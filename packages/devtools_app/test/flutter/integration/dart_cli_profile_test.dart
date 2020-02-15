@@ -9,8 +9,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:devtools_app/src/inspector/flutter_widget.dart';
-import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/flutter/app.dart';
 import 'package:devtools_app/src/framework/framework_core.dart';
 import 'package:devtools_app/src/inspector/flutter_widget.dart';
@@ -98,7 +96,8 @@ Future<void> main() async {
         });
 
         final exitCode = await process.exitCode;
-        expect(exitCode, -9); // sigkill returns a -9 exitCode.
+        // sigkill -9, however some Linux's return unsigned 8-bit value can be 255.
+        expect(exitCode, anyOf(-9, 255));
 
         // Any errors received is a failure of this test.
         expect(
@@ -134,7 +133,7 @@ void validateJSONFile(List<Verbose> values) {
   final contents = file.readAsStringSync();
 
   final samples = memoryDecodeHeapSamples(contents);
-  expect(samples.length, values.length);
+  expect(samples.length, equals(values.length));
 
   var samplesIndex = 0;
   for (var value in values) {
@@ -142,9 +141,9 @@ void validateJSONFile(List<Verbose> values) {
     final timeCollected = mFormat.format(
         DateTime.fromMillisecondsSinceEpoch(samples[samplesIndex].timestamp));
 
-    expect(timeCollected, value.time);
-    expect(samples[samplesIndex].capacity, value.capacity);
-    expect(samples[samplesIndex].adbMemoryInfo.total, value.adbMemoryTotal);
+    expect(timeCollected, equals(value.time));
+    expect(samples[samplesIndex].capacity, equals(value.capacity));
+    expect(samples[samplesIndex].adbMemoryInfo.total, equals(value.adbMemoryTotal));
 
     samplesIndex++;
   }
@@ -193,7 +192,7 @@ class ParseStdout {
       // Pull out the timestamp part.
       final startTimePart = lineOut.substring(verboseMessageStart.length);
       final endTimePart = startTimePart.indexOf(']');
-      expect(endTimePart >= 0, isTrue);
+      expect(endTimePart, isNonNegative);
       final timePart = startTimePart.substring(0, endTimePart);
 
       // Pull out the two numeric values capacity and ADB Memory Total.
@@ -204,7 +203,7 @@ class ParseStdout {
       // Capacity part.
       expect(remaining[1].endsWith(capacityValueEndPart), isTrue);
       final capacityValueEnd = remaining[1].indexOf(',');
-      expect(capacityValueEnd >= 0, isTrue);
+      expect(capacityValueEnd, isNonNegative);
       final capacityValue =
           int.parse(remaining[1].substring(0, capacityValueEnd));
 
@@ -226,7 +225,6 @@ class _DiskAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
     if (key == _assetManifestDotJson) {
-      final cache = <String, ByteData>{};
       final files = [
         ...Directory('web/').listSync(recursive: true),
         ...Directory('assets/').listSync(recursive: true),
