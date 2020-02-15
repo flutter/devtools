@@ -59,9 +59,6 @@ Future<void> main() async {
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
 
-      await tester.pump(const Duration(seconds: 1));
-      await tester.pumpAndSettle();
-
       await env.setupEnvironment();
 
       var vmUri = env.flutter.vmServiceUri.replace(scheme: 'http').toString();
