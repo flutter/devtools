@@ -26,7 +26,7 @@ dependencies:
   codemirror: ^0.5.10
   collection: ^1.14.11
   devtools_server: ^0.1.14
-  devtools_shared: ^0.1.0
+  devtools_shared: ^0.2.0
   file: ^5.1.0
   http: ^0.12.0+1
   html_shim: ^0.0.2
@@ -70,6 +70,8 @@ dependencies:
 dependency_overrides:
   devtools_server:
     path: ../devtools_server
+  devtools_shared:
+    path: ../devtools_shared
   # The text "#OVERRIDE_FOR_TESTS" is stripped out for some CI bots so that the
   # tests can run using the in-repo version of these dependencies instead of
   # only the live Pub version.

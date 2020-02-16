@@ -279,7 +279,7 @@ class MemoryJsonFile {
 
   void _populateJsonHeader() {
     assert(_raFile != null);
-    final payload = '$memoryJsonHeader$memoryJsonTrailer';
+    final payload = '${MemoryJson.header}${MemoryJson.trailer}';
     _raFile.writeStringSync(payload);
     _raFile.flushSync();
   }
@@ -287,7 +287,7 @@ class MemoryJsonFile {
   void _setPositionToWriteSample() {
     // Set the file position to the data array field contents - inside of [].
     final filePosition = _raFile.positionSync();
-    _raFile.setPositionSync(filePosition - memoryJsonTrailer.length);
+    _raFile.setPositionSync(filePosition - MemoryJson.trailer.length);
   }
 
   void writeSample(HeapSample sample) {
@@ -295,12 +295,12 @@ class MemoryJsonFile {
 
     String encodedSample;
     if (_multipleSamples) {
-      encodedSample = memoryEncodeAnotherHeapSample(sample);
+      encodedSample = MemoryJson.encodeAnotherHeapSample(sample);
     } else {
-      encodedSample = memoryEncodeHeapSample(sample);
+      encodedSample = MemoryJson.encodeHeapSample(sample);
     }
 
-    _raFile.writeStringSync('$encodedSample$memoryJsonTrailer');
+    _raFile.writeStringSync('$encodedSample${MemoryJson.trailer}');
 
     _raFile.flushSync();
 

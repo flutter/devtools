@@ -1076,10 +1076,16 @@ class MemoryLog {
       ));
     }
 
-    final jsonPayload = memoryEncodeHeapSamples(liveData);
-    final realData = memoryDecodeHeapSamples(jsonPayload);
-
-    assert(realData.length == liveData.length);
+    final jsonPayload = MemoryJson.encodeHeapSamples(liveData);
+    if (kDebugMode) {
+      // TODO(terry): Remove this check add a unit test instead.
+      // Reload the file just created and validate that the saved data matches
+      // the live data.
+      final memoryJson = MemoryJson.decode(jsonPayload);
+      assert(memoryJson.isMatchedVersion);
+      assert(memoryJson.isMemoryPayload);
+      assert(memoryJson.data.length == liveData.length);
+    }
 
     _fs.writeStringToFile(_memoryLogFilename, jsonPayload);
 
@@ -1104,10 +1110,15 @@ class MemoryLog {
     controller.offline = true;
 
     final jsonPayload = _fs.readStringFromFile(filename);
-    final realData = memoryDecodeHeapSamples(jsonPayload);
+    final memoryJson = MemoryJson.decode(jsonPayload);
+
+    // TODO(terry): Display notification JSON file isn't version isn't
+    // supported or if the payload isn't an exported memory file.
+    assert(memoryJson.isMatchedVersion);
+    assert(memoryJson.isMemoryPayload);
 
     controller.memoryTimeline.offlineData.clear();
-    controller.memoryTimeline.offlineData.addAll(realData);
+    controller.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
 
   @visibleForTesting

@@ -21,7 +21,7 @@ dependencies:
 #  devtools_server: ^0.1.14
   devtools_server:
     path: ../devtools_server
-  devtools_shared: ^0.1.0
+  devtools_shared: ^0.2.0
   http: ^0.12.0+1
   intl: ^0.16.0
 
@@ -31,6 +31,8 @@ dependency_overrides:
 # only the live Pub version.
 #OVERRIDE_FOR_TESTS   devtools_server:
 #OVERRIDE_FOR_TESTS     path: ../devtools_server
+  devtools_shared:
+    path: ../devtools_shared
 
 executables:
   devtools:

@@ -108,7 +108,7 @@ Future<void> main() async {
             reason: parseOutput.errors.toString(),
           );
 
-          // TODO(terry): Currently test() in group/testwidgets isn't possible.
+          // TODO(terry): Using test() in group/testwidgets isn't possible.
           print('Validating Memory JSON');
 
           // Validate the JSON file matches what verbose displayed.
@@ -141,7 +141,11 @@ void validateJSONFile(List<Verbose> values) {
   final file = File('${Directory.current.path}/${ParseStdout.jsonFilename}');
   final contents = file.readAsStringSync();
 
-  final samples = memoryDecodeHeapSamples(contents);
+  final memoryJson = MemoryJson.decode(contents);
+  expect(memoryJson.isMatchedVersion, isTrue);
+  expect(memoryJson.isMemoryPayload, isTrue);
+
+  final samples = memoryJson.data;
   expect(samples.length, equals(values.length));
 
   var samplesIndex = 0;
