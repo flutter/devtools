@@ -20,9 +20,5 @@ dependencies:
   shelf: ^0.7.4
   shelf_static: ^0.2.8
   http_multi_server: ^2.1.0
-  usage: 3.4.1
+  usage: ^3.4.1
   vm_service: ^2.3.1
-
-dependency_overrides:
-  devtools_shared:
-    path: ../devtools_shared
