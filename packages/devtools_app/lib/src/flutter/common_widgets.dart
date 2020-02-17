@@ -7,9 +7,9 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_widgets/flutter_widgets.dart';
 
 import '../ui/flutter/label.dart';
+import 'flutter_widgets/tagged_text.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 

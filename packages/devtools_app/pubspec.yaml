@@ -64,7 +64,6 @@ dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
-  flutter_widgets: ^0.1.10
   recase: ^2.0.1
 
 dependency_overrides:

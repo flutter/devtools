@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/charts/flutter/flame_chart.dart';
+import 'package:devtools_app/src/flutter/flutter_widgets/linked_scroll_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
@@ -13,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_widgets/flutter_widgets.dart';
 
 void main() {
   const defaultZoom = 1.0;
