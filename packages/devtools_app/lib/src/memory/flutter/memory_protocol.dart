@@ -108,8 +108,10 @@ class MemoryTracker {
     isolateHeaps.clear();
 
     for (Isolate isolate in isolates) {
-      final List<HeapSpace> heaps = getHeaps(isolate).toList();
-      isolateHeaps[isolate.id] = heaps;
+      if (isolate != null) {
+        final List<HeapSpace> heaps = getHeaps(isolate).toList();
+        isolateHeaps[isolate.id] = heaps;
+      }
     }
 
     _recalculate();

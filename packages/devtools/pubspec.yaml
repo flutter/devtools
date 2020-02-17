@@ -31,8 +31,6 @@ dependency_overrides:
 # only the live Pub version.
 #OVERRIDE_FOR_TESTS   devtools_server:
 #OVERRIDE_FOR_TESTS     path: ../devtools_server
-  devtools_shared:
-    path: ../devtools_shared
 
 executables:
   devtools:
