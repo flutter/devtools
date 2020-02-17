@@ -18,7 +18,7 @@ import '../vm_service_wrapper.dart';
 class MemoryTracker {
   MemoryTracker(this.service);
 
-  static const Duration kUpdateDelay = Duration(milliseconds: 200);
+  static const Duration kUpdateDelay = Duration(milliseconds: 500);
 
   VmServiceWrapper service;
   Timer _pollingTimer;
@@ -40,7 +40,7 @@ class MemoryTracker {
   int get currentExternal => samples.last.external;
 
   void start() {
-    _pollingTimer = Timer(const Duration(milliseconds: 500), _pollMemory);
+    _pollingTimer = Timer(kUpdateDelay, _pollMemory);
     service.onGCEvent.listen(_handleGCEvent);
   }
 

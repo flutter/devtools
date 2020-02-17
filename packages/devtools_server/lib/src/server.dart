@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:core';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -19,15 +20,19 @@ import 'package:vm_service/vm_service.dart' hide Isolate;
 
 import 'client_manager.dart';
 import 'handlers.dart';
+import 'memory_profile.dart';
 
 const protocolVersion = '1.1.0';
 const argHelp = 'help';
+const argVmUri = 'vm-uri';
 const argEnableNotifications = 'enable-notifications';
+const argHeadlessMode = 'headless';
 const argLaunchBrowser = 'launch-browser';
 const argMachine = 'machine';
 const argPort = 'port';
-const argHeadlessMode = 'headless';
+const argProfileMemory = 'profile-memory';
 const argTryPorts = 'try-ports';
+const argVerbose = 'verbose';
 const launchDevToolsService = 'launchDevTools';
 
 const errorLaunchingBrowserCode = 500;
@@ -54,6 +59,18 @@ final argParser = ArgParser()
     help:
         'The number of ascending ports to try binding to before failing with an error. ',
   )
+  ..addOption(
+    argVmUri,
+    defaultsTo: '',
+    help: 'VM Authentication URI',
+  )
+  ..addOption(
+    argProfileMemory,
+    defaultsTo: '',
+    help: 'Enable memory profiling e.g.,\n'
+        '--profile-memory /usr/local/home/my_name/profiles/memory_samples.json\n'
+        'writes collected memory statistics to the file specified.',
+  )
   ..addFlag(
     argMachine,
     negatable: false,
@@ -79,6 +96,13 @@ final argParser = ArgParser()
     negatable: false,
     help:
         'Causes the server to spawn Chrome in headless mode for use in automated testing.',
+  )
+  ..addFlag(
+    argVerbose,
+    hide: true,
+    negatable: false,
+    abbr: 'v',
+    help: 'Output more informational messages.',
   );
 
 /// Wraps [serveDevTools] `arguments` parsed, as from the command line.
@@ -96,6 +120,11 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
   final bool headlessMode = args[argHeadlessMode];
   final numPortsToTry =
       args[argTryPorts] != null ? int.tryParse(args[argTryPorts]) ?? 1 : 1;
+  final bool verboseMode = args[argVerbose];
+
+  // Support collecting profile data.
+  final String vmUri = args[argVmUri];
+  final String profileAbsoluteFilename = args[argProfileMemory];
 
   return serveDevTools(
     help: help,
@@ -106,6 +135,9 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
     headlessMode: headlessMode,
     numPortsToTry: numPortsToTry,
     handler: handler,
+    serviceProtocolUri: vmUri,
+    profileFilename: profileAbsoluteFilename,
+    verboseMode: verboseMode,
   );
 }
 
@@ -121,10 +153,13 @@ Future<HttpServer> serveDevTools({
   bool launchBrowser = false,
   bool enableNotifications = false,
   bool headlessMode = false,
+  bool verboseMode = false,
   String hostname = 'localhost',
   int port = 0,
   int numPortsToTry = 1,
   shelf.Handler handler,
+  String serviceProtocolUri = '',
+  String profileFilename = '',
 }) async {
   if (help) {
     print('Dart DevTools version ${await _getVersion()}');
@@ -134,6 +169,14 @@ Future<HttpServer> serveDevTools({
     print(argParser.usage);
     return null;
   }
+
+  // Collect profiling information
+  if (serviceProtocolUri.isNotEmpty && profileFilename.isNotEmpty) {
+    final observatoryUri = Uri.tryParse(serviceProtocolUri);
+    await _hookupMemoryProfiling(observatoryUri, profileFilename, verboseMode);
+    return null;
+  }
+
   if (machineMode) {
     assert(enableStdinCommands,
         'machineMode only works with enableStdinCommands.');
@@ -244,6 +287,16 @@ Future<HttpServer> serveDevTools({
   }
 
   return server;
+}
+
+Future<void> _hookupMemoryProfiling(Uri observatoryUri, String profileFile,
+    [bool verboseMode = false]) async {
+  final VmService service = await _connectToVmService(observatoryUri);
+  if (service == null) return;
+
+  MemoryProfile(service, profileFile, verboseMode);
+
+  print('Recording memory profile samples to $profileFile');
 }
 
 Future<void> _handleVmRegister(
@@ -402,6 +455,7 @@ Future<void> registerLaunchDevToolsService(
     // Connect to the vm service and register a method to launch DevTools in
     // chrome.
     final VmService service = await _connectToVmService(vmServiceUri);
+    if (service == null) return;
 
     service.registerServiceCallback(launchDevToolsService, (params) async {
       try {
@@ -576,18 +630,23 @@ bool _isValidVmServiceUri(Uri uri) =>
         uri.isScheme('http') ||
         uri.isScheme('https'));
 
-Future<VmService> _connectToVmService(Uri uri) async {
+Future<VmService> _connectToVmService(Uri theUri) async {
   // Fix up the various acceptable URI formats into a WebSocket URI to connect.
-  uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
+  final uri = convertToWebSocketUrl(serviceProtocolUrl: theUri);
 
-  final WebSocket ws = await WebSocket.connect(uri.toString());
+  try {
+    final WebSocket ws = await WebSocket.connect(uri.toString());
 
-  final VmService service = VmService(
-    ws.asBroadcastStream(),
-    (String message) => ws.add(message),
-  );
+    final VmService service = VmService(
+      ws.asBroadcastStream(),
+      (String message) => ws.add(message),
+    );
 
-  return service;
+    return service;
+  } catch (_) {
+    print('ERROR: Unable to connect to VMService $theUri');
+    return null;
+  }
 }
 
 Future<String> _getVersion() async {

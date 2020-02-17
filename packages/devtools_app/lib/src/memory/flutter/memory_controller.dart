@@ -880,8 +880,9 @@ class MemoryTimeline {
       final capacity = sample.capacity.toDouble();
       final used = sample.used.toDouble();
       final external = sample.external.toDouble();
+
       // TOOD(terry): Need to plot.
-      final rss = sample.rss.toDouble();
+      final rss = (sample.rss ?? 0).toDouble();
 
       final extEntry = Entry(x: timestamp, y: external, icon: dataPointImage);
       final usedEntry =
@@ -1076,9 +1077,15 @@ class MemoryLog {
     }
 
     final jsonPayload = MemoryJson.encodeHeapSamples(liveData);
-    final realData = MemoryJson.decodeHeapSamples(jsonPayload);
-
-    assert(realData.length == liveData.length);
+    if (kDebugMode) {
+      // TODO(terry): Remove this check add a unit test instead.
+      // Reload the file just created and validate that the saved data matches
+      // the live data.
+      final memoryJson = MemoryJson.decode(jsonPayload);
+      assert(memoryJson.isMatchedVersion);
+      assert(memoryJson.isMemoryPayload);
+      assert(memoryJson.data.length == liveData.length);
+    }
 
     _fs.writeStringToFile(_memoryLogFilename, jsonPayload);
 
@@ -1103,10 +1110,15 @@ class MemoryLog {
     controller.offline = true;
 
     final jsonPayload = _fs.readStringFromFile(filename);
-    final realData = MemoryJson.decodeHeapSamples(jsonPayload);
+    final memoryJson = MemoryJson.decode(jsonPayload);
+
+    // TODO(terry): Display notification JSON file isn't version isn't
+    // supported or if the payload isn't an exported memory file.
+    assert(memoryJson.isMatchedVersion);
+    assert(memoryJson.isMemoryPayload);
 
     controller.memoryTimeline.offlineData.clear();
-    controller.memoryTimeline.offlineData.addAll(realData);
+    controller.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
 
   @visibleForTesting
