@@ -70,7 +70,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     with AutoDisposeMixin {
   TimelineController controller;
 
-  ExportController _exportController;
+  final _exportController = ExportController();
 
   TimelineMode get timelineMode => controller.timelineModeNotifier.value;
 
