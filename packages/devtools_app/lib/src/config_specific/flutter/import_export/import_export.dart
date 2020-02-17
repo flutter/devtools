@@ -17,13 +17,8 @@ class ImportController {
 
   final NotificationsState _notifications;
 
+  // ignore: unused_field
   final ProvidedControllers _controllers;
-
-  void dispose() {
-    // TODO(Kenzie): Disabled see issue https://github.com/flutter/devtools/issues/1637.
-//    notifications?.dispose();
-    _controllers?.dispose();
-  }
 
   void importData(Map<String, dynamic> json) {
     final devToolsScreen = json['dartDevToolsScreen'];
