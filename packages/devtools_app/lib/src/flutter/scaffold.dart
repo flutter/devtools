@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 import '../config_specific/flutter/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/flutter/import_export/import_export.dart';
 import 'app.dart';
-import 'controllers.dart';
-import 'notifications.dart';
 import 'screen.dart';
 import 'theme.dart';
 
@@ -28,7 +26,7 @@ class DevToolsScaffold extends StatefulWidget {
         super(key: key);
 
   DevToolsScaffold.withChild({Key key, Widget child})
-      : this(key: key, tabs: [_SimpleScreen(child)]);
+      : this(key: key, tabs: [SimpleScreen(child)]);
 
   /// A [Key] that indicates the scaffold is showing in narrow-width mode.
   static const Key narrowWidthKey = Key('Narrow Scaffold');
@@ -67,7 +65,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   ///
   /// This will be passed to both the [TabBar] and the [TabBarView] widgets
   /// to coordinate their animation when the tab selection changes.
-  TabController _controller;
+  TabController tabController;
 
   ImportController _importController;
 
@@ -83,13 +81,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     if (widget.tabs.length != oldWidget.tabs.length) {
       var newIndex = 0;
       // Stay on the current tab if possible when the collection of tabs changes.
-      if (_controller != null &&
-          widget.tabs.contains(oldWidget.tabs[_controller.index])) {
-        newIndex = widget.tabs.indexOf(oldWidget.tabs[_controller.index]);
+      if (tabController != null &&
+          widget.tabs.contains(oldWidget.tabs[tabController.index])) {
+        newIndex = widget.tabs.indexOf(oldWidget.tabs[tabController.index]);
       }
       // Create a new tab controller to reflect the changed tabs.
       _setupTabController();
-      _controller.index = newIndex;
+      tabController.index = newIndex;
     }
   }
 
@@ -101,10 +99,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _importController = ImportController(
-      Notifications.of(context),
-      Controllers.of(context),
-    );
+    _importController = ImportController(this);
 
     // If the animations are null, initialize them.
     appBarAnimation ??= defaultAnimationController(
@@ -121,27 +116,27 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   @override
   void dispose() {
-    _controller?.dispose();
+    tabController?.dispose();
     appBarAnimation?.dispose();
     super.dispose();
   }
 
   void _setupTabController() {
-    _controller?.dispose();
-    _controller = TabController(length: widget.tabs.length, vsync: this);
+    tabController?.dispose();
+    tabController = TabController(length: widget.tabs.length, vsync: this);
   }
 
   // Pushes tab changes into the navigation history.
   //
   // Note that this currently works very well, but it doesn't
   // integrate with the browser's history yet.
-  void _pushScreenToLocalPageRoute(int newIndex) {
-    final previousTabIndex = _controller.previousIndex;
+  void pushScreenToLocalPageRoute(int newIndex) {
+    final previousTabIndex = tabController.previousIndex;
     if (newIndex != previousTabIndex) {
       ModalRoute.of(context).addLocalHistoryEntry(LocalHistoryEntry(
         onRemove: () {
           if (widget.tabs.length >= previousTabIndex) {
-            _controller.animateTo(previousTabIndex);
+            tabController.animateTo(previousTabIndex);
           }
         },
       ));
@@ -173,7 +168,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         },
         child: TabBarView(
           physics: const NeverScrollableScrollPhysics(),
-          controller: _controller,
+          controller: tabController,
           children: tabBodies,
         ),
       ),
@@ -188,9 +183,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     Size preferredSize;
     if (widget.tabs.length > 1) {
       final tabs = TabBar(
-        controller: _controller,
+        controller: tabController,
         isScrollable: true,
-        onTap: _pushScreenToLocalPageRoute,
+        onTap: pushScreenToLocalPageRoute,
         tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
       );
       preferredSize = Tween<Size>(
@@ -240,10 +235,14 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       ),
     );
   }
+
+  void refresh() {
+    setState(() {});
+  }
 }
 
-class _SimpleScreen extends Screen {
-  const _SimpleScreen(this.child) : super();
+class SimpleScreen extends Screen {
+  const SimpleScreen(this.child) : super(DevToolsScreenType.simple);
 
   final Widget child;
 

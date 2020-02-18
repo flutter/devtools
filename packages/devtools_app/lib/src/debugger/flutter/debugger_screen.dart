@@ -10,7 +10,7 @@ import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 
 class DebuggerScreen extends Screen {
-  const DebuggerScreen();
+  const DebuggerScreen() : super(DevToolsScreenType.debugger);
 
   @override
   Widget build(BuildContext context) {

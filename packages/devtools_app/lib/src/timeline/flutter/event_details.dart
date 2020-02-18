@@ -144,14 +144,23 @@ class EventSummary extends StatelessWidget {
           title: const Text('Category'),
           subtitle: Text(firstTraceEvent.category),
         ),
-        if (event.isAsyncEvent)
-          ListTile(
-            title: const Text('Async id'),
-            subtitle: Text('${(event as AsyncTimelineEvent).asyncId}'),
-          ),
+        if (event.isAsyncEvent) _asyncIdTile(),
         if (_connectedEvents.isNotEmpty) _buildConnectedEvents(),
         if (_eventArgs.isNotEmpty) _buildArguments(),
       ],
+    );
+  }
+
+  Widget _asyncIdTile() {
+    String asyncId;
+    if (event is OfflineTimelineEvent) {
+      asyncId = event.traceEvents.first.event.id;
+    } else {
+      asyncId = (event as AsyncTimelineEvent).asyncId;
+    }
+    return ListTile(
+      title: const Text('Async id'),
+      subtitle: Text(asyncId),
     );
   }
 

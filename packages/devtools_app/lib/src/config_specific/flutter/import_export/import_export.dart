@@ -4,7 +4,11 @@
 
 import '../../../flutter/controllers.dart';
 import '../../../flutter/notifications.dart';
+import '../../../flutter/scaffold.dart';
+import '../../../flutter/screen.dart';
+import '../../../globals.dart';
 import '../../../timeline/timeline_controller.dart';
+import '../../../timeline/timeline_model.dart';
 
 import '_fake_export.dart'
     if (dart.library.html) '_export_web.dart'
@@ -13,12 +17,16 @@ import '_fake_export.dart'
 // TODO(kenz): we should support a file picker import for desktop.
 
 class ImportController {
-  const ImportController(this._notifications, this._controllers);
+  ImportController(this.scaffoldState) {
+    _notifications = Notifications.of(scaffoldState.context);
+    _controllers = Controllers.of(scaffoldState.context);
+  }
 
-  final NotificationsState _notifications;
+  final DevToolsScaffoldState scaffoldState;
 
-  // ignore: unused_field
-  final ProvidedControllers _controllers;
+  NotificationsState _notifications;
+
+  ProvidedControllers _controllers;
 
   void importData(Map<String, dynamic> json) {
     final devToolsScreen = json['dartDevToolsScreen'];
@@ -31,14 +39,13 @@ class ImportController {
       return;
     }
 
-    // TODO(jacobr): add the inspector handling case here once the inspector
-    // can be exported.
-    switch (devToolsScreen) {
-      case timelineScreenId:
-        // TODO(kenz): actually import and load timeline data.
-//        final timelineController =
-//            controllers?.timeline ?? TimelineController();
+    // TODO(kenz): add UI progress indicator when offline data is loading.
+    switch (DevToolsScreenTypeExtension.fromId(devToolsScreen)) {
+      case DevToolsScreenType.timeline:
+        _importTimeline(json);
         break;
+      // TODO(jacobr): add the inspector handling case here once the inspector
+      // can be exported.
       default:
         _notifications.push(
           'Could not import file. The imported file is from '
@@ -48,6 +55,52 @@ class ImportController {
         );
         return;
     }
+  }
+
+  void _navigateToImportScreen(DevToolsScreenType screenType) {
+    final availableScreens = scaffoldState.widget.tabs;
+    int screenIndex =
+        availableScreens.indexWhere((screen) => screen.type == screenType);
+    if (screenIndex == -1) {
+      screenIndex = scaffoldState.widget.tabs.length;
+      scaffoldState.widget.tabs.add(screenType.create());
+    }
+    scaffoldState.tabController.animateTo(screenIndex);
+  }
+
+  void _importTimeline(Map<String, dynamic> json) async {
+    OfflineData offlineData;
+    final timelineMode =
+        json[TimelineData.timelineModeKey] == TimelineMode.full.toString()
+            ? TimelineMode.full
+            : TimelineMode.frameBased;
+    if (timelineMode == TimelineMode.frameBased) {
+      offlineData = OfflineFrameBasedTimelineData.parse(json);
+    } else {
+      offlineData = OfflineFullTimelineData.parse(json);
+    }
+
+    if (offlineData.isEmpty) {
+      _notifications.push('Imported file does not contain timeline data.');
+      return;
+    }
+
+    // TODO(kenz): handle imports when we don't have any active controllers
+    // (i.e. when the connect screen is showing).
+    final timelineController = _controllers?.timeline;
+    if (timelineController == null) {
+      return;
+    }
+
+    _enterOfflineMode();
+    _navigateToImportScreen(DevToolsScreenType.timeline);
+
+    await timelineController.loadOfflineData(offlineData);
+  }
+
+  void _enterOfflineMode() {
+    offlineMode = true;
+    scaffoldState.refresh();
   }
 }
 

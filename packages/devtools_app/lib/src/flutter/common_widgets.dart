@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../globals.dart';
 import '../ui/flutter/label.dart';
 import 'flutter_widgets/tagged_text.dart';
 
@@ -332,6 +334,20 @@ Widget processingInfo({
           ),
         ),
       ],
+    ),
+  );
+}
+
+Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
+  return OutlineButton(
+    key: const Key('exit offline button'),
+    onPressed: () {
+      offlineMode = false;
+      onPressed();
+    },
+    child: MaterialIconLabel(
+      Icons.clear,
+      'Exit offline mode',
     ),
   );
 }

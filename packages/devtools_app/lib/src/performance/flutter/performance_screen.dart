@@ -17,7 +17,7 @@ import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
 
 class PerformanceScreen extends Screen {
-  const PerformanceScreen() : super();
+  const PerformanceScreen() : super(DevToolsScreenType.performance);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');

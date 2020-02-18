@@ -139,6 +139,7 @@ class TimelineController implements DisposableController {
   }
 
   Future<void> loadOfflineData(OfflineData offlineData) async {
+    await _offlineModeChanged();
     final traceEvents = [
       for (var trace in offlineData.traceEvents)
         TraceEventWrapper(
@@ -236,10 +237,19 @@ class TimelineController implements DisposableController {
         ..cpuProfileData = offlineTimelineData.cpuProfileData;
       _selectedTimelineEventNotifier.value = eventToSelect;
     }
+
+    if (offlineTimelineData.cpuProfileData != null) {
+      cpuProfilerController.loadOfflineData(offlineTimelineData.cpuProfileData);
+    }
+  }
+
+  Future<void> _offlineModeChanged() async {
+    await clearData();
+    await timelineService.updateListeningState(true);
   }
 
   void exitOfflineMode({bool clearTimeline = true}) {
-    clearData();
+    _offlineModeChanged();
     offlineTimelineData = null;
   }
 
@@ -431,6 +441,7 @@ class FullTimeline
   void clear() {
     super.clear();
     _recordingNotifier.value = false;
+    _processingNotifier.value = false;
     _emptyRecordingNotifier.value = false;
   }
 }

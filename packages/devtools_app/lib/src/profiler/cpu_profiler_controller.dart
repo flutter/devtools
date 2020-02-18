@@ -86,6 +86,10 @@ class CpuProfilerController {
     }
   }
 
+  void loadOfflineData(CpuProfileData data) {
+    _dataNotifier.value = data;
+  }
+
   void selectCpuStackFrame(CpuStackFrame stackFrame) {
     if (stackFrame == dataNotifier.value.selectedStackFrame) return;
     dataNotifier.value.selectedStackFrame = stackFrame;

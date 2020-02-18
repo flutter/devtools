@@ -72,7 +72,8 @@ void main() {
 }
 
 class _TestScreen extends Screen {
-  const _TestScreen(this.name, this.key, [this.tabKey]) : super();
+  const _TestScreen(this.name, this.key, [this.tabKey])
+      : super(DevToolsScreenType.simple);
 
   final String name;
   final Key key;

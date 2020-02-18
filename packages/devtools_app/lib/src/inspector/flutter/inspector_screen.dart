@@ -22,7 +22,7 @@ import 'inspector_screen_details_tab.dart';
 import 'inspector_tree_flutter.dart';
 
 class InspectorScreen extends Screen {
-  const InspectorScreen();
+  const InspectorScreen() : super(DevToolsScreenType.inspector);
 
   @override
   Widget build(BuildContext context) => const InspectorScreenBody();

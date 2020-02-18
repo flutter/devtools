@@ -17,7 +17,7 @@ import '../logging_controller.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
-  const LoggingScreen() : super();
+  const LoggingScreen() : super(DevToolsScreenType.logging);
 
   @override
   Widget build(BuildContext context) {

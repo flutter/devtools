@@ -14,7 +14,7 @@ import 'http_request_inspector.dart';
 import 'network_model.dart';
 
 class NetworkScreen extends Screen {
-  const NetworkScreen() : super();
+  const NetworkScreen() : super(DevToolsScreenType.network);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
