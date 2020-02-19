@@ -111,7 +111,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
   @override
   void dispose() {
-    controller.dispose();
     controller.timelineService.updateListeningState(false);
     super.dispose();
   }

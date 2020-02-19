@@ -13,10 +13,6 @@ import '../service_registrations.dart' as registrations;
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../version.dart';
 
-// TODO(kenz): we should listen for flag value updates and update the info
-// screen with the new flag values. See
-// https://github.com/flutter/devtools/issues/988.
-
 typedef OnFlutterVersionChanged = void Function(FlutterVersion version);
 
 typedef OnFlagListChanged = void Function(FlagList flagList);

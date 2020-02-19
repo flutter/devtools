@@ -28,6 +28,10 @@ class EventDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(kenz): when in offlineMode and selectedEvent doesn't match the event
+    // from the offline data, show message notifying that CPU profile data is
+    // unavailable for snapshots and provide link to return to offline profile
+    // (see html_event_details.dart).
     final controller = Controllers.of(context).timeline;
     final textTheme = Theme.of(context).textTheme;
     return Column(
