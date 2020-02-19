@@ -428,7 +428,8 @@ class OfflineFullTimelineData extends FullTimelineData
 
   static OfflineFullTimelineData parse(Map<String, dynamic> json) {
     final List<dynamic> traceEvents =
-        (json[TimelineData.traceEventsKey] ?? []).cast<Map<String, dynamic>>();
+        List.from(json[TimelineData.traceEventsKey] ?? [])
+            .cast<Map<String, dynamic>>();
 
     final Map<String, dynamic> cpuProfileJson =
         json[TimelineData.cpuProfileKey] ?? {};

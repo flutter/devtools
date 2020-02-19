@@ -143,7 +143,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   Widget _timelineControls() {
     final _exitOfflineButton = exitOfflineButton(() {
       setState(() {
-        controller.exitOfflineMode();
+        controller.offlineModeChanged();
       });
     });
     return Padding(

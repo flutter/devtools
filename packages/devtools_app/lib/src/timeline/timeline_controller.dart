@@ -139,7 +139,7 @@ class TimelineController implements DisposableController {
   }
 
   Future<void> loadOfflineData(OfflineData offlineData) async {
-    await _offlineModeChanged();
+    await offlineModeChanged();
     final traceEvents = [
       for (var trace in offlineData.traceEvents)
         TraceEventWrapper(
@@ -243,14 +243,9 @@ class TimelineController implements DisposableController {
     }
   }
 
-  Future<void> _offlineModeChanged() async {
+  Future<void> offlineModeChanged() async {
     await clearData();
     await timelineService.updateListeningState(true);
-  }
-
-  void exitOfflineMode({bool clearTimeline = true}) {
-    _offlineModeChanged();
-    offlineTimelineData = null;
   }
 
   Future<void> clearData() async {
