@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/flutter/controllers.dart';
+import 'package:devtools_app/src/flutter/notifications.dart';
 import 'package:devtools_app/src/flutter/theme.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart';
@@ -77,4 +78,15 @@ Future<void> _setWindowSize(Size windowSize) async {
 
 Future<void> _resetWindowSize() async {
   await _setWindowSize(const Size(800.0, 600.0));
+}
+
+/// A test-friendly [NotificationService] that can be run in unit tests
+/// instead of widget tests.
+class TestNotifications implements NotificationService {
+  final List<String> messages = [];
+
+  @override
+  void push(String message) {
+    messages.add(message);
+  }
 }
