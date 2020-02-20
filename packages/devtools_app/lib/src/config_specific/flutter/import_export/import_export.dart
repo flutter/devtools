@@ -14,8 +14,19 @@ import '_fake_export.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
 
-// TODO(kenz): we should support a file picker import for desktop.
+const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
+    ' At this time, DevTools only supports importing files that were originally'
+    ' exported from DevTools.';
 
+String unsupportedDevToolsFileMessage(String devToolsScreen) {
+  return 'Could not import file. The imported file is from "$devToolsScreen", '
+      'which is not supported by this version of Dart DevTools. You may need to'
+      ' upgrade your version of Dart DevTools to view this file.';
+}
+
+const emptyTimelineMessage = 'Imported file does not contain timeline data.';
+
+// TODO(kenz): we should support a file picker import for desktop.
 class ImportController {
   ImportController(
     this._notifications,
@@ -28,18 +39,14 @@ class ImportController {
 
   final void Function(DevToolsScreenType type) pushScreenForImport;
 
-  final NotificationsState _notifications;
+  final NotificationService _notifications;
 
   final ProvidedControllers _controllers;
 
   void importData(Map<String, dynamic> json) {
     final devToolsScreen = json['dartDevToolsScreen'];
     if (devToolsScreen == null) {
-      _notifications.push(
-        'The imported file is not a Dart DevTools file. At this time, '
-        'DevTools only supports importing files that were originally '
-        'exported from DevTools.',
-      );
+      _notifications.push(nonDevToolsFileMessage);
       return;
     }
 
@@ -51,12 +58,7 @@ class ImportController {
       // TODO(jacobr): add the inspector handling case here once the inspector
       // can be exported.
       default:
-        _notifications.push(
-          'Could not import file. The imported file is from '
-          '"$devToolsScreen", which is not supported by this version of '
-          'Dart DevTools. You may need to upgrade your version of Dart '
-          'DevTools to view this file.',
-        );
+        _notifications.push(unsupportedDevToolsFileMessage(devToolsScreen));
         return;
     }
   }
@@ -74,7 +76,7 @@ class ImportController {
     }
 
     if (offlineData.isEmpty) {
-      _notifications.push('Imported file does not contain timeline data.');
+      _notifications.push(emptyTimelineMessage);
       return;
     }
 
