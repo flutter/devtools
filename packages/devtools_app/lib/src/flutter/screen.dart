@@ -45,33 +45,6 @@ enum DevToolsScreenType {
 }
 
 extension DevToolsScreenTypeExtension on DevToolsScreenType {
-  static DevToolsScreenType fromId(String id) {
-    switch (id) {
-      case 'inspector':
-        return DevToolsScreenType.inspector;
-      case 'timeline':
-        return DevToolsScreenType.timeline;
-      case 'memory':
-        return DevToolsScreenType.memory;
-      case 'performance':
-        return DevToolsScreenType.performance;
-      case 'logging':
-        return DevToolsScreenType.logging;
-      case 'info':
-        return DevToolsScreenType.info;
-      case 'connect':
-        return DevToolsScreenType.connect;
-      case 'debugger':
-        return DevToolsScreenType.debugger;
-      case 'network':
-        return DevToolsScreenType.network;
-      case 'simple':
-        return DevToolsScreenType.simple;
-      default:
-        return null;
-    }
-  }
-
   Screen create() {
     switch (this) {
       case DevToolsScreenType.inspector:

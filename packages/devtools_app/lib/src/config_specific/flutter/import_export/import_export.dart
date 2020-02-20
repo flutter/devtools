@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../../enum_utils.dart';
+
 import '../../../flutter/controllers.dart';
 import '../../../flutter/notifications.dart';
 import '../../../flutter/scaffold.dart';
@@ -21,6 +23,9 @@ class ImportController {
     _controllers = Controllers.of(scaffoldState.context);
   }
 
+  static final _devToolsScreenTypeUtils =
+      EnumUtils<DevToolsScreenType>(DevToolsScreenType.values);
+
   final DevToolsScaffoldState scaffoldState;
 
   NotificationsState _notifications;
@@ -39,7 +44,7 @@ class ImportController {
     }
 
     // TODO(kenz): add UI progress indicator when offline data is loading.
-    switch (DevToolsScreenTypeExtension.fromId(devToolsScreen)) {
+    switch (_devToolsScreenTypeUtils.enumEntry(devToolsScreen)) {
       case DevToolsScreenType.timeline:
         _importTimeline(json);
         break;
