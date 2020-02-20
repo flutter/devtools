@@ -533,20 +533,22 @@ class ImmediateValueNotifier<T> extends ValueNotifier<T> {
   }
 }
 
-extension SafeAccess<T> on List<T> {
-  T safeFirst() {
-    return safeGet(0);
-  }
-
-  T safeLast() {
-    return safeGet(length - 1);
-  }
-
+extension SafeAccessList<T> on List<T> {
   T safeGet(int index) {
     if (index < 0 || index >= length) {
       return null;
     } else {
       return this[index];
     }
+  }
+}
+
+extension SafeAccess<T> on Iterable<T> {
+  T get safeFirst {
+    return isNotEmpty ? first : null;
+  }
+
+  T get safeLast {
+    return isNotEmpty ? last : null;
   }
 }
