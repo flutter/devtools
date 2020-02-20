@@ -6,7 +6,6 @@ import '../../../enum_utils.dart';
 
 import '../../../flutter/controllers.dart';
 import '../../../flutter/notifications.dart';
-import '../../../flutter/scaffold.dart';
 import '../../../flutter/screen.dart';
 import '../../../timeline/timeline_controller.dart';
 import '../../../timeline/timeline_model.dart';
@@ -18,19 +17,20 @@ import '_fake_export.dart'
 // TODO(kenz): we should support a file picker import for desktop.
 
 class ImportController {
-  ImportController(this.scaffoldState) {
-    _notifications = Notifications.of(scaffoldState.context);
-    _controllers = Controllers.of(scaffoldState.context);
-  }
+  ImportController(
+    this._notifications,
+    this._controllers,
+    this.pushScreenForImport,
+  );
 
   static final _devToolsScreenTypeUtils =
       EnumUtils<DevToolsScreenType>(DevToolsScreenType.values);
 
-  final DevToolsScaffoldState scaffoldState;
+  final void Function(DevToolsScreenType type) pushScreenForImport;
 
-  NotificationsState _notifications;
+  final NotificationsState _notifications;
 
-  ProvidedControllers _controllers;
+  final ProvidedControllers _controllers;
 
   void importData(Map<String, dynamic> json) {
     final devToolsScreen = json['dartDevToolsScreen'];
@@ -61,17 +61,6 @@ class ImportController {
     }
   }
 
-  void _navigateToImportScreen(DevToolsScreenType screenType) {
-    final availableScreens = scaffoldState.widget.tabs;
-    int screenIndex =
-        availableScreens.indexWhere((screen) => screen.type == screenType);
-    if (screenIndex == -1) {
-      screenIndex = scaffoldState.widget.tabs.length;
-      scaffoldState.widget.tabs.add(screenType.create());
-    }
-    scaffoldState.tabController.animateTo(screenIndex);
-  }
-
   void _importTimeline(Map<String, dynamic> json) async {
     OfflineData offlineData;
     final timelineMode =
@@ -96,8 +85,7 @@ class ImportController {
       return;
     }
 
-    scaffoldState.enterOfflineMode();
-    _navigateToImportScreen(DevToolsScreenType.timeline);
+    pushScreenForImport(DevToolsScreenType.timeline);
 
     await timelineController.loadOfflineData(offlineData);
   }
