@@ -418,20 +418,20 @@ void main() {
     group('SafeAccess', () {
       test('safeFirst', () {
         final list = [];
-        expect(list.safeFirst(), isNull);
+        expect(list.safeFirst, isNull);
         list.addAll([1, 2, 3]);
-        expect(list.safeFirst(), equals(1));
+        expect(list.safeFirst, equals(1));
         list.insert(0, null);
-        expect(list.safeFirst(), isNull);
+        expect(list.safeFirst, isNull);
       });
 
       test('safeLast', () {
         final list = [];
-        expect(list.safeLast(), isNull);
+        expect(list.safeLast, isNull);
         list.addAll([1, 2, 3]);
-        expect(list.safeLast(), equals(3));
+        expect(list.safeLast, equals(3));
         list.add(null);
-        expect(list.safeLast(), isNull);
+        expect(list.safeLast, isNull);
       });
 
       test('safeGet', () {
