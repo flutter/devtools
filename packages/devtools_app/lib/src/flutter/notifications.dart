@@ -12,6 +12,18 @@ import 'common_widgets.dart';
 const _notificationHeight = 160.0;
 final _notificationWidth = _notificationHeight * goldenRatio;
 
+/// Interface for pushing notifications in the app.
+///
+/// Use this interface in controllers that need to show notifications.
+///
+/// Using the interface instead of the [NotificationsState] implementation
+/// will allow you to write unit tests for the controller that consumes it
+/// instead of widget tests.
+abstract class NotificationService {
+  /// Pushes a notification [message].
+  void push(String message);
+}
+
 /// Manager for notifications in the app.
 ///
 /// Must be inside of an [Overlay].
@@ -63,7 +75,8 @@ class _InheritedNotifications extends InheritedWidget {
   }
 }
 
-class NotificationsState extends State<_NotificationsProvider> {
+class NotificationsState extends State<_NotificationsProvider>
+    implements NotificationService {
   OverlayEntry _overlayEntry;
 
   final List<_Notification> _notifications = [];
@@ -91,6 +104,7 @@ class NotificationsState extends State<_NotificationsProvider> {
   }
 
   /// Pushes a notification [message].
+  @override
   void push(String message) {
     setState(() {
       _notifications.add(
