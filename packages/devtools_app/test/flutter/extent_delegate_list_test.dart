@@ -88,12 +88,12 @@ void main() {
 
         expect(extentDelegate.length, equals(4));
         for (int i = 0; i < extents.length; i++) {
-          expect(extentDelegate.getItemExtent(i), extents[i]);
+          expect(extentDelegate.itemExtent(i), extents[i]);
         }
-        expect(extentDelegate.getItemExtent(1), 200.0);
+        expect(extentDelegate.itemExtent(1), 200.0);
         extents[1] = 500.0;
         extentDelegate.recompute();
-        expect(extentDelegate.getItemExtent(1), 500.0);
+        expect(extentDelegate.itemExtent(1), 500.0);
       });
 
       test('getMinChildIndexForScrollOffset', () {
@@ -103,22 +103,22 @@ void main() {
             computeExtent: (index) => extents[index],
             computeLength: () => extents.length);
 
-        expect(extentDelegate.getMinChildIndexForScrollOffset(0), 0);
-        expect(extentDelegate.getMinChildIndexForScrollOffset(-1000), 0);
-        expect(extentDelegate.getMinChildIndexForScrollOffset(99), 0);
+        expect(extentDelegate.minChildIndexForScrollOffset(0), 0);
+        expect(extentDelegate.minChildIndexForScrollOffset(-1000), 0);
+        expect(extentDelegate.minChildIndexForScrollOffset(99), 0);
         expect(
-            extentDelegate.getMinChildIndexForScrollOffset(99.99999999999), 1);
-        expect(extentDelegate.getMinChildIndexForScrollOffset(250), 1);
-        expect(extentDelegate.getMinChildIndexForScrollOffset(299), 1);
+            extentDelegate.minChildIndexForScrollOffset(99.99999999999), 1);
+        expect(extentDelegate.minChildIndexForScrollOffset(250), 1);
+        expect(extentDelegate.minChildIndexForScrollOffset(299), 1);
         expect(
-            extentDelegate.getMinChildIndexForScrollOffset(299.99999999999), 2);
-        expect(extentDelegate.getMinChildIndexForScrollOffset(300), 2);
-        expect(extentDelegate.getMinChildIndexForScrollOffset(330), 2);
-        expect(extentDelegate.getMinChildIndexForScrollOffset(350), 3);
-        expect(extentDelegate.getMinChildIndexForScrollOffset(449), 3);
+            extentDelegate.minChildIndexForScrollOffset(299.99999999999), 2);
+        expect(extentDelegate.minChildIndexForScrollOffset(300), 2);
+        expect(extentDelegate.minChildIndexForScrollOffset(330), 2);
+        expect(extentDelegate.minChildIndexForScrollOffset(350), 3);
+        expect(extentDelegate.minChildIndexForScrollOffset(449), 3);
         // Off the end of the list.
-        expect(extentDelegate.getMinChildIndexForScrollOffset(450), 4);
-        expect(extentDelegate.getMinChildIndexForScrollOffset(1000000), 4);
+        expect(extentDelegate.minChildIndexForScrollOffset(450), 4);
+        expect(extentDelegate.minChildIndexForScrollOffset(1000000), 4);
       });
 
       try {
@@ -133,23 +133,23 @@ void main() {
           // existing fixed extent behavior. The max child for an offset is
           // actually intentionally less than the min child for the case that
           // the child is right on the boundary.
-          expect(extentDelegate.getMaxChildIndexForScrollOffset(0), 0);
-          expect(extentDelegate.getMaxChildIndexForScrollOffset(-1000), 0);
-          expect(extentDelegate.getMaxChildIndexForScrollOffset(99), 0);
-          expect(extentDelegate.getMaxChildIndexForScrollOffset(99.99999999999),
+          expect(extentDelegate.maxChildIndexForScrollOffset(0), 0);
+          expect(extentDelegate.maxChildIndexForScrollOffset(-1000), 0);
+          expect(extentDelegate.maxChildIndexForScrollOffset(99), 0);
+          expect(extentDelegate.maxChildIndexForScrollOffset(99.99999999999),
               0);
-          expect(extentDelegate.getMaxChildIndexForScrollOffset(250), 1);
-          expect(extentDelegate.getMaxChildIndexForScrollOffset(299), 1);
+          expect(extentDelegate.maxChildIndexForScrollOffset(250), 1);
+          expect(extentDelegate.maxChildIndexForScrollOffset(299), 1);
           expect(
-              extentDelegate.getMaxChildIndexForScrollOffset(299.99999999999),
+              extentDelegate.maxChildIndexForScrollOffset(299.99999999999),
               1);
-          expect(extentDelegate.getMaxChildIndexForScrollOffset(300), 1);
-          expect(extentDelegate.getMaxChildIndexForScrollOffset(330), 2);
-          expect(extentDelegate.getMaxChildIndexForScrollOffset(350), 2);
-          expect(extentDelegate.getMaxChildIndexForScrollOffset(449), 3);
+          expect(extentDelegate.maxChildIndexForScrollOffset(300), 1);
+          expect(extentDelegate.maxChildIndexForScrollOffset(330), 2);
+          expect(extentDelegate.maxChildIndexForScrollOffset(350), 2);
+          expect(extentDelegate.maxChildIndexForScrollOffset(449), 3);
           // Off the end of the list.
-          expect(extentDelegate.getMaxChildIndexForScrollOffset(450), 3);
-          expect(extentDelegate.getMaxChildIndexForScrollOffset(1000000), 4);
+          expect(extentDelegate.maxChildIndexForScrollOffset(450), 3);
+          expect(extentDelegate.maxChildIndexForScrollOffset(1000000), 4);
         });
       } catch (e, s) {
         print(s);
@@ -164,16 +164,16 @@ void main() {
             computeExtent: (index) => extents[index],
             computeLength: () => extents.length);
 
-        expect(extentDelegate.getMinChildIndexForScrollOffset(299), 1);
-        expect(extentDelegate.getMaxChildIndexForScrollOffset(299), 1);
+        expect(extentDelegate.minChildIndexForScrollOffset(299), 1);
+        expect(extentDelegate.maxChildIndexForScrollOffset(299), 1);
         expect(
-            extentDelegate.getMinChildIndexForScrollOffset(299.999999999), 1);
+            extentDelegate.minChildIndexForScrollOffset(299.999999999), 1);
         expect(
-            extentDelegate.getMaxChildIndexForScrollOffset(299.999999999), 1);
-        expect(extentDelegate.getMinChildIndexForScrollOffset(300), 2);
-        expect(extentDelegate.getMaxChildIndexForScrollOffset(300), 1);
-        expect(extentDelegate.getMinChildIndexForScrollOffset(301), 5);
-        expect(extentDelegate.getMaxChildIndexForScrollOffset(301), 5);
+            extentDelegate.maxChildIndexForScrollOffset(299.999999999), 1);
+        expect(extentDelegate.minChildIndexForScrollOffset(300), 2);
+        expect(extentDelegate.maxChildIndexForScrollOffset(300), 1);
+        expect(extentDelegate.minChildIndexForScrollOffset(301), 5);
+        expect(extentDelegate.maxChildIndexForScrollOffset(301), 5);
       });
     });
 

@@ -13,15 +13,15 @@ abstract class ExtentDelegate {
   int get length;
 
   /// The main-axis extent of each item.
-  double getItemExtent(int index);
+  double itemExtent(int index);
 
   /// The layout offset for the child with the given index.
-  double indexToLayoutOffset(int index);
+  double layoutOffset(int index);
 
   /// The minimum child index that is visible at the given scroll offset.
   ///
   /// Implementations should take no more than O(log n) time.
-  int getMinChildIndexForScrollOffset(double scrollOffset);
+  int minChildIndexForScrollOffset(double scrollOffset);
 
   /// The maximum child index that is visible at the given scroll offset.
   ///
@@ -29,7 +29,7 @@ abstract class ExtentDelegate {
   /// Surprisingly, getMaxChildIndexForScrollOffset should be 1 less than
   /// getMinChildIndexForScrollOffset if the scrollOffset is right at the
   /// boundary between two items.
-  int getMaxChildIndexForScrollOffset(double scrollOffset);
+  int maxChildIndexForScrollOffset(double scrollOffset);
 
   @mustCallSuper
   void recompute() {
@@ -72,19 +72,19 @@ class FixedExtentDelegate extends ExtentDelegate {
   }
 
   @override
-  double getItemExtent(int index) {
+  double itemExtent(int index) {
     if (index >= length) return 0;
     return _totalExtent[index + 1] - _totalExtent[index];
   }
 
   @override
-  double indexToLayoutOffset(int index) {
+  double layoutOffset(int index) {
     if (index >= _totalExtent.length) return _totalExtent.last;
     return _totalExtent[index];
   }
 
   @override
-  int getMinChildIndexForScrollOffset(double scrollOffset) {
+  int minChildIndexForScrollOffset(double scrollOffset) {
     int index = collection.lowerBound(_totalExtent, scrollOffset);
     if (index == 0) return 0;
     if (index >= _totalExtent.length ||
@@ -96,7 +96,7 @@ class FixedExtentDelegate extends ExtentDelegate {
   }
 
   @override
-  int getMaxChildIndexForScrollOffset(double scrollOffset) {
+  int maxChildIndexForScrollOffset(double scrollOffset) {
     int index = collection.lowerBound(_totalExtent, scrollOffset);
     // TODO(jacobr): review.
     if (index == 0) return 0;
@@ -268,7 +268,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
   }
 
   BoxConstraints buildChildConstraints(int index) {
-    final currentItemExtent = _extentDelegate.getItemExtent(index);
+    final currentItemExtent = _extentDelegate.itemExtent(index);
     return constraints.asBoxConstraints(
       minExtent: currentItemExtent,
       maxExtent: currentItemExtent,
@@ -291,9 +291,9 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
     final double targetEndScrollOffset = scrollOffset + remainingExtent;
 
     final int firstIndex =
-        _extentDelegate.getMinChildIndexForScrollOffset(scrollOffset);
+        _extentDelegate.minChildIndexForScrollOffset(scrollOffset);
     final int targetLastIndex = targetEndScrollOffset.isFinite
-        ? _extentDelegate.getMaxChildIndexForScrollOffset(targetEndScrollOffset)
+        ? _extentDelegate.maxChildIndexForScrollOffset(targetEndScrollOffset)
         : null;
 
     if (firstChild != null) {
@@ -307,7 +307,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
     if (firstChild == null) {
       if (!addInitialChild(
           index: firstIndex,
-          layoutOffset: _extentDelegate.indexToLayoutOffset(firstIndex))) {
+          layoutOffset: _extentDelegate.layoutOffset(firstIndex))) {
         // There are either no children, or we are past the end of all our children.
         // If it is the latter, we will need to find the first available child.
         double max;
@@ -316,7 +316,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
           // This matches the logic from sliver_fixed_extent_list but it seems
           // a little odd. This is only right if the childManager contains all
           // children added to the list view.
-          max = _extentDelegate.indexToLayoutOffset(childManager.childCount);
+          max = _extentDelegate.layoutOffset(childManager.childCount);
         } else if (firstIndex <= 0) {
           max = 0.0;
         } else {
@@ -326,11 +326,11 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
               !addInitialChild(
                 index: possibleFirstIndex,
                 layoutOffset:
-                    _extentDelegate.indexToLayoutOffset(possibleFirstIndex),
+                    _extentDelegate.layoutOffset(possibleFirstIndex),
               )) {
             possibleFirstIndex -= 1;
           }
-          max = _extentDelegate.indexToLayoutOffset(possibleFirstIndex);
+          max = _extentDelegate.layoutOffset(possibleFirstIndex);
         }
         geometry = SliverGeometry(
           scrollExtent: max,
@@ -351,12 +351,12 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
         // Reset the scroll offset to offset all items prior and up to the
         // missing item. Let parent re-layout everything.
         geometry = SliverGeometry(
-            scrollOffsetCorrection: _extentDelegate.indexToLayoutOffset(index));
+            scrollOffsetCorrection: _extentDelegate.layoutOffset(index));
         return;
       }
       final SliverMultiBoxAdaptorParentData childParentData =
           child.parentData as SliverMultiBoxAdaptorParentData;
-      childParentData.layoutOffset = _extentDelegate.indexToLayoutOffset(index);
+      childParentData.layoutOffset = _extentDelegate.layoutOffset(index);
       assert(childParentData.index == index);
       trailingChildWithLayout ??= child;
     }
@@ -366,12 +366,12 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
       final SliverMultiBoxAdaptorParentData childParentData =
           firstChild.parentData as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset =
-          _extentDelegate.indexToLayoutOffset(firstIndex);
+          _extentDelegate.layoutOffset(firstIndex);
       trailingChildWithLayout = firstChild;
     }
 
     double estimatedMaxScrollOffset =
-        _extentDelegate.indexToLayoutOffset(_extentDelegate.length);
+        _extentDelegate.layoutOffset(_extentDelegate.length);
     for (int index = indexOf(trailingChildWithLayout) + 1;
         targetLastIndex == null || index <= targetLastIndex;
         ++index) {
@@ -382,7 +382,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
         if (child == null) {
           // We have run out of children.
           estimatedMaxScrollOffset =
-              _extentDelegate.indexToLayoutOffset(index + 1);
+              _extentDelegate.layoutOffset(index + 1);
           break;
         }
       } else {
@@ -394,14 +394,14 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
           child.parentData as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
       childParentData.layoutOffset =
-          _extentDelegate.indexToLayoutOffset(childParentData.index);
+          _extentDelegate.layoutOffset(childParentData.index);
     }
 
     final int lastIndex = indexOf(lastChild);
     final double leadingScrollOffset =
-        _extentDelegate.indexToLayoutOffset(firstIndex);
+        _extentDelegate.layoutOffset(firstIndex);
     final double trailingScrollOffset =
-        _extentDelegate.indexToLayoutOffset(lastIndex + 1);
+        _extentDelegate.layoutOffset(lastIndex + 1);
 
     assert(firstIndex == 0 ||
         childScrollOffset(firstChild) - scrollOffset <=
@@ -437,7 +437,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
         constraints.scrollOffset + constraints.remainingPaintExtent;
     final int targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite
         ? _extentDelegate
-            .getMaxChildIndexForScrollOffset(targetEndScrollOffsetForPaint)
+            .maxChildIndexForScrollOffset(targetEndScrollOffsetForPaint)
         : null;
     geometry = SliverGeometry(
       scrollExtent: estimatedMaxScrollOffset,
