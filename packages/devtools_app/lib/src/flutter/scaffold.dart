@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../config_specific/flutter/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/flutter/import_export/import_export.dart';
+import '../globals.dart';
 import 'app.dart';
 import 'screen.dart';
 import 'theme.dart';
@@ -236,8 +237,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     );
   }
 
-  void refresh() {
-    setState(() {});
+  void enterOfflineMode() {
+    setState(() {
+      offlineMode = true;
+    });
   }
 }
 

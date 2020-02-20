@@ -6,7 +6,6 @@ import '../../../flutter/controllers.dart';
 import '../../../flutter/notifications.dart';
 import '../../../flutter/scaffold.dart';
 import '../../../flutter/screen.dart';
-import '../../../globals.dart';
 import '../../../timeline/timeline_controller.dart';
 import '../../../timeline/timeline_model.dart';
 
@@ -92,15 +91,10 @@ class ImportController {
       return;
     }
 
-    _enterOfflineMode();
+    scaffoldState.enterOfflineMode();
     _navigateToImportScreen(DevToolsScreenType.timeline);
 
     await timelineController.loadOfflineData(offlineData);
-  }
-
-  void _enterOfflineMode() {
-    offlineMode = true;
-    scaffoldState.refresh();
   }
 }
 

@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../globals.dart';
 import '../ui/flutter/label.dart';
 import 'flutter_widgets/tagged_text.dart';
 
@@ -338,13 +337,18 @@ Widget processingInfo({
   );
 }
 
+/// Common button for exiting offline mode.
+///
+/// Consumers of this widget will be responsible for including the following in
+/// onPressed:
+///
+/// setState(() {
+///   offlineMode = false;
+/// }
 Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
   return OutlineButton(
     key: const Key('exit offline button'),
-    onPressed: () {
-      offlineMode = false;
-      onPressed();
-    },
+    onPressed: onPressed,
     child: MaterialIconLabel(
       Icons.clear,
       'Exit offline mode',

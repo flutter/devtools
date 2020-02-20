@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:mp_chart/mp/core/adapter_android_mp.dart';
 
 import '../ui/theme.dart';
 
@@ -64,8 +65,6 @@ const devtoolsBlue = ColorSwatch<int>(600, {
   400: Color(0xFF13B9FD),
 });
 
-final chartBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
-
 /// The default duration to use for animations.
 const defaultDuration = Duration(milliseconds: 200);
 
@@ -110,3 +109,15 @@ const defaultCurve = Curves.easeInOutCubic;
 /// This is the standard curve for animations in DevTools.
 CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
+
+final chartBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
+
+final chartLightTypeFace = TypeFace(
+  fontFamily: 'OpenSans',
+  fontWeight: FontWeight.w100,
+);
+
+final chartBoldTypeFace = TypeFace(
+  fontFamily: 'OpenSans',
+  fontWeight: FontWeight.w800,
+);

@@ -8,7 +8,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:mp_chart/mp/chart/bar_chart.dart';
 import 'package:mp_chart/mp/controller/bar_chart_controller.dart';
-import 'package:mp_chart/mp/core/adapter_android_mp.dart';
 import 'package:mp_chart/mp/core/axis/x_axis.dart';
 import 'package:mp_chart/mp/core/common_interfaces.dart';
 import 'package:mp_chart/mp/core/data/bar_data.dart';
@@ -62,16 +61,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   int indexOffset = 0;
 
-  final lightTypeFace = TypeFace(
-    fontFamily: 'OpenSans',
-    fontWeight: FontWeight.w100,
-  );
-
-  final boldTypeFace = TypeFace(
-    fontFamily: 'OpenSans',
-    fontWeight: FontWeight.w800,
-  );
-
   /// Compute the FPS highwater mark based on the displayRefreshRate from
   /// FrameBasedTimeline.
   void _setupFPSHighwaterLine() async {
@@ -84,7 +73,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       _chartController.axisLeftSettingFunction = (axisLeft, controller) {
         axisLeft
           ..setStartAtZero(true)
-          ..typeface = lightTypeFace
+          ..typeface = chartLightTypeFace
           ..textColor = defaultForeground
           ..drawGridLines = false
           ..setValueFormatter(YAxisUnitFormatter())
@@ -95,7 +84,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
             // TODO(terry): LEFT_TOP is clipped need to fix in MPFlutterChart.
             ..labelPosition = LimitLabelPosition.RIGHT_TOP
             ..textSize = 10
-            ..typeface = boldTypeFace
+            ..typeface = chartBoldTypeFace
             // TODO(terry): Below crashed Flutter in Travis see issues/1338.
             // ..enableDashedLine(5, 5, 0)
             ..lineColor = const Color.fromARGB(0x80, 0xff, 0x44, 0x44));

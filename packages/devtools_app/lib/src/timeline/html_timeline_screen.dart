@@ -463,7 +463,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     await clearTimeline();
     eventDetails.reset(hide: true);
 
-    await timelineController.offlineModeChanged();
+    await timelineController.exitOfflineMode();
 
     // This needs to be called before we update the button states because it
     // changes the value of [offlineMode], which the button states depend on.
