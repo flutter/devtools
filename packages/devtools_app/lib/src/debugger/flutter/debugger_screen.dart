@@ -42,6 +42,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
     super.initState();
     debuggerState = DebuggerState();
     debuggerState.setVmService(serviceManager.service);
+    // TODO(https://github.com/flutter/devtools/issues/1648): Make file picker.
     serviceManager.service
         .getScripts(serviceManager.isolateManager.selectedIsolate.id)
         .then((scripts) async {
@@ -63,7 +64,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
     return Split(
       axis: Axis.horizontal,
       initialFirstFraction: 0.25,
+      // TODO(https://github.com/flutter/devtools/issues/1648): Debug panes.
       firstChild: const Text('Debugger details'),
+      // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
       secondChild: CodeView(
         script: script,
       ),
@@ -78,6 +81,8 @@ class CodeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(https://github.com/flutter/devtools/issues/1648): Line numbers,
+    // syntax highlighting and breakpoint markers.
     if (script == null) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -86,10 +91,12 @@ class CodeView extends StatelessWidget {
           .textTheme
           .bodyText2
           .copyWith(fontFamily: 'RobotoMono'),
-      child: SingleChildScrollView(
+      child: Scrollbar(
         child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Text(script.source),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Text(script.source),
+          ),
         ),
       ),
     );
