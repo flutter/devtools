@@ -42,13 +42,6 @@ abstract class DragAndDropState extends State<DragAndDrop> {
   }
 
   @override
-  void dispose() {
-// TODO(Kenzie): Disabled see issue https://github.com/flutter/devtools/issues/1637.
-//    notifications?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: _dragging,

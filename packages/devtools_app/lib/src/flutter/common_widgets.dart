@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -332,6 +333,25 @@ Widget processingInfo({
           ),
         ),
       ],
+    ),
+  );
+}
+
+/// Common button for exiting offline mode.
+///
+/// Consumers of this widget will be responsible for including the following in
+/// onPressed:
+///
+/// setState(() {
+///   offlineMode = false;
+/// }
+Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
+  return OutlineButton(
+    key: const Key('exit offline button'),
+    onPressed: onPressed,
+    child: MaterialIconLabel(
+      Icons.clear,
+      'Exit offline mode',
     ),
   );
 }

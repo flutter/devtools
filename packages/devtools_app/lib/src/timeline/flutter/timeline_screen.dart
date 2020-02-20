@@ -14,6 +14,7 @@ import '../../flutter/notifications.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
@@ -28,7 +29,7 @@ import 'timeline_flame_chart.dart';
 // where applicable.
 
 class TimelineScreen extends Screen {
-  const TimelineScreen() : super();
+  const TimelineScreen() : super(DevToolsScreenType.timeline);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -110,8 +111,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
   @override
   void dispose() {
-    // TODO(kenz): make TimelineController disposable via
-    // DisposableController and dispose here.
     controller.timelineService.updateListeningState(false);
     super.dispose();
   }
@@ -120,13 +119,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildPrimaryStateControls(),
-            _buildSecondaryControls(),
-          ],
-        ),
+        _timelineControls(),
         if (timelineMode == TimelineMode.frameBased) const FlutterFramesChart(),
         ValueListenableBuilder<TimelineFrame>(
           valueListenable: controller.frameBasedTimeline.selectedFrameNotifier,
@@ -144,6 +137,26 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           },
         ),
       ],
+    );
+  }
+
+  Widget _timelineControls() {
+    final _exitOfflineButton = exitOfflineButton(() {
+      setState(() {
+        controller.exitOfflineMode();
+      });
+    });
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: offlineMode
+            ? [_exitOfflineButton]
+            : [
+                _buildPrimaryStateControls(),
+                _buildSecondaryControls(),
+              ],
+      ),
     );
   }
 
@@ -238,7 +251,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: ProfileGranularityDropdown(),
         ),
         ServiceExtensionButtonGroup(
