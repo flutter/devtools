@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
+import '../../flutter/split.dart';
+import '../../globals.dart';
 
 class DebuggerScreen extends Screen {
   const DebuggerScreen() : super(DevToolsScreenType.debugger);
@@ -26,55 +27,73 @@ class DebuggerScreen extends Screen {
   }
 }
 
-class DebuggerScreenBody extends StatelessWidget {
+class DebuggerScreenBody extends StatefulWidget {
+  @override
+  DebuggerScreenBodyState createState() => DebuggerScreenBodyState();
+}
+
+class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
+  Script script;
+
+  @override
+  void initState() {
+    super.initState();
+    // TODO(https://github.com/flutter/devtools/issues/1648): Make file picker.
+    // Make the loading process disposable.
+    serviceManager.service
+        .getScripts(serviceManager.isolateManager.selectedIsolate.id)
+        .then((scripts) async {
+      final scriptRef = scripts.scripts
+          .where((ref) => ref.uri.contains('package:flutter'))
+          .first;
+      final _script = await serviceManager.service.getObject(
+        serviceManager.isolateManager.selectedIsolate.id,
+        scriptRef.id,
+      ) as Script;
+      setState(() => script = _script);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (!kIsWeb) {
-      final theme = Theme.of(context);
-      final textStyle = Theme.of(context)
-          .textTheme
-          .headline5
-          .copyWith(color: theme.accentColor);
-      return Center(
-        child: Text(
-          'The debugger screen is only available when running DevTools as a web'
-          'app.\n'
-          '\n'
-          'It is implemented as a webview, which is not available in Flutter '
-          'desktop embedding.',
-          style: textStyle,
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
-
-    // TODO(https://github.com/flutter/flutter/issues/43532): Don't build const
-    // because compile time const evaluation will fail on non-web apps.
-    // ignore:prefer_const_constructors
-    final webView = HtmlElementView(
-      viewType: 'DebuggerFlutterPlugin',
-    );
-
-    // Wrap the content with an EagerGestureRecognizer to pass all mouse
-    // events to the web view.
-    return RawGestureDetector(
-      gestures: {
-        EagerGestureRecognizer: _EagerGestureFactory(PointerDeviceKind.mouse),
-      },
-      child: webView,
+    return Split(
+      axis: Axis.horizontal,
+      initialFirstFraction: 0.25,
+      // TODO(https://github.com/flutter/devtools/issues/1648): Debug panes.
+      firstChild: const Text('Debugger details'),
+      // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
+      secondChild: CodeView(
+        script: script,
+      ),
     );
   }
 }
 
-class _EagerGestureFactory
-    extends GestureRecognizerFactory<EagerGestureRecognizer> {
-  _EagerGestureFactory(this.kind);
+class CodeView extends StatelessWidget {
+  const CodeView({Key key, this.script}) : super(key: key);
 
-  final PointerDeviceKind kind;
-
-  @override
-  EagerGestureRecognizer constructor() => EagerGestureRecognizer(kind: kind);
+  final Script script;
 
   @override
-  void initializer(EagerGestureRecognizer instance) {}
+  Widget build(BuildContext context) {
+    // TODO(https://github.com/flutter/devtools/issues/1648): Line numbers,
+    // syntax highlighting and breakpoint markers.
+    if (script == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return DefaultTextStyle(
+      style: Theme.of(context)
+          .textTheme
+          .bodyText2
+          .copyWith(fontFamily: 'RobotoMono'),
+      child: Scrollbar(
+        child: SingleChildScrollView(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Text(script.source),
+          ),
+        ),
+      ),
+    );
+  }
 }
