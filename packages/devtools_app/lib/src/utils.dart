@@ -502,6 +502,7 @@ class Reporter implements Listenable {
 /// in cases where N is larger.
 class ValueReporter<T> extends Reporter implements ValueListenable<T> {
   ValueReporter(this._value);
+
   @override
   T get value => _value;
 
@@ -534,21 +535,11 @@ class ImmediateValueNotifier<T> extends ValueNotifier<T> {
 }
 
 extension SafeAccessList<T> on List<T> {
-  T safeGet(int index) {
-    if (index < 0 || index >= length) {
-      return null;
-    } else {
-      return this[index];
-    }
-  }
+  T safeGet(int index) => index < 0 || index >= length ? null : this[index];
 }
 
 extension SafeAccess<T> on Iterable<T> {
-  T get safeFirst {
-    return isNotEmpty ? first : null;
-  }
+  T get safeFirst => isNotEmpty ? first : null;
 
-  T get safeLast {
-    return isNotEmpty ? last : null;
-  }
+  T get safeLast => isNotEmpty ? last : null;
 }
