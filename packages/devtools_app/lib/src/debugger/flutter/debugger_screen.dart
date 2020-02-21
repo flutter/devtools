@@ -43,18 +43,17 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
     debuggerState = DebuggerState();
     debuggerState.setVmService(serviceManager.service);
     // TODO(https://github.com/flutter/devtools/issues/1648): Make file picker.
+    // Make the loading process disposable.
     serviceManager.service
         .getScripts(serviceManager.isolateManager.selectedIsolate.id)
         .then((scripts) async {
       final scriptRef = scripts.scripts
           .where((ref) => ref.uri.contains('package:flutter'))
           .first;
-      print('script ref ${scriptRef.uri} found');
       final _script = await serviceManager.service.getObject(
         serviceManager.isolateManager.selectedIsolate.id,
         scriptRef.id,
       ) as Script;
-      print('${_script.library} loaded');
       setState(() => script = _script);
     });
   }
