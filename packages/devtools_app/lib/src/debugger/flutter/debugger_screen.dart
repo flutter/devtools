@@ -9,7 +9,6 @@ import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../globals.dart';
-import '../debugger_state.dart';
 
 class DebuggerScreen extends Screen {
   const DebuggerScreen() : super(DevToolsScreenType.debugger);
@@ -34,14 +33,11 @@ class DebuggerScreenBody extends StatefulWidget {
 }
 
 class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
-  DebuggerState debuggerState;
   Script script;
 
   @override
   void initState() {
     super.initState();
-    debuggerState = DebuggerState();
-    debuggerState.setVmService(serviceManager.service);
     // TODO(https://github.com/flutter/devtools/issues/1648): Make file picker.
     // Make the loading process disposable.
     serviceManager.service
