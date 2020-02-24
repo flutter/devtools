@@ -15,7 +15,7 @@ import 'package:mp_chart/mp/core/data_set/bar_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
 import 'package:mp_chart/mp/core/entry/bar_entry.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
-import 'package:mp_chart/mp/core/enums/limite_label_postion.dart';
+import 'package:mp_chart/mp/core/enums/limit_label_postion.dart';
 import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/highlight/highlight.dart';
 import 'package:mp_chart/mp/core/limit_line.dart';

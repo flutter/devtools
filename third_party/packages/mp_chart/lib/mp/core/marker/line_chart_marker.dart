@@ -12,6 +12,7 @@ import 'package:mp_chart/mp/core/value_formatter/default_value_formatter.dart';
 
 class LineChartMarker implements IMarker {
   Entry _entry;
+  // ignore: unused_field
   Highlight _highlight;
   double _dx = 0.0;
   double _dy = 0.0;

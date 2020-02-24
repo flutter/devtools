@@ -12,14 +12,18 @@ class FSize extends Poolable {
     return FSize(0, 0);
   }
 
+  // ignore: unnecessary_getters_setters
   double get width => _width;
 
+  // ignore: unnecessary_getters_setters
   set width(double value) {
     _width = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get height => _height;
 
+  // ignore: unnecessary_getters_setters
   set height(double value) {
     _height = value;
   }

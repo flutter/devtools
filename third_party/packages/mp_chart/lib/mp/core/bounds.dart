@@ -16,24 +16,30 @@ class XBounds {
   /// range of visible entry indices
   int _range;
 
-  ChartAnimator _animator;
+  Animator _animator;
 
   XBounds(this._animator);
 
+  // ignore: unnecessary_getters_setters
   int get range => _range;
 
+  // ignore: unnecessary_getters_setters
   set range(int value) {
     _range = value;
   }
 
+  // ignore: unnecessary_getters_setters
   int get max => _max;
 
+  // ignore: unnecessary_getters_setters
   set max(int value) {
     _max = value;
   }
 
+  // ignore: unnecessary_getters_setters
   int get min => _min;
 
+  // ignore: unnecessary_getters_setters
   set min(int value) {
     _min = value;
   }

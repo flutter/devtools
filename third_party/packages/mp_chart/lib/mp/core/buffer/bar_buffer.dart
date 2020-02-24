@@ -16,8 +16,10 @@ class BarBuffer extends AbstractBuffer<IBarDataSet> {
     this._containsStacks = containsStacks;
   }
 
+  // ignore: unnecessary_getters_setters
   int get dataSetIndex => _dataSetIndex;
 
+  // ignore: unnecessary_getters_setters
   set dataSetIndex(int value) {
     _dataSetIndex = value;
   }
@@ -113,26 +115,34 @@ class BarBuffer extends AbstractBuffer<IBarDataSet> {
     reset();
   }
 
+  // ignore: unnecessary_getters_setters
   int get dataSetCount => _dataSetCount;
 
+  // ignore: unnecessary_getters_setters
   set dataSetCount(int value) {
     _dataSetCount = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get containsStacks => _containsStacks;
 
+  // ignore: unnecessary_getters_setters
   set containsStacks(bool value) {
     _containsStacks = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get inverted => _inverted;
 
+  // ignore: unnecessary_getters_setters
   set inverted(bool value) {
     _inverted = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get barWidth => _barWidth;
 
+  // ignore: unnecessary_getters_setters
   set barWidth(double value) {
     _barWidth = value;
   }

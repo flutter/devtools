@@ -23,14 +23,18 @@ class Range {
     return value < _from;
   }
 
+  // ignore: unnecessary_getters_setters
   double get from => _from;
 
+  // ignore: unnecessary_getters_setters
   set from(double value) {
     _from = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get to => _to;
 
+  // ignore: unnecessary_getters_setters
   set to(double value) {
     _to = value;
   }

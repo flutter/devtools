@@ -34,9 +34,7 @@ dependencies:
   intl: ^0.16.0
   js: ^0.6.1+1
   meta: ^1.1.0
-  mp_chart:
-    ^0.0.7
-  #  path: ../../third_party/packages/mp_chart
+  mp_chart: ^0.1.7
   path: ^1.6.0
   pedantic: ^1.7.0
   platform_detect: ^1.3.5
@@ -71,6 +69,8 @@ dependency_overrides:
     path: ../devtools_server
   devtools_shared:
     path: ../devtools_shared
+  mp_chart:
+    path: ../../third_party/packages/mp_chart
   # The text "#OVERRIDE_FOR_TESTS" is stripped out for some CI bots so that the
   # tests can run using the in-repo version of these dependencies instead of
   # only the live Pub version.

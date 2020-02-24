@@ -3,7 +3,8 @@ import 'package:mp_chart/mp/controller/candlestick_chart_controller.dart';
 
 class CandlestickChart
     extends BarLineScatterCandleBubbleChart<CandlestickChartController> {
-  const CandlestickChart(CandlestickChartController controller) : super(controller);
+  const CandlestickChart(CandlestickChartController controller)
+      : super(controller);
 }
 
 class CandlestickChartState

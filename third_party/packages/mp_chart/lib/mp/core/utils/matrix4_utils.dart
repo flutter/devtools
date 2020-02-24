@@ -4,78 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 abstract class Matrix4Utils {
-  static void postScaleByPoint(
-      Matrix4 m, double sx, double sy, double px, double py) {
-    m.translate(px, py);
-    m
-      ..storage[15] = 1.0
-      ..storage[10] = 1.0
-      ..storage[13] *= sy
-      ..storage[5] *= sy
-      ..storage[12] *= sx
-      ..storage[0] *= sx;
-    m.translate(-px, -py);
-  }
-
-  static void postScale(Matrix4 m, double sx, double sy) {
-    m
-      ..storage[15] = 1.0
-      ..storage[10] = 1.0
-      ..storage[13] *= sy
-      ..storage[5] *= sy
-      ..storage[12] *= sx
-      ..storage[0] *= sx;
-  }
-
-  static void setScaleByPoint(
-      Matrix4 m, double sx, double sy, double px, double py) {
-    m.translate(px, py);
-    m
-      ..storage[15] = 1.0
-      ..storage[10] = 1.0
-      ..storage[13] *= sy
-      ..storage[12] *= sx
-      ..storage[5] = sy
-      ..storage[0] = sx;
-    m.translate(-px, -py);
-  }
-
-  static void setScale(Matrix4 m, double sx, double sy) {
-    m
-      ..storage[13] *= sy
-      ..storage[12] *= sx
-      ..storage[5] = sy
-      ..storage[0] = sx;
-  }
-
-  static void postTranslate(Matrix4 m, double tx, double ty) {
-//    final Matrix4 result = Matrix4.identity()..setTranslationRaw(tx, ty, 0.0);
-//    multiply(m, result).copyInto(m);
-    m.storage[12] += tx;
-    m.storage[13] += ty;
-  }
-
-  static void setTranslate(Matrix4 m, double tx, double ty) {
-    (Matrix4.identity()..setTranslationRaw(tx, ty, 0.0)).copyInto(m);
-  }
-
-  static void mapPoints(Matrix4 m, List<double> valuePoints) {
-    double x = 0;
-    double y = 0;
-    for (int i = 0; i < valuePoints.length; i += 2) {
-      x = valuePoints[i] == null ? 0 : valuePoints[i];
-      y = valuePoints[i + 1] == null ? 0 : valuePoints[i + 1];
-      final Vector3 transformed = m.perspectiveTransform(Vector3(x, y, 0));
-      valuePoints[i] = transformed.x;
-      valuePoints[i + 1] = transformed.y;
-    }
-  }
-
-  static void postConcat(Matrix4 m, Matrix4 c) {
-    multiply(c, m).copyInto(m);
-  }
-
-  static Matrix4 multiply(Matrix4 first, Matrix4 second) {
+  static Matrix4 _multiply(Matrix4 first, Matrix4 second) {
     var f0 = first.storage[0]; // 123
     var f1 = first.storage[4]; // 567
     var f2 = first.storage[8];
@@ -133,6 +62,101 @@ abstract class Matrix4Utils {
     res.storage[15] = f12 * s3 + f13 * s7 + f14 * s11 + f15 * s15;
 
     return res;
+  }
+
+  static Matrix4 _getScaleTempMatrixByPoint(
+      double sx, double sy, double px, double py) {
+    return Matrix4.identity()
+      ..storage[13] = py - sy * py
+      ..storage[5] = sy
+      ..storage[12] = px - sx * px
+      ..storage[0] = sx;
+  }
+
+  static void postScaleByPoint(
+      Matrix4 m, double sx, double sy, double px, double py) {
+    var temp = _getScaleTempMatrixByPoint(sx, sy, px, py);
+    postConcat(m, temp);
+  }
+
+  static void postScale(Matrix4 m, double sx, double sy) {
+    m
+      ..storage[13] *= sy
+      ..storage[5] *= sy
+      ..storage[12] *= sx
+      ..storage[0] *= sx;
+  }
+
+  static void postTranslate(Matrix4 m, double tx, double ty) {
+//    final Matrix4 result = Matrix4.identity()..setTranslationRaw(tx, ty, 0.0);
+//    multiply(m, result).copyInto(m);
+    m.storage[12] += tx;
+    m.storage[13] += ty;
+  }
+
+  static void setTranslate(Matrix4 m, double tx, double ty) {
+    (Matrix4.identity()..setTranslationRaw(tx, ty, 0.0)).copyInto(m);
+  }
+
+  static void mapPoints(Matrix4 m, List<double> valuePoints) {
+    double x = 0;
+    double y = 0;
+    for (int i = 0; i < valuePoints.length; i += 2) {
+      x = valuePoints[i] == null ? 0 : valuePoints[i];
+      y = valuePoints[i + 1] == null ? 0 : valuePoints[i + 1];
+      final Vector3 transformed = m.perspectiveTransform(Vector3(x, y, 0));
+      valuePoints[i] = transformed.x;
+      valuePoints[i + 1] = transformed.y;
+    }
+  }
+
+  static void postConcat(Matrix4 m, Matrix4 c) {
+    _multiply(c, m).copyInto(m);
+  }
+
+  static void preConcat(Matrix4 m, Matrix4 c) {
+    _multiply(m, c).copyInto(m);
+  }
+
+  static void setScale(Matrix4 m, double sx, double sy) {
+    m
+      ..storage[0] = sx
+      ..storage[1] = 0
+      ..storage[2] = 0
+      ..storage[3] = 0
+      ..storage[4] = 0
+      ..storage[5] = sy
+      ..storage[6] = 0
+      ..storage[7] = 0
+      ..storage[8] = 0
+      ..storage[9] = 0
+      ..storage[10] = 1
+      ..storage[11] = 0
+      ..storage[12] = 0
+      ..storage[13] = 0
+      ..storage[14] = 0
+      ..storage[15] = 1;
+  }
+
+  static void setScaleByPoint(
+      Matrix4 m, double sx, double sy, double px, double py) {
+    m
+      ..storage[0] = sx
+      ..storage[1] = 0
+      ..storage[2] = 0
+      ..storage[3] = 0
+      ..storage[4] = 0
+      ..storage[5] = sy
+      ..storage[6] = 0
+      ..storage[7] = 0
+      ..storage[8] = 0
+      ..storage[9] = 0
+      ..storage[10] = 1
+      ..storage[11] = 0
+      ..storage[12] = px - sx * px
+      ..storage[13] = py - sy * py
+      ..storage[14] = 0
+      ..storage[15] = 1;
   }
 
   static Rect mapRect(Matrix4 m, Rect r) {

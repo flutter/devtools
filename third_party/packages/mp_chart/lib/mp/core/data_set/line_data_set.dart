@@ -173,7 +173,7 @@ class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet {
   }
 
   @override
-  DashPathEffect getDashPathEffect(){
+  DashPathEffect getDashPathEffect() {
     return _dashPathEffect;
   }
 

@@ -11,6 +11,8 @@ import 'package:mp_chart/mp/core/marker/bar_chart_marker.dart';
 import 'package:mp_chart/mp/core/marker/i_marker.dart';
 import 'package:mp_chart/mp/core/render/x_axis_renderer.dart';
 import 'package:mp_chart/mp/core/render/y_axis_renderer.dart';
+import 'package:mp_chart/mp/core/touch_listener.dart';
+import 'package:mp_chart/mp/core/chart_trans_listener.dart';
 import 'package:mp_chart/mp/core/transformer/transformer.dart';
 import 'package:mp_chart/mp/painter/bar_chart_painter.dart';
 
@@ -58,6 +60,8 @@ class BarChartController
     double borderStrokeWidth = 1.0,
     AxisLeftSettingFunction axisLeftSettingFunction,
     AxisRightSettingFunction axisRightSettingFunction,
+    OnTouchEventListener touchEventListener,
+    ChartTransListener chartTransListener,
     IMarker marker,
     Description description,
     String noDataText = "No chart data available.",
@@ -76,6 +80,7 @@ class BarChartController
     double infoTextSize = 12,
     Color descTextColor,
     Color infoTextColor,
+    Color infoBgColor,
   }) : super(
             marker: marker,
             description: description,
@@ -95,6 +100,7 @@ class BarChartController
             infoTextSize: infoTextSize,
             descTextColor: descTextColor,
             infoTextColor: infoTextColor,
+            infoBgColor: infoBgColor,
             maxVisibleCount: maxVisibleCount,
             autoScaleMinMaxEnabled: autoScaleMinMaxEnabled,
             doubleTapToZoomEnabled: doubleTapToZoomEnabled,
@@ -126,7 +132,9 @@ class BarChartController
             borderColor: borderColor,
             borderStrokeWidth: borderStrokeWidth,
             axisLeftSettingFunction: axisLeftSettingFunction,
-            axisRightSettingFunction: axisRightSettingFunction);
+            axisRightSettingFunction: axisRightSettingFunction,
+            touchEventListener: touchEventListener,
+            chartTransListener: chartTransListener);
 
   @override
   void initialPainter() {
@@ -143,6 +151,7 @@ class BarChartController
         marker,
         description,
         drawMarkers,
+        infoBgColor,
         infoPaint,
         descPaint,
         xAxis,
@@ -180,7 +189,8 @@ class BarChartController
         highlightFullBarEnabled,
         drawValueAboveBar,
         drawBarShadow,
-        fitBars);
+        fitBars,
+        chartTransListener);
   }
 
   BarChartPainter get painter => super.painter;

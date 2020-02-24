@@ -38,8 +38,9 @@ abstract class PieRadarChartPainter<T extends ChartData<IDataSet<Entry>>>
 
   Color _backgroundColor;
 
-  PieRadarChartPainter(T data,
-      ChartAnimator animator,
+  PieRadarChartPainter(
+      T data,
+      Animator animator,
       ViewPortHandler viewPortHandler,
       double maxHighlightDistance,
       bool highLightPerTapEnabled,
@@ -50,6 +51,7 @@ abstract class PieRadarChartPainter<T extends ChartData<IDataSet<Entry>>>
       IMarker marker,
       Description desc,
       bool drawMarkers,
+      Color infoBgColor,
       TextPainter infoPainter,
       TextPainter descPainter,
       XAxis xAxis,
@@ -68,25 +70,26 @@ abstract class PieRadarChartPainter<T extends ChartData<IDataSet<Entry>>>
         _minOffset = minOffset,
         _backgroundColor = backgroundColor,
         super(
-          data,
-          animator,
-          viewPortHandler,
-          maxHighlightDistance,
-          highLightPerTapEnabled,
-          extraLeftOffset,
-          extraTopOffset,
-          extraRightOffset,
-          extraBottomOffset,
-          marker,
-          desc,
-          drawMarkers,
-          infoPainter,
-          descPainter,
-          xAxis,
-          legend,
-          legendRenderer,
-          rendererSettingFunction,
-          selectedListener);
+            data,
+            animator,
+            viewPortHandler,
+            maxHighlightDistance,
+            highLightPerTapEnabled,
+            extraLeftOffset,
+            extraTopOffset,
+            extraRightOffset,
+            extraBottomOffset,
+            marker,
+            desc,
+            drawMarkers,
+            infoBgColor,
+            infoPainter,
+            descPainter,
+            xAxis,
+            legend,
+            legendRenderer,
+            rendererSettingFunction,
+            selectedListener);
 
   @override
   void calcMinMax() {
@@ -98,10 +101,9 @@ abstract class PieRadarChartPainter<T extends ChartData<IDataSet<Entry>>>
     return getData().getEntryCount();
   }
 
-
   @override
   void onPaint(Canvas canvas, Size size) {
-    if(_backgroundColor != null) {
+    if (_backgroundColor != null) {
       canvas.drawColor(_backgroundColor, BlendMode.src);
     }
   }
@@ -112,10 +114,7 @@ abstract class PieRadarChartPainter<T extends ChartData<IDataSet<Entry>>>
     renderer?.initBuffers();
     calcMinMax();
 
-    double legendLeft = 0,
-        legendRight = 0,
-        legendBottom = 0,
-        legendTop = 0;
+    double legendLeft = 0, legendRight = 0, legendBottom = 0, legendTop = 0;
 
     if (legend != null && legend.enabled && !legend.drawInside) {
       double fullLegendWidth = min(legend.neededWidth,
@@ -144,7 +143,7 @@ abstract class PieRadarChartPainter<T extends ChartData<IDataSet<Entry>>>
                 var center = getCenter(size);
 
                 double bottomX = legend.horizontalAlignment ==
-                    LegendHorizontalAlignment.RIGHT
+                        LegendHorizontalAlignment.RIGHT
                     ? size.width - legendWidth + 15.0
                     : legendWidth - 15.0;
                 double bottomY = legendHeight + 15.0;
@@ -154,7 +153,7 @@ abstract class PieRadarChartPainter<T extends ChartData<IDataSet<Entry>>>
                     center, getRadius(), getAngleForPoint(bottomX, bottomY));
 
                 double distReference =
-                distanceToCenter(reference.x, reference.y);
+                    distanceToCenter(reference.x, reference.y);
                 double minOffset = Utils.convertDpToPixel(5);
 
                 if (bottomY >= center.y &&
@@ -255,7 +254,7 @@ abstract class PieRadarChartPainter<T extends ChartData<IDataSet<Entry>>>
     double offsetTop = max(minOffset, legendTop);
     double offsetRight = max(minOffset, legendRight);
     double offsetBottom =
-    max(minOffset, max(getRequiredBaseOffset(), legendBottom));
+        max(minOffset, max(getRequiredBaseOffset(), legendBottom));
 
     viewPortHandler.restrainViewPort(
         offsetLeft, offsetTop, offsetRight, offsetBottom);
@@ -271,8 +270,7 @@ abstract class PieRadarChartPainter<T extends ChartData<IDataSet<Entry>>>
   double getAngleForPoint(double x, double y) {
     MPPointF c = getCenterOffsets();
 
-    double tx = x - c.x,
-        ty = y - c.y;
+    double tx = x - c.x, ty = y - c.y;
     double length = sqrt(tx * tx + ty * ty);
     double r = acos(ty / length);
 
@@ -305,8 +303,8 @@ abstract class PieRadarChartPainter<T extends ChartData<IDataSet<Entry>>>
     return p;
   }
 
-  void getPosition2(MPPointF center, double dist, double angle,
-      MPPointF outputPoint) {
+  void getPosition2(
+      MPPointF center, double dist, double angle, MPPointF outputPoint) {
     outputPoint.x = (center.x + dist * cos(angle / 180.0 * pi));
     outputPoint.y = (center.y + dist * sin(angle / 180.0 * pi));
   }
@@ -396,18 +394,10 @@ abstract class PieRadarChartPainter<T extends ChartData<IDataSet<Entry>>>
   /// @return
   double getDiameter() {
     Rect content = Rect.fromLTRB(
-        viewPortHandler
-            .getContentRect()
-            .left + extraLeftOffset,
-        viewPortHandler
-            .getContentRect()
-            .top + extraTopOffset,
-        viewPortHandler
-            .getContentRect()
-            .right - extraRightOffset,
-        viewPortHandler
-            .getContentRect()
-            .bottom - extraBottomOffset);
+        viewPortHandler.getContentRect().left + extraLeftOffset,
+        viewPortHandler.getContentRect().top + extraTopOffset,
+        viewPortHandler.getContentRect().right - extraRightOffset,
+        viewPortHandler.getContentRect().bottom - extraBottomOffset);
     return min(content.width, content.height);
   }
 

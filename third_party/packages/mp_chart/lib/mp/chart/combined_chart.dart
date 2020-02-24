@@ -1,13 +1,15 @@
-import 'package:flutter/src/gestures/scale.dart';
-import 'package:flutter/src/gestures/tap.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mp_chart/mp/chart/bar_line_scatter_candle_bubble_chart.dart';
 import 'package:mp_chart/mp/chart/chart.dart';
 import 'package:mp_chart/mp/controller/combined_chart_controller.dart';
 import 'package:mp_chart/mp/core/data_interfaces/i_data_set.dart';
 import 'package:mp_chart/mp/core/highlight/highlight.dart';
 import 'package:mp_chart/mp/core/poolable/point.dart';
+import 'package:mp_chart/mp/core/touch_listener.dart';
 import 'package:mp_chart/mp/core/utils/highlight_utils.dart';
-import 'package:mp_chart/mp/core/view_port.dart';
+import 'package:mp_chart/mp/core/utils/utils.dart';
+import 'package:optimized_gesture_detector/details.dart';
+import 'package:optimized_gesture_detector/direction.dart';
 
 class CombinedChart
     extends BarLineScatterCandleBubbleChart<CombinedChartController> {
@@ -24,26 +26,23 @@ class CombinedChartState extends ChartState<CombinedChart> {
 
   double _curX = 0.0;
   double _curY = 0.0;
-  double _scaleX = -1.0;
-  double _scaleY = -1.0;
-  bool _isZoom = false;
+  double _scale = -1.0;
+
+  Highlight _lastHighlighted;
 
   MPPointF _getTrans(double x, double y) {
-    ViewPortHandler vph = widget.controller.painter.viewPortHandler;
+    return Utils.local2Chart(widget.controller, x, y, inverted: _inverted());
+  }
 
-    double xTrans = x - vph.offsetLeft();
-    double yTrans = 0.0;
-
-    /// check if axis is inverted
-    if (_inverted()) {
-      yTrans = -(y - vph.offsetTop());
+  MPPointF _getTouchValue(
+      TouchValueType type, double screenX, double screenY, double localX, localY) {
+    if (type == TouchValueType.CHART) {
+      return _getTrans(localX, localY);
+    } else if (type == TouchValueType.SCREEN) {
+      return MPPointF.getInstance1(screenX, screenY);
     } else {
-      yTrans = -(widget.controller.painter.getMeasuredHeight() -
-          y -
-          vph.offsetBottom());
+      return MPPointF.getInstance1(localX, localY);
     }
-
-    return MPPointF.getInstance1(xTrans, yTrans);
   }
 
   bool _inverted() {
@@ -55,115 +54,308 @@ class CombinedChartState extends ChartState<CombinedChart> {
   }
 
   @override
-  void onTapDown(TapDownDetails detail) {
-    _curX = detail.localPosition.dx;
-    _curY = detail.localPosition.dy;
+  void onTapDown(TapDownDetails details) {
+    widget.controller.stopDeceleration();
+    _curX = details.localPosition.dx;
+    _curY = details.localPosition.dy;
     _closestDataSetToTouch = widget.controller.painter.getDataSetByTouchPoint(
-        detail.localPosition.dx, detail.localPosition.dy);
-  }
-
-  @override
-  void onDoubleTap() {
-    if (widget.controller.painter.doubleTapToZoomEnabled &&
-        widget.controller.painter.getData().getEntryCount() > 0) {
-      MPPointF trans = _getTrans(_curX, _curY);
-      widget.controller.painter.zoom(
-          widget.controller.painter.scaleXEnabled ? 1.4 : 1,
-          widget.controller.painter.scaleYEnabled ? 1.4 : 1,
-          trans.x,
-          trans.y);
-      setStateIfNotDispose();
-      MPPointF.recycleInstance(trans);
+        details.localPosition.dx, details.localPosition.dy);
+    if(widget.controller.touchEventListener != null){
+      var point = _getTouchValue(
+          widget.controller.touchEventListener.valueType(),
+          details.globalPosition.dx,
+          details.globalPosition.dy,
+          details.localPosition.dx,
+          details.localPosition.dy);
+      widget.controller.touchEventListener.onTapDown(point.x, point.y);
     }
   }
 
   @override
-  void onScaleEnd(ScaleEndDetails detail) {
-    if (_isZoom) {
-      _isZoom = false;
-    }
-    _scaleX = -1.0;
-    _scaleY = -1.0;
-  }
-
-  @override
-  void onScaleStart(ScaleStartDetails detail) {
-    _curX = detail.localFocalPoint.dx;
-    _curY = detail.localFocalPoint.dy;
-  }
-
-  @override
-  void onScaleUpdate(ScaleUpdateDetails detail) {
-    if (_scaleX == -1.0 && _scaleY == -1.0) {
-      _scaleX = detail.horizontalScale;
-      _scaleY = detail.verticalScale;
-      return;
-    }
-
-    if (_scaleX == detail.horizontalScale && _scaleY == detail.verticalScale) {
-      if (_isZoom) {
-        return;
-      }
-
-      var dx = detail.localFocalPoint.dx - _curX;
-      var dy = detail.localFocalPoint.dy - _curY;
-      if (widget.controller.painter.dragYEnabled &&
-          widget.controller.painter.dragXEnabled) {
-        if (_inverted()) {
-          dy = -dy;
-        }
-        widget.controller.painter.translate(dx, dy);
-        setStateIfNotDispose();
-      } else {
-        if (widget.controller.painter.dragXEnabled) {
-          widget.controller.painter.translate(dx, 0.0);
-          setStateIfNotDispose();
-        } else if (widget.controller.painter.dragYEnabled) {
-          if (_inverted()) {
-            dy = -dy;
-          }
-          widget.controller.painter.translate(0.0, dy);
-          setStateIfNotDispose();
-        }
-      }
-      _curX = detail.localFocalPoint.dx;
-      _curY = detail.localFocalPoint.dy;
-    } else {
-      var scaleX = detail.horizontalScale / _scaleX;
-      var scaleY = detail.verticalScale / _scaleY;
-
-      if (!_isZoom) {
-        scaleX = detail.horizontalScale;
-        scaleY = detail.verticalScale;
-        _isZoom = true;
-      }
-
-      MPPointF trans = _getTrans(_curX, _curY);
-
-      scaleX = widget.controller.painter.scaleXEnabled ? scaleX : 1.0;
-      scaleY = widget.controller.painter.scaleYEnabled ? scaleY : 1.0;
-      widget.controller.painter.zoom(scaleX, scaleY, trans.x, trans.y);
-      setStateIfNotDispose();
-      MPPointF.recycleInstance(trans);
-    }
-    _scaleX = detail.horizontalScale;
-    _scaleY = detail.verticalScale;
-    _curX = detail.localFocalPoint.dx;
-    _curY = detail.localFocalPoint.dy;
-  }
-
-  Highlight _lastHighlighted;
-
-  @override
-  void onSingleTapUp(TapUpDetails detail) {
+  void onSingleTapUp(TapUpDetails details) {
     if (widget.controller.painter.highlightPerDragEnabled) {
       Highlight h = widget.controller.painter.getHighlightByTouchPoint(
-          detail.localPosition.dx, detail.localPosition.dy);
+          details.localPosition.dx, details.localPosition.dy);
       _lastHighlighted = HighlightUtils.performHighlight(
           widget.controller.painter, h, _lastHighlighted);
       setStateIfNotDispose();
     } else {
       _lastHighlighted = null;
+    }
+    if(widget.controller.touchEventListener != null){
+      var point = _getTouchValue(
+          widget.controller.touchEventListener.valueType(),
+          details.globalPosition.dx,
+          details.globalPosition.dy,
+          details.localPosition.dx,
+          details.localPosition.dy);
+      widget.controller.touchEventListener.onSingleTapUp(point.x, point.y);
+    }
+  }
+
+  @override
+  void onDoubleTapUp(TapUpDetails details) {
+    widget.controller.stopDeceleration();
+    if (widget.controller.painter.doubleTapToZoomEnabled &&
+        widget.controller.painter.getData().getEntryCount() > 0) {
+      MPPointF trans =
+          _getTrans(details.localPosition.dx, details.localPosition.dy);
+      widget.controller.painter.zoom(
+          widget.controller.painter.scaleXEnabled ? 1.2 : 1,
+          widget.controller.painter.scaleYEnabled ? 1.2 : 1,
+          trans.x,
+          trans.y);
+      setStateIfNotDispose();
+      MPPointF.recycleInstance(trans);
+    }
+    if(widget.controller.touchEventListener != null){
+      var point = _getTouchValue(
+          widget.controller.touchEventListener.valueType(),
+          details.globalPosition.dx,
+          details.globalPosition.dy,
+          details.localPosition.dx,
+          details.localPosition.dy);
+      widget.controller.touchEventListener.onDoubleTapUp(point.x, point.y);
+    }
+  }
+
+  @override
+  void onMoveStart(OpsMoveStartDetails details) {
+    widget.controller.stopDeceleration();
+    _curX = details.localPoint.dx;
+    _curY = details.localPoint.dy;
+    if(widget.controller.touchEventListener != null){
+      var point = _getTouchValue(
+          widget.controller.touchEventListener.valueType(),
+          details.globalPoint.dx,
+          details.globalPoint.dy,
+          details.localPoint.dx,
+          details.localPoint.dy);
+      widget.controller.touchEventListener.onMoveStart(point.x, point.y);
+    }
+  }
+
+  @override
+  void onMoveUpdate(OpsMoveUpdateDetails details) {
+    var dx = details.localPoint.dx - _curX;
+    var dy = details.localPoint.dy - _curY;
+    if (widget.controller.painter.dragYEnabled &&
+        widget.controller.painter.dragXEnabled) {
+      if (_inverted()) {
+        dy = -dy;
+      }
+      widget.controller.painter.translate(dx, dy);
+      if(widget.controller.touchEventListener != null){
+        var point = _getTouchValue(
+            widget.controller.touchEventListener.valueType(),
+            details.globalPoint.dx,
+            details.globalPoint.dy,
+            details.localPoint.dx,
+            details.localPoint.dy);
+        widget.controller.touchEventListener.onMoveUpdate(point.x, point.y);
+      }
+      setStateIfNotDispose();
+    } else {
+      if (widget.controller.painter.dragXEnabled) {
+        widget.controller.painter.translate(dx, 0.0);
+        if(widget.controller.touchEventListener != null){
+          var point = _getTouchValue(
+              widget.controller.touchEventListener.valueType(),
+              details.globalPoint.dx,
+              details.globalPoint.dy,
+              details.localPoint.dx,
+              details.localPoint.dy);
+          widget.controller.touchEventListener.onMoveUpdate(point.x, point.y);
+        }
+        setStateIfNotDispose();
+      } else if (widget.controller.painter.dragYEnabled) {
+        if (_inverted()) {
+          dy = -dy;
+        }
+        widget.controller.painter.translate(0.0, dy);
+        if(widget.controller.touchEventListener != null){
+          var point = _getTouchValue(
+              widget.controller.touchEventListener.valueType(),
+              details.globalPoint.dx,
+              details.globalPoint.dy,
+              details.localPoint.dx,
+              details.localPoint.dy);
+          widget.controller.touchEventListener.onMoveUpdate(point.x, point.y);
+        }
+        setStateIfNotDispose();
+      }
+    }
+    _curX = details.localPoint.dx;
+    _curY = details.localPoint.dy;
+  }
+
+  @override
+  void onMoveEnd(OpsMoveEndDetails details) {
+    widget.controller
+      ..stopDeceleration()
+      ..setDecelerationVelocity(details.velocity.pixelsPerSecond)
+      ..computeScroll();
+    if(widget.controller.touchEventListener != null){
+      var point = _getTouchValue(
+          widget.controller.touchEventListener.valueType(),
+          details.globalPoint.dx,
+          details.globalPoint.dy,
+          details.localPoint.dx,
+          details.localPoint.dy);
+      widget.controller.touchEventListener.onMoveEnd(point.x, point.y);
+    }
+  }
+
+  @override
+  void onScaleEnd(OpsScaleEndDetails details) {
+    _scale = -1.0;
+    if(widget.controller.touchEventListener != null){
+      var point = _getTouchValue(
+          widget.controller.touchEventListener.valueType(),
+          details.globalPoint.dx,
+          details.globalPoint.dy,
+          details.localPoint.dx,
+          details.localPoint.dy);
+      widget.controller.touchEventListener.onScaleEnd(point.x, point.y);
+    }
+  }
+
+  @override
+  void onScaleStart(OpsScaleStartDetails details) {
+    widget.controller.stopDeceleration();
+    _curX = details.localPoint.dx;
+    _curY = details.localPoint.dy;
+    if(widget.controller.touchEventListener != null){
+      var point = _getTouchValue(
+          widget.controller.touchEventListener.valueType(),
+          details.globalPoint.dx,
+          details.globalPoint.dy,
+          details.localPoint.dx,
+          details.localPoint.dy);
+      widget.controller.touchEventListener.onScaleStart(point.x, point.y);
+    }
+  }
+
+  @override
+  void onScaleUpdate(OpsScaleUpdateDetails details) {
+    var pinchZoomEnabled = widget.controller.pinchZoomEnabled;
+    var isYDirection = details.mainDirection == Direction.Y;
+    if (_scale == -1.0) {
+      if (pinchZoomEnabled) {
+        _scale = details.scale;
+      } else {
+        _scale = isYDirection ? details.verticalScale : details.horizontalScale;
+      }
+      return;
+    }
+
+    var scale = 1.0;
+    if (pinchZoomEnabled) {
+      scale = details.scale / _scale;
+    } else {
+      scale = isYDirection
+          ? details.verticalScale / _scale
+          : details.horizontalScale / _scale;
+    }
+
+    MPPointF trans = _getTrans(_curX, _curY);
+    var h = widget.controller.painter.viewPortHandler;
+    scale = Utils.optimizeScale(scale);
+    if (pinchZoomEnabled) {
+      bool canZoomMoreX = scale < 1 ? h.canZoomOutMoreX() : h.canZoomInMoreX();
+      bool canZoomMoreY = scale < 1 ? h.canZoomOutMoreY() : h.canZoomInMoreY();
+      widget.controller.painter.zoom(
+          canZoomMoreX ? scale : 1, canZoomMoreY ? scale : 1, trans.x, trans.y);
+      if(widget.controller.touchEventListener != null){
+        var point = _getTouchValue(
+            widget.controller.touchEventListener.valueType(),
+            details.globalFocalPoint.dx,
+            details.globalFocalPoint.dy,
+            details.localFocalPoint.dx,
+            details.localFocalPoint.dy);
+        widget.controller.touchEventListener.onScaleUpdate(point.x, point.y);
+      }
+      setStateIfNotDispose();
+    } else {
+      if (isYDirection) {
+        if (widget.controller.painter.scaleYEnabled) {
+          bool canZoomMoreY =
+              scale < 1 ? h.canZoomOutMoreY() : h.canZoomInMoreY();
+          widget.controller.painter
+              .zoom(1, canZoomMoreY ? scale : 1, trans.x, trans.y);
+          if(widget.controller.touchEventListener != null){
+            var point = _getTouchValue(
+                widget.controller.touchEventListener.valueType(),
+                details.globalFocalPoint.dx,
+                details.globalFocalPoint.dy,
+                details.localFocalPoint.dx,
+                details.localFocalPoint.dy);
+            widget.controller.touchEventListener.onScaleUpdate(point.x, point.y);
+          }
+          setStateIfNotDispose();
+        }
+      } else {
+        if (widget.controller.painter.scaleXEnabled) {
+          bool canZoomMoreX =
+              scale < 1 ? h.canZoomOutMoreX() : h.canZoomInMoreX();
+          widget.controller.painter
+              .zoom(canZoomMoreX ? scale : 1, 1, trans.x, trans.y);
+          if(widget.controller.touchEventListener != null){
+            var point = _getTouchValue(
+                widget.controller.touchEventListener.valueType(),
+                details.globalFocalPoint.dx,
+                details.globalFocalPoint.dy,
+                details.localFocalPoint.dx,
+                details.localFocalPoint.dy);
+            widget.controller.touchEventListener.onScaleUpdate(point.x, point.y);
+          }
+          setStateIfNotDispose();
+        }
+      }
+    }
+    setStateIfNotDispose();
+    MPPointF.recycleInstance(trans);
+
+    if (pinchZoomEnabled) {
+      _scale = details.scale;
+    } else {
+      _scale = isYDirection ? details.verticalScale : details.horizontalScale;
+    }
+  }
+
+  void onDragStart(LongPressStartDetails details) {
+    if (widget.controller.touchEventListener != null) {
+      var point = _getTouchValue(
+          widget.controller.touchEventListener.valueType(),
+          details.globalPosition.dx,
+          details.globalPosition.dy,
+          details.localPosition.dx,
+          details.localPosition.dy);
+      widget.controller.touchEventListener.onDragStart(point.x, point.y);
+    }
+  }
+
+  void onDragUpdate(LongPressMoveUpdateDetails details) {
+    if (widget.controller.touchEventListener != null) {
+      var point = _getTouchValue(
+          widget.controller.touchEventListener.valueType(),
+          details.globalPosition.dx,
+          details.globalPosition.dy,
+          details.localPosition.dx,
+          details.localPosition.dy);
+      widget.controller.touchEventListener.onDragUpdate(point.x, point.y);
+    }
+  }
+
+  void onDragEnd(LongPressEndDetails details) {
+    if (widget.controller.touchEventListener != null) {
+      var point = _getTouchValue(
+          widget.controller.touchEventListener.valueType(),
+          details.globalPosition.dx,
+          details.globalPosition.dy,
+          details.localPosition.dx,
+          details.localPosition.dy);
+      widget.controller.touchEventListener.onDragEnd(point.x, point.y);
     }
   }
 }

@@ -5,14 +5,18 @@ class MPPointF extends Poolable {
   double _x;
   double _y;
 
+  // ignore: unnecessary_getters_setters
   double get y => _y;
 
+  // ignore: unnecessary_getters_setters
   set y(double value) {
     _y = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get x => _x;
 
+  // ignore: unnecessary_getters_setters
   set x(double value) {
     _x = value;
   }
@@ -93,6 +97,7 @@ class MPPointD extends Poolable {
 }
 
 abstract class Poolable {
+  // ignore: non_constant_identifier_names
   static int NO_OWNER = -1;
   int currentOwnerId = NO_OWNER;
 

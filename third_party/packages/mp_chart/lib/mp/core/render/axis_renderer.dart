@@ -43,46 +43,56 @@ abstract class AxisRenderer extends Renderer {
 
       _axisLabelPaint = PainterUtils.create(null, null, ColorUtils.BLACK, null);
 
-      _axisLinePaint = Paint()
-        ..style = PaintingStyle.stroke;
+      _axisLinePaint = Paint()..style = PaintingStyle.stroke;
 
-      _limitLinePaint = Paint()
-        ..style = PaintingStyle.stroke;
+      _limitLinePaint = Paint()..style = PaintingStyle.stroke;
     }
   }
 
+  // ignore: unnecessary_getters_setters
   AxisBase get axis => _axis;
 
+  // ignore: unnecessary_getters_setters
   set axis(AxisBase value) {
     _axis = value;
   }
 
+  // ignore: unnecessary_getters_setters
   Transformer get trans => _trans;
 
+  // ignore: unnecessary_getters_setters
   set trans(Transformer value) {
     _trans = value;
   }
 
+  // ignore: unnecessary_getters_setters
   Paint get axisLinePaint => _axisLinePaint;
 
+  // ignore: unnecessary_getters_setters
   set axisLinePaint(Paint value) {
     _axisLinePaint = value;
   }
 
+  // ignore: unnecessary_getters_setters
   TextPainter get axisLabelPaint => _axisLabelPaint;
 
+  // ignore: unnecessary_getters_setters
   set axisLabelPaint(TextPainter value) {
     _axisLabelPaint = value;
   }
 
+  // ignore: unnecessary_getters_setters
   Paint get gridPaint => _gridPaint;
 
+  // ignore: unnecessary_getters_setters
   set gridPaint(Paint value) {
     _gridPaint = value;
   }
 
+  // ignore: unnecessary_getters_setters
   Paint get limitLinePaint => _limitLinePaint;
 
+  // ignore: unnecessary_getters_setters
   set limitLinePaint(Paint value) {
     _limitLinePaint = value;
   }
