@@ -11,8 +11,8 @@ import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../performance/performance_controller.dart';
+import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
-import '../../profiler/cpu_profiler_controller.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
 

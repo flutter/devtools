@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_transformer.dart';
-import 'package:devtools_app/src/profiler/cpu_profiler_controller.dart';
+import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profile_call_tree.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profiler.dart';
