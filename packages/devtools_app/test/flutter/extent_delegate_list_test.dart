@@ -127,13 +127,13 @@ void main() {
               computeExtent: (index) => extents[index],
               computeLength: () => extents.length);
 
+          expect(extentDelegate.maxChildIndexForScrollOffset(0), 0);
+          expect(extentDelegate.maxChildIndexForScrollOffset(-1000), 0);
+          expect(extentDelegate.maxChildIndexForScrollOffset(99), 0);
           // The behavior is a bit counter intuitive but this matching the
           // existing fixed extent behavior. The max child for an offset is
           // actually intentionally less than the min child for the case that
           // the child is right on the boundary.
-          expect(extentDelegate.maxChildIndexForScrollOffset(0), 0);
-          expect(extentDelegate.maxChildIndexForScrollOffset(-1000), 0);
-          expect(extentDelegate.maxChildIndexForScrollOffset(99), 0);
           expect(
               extentDelegate.maxChildIndexForScrollOffset(99.99999999999), 0);
           expect(extentDelegate.maxChildIndexForScrollOffset(250), 1);
@@ -157,9 +157,10 @@ void main() {
         // min and max matching children.
         final extents = [100.0, 200.0, 0.0, 0.0, 0.0, 100.0];
         final extentDelegate = FixedExtentDelegate(
-            // Create items with increasing extents.
-            computeExtent: (index) => extents[index],
-            computeLength: () => extents.length);
+          // Create items with increasing extents.
+          computeExtent: (index) => extents[index],
+          computeLength: () => extents.length,
+        );
 
         expect(extentDelegate.minChildIndexForScrollOffset(299), 1);
         expect(extentDelegate.maxChildIndexForScrollOffset(299), 1);
@@ -184,9 +185,10 @@ void main() {
       // Value to tweak to change how large the items are.
       double extentFactor = 800.0;
       final extentDelegate = FixedExtentDelegate(
-          // Create items with increasing extents.
-          computeExtent: (index) => (index + 1) * extentFactor,
-          computeLength: () => children.length);
+        // Create items with increasing extents.
+        computeExtent: (index) => (index + 1) * extentFactor,
+        computeLength: () => children.length,
+      );
       final TestRenderSliverBoxChildManager childManager =
           TestRenderSliverBoxChildManager(
         children: children,

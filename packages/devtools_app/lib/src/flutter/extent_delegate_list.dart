@@ -107,7 +107,6 @@ class FixedExtentDelegate extends ExtentDelegate {
   @override
   int maxChildIndexForScrollOffset(double scrollOffset) {
     int index = collection.lowerBound(_offsets, scrollOffset);
-    // TODO(jacobr): review.
     if (index == 0) return 0;
     index--;
     assert(_offsets[index] < scrollOffset);
@@ -158,7 +157,7 @@ class ExtentDelegateListView extends BoxScrollView {
   final SliverChildDelegate childrenDelegate;
 
   /// A delegate that provides item extents for the children of the
-  ///  [ExtentDelegateListView].
+  /// [ExtentDelegateListView].
   final ExtentDelegate extentDelegate;
 
   @override
@@ -172,7 +171,7 @@ class ExtentDelegateListView extends BoxScrollView {
 
 /// A sliver that places multiple box children in a linear array.
 ///
-/// The  main axis extents on each child are specified by a delegate.
+/// The main axis extents on each child are specified by a delegate.
 ///
 /// This class is inspired by [SliverFixedExtentList] which provides similar
 /// functionality for the case where all items have the same extent.
@@ -191,8 +190,7 @@ class SliverExtentDelegateList extends SliverMultiBoxAdaptorWidget {
   @override
   RenderSliverExtentDelegateBoxAdaptor createRenderObject(
       BuildContext context) {
-    final SliverMultiBoxAdaptorElement element =
-        context as SliverMultiBoxAdaptorElement;
+    final SliverMultiBoxAdaptorElement element = context;
     return RenderSliverExtentDelegateBoxAdaptor(
       childManager: element,
       extentDelegate: extentDelegate,
@@ -311,9 +309,6 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);
-    }
-
-    if (firstChild == null) {
       if (!addInitialChild(
           index: firstIndex,
           layoutOffset: _extentDelegate.layoutOffset(firstIndex))) {
@@ -345,7 +340,6 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
           maxPaintExtent: max,
         );
         childManager.didFinishLayout();
-        return;
       }
     }
 
@@ -457,8 +451,9 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
 
     // We may have started the layout while scrolled to the end, which would not
     // expose a new child.
-    if (estimatedMaxScrollOffset == trailingScrollOffset)
+    if (estimatedMaxScrollOffset == trailingScrollOffset) {
       childManager.setDidUnderflow(true);
+    }
     childManager.didFinishLayout();
   }
 }
