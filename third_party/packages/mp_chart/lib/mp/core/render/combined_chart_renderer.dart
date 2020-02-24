@@ -19,7 +19,7 @@ class CombinedChartRenderer extends DataRenderer {
 
   ChartPainter _painter;
 
-  CombinedChartRenderer(CombinedChartPainter chart, ChartAnimator animator,
+  CombinedChartRenderer(CombinedChartPainter chart, Animator animator,
       ViewPortHandler viewPortHandler)
       : super(animator, viewPortHandler) {
     _painter = chart;

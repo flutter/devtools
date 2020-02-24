@@ -111,7 +111,6 @@ abstract class DataSet<T extends Entry> extends BaseDataSet<T> {
     super.copy(dataSet);
   }
 
-
   @override
   String toString() {
     return 'DataSet{_values.length: ${_values.length},\n _yMax: $_yMax,\n _yMin: $_yMin,\n _xMax: $_xMax,\n _xMin: $_xMin}';

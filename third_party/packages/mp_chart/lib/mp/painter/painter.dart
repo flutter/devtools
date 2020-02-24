@@ -23,13 +23,14 @@ import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 import 'package:mp_chart/mp/core/view_port.dart';
 
 abstract class ChartPainter<T extends ChartData<IDataSet<Entry>>>
-    extends CustomPainter implements ChartInterface {
+    extends CustomPainter
+    implements ChartInterface {
   /// object that holds all data that was originally set for the chart, before
   /// it was modified or any filtering algorithms had been applied
   final T _data;
 
   /// object responsible for animations
-  final ChartAnimator _animator;
+  final Animator _animator;
 
   /// object that manages the bounds and drawing constraints of the chart
   final ViewPortHandler _viewPortHandler;
@@ -61,6 +62,8 @@ abstract class ChartPainter<T extends ChartData<IDataSet<Entry>>>
   /// paint object for drawing the information text when there are no values in
   /// the chart
   final TextPainter _infoPaint;
+
+  final Color _infoBackgroundColor;
 
   /// the object representing the labels on the x-axis
   final XAxis _xAxis;
@@ -112,7 +115,7 @@ abstract class ChartPainter<T extends ChartData<IDataSet<Entry>>>
 
   bool get isDrawMarkers => _drawMarkers;
 
-  ChartAnimator get animator => _animator;
+  Animator get animator => _animator;
 
   Size get size => _size;
 
@@ -120,9 +123,8 @@ abstract class ChartPainter<T extends ChartData<IDataSet<Entry>>>
 
   bool get highLightPerTapEnabled => _highLightPerTapEnabled;
 
-  ChartPainter(
-      T data,
-      ChartAnimator animator,
+  ChartPainter(T data,
+      Animator animator,
       ViewPortHandler viewPortHandler,
       double maxHighlightDistance,
       bool highLightPerTapEnabled,
@@ -133,6 +135,7 @@ abstract class ChartPainter<T extends ChartData<IDataSet<Entry>>>
       IMarker marker,
       Description desc,
       bool drawMarkers,
+      Color infoBgColor,
       TextPainter infoPainter,
       TextPainter descPainter,
       XAxis xAxis,
@@ -152,6 +155,7 @@ abstract class ChartPainter<T extends ChartData<IDataSet<Entry>>>
         _marker = marker,
         _description = desc,
         _drawMarkers = drawMarkers,
+        _infoBackgroundColor = infoBgColor,
         _infoPaint = infoPainter,
         _descPaint = descPainter,
         _xAxis = xAxis,
@@ -225,6 +229,9 @@ abstract class ChartPainter<T extends ChartData<IDataSet<Entry>>>
     _size = size;
 
     if (!_isInit) {
+      canvas.drawRect(Rect.fromLTRB(0, 0, size.width, size.height),
+          Paint()
+            ..color = _infoBackgroundColor);
       MPPointF c = getCenter(size);
       _infoPaint.layout();
       _infoPaint.paint(canvas,
@@ -271,8 +278,8 @@ abstract class ChartPainter<T extends ChartData<IDataSet<Entry>>>
   /// @return
   bool valuesToHighlight() {
     var res = _indicesToHighlight == null ||
-            _indicesToHighlight.length <= 0 ||
-            _indicesToHighlight[0] == null
+        _indicesToHighlight.length <= 0 ||
+        _indicesToHighlight[0] == null
         ? false
         : true;
     return res;
@@ -323,8 +330,8 @@ abstract class ChartPainter<T extends ChartData<IDataSet<Entry>>>
   /// @param y The y-value to highlight. Supply `NaN` for "any"
   /// @param dataSetIndex The dataset index to search in
   /// @param callListener Should the listener be called for this change
-  void highlightValue4(
-      double x, double y, int dataSetIndex, bool callListener) {
+  void highlightValue4(double x, double y, int dataSetIndex,
+      bool callListener) {
     if (dataSetIndex < 0 || dataSetIndex >= _data.getDataSetCount()) {
       highlightValue6(null, callListener);
     } else {
@@ -359,7 +366,8 @@ abstract class ChartPainter<T extends ChartData<IDataSet<Entry>>>
         high = null;
       } else {
         // set the indices to highlight
-        _indicesToHighlight = List()..add(high);
+        _indicesToHighlight = List()
+          ..add(high);
       }
     }
 
@@ -422,7 +430,8 @@ abstract class ChartPainter<T extends ChartData<IDataSet<Entry>>>
   /// @param high
   /// @return
   List<double> getMarkerPosition(Highlight high) {
-    return List<double>()..add(high.drawX)..add(high.drawY);
+    return List<double>()
+      ..add(high.drawX)..add(high.drawY);
   }
 
   @override

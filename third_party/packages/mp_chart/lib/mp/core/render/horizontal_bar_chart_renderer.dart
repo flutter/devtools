@@ -20,8 +20,8 @@ import 'package:mp_chart/mp/core/poolable/point.dart';
 import 'package:mp_chart/mp/core/utils/utils.dart';
 
 class HorizontalBarChartRenderer extends BarChartRenderer {
-  HorizontalBarChartRenderer(BarDataProvider chart, ChartAnimator animator,
-      ViewPortHandler viewPortHandler)
+  HorizontalBarChartRenderer(
+      BarDataProvider chart, Animator animator, ViewPortHandler viewPortHandler)
       : super(chart, animator, viewPortHandler);
 
   @override

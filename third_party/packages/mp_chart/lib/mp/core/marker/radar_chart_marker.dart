@@ -12,6 +12,7 @@ import 'package:mp_chart/mp/core/value_formatter/default_value_formatter.dart';
 
 class RadarChartMarker implements IMarker {
   Entry _entry;
+  // ignore: unused_field
   Highlight _highlight;
   double _dx = 0.0;
   double _dy = 0.0;
@@ -33,8 +34,8 @@ class RadarChartMarker implements IMarker {
 
   @override
   void draw(Canvas canvas, double posX, double posY) {
-    TextPainter painter = PainterUtils.create(
-        null, "${_formatter.getFormattedValue1(_entry.y)}", _textColor, _fontSize);
+    TextPainter painter = PainterUtils.create(null,
+        "${_formatter.getFormattedValue1(_entry.y)}", _textColor, _fontSize);
     Paint paint = Paint()
       ..color = _backColor
       ..strokeWidth = 2
