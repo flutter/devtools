@@ -973,9 +973,7 @@ class FlexChildVisualizer extends StatelessWidget {
       return Text(
         'flex: $flexFactor',
         style: flexFactor == properties.flexFactor
-            ? const TextStyle(
-                fontWeight: FontWeight.bold,
-              )
+            ? const TextStyle(fontWeight: FontWeight.bold)
             : null,
       );
     }
@@ -1202,30 +1200,20 @@ class WidgetVisualizer extends StatelessWidget {
                             child: Text(
                               title,
                               style: textColor != null
-                                  ? TextStyle(
-                                      color: textColor,
-                                    )
+                                  ? TextStyle(color: textColor)
                                   : null,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          decoration: BoxDecoration(
-                            color: borderColor,
-                          ),
+                          decoration: BoxDecoration(color: borderColor),
                           padding: const EdgeInsets.all(4.0),
                         ),
                       ),
-                      if (hint != null)
-                        Flexible(
-                          child: hint,
-                        ),
+                      if (hint != null) Flexible(child: hint),
                     ],
                   ),
                 ),
-                if (child != null)
-                  Expanded(
-                    child: child,
-                  ),
+                if (child != null) Expanded(child: child),
               ],
             ),
           ),
