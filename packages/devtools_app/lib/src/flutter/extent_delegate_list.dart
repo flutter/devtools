@@ -310,8 +310,9 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
     } else {
       collectGarbage(0, 0);
       if (!addInitialChild(
-          index: firstIndex,
-          layoutOffset: _extentDelegate.layoutOffset(firstIndex))) {
+        index: firstIndex,
+        layoutOffset: _extentDelegate.layoutOffset(firstIndex),
+      )) {
         // There are either no children, or we are past the end of all our children.
         // If it is the latter, we will need to find the first available child.
         double max;
@@ -353,11 +354,11 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
         // Reset the scroll offset to offset all items prior and up to the
         // missing item. Let parent re-layout everything.
         geometry = SliverGeometry(
-            scrollOffsetCorrection: _extentDelegate.layoutOffset(index));
+          scrollOffsetCorrection: _extentDelegate.layoutOffset(index),
+        );
         return;
       }
-      final SliverMultiBoxAdaptorParentData childParentData =
-          child.parentData as SliverMultiBoxAdaptorParentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
       childParentData.layoutOffset = _extentDelegate.layoutOffset(index);
       assert(childParentData.index == index);
       trailingChildWithLayout ??= child;
@@ -366,7 +367,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
     if (trailingChildWithLayout == null) {
       firstChild.layout(buildChildConstraints(firstIndex));
       final SliverMultiBoxAdaptorParentData childParentData =
-          firstChild.parentData as SliverMultiBoxAdaptorParentData;
+          firstChild.parentData;
       childParentData.layoutOffset = _extentDelegate.layoutOffset(firstIndex);
       trailingChildWithLayout = firstChild;
     }
@@ -378,8 +379,10 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
         ++index) {
       RenderBox child = childAfter(trailingChildWithLayout);
       if (child == null || indexOf(child) != index) {
-        child = insertAndLayoutChild(buildChildConstraints(index),
-            after: trailingChildWithLayout);
+        child = insertAndLayoutChild(
+          buildChildConstraints(index),
+          after: trailingChildWithLayout,
+        );
         if (child == null) {
           // We have run out of children.
           estimatedMaxScrollOffset = _extentDelegate.layoutOffset(index + 1);
@@ -390,8 +393,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
       }
       trailingChildWithLayout = child;
       assert(child != null);
-      final SliverMultiBoxAdaptorParentData childParentData =
-          child.parentData as SliverMultiBoxAdaptorParentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
       assert(childParentData.index == index);
       childParentData.layoutOffset =
           _extentDelegate.layoutOffset(childParentData.index);
