@@ -65,10 +65,21 @@ void main() {
         return;
       }
 
+
+await ga.setActiveSurvey('Q1-2020');
+print('>>>> ga.getActiveSurvey() = ${ga.getActiveSurvey()}');
+print('>>>>> await ga.isSurveyActionTaken = ${await ga.isSurveyActionTaken}');
+print('>>>>> 0. ga.surveyShownCount = ${await ga.surveyShownCount}');
+await ga.incrementSurveyShownCount;
+print('>>>>> 1. ga.surveyShownCount = ${await ga.surveyShownCount}');
+await ga.incrementSurveyShownCount;
+print('>>>>> 2. ga.surveyShownCount = ${await ga.surveyShownCount}');
+
       // Show the Q3 DevTools survey. Stop showing the survey after
       // November 14, 2019 (4 weeks after the survey start date
       // October 17, 2019).
-      final surveyThresholdDate = DateTime(2019, 11, 14);
+//      final surveyThresholdDate = DateTime(2019, 11, 14);
+      final surveyThresholdDate = DateTime(2020, 03, 15);
       if (DateTime.now().isBefore(surveyThresholdDate)) {
         // Do not show the survey if the user has either taken or dismissed it.
         if (!await ga.isSurveyActionTaken) {

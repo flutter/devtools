@@ -12,7 +12,7 @@ environment:
 dependencies:
   args: ^1.5.1
   browser_launcher: ^0.1.3
-  devtools_shared: ^0.2.0
+  devtools_shared: ^0.2.1
   intl: ^0.16.0
   meta: ^1.1.0
   path: ^1.6.0
@@ -22,3 +22,7 @@ dependencies:
   http_multi_server: ^2.1.0
   usage: ^3.4.1
   vm_service: ^2.3.1
+
+dependency_overrides:
+  devtools_shared:
+    path: ../devtools_shared

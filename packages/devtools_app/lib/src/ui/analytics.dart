@@ -9,13 +9,13 @@ library gtags;
 
 import 'dart:convert';
 
+import 'package:devtools_shared/devtools_shared.dart' as server;
 import 'package:html_shim/html.dart';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
 import '../../devtools.dart' as devtools show version;
 import '../config_specific/logger/logger.dart';
-import '../devtools_api.dart' as server;
 import '../globals.dart';
 import '../ui/analytics_constants.dart';
 import '../ui/gtags.dart';
@@ -320,6 +320,37 @@ void setEnabled([bool value = true]) async {
       _gaEnabled = value;
     } else {
       _logWarning(resp, server.apiSetDevToolsEnabled, resp.responseText);
+    }
+  }
+}
+
+/// Request DevTools property value 'surveyActionTaken' stored in the file
+/// '~\.devtools'.
+Future<String> getActiveSurvey() async {
+  String activeSurveyName;
+
+  if (isDevToolsServerAvailable) {
+    final resp = await _request(server.apiGetSurvey);
+    if (resp?.status == HttpStatus.ok) {
+      activeSurveyName = json.decode(resp.responseText);
+    } else {
+      _logWarning(resp, server.apiGetSurvey);
+    }
+  }
+
+  return activeSurveyName;
+}
+
+/// Request DevTools property value 'surveyActionTaken' stored in the file
+/// '~\.devtools'.
+Future<void> setActiveSurvey(String name) async {
+  if (isDevToolsServerAvailable) {
+    final resp = await _request(server.apiSetSurvey);
+    if (resp?.status == HttpStatus.ok) {
+      var result = json.decode(resp.responseText);
+      print(">>>>> setActiveSurvey $result");
+    } else {
+      _logWarning(resp, server.apiSetSurvey);
     }
   }
 }
