@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,9 +9,9 @@ import '../../profiler/cpu_profile_columns.dart';
 import '../../profiler/cpu_profile_model.dart';
 import '../../table_data.dart';
 
-/// A table of the CPU's top-down call tree.
-class CpuCallTreeTable extends StatelessWidget {
-  factory CpuCallTreeTable(CpuProfileData data, {Key key}) {
+/// A table of the CPU's bottom-up call tree.
+class CpuBottomUpTable extends StatelessWidget {
+  factory CpuBottomUpTable(List<CpuStackFrame> bottomUpRoots, {Key key}) {
     final treeColumn = MethodNameColumn();
     final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
       TotalTimeColumn(),
@@ -19,20 +19,20 @@ class CpuCallTreeTable extends StatelessWidget {
       treeColumn,
       SourceColumn(),
     ]);
-    return CpuCallTreeTable._(key, data, treeColumn, columns);
+    return CpuBottomUpTable._(key, bottomUpRoots, treeColumn, columns);
   }
 
-  const CpuCallTreeTable._(Key key, this.data, this.treeColumn, this.columns)
+  const CpuBottomUpTable._(
+      Key key, this.bottomUpRoots, this.treeColumn, this.columns)
       : super(key: key);
 
   final TreeColumnData<CpuStackFrame> treeColumn;
   final List<ColumnData<CpuStackFrame>> columns;
-
-  final CpuProfileData data;
+  final List<CpuStackFrame> bottomUpRoots;
   @override
   Widget build(BuildContext context) {
     return TreeTable<CpuStackFrame>(
-      dataRoots: [data.cpuProfileRoot],
+      dataRoots: bottomUpRoots,
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (frame) => PageStorageKey<String>(frame.id),

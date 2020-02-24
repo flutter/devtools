@@ -87,7 +87,7 @@ class HtmlCpuBottomUp extends HtmlCpuProfilerView {
   void rebuildView() {
     final CpuProfileData data = profileDataProvider();
     final List<CpuStackFrame> bottomUpRoots =
-        BottomUpProfileTransformer().processData(data.cpuProfileRoot);
+        BottomUpProfileTransformer.processData(data.cpuProfileRoot);
     bottomUpTable.model.setRows(bottomUpRoots);
   }
 

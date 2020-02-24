@@ -152,13 +152,27 @@ void main() {
     testWidgets('displays with simple content', (WidgetTester tester) async {
       final table = TreeTable<TestData>(
         columns: [treeColumn],
-        data: TestData('empty', 0),
+        dataRoots: [TestData('empty', 0)],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
       expect(find.byKey(const Key('empty')), findsOneWidget);
+    });
+
+    testWidgets('displays with multiple data roots',
+        (WidgetTester tester) async {
+      final table = TreeTable<TestData>(
+        columns: [treeColumn],
+        dataRoots: [TestData('root1', 0), TestData('root2', 1)],
+        treeColumn: treeColumn,
+        keyFactory: (d) => Key(d.name),
+      );
+      await tester.pumpWidget(wrap(table));
+      expect(find.byWidget(table), findsOneWidget);
+      expect(find.byKey(const Key('root1')), findsOneWidget);
+      expect(find.byKey(const Key('root2')), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -169,7 +183,7 @@ void main() {
           treeColumn,
           _NumberColumn(),
         ],
-        data: tree,
+        dataRoots: [tree],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
       );
@@ -194,7 +208,7 @@ void main() {
           treeColumn,
           _CombinedColumn(),
         ],
-        data: tree,
+        dataRoots: [tree],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
       );
@@ -215,7 +229,7 @@ void main() {
           _NumberColumn(),
           treeColumn,
         ],
-        data: tree,
+        dataRoots: [tree],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
       );
@@ -251,7 +265,7 @@ void main() {
           _NumberColumn(),
           treeColumn,
         ],
-        data: data,
+        dataRoots: [data],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
       );
@@ -315,7 +329,7 @@ void main() {
         () {
           TreeTable<TestData>(
             columns: [treeColumn],
-            data: null,
+            dataRoots: null,
             treeColumn: treeColumn,
             keyFactory: (d) => Key(d.name),
           );
@@ -328,7 +342,7 @@ void main() {
       expect(() {
         TreeTable<TestData>(
           columns: [treeColumn],
-          data: tree,
+          dataRoots: [tree],
           treeColumn: treeColumn,
           keyFactory: null,
         );
@@ -339,7 +353,7 @@ void main() {
       expect(() {
         TreeTable<TestData>(
           columns: [treeColumn],
-          data: tree,
+          dataRoots: [tree],
           treeColumn: null,
           keyFactory: (d) => Key(d.name),
         );
@@ -348,7 +362,7 @@ void main() {
       expect(() {
         TreeTable<TestData>(
           columns: const [],
-          data: tree,
+          dataRoots: [tree],
           treeColumn: treeColumn,
           keyFactory: (d) => Key(d.name),
         );
