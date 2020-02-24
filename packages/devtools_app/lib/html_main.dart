@@ -65,10 +65,9 @@ void main() {
         return;
       }
 
-      // Show the Q1 DevTools survey. Stop showing the survey after March 30,
-      // 2020 (4 weeks after the survey start date March 2, 2020).
-      final surveyStartDate = DateTime(2020, 3, 2);
-      final surveyEndDate = DateTime(2020, 3, 30);
+      // Show the Q1 2020 DevTools survey if the current data falls in range.
+      final surveyStartDate = DateTime(2020, 3, 11);
+      final surveyEndDate = DateTime(2020, 4, 10);
       final now = DateTime.now();
       if (now.isAfter(surveyStartDate) && now.isBefore(surveyEndDate)) {
         // Do not show the survey if the user has either taken or dismissed it.
