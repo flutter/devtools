@@ -49,10 +49,13 @@ class FixedExtentDelegate extends ExtentDelegate {
     recompute();
   }
 
-  List<double> _totalExtent;
+  // The _offsets list is intentionally one element larger than the length of
+  // the list as it includes an offset at the end that is the offset after all
+  // items in the list.
+  List<double> _offsets;
 
   @override
-  int get length => _totalExtent.length - 1;
+  int get length => _offsets.length - 1;
 
   final double Function(int index) computeExtent;
   final int Function() computeLength;
@@ -60,12 +63,18 @@ class FixedExtentDelegate extends ExtentDelegate {
   @override
   void recompute() {
     final length = computeLength();
-    _totalExtent = List(length + 1);
-    double total = 0;
-    _totalExtent[0] = 0;
+    // The offsets list is one longer than the length of the list as we
+    // want to query for _offsets(length) to cheaply determine the total size
+    // of the list. Additionally, the logic for binary search assumes that we
+    // have one offset past the end of the list.
+    _offsets = List(length + 1);
+    double offset = 0;
+    // The first item in the list is at offset zero.
+    // TODO(jacobr): remove this line once we have NNBD lists.
+    _offsets[0] = 0;
     for (int i = 0; i < length; ++i) {
-      total += computeExtent(i);
-      _totalExtent[i + 1] = total;
+      offset += computeExtent(i);
+      _offsets[i + 1] = offset;
     }
 
     super.recompute();
@@ -74,34 +83,34 @@ class FixedExtentDelegate extends ExtentDelegate {
   @override
   double itemExtent(int index) {
     if (index >= length) return 0;
-    return _totalExtent[index + 1] - _totalExtent[index];
+    return _offsets[index + 1] - _offsets[index];
   }
 
   @override
   double layoutOffset(int index) {
-    if (index >= _totalExtent.length) return _totalExtent.last;
-    return _totalExtent[index];
+    if (index >= _offsets.length) return _offsets.last;
+    return _offsets[index];
   }
 
   @override
   int minChildIndexForScrollOffset(double scrollOffset) {
-    int index = collection.lowerBound(_totalExtent, scrollOffset);
+    int index = collection.lowerBound(_offsets, scrollOffset);
     if (index == 0) return 0;
-    if (index >= _totalExtent.length ||
-        (_totalExtent[index] - scrollOffset).abs() > precisionErrorTolerance) {
+    if (index >= _offsets.length ||
+        (_offsets[index] - scrollOffset).abs() > precisionErrorTolerance) {
       index--;
     }
-    assert(_totalExtent[index] <= scrollOffset + precisionErrorTolerance);
+    assert(_offsets[index] <= scrollOffset + precisionErrorTolerance);
     return index;
   }
 
   @override
   int maxChildIndexForScrollOffset(double scrollOffset) {
-    int index = collection.lowerBound(_totalExtent, scrollOffset);
+    int index = collection.lowerBound(_offsets, scrollOffset);
     // TODO(jacobr): review.
     if (index == 0) return 0;
     index--;
-    assert(_totalExtent[index] < scrollOffset);
+    assert(_offsets[index] < scrollOffset);
     return index;
   }
 }
@@ -325,8 +334,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
           while (possibleFirstIndex > 0 &&
               !addInitialChild(
                 index: possibleFirstIndex,
-                layoutOffset:
-                    _extentDelegate.layoutOffset(possibleFirstIndex),
+                layoutOffset: _extentDelegate.layoutOffset(possibleFirstIndex),
               )) {
             possibleFirstIndex -= 1;
           }
@@ -365,8 +373,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
       firstChild.layout(buildChildConstraints(firstIndex));
       final SliverMultiBoxAdaptorParentData childParentData =
           firstChild.parentData as SliverMultiBoxAdaptorParentData;
-      childParentData.layoutOffset =
-          _extentDelegate.layoutOffset(firstIndex);
+      childParentData.layoutOffset = _extentDelegate.layoutOffset(firstIndex);
       trailingChildWithLayout = firstChild;
     }
 
@@ -381,8 +388,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
             after: trailingChildWithLayout);
         if (child == null) {
           // We have run out of children.
-          estimatedMaxScrollOffset =
-              _extentDelegate.layoutOffset(index + 1);
+          estimatedMaxScrollOffset = _extentDelegate.layoutOffset(index + 1);
           break;
         }
       } else {
@@ -398,8 +404,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
     }
 
     final int lastIndex = indexOf(lastChild);
-    final double leadingScrollOffset =
-        _extentDelegate.layoutOffset(firstIndex);
+    final double leadingScrollOffset = _extentDelegate.layoutOffset(firstIndex);
     final double trailingScrollOffset =
         _extentDelegate.layoutOffset(lastIndex + 1);
 
