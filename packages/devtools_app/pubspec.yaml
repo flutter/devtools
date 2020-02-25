@@ -27,8 +27,7 @@ dependencies:
   collection: ^1.14.11
   devtools_server: #^0.1.15
     path: ../devtools_server
-  devtools_shared: #^0.2.1
-    path: ../devtools_shared
+  devtools_shared: ^0.2.1
   file: ^5.1.0
   http: ^0.12.0+1
   html_shim: ^0.0.2
