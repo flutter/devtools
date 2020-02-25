@@ -128,6 +128,7 @@ class ServiceConnectionManager {
     serviceAvailable.complete();
 
     connectedApp = ConnectedApp();
+    serviceExtensionManager.connectedApp = connectedApp;
 
     unawaited(onClosed.then((_) => vmServiceClosed()));
 
@@ -205,6 +206,7 @@ class ServiceConnectionManager {
     vm = null;
     sdkVersion = null;
     connectedApp = null;
+    serviceExtensionManager.connectedApp = null;
 
     _stateController.add(false);
     _connectionClosedController.add(null);
@@ -446,6 +448,8 @@ class ServiceExtensionManager {
 
   var extensionStatesUpdated = Completer<void>();
 
+  ConnectedApp connectedApp;
+
   Future<void> _handleExtensionEvent(Event event) async {
     switch (event.extensionKind) {
       case 'Flutter.FirstFrame':
@@ -513,42 +517,48 @@ class ServiceExtensionManager {
     }
     final Isolate isolate = await _service.getIsolate(isolateRef.id);
     if (isolate.extensionRPCs != null) {
-      for (String extension in isolate.extensionRPCs) {
-        await _maybeAddServiceExtension(extension);
-      }
-
-      if (_pendingServiceExtensions.isEmpty) {
-        extensionStatesUpdated.complete();
-      }
-
-      if (!_firstFrameEventReceived) {
-        bool didSendFirstFrameEvent = false;
-        if (isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
-          final value = await _service.callServiceExtension(
-            extensions.didSendFirstFrameEvent,
-            isolateId: _isolateManager.selectedIsolate.id,
-          );
-          didSendFirstFrameEvent =
-              value != null && value.json['enabled'] == 'true';
-        } else {
-          final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
-            [
-              'package:flutter/src/widgets/binding.dart',
-              'package:flutter_web/src/widgets/binding.dart',
-            ],
-            _service,
-          );
-          final InstanceRef value = await flutterLibrary.eval(
-            'WidgetsBinding.instance.debugDidSendFirstFrameEvent',
-            isAlive: null,
-          );
-
-          didSendFirstFrameEvent =
-              value != null && value.valueAsString == 'true';
+      if (await connectedApp.isAnyFlutterApp) {
+        for (String extension in isolate.extensionRPCs) {
+          await _maybeAddServiceExtension(extension);
         }
 
-        if (didSendFirstFrameEvent) {
-          await _onFrameEventReceived();
+        if (_pendingServiceExtensions.isEmpty) {
+          extensionStatesUpdated.complete();
+        }
+
+        if (!_firstFrameEventReceived) {
+          bool didSendFirstFrameEvent = false;
+          if (isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
+            final value = await _service.callServiceExtension(
+              extensions.didSendFirstFrameEvent,
+              isolateId: _isolateManager.selectedIsolate.id,
+            );
+            didSendFirstFrameEvent =
+                value != null && value.json['enabled'] == 'true';
+          } else {
+            final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
+              [
+                'package:flutter/src/widgets/binding.dart',
+                'package:flutter_web/src/widgets/binding.dart',
+              ],
+              _service,
+            );
+            final InstanceRef value = await flutterLibrary.eval(
+              'WidgetsBinding.instance.debugDidSendFirstFrameEvent',
+              isAlive: null,
+            );
+
+            didSendFirstFrameEvent =
+                value != null && value.valueAsString == 'true';
+          }
+
+          if (didSendFirstFrameEvent) {
+            await _onFrameEventReceived();
+          }
+        }
+      } else {
+        for (String extension in isolate.extensionRPCs) {
+          await _addServiceExtension(extension);
         }
       }
     }
