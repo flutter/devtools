@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../http_request_data.dart';
+import '../../http/http_request_data.dart';
 import 'http_request_inspector_views.dart';
 
 /// A [Widget] which displays information about an HTTP request.

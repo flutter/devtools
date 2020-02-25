@@ -25,8 +25,12 @@ class VmServiceWrapper implements VmService {
     DisposeHandler disposeHandler,
     this.trackFutures = false,
   }) {
-    _vmService = VmService(inStream, writeMessage,
-        log: log, disposeHandler: disposeHandler);
+    _vmService = VmService(
+      inStream,
+      writeMessage,
+      log: log,
+      disposeHandler: disposeHandler,
+    );
   }
 
   VmService _vmService;
@@ -419,14 +423,27 @@ class VmServiceWrapper implements VmService {
     }
   }
 
-  Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
-      String isolateId) async {
+  // TODO(kenz): move this method to
+  // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
+  Future<bool> isHttpTimelineLoggingAvailable(String isolateId) async {
+    final Isolate isolate = await getIsolate(isolateId);
+    return isolate.extensionRPCs
+        .contains('ext.dart.io.setHttpEnableTimelineLogging');
+  }
+
+  Future<HttpTimelineLoggingState> getHttpEnableTimelineLogging(
+    String isolateId,
+  ) async {
+    assert(await isHttpTimelineLoggingAvailable(isolateId));
     return _trackFuture('getHttpEnableTimelineLogging',
         _vmService.getHttpEnableTimelineLogging(isolateId));
   }
 
   Future<Success> setHttpEnableTimelineLogging(
-      String isolateId, bool enable) async {
+    String isolateId,
+    bool enable,
+  ) async {
+    assert(await isHttpTimelineLoggingAvailable(isolateId));
     return _trackFuture('setHttpEnableTimelineLogging',
         _vmService.setHttpEnableTimelineLogging(isolateId, enable));
   }
