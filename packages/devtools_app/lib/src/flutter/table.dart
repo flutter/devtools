@@ -92,9 +92,11 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
   }
 }
 
+// TODO(https://github.com/flutter/devtools/issues/1657)
+
 /// A table that shows [TreeNode]s.
 ///
-/// This takes in a collection of [data], and a collection of [ColumnData].
+/// This takes in a collection of [dataRoots], and a collection of [ColumnData].
 /// It takes at most one [TreeColumnData].
 ///
 /// The [ColumnData] gives this table information about how to size its
@@ -102,7 +104,11 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
 ///
 /// To lay the contents out, this table's [_TreeTableState] creates a flattened
 /// list of the tree hierarchy. It then uses the nesting level of the
-/// deepest row in [data] to determine how wide to make the [treeColumn].
+/// deepest row in [dataRoots] to determine how wide to make the [treeColumn].
+///
+/// If [dataRoots.length] > 1, there are multiple trees in this tree table. In
+/// this case, tree table operations (expand all, collapse all, sort, etc.) will
+/// be applied to every tree.
 class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   TreeTable({
     Key key,
@@ -139,7 +145,6 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   Set<T> animatingChildrenSet = {};
   T animatingNode;
   List<double> columnWidths;
-  final Map<T, bool> shouldShowCache = {};
   List<bool> rootsExpanded;
 
   /// The number of items to show when animating out the tree table.
@@ -156,31 +161,9 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   @override
   void didUpdateWidget(TreeTable oldWidget) {
     super.didUpdateWidget(oldWidget);
+    rootsExpanded = List.generate(
+        widget.dataRoots.length, (index) => widget.dataRoots[index].isExpanded);
     _updateItems();
-    // If we detect that the root node has been collapsed or expanded
-    // (eg, by a collapse/expand all button), then we will
-    // reset the expansion status to the last recorded value,
-    // then we will trigger a proper animation to show the status change.
-    //
-    // This will properly handle the collapse/expand button when the
-    // root node is collapsed and expand all is pressed, as well as when the
-    // root node is expanded and collapse all is pressed.
-    //
-    // TODO(djshuckerow): Handle cases when the root node is expanded and expand
-    // all is pressed. This will require listening to expansion changes across the
-    // entire tree.
-    for (int i = 0; i < widget.dataRoots.length; i++) {
-      final root = widget.dataRoots[i];
-      final rootExpanded = rootsExpanded[i];
-      if (root.isExpanded != rootExpanded) {
-        if (rootExpanded) {
-          root.expand();
-        } else {
-          root.collapse();
-        }
-        _onItemPressed(root);
-      }
-    }
   }
 
   @override
