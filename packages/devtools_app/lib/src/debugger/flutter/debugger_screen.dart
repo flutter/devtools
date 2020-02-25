@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
@@ -73,17 +74,21 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
       axis: Axis.horizontal,
       initialFirstFraction: 0.25,
       // TODO(https://github.com/flutter/devtools/issues/1648): Debug panes.
-      firstChild: ScriptPicker(
-        scripts: scriptList,
-        onSelected: onScriptSelected,
-        selected: loadingScript,
+      firstChild: OutlinedBorder(
+        child: ScriptPicker(
+          scripts: scriptList,
+          onSelected: onScriptSelected,
+          selected: loadingScript,
+        ),
       ),
       // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
-      secondChild: loadingScript != null && script == null
-          ? const Center(child: CircularProgressIndicator())
-          : CodeView(
-              script: script,
-            ),
+      secondChild: OutlinedBorder(
+        child: loadingScript != null && script == null
+            ? const Center(child: CircularProgressIndicator())
+            : CodeView(
+                script: script,
+              ),
+      ),
     );
   }
 }
@@ -136,10 +141,9 @@ class ScriptPickerState extends State<ScriptPicker> {
       if (widget.scripts?.scripts == null) {
         _filtered = null;
       } else {
+        // TODO(djshuckerow): Use DebuggerState.getShortScriptName logic here.
         _filtered = widget.scripts.scripts
-            .where(
-              (ref) => ref.uri.contains(value.toLowerCase()),
-            )
+            .where((ref) => ref.uri.contains(value.toLowerCase()))
             .toList();
       }
     });
@@ -151,12 +155,10 @@ class ScriptPickerState extends State<ScriptPicker> {
       color: ref == widget.selected ? selectedColor : null,
       child: InkWell(
         onTap: () => widget.onSelected(ref),
-        child: Padding(
+        child: Container(
           padding: const EdgeInsets.all(4.0),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text('${ref?.uri?.split('/')?.last} (${ref?.uri})'),
-          ),
+          alignment: Alignment.centerLeft,
+          child: Text('${ref?.uri?.split('/')?.last} (${ref?.uri})'),
         ),
       ),
     );
