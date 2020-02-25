@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
-import '../http_request_data.dart';
+import '../../http/http_request_data.dart';
 import '../network_controller.dart';
 import 'http_request_inspector.dart';
 import 'network_model.dart';

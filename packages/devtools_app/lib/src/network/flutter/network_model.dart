@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../http_request_data.dart';
+import '../../http/http_request_data.dart';
 
 class HttpRequestDataTableSource extends DataTableSource {
   @visibleForTesting

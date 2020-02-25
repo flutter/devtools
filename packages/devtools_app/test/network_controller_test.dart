@@ -4,7 +4,7 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/network/http_request_data.dart';
+import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:test/test.dart';

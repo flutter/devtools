@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
+import '../../http/http.dart';
+import '../../http/http_request_data.dart';
 import '../../utils.dart';
-import '../http.dart';
-import '../http_request_data.dart';
 
 // Approximately double the indent of the expandable tile's title.
 const double _rowIndentPadding = 30;
