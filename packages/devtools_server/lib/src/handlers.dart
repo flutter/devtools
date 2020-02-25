@@ -107,6 +107,7 @@ class ServerApi {
               );
 
       // ----- DevTools GA store. -----
+
       case apiResetDevTools:
         _devToolsUsage.reset();
         return api.getCompleted(request, json.encode(true));
@@ -136,13 +137,14 @@ class ServerApi {
         // apiIncrementSurveyShownCount calls.
         String theSurveyName;
         final queryParams = request.requestedUri.queryParameters;
-        if (queryParams.containsKey(surveyName)) {
-          theSurveyName = json.decode(queryParams[surveyName]);
-          if (!_devToolsUsage.surveyNameExists(theSurveyName)) {
-            // Create the survey if property is non-existent in ~/.flutter
-            _devToolsUsage.addSurvey(theSurveyName);
-          }
-          _devToolsUsage.activeSurvey = theSurveyName;
+        if (queryParams.keys.length == 1 &&
+            queryParams.containsKey(surveyName)) {
+          theSurveyName = queryParams[surveyName];
+        }
+        _devToolsUsage.activeSurvey = theSurveyName;
+        if (!_devToolsUsage.surveyNameExists(theSurveyName)) {
+          // Create the survey if property is non-existent in ~/.flutter
+          _devToolsUsage.addSurvey(theSurveyName);
         }
         // Return the survey structure e.g.,
         // { "Q1-2020": {
@@ -156,8 +158,7 @@ class ServerApi {
                 ? _devToolsUsage.properties[_devToolsUsage.activeSurvey]
                 : {}));
       case apiGetSurvey:
-        return api.getCompleted(
-            request, json.encode(_devToolsUsage.activeSurvey));
+        return api.getCompleted(request, _devToolsUsage.activeSurvey);
       case apiGetSurveyActionTaken:
         bool surveyTaken;
         if (_devToolsUsage.activeSurvey != null) {
@@ -299,11 +300,14 @@ class DevToolsUsage {
 
   IOPersistentProperties properties;
 
+  static const String _actionTaken = 'surveyActionTaken';
+  static const String _shownCount = 'surveyShownCount';
+
   void reset() {
     properties.remove('firstRun');
     properties['enabled'] = false;
-    properties['surveyShownCount'] = 0;
-    properties['surveyActionTaken'] = false;
+    properties[_shownCount] = 0;
+    properties[_actionTaken] = false;
   }
 
   bool get isFirstRun {
@@ -326,43 +330,63 @@ class DevToolsUsage {
 
   bool surveyNameExists(String surveyName) => properties[surveyName] != null;
 
-  Map addSurvey([String surveyName]) {
-    if (activeSurvey == null) return {};
+  Map addSurvey(String surveyName) {
+    assert(activeSurvey == surveyName);
+    rewriteActiveSurvey(false, 0);
+    return properties[activeSurvey];
+  }
 
-    surveyName ??= activeSurvey;
-    if (!surveyNameExists(surveyName)) {
-      properties[surveyName] = {
-        'surveyActionTaken': false,
-        'surveyShownCount': 0,
-      };
-    }
-
-    return properties[surveyName];
+  /// Need to rewrite the entire survey structure for property to be persisted.
+  void rewriteActiveSurvey(bool actionTaken, int shownCount) {
+    properties[activeSurvey] = {
+      _actionTaken: actionTaken,
+      _shownCount: shownCount,
+    };
   }
 
   int get surveyShownCount {
-    final prop = activeSurvey == null ? properties : properties[activeSurvey];
-    if (prop['surveyShownCount'] == null) {
-      prop['surveyShownCount'] = 0;
+    int surveyShownCount;
+    if (activeSurvey != null) {
+      final prop = properties[activeSurvey];
+      if (prop[_shownCount] == null) {
+        rewriteActiveSurvey(prop[_actionTaken], 0);
+      }
+      surveyShownCount = properties[activeSurvey][_shownCount];
+    } else {
+      // TODO(terry): Can we eliminate old mechanism - eventually?
+      if (properties[_shownCount] == null) {
+        properties[_shownCount] = 0;
+      }
+      surveyShownCount = properties[_shownCount];
     }
 
-    return prop['surveyShownCount'];
+    return surveyShownCount;
   }
 
   void incrementSurveyShownCount() {
-    final prop = activeSurvey == null ? properties : properties[activeSurvey];
     surveyShownCount; // Ensure surveyShownCount has been initialized.
-    prop['surveyShownCount'] += 1;
+    if (activeSurvey != null) {
+      final prop = properties[activeSurvey];
+      rewriteActiveSurvey(
+          prop[_actionTaken], prop[_shownCount] + 1);
+    } else {
+      // TODO(terry): Can we eliminate old mechanism - eventually?
+      properties[_shownCount] += 1;
+    }
   }
 
   bool get surveyActionTaken {
     final prop = activeSurvey == null ? properties : properties[activeSurvey];
-    return prop['surveyActionTaken'] == true;
+    return prop[_actionTaken] == true;
   }
 
   set surveyActionTaken(bool value) {
-    final prop = activeSurvey == null ? properties : properties[activeSurvey];
-    prop['surveyActionTaken'] = value;
+    if (activeSurvey != null) {
+      final prop = properties[activeSurvey];
+      rewriteActiveSurvey(value, prop[_shownCount]);
+    } else {
+      properties[_actionTaken] = value;
+    }
   }
 }
 

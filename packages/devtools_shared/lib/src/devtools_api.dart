@@ -28,7 +28,7 @@ const String surveyName = 'surveyName';
 
 /// Returns the name of the active survey (apiSetSurvey) if not set returns empty
 /// string.
-const String apiGetSurvey = '{apiPrefix}getSurvey';
+const String apiGetSurvey = '${apiPrefix}getSurvey';
 
 /// Returns the surveyActionTaken of the apiSetSurvey (if not set returns the old getSurveyActionTaken).
 const String apiGetSurveyActionTaken = '${apiPrefix}getSurveyActionTaken';
