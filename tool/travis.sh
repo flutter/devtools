@@ -77,7 +77,7 @@ else
     pushd ./flutter
     # Pin flutter version due to bugs on tip of trunk Flutter.
     # https://github.com/flutter/devtools/issues/1663
-    git checkout aad941e3faeeb0c267164f8bde1d4b5449b16667
+    git checkout 59cc3cdf0167740b51236f5eb5571c6bf3345d6f
     popd
     # Set the suffix so we use the master goldens
     export DEVTOOLS_GOLDENS_SUFFIX=""
