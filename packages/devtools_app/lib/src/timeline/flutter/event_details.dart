@@ -9,8 +9,8 @@ import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
+import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
-import '../../profiler/cpu_profiler_controller.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../utils.dart';
