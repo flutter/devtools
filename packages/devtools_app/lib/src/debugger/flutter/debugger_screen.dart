@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/octicons.dart';
@@ -35,7 +36,8 @@ class DebuggerScreenBody extends StatefulWidget {
   DebuggerScreenBodyState createState() => DebuggerScreenBodyState();
 }
 
-class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
+class DebuggerScreenBodyState extends State<DebuggerScreenBody>
+    with AutoDisposeMixin {
   DebuggerController controller;
   ScriptRef loadingScript;
   Script script;
@@ -44,7 +46,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
   @override
   void initState() {
     super.initState();
-    controller?.setVmService(serviceManager.service);
+    controller = DebuggerController();
+    controller.setVmService(serviceManager.service);
+    addAutoDisposeListener(controller.breakpoints);
     // TODO(https://github.com/flutter/devtools/issues/1648): Make file picker.
     // Make the loading process disposable.
     serviceManager.service
@@ -72,6 +76,34 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
     });
   }
 
+  Map<int, Breakpoint> getBreakpointsForLines() {
+    if (script == null) return {};
+    String getScriptId(Breakpoint b) => b.location.script.id;
+    int getLineNumber(Breakpoint b) {
+      if (b.location is UnresolvedSourceLocation) {
+        return b.location.line;
+      }
+      return controller.calculatePosition(script, b.location.tokenPos).line;
+    }
+
+    final bps = controller.breakpoints.value
+        .where((b) => b != null && getScriptId(b) == script.id);
+    return {
+      for (var b in bps) getLineNumber(b): b,
+    };
+  }
+
+  Future<void> toggleBreakpoint(Script script, int line) async {
+    final breakpoints = getBreakpointsForLines();
+    if (breakpoints.containsKey(line)) {
+      await controller.removeBreakpoint(breakpoints[line]);
+    } else {
+      await controller.addBreakpoint(script.id, line);
+    }
+    // The controller's breakpoints value listener will update us at this
+    // point to rebuild.
+  }
+
   @override
   Widget build(BuildContext context) {
     return Split(
@@ -81,6 +113,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
       firstChild: OutlinedBorder(
         child: Column(
           children: [
+            const Text('Breakpoints'),
+            Expanded(
+              child: BreakpointPicker(
+                breakpoints: controller.breakpoints.value,
+              ),
+            ),
+            const Divider(),
+            const Text('Scripts'),
             Expanded(
               child: ScriptPicker(
                 scripts: scriptList,
@@ -97,7 +137,48 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
             ? const Center(child: CircularProgressIndicator())
             : CodeView(
                 script: script,
-              ),
+                breakpoints: getBreakpointsForLines(),
+                onSelected: toggleBreakpoint),
+      ),
+    );
+  }
+}
+
+class BreakpointPicker extends StatelessWidget {
+  const BreakpointPicker({Key key, this.breakpoints, this.controller})
+      : super(key: key);
+  final List<Breakpoint> breakpoints;
+  final DebuggerController controller;
+
+  String textFor(Breakpoint breakpoint) {
+    if (breakpoint.resolved) {
+      final location = breakpoint.location as SourceLocation;
+      // TODO(djshuckerow): Resolve the scripts in the background and
+      // switch from token position to line numbers.
+      return '${location.script.uri.split('/').last} Position '
+          '${location.tokenPos} (${location.script.uri})';
+    } else {
+      final location = breakpoint.location as UnresolvedSourceLocation;
+      return '${location.script.uri.split('/').last} Position '
+          '${location.line} (${location.script.uri})';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: ListView.builder(
+            itemBuilder: (context, index) => SizedBox(
+              height: ScriptRow.rowHeight,
+              child: Text(textFor(breakpoints[index])),
+            ),
+            itemCount: breakpoints.length,
+          ),
+        ),
       ),
     );
   }
@@ -210,10 +291,12 @@ class ScriptPickerState extends State<ScriptPicker> {
 }
 
 class CodeView extends StatefulWidget {
-  const CodeView({Key key, this.script, this.onSelected}) : super(key: key);
+  const CodeView({Key key, this.script, this.onSelected, this.breakpoints})
+      : super(key: key);
 
+  final Map<int, Breakpoint> breakpoints;
   final Script script;
-  final void Function(Script script, int row, int column) onSelected;
+  final void Function(Script script, int line) onSelected;
 
   @override
   _CodeViewState createState() => _CodeViewState();
@@ -244,7 +327,9 @@ class _CodeViewState extends State<CodeView> {
     });
   }
 
-  void _onPressed(int line) {}
+  void _onPressed(int line) {
+    widget.onSelected(widget.script, line);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -271,6 +356,7 @@ class _CodeViewState extends State<CodeView> {
               lineNumber: index,
               lineContents: lines[index],
               onPressed: () => _onPressed(index),
+              isBreakpoint: widget.breakpoints.containsKey(index),
             );
           },
           itemCount: lines.length,
@@ -282,13 +368,20 @@ class _CodeViewState extends State<CodeView> {
 }
 
 class ScriptRow extends StatefulWidget {
-  const ScriptRow(
-      {Key key, this.group, this.lineNumber, this.lineContents, this.onPressed})
-      : super(key: key);
+  const ScriptRow({
+    Key key,
+    this.group,
+    this.lineNumber,
+    this.lineContents,
+    this.onPressed,
+    @required this.isBreakpoint,
+  }) : super(key: key);
+
   final int lineNumber;
   final String lineContents;
   final LinkedScrollControllerGroup group;
   final VoidCallback onPressed;
+  final bool isBreakpoint;
 
   static const rowHeight = 32.0;
 
@@ -332,9 +425,15 @@ class _ScriptRowState extends State<ScriptRow> {
           controller: linkedController,
           children: [
             Container(
+              // TODO(djshuckerow): Measure the longest line number for sizing.
               width: 48.0,
               padding: const EdgeInsets.only(left: 4.0),
-              color: Theme.of(context).primaryColorDark,
+              decoration: widget.isBreakpoint
+                  ? BoxDecoration(
+                      border: Border.all(color: Theme.of(context).accentColor),
+                      color: Theme.of(context).primaryColorDark,
+                    )
+                  : BoxDecoration(color: Theme.of(context).primaryColorDark),
               child: Text(
                 '${widget.lineNumber}',
                 style: TextStyle(

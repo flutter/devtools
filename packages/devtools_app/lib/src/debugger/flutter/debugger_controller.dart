@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../globals.dart';
+
 /// Responsible for managing the debug state of the app.
 class DebuggerController {
   VmService _service;
@@ -48,8 +50,11 @@ class DebuggerController {
 
   void setVmService(VmService service) {
     _service = service;
+    switchToIsolate(serviceManager.isolateManager.selectedIsolate);
 
     _debugSubscription = _service.onDebugEvent.listen(_handleIsolateEvent);
+    serviceManager.isolateManager.onSelectedIsolateChanged
+        .listen(switchToIsolate);
   }
 
   void switchToIsolate(IsolateRef ref) async {
