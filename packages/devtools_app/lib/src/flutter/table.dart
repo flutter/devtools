@@ -92,9 +92,11 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
   }
 }
 
+// TODO(https://github.com/flutter/devtools/issues/1657)
+
 /// A table that shows [TreeNode]s.
 ///
-/// This takes in a collection of [data], and a collection of [ColumnData].
+/// This takes in a collection of [dataRoots], and a collection of [ColumnData].
 /// It takes at most one [TreeColumnData].
 ///
 /// The [ColumnData] gives this table information about how to size its
@@ -102,18 +104,22 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
 ///
 /// To lay the contents out, this table's [_TreeTableState] creates a flattened
 /// list of the tree hierarchy. It then uses the nesting level of the
-/// deepest row in [data] to determine how wide to make the [treeColumn].
+/// deepest row in [dataRoots] to determine how wide to make the [treeColumn].
+///
+/// If [dataRoots.length] > 1, there are multiple trees in this tree table. In
+/// this case, tree table operations (expand all, collapse all, sort, etc.) will
+/// be applied to every tree.
 class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   TreeTable({
     Key key,
     @required this.columns,
     @required this.treeColumn,
-    @required this.data,
+    @required this.dataRoots,
     @required this.keyFactory,
   })  : assert(columns.contains(treeColumn)),
         assert(columns != null),
         assert(keyFactory != null),
-        assert(data != null),
+        assert(dataRoots != null),
         super(key: key);
 
   /// The columns to show in this table.
@@ -122,8 +128,8 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// The column of the table to treat as expandable.
   final TreeColumnData<T> treeColumn;
 
-  /// The tree structure of rows to show in this table.
-  final T data;
+  /// The tree structures of rows to show in this table.
+  final List<T> dataRoots;
 
   /// Factory that creates keys for each row in this table.
   final Key Function(T) keyFactory;
@@ -139,8 +145,7 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   Set<T> animatingChildrenSet = {};
   T animatingNode;
   List<double> columnWidths;
-  final Map<T, bool> shouldShowCache = {};
-  bool rootExpanded = false;
+  List<bool> rootsExpanded;
 
   /// The number of items to show when animating out the tree table.
   static const itemsToShowWhenAnimating = 50;
@@ -148,34 +153,17 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   @override
   void initState() {
     super.initState();
-    rootExpanded = widget.data.isExpanded;
+    rootsExpanded = List.generate(
+        widget.dataRoots.length, (index) => widget.dataRoots[index].isExpanded);
     _updateItems();
   }
 
   @override
   void didUpdateWidget(TreeTable oldWidget) {
     super.didUpdateWidget(oldWidget);
+    rootsExpanded = List.generate(
+        widget.dataRoots.length, (index) => widget.dataRoots[index].isExpanded);
     _updateItems();
-    // If we detect that the root node has been collapsed or expanded
-    // (eg, by a collapse/expand all button), then we will
-    // reset the expansion status to the last recorded value,
-    // then we will trigger a proper animation to show the status change.
-    //
-    // This will properly handle the collapse/expand button when the
-    // root node is collapsed and expand all is pressed, as well as when the
-    // root node is expanded and collapse all is pressed.
-    //
-    // TODO(djshuckerow): Handle cases when the root node is expanded and expand
-    // all is pressed. This will require listening to expansion changes across the
-    // entire tree.
-    if (widget.data.isExpanded != rootExpanded) {
-      if (rootExpanded) {
-        widget.data.expand();
-      } else {
-        widget.data.collapse();
-      }
-      _onItemPressed(widget.data);
-    }
   }
 
   @override
@@ -185,7 +173,7 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   void _updateItems() {
     setState(() {
-      items = _buildFlatList(widget.data);
+      items = _buildFlatList(widget.dataRoots);
       // Leave enough space for the animating children during the animation.
       columnWidths = _computeColumnWidths([...items, ...animatingChildren]);
     });
@@ -208,12 +196,12 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       List<T> nodeChildren;
       if (node.isExpanded) {
         // Compute the children of the expanded node before collapsing.
-        nodeChildren = _buildFlatList(node);
+        nodeChildren = _buildFlatList([node]);
         node.collapse();
       } else {
         node.expand();
         // Compute the children of the collapsed node after expanding it.
-        nodeChildren = _buildFlatList(node);
+        nodeChildren = _buildFlatList([node]);
       }
       // The first item will be node itself. We will take the next few items
       // to generate a convincing expansion animation without creating
@@ -223,16 +211,17 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       animatingChildrenSet = Set.of(animatingChildren);
 
       // Update the tracked expansion of the root node if needed.
-      if (node == widget.data) {
-        rootExpanded = node.isExpanded;
+      if (widget.dataRoots.contains(node)) {
+        final rootIndex = widget.dataRoots.indexOf(node);
+        rootsExpanded[rootIndex] = node.isExpanded;
       }
     });
     _updateItems();
   }
 
   List<double> _computeColumnWidths(List<T> flattenedList) {
-    final root = widget.data;
-    TreeNode deepest = root;
+    final firstRoot = widget.dataRoots.first;
+    TreeNode deepest = firstRoot;
     // This will use the width of all rows in the table, even the rows
     // that are hidden by nesting.
     // We may want to change this to using a flattened list of only
@@ -272,12 +261,14 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
   }
 
-  List<T> _buildFlatList(T root) {
+  List<T> _buildFlatList(List<T> roots) {
     final flatList = <T>[];
-    traverse(root, (n) {
-      flatList.add(n);
-      return n.isExpanded;
-    });
+    for (T root in roots) {
+      traverse(root, (n) {
+        flatList.add(n);
+        return n.isExpanded;
+      });
+    }
     return flatList;
   }
 
