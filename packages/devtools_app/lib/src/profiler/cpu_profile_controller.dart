@@ -79,8 +79,8 @@ class CpuProfilerController {
       } on AssertionError catch (_) {
         _dataNotifier.value = cpuProfileData;
         _processingNotifier.value = false;
-        // Rethrow after setting notifiers so that cpu profile data is included
-        // in the timeline export.
+        // Rethrow after setting the notifiers so that cpu profile data is
+        // included in the timeline export.
         rethrow;
       }
     }
