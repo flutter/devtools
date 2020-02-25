@@ -376,6 +376,7 @@ class DevToolsUsage {
   }
 
   bool get surveyActionTaken {
+    // TODO(terry): Can we eliminate old mechanism - eventually?
     final prop = activeSurvey == null ? properties : properties[activeSurvey];
     return prop[_actionTaken] == true;
   }
@@ -385,6 +386,7 @@ class DevToolsUsage {
       final prop = properties[activeSurvey];
       rewriteActiveSurvey(value, prop[_shownCount]);
     } else {
+      // TODO(terry): Can we eliminate old mechanism - eventually?
       properties[_actionTaken] = value;
     }
   }
