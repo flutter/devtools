@@ -36,7 +36,7 @@ void validateHeapInfo(MemoryTracker data) {
     // TODO(terry): Bug - VM's first HeapSample returns a null for the rss value.
     //              Subsequent samples the rss values are valid integers.  This is
     //              a VM regression https://github.com/dart-lang/sdk/issues/40766.
-    //              When fixed remove below test rss != null and firstSample global.
+    //              When fixed, remove below test rss != null and firstSample global.
     if (sample.rss != null && firstSample) {
       expect(sample.rss, greaterThan(0));
       expect(sample.rss, greaterThan(sample.capacity));
