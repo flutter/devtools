@@ -74,7 +74,11 @@ if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
 else
     echo "Cloning master Flutter branch"
     git clone https://github.com/flutter/flutter.git ./flutter
-
+    pushd ./flutter
+    # Pin flutter version due to bugs on tip of trunk Flutter.
+    # https://github.com/flutter/devtools/issues/1663
+    git checkout aad941e3faeeb0c267164f8bde1d4b5449b16667
+    popd
     # Set the suffix so we use the master goldens
     export DEVTOOLS_GOLDENS_SUFFIX=""
 fi
