@@ -23,6 +23,7 @@ ThemeData _darkTheme() {
       accentColor: devtoolsBlue[400],
       backgroundColor: devtoolsGrey[600],
       toggleableActiveColor: devtoolsBlue[400],
+      selectedRowColor: devtoolsGrey[600],
       buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth));
 }
 

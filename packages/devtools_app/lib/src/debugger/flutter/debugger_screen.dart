@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
@@ -33,7 +34,9 @@ class DebuggerScreenBody extends StatefulWidget {
 }
 
 class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
+  ScriptRef loadingScript;
   Script script;
+  ScriptList scriptList;
 
   @override
   void initState() {
@@ -43,14 +46,25 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
     serviceManager.service
         .getScripts(serviceManager.isolateManager.selectedIsolate.id)
         .then((scripts) async {
-      final scriptRef = scripts.scripts
-          .where((ref) => ref.uri.contains('package:flutter'))
-          .first;
-      final _script = await serviceManager.service.getObject(
-        serviceManager.isolateManager.selectedIsolate.id,
-        scriptRef.id,
-      ) as Script;
-      setState(() => script = _script);
+      setState(() {
+        scriptList = scripts;
+      });
+    });
+  }
+
+  Future<void> onScriptSelected(ScriptRef ref) async {
+    if (ref == null) return;
+    setState(() {
+      loadingScript = ref;
+      script = null;
+    });
+    final result = await serviceManager.service.getObject(
+      serviceManager.isolateManager.selectedIsolate.id,
+      ref.id,
+    ) as Script;
+
+    setState(() {
+      script = result;
     });
   }
 
@@ -60,11 +74,127 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
       axis: Axis.horizontal,
       initialFirstFraction: 0.25,
       // TODO(https://github.com/flutter/devtools/issues/1648): Debug panes.
-      firstChild: const Text('Debugger details'),
-      // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
-      secondChild: CodeView(
-        script: script,
+      firstChild: OutlinedBorder(
+        child: ScriptPicker(
+          scripts: scriptList,
+          onSelected: onScriptSelected,
+          selected: loadingScript,
+        ),
       ),
+      // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
+      secondChild: OutlinedBorder(
+        child: loadingScript != null && script == null
+            ? const Center(child: CircularProgressIndicator())
+            : CodeView(
+                script: script,
+              ),
+      ),
+    );
+  }
+}
+
+/// Picker that takes a [ScriptList] and allows selection of one of the scripts inside.
+class ScriptPicker extends StatefulWidget {
+  const ScriptPicker({Key key, this.scripts, this.onSelected, this.selected})
+      : super(key: key);
+
+  final ScriptList scripts;
+  final void Function(ScriptRef scriptRef) onSelected;
+  final ScriptRef selected;
+
+  @override
+  ScriptPickerState createState() => ScriptPickerState();
+}
+
+class ScriptPickerState extends State<ScriptPicker> {
+  List<ScriptRef> _filtered;
+  TextEditingController filterController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isNotLoaded) initFilter();
+  }
+
+  @override
+  void didUpdateWidget(ScriptPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_isNotLoaded) {
+      initFilter();
+    } else if (oldWidget.scripts != widget.scripts) {
+      updateFilter(filterController.text);
+    }
+  }
+
+  void initFilter() {
+    // Make an educated guess as to the main package to slim down the initial list of scripts we show.
+    if (widget.scripts?.scripts != null) {
+      final mainFile = widget.scripts.scripts
+          .firstWhere((ref) => ref.uri.contains('main.dart'));
+      filterController.text = mainFile.uri.split('/').first;
+      updateFilter(filterController.text);
+    }
+  }
+
+  void updateFilter(String value) {
+    setState(() {
+      if (widget.scripts?.scripts == null) {
+        _filtered = null;
+      } else {
+        // TODO(djshuckerow): Use DebuggerState.getShortScriptName logic here.
+        _filtered = widget.scripts.scripts
+            .where((ref) => ref.uri.contains(value.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
+  Widget _buildScript(ScriptRef ref) {
+    final selectedColor = Theme.of(context).selectedRowColor;
+    return Material(
+      color: ref == widget.selected ? selectedColor : null,
+      child: InkWell(
+        onTap: () => widget.onSelected(ref),
+        child: Container(
+          padding: const EdgeInsets.all(4.0),
+          alignment: Alignment.centerLeft,
+          child: Text('${ref?.uri?.split('/')?.last} (${ref?.uri})'),
+        ),
+      ),
+    );
+  }
+
+  bool get _isNotLoaded => _filtered == null || widget.scripts?.scripts == null;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isNotLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final items = _filtered;
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        TextField(
+          controller: filterController,
+          onChanged: updateFilter,
+        ),
+        Expanded(
+          child: Scrollbar(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: ListView.builder(
+                  itemBuilder: (context, index) => _buildScript(items[index]),
+                  itemCount: items.length,
+                  itemExtent: 32.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -79,7 +209,12 @@ class CodeView extends StatelessWidget {
     // TODO(https://github.com/flutter/devtools/issues/1648): Line numbers,
     // syntax highlighting and breakpoint markers.
     if (script == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: Text(
+          'No script selected',
+          style: Theme.of(context).textTheme.subtitle1,
+        ),
+      );
     }
     return DefaultTextStyle(
       style: Theme.of(context)
@@ -88,8 +223,8 @@ class CodeView extends StatelessWidget {
           .copyWith(fontFamily: 'RobotoMono'),
       child: Scrollbar(
         child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
           child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
             child: Text(script.source),
           ),
         ),
