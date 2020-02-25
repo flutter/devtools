@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/common_widgets.dart';
+import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../globals.dart';
+import 'debugger_controller.dart';
 
 class DebuggerScreen extends Screen {
   const DebuggerScreen() : super(DevToolsScreenType.debugger);
@@ -34,6 +36,7 @@ class DebuggerScreenBody extends StatefulWidget {
 }
 
 class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
+  DebuggerController controller;
   ScriptRef loadingScript;
   Script script;
   ScriptList scriptList;
@@ -41,6 +44,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
   @override
   void initState() {
     super.initState();
+    controller?.setVmService(serviceManager.service);
     // TODO(https://github.com/flutter/devtools/issues/1648): Make file picker.
     // Make the loading process disposable.
     serviceManager.service
@@ -75,10 +79,16 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
       initialFirstFraction: 0.25,
       // TODO(https://github.com/flutter/devtools/issues/1648): Debug panes.
       firstChild: OutlinedBorder(
-        child: ScriptPicker(
-          scripts: scriptList,
-          onSelected: onScriptSelected,
-          selected: loadingScript,
+        child: Column(
+          children: [
+            Expanded(
+              child: ScriptPicker(
+                scripts: scriptList,
+                onSelected: onScriptSelected,
+                selected: loadingScript,
+              ),
+            ),
+          ],
         ),
       ),
       // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
@@ -199,16 +209,48 @@ class ScriptPickerState extends State<ScriptPicker> {
   }
 }
 
-class CodeView extends StatelessWidget {
-  const CodeView({Key key, this.script}) : super(key: key);
+class CodeView extends StatefulWidget {
+  const CodeView({Key key, this.script, this.onSelected}) : super(key: key);
 
   final Script script;
+  final void Function(Script script, int row, int column) onSelected;
+
+  @override
+  _CodeViewState createState() => _CodeViewState();
+}
+
+class _CodeViewState extends State<CodeView> {
+  List<String> lines = [];
+  LinkedScrollControllerGroup _horizontalController;
+
+  @override
+  void initState() {
+    super.initState();
+    _horizontalController = LinkedScrollControllerGroup();
+    _updateLines();
+  }
+
+  @override
+  void didUpdateWidget(CodeView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.script != oldWidget.script) {
+      _updateLines();
+    }
+  }
+
+  void _updateLines() {
+    setState(() {
+      lines = widget.script?.source?.split('\n') ?? [];
+    });
+  }
+
+  void _onPressed(int line) {}
 
   @override
   Widget build(BuildContext context) {
     // TODO(https://github.com/flutter/devtools/issues/1648): Line numbers,
     // syntax highlighting and breakpoint markers.
-    if (script == null) {
+    if (widget.script == null) {
       return Center(
         child: Text(
           'No script selected',
@@ -222,11 +264,86 @@ class CodeView extends StatelessWidget {
           .bodyText2
           .copyWith(fontFamily: 'RobotoMono'),
       child: Scrollbar(
-        child: SingleChildScrollView(
+        child: ListView.builder(
+          itemBuilder: (context, index) {
+            return ScriptRow(
+              group: _horizontalController,
+              lineNumber: index,
+              lineContents: lines[index],
+              onPressed: () => _onPressed(index),
+            );
+          },
+          itemCount: lines.length,
+          itemExtent: ScriptRow.rowHeight,
+        ),
+      ),
+    );
+  }
+}
+
+class ScriptRow extends StatefulWidget {
+  const ScriptRow(
+      {Key key, this.group, this.lineNumber, this.lineContents, this.onPressed})
+      : super(key: key);
+  final int lineNumber;
+  final String lineContents;
+  final LinkedScrollControllerGroup group;
+  final VoidCallback onPressed;
+
+  static const rowHeight = 32.0;
+
+  @override
+  _ScriptRowState createState() => _ScriptRowState();
+}
+
+class _ScriptRowState extends State<ScriptRow> {
+  ScrollController linkedController;
+
+  @override
+  void initState() {
+    super.initState();
+    linkedController = widget.group.addAndGet();
+  }
+
+  @override
+  void didUpdateWidget(ScriptRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.group != oldWidget.group) {
+      linkedController.dispose();
+      linkedController = widget.group.addAndGet();
+    }
+  }
+
+  @override
+  void dispose() {
+    linkedController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.centerLeft,
+      height: ScriptRow.rowHeight,
+      child: InkWell(
+        onTap: widget.onPressed,
+        child: ListView(
           scrollDirection: Axis.horizontal,
-          child: SingleChildScrollView(
-            child: Text(script.source),
-          ),
+          controller: linkedController,
+          children: [
+            Container(
+              width: 48.0,
+              padding: const EdgeInsets.only(left: 4.0),
+              color: Theme.of(context).primaryColorDark,
+              child: Text(
+                '${widget.lineNumber}',
+                style: TextStyle(
+                  color: Theme.of(context).primaryTextTheme.bodyText2.color,
+                ),
+              ),
+            ),
+            Text(widget.lineContents),
+          ],
         ),
       ),
     );
