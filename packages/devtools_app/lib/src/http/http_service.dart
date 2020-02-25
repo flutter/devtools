@@ -9,9 +9,9 @@ class HttpService {
   /// Enables or disables HTTP logging for all isolates.
   static Future<void> toggleHttpRequestLogging(bool state) async {
     await serviceManager.service.forEachIsolate((isolate) async {
-      final dartIOExtensionsAvailable =
-          await serviceManager.service.areDartIOExtensionsAvailable(isolate.id);
-      if (dartIOExtensionsAvailable) {
+      final httpLoggingAvailable = await serviceManager.service
+          .isHttpTimelineLoggingAvailable(isolate.id);
+      if (httpLoggingAvailable) {
         final future = serviceManager.service.setHttpEnableTimelineLogging(
           isolate.id,
           state,
