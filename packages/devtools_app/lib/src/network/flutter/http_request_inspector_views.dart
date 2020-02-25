@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:recase/recase.dart';
 
 import '../../utils.dart';
 import '../http.dart';
@@ -88,7 +87,9 @@ class HttpRequestHeadersView extends StatelessWidget {
                 for (final entry in data.general.entries)
                   _buildRow(
                     context,
-                    ReCase(entry.key).titleCase,
+                    // TODO(kenz): ensure the default case of `entry.key` looks
+                    // fine.
+                    entry.key,
                     entry.value.toString(),
                     constraints,
                   ),
