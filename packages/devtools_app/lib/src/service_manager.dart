@@ -533,13 +533,11 @@ class ServiceExtensionManager {
               extensions.didSendFirstFrameEvent,
               isolateId: _isolateManager.selectedIsolate.id,
             );
-            didSendFirstFrameEvent =
-                value != null && value.json['enabled'] == 'true';
+            didSendFirstFrameEvent = value?.json['enabled'] == 'true';
           } else {
             final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
               [
                 'package:flutter/src/widgets/binding.dart',
-                'package:flutter_web/src/widgets/binding.dart',
               ],
               _service,
             );
