@@ -26,7 +26,7 @@ import 'theme.dart';
 const showNetworkPage = false;
 // TODO(https://github.com/flutter/flutter/issues/43783): Put back
 // the debugger screen.
-const showDebuggerPage = false;
+const showDebuggerPage = true;
 
 /// Top-level configuration for the app.
 @immutable

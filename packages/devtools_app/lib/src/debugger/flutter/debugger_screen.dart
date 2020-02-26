@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
@@ -42,15 +42,37 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   ScriptRef loadingScript;
   Script script;
   ScriptList scriptList;
+  Stack stack;
 
   @override
   void initState() {
     super.initState();
+    // TODO(djshuckerow): promote this controller to app-level Controllers.
     controller = DebuggerController();
     controller.setVmService(serviceManager.service);
+    addAutoDisposeListener(controller.isPaused, () async {
+      print('Pause status changed');
+      // TODO(https://github.com/flutter/devtools/issues/1648): Allow choice of
+      // the scripts on the stack.
+      if (controller.isPaused.value) {
+        print('Paused is true, updating stack');
+        final currentStack = await controller.getStack();
+        // NOT READY YET: I don't understand why the getStack() call is returning null here.
+        setState(() {
+          print('Updating stack to$stack');
+          stack = currentStack;
+        });
+        if (stack == null) return;
+        final currentScript =
+            await controller.getScript(stack.frames.first.location.script);
+        setState(() {
+          print('Updating script to $script ');
+          script = currentScript;
+        });
+      }
+    });
     addAutoDisposeListener(controller.breakpoints);
-    // TODO(https://github.com/flutter/devtools/issues/1648): Make file picker.
-    // Make the loading process disposable.
+    // TODO(djshuckerow): Make the loading process disposable.
     serviceManager.service
         .getScripts(serviceManager.isolateManager.selectedIsolate.id)
         .then((scripts) async {
@@ -79,17 +101,11 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   Map<int, Breakpoint> getBreakpointsForLines() {
     if (script == null) return {};
     String getScriptId(Breakpoint b) => b.location.script.id;
-    int getLineNumber(Breakpoint b) {
-      if (b.location is UnresolvedSourceLocation) {
-        return b.location.line;
-      }
-      return controller.calculatePosition(script, b.location.tokenPos).line;
-    }
 
     final bps = controller.breakpoints.value
         .where((b) => b != null && getScriptId(b) == script.id);
     return {
-      for (var b in bps) getLineNumber(b): b,
+      for (var b in bps) controller.getLineNumber(script, b.location): b,
     };
   }
 
@@ -133,12 +149,25 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       ),
       // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
       secondChild: OutlinedBorder(
-        child: loadingScript != null && script == null
-            ? const Center(child: CircularProgressIndicator())
-            : CodeView(
-                script: script,
-                breakpoints: getBreakpointsForLines(),
-                onSelected: toggleBreakpoint),
+        child: Column(
+          children: [
+            DebuggingControls(
+              controller: controller,
+            ),
+            const Divider(height: 0.0),
+            Expanded(
+              child: loadingScript != null && script == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : CodeView(
+                      script: script,
+                      stack: stack,
+                      controller: controller,
+                      breakpoints: getBreakpointsForLines(),
+                      onSelected: toggleBreakpoint,
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -290,12 +319,57 @@ class ScriptPickerState extends State<ScriptPicker> {
   }
 }
 
-class CodeView extends StatefulWidget {
-  const CodeView({Key key, this.script, this.onSelected, this.breakpoints})
+class DebuggingControls extends StatelessWidget {
+  const DebuggingControls({Key key, @required this.controller})
       : super(key: key);
 
+  final DebuggerController controller;
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.isPaused,
+      builder: (context, isPaused, child) {
+        return Row(children: [
+          MaterialButton(
+            onPressed: isPaused ? null : controller.pause,
+            child: const Text('Pause'),
+          ),
+          MaterialButton(
+            onPressed: isPaused ? controller.resume : null,
+            child: const Text('Resume'),
+          ),
+          MaterialButton(
+            onPressed: isPaused ? controller.stepIn : null,
+            child: const Text('Step In'),
+          ),
+          MaterialButton(
+            onPressed: isPaused ? controller.stepOver : null,
+            child: const Text('Step Over'),
+          ),
+          MaterialButton(
+            onPressed: isPaused ? controller.stepOut : null,
+            child: const Text('Step Out'),
+          ),
+        ]);
+      },
+    );
+  }
+}
+
+class CodeView extends StatefulWidget {
+  const CodeView(
+      {Key key,
+      this.script,
+      this.stack,
+      this.controller,
+      this.onSelected,
+      this.breakpoints})
+      : super(key: key);
+
+  final DebuggerController controller;
   final Map<int, Breakpoint> breakpoints;
   final Script script;
+  final Stack stack;
   final void Function(Script script, int line) onSelected;
 
   @override
@@ -305,12 +379,14 @@ class CodeView extends StatefulWidget {
 class _CodeViewState extends State<CodeView> {
   List<String> lines = [];
   LinkedScrollControllerGroup _horizontalController;
+  Set<int> pausedPositions;
 
   @override
   void initState() {
     super.initState();
     _horizontalController = LinkedScrollControllerGroup();
     _updateLines();
+    _updatePausedPositions();
   }
 
   @override
@@ -319,11 +395,23 @@ class _CodeViewState extends State<CodeView> {
     if (widget.script != oldWidget.script) {
       _updateLines();
     }
+    if (widget.stack != oldWidget.stack) {
+      _updatePausedPositions();
+    }
   }
 
   void _updateLines() {
     setState(() {
       lines = widget.script?.source?.split('\n') ?? [];
+    });
+  }
+
+  void _updatePausedPositions() {
+    setState(() {
+      pausedPositions = {
+        for (var frame in widget.stack?.frames ?? [])
+          widget.controller.getLineNumber(widget.script, frame.location)
+      };
     });
   }
 
@@ -357,6 +445,7 @@ class _CodeViewState extends State<CodeView> {
               lineContents: lines[index],
               onPressed: () => _onPressed(index),
               isBreakpoint: widget.breakpoints.containsKey(index),
+              isPausedHere: pausedPositions.contains(index),
             );
           },
           itemCount: lines.length,
@@ -374,6 +463,7 @@ class ScriptRow extends StatefulWidget {
     this.lineNumber,
     this.lineContents,
     this.onPressed,
+    @required this.isPausedHere,
     @required this.isBreakpoint,
   }) : super(key: key);
 
@@ -382,6 +472,7 @@ class ScriptRow extends StatefulWidget {
   final LinkedScrollControllerGroup group;
   final VoidCallback onPressed;
   final bool isBreakpoint;
+  final bool isPausedHere;
 
   static const rowHeight = 32.0;
 
@@ -418,6 +509,7 @@ class _ScriptRowState extends State<ScriptRow> {
     return Container(
       alignment: Alignment.centerLeft,
       height: ScriptRow.rowHeight,
+      color: widget.isPausedHere ? Theme.of(context).selectedRowColor : null,
       child: InkWell(
         onTap: widget.onPressed,
         child: ListView(

@@ -266,6 +266,20 @@ class DebuggerController {
     commonScriptPrefix = scriptPrefix;
   }
 
+  int getLineNumber(Script script, dynamic location) {
+    if (script == null || location == null) {
+      return null;
+    }
+    if (location is UnresolvedSourceLocation && location.line != null) {
+      return location.line;
+    } else if (location is SourceLocation) {
+      return calculatePosition(script, location.tokenPos).line;
+    }
+    throw Exception(
+      '$location should be a $UnresolvedSourceLocation or a $SourceLocation',
+    );
+  }
+
   String getShortScriptName(String uri) {
     if (commonScriptPrefix == null) {
       return uri;
