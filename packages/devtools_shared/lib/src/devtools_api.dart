@@ -20,28 +20,24 @@ const String apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
 const String devToolsEnabledPropertyName = 'enabled';
 
 /// Survey properties APIs:
-/// apiSetSurvey sets the survey property to fetch and save JSON values e.g., Q1-2020 
-const String apiSetSurvey = '${apiPrefix}setSurvey';
-/// Survey name passed in apiSetSurvey, the surveyName is the property name
-/// passed in queryParameter:
-const String surveyName = 'surveyName';
+/// setActiveSurvey sets the survey property to fetch and save JSON values e.g., Q1-2020 
+const String apiSetActiveSurvey = '${apiPrefix}setActiveSurvey';
+/// Survey name passed in apiSetActiveSurvey, the activeSurveyName is the property name
+/// passed as a queryParameter and is the property in ~/.devtools too.
+const String activeSurveyName = 'activeSurveyName';
 
-/// Returns the name of the active survey (apiSetSurvey) if not set returns empty
-/// string.
-const String apiGetSurvey = '${apiPrefix}getSurvey';
-
-/// Returns the surveyActionTaken of the apiSetSurvey (if not set returns the old getSurveyActionTaken).
+/// Returns the surveyActionTaken of the activeSurvey (apiSetActiveSurvey).
 const String apiGetSurveyActionTaken = '${apiPrefix}getSurveyActionTaken';
 
-/// Sets the surveyActionTaken of the apiSetSurvey (if not set sets the old getSurveyActionTaken).
+/// Sets the surveyActionTaken of the of the activeSurvey (apiSetActiveSurvey). 
 const String apiSetSurveyActionTaken = '${apiPrefix}setSurveyActionTaken';
 /// Property name to apiSetSurveyActionTaken the surveyActionTaken is the name
 /// passed in queryParameter:
 const String surveyActionTakenPropertyName = 'surveyActionTaken';
 
-/// Returns the surveyShownCount of the apiSetSurvey (if not set sets the old surveyShownCount).
+/// Returns the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey).
 const String apiGetSurveyShownCount = '${apiPrefix}getSurveyShownCount';
 
-/// Increments the surveyShownCount of the apiSetSurvey (if not set increments the old surveyShownCount).
+/// Increments the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey). 
 const String apiIncrementSurveyShownCount =
     '${apiPrefix}incrementSurveyShownCount';

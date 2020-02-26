@@ -1,4 +1,4 @@
-## 0.2.1
+## 0.2.2
 - Added devtools_api.dart to devtools_shared.
 ## 0.2.0
 - Added field to Memory JSON file "dartDevToolsScreen": "memory".

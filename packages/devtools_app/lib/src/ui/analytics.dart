@@ -254,7 +254,7 @@ Future<String> flutterGAClientID() async {
 
 /// Requests all .devtools properties to be reset to their default values in the
 /// file '~/.devtools'.
-void resetDevToolsFile() async {
+Future<void> resetDevToolsFile() async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(server.apiResetDevTools);
     if (resp?.status == HttpStatus.ok) {
@@ -309,7 +309,7 @@ Future<bool> get isEnabled async {
 
 /// Set the DevTools property 'enabled' (GA enabled) stored in the file
 /// '~/.devtools'.
-void setEnabled([bool value = true]) async {
+Future<void> setEnabled([bool value = true]) async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(
       '${server.apiSetDevToolsEnabled}'
@@ -324,47 +324,24 @@ void setEnabled([bool value = true]) async {
   }
 }
 
-/// Returns the current active survey that exist in the file '~\.devtools'.
-Future<String> getActiveSurvey() async {
-  String activeSurveyName;
-
+/// Request DevTools parameter value be the active survey e.g., 'Q1-2020', stored in
+/// the file '~\.devtools'.
+Future<bool> setActiveSurvey(String value) async {
   if (isDevToolsServerAvailable) {
-    final resp = await _request('${server.apiGetSurvey}');
-    if (resp?.status == HttpStatus.ok) {
-      activeSurveyName = resp.responseText;
-    } else {
-      _logWarning(resp, server.apiGetSurvey);
+    final resp = await _request('${server.apiSetActiveSurvey}'
+        '?${server.activeSurveyName}=$value');
+    if (resp?.status == HttpStatus.ok && json.decode(resp.responseText)) {
+      return true;
+    }
+    if (resp?.status != HttpStatus.ok || !json.decode(resp.responseText)) {
+      _logWarning(resp, server.apiSetActiveSurvey);
     }
   }
-
-  return activeSurveyName;
-}
-
-/// Request DevTools property value active survey e.g., 'Q1-2020', stored in the file
-/// '~\.devtools'.  The active survey creates a Map in .devtools e.g.,
-///   Q1-2020 {
-///     'surveyActionTaken': <bool>,
-///     'surveyShownCount': <int>
-///   }
-///
-/// returns a Map with two keys 'surveyActionTaken' and 'surveyShownCount'
-Future<Map> setActiveSurvey(String name) async {
-  Map result = {};
-  if (isDevToolsServerAvailable) {
-    final resp = await _request('${server.apiSetSurvey}'
-        '?${server.surveyName}=$name');
-    if (resp?.status == HttpStatus.ok) {
-      result = json.decode(resp.responseText);
-    } else {
-      _logWarning(resp, server.apiSetSurvey);
-    }
-  }
-  return result;
+  return false;
 }
 
 /// Request DevTools property value 'surveyActionTaken' stored in the file
-/// '~\.devtools' if activeSurvey is set the activeSurvey actionTaken is returned
-/// otherwise original actionTaken is returned (first survey).
+/// '~\.devtools' if activeSurvey is set the activeSurvey actionTaken is returned.
 Future<bool> get isSurveyActionTaken async {
   bool surveyActionTaken = false;
 
@@ -386,15 +363,13 @@ Future<bool> get isSurveyActionTaken async {
 // TODO(terry): remove the query param logic for this request.
 // setSurveyActionTaken should only be called with the value of true, so
 // we can remove the extra complexity.
-void setSurveyActionTaken() async {
+Future<void> setSurveyActionTaken() async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(
       '${server.apiSetSurveyActionTaken}'
       '?${server.surveyActionTakenPropertyName}=true',
     );
-    if (resp?.status == HttpStatus.ok) {
-      assert(json.decode(resp.responseText) == true);
-    } else {
+    if (resp?.status != HttpStatus.ok || !json.decode(resp.responseText)) {
       _logWarning(resp, server.apiSetSurveyActionTaken, resp.responseText);
     }
   }
