@@ -414,78 +414,80 @@ void main() {
 
   group('NodeListExtension', () {
     test(
-        'toPaddedZoomedRects calculation is accurate for unzoomed row with'
+        'toPaddedZoomedIntervals calculation is accurate for unzoomed row with'
         ' label', () {
-      final paddedZoomedRects = testNodesWithLabel.toPaddedZoomedRects(
+      final paddedZoomedIntervals = testNodesWithLabel.toPaddedZoomedIntervals(
         zoom: 1.0,
         chartStartInset: sideInset,
         chartWidth: 610.0,
       );
-      expect(paddedZoomedRects[0],
+      expect(paddedZoomedIntervals[0],
           equals(const Rect.fromLTRB(0.0, 0.0, 70.0, rowHeight)));
-      expect(paddedZoomedRects[1],
+      expect(paddedZoomedIntervals[1],
           equals(const Rect.fromLTRB(70.0, 0.0, 120.0, rowHeight)));
-      expect(paddedZoomedRects[2],
+      expect(paddedZoomedIntervals[2],
           equals(const Rect.fromLTRB(120.0, 0.0, 180.0, rowHeight)));
-      expect(paddedZoomedRects[3],
+      expect(paddedZoomedIntervals[3],
           equals(const Rect.fromLTRB(180.0, 0.0, 240.0, rowHeight)));
-      expect(paddedZoomedRects[4],
+      expect(paddedZoomedIntervals[4],
           equals(const Rect.fromLTRB(240.0, 0.0, 610.0, rowHeight)));
     });
 
     test(
-        'toPaddedZoomedRects calculation is accurate for unzoomed row without'
-        ' label', () {
-      final paddedZoomedRects = testNodesWithoutLabel.toPaddedZoomedRects(
+        'toPaddedZoomedIntervals calculation is accurate for unzoomed row '
+        'without label', () {
+      final paddedZoomedIntervals =
+          testNodesWithoutLabel.toPaddedZoomedIntervals(
         zoom: 1.0,
         chartStartInset: sideInset,
         chartWidth: 610.0,
       );
-      expect(paddedZoomedRects[0],
+      expect(paddedZoomedIntervals[0],
           equals(const Rect.fromLTRB(0.0, 0.0, 120.0, rowHeight)));
-      expect(paddedZoomedRects[1],
+      expect(paddedZoomedIntervals[1],
           equals(const Rect.fromLTRB(120.0, 0.0, 180.0, rowHeight)));
-      expect(paddedZoomedRects[2],
+      expect(paddedZoomedIntervals[2],
           equals(const Rect.fromLTRB(180.0, 0.0, 240.0, rowHeight)));
-      expect(paddedZoomedRects[3],
+      expect(paddedZoomedIntervals[3],
           equals(const Rect.fromLTRB(240.0, 0.0, 610.0, rowHeight)));
     });
 
     test(
-        'toPaddedZoomedRects calculation is accurate for zoomed row with label',
-        () {
-      final paddedZoomedRects = testNodesWithLabel.toPaddedZoomedRects(
+        'toPaddedZoomedIntervals calculation is accurate for zoomed row with '
+        'label', () {
+      final paddedZoomedIntervals = testNodesWithLabel.toPaddedZoomedIntervals(
         zoom: 2.0,
         chartStartInset: sideInset,
         chartWidth: 1080.0,
       );
-      expect(paddedZoomedRects[0],
+      expect(paddedZoomedIntervals[0],
           equals(const Rect.fromLTRB(0.0, 0.0, 70.0, rowHeight)));
-      expect(paddedZoomedRects[1],
+      expect(paddedZoomedIntervals[1],
           equals(const Rect.fromLTRB(70.0, 0.0, 170.0, rowHeight)));
-      expect(paddedZoomedRects[2],
+      expect(paddedZoomedIntervals[2],
           equals(const Rect.fromLTRB(170.0, 0.0, 290.0, rowHeight)));
-      expect(paddedZoomedRects[3],
+      expect(paddedZoomedIntervals[3],
           equals(const Rect.fromLTRB(290.0, 0.0, 410.0, rowHeight)));
-      expect(paddedZoomedRects[4],
+      expect(paddedZoomedIntervals[4],
           equals(const Rect.fromLTRB(410.0, 0.0, 1080.0, rowHeight)));
     });
 
     test(
-        'toPaddedZoomedRects calculation is accurate for zoomed row with label',
-        () {
-      final paddedZoomedRects = testNodesWithoutLabel.toPaddedZoomedRects(
+        'toPaddedZoomedIntervals calculation is accurate for zoomed row without'
+        ' label', () {
+      final paddedZoomedIntervals =
+          testNodesWithoutLabel.toPaddedZoomedIntervals(
         zoom: 2.0,
         chartStartInset: sideInset,
         chartWidth: 1080.0,
       );
-      expect(paddedZoomedRects[0],
+      expect(paddedZoomedIntervals[0],
           equals(const Rect.fromLTRB(0.0, 0.0, 170.0, rowHeight)));
-      expect(paddedZoomedRects[1],
+      expect(paddedZoomedIntervals[1],
           equals(const Rect.fromLTRB(170.0, 0.0, 290.0, rowHeight)));
-      expect(paddedZoomedRects[2],
+      expect(paddedZoomedIntervals[2],
           equals(const Rect.fromLTRB(290.0, 0.0, 410.0, rowHeight)));
-      expect(paddedZoomedRects[3],
+      expect(paddedZoomedIntervals[3],
           equals(const Rect.fromLTRB(410.0, 0.0, 1080.0, rowHeight)));
     });
   });

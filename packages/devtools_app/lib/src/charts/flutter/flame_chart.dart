@@ -385,7 +385,7 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     super.initState();
     scrollController = widget.linkedScrollControllerGroup.addAndGet();
     extentDelegate = _ScrollingFlameChartRowExtentDelegate(
-      nodeRects: nodes.toPaddedZoomedRects(
+      nodeIntervals: nodes.toPaddedZoomedIntervals(
         zoom: widget.zoom,
         chartStartInset: widget.startInset,
         chartWidth: widget.width,
@@ -399,14 +399,12 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
   @override
   void didUpdateWidget(ScrollingFlameChartRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Avoid calling `extentDelegate.recompute()` when only the selected node
-    // has changed.
     if (oldWidget.nodes != widget.nodes ||
         oldWidget.zoom != widget.zoom ||
         oldWidget.width != widget.width ||
         oldWidget.startInset != widget.startInset) {
       extentDelegate.recomputeWith(
-        nodeRects: nodes.toPaddedZoomedRects(
+        nodeIntervals: nodes.toPaddedZoomedIntervals(
           zoom: widget.zoom,
           chartStartInset: widget.startInset,
           chartWidth: widget.width,
@@ -537,14 +535,14 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
 }
 
 extension NodeListExtension on List<FlameChartNode> {
-  List<Rect> toPaddedZoomedRects({
+  List<SimpleInterval> toPaddedZoomedIntervals({
     @required double zoom,
     @required double chartStartInset,
     @required double chartWidth,
   }) {
-    return List<Rect>.generate(
+    return List<SimpleInterval>.generate(
       length,
-      (index) => FlameChartUtils.paddedZoomedRect(
+      (index) => FlameChartUtils.paddedZoomedInterval(
         index,
         this,
         chartZoom: zoom,
@@ -601,7 +599,7 @@ class FlameChartUtils {
         : FlameChartState.minZoomLevel;
   }
 
-  static Rect paddedZoomedRect(
+  static SimpleInterval paddedZoomedInterval(
     int index,
     List<FlameChartNode> nodes, {
     @required double chartZoom,
@@ -625,7 +623,7 @@ class FlameChartUtils {
     );
     final left = zoomedRect.left - leftPadding;
     final width = leftPadding + zoomedRect.width + rightPadding;
-    return Rect.fromLTWH(left, 0.0, width, zoomedRect.height);
+    return SimpleInterval(left, left + width);
   }
 }
 
@@ -808,7 +806,7 @@ mixin FlameChartColorMixin {
 /// known for each list item.
 class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
   _ScrollingFlameChartRowExtentDelegate({
-    @required this.nodeRects,
+    @required this.nodeIntervals,
     @required this.zoom,
     @required this.chartStartInset,
     @required this.chartWidth,
@@ -816,7 +814,7 @@ class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
     recompute();
   }
 
-  List<Rect> nodeRects = [];
+  List<SimpleInterval> nodeIntervals = [];
 
   double zoom;
 
@@ -825,12 +823,12 @@ class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
   double chartWidth;
 
   void recomputeWith({
-    @required List<Rect> nodeRects,
+    @required List<SimpleInterval> nodeIntervals,
     @required double zoom,
     @required double chartStartInset,
     @required double chartWidth,
   }) {
-    this.nodeRects = nodeRects;
+    this.nodeIntervals = nodeIntervals;
     this.zoom = zoom;
     this.chartStartInset = chartStartInset;
     this.chartWidth = chartWidth;
@@ -840,37 +838,50 @@ class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
   @override
   double itemExtent(int index) {
     if (index >= length) return 0;
-    return nodeRects[index].width;
+    return nodeIntervals[index].span;
   }
 
   @override
   double layoutOffset(int index) {
-    if (index >= length) return nodeRects.last.right;
-    return nodeRects[index].left;
+    if (index >= length) return nodeIntervals.last.end;
+    return nodeIntervals[index].begin;
   }
 
   @override
-  int get length => nodeRects.length;
+  int get length => nodeIntervals.length;
 
   @override
   int minChildIndexForScrollOffset(double scrollOffset) {
-    return _lowerBoundIndex(scrollOffset);
+    final boundInterval = SimpleInterval(scrollOffset, scrollOffset + 1);
+    int index = lowerBound(
+      nodeIntervals,
+      boundInterval,
+      compare: (SimpleInterval a, SimpleInterval b) =>
+          a.begin.compareTo(b.begin),
+    );
+    if (index == 0) return 0;
+    if (index >= nodeIntervals.length ||
+        (nodeIntervals[index].begin - scrollOffset).abs() >
+            precisionErrorTolerance) {
+      index--;
+    }
+    assert(
+        nodeIntervals[index].begin <= scrollOffset + precisionErrorTolerance);
+    return index;
   }
 
   @override
   int maxChildIndexForScrollOffset(double endScrollOffset) {
-    return _lowerBoundIndex(endScrollOffset);
-  }
-
-  int _lowerBoundIndex(double boundOffset) {
-    final boundRect = Rect.fromLTWH(boundOffset, 0, 1, rowHeightWithPadding);
+    final boundInterval = SimpleInterval(endScrollOffset, endScrollOffset + 1);
     int index = lowerBound(
-      nodeRects,
-      boundRect,
-      compare: (Rect a, Rect b) => a.left.compareTo(b.left),
+      nodeIntervals,
+      boundInterval,
+      compare: (SimpleInterval a, SimpleInterval b) =>
+          a.begin.compareTo(b.begin),
     );
     if (index == 0) return 0;
     index--;
+    assert(nodeIntervals[index].begin < endScrollOffset);
     return index;
   }
 }

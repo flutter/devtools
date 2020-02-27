@@ -543,3 +543,14 @@ extension SafeAccess<T> on Iterable<T> {
 
   T get safeLast => isNotEmpty ? last : null;
 }
+
+// This class is named [SimpleInterval] instead of [Interval] to avoid class
+// name collisions with
+// https://api.flutter.dev/flutter/animation/Interval-class.html
+class SimpleInterval {
+  SimpleInterval(this.begin, this.end) : assert(begin <= end);
+
+  final double begin;
+  final double end;
+  double get span => end - begin;
+}
