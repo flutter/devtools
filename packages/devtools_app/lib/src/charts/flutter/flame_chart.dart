@@ -62,10 +62,14 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   double get startingContentWidth => totalStartingWidth - startInset - endInset;
 }
 
+// TODO(kenz): cap number of nodes we can show per row at once - need this for
+// performance improvements. Optionally we could also do something clever with
+// grouping nodes that are close together until they are zoomed in (quad tree
+// like implementation).
 abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
   static const minZoomLevel = 1.0;
-  static const maxZoomLevel = 100.0;
+  static const maxZoomLevel = 1000.0;
   static const minScrollOffset = 0.0;
 
   final rowOffsetForBottomPadding = 1;
