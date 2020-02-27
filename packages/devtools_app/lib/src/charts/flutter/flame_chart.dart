@@ -4,12 +4,14 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
+import '../../flutter/extent_delegate_list.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/theme.dart';
 import '../../ui/colors.dart';
@@ -92,8 +94,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   double get maxScrollOffset =>
       widget.totalStartingWidth * (zoomController.value - 1);
 
-  double linkedScrollGroupCacheExtent;
-
   /// Animation controller for animating flame chart zoom changes.
   AnimationController zoomController;
 
@@ -160,9 +160,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       lowerBound: minZoomLevel,
       upperBound: maxZoomLevel,
       vsync: this,
-    )
-      ..addStatusListener(_handleZoomControllerStatusChange)
-      ..addListener(_handleZoomControllerValueUpdate);
+    )..addListener(_handleZoomControllerValueUpdate);
   }
 
   @override
@@ -233,7 +231,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
           startInset: widget.startInset,
           selected: widget.selected,
           zoom: zoomController.value,
-          cacheExtent: linkedScrollGroupCacheExtent,
         );
       },
     );
@@ -307,33 +304,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     }
   }
 
-  void _handleZoomControllerStatusChange(AnimationStatus status) {
-    // We set [linkedScrollGroupCacheExtent] based on the state of the
-    // animation because we need to know the size of off screen widgets as we
-    // zoom.
-    if (status == AnimationStatus.forward &&
-        linkedScrollGroupCacheExtent !=
-            linkedHorizontalScrollControllerGroup.offset) {
-      setState(() {
-        // Set the cache extent to the offset of the scroll group so
-        // that the size of the off-screen elements are not lost on
-        // zoom.
-        linkedScrollGroupCacheExtent = linkedHorizontalScrollControllerGroup
-            .offset
-            .clamp(minScrollOffset, maxScrollOffset);
-      });
-    }
-    if (status == AnimationStatus.completed &&
-        linkedScrollGroupCacheExtent != null) {
-      setState(() {
-        // If [zoomController] is no longer animating, reset the cache
-        // extent so that we are not building unnecessary widgets on
-        // scroll.
-        linkedScrollGroupCacheExtent = null;
-      });
-    }
-  }
-
   void _handleZoomControllerValueUpdate() {
     setState(() {
       final currentZoom = zoomController.value;
@@ -380,7 +350,6 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
     @required this.startInset,
     @required this.selected,
     @required this.zoom,
-    @required this.cacheExtent,
   });
 
   final LinkedScrollControllerGroup linkedScrollControllerGroup;
@@ -395,8 +364,6 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
 
   final double zoom;
 
-  final double cacheExtent;
-
   @override
   ScrollingFlameChartRowState<V> createState() =>
       ScrollingFlameChartRowState<V>();
@@ -405,6 +372,8 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
 class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     with AutoDisposeMixin {
   ScrollController scrollController;
+
+  _ScrollingFlameChartRowExtentDelegate extentDelegate;
 
   /// Convenience getter for widget.nodes.
   List<FlameChartNode> get nodes => widget.nodes;
@@ -415,11 +384,38 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
   void initState() {
     super.initState();
     scrollController = widget.linkedScrollControllerGroup.addAndGet();
+    extentDelegate = _ScrollingFlameChartRowExtentDelegate(
+      nodeRects: nodes.toPaddedZoomedRects(
+        zoom: widget.zoom,
+        chartStartInset: widget.startInset,
+        chartWidth: widget.width,
+      ),
+      zoom: widget.zoom,
+      chartStartInset: widget.startInset,
+      chartWidth: widget.width,
+    );
   }
 
   @override
   void didUpdateWidget(ScrollingFlameChartRow oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Avoid calling `extentDelegate.recompute()` when only the selected node
+    // has changed.
+    if (oldWidget.nodes != widget.nodes ||
+        oldWidget.zoom != widget.zoom ||
+        oldWidget.width != widget.width ||
+        oldWidget.startInset != widget.startInset) {
+      extentDelegate.recomputeWith(
+        nodeRects: nodes.toPaddedZoomedRects(
+          zoom: widget.zoom,
+          chartStartInset: widget.startInset,
+          chartWidth: widget.width,
+        ),
+        zoom: widget.zoom,
+        chartStartInset: widget.startInset,
+        chartWidth: widget.width,
+      );
+    }
     _resetHovered();
   }
 
@@ -448,16 +444,16 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
         child: SizedBox(
           height: rowHeightWithPadding,
           width: widget.width,
-          child: ListView.builder(
-            addAutomaticKeepAlives: false,
-            // The flame chart nodes are inexpensive to paint, so removing the
-            // repaint boundary improves efficiency.
-            addRepaintBoundaries: false,
+          // TODO(kenz): investigate if `addAutomaticKeepAlives: false` and
+          // `addRepaintBoundaries: false` are needed here for perf improvement.
+          child: ExtentDelegateListView(
             controller: scrollController,
             scrollDirection: Axis.horizontal,
-            cacheExtent: widget.cacheExtent,
-            itemCount: nodes.length,
-            itemBuilder: (context, index) => _buildFlameChartNode(index),
+            extentDelegate: extentDelegate,
+            childrenDelegate: SliverChildBuilderDelegate(
+              (context, index) => _buildFlameChartNode(index),
+              childCount: nodes.length,
+            ),
           ),
         ),
       ),
@@ -468,52 +464,27 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     final node = nodes[index];
     return Padding(
       padding: EdgeInsets.only(
-        left: leftPaddingForNode(index),
-        right: rightPaddingForNode(index),
+        left: FlameChartUtils.leftPaddingForNode(
+          index,
+          nodes,
+          chartZoom: widget.zoom,
+          chartStartInset: widget.startInset,
+        ),
+        right: FlameChartUtils.rightPaddingForNode(
+          index,
+          nodes,
+          chartZoom: widget.zoom,
+          chartStartInset: widget.startInset,
+          chartWidth: widget.width,
+        ),
         bottom: rowPadding,
       ),
       child: node.buildWidget(
         selected: node.data == widget.selected,
         hovered: node.data == hovered,
-        zoom: _zoomForNode(node),
+        zoom: FlameChartUtils.zoomForNode(node, widget.zoom),
       ),
     );
-  }
-
-  @visibleForTesting
-  double leftPaddingForNode(int index) {
-    final node = nodes[index];
-    if (index != 0) {
-      return 0.0;
-    } else if (!node.selectable) {
-      return node.rect.left;
-    } else {
-      return (node.rect.left - widget.startInset) * _zoomForNode(node) +
-          widget.startInset;
-    }
-  }
-
-  @visibleForTesting
-  double rightPaddingForNode(int index) {
-    final node = nodes[index];
-    final nextNode = index == nodes.length - 1 ? null : nodes[index + 1];
-    final nodeZoom = _zoomForNode(node);
-    final nextNodeZoom = _zoomForNode(nextNode);
-
-    // Node right with zoom and insets taken into consideration.
-    final nodeRight =
-        (node.rect.right - widget.startInset) * nodeZoom + widget.startInset;
-    return nextNode == null
-        ? widget.width - nodeRight
-        : ((nextNode.rect.left - widget.startInset) * nextNodeZoom +
-                widget.startInset) -
-            nodeRight;
-  }
-
-  double _zoomForNode(FlameChartNode node) {
-    return node != null && node.selectable
-        ? widget.zoom
-        : FlameChartState.minZoomLevel;
   }
 
   void _handleMouseHover(PointerHoverEvent event) {
@@ -562,6 +533,99 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
 
   void _resetHovered() {
     hovered = null;
+  }
+}
+
+extension NodeListExtension on List<FlameChartNode> {
+  List<Rect> toPaddedZoomedRects({
+    @required double zoom,
+    @required double chartStartInset,
+    @required double chartWidth,
+  }) {
+    return List<Rect>.generate(
+      length,
+      (index) => FlameChartUtils.paddedZoomedRect(
+        index,
+        this,
+        chartZoom: zoom,
+        chartStartInset: chartStartInset,
+        chartWidth: chartWidth,
+      ),
+    );
+  }
+}
+
+class FlameChartUtils {
+  static double leftPaddingForNode(
+    int index,
+    List<FlameChartNode> nodes, {
+    @required double chartZoom,
+    @required double chartStartInset,
+  }) {
+    final node = nodes[index];
+    if (index != 0) {
+      return 0.0;
+    } else if (!node.selectable) {
+      return node.rect.left;
+    } else {
+      return (node.rect.left - chartStartInset) * zoomForNode(node, chartZoom) +
+          chartStartInset;
+    }
+  }
+
+  static double rightPaddingForNode(
+    int index,
+    List<FlameChartNode> nodes, {
+    @required double chartZoom,
+    @required double chartStartInset,
+    @required double chartWidth,
+  }) {
+    final node = nodes[index];
+    final nextNode = index == nodes.length - 1 ? null : nodes[index + 1];
+    final nodeZoom = zoomForNode(node, chartZoom);
+    final nextNodeZoom = zoomForNode(nextNode, chartZoom);
+
+    // Node right with zoom and insets taken into consideration.
+    final nodeRight =
+        (node.rect.right - chartStartInset) * nodeZoom + chartStartInset;
+    return nextNode == null
+        ? chartWidth - nodeRight
+        : ((nextNode.rect.left - chartStartInset) * nextNodeZoom +
+                chartStartInset) -
+            nodeRight;
+  }
+
+  static double zoomForNode(FlameChartNode node, double chartZoom) {
+    return node != null && node.selectable
+        ? chartZoom
+        : FlameChartState.minZoomLevel;
+  }
+
+  static Rect paddedZoomedRect(
+    int index,
+    List<FlameChartNode> nodes, {
+    @required double chartZoom,
+    @required double chartStartInset,
+    @required double chartWidth,
+  }) {
+    final node = nodes[index];
+    final zoomedRect = node.zoomedRect(chartZoom, chartStartInset);
+    final leftPadding = leftPaddingForNode(
+      index,
+      nodes,
+      chartZoom: chartZoom,
+      chartStartInset: chartStartInset,
+    );
+    final rightPadding = rightPaddingForNode(
+      index,
+      nodes,
+      chartZoom: chartZoom,
+      chartStartInset: chartStartInset,
+      chartWidth: chartWidth,
+    );
+    final left = zoomedRect.left - leftPadding;
+    final width = leftPadding + zoomedRect.width + rightPadding;
+    return Rect.fromLTWH(left, 0.0, width, zoomedRect.height);
   }
 }
 
@@ -677,7 +741,7 @@ class FlameChartNode<T> {
             )
           : const SizedBox(),
     );
-    if (hovered) {
+    if (hovered || !selectable) {
       return Tooltip(
         key: key,
         message: tooltip,
@@ -737,5 +801,76 @@ mixin FlameChartColorMixin {
     _uiColorOffset = 0;
     _gpuColorOffset = 0;
     _unknownColorOffset = 0;
+  }
+}
+
+/// [ExtentDelegate] implementation for the case where size and position is
+/// known for each list item.
+class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
+  _ScrollingFlameChartRowExtentDelegate({
+    @required this.nodeRects,
+    @required this.zoom,
+    @required this.chartStartInset,
+    @required this.chartWidth,
+  }) {
+    recompute();
+  }
+
+  List<Rect> nodeRects = [];
+
+  double zoom;
+
+  double chartStartInset;
+
+  double chartWidth;
+
+  void recomputeWith({
+    @required List<Rect> nodeRects,
+    @required double zoom,
+    @required double chartStartInset,
+    @required double chartWidth,
+  }) {
+    this.nodeRects = nodeRects;
+    this.zoom = zoom;
+    this.chartStartInset = chartStartInset;
+    this.chartWidth = chartWidth;
+    recompute();
+  }
+
+  @override
+  double itemExtent(int index) {
+    if (index >= length) return 0;
+    return nodeRects[index].width;
+  }
+
+  @override
+  double layoutOffset(int index) {
+    if (index >= length) return nodeRects.last.right;
+    return nodeRects[index].left;
+  }
+
+  @override
+  int get length => nodeRects.length;
+
+  @override
+  int minChildIndexForScrollOffset(double scrollOffset) {
+    return _lowerBoundIndex(scrollOffset);
+  }
+
+  @override
+  int maxChildIndexForScrollOffset(double endScrollOffset) {
+    return _lowerBoundIndex(endScrollOffset);
+  }
+
+  int _lowerBoundIndex(double boundOffset) {
+    final boundRect = Rect.fromLTWH(boundOffset, 0, 1, rowHeightWithPadding);
+    int index = lowerBound(
+      nodeRects,
+      boundRect,
+      compare: (Rect a, Rect b) => a.left.compareTo(b.left),
+    );
+    if (index == 0) return 0;
+    index--;
+    return index;
   }
 }

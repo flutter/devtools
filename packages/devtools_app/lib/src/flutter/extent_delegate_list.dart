@@ -23,13 +23,13 @@ abstract class ExtentDelegate {
   /// Implementations should take no more than O(log n) time.
   int minChildIndexForScrollOffset(double scrollOffset);
 
-  /// The maximum child index that is visible at the given scroll offset.
+  /// The maximum child index that is visible at the given end scroll offset.
   ///
   /// Implementations should take no more than O(log n) time.
   /// Surprisingly, getMaxChildIndexForScrollOffset should be 1 less than
   /// getMinChildIndexForScrollOffset if the scrollOffset is right at the
   /// boundary between two items.
-  int maxChildIndexForScrollOffset(double scrollOffset);
+  int maxChildIndexForScrollOffset(double endScrollOffset);
 
   @mustCallSuper
   void recompute() {
@@ -39,7 +39,7 @@ abstract class ExtentDelegate {
   }
 }
 
-/// [ExtentDelegate]  implementation for the case where sizes for each
+/// [ExtentDelegate] implementation for the case where sizes for each
 /// item are known but absolute positions are not known.
 class FixedExtentDelegate extends ExtentDelegate {
   FixedExtentDelegate({
@@ -105,11 +105,11 @@ class FixedExtentDelegate extends ExtentDelegate {
   }
 
   @override
-  int maxChildIndexForScrollOffset(double scrollOffset) {
-    int index = collection.lowerBound(_offsets, scrollOffset);
+  int maxChildIndexForScrollOffset(double endScrollOffset) {
+    int index = collection.lowerBound(_offsets, endScrollOffset);
     if (index == 0) return 0;
     index--;
-    assert(_offsets[index] < scrollOffset);
+    assert(_offsets[index] < endScrollOffset);
     return index;
   }
 }
