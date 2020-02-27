@@ -297,7 +297,7 @@ Future<HttpServer> serveDevTools({
               break;
             case 'restoreDevToolsFile':
               _devToolsUsage = null;
-              String content = restoreDevToolsStore();
+              final content = restoreDevToolsStore();
               if (content != null) {
                 printOutput(
                   'DevTools Survey',
