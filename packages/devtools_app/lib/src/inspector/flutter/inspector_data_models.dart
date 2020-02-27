@@ -674,8 +674,8 @@ class RenderProperties {
         height = size?.height ?? 0.0,
         realWidth = realSize?.width ?? 0.0,
         realHeight = realSize?.height ?? 0.0,
-        dx = offset?.dx ?? 0,
-        dy = offset?.dy ?? 0;
+        dx = offset?.dx ?? 0.0,
+        dy = offset?.dy ?? 0.0;
 
   final Axis axis;
 
