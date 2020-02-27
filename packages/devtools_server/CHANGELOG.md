@@ -1,5 +1,5 @@
 ## 0.1.15
-- Added new setActiveSurvey and getActiveSurvey requests.  Set will create the survey e.g., Q1-2020 and subsequent surveys will perform on the current activeSurvey. setActiveSurvey to '' will allow the original survey values actionTaken and shownCount.
+- Added new setActiveSurvey requests.  Set will create the survey e.g., Q1-2020 and subsequent surveys will perform on the current activeSurvey.
 ## 0.1.14
 - Added CLI support to collect memory profile statistics to collect run run:</br>
 `dart ../devtools/bin/devtools.dart --vm-uri `**VM_Auth_URI**` --profile-memory `**FileName**` --verbose`</br></br>
