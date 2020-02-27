@@ -69,8 +69,8 @@ void main() {
       final surveyStartDate = DateTime(2020, 3, 11);
       final surveyEndDate = DateTime(2020, 4, 10);
       final now = DateTime.now();
-      await ga.setActiveSurvey('Q1-2020');
       if (now.isAfter(surveyStartDate) && now.isBefore(surveyEndDate)) {
+        await ga.setActiveSurvey('Q1-2020');
         // Do not show the survey if the user has either taken or dismissed it.
         if (!await ga.isSurveyActionTaken) {
           // Stop showing the survey toast after 5 times without action.
