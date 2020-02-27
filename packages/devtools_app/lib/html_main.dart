@@ -65,7 +65,7 @@ void main() {
         return;
       }
 
-      // Show the Q1 2020 DevTools survey if the current data falls in range.
+      // Show the Q1 2020 DevTools survey if the current date falls in range.
       final surveyStartDate = DateTime(2020, 3, 11);
       final surveyEndDate = DateTime(2020, 4, 10);
       final now = DateTime.now();
