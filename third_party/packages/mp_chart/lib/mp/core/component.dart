@@ -22,8 +22,10 @@ abstract class ComponentBase {
   /// the text color to use for the labels
   Color _textColor = ColorUtils.BLACK;
 
+  // ignore: unnecessary_getters_setters
   bool get enabled => _enabled;
 
+  // ignore: unnecessary_getters_setters
   set enabled(bool value) {
     _enabled = value;
   }
@@ -40,8 +42,10 @@ abstract class ComponentBase {
     _yOffset = Utils.convertDpToPixel(value);
   }
 
+  // ignore: unnecessary_getters_setters
   TypeFace get typeface => _typeface;
 
+  // ignore: unnecessary_getters_setters
   set typeface(TypeFace value) {
     _typeface = value;
   }
@@ -54,8 +58,10 @@ abstract class ComponentBase {
     _textSize = value;
   }
 
+  // ignore: unnecessary_getters_setters
   Color get textColor => _textColor;
 
+  // ignore: unnecessary_getters_setters
   set textColor(Color value) {
     _textColor = value;
   }

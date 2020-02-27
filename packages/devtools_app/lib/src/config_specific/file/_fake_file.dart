@@ -4,8 +4,8 @@
 
 import 'file_io.dart';
 
-/// Abstracted memory file system access for Flutter Web.
-class MemoryFiles implements FileIO {
+/// Abstracted file system access for Flutter Web.
+class FileSystem implements FileIO {
   // TODO(terry): Implement Web based file IO.
 
   /// Key is filename and value is content of the file.

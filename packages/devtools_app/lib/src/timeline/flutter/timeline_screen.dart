@@ -2,14 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
+import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
+import '../../flutter/notifications.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
@@ -24,7 +29,7 @@ import 'timeline_flame_chart.dart';
 // where applicable.
 
 class TimelineScreen extends Screen {
-  const TimelineScreen() : super();
+  const TimelineScreen() : super(DevToolsScreenType.timeline);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -66,7 +71,13 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     with AutoDisposeMixin {
   TimelineController controller;
 
+  final _exportController = ExportController();
+
   TimelineMode get timelineMode => controller.timelineModeNotifier.value;
+
+  bool recording = false;
+  bool processing = false;
+  double processingProgress = 0.0;
 
   @override
   void didChangeDependencies() {
@@ -79,15 +90,27 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
     cancel();
     addAutoDisposeListener(controller.timelineModeNotifier);
-    autoDispose(controller.fullTimeline.onTimelineProcessed.listen((_) {
-      setState(() {});
-    }));
+    addAutoDisposeListener(controller.fullTimeline.recordingNotifier, () {
+      setState(() {
+        recording = controller.fullTimeline.recordingNotifier.value;
+      });
+    });
+    addAutoDisposeListener(controller.fullTimeline.processingNotifier, () {
+      setState(() {
+        processing = controller.fullTimeline.processingNotifier.value;
+      });
+    });
+    addAutoDisposeListener(controller.fullTimeline.processor.progressNotifier,
+        () {
+      setState(() {
+        processingProgress =
+            controller.fullTimeline.processor.progressNotifier.value;
+      });
+    });
   }
 
   @override
   void dispose() {
-    // TODO(kenz): make TimelineController disposable via
-    // DisposableController and dispose here.
     controller.timelineService.updateListeningState(false);
     super.dispose();
   }
@@ -96,13 +119,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildPrimaryStateControls(),
-            _buildSecondaryControls(),
-          ],
-        ),
+        _timelineControls(),
         if (timelineMode == TimelineMode.frameBased) const FlutterFramesChart(),
         ValueListenableBuilder<TimelineFrame>(
           valueListenable: controller.frameBasedTimeline.selectedFrameNotifier,
@@ -120,6 +137,26 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           },
         ),
       ],
+    );
+  }
+
+  Widget _timelineControls() {
+    final _exitOfflineButton = exitOfflineButton(() {
+      setState(() {
+        controller.exitOfflineMode();
+      });
+    });
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: offlineMode
+            ? [_exitOfflineButton]
+            : [
+                _buildPrimaryStateControls(),
+                _buildSecondaryControls(),
+              ],
+      ),
     );
   }
 
@@ -190,27 +227,22 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     List<Widget> sharedWidgets,
     double minIncludeTextWidth,
   ) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.fullTimeline.recordingNotifier,
-      builder: (context, recording, _) {
-        return Row(
-          children: [
-            recordButton(
-              key: TimelineScreen.recordButtonKey,
-              recording: recording,
-              minIncludeTextWidth: minIncludeTextWidth,
-              onPressed: _startRecording,
-            ),
-            stopRecordingButton(
-              key: TimelineScreen.stopRecordingButtonKey,
-              recording: recording,
-              minIncludeTextWidth: minIncludeTextWidth,
-              onPressed: _stopRecording,
-            ),
-            ...sharedWidgets,
-          ],
-        );
-      },
+    return Row(
+      children: [
+        recordButton(
+          key: TimelineScreen.recordButtonKey,
+          recording: recording,
+          minIncludeTextWidth: minIncludeTextWidth,
+          onPressed: _startRecording,
+        ),
+        stopRecordingButton(
+          key: TimelineScreen.stopRecordingButtonKey,
+          recording: recording,
+          minIncludeTextWidth: minIncludeTextWidth,
+          onPressed: _stopRecording,
+        ),
+        ...sharedWidgets,
+      ],
     );
   }
 
@@ -219,7 +251,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: ProfileGranularityDropdown(),
         ),
         ServiceExtensionButtonGroup(
@@ -241,8 +273,10 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
   Widget _buildFlameChartSection() {
     Widget content;
-    final fullTimelineEmpty = controller.fullTimeline.data?.isEmpty ?? true;
-    if (timelineMode == TimelineMode.full && fullTimelineEmpty) {
+    final fullTimelineEmpty = (controller.fullTimeline.data?.isEmpty ?? true) ||
+        controller.fullTimeline.data.eventGroups.isEmpty;
+    if (timelineMode == TimelineMode.full &&
+        (recording || processing || fullTimelineEmpty)) {
       content = ValueListenableBuilder<bool>(
         valueListenable: controller.fullTimeline.emptyRecordingNotifier,
         builder: (context, emptyRecording, _) {
@@ -258,26 +292,26 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       content = TimelineFlameChart();
     }
 
-    return Container(
-      key: TimelineScreen.flameChartSectionKey,
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).focusColor),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Container(
+        key: TimelineScreen.flameChartSectionKey,
+        decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).focusColor),
+        ),
+        child: content,
       ),
-      child: content,
     );
   }
 
   Widget _buildRecordingInfo() {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.fullTimeline.recordingNotifier,
-      builder: (context, recording, _) {
-        return recordingInfo(
-          instructionsKey: TimelineScreen.recordingInstructionsKey,
-          statusKey: TimelineScreen.recordingStatusKey,
-          recording: recording,
-          recordedObject: 'timeline trace',
-        );
-      },
+    return recordingInfo(
+      instructionsKey: TimelineScreen.recordingInstructionsKey,
+      recordingStatusKey: TimelineScreen.recordingStatusKey,
+      recording: recording,
+      processing: processing,
+      progressValue: processingProgress,
+      recordedObject: 'timeline trace',
     );
   }
 
@@ -309,8 +343,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     controller.fullTimeline.startRecording();
   }
 
-  void _stopRecording() {
-    controller.fullTimeline.stopRecording();
+  void _stopRecording() async {
+    await controller.fullTimeline.stopRecording();
   }
 
   Future<void> _clearTimeline() async {
@@ -319,7 +353,28 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   void _exportTimeline() {
-    // TODO(kenz): implement.
+    final exportedFile = _exportData();
+    // TODO(kenz): investigate if we need to do any error handling here. Is the
+    // download always successful?
+    Notifications.of(context)
+        .push('Successfully exported $exportedFile to ~/Downloads directory');
+  }
+
+  // TODO(kenz): move this to the controller once the dart:html app is deleted.
+  // This code relies on `import_export.dart` which contains a flutter import.
+  /// Exports the current timeline data to a .json file.
+  ///
+  /// This method returns the name of the file that was downloaded.
+  String _exportData() {
+    // TODO(kenz): add analytics for this. It would be helpful to know how
+    // complex the problems are that users are trying to solve.
+    final encodedTimelineData = jsonEncode(controller.timeline.data.json);
+    final now = DateTime.now();
+    final timestamp =
+        '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
+    final fileName = 'timeline_$timestamp.json';
+    _exportController.downloadFile(fileName, encodedTimelineData);
+    return fileName;
   }
 
   void _onTimelineModeChanged(bool frameBased) async {

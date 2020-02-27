@@ -107,7 +107,7 @@ extension LayoutThemeDataExtension on ThemeData {
   Color get inActiveBackgroundColor => cardColor;
 }
 
-const freeSpaceAssetName = 'assets/img/story_of_layout/free_space.png';
+const freeSpaceAssetName = 'assets/img/layout_explorer/free_space.png';
 
 const dimensionIndicatorTextStyle = TextStyle(
   height: 1.0,
@@ -446,7 +446,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
   Future<FlexLayoutProperties> fetchFlexLayoutProperties() async {
     objectGroupManager?.cancelNext();
     final nextObjectGroup = objectGroupManager.next;
-    final node = await nextObjectGroup.getSummarySubtreeWithRenderObject(
+    final node = await nextObjectGroup.getLayoutExplorerNode(
       getRoot(selectedNode),
       subtreeDepth: 1,
     );
@@ -752,7 +752,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
             final service = await properties.node.inspectorService;
             final valueRef = properties.node.valueRef;
             markAsDirty();
-            await service.invokeTweakFlexProperties(
+            await service.invokeSetFlexProperties(
               valueRef,
               changedProperties.mainAxisAlignment,
               changedProperties.crossAxisAlignment,
@@ -952,7 +952,7 @@ class FlexChildVisualizer extends StatelessWidget {
     final node = properties.node;
     final inspectorService = await node.inspectorService;
     state.markAsDirty();
-    await inspectorService.invokeTweakFlexFactor(
+    await inspectorService.invokeSetFlexFactor(
       node.valueRef,
       newFlexFactor,
     );
@@ -962,7 +962,7 @@ class FlexChildVisualizer extends StatelessWidget {
     final node = properties.node;
     final inspectorService = await node.inspectorService;
     state.markAsDirty();
-    await inspectorService.invokeTweakFlexFit(
+    await inspectorService.invokeSetFlexFit(
       node.valueRef,
       newFlexFit,
     );
@@ -973,9 +973,7 @@ class FlexChildVisualizer extends StatelessWidget {
       return Text(
         'flex: $flexFactor',
         style: flexFactor == properties.flexFactor
-            ? const TextStyle(
-                fontWeight: FontWeight.bold,
-              )
+            ? const TextStyle(fontWeight: FontWeight.bold)
             : null,
       );
     }
@@ -1202,30 +1200,20 @@ class WidgetVisualizer extends StatelessWidget {
                             child: Text(
                               title,
                               style: textColor != null
-                                  ? TextStyle(
-                                      color: textColor,
-                                    )
+                                  ? TextStyle(color: textColor)
                                   : null,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          decoration: BoxDecoration(
-                            color: borderColor,
-                          ),
+                          decoration: BoxDecoration(color: borderColor),
                           padding: const EdgeInsets.all(4.0),
                         ),
                       ),
-                      if (hint != null)
-                        Flexible(
-                          child: hint,
-                        ),
+                      if (hint != null) Flexible(child: hint),
                     ],
                   ),
                 ),
-                if (child != null)
-                  Expanded(
-                    child: child,
-                  ),
+                if (child != null) Expanded(child: child),
               ],
             ),
           ),

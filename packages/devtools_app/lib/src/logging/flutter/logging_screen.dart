@@ -17,7 +17,7 @@ import '../logging_controller.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
-  const LoggingScreen() : super();
+  const LoggingScreen() : super(DevToolsScreenType.logging);
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +208,10 @@ class _LogDetailsState extends State<LogDetails>
       child: SingleChildScrollView(
         child: Text(
           log.prettyPrinted ?? '',
-          style: Theme.of(context).textTheme.subtitle1,
+          style: Theme.of(context)
+              .textTheme
+              .subtitle1
+              .copyWith(fontFamily: 'RobotoMono'),
         ),
       ),
     );

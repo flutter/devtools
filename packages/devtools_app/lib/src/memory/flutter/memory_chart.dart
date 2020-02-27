@@ -4,6 +4,8 @@
 
 import 'dart:ui' as dart_ui;
 
+import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
@@ -38,7 +40,6 @@ import '../../flutter/theme.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/theme.dart';
 import 'memory_controller.dart';
-import 'memory_protocol.dart';
 
 class MemoryChart extends StatefulWidget {
   @override
@@ -458,6 +459,15 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setFillColor(ColorUtils.LTGRAY)
       ..setDrawCircleHole(false);
 
+    // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web see issue
+    //              https://github.com/flutter/flutter/issues/49882.
+    if (kIsWeb) {
+      // Disable dash and set the color to greenish.
+      totalSizeSet
+        ..disableDashedLine()
+        ..setColor1(ColorUtils.HOLO_GREEN_LIGHT);
+    }
+
     // Create a data object with all the data sets.
     androidChartController.data = LineData.fromList(
       [
@@ -656,6 +666,15 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setFillAlpha(65)
       ..setFillColor(ColorUtils.GRAY)
       ..setDrawCircleHole(false);
+
+    // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web see issue
+    //              https://github.com/flutter/flutter/issues/49882.
+    if (kIsWeb) {
+      // Disable dash and set the color to greenish.
+      capacityHeapSet
+        ..disableDashedLine()
+        ..setColor1(ColorUtils.HOLO_GREEN_LIGHT);
+    }
 
     // Create external memory dataset.
     const externalColorLine =
@@ -901,7 +920,11 @@ class SelectedDataPoint extends LineChartMarker {
 
   // These are the alpha blended values.
   final List<Color> _dartVMColors = [
-    ColorUtils.GRAY, // Total dashed line (Capacity)
+    // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web
+    //              use a green color on Web see Flutter issue/49882.
+    kIsWeb
+        ? const Color(0xff00ff00)
+        : ColorUtils.GRAY, // Total dashed line (Capacity)
     const Color(0xff315a69), // Aqua (Used)
     const Color(0xff77aed5), // Light-Blue (External)
   ];
@@ -919,7 +942,11 @@ class SelectedDataPoint extends LineChartMarker {
 
   // These are the alpha blended values.
   final List<Color> _androidColors = [
-    ColorUtils.WHITE, // Total dashed line (Total)
+    // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web
+    //              use a green color on Web see Flutter issue/49882.
+    kIsWeb
+        ? const Color(0xff00ff00)
+        : ColorUtils.WHITE, // Total dashed line (Total)
     const Color(0xff945caf), // Purple-ish (Other)
     const Color(0xff6a5caf), // Gray Purple-ish (Code)
     const Color(0xff607ebe), // Blue-ish (Native Heap)

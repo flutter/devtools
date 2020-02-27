@@ -22,7 +22,7 @@ import 'inspector_screen_details_tab.dart';
 import 'inspector_tree_flutter.dart';
 
 class InspectorScreen extends Screen {
-  const InspectorScreen();
+  const InspectorScreen() : super(DevToolsScreenType.inspector);
 
   @override
   Widget build(BuildContext context) => const InspectorScreenBody();
@@ -114,7 +114,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
                         ? extensions.toggleSelectWidgetMode
                         : extensions.toggleOnDeviceWidgetInspector
                   ],
-                  minIncludeTextWidth: 800,
+                  minIncludeTextWidth: 650,
                 );
               },
             ),
@@ -123,7 +123,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
               child: Label(
                 FlutterIcons.refresh,
                 'Refresh Tree',
-                minIncludeTextWidth: 900,
+                minIncludeTextWidth: 750,
               ),
             ),
             const Spacer(),
@@ -145,6 +145,25 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         ),
       ],
     );
+  }
+
+  List<Widget> getServiceExtensionWidgets() {
+    return [
+      ServiceExtensionButtonGroup(
+        minIncludeTextWidth: 1050,
+        extensions: [extensions.slowAnimations],
+      ),
+      ServiceExtensionButtonGroup(
+        minIncludeTextWidth: 1050,
+        extensions: [extensions.debugPaint, extensions.debugPaintBaselines],
+      ),
+      ServiceExtensionButtonGroup(
+        minIncludeTextWidth: 1250,
+        extensions: [extensions.repaintRainbow, extensions.debugAllowBanner],
+      ),
+      // TODO(jacobr): implement TogglePlatformSelector.
+      //  TogglePlatformSelector().selector
+    ];
   }
 
   Widget _expandCollapseButtons() {

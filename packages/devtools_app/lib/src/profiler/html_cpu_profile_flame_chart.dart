@@ -76,13 +76,14 @@ class HtmlCpuFlameChart extends HtmlCpuProfilerView {
 
     final data = profileDataProvider();
 
-    // Only update the canvas if the flame chart is visible and has data.
-    // Otherwise, mark the canvas as needing a rebuild.
-    if (!isHidden && data != null) {
+    // Only update the canvas if the flame chart is visible and has processed
+    // data. Otherwise, mark the canvas as needing a rebuild.
+    if (!isHidden && data != null && data.processed) {
       // We need to rebuild the canvas with a new content size so that the
       // canvas is always at least as tall as the container it is in. This
       // ensures that the grid lines in the chart will extend all the way to the
       // bottom of the container.
+      // add check here to check that data is processed
       canvas.forceRebuildForSize(
         canvas.calculatedWidthWithInsets,
         math.max(

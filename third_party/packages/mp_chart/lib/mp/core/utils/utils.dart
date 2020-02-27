@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:mp_chart/mp/controller/controller.dart';
 import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/poolable/point.dart';
 import 'package:mp_chart/mp/core/poolable/size.dart';
@@ -9,10 +10,13 @@ import 'package:mp_chart/mp/core/utils/painter_utils.dart';
 import 'package:mp_chart/mp/core/utils/screen_utils.dart';
 import 'package:mp_chart/mp/core/value_formatter/default_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
+import 'package:mp_chart/mp/core/view_port.dart';
 
 abstract class Utils {
+  // ignore: non_constant_identifier_names
   static double DEG2RAD = pi / 180.0;
 
+  // ignore: non_constant_identifier_names
   static double FLOAT_EPSILON = 1.4E-45;
 
   static void drawXAxisValue(
@@ -219,6 +223,7 @@ abstract class Utils {
     paint.textAlign = originalTextAlign;
   }
 
+  // ignore: non_constant_identifier_names
   static double FDEG2RAD = (pi / 180);
 
   static FSize getSizeOfRotatedRectangleByDegrees(
@@ -261,10 +266,31 @@ abstract class Utils {
     if (d == double.infinity)
       return d;
     else {
-      d += 0.1;
-//      todo return longBitsToDouble(doubleToRawLongBits(d) +
+      /**
+       * dart don't have longBitsToDouble and doubleToRawLongBits
+       * so we just return like this
+       */
+      var res = 0.0;
+      try {
+        var len = d.toString().split(".")[1].length;
+        var value = "0.";
+        for(var i = 0; i < len; i++){
+          value += "0";
+        }
+        value += "1";
+        if(d >= 0){
+          res = double.parse(value);
+        } else {
+          res = -double.parse(value);
+        }
+      } catch (e) {
+        return d;
+      }
+
+      return d + res;
+//      todo
+//       return longBitsToDouble(doubleToRawLongBits(d) +
 //          ((d >= 0.0) ? 1 : -1));
-      return d;
     }
   }
 
@@ -358,5 +384,28 @@ abstract class Utils {
       MPPointF center, double dist, double angle, MPPointF outputPoint) {
     outputPoint.x = (center.x + dist * cos((angle / 180 * pi)));
     outputPoint.y = (center.y + dist * sin((angle / 180 * pi)));
+  }
+
+  static double optimizeScale(double scale) {
+//    return scale > 1.1 ? 1.0 : scale;
+    return scale;
+  }
+
+  static MPPointF local2Chart(Controller controller, double x, double y,
+      {bool inverted = false}) {
+    ViewPortHandler vph = controller.painter.viewPortHandler;
+
+    double xTrans = x - vph.offsetLeft();
+    double yTrans = 0.0;
+
+    /// check if axis is inverted
+    if (inverted) {
+      yTrans = -(y - vph.offsetTop());
+    } else {
+      yTrans =
+          -(controller.painter.getMeasuredHeight() - y - vph.offsetBottom());
+    }
+
+    return MPPointF.getInstance1(xTrans, yTrans);
   }
 }

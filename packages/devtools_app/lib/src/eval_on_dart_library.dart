@@ -9,7 +9,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'config_specific/logger.dart';
+import 'config_specific/logger/logger.dart';
 import 'globals.dart';
 import 'inspector/inspector_service.dart';
 import 'vm_service_wrapper.dart';

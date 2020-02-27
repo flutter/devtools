@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
@@ -22,6 +22,10 @@ class CpuProfilerController {
   /// Notifies that new cpu profile data is available.
   ValueListenable get dataNotifier => _dataNotifier;
   final _dataNotifier = ValueNotifier<CpuProfileData>(baseStateCpuProfileData);
+
+  /// Notifies that CPU profile data is currently being processed.
+  ValueListenable get processingNotifier => _processingNotifier;
+  final _processingNotifier = ValueNotifier<bool>(false);
 
   /// Notifies that a cpu stack frame was selected.
   ValueListenable get selectedCpuStackFrameNotifier =>
@@ -51,8 +55,11 @@ class CpuProfilerController {
     @required int startMicros,
     @required int extentMicros,
   }) async {
-    assert(_dataNotifier.value != null);
     if (!profilerEnabled) return;
+    assert(_dataNotifier.value != null);
+    assert(!_processingNotifier.value);
+
+    _processingNotifier.value = true;
 
     const Duration processingTimeout = Duration(seconds: 5);
     var cpuProfileData = baseStateCpuProfileData;
@@ -65,9 +72,22 @@ class CpuProfilerController {
     } on TimeoutException catch (e) {
       log(e.message, LogLevel.error);
     } finally {
-      transformer.processData(cpuProfileData);
-      _dataNotifier.value = cpuProfileData;
+      try {
+        await transformer.processData(cpuProfileData);
+        _dataNotifier.value = cpuProfileData;
+        _processingNotifier.value = false;
+      } on AssertionError catch (_) {
+        _dataNotifier.value = cpuProfileData;
+        _processingNotifier.value = false;
+        // Rethrow after setting notifiers so that cpu profile data is included
+        // in the timeline export.
+        rethrow;
+      }
     }
+  }
+
+  void loadOfflineData(CpuProfileData data) {
+    _dataNotifier.value = data;
   }
 
   void selectCpuStackFrame(CpuStackFrame stackFrame) {
@@ -77,17 +97,21 @@ class CpuProfilerController {
   }
 
   Future<void> clear() async {
-    resetNotifiers();
+    reset();
     await service.clearCpuSamples();
   }
 
-  void resetNotifiers() {
+  void reset() {
     _selectedCpuStackFrameNotifier.value = null;
     _dataNotifier.value = baseStateCpuProfileData;
+    _processingNotifier.value = false;
+    transformer.reset();
   }
 
   void dispose() {
     _dataNotifier.dispose();
     _selectedCpuStackFrameNotifier.dispose();
+    _processingNotifier.dispose();
+    transformer.dispose();
   }
 }

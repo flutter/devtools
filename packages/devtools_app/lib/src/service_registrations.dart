@@ -19,7 +19,7 @@ class RegisteredServiceDescription {
 /// Hot reload service registered by Flutter Tools.
 ///
 /// We call this service to perform hot reload.
-const RegisteredServiceDescription hotReload = RegisteredServiceDescription._(
+const hotReload = RegisteredServiceDescription._(
   service: 'reloadSources',
   title: 'Hot Reload',
   icon: FlutterIcons.hotReloadWhite,
@@ -28,7 +28,7 @@ const RegisteredServiceDescription hotReload = RegisteredServiceDescription._(
 /// Hot restart service registered by Flutter Tools.
 ///
 /// We call this service to perform a hot restart.
-const RegisteredServiceDescription hotRestart = RegisteredServiceDescription._(
+const hotRestart = RegisteredServiceDescription._(
   service: 'hotRestart',
   title: 'Hot Restart',
   icon: FlutterIcons.hotRestartWhite,
@@ -38,8 +38,7 @@ const RegisteredServiceDescription hotRestart = RegisteredServiceDescription._(
 ///
 /// We call this service to get version information about the Flutter framework,
 /// the Flutter engine, and the Dart sdk.
-const RegisteredServiceDescription flutterVersion =
-    RegisteredServiceDescription._(
+const flutterVersion = RegisteredServiceDescription._(
   service: 'flutterVersion',
   title: 'Flutter Version',
   icon: FlutterIcons.flutter,
@@ -49,7 +48,7 @@ const RegisteredServiceDescription flutterVersion =
 ///
 /// We call this service to get version information about the Flutter Android memory info
 /// using Android's ADB.
-RegisteredServiceDescription flutterMemory = RegisteredServiceDescription._(
+const flutterMemory = RegisteredServiceDescription._(
   service: 'flutterMemoryInfo',
   title: 'Flutter Memory Info',
   // TODO(terry): Better icon - package or memory looking for now snapshop is memory.

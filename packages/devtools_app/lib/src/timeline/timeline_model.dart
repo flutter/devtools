@@ -231,7 +231,7 @@ class FullTimelineEventGroup {
       final lastEventAtLevel = displayRow + level < rows.length
           ? rows[displayRow + level].lastEvent
           : null;
-      final firstNewEventAtLevel = event.displayRows[level].safeFirst();
+      final firstNewEventAtLevel = event.displayRows[level].safeFirst;
       if (lastEventAtLevel != null && firstNewEventAtLevel != null) {
         // Events overlap one another, so [event] does not fit at [displayRow].
         if (lastEventAtLevel.time.overlaps(firstNewEventAtLevel.time)) {
@@ -428,7 +428,8 @@ class OfflineFullTimelineData extends FullTimelineData
 
   static OfflineFullTimelineData parse(Map<String, dynamic> json) {
     final List<dynamic> traceEvents =
-        (json[TimelineData.traceEventsKey] ?? []).cast<Map<String, dynamic>>();
+        List.from(json[TimelineData.traceEventsKey] ?? [])
+            .cast<Map<String, dynamic>>();
 
     final Map<String, dynamic> cpuProfileJson =
         json[TimelineData.cpuProfileKey] ?? {};
@@ -957,7 +958,7 @@ class AsyncTimelineEvent extends TimelineEvent {
     if (children.isEmpty) {
       return time.end.inMicroseconds;
     }
-    var maxEnd = 0;
+    var maxEnd = time.end.inMicroseconds;
     for (AsyncTimelineEvent child in children) {
       maxEnd = math.max(maxEnd, child._calculateMaxEndMicros());
     }
@@ -995,7 +996,7 @@ class AsyncTimelineEvent extends TimelineEvent {
     final maxLevelToVerify =
         math.min(event.displayDepth, currentLargestRowIndex - displayRow);
     for (int level = 0; level < maxLevelToVerify; level++) {
-      final lastEventAtLevel = _displayRows[displayRow + level].safeLast();
+      final lastEventAtLevel = _displayRows[displayRow + level].safeLast;
       final firstNewEventAtLevel = event.firstChildNodeAtLevel(level);
       if (lastEventAtLevel != null && firstNewEventAtLevel != null) {
         // Events overlap one another, so [event] does not fit at [displayRow].

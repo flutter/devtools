@@ -5,7 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../config_specific/allowed_error.dart';
+import '../config_specific/logger/allowed_error.dart';
 import '../globals.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/profile_granularity.dart';
@@ -151,11 +151,8 @@ class TimelineService {
     }
 
     for (var timeline in timelineController.timelines) {
-      timeline.initProcessor(
-        uiThreadId: uiThreadId,
-        gpuThreadId: gpuThreadId,
-        timelineController: timelineController,
-      );
+      timeline.processor
+          .primeThreadIds(uiThreadId: uiThreadId, gpuThreadId: gpuThreadId);
     }
   }
 

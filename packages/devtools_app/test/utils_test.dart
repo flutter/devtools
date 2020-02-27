@@ -417,25 +417,29 @@ void main() {
 
     group('SafeAccess', () {
       test('safeFirst', () {
-        final list = [];
-        expect(list.safeFirst(), isNull);
+        final list = <int>[];
+        final Iterable<int> iterable = list;
+        expect(list.safeFirst, isNull);
+        expect(iterable.safeFirst, isNull);
         list.addAll([1, 2, 3]);
-        expect(list.safeFirst(), equals(1));
+        expect(list.safeFirst, equals(1));
+        expect(iterable.safeFirst, equals(1));
         list.insert(0, null);
-        expect(list.safeFirst(), isNull);
+        expect(list.safeFirst, isNull);
+        expect(iterable.safeFirst, isNull);
       });
 
       test('safeLast', () {
-        final list = [];
-        expect(list.safeLast(), isNull);
+        final list = <int>[];
+        expect(list.safeLast, isNull);
         list.addAll([1, 2, 3]);
-        expect(list.safeLast(), equals(3));
+        expect(list.safeLast, equals(3));
         list.add(null);
-        expect(list.safeLast(), isNull);
+        expect(list.safeLast, isNull);
       });
 
       test('safeGet', () {
-        final list = [];
+        final list = <int>[];
         expect(list.safeGet(0), isNull);
         list.addAll([1, 2]);
         expect(list.safeGet(0), equals(1));

@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_widgets/flutter_widgets.dart';
 
 import '../ui/flutter/label.dart';
+import 'flutter_widgets/tagged_text.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 
@@ -231,13 +233,43 @@ StatelessWidget pauseButton({
   );
 }
 
+// TODO(kenz): make recording info its own stateful widget that handles
+// listening to value notifiers and building info.
 Widget recordingInfo({
   Key instructionsKey,
-  Key statusKey,
+  Key recordingStatusKey,
+  Key processingStatusKey,
   @required bool recording,
   @required String recordedObject,
+  @required bool processing,
+  double progressValue,
   bool isPause = false,
 }) {
+  Widget child;
+  if (processing) {
+    child = processingInfo(
+      key: processingStatusKey,
+      progressValue: progressValue,
+      processedObject: recordedObject,
+    );
+  } else if (recording) {
+    child = _recordingStatus(
+      key: recordingStatusKey,
+      recordedObject: recordedObject,
+    );
+  } else {
+    child = _recordingInstructions(
+      key: instructionsKey,
+      recordedObject: recordedObject,
+      isPause: isPause,
+    );
+  }
+  return Center(
+    child: child,
+  );
+}
+
+Widget _recordingInstructions({Key key, String recordedObject, bool isPause}) {
   final stopOrPauseRow = Row(
     mainAxisAlignment: MainAxisAlignment.center,
     children: isPause
@@ -252,8 +284,8 @@ Widget recordingInfo({
             Text(' to end the recording.'),
           ],
   );
-  final recordingInstructions = Column(
-    key: instructionsKey,
+  return Column(
+    key: key,
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Row(
@@ -267,8 +299,11 @@ Widget recordingInfo({
       stopOrPauseRow,
     ],
   );
-  final recordingStatus = Column(
-    key: statusKey,
+}
+
+Widget _recordingStatus({Key key, String recordedObject}) {
+  return Column(
+    key: key,
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Text('Recording $recordedObject'),
@@ -276,10 +311,64 @@ Widget recordingInfo({
       const CircularProgressIndicator(),
     ],
   );
+}
 
+Widget processingInfo({
+  Key key,
+  @required double progressValue,
+  @required String processedObject,
+}) {
   return Center(
-    child: recording ? recordingStatus : recordingInstructions,
+    child: Column(
+      key: key,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Processing $processedObject'),
+        const SizedBox(height: 16.0),
+        SizedBox(
+          width: 200.0,
+          height: 16.0,
+          child: LinearProgressIndicator(
+            value: progressValue,
+          ),
+        ),
+      ],
+    ),
   );
+}
+
+/// Common button for exiting offline mode.
+///
+/// Consumers of this widget will be responsible for including the following in
+/// onPressed:
+///
+/// setState(() {
+///   offlineMode = false;
+/// }
+Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
+  return OutlineButton(
+    key: const Key('exit offline button'),
+    onPressed: onPressed,
+    child: MaterialIconLabel(
+      Icons.clear,
+      'Exit offline mode',
+    ),
+  );
+}
+
+class OutlinedBorder extends StatelessWidget {
+  const OutlinedBorder({Key key, this.child}) : super(key: key);
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).focusColor),
+      ),
+      child: child,
+    );
+  }
 }
 
 /// The golden ratio.

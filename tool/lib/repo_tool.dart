@@ -8,6 +8,7 @@ import 'commands/analyze.dart';
 import 'commands/list.dart';
 import 'commands/packages_get.dart';
 import 'commands/repo_check.dart';
+import 'commands/rollback.dart';
 
 class DevToolsCommandRunner extends CommandRunner {
   DevToolsCommandRunner()
@@ -16,5 +17,6 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(RepoCheckCommand());
     addCommand(ListCommand());
     addCommand(PackagesGetCommand());
+    addCommand(RollbackCommand());
   }
 }

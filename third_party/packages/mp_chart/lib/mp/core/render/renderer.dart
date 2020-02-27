@@ -6,8 +6,10 @@ abstract class Renderer {
 
   Renderer(this._viewPortHandler);
 
+  // ignore: unnecessary_getters_setters
   ViewPortHandler get viewPortHandler => _viewPortHandler;
 
+  // ignore: unnecessary_getters_setters
   set viewPortHandler(ViewPortHandler value) {
     _viewPortHandler = value;
   }

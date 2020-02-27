@@ -128,12 +128,13 @@ void main() {
   });
 
   group('TreeTable view', () {
-    TestData tree;
+    TestData tree1;
+    TestData tree2;
     TreeColumnData<TestData> treeColumn;
 
     setUp(() {
       treeColumn = _NameColumn();
-      tree = TestData('Foo', 0)
+      tree1 = TestData('Foo', 0)
         ..children.addAll([
           TestData('Bar', 1)
             ..children.addAll([
@@ -145,20 +146,97 @@ void main() {
             ]),
           TestData('Baz', 6),
           TestData('Qux', 7),
-        ]);
-      tree.expandCascading();
+        ])
+        ..expandCascading();
+      tree2 = TestData('Foo_2', 0)
+        ..children.add(
+          TestData('Bar_2', 1)
+            ..children.add(
+              TestData('Snap_2', 2),
+            ),
+        )
+        ..expandCascading();
     });
 
     testWidgets('displays with simple content', (WidgetTester tester) async {
       final table = TreeTable<TestData>(
         columns: [treeColumn],
-        data: TestData('empty', 0),
+        dataRoots: [TestData('empty', 0)],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
       expect(find.byKey(const Key('empty')), findsOneWidget);
+    });
+
+    testWidgets('displays with multiple data roots',
+        (WidgetTester tester) async {
+      final table = TreeTable<TestData>(
+        columns: [treeColumn],
+        dataRoots: [tree1, tree2],
+        treeColumn: treeColumn,
+        keyFactory: (d) => Key(d.name),
+      );
+      await tester.pumpWidget(wrap(table));
+      expect(find.byWidget(table), findsOneWidget);
+      expect(find.byKey(const Key('Foo')), findsOneWidget);
+      expect(find.byKey(const Key('Bar')), findsOneWidget);
+      expect(find.byKey(const Key('Snap')), findsOneWidget);
+      expect(find.byKey(const Key('Foo_2')), findsOneWidget);
+      expect(find.byKey(const Key('Bar_2')), findsOneWidget);
+      expect(find.byKey(const Key('Snap_2')), findsOneWidget);
+      expect(tree1.isExpanded, isTrue);
+      expect(tree2.isExpanded, isTrue);
+
+      await tester.tap(find.byKey(const Key('Foo')));
+      await tester.pumpAndSettle();
+      expect(tree1.isExpanded, isFalse);
+      expect(tree2.isExpanded, isTrue);
+
+      await tester.tap(find.byKey(const Key('Foo_2')));
+      expect(tree1.isExpanded, isFalse);
+      expect(tree2.isExpanded, isFalse);
+
+      await tester.tap(find.byKey(const Key('Foo')));
+      expect(tree1.isExpanded, isTrue);
+      expect(tree2.isExpanded, isFalse);
+    });
+
+    testWidgets('displays when widget changes dataRoots',
+        (WidgetTester tester) async {
+      final table = TreeTable<TestData>(
+        columns: [treeColumn],
+        dataRoots: [tree1, tree2],
+        treeColumn: treeColumn,
+        keyFactory: (d) => Key(d.name),
+      );
+      await tester.pumpWidget(wrap(table));
+      expect(find.byWidget(table), findsOneWidget);
+      expect(find.byKey(const Key('Foo')), findsOneWidget);
+      expect(find.byKey(const Key('Bar')), findsOneWidget);
+      expect(find.byKey(const Key('Snap')), findsOneWidget);
+      expect(find.byKey(const Key('Foo_2')), findsOneWidget);
+      expect(find.byKey(const Key('Bar_2')), findsOneWidget);
+      expect(find.byKey(const Key('Snap_2')), findsOneWidget);
+      expect(tree1.isExpanded, isTrue);
+      expect(tree2.isExpanded, isTrue);
+
+      final newTable = TreeTable<TestData>(
+        columns: [treeColumn],
+        dataRoots: [TestData('root1', 0), TestData('root2', 1)],
+        treeColumn: treeColumn,
+        keyFactory: (d) => Key(d.name),
+      );
+      await tester.pumpWidget(wrap(newTable));
+      expect(find.byKey(const Key('Foo')), findsNothing);
+      expect(find.byKey(const Key('Bar')), findsNothing);
+      expect(find.byKey(const Key('Snap')), findsNothing);
+      expect(find.byKey(const Key('Foo_2')), findsNothing);
+      expect(find.byKey(const Key('Bar_2')), findsNothing);
+      expect(find.byKey(const Key('Snap_2')), findsNothing);
+      expect(find.byKey(const Key('root1')), findsOneWidget);
+      expect(find.byKey(const Key('root2')), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -169,7 +247,7 @@ void main() {
           treeColumn,
           _NumberColumn(),
         ],
-        data: tree,
+        dataRoots: [tree1],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
       );
@@ -194,7 +272,7 @@ void main() {
           treeColumn,
           _CombinedColumn(),
         ],
-        data: tree,
+        dataRoots: [tree1],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
       );
@@ -215,22 +293,22 @@ void main() {
           _NumberColumn(),
           treeColumn,
         ],
-        data: tree,
+        dataRoots: [tree1],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
       );
       await tester.pumpWidget(wrap(table));
       await tester.pumpAndSettle();
-      expect(tree.isExpanded, true);
+      expect(tree1.isExpanded, true);
       await tester.tap(find.byKey(const Key('Foo')));
       await tester.pumpAndSettle();
-      expect(tree.isExpanded, false);
+      expect(tree1.isExpanded, false);
       await tester.tap(find.byKey(const Key('Foo')));
       await tester.pumpAndSettle();
-      expect(tree.isExpanded, true);
+      expect(tree1.isExpanded, true);
       await tester.tap(find.byKey(const Key('Bar')));
       await tester.pumpAndSettle();
-      expect(tree.children[0].isExpanded, false);
+      expect(tree1.children[0].isExpanded, false);
     });
 
     testWidgets('properly colors rows with alternating colors',
@@ -251,7 +329,7 @@ void main() {
           _NumberColumn(),
           treeColumn,
         ],
-        data: data,
+        dataRoots: [data],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
       );
@@ -269,7 +347,7 @@ void main() {
 
       await tester.pumpWidget(wrap(table));
       await tester.pumpAndSettle();
-      expect(tree.isExpanded, true);
+      expect(tree1.isExpanded, true);
 
       expect(fooFinder, findsOneWidget);
       expect(barFinder, findsOneWidget);
@@ -315,7 +393,7 @@ void main() {
         () {
           TreeTable<TestData>(
             columns: [treeColumn],
-            data: null,
+            dataRoots: null,
             treeColumn: treeColumn,
             keyFactory: (d) => Key(d.name),
           );
@@ -328,7 +406,7 @@ void main() {
       expect(() {
         TreeTable<TestData>(
           columns: [treeColumn],
-          data: tree,
+          dataRoots: [tree1],
           treeColumn: treeColumn,
           keyFactory: null,
         );
@@ -339,7 +417,7 @@ void main() {
       expect(() {
         TreeTable<TestData>(
           columns: [treeColumn],
-          data: tree,
+          dataRoots: [tree1],
           treeColumn: null,
           keyFactory: (d) => Key(d.name),
         );
@@ -348,7 +426,7 @@ void main() {
       expect(() {
         TreeTable<TestData>(
           columns: const [],
-          data: tree,
+          dataRoots: [tree1],
           treeColumn: treeColumn,
           keyFactory: (d) => Key(d.name),
         );

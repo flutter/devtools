@@ -10,6 +10,8 @@ import 'package:mp_chart/mp/core/functions.dart';
 import 'package:mp_chart/mp/core/marker/i_marker.dart';
 import 'package:mp_chart/mp/core/render/x_axis_renderer.dart';
 import 'package:mp_chart/mp/core/render/y_axis_renderer.dart';
+import 'package:mp_chart/mp/core/touch_listener.dart';
+import 'package:mp_chart/mp/core/chart_trans_listener.dart';
 import 'package:mp_chart/mp/core/transformer/transformer.dart';
 import 'package:mp_chart/mp/painter/bubble_chart_painter.dart';
 
@@ -48,6 +50,8 @@ class BubbleChartController
     double borderStrokeWidth = 1.0,
     AxisLeftSettingFunction axisLeftSettingFunction,
     AxisRightSettingFunction axisRightSettingFunction,
+    OnTouchEventListener touchEventListener,
+    ChartTransListener chartTransListener,
     IMarker marker,
     Description description,
     String noDataText = "No chart data available.",
@@ -66,6 +70,7 @@ class BubbleChartController
     double infoTextSize = 12,
     Color descTextColor,
     Color infoTextColor,
+    Color infoBgColor,
   }) : super(
             marker: marker,
             description: description,
@@ -85,6 +90,7 @@ class BubbleChartController
             infoTextSize: infoTextSize,
             descTextColor: descTextColor,
             infoTextColor: infoTextColor,
+            infoBgColor: infoBgColor,
             maxVisibleCount: maxVisibleCount,
             autoScaleMinMaxEnabled: autoScaleMinMaxEnabled,
             doubleTapToZoomEnabled: doubleTapToZoomEnabled,
@@ -116,7 +122,9 @@ class BubbleChartController
             borderColor: borderColor,
             borderStrokeWidth: borderStrokeWidth,
             axisLeftSettingFunction: axisLeftSettingFunction,
-            axisRightSettingFunction: axisRightSettingFunction);
+            axisRightSettingFunction: axisRightSettingFunction,
+            touchEventListener: touchEventListener,
+            chartTransListener: chartTransListener);
 
   BubbleData get data => super.data;
 
@@ -139,6 +147,7 @@ class BubbleChartController
         marker,
         description,
         drawMarkers,
+        infoBgColor,
         infoPaint,
         descPaint,
         xAxis,
@@ -172,7 +181,8 @@ class BubbleChartController
         rightAxisTransformer,
         xAxisRenderer,
         zoomMatrixBuffer,
-        customViewPortEnabled);
+        customViewPortEnabled,
+        chartTransListener);
   }
 
   @override

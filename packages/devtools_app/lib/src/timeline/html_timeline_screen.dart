@@ -289,12 +289,14 @@ class HtmlTimelineScreen extends HtmlScreen {
       });
 
     timelineController.onLoadOfflineData.listen((_) {
+      _recordingStatus.hidden(true);
       if (timelineController.offlineTimelineData
           is OfflineFrameBasedTimelineData) {
         final offlineData = timelineController.offlineTimelineData
             as OfflineFrameBasedTimelineData;
         // Relayout the plotly graph so that the frames bar chart reflects the
         // display refresh rate from the imported snapshot.
+        framesBarChart.hidden(false);
         framesBarChart.frameUIgraph.plotlyChart
           ..displayRefreshRate = offlineData.displayRefreshRate
           ..relayoutFPSTimeseriesLayout();
@@ -308,6 +310,8 @@ class HtmlTimelineScreen extends HtmlScreen {
           _selectFrame(
               timelineController.frameBasedTimeline.data.selectedFrame);
         }
+      } else {
+        eventDetails.hidden(false);
       }
 
       if (timelineController.offlineTimelineData.hasCpuProfileData()) {
@@ -441,11 +445,14 @@ class HtmlTimelineScreen extends HtmlScreen {
 
   Future<void> prepareViewForOfflineData(TimelineMode timelineMode) async {
     await clearTimeline();
-    framesBarChart.hidden(timelineMode == TimelineMode.full);
+    framesBarChart.hidden(true);
     _setFlameChart(_emptyFlameChart);
-    flameChartContainer.hidden(timelineMode == TimelineMode.frameBased);
-    eventDetails.hidden(timelineMode == TimelineMode.frameBased);
+    flameChartContainer.hidden(false);
+    eventDetails.hidden(true);
     _recordingInstructions.hidden(true);
+    _recordingStatus.hidden(false);
+    _recordingStatusMessage.text = 'Loading timeline data';
+    _destroySplitter();
   }
 
   Future<void> _exitOfflineMode() async {
@@ -456,8 +463,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     await clearTimeline();
     eventDetails.reset(hide: true);
 
-    // We already cleared the timeline data - do not repeat this action.
-    timelineController.exitOfflineMode(clearTimeline: false);
+    await timelineController.exitOfflineMode();
 
     // This needs to be called before we update the button states because it
     // changes the value of [offlineMode], which the button states depend on.
@@ -503,10 +509,10 @@ class HtmlTimelineScreen extends HtmlScreen {
     _updateButtonStates();
   }
 
-  void _stopFullRecording() {
+  void _stopFullRecording() async {
     assert(timelineController.timelineModeNotifier.value == TimelineMode.full);
     _recordingStatusMessage.text = 'Processing timeline trace';
-    timelineController.fullTimeline.stopRecording();
+    await timelineController.fullTimeline.stopRecording();
     _recordingStatus.hidden(true);
     _updateButtonStates();
   }
@@ -579,6 +585,7 @@ class HtmlTimelineScreen extends HtmlScreen {
       ..disabled = timelineController.fullTimeline.recordingNotifier.value
       ..hidden(offlineMode);
     performanceOverlayButton.button.hidden(offlineMode || isDartCliApp);
+    trackWidgetBuildsButton.button.hidden(offlineMode || isDartCliApp);
     _profileGranularitySelector.selector.hidden(offlineMode);
     exitOfflineModeButton.hidden(!offlineMode);
   }

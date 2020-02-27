@@ -9,13 +9,17 @@ import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileTransformer', () {
-    final cpuProfileTransformer = CpuProfileTransformer();
-    final CpuProfileData cpuProfileData =
-        CpuProfileData.parse(cpuProfileResponseJson);
+    CpuProfileTransformer cpuProfileTransformer;
+    CpuProfileData cpuProfileData;
 
-    test('processCpuProfile', () {
+    setUp(() {
+      cpuProfileTransformer = CpuProfileTransformer();
+      cpuProfileData = CpuProfileData.parse(cpuProfileResponseJson);
+    });
+
+    test('processData', () async {
       expect(cpuProfileData.processed, isFalse);
-      cpuProfileTransformer.processData(cpuProfileData);
+      await cpuProfileTransformer.processData(cpuProfileData);
       expect(cpuProfileData.processed, isTrue);
       expect(
         cpuProfileData.cpuProfileRoot.toStringDeep(),
@@ -28,8 +32,9 @@ void main() {
         final cpuProfileDataWithMissingLeaf =
             CpuProfileData.parse(responseWithMissingLeafFrame);
         expect(
-          () {
-            cpuProfileTransformer.processData(cpuProfileDataWithMissingLeaf);
+          () async {
+            await cpuProfileTransformer
+                .processData(cpuProfileDataWithMissingLeaf);
           },
           throwsA(const TypeMatcher<AssertionError>()),
         );
@@ -39,11 +44,16 @@ void main() {
       // Only run this test if asserts are enabled.
       assert(_runTest());
     });
+
+    test('dispose', () {
+      cpuProfileTransformer.dispose();
+      expect(() {
+        cpuProfileTransformer.progressNotifier.addListener(() {});
+      }, throwsA(anything));
+    });
   });
 
   group('BottomUpProfileTransformer', () {
-    final bottomUpTransformer = BottomUpProfileTransformer();
-
     test('setBottomUpSampleCounts', () {
       void verifySampleCount(CpuStackFrame stackFrame, int targetCount) {
         expect(stackFrame.exclusiveSampleCount, equals(0));
@@ -54,7 +64,7 @@ void main() {
       }
 
       final stackFrame = testStackFrame.deepCopy();
-      bottomUpTransformer.cascadeSampleCounts(stackFrame);
+      BottomUpProfileTransformer.cascadeSampleCounts(stackFrame);
 
       verifySampleCount(stackFrame, 0);
     });
@@ -62,7 +72,7 @@ void main() {
     test('processData step by step', () {
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
       final List<CpuStackFrame> bottomUpRoots =
-          bottomUpTransformer.getRoots(testStackFrame, null, []);
+          BottomUpProfileTransformer.getRoots(testStackFrame, null, []);
 
       // Verify the original stack frame was not modified.
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
@@ -70,7 +80,7 @@ void main() {
       expect(bottomUpRoots.length, equals(6));
 
       // Set the bottom up sample counts for the roots.
-      bottomUpRoots.forEach(bottomUpTransformer.cascadeSampleCounts);
+      bottomUpRoots.forEach(BottomUpProfileTransformer.cascadeSampleCounts);
 
       final buf = StringBuffer();
       for (CpuStackFrame stackFrame in bottomUpRoots) {
@@ -93,7 +103,7 @@ void main() {
     test('processData', () {
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
       final List<CpuStackFrame> bottomUpRoots =
-          bottomUpTransformer.processData(testStackFrame);
+          BottomUpProfileTransformer.processData(testStackFrame);
 
       // Verify the original stack frame was not modified.
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));

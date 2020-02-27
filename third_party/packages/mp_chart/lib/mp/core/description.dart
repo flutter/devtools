@@ -20,8 +20,10 @@ class Description extends ComponentBase {
     textSize = Utils.convertDpToPixel(8);
   }
 
+  // ignore: unnecessary_getters_setters
   String get text => _text;
 
+  // ignore: unnecessary_getters_setters
   set text(String value) {
     _text = value;
   }
@@ -41,8 +43,10 @@ class Description extends ComponentBase {
 
   MPPointF get position => _position;
 
+  // ignore: unnecessary_getters_setters
   TextAlign get textAlign => _textAlign;
 
+  // ignore: unnecessary_getters_setters
   set textAlign(TextAlign value) {
     _textAlign = value;
   }

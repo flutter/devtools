@@ -20,7 +20,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../service_extensions.dart' as extensions;
 import '../service_registrations.dart' as registrations;
@@ -99,7 +99,7 @@ class InspectorController extends DisposableController
     });
 
     _checkForExpandCollapseSupport();
-    _checkForLayoutDetailsSupport();
+    _checkForLayoutExplorerSupport();
 
     // This logic only needs to be run once so run it in the outermost
     // controller.
@@ -872,10 +872,10 @@ class InspectorController extends DisposableController
     );
   }
 
-  void _checkForLayoutDetailsSupport() {
+  void _checkForLayoutExplorerSupport() {
     if (onLayoutExplorerSupported == null) return;
     _onVersionSupported(
-      SemanticVersion(major: 1, minor: 12, patch: 16),
+      SemanticVersion(major: 1, minor: 13, patch: 1),
       onLayoutExplorerSupported,
     );
   }

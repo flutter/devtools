@@ -8,13 +8,13 @@ import 'package:flutter/rendering.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
-import '../http_request_data.dart';
+import '../../http/http_request_data.dart';
 import '../network_controller.dart';
 import 'http_request_inspector.dart';
 import 'network_model.dart';
 
 class NetworkScreen extends Screen {
-  const NetworkScreen() : super();
+  const NetworkScreen() : super(DevToolsScreenType.network);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -190,6 +190,9 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                     child: recordingInfo(
                       instructionsKey: NetworkScreen.recordingInstructionsKey,
                       recording: isRecording,
+                      // TODO(kenz): create a processing notifier if necessary
+                      // for this data.
+                      processing: false,
                       recordedObject: 'HTTP requests',
                       isPause: true,
                     ),

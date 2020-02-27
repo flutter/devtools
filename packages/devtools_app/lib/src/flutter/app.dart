@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../src/framework/framework_core.dart';
+import '../debugger/flutter/debugger_screen.dart';
 import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
 import '../logging/flutter/logging_screen.dart';
@@ -23,6 +24,9 @@ import 'theme.dart';
 
 // TODO(bkonyi): remove this bool when page is ready.
 const showNetworkPage = false;
+// TODO(https://github.com/flutter/flutter/issues/43783): Put back
+// the debugger screen.
+const showDebuggerPage = false;
 
 /// Top-level configuration for the app.
 @immutable
@@ -107,10 +111,8 @@ class DevToolsAppState extends State<DevToolsApp> {
               TimelineScreen(),
               MemoryScreen(),
               PerformanceScreen(),
-              // TODO(https://github.com/flutter/flutter/issues/43783): Put back
-              // the debugger screen.
-              if (showNetworkPage)
-                NetworkScreen(),
+              if (showDebuggerPage) DebuggerScreen(),
+              if (showNetworkPage) NetworkScreen(),
               LoggingScreen(),
               InfoScreen(),
             ],

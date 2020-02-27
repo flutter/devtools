@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:mp_chart/mp/chart/bar_chart.dart';
 import 'package:mp_chart/mp/controller/bar_chart_controller.dart';
-import 'package:mp_chart/mp/core/adapter_android_mp.dart';
 import 'package:mp_chart/mp/core/axis/x_axis.dart';
 import 'package:mp_chart/mp/core/common_interfaces.dart';
 import 'package:mp_chart/mp/core/data/bar_data.dart';
@@ -15,7 +15,7 @@ import 'package:mp_chart/mp/core/data_set/bar_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
 import 'package:mp_chart/mp/core/entry/bar_entry.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
-import 'package:mp_chart/mp/core/enums/limite_label_postion.dart';
+import 'package:mp_chart/mp/core/enums/limit_label_postion.dart';
 import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/highlight/highlight.dart';
 import 'package:mp_chart/mp/core/limit_line.dart';
@@ -45,21 +45,21 @@ class FlutterFramesChart extends StatefulWidget {
 class _FlutterFramesChartState extends State<FlutterFramesChart>
     with AutoDisposeMixin
     implements OnChartValueSelectedListener {
-  TimelineController _controller;
+  static const maxFrames = 150;
 
-  List<TimelineFrame> frames = [];
+  /// Datapoint entry for each frame duration (UI/GPU) for stacked bars.
+  final _frameDurations = <BarEntry>[];
+
+  /// Set of all duration information (the data, colors, etc).
+  BarDataSet frameDurationsSet;
 
   BarChartController _chartController;
 
   BarChartController get chartController => _chartController;
 
-  /// Datapoint entry for each frame duration (UI/GPU) for stacked bars.
-  final List<BarEntry> _frameDurations = <BarEntry>[];
+  TimelineController _controller;
 
-  /// Set of all duration information (the data, colors, etc).
-  BarDataSet frameDurationsSet;
-
-  final int totalFramesToChart = 150;
+  int indexOffset = 0;
 
   /// Compute the FPS highwater mark based on the displayRefreshRate from
   /// FrameBasedTimeline.
@@ -73,7 +73,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       _chartController.axisLeftSettingFunction = (axisLeft, controller) {
         axisLeft
           ..setStartAtZero(true)
-          ..typeface = lightTypeFace
+          ..typeface = chartLightTypeFace
           ..textColor = defaultForeground
           ..drawGridLines = false
           ..setValueFormatter(YAxisUnitFormatter())
@@ -84,7 +84,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
             // TODO(terry): LEFT_TOP is clipped need to fix in MPFlutterChart.
             ..labelPosition = LimitLabelPosition.RIGHT_TOP
             ..textSize = 10
-            ..typeface = boldTypeFace
+            ..typeface = chartBoldTypeFace
             // TODO(terry): Below crashed Flutter in Travis see issues/1338.
             // ..enableDashedLine(5, 5, 0)
             ..lineColor = const Color.fromARGB(0x80, 0xff, 0x44, 0x44));
@@ -102,7 +102,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     cancel();
     autoDispose(_controller.onTimelineCleared.listen((_) {
       setState(() {
-        frames.clear();
         _frameDurations.clear();
         _updateChart();
       });
@@ -115,6 +114,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     // Process each timeline frame.
     addAutoDisposeListener(_controller.frameBasedTimeline.frameAddedNotifier,
         () {
+      final frames = _controller.frameBasedTimeline.data.frames;
       final newFrame = _controller.frameBasedTimeline.frameAddedNotifier.value;
       if (newFrame == null) return;
       setState(() {
@@ -125,64 +125,41 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           _frameDurations.clear(); // Away the fake entry.
         }
 
-        // Prune frames displayed to the last 150 frames.
-        if (frames.length > totalFramesToChart) {
-          frames.removeAt(0);
-          _frameDurations.removeAt(0);
-          // TODO(terry): Need a cleaner solution - fixed width bar and
-          //              chart that scrolls.
-          for (BarEntry entry in _frameDurations) {
-            entry.x -= 1; // Fixup all indexes.
-          }
-        }
+        _maybePruneData();
 
-        frames.add(newFrame);
-        _frameDurations.add(createBarEntry(
-          frames.length - 1, // Index into frames.
-          newFrame.uiDurationMs,
-          newFrame.gpuDurationMs,
-        ));
+        _frameDurations
+            .add(createBarEntry(newFrame, frames.length - 1 - indexOffset));
 
         _updateChart();
       });
     });
-  }
 
-  @override
-  void dispose() {
-    // TODO(kenz): dispose [_controller] here.
-    super.dispose();
+    autoDispose(_controller.onLoadOfflineData.listen((_) {
+      if (_controller.timelineModeNotifier.value != TimelineMode.frameBased) {
+        return;
+      }
+      final frames = _controller.frameBasedTimeline.data?.frames ?? [];
+      if (frames.isNotEmpty) {
+        _frameDurations.clear();
+        final startFrameIndex = math.max(0, frames.length - maxFrames);
+        for (int i = startFrameIndex; i < frames.length; i++) {
+          _frameDurations.add(createBarEntry(frames[i], i - startFrameIndex));
+        }
+      }
+      _updateChart();
+    }));
   }
 
   @override
   void initState() {
     _initChartController();
-
-    // True simulates charting a live feed, false to chart all canned data immediately.
-    _initData(true);
-
+    _initData();
     super.initState();
   }
-
-  final lightTypeFace = TypeFace(
-    fontFamily: 'OpenSans',
-    fontWeight: FontWeight.w100,
-  );
-
-  final boldTypeFace = TypeFace(
-    fontFamily: 'OpenSans',
-    fontWeight: FontWeight.w800,
-  );
-
-  final double groupSpace = 0.04;
-
-  final double barSpace = 0.0;
 
   void _initChartController() {
     final desc = Description()..enabled = false;
     _chartController = BarChartController(
-      // TODO(kenz): make this a general background color for use throughout
-      // devtools.
       backgroundColor: chartBackgroundColor,
       // The axisLeftSettingFunction is computed in didChangeDependencies,
       // see _setupFPSHighwaterLine.
@@ -219,13 +196,14 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   }
 
   void onBarSelected(int index) {
-    _controller.frameBasedTimeline.selectFrame(frames[index]);
+    _controller.frameBasedTimeline.selectFrame(
+        _controller.frameBasedTimeline.data.frames[index + indexOffset]);
   }
 
-  void _initData([bool simulateFeed = false]) {
+  void _initData() {
     // Create place holder for empty chart.
     // TODO(terry): Look at fixing MPFlutterChart to handle empty data entries.
-    _frameDurations.add(createBarEntry(0, 0, 0));
+    _frameDurations.add(createStubBarEntry());
 
     // Create heap used dataset.
     frameDurationsSet = BarDataSet(_frameDurations, 'Durations')
@@ -239,20 +217,39 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     _chartController.data.barWidth = 0.8;
   }
 
+  void _maybePruneData() {
+    // Prune frames displayed to the last 150 frames.
+    if (_frameDurations.length > maxFrames) {
+      // Increase the index offset since we are removing a frame.
+      indexOffset++;
+
+      _frameDurations.removeAt(0);
+      // TODO(terry): Need a cleaner solution - fixed width bar and
+      //              chart that scrolls.
+      for (BarEntry entry in _frameDurations) {
+        entry.x -= 1; // Fixup all indexes.
+      }
+    }
+  }
+
+  BarEntry createStubBarEntry() {
+    return BarEntry.fromListYVals(x: 0.0, vals: [0.0, 0.0]);
+  }
+
   // TODO(terry): Consider grouped bars (UI/GPU) not stacked.
-  BarEntry createBarEntry(int index, double uiDuration, double gpuDuration) {
-    if (uiDuration + gpuDuration > 250) {
+  BarEntry createBarEntry(TimelineFrame frame, int index) {
+    if (frame.uiDurationMs + frame.gpuDurationMs > 250) {
       // Constrain the y-axis so outliers don't blow the barchart scale.
       // TODO(terry): Need to have a max where the hover value shows the real #s but the chart just looks pinned to the top.
-      _chartController.axisLeft.setAxisMaximum(250);
+      _chartController.axisLeft?.setAxisMaximum(250);
     }
 
     // TODO(terry): Structured class item 0 is GPU, item 1 is UI if not stacked.
     final entry = BarEntry.fromListYVals(
       x: index.toDouble(),
       vals: [
-        gpuDuration,
-        uiDuration,
+        frame.gpuDurationMs.toDouble(),
+        frame.uiDurationMs.toDouble(),
       ],
     );
 

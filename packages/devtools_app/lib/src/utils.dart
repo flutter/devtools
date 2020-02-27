@@ -120,6 +120,12 @@ void executeWithDelay(Duration delay, void callback(),
   }
 }
 
+Future<void> delayForBatchProcessing({int micros = 0}) async {
+  // Even with a delay of 0 microseconds, awaiting this delay is enough to free
+  // the UI thread to update the UI.
+  await Future.delayed(Duration(microseconds: micros));
+}
+
 /// Creates a [Future] that completes either when `operation` completes or the
 /// duration specified by `timeoutMillis` has passed.
 ///
@@ -496,6 +502,7 @@ class Reporter implements Listenable {
 /// in cases where N is larger.
 class ValueReporter<T> extends Reporter implements ValueListenable<T> {
   ValueReporter(this._value);
+
   @override
   T get value => _value;
 
@@ -527,20 +534,12 @@ class ImmediateValueNotifier<T> extends ValueNotifier<T> {
   }
 }
 
-extension SafeAccess<T> on List<T> {
-  T safeFirst() {
-    return safeGet(0);
-  }
+extension SafeAccessList<T> on List<T> {
+  T safeGet(int index) => index < 0 || index >= length ? null : this[index];
+}
 
-  T safeLast() {
-    return safeGet(length - 1);
-  }
+extension SafeAccess<T> on Iterable<T> {
+  T get safeFirst => isNotEmpty ? first : null;
 
-  T safeGet(int index) {
-    if (index < 0 || index >= length) {
-      return null;
-    } else {
-      return this[index];
-    }
-  }
+  T get safeLast => isNotEmpty ? last : null;
 }

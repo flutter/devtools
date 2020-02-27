@@ -4,10 +4,12 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../http/http_request_data.dart';
+import '../http/http_service.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
-import 'http_request_data.dart';
 import 'network_service.dart';
 
 class NetworkController {
@@ -119,7 +121,7 @@ class NetworkController {
   }
 
   Future<void> _toggleHttpTimelineRecording(bool state) async {
-    await _networkService.toggleHttpRequestLogging(state);
+    await HttpService.toggleHttpRequestLogging(state);
 
     if (state) {
       // Start polling once we've enabled logging.

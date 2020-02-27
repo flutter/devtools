@@ -109,7 +109,7 @@ class Controllers extends StatefulWidget {
   static ProvidedControllers of(BuildContext context) {
     final provider =
         context.dependOnInheritedWidgetOfExactType<_InheritedProvider>();
-    return provider.data;
+    return provider?.data;
   }
 }
 

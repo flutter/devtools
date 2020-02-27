@@ -24,7 +24,7 @@ void main() {
       ga.exposeGaDevToolsEnabledToJs();
 
       if (ga.isGtagsReset()) {
-        ga.resetDevToolsFile();
+        await ga.resetDevToolsFile();
       }
 
       // Load the web app framework.

@@ -9,7 +9,7 @@ import '../../profiler/cpu_profile_columns.dart';
 import '../../profiler/cpu_profile_model.dart';
 import '../../table_data.dart';
 
-/// A table of the CPU's call tree.
+/// A table of the CPU's top-down call tree.
 class CpuCallTreeTable extends StatelessWidget {
   factory CpuCallTreeTable(CpuProfileData data, {Key key}) {
     final treeColumn = MethodNameColumn();
@@ -21,6 +21,7 @@ class CpuCallTreeTable extends StatelessWidget {
     ]);
     return CpuCallTreeTable._(key, data, treeColumn, columns);
   }
+
   const CpuCallTreeTable._(Key key, this.data, this.treeColumn, this.columns)
       : super(key: key);
 
@@ -31,7 +32,7 @@ class CpuCallTreeTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TreeTable<CpuStackFrame>(
-      data: data.cpuProfileRoot,
+      dataRoots: [data.cpuProfileRoot],
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (frame) => PageStorageKey<String>(frame.id),

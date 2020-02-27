@@ -1,4 +1,20 @@
-## 0.1.14-dev.2
+## 0.1.15 2020-02-07
+* Fix a stack overflow error that was caused by a change in Dart's RTI implementation [#1615](https://github.com/flutter/devtools/pull/1615).
+* Hide annotations that Flutter re-exports [#1606](https://github.com/flutter/devtools/pull/1606)
+* Update package:devtools_server dependency to 0.1.13 or newer [#1603](https://github.com/flutter/devtools/pull/1603)
+* Update package:sse dependency to 3.1.2 or newer [#1601](https://github.com/flutter/devtools/pull/1601)
+
+## 0.1.14 2020-02-03
+* Added collecting of Android Debug Bridge (adb) Java memory information see [PR](https://github.com/flutter/devtools/pull/1553).
+* Added multiple charts to memory profiling (Dart VM and Java memory).
+* Added display interval e.g., 1 minute, 5 minutes, 10 minutes for memory charts.
+* More succinct memory detail marker (pop-up) for data points of a particular timestamp.
+* Graceful resize buttons and drop-downs in memory profile for narrower windows.
+* Updated exported JSON format both Dart VM and ADB memory information.
+* Added timeline slider, to memory profile, for temporal navigation in charts.
+* Added ‘Clear’ button, to memory profile, throws away all collected live data.
+* Fix a number of charting bugs NaN, INF problems, axis scales, etc.
+* Support saving and loading memory profile data.
 * Add Track Widget Builds toggle to Timeline.
 * Fix issues with async trace event rendering in Timeline.
 * Add timing and id information in Timeline event summary.

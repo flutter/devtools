@@ -9,8 +9,8 @@ import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
+import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
-import '../../profiler/cpu_profiler_controller.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../utils.dart';
@@ -28,6 +28,10 @@ class EventDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(kenz): when in offlineMode and selectedEvent doesn't match the event
+    // from the offline data, show message notifying that CPU profile data is
+    // unavailable for snapshots and provide link to return to offline profile
+    // (see html_event_details.dart).
     final controller = Controllers.of(context).timeline;
     final textTheme = Theme.of(context).textTheme;
     return Column(
@@ -70,9 +74,24 @@ class EventDetails extends StatelessWidget {
     return ValueListenableBuilder<CpuProfileData>(
       valueListenable: cpuProfilerController.dataNotifier,
       builder: (context, cpuProfileData, _) {
+        if (cpuProfileData == null) {
+          return _buildProcessingInfo(cpuProfilerController);
+        }
         return CpuProfiler(
           data: cpuProfileData,
           controller: cpuProfilerController,
+        );
+      },
+    );
+  }
+
+  Widget _buildProcessingInfo(CpuProfilerController cpuProfilerController) {
+    return ValueListenableBuilder(
+      valueListenable: cpuProfilerController.transformer.progressNotifier,
+      builder: (context, progress, _) {
+        return processingInfo(
+          progressValue: progress,
+          processedObject: 'CPU samples',
         );
       },
     );
@@ -129,14 +148,23 @@ class EventSummary extends StatelessWidget {
           title: const Text('Category'),
           subtitle: Text(firstTraceEvent.category),
         ),
-        if (event.isAsyncEvent)
-          ListTile(
-            title: const Text('Async id'),
-            subtitle: Text('${(event as AsyncTimelineEvent).asyncId}'),
-          ),
+        if (event.isAsyncEvent) _asyncIdTile(),
         if (_connectedEvents.isNotEmpty) _buildConnectedEvents(),
         if (_eventArgs.isNotEmpty) _buildArguments(),
       ],
+    );
+  }
+
+  Widget _asyncIdTile() {
+    String asyncId;
+    if (event is OfflineTimelineEvent) {
+      asyncId = event.traceEvents.first.event.id;
+    } else {
+      asyncId = (event as AsyncTimelineEvent).asyncId;
+    }
+    return ListTile(
+      title: const Text('Async id'),
+      subtitle: Text(asyncId),
     );
   }
 
@@ -180,7 +208,6 @@ class EventSummary extends StatelessWidget {
     final formattedArgs = encoder.convert(args);
     return Text(
       formattedArgs.replaceAll('"', ''),
-      // TODO(kenz): make monospace font work for flutter desktop.
       style: const TextStyle(fontFamily: 'RobotoMono'),
     );
   }

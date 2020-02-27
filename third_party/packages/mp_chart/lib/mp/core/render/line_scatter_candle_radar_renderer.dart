@@ -10,7 +10,7 @@ abstract class LineScatterCandleRadarRenderer
   Path _highlightLinePath = Path();
 
   LineScatterCandleRadarRenderer(
-      ChartAnimator animator, ViewPortHandler viewPortHandler)
+      Animator animator, ViewPortHandler viewPortHandler)
       : super(animator, viewPortHandler);
 
   /// Draws vertical & horizontal highlight-lines if enabled.

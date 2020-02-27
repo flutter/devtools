@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../../devtools.dart' as devtools show version;
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
 import '../globals.dart';
 import '../service.dart';
@@ -58,13 +58,13 @@ class FrameworkCore {
           );
           return true;
         } else {
-          errorReporter(
-              'Unable to connect to VM service at "$uri" without error', null);
+          errorReporter('Unable to connect to VM service at $uri', null);
           return false;
         }
-      } catch (e) {
-        errorReporter(
-            'Unable to connect to VM service at "$uri" with error $e', e);
+      } catch (e, st) {
+        log('$e\n$st', LogLevel.error);
+
+        errorReporter('Unable to connect to VM service at $uri: $e', e);
         return false;
       }
     } else {
