@@ -9,13 +9,13 @@ library gtags;
 
 import 'dart:convert';
 
+import 'package:devtools_shared/devtools_shared.dart' as server;
 import 'package:html_shim/html.dart';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
 import '../../devtools.dart' as devtools show version;
 import '../config_specific/logger/logger.dart';
-import '../devtools_api.dart' as server;
 import '../globals.dart';
 import '../ui/analytics_constants.dart';
 import '../ui/gtags.dart';
@@ -254,7 +254,7 @@ Future<String> flutterGAClientID() async {
 
 /// Requests all .devtools properties to be reset to their default values in the
 /// file '~/.devtools'.
-void resetDevToolsFile() async {
+Future<void> resetDevToolsFile() async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(server.apiResetDevTools);
     if (resp?.status == HttpStatus.ok) {
@@ -309,7 +309,7 @@ Future<bool> get isEnabled async {
 
 /// Set the DevTools property 'enabled' (GA enabled) stored in the file
 /// '~/.devtools'.
-void setEnabled([bool value = true]) async {
+Future<void> setEnabled([bool value = true]) async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(
       '${server.apiSetDevToolsEnabled}'
@@ -324,8 +324,24 @@ void setEnabled([bool value = true]) async {
   }
 }
 
+/// Request DevTools parameter value be the active survey e.g., 'Q1-2020', stored in
+/// the file '~\.devtools'.
+Future<bool> setActiveSurvey(String value) async {
+  if (isDevToolsServerAvailable) {
+    final resp = await _request('${server.apiSetActiveSurvey}'
+        '?${server.activeSurveyName}=$value');
+    if (resp?.status == HttpStatus.ok && json.decode(resp.responseText)) {
+      return true;
+    }
+    if (resp?.status != HttpStatus.ok || !json.decode(resp.responseText)) {
+      _logWarning(resp, server.apiSetActiveSurvey);
+    }
+  }
+  return false;
+}
+
 /// Request DevTools property value 'surveyActionTaken' stored in the file
-/// '~\.devtools'.
+/// '~\.devtools' if activeSurvey is set the activeSurvey actionTaken is returned.
 Future<bool> get isSurveyActionTaken async {
   bool surveyActionTaken = false;
 
@@ -342,26 +358,26 @@ Future<bool> get isSurveyActionTaken async {
 }
 
 /// Set DevTools property value 'surveyActionTaken' stored in the file
-/// '~\.devtools'.
+/// '~\.devtools'.  If activeSurvey is set the activeSurvey actionTaken is set
+/// otherwise original actionTaken is set (first survey).
 // TODO(terry): remove the query param logic for this request.
 // setSurveyActionTaken should only be called with the value of true, so
 // we can remove the extra complexity.
-void setSurveyActionTaken() async {
+Future<void> setSurveyActionTaken() async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(
       '${server.apiSetSurveyActionTaken}'
       '?${server.surveyActionTakenPropertyName}=true',
     );
-    if (resp?.status == HttpStatus.ok) {
-      assert(json.decode(resp.responseText) == true);
-    } else {
+    if (resp?.status != HttpStatus.ok || !json.decode(resp.responseText)) {
       _logWarning(resp, server.apiSetSurveyActionTaken, resp.responseText);
     }
   }
 }
 
 /// Request DevTools property value 'surveyShownCount' stored in the file
-/// '~\.devtools'.
+/// '~\.devtools' if activeSurvey is set the activeSurvey surveyShownCount
+/// is returned otherwise original surveyShownCount is returned (first survey).
 Future<int> get surveyShownCount async {
   int surveyShownCount = 0;
 
@@ -378,7 +394,8 @@ Future<int> get surveyShownCount async {
 }
 
 /// Increment DevTools property value 'surveyShownCount' stored in the file
-/// '~\.devtools'.
+/// '~\.devtools'. If activeSurvey is set the activeSurvey surveyShownCount
+/// is set otherwise original surveyShownCount is set (first survey).
 Future<int> get incrementSurveyShownCount async {
   // Any failure will still return 0.
   int surveyShownCount = 0;

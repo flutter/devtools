@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
@@ -15,7 +16,6 @@ import 'package:sse/server/sse_handler.dart';
 import 'package:usage/usage_io.dart';
 
 import 'client_manager.dart';
-import 'devtools_api.dart';
 
 /// Default [shelf.Handler] for serving DevTools files.
 ///
@@ -72,6 +72,8 @@ Future<shelf.Handler> defaultHandler(ClientManager clients) async {
 ///
 /// This defines endpoints that serve all requests that come in over api/.
 class ServerApi {
+  static const errorNoActiveSurvey = 'ERROR: setActiveSurvey not called.';
+
   /// Determines whether or not [request] is an API call.
   static bool canHandle(shelf.Request request) {
     return request.url.path.startsWith(apiPrefix);
@@ -107,6 +109,7 @@ class ServerApi {
               );
 
       // ----- DevTools GA store. -----
+
       case apiResetDevTools:
         _devToolsUsage.reset();
         return api.getCompleted(request, json.encode(true));
@@ -129,14 +132,45 @@ class ServerApi {
         return api.setCompleted(request, json.encode(_devToolsUsage.enabled));
 
       // ----- DevTools survey store. -----
+
+      case apiSetActiveSurvey:
+        // Assume failure.
+        bool result = false;
+
+        // Set the active survey used to store subsequent apiGetSurveyActionTaken,
+        // apiSetSurveyActionTaken, apiGetSurveyShownCount, and
+        // apiIncrementSurveyShownCount calls.
+        final queryParams = request.requestedUri.queryParameters;
+        if (queryParams.keys.length == 1 &&
+            queryParams.containsKey(activeSurveyName)) {
+          final String theSurveyName = queryParams[activeSurveyName];
+
+          // Set the current activeSurvey.
+          _devToolsUsage.activeSurvey = theSurveyName;
+          result = true;
+        }
+
+        return api.getCompleted(request, json.encode(result));
       case apiGetSurveyActionTaken:
+        // Request setActiveSurvey has not been requested.
+        if (_devToolsUsage.activeSurvey == null) {
+          return api.badRequest('$errorNoActiveSurvey '
+              '- $apiGetSurveyActionTaken');
+        }
         // SurveyActionTaken has the survey been acted upon (taken or dismissed)
         return api.getCompleted(
-            request, json.encode(_devToolsUsage.surveyActionTaken));
+          request,
+          json.encode(_devToolsUsage.surveyActionTaken),
+        );
       // TODO(terry): remove the query param logic for this request.
       // setSurveyActionTaken should only be called with the value of true, so
       // we can remove the extra complexity.
       case apiSetSurveyActionTaken:
+        // Request setActiveSurvey has not been requested.
+        if (_devToolsUsage.activeSurvey == null) {
+          return api.badRequest('$errorNoActiveSurvey '
+              '- $apiSetSurveyActionTaken');
+        }
         // Set the SurveyActionTaken.
         // Has the survey been taken or dismissed..
         final queryParams = request.requestedUri.queryParameters;
@@ -149,12 +183,22 @@ class ServerApi {
           json.encode(_devToolsUsage.surveyActionTaken),
         );
       case apiGetSurveyShownCount:
+        // Request setActiveSurvey has not been requested.
+        if (_devToolsUsage.activeSurvey == null) {
+          return api.badRequest('$errorNoActiveSurvey '
+              '- $apiGetSurveyShownCount');
+        }
         // SurveyShownCount how many times have we asked to take survey.
         return api.getCompleted(
           request,
           json.encode(_devToolsUsage.surveyShownCount),
         );
       case apiIncrementSurveyShownCount:
+        // Request setActiveSurvey has not been requested.
+        if (_devToolsUsage.activeSurvey == null) {
+          return api.badRequest('$errorNoActiveSurvey '
+              '- $apiIncrementSurveyShownCount');
+        }
         // Increment the SurveyShownCount, we've asked about the survey.
         _devToolsUsage.incrementSurveyShownCount();
         return api.getCompleted(
@@ -190,13 +234,22 @@ class ServerApi {
   FutureOr<shelf.Response> setCompleted(shelf.Request request, String value) =>
       shelf.Response.ok('$value');
 
+  /// A [shelf.Response] for API calls that encountered a request problem e.g.,
+  /// setActiveSurvey not called.
+  ///
+  /// This is a 400 Bad Request response.
+  FutureOr<shelf.Response> badRequest([String logError]) {
+    if (logError != null) print(logError);
+    return shelf.Response(HttpStatus.badRequest);
+  }
+
   /// A [shelf.Response] for API calls that have not been implemented in this
   /// server.
   ///
   /// This is a no-op 204 No Content response because returning 404 Not Found
   /// creates unnecessary noise in the console.
   FutureOr<shelf.Response> notImplemented(shelf.Request request) =>
-      shelf.Response(204);
+      shelf.Response(HttpStatus.noContent);
 }
 
 /// Access the file '~/.flutter'.
@@ -243,6 +296,18 @@ class DevToolsUsage {
     );
   }
 
+  /// The activeSurvey is the property name of a top-level property
+  /// existing or created in the file ~/.devtools
+  /// If the property doesn't exist it is created with default survey values:
+  ///
+  ///   properties[activeSurvey]['surveyActionTaken'] = false;
+  ///   properties[activeSurvey]['surveyShownCount'] = 0;
+  ///
+  /// It is a requirement that the API apiSetActiveSurvey must be called before
+  /// calling any survey method on DevToolsUsage (addSurvey, rewriteActiveSurvey,
+  /// surveyShownCount, incrementSurveyShownCount, or surveyActionTaken).
+  String _activeSurvey;
+
   static String userHomeDir() {
     final String envKey =
         Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
@@ -252,11 +317,12 @@ class DevToolsUsage {
 
   IOPersistentProperties properties;
 
+  static const String _surveyActionTaken = 'surveyActionTaken';
+  static const String _surveyShownCount = 'surveyShownCount';
+
   void reset() {
     properties.remove('firstRun');
     properties['enabled'] = false;
-    properties['surveyShownCount'] = 0;
-    properties['surveyActionTaken'] = false;
   }
 
   bool get isFirstRun {
@@ -277,23 +343,60 @@ class DevToolsUsage {
     return properties['enabled'];
   }
 
-  int get surveyShownCount {
-    if (properties['surveyShownCount'] == null) {
-      properties['surveyShownCount'] = 0;
-    }
+  bool surveyNameExists(String surveyName) => properties[surveyName] != null;
 
-    return properties['surveyShownCount'];
+  void _addSurvey(String surveyName) {
+    assert(activeSurvey != null);
+    assert(activeSurvey == surveyName);
+    rewriteActiveSurvey(false, 0);
+  }
+
+  String get activeSurvey => _activeSurvey;
+
+  set activeSurvey(String surveyName) {
+    assert(surveyName != null);
+    _activeSurvey = surveyName;
+
+    if (!surveyNameExists(activeSurvey)) {
+      // Create the survey if property is non-existent in ~/.devtools
+      _addSurvey(activeSurvey);
+    }
+  }
+
+  /// Need to rewrite the entire survey structure for property to be persisted.
+  void rewriteActiveSurvey(bool actionTaken, int shownCount) {
+    assert(activeSurvey != null);
+    properties[activeSurvey] = {
+      _surveyActionTaken: actionTaken,
+      _surveyShownCount: shownCount,
+    };
+  }
+
+  int get surveyShownCount {
+    assert(activeSurvey != null);
+    final prop = properties[activeSurvey];
+    if (prop[_surveyShownCount] == null) {
+      rewriteActiveSurvey(prop[_surveyActionTaken], 0);
+    }
+    return properties[activeSurvey][_surveyShownCount];
   }
 
   void incrementSurveyShownCount() {
+    assert(activeSurvey != null);
     surveyShownCount; // Ensure surveyShownCount has been initialized.
-    properties['surveyShownCount'] += 1;
+    final prop = properties[activeSurvey];
+    rewriteActiveSurvey(prop[_surveyActionTaken], prop[_surveyShownCount] + 1);
   }
 
-  bool get surveyActionTaken => properties['surveyActionTaken'] == true;
+  bool get surveyActionTaken {
+    assert(activeSurvey != null);
+    return properties[activeSurvey][_surveyActionTaken] == true;
+  }
 
   set surveyActionTaken(bool value) {
-    properties['surveyActionTaken'] = value;
+    assert(activeSurvey != null);
+    final prop = properties[activeSurvey];
+    rewriteActiveSurvey(value, prop[_surveyShownCount]);
   }
 }
 

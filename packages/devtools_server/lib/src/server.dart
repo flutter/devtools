@@ -10,6 +10,7 @@ import 'dart:isolate';
 
 import 'package:args/args.dart';
 import 'package:browser_launcher/browser_launcher.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -273,6 +274,129 @@ Future<HttpServer> serveDevTools({
         case 'client.list':
           await _handleClientsList(id, params, machineMode);
           break;
+        case 'devTools.survey':
+          _devToolsUsage ??= DevToolsUsage();
+          final String surveyRequest = params['surveyRequest'];
+          final String value = params['value'];
+          switch (surveyRequest) {
+            case 'copyAndCreateDevToolsFile':
+              // Backup and delete ~/.devtools file.
+              if (backupAndCreateDevToolsStore()) {
+                _devToolsUsage = null;
+                printOutput(
+                  'DevTools Survey',
+                  {
+                    'id': id,
+                    'result': {
+                      'sucess': true,
+                    },
+                  },
+                  machineMode: machineMode,
+                );
+              }
+              break;
+            case 'restoreDevToolsFile':
+              _devToolsUsage = null;
+              final content = restoreDevToolsStore();
+              if (content != null) {
+                printOutput(
+                  'DevTools Survey',
+                  {
+                    'id': id,
+                    'result': {
+                      'sucess': true,
+                      'content': content,
+                    },
+                  },
+                  machineMode: machineMode,
+                );
+
+                _devToolsUsage = null;
+              }
+              break;
+            case apiSetActiveSurvey:
+              _devToolsUsage.activeSurvey = value;
+              printOutput(
+                'DevTools Survey',
+                {
+                  'id': id,
+                  'result': {
+                    'sucess': _devToolsUsage.activeSurvey == value,
+                    'activeSurvey': _devToolsUsage.activeSurvey,
+                  },
+                },
+                machineMode: machineMode,
+              );
+              break;
+            case apiGetSurveyActionTaken:
+              printOutput(
+                'DevTools Survey',
+                {
+                  'id': id,
+                  'result': {
+                    'activeSurvey': _devToolsUsage.activeSurvey,
+                    'surveyActionTaken': _devToolsUsage.surveyActionTaken,
+                  },
+                },
+                machineMode: machineMode,
+              );
+              break;
+            case apiSetSurveyActionTaken:
+              _devToolsUsage.surveyActionTaken = jsonDecode(value);
+              printOutput(
+                'DevTools Survey',
+                {
+                  'id': id,
+                  'result': {
+                    'activeSurvey': _devToolsUsage.activeSurvey,
+                    'surveyActionTaken': _devToolsUsage.surveyActionTaken,
+                  },
+                },
+                machineMode: machineMode,
+              );
+              break;
+            case apiGetSurveyShownCount:
+              printOutput(
+                'DevTools Survey',
+                {
+                  'id': id,
+                  'result': {
+                    'activeSurvey': _devToolsUsage.activeSurvey,
+                    'surveyShownCount': _devToolsUsage.surveyShownCount,
+                  },
+                },
+                machineMode: machineMode,
+              );
+              break;
+            case apiIncrementSurveyShownCount:
+              _devToolsUsage.incrementSurveyShownCount();
+              printOutput(
+                'DevTools Survey',
+                {
+                  'id': id,
+                  'result': {
+                    'activeSurvey': _devToolsUsage.activeSurvey,
+                    'surveyShownCount': _devToolsUsage.surveyShownCount,
+                  },
+                },
+                machineMode: machineMode,
+              );
+              break;
+            default:
+              printOutput(
+                'Unknown DevTools Survey Request $surveyRequest',
+                {
+                  'id': id,
+                  'result': {
+                    'activeSurvey': _devToolsUsage.activeSurvey,
+                    'surveyActionTaken': _devToolsUsage.surveyActionTaken,
+                    'surveyShownCount': _devToolsUsage.surveyShownCount,
+                  },
+                },
+                machineMode: machineMode,
+              );
+          }
+          break;
         default:
           printOutput(
             'Unknown method ${json['method']}',
@@ -287,6 +411,44 @@ Future<HttpServer> serveDevTools({
   }
 
   return server;
+}
+
+// Only used for testing DevToolsUsage (used by survey).
+DevToolsUsage _devToolsUsage;
+
+File _devToolsBackup;
+
+bool backupAndCreateDevToolsStore() {
+  assert(_devToolsBackup == null);
+  final devToolsStore = File('${DevToolsUsage.userHomeDir()}/.devtools');
+  if (devToolsStore.existsSync()) {
+    _devToolsBackup = devToolsStore.copySync('${DevToolsUsage.userHomeDir()}/'
+        '.devtools_backup_test');
+    devToolsStore.deleteSync();
+  }
+
+  return true;
+}
+
+String restoreDevToolsStore() {
+  if (_devToolsBackup != null) {
+    // Read the current ~/.devtools file
+    final devToolsStore = File('${DevToolsUsage.userHomeDir()}/'
+        '.devtools');
+    final content = devToolsStore.readAsStringSync();
+
+    // Delete the temporary ~/.devtools file
+    devToolsStore.deleteSync();
+    if (_devToolsBackup.existsSync()) {
+      // Restore the backup ~/.devtools file we created in backupAndCreateDevToolsStore.
+      _devToolsBackup.copySync('${DevToolsUsage.userHomeDir()}/.devtools');
+      _devToolsBackup.deleteSync();
+      _devToolsBackup = null;
+    }
+    return content;
+  }
+
+  return null;
 }
 
 Future<void> _hookupMemoryProfiling(Uri observatoryUri, String profileFile,
