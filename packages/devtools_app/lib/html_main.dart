@@ -70,13 +70,15 @@ void main() {
       final surveyEndDate = DateTime(2020, 4, 10);
       final now = DateTime.now();
       if (now.isAfter(surveyStartDate) && now.isBefore(surveyEndDate)) {
-        await ga.setActiveSurvey('Q1-2020');
-        // Do not show the survey if the user has either taken or dismissed it.
-        if (!await ga.isSurveyActionTaken) {
-          // Stop showing the survey toast after 5 times without action.
-          if (await ga.surveyShownCount < 5) {
-            framework.surveyToast(await _generateSurveyUrl());
-            await ga.incrementSurveyShownCount;
+        final activeSurveySet = await ga.setActiveSurvey('Q1-2020');
+        if (activeSurveySet) {
+          // Do not show the survey if the user has either taken or dismissed it.
+          if (!await ga.isSurveyActionTaken) {
+            // Stop showing the survey toast after 5 times without action.
+            if (await ga.surveyShownCount < 5) {
+              framework.surveyToast(await _generateSurveyUrl());
+              await ga.incrementSurveyShownCount;
+            }
           }
         }
       }
