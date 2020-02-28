@@ -324,8 +324,14 @@ Future<void> setEnabled([bool value = true]) async {
   }
 }
 
-/// Request DevTools parameter value be the active survey e.g., 'Q1-2020', stored in
-/// the file '~\.devtools'.
+/// Set DevTools parameter value for the active survey (e.g. 'Q1-2020').
+///
+/// The value is stored in the file '~\.devtools'.
+///
+/// This method must be called before calling other survey related methods
+/// ([isSurveyActionTaken], [setSurveyActionTaken], [surveyShownCount],
+/// [incrementSurveyShownCount]). If the active survey is not set, warnings are
+/// logged.
 Future<bool> setActiveSurvey(String value) async {
   if (isDevToolsServerAvailable) {
     final resp = await _request('${server.apiSetActiveSurvey}'
@@ -340,8 +346,11 @@ Future<bool> setActiveSurvey(String value) async {
   return false;
 }
 
-/// Request DevTools property value 'surveyActionTaken' stored in the file
-/// '~\.devtools' if activeSurvey is set the activeSurvey actionTaken is returned.
+/// Request DevTools property value 'surveyActionTaken' for the active survey.
+///
+/// The value is stored in the file '~\.devtools'.
+///
+/// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<bool> get isSurveyActionTaken async {
   bool surveyActionTaken = false;
 
@@ -357,12 +366,11 @@ Future<bool> get isSurveyActionTaken async {
   return surveyActionTaken;
 }
 
-/// Set DevTools property value 'surveyActionTaken' stored in the file
-/// '~\.devtools'.  If activeSurvey is set the activeSurvey actionTaken is set
-/// otherwise original actionTaken is set (first survey).
-// TODO(terry): remove the query param logic for this request.
-// setSurveyActionTaken should only be called with the value of true, so
-// we can remove the extra complexity.
+/// Set DevTools property value 'surveyActionTaken' for the active survey.
+///
+/// The value is stored in the file '~\.devtools'.
+///
+/// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<void> setSurveyActionTaken() async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(
@@ -375,9 +383,11 @@ Future<void> setSurveyActionTaken() async {
   }
 }
 
-/// Request DevTools property value 'surveyShownCount' stored in the file
-/// '~\.devtools' if activeSurvey is set the activeSurvey surveyShownCount
-/// is returned otherwise original surveyShownCount is returned (first survey).
+/// Request DevTools property value 'surveyShownCount' for the active survey.
+///
+/// The value is stored in the file '~\.devtools'.
+///
+/// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<int> get surveyShownCount async {
   int surveyShownCount = 0;
 
@@ -393,9 +403,11 @@ Future<int> get surveyShownCount async {
   return surveyShownCount;
 }
 
-/// Increment DevTools property value 'surveyShownCount' stored in the file
-/// '~\.devtools'. If activeSurvey is set the activeSurvey surveyShownCount
-/// is set otherwise original surveyShownCount is set (first survey).
+/// Increment DevTools property value 'surveyShownCount' for the active survey.
+///
+/// The value is stored in the file '~\.devtools'.
+///
+/// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<int> get incrementSurveyShownCount async {
   // Any failure will still return 0.
   int surveyShownCount = 0;
