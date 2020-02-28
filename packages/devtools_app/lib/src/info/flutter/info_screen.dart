@@ -107,42 +107,42 @@ class _VersionInformation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final boldText = TextStyle(fontWeight: FontWeight.bold);
+    const boldText = TextStyle(fontWeight: FontWeight.bold);
     const contentPadding = 8.0;
     return Column(
       key: InfoScreen.flutterVersionKey,
       children: [
         Row(
           children: [
-            Text('Flutter:', style: boldText),
+            const Text('Flutter:', style: boldText),
             const SizedBox(width: contentPadding),
             Text(flutterVersion.flutterVersionSummary),
           ],
         ),
         Row(
           children: [
-            Text('Framework:', style: boldText),
+            const Text('Framework:', style: boldText),
             const SizedBox(width: contentPadding),
             Text(flutterVersion.frameworkVersionSummary),
           ],
         ),
         Row(
           children: [
-            Text('Engine:', style: boldText),
+            const Text('Engine:', style: boldText),
             const SizedBox(width: contentPadding),
             Text(flutterVersion.engineVersionSummary),
           ],
         ),
         Row(
           children: [
-            Text('Dart SDK:', style: boldText),
+            const Text('Dart SDK:', style: boldText),
             const SizedBox(width: contentPadding),
             Text(flutterVersion.dartSdkVersion),
           ],
         ),
         Row(
           children: [
-            Text('DevTools:', style: boldText),
+            const Text('DevTools:', style: boldText),
             const SizedBox(width: contentPadding),
             Text(devtools.version),
           ],
