@@ -61,7 +61,7 @@ class CpuProfilerController {
 
     _processingNotifier.value = true;
 
-    const Duration processingTimeout = Duration(seconds: 5);
+    const Duration processingTimeout = Duration(minutes: 10);
     var cpuProfileData = baseStateCpuProfileData;
     try {
       _dataNotifier.value = null;
