@@ -61,28 +61,26 @@ class CpuProfilerController {
 
     _processingNotifier.value = true;
 
-    const Duration processingTimeout = Duration(minutes: 10);
     var cpuProfileData = baseStateCpuProfileData;
+
+    _dataNotifier.value = null;
+    // TODO(kenz): add a cancel button to the processing UI in case pulling a
+    // large payload from the vm service takes a long time.
+    cpuProfileData = await service.getCpuProfile(
+      startMicros: startMicros,
+      extentMicros: extentMicros,
+    );
+
     try {
-      _dataNotifier.value = null;
-      cpuProfileData = await (service.getCpuProfile(
-        startMicros: startMicros,
-        extentMicros: extentMicros,
-      )).timeout(processingTimeout);
-    } on TimeoutException catch (e) {
-      log(e.message, LogLevel.error);
-    } finally {
-      try {
-        await transformer.processData(cpuProfileData);
-        _dataNotifier.value = cpuProfileData;
-        _processingNotifier.value = false;
-      } on AssertionError catch (_) {
-        _dataNotifier.value = cpuProfileData;
-        _processingNotifier.value = false;
-        // Rethrow after setting notifiers so that cpu profile data is included
-        // in the timeline export.
-        rethrow;
-      }
+      await transformer.processData(cpuProfileData);
+      _dataNotifier.value = cpuProfileData;
+      _processingNotifier.value = false;
+    } on AssertionError catch (_) {
+      _dataNotifier.value = cpuProfileData;
+      _processingNotifier.value = false;
+      // Rethrow after setting notifiers so that cpu profile data is included
+      // in the timeline export.
+      rethrow;
     }
   }
 
