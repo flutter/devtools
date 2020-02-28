@@ -545,9 +545,20 @@ extension SafeAccess<T> on Iterable<T> {
 }
 
 class Range {
-  Range(this.begin, this.end) : assert(begin <= end);
+  const Range(this.begin, this.end) : assert(begin <= end);
 
   final double begin;
   final double end;
   double get size => end - begin;
+
+  @override
+  String toString() => 'Range($begin, $end)';
+
+  @override
+  bool operator ==(other) {
+    return begin == other.begin && end == other.end;
+  }
+
+  @override
+  int get hashCode => hashValues(begin, end);
 }

@@ -8,6 +8,7 @@ import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/ui/colors.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:devtools_testing/support/timeline_test_data.dart';
 import 'package:flutter/material.dart';
@@ -175,7 +176,15 @@ void main() {
       await tester.pumpWidget(Container(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: currentRow = row,
+          child: Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder: (context) {
+                  return currentRow = row;
+                },
+              ),
+            ],
+          ),
         ),
       ));
     }
@@ -427,16 +436,11 @@ void main() {
         chartStartInset: sideInset,
         chartWidth: 610.0,
       );
-      expect(paddedZoomedIntervals[0],
-          equals(const Rect.fromLTRB(0.0, 0.0, 70.0, rowHeight)));
-      expect(paddedZoomedIntervals[1],
-          equals(const Rect.fromLTRB(70.0, 0.0, 120.0, rowHeight)));
-      expect(paddedZoomedIntervals[2],
-          equals(const Rect.fromLTRB(120.0, 0.0, 180.0, rowHeight)));
-      expect(paddedZoomedIntervals[3],
-          equals(const Rect.fromLTRB(180.0, 0.0, 240.0, rowHeight)));
-      expect(paddedZoomedIntervals[4],
-          equals(const Rect.fromLTRB(240.0, 0.0, 610.0, rowHeight)));
+      expect(paddedZoomedIntervals[0], equals(const Range(0.0, 70.0)));
+      expect(paddedZoomedIntervals[1], equals(const Range(70.0, 120.0)));
+      expect(paddedZoomedIntervals[2], equals(const Range(120.0, 180.0)));
+      expect(paddedZoomedIntervals[3], equals(const Range(180.0, 240.0)));
+      expect(paddedZoomedIntervals[4], equals(const Range(240.0, 610.0)));
     });
 
     test(
@@ -448,14 +452,10 @@ void main() {
         chartStartInset: sideInset,
         chartWidth: 610.0,
       );
-      expect(paddedZoomedIntervals[0],
-          equals(const Rect.fromLTRB(0.0, 0.0, 120.0, rowHeight)));
-      expect(paddedZoomedIntervals[1],
-          equals(const Rect.fromLTRB(120.0, 0.0, 180.0, rowHeight)));
-      expect(paddedZoomedIntervals[2],
-          equals(const Rect.fromLTRB(180.0, 0.0, 240.0, rowHeight)));
-      expect(paddedZoomedIntervals[3],
-          equals(const Rect.fromLTRB(240.0, 0.0, 610.0, rowHeight)));
+      expect(paddedZoomedIntervals[0], equals(const Range(0.0, 120.0)));
+      expect(paddedZoomedIntervals[1], equals(const Range(120.0, 180.0)));
+      expect(paddedZoomedIntervals[2], equals(const Range(180.0, 240.0)));
+      expect(paddedZoomedIntervals[3], equals(const Range(240.0, 610.0)));
     });
 
     test(
@@ -466,16 +466,11 @@ void main() {
         chartStartInset: sideInset,
         chartWidth: 1080.0,
       );
-      expect(paddedZoomedIntervals[0],
-          equals(const Rect.fromLTRB(0.0, 0.0, 70.0, rowHeight)));
-      expect(paddedZoomedIntervals[1],
-          equals(const Rect.fromLTRB(70.0, 0.0, 170.0, rowHeight)));
-      expect(paddedZoomedIntervals[2],
-          equals(const Rect.fromLTRB(170.0, 0.0, 290.0, rowHeight)));
-      expect(paddedZoomedIntervals[3],
-          equals(const Rect.fromLTRB(290.0, 0.0, 410.0, rowHeight)));
-      expect(paddedZoomedIntervals[4],
-          equals(const Rect.fromLTRB(410.0, 0.0, 1080.0, rowHeight)));
+      expect(paddedZoomedIntervals[0], equals(const Range(0.0, 70.0)));
+      expect(paddedZoomedIntervals[1], equals(const Range(70.0, 170.0)));
+      expect(paddedZoomedIntervals[2], equals(const Range(170.0, 290.0)));
+      expect(paddedZoomedIntervals[3], equals(const Range(290.0, 410.0)));
+      expect(paddedZoomedIntervals[4], equals(const Range(410.0, 1080.0)));
     });
 
     test(
@@ -487,14 +482,10 @@ void main() {
         chartStartInset: sideInset,
         chartWidth: 1080.0,
       );
-      expect(paddedZoomedIntervals[0],
-          equals(const Rect.fromLTRB(0.0, 0.0, 170.0, rowHeight)));
-      expect(paddedZoomedIntervals[1],
-          equals(const Rect.fromLTRB(170.0, 0.0, 290.0, rowHeight)));
-      expect(paddedZoomedIntervals[2],
-          equals(const Rect.fromLTRB(290.0, 0.0, 410.0, rowHeight)));
-      expect(paddedZoomedIntervals[3],
-          equals(const Rect.fromLTRB(410.0, 0.0, 1080.0, rowHeight)));
+      expect(paddedZoomedIntervals[0], equals(const Range(0.0, 170.0)));
+      expect(paddedZoomedIntervals[1], equals(const Range(170.0, 290.0)));
+      expect(paddedZoomedIntervals[2], equals(const Range(290.0, 410.0)));
+      expect(paddedZoomedIntervals[3], equals(const Range(410.0, 1080.0)));
     });
   });
 
