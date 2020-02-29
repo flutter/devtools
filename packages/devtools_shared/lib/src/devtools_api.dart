@@ -20,8 +20,9 @@ const String apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
 const String devToolsEnabledPropertyName = 'enabled';
 
 /// Survey properties APIs:
-/// setActiveSurvey sets the survey property to fetch and save JSON values e.g., Q1-2020 
+/// setActiveSurvey sets the survey property to fetch and save JSON values e.g., Q1-2020
 const String apiSetActiveSurvey = '${apiPrefix}setActiveSurvey';
+
 /// Survey name passed in apiSetActiveSurvey, the activeSurveyName is the property name
 /// passed as a queryParameter and is the property in ~/.devtools too.
 const String activeSurveyName = 'activeSurveyName';
@@ -29,8 +30,9 @@ const String activeSurveyName = 'activeSurveyName';
 /// Returns the surveyActionTaken of the activeSurvey (apiSetActiveSurvey).
 const String apiGetSurveyActionTaken = '${apiPrefix}getSurveyActionTaken';
 
-/// Sets the surveyActionTaken of the of the activeSurvey (apiSetActiveSurvey). 
+/// Sets the surveyActionTaken of the of the activeSurvey (apiSetActiveSurvey).
 const String apiSetSurveyActionTaken = '${apiPrefix}setSurveyActionTaken';
+
 /// Property name to apiSetSurveyActionTaken the surveyActionTaken is the name
 /// passed in queryParameter:
 const String surveyActionTakenPropertyName = 'surveyActionTaken';
@@ -38,6 +40,6 @@ const String surveyActionTakenPropertyName = 'surveyActionTaken';
 /// Returns the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey).
 const String apiGetSurveyShownCount = '${apiPrefix}getSurveyShownCount';
 
-/// Increments the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey). 
+/// Increments the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey).
 const String apiIncrementSurveyShownCount =
     '${apiPrefix}incrementSurveyShownCount';
