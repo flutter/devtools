@@ -25,7 +25,6 @@ dependencies:
   #   path: ../../third_party/packages/ansi_up
   codemirror: ^0.5.10
   collection: ^1.14.11
-  devtools_server: ^0.1.15
   devtools_shared: ^0.2.2
   file: ^5.1.0
   http: ^0.12.0+1
@@ -64,8 +63,6 @@ dependencies:
     sdk: flutter
 
 dependency_overrides:
-  devtools_server:
-    path: ../devtools_server
   devtools_shared:
     path: ../devtools_shared
   # The text "#OVERRIDE_FOR_TESTS" is stripped out for some CI bots so that the
