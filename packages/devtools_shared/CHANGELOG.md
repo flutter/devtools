@@ -1,5 +1,5 @@
-## 0.1.16
-- Rev version number for coordinated release with DevTools 0.1.16.
+## 0.2.3
+- Coordinated release with DevTools 0.2.3.
 ## 0.2.2
 - Simplified devtools_api.dart.
 ## 0.2.1

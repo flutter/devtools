@@ -1,5 +1,5 @@
-## 0.1.16
-- Rev version number for coordinated release with DevTools 0.1.16.
+## 0.2.3
+- Coordinated release with DevTools 0.2.3.
 
 ## 0.1.15
 - Added new setActiveSurvey requests.  Set will create the survey e.g., Q1-2020 and subsequent surveys will perform on the current activeSurvey.

@@ -1,4 +1,4 @@
-## 0.1.16 2020-02-28
+## 0.2.3 2020-02-28
 * Remove cpu profiling timeout [#1683]((https://github.com/flutter/devtools/pull/1683)
 * Prep for Q1 DevTools survey [#1574](https://github.com/flutter/devtools/pull/1574)
 * Use ExtentDelegateListView for flame chart rows [#1676](https://github.com/flutter/devtools/pull/1676)
