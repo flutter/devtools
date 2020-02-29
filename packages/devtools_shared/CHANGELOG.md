@@ -1,5 +1,5 @@
-## 0.2.3
-- Coordinated release with DevTools 0.2.3.
+## 0.2.2
+- Coordinated release with DevTools 0.2.2.
 ## 0.2.2
 - Simplified devtools_api.dart.
 ## 0.2.1

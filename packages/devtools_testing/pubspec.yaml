@@ -3,9 +3,9 @@ version: 3.0.0
 environment:
   sdk: '>=2.3.0 <3.0.0'
 dependencies:
-  devtools_app: ^0.1.15
-  devtools_server: ^0.1.14
-  devtools_shared: ^0.2.0
+  devtools_app: ^0.2.2
+  devtools_server: ^0.2.2
+  devtools_shared: ^0.2.2
   meta: ^1.1.0
   package_resolver: ^1.0.0
   test: ^1.0.0
