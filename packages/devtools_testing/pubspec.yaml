@@ -1,14 +1,24 @@
 name: devtools_testing
-version: 3.0.0
+description: Package of shared testing code for Dart DevTools.
+version: 0.2.2
+
+homepage: https://github.com/flutter/devtools
+
 environment:
   sdk: '>=2.3.0 <3.0.0'
+
 dependencies:
-  devtools_app: ^0.2.2
-  devtools_server: ^0.2.2
+  devtools_app: ^0.1.15
   devtools_shared: ^0.2.2
+  flutter_test:
+    sdk: flutter
+  matcher: ^0.12.3
   meta: ^1.1.0
   package_resolver: ^1.0.0
+  pedantic: ^1.7.0
   test: ^1.0.0
+  vm_service: ^2.3.1
+
 dependency_overrides:
   devtools_app:
     path: ../devtools_app
@@ -16,7 +26,4 @@ dependency_overrides:
     path: ../devtools_server
   devtools_shared:
     path: ../devtools_shared
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
 
