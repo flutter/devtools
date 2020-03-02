@@ -1,3 +1,6 @@
+## 0.2.3 2020-03-02
+* Disable Q1 DevTools survey - postponing until Q2.
+
 ## 0.2.2 2020-02-28
 * Remove cpu profiling timeout [#1683]((https://github.com/flutter/devtools/pull/1683)
 * Prep for Q1 DevTools survey [#1574](https://github.com/flutter/devtools/pull/1574)
