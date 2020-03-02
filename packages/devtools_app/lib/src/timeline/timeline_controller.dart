@@ -6,6 +6,7 @@ import 'dart:async';
 import '../auto_dispose.dart';
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
+import '../http/http_service.dart';
 import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../service_manager.dart';
@@ -40,6 +41,11 @@ class TimelineController implements DisposableController {
   ValueListenable get selectedTimelineEventNotifier =>
       _selectedTimelineEventNotifier;
   final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent>(null);
+
+  /// Notifies that the http timeline logging has been toggled
+  ValueListenable get httpTimelineLoggingNotifier =>
+      _httpTimelineLoggingNotifier;
+  final _httpTimelineLoggingNotifier = ValueNotifier<bool>(false);
 
   /// Stream controller that notifies that offline data was loaded into the
   /// timeline.
@@ -246,6 +252,11 @@ class TimelineController implements DisposableController {
   Future<void> _offlineModeChanged() async {
     await clearData();
     await timelineService.updateListeningState(true);
+  }
+
+  Future<void> toggleHttpRequestLogging(bool state) async {
+    await HttpService.toggleHttpRequestLogging(state);
+    _httpTimelineLoggingNotifier.value = state;
   }
 
   Future<void> exitOfflineMode() async {

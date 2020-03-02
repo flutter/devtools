@@ -254,10 +254,14 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: ProfileGranularityDropdown(),
         ),
+        // TODO(kenz): don't show these buttons if connected to a Dart VM app.
         ServiceExtensionButtonGroup(
           minIncludeTextWidth: 1300,
           extensions: [performanceOverlay, profileWidgetBuilds],
         ),
+        // TODO(kenz): hide or disable button if http timeline logging is not
+        // available.
+        _trackHttpButton(),
         const SizedBox(width: 8.0),
         OutlineButton(
           onPressed: _exportTimeline,
@@ -268,6 +272,29 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _trackHttpButton() {
+    return ValueListenableBuilder(
+      valueListenable: controller.httpTimelineLoggingNotifier,
+      builder: (context, enabled, _) {
+        return ToggleButtons(
+          constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+          children: [
+            devToolsToggleButton(
+              icon: Icons.language,
+              text: 'Track HTTP',
+              enabledTooltip: 'Disable HTTP timeline logging',
+              disabledTooltip: 'Enable HTTP timeline logging',
+              minIncludeTextWidth: 1200.0,
+              selected: enabled,
+            ),
+          ],
+          isSelected: [enabled],
+          onPressed: (_) => controller.toggleHttpRequestLogging(!enabled),
+        );
+      },
     );
   }
 

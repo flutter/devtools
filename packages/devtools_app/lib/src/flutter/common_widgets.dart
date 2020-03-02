@@ -356,6 +356,30 @@ Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
   );
 }
 
+/// Toggle button for use as a child of a [ToggleButtons] widget.
+Widget devToolsToggleButton({
+  @required IconData icon,
+  @required String text,
+  @required String enabledTooltip,
+  @required String disabledTooltip,
+  @required double minIncludeTextWidth,
+  @required bool selected,
+}) {
+  return Tooltip(
+    message: selected ? enabledTooltip : disabledTooltip,
+    waitDuration: tooltipWait,
+    preferBelow: false,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: MaterialIconLabel(
+        icon,
+        text,
+        minIncludeTextWidth: minIncludeTextWidth,
+      ),
+    ),
+  );
+}
+
 class OutlinedBorder extends StatelessWidget {
   const OutlinedBorder({Key key, this.child}) : super(key: key);
   final Widget child;

@@ -536,9 +536,7 @@ class ServiceExtensionManager {
             didSendFirstFrameEvent = value?.json['enabled'] == 'true';
           } else {
             final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
-              [
-                'package:flutter/src/widgets/binding.dart',
-              ],
+              ['package:flutter/src/widgets/binding.dart'],
               _service,
             );
             final InstanceRef value = await flutterLibrary.eval(
@@ -546,8 +544,7 @@ class ServiceExtensionManager {
               isAlive: null,
             );
 
-            didSendFirstFrameEvent =
-                value != null && value.valueAsString == 'true';
+            didSendFirstFrameEvent = value?.valueAsString == 'true';
           }
 
           if (didSendFirstFrameEvent) {
