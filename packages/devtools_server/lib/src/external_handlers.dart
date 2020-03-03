@@ -17,9 +17,9 @@ import 'package:sse/server/sse_handler.dart';
 import 'client_manager.dart';
 import 'usage.dart';
 
-// DO NOT IMPORT THIS FILE into any other files. This file is overwritten
-// for internal DevTools builds, so any file depending on
-// `external_handlers.dart` would break internally.
+// DO NOT IMPORT THIS FILE into any files other than `devtools_server.dart`.
+// This file is overwritten for internal DevTools builds, so any file depending
+// on `external_handlers.dart` would break internally.
 
 /// Default [shelf.Handler] for serving DevTools files.
 ///
