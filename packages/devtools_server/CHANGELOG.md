@@ -1,8 +1,8 @@
 ## 0.2.3
-- Coordinated release with DevTools 0.2.3.
+- Updated package:vm_service to >= 3.0.0
 
 ## 0.2.2
-- Coordinated release with DevTools 0.2.2.
+- Coordinated release with DevTools 0.2.2
 
 ## 0.1.15
 - Added new setActiveSurvey requests.  Set will create the survey e.g., Q1-2020 and subsequent surveys will perform on the current activeSurvey.
