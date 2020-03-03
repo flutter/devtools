@@ -141,9 +141,9 @@ class _VersionInformation extends StatelessWidget {
           ],
         ),
         Row(
-          children: [
-            const Text('DevTools:', style: boldText),
-            const SizedBox(width: contentPadding),
+          children: const [
+            Text('DevTools:', style: boldText),
+            SizedBox(width: contentPadding),
             Text(devtools.version),
           ],
         ),
