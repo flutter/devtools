@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:html_shim/html.dart' as html;
+import 'dart:html' as html;
 
 import 'ui/html_custom.dart';
 import 'ui/html_elements.dart';
