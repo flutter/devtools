@@ -1,5 +1,6 @@
 ## 0.2.3
 - Updated package:vm_service to >= 3.0.0
+- Move shared code out of handlers.dart and rename to `external_handlers.dart`
 
 ## 0.2.2
 - Coordinated release with DevTools 0.2.2
