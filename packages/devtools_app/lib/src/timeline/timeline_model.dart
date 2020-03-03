@@ -997,7 +997,7 @@ class AsyncTimelineEvent extends TimelineEvent {
         math.min(event.displayDepth, currentLargestRowIndex - displayRow);
     for (int level = 0; level < maxLevelToVerify; level++) {
       final lastEventAtLevel = _displayRows[displayRow + level].safeLast;
-      final firstNewEventAtLevel = event.firstChildNodeAtLevel(level);
+      final firstNewEventAtLevel = event.displayRows[level].safeFirst;
       if (lastEventAtLevel != null && firstNewEventAtLevel != null) {
         // Events overlap one another, so [event] does not fit at [displayRow].
         if (lastEventAtLevel.time.overlaps(firstNewEventAtLevel.time)) {
