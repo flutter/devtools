@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,10 +6,14 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as _path;
 
-import 'file_io.dart';
+import 'file.dart';
+
+FileSystemDesktop createFileSystem() {
+  return FileSystemDesktop();
+}
 
 /// Abstracted local file system access for Flutter Desktop.
-class FileSystem implements FileIO {
+class FileSystemDesktop implements FileIO {
   final _fs = const LocalFileSystem();
 
   Directory exportDirectory() {

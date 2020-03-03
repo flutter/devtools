@@ -1051,7 +1051,7 @@ class MemoryLog {
   MemoryLog(this.controller);
 
   /// Use in memory or local file system based on Flutter Web/Desktop.
-  static final _fs = FileSystem();
+  static final _fs = FileIO();
 
   MemoryController controller;
 
