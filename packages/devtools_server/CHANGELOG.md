@@ -1,5 +1,9 @@
+## 0.1.16
+- Updated package:vm_service to >= 3.0.0
+
 ## 0.1.15
 - Added new setActiveSurvey requests.  Set will create the survey e.g., Q1-2020 and subsequent surveys will perform on the current activeSurvey.
+
 ## 0.1.14
 - Added CLI support to collect memory profile statistics to collect run run:</br>
 `dart ../devtools/bin/devtools.dart --vm-uri `**VM_Auth_URI**` --profile-memory `**FileName**` --verbose`</br></br>

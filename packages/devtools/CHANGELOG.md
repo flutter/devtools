@@ -1,3 +1,6 @@
+## 0.1.16 2020-03-03
+* Update package:vm_service dependency to ^3.0.0.
+
 ## 0.1.15 2020-02-07
 * Fix a stack overflow error that was caused by a change in Dart's RTI implementation [#1615](https://github.com/flutter/devtools/pull/1615).
 * Hide annotations that Flutter re-exports [#1606](https://github.com/flutter/devtools/pull/1606)
