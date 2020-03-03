@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../ui/flutter/label.dart';
-import 'flutter_widgets/tagged_text.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 
@@ -32,83 +31,6 @@ class PaddedDivider extends StatelessWidget {
     return Padding(
       padding: padding,
       child: const Divider(thickness: 1.0),
-    );
-  }
-}
-
-/// A [TaggedText] with builtin DevTools-specific text styling.
-///
-/// This widget is a wrapper around Flutter's [RichText]. It's an alternative
-/// to that for richly-formatted text. The performance is roughly the same,
-/// and it will throw assertion errors in any cases where the text isn't
-/// parsed properly.
-///
-/// The xml styling is much easier to read than creating multiple [TextSpan]s
-/// in a [RichText].  For example, the following are equivalent text
-/// presentations:
-///
-/// ```dart
-/// var taggedText = DefaultTaggedText(
-///   '<bold>bold text</bold>\n'
-///   'normal text',
-/// );
-///
-/// var richText = RichText(
-///   style
-///   text: TextSpan(
-///     text: '',
-///     style: DefaultTextStyle.of(context)
-///     children: [
-///       TextSpan(
-///         text: 'bold text',
-///         style: DefaultTextStyle.of(context).copyWith(fontWeight: FontWeight.w600),
-///       ),
-///       TextSpan(
-///         text: '\nnormal text',
-///       )
-///     ],
-///   ),
-/// );
-/// ```
-///
-/// The [TaggedText] abstraction separates the styling from the content
-/// of the rich strings we show in the UI.
-///
-/// The [TaggedText] also has the benefit of being localizable by a
-/// human translator. The content is passed in to Flutter as a single
-/// string, and the xml markup is understood by many translators.
-class DefaultTaggedText extends StatelessWidget {
-  const DefaultTaggedText(
-    this.content, {
-    this.textAlign = TextAlign.start,
-    Key key,
-  }) : super(key: key);
-
-  /// The XML-markup string to show.
-  final String content;
-
-  /// See [TaggedText.textAlign].
-  final TextAlign textAlign;
-
-  @override
-  Widget build(BuildContext context) {
-    final defaultTextStyle = DefaultTextStyle.of(context).style;
-    final _tagToTextSpanBuilder = {
-      'bold': (text) => TextSpan(
-            text: text,
-            style: semibold(defaultTextStyle),
-          ),
-      'primary-color': (text) =>
-          TextSpan(text: text, style: primaryColor(defaultTextStyle, context)),
-      'primary-color-light': (text) => TextSpan(
-          text: text, style: primaryColorLight(defaultTextStyle, context)),
-    };
-    return TaggedText(
-      content: content,
-      tagToTextSpanBuilder: _tagToTextSpanBuilder,
-      overflow: TextOverflow.visible,
-      textAlign: textAlign,
-      style: defaultTextStyle,
     );
   }
 }
