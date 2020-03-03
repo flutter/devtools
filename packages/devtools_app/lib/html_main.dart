@@ -65,27 +65,6 @@ void main() {
         return;
       }
 
-      // Show the quarterly DevTools survey if the current date falls in range.
-      final surveyStartDate = DateTime(2020, 3, 11);
-      final surveyEndDate = DateTime(2020, 4, 10);
-      final now = DateTime.now();
-      const surveyActive = false;
-      if (surveyActive &&
-          now.isAfter(surveyStartDate) &&
-          now.isBefore(surveyEndDate)) {
-        final activeSurveySet = await ga.setActiveSurvey('Q1-2020');
-        if (activeSurveySet) {
-          // Do not show the survey if the user has either taken or dismissed it.
-          if (!await ga.isSurveyActionTaken) {
-            // Stop showing the survey toast after 5 times without action.
-            if (await ga.surveyShownCount < 5) {
-              framework.surveyToast(await _generateSurveyUrl());
-              await ga.incrementSurveyShownCount;
-            }
-          }
-        }
-      }
-
       unawaited(FrameworkCore.initVmService(
         window.location.toString(),
         errorReporter: (String title, dynamic error) {
@@ -108,34 +87,6 @@ void main() {
       handleUncaughtError: _handleUncaughtError,
     ),
   );
-}
-
-Future<String> _generateSurveyUrl() async {
-  const clientIdKey = 'ClientId';
-  const ideKey = 'IDE';
-  const fromKey = 'From';
-  const internalKey = 'Internal';
-
-  final uri = Uri.parse(window.location.toString());
-  final ideValue = uri.queryParameters[ga.ideLaunchedQuery] ?? 'CLI';
-  final fromValue = uri.fragment ?? '';
-  final clientId = await ga.flutterGAClientID();
-
-  // TODO(djshuckerow): override this value for internal users.
-  const internalValue = 'false';
-
-  final surveyUri = Uri(
-    scheme: 'https',
-    host: 'google.qualtrics.com',
-    path: 'jfe/form/SV_9XDmbo8lhv0VaUl',
-    queryParameters: {
-      clientIdKey: clientId,
-      ideKey: ideValue,
-      fromKey: fromValue,
-      internalKey: internalValue,
-    },
-  );
-  return surveyUri.toString();
 }
 
 void _handleUncaughtError(
