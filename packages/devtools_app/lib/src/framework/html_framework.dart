@@ -74,8 +74,6 @@ class HtmlFramework {
 
   HtmlAnalyticsOptInDialog analyticsDialog;
 
-  HtmlSurveyToast devToolsSurvey;
-
   Stream<String> get onPageChange => _pageChangeController.stream;
   final _pageChangeController = StreamController<String>.broadcast();
 
@@ -355,22 +353,6 @@ class HtmlFramework {
     auxiliaryStatus.defaultStatus = screen._helpStatus;
 
     updatePage();
-    _updateSurveyUrlForCurrentScreen();
-  }
-
-  void _updateSurveyUrlForCurrentScreen() {
-    if (devToolsSurvey == null) return;
-    assert(current != null);
-
-    final oldUri = Uri.parse(devToolsSurvey.url);
-    final newUri = Uri(
-      scheme: oldUri.scheme,
-      host: oldUri.host,
-      path: oldUri.path,
-      queryParameters: Map.from(oldUri.queryParameters)
-        ..['From'] = current?.id ?? '',
-    );
-    devToolsSurvey.url = newUri.toString();
   }
 
   void updatePage() {
@@ -408,15 +390,6 @@ class HtmlFramework {
 
   void clearMessages() {
     messageManager.removeAll();
-  }
-
-  void surveyToast(String url) {
-    devToolsSurvey = HtmlSurveyToast(url);
-    final CoreElement toastContainer =
-        CoreElement.from(queryId('toast-container'))
-          ..clazz('survey-toast-container');
-    toastContainer.add(devToolsSurvey);
-    devToolsSurvey.show();
   }
 
   void toast(

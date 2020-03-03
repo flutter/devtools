@@ -20,8 +20,9 @@ import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart' hide Isolate;
 
 import 'client_manager.dart';
-import 'handlers.dart';
+import 'external_handlers.dart';
 import 'memory_profile.dart';
+import 'usage.dart';
 
 const protocolVersion = '1.1.0';
 const argHelp = 'help';
