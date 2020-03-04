@@ -9,7 +9,7 @@
 /// canvas.
 library inspector_tree_html;
 
-import 'package:html_shim/html.dart';
+import 'dart:html' hide VoidCallback;
 import 'package:meta/meta.dart';
 
 import '../config_specific/logger/logger.dart';

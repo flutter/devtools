@@ -9,7 +9,7 @@ import 'service_extensions.dart' as extensions;
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
-const dartHtmlLibraryUri = 'package:html_shim/html.dart';
+const dartHtmlLibraryUri = 'dart:html';
 
 class ConnectedApp {
   ConnectedApp();

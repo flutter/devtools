@@ -4,6 +4,7 @@
 
 // This code imports dart:ui, but it uses API calls
 // that are only available in the web implementation of dart:ui.
+import 'dart:html' as html;
 import 'dart:ui' as dart_ui_web;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -11,7 +12,6 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 // TODO(https://github.com/flutter/devtools/issues/1258): switch to dart:html
 // when turning down html_shim.
 // This is web plugin code may only be compiled into the web app.
-import 'package:html_shim/html.dart' as html;
 
 import 'src/debugger/html_debugger_screen.dart';
 import 'src/framework/framework_core.dart';

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 import 'dart:convert';
 
-import 'package:html_shim/html.dart' as html;
+import 'dart:html' as html;
 
 import '../globals.dart';
 import '../profiler/html_cpu_profile_flame_chart.dart';

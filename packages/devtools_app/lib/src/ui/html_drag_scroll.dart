@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:html_shim/html.dart';
+import 'dart:html' hide VoidCallback;
 
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/html_elements.dart';
