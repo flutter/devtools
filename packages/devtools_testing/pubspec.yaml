@@ -16,7 +16,7 @@ dependencies:
   meta: ^1.1.0
   package_resolver: ^1.0.0
   pedantic: ^1.7.0
-  test: any
+  test: any # This version is pinned by Flutter so we don't need to set one explicitly.
   vm_service: ^3.0.0
 
 dependency_overrides:

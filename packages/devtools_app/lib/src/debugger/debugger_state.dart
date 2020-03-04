@@ -84,11 +84,11 @@ class DebuggerState {
     }
   }
 
-  Future<dynamic> pause() => _service.pause(isolateRef.id);
+  Future pause() => _service.pause(isolateRef.id);
 
-  Future<dynamic> resume() => _service.resume(isolateRef.id);
+  Future resume() => _service.resume(isolateRef.id);
 
-  Future<dynamic> stepOver() {
+  Future stepOver() {
     ga.select(ga.debugger, ga.stepOver);
 
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
@@ -99,13 +99,13 @@ class DebuggerState {
             : StepOption.kOver);
   }
 
-  Future<dynamic> stepIn() {
+  Future stepIn() {
     ga.select(ga.debugger, ga.stepIn);
 
     return _service.resume(isolateRef.id, step: StepOption.kInto);
   }
 
-  Future<dynamic> stepOut() {
+  Future stepOut() {
     ga.select(ga.debugger, ga.stepOut);
 
     return _service.resume(isolateRef.id, step: StepOption.kOut);
@@ -118,11 +118,11 @@ class DebuggerState {
     });
   }
 
-  Future<dynamic> addBreakpoint(String scriptId, int line) {
+  Future addBreakpoint(String scriptId, int line) {
     return _service.addBreakpoint(isolateRef.id, scriptId, line);
   }
 
-  Future<dynamic> addBreakpointByPathFragment(String path, int line) async {
+  Future addBreakpointByPathFragment(String path, int line) async {
     final ScriptRef ref =
         scripts.firstWhere((ref) => ref.uri.endsWith(path), orElse: () => null);
     if (ref != null) {
@@ -130,16 +130,18 @@ class DebuggerState {
     }
   }
 
-  Future<dynamic> removeBreakpoint(Breakpoint breakpoint) {
+  Future removeBreakpoint(Breakpoint breakpoint) {
     return _service.removeBreakpoint(isolateRef.id, breakpoint.id);
   }
 
-  Future<dynamic> setExceptionPauseMode(String mode) {
+  Future setExceptionPauseMode(String mode) {
     return _service.setExceptionPauseMode(isolateRef.id, mode);
   }
 
-  Future<dynamic> getStack() {
-    return _service.getStack(isolateRef.id);
+  Future<Stack> getStack() {
+    final stack = _service.getStack(isolateRef.id);
+    if (stack is Sentinel) return null;
+    return stack;
   }
 
   InstanceRef get reportedException => _reportedException;

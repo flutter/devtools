@@ -116,7 +116,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<dynamic> clearCpuSamples(String isolateId) async {
+  Future clearCpuSamples(String isolateId) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 27))) {
       return _trackFuture(
