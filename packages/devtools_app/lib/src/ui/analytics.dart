@@ -8,9 +8,9 @@ library gtags;
 // ignore_for_file: non_constant_identifier_names
 
 import 'dart:convert';
+import 'dart:html';
 
 import 'package:devtools_shared/devtools_shared.dart' as server;
-import 'package:html_shim/html.dart';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
