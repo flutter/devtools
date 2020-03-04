@@ -138,8 +138,8 @@ class DebuggerState {
     return _service.setExceptionPauseMode(isolateRef.id, mode);
   }
 
-  Future<Stack> getStack() {
-    final stack = _service.getStack(isolateRef.id);
+  Future<Stack> getStack() async {
+    final stack = await _service.getStack(isolateRef.id);
     if (stack is Sentinel) return null;
     return stack;
   }
