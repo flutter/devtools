@@ -4,5 +4,6 @@
 
 /// Return the url the application is launched from.
 String initializePlatform() {
-  throw UnimplementedError('Unsupported platfrom');
+  throw UnimplementedError(
+      'Attempting to initialize framework for unrecognized platform');
 }
