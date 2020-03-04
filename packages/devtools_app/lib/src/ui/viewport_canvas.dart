@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:html_shim/html.dart';
+import 'dart:html' hide VoidCallback;
+
 import 'package:meta/meta.dart';
 
 import '../framework/html_framework.dart';

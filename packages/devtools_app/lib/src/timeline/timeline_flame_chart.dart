@@ -1,10 +1,10 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:html';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
-import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
 import '../charts/flame_chart_canvas.dart';

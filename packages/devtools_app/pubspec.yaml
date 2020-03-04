@@ -28,8 +28,6 @@ dependencies:
   devtools_shared: ^0.2.2
   file: ^5.1.0
   http: ^0.12.0+1
-  html_shim: ^0.0.2
-  #    path: ../html_shim
   intl: ^0.16.0
   js: ^0.6.1+1
   meta: ^1.1.0
@@ -58,8 +56,6 @@ dependencies:
   web_socket_channel:
     ^1.1.0
   flutter:
-    sdk: flutter
-  flutter_web_plugins:
     sdk: flutter
 
 dev_dependencies:
@@ -124,11 +120,6 @@ flutter:
     - family: Octicons
       fonts:
         - asset: fonts/Octicons.ttf
-  plugin:
-    platforms:
-      web:
-        pluginClass: DebuggerHtmlPlugin
-        fileName: debugger_html_plugin.dart
 
 dependency_overrides:
   devtools_shared:

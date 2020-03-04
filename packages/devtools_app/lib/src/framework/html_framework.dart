@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:html_shim/html.dart' hide Screen;
+import 'dart:html' hide Screen;
 import 'package:meta/meta.dart';
 
 import '../globals.dart';

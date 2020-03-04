@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:html_shim/js_util.dart';
+import 'dart:js_util';
 import 'package:plotly_js/plotly.dart' hide Title, RangeSlider;
 import 'package:plotly_js/plotly.dart' as plotly;
 

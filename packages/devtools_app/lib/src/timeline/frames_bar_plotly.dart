@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // TODO(jacobr): remove all uses of JS interop from package:devtools_app
-import 'package:html_shim/js_util.dart';
+import 'dart:js_util';
 import 'package:plotly_js/plotly.dart' hide Title, RangeSlider;
 import 'package:plotly_js/plotly.dart' as plotly;
 

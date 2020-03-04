@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:html_shim/html.dart';
+import 'dart:html';
 import 'package:pedantic/pedantic.dart';
 import 'package:platform_detect/platform_detect.dart';
 
