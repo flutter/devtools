@@ -377,7 +377,7 @@ class MemoryController extends DisposableController
   List<String> sortLibrariesByNormalizedNames() =>
       libraryCollection.librarires.keys.toList()..sort();
 
-  Future<dynamic> getObject(String objectRef) async =>
+  Future getObject(String objectRef) async =>
       await serviceManager.service.getObject(
         _isolateId,
         objectRef,

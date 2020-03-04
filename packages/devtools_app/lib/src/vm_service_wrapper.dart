@@ -151,7 +151,7 @@ class VmServiceWrapper implements VmService {
   void dispose() => _vmService.dispose();
 
   @override
-  Future<dynamic> evaluate(
+  Future evaluate(
     String isolateId,
     String targetId,
     String expression, {
@@ -170,7 +170,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<dynamic> evaluateInFrame(
+  Future evaluateInFrame(
     String isolateId,
     int frameIndex,
     String expression, {
@@ -342,24 +342,24 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<dynamic> getIsolate(String isolateId) {
+  Future getIsolate(String isolateId) {
     return _trackFuture('getIsolate', _vmService.getIsolate(isolateId));
   }
 
   @override
-  Future<dynamic> getIsolateGroup(String isolateGroupId) {
+  Future getIsolateGroup(String isolateGroupId) {
     return _trackFuture(
         'getIsolateGroup', _vmService.getIsolateGroup(isolateGroupId));
   }
 
   @override
-  Future<dynamic> getIsolateGroupMemoryUsage(String isolateGroupId) {
+  Future getIsolateGroupMemoryUsage(String isolateGroupId) {
     return _trackFuture('getIsolateGroupMemoryUsage',
         _vmService.getIsolateGroupMemoryUsage(isolateGroupId));
   }
 
   @override
-  Future<dynamic> getObject(
+  Future getObject(
     String isolateId,
     String objectId, {
     int offset,
@@ -475,7 +475,7 @@ class VmServiceWrapper implements VmService {
       _trackFuture('getMemoryUsage', _vmService.getMemoryUsage(isolateId));
 
   @override
-  Future<dynamic> invoke(
+  Future invoke(
     String isolateId,
     String targetId,
     String selector,
@@ -685,7 +685,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<dynamic> getInboundReferences(
+  Future getInboundReferences(
     String isolateId,
     String targetId,
     int limit,
