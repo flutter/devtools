@@ -84,11 +84,11 @@ class DebuggerState {
     }
   }
 
-  Future<Success> pause() => _service.pause(isolateRef.id);
+  Future<dynamic> pause() => _service.pause(isolateRef.id);
 
-  Future<Success> resume() => _service.resume(isolateRef.id);
+  Future<dynamic> resume() => _service.resume(isolateRef.id);
 
-  Future<Success> stepOver() {
+  Future<dynamic> stepOver() {
     ga.select(ga.debugger, ga.stepOver);
 
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
@@ -99,13 +99,13 @@ class DebuggerState {
             : StepOption.kOver);
   }
 
-  Future<Success> stepIn() {
+  Future<dynamic> stepIn() {
     ga.select(ga.debugger, ga.stepIn);
 
     return _service.resume(isolateRef.id, step: StepOption.kInto);
   }
 
-  Future<Success> stepOut() {
+  Future<dynamic> stepOut() {
     ga.select(ga.debugger, ga.stepOut);
 
     return _service.resume(isolateRef.id, step: StepOption.kOut);
@@ -118,11 +118,11 @@ class DebuggerState {
     });
   }
 
-  Future<void> addBreakpoint(String scriptId, int line) {
+  Future<dynamic> addBreakpoint(String scriptId, int line) {
     return _service.addBreakpoint(isolateRef.id, scriptId, line);
   }
 
-  Future<void> addBreakpointByPathFragment(String path, int line) async {
+  Future<dynamic> addBreakpointByPathFragment(String path, int line) async {
     final ScriptRef ref =
         scripts.firstWhere((ref) => ref.uri.endsWith(path), orElse: () => null);
     if (ref != null) {
@@ -130,15 +130,15 @@ class DebuggerState {
     }
   }
 
-  Future<void> removeBreakpoint(Breakpoint breakpoint) {
+  Future<dynamic> removeBreakpoint(Breakpoint breakpoint) {
     return _service.removeBreakpoint(isolateRef.id, breakpoint.id);
   }
 
-  Future<void> setExceptionPauseMode(String mode) {
+  Future<dynamic> setExceptionPauseMode(String mode) {
     return _service.setExceptionPauseMode(isolateRef.id, mode);
   }
 
-  Future<Stack> getStack() {
+  Future<dynamic> getStack() {
     return _service.getStack(isolateRef.id);
   }
 

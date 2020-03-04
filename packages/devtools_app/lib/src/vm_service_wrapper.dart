@@ -439,7 +439,7 @@ class VmServiceWrapper implements VmService {
         _vmService.getHttpEnableTimelineLogging(isolateId));
   }
 
-  Future<Success> setHttpEnableTimelineLogging(
+  Future<dynamic> setHttpEnableTimelineLogging(
     String isolateId,
     bool enable,
   ) async {
@@ -549,7 +549,7 @@ class VmServiceWrapper implements VmService {
   Stream<Event> get onHeapSnapshotEvent => _vmService.onHeapSnapshotEvent;
 
   @override
-  Future<Success> pause(String isolateId) {
+  Future<dynamic> pause(String isolateId) {
     return _trackFuture('pause', _vmService.pause(isolateId));
   }
 
