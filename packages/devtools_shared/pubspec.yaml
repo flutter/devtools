@@ -1,7 +1,7 @@
 name: devtools_shared
 description: Package of shared structures between devtools_app and devtools_server.
 
-version: 0.2.2
+version: 0.2.3
 
 author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools

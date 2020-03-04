@@ -310,12 +310,13 @@ class MemoryController extends DisposableController
   // 'reset': true to reset the object allocation accumulators
   Future<List<ClassHeapDetailStats>> getAllocationProfile(
       {bool reset = false}) async {
-    final AllocationProfile allocationProfile =
-        await serviceManager.service.getAllocationProfile(
+    final allocationProfile = await serviceManager.service.getAllocationProfile(
       _isolateId,
       reset: reset,
     );
-    return allocationProfile.members
+    if (allocationProfile is Sentinel) return [];
+    return (allocationProfile as AllocationProfile)
+        .members
         .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
         .where((ClassHeapDetailStats stats) {
       return stats.instancesCurrent > 0 || stats.instancesAccumulated > 0;
@@ -335,14 +336,15 @@ class MemoryController extends DisposableController
       String classRef, String className, int maxInstances) async {
     // TODO(terry): Expose as a stream to reduce stall when querying for 1000s
     // TODO(terry): of instances.
-    final InstanceSet instanceSet = await serviceManager.service.getInstances(
+    final instanceSet = await serviceManager.service.getInstances(
       _isolateId,
       classRef,
       maxInstances,
       classId: classRef,
     );
-
-    return instanceSet.instances
+    if (instanceSet is Sentinel) return [];
+    return (instanceSet as InstanceSet)
+        .instances
         .map((ObjRef ref) => InstanceSummary(classRef, className, ref.id))
         .toList();
   }

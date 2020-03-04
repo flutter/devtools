@@ -1,3 +1,8 @@
+## 0.2.3 2020-03-03
+* Disable Q1 DevTools survey - postponing until Q2 [#1695](https://github.com/flutter/devtools/pull/1695)
+* Fix async timeline event rendering bug [#1690](https://github.com/flutter/devtools/pull/1690)
+* Update package:vm_service dependency to ^3.0.0 [#1696](https://github.com/flutter/devtools/pull/1696)
+
 ## 0.2.2 2020-02-28
 * Remove cpu profiling timeout [#1683]((https://github.com/flutter/devtools/pull/1683)
 * Prep for Q1 DevTools survey [#1574](https://github.com/flutter/devtools/pull/1574)

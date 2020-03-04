@@ -61,7 +61,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Breakpoint> addBreakpoint(
+  Future<dynamic> addBreakpoint(
     String isolateId,
     String scriptId,
     int line, {
@@ -72,13 +72,13 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Breakpoint> addBreakpointAtEntry(String isolateId, String functionId) {
+  Future<dynamic> addBreakpointAtEntry(String isolateId, String functionId) {
     return _trackFuture('addBreakpointAtEntry',
         _vmService.addBreakpointAtEntry(isolateId, functionId));
   }
 
   @override
-  Future<Breakpoint> addBreakpointWithScriptUri(
+  Future<dynamic> addBreakpointWithScriptUri(
     String isolateId,
     String scriptUri,
     int line, {
@@ -116,7 +116,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> clearCpuSamples(String isolateId) async {
+  Future clearCpuSamples(String isolateId) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 27))) {
       return _trackFuture(
@@ -189,7 +189,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<AllocationProfile> getAllocationProfile(
+  Future<dynamic> getAllocationProfile(
     String isolateId, {
     bool reset,
     bool gc,
@@ -217,7 +217,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<CpuSamples> getCpuSamples(
+  Future<dynamic> getCpuSamples(
       String isolateId, int timeOriginMicros, int timeExtentMicros) async {
     return _trackFuture(
         'getCpuSamples',
@@ -316,7 +316,7 @@ class VmServiceWrapper implements VmService {
       _trackFuture('getFlagList', _vmService.getFlagList());
 
   @override
-  Future<InstanceSet> getInstances(
+  Future<dynamic> getInstances(
     String isolateId,
     String objectId,
     int limit, {
@@ -359,7 +359,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Object> getObject(
+  Future getObject(
     String isolateId,
     String objectId, {
     int offset,
@@ -369,12 +369,12 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<ScriptList> getScripts(String isolateId) {
+  Future<dynamic> getScripts(String isolateId) {
     return _trackFuture('getScripts', _vmService.getScripts(isolateId));
   }
 
   @override
-  Future<SourceReport> getSourceReport(
+  Future<dynamic> getSourceReport(
     String isolateId,
     List<String> reports, {
     String scriptId,
@@ -395,7 +395,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Stack> getStack(String isolateId) {
+  Future<dynamic> getStack(String isolateId) {
     return _trackFuture('getStack', _vmService.getStack(isolateId));
   }
 
@@ -439,7 +439,7 @@ class VmServiceWrapper implements VmService {
         _vmService.getHttpEnableTimelineLogging(isolateId));
   }
 
-  Future<Success> setHttpEnableTimelineLogging(
+  Future<dynamic> setHttpEnableTimelineLogging(
     String isolateId,
     bool enable,
   ) async {
@@ -494,7 +494,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> requestHeapSnapshot(String isolateId) {
+  Future<dynamic> requestHeapSnapshot(String isolateId) {
     return _trackFuture(
       'requestHeapSnapshot',
       _vmService.requestHeapSnapshot(isolateId),
@@ -502,7 +502,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> kill(String isolateId) {
+  Future<dynamic> kill(String isolateId) {
     return _trackFuture('kill', _vmService.kill(isolateId));
   }
 
@@ -549,7 +549,7 @@ class VmServiceWrapper implements VmService {
   Stream<Event> get onHeapSnapshotEvent => _vmService.onHeapSnapshotEvent;
 
   @override
-  Future<Success> pause(String isolateId) {
+  Future<dynamic> pause(String isolateId) {
     return _trackFuture('pause', _vmService.pause(isolateId));
   }
 
@@ -583,7 +583,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<ReloadReport> reloadSources(
+  Future<dynamic> reloadSources(
     String isolateId, {
     bool force,
     bool pause,
@@ -602,19 +602,19 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> removeBreakpoint(String isolateId, String breakpointId) {
+  Future<dynamic> removeBreakpoint(String isolateId, String breakpointId) {
     return _trackFuture('removeBreakpoint',
         _vmService.removeBreakpoint(isolateId, breakpointId));
   }
 
   @override
-  Future<Success> resume(String isolateId, {String step, int frameIndex}) {
+  Future<dynamic> resume(String isolateId, {String step, int frameIndex}) {
     return _trackFuture('resume',
         _vmService.resume(isolateId, step: step, frameIndex: frameIndex));
   }
 
   @override
-  Future<Success> setExceptionPauseMode(String isolateId, String mode) {
+  Future<dynamic> setExceptionPauseMode(String isolateId, String mode) {
     return _trackFuture('setExceptionPauseMode',
         _vmService.setExceptionPauseMode(isolateId, mode));
   }
@@ -625,7 +625,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> setLibraryDebuggable(
+  Future<dynamic> setLibraryDebuggable(
     String isolateId,
     String libraryId,
     bool isDebuggable,
@@ -635,7 +635,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> setName(String isolateId, String name) {
+  Future<dynamic> setName(String isolateId, String name) {
     return _trackFuture('setName', _vmService.setName(isolateId, name));
   }
 
@@ -682,6 +682,61 @@ class VmServiceWrapper implements VmService {
     } else {
       return _activeStreams[streamId];
     }
+  }
+
+  @override
+  Future getInboundReferences(
+    String isolateId,
+    String targetId,
+    int limit,
+  ) async {
+    if (await isProtocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 3, minor: 25))) {
+      return _trackFuture(
+        'getInboundReferences',
+        _vmService.getInboundReferences(isolateId, targetId, limit),
+      );
+    } else {
+      return _trackFuture(
+        'getInboundReferences',
+        _vmService.callMethod(
+          '_getInboundReferences',
+          isolateId: isolateId,
+          args: {'targetId': targetId, 'limit': limit},
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<dynamic> getRetainingPath(
+          String isolateId, String targetId, int limit) =>
+      _trackFuture('getRetainingPath',
+          _vmService.getRetainingPath(isolateId, targetId, limit));
+
+  @override
+  Future<ClientName> getClientName() {
+    return _trackFuture('getClientName', _vmService.getClientName());
+  }
+
+  @override
+  Future<Success> requirePermissionToResume({
+    bool onPauseStart,
+    bool onPauseReload,
+    bool onPauseExit,
+  }) {
+    return _trackFuture(
+        'requirePermissionToResume',
+        _vmService.requirePermissionToResume(
+          onPauseStart: onPauseStart,
+          onPauseReload: onPauseReload,
+          onPauseExit: onPauseExit,
+        ));
+  }
+
+  @override
+  Future<Success> setClientName(String name) {
+    return _trackFuture('setClientName', _vmService.setClientName(name));
   }
 
   /// Testing only method to indicate that we don't really need to await all
@@ -743,36 +798,6 @@ class VmServiceWrapper implements VmService {
     );
     return future;
   }
-
-  @override
-  Future getInboundReferences(
-    String isolateId,
-    String targetId,
-    int limit,
-  ) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 25))) {
-      return _trackFuture(
-        'getInboundReferences',
-        _vmService.getInboundReferences(isolateId, targetId, limit),
-      );
-    } else {
-      return _trackFuture(
-        'getInboundReferences',
-        _vmService.callMethod(
-          '_getInboundReferences',
-          isolateId: isolateId,
-          args: {'targetId': targetId, 'limit': limit},
-        ),
-      );
-    }
-  }
-
-  @override
-  Future<RetainingPath> getRetainingPath(
-          String isolateId, String targetId, int limit) =>
-      _trackFuture('getRetainingPath',
-          _vmService.getRetainingPath(isolateId, targetId, limit));
 }
 
 class TrackedFuture<T> {
