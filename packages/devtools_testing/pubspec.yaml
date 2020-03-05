@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   devtools_app: ^0.1.15
-  devtools_shared: ^0.2.2
+  devtools_shared: 0.2.3
   flutter_test:
     sdk: flutter
   matcher: ^0.12.3
