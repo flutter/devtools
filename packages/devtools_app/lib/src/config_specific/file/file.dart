@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '_fake_file.dart'
+import '_file_stub.dart'
     if (dart.library.html) '_file_web.dart'
     if (dart.library.io) '_file_desktop.dart';
 
