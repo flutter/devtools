@@ -10,7 +10,7 @@ import '../../../flutter/screen.dart';
 import '../../../timeline/timeline_controller.dart';
 import '../../../timeline/timeline_model.dart';
 
-import '_fake_export.dart'
+import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
 
