@@ -21,18 +21,15 @@ git checkout -b release_0_0_15
 
 ```
 
-## Update the release number in three files:
-- **packages/devtools/pubspec.yaml**
+## Update the release number by running files:
 
-Change ```version: 0.0.14``` to ```version: 0.0.15```
+./tool/update_version.sh 0_0_15
 
-- **packages/devtools_app/pubspec.yaml**
-
-Change ```version: 0.0.14``` to ```version: 0.0.15```
-
-- **packages/devtools_app/lib/devtools.dart**
-
-Change ```const String version = '0.0.14';``` to ```const String version = '0.0.15';```
+Verify that this script updated the pubspecs under packages/
+and updated all references to those packages. These packages always have their
+version numbers updated in lock step so we don't have to worry about
+versioning. Also make sure that the version constant in
+**packages/devtools_app/lib/devtools.dart** was updated.
 
 ## Update the CHANGELOG.md
 - **packages/devtools/CHANGELOG.md**
@@ -47,13 +44,6 @@ Add the release number and date followed by the features or changes e.g.,
 ## Push the local branch
 
 ```shell
-git add packages/devtools_app/lib/devtools.dart
-
-git add packages/devtools_app/pubspec.yaml
-
-git add packages/devtools/pubspec.yaml
-
-git add pavackages/devtools/CHANGELOG.md
 
 git commit -a -m “Prepare for v0.0.15 release.”
 
@@ -93,18 +83,26 @@ git pull upstream master
 
 #### Publish the packages
 ```shell
-cd packages/devtools_app
-
+pushd packages/devtools_shared
 pub publish
+popd
 
-...
-Looks great! Are you ready to upload your package (y/n)? y
-
-cd packages/devtools
-
+pushd packages/devtools_server
 pub publish
-...
-Looks great! Are you ready to upload your package (y/n)? y
+popd
+
+pushd packages/devtools_testing
+pub publish
+popd
+
+pushd packages/devtools_app
+pub publish
+popd
+
+pushd packages/devtools
+pub publish
+popd
+
 ```
 
 #### Revert the change to .gitignore

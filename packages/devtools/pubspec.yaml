@@ -1,9 +1,8 @@
 name: devtools
 description: A suite of web-based performance tooling for Dart and Flutter.
 
-# Note: when updating this version, please update the corresponding entry in
-# ../devtools_app/lib/devtools.dart and the version in
-# ../devtools_app/pubspec.yaml
+# Note: this version should only be updated by running tools/update_version.sh
+# that updates all versions of packages from packages/devtools.
 #
 # All the real functionality has moved to the devtools_app package with this
 # package remaining purely as a container for the compiled copy of the devtools
@@ -18,8 +17,8 @@ environment:
   sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
-  devtools_server: ^0.2.3
-  devtools_shared: ^0.2.3
+  devtools_server: 0.2.3
+  devtools_shared: 0.2.3
   http: ^0.12.0+1
   intl: ^0.16.0
 
