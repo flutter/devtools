@@ -644,8 +644,6 @@ class FullTimelineProcessor extends TimelineProcessor {
   /// This is guaranteed because we process the events in timestamp order.
   SyncTimelineEvent _pendingRootCompleteEvent;
 
-  TraceEventWrapper _previousTraceEvent;
-
   Future<void> processTimeline(List<TraceEventWrapper> traceEvents) async {
     // Reset the processor before processing.
     reset();
@@ -717,13 +715,6 @@ class FullTimelineProcessor extends TimelineProcessor {
       final eventWrapper = traceEvents[i];
       _traceEventsProcessed++;
 
-      // This is a duplicate trace event. Skip it.
-      // See https://github.com/flutter/flutter/issues/47020.
-      if (_previousTraceEvent != null &&
-          collectionEquals(eventWrapper.json, _previousTraceEvent.json)) {
-        continue;
-      }
-
       // TODO(kenz): stop manually setting the type once we have that data
       // from the engine.
       eventWrapper.event.type = inferEventType(eventWrapper.event);
@@ -755,7 +746,6 @@ class FullTimelineProcessor extends TimelineProcessor {
         default:
           break;
       }
-      _previousTraceEvent = eventWrapper;
     }
   }
 
