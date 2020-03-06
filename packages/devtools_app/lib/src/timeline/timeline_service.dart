@@ -178,6 +178,8 @@ class TimelineService {
     @required bool shouldBeRunning,
     @required bool isRunning,
   }) async {
+    // TODO(kenz): instead of awaiting here, should we check that
+    // serviceManager.connectedApp != null?
     await serviceManager.serviceAvailable.future;
     if (shouldBeRunning) {
       await startTimeline();
