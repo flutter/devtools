@@ -565,14 +565,18 @@ class FlameChartUtils {
     @required double chartStartInset,
   }) {
     final node = nodes[index];
+    double padding;
     if (index != 0) {
-      return 0.0;
+      padding = 0.0;
     } else if (!node.selectable) {
-      return node.rect.left;
+      padding = node.rect.left;
     } else {
-      return (node.rect.left - chartStartInset) * zoomForNode(node, chartZoom) +
-          chartStartInset;
+      padding =
+          (node.rect.left - chartStartInset) * zoomForNode(node, chartZoom) +
+              chartStartInset;
     }
+    // Prevent negative padding from being returned.
+    return math.max(0.0, padding);
   }
 
   static double rightPaddingForNode(
@@ -590,11 +594,14 @@ class FlameChartUtils {
     // Node right with zoom and insets taken into consideration.
     final nodeRight =
         (node.rect.right - chartStartInset) * nodeZoom + chartStartInset;
-    return nextNode == null
+    final padding = nextNode == null
         ? chartWidth - nodeRight
         : ((nextNode.rect.left - chartStartInset) * nextNodeZoom +
                 chartStartInset) -
             nodeRight;
+    // Prevent negative padding from being returned. -0.0 can be returned from
+    // the above calculation due to double precision when nodes are very small.
+    return math.max(0.0, padding);
   }
 
   static double zoomForNode(FlameChartNode node, double chartZoom) {
