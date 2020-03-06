@@ -16,7 +16,12 @@ if [ -z "$VERSION" ]; then
 fi
 
 # If you add a package that is version locked, please add it to this list.
-PUBSPECS="./devtools_shared/pubspec.yaml ./devtools_server/pubspec.yaml ./devtools/pubspec.yaml ./devtools_app/pubspec.yaml ./devtools_testing/pubspec.yaml"
+PUBSPECS="./devtools_shared/pubspec.yaml \
+./devtools_server/pubspec.yaml \
+./devtools/pubspec.yaml \
+./devtools_app/pubspec.yaml \
+./devtools_testing/pubspec.yaml"
+
 echo "Updating pubspec versions"
 
 pushd packages

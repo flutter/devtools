@@ -28,7 +28,7 @@ git checkout -b release_0_0_15
 Verify that this script updated the pubspecs under packages/
 and updated all references to those packages. These packages always have their
 version numbers updated in lock step so we don't have to worry about
-versioning. Also make sure that tbe version constant in
+versioning. Also make sure that the version constant in
 **packages/devtools_app/lib/devtools.dart** was updated.
 
 ## Update the CHANGELOG.md
@@ -84,44 +84,26 @@ git pull upstream master
 #### Publish the packages
 ```shell
 pushd packages/devtools_shared
-
 pub publish
-...
-Looks great! Are you ready to upload your package (y/n)? y
-
 popd
 
-pushd packages/devtools_app
-
+pushd packages/devtools_server
 pub publish
-...
-Looks great! Are you ready to upload your package (y/n)? y
-
 popd
 
 pushd packages/devtools_testing
-
 pub publish
-...
-Looks great! Are you ready to upload your package (y/n)? y
+popd
 
+pushd packages/devtools_app
+pub publish
 popd
 
 pushd packages/devtools
-
 pub publish
-...
-Looks great! Are you ready to upload your package (y/n)? y
-```
-
-pushd packages/devtools_server
-
-pub publish
-
-...
-Looks great! Are you ready to upload your package (y/n)? y
-
 popd
+
+```
 
 #### Revert the change to .gitignore
 ```shell
