@@ -575,7 +575,7 @@ class FlameChartUtils {
           (node.rect.left - chartStartInset) * zoomForNode(node, chartZoom) +
               chartStartInset;
     }
-    // Prevent negative padding from being returned.
+    // Floating point rounding error can result in slightly negative padding.
     return math.max(0.0, padding);
   }
 
@@ -599,8 +599,7 @@ class FlameChartUtils {
         : ((nextNode.rect.left - chartStartInset) * nextNodeZoom +
                 chartStartInset) -
             nodeRight;
-    // Prevent negative padding from being returned. -0.0 can be returned from
-    // the above calculation due to double precision when nodes are very small.
+    // Floating point rounding error can result in slightly negative padding.
     return math.max(0.0, padding);
   }
 
