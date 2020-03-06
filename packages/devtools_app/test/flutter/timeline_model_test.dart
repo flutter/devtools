@@ -4,20 +4,28 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/timeline/html_timeline_controller.dart';
-import 'package:devtools_app/src/timeline/html_timeline_model.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
-import 'package:devtools_testing/support/test_utils.dart';
-import 'package:devtools_testing/support/timeline_test_data.dart';
+import 'package:devtools_testing/support/flutter/test_utils.dart';
+import 'package:devtools_testing/support/flutter/timeline_test_data.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('FrameBasedTimelineData', () {
-    FrameBasedTimelineData timelineData;
+  group('TimelineData', () {
+    TimelineData timelineData;
 
     setUp(() {
-      timelineData = FrameBasedTimelineData(displayRefreshRate: 60.0);
+      timelineData = TimelineData(
+        displayRefreshRate: 60.0,
+        timelineEvents: [
+          goldenAsyncTimelineEvent,
+          goldenUiTimelineEvent,
+          goldenGpuTimelineEvent,
+          unknownEvent,
+        ],
+      );
     });
 
     test('init', () async {
@@ -28,7 +36,6 @@ void main() {
       expect(timelineData.selectedEvent, isNull);
       expect(timelineData.displayRefreshRate, 60.0);
       expect(timelineData.cpuProfileData, isNull);
-      expect(timelineData.timelineMode, equals(TimelineMode.frameBased));
     });
 
     test('to json', () {
@@ -37,14 +44,13 @@ void main() {
           equals({
             TimelineData.traceEventsKey: [],
             TimelineData.cpuProfileKey: {},
-            FrameBasedTimelineData.selectedFrameIdKey: null,
+            TimelineData.selectedFrameIdKey: null,
             TimelineData.selectedEventKey: {},
-            FrameBasedTimelineData.displayRefreshRateKey: 60,
-            TimelineData.timelineModeKey: TimelineMode.frameBased.toString(),
+            TimelineData.displayRefreshRateKey: 60,
             TimelineData.devToolsScreenKey: timelineScreenId,
           }));
 
-      timelineData = FrameBasedTimelineData(displayRefreshRate: 60)
+      timelineData = TimelineData(displayRefreshRate: 60)
         ..traceEvents.add({'name': 'FakeTraceEvent'})
         ..cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson)
         ..selectedEvent = vsyncEvent;
@@ -55,24 +61,24 @@ void main() {
             {'name': 'FakeTraceEvent'}
           ],
           TimelineData.cpuProfileKey: goldenCpuProfileDataJson,
-          FrameBasedTimelineData.selectedFrameIdKey: null,
+          TimelineData.selectedFrameIdKey: null,
           TimelineData.selectedEventKey: vsyncEvent.json,
-          FrameBasedTimelineData.displayRefreshRateKey: 60,
-          TimelineData.timelineModeKey: TimelineMode.frameBased.toString(),
+          TimelineData.displayRefreshRateKey: 60,
           TimelineData.devToolsScreenKey: timelineScreenId,
         }),
       );
     });
 
-    test('displayDepth', () {
-      timelineData.selectedFrame = testFrame0;
-      expect(timelineData.selectedFrame.uiEventFlow.depth, equals(7));
-      expect(timelineData.selectedFrame.gpuEventFlow.depth, equals(2));
-      expect(timelineData.displayDepth, equals(9));
-    });
-
     test('clear', () async {
-      timelineData = FrameBasedTimelineData(displayRefreshRate: 120)
+      timelineData = TimelineData(
+        displayRefreshRate: 120,
+        timelineEvents: [
+          goldenAsyncTimelineEvent,
+          goldenUiTimelineEvent,
+          goldenGpuTimelineEvent,
+          unknownEvent,
+        ],
+      )
         ..traceEvents.add({'test': 'trace event'})
         ..frames.add(testFrame0)
         ..selectedEvent = vsyncEvent
@@ -85,6 +91,7 @@ void main() {
       expect(timelineData.selectedEvent, isNotNull);
       expect(timelineData.displayRefreshRate, equals(120));
       expect(timelineData.cpuProfileData, isNotNull);
+      expect(timelineData.timelineEvents, isNotEmpty);
 
       timelineData.clear();
       expect(timelineData.traceEvents, isEmpty);
@@ -93,64 +100,40 @@ void main() {
       expect(timelineData.selectedFrameId, isNull);
       expect(timelineData.selectedEvent, isNull);
       expect(timelineData.cpuProfileData, isNull);
-    });
-  });
-
-  group('FullTimelineData', () {
-    FullTimelineData timelineData;
-    setUp(() {
-      timelineData = FullTimelineData(timelineEvents: [
-        goldenAsyncTimelineEvent,
-        goldenUiTimelineEvent,
-        goldenGpuTimelineEvent,
-        unknownEvent,
-      ]);
-    });
-
-    test('displayDepth', () {
-      expect(goldenAsyncTimelineEvent.displayDepth, equals(6));
-      expect(goldenUiTimelineEvent.displayDepth, equals(7));
-      expect(goldenGpuTimelineEvent.displayDepth, equals(2));
-      expect(unknownEvent.displayDepth, equals(1));
-      expect(timelineData.displayDepth, equals(16));
+      expect(timelineData.timelineEvents, isEmpty);
     });
 
     test('initializeEventBuckets', () {
       expect(timelineData.eventGroups, isEmpty);
       timelineData.initializeEventGroups();
       expect(
-        timelineData.eventGroups[FullTimelineData.uiKey].rows[0].events.length,
+        timelineData.eventGroups[TimelineData.uiKey].rows[0].events.length,
         equals(1),
       );
       expect(
-        timelineData.eventGroups[FullTimelineData.gpuKey].rows[0].events.length,
+        timelineData.eventGroups[TimelineData.gpuKey].rows[0].events.length,
         equals(1),
       );
       expect(
-        timelineData
-            .eventGroups[FullTimelineData.unknownKey].rows[0].events.length,
+        timelineData.eventGroups[TimelineData.unknownKey].rows[0].events.length,
         equals(1),
       );
       expect(timelineData.eventGroups['A'].rows[0].events.length, equals(1));
     });
 
     test('event bucket compare', () {
-      expect(FullTimelineData.eventGroupComparator('UI', 'GPU'), equals(-1));
-      expect(FullTimelineData.eventGroupComparator('GPU', 'UI'), equals(1));
-      expect(FullTimelineData.eventGroupComparator('UI', 'UI'), equals(0));
-      expect(FullTimelineData.eventGroupComparator('UI', 'Async'), equals(1));
-      expect(FullTimelineData.eventGroupComparator('A', 'B'), equals(-1));
-      expect(
-        FullTimelineData.eventGroupComparator('Z', 'Unknown'),
-        equals(-1),
-      );
+      expect(TimelineData.eventGroupComparator('UI', 'GPU'), equals(-1));
+      expect(TimelineData.eventGroupComparator('GPU', 'UI'), equals(1));
+      expect(TimelineData.eventGroupComparator('UI', 'UI'), equals(0));
+      expect(TimelineData.eventGroupComparator('UI', 'Async'), equals(1));
+      expect(TimelineData.eventGroupComparator('A', 'B'), equals(-1));
+      expect(TimelineData.eventGroupComparator('Z', 'Unknown'), equals(-1));
     });
   });
 
-  group('OfflineFrameBasedTimelineData', () {
+  group('OfflineTimelineData', () {
     test('init from parse', () {
-      OfflineFrameBasedTimelineData offlineData =
-          OfflineFrameBasedTimelineData.parse({});
+      OfflineTimelineData offlineData = OfflineTimelineData.parse({});
       expect(offlineData.traceEvents, isEmpty);
       expect(offlineData.frames, isEmpty);
       expect(offlineData.selectedFrame, isNull);
@@ -158,10 +141,8 @@ void main() {
       expect(offlineData.selectedEvent, isNull);
       expect(offlineData.displayRefreshRate, equals(60.0));
       expect(offlineData.cpuProfileData, isNull);
-      expect(offlineData.timelineMode, equals(TimelineMode.frameBased));
 
-      offlineData = OfflineFrameBasedTimelineData.parse(
-          offlineFrameBasedTimelineDataJson);
+      offlineData = OfflineTimelineData.parse(offlineTimelineDataJson);
       expect(
         offlineData.traceEvents,
         equals(goldenTraceEventsJson),
@@ -183,12 +164,10 @@ void main() {
       );
       expect(offlineData.displayRefreshRate, equals(120));
       expect(offlineData.cpuProfileData.json, equals(goldenCpuProfileDataJson));
-      expect(offlineData.timelineMode, equals(TimelineMode.frameBased));
     });
 
     test('shallowClone', () {
-      final offlineData = OfflineFrameBasedTimelineData.parse(
-          offlineFrameBasedTimelineDataJson);
+      final offlineData = OfflineTimelineData.parse(offlineTimelineDataJson);
       final clone = offlineData.shallowClone();
       expect(offlineData.traceEvents, equals(clone.traceEvents));
       expect(offlineData.frames, equals(clone.frames));
@@ -197,48 +176,6 @@ void main() {
       expect(offlineData.selectedEvent, equals(clone.selectedEvent));
       expect(offlineData.displayRefreshRate, equals(clone.displayRefreshRate));
       expect(offlineData.cpuProfileData, equals(clone.cpuProfileData));
-      expect(offlineData.timelineMode, equals(clone.timelineMode));
-      expect(identical(offlineData, clone), isFalse);
-    });
-  });
-
-  group('OfflineFullTimelineData', () {
-    test('init from parse', () {
-      OfflineFullTimelineData offlineData = OfflineFullTimelineData.parse({});
-      expect(offlineData.traceEvents, isEmpty);
-      expect(offlineData.selectedEvent, isNull);
-      expect(offlineData.cpuProfileData, isNull);
-      expect(offlineData.timelineMode, equals(TimelineMode.full));
-
-      offlineData = OfflineFullTimelineData.parse(offlineFullTimelineDataJson);
-      expect(
-        offlineData.traceEvents,
-        equals(goldenTraceEventsJson),
-      );
-      expect(offlineData.selectedEvent, isA<OfflineTimelineEvent>());
-
-      final expectedFirstTraceJson =
-          Map<String, dynamic>.from(vsyncEvent.beginTraceEventJson);
-      expectedFirstTraceJson[TraceEvent.argsKey]
-          .addAll({TraceEvent.typeKey: TimelineEventType.ui});
-      expectedFirstTraceJson.addAll(
-          {TraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds});
-      expect(
-        offlineData.selectedEvent.json,
-        equals({TimelineEvent.firstTraceKey: expectedFirstTraceJson}),
-      );
-      expect(offlineData.cpuProfileData.json, equals(goldenCpuProfileDataJson));
-      expect(offlineData.timelineMode, equals(TimelineMode.full));
-    });
-
-    test('shallowClone', () {
-      final offlineData =
-          OfflineFullTimelineData.parse(offlineFullTimelineDataJson);
-      final clone = offlineData.shallowClone();
-      expect(offlineData.traceEvents, equals(clone.traceEvents));
-      expect(offlineData.selectedEvent, equals(clone.selectedEvent));
-      expect(offlineData.cpuProfileData, equals(clone.cpuProfileData));
-      expect(offlineData.timelineMode, equals(clone.timelineMode));
       expect(identical(offlineData, clone), isFalse);
     });
   });

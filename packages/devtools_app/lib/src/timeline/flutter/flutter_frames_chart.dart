@@ -32,8 +32,8 @@ import '../../flutter/theme.dart';
 import '../../ui/colors.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../ui/theme.dart';
-import '../timeline_controller.dart';
-import '../timeline_model.dart';
+import 'timeline_controller.dart';
+import 'timeline_model.dart';
 
 class FlutterFramesChart extends StatefulWidget {
   const FlutterFramesChart();
@@ -65,7 +65,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   /// FrameBasedTimeline.
   void _setupFPSHighwaterLine() async {
     if (_chartController.axisLeftSettingFunction == null) {
-      final fpsRate = await _controller.frameBasedTimeline.displayRefreshRate;
+      final fpsRate = await _controller.displayRefreshRate;
 
       // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
       final targetMsPerFrame = 1 / fpsRate * 1000;
@@ -110,44 +110,20 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     setState(() {
       _setupFPSHighwaterLine();
     });
+    autoDispose(_controller.onTimelineProcessed.listen((_) => _loadData()));
+    autoDispose(_controller.onLoadOfflineData.listen((_) => _loadData()));
+  }
 
-    // Process each timeline frame.
-    addAutoDisposeListener(_controller.frameBasedTimeline.frameAddedNotifier,
-        () {
-      final frames = _controller.frameBasedTimeline.data.frames;
-      final newFrame = _controller.frameBasedTimeline.frameAddedNotifier.value;
-      if (newFrame == null) return;
-      setState(() {
-        // If frames not in sync with charting data (_frameDurations)?
-        if (frames.isEmpty && _frameDurations.length == 1) {
-          // Works around a problem with chart appearing before
-          // any data so the chart data is primed with a entry.
-          _frameDurations.clear(); // Away the fake entry.
-        }
-
-        _maybePruneData();
-
-        _frameDurations
-            .add(createBarEntry(newFrame, frames.length - 1 - indexOffset));
-
-        _updateChart();
-      });
-    });
-
-    autoDispose(_controller.onLoadOfflineData.listen((_) {
-      if (_controller.timelineModeNotifier.value != TimelineMode.frameBased) {
-        return;
+  void _loadData() {
+    _frameDurations.clear();
+    final frames = _controller.data?.frames ?? [];
+    if (frames.isNotEmpty) {
+      final startFrameIndex = math.max(0, frames.length - maxFrames);
+      for (int i = startFrameIndex; i < frames.length; i++) {
+        _frameDurations.add(createBarEntry(frames[i], i - startFrameIndex));
       }
-      final frames = _controller.frameBasedTimeline.data?.frames ?? [];
-      if (frames.isNotEmpty) {
-        _frameDurations.clear();
-        final startFrameIndex = math.max(0, frames.length - maxFrames);
-        for (int i = startFrameIndex; i < frames.length; i++) {
-          _frameDurations.add(createBarEntry(frames[i], i - startFrameIndex));
-        }
-      }
-      _updateChart();
-    }));
+    }
+    _updateChart();
   }
 
   @override
@@ -196,8 +172,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   }
 
   void onBarSelected(int index) {
-    _controller.frameBasedTimeline.selectFrame(
-        _controller.frameBasedTimeline.data.frames[index + indexOffset]);
+    _controller.selectFrame(_controller.data.frames[index + indexOffset]);
   }
 
   void _initData() {
@@ -215,21 +190,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
     // specify the width each bar should have
     _chartController.data.barWidth = 0.8;
-  }
-
-  void _maybePruneData() {
-    // Prune frames displayed to the last 150 frames.
-    if (_frameDurations.length > maxFrames) {
-      // Increase the index offset since we are removing a frame.
-      indexOffset++;
-
-      _frameDurations.removeAt(0);
-      // TODO(terry): Need a cleaner solution - fixed width bar and
-      //              chart that scrolls.
-      for (BarEntry entry in _frameDurations) {
-        entry.x -= 1; // Fixup all indexes.
-      }
-    }
   }
 
   BarEntry createStubBarEntry() {
@@ -262,6 +222,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     setState(() {
       // Signal data has changed.
       frameDurationsSet.notifyDataSetChanged();
+      _setupFPSHighwaterLine();
     });
   }
 

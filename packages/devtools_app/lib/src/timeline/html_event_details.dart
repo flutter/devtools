@@ -16,8 +16,8 @@ import '../ui/html_elements.dart';
 import '../ui/primer.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
-import 'timeline_controller.dart';
-import 'timeline_model.dart';
+import 'html_timeline_controller.dart';
+import 'html_timeline_model.dart';
 
 class HtmlEventDetails extends CoreElement {
   HtmlEventDetails(this._timelineController) : super('div') {

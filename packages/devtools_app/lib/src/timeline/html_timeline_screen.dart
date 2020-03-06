@@ -25,10 +25,10 @@ import '../ui/ui_utils.dart';
 import '../ui/vm_flag_elements.dart';
 import 'html_event_details.dart';
 import 'html_frames_bar_chart.dart';
-import 'timeline_controller.dart';
-import 'timeline_flame_chart.dart';
-import 'timeline_model.dart';
-import 'timeline_processor.dart';
+import 'html_timeline_controller.dart';
+import 'html_timeline_flame_chart.dart';
+import 'html_timeline_model.dart';
+import 'html_timeline_processor.dart';
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../timeline/timeline_model.dart';
+import '../timeline/flutter/timeline_model.dart';
 import '../utils.dart';
 
 import 'http.dart';

@@ -14,8 +14,8 @@ import '../../profiler/cpu_profile_model.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../utils.dart';
-import '../timeline_controller.dart';
-import '../timeline_model.dart';
+import 'timeline_controller.dart';
+import 'timeline_model.dart';
 
 class EventDetails extends StatelessWidget {
   const EventDetails(this.selectedEvent);

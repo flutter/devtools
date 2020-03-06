@@ -13,7 +13,7 @@ import '../ui/colors.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/theme.dart';
-import 'timeline_model.dart';
+import 'html_timeline_model.dart';
 
 final String guidelineColorCss = colorToCss(treeGuidelineColor);
 

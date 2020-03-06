@@ -6,10 +6,10 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profiler.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/timeline/flutter/event_details.dart';
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
-import 'package:devtools_app/src/timeline/timeline_model.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
-import 'package:devtools_testing/support/timeline_test_data.dart';
+import 'package:devtools_testing/support/flutter/timeline_test_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 

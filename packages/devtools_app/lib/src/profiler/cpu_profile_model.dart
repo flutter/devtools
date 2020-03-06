@@ -6,7 +6,6 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
-import '../timeline/timeline_model.dart';
 import '../trees.dart';
 import '../utils.dart';
 
@@ -52,8 +51,8 @@ class CpuProfileData {
     // Each trace event in [subTraceEvents] will have the leaf stack frame id
     // for a cpu sample within [subTimeRange].
     final subTraceEvents = superProfile.stackTraceEvents
-        .where((trace) => subTimeRange
-            .contains(Duration(microseconds: trace[TraceEvent.timestampKey])))
+        .where((trace) =>
+            subTimeRange.contains(Duration(microseconds: trace['ts'])))
         .toList();
 
     // Use a SplayTreeMap so that map iteration will be in sorted key order.

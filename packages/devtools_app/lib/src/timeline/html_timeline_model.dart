@@ -10,7 +10,7 @@ import '../profiler/cpu_profile_model.dart';
 import '../service_manager.dart';
 import '../trees.dart';
 import '../utils.dart';
-import 'timeline_controller.dart';
+import 'html_timeline_controller.dart';
 
 /// Data model for DevTools Timeline.
 class FrameBasedTimelineData extends TimelineData {

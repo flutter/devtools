@@ -6,7 +6,7 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/timeline/html_timeline_model.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
 
 SyncTimelineEvent testSyncTimelineEvent(TraceEventWrapper eventWrapper) =>
     SyncTimelineEvent(eventWrapper);

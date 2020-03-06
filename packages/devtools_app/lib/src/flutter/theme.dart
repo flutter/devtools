@@ -66,6 +66,9 @@ const devtoolsBlue = ColorSwatch<int>(600, {
   400: Color(0xFF13B9FD),
 });
 
+/// A short duration to use for animations.
+const shortDuration = Duration(milliseconds: 50);
+
 /// The default duration to use for animations.
 const defaultDuration = Duration(milliseconds: 200);
 
@@ -122,3 +125,5 @@ final chartBoldTypeFace = TypeFace(
   fontFamily: 'OpenSans',
   fontWeight: FontWeight.w800,
 );
+
+const lightSelection = Color(0xFFD4D7DA);
