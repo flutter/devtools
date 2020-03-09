@@ -214,12 +214,9 @@ class _NotificationState extends State<_Notification>
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
-        return SizedBox(
-          height: _notificationHeight * curve.value,
-          child: Opacity(
-            opacity: curve.value,
-            child: child,
-          ),
+        return Opacity(
+          opacity: curve.value,
+          child: child,
         );
       },
       child: Padding(
