@@ -139,8 +139,9 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
           routeNameWithQueryParams(context, '/', {'uri': '$uri'}),
         ),
       );
+      final shortUri = uri.replace(path: '');
       Notifications.of(context).push(
-        'Successfully connected to the VM Service at "$uri"',
+        'Successfully connected to $shortUri.',
       );
     } else if (uri == null) {
       Notifications.of(context).push(
