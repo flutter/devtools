@@ -9,7 +9,8 @@ import 'package:flutter/scheduler.dart';
 
 import 'common_widgets.dart';
 
-final _notificationWidth = 160.0 * goldenRatio;
+const _notificationHeight = 160.0;
+final _notificationWidth = _notificationHeight * goldenRatio;
 
 /// Interface for pushing notifications in the app.
 ///
