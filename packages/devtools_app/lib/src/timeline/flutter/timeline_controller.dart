@@ -35,24 +35,23 @@ class TimelineController implements DisposableController {
   final cpuProfilerController = CpuProfilerController();
 
   /// Notifies that a timeline event was selected.
-  ValueListenable get selectedTimelineEventNotifier =>
-      _selectedTimelineEventNotifier;
+  ValueListenable get selectedTimelineEvent => _selectedTimelineEventNotifier;
   final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent>(null);
 
   /// Notifies that a timeline frame has been selected.
-  ValueListenable get selectedFrameNotifier => _selectedFrameNotifier;
+  ValueListenable get selectedFrame => _selectedFrameNotifier;
   final _selectedFrameNotifier = ValueNotifier<TimelineFrame>(null);
 
   /// Notifies when an empty timeline recording finishes
-  ValueListenable get emptyRecordingNotifier => _emptyRecordingNotifier;
+  ValueListenable get emptyRecording => _emptyRecordingNotifier;
   final _emptyRecordingNotifier = ValueNotifier<bool>(false);
 
   /// Notifies that the timeline is currently being recorded.
-  ValueListenable get recordingNotifier => _recordingNotifier;
+  ValueListenable get recording => _recordingNotifier;
   final _recordingNotifier = ValueNotifier<bool>(false);
 
   /// Notifies that the recorded timeline data is currently being processed.
-  ValueListenable get processingNotifier => _processingNotifier;
+  ValueListenable get processing => _processingNotifier;
   final _processingNotifier = ValueNotifier<bool>(false);
 
   /// Stream controller that notifies the timeline has been processed.

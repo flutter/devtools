@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -35,7 +35,7 @@ class TimelineService {
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
 
-    timelineController.recordingNotifier.addListener(() async {
+    timelineController.recording.addListener(() async {
       await updateListeningState(true);
     });
   }
@@ -50,7 +50,7 @@ class TimelineService {
       final List<Map<String, dynamic>> events =
           list.cast<Map<String, dynamic>>();
 
-      if (!offlineMode && timelineController.recordingNotifier.value) {
+      if (!offlineMode && timelineController.recording.value) {
         for (Map<String, dynamic> json in events) {
           final eventWrapper = TraceEventWrapper(
             TraceEvent(json),
@@ -145,11 +145,10 @@ class TimelineService {
   }
 
   Future<void> updateListeningState(bool isCurrentScreen) async {
-    final bool shouldBeRunning = timelineController.recordingNotifier.value &&
-        !offlineMode &&
-        isCurrentScreen;
+    final bool shouldBeRunning =
+        timelineController.recording.value && !offlineMode && isCurrentScreen;
     final bool isRunning = serviceManager.serviceAvailable.isCompleted &&
-        timelineController.recordingNotifier.value &&
+        timelineController.recording.value &&
         (await serviceManager.service.getVMTimelineFlags())
             .recordedStreams
             .isNotEmpty;

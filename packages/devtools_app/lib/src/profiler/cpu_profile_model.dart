@@ -50,6 +50,10 @@ class CpuProfileData {
   ) {
     // Each trace event in [subTraceEvents] will have the leaf stack frame id
     // for a cpu sample within [subTimeRange].
+    // TODO(kenz): use TraceEvent.timestampKey instead of 'ts' once we delete
+    // the html app. Attempting to import `timeline_model.dart` was causing
+    // dependency issues when trying to use this file in both the html and
+    // Flutter versions of DevTools.
     final subTraceEvents = superProfile.stackTraceEvents
         .where((trace) =>
             subTimeRange.contains(Duration(microseconds: trace['ts'])))

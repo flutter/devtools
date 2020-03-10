@@ -716,6 +716,7 @@ class FlameChartNode<T> {
         alternateBackgroundColor = null;
 
   static const _selectedNodeColor = lightSelection;
+  static const _alternateTextColor = Colors.black;
   static const _minWidthForText = 22.0;
 
   final Key key;
@@ -740,6 +741,8 @@ class FlameChartNode<T> {
     @required double zoom,
   }) {
     final zoomedWidth = rect.width * zoom;
+    // TODO(kenz): this is intended to improve performance but can probably be
+    // improved. Perhaps we should still show a solid line and fade it out?
     if (zoomedWidth < 0.5) {
       return SizedBox(width: zoomedWidth);
     }
@@ -791,7 +794,7 @@ class FlameChartNode<T> {
   Color _textColor(bool selected) {
     if (selected ||
         (useAlternateBackground != null && useAlternateBackground(data))) {
-      return Colors.black;
+      return _alternateTextColor;
     }
     return textColor;
   }
@@ -810,7 +813,9 @@ class FlameChartNode<T> {
 mixin FlameChartColorMixin {
   int _uiColorOffset = 0;
   Color nextUiColor({bool resetOffset = false}) {
-    if (resetOffset) _uiColorOffset = 0;
+    if (resetOffset) {
+      _uiColorOffset = 0;
+    }
     final color = uiColorPalette[_uiColorOffset % uiColorPalette.length];
     _uiColorOffset++;
     return color;
@@ -818,7 +823,9 @@ mixin FlameChartColorMixin {
 
   int _gpuColorOffset = 0;
   Color nextGpuColor({bool resetOffset = false}) {
-    if (resetOffset) _gpuColorOffset = 0;
+    if (resetOffset) {
+      _gpuColorOffset = 0;
+    }
     final color = gpuColorPalette[_gpuColorOffset % gpuColorPalette.length];
     _gpuColorOffset++;
     return color;
@@ -826,7 +833,9 @@ mixin FlameChartColorMixin {
 
   int _asyncColorOffset = 0;
   Color nextAsyncColor({bool resetOffset = false}) {
-    if (resetOffset) _asyncColorOffset = 0;
+    if (resetOffset) {
+      _asyncColorOffset = 0;
+    }
     final color =
         asyncColorPalette[_asyncColorOffset % asyncColorPalette.length];
     _asyncColorOffset++;
@@ -835,7 +844,9 @@ mixin FlameChartColorMixin {
 
   int _unknownColorOffset = 0;
   Color nextUnknownColor({bool resetOffset = false}) {
-    if (resetOffset) _unknownColorOffset = 0;
+    if (resetOffset) {
+      _unknownColorOffset = 0;
+    }
     final color =
         unknownColorPalette[_unknownColorOffset % unknownColorPalette.length];
     _unknownColorOffset++;
@@ -844,7 +855,9 @@ mixin FlameChartColorMixin {
 
   int _selectedColorOffset = 0;
   Color nextSelectedColor({bool resetOffset = false}) {
-    if (resetOffset) _selectedColorOffset = 0;
+    if (resetOffset) {
+      _selectedColorOffset = 0;
+    }
     final color = selectedColorPalette[
         _selectedColorOffset % selectedColorPalette.length];
     _selectedColorOffset++;

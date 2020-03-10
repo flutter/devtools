@@ -83,14 +83,14 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     controller.timelineService.updateListeningState(true);
 
     cancel();
-    addAutoDisposeListener(controller.recordingNotifier, () {
+    addAutoDisposeListener(controller.recording, () {
       setState(() {
-        recording = controller.recordingNotifier.value;
+        recording = controller.recording.value;
       });
     });
-    addAutoDisposeListener(controller.processingNotifier, () {
+    addAutoDisposeListener(controller.processing, () {
       setState(() {
-        processing = controller.processingNotifier.value;
+        processing = controller.processing.value;
       });
     });
     addAutoDisposeListener(controller.processor.progressNotifier, () {
@@ -115,7 +115,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         // app.
         const FlutterFramesChart(),
         ValueListenableBuilder<TimelineFrame>(
-          valueListenable: controller.selectedFrameNotifier,
+          valueListenable: controller.selectedFrame,
           builder: (context, selectedFrame, _) {
             return Expanded(
               child: Split(
@@ -210,7 +210,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         controller.data.eventGroups.isEmpty;
     if (recording || processing || timelineEmpty) {
       content = ValueListenableBuilder<bool>(
-        valueListenable: controller.emptyRecordingNotifier,
+        valueListenable: controller.emptyRecording,
         builder: (context, emptyRecording, _) {
           return emptyRecording
               ? const Center(
@@ -221,7 +221,21 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         },
       );
     } else {
-      content = TimelineFlameChart();
+      content = LayoutBuilder(
+        builder: (context, constraints) {
+          return ValueListenableBuilder(
+            valueListenable: controller.selectedTimelineEvent,
+            builder: (context, selectedEvent, _) {
+              return TimelineFlameChart(
+                controller.data,
+                width: constraints.maxWidth,
+                selected: selectedEvent,
+                onSelection: (e) => controller.selectTimelineEvent(e),
+              );
+            },
+          );
+        },
+      );
     }
 
     return Padding(
@@ -249,7 +263,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
   Widget _buildEventDetailsSection() {
     return ValueListenableBuilder<TimelineEvent>(
-      valueListenable: controller.selectedTimelineEventNotifier,
+      valueListenable: controller.selectedTimelineEvent,
       builder: (context, selectedEvent, _) {
         return EventDetails(selectedEvent);
       },

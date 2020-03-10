@@ -105,14 +105,14 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(TimelineScreen.recordingStatusKey), findsNothing);
-      expect(controller.recordingNotifier.value, isFalse);
+      expect(controller.recording.value, isFalse);
 
       // Start recording.
       await tester.tap(find.byKey(TimelineScreen.recordButtonKey));
       await tester.pump();
       expect(find.byKey(TimelineScreen.recordingInstructionsKey), findsNothing);
       expect(find.byKey(TimelineScreen.recordingStatusKey), findsOneWidget);
-      expect(controller.recordingNotifier.value, isTrue);
+      expect(controller.recording.value, isTrue);
 
       // Stop recording.
       await tester.tap(find.byKey(TimelineScreen.stopRecordingButtonKey));
@@ -123,7 +123,7 @@ void main() {
         find.byKey(TimelineScreen.emptyTimelineRecordingKey),
         findsOneWidget,
       );
-      expect(controller.recordingNotifier.value, isFalse);
+      expect(controller.recording.value, isFalse);
     });
 
     testWidgetsWithWindowSize('clears timeline on clear', windowSize,

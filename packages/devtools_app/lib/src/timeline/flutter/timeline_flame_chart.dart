@@ -18,45 +18,18 @@ import '../../utils.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
 
-class TimelineFlameChart extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final controller = Controllers.of(context).timeline;
-    return LayoutBuilder(builder: (context, constraints) {
-      return ValueListenableBuilder(
-        valueListenable: controller.selectedFrameNotifier,
-        builder: (context, selectedFrame, _) {
-          return ValueListenableBuilder(
-            valueListenable: controller.selectedTimelineEventNotifier,
-            builder: (context, selectedEvent, _) {
-              // We don't actually need to pass the data in but using the
-              // ValueListenableBuilders ensures [TimelineFlameChart] is
-              // rebuilt when either [selectedFrame] or [selectedFrame]
-              // changes.
-              return _TimelineFlameChart(
-                controller.data,
-                width: constraints.maxWidth,
-                onSelection: (e) => controller.selectTimelineEvent(e),
-              );
-            },
-          );
-        },
-      );
-    });
-  }
-}
-
-class _TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
-  _TimelineFlameChart(
+class TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
+  TimelineFlameChart(
     TimelineData data, {
     @required double width,
+    @required TimelineEvent selected,
     @required Function(TimelineEvent event) onSelection,
   }) : super(
           data,
           time: data.time,
           totalStartingWidth: width,
           startInset: _calculateStartInset(data),
-          selected: data.selectedEvent,
+          selected: selected,
           onSelected: onSelection,
         );
 
@@ -76,11 +49,11 @@ class _TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
   static int asyncGuidelineOffset = 1;
 
   @override
-  _TimelineFlameChartState createState() => _TimelineFlameChartState();
+  TimelineFlameChartState createState() => TimelineFlameChartState();
 }
 
-class _TimelineFlameChartState
-    extends FlameChartState<_TimelineFlameChart, TimelineEvent> {
+class TimelineFlameChartState
+    extends FlameChartState<TimelineFlameChart, TimelineEvent> {
   /// Stores the [FlameChartNode] for each [TimelineEvent] in the chart.
   ///
   /// We need to be able to look up a [FlameChartNode] based on its
@@ -109,14 +82,13 @@ class _TimelineFlameChartState
     _timelineController = newController;
 
     addAutoDisposeListener(
-      _timelineController.selectedFrameNotifier,
+      _timelineController.selectedFrame,
       _handleSelectedFrame,
     );
   }
 
   void _handleSelectedFrame() async {
-    final TimelineFrame selectedFrame =
-        _timelineController.selectedFrameNotifier.value;
+    final TimelineFrame selectedFrame = _timelineController.selectedFrame.value;
     if (selectedFrame != null) {
       setState(() {
         _selectedFrame = selectedFrame;
@@ -131,6 +103,10 @@ class _TimelineFlameChartState
         curve: defaultCurve,
       );
 
+      // Maybe bail early if multiple frame selections were triggered in
+      // succession.
+      if (selectedFrame != _selectedFrame) return;
+
       // Zoom the frame into view.
       final targetFrameWidth = widget.totalStartingWidth * 0.8;
       final startingFrameWidth =
@@ -142,6 +118,10 @@ class _TimelineFlameChartState
               startingPxPerMicro +
           widget.startInset;
       await zoomTo(zoom, forceMouseX: mouseXForZoom);
+
+      // Maybe bail early if multiple frame selections were triggered in
+      // succession.
+      if (selectedFrame != _selectedFrame) return;
 
       // Horizontally scroll to the frame.
       final relativeStartTime =
@@ -333,7 +313,7 @@ class _TimelineFlameChartState
             // Vertical guideline that will connect [node] with its children
             // nodes. The line will end at [node]'s last child.
             final verticalGuidelineX =
-                node.rect.left + _TimelineFlameChart.asyncGuidelineOffset;
+                node.rect.left + TimelineFlameChart.asyncGuidelineOffset;
             final verticalGuidelineStartY =
                 _calculateVerticalGuidelineStartY(event);
             final verticalGuidelineEndY =
@@ -523,7 +503,7 @@ class AsyncGuidelinePainter extends CustomPainter {
       // [FullTimelineFlameChart.asyncGuidelineOffset] into account when
       // calculating [zoomedLine] because these units of space should not scale.
       final unzoomableOffsetLineStart =
-          _TimelineFlameChart.asyncGuidelineOffset + chartStartInset;
+          TimelineFlameChart.asyncGuidelineOffset + chartStartInset;
 
       LineSegment zoomedLine;
       if (line is VerticalLineSegment) {
