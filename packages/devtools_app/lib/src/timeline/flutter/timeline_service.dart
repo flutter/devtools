@@ -1,16 +1,17 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:meta/meta.dart';
+import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/allowed_error.dart';
-import '../../globals.dart';
-import '../../profiler/cpu_profile_service.dart';
-import '../../profiler/profile_granularity.dart';
-import '../../vm_service_wrapper.dart';
-import 'timeline_controller.dart';
-import 'timeline_model.dart';
+import '../config_specific/logger/allowed_error.dart';
+import '../globals.dart';
+import '../profiler/cpu_profile_service.dart';
+import '../profiler/profile_granularity.dart';
+import '../vm_service_wrapper.dart';
+import 'html_timeline_controller.dart';
+import 'html_timeline_model.dart';
 
 /// Manages interactions between the Timeline and the VmService.
 class TimelineService {
@@ -22,10 +23,6 @@ class TimelineService {
 
   final profilerService = CpuProfilerService();
 
-  Future<vm_service.Timestamp> vmTimelineMicros() async {
-    return await serviceManager.service.getVMTimelineMicros();
-  }
-
   void _initListeners() async {
     serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
     // Do not start the timeline for Dart web apps.
@@ -34,10 +31,6 @@ class TimelineService {
       _handleConnectionStart(serviceManager.service);
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
-
-    timelineController.recording.addListener(() async {
-      await updateListeningState(true);
-    });
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
@@ -45,18 +38,37 @@ class TimelineService {
       profilerService.setProfilePeriod(mediumProfilePeriod),
       logError: false,
     );
-    serviceManager.service.onEvent('Timeline').listen((vm_service.Event event) {
+    serviceManager.service.onEvent('Timeline').listen((Event event) {
       final List<dynamic> list = event.json['timelineEvents'];
       final List<Map<String, dynamic>> events =
           list.cast<Map<String, dynamic>>();
 
-      if (!offlineMode && timelineController.recording.value) {
+      final bool shouldProcessEventForFrameBasedTimeline =
+          timelineController.timelineModeNotifier.value ==
+                  TimelineMode.frameBased &&
+              !timelineController.frameBasedTimeline.manuallyPaused &&
+              !timelineController.frameBasedTimeline.pausedNotifier.value;
+      final bool shouldProcessEventForFullTimeline =
+          timelineController.timelineModeNotifier.value == TimelineMode.full &&
+              timelineController.fullTimeline.recordingNotifier.value;
+
+      if (!offlineMode &&
+          (shouldProcessEventForFrameBasedTimeline ||
+              shouldProcessEventForFullTimeline)) {
         for (Map<String, dynamic> json in events) {
           final eventWrapper = TraceEventWrapper(
             TraceEvent(json),
             DateTime.now().millisecondsSinceEpoch,
           );
           timelineController.allTraceEvents.add(eventWrapper);
+
+          // For [TimelineMode.frameBased], process the events as we receive
+          // them.
+          if (timelineController.timelineModeNotifier.value ==
+              TimelineMode.frameBased) {
+            timelineController.frameBasedTimeline.processor
+                ?.processTraceEvent(eventWrapper);
+          }
         }
       }
     });
@@ -68,19 +80,17 @@ class TimelineService {
 
   Future<void> startTimeline() async {
     if (await serviceManager.connectedApp.isAnyFlutterApp) {
-      timelineController.data = TimelineData(
+      timelineController.frameBasedTimeline.data = FrameBasedTimelineData(
           displayRefreshRate: await serviceManager.getDisplayRefreshRate());
-    } else {
-      timelineController.data = TimelineData();
     }
+    timelineController.fullTimeline.data = FullTimelineData();
 
     await serviceManager.serviceAvailable.future;
     await allowedError(serviceManager.service
         .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']));
     await allowedError(serviceManager.service.clearVMTimeline());
 
-    final vm_service.Timeline timeline =
-        await serviceManager.service.getVMTimeline();
+    final Timeline timeline = await serviceManager.service.getVMTimeline();
     final List<dynamic> list = timeline.json['traceEvents'];
     final List<Map<String, dynamic>> traceEvents =
         list.cast<Map<String, dynamic>>();
@@ -140,26 +150,44 @@ class TimelineService {
           '${threadIdsByName.keys}');
     }
 
-    timelineController.processor
-        .primeThreadIds(uiThreadId: uiThreadId, gpuThreadId: gpuThreadId);
+    for (var timeline in timelineController.timelines) {
+      timeline.processor
+          .primeThreadIds(uiThreadId: uiThreadId, gpuThreadId: gpuThreadId);
+    }
   }
 
   Future<void> updateListeningState(bool isCurrentScreen) async {
     final bool shouldBeRunning =
-        timelineController.recording.value && !offlineMode && isCurrentScreen;
+        (!timelineController.frameBasedTimeline.manuallyPaused ||
+                timelineController.fullTimeline.recordingNotifier.value) &&
+            !offlineMode &&
+            isCurrentScreen;
     final bool isRunning = serviceManager.serviceAvailable.isCompleted &&
-        timelineController.recording.value &&
+        (!timelineController.frameBasedTimeline.pausedNotifier.value ||
+            timelineController.fullTimeline.recordingNotifier.value) &&
         (await serviceManager.service.getVMTimelineFlags())
             .recordedStreams
             .isNotEmpty;
+    await _updateListeningState(
+      shouldBeRunning: shouldBeRunning,
+      isRunning: isRunning,
+    );
+  }
 
+  Future<void> _updateListeningState({
+    @required bool shouldBeRunning,
+    @required bool isRunning,
+  }) async {
+    // TODO(kenz): instead of awaiting here, should we check that
+    // serviceManager.connectedApp != null?
     await serviceManager.serviceAvailable.future;
     if (shouldBeRunning) {
       await startTimeline();
     } else if (shouldBeRunning && !isRunning) {
-      await allowedError(serviceManager.service
-          .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']));
+      timelineController.frameBasedTimeline.resume();
     } else if (!shouldBeRunning && isRunning) {
+      // TODO(devoncarew): turn off the events
+      timelineController.frameBasedTimeline.pause();
       await allowedError(serviceManager.service.setVMTimelineFlags(<String>[]));
     }
   }
