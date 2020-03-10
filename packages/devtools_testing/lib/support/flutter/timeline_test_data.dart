@@ -953,3 +953,53 @@ final offlineTimelineDataJson = {
   TimelineData.displayRefreshRateKey: 120.0,
   TimelineData.devToolsScreenKey: timelineScreenId,
 };
+
+// Mark: Duration events with duplicate traces
+final transformLayerStart1 = testTraceEventWrapper({
+  'name': 'TransformLayer::Preroll',
+  'cat': 'Embedder',
+  'tid': testGpuThreadId,
+  'pid': 22283,
+  'ts': 118039651669,
+  'tts': 733287,
+  'ph': 'B',
+  'args': {}
+});
+final transformLayerStart2 = testTraceEventWrapper({
+  'name': 'TransformLayer::Preroll',
+  'cat': 'Embedder',
+  'tid': testGpuThreadId,
+  'pid': 22283,
+  'ts': 118039651869,
+  'tts': 733289,
+  'ph': 'B',
+  'args': {}
+});
+final transformLayerEnd2 = testTraceEventWrapper({
+  'name': 'TransformLayer::Preroll',
+  'cat': 'Embedder',
+  'tid': testGpuThreadId,
+  'pid': 22283,
+  'ts': 118039679673,
+  'tts': 733656,
+  'ph': 'E',
+  'args': {}
+});
+final transformLayerEnd1 = testTraceEventWrapper({
+  'name': 'TransformLayer::Preroll',
+  'cat': 'Embedder',
+  'tid': testGpuThreadId,
+  'pid': 22283,
+  'ts': 118039679673,
+  'tts': 733656,
+  'ph': 'E',
+  'args': {}
+});
+final durationEventsWithDuplicateTraces = [
+  gpuRasterizerDrawTrace,
+  transformLayerStart1,
+  transformLayerStart2,
+  transformLayerEnd2,
+  transformLayerEnd1,
+  endGpuRasterizerDrawTrace,
+];

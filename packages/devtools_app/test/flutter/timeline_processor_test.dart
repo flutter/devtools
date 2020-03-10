@@ -245,6 +245,20 @@ void main() {
       );
     });
 
+    test('processes trace with duplicate events', () async {
+      expect(
+        processor.timelineController.data.timelineEvents,
+        isEmpty,
+      );
+      await processor.processTimeline(durationEventsWithDuplicateTraces, 0);
+      // If the processor is not handling duplicates properly, this value would
+      // be 0.
+      expect(
+        processor.timelineController.data.timelineEvents.length,
+        equals(1),
+      );
+    });
+
     test('inferEventType', () {
       expect(
         processor.inferEventType(asyncStartATrace.event),
