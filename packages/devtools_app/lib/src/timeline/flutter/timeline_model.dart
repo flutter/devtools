@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:collection';
@@ -6,33 +6,63 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
-import '../profiler/cpu_profile_model.dart';
-import '../service_manager.dart';
-import '../trees.dart';
-import '../utils.dart';
-import 'html_timeline_controller.dart';
+import '../../profiler/cpu_profile_model.dart';
+import '../../service_manager.dart';
+import '../../trees.dart';
+import '../../utils.dart';
+import 'timeline_controller.dart';
 
-/// Data model for DevTools Timeline.
-class FrameBasedTimelineData extends TimelineData {
-  FrameBasedTimelineData({
+class TimelineData {
+  TimelineData({
     List<Map<String, dynamic>> traceEvents,
     List<TimelineFrame> frames,
     this.selectedFrame,
-    TimelineEvent selectedEvent,
-    CpuProfileData cpuProfileData,
+    this.selectedEvent,
+    this.cpuProfileData,
     double displayRefreshRate,
-  })  : frames = frames ?? [],
+    List<TimelineEvent> timelineEvents,
+  })  : traceEvents = traceEvents ?? [],
+        frames = frames ?? [],
         displayRefreshRate = displayRefreshRate ?? defaultRefreshRate,
-        super(
-          TimelineMode.frameBased,
-          traceEvents: traceEvents ?? [],
-          selectedEvent: selectedEvent,
-          cpuProfileData: cpuProfileData,
-        );
+        timelineEvents = timelineEvents ?? [];
+
+  static const traceEventsKey = 'traceEvents';
+
+  static const cpuProfileKey = 'cpuProfile';
+
+  static const selectedEventKey = 'selectedEvent';
+
+  static const timelineModeKey = 'timelineMode';
+
+  static const devToolsScreenKey = 'dartDevToolsScreen';
+
+  static const uiKey = 'UI';
+
+  static const gpuKey = 'GPU';
+
+  static const unknownKey = 'Unknown';
 
   static const displayRefreshRateKey = 'displayRefreshRate';
 
   static const selectedFrameIdKey = 'selectedFrameId';
+
+  final List<TimelineEvent> timelineEvents;
+
+  final SplayTreeMap<String, TimelineEventGroup> eventGroups =
+      SplayTreeMap(eventGroupComparator);
+
+  /// List that will store trace events in the order we process them.
+  ///
+  /// These events are scrubbed so that bad data from the engine does not hinder
+  /// event processing or trace viewing. When the export timeline button is
+  /// clicked, this will be part of the output.
+  List<Map<String, dynamic>> traceEvents = [];
+
+  bool get isEmpty => traceEvents.isEmpty;
+
+  TimelineEvent selectedEvent;
+
+  CpuProfileData cpuProfileData;
 
   double displayRefreshRate;
 
@@ -43,49 +73,6 @@ class FrameBasedTimelineData extends TimelineData {
 
   String get selectedFrameId => selectedFrame?.id;
 
-  @override
-  Map<String, dynamic> get json => {
-        selectedFrameIdKey: selectedFrame?.id,
-        displayRefreshRateKey: displayRefreshRate,
-      }..addAll(super.json);
-
-  @override
-  int get displayDepth =>
-      selectedFrame.uiEventFlow.depth + selectedFrame.gpuEventFlow.depth;
-
-  @override
-  void clear() {
-    super.clear();
-    frames.clear();
-    selectedFrame = null;
-  }
-}
-
-class FullTimelineData extends TimelineData {
-  FullTimelineData({
-    List<Map<String, dynamic>> traceEvents,
-    TimelineEvent selectedEvent,
-    CpuProfileData cpuProfileData,
-    List<TimelineEvent> timelineEvents,
-  })  : timelineEvents = timelineEvents ?? [],
-        super(
-          TimelineMode.full,
-          traceEvents: traceEvents ?? [],
-          selectedEvent: selectedEvent,
-          cpuProfileData: cpuProfileData,
-        );
-
-  static const uiKey = 'UI';
-
-  static const gpuKey = 'GPU';
-
-  static const unknownKey = 'Unknown';
-
-  final List<TimelineEvent> timelineEvents;
-
-  final SplayTreeMap<String, FullTimelineEventGroup> eventGroups =
-      SplayTreeMap(eventGroupComparator);
-
   TimeRange time = TimeRange();
 
   /// The end timestamp for the data in this timeline.
@@ -95,32 +82,10 @@ class FullTimelineData extends TimelineData {
   int get endTimestampMicros => _endTimestampMicros;
   int _endTimestampMicros = -1;
 
-  /// Returns the number of rows needed to display this data.
-  ///
-  /// This factors in offsets necessary to display overlapping events.
-  @override
-  int get displayDepth {
-    if (_displayDepth != null) return _displayDepth;
-
-    if (eventGroups.isEmpty) {
-      initializeEventGroups();
-    }
-
-    int depth = 0;
-    for (var eventGroup in eventGroups.values) {
-      depth += eventGroup.displayDepth;
-    }
-    return depth;
-  }
-
-  int _displayDepth;
-
   void initializeEventGroups() {
-    timelineEvents.sort((a, b) =>
-        a.time.start.inMicroseconds.compareTo(b.time.start.inMicroseconds));
     for (TimelineEvent event in timelineEvents) {
       eventGroups.putIfAbsent(
-          _computeEventGroupKey(event), () => FullTimelineEventGroup())
+          _computeEventGroupKey(event), () => TimelineEventGroup())
         ..addEventAtCalculatedRow(event);
     }
   }
@@ -143,14 +108,20 @@ class FullTimelineData extends TimelineData {
     }
   }
 
-  @override
+  bool hasCpuProfileData() {
+    return cpuProfileData != null && cpuProfileData.stackFrames.isNotEmpty;
+  }
+
   void clear() {
-    super.clear();
+    traceEvents.clear();
+    selectedEvent = null;
+    cpuProfileData = null;
     timelineEvents.clear();
     eventGroups.clear();
     time = TimeRange();
-    _displayDepth = null;
     _endTimestampMicros = -1;
+    frames.clear();
+    selectedFrame = null;
   }
 
   // TODO(kenz): simplify this comparator if possible.
@@ -174,10 +145,19 @@ class FullTimelineData extends TimelineData {
     // Alphabetize all other buckets.
     return a.compareTo(b);
   }
+
+  Map<String, dynamic> get json => {
+        selectedFrameIdKey: selectedFrame?.id,
+        displayRefreshRateKey: displayRefreshRate,
+        traceEventsKey: traceEvents,
+        cpuProfileKey: cpuProfileData?.json ?? {},
+        selectedEventKey: selectedEvent?.json ?? {},
+        devToolsScreenKey: timelineScreenId,
+      };
 }
 
 // TODO(kenz): add tests for this class.
-class FullTimelineEventGroup {
+class TimelineEventGroup {
   /// At each index in the list, this stores row data for the row at index.
   ///
   /// We store data by row within the group in order to display events with
@@ -186,7 +166,7 @@ class FullTimelineEventGroup {
   /// events on a new flame chart row.
   ///
   /// If we have events A, B, C, and D, where all belong in a single
-  /// [FullTimelineEventGroup] but some overlap, the UI will look
+  /// [TimelineEventGroup] but some overlap, the UI will look
   /// like this:
   ///
   ///    [timeline_event_A]    [timeline_event_C]    <-- row 0
@@ -199,7 +179,7 @@ class FullTimelineEventGroup {
   ///   [timeline_event_B],
   ///   [timeline_event_D],
   /// ]
-  final rows = <FullTimelineRowData>[];
+  final rows = <TimelineRowData>[];
 
   int get displayDepth => rows.length;
 
@@ -251,7 +231,7 @@ class FullTimelineEventGroup {
   void _addEventAtDisplayRow(TimelineEvent event, {@required int row}) {
     if (row + event.displayDepth >= rows.length) {
       for (int i = rows.length; i < row + event.displayDepth; i++) {
-        rows.add(FullTimelineRowData());
+        rows.add(TimelineRowData());
       }
     }
 
@@ -268,9 +248,9 @@ class FullTimelineEventGroup {
   }
 }
 
-class FullTimelineRowData {
+class TimelineRowData {
   /// Timeline events that will be displayed in this row in a visualization of a
-  /// [FullTimelineEventGroup].
+  /// [TimelineEventGroup].
   final List<TimelineEvent> events = [];
 
   /// The last event for this row, where last means the event has the latest end
@@ -282,63 +262,8 @@ class FullTimelineRowData {
   TimelineEvent lastEvent;
 }
 
-abstract class TimelineData {
-  TimelineData(
-    this.timelineMode, {
-    List<Map<String, dynamic>> traceEvents,
-    this.selectedEvent,
-    this.cpuProfileData,
-  }) : traceEvents = traceEvents ?? [];
-
-  static const traceEventsKey = 'traceEvents';
-
-  static const cpuProfileKey = 'cpuProfile';
-
-  static const selectedEventKey = 'selectedEvent';
-
-  static const timelineModeKey = 'timelineMode';
-
-  static const devToolsScreenKey = 'dartDevToolsScreen';
-
-  final TimelineMode timelineMode;
-
-  /// List that will store trace events in the order we process them.
-  ///
-  /// These events are scrubbed so that bad data from the engine does not hinder
-  /// event processing or trace viewing. When the export timeline button is
-  /// clicked, this will be part of the output.
-  List<Map<String, dynamic>> traceEvents = [];
-
-  bool get isEmpty => traceEvents.isEmpty;
-
-  TimelineEvent selectedEvent;
-
-  CpuProfileData cpuProfileData;
-
-  Map<String, dynamic> get json => {
-        traceEventsKey: traceEvents,
-        cpuProfileKey: cpuProfileData?.json ?? {},
-        selectedEventKey: selectedEvent?.json ?? {},
-        timelineModeKey: timelineMode.toString(),
-        devToolsScreenKey: timelineScreenId,
-      };
-
-  int get displayDepth;
-
-  void clear() {
-    traceEvents.clear();
-    selectedEvent = null;
-    cpuProfileData = null;
-  }
-
-  bool hasCpuProfileData() {
-    return cpuProfileData != null && cpuProfileData.stackFrames.isNotEmpty;
-  }
-}
-
-class OfflineFrameBasedTimelineData extends FrameBasedTimelineData
-    with OfflineData<OfflineFrameBasedTimelineData> {
-  OfflineFrameBasedTimelineData._({
+class OfflineTimelineData extends TimelineData {
+  OfflineTimelineData._({
     List<Map<String, dynamic>> traceEvents,
     List<TimelineFrame> frames,
     TimelineFrame selectedFrame,
@@ -356,7 +281,7 @@ class OfflineFrameBasedTimelineData extends FrameBasedTimelineData
           cpuProfileData: cpuProfileData,
         );
 
-  static OfflineFrameBasedTimelineData parse(Map<String, dynamic> json) {
+  static OfflineTimelineData parse(Map<String, dynamic> json) {
     final List<dynamic> traceEvents =
         (json[TimelineData.traceEventsKey] ?? []).cast<Map<String, dynamic>>();
 
@@ -365,8 +290,7 @@ class OfflineFrameBasedTimelineData extends FrameBasedTimelineData
     final CpuProfileData cpuProfileData =
         cpuProfileJson.isNotEmpty ? CpuProfileData.parse(cpuProfileJson) : null;
 
-    final String selectedFrameId =
-        json[FrameBasedTimelineData.selectedFrameIdKey];
+    final String selectedFrameId = json[TimelineData.selectedFrameIdKey];
 
     final Map<String, dynamic> selectedEventJson =
         json[TimelineData.selectedEventKey] ?? {};
@@ -377,10 +301,9 @@ class OfflineFrameBasedTimelineData extends FrameBasedTimelineData
         : null;
 
     final double displayRefreshRate =
-        json[FrameBasedTimelineData.displayRefreshRateKey] ??
-            defaultRefreshRate;
+        json[TimelineData.displayRefreshRateKey] ?? defaultRefreshRate;
 
-    return OfflineFrameBasedTimelineData._(
+    return OfflineTimelineData._(
       traceEvents: traceEvents,
       selectedFrameId: selectedFrameId,
       selectedEvent: selectedEvent,
@@ -393,16 +316,15 @@ class OfflineFrameBasedTimelineData extends FrameBasedTimelineData
   String get selectedFrameId => _selectedFrameId;
   final String _selectedFrameId;
 
-  /// Creates a new instance of [OfflineFrameBasedTimelineData] with references to the
+  /// Creates a new instance of [OfflineTimelineData] with references to the
   /// same objects contained in this instance.
   ///
   /// This is not a deep copy. We are not modifying the before-mentioned
   /// objects, only pointing our reference variables at different objects.
   /// Therefore, we do not need to store a copy of all these objects (and the
   /// objects they contain) in memory.
-  @override
-  OfflineFrameBasedTimelineData shallowClone() {
-    return OfflineFrameBasedTimelineData._(
+  OfflineTimelineData shallowClone() {
+    return OfflineTimelineData._(
       traceEvents: traceEvents,
       frames: frames,
       selectedFrame: selectedFrame,
@@ -412,64 +334,6 @@ class OfflineFrameBasedTimelineData extends FrameBasedTimelineData
       cpuProfileData: cpuProfileData,
     );
   }
-}
-
-class OfflineFullTimelineData extends FullTimelineData
-    with OfflineData<OfflineFullTimelineData> {
-  OfflineFullTimelineData._({
-    List<Map<String, dynamic>> traceEvents,
-    TimelineEvent selectedEvent,
-    CpuProfileData cpuProfileData,
-  }) : super(
-          traceEvents: traceEvents,
-          selectedEvent: selectedEvent,
-          cpuProfileData: cpuProfileData,
-        );
-
-  static OfflineFullTimelineData parse(Map<String, dynamic> json) {
-    final List<dynamic> traceEvents =
-        List.from(json[TimelineData.traceEventsKey] ?? [])
-            .cast<Map<String, dynamic>>();
-
-    final Map<String, dynamic> cpuProfileJson =
-        json[TimelineData.cpuProfileKey] ?? {};
-    final CpuProfileData cpuProfileData =
-        cpuProfileJson.isNotEmpty ? CpuProfileData.parse(cpuProfileJson) : null;
-
-    final Map<String, dynamic> selectedEventJson =
-        json[TimelineData.selectedEventKey] ?? {};
-    final OfflineTimelineEvent selectedEvent = selectedEventJson.isNotEmpty
-        ? OfflineTimelineEvent(
-            (selectedEventJson[TimelineEvent.firstTraceKey] ?? {})
-                .cast<String, dynamic>())
-        : null;
-
-    return OfflineFullTimelineData._(
-      traceEvents: traceEvents,
-      selectedEvent: selectedEvent,
-      cpuProfileData: cpuProfileData,
-    );
-  }
-
-  /// Creates a new instance of [OfflineFullTimelineData] with references to the
-  /// same objects contained in this instance.
-  ///
-  /// This is not a deep clone. We are not modifying the before-mentioned
-  /// objects, only pointing our reference variables at different objects.
-  /// Therefore, we do not need to store a copy of all these objects (and the
-  /// objects they contain) in memory.
-  @override
-  OfflineFullTimelineData shallowClone() {
-    return OfflineFullTimelineData._(
-      traceEvents: traceEvents,
-      selectedEvent: selectedEvent,
-      cpuProfileData: cpuProfileData,
-    );
-  }
-}
-
-mixin OfflineData<T extends TimelineData> on TimelineData {
-  T shallowClone();
 }
 
 /// Wrapper class for [TimelineEvent] that only includes information we need for
@@ -530,26 +394,14 @@ class TimelineFrame {
 
   final String id;
 
-  /// Marks whether this frame has been added to the timeline.
-  ///
-  /// This should only be set once.
-  bool get addedToTimeline => _addedToTimeline;
-
-  bool _addedToTimeline;
-
-  set addedToTimeline(bool v) {
-    assert(_addedToTimeline == null);
-    _addedToTimeline = v;
-  }
-
   /// Event flows for the UI and GPU work for the frame.
-  final List<TimelineEvent> eventFlows = List.generate(2, (_) => null);
+  final List<SyncTimelineEvent> eventFlows = List.generate(2, (_) => null);
 
   /// Flow of events describing the UI work for the frame.
-  TimelineEvent get uiEventFlow => eventFlows[TimelineEventType.ui.index];
+  SyncTimelineEvent get uiEventFlow => eventFlows[TimelineEventType.ui.index];
 
   /// Flow of events describing the GPU work for the frame.
-  TimelineEvent get gpuEventFlow => eventFlows[TimelineEventType.gpu.index];
+  SyncTimelineEvent get gpuEventFlow => eventFlows[TimelineEventType.gpu.index];
 
   /// Whether the frame is ready for the timeline.
   ///
@@ -590,7 +442,7 @@ class TimelineFrame {
 
   CpuProfileData cpuProfileData;
 
-  void setEventFlow(TimelineEvent event, {TimelineEventType type}) {
+  void setEventFlow(SyncTimelineEvent event, {TimelineEventType type}) {
     type ??= event?.type;
     if (type == TimelineEventType.ui) {
       time.start = event?.time?.start;
