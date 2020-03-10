@@ -1,7 +1,8 @@
 os:
   - linux
   - osx
-  - windows
+  # TODO(devoncarew): Skip testing on windows bots to work around a travis regression.
+  #- windows
 
 language: dart
 dart:
