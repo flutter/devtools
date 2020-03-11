@@ -72,12 +72,11 @@ void main() {
 }
 
 class _TestScreen extends Screen {
-  const _TestScreen(this.name, this.key, [this.tabKey])
-      : super(DevToolsScreenType.simple, name, Icons.computer);
+  const _TestScreen(this.name, this.key, {Key tabKey})
+      : super(DevToolsScreenType.simple, name, Icons.computer, tabKey: tabKey);
 
   final String name;
   final Key key;
-  final Key tabKey;
 
   @override
   Widget build(BuildContext context) {
@@ -93,8 +92,8 @@ const k4 = Key('body key 4');
 const k5 = Key('body key 5');
 const t1 = Key('tab key 1');
 const t2 = Key('tab key 2');
-const screen1 = _TestScreen('screen1', k1, t1);
-const screen2 = _TestScreen('screen2', k2, t2);
+const screen1 = _TestScreen('screen1', k1, tabKey: t1);
+const screen2 = _TestScreen('screen2', k2, tabKey: t2);
 const screen3 = _TestScreen('screen3', k3);
 const screen4 = _TestScreen('screen4', k4);
 const screen5 = _TestScreen('screen5', k5);
