@@ -9,7 +9,7 @@
 │ maxLines: null [D]
 │ textWidthBasis: null [D]
 │ textHeightBehavior: null [D] <-- selected
-│ dependencies: [MediaQuery, DefaultTextStyle]
+│ dependencies: [DefaultTextStyle, MediaQuery]
 └─▼[/icons/inspector/textArea.png]RichText
     softWrap: wrapping at box width
     maxLines: unlimited
