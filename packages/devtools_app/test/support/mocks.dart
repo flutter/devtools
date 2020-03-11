@@ -201,7 +201,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<dynamic> clearCpuSamples(String isolateId) => Future.value(Success());
+  Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
 
   @override
   Future<bool> isHttpTimelineLoggingAvailable(String isolateId) =>
@@ -213,7 +213,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult);
 
   @override
-  Future<dynamic> setHttpEnableTimelineLogging(
+  Future<Success> setHttpEnableTimelineLogging(
     String isolateId,
     bool enable,
   ) async =>
