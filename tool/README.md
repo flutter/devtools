@@ -105,9 +105,10 @@ popd
 
 ```
 
-#### Revert the change to .gitignore
+#### Revert the change to .gitignore and pubspec files
 ```shell
 git checkout .gitignore
+git checkout packages/*/pubspec.yaml
 ```
 
 #### Create the tag for this release and push to the remote repository.
