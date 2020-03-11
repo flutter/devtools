@@ -742,7 +742,12 @@ class FlameChartNode<T> {
     @required bool hovered,
     @required double zoom,
   }) {
-    final zoomedWidth = rect.width * zoom;
+    // This math.max call prevents using a rect with negative width for
+    // small events that have padding.
+    //
+    // See https://github.com/flutter/devtools/issues/1503 for details.
+    final zoomedWidth = math.max(0.0, rect.width * zoom);
+
     // TODO(kenz): this is intended to improve performance but can probably be
     // improved. Perhaps we should still show a solid line and fade it out?
     if (zoomedWidth < 0.5) {
@@ -754,16 +759,12 @@ class FlameChartNode<T> {
 
     final node = Container(
       key: hovered ? null : key,
-      // This math.max call prevents using a rect with negative width for
-      // small events that have padding.
-      //
-      // See https://github.com/flutter/devtools/issues/1503 for details.
-      width: math.max(0.0, zoomedWidth),
+      width: zoomedWidth,
       height: rect.height,
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       alignment: Alignment.centerLeft,
       color: _backgroundColor(selected),
-      child: rect.width * zoom >= _minWidthForText
+      child: zoomedWidth >= _minWidthForText
           ? Text(
               text,
               textAlign: TextAlign.left,
@@ -806,8 +807,13 @@ class FlameChartNode<T> {
     // will not be zoomed, so return the original rect.
     if (!selectable) return rect;
 
-    final zoomedLeft = (rect.left - chartStartInset) * zoom + chartStartInset;
-    final zoomedWidth = rect.width * zoom;
+    // These math.max calls prevent using a rect with negative width for
+    // small events that have padding.
+    //
+    // See https://github.com/flutter/devtools/issues/1503 for details.
+    final zoomedLeft =
+        math.max(0.0, (rect.left - chartStartInset) * zoom + chartStartInset);
+    final zoomedWidth = math.max(0.0, rect.width * zoom);
     return Rect.fromLTWH(zoomedLeft, rect.top, zoomedWidth, rect.height);
   }
 }
