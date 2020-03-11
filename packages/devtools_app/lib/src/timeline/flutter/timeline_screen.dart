@@ -196,7 +196,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         ),
         // TODO(kenz): hide or disable button if http timeline logging is not
         // available.
-        _trackHttpButton(),
+        _logNetworkTrafficButton(),
         const SizedBox(width: 8.0),
         OutlineButton(
           onPressed: _exportTimeline,
@@ -210,7 +210,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Widget _trackHttpButton() {
+  Widget _logNetworkTrafficButton() {
     return ValueListenableBuilder(
       valueListenable: controller.httpTimelineLoggingEnabled,
       builder: (context, enabled, _) {
@@ -219,10 +219,10 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           children: [
             devToolsToggleButton(
               icon: Icons.language,
-              text: 'Track HTTP',
-              enabledTooltip: 'Disable HTTP timeline logging',
-              disabledTooltip: 'Enable HTTP timeline logging',
-              minIncludeTextWidth: 1200.0,
+              text: 'Log Network Traffic',
+              enabledTooltip: 'Stop logging network traffic',
+              disabledTooltip: 'Start logging network traffic',
+              minIncludeTextWidth: 1300.0,
               selected: enabled,
             ),
           ],
