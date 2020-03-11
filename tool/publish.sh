@@ -18,10 +18,9 @@ pub get
 perl -pi -e "s/^build\/\$/\# build\//g" .gitignore
 popd
 
+echo "Updating pubspecs to remove dependency overrides for development"
+perl -pi -e 's/^.*#OVERRIDE_FOR_DEVELOPMENT.*//' packages/*/pubspec.yaml
+
 set +x
 echo "Ready to publish."
-echo "Verify the package works, then publish the package, and finally, revert the change to .gitignore."
-echo "Publish by:"
-echo "cd packages/devtools"
-echo "pub publish"
-echo "git checkout .gitignore"
+echo "Verify the package works, then follow the steps in README.md to publish"
