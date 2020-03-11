@@ -213,7 +213,7 @@ class TimelineController implements DisposableController {
     }
 
     _processingNotifier.value = true;
-    await processTraceEvents(allTraceEvents);
+    await processTraceEvents(allTraceEvents, _vmStartRecordingMicros);
     _processingNotifier.value = false;
     _timelineProcessedController.add(true);
     await timelineService.updateListeningState(true);
@@ -223,8 +223,11 @@ class TimelineController implements DisposableController {
     data.addTimelineEvent(event);
   }
 
-  FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
-    await processor.processTimeline(traceEvents, _vmStartRecordingMicros);
+  FutureOr<void> processTraceEvents(
+    List<TraceEventWrapper> traceEvents,
+    int startRecordingMicros,
+  ) async {
+    await processor.processTimeline(traceEvents, startRecordingMicros);
     data.initializeEventGroups();
     if (data.eventGroups.isEmpty) {
       _emptyRecordingNotifier.value = true;
@@ -248,26 +251,22 @@ class TimelineController implements DisposableController {
 
     offlineTimelineData = offlineData.shallowClone();
     data = offlineData.shallowClone();
+
+    // Process offline data.
     processor.primeThreadIds(
       uiThreadId: uiThreadId,
       gpuThreadId: gpuThreadId,
     );
-    await processTraceEvents(traceEvents);
-
+    await processTraceEvents(traceEvents, 0);
     if (data.cpuProfileData != null) {
       await cpuProfilerController.transformer
           .processData(offlineTimelineData.cpuProfileData);
     }
 
+    // Set offline data.
     setOfflineData();
-    _loadOfflineDataController.add(offlineTimelineData);
 
-    if (offlineTimelineData.selectedEvent != null) {
-      // TODO(kenz): the flame chart should listen to this stream and
-      // programmatically select the flame chart node that corresponds to
-      // the selected event.
-      _selectedTimelineEventNotifier.value = offlineTimelineData.selectedEvent;
-    }
+    _loadOfflineDataController.add(offlineTimelineData);
   }
 
   int _threadIdForEvent(
@@ -284,10 +283,8 @@ class TimelineController implements DisposableController {
   }
 
   void setOfflineData() {
-    TimelineEvent eventToSelect;
-    final offlineData = offlineTimelineData;
-    final frameToSelect = offlineData.frames.firstWhere(
-      (frame) => frame.id == offlineData.selectedFrameId,
+    final frameToSelect = offlineTimelineData.frames.firstWhere(
+      (frame) => frame.id == offlineTimelineData.selectedFrameId,
       orElse: () => null,
     );
     if (frameToSelect != null) {
@@ -296,24 +293,20 @@ class TimelineController implements DisposableController {
       // programmatially select the frame from the offline snapshot.
       _selectedFrameNotifier.value = frameToSelect;
     }
-    if (offlineData.selectedEvent != null) {
+    if (offlineTimelineData.selectedEvent != null) {
       for (var timelineEvent in data.timelineEvents) {
-        final e = timelineEvent.firstChildWithCondition((event) {
-          return event.name == offlineData.selectedEvent.name &&
-              event.time == offlineData.selectedEvent.time;
+        final eventToSelect = timelineEvent.firstChildWithCondition((event) {
+          return event.name == offlineTimelineData.selectedEvent.name &&
+              event.time == offlineTimelineData.selectedEvent.time;
         });
-        if (e != null) {
-          eventToSelect = e;
+        if (eventToSelect != null) {
+          data
+            ..selectedEvent = eventToSelect
+            ..cpuProfileData = offlineTimelineData.cpuProfileData;
+          _selectedTimelineEventNotifier.value = eventToSelect;
           break;
         }
       }
-    }
-
-    if (eventToSelect != null) {
-      data
-        ..selectedEvent = eventToSelect
-        ..cpuProfileData = offlineTimelineData.cpuProfileData;
-      _selectedTimelineEventNotifier.value = eventToSelect;
     }
 
     if (offlineTimelineData.cpuProfileData != null) {
@@ -346,6 +339,7 @@ class TimelineController implements DisposableController {
     _processingNotifier.value = false;
     _emptyRecordingNotifier.value = false;
     _clearController.add(true);
+    _vmStartRecordingMicros = null;
   }
 
   void recordTrace(Map<String, dynamic> trace) {

@@ -42,7 +42,12 @@ class ImportController {
 
   final ProvidedControllers _controllers;
 
+  bool importing = false;
+
   void importData(Map<String, dynamic> json) {
+    if (importing) return;
+    importing = true;
+
     final devToolsScreen = json['dartDevToolsScreen'];
     if (devToolsScreen == null) {
       _notifications.push(nonDevToolsFileMessage);
@@ -60,6 +65,8 @@ class ImportController {
         _notifications.push(unsupportedDevToolsFileMessage(devToolsScreen));
         return;
     }
+
+    importing = false;
   }
 
   void _importTimeline(Map<String, dynamic> json) async {

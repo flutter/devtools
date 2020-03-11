@@ -72,6 +72,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   bool recording = false;
   bool processing = false;
   double processingProgress = 0.0;
+  TimelineEvent selectedEvent;
 
   @override
   void didChangeDependencies() {
@@ -98,6 +99,12 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         processingProgress = controller.processor.progressNotifier.value;
       });
     });
+    addAutoDisposeListener(controller.selectedFrame);
+    addAutoDisposeListener(controller.selectedTimelineEvent, () {
+      setState(() {
+        selectedEvent = controller.selectedTimelineEvent.value;
+      });
+    });
   }
 
   @override
@@ -114,18 +121,13 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         // TODO(kenz): hide the bar chart if the connected app is not a Flutter
         // app.
         const FlutterFramesChart(),
-        ValueListenableBuilder<TimelineFrame>(
-          valueListenable: controller.selectedFrame,
-          builder: (context, selectedFrame, _) {
-            return Expanded(
-              child: Split(
-                axis: Axis.vertical,
-                firstChild: _buildFlameChartSection(),
-                secondChild: _buildEventDetailsSection(),
-                initialFirstFraction: 0.6,
-              ),
-            );
-          },
+        Expanded(
+          child: Split(
+            axis: Axis.vertical,
+            firstChild: _buildFlameChartSection(selectedEvent),
+            secondChild: EventDetails(selectedEvent),
+            initialFirstFraction: 0.6,
+          ),
         ),
       ],
     );
@@ -204,7 +206,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Widget _buildFlameChartSection() {
+  Widget _buildFlameChartSection(TimelineEvent selectedEvent) {
     Widget content;
     final timelineEmpty = (controller.data?.isEmpty ?? true) ||
         controller.data.eventGroups.isEmpty;
@@ -223,16 +225,11 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     } else {
       content = LayoutBuilder(
         builder: (context, constraints) {
-          return ValueListenableBuilder(
-            valueListenable: controller.selectedTimelineEvent,
-            builder: (context, selectedEvent, _) {
-              return TimelineFlameChart(
-                controller.data,
-                width: constraints.maxWidth,
-                selected: selectedEvent,
-                onSelection: (e) => controller.selectTimelineEvent(e),
-              );
-            },
+          return TimelineFlameChart(
+            controller.data,
+            width: constraints.maxWidth,
+            selected: selectedEvent,
+            onSelection: (e) => controller.selectTimelineEvent(e),
           );
         },
       );
@@ -258,15 +255,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       processing: processing,
       progressValue: processingProgress,
       recordedObject: 'timeline trace',
-    );
-  }
-
-  Widget _buildEventDetailsSection() {
-    return ValueListenableBuilder<TimelineEvent>(
-      valueListenable: controller.selectedTimelineEvent,
-      builder: (context, selectedEvent, _) {
-        return EventDetails(selectedEvent);
-      },
     );
   }
 
