@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:html_shim/html.dart' hide Point;
+import 'dart:html' hide Point;
 
 /// Override of the default document root to allow DevTools to work
 /// inside of a shadow DOM.

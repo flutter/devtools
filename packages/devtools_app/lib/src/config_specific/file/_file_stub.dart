@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This library exists purely as a workaround for bugs exporting 'dart:js_util'
-// directly from a conditional export.
+import 'file.dart';
 
-export 'dart:js_util';
+FileIO createFileSystem() {
+  throw Exception('Attempting to create FileSystem for unrecognized platform.');
+}

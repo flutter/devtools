@@ -8,11 +8,6 @@ set -x #echo on
 
 pushd packages/devtools_app
 
-# TODO(terry): Look at using dependency_overrides to work around transitive dependencies w/ import.
-# Shared file between devtoools_server and devtools_app
-echo '// DO NOT EDIT - edit devtools_server/lib/src/devtools_api.dart.' > lib/src/devtools_api.dart
-cat ../devtools_server/lib/src/devtools_api.dart >> lib/src/devtools_api.dart
-
 rm -rf build
 rm -rf ../devtools/build
 flutter pub get

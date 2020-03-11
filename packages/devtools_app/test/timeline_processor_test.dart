@@ -312,6 +312,20 @@ void main() {
         equals('  D [193937061035 μs - 193938741076 μs]\n'),
       );
     });
+
+    test('processes trace with duplicate events', () async {
+      expect(
+        processor.timelineController.fullTimeline.data.timelineEvents,
+        isEmpty,
+      );
+      await processor.processTimeline(durationEventsWithDuplicateTraces);
+      // If the processor is not handling duplicates properly, this value would
+      // be 0.
+      expect(
+        processor.timelineController.fullTimeline.data.timelineEvents.length,
+        equals(1),
+      );
+    });
   });
 
   group('TimelineProcessor', () {

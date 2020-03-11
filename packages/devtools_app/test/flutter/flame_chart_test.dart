@@ -8,6 +8,7 @@ import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/ui/colors.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:devtools_testing/support/timeline_test_data.dart';
 import 'package:flutter/material.dart';
@@ -157,16 +158,6 @@ void main() {
       startInset: sideInset,
       selected: null,
       zoom: FlameChartState.minZoomLevel,
-      cacheExtent: null,
-    );
-    final testRowWithoutLabel = ScrollingFlameChartRow(
-      linkedScrollControllerGroup: linkedScrollControllerGroup,
-      nodes: testNodesWithoutLabel,
-      width: 610.0, // 610.0 fits all test nodes and sideInsets of 70.0.
-      startInset: sideInset,
-      selected: null,
-      zoom: FlameChartState.minZoomLevel,
-      cacheExtent: null,
     );
     final zoomedTestRow = ScrollingFlameChartRow(
       linkedScrollControllerGroup: linkedScrollControllerGroup,
@@ -176,7 +167,6 @@ void main() {
       startInset: sideInset,
       selected: null,
       zoom: 2.0,
-      cacheExtent: null,
     );
 
     Future<void> pumpScrollingFlameChartRow(
@@ -186,7 +176,15 @@ void main() {
       await tester.pumpWidget(Container(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: currentRow = row,
+          child: Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder: (context) {
+                  return currentRow = row;
+                },
+              ),
+            ],
+          ),
         ),
       ));
     }
@@ -219,7 +217,6 @@ void main() {
         startInset: sideInset,
         selected: null,
         zoom: FlameChartState.minZoomLevel,
-        cacheExtent: null,
       );
 
       await pumpScrollingFlameChartRow(tester, emptyRow);
@@ -264,58 +261,6 @@ void main() {
       expect(rowState.binarySearchForNode(1010.0), equals(testNode4));
       expect(rowState.binarySearchForNode(1010.1), isNull);
       expect(rowState.binarySearchForNode(10000), isNull);
-    });
-
-    testWidgets('leftPaddingForNode returns correct value for un-zoomed row',
-        (WidgetTester tester) async {
-      var rowState = await pumpRowAndGetState(tester);
-      expect(rowState.leftPaddingForNode(0), equals(2.0));
-      expect(rowState.leftPaddingForNode(1), equals(0.0));
-      expect(rowState.leftPaddingForNode(2), equals(0.0));
-      expect(rowState.leftPaddingForNode(3), equals(0.0));
-      expect(rowState.leftPaddingForNode(4), equals(0.0));
-
-      rowState = await pumpRowAndGetState(tester, row: testRowWithoutLabel);
-      expect(rowState.leftPaddingForNode(0), equals(70.0));
-      expect(rowState.leftPaddingForNode(1), equals(0.0));
-      expect(rowState.leftPaddingForNode(2), equals(0.0));
-      expect(rowState.leftPaddingForNode(3), equals(0.0));
-    });
-
-    testWidgets('rightPaddingForNode returns correct value for un-zoomed row',
-        (WidgetTester tester) async {
-      var rowState = await pumpRowAndGetState(tester);
-      expect(rowState.rightPaddingForNode(0), equals(48.0));
-      expect(rowState.rightPaddingForNode(1), equals(28.0));
-      expect(rowState.rightPaddingForNode(2), equals(10.0));
-      expect(rowState.rightPaddingForNode(3), equals(10.0));
-      expect(rowState.rightPaddingForNode(4), equals(70.0));
-
-      rowState = await pumpRowAndGetState(tester, row: testRowWithoutLabel);
-      expect(rowState.rightPaddingForNode(0), equals(28.0));
-      expect(rowState.rightPaddingForNode(1), equals(10.0));
-      expect(rowState.rightPaddingForNode(2), equals(10.0));
-      expect(rowState.rightPaddingForNode(3), equals(70.0));
-    });
-
-    testWidgets('leftPaddingForNode returns correct value for zoomed row',
-        (WidgetTester tester) async {
-      final rowState = await pumpRowAndGetState(tester, row: zoomedTestRow);
-      expect(rowState.leftPaddingForNode(0), equals(2.0));
-      expect(rowState.leftPaddingForNode(1), equals(0.0));
-      expect(rowState.leftPaddingForNode(2), equals(0.0));
-      expect(rowState.leftPaddingForNode(3), equals(0.0));
-      expect(rowState.leftPaddingForNode(4), equals(0.0));
-    });
-
-    testWidgets('rightPaddingForNode returns correct value for zoomed row',
-        (WidgetTester tester) async {
-      final rowState = await pumpRowAndGetState(tester, row: zoomedTestRow);
-      expect(rowState.rightPaddingForNode(0), equals(48.0));
-      expect(rowState.rightPaddingForNode(1), equals(56.0));
-      expect(rowState.rightPaddingForNode(2), equals(20.0));
-      expect(rowState.rightPaddingForNode(3), equals(20.0));
-      expect(rowState.rightPaddingForNode(4), equals(70.0));
     });
   });
 
@@ -367,36 +312,42 @@ void main() {
       ));
     }
 
-    testWidgets('builds with correct colors for selected state',
-        (WidgetTester tester) async {
-      await pumpFlameChartNode(tester, selected: true, hovered: false);
-      expect(nodeFinder, findsOneWidget);
-      final Container nodeWidget = tester.widget(nodeFinder);
-      expect(
-        (nodeWidget.decoration as BoxDecoration).color,
-        equals(mainUiColorSelectedLight),
-      );
+    testWidgets(
+      'builds with correct colors for selected state',
+      (WidgetTester tester) async {
+        await pumpFlameChartNode(tester, selected: true, hovered: false);
+        expect(nodeFinder, findsOneWidget);
+        final Container nodeWidget = tester.widget(nodeFinder);
+        expect(
+          (nodeWidget.decoration as BoxDecoration).color,
+          equals(mainUiColorSelectedLight),
+        );
 
-      expect(textFinder, findsOneWidget);
-      final Text textWidget = tester.widget(textFinder);
-      expect(textWidget.style.color, equals(Colors.black));
-    });
+        expect(textFinder, findsOneWidget);
+        final Text textWidget = tester.widget(textFinder);
+        expect(textWidget.style.color, equals(Colors.black));
+      },
+      skip: true,
+    );
 
-    testWidgets('builds with correct colors for non-selected state',
-        (WidgetTester tester) async {
-      await pumpFlameChartNode(tester, selected: false, hovered: false);
+    testWidgets(
+      'builds with correct colors for non-selected state',
+      (WidgetTester tester) async {
+        await pumpFlameChartNode(tester, selected: false, hovered: false);
 
-      expect(nodeFinder, findsOneWidget);
-      final Container nodeWidget = tester.widget(nodeFinder);
-      expect(
-        (nodeWidget.decoration as BoxDecoration).color,
-        equals(Colors.blue),
-      );
+        expect(nodeFinder, findsOneWidget);
+        final Container nodeWidget = tester.widget(nodeFinder);
+        expect(
+          (nodeWidget.decoration as BoxDecoration).color,
+          equals(Colors.blue),
+        );
 
-      expect(textFinder, findsOneWidget);
-      final Text textWidget = tester.widget(textFinder);
-      expect(textWidget.style.color, equals(Colors.white));
-    });
+        expect(textFinder, findsOneWidget);
+        final Text textWidget = tester.widget(textFinder);
+        expect(textWidget.style.color, equals(Colors.white));
+      },
+      skip: true,
+    );
 
     testWidgets('builds tooltip for hovered state',
         (WidgetTester tester) async {
@@ -473,6 +424,206 @@ void main() {
       expect(nodeFinder, findsOneWidget);
       nodeWidget = tester.widget(nodeFinder);
       expect(nodeWidget.constraints.maxWidth, equals(55.0));
+    });
+  });
+
+  group('NodeListExtension', () {
+    test(
+        'toPaddedZoomedIntervals calculation is accurate for unzoomed row with'
+        ' label', () {
+      final paddedZoomedIntervals = testNodesWithLabel.toPaddedZoomedIntervals(
+        zoom: 1.0,
+        chartStartInset: sideInset,
+        chartWidth: 610.0,
+      );
+      expect(paddedZoomedIntervals[0], equals(const Range(0.0, 70.0)));
+      expect(paddedZoomedIntervals[1], equals(const Range(70.0, 120.0)));
+      expect(paddedZoomedIntervals[2], equals(const Range(120.0, 180.0)));
+      expect(paddedZoomedIntervals[3], equals(const Range(180.0, 240.0)));
+      expect(paddedZoomedIntervals[4], equals(const Range(240.0, 610.0)));
+    });
+
+    test(
+        'toPaddedZoomedIntervals calculation is accurate for unzoomed row '
+        'without label', () {
+      final paddedZoomedIntervals =
+          testNodesWithoutLabel.toPaddedZoomedIntervals(
+        zoom: 1.0,
+        chartStartInset: sideInset,
+        chartWidth: 610.0,
+      );
+      expect(paddedZoomedIntervals[0], equals(const Range(0.0, 120.0)));
+      expect(paddedZoomedIntervals[1], equals(const Range(120.0, 180.0)));
+      expect(paddedZoomedIntervals[2], equals(const Range(180.0, 240.0)));
+      expect(paddedZoomedIntervals[3], equals(const Range(240.0, 610.0)));
+    });
+
+    test(
+        'toPaddedZoomedIntervals calculation is accurate for zoomed row with '
+        'label', () {
+      final paddedZoomedIntervals = testNodesWithLabel.toPaddedZoomedIntervals(
+        zoom: 2.0,
+        chartStartInset: sideInset,
+        chartWidth: 1080.0,
+      );
+      expect(paddedZoomedIntervals[0], equals(const Range(0.0, 70.0)));
+      expect(paddedZoomedIntervals[1], equals(const Range(70.0, 170.0)));
+      expect(paddedZoomedIntervals[2], equals(const Range(170.0, 290.0)));
+      expect(paddedZoomedIntervals[3], equals(const Range(290.0, 410.0)));
+      expect(paddedZoomedIntervals[4], equals(const Range(410.0, 1080.0)));
+    });
+
+    test(
+        'toPaddedZoomedIntervals calculation is accurate for zoomed row without'
+        ' label', () {
+      final paddedZoomedIntervals =
+          testNodesWithoutLabel.toPaddedZoomedIntervals(
+        zoom: 2.0,
+        chartStartInset: sideInset,
+        chartWidth: 1080.0,
+      );
+      expect(paddedZoomedIntervals[0], equals(const Range(0.0, 170.0)));
+      expect(paddedZoomedIntervals[1], equals(const Range(170.0, 290.0)));
+      expect(paddedZoomedIntervals[2], equals(const Range(290.0, 410.0)));
+      expect(paddedZoomedIntervals[3], equals(const Range(410.0, 1080.0)));
+    });
+  });
+
+  group('FlameChartUtils', () {
+    test('leftPaddingForNode returns correct value for un-zoomed row', () {
+      // Row with label.
+      expect(
+          FlameChartUtils.leftPaddingForNode(0, testNodesWithLabel,
+              chartZoom: 1.0, chartStartInset: sideInset),
+          equals(2.0));
+      expect(
+          FlameChartUtils.leftPaddingForNode(1, testNodesWithLabel,
+              chartZoom: 1.0, chartStartInset: sideInset),
+          equals(0.0));
+      expect(
+          FlameChartUtils.leftPaddingForNode(2, testNodesWithLabel,
+              chartZoom: 1.0, chartStartInset: sideInset),
+          equals(0.0));
+      expect(
+          FlameChartUtils.leftPaddingForNode(3, testNodesWithLabel,
+              chartZoom: 1.0, chartStartInset: sideInset),
+          equals(0.0));
+      expect(
+          FlameChartUtils.leftPaddingForNode(4, testNodesWithLabel,
+              chartZoom: 1.0, chartStartInset: sideInset),
+          equals(0.0));
+
+      // Row without label.
+      expect(
+          FlameChartUtils.leftPaddingForNode(0, testNodesWithoutLabel,
+              chartZoom: 1.0, chartStartInset: sideInset),
+          equals(70.0));
+      expect(
+          FlameChartUtils.leftPaddingForNode(1, testNodesWithoutLabel,
+              chartZoom: 1.0, chartStartInset: sideInset),
+          equals(0.0));
+      expect(
+          FlameChartUtils.leftPaddingForNode(2, testNodesWithoutLabel,
+              chartZoom: 1.0, chartStartInset: sideInset),
+          equals(0.0));
+      expect(
+          FlameChartUtils.leftPaddingForNode(3, testNodesWithoutLabel,
+              chartZoom: 1.0, chartStartInset: sideInset),
+          equals(0.0));
+    });
+
+    test('rightPaddingForNode returns correct value for un-zoomed row', () {
+      // Row with label.
+      expect(
+          FlameChartUtils.rightPaddingForNode(0, testNodesWithLabel,
+              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
+          equals(48.0));
+      expect(
+          FlameChartUtils.rightPaddingForNode(1, testNodesWithLabel,
+              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
+          equals(28.0));
+      expect(
+          FlameChartUtils.rightPaddingForNode(2, testNodesWithLabel,
+              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
+          equals(10.0));
+      expect(
+          FlameChartUtils.rightPaddingForNode(3, testNodesWithLabel,
+              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
+          equals(10.0));
+      expect(
+          FlameChartUtils.rightPaddingForNode(4, testNodesWithLabel,
+              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
+          equals(70.0));
+
+      // Row without label.
+      expect(
+          FlameChartUtils.rightPaddingForNode(0, testNodesWithoutLabel,
+              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
+          equals(28.0));
+      expect(
+          FlameChartUtils.rightPaddingForNode(1, testNodesWithoutLabel,
+              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
+          equals(10.0));
+      expect(
+          FlameChartUtils.rightPaddingForNode(2, testNodesWithoutLabel,
+              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
+          equals(10.0));
+      expect(
+          FlameChartUtils.rightPaddingForNode(3, testNodesWithoutLabel,
+              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
+          equals(70.0));
+    });
+
+    test('leftPaddingForNode returns correct value for zoomed row', () {
+      expect(
+          FlameChartUtils.leftPaddingForNode(0, testNodesWithLabel,
+              chartZoom: 2.0, chartStartInset: sideInset),
+          equals(2.0));
+      expect(
+          FlameChartUtils.leftPaddingForNode(1, testNodesWithLabel,
+              chartZoom: 2.0, chartStartInset: sideInset),
+          equals(0.0));
+      expect(
+          FlameChartUtils.leftPaddingForNode(2, testNodesWithLabel,
+              chartZoom: 2.0, chartStartInset: sideInset),
+          equals(0.0));
+      expect(
+          FlameChartUtils.leftPaddingForNode(3, testNodesWithLabel,
+              chartZoom: 2.0, chartStartInset: sideInset),
+          equals(0.0));
+      expect(
+          FlameChartUtils.leftPaddingForNode(4, testNodesWithLabel,
+              chartZoom: 2.0, chartStartInset: sideInset),
+          equals(0.0));
+    });
+
+    test('rightPaddingForNode returns correct value for zoomed row', () {
+      expect(
+          FlameChartUtils.rightPaddingForNode(0, testNodesWithLabel,
+              chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
+          equals(48.0));
+      expect(
+          FlameChartUtils.rightPaddingForNode(1, testNodesWithLabel,
+              chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
+          equals(56.0));
+      expect(
+          FlameChartUtils.rightPaddingForNode(2, testNodesWithLabel,
+              chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
+          equals(20.0));
+      expect(
+          FlameChartUtils.rightPaddingForNode(3, testNodesWithLabel,
+              chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
+          equals(20.0));
+      expect(
+          FlameChartUtils.rightPaddingForNode(4, testNodesWithLabel,
+              chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
+          equals(70.0));
+    });
+
+    test('zoomForNode returns correct values', () {
+      expect(FlameChartUtils.zoomForNode(labelNode, 2.0), equals(1.0));
+      expect(FlameChartUtils.zoomForNode(testNode, 3.0), equals(3.0));
+      expect(FlameChartUtils.zoomForNode(testNode4, 10.0), equals(10.0));
     });
   });
 }

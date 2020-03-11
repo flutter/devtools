@@ -251,7 +251,9 @@ class TimelineController implements DisposableController {
 
   Future<void> _offlineModeChanged() async {
     await clearData();
-    await timelineService.updateListeningState(true);
+    if (serviceManager.connectedApp != null) {
+      await timelineService.updateListeningState(true);
+    }
   }
 
   Future<void> toggleHttpRequestLogging(bool state) async {

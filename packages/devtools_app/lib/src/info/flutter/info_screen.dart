@@ -107,13 +107,47 @@ class _VersionInformation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTaggedText(
-      '<bold>Flutter: </bold>${flutterVersion.flutterVersionSummary}\n'
-      '<bold>Framework: </bold>${flutterVersion.frameworkVersionSummary}\n'
-      '<bold>Engine: </bold>${flutterVersion.engineVersionSummary}\n'
-      '<bold>Dart SDK: </bold>${flutterVersion.dartSdkVersion}\n'
-      '<bold>DevTools: </bold>${devtools.version}\n',
+    const boldText = TextStyle(fontWeight: FontWeight.bold);
+    const contentPadding = 8.0;
+    return Column(
       key: InfoScreen.flutterVersionKey,
+      children: [
+        Row(
+          children: [
+            const Text('Flutter:', style: boldText),
+            const SizedBox(width: contentPadding),
+            Text(flutterVersion.flutterVersionSummary),
+          ],
+        ),
+        Row(
+          children: [
+            const Text('Framework:', style: boldText),
+            const SizedBox(width: contentPadding),
+            Text(flutterVersion.frameworkVersionSummary),
+          ],
+        ),
+        Row(
+          children: [
+            const Text('Engine:', style: boldText),
+            const SizedBox(width: contentPadding),
+            Text(flutterVersion.engineVersionSummary),
+          ],
+        ),
+        Row(
+          children: [
+            const Text('Dart SDK:', style: boldText),
+            const SizedBox(width: contentPadding),
+            Text(flutterVersion.dartSdkVersion),
+          ],
+        ),
+        Row(
+          children: const [
+            Text('DevTools:', style: boldText),
+            SizedBox(width: contentPadding),
+            Text(devtools.version),
+          ],
+        ),
+      ],
     );
   }
 }

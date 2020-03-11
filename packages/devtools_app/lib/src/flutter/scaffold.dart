@@ -203,8 +203,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     const title = Text('Dart DevTools');
     Widget flexibleSpace;
     Size preferredSize;
+    TabBar tabBar;
+
     if (widget.tabs.length > 1) {
-      final tabs = TabBar(
+      tabBar = TabBar(
         controller: _tabController,
         isScrollable: true,
         onTap: _pushScreenToLocalPageRoute,
@@ -212,17 +214,21 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       );
       preferredSize = Tween<Size>(
         begin: Size.fromHeight(kToolbarHeight),
-        end: Size.fromHeight(kToolbarHeight + tabs.preferredSize.height),
+        end: Size.fromHeight(kToolbarHeight + tabBar.preferredSize.height),
       ).evaluate(appBarCurve);
       final animatedAlignment = Tween<Alignment>(
         begin: Alignment.centerRight,
         end: Alignment.bottomCenter,
       ).evaluate(appBarCurve);
+
+      final rightEdge = isNarrow ? 0.0 : DevToolsScaffold.actionWidgetSize / 2;
       final animatedRightPadding = Tween<double>(
-        begin:
-            DevToolsScaffold.actionWidgetSize * (widget.actions?.length ?? 0.0),
-        end: 0.0,
+        begin: DevToolsScaffold.actionWidgetSize *
+                (widget.actions?.length ?? 0.0) +
+            rightEdge,
+        end: rightEdge,
       ).evaluate(appBarCurve);
+
       flexibleSpace = Align(
         alignment: animatedAlignment,
         child: Padding(
@@ -230,7 +236,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             top: 4.0,
             right: animatedRightPadding,
           ),
-          child: tabs,
+          child: tabBar,
         ),
       );
     }
@@ -244,6 +250,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     );
 
     if (flexibleSpace == null) return appBar;
+
     return PreferredSize(
       key: isNarrow
           ? DevToolsScaffold.narrowWidthKey

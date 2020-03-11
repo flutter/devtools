@@ -66,9 +66,8 @@ class MemoryJson {
 
     // Iterate over all HeapSamples collected.
     data.map((f) {
-      final encode = result.isNotEmpty
-          ? encodeAnotherHeapSample(f)
-          : encodeHeapSample(f);
+      final encode =
+          result.isNotEmpty ? encodeAnotherHeapSample(f) : encodeHeapSample(f);
       result.write(encode);
     }).toList();
 

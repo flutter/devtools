@@ -7,15 +7,19 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
 import 'package:shelf_static/shelf_static.dart';
 import 'package:sse/server/sse_handler.dart';
-import 'package:usage/usage_io.dart';
 
 import 'client_manager.dart';
-import 'devtools_api.dart';
+import 'usage.dart';
+
+// DO NOT IMPORT THIS FILE into any files other than `devtools_server.dart`.
+// This file is overwritten for internal DevTools builds, so any file depending
+// on `external_handlers.dart` would break internally.
 
 /// Default [shelf.Handler] for serving DevTools files.
 ///
@@ -72,6 +76,8 @@ Future<shelf.Handler> defaultHandler(ClientManager clients) async {
 ///
 /// This defines endpoints that serve all requests that come in over api/.
 class ServerApi {
+  static const errorNoActiveSurvey = 'ERROR: setActiveSurvey not called.';
+
   /// Determines whether or not [request] is an API call.
   static bool canHandle(shelf.Request request) {
     return request.url.path.startsWith(apiPrefix);
@@ -107,6 +113,7 @@ class ServerApi {
               );
 
       // ----- DevTools GA store. -----
+
       case apiResetDevTools:
         _devToolsUsage.reset();
         return api.getCompleted(request, json.encode(true));
@@ -129,14 +136,45 @@ class ServerApi {
         return api.setCompleted(request, json.encode(_devToolsUsage.enabled));
 
       // ----- DevTools survey store. -----
+
+      case apiSetActiveSurvey:
+        // Assume failure.
+        bool result = false;
+
+        // Set the active survey used to store subsequent apiGetSurveyActionTaken,
+        // apiSetSurveyActionTaken, apiGetSurveyShownCount, and
+        // apiIncrementSurveyShownCount calls.
+        final queryParams = request.requestedUri.queryParameters;
+        if (queryParams.keys.length == 1 &&
+            queryParams.containsKey(activeSurveyName)) {
+          final String theSurveyName = queryParams[activeSurveyName];
+
+          // Set the current activeSurvey.
+          _devToolsUsage.activeSurvey = theSurveyName;
+          result = true;
+        }
+
+        return api.getCompleted(request, json.encode(result));
       case apiGetSurveyActionTaken:
+        // Request setActiveSurvey has not been requested.
+        if (_devToolsUsage.activeSurvey == null) {
+          return api.badRequest('$errorNoActiveSurvey '
+              '- $apiGetSurveyActionTaken');
+        }
         // SurveyActionTaken has the survey been acted upon (taken or dismissed)
         return api.getCompleted(
-            request, json.encode(_devToolsUsage.surveyActionTaken));
+          request,
+          json.encode(_devToolsUsage.surveyActionTaken),
+        );
       // TODO(terry): remove the query param logic for this request.
       // setSurveyActionTaken should only be called with the value of true, so
       // we can remove the extra complexity.
       case apiSetSurveyActionTaken:
+        // Request setActiveSurvey has not been requested.
+        if (_devToolsUsage.activeSurvey == null) {
+          return api.badRequest('$errorNoActiveSurvey '
+              '- $apiSetSurveyActionTaken');
+        }
         // Set the SurveyActionTaken.
         // Has the survey been taken or dismissed..
         final queryParams = request.requestedUri.queryParameters;
@@ -149,12 +187,22 @@ class ServerApi {
           json.encode(_devToolsUsage.surveyActionTaken),
         );
       case apiGetSurveyShownCount:
+        // Request setActiveSurvey has not been requested.
+        if (_devToolsUsage.activeSurvey == null) {
+          return api.badRequest('$errorNoActiveSurvey '
+              '- $apiGetSurveyShownCount');
+        }
         // SurveyShownCount how many times have we asked to take survey.
         return api.getCompleted(
           request,
           json.encode(_devToolsUsage.surveyShownCount),
         );
       case apiIncrementSurveyShownCount:
+        // Request setActiveSurvey has not been requested.
+        if (_devToolsUsage.activeSurvey == null) {
+          return api.badRequest('$errorNoActiveSurvey '
+              '- $apiIncrementSurveyShownCount');
+        }
         // Increment the SurveyShownCount, we've asked about the survey.
         _devToolsUsage.incrementSurveyShownCount();
         return api.getCompleted(
@@ -190,187 +238,20 @@ class ServerApi {
   FutureOr<shelf.Response> setCompleted(shelf.Request request, String value) =>
       shelf.Response.ok('$value');
 
+  /// A [shelf.Response] for API calls that encountered a request problem e.g.,
+  /// setActiveSurvey not called.
+  ///
+  /// This is a 400 Bad Request response.
+  FutureOr<shelf.Response> badRequest([String logError]) {
+    if (logError != null) print(logError);
+    return shelf.Response(HttpStatus.badRequest);
+  }
+
   /// A [shelf.Response] for API calls that have not been implemented in this
   /// server.
   ///
   /// This is a no-op 204 No Content response because returning 404 Not Found
   /// creates unnecessary noise in the console.
   FutureOr<shelf.Response> notImplemented(shelf.Request request) =>
-      shelf.Response(204);
-}
-
-/// Access the file '~/.flutter'.
-class FlutterUsage {
-  /// Create a new Usage instance; [versionOverride] and [configDirOverride] are
-  /// used for testing.
-  FlutterUsage({
-    String settingsName = 'flutter',
-    String versionOverride,
-    String configDirOverride,
-  }) {
-    _analytics = AnalyticsIO('', settingsName, '', documentDirectory: null);
-  }
-
-  Analytics _analytics;
-
-  /// Does the .flutter store exist?
-  static bool get doesStoreExist {
-    final flutterStore = File('${DevToolsUsage.userHomeDir()}/.flutter');
-    return flutterStore.existsSync();
-  }
-
-  bool get isFirstRun => _analytics.firstRun;
-
-  bool get enabled => _analytics.enabled;
-
-  set enabled(bool value) => _analytics.enabled = value;
-
-  String get clientId => _analytics.clientId;
-}
-
-// Access the DevTools on disk store (~/.devtools).
-class DevToolsUsage {
-  /// Create a new Usage instance; [versionOverride] and [configDirOverride] are
-  /// used for testing.
-  DevToolsUsage({
-    String settingsName = 'devtools',
-    String versionOverride,
-    String configDirOverride,
-  }) {
-    properties = IOPersistentProperties(
-      settingsName,
-      documentDirPath: userHomeDir(),
-    );
-  }
-
-  static String userHomeDir() {
-    final String envKey =
-        Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-    final String value = Platform.environment[envKey];
-    return value == null ? '.' : value;
-  }
-
-  IOPersistentProperties properties;
-
-  void reset() {
-    properties.remove('firstRun');
-    properties['enabled'] = false;
-    properties['surveyShownCount'] = 0;
-    properties['surveyActionTaken'] = false;
-  }
-
-  bool get isFirstRun {
-    properties['firstRun'] = properties['firstRun'] == null;
-    return properties['firstRun'];
-  }
-
-  bool get enabled {
-    if (properties['enabled'] == null) {
-      properties['enabled'] = false;
-    }
-
-    return properties['enabled'];
-  }
-
-  set enabled(bool value) {
-    properties['enabled'] = value;
-    return properties['enabled'];
-  }
-
-  int get surveyShownCount {
-    if (properties['surveyShownCount'] == null) {
-      properties['surveyShownCount'] = 0;
-    }
-
-    return properties['surveyShownCount'];
-  }
-
-  void incrementSurveyShownCount() {
-    surveyShownCount; // Ensure surveyShownCount has been initialized.
-    properties['surveyShownCount'] += 1;
-  }
-
-  bool get surveyActionTaken => properties['surveyActionTaken'] == true;
-
-  set surveyActionTaken(bool value) {
-    properties['surveyActionTaken'] = value;
-  }
-}
-
-abstract class PersistentProperties {
-  PersistentProperties(this.name);
-
-  final String name;
-
-  dynamic operator [](String key);
-
-  void operator []=(String key, dynamic value);
-
-  /// Re-read settings from the backing store.
-  ///
-  /// May be a no-op on some platforms.
-  void syncSettings();
-}
-
-const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('  ');
-
-class IOPersistentProperties extends PersistentProperties {
-  IOPersistentProperties(
-    String name, {
-    String documentDirPath,
-  }) : super(name) {
-    final String fileName = '.${name.replaceAll(' ', '_')}';
-    documentDirPath ??= DevToolsUsage.userHomeDir();
-    _file = File(path.join(documentDirPath, fileName));
-    if (!_file.existsSync()) {
-      _file.createSync();
-    }
-    syncSettings();
-  }
-
-  IOPersistentProperties.fromFile(File file) : super(path.basename(file.path)) {
-    _file = file;
-    if (!_file.existsSync()) {
-      _file.createSync();
-    }
-    syncSettings();
-  }
-
-  File _file;
-
-  Map _map;
-
-  @override
-  dynamic operator [](String key) => _map[key];
-
-  @override
-  void operator []=(String key, dynamic value) {
-    if (value == null && !_map.containsKey(key)) return;
-    if (_map[key] == value) return;
-
-    if (value == null) {
-      _map.remove(key);
-    } else {
-      _map[key] = value;
-    }
-
-    try {
-      _file.writeAsStringSync(_jsonEncoder.convert(_map) + '\n');
-    } catch (_) {}
-  }
-
-  @override
-  void syncSettings() {
-    try {
-      String contents = _file.readAsStringSync();
-      if (contents.isEmpty) contents = '{}';
-      _map = jsonDecode(contents);
-    } catch (_) {
-      _map = {};
-    }
-  }
-
-  void remove(String propertyName) {
-    _map.remove(propertyName);
-  }
+      shelf.Response(HttpStatus.noContent);
 }

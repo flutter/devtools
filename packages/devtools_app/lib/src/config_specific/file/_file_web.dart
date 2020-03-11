@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'file_io.dart';
+import 'file.dart';
+
+FileSystemWeb createFileSystem() {
+  return FileSystemWeb();
+}
 
 /// Abstracted file system access for Flutter Web.
-class FileSystem implements FileIO {
+class FileSystemWeb implements FileIO {
   // TODO(terry): Implement Web based file IO.
 
   /// Key is filename and value is content of the file.
