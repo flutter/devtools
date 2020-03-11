@@ -111,11 +111,17 @@ class TimelineController implements DisposableController {
 
   TimelineProcessor processor;
 
+  int _vmStartRecordingMicros;
+
   /// Trace events we received while listening to the Timeline event stream.
   ///
   /// This does not include events that we receive while stopped.
   List<TraceEventWrapper> allTraceEvents = [];
 
+  /// Whether the timeline has been started from [timelineService].
+  ///
+  /// [data] is initialized in [timelineService.startTimeline], where the
+  /// timeline recorders are also set (Dart, GC, Embedder).
   bool get hasStarted => data != null;
 
   Future<void> selectTimelineEvent(TimelineEvent event) async {
@@ -193,10 +199,9 @@ class TimelineController implements DisposableController {
     data.frames.add(frame);
   }
 
-  int vmStartRecordingMicros;
   Future<void> startRecording() async {
     _recordingNotifier.value = true;
-    vmStartRecordingMicros =
+    _vmStartRecordingMicros =
         (await timelineService.vmTimelineMicros()).timestamp;
     await timelineService.updateListeningState(true);
   }
@@ -221,7 +226,7 @@ class TimelineController implements DisposableController {
   }
 
   FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
-    await processor.processTimeline(traceEvents, vmStartRecordingMicros);
+    await processor.processTimeline(traceEvents, _vmStartRecordingMicros);
     data.initializeEventGroups();
     if (data.eventGroups.isEmpty) {
       _emptyRecordingNotifier.value = true;

@@ -90,15 +90,14 @@ class TimelineFlameChartState
   void _handleSelectedFrame() async {
     final TimelineFrame selectedFrame = _timelineController.selectedFrame.value;
     if (selectedFrame != null) {
-      // Bail early if the selection has not changed.
       if (selectedFrame == _selectedFrame) return;
 
       setState(() {
         _selectedFrame = selectedFrame;
       });
 
-      // TODO(kenz): consider using jumpTo for some of these animations to bump
-      // performance.
+      // TODO(kenz): consider using jumpTo for some of these animations to
+      // improve performance.
 
       // Vertically scroll to the UI event group.
       final verticalScrollOffset =
