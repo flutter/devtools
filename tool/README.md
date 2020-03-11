@@ -23,7 +23,7 @@ git checkout -b release_0_0_15
 
 ## Update the release number by running files:
 
-./tool/update_version.sh 0_0_15
+./tool/update_version.sh 0.0.15
 
 Verify that this script updated the pubspecs under packages/
 and updated all references to those packages. These packages always have their
