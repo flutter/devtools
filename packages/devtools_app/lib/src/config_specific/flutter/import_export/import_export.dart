@@ -51,6 +51,7 @@ class ImportController {
     final devToolsScreen = json['dartDevToolsScreen'];
     if (devToolsScreen == null) {
       _notifications.push(nonDevToolsFileMessage);
+      importing = false;
       return;
     }
 
@@ -63,6 +64,7 @@ class ImportController {
       // can be exported.
       default:
         _notifications.push(unsupportedDevToolsFileMessage(devToolsScreen));
+        importing = false;
         return;
     }
 
