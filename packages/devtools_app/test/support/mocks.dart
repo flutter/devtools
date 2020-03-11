@@ -263,8 +263,6 @@ class MockTimelineController extends Mock implements TimelineController {}
 
 class MockPerformanceController extends Mock implements PerformanceController {}
 
-class MockTimelineData extends Mock implements TimelineData {}
-
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.
 // TODO(jacobr): refactor ServiceExtensionManager so this fake can reuse more

@@ -5,6 +5,7 @@
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_flame_chart.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_screen.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
 import 'package:devtools_testing/support/flutter/timeline_test_data.dart';
@@ -31,13 +32,16 @@ void main() {
     testWidgetsWithWindowSize('builds flame chart with data', windowSize,
         (WidgetTester tester) async {
       // Set a wide enough screen width that we do not run into overflow.
-
-      final mockData = MockTimelineData();
-      when(mockData.selectedFrame).thenReturn(testFrame0);
-      when(mockData.timelineEvents)
-          .thenReturn([goldenUiTimelineEvent, goldenGpuTimelineEvent]);
+      final data = TimelineData()
+        ..timelineEvents.addAll([goldenUiTimelineEvent])
+        ..traceEvents.addAll(
+            goldenUiTraceEvents.map((eventWrapper) => eventWrapper.event.json))
+        ..time.start = goldenUiTimelineEvent.time.start
+        ..time.end = goldenUiTimelineEvent.time.end;
+      data.initializeEventGroups();
       final controllerWithData = TimelineController()
-        ..data = mockData
+        ..allTraceEvents.addAll(goldenUiTraceEvents)
+        ..data = data
         ..selectFrame(testFrame1);
       await tester.pumpWidget(wrapWithControllers(
         TimelineScreenBody(),
