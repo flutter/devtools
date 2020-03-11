@@ -9,6 +9,7 @@ import '../globals.dart';
 import '../profiler/html_cpu_profile_flame_chart.dart';
 import '../profiler/html_cpu_profile_tables.dart';
 import '../profiler/html_cpu_profiler.dart';
+import '../trace_event.dart';
 import '../ui/colors.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';

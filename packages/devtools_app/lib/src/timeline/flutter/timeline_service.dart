@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:vm_service/vm_service.dart';
 
 import '../../config_specific/logger/allowed_error.dart';
 import '../../globals.dart';
 import '../../profiler/cpu_profile_service.dart';
 import '../../profiler/profile_granularity.dart';
+import '../../trace_event.dart';
 import '../../vm_service_wrapper.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
@@ -22,7 +23,7 @@ class TimelineService {
 
   final profilerService = CpuProfilerService();
 
-  Future<vm_service.Timestamp> vmTimelineMicros() async {
+  Future<Timestamp> vmTimelineMicros() async {
     return await serviceManager.service.getVMTimelineMicros();
   }
 
@@ -35,9 +36,7 @@ class TimelineService {
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
 
-    timelineController.recording.addListener(() async {
-      await updateListeningState(true);
-    });
+    timelineController.recording.addListener(() => updateListeningState(true));
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
@@ -45,7 +44,7 @@ class TimelineService {
       profilerService.setProfilePeriod(mediumProfilePeriod),
       logError: false,
     );
-    serviceManager.service.onEvent('Timeline').listen((vm_service.Event event) {
+    serviceManager.service.onEvent('Timeline').listen((Event event) {
       final List<dynamic> list = event.json['timelineEvents'];
       final List<Map<String, dynamic>> events =
           list.cast<Map<String, dynamic>>();
@@ -67,20 +66,18 @@ class TimelineService {
   }
 
   Future<void> startTimeline() async {
-    if (await serviceManager.connectedApp.isAnyFlutterApp) {
-      timelineController.data = TimelineData(
-          displayRefreshRate: await serviceManager.getDisplayRefreshRate());
-    } else {
-      timelineController.data = TimelineData();
-    }
+    timelineController.data = await serviceManager.connectedApp.isAnyFlutterApp
+        ? TimelineData(
+            displayRefreshRate: await serviceManager.getDisplayRefreshRate(),
+          )
+        : TimelineData();
 
     await serviceManager.serviceAvailable.future;
     await allowedError(serviceManager.service
         .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']));
     await allowedError(serviceManager.service.clearVMTimeline());
 
-    final vm_service.Timeline timeline =
-        await serviceManager.service.getVMTimeline();
+    final timeline = await serviceManager.service.getVMTimeline();
     final List<dynamic> list = timeline.json['traceEvents'];
     final List<Map<String, dynamic>> traceEvents =
         list.cast<Map<String, dynamic>>();

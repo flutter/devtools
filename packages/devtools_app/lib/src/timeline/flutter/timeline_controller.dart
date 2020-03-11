@@ -3,12 +3,15 @@
 // found in the LICENSE file.
 import 'dart:async';
 
+import 'package:devtools_app/src/debugger/html_debugger_screen.dart';
+
 import '../../auto_dispose.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../globals.dart';
 import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_transformer.dart';
 import '../../service_manager.dart';
+import '../../trace_event.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
 import 'timeline_model.dart';
 import 'timeline_processor.dart';
@@ -34,25 +37,30 @@ class TimelineController implements DisposableController {
 
   final cpuProfilerController = CpuProfilerController();
 
-  /// Notifies that a timeline event was selected.
-  ValueListenable get selectedTimelineEvent => _selectedTimelineEventNotifier;
+  /// The currently selected timeline event.
+  ValueListenable<TimelineEvent> get selectedTimelineEvent =>
+      _selectedTimelineEventNotifier;
   final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent>(null);
 
-  /// Notifies that a timeline frame has been selected.
-  ValueListenable get selectedFrame => _selectedFrameNotifier;
+  /// The currently selected timeline frame.
+  ValueListenable<TimelineFrame> get selectedFrame => _selectedFrameNotifier;
   final _selectedFrameNotifier = ValueNotifier<TimelineFrame>(null);
 
-  /// Notifies when an empty timeline recording finishes
-  ValueListenable get emptyRecording => _emptyRecordingNotifier;
+  /// Whether an empty timeline recording was just recorded.
+  ValueListenable<bool> get emptyRecording => _emptyRecordingNotifier;
   final _emptyRecordingNotifier = ValueNotifier<bool>(false);
 
-  /// Notifies that the timeline is currently being recorded.
-  ValueListenable get recording => _recordingNotifier;
+  /// Whether the timeline is currently being recorded.
+  ValueListenable<bool> get recording => _recordingNotifier;
   final _recordingNotifier = ValueNotifier<bool>(false);
 
-  /// Notifies that the recorded timeline data is currently being processed.
-  ValueListenable get processing => _processingNotifier;
+  /// Whether the recorded timeline data is currently being processed.
+  ValueListenable<bool> get processing => _processingNotifier;
   final _processingNotifier = ValueNotifier<bool>(false);
+
+  // TODO(kenz): change these streams to ValueListenables or remove altogether
+  // if we can refactor the FlutterFramesChart to be written with more idiomatic
+  // Flutter.
 
   /// Stream controller that notifies the timeline has been processed.
   Stream<bool> get onTimelineProcessed => _timelineProcessedController.stream;
@@ -63,11 +71,10 @@ class TimelineController implements DisposableController {
   ///
   /// Subscribers to this stream will be responsible for updating the UI for the
   /// new value of [timelineData].
-  final _loadOfflineDataController =
-      StreamController<OfflineTimelineData>.broadcast();
-
   Stream<OfflineTimelineData> get onLoadOfflineData =>
       _loadOfflineDataController.stream;
+  final _loadOfflineDataController =
+      StreamController<OfflineTimelineData>.broadcast();
 
   /// Stream controller that notifies the timeline screen when a non-fatal error
   /// should be logged for the timeline.
@@ -80,8 +87,24 @@ class TimelineController implements DisposableController {
 
   Stream<bool> get onTimelineCleared => _clearController.stream;
 
+  /// Active timeline data.
+  ///
+  /// This is the true source of data for the UI. In the case of an offline
+  /// import, this will begin as a copy of [offlineTimelineData] (the original
+  /// data from the imported file). If any modifications are made while the data
+  /// is displayed (e.g. change in selected timeline event, selected frame,
+  /// etc.), those changes will be tracked here.
   TimelineData data;
 
+  /// Timeline data loaded via import.
+  ///
+  /// This is expected to be null when we are not in [offlineMode].
+  ///
+  /// This will contain the original data from the imported file, regardless of
+  /// any selection modifications that occur while the data is displayed. [data]
+  /// will start as a copy of offlineTimelineData in this case, and will track
+  /// any data modifications that occur while the data is displayed (e.g. change
+  /// in selected timeline event, selected frame, etc.).
   TimelineData offlineTimelineData;
 
   TimelineService timelineService;

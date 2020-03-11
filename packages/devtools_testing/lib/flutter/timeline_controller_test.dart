@@ -125,11 +125,11 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
     });
 
     test('recording', () async {
-      expect(timelineController.recordingNotifier.value, isFalse);
+      expect(timelineController.recording.value, isFalse);
       await timelineController.startRecording();
-      expect(timelineController.recordingNotifier.value, isTrue);
+      expect(timelineController.recording.value, isTrue);
       await timelineController.stopRecording();
-      expect(timelineController.recordingNotifier.value, isFalse);
+      expect(timelineController.recording.value, isFalse);
     });
   });
 }

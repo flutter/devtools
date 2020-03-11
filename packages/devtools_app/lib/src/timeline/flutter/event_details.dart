@@ -12,6 +12,7 @@ import '../../flutter/controllers.dart';
 import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
+import '../../trace_event.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../utils.dart';
 import 'timeline_controller.dart';

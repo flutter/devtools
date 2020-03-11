@@ -9,6 +9,7 @@ import '../globals.dart';
 import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../service_manager.dart';
+import '../trace_event.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import 'html_timeline_model.dart';
 import 'html_timeline_processor.dart';

@@ -90,9 +90,15 @@ class TimelineFlameChartState
   void _handleSelectedFrame() async {
     final TimelineFrame selectedFrame = _timelineController.selectedFrame.value;
     if (selectedFrame != null) {
+      // Bail early if the selection has not changed.
+      if (selectedFrame == _selectedFrame) return;
+
       setState(() {
         _selectedFrame = selectedFrame;
       });
+
+      // TODO(kenz): consider using jumpTo for some of these animations to bump
+      // performance.
 
       // Vertically scroll to the UI event group.
       final verticalScrollOffset =
@@ -103,8 +109,8 @@ class TimelineFlameChartState
         curve: defaultCurve,
       );
 
-      // Maybe bail early if multiple frame selections were triggered in
-      // succession.
+      // Bail early if the selection has changed again while the animation was
+      // in progress.
       if (selectedFrame != _selectedFrame) return;
 
       // Zoom the frame into view.
@@ -119,8 +125,8 @@ class TimelineFlameChartState
           widget.startInset;
       await zoomTo(zoom, forceMouseX: mouseXForZoom);
 
-      // Maybe bail early if multiple frame selections were triggered in
-      // succession.
+      // Bail early if the selection has changed again while the animation was
+      // in progress.
       if (selectedFrame != _selectedFrame) return;
 
       // Horizontally scroll to the frame.

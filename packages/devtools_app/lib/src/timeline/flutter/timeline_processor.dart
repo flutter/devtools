@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 
 import '../../config_specific/logger/logger.dart';
+import '../../trace_event.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
 import '../../utils.dart';
 //import '../simple_trace_example.dart';
@@ -40,6 +41,11 @@ StringBuffer debugFrameTracking = StringBuffer();
 const String gpuEventName = 'GPURasterizer::Draw';
 
 const String uiEventName = 'VSYNC';
+
+const String messageLoopFlushTasks = 'MessageLoop::FlushTasks';
+
+// For Flutter apps, PipelineItem flow events signal frame start and end events.
+const String pipelineItem = 'PipelineItem';
 
 /// Processor for composing a recorded list of trace events into a timeline of
 /// [AsyncTimelineEvent]s, [SyncTimelineEvent]s, and [TimelineFrame]s.
@@ -105,8 +111,10 @@ class TimelineProcessor {
   int gpuThreadId;
 
   Future<void> processTimeline(
-      List<TraceEventWrapper> traceEvents, int startRecordingMicros,
-      {bool resetAfterProcessing = true}) async {
+    List<TraceEventWrapper> traceEvents,
+    int startRecordingMicros, {
+    bool resetAfterProcessing = true,
+  }) async {
     // Reset the processor before processing.
     reset();
 
@@ -122,7 +130,7 @@ class TimelineProcessor {
       // 'MessageLoop::FlushTasks' event can parent multiple Flutter frame event
       // sequences and complicates the frame detection logic.
       final isMessageLoopFlushTasks =
-          event.event.name.contains('MessageLoop::FlushTasks');
+          event.event.name.contains(messageLoopFlushTasks);
       // Throw out timeline events that do not have a timestamp
       // (e.g. thread_name events) as well as events from before we started
       // recording.
@@ -227,12 +235,12 @@ class TimelineProcessor {
           break;
         // TODO(kenz): add additional support for flows.
         case TraceEvent.flowStartPhase:
-          if (eventWrapper.event.name.contains('PipelineItem')) {
+          if (eventWrapper.event.name.contains(pipelineItem)) {
             _handleFrameStartEvent(eventWrapper.event);
           }
           break;
         case TraceEvent.flowEndPhase:
-          if (eventWrapper.event.name.contains('PipelineItem')) {
+          if (eventWrapper.event.name.contains(pipelineItem)) {
             _handleFrameEndEvent(eventWrapper.event);
           }
           break;
@@ -320,11 +328,6 @@ class TimelineProcessor {
   void _handleDurationBeginEvent(TraceEventWrapper eventWrapper) {
     final current = currentDurationEventNodes[eventWrapper.event.threadId];
     final timelineEvent = SyncTimelineEvent(eventWrapper);
-    if (current == null) {
-      if (eventWrapper.event.name.contains(uiEventName)) {
-        // pending frame . ui event flow = timeline event
-      } else if (eventWrapper.event.name.contains(gpuEventName)) {}
-    }
     if (current != null) {
       current.addChild(timelineEvent);
     }
@@ -474,41 +477,39 @@ class TimelineProcessor {
   }
 
   void _handleFrameStartEvent(TraceEvent event) {
-    if (event.id != null) {
-      final pendingFrame = _frameFromEvent(event);
-      pendingFrame.pipelineItemTime.start = Duration(
-        microseconds: nullSafeMin(
-          pendingFrame.pipelineItemTime.start?.inMicroseconds,
-          event.timestampMicros,
-        ),
-      );
-      if (pendingFrame.pipelineItemTime.start.inMicroseconds ==
-          event.timestampMicros) {
-        pendingFrame.pipelineItemStartTrace = event;
-      }
-      _maybeAddCompletedFrame(pendingFrame);
+    if (event.id == null) return;
+    final pendingFrame = _frameFromEvent(event);
+    pendingFrame.pipelineItemTime.start = Duration(
+      microseconds: nullSafeMin(
+        pendingFrame.pipelineItemTime.start?.inMicroseconds,
+        event.timestampMicros,
+      ),
+    );
+    if (pendingFrame.pipelineItemTime.start.inMicroseconds ==
+        event.timestampMicros) {
+      pendingFrame.pipelineItemStartTrace = event;
     }
+    _maybeAddCompletedFrame(pendingFrame);
   }
 
   void _handleFrameEndEvent(TraceEvent event) async {
-    if (event.id != null) {
-      // Since we handle events in ascending timestamp order, we should ignore
-      // frame end events that we receive before the corresponding frame start
-      // event.
-      if (!pendingFrames.containsKey(_frameId(event))) return;
-      final pendingFrame = _frameFromEvent(event);
-      pendingFrame.pipelineItemTime.end = Duration(
-        microseconds: nullSafeMax(
-          pendingFrame.pipelineItemTime.end?.inMicroseconds,
-          event.timestampMicros,
-        ),
-      );
-      if (pendingFrame.pipelineItemTime.end.inMicroseconds ==
-          event.timestampMicros) {
-        pendingFrame.pipelineItemEndTrace = event;
-      }
-      _maybeAddCompletedFrame(pendingFrame);
+    if (event.id == null) return;
+    // Since we handle events in ascending timestamp order, we should ignore
+    // frame end events that we receive before the corresponding frame start
+    // event.
+    if (!pendingFrames.containsKey(_frameId(event))) return;
+    final pendingFrame = _frameFromEvent(event);
+    pendingFrame.pipelineItemTime.end = Duration(
+      microseconds: nullSafeMax(
+        pendingFrame.pipelineItemTime.end?.inMicroseconds,
+        event.timestampMicros,
+      ),
+    );
+    if (pendingFrame.pipelineItemTime.end.inMicroseconds ==
+        event.timestampMicros) {
+      pendingFrame.pipelineItemEndTrace = event;
     }
+    _maybeAddCompletedFrame(pendingFrame);
   }
 
   /// Add event to an available frame in [pendingFrames] if we can.

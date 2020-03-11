@@ -13,6 +13,7 @@ import '../charts/flame_chart_canvas.dart';
 import '../framework/html_framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart';
+import '../trace_event.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/html_custom.dart';

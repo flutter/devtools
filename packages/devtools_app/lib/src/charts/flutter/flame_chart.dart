@@ -680,6 +680,8 @@ class FlameChartRow {
   }
 }
 
+// TODO(kenz): consider de-coupling this API from the dual background color
+// scheme.
 class FlameChartNode<T> {
   FlameChartNode({
     this.key,

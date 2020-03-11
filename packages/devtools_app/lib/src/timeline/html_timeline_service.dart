@@ -9,6 +9,7 @@ import '../config_specific/logger/allowed_error.dart';
 import '../globals.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/profile_granularity.dart';
+import '../trace_event.dart';
 import '../vm_service_wrapper.dart';
 import 'html_timeline_controller.dart';
 import 'html_timeline_model.dart';
