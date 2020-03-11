@@ -23,4 +23,4 @@ perl -pi -e 's/^.*#OVERRIDE_FOR_DEVELOPMENT.*//' packages/*/pubspec.yaml
 
 set +x
 echo "Ready to publish."
-echo "Verify the package works, then follow the steps in README.md to publish"
+echo "Verify the package works, then follow the steps in tool/README.md to publish"
