@@ -66,6 +66,14 @@ const devtoolsBlue = ColorSwatch<int>(600, {
   400: Color(0xFF13B9FD),
 });
 
+/// A short duration to use for animations.
+///
+/// Use this when you want less emphasis on the animation and more on the
+/// animation result, or when you have multiple animations running in sequence
+/// For example, in the timeline we use this when we are zooming the flame chart
+/// and scrolling to an offset immediately after.
+const shortDuration = Duration(milliseconds: 50);
+
 /// The default duration to use for animations.
 const defaultDuration = Duration(milliseconds: 200);
 
@@ -122,3 +130,5 @@ final chartBoldTypeFace = TypeFace(
   fontFamily: 'OpenSans',
   fontWeight: FontWeight.w800,
 );
+
+const lightSelection = Color(0xFFD4D7DA);

@@ -8,11 +8,12 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import '../config_specific/logger/logger.dart';
+import '../trace_event.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../utils.dart';
 //import 'simple_trace_example.dart';
-import 'timeline_controller.dart';
-import 'timeline_model.dart';
+import 'html_timeline_controller.dart';
+import 'html_timeline_model.dart';
 
 // For documentation, see the Chrome "Trace Event Format" document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU.
@@ -556,7 +557,6 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
       return a.pipelineItemTime.start.inMicroseconds
           .compareTo(b.pipelineItemTime.start.inMicroseconds);
     });
-
     return frames;
   }
 

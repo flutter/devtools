@@ -6,11 +6,11 @@ import 'package:devtools_app/src/charts/flutter/flame_chart.dart';
 import 'package:devtools_app/src/flutter/flutter_widgets/linked_scroll_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profile_flame_chart.dart';
-import 'package:devtools_app/src/timeline/timeline_model.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
 import 'package:devtools_app/src/ui/colors.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
-import 'package:devtools_testing/support/timeline_test_data.dart';
+import 'package:devtools_testing/support/flutter/timeline_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -157,7 +157,7 @@ void main() {
       width: 610.0, // 610.0 fits all test nodes and sideInsets of 70.0.
       startInset: sideInset,
       selected: null,
-      zoom: FlameChartState.minZoomLevel,
+      zoom: FlameChart.minZoomLevel,
     );
     final zoomedTestRow = ScrollingFlameChartRow(
       linkedScrollControllerGroup: linkedScrollControllerGroup,
@@ -216,7 +216,7 @@ void main() {
         width: 500.0, // 500.0 is arbitrary.
         startInset: sideInset,
         selected: null,
-        zoom: FlameChartState.minZoomLevel,
+        zoom: FlameChart.minZoomLevel,
       );
 
       await pumpScrollingFlameChartRow(tester, emptyRow);

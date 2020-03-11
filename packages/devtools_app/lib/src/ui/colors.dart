@@ -68,6 +68,12 @@ final unknownColorPalette = [
   ThemedColor.fromSingleColor(const Color(0xFF9D84CA)),
 ];
 
+final selectedColorPalette = [
+  ThemedColor.fromSingleColor(const Color(0xFFBDBDBD)),
+  ThemedColor.fromSingleColor(const Color(0xFFADADAD)),
+  ThemedColor.fromSingleColor(const Color(0xFF9E9E9E)),
+];
+
 const selectedFlameChartItemColor = ThemedColor(
   mainUiColorSelectedLight,
   mainUiColorSelectedLight,

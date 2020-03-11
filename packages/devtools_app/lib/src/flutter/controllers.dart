@@ -10,7 +10,7 @@ import '../globals.dart';
 import '../logging/logging_controller.dart';
 import '../memory/flutter/memory_controller.dart';
 import '../performance/performance_controller.dart';
-import '../timeline/timeline_controller.dart';
+import '../timeline/flutter/timeline_controller.dart';
 
 /// Container for controllers that should outlive individual screens of the app.
 ///

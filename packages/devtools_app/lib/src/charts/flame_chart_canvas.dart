@@ -9,7 +9,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
-import '../timeline/timeline_model.dart';
+import '../timeline/html_timeline_model.dart';
 import '../ui/colors.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';

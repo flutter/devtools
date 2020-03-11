@@ -13,6 +13,7 @@ import '../charts/flame_chart_canvas.dart';
 import '../framework/html_framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart';
+import '../trace_event.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/html_custom.dart';
@@ -25,10 +26,10 @@ import '../ui/ui_utils.dart';
 import '../ui/vm_flag_elements.dart';
 import 'html_event_details.dart';
 import 'html_frames_bar_chart.dart';
-import 'timeline_controller.dart';
-import 'timeline_flame_chart.dart';
-import 'timeline_model.dart';
-import 'timeline_processor.dart';
+import 'html_timeline_controller.dart';
+import 'html_timeline_flame_chart.dart';
+import 'html_timeline_model.dart';
+import 'html_timeline_processor.dart';
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 

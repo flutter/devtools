@@ -5,9 +5,10 @@
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_flame_chart.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_screen.dart';
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
-import 'package:devtools_testing/support/timeline_test_data.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
+import 'package:devtools_testing/support/flutter/timeline_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -28,32 +29,36 @@ void main() {
 
     const windowSize = Size(2225.0, 1000.0);
 
-    testWidgetsWithWindowSize('builds frame based timeline', windowSize,
+    testWidgetsWithWindowSize('builds flame chart with data', windowSize,
         (WidgetTester tester) async {
       // Set a wide enough screen width that we do not run into overflow.
-
-      final mockData = MockFrameBasedTimelineData();
-      when(mockData.displayDepth).thenReturn(8);
-      when(mockData.selectedFrame).thenReturn(testFrame0);
+      final data = TimelineData()
+        ..timelineEvents.addAll([goldenUiTimelineEvent])
+        ..traceEvents.addAll(
+            goldenUiTraceEvents.map((eventWrapper) => eventWrapper.event.json))
+        ..time.start = goldenUiTimelineEvent.time.start
+        ..time.end = goldenUiTimelineEvent.time.end;
+      data.initializeEventGroups();
       final controllerWithData = TimelineController()
-        ..frameBasedTimeline.data = mockData
-        ..frameBasedTimeline.selectFrame(testFrame1);
+        ..allTraceEvents.addAll(goldenUiTraceEvents)
+        ..data = data
+        ..selectFrame(testFrame1);
       await tester.pumpWidget(wrapWithControllers(
         TimelineScreenBody(),
         timeline: controllerWithData,
       ));
-      expect(find.byType(FrameBasedTimelineFlameChart), findsOneWidget);
+      expect(find.byType(TimelineFlameChart), findsOneWidget);
       expect(find.byKey(TimelineScreen.recordingInstructionsKey), findsNothing);
     });
 
-    testWidgetsWithWindowSize('builds full timeline', windowSize,
+    testWidgetsWithWindowSize('builds flame chart with no data', windowSize,
         (WidgetTester tester) async {
       // Set a wide enough screen width that we do not run into overflow.
       await tester.pumpWidget(wrapWithControllers(
         TimelineScreenBody(),
-        timeline: TimelineController()..selectTimelineMode(TimelineMode.full),
+        timeline: TimelineController(),
       ));
-      expect(find.byType(FrameBasedTimelineFlameChart), findsNothing);
+      expect(find.byType(TimelineFlameChart), findsNothing);
       expect(
         find.byKey(TimelineScreen.recordingInstructionsKey),
         findsOneWidget,
