@@ -98,7 +98,9 @@ class TimelineData {
   }
 
   String _computeEventGroupKey(TimelineEvent event) {
-    if (event.isAsyncEvent) {
+    if (event.groupKey != null) {
+      return event.groupKey;
+    } else if (event.isAsyncEvent) {
       return event.name;
     } else if (event.isUiEvent) {
       return uiKey;
@@ -503,6 +505,8 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
 
   String get name => traceEvents.first.event.name;
 
+  String get groupKey => traceEvents.first.event.args['filterKey'];
+
   Map<String, dynamic> get beginTraceEventJson => traceEvents.first.json;
 
   Map<String, dynamic> get endTraceEventJson =>
@@ -513,6 +517,9 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
   bool get isGpuEvent => type == TimelineEventType.gpu;
 
   bool get isAsyncEvent => type == TimelineEventType.async;
+
+  bool get isAsyncInstantEvent =>
+      traceEvents.first.event.phase == TraceEvent.asyncInstantPhase;
 
   bool get isWellFormed => time.start != null && time.end != null;
 

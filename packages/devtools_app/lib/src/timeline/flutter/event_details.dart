@@ -112,8 +112,7 @@ class EventSummary extends StatelessWidget {
   EventSummary(this.event)
       : _connectedEvents = [
           if (event.isAsyncEvent)
-            ...event.children.where((e) =>
-                e.traceEvents.first.event.phase == TraceEvent.asyncInstantPhase)
+            ...event.children.where((e) => e.isAsyncInstantEvent)
         ],
         _eventArgs = Map.from(event.traceEvents.first.event.args)
           ..addAll({for (var trace in event.traceEvents) ...trace.event.args});

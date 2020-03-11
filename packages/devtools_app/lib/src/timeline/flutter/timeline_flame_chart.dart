@@ -314,85 +314,95 @@ class TimelineFlameChartState
       for (var node in row.nodes) {
         if (node.data is AsyncTimelineEvent) {
           final event = node.data as AsyncTimelineEvent;
-          if (event.children.isNotEmpty) {
-            // Vertical guideline that will connect [node] with its children
-            // nodes. The line will end at [node]'s last child.
-            final verticalGuidelineX =
-                node.rect.left + TimelineFlameChart.asyncGuidelineOffset;
-            final verticalGuidelineStartY =
-                _calculateVerticalGuidelineStartY(event);
-            final verticalGuidelineEndY =
-                _calculateHorizontalGuidelineY(event.lowestDisplayChild);
-            verticalGuidelines.add(VerticalLineSegment(
-              Offset(verticalGuidelineX, verticalGuidelineStartY),
-              Offset(verticalGuidelineX, verticalGuidelineEndY),
-            ));
+          bool allChildrenAreAsyncInstantEvents = true;
+          for (var child in event.children) {
+            if (!child.isAsyncInstantEvent) {
+              allChildrenAreAsyncInstantEvents = false;
+              break;
+            }
+          }
+          // Continue if there are no children we should draw async guidelines
+          // to.
+          if (event.children.isEmpty || allChildrenAreAsyncInstantEvents) {
+            continue;
+          }
 
-            // Draw the first child since it is guaranteed to be connected to
-            // the main vertical we just created.
-            final firstChild = event.children.first;
-            final horizontalGuidelineEndX =
-                chartNodesByEvent[firstChild].rect.left;
-            final horizontalGuidelineY =
-                _calculateHorizontalGuidelineY(firstChild);
+          // Vertical guideline that will connect [node] with its children
+          // nodes. The line will end at [node]'s last child.
+          final verticalGuidelineX =
+              node.rect.left + TimelineFlameChart.asyncGuidelineOffset;
+          final verticalGuidelineStartY =
+              _calculateVerticalGuidelineStartY(event);
+          final verticalGuidelineEndY =
+              _calculateHorizontalGuidelineY(event.lowestDisplayChild);
+          verticalGuidelines.add(VerticalLineSegment(
+            Offset(verticalGuidelineX, verticalGuidelineStartY),
+            Offset(verticalGuidelineX, verticalGuidelineEndY),
+          ));
+
+          // Draw the first child since it is guaranteed to be connected to
+          // the main vertical we just created.
+          final firstChild = event.children.first;
+          final horizontalGuidelineEndX =
+              chartNodesByEvent[firstChild].rect.left;
+          final horizontalGuidelineY =
+              _calculateHorizontalGuidelineY(firstChild);
+          horizontalGuidelines.add(HorizontalLineSegment(
+            Offset(verticalGuidelineX, horizontalGuidelineY),
+            Offset(horizontalGuidelineEndX, horizontalGuidelineY),
+          ));
+
+          // Horizontal guidelines connecting each child to the vertical
+          // guideline above.
+          for (int i = 1; i < event.children.length; i++) {
+            double horizontalGuidelineStartX = verticalGuidelineX;
+
+            final child = event.children[i];
+            final childNode = chartNodesByEvent[child];
+
+            // Helper method to generate a vertical guideline for subsequent
+            // children after the first child. We will create a new guideline
+            // if it can be created without intersecting previous children.
+            void generateSubsequentVerticalGuideline(double previousXInRow) {
+              double newVerticalGuidelineX;
+
+              // If [child] started after [event] ended, use the right edge of
+              // event's [node] as the x coordinate for the guideline.
+              // Otherwise, take the minimum of
+              // [subsequentChildGuidelineOffset] and half the distance
+              // between [previousXInRow] and child's left edge.
+              if (event.time.end < child.time.start) {
+                newVerticalGuidelineX = node.rect.right;
+              } else {
+                newVerticalGuidelineX = childNode.rect.left -
+                    math.min(
+                      subsequentChildGuidelinePadding,
+                      (childNode.rect.left - previousXInRow) / 2,
+                    );
+              }
+              final newVerticalGuidelineEndY =
+                  _calculateHorizontalGuidelineY(child);
+              verticalGuidelines.add(VerticalLineSegment(
+                Offset(newVerticalGuidelineX, verticalGuidelineStartY),
+                Offset(newVerticalGuidelineX, newVerticalGuidelineEndY),
+              ));
+
+              horizontalGuidelineStartX = newVerticalGuidelineX;
+            }
+
+            if (childNode.row.index == node.row.index + 1) {
+              final previousChildIndex =
+                  childNode.row.nodes.indexOf(childNode) - 1;
+              final previousNode = childNode.row.nodes[previousChildIndex];
+              generateSubsequentVerticalGuideline(previousNode.rect.right);
+            }
+
+            final horizontalGuidelineEndX = childNode.rect.left;
+            final horizontalGuidelineY = _calculateHorizontalGuidelineY(child);
             horizontalGuidelines.add(HorizontalLineSegment(
-              Offset(verticalGuidelineX, horizontalGuidelineY),
+              Offset(horizontalGuidelineStartX, horizontalGuidelineY),
               Offset(horizontalGuidelineEndX, horizontalGuidelineY),
             ));
-
-            // Horizontal guidelines connecting each child to the vertical
-            // guideline above.
-            for (int i = 1; i < event.children.length; i++) {
-              double horizontalGuidelineStartX = verticalGuidelineX;
-
-              final child = event.children[i];
-              final childNode = chartNodesByEvent[child];
-
-              // Helper method to generate a vertical guideline for subsequent
-              // children after the first child. We will create a new guideline
-              // if it can be created without intersecting previous children.
-              void generateSubsequentVerticalGuideline(double previousXInRow) {
-                double newVerticalGuidelineX;
-
-                // If [child] started after [event] ended, use the right edge of
-                // event's [node] as the x coordinate for the guideline.
-                // Otherwise, take the minimum of
-                // [subsequentChildGuidelineOffset] and half the distance
-                // between [previousXInRow] and child's left edge.
-                if (event.time.end < child.time.start) {
-                  newVerticalGuidelineX = node.rect.right;
-                } else {
-                  newVerticalGuidelineX = childNode.rect.left -
-                      math.min(
-                        subsequentChildGuidelinePadding,
-                        (childNode.rect.left - previousXInRow) / 2,
-                      );
-                }
-                final newVerticalGuidelineEndY =
-                    _calculateHorizontalGuidelineY(child);
-                verticalGuidelines.add(VerticalLineSegment(
-                  Offset(newVerticalGuidelineX, verticalGuidelineStartY),
-                  Offset(newVerticalGuidelineX, newVerticalGuidelineEndY),
-                ));
-
-                horizontalGuidelineStartX = newVerticalGuidelineX;
-              }
-
-              if (childNode.row.index == node.row.index + 1) {
-                final previousChildIndex =
-                    childNode.row.nodes.indexOf(childNode) - 1;
-                final previousNode = childNode.row.nodes[previousChildIndex];
-                generateSubsequentVerticalGuideline(previousNode.rect.right);
-              }
-
-              final horizontalGuidelineEndX = childNode.rect.left;
-              final horizontalGuidelineY =
-                  _calculateHorizontalGuidelineY(child);
-              horizontalGuidelines.add(HorizontalLineSegment(
-                Offset(horizontalGuidelineStartX, horizontalGuidelineY),
-                Offset(horizontalGuidelineEndX, horizontalGuidelineY),
-              ));
-            }
           }
         }
       }
