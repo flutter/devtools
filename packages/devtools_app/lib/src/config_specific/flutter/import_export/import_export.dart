@@ -7,8 +7,7 @@ import '../../../enum_utils.dart';
 import '../../../flutter/controllers.dart';
 import '../../../flutter/notifications.dart';
 import '../../../flutter/screen.dart';
-import '../../../timeline/timeline_controller.dart';
-import '../../../timeline/timeline_model.dart';
+import '../../../timeline/flutter/timeline_model.dart';
 
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
@@ -43,10 +42,16 @@ class ImportController {
 
   final ProvidedControllers _controllers;
 
+  bool importing = false;
+
   void importData(Map<String, dynamic> json) {
+    if (importing) return;
+    importing = true;
+
     final devToolsScreen = json['dartDevToolsScreen'];
     if (devToolsScreen == null) {
       _notifications.push(nonDevToolsFileMessage);
+      importing = false;
       return;
     }
 
@@ -59,22 +64,15 @@ class ImportController {
       // can be exported.
       default:
         _notifications.push(unsupportedDevToolsFileMessage(devToolsScreen));
+        importing = false;
         return;
     }
+
+    importing = false;
   }
 
   void _importTimeline(Map<String, dynamic> json) async {
-    OfflineData offlineData;
-    final timelineMode =
-        json[TimelineData.timelineModeKey] == TimelineMode.full.toString()
-            ? TimelineMode.full
-            : TimelineMode.frameBased;
-    if (timelineMode == TimelineMode.frameBased) {
-      offlineData = OfflineFrameBasedTimelineData.parse(json);
-    } else {
-      offlineData = OfflineFullTimelineData.parse(json);
-    }
-
+    final offlineData = OfflineTimelineData.parse(json);
     if (offlineData.isEmpty) {
       _notifications.push(emptyTimelineMessage);
       return;

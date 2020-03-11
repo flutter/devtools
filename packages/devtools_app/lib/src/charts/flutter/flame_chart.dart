@@ -44,6 +44,11 @@ abstract class FlameChart<T, V> extends StatefulWidget {
     this.startInset = sideInset,
     this.endInset = sideInset,
   });
+  static const minZoomLevel = 1.0;
+  static const maxZoomLevel = 1000.0;
+  static const minScrollOffset = 0.0;
+  static const rowOffsetForBottomPadding = 1;
+  static const rowOffsetForSectionSpacer = 1;
 
   final T data;
 
@@ -68,13 +73,6 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 // like implementation).
 abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
-  static const minZoomLevel = 1.0;
-  static const maxZoomLevel = 1000.0;
-  static const minScrollOffset = 0.0;
-
-  final rowOffsetForBottomPadding = 1;
-  final rowOffsetForSectionSpacer = 1;
-
   int get rowOffsetForTopPadding => 2;
 
   // The "top" positional value for each flame chart node will be 0.0 because
@@ -101,7 +99,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   /// Animation controller for animating flame chart zoom changes.
   AnimationController zoomController;
 
-  double previousZoom = minZoomLevel;
+  double previousZoom = FlameChart.minZoomLevel;
 
   double verticalScrollOffset = 0.0;
 
@@ -121,10 +119,11 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   // for an explanation of how we previously zoomed from level 2.0 to level 3.0.
   double get keyboardZoomOutUnit => zoomController.value * 1 / 3;
 
+  double get contentWidthWithZoom =>
+      widget.startingContentWidth * zoomController.value;
+
   double get widthWithZoom =>
-      widget.startingContentWidth * zoomController.value +
-      widget.startInset +
-      widget.endInset;
+      contentWidthWithZoom + widget.startInset + widget.endInset;
 
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
@@ -160,9 +159,9 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       });
 
     zoomController = AnimationController(
-      value: minZoomLevel,
-      lowerBound: minZoomLevel,
-      upperBound: maxZoomLevel,
+      value: FlameChart.minZoomLevel,
+      lowerBound: FlameChart.minZoomLevel,
+      upperBound: FlameChart.maxZoomLevel,
       vsync: this,
     )..addListener(_handleZoomControllerValueUpdate);
   }
@@ -172,8 +171,8 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     if (widget.data != oldWidget.data) {
       initFlameChartElements();
       linkedHorizontalScrollControllerGroup.resetScroll();
-      verticalScrollController.jumpTo(minScrollOffset);
-      previousZoom = minZoomLevel;
+      verticalScrollController.jumpTo(FlameChart.minScrollOffset);
+      previousZoom = FlameChart.minZoomLevel;
       zoomController.reset();
     }
     FocusScope.of(context).requestFocus(focusNode);
@@ -281,16 +280,16 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
       // if the key is held currently.
       if (keyLabel == 'w') {
-        _zoomTo(
-            math.min(maxZoomLevel, zoomController.value + keyboardZoomInUnit));
+        zoomTo(math.min(FlameChart.maxZoomLevel,
+            zoomController.value + keyboardZoomInUnit));
       } else if (keyLabel == 's') {
-        _zoomTo(
-            math.max(minZoomLevel, zoomController.value - keyboardZoomOutUnit));
+        zoomTo(math.max(FlameChart.minZoomLevel,
+            zoomController.value - keyboardZoomOutUnit));
       } else if (keyLabel == 'a') {
-        _scrollTo(
+        scrollTo(
             linkedHorizontalScrollControllerGroup.offset - keyboardScrollUnit);
       } else if (keyLabel == 'd') {
-        _scrollTo(
+        scrollTo(
             linkedHorizontalScrollControllerGroup.offset + keyboardScrollUnit);
       }
     }
@@ -316,32 +315,39 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       // Store current scroll values for re-calculating scroll location on zoom.
       final lastScrollOffset = linkedHorizontalScrollControllerGroup.offset;
 
+      final safeMouseHoverX = mouseHoverX ?? widget.totalStartingWidth / 2;
       // Position in the zoomable coordinate space that we want to keep fixed.
-      final fixedX = mouseHoverX + lastScrollOffset - widget.startInset;
+      final fixedX = safeMouseHoverX + lastScrollOffset - widget.startInset;
 
       // Calculate the new horizontal scroll position.
       final newScrollOffset = fixedX >= 0
           ? fixedX * currentZoom / previousZoom +
               widget.startInset -
-              mouseHoverX
+              safeMouseHoverX
           // We are in the fixed portion of the window - no need to transform.
           : lastScrollOffset;
 
       previousZoom = currentZoom;
-      linkedHorizontalScrollControllerGroup
-          .jumpTo(newScrollOffset.clamp(minScrollOffset, maxScrollOffset));
+      linkedHorizontalScrollControllerGroup.jumpTo(
+          newScrollOffset.clamp(FlameChart.minScrollOffset, maxScrollOffset));
     });
   }
 
-  void _zoomTo(double zoom) {
-    zoomController.animateTo(zoom, duration: defaultDuration);
+  Future<void> zoomTo(double zoom, {double forceMouseX}) async {
+    if (forceMouseX != null) {
+      mouseHoverX = forceMouseX;
+    }
+    await zoomController.animateTo(
+      zoom.clamp(FlameChart.minZoomLevel, FlameChart.maxZoomLevel),
+      duration: shortDuration,
+    );
   }
 
-  void _scrollTo(double offset) {
-    linkedHorizontalScrollControllerGroup.animateTo(
-      offset.clamp(minScrollOffset, maxScrollOffset),
+  Future<void> scrollTo(double offset) async {
+    await linkedHorizontalScrollControllerGroup.animateTo(
+      offset.clamp(FlameChart.minScrollOffset, maxScrollOffset),
       curve: defaultCurve,
-      duration: defaultDuration,
+      duration: shortDuration,
     );
   }
 }
@@ -606,7 +612,7 @@ class FlameChartUtils {
   static double zoomForNode(FlameChartNode node, double chartZoom) {
     return node != null && node.selectable
         ? chartZoom
-        : FlameChartState.minZoomLevel;
+        : FlameChart.minZoomLevel;
   }
 
   static Range paddedZoomedInterval(
@@ -674,6 +680,8 @@ class FlameChartRow {
   }
 }
 
+// TODO(kenz): consider de-coupling this API from the dual background color
+// scheme.
 class FlameChartNode<T> {
   FlameChartNode({
     this.key,
@@ -684,9 +692,15 @@ class FlameChartNode<T> {
     @required this.textColor,
     @required this.data,
     @required this.onSelected,
+    this.useAlternateBackground,
+    this.alternateBackgroundColor,
     this.selectable = true,
     this.sectionIndex,
-  });
+  }) {
+    if (useAlternateBackground != null) {
+      assert(alternateBackgroundColor != null);
+    }
+  }
 
   FlameChartNode.sectionLabel({
     this.key,
@@ -699,10 +713,12 @@ class FlameChartNode<T> {
         tooltip = text,
         data = null,
         onSelected = ((_) {}),
-        selectable = false;
+        selectable = false,
+        useAlternateBackground = null,
+        alternateBackgroundColor = null;
 
-  static const _selectedNodeColor = mainUiColorSelectedLight;
-
+  static const _selectedNodeColor = lightSelection;
+  static const _alternateTextColor = Colors.black;
   static const _minWidthForText = 22.0;
 
   final Key key;
@@ -712,6 +728,8 @@ class FlameChartNode<T> {
   final Color backgroundColor;
   final Color textColor;
   final T data;
+  final bool Function(T) useAlternateBackground;
+  final Color alternateBackgroundColor;
   final void Function(T) onSelected;
   final bool selectable;
 
@@ -724,28 +742,34 @@ class FlameChartNode<T> {
     @required bool hovered,
     @required double zoom,
   }) {
+    // This math.max call prevents using a rect with negative width for
+    // small events that have padding.
+    //
+    // See https://github.com/flutter/devtools/issues/1503 for details.
+    final zoomedWidth = math.max(0.0, rect.width * zoom);
+
+    // TODO(kenz): this is intended to improve performance but can probably be
+    // improved. Perhaps we should still show a solid line and fade it out?
+    if (zoomedWidth < 0.5) {
+      return SizedBox(width: zoomedWidth);
+    }
+
     selected = selectable ? selected : false;
     hovered = selectable ? hovered : false;
 
     final node = Container(
       key: hovered ? null : key,
-      // This math.max call prevents using a rect with negative width for
-      // small events that have padding.
-      //
-      // See https://github.com/flutter/devtools/issues/1503 for details.
-      width: math.max(0.0, rect.width * zoom),
+      width: zoomedWidth,
       height: rect.height,
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       alignment: Alignment.centerLeft,
-      color: selected ? _selectedNodeColor : backgroundColor,
-      child: rect.width * zoom >= _minWidthForText
+      color: _backgroundColor(selected),
+      child: zoomedWidth >= _minWidthForText
           ? Text(
               text,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: selected ? Colors.black : textColor,
-              ),
+              style: TextStyle(color: _textColor(selected)),
             )
           : const SizedBox(),
     );
@@ -762,34 +786,64 @@ class FlameChartNode<T> {
     }
   }
 
+  Color _backgroundColor(bool selected) {
+    if (selected) return _selectedNodeColor;
+    if (useAlternateBackground != null && useAlternateBackground(data)) {
+      return alternateBackgroundColor;
+    }
+    return backgroundColor;
+  }
+
+  Color _textColor(bool selected) {
+    if (selected ||
+        (useAlternateBackground != null && useAlternateBackground(data))) {
+      return _alternateTextColor;
+    }
+    return textColor;
+  }
+
   Rect zoomedRect(double zoom, double chartStartInset) {
     // If a node is not selectable (e.g. section labels "UI", "GPU", etc.), it
     // will not be zoomed, so return the original rect.
     if (!selectable) return rect;
 
-    final zoomedLeft = (rect.left - chartStartInset) * zoom + chartStartInset;
-    final zoomedWidth = rect.width * zoom;
+    // These math.max calls prevent using a rect with negative width for
+    // small events that have padding.
+    //
+    // See https://github.com/flutter/devtools/issues/1503 for details.
+    final zoomedLeft =
+        math.max(0.0, (rect.left - chartStartInset) * zoom + chartStartInset);
+    final zoomedWidth = math.max(0.0, rect.width * zoom);
     return Rect.fromLTWH(zoomedLeft, rect.top, zoomedWidth, rect.height);
   }
 }
 
 mixin FlameChartColorMixin {
   int _uiColorOffset = 0;
-  Color nextUiColor() {
+  Color nextUiColor({bool resetOffset = false}) {
+    if (resetOffset) {
+      _uiColorOffset = 0;
+    }
     final color = uiColorPalette[_uiColorOffset % uiColorPalette.length];
     _uiColorOffset++;
     return color;
   }
 
   int _gpuColorOffset = 0;
-  Color nextGpuColor() {
+  Color nextGpuColor({bool resetOffset = false}) {
+    if (resetOffset) {
+      _gpuColorOffset = 0;
+    }
     final color = gpuColorPalette[_gpuColorOffset % gpuColorPalette.length];
     _gpuColorOffset++;
     return color;
   }
 
   int _asyncColorOffset = 0;
-  Color nextAsyncColor() {
+  Color nextAsyncColor({bool resetOffset = false}) {
+    if (resetOffset) {
+      _asyncColorOffset = 0;
+    }
     final color =
         asyncColorPalette[_asyncColorOffset % asyncColorPalette.length];
     _asyncColorOffset++;
@@ -797,10 +851,24 @@ mixin FlameChartColorMixin {
   }
 
   int _unknownColorOffset = 0;
-  Color nextUnknownColor() {
+  Color nextUnknownColor({bool resetOffset = false}) {
+    if (resetOffset) {
+      _unknownColorOffset = 0;
+    }
     final color =
         unknownColorPalette[_unknownColorOffset % unknownColorPalette.length];
     _unknownColorOffset++;
+    return color;
+  }
+
+  int _selectedColorOffset = 0;
+  Color nextSelectedColor({bool resetOffset = false}) {
+    if (resetOffset) {
+      _selectedColorOffset = 0;
+    }
+    final color = selectedColorPalette[
+        _selectedColorOffset % selectedColorPalette.length];
+    _selectedColorOffset++;
     return color;
   }
 
@@ -809,6 +877,7 @@ mixin FlameChartColorMixin {
     _uiColorOffset = 0;
     _gpuColorOffset = 0;
     _unknownColorOffset = 0;
+    _selectedColorOffset = 0;
   }
 }
 

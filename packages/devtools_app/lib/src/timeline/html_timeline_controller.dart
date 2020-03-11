@@ -9,10 +9,11 @@ import '../globals.dart';
 import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../service_manager.dart';
+import '../trace_event.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
-import 'timeline_model.dart';
-import 'timeline_processor.dart';
-import 'timeline_service.dart';
+import 'html_timeline_model.dart';
+import 'html_timeline_processor.dart';
+import 'html_timeline_service.dart';
 
 const String timelineScreenId = 'timeline';
 
@@ -52,15 +53,15 @@ class TimelineController implements DisposableController {
   /// should be logged for the timeline.
   final _nonFatalErrorController = StreamController<String>.broadcast();
 
-  /// Stream controller that notifies the timeline has been cleared.
-  final _clearController = StreamController<bool>.broadcast();
-
-  Stream<bool> get onTimelineCleared => _clearController.stream;
-
   Stream<OfflineData> get onLoadOfflineData =>
       _loadOfflineDataController.stream;
 
   Stream<String> get onNonFatalError => _nonFatalErrorController.stream;
+
+  /// Stream controller that notifies the timeline has been cleared.
+  final _clearController = StreamController<bool>.broadcast();
+
+  Stream<bool> get onTimelineCleared => _clearController.stream;
 
   TimelineBase get timeline =>
       timelineModeNotifier.value == TimelineMode.frameBased

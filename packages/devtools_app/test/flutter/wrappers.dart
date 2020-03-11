@@ -8,7 +8,7 @@ import 'package:devtools_app/src/flutter/theme.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
