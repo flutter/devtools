@@ -27,7 +27,7 @@ dependencies:
 
 dependency_overrides:
 # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.
-# All overriden dependencies and published together so there is no harm
+# All overriden dependencies are published together so there is no harm
 # in treating them like they are part of a mono-repo while developing.
   devtools_shared:  #OVERRIDE_FOR_DEVELOPMENT
     path: ../devtools_shared  #OVERRIDE_FOR_DEVELOPMENT
