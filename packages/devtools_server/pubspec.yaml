@@ -26,5 +26,8 @@ dependencies:
   vm_service: ^4.0.0
 
 dependency_overrides:
-  devtools_shared:
-    path: ../devtools_shared
+# The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.
+# All overriden dependencies and published together so there is no harm
+# in treating them like they are part of a mono-repo while developing.
+  devtools_shared:  #OVERRIDE_FOR_DEVELOPMENT
+    path: ../devtools_shared  #OVERRIDE_FOR_DEVELOPMENT

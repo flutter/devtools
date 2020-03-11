@@ -23,11 +23,11 @@ dependencies:
   intl: ^0.16.0
 
 dependency_overrides:
-# The text "#OVERRIDE_FOR_TESTS" is stripped out for some CI bots so that the
-# tests can run using the in-repo version of these dependencies instead of
-# only the live Pub version.
-#OVERRIDE_FOR_TESTS   devtools_server:
-#OVERRIDE_FOR_TESTS     path: ../devtools_server
+# The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.
+# All overriden dependencies and published together so there is no harm
+# in treating them like they are part of a mono-repo while developing.
+  devtools_server:  #OVERRIDE_FOR_DEVELOPMENT
+    path: ../devtools_server  #OVERRIDE_FOR_DEVELOPMENT
 
 executables:
   devtools:
