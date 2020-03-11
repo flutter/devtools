@@ -45,7 +45,7 @@ void main() {
 
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.buildTab),
+        Builder(builder: screen.buildTabWidget),
         performance: PerformanceController(),
       ));
       expect(find.text('Performance'), findsOneWidget);

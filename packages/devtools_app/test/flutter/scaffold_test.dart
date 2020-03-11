@@ -73,7 +73,7 @@ void main() {
 
 class _TestScreen extends Screen {
   const _TestScreen(this.name, this.key, [this.tabKey])
-      : super(DevToolsScreenType.simple);
+      : super(DevToolsScreenType.simple, name, Icons.computer);
 
   final String name;
   final Key key;
@@ -82,15 +82,6 @@ class _TestScreen extends Screen {
   @override
   Widget build(BuildContext context) {
     return SizedBox(key: key);
-  }
-
-  @override
-  Widget buildTab(BuildContext context) {
-    return Tab(
-      key: tabKey,
-      text: name,
-      icon: const Icon(Icons.computer),
-    );
   }
 }
 

@@ -29,7 +29,8 @@ import 'timeline_flame_chart.dart';
 // where applicable.
 
 class TimelineScreen extends Screen {
-  const TimelineScreen() : super(DevToolsScreenType.timeline);
+  const TimelineScreen()
+      : super(DevToolsScreenType.timeline, 'Timeline', Octicons.pulse);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -52,14 +53,6 @@ class TimelineScreen extends Screen {
 
   @override
   Widget build(BuildContext context) => TimelineScreenBody();
-
-  @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Timeline',
-      icon: Icon(Octicons.pulse),
-    );
-  }
 }
 
 class TimelineScreenBody extends StatefulWidget {

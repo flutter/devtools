@@ -17,19 +17,12 @@ import '../logging_controller.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
-  const LoggingScreen() : super(DevToolsScreenType.logging);
+  const LoggingScreen()
+      : super(DevToolsScreenType.logging, 'Logging', Octicons.clippy);
 
   @override
   Widget build(BuildContext context) {
     return LoggingScreenBody();
-  }
-
-  @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Logging',
-      icon: Icon(Octicons.clippy),
-    );
   }
 }
 
@@ -164,6 +157,7 @@ class _LogDetailsState extends State<LogDetails>
   LogData _oldLog;
 
   bool showInspector(LogData log) => log != null && log.node != null;
+
   bool showSimple(LogData log) =>
       log != null && log.node == null && !log.needsComputing;
 

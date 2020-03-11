@@ -241,8 +241,8 @@ class _RegisteredServiceExtensionButtonState
       child: Container(
         constraints: const BoxConstraints.tightFor(width: 48.0, height: 48.0),
         alignment: Alignment.center,
-        // TODO(djshuckerow): Just make these icons the right size to fit this box.
-        // The current size is a little tiny by comparison to our other
+        // TODO(djshuckerow): Just make these icons the right size to fit this
+        // box. The current size is a little tiny by comparison to our other
         // material icons.
         child: getIconWidget(widget.serviceDescription.icon),
       ),
@@ -278,6 +278,7 @@ class _ServiceExtensionToggle extends _ServiceExtensionWidget {
           describeError: describeError,
         );
   final ToggleableServiceExtensionDescription service;
+
   @override
   _ServiceExtensionMixin<_ServiceExtensionWidget> createState() =>
       _ServiceExtensionToggleState();
@@ -286,6 +287,7 @@ class _ServiceExtensionToggle extends _ServiceExtensionWidget {
 class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
     with _ServiceExtensionMixin, AutoDisposeMixin {
   bool value = false;
+
   @override
   void initState() {
     super.initState();

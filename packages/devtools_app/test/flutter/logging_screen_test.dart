@@ -44,7 +44,7 @@ void main() {
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
+      await tester.pumpWidget(wrap(Builder(builder: screen.buildTabWidget)));
       expect(find.text('Logging'), findsOneWidget);
     });
 

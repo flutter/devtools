@@ -199,7 +199,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// Builds an [AppBar] with the [TabBar] placed on the side or the bottom,
   /// depending on the screen width.
-  Widget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar() {
     const title = Text('Dart DevTools');
     Widget flexibleSpace;
     Size preferredSize;
@@ -210,15 +210,15 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         controller: _tabController,
         isScrollable: true,
         onTap: _pushScreenToLocalPageRoute,
-        tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
+        tabs: [for (var screen in widget.tabs) screen.buildTabWidget(context)],
       );
       preferredSize = Tween<Size>(
         begin: Size.fromHeight(kToolbarHeight),
-        end: Size.fromHeight(kToolbarHeight + tabBar.preferredSize.height),
+        end: Size.fromHeight(kToolbarHeight + 40.0),
       ).evaluate(appBarCurve);
       final animatedAlignment = Tween<Alignment>(
         begin: Alignment.centerRight,
-        end: Alignment.bottomCenter,
+        end: Alignment.bottomLeft,
       ).evaluate(appBarCurve);
 
       final rightEdge = isNarrow ? 0.0 : DevToolsScaffold.actionWidgetSize / 2;
@@ -256,8 +256,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           ? DevToolsScaffold.narrowWidthKey
           : DevToolsScaffold.fullWidthKey,
       preferredSize: preferredSize,
-      // Place the AppBar inside of a Hero widget to keep it the same
-      // across route transitions.
+      // Place the AppBar inside of a Hero widget to keep it the same across
+      // route transitions.
       child: Hero(
         tag: _appBarTag,
         child: appBar,
@@ -273,17 +273,12 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 }
 
 class SimpleScreen extends Screen {
-  const SimpleScreen(this.child) : super(DevToolsScreenType.simple);
+  const SimpleScreen(this.child) : super(DevToolsScreenType.simple, null, null);
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return child;
-  }
-
-  @override
-  Widget buildTab(BuildContext context) {
-    return null;
   }
 }

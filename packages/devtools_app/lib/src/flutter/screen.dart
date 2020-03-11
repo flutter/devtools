@@ -18,14 +18,33 @@ import 'scaffold.dart';
 /// Defines pages shown in the tabbar of the app.
 @immutable
 abstract class Screen {
-  const Screen(this.type);
+  const Screen(this.type, this.title, this.iconData);
 
   final DevToolsScreenType type;
 
-  /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main navbar.
+  /// The user-facing name of the page.
+  final String title;
+
+  final IconData iconData;
+
+  /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main
+  /// navbar.
   ///
-  /// This will not be used if the [Screen] is the only one shown in the scaffold.
-  Widget buildTab(BuildContext context);
+  /// This will not be used if the [Screen] is the only one shown in the
+  /// scaffold.
+  Widget buildTabWidget(BuildContext context) {
+    return Tab(
+      child: Row(
+        children: <Widget>[
+          Icon(iconData, size: 16.0),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text(title),
+          ),
+        ],
+      ),
+    );
+  }
 
   /// Builds the body to display for this tab.
   Widget build(BuildContext context);
