@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 import 'dart:async';
 
-import 'package:devtools_app/src/debugger/html_debugger_screen.dart';
-
 import '../../auto_dispose.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../globals.dart';
