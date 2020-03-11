@@ -138,6 +138,7 @@ bool isTimelineDataEqual(TimelineData a, TimelineData b) {
   return a.traceEvents == b.traceEvents &&
       a.frames == b.frames &&
       a.selectedFrame == b.selectedFrame &&
-      a.selectedEvent == b.selectedEvent &&
+      a.selectedEvent.name == b.selectedEvent.name &&
+      a.selectedEvent.time == b.selectedEvent.time &&
       a.cpuProfileData == b.cpuProfileData;
 }
