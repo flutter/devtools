@@ -17,7 +17,6 @@ import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
-import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
