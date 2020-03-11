@@ -8,7 +8,7 @@ description: A suite of web-based performance tooling for Dart and Flutter.
 # package remaining purely as a container for the compiled copy of the devtools
 # app. That ensures that version constraints for the devtools_app do not impact
 # this package.
-version: 0.2.3
+version: 0.2.4-dev.1
 
 author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools
@@ -17,8 +17,8 @@ environment:
   sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
-  devtools_server: 0.2.3
-  devtools_shared: 0.2.3
+  devtools_server: 0.2.4-dev.1
+  devtools_shared: 0.2.4-dev.1
   http: ^0.12.0+1
   intl: ^0.16.0
 
@@ -26,6 +26,8 @@ dependency_overrides:
 # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.
 # All overriden dependencies are published together so there is no harm
 # in treating them like they are part of a mono-repo while developing.
+  devtools_shared:  #OVERRIDE_FOR_DEVELOPMENT
+    path: ../devtools_shared  #OVERRIDE_FOR_DEVELOPMENT
   devtools_server:  #OVERRIDE_FOR_DEVELOPMENT
     path: ../devtools_server  #OVERRIDE_FOR_DEVELOPMENT
 
