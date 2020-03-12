@@ -5,17 +5,7 @@ import 'package:flutter/rendering.dart';
 import '../../globals.dart';
 import '../diagnostics_node.dart';
 import '../inspector_service.dart';
-
-const toEnumEntryCodeDefinition = '''
-  T toEnumEntry<T>(List<T> enumEntries, String name) {
-    for (T entry in enumEntries) {
-      if (entry.toString() == name) {
-        return entry;
-      }
-    }
-    return null;
-  }
-''';
+import 'inspector_service_polyfill.dart';
 
 extension InspectorFlutterService on ObjectGroup {
   Future<void> invokeSetFlexProperties(
@@ -78,15 +68,7 @@ extension InspectorFlutterService on ObjectGroup {
     final name = extension.name;
     if (!serviceManager.serviceExtensionManager
         .isServiceExtensionAvailable('ext.flutter.inspector.$name')) {
-      String expression = '''
-        ${extension.callbackDefinition}
-        WidgetInspectorService.instance.registerServiceExtension(
-          name: '$name',
-          callback: $name
-        );
-      ''';
-      expression = '((){${expression.split('\n').join()}})()';
-      await inspectorLibrary.eval(expression, isAlive: this);
+      await invokeInspectorPolyfill(this);
     }
     return invokeServiceMethodDaemonParams(name, parameters);
   }
@@ -95,175 +77,15 @@ extension InspectorFlutterService on ObjectGroup {
 class RegistrableServiceExtension {
   RegistrableServiceExtension({
     @required this.name,
-    @required this.statements,
-    this.requireEnumDeserialization = false,
   });
 
   final String name;
 
-  /// Statements inside the callback.
-  /// Should end with ';'
-  /// To deserialize the required parameters, use variable 'parameters'.
-  /// See [getLayoutExplorerNode] for example.
-  final String statements;
-
-  // Whether this callback need to deserialize enum values or not.
-  final bool requireEnumDeserialization;
-
-  // Generated ServiceExtensionCallback definition
-  String get callbackDefinition {
-    return '''
-      ${requireEnumDeserialization ? toEnumEntryCodeDefinition : ''}
-      Future<Map<String, dynamic>> $name(Map<String, String> parameters){
-        $statements
-      }
-    ''';
-  }
-
-  static final getLayoutExplorerNode = RegistrableServiceExtension(
-    name: 'getLayoutExplorerNode',
-    statements: '''
-        final String id = parameters['id'];
-        final int subtreeDepth = int.parse(parameters['subtreeDepth']);
-        final String groupName = parameters['groupName'];
-        Map<String, Object> result = {};
-        final instance = WidgetInspectorService.instance;
-        final root = instance.toObject(id);
-        if (root == null) {
-          result = null;
-        } else {
-          result = instance._nodeToJson(
-            root,
-            InspectorSerializationDelegate(
-              groupName: groupName,
-              summaryTree: true,
-              subtreeDepth: subtreeDepth,
-              includeProperties: false,
-              service: instance,
-              addAdditionalPropertiesCallback: (node, delegate) {
-                final Map<String, Object> additionalJson = <String, Object>{};
-                final Object value = node.value;
-                if (value is Element) {
-                  final renderObject = value.renderObject;
-                  additionalJson['renderObject'] =
-                      renderObject.toDiagnosticsNode()?.toJsonMap(
-                        delegate.copyWith(
-                          subtreeDepth: 0,
-                          includeProperties: true,
-                        ),
-                      );
-                  final Constraints constraints = renderObject.constraints;
-                  if (constraints != null) {
-                    final Map<String, Object> constraintsProperty = <
-                        String,
-                        Object>{
-                      'type': constraints.runtimeType.toString(),
-                      'description': constraints.toString(),
-                    };
-                    if (constraints is BoxConstraints) {
-                      constraintsProperty.addAll(<String, Object>{
-                        'minWidth': constraints.minWidth.toString(),
-                        'minHeight': constraints.minHeight.toString(),
-                        'maxWidth': constraints.maxWidth.toString(),
-                        'maxHeight': constraints.maxHeight.toString(),
-                      });
-                    }
-                    additionalJson['constraints'] = constraintsProperty;
-                  }
-                  if (renderObject is RenderBox) {
-                    additionalJson['size'] = <String, Object>{
-                      'width': renderObject.size.width.toString(),
-                      'height': renderObject.size.height.toString(),
-                    };
-
-                    final ParentData parentData = renderObject.parentData;
-                    if (parentData is FlexParentData) {
-                      additionalJson['flexFactor'] = parentData.flex;
-                      additionalJson['flexFit'] =
-                          describeEnum(parentData.fit ?? FlexFit.tight);
-                    }
-                  }
-                }
-                return additionalJson;
-              }
-            ),
-          );
-        }
-        return Future<Map<String, Object>>.value(<String, Object>{
-          'result': result,
-        });
-      ''',
-  );
-
-  static final setFlexFit = RegistrableServiceExtension(
-    name: 'setFlexFit',
-    statements: '''
-      final String id = parameters['id'];
-      final FlexFit flexFit =
-          toEnumEntry<FlexFit>(FlexFit.values, parameters['flexFit']);
-      dynamic object = WidgetInspectorService.instance.toObject(id);
-      if (object == null) return null;
-      final render = object.renderObject;
-      final parentData = render.parentData;
-      bool succeed = false;
-      if (parentData is FlexParentData) {
-        parentData.fit = flexFit;
-        render.markNeedsLayout();
-        succeed = true;
-      }
-      return Future<Map<String, Object>>.value(<String, Object>{
-        'result': succeed,
-      });
-    ''',
-    requireEnumDeserialization: true,
-  );
-  static final setFlexFactor = RegistrableServiceExtension(
-    name: 'setFlexFactor',
-    statements: '''
-      final String id = parameters['id'];
-      final String flexFactor = parameters['flexFactor'];
-      final int factor = flexFactor == "null" ? null : int.parse(flexFactor);
-      final dynamic object = WidgetInspectorService.instance.toObject(id);
-      if (object == null) return null;
-      final render = object.renderObject;
-      final parentData = render.parentData;
-      bool succeed = false;
-      if (parentData is FlexParentData) {
-        parentData.flex = factor;
-        render.markNeedsLayout();
-        succeed = true;
-      }
-      return Future<Map<String, Object>>.value(<String, Object>{
-        'result': succeed,
-      });
-    ''',
-  );
-  static final setFlexProperties = RegistrableServiceExtension(
-    name: 'setFlexProperties',
-    statements: '''
-      final String id = parameters['id'];
-      final MainAxisAlignment mainAxisAlignment = toEnumEntry<MainAxisAlignment>(
-        MainAxisAlignment.values,
-        parameters['mainAxisAlignment'],
-      );
-      final CrossAxisAlignment crossAxisAlignment = toEnumEntry<CrossAxisAlignment>(
-        CrossAxisAlignment.values,
-        parameters['crossAxisAlignment'],
-      );
-      final dynamic object = WidgetInspectorService.instance.toObject(id);
-      if (object == null) return null;
-      final render = object.renderObject;
-      bool succeed = false;
-      if (render is RenderFlex) {
-        render.mainAxisAlignment = mainAxisAlignment;
-        render.crossAxisAlignment = crossAxisAlignment;
-        render.markNeedsLayout();
-        succeed = true;
-      }
-      return Future<Map<String, Object>>.value(<String, Object>{
-        'result': succeed,
-      });
-    ''',
-    requireEnumDeserialization: true,
-  );
+  static final getLayoutExplorerNode =
+      RegistrableServiceExtension(name: 'getLayoutExplorerNode');
+  static final setFlexFit = RegistrableServiceExtension(name: 'setFlexFit');
+  static final setFlexFactor =
+      RegistrableServiceExtension(name: 'setFlexFactor');
+  static final setFlexProperties =
+      RegistrableServiceExtension(name: 'setFlexProperties');
 }

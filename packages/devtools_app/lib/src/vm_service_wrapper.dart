@@ -766,6 +766,39 @@ class VmServiceWrapper implements VmService {
     ).isSupported(supportedVersion: supportedVersion);
   }
 
+  /// Retrieves the full string value of a [stringRef].
+  ///
+  /// The string value stored with the [stringRef] is returned unless the value
+  /// is truncated in which an extra getObject call is issued to return the
+  /// value. If the [stringRef] has expired so the full string is unavailable,
+  /// [onUnavailable] is called to return how the truncated value should be
+  /// displayed. If [onUnavailable] is not specified, an exception is thrown
+  /// if the full value cannot be retrieved.
+  Future<String> retrieveFullStringValue(
+    String isolateId,
+    InstanceRef stringRef, {
+    String onUnavailable(String truncatedValue),
+  }) async {
+    if (stringRef == null) return null;
+    if (stringRef.valueAsStringIsTruncated != true)
+      return stringRef.valueAsString;
+
+    final result = await getObject(
+      isolateId,
+      stringRef.id,
+      offset: 0,
+      count: stringRef.length,
+    );
+    if (result is Instance) {
+      return result.valueAsString;
+    } else if (onUnavailable != null) {
+      return onUnavailable(stringRef.valueAsString);
+    } else {
+      throw Exception(
+          'The full string for "{stringRef.valueAsString}..." is unavailable');
+    }
+  }
+
   /// Gets the name of the service stream for the connected VM service. Pre-v3.22
   /// this was a private API and named _Service and in v3.22 (July 2019) it was
   /// made public ("Service").

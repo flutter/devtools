@@ -254,6 +254,10 @@ class EvalOnDartLibrary {
       return value;
     });
   }
+
+  Future<String> retrieveFullValueAsString(InstanceRef stringRef) {
+    return service.retrieveFullStringValue(_isolateId, stringRef);
+  }
 }
 
 class LibraryNotFound implements Exception {
