@@ -30,8 +30,11 @@ import 'timeline_model.dart';
 
 class TimelineScreen extends Screen {
   const TimelineScreen()
-      : super(DevToolsScreenType.timeline,
-            title: 'Timeline', icon: Octicons.pulse);
+      : super(
+          DevToolsScreenType.timeline,
+          title: 'Timeline',
+          icon: Octicons.pulse,
+        );
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');

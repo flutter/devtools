@@ -23,8 +23,11 @@ import 'inspector_tree_flutter.dart';
 
 class InspectorScreen extends Screen {
   const InspectorScreen()
-      : super(DevToolsScreenType.inspector,
-            title: 'Flutter Inspector', icon: Octicons.deviceMobile);
+      : super(
+          DevToolsScreenType.inspector,
+          title: 'Flutter Inspector',
+          icon: Octicons.deviceMobile,
+        );
 
   @override
   Widget build(BuildContext context) => const InspectorScreenBody();
