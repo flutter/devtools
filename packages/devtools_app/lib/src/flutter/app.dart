@@ -196,7 +196,10 @@ class ReportBugAction extends StatelessWidget {
       child: Container(
         constraints: const BoxConstraints.tightFor(width: 48.0, height: 48.0),
         alignment: Alignment.center,
-        child: Icon(Icons.bug_report),
+        child: Icon(
+          Icons.bug_report,
+          size: 20.0,
+        ),
       ),
     );
   }
