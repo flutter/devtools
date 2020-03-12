@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 import '../../src/framework/framework_core.dart';
 import '../debugger/flutter/debugger_screen.dart';
@@ -56,8 +57,8 @@ class DevToolsAppState extends State<DevToolsApp> {
     final path = uri.path;
 
     // Update the theme based on the query parameters.
-    // TODO(djshuckerow): Update this with a NavigatorObserver to load the
-    // new theme a frame earlier.
+    // TODO(djshuckerow): Update this with a NavigatorObserver to load the new
+    // theme a frame earlier.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // On desktop, don't change the theme on route changes.
       if (!kIsWeb) return;
@@ -117,8 +118,10 @@ class DevToolsAppState extends State<DevToolsApp> {
               InfoScreen(),
             ],
             actions: [
+              _BulletSpacer(),
               HotReloadButton(),
               HotRestartButton(),
+              ReportBugAction(),
             ],
           ),
         ),
@@ -160,6 +163,40 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
       location: BannerLocation.bottomEnd,
       child: Builder(
         builder: builder,
+      ),
+    );
+  }
+}
+
+class _BulletSpacer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints.tightFor(width: 24.0, height: 48.0),
+      alignment: Alignment.center,
+      child: const Text('•'),
+    );
+  }
+}
+
+class ReportBugAction extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        // TODO(devoncarew): Support analytics.
+        // ga.select(ga.devToolsMain, ga.feedback);
+
+        const reportIssuesUrl = 'https://github.com/flutter/devtools/issues';
+
+        if (await url_launcher.canLaunch(reportIssuesUrl)) {
+          await url_launcher.launch(reportIssuesUrl);
+        }
+      },
+      child: Container(
+        constraints: const BoxConstraints.tightFor(width: 48.0, height: 48.0),
+        alignment: Alignment.center,
+        child: Icon(Icons.bug_report),
       ),
     );
   }

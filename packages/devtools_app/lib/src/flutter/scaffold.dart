@@ -221,12 +221,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         end: Alignment.bottomLeft,
       ).evaluate(appBarCurve);
 
-      final rightEdge = isNarrow ? 0.0 : DevToolsScaffold.actionWidgetSize / 2;
+      final rightAdjust =
+          isNarrow ? 0.0 : DevToolsScaffold.actionWidgetSize / 2;
       final animatedRightPadding = Tween<double>(
         begin: DevToolsScaffold.actionWidgetSize *
-                (widget.actions?.length ?? 0.0) +
-            rightEdge,
-        end: rightEdge,
+                (widget.actions?.length ?? 0.0) -
+            rightAdjust,
+        end: 0.0,
       ).evaluate(appBarCurve);
 
       flexibleSpace = Align(
