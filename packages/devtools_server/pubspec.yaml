@@ -5,7 +5,6 @@ description: A server that supports Dart DevTools.
 # that updates all versions of packages from packages/devtools.
 version: 0.2.4-dev.1
 
-author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools
 
 environment:

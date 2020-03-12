@@ -8,7 +8,6 @@ description: Main package implementing web-based performance tooling for Dart an
 # this package.
 version: 0.2.4-dev.1
 
-author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools
 
 environment:
