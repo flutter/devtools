@@ -14,7 +14,9 @@ import 'http_request_inspector.dart';
 import 'network_model.dart';
 
 class NetworkScreen extends Screen {
-  const NetworkScreen() : super(DevToolsScreenType.network);
+  const NetworkScreen()
+      : super(DevToolsScreenType.network,
+            title: 'Network', icon: Icons.network_check);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -24,14 +26,6 @@ class NetworkScreen extends Screen {
   static const recordButtonKey = Key('Record Button');
   @visibleForTesting
   static const recordingInstructionsKey = Key('Recording Instructions');
-
-  @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Network',
-      icon: Icon(Icons.network_check),
-    );
-  }
 
   @override
   Widget build(BuildContext context) => const NetworkScreenBody();

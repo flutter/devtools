@@ -17,7 +17,9 @@ import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
 
 class PerformanceScreen extends Screen {
-  const PerformanceScreen() : super(DevToolsScreenType.performance);
+  const PerformanceScreen()
+      : super(DevToolsScreenType.performance,
+            title: 'Performance', icon: Octicons.dashboard);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -32,14 +34,6 @@ class PerformanceScreen extends Screen {
 
   @override
   Widget build(BuildContext context) => PerformanceScreenBody();
-
-  @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Performance',
-      icon: Icon(Octicons.dashboard),
-    );
-  }
 }
 
 class PerformanceScreenBody extends StatefulWidget {

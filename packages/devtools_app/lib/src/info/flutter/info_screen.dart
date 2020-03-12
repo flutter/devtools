@@ -13,18 +13,11 @@ import '../../version.dart';
 import '../info_controller.dart';
 
 class InfoScreen extends Screen {
-  const InfoScreen() : super(DevToolsScreenType.info);
+  const InfoScreen()
+      : super(DevToolsScreenType.info, title: 'Info', icon: Octicons.info);
 
   @override
   Widget build(BuildContext context) => InfoScreenBody();
-
-  @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      icon: Icon(Octicons.info),
-      text: 'Info',
-    );
-  }
 
   /// The key to identify the flag list view
   @visibleForTesting

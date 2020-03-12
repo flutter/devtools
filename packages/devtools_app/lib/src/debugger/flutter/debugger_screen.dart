@@ -12,19 +12,13 @@ import '../../flutter/split.dart';
 import '../../globals.dart';
 
 class DebuggerScreen extends Screen {
-  const DebuggerScreen() : super(DevToolsScreenType.debugger);
+  const DebuggerScreen()
+      : super(DevToolsScreenType.debugger,
+            title: 'Debugger', icon: Octicons.bug);
 
   @override
   Widget build(BuildContext context) {
     return DebuggerScreenBody();
-  }
-
-  @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Debugger',
-      icon: Icon(Octicons.bug),
-    );
   }
 }
 

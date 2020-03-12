@@ -15,7 +15,9 @@ import 'memory_chart.dart';
 import 'memory_controller.dart';
 
 class MemoryScreen extends Screen {
-  const MemoryScreen() : super(DevToolsScreenType.memory);
+  const MemoryScreen()
+      : super(DevToolsScreenType.memory,
+            title: 'Memory', icon: Octicons.package);
 
   @visibleForTesting
   static const pauseButtonKey = Key('Pause Button');
@@ -50,14 +52,6 @@ class MemoryScreen extends Screen {
 
   @override
   Widget build(BuildContext context) => const MemoryBody();
-
-  @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Memory',
-      icon: Icon(Octicons.package),
-    );
-  }
 }
 
 class MemoryBody extends StatefulWidget {
