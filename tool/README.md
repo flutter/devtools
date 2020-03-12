@@ -112,8 +112,8 @@ git checkout packages/*/pubspec.yaml
 ```
 
 #### Create the tag for this release and push to the remote repository.
+This script will automatically determine the version from the `packages/devtools/pubspec.yaml` so there
+is no need to manually enter the version.
 ```shell
-git tag -a v0.0.15 -m "DevTools 0.0.15"
-
-git push upstream v0.0.15
+too/tag_version.sh
 ```

@@ -5,7 +5,7 @@
 # found in the LICENSE file.
 
 VERSION=$1
-LAST_VERSION="$(sed -n -e 's/^.*version: //p' packages/devtools_app/pubspec.yaml)"
+LAST_VERSION="$(sed -n -e 's/^.*version: //p' packages/devtools/pubspec.yaml)"
 
 echo "The previous version was: $LAST_VERSION"
 
