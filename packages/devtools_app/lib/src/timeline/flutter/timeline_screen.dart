@@ -217,11 +217,11 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         return ToggleButtons(
           constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
           children: [
-            devToolsToggleButton(
+            ToggleButton(
               icon: Icons.language,
-              text: 'Log Network Traffic',
+              text: 'Network',
               enabledTooltip: 'Stop logging network traffic',
-              disabledTooltip: 'Start logging network traffic',
+              disabledTooltip: 'Log network traffic',
               minIncludeTextWidth: 1300.0,
               selected: enabled,
             ),
