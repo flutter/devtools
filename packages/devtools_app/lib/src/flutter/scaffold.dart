@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -38,7 +40,7 @@ class DevToolsScaffold extends StatefulWidget {
   static const Key fullWidthKey = Key('Full-width Scaffold');
 
   /// The width at or below which we treat the scaffold as narrow-width.
-  static const double narrowWidthThreshold = 1000.0;
+  static const double narrowWidthThreshold = 1060.0;
 
   /// The size that all actions on this widget are expected to have.
   static const double actionWidgetSize = 48.0;
@@ -221,12 +223,15 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         end: Alignment.bottomLeft,
       ).evaluate(appBarCurve);
 
-      final rightEdge = isNarrow ? 0.0 : DevToolsScaffold.actionWidgetSize / 2;
+      final rightAdjust =
+          isNarrow ? 0.0 : DevToolsScaffold.actionWidgetSize / 2;
       final animatedRightPadding = Tween<double>(
-        begin: DevToolsScaffold.actionWidgetSize *
-                (widget.actions?.length ?? 0.0) +
-            rightEdge,
-        end: rightEdge,
+        begin: math.max(
+            0.0,
+            DevToolsScaffold.actionWidgetSize *
+                    (widget.actions?.length ?? 0.0) -
+                rightAdjust),
+        end: 0.0,
       ).evaluate(appBarCurve);
 
       flexibleSpace = Align(
@@ -242,8 +247,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     }
 
     final appBar = AppBar(
-      // Turn off the appbar's back button on the web.
-      automaticallyImplyLeading: !kIsWeb,
+      // Turn off the appbar's back button.
+      automaticallyImplyLeading: false,
       title: title,
       actions: widget.actions,
       flexibleSpace: flexibleSpace,

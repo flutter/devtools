@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 import '../../src/framework/framework_core.dart';
 import '../debugger/flutter/debugger_screen.dart';
@@ -16,6 +17,7 @@ import '../performance/flutter/performance_screen.dart';
 import '../timeline/flutter/timeline_screen.dart';
 import '../ui/flutter/service_extension_widgets.dart';
 import '../ui/theme.dart' as devtools_theme;
+import 'common_widgets.dart';
 import 'connect_screen.dart';
 import 'initializer.dart';
 import 'notifications.dart';
@@ -56,8 +58,8 @@ class DevToolsAppState extends State<DevToolsApp> {
     final path = uri.path;
 
     // Update the theme based on the query parameters.
-    // TODO(djshuckerow): Update this with a NavigatorObserver to load the
-    // new theme a frame earlier.
+    // TODO(djshuckerow): Update this with a NavigatorObserver to load the new
+    // theme a frame earlier.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // On desktop, don't change the theme on route changes.
       if (!kIsWeb) return;
@@ -117,8 +119,10 @@ class DevToolsAppState extends State<DevToolsApp> {
               InfoScreen(),
             ],
             actions: [
+              BulletSpacer(),
               HotReloadButton(),
               HotRestartButton(),
+              ReportBugAction(),
             ],
           ),
         ),
@@ -160,6 +164,35 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
       location: BannerLocation.bottomEnd,
       child: Builder(
         builder: builder,
+      ),
+    );
+  }
+}
+
+class ReportBugAction extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        // TODO(devoncarew): Support analytics.
+        // ga.select(ga.devToolsMain, ga.feedback);
+
+        const reportIssuesUrl = 'https://github.com/flutter/devtools/issues';
+        if (await url_launcher.canLaunch(reportIssuesUrl)) {
+          await url_launcher.launch(reportIssuesUrl);
+        } else {
+          Notifications.of(context).push('Unable to open url.');
+          Notifications.of(context).push('File issues at $reportIssuesUrl.');
+        }
+      },
+      child: Container(
+        width: 48.0,
+        height: 48.0,
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.bug_report,
+          size: 20.0,
+        ),
       ),
     );
   }

@@ -281,6 +281,21 @@ Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
   );
 }
 
+/// Display a single bullet character in order to act as a stylized spacer
+/// component.
+class BulletSpacer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // TODO(devoncarew): Use the theme's AppBar unselected text color for the
+    // bullet character.
+    return Container(
+      constraints: const BoxConstraints.tightFor(width: 24.0, height: 48.0),
+      alignment: Alignment.center,
+      child: const Text('•'),
+    );
+  }
+}
+
 /// Toggle button for use as a child of a [ToggleButtons] widget.
 class ToggleButton extends StatelessWidget {
   const ToggleButton({
