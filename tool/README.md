@@ -82,6 +82,8 @@ git pull upstream master
   generally work, and there are no exceptions in the chrome devtools log
 
 #### Publish the packages
+Paste this multiline block into your console, and follow the confirmation prompts to upload the packages.
+
 ```shell
 pushd packages/devtools_shared
 pub publish
