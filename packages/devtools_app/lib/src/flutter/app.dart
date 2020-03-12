@@ -17,6 +17,7 @@ import '../performance/flutter/performance_screen.dart';
 import '../timeline/flutter/timeline_screen.dart';
 import '../ui/flutter/service_extension_widgets.dart';
 import '../ui/theme.dart' as devtools_theme;
+import 'common_widgets.dart';
 import 'connect_screen.dart';
 import 'initializer.dart';
 import 'notifications.dart';
@@ -118,7 +119,7 @@ class DevToolsAppState extends State<DevToolsApp> {
               InfoScreen(),
             ],
             actions: [
-              _BulletSpacer(),
+              BulletSpacer(),
               HotReloadButton(),
               HotRestartButton(),
               ReportBugAction(),
@@ -168,17 +169,6 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
   }
 }
 
-class _BulletSpacer extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints.tightFor(width: 24.0, height: 48.0),
-      alignment: Alignment.center,
-      child: const Text('•'),
-    );
-  }
-}
-
 class ReportBugAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -188,13 +178,16 @@ class ReportBugAction extends StatelessWidget {
         // ga.select(ga.devToolsMain, ga.feedback);
 
         const reportIssuesUrl = 'https://github.com/flutter/devtools/issues';
-
         if (await url_launcher.canLaunch(reportIssuesUrl)) {
           await url_launcher.launch(reportIssuesUrl);
+        } else {
+          Notifications.of(context).push('Unable to open url.');
+          Notifications.of(context).push('File issues at $reportIssuesUrl.');
         }
       },
       child: Container(
-        constraints: const BoxConstraints.tightFor(width: 48.0, height: 48.0),
+        width: 48.0,
+        height: 48.0,
         alignment: Alignment.center,
         child: Icon(
           Icons.bug_report,
