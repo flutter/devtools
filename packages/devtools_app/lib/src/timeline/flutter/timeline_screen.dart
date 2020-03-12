@@ -59,6 +59,9 @@ class TimelineScreenBody extends StatefulWidget {
 
 class TimelineScreenBodyState extends State<TimelineScreenBody>
     with AutoDisposeMixin {
+  static const _primaryControlsMinIncludeTextWidth = 825.0;
+  static const _secondaryControlsMinIncludeTextWidth = 1205.0;
+
   TimelineController controller;
 
   final _exportController = ExportController();
@@ -148,25 +151,24 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   Widget _buildPrimaryStateControls() {
-    const minIncludeTextWidth = 950.0;
     return Row(
       children: [
         recordButton(
           key: TimelineScreen.recordButtonKey,
           recording: recording,
-          minIncludeTextWidth: minIncludeTextWidth,
+          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: _startRecording,
         ),
         stopRecordingButton(
           key: TimelineScreen.stopRecordingButtonKey,
           recording: recording,
-          minIncludeTextWidth: minIncludeTextWidth,
+          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: _stopRecording,
         ),
         const SizedBox(width: 8.0),
         clearButton(
           key: TimelineScreen.clearButtonKey,
-          minIncludeTextWidth: minIncludeTextWidth,
+          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: () async {
             await _clearTimeline();
           },
@@ -183,20 +185,47 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: ProfileGranularityDropdown(),
         ),
+        // TODO(kenz): don't show these buttons if connected to a Dart VM app.
         ServiceExtensionButtonGroup(
-          minIncludeTextWidth: 1300,
+          minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
           extensions: [performanceOverlay, profileWidgetBuilds],
         ),
+        // TODO(kenz): hide or disable button if http timeline logging is not
+        // available.
+        _logNetworkTrafficButton(),
         const SizedBox(width: 8.0),
         OutlineButton(
           onPressed: _exportTimeline,
           child: MaterialIconLabel(
             Icons.file_download,
             'Export',
-            minIncludeTextWidth: 1300,
+            minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _logNetworkTrafficButton() {
+    return ValueListenableBuilder(
+      valueListenable: controller.httpTimelineLoggingEnabled,
+      builder: (context, enabled, _) {
+        return ToggleButtons(
+          constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+          children: [
+            ToggleButton(
+              icon: Icons.language,
+              text: 'Network',
+              enabledTooltip: 'Stop logging network traffic',
+              disabledTooltip: 'Log network traffic',
+              minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+              selected: enabled,
+            ),
+          ],
+          isSelected: [enabled],
+          onPressed: (_) => controller.toggleHttpRequestLogging(!enabled),
+        );
+      },
     );
   }
 

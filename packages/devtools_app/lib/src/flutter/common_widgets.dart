@@ -65,6 +65,9 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
   );
 }
 
+// TODO(kenz): Cleanup - audit the following methods and convert them into
+// Widgets where possible.
+
 /// Button to clear data in the UI.
 ///
 /// * `minIncludeTextWidth`: The minimum width the button can be before the text
@@ -276,6 +279,42 @@ Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
       'Exit offline mode',
     ),
   );
+}
+
+/// Toggle button for use as a child of a [ToggleButtons] widget.
+class ToggleButton extends StatelessWidget {
+  const ToggleButton({
+    @required this.icon,
+    @required this.text,
+    @required this.enabledTooltip,
+    @required this.disabledTooltip,
+    @required this.minIncludeTextWidth,
+    @required this.selected,
+  });
+
+  final IconData icon;
+  final String text;
+  final String enabledTooltip;
+  final String disabledTooltip;
+  final double minIncludeTextWidth;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: selected ? enabledTooltip : disabledTooltip,
+      waitDuration: tooltipWait,
+      preferBelow: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: MaterialIconLabel(
+          icon,
+          text,
+          minIncludeTextWidth: minIncludeTextWidth,
+        ),
+      ),
+    );
+  }
 }
 
 class OutlinedBorder extends StatelessWidget {

@@ -6,6 +6,7 @@ import 'dart:async';
 import '../../auto_dispose.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../globals.dart';
+import '../../http/http_service.dart';
 import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_transformer.dart';
 import '../../service_manager.dart';
@@ -55,6 +56,11 @@ class TimelineController implements DisposableController {
   /// Whether the recorded timeline data is currently being processed.
   ValueListenable<bool> get processing => _processingNotifier;
   final _processingNotifier = ValueNotifier<bool>(false);
+
+  /// Whether http timeline logging is enabled.
+  ValueListenable<bool> get httpTimelineLoggingEnabled =>
+      _httpTimelineLoggingEnabledNotifier;
+  final _httpTimelineLoggingEnabledNotifier = ValueNotifier<bool>(false);
 
   // TODO(kenz): change these streams to ValueListenables or remove altogether
   // if we can refactor the FlutterFramesChart to be written with more idiomatic
@@ -322,6 +328,11 @@ class TimelineController implements DisposableController {
   Future<void> exitOfflineMode() async {
     offlineMode = false;
     await _offlineModeChanged();
+  }
+
+  Future<void> toggleHttpRequestLogging(bool state) async {
+    await HttpService.toggleHttpRequestLogging(state);
+    _httpTimelineLoggingEnabledNotifier.value = state;
   }
 
   Future<void> clearData() async {
