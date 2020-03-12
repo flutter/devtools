@@ -18,8 +18,11 @@ import '../../ui/flutter/vm_flag_widgets.dart';
 
 class PerformanceScreen extends Screen {
   const PerformanceScreen()
-      : super(DevToolsScreenType.performance,
-            title: 'Performance', icon: Octicons.dashboard);
+      : super(
+          DevToolsScreenType.performance,
+          title: 'Performance',
+          icon: Octicons.dashboard,
+        );
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
