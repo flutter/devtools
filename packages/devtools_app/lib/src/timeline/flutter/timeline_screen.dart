@@ -65,6 +65,9 @@ class TimelineScreenBody extends StatefulWidget {
 
 class TimelineScreenBodyState extends State<TimelineScreenBody>
     with AutoDisposeMixin {
+  static const _primaryControlsMinIncludeTextWidth = 825.0;
+  static const _secondaryControlsMinIncludeTextWidth = 1205.0;
+
   TimelineController controller;
 
   final _exportController = ExportController();
@@ -154,25 +157,24 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   Widget _buildPrimaryStateControls() {
-    const minIncludeTextWidth = 950.0;
     return Row(
       children: [
         recordButton(
           key: TimelineScreen.recordButtonKey,
           recording: recording,
-          minIncludeTextWidth: minIncludeTextWidth,
+          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: _startRecording,
         ),
         stopRecordingButton(
           key: TimelineScreen.stopRecordingButtonKey,
           recording: recording,
-          minIncludeTextWidth: minIncludeTextWidth,
+          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: _stopRecording,
         ),
         const SizedBox(width: 8.0),
         clearButton(
           key: TimelineScreen.clearButtonKey,
-          minIncludeTextWidth: minIncludeTextWidth,
+          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: () async {
             await _clearTimeline();
           },
@@ -191,7 +193,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         ),
         // TODO(kenz): don't show these buttons if connected to a Dart VM app.
         ServiceExtensionButtonGroup(
-          minIncludeTextWidth: 1300,
+          minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
           extensions: [performanceOverlay, profileWidgetBuilds],
         ),
         // TODO(kenz): hide or disable button if http timeline logging is not
@@ -203,7 +205,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           child: MaterialIconLabel(
             Icons.file_download,
             'Export',
-            minIncludeTextWidth: 1300,
+            minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
           ),
         ),
       ],
@@ -222,7 +224,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
               text: 'Network',
               enabledTooltip: 'Stop logging network traffic',
               disabledTooltip: 'Log network traffic',
-              minIncludeTextWidth: 1300.0,
+              minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
               selected: enabled,
             ),
           ],
