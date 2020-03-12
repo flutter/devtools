@@ -115,5 +115,5 @@ git checkout packages/*/pubspec.yaml
 This script will automatically determine the version from the `packages/devtools/pubspec.yaml` so there
 is no need to manually enter the version.
 ```shell
-too/tag_version.sh
+tool/tag_version.sh
 ```
