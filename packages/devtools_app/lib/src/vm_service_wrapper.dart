@@ -783,11 +783,14 @@ class VmServiceWrapper implements VmService {
     if (stringRef.valueAsStringIsTruncated != true)
       return stringRef.valueAsString;
 
-    final dynamic result = await getObject(isolateId, stringRef.id,
-        offset: 0, count: stringRef.length);
+    final result = await getObject(
+      isolateId,
+      stringRef.id,
+      offset: 0,
+      count: stringRef.length,
+    );
     if (result is Instance) {
-      final Instance obj = result;
-      return obj.valueAsString;
+      return result.valueAsString;
     } else if (onUnavailable != null) {
       return onUnavailable(stringRef.valueAsString);
     } else {
