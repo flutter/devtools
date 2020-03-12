@@ -41,6 +41,18 @@ typedef CreateLoggingTree = InspectorTreeController Function({
   VoidCallback onSelectionChange,
 });
 
+Future<String> _retrieveFullStringValue(
+  VmServiceWrapper service,
+  IsolateRef isolateRef,
+  InstanceRef stringRef,
+) {
+  return service.retrieveFullStringValue(
+    isolateRef.id,
+    stringRef,
+    onUnavailable: (truncatedValue) => '${stringRef.valueAsString}...',
+  );
+}
+
 class LoggingDetailsController {
   LoggingDetailsController({
     @required this.onShowInspector,
@@ -452,25 +464,6 @@ class LoggingController {
       summary: summary,
       detailsComputer: detailsComputer,
     ));
-  }
-
-  Future<String> _retrieveFullStringValue(
-    VmServiceWrapper service,
-    IsolateRef isolateRef,
-    InstanceRef stringRef,
-  ) async {
-    if (stringRef.valueAsStringIsTruncated != true) {
-      return stringRef.valueAsString;
-    }
-
-    final dynamic result = await service.getObject(isolateRef.id, stringRef.id,
-        offset: 0, count: stringRef.length);
-    if (result is Instance) {
-      final Instance obj = result;
-      return obj.valueAsString;
-    } else {
-      return '${stringRef.valueAsString}...';
-    }
   }
 
   void _handleConnectionStop(dynamic event) {}

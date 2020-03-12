@@ -9,7 +9,7 @@
 // features should be exposed with a wide range of Flutter versions to get
 // useful user feedback.
 //
-// We current execute this library using eval but that should be viewed as an
+// We currently execute this library using eval but that should be viewed as an
 // implementation detail as eval is simply the most expedient way to currently
 // late bind these service extensions. It could make sense to provide an
 // alternate eval like mechanism to inject additional libraries into an already
@@ -76,9 +76,17 @@ extension WidgetInspectorServicePrivateMethods on WidgetInspectorService {
   ) {
     throw 'Dummy extension method to make the code type check when it calls private members';
   }
+
+  String _safeJsonEncode(Object object) {
+    throw 'Dummy extension method to make the code type check when it calls private members';
+  }
 }
 
-void addServiceExtensions() {
+// Returns json describing which service extensions failed to load.
+//
+// The format of the json is:
+// {'extension_name_a': 'exception message_a', 'extension_name_b', 'exception_message_b', ...}
+String addServiceExtensions() {
   // INSPECTOR_POLYFILL_SCRIPT_START
   T toEnumEntry<T>(List<T> enumEntries, String name) {
     for (T entry in enumEntries) {
@@ -222,6 +230,7 @@ void addServiceExtensions() {
     return Future.value(<String, Object>{'result': succeed});
   }
 
+  final failures = <String, String>{};
   void registerHelper(String name, ServiceExtensionCallback callback) {
     try {
       WidgetInspectorService.instance.registerServiceExtension(
@@ -232,7 +241,7 @@ void addServiceExtensions() {
       // It is not a fatal error if some of the extensions fail to register
       // as could be the case if some are already defined directly within
       // package:flutter for the version of package:flutter being used.
-      print('Warning: unable to register service extension \'$name\'');
+      failures[name] = e.toString();
     }
   }
 
@@ -240,5 +249,8 @@ void addServiceExtensions() {
   registerHelper('setFlexFit', setFlexFit);
   registerHelper('setFlexFactor', setFlexFactor);
   registerHelper('setFlexProperties', setFlexProperties);
+  return failures.isNotEmpty
+      ? WidgetInspectorService.instance._safeJsonEncode(failures)
+      : null;
   // INSPECTOR_POLYFILL_SCRIPT_END
 }

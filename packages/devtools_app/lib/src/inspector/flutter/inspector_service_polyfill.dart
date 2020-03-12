@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../../config_specific/logger/logger.dart';
 import '../inspector_service.dart';
 
 // Magic tokens to detect the start and the end of the block of code from the
@@ -42,5 +45,17 @@ $script''',
 
   final expression = '((){${filteredLines.join()}})()';
 
-  await group.inspectorLibrary.eval(expression, isAlive: group);
+  final result = await group.inspectorLibrary.eval(expression, isAlive: group);
+  final encodedResult =
+      await group.inspectorLibrary.retrieveFullValueAsString(result);
+  if (encodedResult != null) {
+    final Map<String, Object> decodedError = json.decode(encodedResult);
+    if (encodedResult != null) {
+      for (String name in decodedError.keys) {
+        log(
+          "Unable to add service extension '$name' due to error:\n${decodedError[name]}",
+        );
+      }
+    }
+  }
 }
