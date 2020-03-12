@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -224,9 +226,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       final rightAdjust =
           isNarrow ? 0.0 : DevToolsScaffold.actionWidgetSize / 2;
       final animatedRightPadding = Tween<double>(
-        begin: DevToolsScaffold.actionWidgetSize *
-                (widget.actions?.length ?? 0.0) -
-            rightAdjust,
+        begin: math.max(
+            0.0,
+            DevToolsScaffold.actionWidgetSize *
+                    (widget.actions?.length ?? 0.0) -
+                rightAdjust),
         end: 0.0,
       ).evaluate(appBarCurve);
 
