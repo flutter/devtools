@@ -66,7 +66,7 @@ void main() {
     }
 
     testWidgets('builds its tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(Builder(builder: screen.buildTabWidget)));
+      await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
       expect(find.text('Flutter Inspector'), findsOneWidget);
     });
 

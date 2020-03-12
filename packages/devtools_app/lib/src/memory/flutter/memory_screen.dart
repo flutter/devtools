@@ -16,7 +16,8 @@ import 'memory_controller.dart';
 
 class MemoryScreen extends Screen {
   const MemoryScreen()
-      : super(DevToolsScreenType.memory, 'Memory', Octicons.package);
+      : super(DevToolsScreenType.memory,
+            title: 'Memory', icon: Octicons.package);
 
   @visibleForTesting
   static const pauseButtonKey = Key('Pause Button');

@@ -73,7 +73,7 @@ void main() {
 
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.buildTabWidget),
+        Builder(builder: screen.buildTab),
         timeline: TimelineController(),
       ));
       expect(find.text('Timeline'), findsOneWidget);

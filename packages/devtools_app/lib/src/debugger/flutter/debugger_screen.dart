@@ -13,7 +13,8 @@ import '../../globals.dart';
 
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
-      : super(DevToolsScreenType.debugger, 'Debugger', Octicons.bug);
+      : super(DevToolsScreenType.debugger,
+            title: 'Debugger', icon: Octicons.bug);
 
   @override
   Widget build(BuildContext context) {

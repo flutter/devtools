@@ -30,7 +30,8 @@ import 'timeline_flame_chart.dart';
 
 class TimelineScreen extends Screen {
   const TimelineScreen()
-      : super(DevToolsScreenType.timeline, 'Timeline', Octicons.pulse);
+      : super(DevToolsScreenType.timeline,
+            title: 'Timeline', icon: Octicons.pulse);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');

@@ -18,14 +18,14 @@ import 'scaffold.dart';
 /// Defines pages shown in the tabbar of the app.
 @immutable
 abstract class Screen {
-  const Screen(this.type, this.title, this.iconData, {this.tabKey});
+  const Screen(this.type, {this.title, this.icon, this.tabKey});
 
   final DevToolsScreenType type;
 
   /// The user-facing name of the page.
   final String title;
 
-  final IconData iconData;
+  final IconData icon;
 
   /// An optional key to use when creating the Tab widget (for use during
   /// testing).
@@ -36,12 +36,12 @@ abstract class Screen {
   ///
   /// This will not be used if the [Screen] is the only one shown in the
   /// scaffold.
-  Widget buildTabWidget(BuildContext context) {
+  Widget buildTab(BuildContext context) {
     return Tab(
       key: tabKey,
       child: Row(
         children: <Widget>[
-          Icon(iconData, size: 16.0),
+          Icon(icon, size: 16.0),
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(title),

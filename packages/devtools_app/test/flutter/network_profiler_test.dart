@@ -56,7 +56,7 @@ void main() {
 
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(
-        Builder(builder: const NetworkScreen().buildTabWidget),
+        Builder(builder: const NetworkScreen().buildTab),
       ));
       expect(find.text('Network'), findsOneWidget);
     });

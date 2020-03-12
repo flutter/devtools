@@ -210,7 +210,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         controller: _tabController,
         isScrollable: true,
         onTap: _pushScreenToLocalPageRoute,
-        tabs: [for (var screen in widget.tabs) screen.buildTabWidget(context)],
+        tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
       );
       preferredSize = Tween<Size>(
         begin: Size.fromHeight(kToolbarHeight),
@@ -273,7 +273,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 }
 
 class SimpleScreen extends Screen {
-  const SimpleScreen(this.child) : super(DevToolsScreenType.simple, null, null);
+  const SimpleScreen(this.child) : super(DevToolsScreenType.simple);
 
   final Widget child;
 
