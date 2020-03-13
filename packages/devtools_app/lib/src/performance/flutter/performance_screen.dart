@@ -64,10 +64,9 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
         recording = controller.recordingNotifier.value;
       });
     });
-    addAutoDisposeListener(controller.cpuProfilerController.processingNotifier,
-        () {
+    addAutoDisposeListener(controller.cpuProfilerController.processing, () {
       setState(() {
-        processing = controller.cpuProfilerController.processingNotifier.value;
+        processing = controller.cpuProfilerController.processing.value;
       });
     });
     addAutoDisposeListener(
@@ -82,7 +81,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Flag>(
-      valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
+      valueListenable: controller.cpuProfilerController.profilerFlag,
       builder: (context, profilerFlag, _) {
         return profilerFlag.valueAsString == 'true'
             ? _buildPerformanceBody(controller)
@@ -103,7 +102,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
         ),
         Expanded(
           child: ValueListenableBuilder<CpuProfileData>(
-            valueListenable: controller.cpuProfilerController.dataNotifier,
+            valueListenable: controller.cpuProfilerController.data,
             builder: (context, cpuProfileData, _) {
               if (cpuProfileData ==
                       CpuProfilerController.baseStateCpuProfileData ||

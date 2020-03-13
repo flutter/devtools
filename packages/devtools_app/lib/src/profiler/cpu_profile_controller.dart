@@ -19,16 +19,15 @@ class CpuProfilerController {
   static CpuProfileData baseStateCpuProfileData = CpuProfileData.empty();
 
   /// Notifies that new cpu profile data is available.
-  ValueListenable get dataNotifier => _dataNotifier;
+  ValueListenable get data => _dataNotifier;
   final _dataNotifier = ValueNotifier<CpuProfileData>(baseStateCpuProfileData);
 
   /// Notifies that CPU profile data is currently being processed.
-  ValueListenable get processingNotifier => _processingNotifier;
+  ValueListenable get processing => _processingNotifier;
   final _processingNotifier = ValueNotifier<bool>(false);
 
   /// Notifies that a cpu stack frame was selected.
-  ValueListenable get selectedCpuStackFrameNotifier =>
-      _selectedCpuStackFrameNotifier;
+  ValueListenable get selectedCpuStackFrame => _selectedCpuStackFrameNotifier;
   final _selectedCpuStackFrameNotifier = ValueNotifier<CpuStackFrame>(null);
 
   final service = CpuProfilerService();
@@ -36,15 +35,14 @@ class CpuProfilerController {
   final transformer = CpuProfileTransformer();
 
   /// Notifies that the vm profiler flag has changed.
-  ValueListenable get profilerFlagNotifier => service.profilerFlagNotifier;
+  ValueListenable get profilerFlag => service.profilerFlagNotifier;
 
   /// Whether the profiler is enabled.
   ///
-  /// Clients interested in the current value of [profilerFlagNotifier] should
+  /// Clients interested in the current value of [profilerFlag] should
   /// use this getter. Otherwise, clients subscribing to change notifications,
-  /// should listen to [profilerFlagNotifier].
-  bool get profilerEnabled =>
-      profilerFlagNotifier.value.valueAsString == 'true';
+  /// should listen to [profilerFlag].
+  bool get profilerEnabled => profilerFlag.value.valueAsString == 'true';
 
   Future<dynamic> enableCpuProfiler() {
     return service.enableCpuProfiler();
@@ -88,8 +86,8 @@ class CpuProfilerController {
   }
 
   void selectCpuStackFrame(CpuStackFrame stackFrame) {
-    if (stackFrame == dataNotifier.value.selectedStackFrame) return;
-    dataNotifier.value.selectedStackFrame = stackFrame;
+    if (stackFrame == data.value.selectedStackFrame) return;
+    data.value.selectedStackFrame = stackFrame;
     _selectedCpuStackFrameNotifier.value = stackFrame;
   }
 
@@ -112,3 +110,143 @@ class CpuProfilerController {
     transformer.dispose();
   }
 }
+
+final Map<String, dynamic> cpuProfileResponseJson = {
+  'type': '_CpuProfileTimeline',
+  'samplePeriod': 50,
+  'stackDepth': 128,
+  'sampleCount': 7,
+  'timeSpan': 0.003678,
+  'timeOriginMicros': 47377800463,
+  'timeExtentMicros': 600,
+  'stackFrames': goldenCpuProfileStackFrames,
+  'traceEvents': goldenCpuProfileTraceEvents,
+};
+
+final Map<String, dynamic> goldenCpuProfileStackFrames = {
+  '140357727781376-1': {
+    'category': 'Dart',
+    'name': 'A',
+    'resolvedUrl': 'B',
+  },
+  '140357727781376-2': {
+    'category': 'Dart',
+    'name': 'A1',
+    'parent': '140357727781376-1',
+    'resolvedUrl': 'B',
+  },
+  '140357727781376-3': {
+    'category': 'Dart',
+    'name': 'A2',
+    'parent': '140357727781376-1',
+    'resolvedUrl': 'A',
+  },
+  '140357727781376-4': {
+    'category': 'Dart',
+    'name': 'A2-A child',
+    'parent': '140357727781376-3',
+    'resolvedUrl': 'B',
+  },
+  '140357727781376-5': {
+    'category': 'Dart',
+    'name': 'A2-B child',
+    'parent': '140357727781376-3',
+    'resolvedUrl': 'A',
+  },
+  '140357727781376-6': {
+    'category': 'Dart',
+    'name': 'A2-C child',
+    'parent': '140357727781376-3',
+    'resolvedUrl': 'C',
+  },
+  '140357727781376-7': {
+    'category': 'Dart',
+    'name': 'B',
+    'resolvedUrl': 'A',
+  },
+  '140357727781376-8': {
+    'category': 'Dart',
+    'name': 'B1',
+    'parent': '140357727781376-7',
+    'resolvedUrl': 'B',
+  },
+  '140357727781376-9': {
+    'category': 'Dart',
+    'name': 'B2',
+    'parent': '140357727781376-7',
+    'resolvedUrl': 'A',
+  },
+};
+
+final List<Map<String, dynamic>> goldenCpuProfileTraceEvents = [
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377800463,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-2'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377800563,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-2'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377800663,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-4'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377800763,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-5'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377800863,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-6'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377800963,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-8'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377801063,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-9'
+  },
+];

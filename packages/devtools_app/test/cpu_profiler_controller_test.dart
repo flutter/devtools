@@ -24,78 +24,78 @@ void main() {
       await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
       controller.selectCpuStackFrame(testStackFrame);
       expect(
-        controller.dataNotifier.value,
+        controller.data.value,
         isNot(equals(CpuProfilerController.baseStateCpuProfileData)),
       );
       expect(
-        controller.selectedCpuStackFrameNotifier.value,
+        controller.selectedCpuStackFrame.value,
         equals(testStackFrame),
       );
     }
 
     test('pullAndProcessProfile', () async {
       expect(
-        controller.dataNotifier.value,
+        controller.data.value,
         equals(CpuProfilerController.baseStateCpuProfileData),
       );
-      expect(controller.processingNotifier.value, false);
+      expect(controller.processing.value, false);
 
       // [startMicros] and [extentMicros] are arbitrary for testing.
       await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
       expect(
-        controller.dataNotifier.value,
+        controller.data.value,
         isNot(equals(CpuProfilerController.baseStateCpuProfileData)),
       );
-      expect(controller.processingNotifier.value, false);
+      expect(controller.processing.value, false);
 
       await controller.clear();
       expect(
-        controller.dataNotifier.value,
+        controller.data.value,
         equals(CpuProfilerController.baseStateCpuProfileData),
       );
     });
 
     test('selectCpuStackFrame', () async {
       expect(
-        controller.dataNotifier.value.selectedStackFrame,
+        controller.data.value.selectedStackFrame,
         isNull,
       );
-      expect(controller.selectedCpuStackFrameNotifier.value, isNull);
+      expect(controller.selectedCpuStackFrame.value, isNull);
       controller.selectCpuStackFrame(testStackFrame);
       expect(
-        controller.dataNotifier.value.selectedStackFrame,
+        controller.data.value.selectedStackFrame,
         equals(testStackFrame),
       );
       expect(
-        controller.selectedCpuStackFrameNotifier.value,
+        controller.selectedCpuStackFrame.value,
         equals(testStackFrame),
       );
 
       await controller.clear();
-      expect(controller.selectedCpuStackFrameNotifier.value, isNull);
+      expect(controller.selectedCpuStackFrame.value, isNull);
     });
 
     test('reset', () async {
       await pullProfileAndSelectFrame();
       controller.reset();
       expect(
-        controller.dataNotifier.value,
+        controller.data.value,
         equals(CpuProfilerController.baseStateCpuProfileData),
       );
-      expect(controller.selectedCpuStackFrameNotifier.value, isNull);
-      expect(controller.processingNotifier.value, isFalse);
+      expect(controller.selectedCpuStackFrame.value, isNull);
+      expect(controller.processing.value, isFalse);
     });
 
     test('disposes', () {
       controller.dispose();
       expect(() {
-        controller.dataNotifier.addListener(() {});
+        controller.data.addListener(() {});
       }, throwsA(anything));
       expect(() {
-        controller.selectedCpuStackFrameNotifier.addListener(() {});
+        controller.selectedCpuStackFrame.addListener(() {});
       }, throwsA(anything));
       expect(() {
-        controller.processingNotifier.addListener(() {});
+        controller.processing.addListener(() {});
       }, throwsA(anything));
     });
   });

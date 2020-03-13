@@ -163,7 +163,7 @@ class TimelineController implements DisposableController {
       startMicros: selectedEvent.time.start.inMicroseconds,
       extentMicros: selectedEvent.time.duration.inMicroseconds,
     );
-    data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+    data.cpuProfileData = cpuProfilerController.data.value;
   }
 
   Future<double> get displayRefreshRate async {

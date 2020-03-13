@@ -34,11 +34,11 @@ void main() {
       }, throwsA(anything));
 
       expect(() {
-        controller.cpuProfilerController.dataNotifier.addListener(() {});
+        controller.cpuProfilerController.data.addListener(() {});
       }, throwsA(anything));
 
       expect(() {
-        controller.cpuProfilerController.selectedCpuStackFrameNotifier
+        controller.cpuProfilerController.selectedCpuStackFrame
             .addListener(() {});
       }, throwsA(anything));
     });

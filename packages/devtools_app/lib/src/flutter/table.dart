@@ -5,6 +5,7 @@ import 'package:flutter/material.dart' hide TableRow;
 import '../table_data.dart';
 import '../trees.dart';
 import '../ui/theme.dart';
+import '../utils.dart';
 import 'collapsible_mixin.dart';
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'theme.dart';
@@ -27,6 +28,8 @@ class FlatTable<T> extends StatefulWidget {
     @required this.data,
     @required this.keyFactory,
     @required this.onItemSelected,
+    @required this.startingSortColumn,
+    @required this.startingSortDirection,
   })  : assert(columns != null),
         assert(keyFactory != null),
         assert(data != null),
@@ -42,22 +45,28 @@ class FlatTable<T> extends StatefulWidget {
 
   final ItemCallback<T> onItemSelected;
 
+  final ColumnData<T> startingSortColumn;
+
+  final SortDirection startingSortDirection;
+
   @override
   _FlatTableState<T> createState() => _FlatTableState<T>();
 }
 
-class _FlatTableState<T> extends State<FlatTable<T>> {
+class _FlatTableState<T> extends State<FlatTable<T>> with TableSortMixin<T> {
   List<double> columnWidths;
 
   @override
   void initState() {
     super.initState();
+    sortData(widget.startingSortColumn, widget.startingSortDirection);
     columnWidths = _computeColumnWidths();
   }
 
   @override
   void didUpdateWidget(FlatTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    sortData(widget.startingSortColumn, widget.startingSortDirection);
     columnWidths = _computeColumnWidths();
   }
 
@@ -83,6 +92,9 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
       columnWidths: columnWidths,
       startAtBottom: true,
       rowBuilder: _buildRow,
+      startingSortColumn: widget.startingSortColumn,
+      startingSortDirection: widget.startingSortDirection,
+      onSortChanged: _sortDataAndUpdate,
     );
   }
 
@@ -101,6 +113,17 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
       columnWidths: columnWidths,
       backgroundColor: TableRow.colorFor(context, index),
     );
+  }
+
+  void _sortDataAndUpdate(ColumnData column, SortDirection direction) {
+    setState(() {
+      sortData(column, direction);
+    });
+  }
+
+  @override
+  void sortData(ColumnData column, SortDirection direction) {
+    widget.data.sort((T a, T b) => _compareData(a, b, column, direction));
   }
 }
 
@@ -128,7 +151,10 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     @required this.treeColumn,
     @required this.dataRoots,
     @required this.keyFactory,
+    @required this.startingSortColumn,
+    @required this.startingSortDirection,
   })  : assert(columns.contains(treeColumn)),
+        assert(columns.contains(startingSortColumn)),
         assert(columns != null),
         assert(keyFactory != null),
         assert(dataRoots != null),
@@ -146,12 +172,19 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// Factory that creates keys for each row in this table.
   final Key Function(T) keyFactory;
 
+  final ColumnData<T> startingSortColumn;
+
+  final SortDirection startingSortDirection;
+
   @override
   _TreeTableState<T> createState() => _TreeTableState<T>();
 }
 
 class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, TableSortMixin<T> {
+  /// The number of items to show when animating out the tree table.
+  static const itemsToShowWhenAnimating = 50;
+
   List<T> items;
   List<T> animatingChildren = [];
   Set<T> animatingChildrenSet = {};
@@ -159,12 +192,10 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   List<double> columnWidths;
   List<bool> rootsExpanded;
 
-  /// The number of items to show when animating out the tree table.
-  static const itemsToShowWhenAnimating = 50;
-
   @override
   void initState() {
     super.initState();
+    sortData(widget.startingSortColumn, widget.startingSortDirection);
     rootsExpanded = List.generate(
         widget.dataRoots.length, (index) => widget.dataRoots[index].isExpanded);
     _updateItems();
@@ -173,6 +204,7 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   @override
   void didUpdateWidget(TreeTable oldWidget) {
     super.didUpdateWidget(oldWidget);
+    sortData(widget.startingSortColumn, widget.startingSortDirection);
     rootsExpanded = List.generate(
         widget.dataRoots.length, (index) => widget.dataRoots[index].isExpanded);
     _updateItems();
@@ -245,7 +277,8 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
     final widths = <double>[];
     for (ColumnData<T> column in widget.columns) {
-      double width = column.getNodeIndentPx(deepest);
+      double width =
+          column.getNodeIndentPx(deepest, indentForTreeToggle: false);
       if (column.fixedWidthPx != null) {
         width += column.fixedWidthPx;
       } else {
@@ -291,6 +324,9 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       itemCount: items.length,
       columnWidths: columnWidths,
       rowBuilder: _buildRow,
+      startingSortColumn: widget.startingSortColumn,
+      startingSortDirection: widget.startingSortDirection,
+      onSortChanged: _sortDataAndUpdate,
     );
   }
 
@@ -326,6 +362,24 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     if (animatingChildrenSet.contains(node)) return const SizedBox();
     return rowForNode(node);
   }
+
+  @override
+  void sortData(ColumnData column, SortDirection direction) {
+    void _sort(T dataObject) {
+      dataObject.children
+        ..sort((T a, T b) => _compareData(a, b, column, direction))
+        ..forEach(_sort);
+    }
+
+    widget.dataRoots.where((dataRoot) => dataRoot.level == 0).toList()
+      ..sort((T a, T b) => _compareData(a, b, column, direction))
+      ..forEach(_sort);
+  }
+
+  void _sortDataAndUpdate(ColumnData column, SortDirection direction) {
+    sortData(column, direction);
+    _updateItems();
+  }
 }
 
 class _Table<T> extends StatefulWidget {
@@ -335,6 +389,9 @@ class _Table<T> extends StatefulWidget {
       @required this.columns,
       @required this.columnWidths,
       @required this.rowBuilder,
+      @required this.startingSortColumn,
+      @required this.startingSortDirection,
+      @required this.onSortChanged,
       this.startAtBottom = false})
       : super(key: key);
 
@@ -343,6 +400,9 @@ class _Table<T> extends StatefulWidget {
   final List<ColumnData<T>> columns;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
+  final ColumnData<T> startingSortColumn;
+  final SortDirection startingSortDirection;
+  final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
@@ -358,16 +418,20 @@ class _Table<T> extends StatefulWidget {
   static const rowHorizontalPadding = 16.0;
 
   @override
-  __TableState<T> createState() => __TableState<T>();
+  _TableState<T> createState() => _TableState<T>();
 }
 
-class __TableState<T> extends State<_Table<T>> {
+class _TableState<T> extends State<_Table<T>> {
   LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
+  ColumnData<T> sortColumn;
+  SortDirection sortDirection;
 
   @override
   void initState() {
     super.initState();
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
+    sortColumn = widget.startingSortColumn;
+    sortDirection = widget.startingSortDirection;
   }
 
   /// The width of all columns in the table, with additional padding.
@@ -409,6 +473,9 @@ class __TableState<T> extends State<_Table<T>> {
                   _linkedHorizontalScrollControllerGroup,
               columns: widget.columns,
               columnWidths: widget.columnWidths,
+              sortColumn: sortColumn,
+              sortDirection: sortDirection,
+              onSortChanged: _sortData,
             ),
             Expanded(
               child: Scrollbar(
@@ -422,6 +489,12 @@ class __TableState<T> extends State<_Table<T>> {
         ),
       );
     });
+  }
+
+  void _sortData(ColumnData column, SortDirection direction) {
+    sortDirection = direction;
+    sortColumn = column;
+    widget.onSortChanged(column, direction);
   }
 }
 
@@ -441,8 +514,8 @@ class TableRow<T> extends StatefulWidget {
     @required this.linkedScrollControllerGroup,
     @required this.node,
     @required this.columns,
-    @required this.onPressed,
     @required this.columnWidths,
+    @required this.onPressed,
     this.backgroundColor,
     this.expandableColumn,
     this.expansionChildren,
@@ -450,7 +523,10 @@ class TableRow<T> extends StatefulWidget {
     this.isExpanded = false,
     this.isExpandable = false,
     this.isShown = true,
-  }) : super(key: key);
+  })  : sortColumn = null,
+        sortDirection = null,
+        onSortChanged = null,
+        super(key: key);
 
   /// Constructs a [TableRow] that presents the column titles instead
   /// of any [node].
@@ -459,6 +535,9 @@ class TableRow<T> extends StatefulWidget {
     @required this.linkedScrollControllerGroup,
     @required this.columns,
     @required this.columnWidths,
+    @required this.sortColumn,
+    @required this.sortDirection,
+    @required this.onSortChanged,
     this.onPressed,
   })  : node = null,
         isExpanded = false,
@@ -508,6 +587,12 @@ class TableRow<T> extends StatefulWidget {
   ///
   /// If null, defaults to `Theme.of(context).canvasColor`.
   final Color backgroundColor;
+
+  final ColumnData<T> sortColumn;
+
+  final SortDirection sortDirection;
+
+  final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
 
   /// Gets a color to use for this row at a given index.
   static Color colorFor(BuildContext context, int index) {
@@ -619,12 +704,29 @@ class _TableRowState<T> extends State<TableRow<T>>
       Widget content;
       final node = widget.node;
       if (node == null) {
-        content = Text(
-          column.title,
-          overflow: TextOverflow.ellipsis,
+        final isSortColumn = column.title == widget.sortColumn.title;
+        content = InkWell(
+          onTap: () => _handleSortChange(column),
+          child: Row(
+            children: [
+              if (isSortColumn)
+                Icon(
+                  widget.sortDirection == SortDirection.ascending
+                      ? Icons.expand_less
+                      : Icons.expand_more,
+                  size: 16.0,
+                ),
+              const SizedBox(width: 4.0),
+              Text(
+                column.title,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         );
       } else {
-        final padding = column.getNodeIndentPx(node);
+        final padding =
+            column.getNodeIndentPx(node, indentForTreeToggle: false);
         content = Text(
           '${column.getDisplayValue(node)}',
           overflow: TextOverflow.ellipsis,
@@ -689,4 +791,27 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   @override
   bool shouldShow() => widget.isShown;
+
+  void _handleSortChange(ColumnData<T> columnData) {
+    SortDirection direction;
+    if (columnData.title == widget.sortColumn.title) {
+      direction = widget.sortDirection.opposite();
+    } else if (columnData.numeric) {
+      direction = SortDirection.descending;
+    } else {
+      direction = SortDirection.ascending;
+    }
+    widget.onSortChanged(columnData, direction);
+  }
+}
+
+mixin TableSortMixin<T> {
+  int _compareFactor(SortDirection direction) =>
+      direction == SortDirection.ascending ? 1 : -1;
+
+  int _compareData(T a, T b, ColumnData column, SortDirection direction) {
+    return column.compare(a, b) * _compareFactor(direction);
+  }
+
+  void sortData(ColumnData column, SortDirection direction);
 }

@@ -27,7 +27,7 @@ abstract class TableDataClient<T> {
   /// The way the columns are sorted have changed.
   ///
   /// Update the UI to reflect the new state.
-  void onColumnSortChanged(ColumnData<T> column, SortOrder sortDirection);
+  void onColumnSortChanged(ColumnData<T> column, SortDirection sortDirection);
 
   /// Selects by index. Note: This is index of the row as it's rendered
   /// and not necessarily for rows[] since it may be being rendered in reverse.
@@ -65,12 +65,12 @@ class TableData<T> extends Object {
 
   ColumnData<T> _sortColumn;
 
-  SortOrder _sortDirection;
+  SortDirection _sortDirection;
 
   set sortColumn(ColumnData<T> column) {
     _sortColumn = column;
     _sortDirection =
-        column.numeric ? SortOrder.descending : SortOrder.ascending;
+        column.numeric ? SortDirection.descending : SortDirection.ascending;
   }
 
   @protected
@@ -163,7 +163,7 @@ class TableData<T> extends Object {
 
   void _doSort() {
     final ColumnData<T> column = _sortColumn;
-    final int direction = _sortDirection == SortOrder.ascending ? 1 : -1;
+    final int direction = _sortDirection == SortDirection.ascending ? 1 : -1;
 
     client?.onColumnSortChanged(column, _sortDirection);
 
@@ -201,9 +201,9 @@ class TableData<T> extends Object {
     }
 
     if (_sortColumn == column) {
-      _sortDirection = _sortDirection == SortOrder.ascending
-          ? SortOrder.descending
-          : SortOrder.ascending;
+      _sortDirection = _sortDirection == SortDirection.ascending
+          ? SortDirection.descending
+          : SortDirection.ascending;
     } else {
       sortColumn = column;
     }
@@ -399,7 +399,11 @@ abstract class ColumnData<T> {
   /// How much to indent the data object by.
   ///
   /// This should only be non-zero for [TreeColumnData].
-  double getNodeIndentPx(T dataObject) => 0.0;
+  // TODO(kenz): remove `indentForTreeToggle` param once we delete the html app.
+  // we only added this so that we could tweak this API without breaking the
+  // dart:html app.
+  double getNodeIndentPx(T dataObject, {bool indentForTreeToggle = true}) =>
+      0.0;
 
   final ColumnAlignment alignment;
 
@@ -461,10 +465,13 @@ abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
 
   Stream<T> get onNodeCollapsed => nodeCollapsedController.stream;
 
+  // TODO(kenz): remove `indentForTreeToggle` param once we delete the html app.
+  // we only added this so that we could tweak this API without breaking the
+  // dart:html app.
   @override
-  double getNodeIndentPx(T dataObject) {
+  double getNodeIndentPx(T dataObject, {bool indentForTreeToggle = true}) {
     double indentWidth = dataObject.level * treeToggleWidth;
-    if (!dataObject.isExpandable) {
+    if (indentForTreeToggle && !dataObject.isExpandable) {
       // If the object is not expandable, we need to increase the width of our
       // spacer to account for the missing tree toggle.
       indentWidth += TreeColumnData.treeToggleWidth;
@@ -477,9 +484,4 @@ enum ColumnAlignment {
   left,
   right,
   center,
-}
-
-enum SortOrder {
-  ascending,
-  descending,
 }
