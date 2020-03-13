@@ -11,9 +11,11 @@ import '../config_specific/flutter/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/flutter/import_export/import_export.dart';
 import '../globals.dart';
 import 'app.dart';
+import 'common_widgets.dart';
 import 'controllers.dart';
 import 'notifications.dart';
 import 'screen.dart';
+import 'status_line.dart';
 import 'theme.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
@@ -44,6 +46,10 @@ class DevToolsScaffold extends StatefulWidget {
 
   /// The size that all actions on this widget are expected to have.
   static const double actionWidgetSize = 48.0;
+
+  /// The border around the content in the DevTools UI.
+  static const EdgeInsets appPadding =
+      EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
@@ -175,11 +181,12 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         Align(
           alignment: Alignment.topLeft,
           child: Padding(
-            padding: const EdgeInsets.all(32.0),
+            padding: DevToolsScaffold.appPadding,
             child: screen.build(context),
           ),
         ),
     ];
+
     return DragAndDrop(
       handleDrop: _importController.importData,
       child: AnimatedBuilder(
@@ -188,6 +195,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           return Scaffold(
             appBar: _buildAppBar(),
             body: child,
+            bottomNavigationBar: _buildStatusLine(context),
           );
         },
         child: TabBarView(
@@ -266,6 +274,28 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       child: Hero(
         tag: _appBarTag,
         child: appBar,
+      ),
+    );
+  }
+
+  Widget _buildStatusLine(BuildContext context) {
+    const appPadding = DevToolsScaffold.appPadding;
+
+    return Container(
+      height: 48.0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const PaddedDivider(padding: EdgeInsets.zero),
+          Padding(
+            padding: EdgeInsets.only(
+              left: appPadding.left,
+              right: appPadding.right,
+              bottom: appPadding.bottom,
+            ),
+            child: StatusLine(),
+          ),
+        ],
       ),
     );
   }

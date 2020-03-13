@@ -30,7 +30,7 @@ const double sideInsetSmall = 40.0;
 // [PointerHoverEvent.localPosition] is actually the absolute position right
 // now, so for mouse position detection in the flame chart container, we use
 // this offset. Use `localPosition` once this is fixed.
-const flameChartContainerOffset = 33.0;
+const flameChartContainerOffset = 17.0;
 
 // TODO(kenz): consider cleaning up by changing to a flame chart code to use a
 // composition pattern instead of a class extension pattern.
