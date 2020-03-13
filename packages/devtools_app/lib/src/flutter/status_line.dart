@@ -16,8 +16,6 @@ class StatusLine extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      // Used to diagnose the layout.
-      //color: Colors.grey,
       height: 24.0,
       child: Center(
         child: Text(
