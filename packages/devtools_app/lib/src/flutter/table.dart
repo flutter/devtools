@@ -6,7 +6,14 @@ import '../table_data.dart';
 import '../trees.dart';
 import '../ui/theme.dart';
 import 'collapsible_mixin.dart';
+import 'flutter_widgets/linked_scroll_controller.dart';
 import 'theme.dart';
+
+typedef IndexedScrollableWidgetBuilder = Widget Function(
+  BuildContext,
+  LinkedScrollControllerGroup linkedScrollControllerGroup,
+  int index,
+);
 
 /// A table that displays in a collection of [data], based on a collection
 /// of [ColumnData].
@@ -75,14 +82,19 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
       columns: widget.columns,
       columnWidths: columnWidths,
       startAtBottom: true,
-      tableRowBuilder: _buildRow,
+      rowBuilder: _buildRow,
     );
   }
 
-  Widget _buildRow(BuildContext context, int index) {
+  Widget _buildRow(
+    BuildContext context,
+    LinkedScrollControllerGroup linkedScrollControllerGroup,
+    int index,
+  ) {
     final node = widget.data[index];
     return TableRow<T>(
       key: widget.keyFactory(node),
+      linkedScrollControllerGroup: linkedScrollControllerGroup,
       node: node,
       onPressed: widget.onItemSelected,
       columns: widget.columns,
@@ -278,14 +290,19 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       columns: widget.columns,
       itemCount: items.length,
       columnWidths: columnWidths,
-      tableRowBuilder: _buildRow,
+      rowBuilder: _buildRow,
     );
   }
 
-  Widget _buildRow(BuildContext context, int index) {
+  Widget _buildRow(
+    BuildContext context,
+    LinkedScrollControllerGroup linkedScrollControllerGroup,
+    int index,
+  ) {
     Widget rowForNode(T node) {
       return TableRow<T>(
         key: widget.keyFactory(node),
+        linkedScrollControllerGroup: linkedScrollControllerGroup,
         node: node,
         onPressed: _onItemPressed,
         backgroundColor: TableRow.colorFor(context, index),
@@ -311,13 +328,13 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 }
 
-class _Table<T> extends StatelessWidget {
+class _Table<T> extends StatefulWidget {
   const _Table(
       {Key key,
       @required this.itemCount,
       @required this.columns,
       @required this.columnWidths,
-      @required this.tableRowBuilder,
+      @required this.rowBuilder,
       this.startAtBottom = false})
       : super(key: key);
 
@@ -325,7 +342,7 @@ class _Table<T> extends StatelessWidget {
   final bool startAtBottom;
   final List<ColumnData<T>> columns;
   final List<double> columnWidths;
-  final IndexedWidgetBuilder tableRowBuilder;
+  final IndexedScrollableWidgetBuilder rowBuilder;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
@@ -340,54 +357,68 @@ class _Table<T> extends StatelessWidget {
   /// and end of each row in the table.
   static const rowHorizontalPadding = 16.0;
 
+  @override
+  __TableState<T> createState() => __TableState<T>();
+}
+
+class __TableState<T> extends State<_Table<T>> {
+  LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
+
+  @override
+  void initState() {
+    super.initState();
+    _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
+  }
+
   /// The width of all columns in the table, with additional padding.
   double get tableWidth =>
-      columnWidths.reduce((x, y) => x + y) + (2 * rowHorizontalPadding);
+      widget.columnWidths.reduce((x, y) => x + y) +
+      (2 * _Table.rowHorizontalPadding);
 
   Widget _buildItem(BuildContext context, int index) {
-    if (startAtBottom) {
-      index = itemCount - index - 1;
+    if (widget.startAtBottom) {
+      index = widget.itemCount - index - 1;
     }
 
-    return tableRowBuilder(context, index);
+    return widget.rowBuilder(
+      context,
+      _linkedHorizontalScrollControllerGroup,
+      index,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final itemDelegate = SliverChildBuilderDelegate(
       _buildItem,
-      childCount: itemCount,
+      childCount: widget.itemCount,
     );
 
     return LayoutBuilder(builder: (context, constraints) {
-      return Scrollbar(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SizedBox(
-            width: max(
-              constraints.widthConstraints().maxWidth,
-              tableWidth,
+      return SizedBox(
+        width: max(
+          constraints.widthConstraints().maxWidth,
+          tableWidth,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TableRow.tableHeader(
+              key: const Key('Table header'),
+              linkedScrollControllerGroup:
+                  _linkedHorizontalScrollControllerGroup,
+              columns: widget.columns,
+              columnWidths: widget.columnWidths,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TableRow.tableHeader(
-                  key: const Key('Table header'),
-                  columns: columns,
-                  columnWidths: columnWidths,
-                  onPressed: (_) {},
+            Expanded(
+              child: Scrollbar(
+                child: ListView.custom(
+                  reverse: widget.startAtBottom,
+                  childrenDelegate: itemDelegate,
                 ),
-                Expanded(
-                  child: Scrollbar(
-                    child: ListView.custom(
-                      reverse: startAtBottom,
-                      childrenDelegate: itemDelegate,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       );
     });
@@ -407,6 +438,7 @@ class TableRow<T> extends StatefulWidget {
   /// [node].
   const TableRow({
     Key key,
+    @required this.linkedScrollControllerGroup,
     @required this.node,
     @required this.columns,
     @required this.onPressed,
@@ -424,9 +456,10 @@ class TableRow<T> extends StatefulWidget {
   /// of any [node].
   const TableRow.tableHeader({
     Key key,
+    @required this.linkedScrollControllerGroup,
     @required this.columns,
     @required this.columnWidths,
-    @required this.onPressed,
+    this.onPressed,
   })  : node = null,
         isExpanded = false,
         isExpandable = false,
@@ -436,6 +469,8 @@ class TableRow<T> extends StatefulWidget {
         expansionChildren = null,
         onExpansionCompleted = null,
         super(key: key);
+
+  final LinkedScrollControllerGroup linkedScrollControllerGroup;
 
   final T node;
   final List<ColumnData<T>> columns;
@@ -489,10 +524,14 @@ class _TableRowState<T> extends State<TableRow<T>>
     with TickerProviderStateMixin, CollapsibleAnimationMixin {
   Key contentKey;
 
+  ScrollController scrollController;
+
   @override
   void initState() {
     super.initState();
     contentKey = ValueKey(this);
+    scrollController = widget.linkedScrollControllerGroup.addAndGet();
+
     expandController.addStatusListener((status) {
       setState(() {});
       if ([AnimationStatus.completed, AnimationStatus.dismissed]
@@ -507,6 +546,17 @@ class _TableRowState<T> extends State<TableRow<T>>
   void didUpdateWidget(TableRow<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     setExpanded(widget.isExpanded);
+    if (oldWidget.linkedScrollControllerGroup !=
+        widget.linkedScrollControllerGroup) {
+      scrollController?.dispose();
+      scrollController = widget.linkedScrollControllerGroup.addAndGet();
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    scrollController.dispose();
   }
 
   @override
@@ -517,11 +567,13 @@ class _TableRowState<T> extends State<TableRow<T>>
       height: _Table.defaultRowHeight,
       child: Material(
         color: widget.backgroundColor ?? Theme.of(context).canvasColor,
-        child: InkWell(
-          key: contentKey,
-          onTap: () => widget.onPressed(widget.node),
-          child: row,
-        ),
+        child: widget.onPressed != null
+            ? InkWell(
+                key: contentKey,
+                onTap: () => widget.onPressed(widget.node),
+                child: row,
+              )
+            : row,
       ),
     );
     if (widget.expansionChildren == null) return box;
@@ -549,20 +601,20 @@ class _TableRowState<T> extends State<TableRow<T>>
     );
   }
 
+  Alignment _alignmentFor(ColumnData<T> column) {
+    switch (column.alignment) {
+      case ColumnAlignment.center:
+        return Alignment.center;
+      case ColumnAlignment.right:
+        return Alignment.centerRight;
+      case ColumnAlignment.left:
+      default:
+        return Alignment.centerLeft;
+    }
+  }
+
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context) {
-    Alignment alignmentFor(ColumnData<T> column) {
-      switch (column.alignment) {
-        case ColumnAlignment.center:
-          return Alignment.center;
-        case ColumnAlignment.right:
-          return Alignment.centerRight;
-        case ColumnAlignment.left:
-        default:
-          return Alignment.centerLeft;
-      }
-    }
-
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget content;
       final node = widget.node;
@@ -606,7 +658,7 @@ class _TableRowState<T> extends State<TableRow<T>>
       content = SizedBox(
         width: columnWidth,
         child: Align(
-          alignment: alignmentFor(column),
+          alignment: _alignmentFor(column),
           child: content,
         ),
       );
@@ -617,15 +669,14 @@ class _TableRowState<T> extends State<TableRow<T>>
       padding: const EdgeInsets.symmetric(
         horizontal: _Table.rowHorizontalPadding,
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          for (var i = 0; i < widget.columns.length; i++)
-            columnFor(
-              widget.columns[i],
-              widget.columnWidths[i],
-            ),
-        ],
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        controller: scrollController,
+        itemCount: widget.columns.length,
+        itemBuilder: (context, int i) => columnFor(
+          widget.columns[i],
+          widget.columnWidths[i],
+        ),
       ),
     );
   }
