@@ -287,10 +287,8 @@ Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
 class BulletSpacer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final themeData = Theme.of(context);
-    final textStyle = themeData.primaryTextTheme.bodyText1;
-    final textColor = themeData.primaryTextTheme.bodyText1.color;
-    final mutedColor = textColor.withAlpha(0xB2); // 70% alpha
+    final textStyle = Theme.of(context).primaryTextTheme.bodyText1;
+    final mutedColor = textStyle.color.withAlpha(0xB2); // 70% alpha
 
     return Container(
       width: DevToolsScaffold.actionWidgetSize / 2,
