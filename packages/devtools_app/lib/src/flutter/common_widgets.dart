@@ -287,13 +287,17 @@ Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
 class BulletSpacer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO(devoncarew): Use the theme's AppBar unselected text color for the
-    // bullet character.
+    final textStyle = Theme.of(context).primaryTextTheme.bodyText1;
+    final mutedColor = textStyle.color.withAlpha(0xB2); // 70% alpha
+
     return Container(
       width: DevToolsScaffold.actionWidgetSize / 2,
       height: DevToolsScaffold.actionWidgetSize,
       alignment: Alignment.center,
-      child: const Text('•'),
+      child: Text(
+        '•',
+        style: textStyle.copyWith(color: mutedColor),
+      ),
     );
   }
 }
