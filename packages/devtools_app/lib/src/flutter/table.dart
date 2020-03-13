@@ -9,6 +9,12 @@ import 'collapsible_mixin.dart';
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'theme.dart';
 
+typedef IndexedScrollableWidgetBuilder = Widget Function(
+  BuildContext,
+  LinkedScrollControllerGroup linkedScrollControllerGroup,
+  int index,
+);
+
 /// A table that displays in a collection of [data], based on a collection
 /// of [ColumnData].
 ///
@@ -42,13 +48,11 @@ class FlatTable<T> extends StatefulWidget {
 
 class _FlatTableState<T> extends State<FlatTable<T>> {
   List<double> columnWidths;
-  LinkedScrollControllerGroup linkedHorizontalScrollControllerGroup;
 
   @override
   void initState() {
     super.initState();
     columnWidths = _computeColumnWidths();
-    linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
   }
 
   @override
@@ -78,17 +82,19 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
       columns: widget.columns,
       columnWidths: columnWidths,
       startAtBottom: true,
-      tableRowBuilder: _buildRow,
-      linkedHorizontalScrollControllerGroup:
-          linkedHorizontalScrollControllerGroup,
+      rowBuilder: _buildRow,
     );
   }
 
-  Widget _buildRow(BuildContext context, int index) {
+  Widget _buildRow(
+    BuildContext context,
+    LinkedScrollControllerGroup linkedScrollControllerGroup,
+    int index,
+  ) {
     final node = widget.data[index];
     return TableRow<T>(
       key: widget.keyFactory(node),
-      linkedScrollControllerGroup: linkedHorizontalScrollControllerGroup,
+      linkedScrollControllerGroup: linkedScrollControllerGroup,
       node: node,
       onPressed: widget.onItemSelected,
       columns: widget.columns,
@@ -153,15 +159,12 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   List<double> columnWidths;
   List<bool> rootsExpanded;
 
-  LinkedScrollControllerGroup linkedHorizontalScrollControllerGroup;
-
   /// The number of items to show when animating out the tree table.
   static const itemsToShowWhenAnimating = 50;
 
   @override
   void initState() {
     super.initState();
-    linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
     rootsExpanded = List.generate(
         widget.dataRoots.length, (index) => widget.dataRoots[index].isExpanded);
     _updateItems();
@@ -287,17 +290,19 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       columns: widget.columns,
       itemCount: items.length,
       columnWidths: columnWidths,
-      tableRowBuilder: _buildRow,
-      linkedHorizontalScrollControllerGroup:
-          linkedHorizontalScrollControllerGroup,
+      rowBuilder: _buildRow,
     );
   }
 
-  Widget _buildRow(BuildContext context, int index) {
+  Widget _buildRow(
+    BuildContext context,
+    LinkedScrollControllerGroup linkedScrollControllerGroup,
+    int index,
+  ) {
     Widget rowForNode(T node) {
       return TableRow<T>(
         key: widget.keyFactory(node),
-        linkedScrollControllerGroup: linkedHorizontalScrollControllerGroup,
+        linkedScrollControllerGroup: linkedScrollControllerGroup,
         node: node,
         onPressed: _onItemPressed,
         backgroundColor: TableRow.colorFor(context, index),
@@ -323,14 +328,13 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 }
 
-class _Table<T> extends StatelessWidget {
+class _Table<T> extends StatefulWidget {
   const _Table(
       {Key key,
       @required this.itemCount,
       @required this.columns,
       @required this.columnWidths,
-      @required this.tableRowBuilder,
-      @required this.linkedHorizontalScrollControllerGroup,
+      @required this.rowBuilder,
       this.startAtBottom = false})
       : super(key: key);
 
@@ -338,8 +342,7 @@ class _Table<T> extends StatelessWidget {
   final bool startAtBottom;
   final List<ColumnData<T>> columns;
   final List<double> columnWidths;
-  final IndexedWidgetBuilder tableRowBuilder;
-  final LinkedScrollControllerGroup linkedHorizontalScrollControllerGroup;
+  final IndexedScrollableWidgetBuilder rowBuilder;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
@@ -354,23 +357,41 @@ class _Table<T> extends StatelessWidget {
   /// and end of each row in the table.
   static const rowHorizontalPadding = 16.0;
 
+  @override
+  __TableState<T> createState() => __TableState<T>();
+}
+
+class __TableState<T> extends State<_Table<T>> {
+  LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
+
+  @override
+  void initState() {
+    super.initState();
+    _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
+  }
+
   /// The width of all columns in the table, with additional padding.
   double get tableWidth =>
-      columnWidths.reduce((x, y) => x + y) + (2 * rowHorizontalPadding);
+      widget.columnWidths.reduce((x, y) => x + y) +
+      (2 * _Table.rowHorizontalPadding);
 
   Widget _buildItem(BuildContext context, int index) {
-    if (startAtBottom) {
-      index = itemCount - index - 1;
+    if (widget.startAtBottom) {
+      index = widget.itemCount - index - 1;
     }
 
-    return tableRowBuilder(context, index);
+    return widget.rowBuilder(
+      context,
+      _linkedHorizontalScrollControllerGroup,
+      index,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final itemDelegate = SliverChildBuilderDelegate(
       _buildItem,
-      childCount: itemCount,
+      childCount: widget.itemCount,
     );
 
     return LayoutBuilder(builder: (context, constraints) {
@@ -385,14 +406,14 @@ class _Table<T> extends StatelessWidget {
             TableRow.tableHeader(
               key: const Key('Table header'),
               linkedScrollControllerGroup:
-                  linkedHorizontalScrollControllerGroup,
-              columns: columns,
-              columnWidths: columnWidths,
+                  _linkedHorizontalScrollControllerGroup,
+              columns: widget.columns,
+              columnWidths: widget.columnWidths,
             ),
             Expanded(
               child: Scrollbar(
                 child: ListView.custom(
-                  reverse: startAtBottom,
+                  reverse: widget.startAtBottom,
                   childrenDelegate: itemDelegate,
                 ),
               ),
