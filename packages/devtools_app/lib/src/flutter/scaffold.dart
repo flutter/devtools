@@ -48,12 +48,8 @@ class DevToolsScaffold extends StatefulWidget {
   static const double actionWidgetSize = 48.0;
 
   /// The border around the content in the DevTools UI.
-  static const EdgeInsets borderInsets = EdgeInsets.only(
-    top: 16.0,
-    right: 16.0,
-    bottom: 8.0,
-    left: 16.0,
-  );
+  static const EdgeInsets appPadding =
+      EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
@@ -185,7 +181,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         Align(
           alignment: Alignment.topLeft,
           child: Padding(
-            padding: DevToolsScaffold.borderInsets,
+            padding: DevToolsScaffold.appPadding,
             child: screen.build(context),
           ),
         ),
@@ -283,16 +279,20 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   }
 
   Widget _buildStatusLine(BuildContext context) {
-    final inset = DevToolsScaffold.borderInsets.bottom;
+    const appPadding = DevToolsScaffold.appPadding;
 
     return Container(
       height: 48.0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          const PaddedDivider(padding: EdgeInsets.all(0.0)),
+        children: [
+          const PaddedDivider(padding: EdgeInsets.zero),
           Padding(
-            padding: EdgeInsets.only(right: inset, bottom: inset, left: inset),
+            padding: EdgeInsets.only(
+              left: appPadding.left,
+              right: appPadding.right,
+              bottom: appPadding.bottom,
+            ),
             child: StatusLine(),
           ),
         ],

@@ -17,11 +17,10 @@ class StatusLine extends StatelessWidget {
 
     return Container(
       height: 24.0,
-      child: Center(
-        child: Text(
-          'DevTools ${devtools.version}',
-          style: textTheme.bodyText2,
-        ),
+      alignment: Alignment.centerLeft,
+      child: Text(
+        'DevTools ${devtools.version}',
+        style: textTheme.bodyText2,
       ),
     );
   }
