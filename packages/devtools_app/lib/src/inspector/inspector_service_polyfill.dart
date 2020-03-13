@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/services.dart' show rootBundle;
-
 import '../config_specific/asset/asset.dart' as asset;
 import '../config_specific/logger/logger.dart';
 import 'inspector_service.dart';
