@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 
-import '../../devtools.dart' as devtools;
 import '../../src/framework/framework_core.dart';
 import '../url_utils.dart';
 import 'common_widgets.dart';
@@ -74,12 +73,6 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
             // TODO(https://github.com/flutter/devtools/issues/1111): support drag-and-drop of snapshot files here.
           ],
         ),
-        Center(
-          child: Text(
-            'Version ${devtools.version}',
-            style: textTheme.subtitle1,
-          ),
-        )
       ],
     );
   }
