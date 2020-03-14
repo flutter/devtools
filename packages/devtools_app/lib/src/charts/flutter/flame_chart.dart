@@ -45,7 +45,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
     this.endInset = sideInset,
   });
   static const minZoomLevel = 1.0;
-  static const maxZoomLevel = 1000.0;
+  static const maxZoomLevel = 32000.0;
   static const minScrollOffset = 0.0;
   static const rowOffsetForBottomPadding = 1;
   static const rowOffsetForSectionSpacer = 1;

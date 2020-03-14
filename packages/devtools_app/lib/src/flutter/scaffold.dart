@@ -47,6 +47,8 @@ class DevToolsScaffold extends StatefulWidget {
   /// The size that all actions on this widget are expected to have.
   static const double actionWidgetSize = 48.0;
 
+  // TODO: When changing this value, also update `flameChartContainerOffset`
+  // from flame_chart.dart.
   /// The border around the content in the DevTools UI.
   static const EdgeInsets appPadding =
       EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
@@ -74,8 +76,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// The controller for animating between tabs.
   ///
-  /// This will be passed to both the [TabBar] and the [TabBarView] widgets
-  /// to coordinate their animation when the tab selection changes.
+  /// This will be passed to both the [TabBar] and the [TabBarView] widgets to
+  /// coordinate their animation when the tab selection changes.
   TabController _tabController;
 
   ImportController _importController;
@@ -89,6 +91,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   @override
   void didUpdateWidget(DevToolsScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (widget.tabs.length != oldWidget.tabs.length) {
       var newIndex = 0;
       // Stay on the current tab if possible when the collection of tabs changes.
@@ -143,8 +146,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// Pushes tab changes into the navigation history.
   ///
-  /// Note that this currently works very well, but it doesn't
-  /// integrate with the browser's history yet.
+  /// Note that this currently works very well, but it doesn't integrate with
+  /// the browser's history yet.
   void _pushScreenToLocalPageRoute(int newIndex) {
     final previousTabIndex = _tabController.previousIndex;
     if (newIndex != previousTabIndex) {
