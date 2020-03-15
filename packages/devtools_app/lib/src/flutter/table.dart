@@ -9,22 +9,26 @@ import 'collapsible_mixin.dart';
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'theme.dart';
 
+// TODO(devoncarew): We need to render the selected row with a different
+// background color.
+
 typedef IndexedScrollableWidgetBuilder = Widget Function(
   BuildContext,
   LinkedScrollControllerGroup linkedScrollControllerGroup,
   int index,
 );
 
-/// A table that displays in a collection of [data], based on a collection
-/// of [ColumnData].
+/// A table that displays in a collection of [data], based on a collection of
+/// [ColumnData].
 ///
-/// The [ColumnData] gives this table information about how to size its
-/// columns, and how to present each row of `data`
+/// The [ColumnData] gives this table information about how to size its columns,
+/// and how to present each row of `data`.
 class FlatTable<T> extends StatefulWidget {
   const FlatTable({
     Key key,
     @required this.columns,
     @required this.data,
+    this.populateInReverse = false,
     @required this.keyFactory,
     @required this.onItemSelected,
   })  : assert(columns != null),
@@ -36,6 +40,12 @@ class FlatTable<T> extends StatefulWidget {
   final List<ColumnData<T>> columns;
 
   final List<T> data;
+
+  /// Display list items reversed and from the bottom up.
+  ///
+  /// Note: this is a workaround for implmenting auto-scrolling in order to
+  /// always display newly added items.
+  final bool populateInReverse;
 
   /// Factory that creates keys for each row in this table.
   final Key Function(T data) keyFactory;
@@ -64,12 +74,7 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
   List<double> _computeColumnWidths() {
     final widths = <double>[];
     for (ColumnData<T> column in widget.columns) {
-      double width;
-      if (column.fixedWidthPx != null) {
-        width = column.fixedWidthPx;
-      } else {
-        width = _Table.defaultColumnWidth;
-      }
+      final width = column.fixedWidthPx ?? _Table.defaultColumnWidth;
       widths.add(width);
     }
     return widths;
@@ -81,7 +86,7 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
       itemCount: widget.data.length,
       columns: widget.columns,
       columnWidths: columnWidths,
-      startAtBottom: true,
+      populateInReverse: widget.populateInReverse,
       rowBuilder: _buildRow,
     );
   }
@@ -329,17 +334,18 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 }
 
 class _Table<T> extends StatefulWidget {
-  const _Table(
-      {Key key,
-      @required this.itemCount,
-      @required this.columns,
-      @required this.columnWidths,
-      @required this.rowBuilder,
-      this.startAtBottom = false})
-      : super(key: key);
+  const _Table({
+    Key key,
+    @required this.itemCount,
+    @required this.columns,
+    @required this.columnWidths,
+    @required this.rowBuilder,
+    this.populateInReverse = false,
+  }) : super(key: key);
 
   final int itemCount;
-  final bool startAtBottom;
+
+  final bool populateInReverse;
   final List<ColumnData<T>> columns;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
@@ -351,7 +357,7 @@ class _Table<T> extends StatefulWidget {
   ///
   /// When rows in the table expand or collapse, they will animate between
   /// a height of 0 and a height of [defaultRowHeight].
-  static const defaultRowHeight = 42.0;
+  static const defaultRowHeight = 32.0;
 
   /// How much padding to place around the beginning
   /// and end of each row in the table.
@@ -376,7 +382,7 @@ class __TableState<T> extends State<_Table<T>> {
       (2 * _Table.rowHorizontalPadding);
 
   Widget _buildItem(BuildContext context, int index) {
-    if (widget.startAtBottom) {
+    if (widget.populateInReverse) {
       index = widget.itemCount - index - 1;
     }
 
@@ -413,7 +419,7 @@ class __TableState<T> extends State<_Table<T>> {
             Expanded(
               child: Scrollbar(
                 child: ListView.custom(
-                  reverse: widget.startAtBottom,
+                  reverse: widget.populateInReverse,
                   childrenDelegate: itemDelegate,
                 ),
               ),
@@ -423,6 +429,16 @@ class __TableState<T> extends State<_Table<T>> {
       );
     });
   }
+}
+
+/// If a [ColumnData] implements this interface, it can override how that cell
+/// is rendered.
+abstract class ColumnRenderer<T> {
+  /// Render the given [data] to a [Widget].
+  ///
+  /// This method can return `null` to indicate that the default rendering
+  /// should be used instead.
+  Widget build(BuildContext context, T data);
 }
 
 /// Callback for when a specific item in a table is selected.
@@ -613,8 +629,17 @@ class _TableRowState<T> extends State<TableRow<T>>
     }
   }
 
+  TextStyle _fixedFontStyle(BuildContext context) {
+    return Theme.of(context)
+        .textTheme
+        .bodyText2
+        .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
+  }
+
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context) {
+    final fixedFontStyle = _fixedFontStyle(context);
+
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget content;
       final node = widget.node;
@@ -625,18 +650,21 @@ class _TableRowState<T> extends State<TableRow<T>>
         );
       } else {
         final padding = column.getNodeIndentPx(node);
-        content = Text(
+
+        if (column is ColumnRenderer) {
+          content = (column as ColumnRenderer).build(context, node);
+        }
+        content ??= Text(
           '${column.getDisplayValue(node)}',
           overflow: TextOverflow.ellipsis,
+          style: fixedFontStyle,
         );
+
         if (column == widget.expandableColumn) {
           final expandIndicator = widget.isExpandable
               ? RotationTransition(
                   turns: expandArrowAnimation,
-                  child: const Icon(
-                    Icons.expand_more,
-                    size: 16.0,
-                  ),
+                  child: const Icon(Icons.expand_more, size: 16.0),
                 )
               : const SizedBox(width: 16.0, height: 16.0);
           content = Row(

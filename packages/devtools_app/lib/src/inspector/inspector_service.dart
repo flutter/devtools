@@ -27,7 +27,8 @@ const inspectorLibraryUriCandidates = [
 ];
 
 bool _inspectorDependenciesLoaded = false;
-// This method must be called before any methods on the Inspector are used.
+
+/// This method must be called before any methods on the Inspector are used.
 Future<void> ensureInspectorServiceDependencies() async {
   if (_inspectorDependenciesLoaded) {
     return;

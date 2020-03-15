@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-
 import 'dart:async';
 
 import 'package:devtools_app/src/globals.dart';
@@ -24,6 +23,7 @@ void main() {
   LoggingScreen screen;
   group('Logging Screen', () {
     MockLoggingController mockLoggingController;
+
     Widget wrap(Widget widget) =>
         wrapWithControllers(widget, logging: mockLoggingController);
 
@@ -31,6 +31,7 @@ void main() {
       await ensureInspectorDependencies();
       mockLoggingController = MockLoggingController();
       when(mockLoggingController.data).thenReturn([]);
+      when(mockLoggingController.filteredData).thenReturn([]);
       when(mockLoggingController.onLogsUpdated).thenReturn(Reporter());
 
       setGlobal(
@@ -54,6 +55,7 @@ void main() {
       expect(find.byType(LogsTable), findsOneWidget);
       expect(find.byType(LogDetails), findsOneWidget);
       expect(find.text('Clear logs'), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
       expect(find.byType(StructuredErrorsToggle), findsOneWidget);
     });
 
@@ -62,6 +64,13 @@ void main() {
       verifyNever(mockLoggingController.clear());
       await tester.tap(find.text('Clear logs'));
       verify(mockLoggingController.clear()).called(1);
+    });
+
+    testWidgets('can enter filter text', (WidgetTester tester) async {
+      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      verifyNever(mockLoggingController.clear());
+      await tester.enterText(find.byType(TextField), 'abc');
+      verify(mockLoggingController.filterText = 'abc');
     });
 
     testWidgets('can toggle structured errors', (WidgetTester tester) async {
@@ -86,6 +95,7 @@ void main() {
     group('with data', () {
       setUp(() {
         when(mockLoggingController.data).thenReturn(fakeLogData);
+        when(mockLoggingController.filteredData).thenReturn(fakeLogData);
       });
 
       testWidgets('shows most recent logs first', (WidgetTester tester) async {
