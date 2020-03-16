@@ -14,6 +14,7 @@ import '../performance/flutter/performance_screen.dart';
 import '../timeline/flutter/timeline_screen.dart';
 import 'connect_screen.dart';
 import 'scaffold.dart';
+import 'theme.dart';
 
 /// Defines pages shown in the tabbar of the app.
 @immutable
@@ -41,7 +42,7 @@ abstract class Screen {
       key: tabKey,
       child: Row(
         children: <Widget>[
-          Icon(icon, size: 16.0),
+          Icon(icon, size: defaultIconSize),
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(title),

@@ -9,6 +9,7 @@ import '../../../devtools.dart' as devtools;
 import '../../flutter/common_widgets.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
+import '../../flutter/theme.dart';
 import '../../version.dart';
 import '../info_controller.dart';
 
@@ -76,7 +77,7 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
         const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
         if (_flutterVersion != null)
           _VersionInformation(_flutterVersion),
-        const Padding(padding: EdgeInsets.only(top: 16.0)),
+        const Padding(padding: EdgeInsets.only(top: defaultSpacing)),
         // TODO(devoncarew): Move this information into an advanced page.
         Text(
           'Dart VM Flag List',

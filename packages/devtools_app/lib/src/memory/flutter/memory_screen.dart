@@ -8,6 +8,7 @@ import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/material_icons.dart';
@@ -253,7 +254,7 @@ class MemoryBodyState extends State<MemoryBody> {
               minIncludeTextWidth: _primaryControlsMinVerboseWidth,
             ),
           ),
-          const SizedBox(width: 16.0),
+          const SizedBox(width: defaultSpacing),
           OutlineButton(
               key: MemoryScreen.clearButtonKey,
               // TODO(terry): Button needs to be Delete for offline data.
@@ -265,7 +266,7 @@ class MemoryBodyState extends State<MemoryBody> {
                 'Clear',
                 minIncludeTextWidth: _primaryControlsMinVerboseWidth,
               )),
-          const SizedBox(width: 16.0),
+          const SizedBox(width: defaultSpacing),
           _intervalDropdown(),
         ],
       ),
@@ -283,7 +284,7 @@ class MemoryBodyState extends State<MemoryBody> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           _memorySourceDropdown(),
-          const SizedBox(width: 16.0),
+          const SizedBox(width: defaultSpacing),
           Flexible(
             child: OutlineButton(
               key: MemoryScreen.snapshotButtonKey,
@@ -317,7 +318,7 @@ class MemoryBodyState extends State<MemoryBody> {
               ),
             ),
           ),
-          const SizedBox(width: 16.0),
+          const SizedBox(width: defaultSpacing),
           Flexible(
             child: OutlineButton(
               key: MemoryScreen.exportButtonKey,

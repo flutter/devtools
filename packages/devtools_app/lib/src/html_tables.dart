@@ -12,6 +12,7 @@ import 'trees.dart';
 import 'ui/html_custom.dart';
 import 'ui/html_elements.dart';
 import 'ui/primer.dart';
+import 'utils.dart';
 
 class HtmlHoverCell<T> extends HoverCellData<T> {
   HtmlHoverCell(this.cell, T data) : super(data);
@@ -170,7 +171,7 @@ class HtmlTable<T> with HtmlSetStateMixin implements TableDataClient<T> {
   }
 
   @override
-  void onColumnSortChanged(ColumnData<T> column, SortOrder sortDirection) {
+  void onColumnSortChanged(ColumnData<T> column, SortDirection sortDirection) {
     // Update the UI to reflect the new column sort order.
     // The base class will sort the actual data.
 
@@ -178,8 +179,8 @@ class HtmlTable<T> with HtmlSetStateMixin implements TableDataClient<T> {
     for (ColumnData<T> c in model.columns) {
       final CoreElement s = _spanForColumn[c];
       if (c == column) {
-        s.toggleClass('up', sortDirection == SortOrder.ascending);
-        s.toggleClass('down', sortDirection != SortOrder.ascending);
+        s.toggleClass('up', sortDirection == SortDirection.ascending);
+        s.toggleClass('down', sortDirection != SortDirection.ascending);
       } else {
         s.toggleClass('up', false);
         s.toggleClass('down', false);

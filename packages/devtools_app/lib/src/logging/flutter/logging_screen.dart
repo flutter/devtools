@@ -15,6 +15,7 @@ import '../../flutter/table.dart';
 import '../../flutter/theme.dart';
 import '../../table_data.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
+import '../../utils.dart';
 import '../logging_controller.dart';
 
 // TODO(devoncarew): Show rows starting from the top (and have them grow down).
@@ -135,16 +136,15 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 }
 
 class LogsTable extends StatelessWidget {
-  const LogsTable({Key key, this.data, this.onItemSelected}) : super(key: key);
+  LogsTable({Key key, this.data, this.onItemSelected}) : super(key: key);
 
   final List<LogData> data;
   final ItemCallback<LogData> onItemSelected;
 
-  List<ColumnData<LogData>> get columns => [
-        _WhenColumn(),
-        _KindColumn(),
-        _MessageColumn((message) => message),
-      ];
+  final ColumnData<LogData> when = _WhenColumn();
+  final ColumnData<LogData> kind = _KindColumn();
+  final ColumnData<LogData> message = _MessageColumn((message) => message);
+  List<ColumnData<LogData>> get columns => [when, kind, message];
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +154,8 @@ class LogsTable extends StatelessWidget {
       reverse: true,
       keyFactory: (LogData data) => ValueKey<LogData>(data),
       onItemSelected: onItemSelected,
+      sortColumn: when,
+      sortDirection: SortDirection.ascending,
     );
   }
 }

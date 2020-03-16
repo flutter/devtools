@@ -562,3 +562,16 @@ class Range {
   @override
   int get hashCode => hashValues(begin, end);
 }
+
+enum SortDirection {
+  ascending,
+  descending,
+}
+
+extension SortDirectionExtension on SortDirection {
+  SortDirection reverse() {
+    return this == SortDirection.ascending
+        ? SortDirection.descending
+        : SortDirection.ascending;
+  }
+}

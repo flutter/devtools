@@ -38,6 +38,8 @@ ThemeData _lightTheme() {
 }
 
 const buttonMinWidth = 36.0;
+const defaultIconSize = 16.0;
+const defaultSpacing = 16.0;
 
 /// Branded grey color.
 ///

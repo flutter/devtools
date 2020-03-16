@@ -11,6 +11,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../ui/flutter/label.dart';
 import 'scaffold.dart';
+import 'theme.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 
@@ -233,7 +234,7 @@ Widget _recordingStatus({Key key, String recordedObject}) {
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Text('Recording $recordedObject'),
-      const SizedBox(height: 16.0),
+      const SizedBox(height: defaultSpacing),
       const CircularProgressIndicator(),
     ],
   );
@@ -250,10 +251,10 @@ Widget processingInfo({
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text('Processing $processedObject'),
-        const SizedBox(height: 16.0),
+        const SizedBox(height: defaultSpacing),
         SizedBox(
           width: 200.0,
-          height: 16.0,
+          height: defaultSpacing,
           child: LinearProgressIndicator(
             value: progressValue,
           ),
@@ -327,7 +328,7 @@ class ToggleButton extends StatelessWidget {
       waitDuration: tooltipWait,
       preferBelow: false,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
         child: MaterialIconLabel(
           icon,
           text,
