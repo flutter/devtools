@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../ui/flutter/label.dart';
+import 'scaffold.dart';
 import 'theme.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
@@ -287,12 +288,17 @@ Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
 class BulletSpacer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO(devoncarew): Use the theme's AppBar unselected text color for the
-    // bullet character.
+    final textStyle = Theme.of(context).primaryTextTheme.bodyText1;
+    final mutedColor = textStyle.color.withAlpha(0xB2); // 70% alpha
+
     return Container(
-      constraints: const BoxConstraints.tightFor(width: 24.0, height: 48.0),
+      width: DevToolsScaffold.actionWidgetSize / 2,
+      height: DevToolsScaffold.actionWidgetSize,
       alignment: Alignment.center,
-      child: const Text('•'),
+      child: Text(
+        '•',
+        style: textStyle.copyWith(color: mutedColor),
+      ),
     );
   }
 }

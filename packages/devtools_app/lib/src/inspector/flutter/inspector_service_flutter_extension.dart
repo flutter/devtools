@@ -5,7 +5,7 @@ import 'package:flutter/rendering.dart';
 import '../../globals.dart';
 import '../diagnostics_node.dart';
 import '../inspector_service.dart';
-import 'inspector_service_polyfill.dart';
+import '../inspector_service_polyfill.dart';
 
 extension InspectorFlutterService on ObjectGroup {
   Future<void> invokeSetFlexProperties(

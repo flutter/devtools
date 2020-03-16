@@ -1,9 +1,8 @@
 import 'dart:convert';
 
-import 'package:flutter/services.dart' show rootBundle;
-
-import '../../config_specific/logger/logger.dart';
-import '../inspector_service.dart';
+import '../config_specific/asset/asset.dart' as asset;
+import '../config_specific/logger/logger.dart';
+import 'inspector_service.dart';
 
 // Magic tokens to detect the start and the end of the block of code from the
 // polyfill script to execute as an eval expression.
@@ -11,7 +10,7 @@ const _inspectorPolyfillStart = '// INSPECTOR_POLYFILL_SCRIPT_START\n';
 const _inspectorPolyfillEnd = '// INSPECTOR_POLYFILL_SCRIPT_END\n';
 
 Future<String> loadPolyfillScript() {
-  return rootBundle.loadString('assets/scripts/inspector_polyfill_script.dart');
+  return asset.loadString('assets/scripts/inspector_polyfill_script.dart');
 }
 
 Future<void> invokeInspectorPolyfill(ObjectGroup group) async {

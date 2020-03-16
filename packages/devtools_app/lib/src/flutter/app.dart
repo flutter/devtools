@@ -87,6 +87,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       }());
       return MaterialPageRoute(settings: settings, builder: builder);
     }
+
     // Return a page not found.
     return MaterialPageRoute(
       settings: settings,
@@ -186,8 +187,8 @@ class ReportBugAction extends StatelessWidget {
         }
       },
       child: Container(
-        width: 48.0,
-        height: 48.0,
+        width: DevToolsScaffold.actionWidgetSize,
+        height: DevToolsScaffold.actionWidgetSize,
         alignment: Alignment.center,
         child: Icon(
           Icons.bug_report,

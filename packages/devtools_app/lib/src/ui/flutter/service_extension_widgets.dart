@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
+import '../../flutter/notifications.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
@@ -170,7 +171,7 @@ class HotReloadButton extends StatelessWidget {
       serviceDescription: hotReload,
       action: serviceManager.performHotReload,
       inProgressText: 'Performing hot reload',
-      completedText: 'Hot reload completed',
+      completedText: 'Hot reload completed.',
       describeError: (error) => 'Unable to hot reload the app: $error',
     );
   }
@@ -184,7 +185,7 @@ class HotRestartButton extends StatelessWidget {
       serviceDescription: hotRestart,
       action: serviceManager.performHotRestart,
       inProgressText: 'Performing hot restart',
-      completedText: 'Hot restart completed',
+      completedText: 'Hot restart completed.',
       describeError: (error) => 'Unable to hot restart the app: $error',
     );
   }
@@ -391,36 +392,25 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
     if (disabled) {
       return;
     }
+
     setState(() {
       disabled = true;
     });
-    // TODO(https://github.com/flutter/devtools/issues/1249): Avoid adding
-    // and removing snackbars so often as we do here.
-    ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBar;
+
     if (widget.inProgressText != null) {
-      Scaffold.of(context)
-          .removeCurrentSnackBar(reason: SnackBarClosedReason.remove);
-      // Push a snackbar that the action is in progress.
-      snackBar = Scaffold.of(context).showSnackBar(
-        SnackBar(content: Text(widget.inProgressText)),
-      );
+      // TODO(devoncarew): Display this 'starting work' message in the status
+      // bar.
+
     }
+
     try {
       await action();
-      // If the action was successful, remove the snack bar and show a new
-      // one with action success.
-      snackBar?.close();
+
       if (widget.completedText != null) {
-        Scaffold.of(context).showSnackBar(
-          SnackBar(content: Text(widget.completedText)),
-        );
+        Notifications.of(context).push(widget.completedText);
       }
     } catch (e) {
-      // On a failure, remove the snack bar and replace it with the failure.
-      snackBar?.close();
-      Scaffold.of(context).showSnackBar(
-        SnackBar(content: Text(widget.describeError(e))),
-      );
+      Notifications.of(context).push(widget.describeError(e));
     } finally {
       setState(() {
         disabled = false;
