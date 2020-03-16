@@ -406,10 +406,10 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
       await action();
 
       if (widget.completedText != null) {
-        Notifications.of(context)?.push(widget.completedText);
+        Notifications.of(context).push(widget.completedText);
       }
     } catch (e) {
-      Notifications.of(context)?.push(widget.describeError(e));
+      Notifications.of(context).push(widget.describeError(e));
     } finally {
       setState(() {
         disabled = false;
