@@ -10,7 +10,7 @@ import 'dart:html';
 
 import 'package:meta/meta.dart';
 
-import 'fake_flutter/fake_flutter.dart';
+import 'fake_flutter/fake_flutter.dart' hide Element;
 import 'flutter_html_shim.dart';
 import 'html_elements.dart';
 import 'html_environment.dart' as environment;

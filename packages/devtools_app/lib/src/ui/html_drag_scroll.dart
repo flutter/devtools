@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:html' hide VoidCallback;
 
-import '../ui/fake_flutter/fake_flutter.dart';
+import '../ui/fake_flutter/fake_flutter.dart' hide Element;
 import '../ui/html_elements.dart';
 
 class HtmlDragScroll {

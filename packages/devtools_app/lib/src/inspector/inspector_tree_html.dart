@@ -13,7 +13,7 @@ import 'dart:html' hide VoidCallback;
 import 'package:meta/meta.dart';
 
 import '../config_specific/logger/logger.dart';
-import '../ui/fake_flutter/fake_flutter.dart';
+import '../ui/fake_flutter/fake_flutter.dart' hide Element;
 import '../ui/flutter_html_shim.dart';
 import '../ui/html_elements.dart';
 import '../ui/html_icon_renderer.dart';
