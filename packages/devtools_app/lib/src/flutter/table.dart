@@ -394,14 +394,15 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   @override
   void sortData(ColumnData column, SortDirection direction) {
+    final sortFunction = (T a, T b) => _compareData<T>(a, b, column, direction);
     void _sort(T dataObject) {
       dataObject.children
-        ..sort((T a, T b) => _compareData<T>(a, b, column, direction))
+        ..sort(sortFunction)
         ..forEach(_sort);
     }
 
-    dataRoots.where((dataRoot) => dataRoot.level == 0).toList()
-      ..sort((T a, T b) => _compareData<T>(a, b, column, direction))
+    dataRoots
+      ..sort(sortFunction)
       ..forEach(_sort);
   }
 
@@ -733,6 +734,18 @@ class _TableRowState<T> extends State<TableRow<T>>
     }
   }
 
+  MainAxisAlignment _mainAxisAlignmentFor(ColumnData<T> column) {
+    switch (column.alignment) {
+      case ColumnAlignment.center:
+        return MainAxisAlignment.center;
+      case ColumnAlignment.right:
+        return MainAxisAlignment.end;
+      case ColumnAlignment.left:
+      default:
+        return MainAxisAlignment.start;
+    }
+  }
+
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context) {
     final fontStyle = fixedFontStyle(context);
@@ -745,6 +758,7 @@ class _TableRowState<T> extends State<TableRow<T>>
         content = InkWell(
           onTap: () => _handleSortChange(column),
           child: Row(
+            mainAxisAlignment: _mainAxisAlignmentFor(column),
             children: [
               if (isSortColumn)
                 Icon(
@@ -753,7 +767,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                       : Icons.expand_more,
                   size: defaultIconSize,
                 ),
-              const SizedBox(width: 4.0),
+              const SizedBox(height: _Table.defaultRowHeight, width: 4.0),
               Text(
                 column.title,
                 overflow: TextOverflow.ellipsis,
