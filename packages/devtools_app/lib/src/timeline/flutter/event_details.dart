@@ -44,7 +44,7 @@ class EventDetails extends StatelessWidget {
             selectedEvent != null
                 ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
                 : noEventSelected,
-            style: textTheme.headline6,
+            style: textTheme.subtitle1,
           ),
         ),
         const PaddedDivider.thin(),
