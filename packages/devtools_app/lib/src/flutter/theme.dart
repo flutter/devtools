@@ -9,8 +9,7 @@ import '../ui/theme.dart';
 
 /// Constructs the light or dark theme for the app.
 ThemeData themeFor({@required bool isDarkTheme}) {
-  final theme = isDarkTheme ? _darkTheme() : _lightTheme();
-  return theme;
+  return isDarkTheme ? _darkTheme() : _lightTheme();
 }
 
 ThemeData _darkTheme() {
@@ -132,3 +131,11 @@ final chartBoldTypeFace = TypeFace(
 );
 
 const lightSelection = Color(0xFFD4D7DA);
+
+/// Return the fixed font style for DevTools.
+TextStyle fixedFontStyle(BuildContext context) {
+  return Theme.of(context)
+      .textTheme
+      .bodyText2
+      .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
+}

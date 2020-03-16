@@ -10,8 +10,7 @@ String initializePlatform() {
   // platform is not officially supported. This is not needed for web.
   debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   // TODO(jacobr): we don't yet have a direct analog to the URL on flutter
-  // desktop.
-  // Hard code to the dark theme as the majority of users are on the dark
-  // theme.
+  // desktop. Hard code to the dark theme as the majority of users are on the
+  // dark theme.
   return '/?theme=dark';
 }
