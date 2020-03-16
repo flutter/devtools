@@ -231,7 +231,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Container(
-        height: 200.0,
+        height: 160.0,
         child: BarChart(_chartController),
       ),
     );

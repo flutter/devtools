@@ -34,7 +34,9 @@ class ProvidedControllers implements DisposableController {
   factory ProvidedControllers.defaults() {
     return ProvidedControllers(
       logging: LoggingController(
-        onLogCountStatusChanged: (_) {},
+        onLogCountStatusChanged: (_) {
+          // TODO(devoncarew): This callback is not used.
+        },
         // TODO(djshuckerow): Use a notifier pattern for the logging controller.
         // That way, it is visible if it has listeners and invisible otherwise.
         isVisible: () => true,
@@ -208,9 +210,9 @@ class _DisposeAfterNotifyElement extends InheritedElement {
   @override
   void notifyClients(_InheritedProvider oldWidget) {
     super.notifyClients(oldWidget);
-    // For stateful widgets that depend on Controllers.of(context) to
-    // subscribe directly, we don't need a postframe callback and we can just
-    // dispose the old data.
+    // For stateful widgets that depend on Controllers.of(context) to subscribe
+    // directly, we don't need a postframe callback and we can just  dispose the
+    // old data.
     // For ValueListenableBuilder widgets, we need the postframe callback to
     // wait until the builders have a chance to build and update their
     // listeners.
