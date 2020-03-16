@@ -11,7 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../config_specific/logger/logger.dart';
+import '../config_specific/logger/logger.dart' as logger;
 import '../core/message_bus.dart';
 import '../globals.dart';
 import '../inspector/diagnostics_node.dart';
@@ -155,8 +155,9 @@ class LoggingDetailsController {
 
 class LoggingController {
   LoggingController({
-    @required this.onLogCountStatusChanged,
     @required this.isVisible,
+    @required this.onLogCountStatusChanged,
+    this.inspectorService,
   }) {
     _listen(serviceManager.onConnectionAvailable, _handleConnectionStart);
     if (serviceManager.hasConnection) {
@@ -175,6 +176,7 @@ class LoggingController {
     return subscription;
   }
 
+  // TODO(devoncarew): This is not used by the Flutter web version of the app.
   TableData<LogData> get loggingTableModel => _loggingTableModel;
   TableData<LogData> _loggingTableModel;
 
@@ -192,14 +194,14 @@ class LoggingController {
     // TODO(jacobr): expose the messageBus for use by vm tests.
     if (messageBus != null) {
       _listen(messageBus.onEvent(type: 'reload.end'), (BusEvent event) {
-        _log(LogData(
+        log(LogData(
           'hot.reload',
           event.data,
           DateTime.now().millisecondsSinceEpoch,
         ));
       });
       _listen(messageBus.onEvent(type: 'restart.end'), (BusEvent event) {
-        _log(LogData(
+        log(LogData(
           'hot.restart',
           event.data,
           DateTime.now().millisecondsSinceEpoch,
@@ -208,13 +210,37 @@ class LoggingController {
     }
   }
 
-  /// Callbacks to apply changes in the controller to other views.
-  final OnLogCountStatusChanged onLogCountStatusChanged;
-
   /// Callback returning whether the logging screen is visible.
   final bool Function() isVisible;
 
+  /// Callbacks to apply changes in the controller to other views.
+  final OnLogCountStatusChanged onLogCountStatusChanged;
+
+  /// This is specifiable in the constructor for testing.
+  @visibleForTesting
+  InspectorService inspectorService;
+
   List<LogData> data = <LogData>[];
+
+  // If non-null, this is an up-to-date cache of the filtered view of items.
+  List<LogData> _cachedFilteredData;
+
+  /// Get the view of the [data] items, filtered by the current value of
+  /// [filterText].
+  List<LogData> get filteredData {
+    if (filterText == null || filterText.trim().isEmpty) {
+      return data;
+    }
+
+    if (_cachedFilteredData != null) {
+      return _cachedFilteredData;
+    }
+
+    final match = filterText.trim().toLowerCase();
+    _cachedFilteredData =
+        data.where((LogData logData) => logData.matchesFilter(match)).toList();
+    return _cachedFilteredData;
+  }
 
   final List<StreamSubscription> _subscriptions = [];
 
@@ -224,19 +250,36 @@ class LoggingController {
 
   final Reporter onLogsUpdated = Reporter();
 
-  /// ObjectGroup for Flutter (completes with null for non-Flutter apps).
-  Future<ObjectGroup> objectGroup;
+  String _filterText;
+
+  /// The search term used to filter [data] - the list of items.
+  ///
+  /// See also [filteredData] for the filtered view of [data].
+  String get filterText => _filterText;
+
+  set filterText(String value) {
+    _filterText = value;
+    _cachedFilteredData = null;
+
+    onLogsUpdated.notify();
+  }
+
+  /// ObjectGroup for Flutter (null for non-Flutter apps).
+  ObjectGroup objectGroup;
 
   void _updateStatus() {
     final int count = _loggingTableModel.rowCount;
     final String label = count >= kMaxLogItemsLowerBound
         ? '${nf.format(kMaxLogItemsLowerBound)}+'
         : nf.format(count);
+
+    // TODO(devoncarew): Nobody is currently listening for this event.
     onLogCountStatusChanged('$label events');
   }
 
   void clear() {
     data.clear();
+    _cachedFilteredData = null;
     detailsController?.setData(null);
     _loggingTableModel?.setRows(data);
   }
@@ -261,11 +304,17 @@ class LoggingController {
     // Log Flutter extension events.
     _listen(service.onExtensionEvent, _handleExtensionEvent);
 
-    await ensureInspectorServiceDependencies();
+    if (inspectorService == null) {
+      await ensureInspectorServiceDependencies();
 
-    objectGroup = InspectorService.createGroup(service, 'console-group')
-        .catchError((e) => null,
-            test: (e) => e is FlutterInspectorLibraryNotFound);
+      inspectorService = await InspectorService.create(service).catchError(
+          (e) => null,
+          test: (e) => e is FlutterInspectorLibraryNotFound);
+    }
+
+    if (inspectorService != null) {
+      objectGroup = inspectorService.createObjectGroup('console-group');
+    }
   }
 
   void _handleExtensionEvent(Event e) async {
@@ -293,7 +342,7 @@ class LoggingController {
       final String frameInfo = '<span class="pre">$frameInfoText</span>';
       final String div = _createFrameDivHtml(frame);
 
-      _log(LogData(
+      log(LogData(
         e.extensionKind.toLowerCase(),
         jsonEncode(e.extensionData.data),
         e.timestamp,
@@ -303,14 +352,14 @@ class LoggingController {
     } else if (e.extensionKind == NavigationInfo.eventName) {
       final NavigationInfo navInfo = NavigationInfo.from(e.extensionData.data);
 
-      _log(LogData(
+      log(LogData(
         e.extensionKind.toLowerCase(),
         jsonEncode(e.json),
         e.timestamp,
         summary: navInfo.routeDescription,
       ));
     } else if (untitledEvents.contains(e.extensionKind)) {
-      _log(LogData(
+      log(LogData(
         e.extensionKind.toLowerCase(),
         jsonEncode(e.json),
         e.timestamp,
@@ -320,7 +369,7 @@ class LoggingController {
       final ServiceExtensionStateChangedInfo changedInfo =
           ServiceExtensionStateChangedInfo.from(e.extensionData.data);
 
-      _log(LogData(
+      log(LogData(
         e.extensionKind.toLowerCase(),
         jsonEncode(e.json),
         e.timestamp,
@@ -335,11 +384,11 @@ class LoggingController {
       // style error.
       node.style = DiagnosticsTreeStyle.error;
       if (_verboseDebugging) {
-        log('node toStringDeep:######\n${node.toStringDeep()}\n###');
+        logger.log('node toStringDeep:######\n${node.toStringDeep()}\n###');
       }
 
       final RemoteDiagnosticsNode summary = _findFirstSummary(node) ?? node;
-      _log(LogData(
+      log(LogData(
         e.extensionKind.toLowerCase(),
         jsonEncode(e.json),
         e.timestamp,
@@ -347,7 +396,7 @@ class LoggingController {
         node: node,
       ));
     } else {
-      _log(LogData(
+      log(LogData(
         e.extensionKind.toLowerCase(),
         jsonEncode(e.json),
         e.timestamp,
@@ -378,7 +427,7 @@ class LoggingController {
     };
 
     final String message = jsonEncode(event);
-    _log(LogData('gc', message, e.timestamp, summary: summary));
+    log(LogData('gc', message, e.timestamp, summary: summary));
   }
 
   void _handleDeveloperLogEvent(Event e) {
@@ -456,7 +505,7 @@ class LoggingController {
     const int severeIssue = 1000;
     final bool isError = level != null && level >= severeIssue ? true : false;
 
-    _log(LogData(
+    log(LogData(
       loggerName,
       details,
       e.timestamp,
@@ -468,9 +517,12 @@ class LoggingController {
 
   void _handleConnectionStop(dynamic event) {}
 
-  void _log(LogData log) {
+  void log(LogData log) {
+    _cachedFilteredData = null;
+
     // Insert the new item and clamped the list to kMaxLogItemsLength.
     data.add(log);
+
     // Note: We need to drop rows from the start because we want to drop old
     // rows but because that's expensive, we only do it periodically (eg. when
     // the list is 500 rows more).
@@ -500,6 +552,7 @@ class LoggingController {
     } else {
       _hasPendingUiUpdates = true;
     }
+
     onLogsUpdated.notify();
   }
 
@@ -511,7 +564,7 @@ class LoggingController {
     }
   }
 
-  RemoteDiagnosticsNode _findFirstSummary(RemoteDiagnosticsNode node) {
+  static RemoteDiagnosticsNode _findFirstSummary(RemoteDiagnosticsNode node) {
     if (node.level == DiagnosticLevel.summary) {
       return node;
     }
@@ -563,7 +616,7 @@ class _StdoutEventHandler {
       timer?.cancel();
 
       if (message == '\n') {
-        loggingController._log(LogData(
+        loggingController.log(LogData(
           buffer.kind,
           buffer.details + message,
           buffer.timestamp,
@@ -574,7 +627,7 @@ class _StdoutEventHandler {
         return;
       }
 
-      loggingController._log(buffer);
+      loggingController.log(buffer);
       buffer = null;
     }
 
@@ -592,11 +645,11 @@ class _StdoutEventHandler {
     );
 
     if (message == '\n') {
-      loggingController._log(data);
+      loggingController.log(data);
     } else {
       buffer = data;
       timer = Timer(const Duration(milliseconds: 1), () {
-        loggingController._log(buffer);
+        loggingController.log(buffer);
         buffer = null;
       });
     }
@@ -671,6 +724,22 @@ class LogData {
     } catch (_) {
       return details;
     }
+  }
+
+  bool matchesFilter(String filter) {
+    if (kind.toLowerCase().contains(filter)) {
+      return true;
+    }
+
+    if (summary != null && summary.toLowerCase().contains(filter)) {
+      return true;
+    }
+
+    if (_details != null && _details.toLowerCase().contains(filter)) {
+      return true;
+    }
+
+    return false;
   }
 
   @override

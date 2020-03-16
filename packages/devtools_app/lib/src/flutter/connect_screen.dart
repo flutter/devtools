@@ -15,8 +15,8 @@ import 'screen.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
 ///
-/// We need to use this screen to get a guarantee that the app has a
-/// Dart VM available.
+/// We need to use this screen to get a guarantee that the app has a Dart VM
+/// available.
 class ConnectScreen extends Screen {
   const ConnectScreen() : super(DevToolsScreenType.connect, title: 'Connect');
 
@@ -63,6 +63,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
               'Connect to a Running App',
               style: textTheme.bodyText1,
             ),
+            const SizedBox(height: 6),
             Text(
               'Enter a URL to a running Dart or Flutter application',
               style: textTheme.caption,
@@ -85,6 +86,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
           width: 350.0,
           child: TextField(
             onSubmitted: _connect,
+            autofocus: true,
             decoration: const InputDecoration(
               isDense: true,
               border: OutlineInputBorder(),
@@ -93,9 +95,8 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
                 // of hard coding material colors.
                 borderSide: BorderSide(width: 0.5, color: Colors.grey),
               ),
-              hintText: 'http://127.0.0.1:12345/AUTH_CODE=/',
+              hintText: 'http://127.0.0.1:12345/auth_code=',
             ),
-            maxLines: 1,
             controller: controller,
           ),
         ),
