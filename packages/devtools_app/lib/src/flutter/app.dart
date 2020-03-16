@@ -65,8 +65,8 @@ class DevToolsAppState extends State<DevToolsApp> {
       if (!kIsWeb) return;
       setState(() {
         final themeQueryParameter = uri.queryParameters['theme'];
-        // We refer to the legacy theme to make sure the
-        // debugging page stays in-sync with the rest of the app.
+        // We refer to the legacy theme to make sure the debugging page stays
+        // in-sync with the rest of the app.
         devtools_theme.initializeTheme(themeQueryParameter);
         theme = themeFor(isDarkTheme: devtools_theme.isDarkTheme);
       });

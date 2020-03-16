@@ -28,7 +28,7 @@ class FlatTable<T> extends StatefulWidget {
     Key key,
     @required this.columns,
     @required this.data,
-    this.populateInReverse = false,
+    this.reverse = false,
     @required this.keyFactory,
     @required this.onItemSelected,
   })  : assert(columns != null),
@@ -43,9 +43,9 @@ class FlatTable<T> extends StatefulWidget {
 
   /// Display list items reversed and from the bottom up.
   ///
-  /// Note: this is a workaround for implmenting auto-scrolling in order to
+  /// Note: this is a workaround for implementing auto-scrolling in order to
   /// always display newly added items.
-  final bool populateInReverse;
+  final bool reverse;
 
   /// Factory that creates keys for each row in this table.
   final Key Function(T data) keyFactory;
@@ -86,7 +86,7 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
       itemCount: widget.data.length,
       columns: widget.columns,
       columnWidths: columnWidths,
-      populateInReverse: widget.populateInReverse,
+      reverse: widget.reverse,
       rowBuilder: _buildRow,
     );
   }
@@ -340,12 +340,12 @@ class _Table<T> extends StatefulWidget {
     @required this.columns,
     @required this.columnWidths,
     @required this.rowBuilder,
-    this.populateInReverse = false,
+    this.reverse = false,
   }) : super(key: key);
 
   final int itemCount;
 
-  final bool populateInReverse;
+  final bool reverse;
   final List<ColumnData<T>> columns;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
@@ -382,7 +382,7 @@ class __TableState<T> extends State<_Table<T>> {
       (2 * _Table.rowHorizontalPadding);
 
   Widget _buildItem(BuildContext context, int index) {
-    if (widget.populateInReverse) {
+    if (widget.reverse) {
       index = widget.itemCount - index - 1;
     }
 
@@ -419,7 +419,7 @@ class __TableState<T> extends State<_Table<T>> {
             Expanded(
               child: Scrollbar(
                 child: ListView.custom(
-                  reverse: widget.populateInReverse,
+                  reverse: widget.reverse,
                   childrenDelegate: itemDelegate,
                 ),
               ),
@@ -629,16 +629,9 @@ class _TableRowState<T> extends State<TableRow<T>>
     }
   }
 
-  TextStyle _fixedFontStyle(BuildContext context) {
-    return Theme.of(context)
-        .textTheme
-        .bodyText2
-        .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
-  }
-
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context) {
-    final fixedFontStyle = _fixedFontStyle(context);
+    final fontStyle = fixedFontStyle(context);
 
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget content;
@@ -657,7 +650,7 @@ class _TableRowState<T> extends State<TableRow<T>>
         content ??= Text(
           '${column.getDisplayValue(node)}',
           overflow: TextOverflow.ellipsis,
-          style: fixedFontStyle,
+          style: fontStyle,
         );
 
         if (column == widget.expandableColumn) {

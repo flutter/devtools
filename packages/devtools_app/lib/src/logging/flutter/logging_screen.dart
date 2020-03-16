@@ -151,7 +151,7 @@ class LogsTable extends StatelessWidget {
     return FlatTable<LogData>(
       columns: columns,
       data: data,
-      populateInReverse: true,
+      reverse: true,
       keyFactory: (LogData data) => ValueKey<LogData>(data),
       onItemSelected: onItemSelected,
     );
@@ -259,7 +259,7 @@ class _LogDetailsState extends State<LogDetails>
       child: SingleChildScrollView(
         child: Text(
           log.prettyPrinted ?? '',
-          style: _fixedFontStyle(context),
+          style: fixedFontStyle(context),
         ),
       ),
     );
@@ -300,6 +300,12 @@ class _KindColumn extends LogKindColumn implements ColumnRenderer<LogData> {
       color = const Color.fromARGB(0xff, 0x42, 0x42, 0x42);
     }
 
+    // Use a font color that contrasts with the colored backgrounds.
+    final textStyle = Theme.of(context)
+        .primaryTextTheme
+        .bodyText2
+        .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 3.0),
       decoration: BoxDecoration(
@@ -309,7 +315,7 @@ class _KindColumn extends LogKindColumn implements ColumnRenderer<LogData> {
       child: Text(
         kind,
         overflow: TextOverflow.ellipsis,
-        style: _fixedFontStyle(context),
+        style: textStyle,
       ),
     );
   }
@@ -331,7 +337,7 @@ class _MessageColumn extends LogMessageColumn
       final Text text = Text(
         '${getDisplayValue(data)}',
         overflow: TextOverflow.ellipsis,
-        style: _fixedFontStyle(context),
+        style: fixedFontStyle(context),
       );
 
       double frameLength = 0.0;
@@ -358,11 +364,4 @@ class _MessageColumn extends LogMessageColumn
       return null;
     }
   }
-}
-
-TextStyle _fixedFontStyle(BuildContext context) {
-  return Theme.of(context)
-      .textTheme
-      .bodyText2
-      .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
 }
