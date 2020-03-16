@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
@@ -15,6 +17,13 @@ import '../../table_data.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../../utils.dart';
 import '../logging_controller.dart';
+
+// TODO(devoncarew): Show rows starting from the top (and have them grow down).
+// TODO(devoncarew): We should keep new items visible (if the last item was
+// already visible).
+
+// TODO(devoncarew): The last column of a table should take up all remaining
+// width.
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
@@ -38,38 +47,77 @@ class LoggingScreenBody extends StatefulWidget {
 
 class _LoggingScreenState extends State<LoggingScreenBody>
     with AutoDisposeMixin {
-  LoggingController get controller => Controllers.of(context).logging;
   LogData selected;
+  TextEditingController filterController;
+
+  LoggingController get controller => Controllers.of(context).logging;
+
+  @override
+  void initState() {
+    super.initState();
+
+    filterController = TextEditingController();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     cancel();
-    addAutoDisposeListener(controller.onLogsUpdated);
+
+    filterController.text = controller.filterText;
+    filterController.addListener(() {
+      controller.filterText = filterController.text;
+    });
+
+    addAutoDisposeListener(controller.onLogsUpdated, () {
+      setState(() {
+        if (selected != null) {
+          final List<LogData> items = controller.filteredData;
+          if (!items.contains(selected)) {
+            selected = null;
+          }
+        }
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(children: [
       Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           RaisedButton(
             child: const Text('Clear logs'),
             onPressed: _clearLogs,
           ),
+          const Spacer(),
+          Container(
+            width: 200.0,
+            height: 36.0,
+            child: TextField(
+              controller: filterController,
+              decoration: const InputDecoration(
+                isDense: true,
+                border: OutlineInputBorder(),
+                labelText: 'Search',
+              ),
+            ),
+          ),
+          const SizedBox(width: 8.0),
           StructuredErrorsToggle(),
         ],
       ),
       Expanded(
         child: Split(
-          axis: Split.axisFor(context, 1.0),
+          axis: Axis.vertical,
           firstChild: LogsTable(
-            data: controller.data,
+            data: controller.filteredData,
             onItemSelected: _select,
           ),
           secondChild: LogDetails(log: selected),
-          initialFirstFraction: 0.6,
+          initialFirstFraction: 0.78,
         ),
       ),
     ]);
@@ -82,16 +130,13 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   void _clearLogs() {
     setState(() {
       controller.clear();
+      selected = null;
     });
   }
 }
 
 class LogsTable extends StatelessWidget {
-  LogsTable({
-    Key key,
-    this.data,
-    this.onItemSelected,
-  }) : super(key: key);
+  LogsTable({Key key, this.data, this.onItemSelected}) : super(key: key);
 
   final List<LogData> data;
   final ItemCallback<LogData> onItemSelected;
@@ -106,6 +151,7 @@ class LogsTable extends StatelessWidget {
     return FlatTable<LogData>(
       columns: columns,
       data: data,
+      reverse: true,
       keyFactory: (LogData data) => ValueKey<LogData>(data),
       onItemSelected: onItemSelected,
       sortColumn: when,
@@ -179,16 +225,19 @@ class _LogDetailsState extends State<LogDetails>
       builder: (context, _) {
         return Container(
           color: Theme.of(context).cardColor,
-          child: Stack(children: [
-            Opacity(
-              opacity: crossFade.value,
-              child: _buildContent(context, widget.log),
-            ),
-            Opacity(
-              opacity: 1 - crossFade.value,
-              child: _buildContent(context, _oldLog),
-            ),
-          ]),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Opacity(
+                opacity: crossFade.value,
+                child: _buildContent(context, widget.log),
+              ),
+              Opacity(
+                opacity: 1 - crossFade.value,
+                child: _buildContent(context, _oldLog),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -208,15 +257,11 @@ class _LogDetailsState extends State<LogDetails>
   Widget _buildInspector(BuildContext context, LogData log) => const SizedBox();
 
   Widget _buildSimpleLog(BuildContext context, LogData log) {
-    // TODO(https://github.com/flutter/devtools/issues/1339): Present with monospaced fonts.
     return Scrollbar(
       child: SingleChildScrollView(
         child: Text(
           log.prettyPrinted ?? '',
-          style: Theme.of(context)
-              .textTheme
-              .subtitle1
-              .copyWith(fontFamily: 'RobotoMono'),
+          style: fixedFontStyle(context),
         ),
       ),
     );
@@ -234,20 +279,91 @@ class _WhenColumn extends LogWhenColumn {
   String getValue(LogData dataObject) => render(dataObject.timestamp);
 }
 
-class _KindColumn extends LogKindColumn {
+class _KindColumn extends LogKindColumn implements ColumnRenderer<LogData> {
   @override
   String getValue(LogData dataObject) => dataObject.kind;
 
   @override
-  double get fixedWidthPx => 120;
+  double get fixedWidthPx => 140;
+
+  @override
+  Widget build(BuildContext context, LogData item) {
+    final String kind = item.kind;
+
+    Color color = const Color.fromARGB(0xff, 0x61, 0x61, 0x61);
+
+    if (kind == 'stderr' || item.isError || kind == 'flutter.error') {
+      color = const Color.fromARGB(0xff, 0xF4, 0x43, 0x36);
+    } else if (kind == 'stdout') {
+      color = const Color.fromARGB(0xff, 0x78, 0x90, 0x9C);
+    } else if (kind.startsWith('flutter')) {
+      color = const Color.fromARGB(0xff, 0x00, 0x91, 0xea);
+    } else if (kind == 'gc') {
+      color = const Color.fromARGB(0xff, 0x42, 0x42, 0x42);
+    }
+
+    // Use a font color that contrasts with the colored backgrounds.
+    final textStyle = Theme.of(context)
+        .primaryTextTheme
+        .bodyText2
+        .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 3.0),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(3.0),
+      ),
+      child: Text(
+        kind,
+        overflow: TextOverflow.ellipsis,
+        style: textStyle,
+      ),
+    );
+  }
 }
 
-class _MessageColumn extends LogMessageColumn {
+class _MessageColumn extends LogMessageColumn
+    implements ColumnRenderer<LogData> {
   _MessageColumn(String Function(String) logMessageToHtml)
       : super(logMessageToHtml);
 
-  /// TODO(djshuckerow): Do better than showing raw HTML here.
   @override
   String getValue(LogData dataObject) =>
       dataObject.summary ?? dataObject.details;
+
+  @override
+  Widget build(BuildContext context, LogData data) {
+    if (data.kind == 'flutter.frame') {
+      const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
+      final Text text = Text(
+        '${getDisplayValue(data)}',
+        overflow: TextOverflow.ellipsis,
+        style: fixedFontStyle(context),
+      );
+
+      double frameLength = 0.0;
+      try {
+        final int micros = jsonDecode(data.details)['elapsed'];
+        frameLength = micros * 3.0 / 1000.0;
+      } catch (e) {
+        // ignore
+      }
+
+      return Row(
+        children: <Widget>[
+          text,
+          Flexible(
+            child: Container(
+              height: 12.0,
+              width: frameLength,
+              decoration: const BoxDecoration(color: color),
+            ),
+          ),
+        ],
+      );
+    } else {
+      return null;
+    }
+  }
 }

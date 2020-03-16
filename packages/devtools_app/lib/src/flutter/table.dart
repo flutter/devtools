@@ -10,22 +10,26 @@ import 'collapsible_mixin.dart';
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'theme.dart';
 
+// TODO(devoncarew): We need to render the selected row with a different
+// background color.
+
 typedef IndexedScrollableWidgetBuilder = Widget Function(
   BuildContext,
   LinkedScrollControllerGroup linkedScrollControllerGroup,
   int index,
 );
 
-/// A table that displays in a collection of [data], based on a collection
-/// of [ColumnData].
+/// A table that displays in a collection of [data], based on a collection of
+/// [ColumnData].
 ///
-/// The [ColumnData] gives this table information about how to size its
-/// columns, and how to present each row of `data`
+/// The [ColumnData] gives this table information about how to size its columns,
+/// and how to present each row of `data`.
 class FlatTable<T> extends StatefulWidget {
   const FlatTable({
     Key key,
     @required this.columns,
     @required this.data,
+    this.reverse = false,
     @required this.keyFactory,
     @required this.onItemSelected,
     @required this.sortColumn,
@@ -39,6 +43,12 @@ class FlatTable<T> extends StatefulWidget {
   final List<ColumnData<T>> columns;
 
   final List<T> data;
+
+  /// Display list items reversed and from the bottom up.
+  ///
+  /// Note: this is a workaround for implementing auto-scrolling in order to
+  /// always display newly added items.
+  final bool reverse;
 
   /// Factory that creates keys for each row in this table.
   final Key Function(T data) keyFactory;
@@ -85,12 +95,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
   List<double> _computeColumnWidths() {
     final widths = <double>[];
     for (ColumnData<T> column in widget.columns) {
-      double width;
-      if (column.fixedWidthPx != null) {
-        width = column.fixedWidthPx;
-      } else {
-        width = _Table.defaultColumnWidth;
-      }
+      final width = column.fixedWidthPx ?? _Table.defaultColumnWidth;
       widths.add(width);
     }
     return widths;
@@ -102,7 +107,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
       itemCount: widget.data.length,
       columns: widget.columns,
       columnWidths: columnWidths,
-      startAtBottom: true,
+      reverse: widget.reverse,
       rowBuilder: _buildRow,
       sortColumn: widget.sortColumn,
       sortDirection: widget.sortDirection,
@@ -407,20 +412,21 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 }
 
 class _Table<T> extends StatefulWidget {
-  const _Table(
-      {Key key,
-      @required this.itemCount,
-      @required this.columns,
-      @required this.columnWidths,
-      @required this.rowBuilder,
-      @required this.sortColumn,
-      @required this.sortDirection,
-      @required this.onSortChanged,
-      this.startAtBottom = false})
-      : super(key: key);
+  const _Table({
+    Key key,
+    @required this.itemCount,
+    @required this.columns,
+    @required this.columnWidths,
+    @required this.rowBuilder,
+    @required this.sortColumn,
+    @required this.sortDirection,
+    @required this.onSortChanged,
+    this.reverse = false,
+  }) : super(key: key);
 
   final int itemCount;
-  final bool startAtBottom;
+
+  final bool reverse;
   final List<ColumnData<T>> columns;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
@@ -435,7 +441,7 @@ class _Table<T> extends StatefulWidget {
   ///
   /// When rows in the table expand or collapse, they will animate between
   /// a height of 0 and a height of [defaultRowHeight].
-  static const defaultRowHeight = 42.0;
+  static const defaultRowHeight = 32.0;
 
   @override
   _TableState<T> createState() => _TableState<T>();
@@ -459,7 +465,7 @@ class _TableState<T> extends State<_Table<T>> {
       widget.columnWidths.reduce((x, y) => x + y) + (2 * defaultSpacing);
 
   Widget _buildItem(BuildContext context, int index) {
-    if (widget.startAtBottom) {
+    if (widget.reverse) {
       index = widget.itemCount - index - 1;
     }
 
@@ -499,7 +505,7 @@ class _TableState<T> extends State<_Table<T>> {
             Expanded(
               child: Scrollbar(
                 child: ListView.custom(
-                  reverse: widget.startAtBottom,
+                  reverse: widget.reverse,
                   childrenDelegate: itemDelegate,
                 ),
               ),
@@ -515,6 +521,16 @@ class _TableState<T> extends State<_Table<T>> {
     sortColumn = column;
     widget.onSortChanged(column, direction);
   }
+}
+
+/// If a [ColumnData] implements this interface, it can override how that cell
+/// is rendered.
+abstract class ColumnRenderer<T> {
+  /// Render the given [data] to a [Widget].
+  ///
+  /// This method can return `null` to indicate that the default rendering
+  /// should be used instead.
+  Widget build(BuildContext context, T data);
 }
 
 /// Callback for when a specific item in a table is selected.
@@ -719,6 +735,8 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context) {
+    final fontStyle = fixedFontStyle(context);
+
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget content;
       final node = widget.node;
@@ -746,10 +764,16 @@ class _TableRowState<T> extends State<TableRow<T>>
       } else {
         final padding =
             column.getNodeIndentPx(node, indentForTreeToggle: false);
-        content = Text(
+
+        if (column is ColumnRenderer) {
+          content = (column as ColumnRenderer).build(context, node);
+        }
+        content ??= Text(
           '${column.getDisplayValue(node)}',
           overflow: TextOverflow.ellipsis,
+          style: fontStyle,
         );
+
         if (column == widget.expandableColumn) {
           final expandIndicator = widget.isExpandable
               ? RotationTransition(
