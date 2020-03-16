@@ -130,7 +130,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     final cpuFlameChart = LayoutBuilder(
       builder: (context, constraints) {
         return ValueListenableBuilder<CpuStackFrame>(
-          valueListenable: widget.controller.selectedCpuStackFrame,
+          valueListenable: widget.controller.selectedCpuStackFrameNotifier,
           builder: (context, selectedStackFrame, _) {
             return CpuProfileFlameChart(
               widget.data,

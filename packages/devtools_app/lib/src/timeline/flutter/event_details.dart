@@ -60,7 +60,7 @@ class EventDetails extends StatelessWidget {
   Widget _buildDetails(TimelineController controller) {
     if (selectedEvent.isUiEvent) {
       return ValueListenableBuilder<Flag>(
-        valueListenable: controller.cpuProfilerController.profilerFlag,
+        valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
         builder: (context, profilerFlag, _) {
           return profilerFlag.valueAsString == 'true'
               ? _buildCpuProfiler(controller.cpuProfilerController)
@@ -73,7 +73,7 @@ class EventDetails extends StatelessWidget {
 
   Widget _buildCpuProfiler(CpuProfilerController cpuProfilerController) {
     return ValueListenableBuilder<CpuProfileData>(
-      valueListenable: cpuProfilerController.data,
+      valueListenable: cpuProfilerController.dataNotifier,
       builder: (context, cpuProfileData, _) {
         if (cpuProfileData == null) {
           return _buildProcessingInfo(cpuProfilerController);

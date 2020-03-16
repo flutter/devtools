@@ -152,7 +152,7 @@ Widget dimensionDescription(TextSpan description, bool overflow) {
 Widget _visualizeWidthAndHeightWithConstraints({
   @required Widget widget,
   @required LayoutProperties properties,
-  double arrowHeadSize = defaultArrowHeadSize,
+  double arrowHeadSize = defaultIconSize,
 }) {
   final showChildrenWidthsSum =
       properties is FlexLayoutProperties && properties.isOverflowWidth;

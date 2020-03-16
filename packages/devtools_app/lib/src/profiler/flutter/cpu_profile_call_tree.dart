@@ -34,12 +34,12 @@ class CpuCallTreeTable extends StatelessWidget {
     Key key,
     this.data,
     this.treeColumn,
-    this.startingSortColumn,
+    this.sortColumn,
     this.columns,
   ) : super(key: key);
 
   final TreeColumnData<CpuStackFrame> treeColumn;
-  final ColumnData<CpuStackFrame> startingSortColumn;
+  final ColumnData<CpuStackFrame> sortColumn;
   final List<ColumnData<CpuStackFrame>> columns;
 
   final CpuProfileData data;
@@ -50,8 +50,8 @@ class CpuCallTreeTable extends StatelessWidget {
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (frame) => PageStorageKey<String>(frame.id),
-      startingSortColumn: startingSortColumn,
-      startingSortDirection: SortDirection.descending,
+      sortColumn: sortColumn,
+      sortDirection: SortDirection.descending,
     );
   }
 }

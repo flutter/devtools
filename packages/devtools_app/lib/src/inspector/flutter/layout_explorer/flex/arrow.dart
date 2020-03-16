@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../../flutter/theme.dart';
+
 const defaultArrowColor = Colors.white;
-const defaultArrowHeadSize = 16.0;
 const defaultArrowStrokeWidth = 2.0;
 const defaultDistanceToArrow = 4.0;
 
@@ -34,7 +35,7 @@ class ArrowWrapper extends StatelessWidget {
     this.child,
     @required ArrowType type,
     this.arrowColor = defaultArrowColor,
-    this.arrowHeadSize = defaultArrowHeadSize,
+    this.arrowHeadSize = defaultIconSize,
     this.arrowStrokeWidth = defaultArrowStrokeWidth,
     this.childMarginFromArrow = defaultDistanceToArrow,
   })  : assert(type != null),
@@ -53,7 +54,7 @@ class ArrowWrapper extends StatelessWidget {
     this.child,
     @required this.direction,
     this.arrowColor = defaultArrowColor,
-    this.arrowHeadSize = defaultArrowHeadSize,
+    this.arrowHeadSize = defaultIconSize,
     this.arrowStrokeWidth = defaultArrowStrokeWidth,
     this.childMarginFromArrow = defaultDistanceToArrow,
   })  : assert(direction != null),
@@ -144,7 +145,7 @@ class ArrowWrapper extends StatelessWidget {
 class ArrowWidget extends StatelessWidget {
   ArrowWidget({
     this.color = defaultArrowColor,
-    this.headSize = defaultArrowHeadSize,
+    this.headSize = defaultIconSize,
     Key key,
     this.shouldDrawHead = true,
     this.strokeWidth = defaultArrowStrokeWidth,
@@ -187,7 +188,7 @@ class ArrowWidget extends StatelessWidget {
 
 class _ArrowPainter extends CustomPainter {
   _ArrowPainter({
-    this.headSize = defaultArrowHeadSize,
+    this.headSize = defaultIconSize,
     this.strokeWidth = defaultArrowStrokeWidth,
     this.color = defaultArrowColor,
     this.shouldDrawHead = true,

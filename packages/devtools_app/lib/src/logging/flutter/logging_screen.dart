@@ -108,8 +108,8 @@ class LogsTable extends StatelessWidget {
       data: data,
       keyFactory: (LogData data) => ValueKey<LogData>(data),
       onItemSelected: onItemSelected,
-      startingSortColumn: when,
-      startingSortDirection: SortDirection.ascending,
+      sortColumn: when,
+      sortDirection: SortDirection.ascending,
     );
   }
 }

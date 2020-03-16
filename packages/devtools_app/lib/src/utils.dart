@@ -569,7 +569,7 @@ enum SortDirection {
 }
 
 extension SortDirectionExtension on SortDirection {
-  SortDirection opposite() {
+  SortDirection reverse() {
     return this == SortDirection.ascending
         ? SortDirection.descending
         : SortDirection.ascending;

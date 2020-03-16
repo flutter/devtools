@@ -136,7 +136,7 @@ class TimelineController implements DisposableController {
       startMicros: selectedEvent.time.start.inMicroseconds,
       extentMicros: selectedEvent.time.duration.inMicroseconds,
     );
-    timeline.data.cpuProfileData = cpuProfilerController.data.value;
+    timeline.data.cpuProfileData = cpuProfilerController.dataNotifier.value;
   }
 
   Future<void> loadOfflineData(OfflineData offlineData) async {

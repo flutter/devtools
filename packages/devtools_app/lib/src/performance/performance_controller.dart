@@ -12,7 +12,7 @@ import '../utils.dart';
 class PerformanceController {
   final cpuProfilerController = CpuProfilerController();
 
-  CpuProfileData get cpuProfileData => cpuProfilerController.data.value;
+  CpuProfileData get cpuProfileData => cpuProfilerController.dataNotifier.value;
 
   /// Notifies that a CPU profile is currently being recorded.
   ValueListenable get recordingNotifier => _recordingNotifier;

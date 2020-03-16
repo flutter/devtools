@@ -201,9 +201,7 @@ class TableData<T> extends Object {
     }
 
     if (_sortColumn == column) {
-      _sortDirection = _sortDirection == SortDirection.ascending
-          ? SortDirection.descending
-          : SortDirection.ascending;
+      _sortDirection = _sortDirection.reverse();
     } else {
       sortColumn = column;
     }

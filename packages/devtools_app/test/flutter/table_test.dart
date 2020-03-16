@@ -33,8 +33,8 @@ void main() {
         data: [TestData('empty', 0)],
         keyFactory: (d) => Key(d.name),
         onItemSelected: noop,
-        startingSortColumn: flatNameColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: flatNameColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -52,8 +52,8 @@ void main() {
         data: flatData,
         onItemSelected: noop,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: flatNameColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: flatNameColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -86,19 +86,21 @@ void main() {
         data: flatData,
         onItemSelected: noop,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: flatNameColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: flatNameColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
-      expect(flatData[0].name, equals('Bar'));
-      expect(flatData[1].name, equals('Baz'));
-      expect(flatData[2].name, equals('Baz'));
-      expect(flatData[3].name, equals('Crackle'));
-      expect(flatData[4].name, equals('Foo'));
-      expect(flatData[5].name, equals('Pop'));
-      expect(flatData[6].name, equals('Qux'));
-      expect(flatData[7].name, equals('Qux'));
-      expect(flatData[8].name, equals('Snap'));
+      final FlatTableState state = tester.state(find.byWidget(table));
+      final data = state.data;
+      expect(data[0].name, equals('Bar'));
+      expect(data[1].name, equals('Baz'));
+      expect(data[2].name, equals('Baz'));
+      expect(data[3].name, equals('Crackle'));
+      expect(data[4].name, equals('Foo'));
+      expect(data[5].name, equals('Pop'));
+      expect(data[6].name, equals('Qux'));
+      expect(data[7].name, equals('Qux'));
+      expect(data[8].name, equals('Snap'));
     });
 
     testWidgets('sorts data by column', (WidgetTester tester) async {
@@ -110,46 +112,48 @@ void main() {
         data: flatData,
         onItemSelected: noop,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: flatNameColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: flatNameColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
-      expect(flatData[0].name, equals('Bar'));
-      expect(flatData[1].name, equals('Baz'));
-      expect(flatData[2].name, equals('Baz'));
-      expect(flatData[3].name, equals('Crackle'));
-      expect(flatData[4].name, equals('Foo'));
-      expect(flatData[5].name, equals('Pop'));
-      expect(flatData[6].name, equals('Qux'));
-      expect(flatData[7].name, equals('Qux'));
-      expect(flatData[8].name, equals('Snap'));
+      final FlatTableState state = tester.state(find.byWidget(table));
+      final data = state.data;
+      expect(data[0].name, equals('Bar'));
+      expect(data[1].name, equals('Baz'));
+      expect(data[2].name, equals('Baz'));
+      expect(data[3].name, equals('Crackle'));
+      expect(data[4].name, equals('Foo'));
+      expect(data[5].name, equals('Pop'));
+      expect(data[6].name, equals('Qux'));
+      expect(data[7].name, equals('Qux'));
+      expect(data[8].name, equals('Snap'));
 
       // Reverse the sort direction.
       await tester.tap(find.text('FlatName'));
       await tester.pumpAndSettle();
 
-      expect(flatData[8].name, equals('Bar'));
-      expect(flatData[7].name, equals('Baz'));
-      expect(flatData[6].name, equals('Baz'));
-      expect(flatData[5].name, equals('Crackle'));
-      expect(flatData[4].name, equals('Foo'));
-      expect(flatData[3].name, equals('Pop'));
-      expect(flatData[2].name, equals('Qux'));
-      expect(flatData[1].name, equals('Qux'));
-      expect(flatData[0].name, equals('Snap'));
+      expect(data[8].name, equals('Bar'));
+      expect(data[7].name, equals('Baz'));
+      expect(data[6].name, equals('Baz'));
+      expect(data[5].name, equals('Crackle'));
+      expect(data[4].name, equals('Foo'));
+      expect(data[3].name, equals('Pop'));
+      expect(data[2].name, equals('Qux'));
+      expect(data[1].name, equals('Qux'));
+      expect(data[0].name, equals('Snap'));
 
       // Change the sort column.
       await tester.tap(find.text('Number'));
       await tester.pumpAndSettle();
-      expect(flatData[0].name, equals('Foo'));
-      expect(flatData[1].name, equals('Bar'));
-      expect(flatData[2].name, equals('Baz'));
-      expect(flatData[3].name, equals('Qux'));
-      expect(flatData[4].name, equals('Snap'));
-      expect(flatData[5].name, equals('Pop'));
-      expect(flatData[6].name, equals('Crackle'));
-      expect(flatData[7].name, equals('Baz'));
-      expect(flatData[8].name, equals('Qux'));
+      expect(data[0].name, equals('Foo'));
+      expect(data[1].name, equals('Bar'));
+      expect(data[2].name, equals('Baz'));
+      expect(data[3].name, equals('Qux'));
+      expect(data[4].name, equals('Snap'));
+      expect(data[5].name, equals('Pop'));
+      expect(data[6].name, equals('Crackle'));
+      expect(data[7].name, equals('Baz'));
+      expect(data[8].name, equals('Qux'));
     });
 
     testWidgets('displays with many columns', (WidgetTester tester) async {
@@ -163,8 +167,8 @@ void main() {
         data: flatData,
         onItemSelected: noop,
         keyFactory: (data) => Key(data.name),
-        startingSortColumn: flatNameColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: flatNameColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(
         SizedBox(
@@ -185,8 +189,8 @@ void main() {
         data: [testData],
         keyFactory: (d) => Key(d.name),
         onItemSelected: (item) => selected = item,
-        startingSortColumn: flatNameColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: flatNameColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -204,8 +208,8 @@ void main() {
             data: null,
             keyFactory: (d) => Key(d.name),
             onItemSelected: noop,
-            startingSortColumn: flatNameColumn,
-            startingSortDirection: SortDirection.ascending,
+            sortColumn: flatNameColumn,
+            sortDirection: SortDirection.ascending,
           );
         },
         throwsAssertionError,
@@ -219,8 +223,8 @@ void main() {
           data: flatData,
           keyFactory: null,
           onItemSelected: noop,
-          startingSortColumn: flatNameColumn,
-          startingSortDirection: SortDirection.ascending,
+          sortColumn: flatNameColumn,
+          sortDirection: SortDirection.ascending,
         );
       }, throwsAssertionError);
     });
@@ -264,8 +268,8 @@ void main() {
         dataRoots: [TestData('empty', 0)],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: treeColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: treeColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -279,8 +283,8 @@ void main() {
         dataRoots: [tree1, tree2],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: treeColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: treeColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -314,8 +318,8 @@ void main() {
         dataRoots: [tree1, tree2],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: treeColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: treeColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -333,8 +337,8 @@ void main() {
         dataRoots: [TestData('root1', 0), TestData('root2', 1)],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: treeColumn,
-        startingSortDirection: SortDirection.descending,
+        sortColumn: treeColumn,
+        sortDirection: SortDirection.descending,
       );
       await tester.pumpWidget(wrap(newTable));
       expect(find.byKey(const Key('Foo')), findsNothing);
@@ -358,8 +362,8 @@ void main() {
         dataRoots: [tree1],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: treeColumn,
-        startingSortDirection: SortDirection.descending,
+        sortColumn: treeColumn,
+        sortDirection: SortDirection.descending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -385,8 +389,8 @@ void main() {
         dataRoots: [tree1],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: treeColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: treeColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(
         SizedBox(
@@ -408,11 +412,12 @@ void main() {
         dataRoots: [tree1],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: treeColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: treeColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       await tester.pumpAndSettle();
+
       expect(tree1.isExpanded, true);
       await tester.tap(find.byKey(const Key('Foo')));
       await tester.pumpAndSettle();
@@ -442,18 +447,20 @@ void main() {
         dataRoots: [tree1],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: treeColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: treeColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
-      expect(tree1.children[0].name, equals('Bar'));
-      expect(tree1.children[0].children[0].name, equals('Baz'));
-      expect(tree1.children[0].children[1].name, equals('Crackle'));
-      expect(tree1.children[0].children[2].name, equals('Pop'));
-      expect(tree1.children[0].children[3].name, equals('Qux'));
-      expect(tree1.children[0].children[4].name, equals('Snap'));
-      expect(tree1.children[1].name, equals('Baz'));
-      expect(tree1.children[2].name, equals('Qux'));
+      final TreeTableState state = tester.state(find.byWidget(table));
+      final tree = state.dataRoots[0];
+      expect(tree.children[0].name, equals('Bar'));
+      expect(tree.children[0].children[0].name, equals('Baz'));
+      expect(tree.children[0].children[1].name, equals('Crackle'));
+      expect(tree.children[0].children[2].name, equals('Pop'));
+      expect(tree.children[0].children[3].name, equals('Qux'));
+      expect(tree.children[0].children[4].name, equals('Snap'));
+      expect(tree.children[1].name, equals('Baz'));
+      expect(tree.children[2].name, equals('Qux'));
     });
 
     testWidgets('sorts data by column', (WidgetTester tester) async {
@@ -465,42 +472,43 @@ void main() {
         dataRoots: [tree1],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: treeColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: treeColumn,
+        sortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
-      expect(tree1.children[0].name, equals('Bar'));
-      expect(tree1.children[0].children[0].name, equals('Baz'));
-      expect(tree1.children[0].children[1].name, equals('Crackle'));
-      expect(tree1.children[0].children[2].name, equals('Pop'));
-      expect(tree1.children[0].children[3].name, equals('Qux'));
-      expect(tree1.children[0].children[4].name, equals('Snap'));
-      expect(tree1.children[1].name, equals('Baz'));
-      expect(tree1.children[2].name, equals('Qux'));
+      final TreeTableState state = tester.state(find.byWidget(table));
+      final tree = state.dataRoots[0];
+      expect(tree.children[0].name, equals('Bar'));
+      expect(tree.children[0].children[0].name, equals('Baz'));
+      expect(tree.children[0].children[1].name, equals('Crackle'));
+      expect(tree.children[0].children[2].name, equals('Pop'));
+      expect(tree.children[0].children[4].name, equals('Snap'));
+      expect(tree.children[1].name, equals('Baz'));
+      expect(tree.children[2].name, equals('Qux'));
 
       // Reverse the sort direction.
       await tester.tap(find.text('Name'));
       await tester.pumpAndSettle();
-      expect(tree1.children[2].name, equals('Bar'));
-      expect(tree1.children[2].children[4].name, equals('Baz'));
-      expect(tree1.children[2].children[3].name, equals('Crackle'));
-      expect(tree1.children[2].children[2].name, equals('Pop'));
-      expect(tree1.children[2].children[1].name, equals('Qux'));
-      expect(tree1.children[2].children[0].name, equals('Snap'));
-      expect(tree1.children[1].name, equals('Baz'));
-      expect(tree1.children[0].name, equals('Qux'));
+      expect(tree.children[2].name, equals('Bar'));
+      expect(tree.children[2].children[4].name, equals('Baz'));
+      expect(tree.children[2].children[3].name, equals('Crackle'));
+      expect(tree.children[2].children[2].name, equals('Pop'));
+      expect(tree.children[2].children[1].name, equals('Qux'));
+      expect(tree.children[2].children[0].name, equals('Snap'));
+      expect(tree.children[1].name, equals('Baz'));
+      expect(tree.children[0].name, equals('Qux'));
 
       // Change the sort column.
       await tester.tap(find.text('Number'));
       await tester.pumpAndSettle();
-      expect(tree1.children[0].name, equals('Bar'));
-      expect(tree1.children[0].children[0].name, equals('Baz'));
-      expect(tree1.children[0].children[1].name, equals('Qux'));
-      expect(tree1.children[0].children[2].name, equals('Snap'));
-      expect(tree1.children[0].children[3].name, equals('Pop'));
-      expect(tree1.children[0].children[4].name, equals('Crackle'));
-      expect(tree1.children[1].name, equals('Qux'));
-      expect(tree1.children[2].name, equals('Baz'));
+      expect(tree.children[0].name, equals('Bar'));
+      expect(tree.children[0].children[0].name, equals('Baz'));
+      expect(tree.children[0].children[1].name, equals('Qux'));
+      expect(tree.children[0].children[2].name, equals('Snap'));
+      expect(tree.children[0].children[3].name, equals('Pop'));
+      expect(tree.children[0].children[4].name, equals('Crackle'));
+      expect(tree.children[1].name, equals('Qux'));
+      expect(tree.children[2].name, equals('Baz'));
     });
 
     testWidgets('properly colors rows with alternating colors',
@@ -524,8 +532,8 @@ void main() {
         dataRoots: [data],
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        startingSortColumn: treeColumn,
-        startingSortDirection: SortDirection.ascending,
+        sortColumn: treeColumn,
+        sortDirection: SortDirection.ascending,
       );
 
       final fooFinder = find.byKey(const Key('Foo'));
@@ -590,8 +598,8 @@ void main() {
             dataRoots: null,
             treeColumn: treeColumn,
             keyFactory: (d) => Key(d.name),
-            startingSortColumn: treeColumn,
-            startingSortDirection: SortDirection.ascending,
+            sortColumn: treeColumn,
+            sortDirection: SortDirection.ascending,
           );
         },
         throwsAssertionError,
@@ -605,8 +613,8 @@ void main() {
           dataRoots: [tree1],
           treeColumn: treeColumn,
           keyFactory: null,
-          startingSortColumn: treeColumn,
-          startingSortDirection: SortDirection.ascending,
+          sortColumn: treeColumn,
+          sortDirection: SortDirection.ascending,
         );
       }, throwsAssertionError);
     });
@@ -618,8 +626,8 @@ void main() {
           dataRoots: [tree1],
           treeColumn: null,
           keyFactory: (d) => Key(d.name),
-          startingSortColumn: treeColumn,
-          startingSortDirection: SortDirection.ascending,
+          sortColumn: treeColumn,
+          sortDirection: SortDirection.ascending,
         );
       }, throwsAssertionError);
 
@@ -629,8 +637,8 @@ void main() {
           dataRoots: [tree1],
           treeColumn: treeColumn,
           keyFactory: (d) => Key(d.name),
-          startingSortColumn: treeColumn,
-          startingSortDirection: SortDirection.ascending,
+          sortColumn: treeColumn,
+          sortDirection: SortDirection.ascending,
         );
       }, throwsAssertionError);
     });

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
+import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../service_registrations.dart';
@@ -127,7 +128,7 @@ class _ServiceExtensionButtonGroupState
       waitDuration: tooltipWait,
       preferBelow: false,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
         child: Label(
           description.icon,
           description.description,
@@ -323,7 +324,7 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
             Text(widget.service.description),
             // The switch is padded on its sides by 16dp.
             // This balances out the tappable area.
-            const Padding(padding: EdgeInsets.only(left: 16.0)),
+            const Padding(padding: EdgeInsets.only(left: defaultSpacing)),
           ],
         ),
       ),
