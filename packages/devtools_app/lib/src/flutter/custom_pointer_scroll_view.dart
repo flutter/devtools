@@ -17,7 +17,7 @@ import 'package:flutter/widgets.dart';
 /// This class is copied from the Flutter framework [BoxScrollView] and
 /// overrides [ScrollView.build] to use [CustomPointerScrollable] in place of
 /// [Scrollable].
-abstract class CustomPointerScrollView extends ScrollView {
+abstract class CustomPointerScrollView extends BoxScrollView {
   /// Creates a [ScrollView] uses a single child layout model.
   ///
   /// If the [primary] argument is true, the [controller] must be null.
@@ -29,7 +29,7 @@ abstract class CustomPointerScrollView extends ScrollView {
     bool primary,
     ScrollPhysics physics,
     bool shrinkWrap = false,
-    this.padding,
+    EdgeInsetsGeometry padding,
     double cacheExtent,
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
@@ -39,6 +39,7 @@ abstract class CustomPointerScrollView extends ScrollView {
           scrollDirection: scrollDirection,
           reverse: reverse,
           controller: controller,
+          padding: padding,
           primary: primary,
           physics: physics,
           shrinkWrap: shrinkWrap,
@@ -47,47 +48,7 @@ abstract class CustomPointerScrollView extends ScrollView {
           dragStartBehavior: dragStartBehavior,
         );
 
-  /// The amount of space by which to inset the children.
-  final EdgeInsetsGeometry padding;
-
   final void Function(PointerSignalEvent event) customPointerSignalHandler;
-
-  @override
-  List<Widget> buildSlivers(BuildContext context) {
-    Widget sliver = buildChildLayout(context);
-    EdgeInsetsGeometry effectivePadding = padding;
-    if (padding == null) {
-      final MediaQueryData mediaQuery = MediaQuery.of(context, nullOk: true);
-      if (mediaQuery != null) {
-        // Automatically pad sliver with padding from MediaQuery.
-        final EdgeInsets mediaQueryHorizontalPadding =
-            mediaQuery.padding.copyWith(top: 0.0, bottom: 0.0);
-        final EdgeInsets mediaQueryVerticalPadding =
-            mediaQuery.padding.copyWith(left: 0.0, right: 0.0);
-        // Consume the main axis padding with SliverPadding.
-        effectivePadding = scrollDirection == Axis.vertical
-            ? mediaQueryVerticalPadding
-            : mediaQueryHorizontalPadding;
-        // Leave behind the cross axis padding.
-        sliver = MediaQuery(
-          data: mediaQuery.copyWith(
-            padding: scrollDirection == Axis.vertical
-                ? mediaQueryHorizontalPadding
-                : mediaQueryVerticalPadding,
-          ),
-          child: sliver,
-        );
-      }
-    }
-
-    if (effectivePadding != null)
-      sliver = SliverPadding(padding: effectivePadding, sliver: sliver);
-    return <Widget>[sliver];
-  }
-
-  /// Subclasses should override this method to build the layout model.
-  @protected
-  Widget buildChildLayout(BuildContext context);
 
   @override
   Widget build(BuildContext context) {
@@ -110,13 +71,6 @@ abstract class CustomPointerScrollView extends ScrollView {
     return primary && scrollController != null
         ? PrimaryScrollController.none(child: scrollable)
         : scrollable;
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding,
-        defaultValue: null));
   }
 }
 
