@@ -136,7 +136,7 @@ class TimelineFlameChartState
       final offset = contentWidthWithZoom * ratio +
           widget.startInset -
           widget.totalStartingWidth * 0.1;
-      await scrollTo(offset);
+      await horizontallyScrollTo(offset);
     }
   }
 
@@ -628,7 +628,7 @@ class TimelineGridPainter extends CustomPainter {
         origin,
         origin,
         constraints.maxWidth,
-        rowHeight,
+        math.min(constraints.maxHeight, rowHeight),
       ),
       Paint()..color = chartBackgroundColor,
     );
