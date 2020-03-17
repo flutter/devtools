@@ -34,8 +34,27 @@ class LoggingScreen extends Screen {
         );
 
   @override
+  bool get providesStatus => true;
+
+  @override
+  String get docPageId => 'logging';
+
+  @override
   Widget build(BuildContext context) {
     return LoggingScreenBody();
+  }
+
+  @override
+  Widget buildStatus(BuildContext context, TextTheme textTheme) {
+    final LoggingController controller = Controllers.of(context).logging;
+
+    return StreamBuilder<String>(
+      initialData: controller.statusText,
+      stream: controller.onLogStatusChanged,
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        return Text(snapshot.data ?? '');
+      },
+    );
   }
 }
 

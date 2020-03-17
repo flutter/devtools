@@ -52,6 +52,9 @@ class TimelineScreen extends Screen {
   static const stopRecordingButtonKey = Key('Stop Recording Button');
 
   @override
+  String get docPageId => 'timeline';
+
+  @override
   Widget build(BuildContext context) => TimelineScreenBody();
 }
 

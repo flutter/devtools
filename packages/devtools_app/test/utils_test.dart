@@ -298,6 +298,20 @@ void main() {
       expect(getSimpleStackFrameName(name), equals(name));
     });
 
+    group('pluralize', () {
+      test('zero', () {
+        expect(pluralize('cat', 0), 'cats');
+      });
+
+      test('one', () {
+        expect(pluralize('cat', 1), 'cat');
+      });
+
+      test('many', () {
+        expect(pluralize('cat', 2), 'cats');
+      });
+    });
+
     group('safeDivide', () {
       test('divides a finite result correctly', () {
         expect(safeDivide(2.0, 1.0), 2.0);

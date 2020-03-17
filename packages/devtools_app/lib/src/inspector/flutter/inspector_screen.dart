@@ -30,6 +30,9 @@ class InspectorScreen extends Screen {
         );
 
   @override
+  String get docPageId => 'inspector';
+
+  @override
   Widget build(BuildContext context) => const InspectorScreenBody();
 }
 

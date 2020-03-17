@@ -167,6 +167,8 @@ String longestFittingSubstring(
 bool isLetter(int codeUnit) =>
     (codeUnit >= 65 && codeUnit <= 90) || (codeUnit >= 97 && codeUnit <= 122);
 
+String pluralize(String word, int count) => count == 1 ? word : '${word}s';
+
 /// Returns a simplified version of a StackFrame name.
 ///
 /// Given an input such as

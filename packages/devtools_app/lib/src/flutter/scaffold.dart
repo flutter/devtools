@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../config_specific/flutter/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/flutter/import_export/import_export.dart';
@@ -80,11 +82,16 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// coordinate their animation when the tab selection changes.
   TabController _tabController;
 
+  Screen _currentScreen;
+  final StreamController<Screen> _screenController =
+      StreamController.broadcast();
+
   ImportController _importController;
 
   @override
   void initState() {
     super.initState();
+
     _setupTabController();
   }
 
@@ -142,6 +149,18 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void _setupTabController() {
     _tabController?.dispose();
     _tabController = TabController(length: widget.tabs.length, vsync: this);
+
+    _handleScreenChange(widget.tabs[_tabController.index]);
+    _tabController.addListener(() {
+      _handleScreenChange(widget.tabs[_tabController.index]);
+    });
+  }
+
+  void _handleScreenChange(Screen screen) {
+    if (screen?.type != _currentScreen?.type) {
+      _currentScreen = screen;
+      _screenController.add(_currentScreen);
+    }
   }
 
   /// Pushes tab changes into the navigation history.
@@ -190,21 +209,27 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
     ];
 
-    return DragAndDrop(
-      handleDrop: _importController.importData,
-      child: AnimatedBuilder(
-        animation: appBarCurve,
-        builder: (context, child) {
-          return Scaffold(
-            appBar: _buildAppBar(),
-            body: child,
-            bottomNavigationBar: _buildStatusLine(context),
-          );
-        },
-        child: TabBarView(
-          physics: const NeverScrollableScrollPhysics(),
-          controller: _tabController,
-          children: tabBodies,
+    return StreamProvider<Screen>(
+      create: (BuildContext context) {
+        return _screenController.stream;
+      },
+      initialData: _currentScreen,
+      child: DragAndDrop(
+        handleDrop: _importController.importData,
+        child: AnimatedBuilder(
+          animation: appBarCurve,
+          builder: (context, child) {
+            return Scaffold(
+              appBar: _buildAppBar(),
+              body: child,
+              bottomNavigationBar: _buildStatusLine(context),
+            );
+          },
+          child: TabBarView(
+            physics: const NeverScrollableScrollPhysics(),
+            controller: _tabController,
+            children: tabBodies,
+          ),
         ),
       ),
     );

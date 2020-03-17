@@ -6,12 +6,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/message_bus.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/notifications.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../service_registrations.dart';
+import '../../utils.dart';
 import '../fake_flutter/fake_flutter.dart';
 import 'flutter_icon_renderer.dart';
 import 'label.dart';
@@ -168,7 +170,7 @@ class HotReloadButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _RegisteredServiceExtensionButton._(
       serviceDescription: hotReload,
-      action: serviceManager.performHotReload,
+      action: () => _wrapReloadCall('reload', serviceManager.performHotReload),
       inProgressText: 'Performing hot reload',
       completedText: 'Hot reload completed.',
       describeError: (error) => 'Unable to hot reload the app: $error',
@@ -182,11 +184,40 @@ class HotRestartButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _RegisteredServiceExtensionButton._(
       serviceDescription: hotRestart,
-      action: serviceManager.performHotRestart,
+      action: () =>
+          _wrapReloadCall('restart', serviceManager.performHotRestart),
       inProgressText: 'Performing hot restart',
       completedText: 'Hot restart completed.',
       describeError: (error) => 'Unable to hot restart the app: $error',
     );
+  }
+}
+
+Future<void> _wrapReloadCall(
+  String name,
+  Future<void> Function() reloadCall,
+) async {
+  try {
+    final Stopwatch timer = Stopwatch()..start();
+    messageBus.addEvent(BusEvent('$name.start'));
+    await reloadCall();
+    timer.stop();
+    // 'restarted in 1.6s'
+    final String message = '${name}ed in ${_renderDuration(timer.elapsed)}';
+    messageBus.addEvent(BusEvent('$name.end', data: message));
+    // TODO(devoncarew): Add analytics.
+    //ga.select(ga.devToolsMain, ga.hotRestart, timer.elapsed.inMilliseconds);
+  } catch (_) {
+    final String message = 'error performing $name';
+    messageBus.addEvent(BusEvent('$name.end', data: message));
+  }
+}
+
+String _renderDuration(Duration duration) {
+  if (duration.inMilliseconds < 1000) {
+    return '${nf.format(duration.inMilliseconds)}ms';
+  } else {
+    return '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
   }
 }
 

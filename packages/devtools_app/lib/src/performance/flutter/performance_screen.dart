@@ -36,6 +36,9 @@ class PerformanceScreen extends Screen {
   static const recordingStatusKey = Key('Recording Status');
 
   @override
+  String get docPageId => 'performance';
+
+  @override
   Widget build(BuildContext context) => PerformanceScreenBody();
 }
 

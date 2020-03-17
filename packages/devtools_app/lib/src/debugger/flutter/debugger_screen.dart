@@ -20,6 +20,12 @@ class DebuggerScreen extends Screen {
         );
 
   @override
+  String get docPageId => 'debugger';
+
+  @override
+  bool get usesIsolateSelector => true;
+
+  @override
   Widget build(BuildContext context) {
     return DebuggerScreenBody();
   }

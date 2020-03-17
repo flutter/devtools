@@ -54,6 +54,9 @@ class MemoryScreen extends Screen {
   static const memorySourceMenuItemPrefix = 'Source: ';
 
   @override
+  String get docPageId => 'memory';
+
+  @override
   Widget build(BuildContext context) => const MemoryBody();
 }
 

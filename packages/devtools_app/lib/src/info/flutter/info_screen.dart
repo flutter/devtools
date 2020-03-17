@@ -21,6 +21,9 @@ class InfoScreen extends Screen {
         );
 
   @override
+  bool get usesIsolateSelector => true;
+
+  @override
   Widget build(BuildContext context) => InfoScreenBody();
 
   /// The key to identify the flutter version view.
