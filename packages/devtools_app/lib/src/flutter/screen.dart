@@ -32,19 +32,19 @@ abstract class Screen {
   final Key tabKey;
 
   /// Whether this screen provides a screen specific status.
-  /// 
+  ///
   /// See also [buildStatus].
   bool get providesStatus => false;
 
   /// Whether this screen should display the isolate selector in the status
   /// line.
-  /// 
+  ///
   /// Some screens act on all isolates; for these screens, displaying a
   /// selector doesn't make sense.
   bool get usesIsolateSelector => false;
 
   /// The id to use to synthesize a help URL.
-  /// 
+  ///
   /// If the screen does not have a custom documentation page, this property
   /// should return `null`.
   String get docPageId => null;
@@ -73,7 +73,7 @@ abstract class Screen {
   Widget build(BuildContext context);
 
   /// Build a widget to display in the statys line.
-  /// 
+  ///
   /// See also [providesStatus].
   Widget buildStatus(BuildContext context, TextTheme textTheme) {
     throw UnimplementedError();
