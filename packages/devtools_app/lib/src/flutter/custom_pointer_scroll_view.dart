@@ -249,7 +249,7 @@ class CustomPointerScrollable extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ScrollableState scrollable = Scrollable.of(context);
+  /// _CustomPointerScrollableState scrollable = Scrollable.of(context);
   /// ```
   ///
   /// Calling this method will create a dependency on the closest [Scrollable]
@@ -295,7 +295,8 @@ class CustomPointerScrollable extends StatefulWidget {
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
-    ScrollableState scrollable = Scrollable.of(context);
+    _CustomPointerScrollableState scrollable =
+        CustomPointerScrollable.of(context);
     while (scrollable != null) {
       futures.add(scrollable.position.ensureVisible(
         context.findRenderObject(),
@@ -305,7 +306,7 @@ class CustomPointerScrollable extends StatefulWidget {
         alignmentPolicy: alignmentPolicy,
       ));
       context = scrollable.context;
-      scrollable = Scrollable.of(context);
+      scrollable = CustomPointerScrollable.of(context);
     }
 
     if (futures.isEmpty || duration == Duration.zero)
@@ -599,11 +600,12 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
   @override
   Widget build(BuildContext context) {
     assert(position != null);
-    // _ScrollableScope must be placed above the BuildContext returned by notificationContext
-    // so that we can get this ScrollableState by doing the following:
+    // _ScrollableScope must be placed above the BuildContext returned by
+    // notificationContext so that we can get this _CustomPointerScrollableState
+    // by doing the following:
     //
     // ScrollNotification notification;
-    // Scrollable.of(notification.context)
+    // CustomPointerScrollable.of(notification.context)
     //
     // Since notificationContext is pointing to _gestureDetectorKey.context, _ScrollableScope
     // must be placed above the widget using it: RawGestureDetector
@@ -659,8 +661,9 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
 // [CustomPointerScrollable]. See flutter/lib/src/widgets/scrollable.dart for
 // original classes.
 
-// Enable Scrollable.of() to work as if ScrollableState was an inherited widget.
-// ScrollableState.build() always rebuilds its _ScrollableScope.
+// Enable Scrollable.of() to work as if _CustomPointerScrollableState was an
+// inherited widget. _CustomPointerScrollableState.build() always rebuilds its
+// _ScrollableScope.
 class _ScrollableScope extends InheritedWidget {
   const _ScrollableScope({
     Key key,
