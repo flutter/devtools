@@ -21,7 +21,7 @@ class InfoScreen extends Screen {
         );
 
   @override
-  bool get usesIsolateSelector => true;
+  bool get showIsolateSelector => true;
 
   @override
   Widget build(BuildContext context) => InfoScreenBody();

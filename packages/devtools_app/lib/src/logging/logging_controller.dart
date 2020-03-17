@@ -605,18 +605,22 @@ class LoggingController {
     // TODO(jacobr): expose the messageBus for use by vm tests.
     if (messageBus != null) {
       _listen(messageBus.onEvent(type: 'reload.end'), (BusEvent event) {
-        log(LogData(
-          'hot.reload',
-          event.data,
-          DateTime.now().millisecondsSinceEpoch,
-        ));
+        log(
+          LogData(
+            'hot.reload',
+            event.data,
+            DateTime.now().millisecondsSinceEpoch,
+          ),
+        );
       });
       _listen(messageBus.onEvent(type: 'restart.end'), (BusEvent event) {
-        log(LogData(
-          'hot.restart',
-          event.data,
-          DateTime.now().millisecondsSinceEpoch,
-        ));
+        log(
+          LogData(
+            'hot.restart',
+            event.data,
+            DateTime.now().millisecondsSinceEpoch,
+          ),
+        );
       });
     }
   }

@@ -31,17 +31,12 @@ abstract class Screen {
   /// testing).
   final Key tabKey;
 
-  /// Whether this screen provides a screen specific status.
-  ///
-  /// See also [buildStatus].
-  bool get providesStatus => false;
-
   /// Whether this screen should display the isolate selector in the status
   /// line.
   ///
   /// Some screens act on all isolates; for these screens, displaying a
   /// selector doesn't make sense.
-  bool get usesIsolateSelector => false;
+  bool get showIsolateSelector => false;
 
   /// The id to use to synthesize a help URL.
   ///
@@ -72,11 +67,11 @@ abstract class Screen {
   /// Builds the body to display for this tab.
   Widget build(BuildContext context);
 
-  /// Build a widget to display in the statys line.
+  /// Build a widget to display in the status line.
   ///
-  /// See also [providesStatus].
+  /// If this method returns `null`, then no page specific status is displayed.
   Widget buildStatus(BuildContext context, TextTheme textTheme) {
-    throw UnimplementedError();
+    return null;
   }
 }
 

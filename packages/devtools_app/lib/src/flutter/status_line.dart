@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../devtools.dart' as devtools;
 import '../globals.dart';
 import '../service_manager.dart';
+import '../utils.dart';
 import 'common_widgets.dart';
 import 'notifications.dart';
 import 'screen.dart';
@@ -32,51 +33,48 @@ class StatusLine extends StatelessWidget {
     final List<Widget> children = [];
 
     // Have an area for page specific help (always docked to the left).
-    children.addAll([
-      Expanded(
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: buildHelpUrlStatus(context, currentScreen, textTheme),
-        ),
+    children.add(Expanded(
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: buildHelpUrlStatus(context, currentScreen, textTheme),
       ),
-      BulletSpacer(),
-    ]);
+    ));
+    children.add(BulletSpacer());
 
     // Optionally display page specific status.
-    if (currentScreen != null && currentScreen.providesStatus) {
-      children.addAll([
-        Expanded(
+    if (currentScreen != null) {
+      final Widget pageStatus =
+          buildPageStatus(context, currentScreen, textTheme);
+
+      if (pageStatus != null) {
+        children.add(Expanded(
           child: Align(
             alignment: Alignment.center,
             child: buildPageStatus(context, currentScreen, textTheme),
           ),
-        ),
-        BulletSpacer(),
-      ]);
+        ));
+        children.add(BulletSpacer());
+      }
     }
 
     // Optionally display an isolate selector.
-    if (currentScreen != null && currentScreen.usesIsolateSelector) {
-      children.addAll([
-        Expanded(
-          child: Align(
-            alignment: Alignment.center,
-            child: buildIsolateSelector(context, textTheme),
-          ),
+    if (currentScreen != null && currentScreen.showIsolateSelector) {
+      children.add(Expanded(
+        child: Align(
+          alignment: Alignment.center,
+          child: buildIsolateSelector(context, textTheme),
         ),
-        BulletSpacer(),
-      ]);
+      ));
+      children.add(BulletSpacer());
     }
 
     // Always display connection status (docked to the right).
-    children.addAll([
-      Expanded(
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: buildConnectionStatus(textTheme),
-        ),
+    children.add(Expanded(
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: buildConnectionStatus(textTheme),
       ),
-    ]);
+    ));
 
     return Container(
       height: statusLineHeight,
@@ -116,7 +114,7 @@ class StatusLine extends StatelessWidget {
       );
     } else {
       // Use a placeholder for pages with no explicit documentation.
-      return Text('DevTools ${devtools.version}');
+      return const Text('DevTools ${devtools.version}');
     }
   }
 
@@ -200,27 +198,4 @@ class StatusLine extends StatelessWidget {
       },
     );
   }
-}
-
-Stream combineStreams(Stream a, Stream b, Stream c) {
-  StreamController controller;
-
-  StreamSubscription asub;
-  StreamSubscription bsub;
-  StreamSubscription csub;
-
-  controller = StreamController(
-    onListen: () {
-      asub = a.listen(controller.add);
-      bsub = b.listen(controller.add);
-      csub = c.listen(controller.add);
-    },
-    onCancel: () {
-      asub?.cancel();
-      bsub?.cancel();
-      csub?.cancel();
-    },
-  );
-
-  return controller.stream;
 }

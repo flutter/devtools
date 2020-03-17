@@ -203,21 +203,13 @@ Future<void> _wrapReloadCall(
     await reloadCall();
     timer.stop();
     // 'restarted in 1.6s'
-    final String message = '${name}ed in ${_renderDuration(timer.elapsed)}';
+    final String message = '${name}ed in ${renderDuration(timer.elapsed)}';
     messageBus.addEvent(BusEvent('$name.end', data: message));
     // TODO(devoncarew): Add analytics.
     //ga.select(ga.devToolsMain, ga.hotRestart, timer.elapsed.inMilliseconds);
   } catch (_) {
     final String message = 'error performing $name';
     messageBus.addEvent(BusEvent('$name.end', data: message));
-  }
-}
-
-String _renderDuration(Duration duration) {
-  if (duration.inMilliseconds < 1000) {
-    return '${nf.format(duration.inMilliseconds)}ms';
-  } else {
-    return '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
   }
 }
 

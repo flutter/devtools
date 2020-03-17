@@ -34,9 +34,6 @@ class LoggingScreen extends Screen {
         );
 
   @override
-  bool get providesStatus => true;
-
-  @override
   String get docPageId => 'logging';
 
   @override
