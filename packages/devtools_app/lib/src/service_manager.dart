@@ -504,11 +504,13 @@ class ServiceExtensionManager {
     }
     _firstFrameEventReceived = true;
 
-    for (String extension in _pendingServiceExtensions) {
-      await _addServiceExtension(extension);
-    }
-    extensionStatesUpdated.complete();
+    final extensionsToProcess = _pendingServiceExtensions.toList();
     _pendingServiceExtensions.clear();
+    await Future.wait([
+      for (String extension in extensionsToProcess)
+        _addServiceExtension(extension)
+    ]);
+    extensionStatesUpdated.complete();
   }
 
   Future<void> _addRegisteredExtensionRPCs(IsolateRef isolateRef) async {
@@ -568,7 +570,7 @@ class ServiceExtensionManager {
     }
   }
 
-  Future<void> _addServiceExtension(String name) async {
+  Future<void> _addServiceExtension(String name) {
     final streamController = _getServiceExtensionController(name);
 
     _serviceExtensions.add(name);
@@ -579,11 +581,11 @@ class ServiceExtensionManager {
       // extension. This will restore extension states on the device after a hot
       // restart. [_enabledServiceExtensions] will be empty on page refresh or
       // initial start.
-      await _callServiceExtension(name, _enabledServiceExtensions[name].value);
+      return _callServiceExtension(name, _enabledServiceExtensions[name].value);
     } else {
       // Set any extensions that are already enabled on the device. This will
       // enable extension states in DevTools on page refresh or initial start.
-      await _restoreExtensionFromDevice(name);
+      return _restoreExtensionFromDevice(name);
     }
   }
 
