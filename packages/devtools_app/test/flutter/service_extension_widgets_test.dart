@@ -26,10 +26,7 @@ void main() {
     mockServiceManager = MockServiceManager();
     when(mockServiceManager.serviceExtensionManager)
         .thenReturn(FakeServiceExtensionManager());
-    setGlobal(
-      ServiceConnectionManager,
-      mockServiceManager,
-    );
+    setGlobal(ServiceConnectionManager, mockServiceManager);
   });
 
   group('Hot Reload Button', () {
