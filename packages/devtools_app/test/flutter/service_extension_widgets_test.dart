@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/core/message_bus.dart';
 import 'package:devtools_app/src/flutter/notifications.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_extensions.dart';
@@ -42,7 +43,7 @@ void main() {
       });
     });
 
-    testWidgets('performs a hot reload when pressed',
+    testWidgetsWithContext('performs a hot reload when pressed',
         (WidgetTester tester) async {
       registerServiceExtension(mockServiceManager, hotReload);
       final button = HotReloadButton();
@@ -55,6 +56,8 @@ void main() {
       await tester.tap(find.byWidget(button));
       await tester.pumpAndSettle();
       expect(reloads, 1);
+    }, context: {
+      MessageBus: MessageBus(),
     });
 
     testWidgets(
@@ -87,7 +90,7 @@ void main() {
       });
     });
 
-    testWidgets('performs a hot restart when pressed',
+    testWidgetsWithContext('performs a hot restart when pressed',
         (WidgetTester tester) async {
       registerServiceExtension(mockServiceManager, hotRestart);
       final button = HotRestartButton();
@@ -100,6 +103,8 @@ void main() {
       await tester.tap(find.byWidget(button));
       await tester.pumpAndSettle();
       expect(restarts, 1);
+    }, context: {
+      MessageBus: MessageBus(),
     });
 
     testWidgets(

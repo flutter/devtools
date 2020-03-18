@@ -139,6 +139,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   @override
   void dispose() {
     _tabController?.dispose();
+    _currentScreen?.dispose();
     appBarAnimation?.dispose();
     super.dispose();
   }

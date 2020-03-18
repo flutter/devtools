@@ -210,6 +210,7 @@ Future<void> _wrapReloadCall(
   } catch (_) {
     final String message = 'error performing $name';
     messageBus.addEvent(BusEvent('$name.end', data: message));
+    rethrow;
   }
 }
 

@@ -95,10 +95,7 @@ class StatusLine extends StatelessWidget {
     if (docPageId != null) {
       return InkWell(
         onTap: () async {
-          // TODO(devoncarew): Shorten these urls to something like
-          // 'https://flutter.dev/devtools/$docPageId'.
-          final url =
-              'https://flutter.dev/docs/development/tools/devtools/$docPageId';
+          final url = 'https://flutter.dev/devtools/$docPageId';
           if (await url_launcher.canLaunch(url)) {
             await url_launcher.launch(url);
           } else {
@@ -106,7 +103,7 @@ class StatusLine extends StatelessWidget {
           }
         },
         child: Text(
-          'flutter.dev/docs/development/tools/devtools/$docPageId',
+          'flutter.dev/devtools/$docPageId',
           style: textTheme.bodyText2.copyWith(
             decoration: TextDecoration.underline,
           ),
