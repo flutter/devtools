@@ -39,7 +39,7 @@ class StatusLine extends StatelessWidget {
         child: buildHelpUrlStatus(context, currentScreen, textTheme),
       ),
     ));
-    children.add(BulletSpacer());
+    children.add(const BulletSpacer());
 
     // Optionally display page specific status.
     if (currentScreen != null) {
@@ -53,7 +53,7 @@ class StatusLine extends StatelessWidget {
             child: buildPageStatus(context, currentScreen, textTheme),
           ),
         ));
-        children.add(BulletSpacer());
+        children.add(const BulletSpacer());
       }
     }
 
@@ -65,7 +65,7 @@ class StatusLine extends StatelessWidget {
           child: buildIsolateSelector(context, textTheme),
         ),
       ));
-      children.add(BulletSpacer());
+      children.add(const BulletSpacer());
     }
 
     // Always display connection status (docked to the right).

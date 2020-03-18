@@ -286,10 +286,17 @@ Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
 /// Display a single bullet character in order to act as a stylized spacer
 /// component.
 class BulletSpacer extends StatelessWidget {
+  const BulletSpacer({this.useAccentColor = false});
+
+  final bool useAccentColor;
+
   @override
   Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).primaryTextTheme.bodyText1;
-    final mutedColor = textStyle.color.withAlpha(0xB2); // 70% alpha
+    final textStyle = (useAccentColor
+            ? Theme.of(context).accentTextTheme
+            : Theme.of(context).textTheme)
+        .bodyText2;
+    final mutedColor = textStyle.color.withAlpha(0x90);
 
     return Container(
       width: DevToolsScaffold.actionWidgetSize / 2,

@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 import '../../src/framework/framework_core.dart';
@@ -26,6 +27,7 @@ import 'theme.dart';
 
 // TODO(bkonyi): remove this bool when page is ready.
 const showNetworkPage = false;
+
 // TODO(https://github.com/flutter/flutter/issues/43783): Put back
 // the debugger screen.
 const showDebuggerPage = false;
@@ -35,6 +37,10 @@ const showDebuggerPage = false;
 class DevToolsApp extends StatefulWidget {
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
+
+  static DevToolsAppState of(BuildContext context) {
+    return context.findAncestorStateOfType<DevToolsAppState>();
+  }
 }
 
 /// Initializer for the [FrameworkCore] and the app's navigation.
@@ -49,6 +55,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   @override
   void initState() {
     super.initState();
+
     theme = themeFor(isDarkTheme: devtools_theme.isDarkTheme);
   }
 
@@ -63,6 +70,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // On desktop, don't change the theme on route changes.
       if (!kIsWeb) return;
+
       setState(() {
         final themeQueryParameter = uri.queryParameters['theme'];
         // We refer to the legacy theme to make sure the debugging page stays
@@ -120,10 +128,11 @@ class DevToolsAppState extends State<DevToolsApp> {
               InfoScreen(),
             ],
             actions: [
-              BulletSpacer(),
+              const BulletSpacer(useAccentColor: true),
               HotReloadButton(),
               HotRestartButton(),
               ReportBugAction(),
+              OpenSettingsAction(),
             ],
           ),
         ),
@@ -139,6 +148,13 @@ class DevToolsAppState extends State<DevToolsApp> {
       builder: (context, child) => Notifications(child: child),
       onGenerateRoute: _generateRoute,
     );
+  }
+
+  /// Allow clients to force a rebuild for theme changes.
+  void updateTheme() {
+    setState(() {
+      theme = themeFor(isDarkTheme: devtools_theme.isDarkTheme);
+    });
   }
 }
 
@@ -173,27 +189,115 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
 class ReportBugAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        // TODO(devoncarew): Support analytics.
-        // ga.select(ga.devToolsMain, ga.feedback);
+    return Tooltip(
+      message: 'Report an issue',
+      waitDuration: tooltipWait,
+      child: InkWell(
+        onTap: () async {
+          // TODO(devoncarew): Support analytics.
+          // ga.select(ga.devToolsMain, ga.feedback);
 
-        const reportIssuesUrl = 'https://github.com/flutter/devtools/issues';
-        if (await url_launcher.canLaunch(reportIssuesUrl)) {
-          await url_launcher.launch(reportIssuesUrl);
-        } else {
-          Notifications.of(context).push('Unable to open url.');
-          Notifications.of(context).push('File issues at $reportIssuesUrl.');
-        }
-      },
-      child: Container(
-        width: DevToolsScaffold.actionWidgetSize,
-        height: DevToolsScaffold.actionWidgetSize,
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.bug_report,
-          size: 20.0,
+          const reportIssuesUrl = 'https://github.com/flutter/devtools/issues';
+          if (await url_launcher.canLaunch(reportIssuesUrl)) {
+            await url_launcher.launch(reportIssuesUrl);
+          } else {
+            Notifications.of(context).push('Unable to open url.');
+            Notifications.of(context).push('File issues at $reportIssuesUrl.');
+          }
+        },
+        child: Container(
+          width: DevToolsScaffold.actionWidgetSize,
+          height: DevToolsScaffold.actionWidgetSize,
+          alignment: Alignment.center,
+          child: Icon(
+            Icons.bug_report,
+            size: actionsIconSize,
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class OpenSettingsAction extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Settings',
+      waitDuration: tooltipWait,
+      child: InkWell(
+        onTap: () async {
+          unawaited(showDialog(
+            context: context,
+            builder: (context) => const SettingsDialog(),
+          ));
+        },
+        child: Container(
+          width: DevToolsScaffold.actionWidgetSize,
+          height: DevToolsScaffold.actionWidgetSize,
+          alignment: Alignment.center,
+          child: Icon(
+            Icons.settings,
+            size: actionsIconSize,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// TODO(devoncarew): Add an analytics setting.
+
+// TODO(devoncarew): Convert the SettingsDialog over to using a controller?
+
+class SettingsDialog extends StatefulWidget {
+  const SettingsDialog({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  _SettingsDialogState createState() => _SettingsDialogState();
+}
+
+class _SettingsDialogState extends State<SettingsDialog> {
+  @override
+  Widget build(BuildContext context) {
+    void _toggleTheme([bool value]) {
+      value ??= !devtools_theme.isDarkTheme;
+      setState(() {
+        devtools_theme.useDartTheme = value;
+
+        DevToolsApp.of(context).updateTheme();
+      });
+    }
+
+    return AlertDialog(
+      title: const Text('Settings'),
+      actions: <Widget>[
+        FlatButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+          },
+          child: const Text('CLOSE'),
+        ),
+      ],
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Theme setting
+          InkWell(
+            onTap: _toggleTheme,
+            child: Row(
+              children: <Widget>[
+                Checkbox(
+                  value: devtools_theme.isDarkTheme,
+                  onChanged: (bool value) => _toggleTheme(value),
+                ),
+                const Text('Use a dark theme'),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
