@@ -614,12 +614,12 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
       position: position,
       // TODO(ianh): Having all these global keys is sad.
       child: Listener(
-        behavior: HitTestBehavior.opaque,
         onPointerSignal:
             widget.customPointerSignalHandler ?? _receivedPointerSignal,
         child: RawGestureDetector(
           key: _gestureDetectorKey,
           gestures: _gestureRecognizers,
+          behavior: HitTestBehavior.opaque,
           excludeFromSemantics: widget.excludeFromSemantics,
           child: Semantics(
             explicitChildNodes: !widget.excludeFromSemantics,
@@ -656,10 +656,9 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
   }
 }
 
-// The following classes were copied from the Flutter framework, with the
-// exception that some types had to be replaced to use these classes with
-// [CustomPointerScrollable]. See flutter/lib/src/widgets/scrollable.dart for
-// original classes.
+// The following classes were copied from the Flutter framework with minor
+// changes to use with [CustomPointerScrollable] instead of [Scrollable]. See
+// flutter/lib/src/widgets/scrollable.dart for original classes.
 
 // Enable Scrollable.of() to work as if _CustomPointerScrollableState was an
 // inherited widget. _CustomPointerScrollableState.build() always rebuilds its

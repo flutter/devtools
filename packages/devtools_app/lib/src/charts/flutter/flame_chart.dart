@@ -47,7 +47,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   });
   static const minZoomLevel = 1.0;
   static const maxZoomLevel = 32000.0;
-  static const zoomMultiplier = 0.003;
+  static const zoomMultiplier = 0.01;
   static const minScrollOffset = 0.0;
   static const rowOffsetForBottomPadding = 1;
   static const rowOffsetForSectionSpacer = 1;
@@ -93,7 +93,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   final focusNode = FocusNode();
 
-  bool _shiftKeyPressed = false;
+  bool _altKeyPressed = false;
 
   double mouseHoverX;
 
@@ -239,8 +239,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       customPointerSignalHandler: _handlePointerSignal,
       childrenDelegate: SliverChildBuilderDelegate(
         (context, index) {
-          // TODO(kenz): investigate if we are building too many
-          // ScrollingFlameChartRow widgets on zoom / pan.
           return ScrollingFlameChartRow<V>(
             linkedScrollControllerGroup: linkedHorizontalScrollControllerGroup,
             nodes: rows[index].nodes,
@@ -284,10 +282,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
-    if (event.isShiftPressed) {
-      _shiftKeyPressed = true;
+    if (event.isAltPressed) {
+      _altKeyPressed = true;
     } else {
-      _shiftKeyPressed = false;
+      _altKeyPressed = false;
     }
 
     // Only handle down events so logic is not duplicated on key up.
@@ -303,10 +301,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
         zoomTo(math.max(FlameChart.minZoomLevel,
             zoomController.value - keyboardZoomOutUnit));
       } else if (keyLabel == 'a') {
-        horizontallyScrollTo(
+        scrollToX(
             linkedHorizontalScrollControllerGroup.offset - keyboardScrollUnit);
       } else if (keyLabel == 'd') {
-        horizontallyScrollTo(
+        scrollToX(
             linkedHorizontalScrollControllerGroup.offset + keyboardScrollUnit);
       }
     }
@@ -316,13 +314,8 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     if (event is PointerScrollEvent) {
       final deltaX = event.scrollDelta.dx;
       double deltaY = event.scrollDelta.dy;
-      // TODO(kenz): shift + scroll with a mouse wheel does not register as a
-      // vertical scroll event, so we will not vertical scroll in this case (see
-      // https://github.com/flutter/flutter/issues/52767). Hopefully we can get
-      // around this if https://github.com/flutter/flutter/issues/52762 is
-      // fixed.
       if (deltaY.abs() >= deltaX.abs()) {
-        if (_shiftKeyPressed) {
+        if (_altKeyPressed) {
           verticalScrollController
               .jumpTo(verticalScrollController.offset + deltaY);
         } else {
@@ -341,11 +334,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
           );
           zoomTo(newZoomLevel, jump: true);
         }
-      } else {
-        horizontallyScrollTo(
-          linkedHorizontalScrollControllerGroup.offset + deltaX,
-          jump: true,
-        );
       }
     }
   }
@@ -390,7 +378,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     );
   }
 
-  FutureOr<void> horizontallyScrollTo(
+  FutureOr<void> scrollToX(
     double offset, {
     bool jump = false,
   }) async {
@@ -513,8 +501,6 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
             controller: scrollController,
             scrollDirection: Axis.horizontal,
             extentDelegate: extentDelegate,
-            // Horizontal scrolling is handled in FlameChartState.
-            physics: const NeverScrollableScrollPhysics(),
             childrenDelegate: SliverChildBuilderDelegate(
               (context, index) => _buildFlameChartNode(index),
               childCount: nodes.length,
@@ -776,6 +762,9 @@ class FlameChartNode<T> {
 
   static const _selectedNodeColor = lightSelection;
   static const _alternateTextColor = Colors.black;
+  // We would like this value to be smaller, but zoom performance does not allow
+  // for that. We should decrease this value if we can improve flame chart zoom
+  // performance.
   static const _minWidthForText = 30.0;
 
   final Key key;

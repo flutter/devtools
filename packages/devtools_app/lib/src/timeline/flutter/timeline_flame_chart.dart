@@ -136,7 +136,7 @@ class TimelineFlameChartState
       final offset = contentWidthWithZoom * ratio +
           widget.startInset -
           widget.totalStartingWidth * 0.1;
-      await horizontallyScrollTo(offset);
+      await scrollToX(offset);
     }
   }
 
