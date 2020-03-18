@@ -77,7 +77,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 }
 
 void main() {
-  group('RenderSliverFixedExtentList', () {
+  group('RenderSliverFixedExtentDelgate', () {
     group('extentDelegate', () {
       test('itemExtent', () {
         final extents = [100.0, 200.0, 50.0, 100.0];
