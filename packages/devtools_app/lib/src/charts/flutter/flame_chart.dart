@@ -504,6 +504,8 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
             childrenDelegate: SliverChildBuilderDelegate(
               (context, index) => _buildFlameChartNode(index),
               childCount: nodes.length,
+              addRepaintBoundaries: false,
+              addAutomaticKeepAlives: false,
             ),
           ),
         ),
