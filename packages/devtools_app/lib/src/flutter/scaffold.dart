@@ -81,7 +81,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// coordinate their animation when the tab selection changes.
   TabController _tabController;
 
-  ValueNotifier<Screen> _currentScreen;
+  final ValueNotifier<Screen> _currentScreen = ValueNotifier(null);
 
   ImportController _importController;
 
@@ -148,7 +148,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     _tabController?.dispose();
     _tabController = TabController(length: widget.tabs.length, vsync: this);
 
-    _currentScreen = ValueNotifier(widget.tabs[_tabController.index]);
+    _currentScreen.value = widget.tabs[_tabController.index];
     _tabController.addListener(() {
       _currentScreen.value = widget.tabs[_tabController.index];
     });
