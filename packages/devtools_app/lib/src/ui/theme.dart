@@ -16,7 +16,7 @@ bool get isDarkTheme => _isDarkTheme;
 bool _isDarkTheme = false;
 
 /// Change the value for the current theme.
-/// 
+///
 /// Note: this does not rebuild the widget hierarchy.
 set useDartTheme(bool value) {
   _isDarkTheme = value;
