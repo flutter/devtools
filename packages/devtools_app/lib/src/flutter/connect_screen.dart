@@ -63,7 +63,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
               'Connect to a Running App',
               style: textTheme.bodyText1,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 6.0),
             Text(
               'Enter a URL to a running Dart or Flutter application',
               style: textTheme.caption,

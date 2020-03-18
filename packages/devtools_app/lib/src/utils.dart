@@ -70,6 +70,16 @@ String msText(
       '${includeUnit ? ' ms' : ''}';
 }
 
+/// Render the given [Duration] to text using either seconds or milliseconds as
+/// the units, depending on the value of the duration.
+String renderDuration(Duration duration) {
+  if (duration.inMilliseconds < 1000) {
+    return '${nf.format(duration.inMilliseconds)}ms';
+  } else {
+    return '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
+  }
+}
+
 T nullSafeMin<T extends num>(T a, T b) {
   if (a == null || b == null) {
     return a ?? b;
@@ -167,6 +177,8 @@ String longestFittingSubstring(
 bool isLetter(int codeUnit) =>
     (codeUnit >= 65 && codeUnit <= 90) || (codeUnit >= 97 && codeUnit <= 122);
 
+String pluralize(String word, int count) => count == 1 ? word : '${word}s';
+
 /// Returns a simplified version of a StackFrame name.
 ///
 /// Given an input such as
@@ -186,6 +198,31 @@ String getSimpleStackFrameName(String name) {
     return newName;
   }
   return newName.split('&').last;
+}
+
+/// Return a Stream that fires events whenever any of the three given parameter
+/// streams fire.
+Stream combineStreams(Stream a, Stream b, Stream c) {
+  StreamController controller;
+
+  StreamSubscription asub;
+  StreamSubscription bsub;
+  StreamSubscription csub;
+
+  controller = StreamController(
+    onListen: () {
+      asub = a.listen(controller.add);
+      bsub = b.listen(controller.add);
+      csub = c.listen(controller.add);
+    },
+    onCancel: () {
+      asub?.cancel();
+      bsub?.cancel();
+      csub?.cancel();
+    },
+  );
+
+  return controller.stream;
 }
 
 class Property<T> {
@@ -549,6 +586,7 @@ class Range {
 
   final double begin;
   final double end;
+
   double get size => end - begin;
 
   @override

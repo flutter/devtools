@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../config_specific/flutter/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/flutter/import_export/import_export.dart';
@@ -80,11 +81,14 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// coordinate their animation when the tab selection changes.
   TabController _tabController;
 
+  final ValueNotifier<Screen> _currentScreen = ValueNotifier(null);
+
   ImportController _importController;
 
   @override
   void initState() {
     super.initState();
+
     _setupTabController();
   }
 
@@ -135,6 +139,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   @override
   void dispose() {
     _tabController?.dispose();
+    _currentScreen?.dispose();
     appBarAnimation?.dispose();
     super.dispose();
   }
@@ -142,6 +147,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void _setupTabController() {
     _tabController?.dispose();
     _tabController = TabController(length: widget.tabs.length, vsync: this);
+
+    _currentScreen.value = widget.tabs[_tabController.index];
+    _tabController.addListener(() {
+      _currentScreen.value = widget.tabs[_tabController.index];
+    });
   }
 
   /// Pushes tab changes into the navigation history.
@@ -190,21 +200,24 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
     ];
 
-    return DragAndDrop(
-      handleDrop: _importController.importData,
-      child: AnimatedBuilder(
-        animation: appBarCurve,
-        builder: (context, child) {
-          return Scaffold(
-            appBar: _buildAppBar(),
-            body: child,
-            bottomNavigationBar: _buildStatusLine(context),
-          );
-        },
-        child: TabBarView(
-          physics: const NeverScrollableScrollPhysics(),
-          controller: _tabController,
-          children: tabBodies,
+    return ValueListenableProvider<Screen>.value(
+      value: _currentScreen,
+      child: DragAndDrop(
+        handleDrop: _importController.importData,
+        child: AnimatedBuilder(
+          animation: appBarCurve,
+          builder: (context, child) {
+            return Scaffold(
+              appBar: _buildAppBar(),
+              body: child,
+              bottomNavigationBar: _buildStatusLine(context),
+            );
+          },
+          child: TabBarView(
+            physics: const NeverScrollableScrollPhysics(),
+            controller: _tabController,
+            children: tabBodies,
+          ),
         ),
       ),
     );

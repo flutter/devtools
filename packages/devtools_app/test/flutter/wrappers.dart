@@ -5,6 +5,7 @@
 import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/flutter/notifications.dart';
 import 'package:devtools_app/src/flutter/theme.dart';
+import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
@@ -51,6 +52,33 @@ Widget wrapWithControllers(
       ),
     ),
   );
+}
+
+/// Call [testWidgets], allowing the test to set specific values for app globals
+/// ([MessageBus], ...).
+@isTest
+void testWidgetsWithContext(
+  String description,
+  WidgetTesterCallback callback, {
+  Map<Type, dynamic> context = const {},
+}) {
+  testWidgets(description, (WidgetTester widgetTester) async {
+    // set up the context
+    final Map<Type, dynamic> oldValues = {};
+    for (Type type in context.keys) {
+      oldValues[type] = globals[type];
+      setGlobal(type, context[type]);
+    }
+
+    try {
+      await callback(widgetTester);
+    } finally {
+      // restore previous global values
+      for (Type type in oldValues.keys) {
+        setGlobal(type, oldValues[type]);
+      }
+    }
+  });
 }
 
 /// Runs a test with the size of the app window under test to [windowSize].

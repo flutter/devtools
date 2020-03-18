@@ -67,7 +67,7 @@ class LoggingDetailsController {
   /// Callback to execute to show the inspector.
   final VoidCallback onShowInspector;
 
-  /// Callback to executue to show the data from the details tree in the view.
+  /// Callback to execute to show the data from the details tree in the view.
   final OnShowDetails onShowDetails;
 
   /// Callback to create an inspectorTree for the logging view of the correct
@@ -164,6 +164,7 @@ class LoggingController {
       _handleConnectionStart(serviceManager.service);
     }
     _listen(serviceManager.onConnectionClosed, _handleConnectionStop);
+    _handleBusEvents();
   }
 
   LoggingDetailsController detailsController;
@@ -190,24 +191,6 @@ class LoggingController {
     _listen(_loggingTableModel.onRowsChanged, (_) {
       _updateStatus();
     });
-
-    // TODO(jacobr): expose the messageBus for use by vm tests.
-    if (messageBus != null) {
-      _listen(messageBus.onEvent(type: 'reload.end'), (BusEvent event) {
-        log(LogData(
-          'hot.reload',
-          event.data,
-          DateTime.now().millisecondsSinceEpoch,
-        ));
-      });
-      _listen(messageBus.onEvent(type: 'restart.end'), (BusEvent event) {
-        log(LogData(
-          'hot.restart',
-          event.data,
-          DateTime.now().millisecondsSinceEpoch,
-        ));
-      });
-    }
   }
 
   /// Callback returning whether the logging screen is visible.
@@ -215,6 +198,14 @@ class LoggingController {
 
   /// Callbacks to apply changes in the controller to other views.
   final OnLogCountStatusChanged onLogCountStatusChanged;
+
+  final StreamController<String> _logStatusController =
+      StreamController.broadcast();
+
+  /// A stream of events for the textual description of the log contents.
+  ///
+  /// See also [statusText].
+  Stream get onLogStatusChanged => _logStatusController.stream;
 
   /// This is specifiable in the constructor for testing.
   @visibleForTesting
@@ -262,19 +253,36 @@ class LoggingController {
     _cachedFilteredData = null;
 
     onLogsUpdated.notify();
+    _updateStatus();
   }
 
   /// ObjectGroup for Flutter (null for non-Flutter apps).
   ObjectGroup objectGroup;
 
-  void _updateStatus() {
-    final int count = _loggingTableModel.rowCount;
-    final String label = count >= kMaxLogItemsLowerBound
-        ? '${nf.format(kMaxLogItemsLowerBound)}+'
-        : nf.format(count);
+  String get statusText {
+    final int totalCount = data.length;
+    final int showingCount = filteredData.length;
 
-    // TODO(devoncarew): Nobody is currently listening for this event.
-    onLogCountStatusChanged('$label events');
+    String label;
+
+    if (totalCount == showingCount) {
+      label = nf.format(totalCount);
+    } else {
+      label = 'showing ${nf.format(showingCount)} of '
+          '${nf.format(totalCount)}';
+    }
+
+    label = '$label ${pluralize('event', totalCount)}';
+
+    return label;
+  }
+
+  void _updateStatus() {
+    final label = statusText;
+    _logStatusController.add(label);
+
+    // TODO(devoncarew): The Flutter web version does not listen for this event.
+    onLogCountStatusChanged(label);
   }
 
   void clear() {
@@ -282,6 +290,7 @@ class LoggingController {
     _cachedFilteredData = null;
     detailsController?.setData(null);
     _loggingTableModel?.setRows(data);
+    _updateStatus();
   }
 
   void _handleConnectionStart(VmServiceWrapper service) async {
@@ -554,6 +563,7 @@ class LoggingController {
     }
 
     onLogsUpdated.notify();
+    _updateStatus();
   }
 
   void entering() {
@@ -589,6 +599,30 @@ class LoggingController {
       subscription.cancel();
     }
     _subscriptions.clear();
+  }
+
+  void _handleBusEvents() {
+    // TODO(jacobr): expose the messageBus for use by vm tests.
+    if (messageBus != null) {
+      _listen(messageBus.onEvent(type: 'reload.end'), (BusEvent event) {
+        log(
+          LogData(
+            'hot.reload',
+            event.data,
+            DateTime.now().millisecondsSinceEpoch,
+          ),
+        );
+      });
+      _listen(messageBus.onEvent(type: 'restart.end'), (BusEvent event) {
+        log(
+          LogData(
+            'hot.restart',
+            event.data,
+            DateTime.now().millisecondsSinceEpoch,
+          ),
+        );
+      });
+    }
   }
 }
 

@@ -4,13 +4,25 @@
 
 import 'package:devtools_app/src/flutter/scaffold.dart';
 import 'package:devtools_app/src/flutter/screen.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
+import '../support/mocks.dart';
 import 'wrappers.dart';
 
 void main() {
   group('DevToolsScaffold widget', () {
+    MockServiceManager mockServiceManager;
+
+    setUp(() {
+      mockServiceManager = MockServiceManager();
+      when(mockServiceManager.service).thenReturn(null);
+      setGlobal(ServiceConnectionManager, mockServiceManager);
+    });
+
     testWidgetsWithWindowSize(
         'displays in narrow mode without error', const Size(800.0, 1200.0),
         (WidgetTester tester) async {
