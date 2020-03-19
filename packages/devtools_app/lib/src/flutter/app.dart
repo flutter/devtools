@@ -17,7 +17,6 @@ import '../performance/flutter/performance_screen.dart';
 import '../timeline/flutter/timeline_screen.dart';
 import '../ui/flutter/service_extension_widgets.dart';
 import '../ui/theme.dart' as devtools_theme;
-import 'common_widgets.dart';
 import 'connect_screen.dart';
 import 'initializer.dart';
 import 'notifications.dart';
