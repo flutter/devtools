@@ -128,7 +128,6 @@ class DevToolsAppState extends State<DevToolsApp> {
               InfoScreen(),
             ],
             actions: [
-              const BulletSpacer(useAccentColor: true),
               HotReloadButton(),
               HotRestartButton(),
               ReportBugAction(),
