@@ -13,7 +13,7 @@ import '../ui/flutter/label.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-const Duration tooltipWait = Duration(milliseconds: 500);
+const tooltipWait = Duration(milliseconds: 500);
 
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
