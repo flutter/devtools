@@ -43,7 +43,7 @@ class DevToolsScaffold extends StatefulWidget {
   static const Key fullWidthKey = Key('Full-width Scaffold');
 
   /// The width at or below which we treat the scaffold as narrow-width.
-  static const double narrowWidthThreshold = 1060.0;
+  static const double narrowWidthThreshold = 1100.0;
 
   /// The size that all actions on this widget are expected to have.
   static const double actionWidgetSize = 48.0;
@@ -200,7 +200,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
     ];
 
-    return ValueListenableProvider<Screen>.value(
+    return ValueListenableProvider.value(
       value: _currentScreen,
       child: DragAndDrop(
         handleDrop: _importController.importData,
@@ -234,7 +234,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // Add a leading [BulletSpacer] to the actions if the screen is not narrow.
     final actions = List<Widget>.from(widget.actions ?? []);
     if (!isNarrow && actions.isNotEmpty) {
-      actions.insert(0, BulletSpacer());
+      actions.insert(0, const BulletSpacer(useAccentColor: true));
     }
 
     if (widget.tabs.length > 1) {

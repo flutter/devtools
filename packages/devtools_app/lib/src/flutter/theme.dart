@@ -15,30 +15,33 @@ ThemeData themeFor({@required bool isDarkTheme}) {
 ThemeData _darkTheme() {
   final theme = ThemeData.dark();
   return theme.copyWith(
-      primaryColor: devtoolsGrey[900],
-      primaryColorDark: devtoolsBlue[700],
-      primaryColorLight: devtoolsBlue[400],
-      indicatorColor: devtoolsBlue[400],
-      accentColor: devtoolsBlue[400],
-      backgroundColor: devtoolsGrey[600],
-      toggleableActiveColor: devtoolsBlue[400],
-      selectedRowColor: devtoolsGrey[600],
-      buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth));
+    primaryColor: devtoolsGrey[900],
+    primaryColorDark: devtoolsBlue[700],
+    primaryColorLight: devtoolsBlue[400],
+    indicatorColor: devtoolsBlue[400],
+    accentColor: devtoolsBlue[400],
+    backgroundColor: devtoolsGrey[600],
+    toggleableActiveColor: devtoolsBlue[400],
+    selectedRowColor: devtoolsGrey[600],
+    buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
+  );
 }
 
 ThemeData _lightTheme() {
   final theme = ThemeData.light();
   return theme.copyWith(
-      primaryColor: devtoolsBlue[600],
-      primaryColorDark: devtoolsBlue[700],
-      primaryColorLight: devtoolsBlue[400],
-      indicatorColor: Colors.yellowAccent[400],
-      accentColor: devtoolsBlue[400],
-      buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth));
+    primaryColor: devtoolsBlue[600],
+    primaryColorDark: devtoolsBlue[700],
+    primaryColorLight: devtoolsBlue[400],
+    indicatorColor: Colors.yellowAccent[400],
+    accentColor: devtoolsBlue[400],
+    buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
+  );
 }
 
 const buttonMinWidth = 36.0;
 const defaultIconSize = 16.0;
+const actionsIconSize = 20.0;
 const defaultSpacing = 16.0;
 
 /// Branded grey color.

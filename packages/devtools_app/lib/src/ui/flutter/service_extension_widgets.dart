@@ -169,12 +169,16 @@ class _ServiceExtensionButtonGroupState
 class HotReloadButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return _RegisteredServiceExtensionButton._(
-      serviceDescription: hotReload,
-      action: () => _wrapReloadCall('reload', serviceManager.performHotReload),
-      inProgressText: 'Performing hot reload',
-      completedText: 'Hot reload completed.',
-      describeError: (error) => 'Unable to hot reload the app: $error',
+    return ActionButton(
+      tooltip: 'Hot reload',
+      child: _RegisteredServiceExtensionButton._(
+        serviceDescription: hotReload,
+        action: () =>
+            _wrapReloadCall('reload', serviceManager.performHotReload),
+        inProgressText: 'Performing hot reload',
+        completedText: 'Hot reload completed.',
+        describeError: (error) => 'Unable to hot reload the app: $error',
+      ),
     );
   }
 }
@@ -183,13 +187,16 @@ class HotReloadButton extends StatelessWidget {
 class HotRestartButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return _RegisteredServiceExtensionButton._(
-      serviceDescription: hotRestart,
-      action: () =>
-          _wrapReloadCall('restart', serviceManager.performHotRestart),
-      inProgressText: 'Performing hot restart',
-      completedText: 'Hot restart completed.',
-      describeError: (error) => 'Unable to hot restart the app: $error',
+    return ActionButton(
+      tooltip: 'Hot restart',
+      child: _RegisteredServiceExtensionButton._(
+        serviceDescription: hotRestart,
+        action: () =>
+            _wrapReloadCall('restart', serviceManager.performHotRestart),
+        inProgressText: 'Performing hot restart',
+        completedText: 'Hot restart completed.',
+        describeError: (error) => 'Unable to hot restart the app: $error',
+      ),
     );
   }
 }
@@ -337,7 +344,7 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
       message: value
           ? widget.service.enabledTooltip
           : widget.service.disabledTooltip,
-      waitDuration: const Duration(seconds: 1),
+      waitDuration: tooltipWait,
       child: InkWell(
         onTap: _onClick,
         child: Row(
