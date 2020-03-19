@@ -178,7 +178,8 @@ class ReportBugAction extends StatelessWidget {
         // TODO(devoncarew): Support analytics.
         // ga.select(ga.devToolsMain, ga.feedback);
 
-        const reportIssuesUrl = 'https://github.com/flutter/devtools/issues';
+        const reportIssuesUrl =
+            'https://github.com/flutter/devtools/issues/new';
         if (await url_launcher.canLaunch(reportIssuesUrl)) {
           await url_launcher.launch(reportIssuesUrl);
         } else {
