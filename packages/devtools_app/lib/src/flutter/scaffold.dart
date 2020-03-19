@@ -231,6 +231,12 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     Size preferredSize;
     TabBar tabBar;
 
+    // Add a leading [BulletSpacer] to the actions if the screen is not narrow.
+    final actions = List<Widget>.from(widget.actions ?? []);
+    if (!isNarrow && actions.isNotEmpty) {
+      actions.insert(0, BulletSpacer());
+    }
+
     if (widget.tabs.length > 1) {
       tabBar = TabBar(
         controller: _tabController,
@@ -252,8 +258,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       final animatedRightPadding = Tween<double>(
         begin: math.max(
             0.0,
-            DevToolsScaffold.actionWidgetSize *
-                    (widget.actions?.length ?? 0.0) -
+            DevToolsScaffold.actionWidgetSize * (actions?.length ?? 0.0) -
                 rightAdjust),
         end: 0.0,
       ).evaluate(appBarCurve);
@@ -270,8 +275,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       );
     }
 
-    // Remove the leading [BulletSpacer] if in narrow mode.
-    final actions = isNarrow ? widget.actions?.sublist(1) : widget.actions;
     final appBar = AppBar(
       // Turn off the appbar's back button.
       automaticallyImplyLeading: false,

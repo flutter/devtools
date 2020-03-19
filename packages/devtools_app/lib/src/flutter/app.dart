@@ -120,7 +120,6 @@ class DevToolsAppState extends State<DevToolsApp> {
               InfoScreen(),
             ],
             actions: [
-              BulletSpacer(),
               HotReloadButton(),
               HotRestartButton(),
               ReportBugAction(),
