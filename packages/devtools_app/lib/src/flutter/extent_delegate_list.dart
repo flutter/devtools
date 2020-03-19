@@ -1,9 +1,15 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart' as collection;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+
+import 'custom_pointer_scroll_view.dart';
 
 /// Base class for delegate providing extent information for items in a list.
 abstract class ExtentDelegate {
@@ -127,7 +133,7 @@ class FixedExtentDelegate extends ExtentDelegate {
 /// itemExtent as only items visible on screen need to be built and laid out.
 /// This class is more robust than ListView for cases where ListView items off
 /// screen need to be animated.
-class ExtentDelegateListView extends BoxScrollView {
+class ExtentDelegateListView extends CustomPointerScrollView {
   const ExtentDelegateListView({
     Key key,
     Axis scrollDirection = Axis.vertical,
@@ -140,6 +146,7 @@ class ExtentDelegateListView extends BoxScrollView {
     @required this.childrenDelegate,
     @required this.extentDelegate,
     int semanticChildCount,
+    Function(PointerSignalEvent event) customPointerSignalHandler,
   })  : assert(childrenDelegate != null),
         super(
           key: key,
@@ -151,6 +158,7 @@ class ExtentDelegateListView extends BoxScrollView {
           shrinkWrap: shrinkWrap,
           padding: padding,
           semanticChildCount: semanticChildCount,
+          customPointerSignalHandler: customPointerSignalHandler,
         );
 
   /// A delegate that provides the children for the [ExtentDelegateListView].

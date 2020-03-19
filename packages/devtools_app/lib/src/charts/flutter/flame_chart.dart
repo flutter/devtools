@@ -1,10 +1,12 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +17,6 @@ import '../../flutter/extent_delegate_list.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/theme.dart';
 import '../../ui/colors.dart';
-import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../utils.dart';
 
 const double rowPadding = 2.0;
@@ -46,9 +47,16 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   });
   static const minZoomLevel = 1.0;
   static const maxZoomLevel = 32000.0;
+  static const zoomMultiplier = 0.01;
   static const minScrollOffset = 0.0;
   static const rowOffsetForBottomPadding = 1;
   static const rowOffsetForSectionSpacer = 1;
+
+  /// Maximum scroll delta allowed for scroll wheel based zooming.
+  ///
+  /// This isn't really needed but is a reasonable for safety in case we
+  /// aren't handling some mouse based scroll wheel behavior well, etc.
+  static const double maxScrollWheelDelta = 20.0;
 
   final T data;
 
@@ -85,11 +93,13 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   final focusNode = FocusNode();
 
-  bool _shiftKeyPressed = false;
+  bool _altKeyPressed = false;
 
   double mouseHoverX;
 
   ScrollController verticalScrollController;
+
+  FixedExtentDelegate verticalExtentDelegate;
 
   LinkedScrollControllerGroup linkedHorizontalScrollControllerGroup;
 
@@ -164,6 +174,12 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       upperBound: FlameChart.maxZoomLevel,
       vsync: this,
     )..addListener(_handleZoomControllerValueUpdate);
+
+    verticalExtentDelegate = FixedExtentDelegate(
+      computeExtent: (index) =>
+          rows[index].nodes.isEmpty ? sectionSpacing : rowHeightWithPadding,
+      computeLength: () => rows.length,
+    );
   }
 
   @override
@@ -174,6 +190,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       verticalScrollController.jumpTo(FlameChart.minScrollOffset);
       previousZoom = FlameChart.minZoomLevel;
       zoomController.reset();
+      verticalExtentDelegate.recompute();
     }
     FocusScope.of(context).requestFocus(focusNode);
     super.didUpdateWidget(oldWidget);
@@ -197,45 +214,43 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       child: RawKeyboardListener(
         focusNode: focusNode,
         onKey: (event) => _handleKeyEvent(event),
-        child: Listener(
-          behavior: HitTestBehavior.opaque,
-          onPointerSignal: (event) => _handlePointerSignal(event),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final customPaints = buildCustomPaints(constraints);
-              final flameChart = _buildFlameChart(constraints);
-              return customPaints.isNotEmpty
-                  ? Stack(
-                      children: [
-                        flameChart,
-                        ...customPaints,
-                      ],
-                    )
-                  : flameChart;
-            },
-          ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final customPaints = buildCustomPaints(constraints);
+            final flameChart = _buildFlameChart(constraints);
+            return customPaints.isNotEmpty
+                ? Stack(
+                    children: [
+                      flameChart,
+                      ...customPaints,
+                    ],
+                  )
+                : flameChart;
+          },
         ),
       ),
     );
   }
 
   Widget _buildFlameChart(BoxConstraints constraints) {
-    return ListView.builder(
+    return ExtentDelegateListView(
       controller: verticalScrollController,
-      addAutomaticKeepAlives: false,
-      itemCount: rows.length,
-      itemBuilder: (context, index) {
-        // TODO(kenz): investigate if we are building too many
-        // ScrollingFlameChartRow widgets on zoom / pan.
-        return ScrollingFlameChartRow<V>(
-          linkedScrollControllerGroup: linkedHorizontalScrollControllerGroup,
-          nodes: rows[index].nodes,
-          width: math.max(constraints.maxWidth, widthWithZoom),
-          startInset: widget.startInset,
-          selected: widget.selected,
-          zoom: zoomController.value,
-        );
-      },
+      extentDelegate: verticalExtentDelegate,
+      customPointerSignalHandler: _handlePointerSignal,
+      childrenDelegate: SliverChildBuilderDelegate(
+        (context, index) {
+          return ScrollingFlameChartRow<V>(
+            linkedScrollControllerGroup: linkedHorizontalScrollControllerGroup,
+            nodes: rows[index].nodes,
+            width: math.max(constraints.maxWidth, widthWithZoom),
+            startInset: widget.startInset,
+            selected: widget.selected,
+            zoom: zoomController.value,
+          );
+        },
+        childCount: rows.length,
+        addAutomaticKeepAlives: false,
+      ),
     );
   }
 
@@ -267,10 +282,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
-    if (event.isShiftPressed) {
-      _shiftKeyPressed = true;
+    if (event.isAltPressed) {
+      _altKeyPressed = true;
     } else {
-      _shiftKeyPressed = false;
+      _altKeyPressed = false;
     }
 
     // Only handle down events so logic is not duplicated on key up.
@@ -286,10 +301,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
         zoomTo(math.max(FlameChart.minZoomLevel,
             zoomController.value - keyboardZoomOutUnit));
       } else if (keyLabel == 'a') {
-        scrollTo(
+        scrollToX(
             linkedHorizontalScrollControllerGroup.offset - keyboardScrollUnit);
       } else if (keyLabel == 'd') {
-        scrollTo(
+        scrollToX(
             linkedHorizontalScrollControllerGroup.offset + keyboardScrollUnit);
       }
     }
@@ -297,12 +312,28 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   void _handlePointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent) {
-      if (_shiftKeyPressed) {
-        // TODO(kenz): scroll vertical list regularly / zoom. See
-        // https://github.com/flutter/devtools/issues/1600.
-      } else {
-        // TODO(kenz): scroll vertical list regularly / zoom. See
-        // https://github.com/flutter/devtools/issues/1600.
+      final deltaX = event.scrollDelta.dx;
+      double deltaY = event.scrollDelta.dy;
+      if (deltaY.abs() >= deltaX.abs()) {
+        if (_altKeyPressed) {
+          verticalScrollController
+              .jumpTo(verticalScrollController.offset + deltaY);
+        } else {
+          deltaY = deltaY.clamp(
+            -FlameChart.maxScrollWheelDelta,
+            FlameChart.maxScrollWheelDelta,
+          );
+          final currentZoom = zoomController.value;
+          // TODO(kenz): if https://github.com/flutter/flutter/issues/52762 is,
+          // resolved, consider adjusting the multiplier based on the scroll device
+          // kind (mouse or track pad).
+          final multiplier = FlameChart.zoomMultiplier * currentZoom;
+          final newZoomLevel = (currentZoom + deltaY * multiplier).clamp(
+            FlameChart.minZoomLevel,
+            FlameChart.maxZoomLevel,
+          );
+          zoomTo(newZoomLevel, jump: true);
+        }
       }
     }
   }
@@ -333,22 +364,34 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     });
   }
 
-  Future<void> zoomTo(double zoom, {double forceMouseX}) async {
+  Future<void> zoomTo(
+    double zoom, {
+    double forceMouseX,
+    bool jump = false,
+  }) async {
     if (forceMouseX != null) {
       mouseHoverX = forceMouseX;
     }
     await zoomController.animateTo(
       zoom.clamp(FlameChart.minZoomLevel, FlameChart.maxZoomLevel),
-      duration: shortDuration,
+      duration: jump ? Duration.zero : shortDuration,
     );
   }
 
-  Future<void> scrollTo(double offset) async {
-    await linkedHorizontalScrollControllerGroup.animateTo(
-      offset.clamp(FlameChart.minScrollOffset, maxScrollOffset),
-      curve: defaultCurve,
-      duration: shortDuration,
-    );
+  FutureOr<void> scrollToX(
+    double offset, {
+    bool jump = false,
+  }) async {
+    final target = offset.clamp(FlameChart.minScrollOffset, maxScrollOffset);
+    if (jump) {
+      linkedHorizontalScrollControllerGroup.jumpTo(target);
+    } else {
+      await linkedHorizontalScrollControllerGroup.animateTo(
+        target,
+        curve: defaultCurve,
+        duration: shortDuration,
+      );
+    }
   }
 }
 
@@ -461,6 +504,8 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
             childrenDelegate: SliverChildBuilderDelegate(
               (context, index) => _buildFlameChartNode(index),
               childCount: nodes.length,
+              addRepaintBoundaries: false,
+              addAutomaticKeepAlives: false,
             ),
           ),
         ),
@@ -719,7 +764,10 @@ class FlameChartNode<T> {
 
   static const _selectedNodeColor = lightSelection;
   static const _alternateTextColor = Colors.black;
-  static const _minWidthForText = 22.0;
+  // We would like this value to be smaller, but zoom performance does not allow
+  // for that. We should decrease this value if we can improve flame chart zoom
+  // performance.
+  static const _minWidthForText = 30.0;
 
   final Key key;
   final Rect rect;
