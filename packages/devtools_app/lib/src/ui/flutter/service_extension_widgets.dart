@@ -169,9 +169,8 @@ class _ServiceExtensionButtonGroupState
 class HotReloadButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'Hot reload',
-      waitDuration: tooltipWait,
+    return ActionButton(
+      tooltip: 'Hot reload',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotReload,
         action: () =>
@@ -188,9 +187,8 @@ class HotReloadButton extends StatelessWidget {
 class HotRestartButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'Hot restart',
-      waitDuration: tooltipWait,
+    return ActionButton(
+      tooltip: 'Hot restart',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotRestart,
         action: () =>

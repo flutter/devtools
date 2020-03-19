@@ -13,7 +13,7 @@ import '../ui/flutter/label.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-const tooltipWait = Duration(milliseconds: 500);
+const Duration tooltipWait = Duration(milliseconds: 500);
 
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
@@ -306,6 +306,27 @@ class BulletSpacer extends StatelessWidget {
         '•',
         style: textStyle.copyWith(color: mutedColor),
       ),
+    );
+  }
+}
+
+/// A widget, commonly used for icon buttons, that provides a tooltip with a
+/// common delay before the tooltip is shown.
+class ActionButton extends StatelessWidget {
+  const ActionButton({
+    @required this.tooltip,
+    @required this.child,
+  });
+
+  final String tooltip;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      waitDuration: tooltipWait,
+      child: child,
     );
   }
 }

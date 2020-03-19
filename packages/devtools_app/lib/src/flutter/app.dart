@@ -189,9 +189,8 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
 class ReportBugAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'Report an issue',
-      waitDuration: tooltipWait,
+    return ActionButton(
+      tooltip: 'Report an issue',
       child: InkWell(
         onTap: () async {
           // TODO(devoncarew): Support analytics.
@@ -222,9 +221,8 @@ class ReportBugAction extends StatelessWidget {
 class OpenSettingsAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'Settings',
-      waitDuration: tooltipWait,
+    return ActionButton(
+      tooltip: 'Settings',
       child: InkWell(
         onTap: () async {
           unawaited(showDialog(
@@ -249,6 +247,11 @@ class OpenSettingsAction extends StatelessWidget {
 // TODO(devoncarew): Add an analytics setting.
 
 // TODO(devoncarew): Convert the SettingsDialog over to using a controller?
+// Add a settings controller to Controllers that Widgets can access via
+// Controllers.of(context); the SettingsController could manage setting states
+// (where setting values are ValueNotifiers) and have methods to modify them.
+// Widgets (like below) can then just grab the active SettingsController from
+// Controller.of(context).settings and listening to its notifiers.
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({
@@ -265,7 +268,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     void _toggleTheme([bool value]) {
       value ??= !devtools_theme.isDarkTheme;
       setState(() {
-        devtools_theme.useDartTheme = value;
+        devtools_theme.useDarkTheme = value;
 
         DevToolsApp.of(context).updateTheme();
       });
