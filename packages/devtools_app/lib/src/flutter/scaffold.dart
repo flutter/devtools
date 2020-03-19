@@ -271,7 +271,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     }
 
     // Remove the leading [BulletSpacer] if in narrow mode.
-    final actions = isNarrow ? widget.actions.sublist(1) : widget.actions;
+    final actions = isNarrow ? widget.actions?.sublist(1) : widget.actions;
     final appBar = AppBar(
       // Turn off the appbar's back button.
       automaticallyImplyLeading: false,
