@@ -188,7 +188,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   @override
   Widget build(BuildContext context) {
-    // Build the screens for each tab and wrap them in the appropriate styling.
+    // Build the screens for each tab and wrap them in the appropriate styling
     final tabBodies = [
       for (var screen in widget.tabs)
         Align(
