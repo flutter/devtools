@@ -37,7 +37,7 @@ class FrameBasedTimelineFlameChartCanvas
   @override
   void initUiElements() {
     super.initUiElements();
-    expandRows(data.uiEventFlow.depth + data.rasterEventFlow.depth);
+    expandRows(data.uiEventFlow.depth + data.gpuEventFlow.depth);
 
     final int frameStartOffset = data.time.start.inMicroseconds;
     double getTopForRow(int row) {
@@ -108,7 +108,7 @@ class FrameBasedTimelineFlameChartCanvas
     }
 
     createChartNodes(data.uiEventFlow, 0);
-    createChartNodes(data.rasterEventFlow, gpuSectionStartRow);
+    createChartNodes(data.gpuEventFlow, gpuSectionStartRow);
   }
 
   @override
