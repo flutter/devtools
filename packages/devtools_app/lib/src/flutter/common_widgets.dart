@@ -292,11 +292,17 @@ class BulletSpacer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = (useAccentColor
-            ? Theme.of(context).accentTextTheme
-            : Theme.of(context).textTheme)
-        .bodyText2;
-    final mutedColor = textStyle.color.withAlpha(0x90);
+    final ThemeData theme = Theme.of(context);
+
+    TextTheme textTheme;
+    if (useAccentColor) {
+      textTheme = theme.appBarTheme.textTheme ?? theme.primaryTextTheme;
+    } else {
+      textTheme = theme.textTheme;
+    }
+
+    final textStyle = textTheme.bodyText2;
+    final mutedColor = textStyle?.color?.withAlpha(0x90);
 
     return Container(
       width: DevToolsScaffold.actionWidgetSize / 2,
@@ -304,7 +310,7 @@ class BulletSpacer extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         '•',
-        style: textStyle.copyWith(color: mutedColor),
+        style: textStyle?.copyWith(color: mutedColor),
       ),
     );
   }
