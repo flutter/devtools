@@ -66,7 +66,7 @@ class TimelineService {
   }
 
   Future<void> startTimeline() async {
-    timelineController.data = await serviceManager.connectedApp.isAnyFlutterApp
+    timelineController.data = await serviceManager.connectedApp.isFlutterApp
         ? TimelineData(
             displayRefreshRate: await serviceManager.getDisplayRefreshRate(),
           )

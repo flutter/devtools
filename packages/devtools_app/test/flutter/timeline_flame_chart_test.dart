@@ -44,7 +44,7 @@ void main() {
         ..data = data
         ..selectFrame(testFrame1);
       await tester.pumpWidget(wrapWithControllers(
-        TimelineScreenBody(),
+        const TimelineScreenBody(),
         timeline: controllerWithData,
       ));
       expect(find.byType(TimelineFlameChart), findsOneWidget);
@@ -55,7 +55,7 @@ void main() {
         (WidgetTester tester) async {
       // Set a wide enough screen width that we do not run into overflow.
       await tester.pumpWidget(wrapWithControllers(
-        TimelineScreenBody(),
+        const TimelineScreenBody(),
         timeline: TimelineController(),
       ));
       expect(find.byType(TimelineFlameChart), findsNothing);

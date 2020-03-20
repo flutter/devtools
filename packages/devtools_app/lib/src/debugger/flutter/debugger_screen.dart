@@ -27,11 +27,18 @@ class DebuggerScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return DebuggerScreenBody();
+    return enabled()
+        ? const DebuggerScreenBody()
+        : const DisabledForProfileModeMessage();
   }
+
+  @override
+  bool enabled() => !serviceManager.connectedApp.isProfileBuildRaw;
 }
 
 class DebuggerScreenBody extends StatefulWidget {
+  const DebuggerScreenBody();
+
   @override
   DebuggerScreenBodyState createState() => DebuggerScreenBodyState();
 }

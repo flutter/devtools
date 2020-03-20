@@ -74,6 +74,9 @@ abstract class Screen {
   Widget buildStatus(BuildContext context, TextTheme textTheme) {
     return null;
   }
+
+  /// Whether the screen is enabled.
+  bool enabled() => true;
 }
 
 enum DevToolsScreenType {

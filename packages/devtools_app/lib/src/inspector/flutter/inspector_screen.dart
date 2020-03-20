@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/blocking_action_mixin.dart';
+import '../../flutter/common_widgets.dart';
 import '../../flutter/initializer.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
@@ -33,7 +34,22 @@ class InspectorScreen extends Screen {
   String get docPageId => 'inspector';
 
   @override
-  Widget build(BuildContext context) => const InspectorScreenBody();
+  Widget build(BuildContext context) {
+    if (!enabled()) {
+      if (!serviceManager.connectedApp.isFlutterAppRaw) {
+        return const DisabledForNonFlutterAppMessage();
+      }
+      if (serviceManager.connectedApp.isProfileBuildRaw) {
+        return const DisabledForProfileModeMessage();
+      }
+    }
+    return const InspectorScreenBody();
+  }
+
+  @override
+  bool enabled() =>
+      serviceManager.connectedApp.isFlutterAppRaw &&
+      !serviceManager.connectedApp.isProfileBuildRaw;
 }
 
 class InspectorScreenBody extends StatefulWidget {

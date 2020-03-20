@@ -595,7 +595,6 @@ Future<void> computeUserApplicationCustomGTagData() async {
   final isFlutter = await serviceManager.connectedApp.isFlutterApp;
   final isWebApp = await serviceManager.connectedApp.isDartWebApp;
   final isProfile = await serviceManager.connectedApp.isProfileBuild;
-  final isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
 
   if (isFlutter) {
     userPlatformType = (await serviceManager.service.isProtocolVersionSupported(
@@ -604,13 +603,11 @@ Future<void> computeUserApplicationCustomGTagData() async {
         : 'unknown';
   }
 
-  if (isAnyFlutterApp) {
-    if (isFlutter) {
-      userAppType = appTypeFlutter;
-    }
-    if (isWebApp) {
-      userAppType = appTypeWeb;
-    }
+  if (isFlutter) {
+    userAppType = appTypeFlutter;
+  }
+  if (isWebApp) {
+    userAppType = appTypeWeb;
   }
   userBuildType = isProfile ? buildTypeProfile : buildTypeDebug;
 

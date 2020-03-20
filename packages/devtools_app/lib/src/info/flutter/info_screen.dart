@@ -10,6 +10,7 @@ import '../../flutter/common_widgets.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/theme.dart';
+import '../../globals.dart';
 import '../../version.dart';
 import '../info_controller.dart';
 
@@ -25,7 +26,14 @@ class InfoScreen extends Screen {
   bool get showIsolateSelector => true;
 
   @override
-  Widget build(BuildContext context) => InfoScreenBody();
+  Widget build(BuildContext context) {
+    return enabled()
+        ? const InfoScreenBody()
+        : const DisabledForWebAppMessage();
+  }
+
+  @override
+  bool enabled() => !serviceManager.connectedApp.isDartWebAppRaw;
 
   /// The key to identify the flutter version view.
   @visibleForTesting
@@ -37,6 +45,8 @@ class InfoScreen extends Screen {
 }
 
 class InfoScreenBody extends StatefulWidget {
+  const InfoScreenBody();
+
   @override
   _InfoScreenBodyState createState() => _InfoScreenBodyState();
 }

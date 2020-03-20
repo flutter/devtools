@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../globals.dart';
 import '../../http/http_request_data.dart';
 import '../network_controller.dart';
 import 'http_request_inspector.dart';
@@ -31,7 +32,14 @@ class NetworkScreen extends Screen {
   static const recordingInstructionsKey = Key('Recording Instructions');
 
   @override
-  Widget build(BuildContext context) => const NetworkScreenBody();
+  Widget build(BuildContext context) {
+    return enabled()
+        ? const NetworkScreenBody()
+        : const DisabledForWebAppMessage();
+  }
+
+  @override
+  bool enabled() => !serviceManager.connectedApp.isDartWebAppRaw;
 }
 
 class NetworkScreenBody extends StatefulWidget {

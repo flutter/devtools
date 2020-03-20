@@ -80,7 +80,7 @@ class TimelineService {
   }
 
   Future<void> startTimeline() async {
-    if (await serviceManager.connectedApp.isAnyFlutterApp) {
+    if (await serviceManager.connectedApp.isFlutterApp) {
       timelineController.frameBasedTimeline.data = FrameBasedTimelineData(
           displayRefreshRate: await serviceManager.getDisplayRefreshRate());
     }

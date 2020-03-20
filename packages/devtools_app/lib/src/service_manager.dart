@@ -73,7 +73,8 @@ class ServiceConnectionManager {
   VM vm;
   String sdkVersion;
 
-  bool get hasConnection => service != null;
+  bool get hasConnection =>
+      service != null && connectedApp != null && connectedApp.appTypeKnown;
 
   Stream<bool> get onStateChange => _stateController.stream;
   final _stateController = StreamController<bool>.broadcast();
@@ -199,6 +200,8 @@ class ServiceConnectionManager {
         }
       }
     }));
+
+    await connectedApp.initializeValues();
   }
 
   void vmServiceClosed() {
@@ -243,7 +246,7 @@ class ServiceConnectionManager {
   }
 
   Future<double> getDisplayRefreshRate() async {
-    if (connectedApp == null || !await connectedApp.isAnyFlutterApp) {
+    if (connectedApp == null || !await connectedApp.isFlutterApp) {
       return null;
     }
 
@@ -519,7 +522,7 @@ class ServiceExtensionManager {
     }
     final Isolate isolate = await _service.getIsolate(isolateRef.id);
     if (isolate.extensionRPCs != null) {
-      if (await connectedApp.isAnyFlutterApp) {
+      if (await connectedApp.isFlutterApp) {
         for (String extension in isolate.extensionRPCs) {
           await _maybeAddServiceExtension(extension);
         }

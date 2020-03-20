@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/flutter/split.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -31,7 +32,7 @@ void main() {
   }) async {
     // Set a wide enough screen width that we do not run into overflow.
     await tester.pumpWidget(wrapWithControllers(
-      TimelineScreenBody(),
+      const TimelineScreenBody(),
       timeline: controller = timelineController ?? TimelineController(),
     ));
     expect(find.byType(TimelineScreenBody), findsOneWidget);
@@ -61,6 +62,9 @@ void main() {
     setUp(() async {
       await ensureInspectorDependencies();
       fakeServiceManager = FakeServiceManager(useFakeService: true);
+      when(fakeServiceManager.connectedApp.isDartWebAppRaw).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isFlutterAppRaw).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isDartCliAppRaw).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
@@ -73,6 +77,14 @@ void main() {
         timeline: TimelineController(),
       ));
       expect(find.text('Timeline'), findsOneWidget);
+    });
+
+    testWidgets('builds disabled message when disabled for web app',
+        (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp.isDartWebAppRaw).thenReturn(true);
+      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      expect(find.byType(TimelineScreenBody), findsNothing);
+      expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds initial content', windowSize,

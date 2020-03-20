@@ -550,5 +550,5 @@ Future<void> ensureInspectorDependencies() async {
 }
 
 void mockIsFlutterApp(MockConnectedApp connectedApp) {
-  when(connectedApp.isAnyFlutterApp).thenAnswer((_) => Future.value(true));
+  when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(true));
 }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/flutter/performance_screen.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
@@ -12,6 +13,7 @@ import 'package:devtools_app/src/ui/flutter/vm_flag_widgets.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 import '../support/mocks.dart';
 import 'wrappers.dart';
@@ -20,9 +22,10 @@ void main() {
   PerformanceScreen screen;
   FakeServiceManager fakeServiceManager;
 
-  group('TimelineScreen', () {
+  group('PerformanceScreen', () {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
+      when(fakeServiceManager.connectedApp.isDartWebAppRaw).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       screen = const PerformanceScreen();
     });
@@ -51,13 +54,21 @@ void main() {
       expect(find.text('Performance'), findsOneWidget);
     });
 
+    testWidgets('builds disabled message when disabled for web app',
+        (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp.isDartWebAppRaw).thenReturn(true);
+      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      expect(find.byType(PerformanceScreenBody), findsNothing);
+      expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
+    });
+
     const windowSize = Size(1000.0, 1000.0);
 
     testWidgetsWithWindowSize(
       'builds proper content for recording state',
       windowSize,
       (WidgetTester tester) async {
-        final perfScreenBody = PerformanceScreenBody();
+        const perfScreenBody = PerformanceScreenBody();
         await tester.pumpWidget(wrapWithControllers(
           perfScreenBody,
           performance: PerformanceController(),
@@ -91,7 +102,7 @@ void main() {
     testWidgetsWithWindowSize('builds for disabled profiler', windowSize,
         (WidgetTester tester) async {
       await serviceManager.service.setFlag(vm_flags.profiler, 'false');
-      final perfScreenBody = PerformanceScreenBody();
+      const perfScreenBody = PerformanceScreenBody();
       await tester.pumpWidget(wrapWithControllers(
         perfScreenBody,
         performance: PerformanceController(),
