@@ -14,6 +14,7 @@ import '../../flutter/notifications.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../ui/flutter/label.dart';
@@ -127,6 +128,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     return Column(
       children: [
         _timelineControls(),
+        const SizedBox(height: denseRowSpacing),
         if (serviceManager.connectedApp.isFlutterAppRaw)
           const FlutterFramesChart(),
         Expanded(
@@ -147,17 +149,14 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         controller.exitOfflineMode();
       });
     });
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: offlineMode
-            ? [_exitOfflineButton]
-            : [
-                _buildPrimaryStateControls(),
-                _buildSecondaryControls(),
-              ],
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: offlineMode
+          ? [_exitOfflineButton]
+          : [
+              _buildPrimaryStateControls(),
+              _buildSecondaryControls(),
+            ],
     );
   }
 
@@ -170,13 +169,14 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: _startRecording,
         ),
+        const SizedBox(width: denseSpacing),
         stopRecordingButton(
           key: TimelineScreen.stopRecordingButtonKey,
           recording: recording,
           minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: _stopRecording,
         ),
-        const SizedBox(width: 8.0),
+        const SizedBox(width: defaultSpacing),
         clearButton(
           key: TimelineScreen.clearButtonKey,
           minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
@@ -192,10 +192,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: ProfileGranularityDropdown(),
-        ),
+        ProfileGranularityDropdown(),
+        const SizedBox(width: defaultSpacing),
         if (!serviceManager.connectedApp.isDartCliAppRaw)
           ServiceExtensionButtonGroup(
             minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
@@ -204,13 +202,16 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         // TODO(kenz): hide or disable button if http timeline logging is not
         // available.
         _logNetworkTrafficButton(),
-        const SizedBox(width: 8.0),
-        OutlineButton(
-          onPressed: _exportTimeline,
-          child: MaterialIconLabel(
-            Icons.file_download,
-            'Export',
-            minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+        const SizedBox(width: defaultSpacing),
+        Container(
+          height: Theme.of(context).buttonTheme.height,
+          child: OutlineButton(
+            onPressed: _exportTimeline,
+            child: MaterialIconLabel(
+              Icons.file_download,
+              'Export',
+              minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+            ),
           ),
         ),
       ],

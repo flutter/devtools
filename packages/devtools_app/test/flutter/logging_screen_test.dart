@@ -54,7 +54,7 @@ void main() {
       expect(find.byType(LoggingScreenBody), findsOneWidget);
       expect(find.byType(LogsTable), findsOneWidget);
       expect(find.byType(LogDetails), findsOneWidget);
-      expect(find.text('Clear logs'), findsOneWidget);
+      expect(find.text('Clear'), findsOneWidget);
       expect(find.byType(TextField), findsOneWidget);
       expect(find.byType(StructuredErrorsToggle), findsOneWidget);
     });
@@ -62,7 +62,7 @@ void main() {
     testWidgets('can clear logs', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       verifyNever(mockLoggingController.clear());
-      await tester.tap(find.text('Clear logs'));
+      await tester.tap(find.text('Clear'));
       verify(mockLoggingController.clear()).called(1);
     });
 

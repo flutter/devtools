@@ -43,6 +43,8 @@ const buttonMinWidth = 36.0;
 const defaultIconSize = 16.0;
 const actionsIconSize = 20.0;
 const defaultSpacing = 16.0;
+const denseSpacing = 8.0;
+const denseRowSpacing = 6.0;
 
 /// Branded grey color.
 ///
