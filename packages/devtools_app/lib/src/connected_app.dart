@@ -16,7 +16,7 @@ class ConnectedApp {
   bool get appTypeKnown => _appTypeKnown;
   bool _appTypeKnown = false;
 
-  FutureOr<bool> get isFlutterApp async {
+  Future<bool> get isFlutterApp async {
     _isFlutterApp ??= await _libraryUriAvailable(flutterLibraryUri);
     _updateAppTypeKnown();
     return _isFlutterApp;
@@ -29,7 +29,7 @@ class ConnectedApp {
 
   bool _isFlutterApp;
 
-  FutureOr<bool> get isProfileBuild async {
+  Future<bool> get isProfileBuild async {
     _isProfileBuild ??= await _connectedToProfileBuild();
     _updateAppTypeKnown();
     return _isProfileBuild;
@@ -42,7 +42,7 @@ class ConnectedApp {
 
   bool _isProfileBuild;
 
-  FutureOr<bool> get isDartWebApp async {
+  Future<bool> get isDartWebApp async {
     _isDartWebApp ??= await _libraryUriAvailable(dartHtmlLibraryUri);
     _updateAppTypeKnown();
     return _isDartWebApp;
@@ -63,7 +63,7 @@ class ConnectedApp {
 
   bool get isRunningOnDartVM => serviceManager.vm.name != 'ChromeDebugProxy';
 
-  FutureOr<bool> get isDartCliApp async =>
+  Future<bool> get isDartCliApp async =>
       isRunningOnDartVM && !(await isFlutterApp);
 
   bool get isDartCliAppRaw => isRunningOnDartVM && !isFlutterAppRaw;
