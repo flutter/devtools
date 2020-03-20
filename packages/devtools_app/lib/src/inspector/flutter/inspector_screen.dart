@@ -11,6 +11,7 @@ import '../../flutter/initializer.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart' as extensions;
 import '../../ui/flutter/label.dart';
@@ -89,19 +90,25 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final summaryTree = InspectorTree(
-      controller: summaryTreeController,
-      isSummaryTree: true,
+    final summaryTree = Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).focusColor),
+      ),
+      child: InspectorTree(
+        controller: summaryTreeController,
+        isSummaryTree: true,
+      ),
     );
     final detailsTree = InspectorTree(
       controller: detailsTreeController,
       isSummaryTree: false,
     );
+
     final splitAxis = Split.axisFor(context, 0.85);
     return Column(
       children: <Widget>[
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ValueListenableBuilder(
               valueListenable: serviceManager.serviceExtensionManager
@@ -118,18 +125,23 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
                 );
               },
             ),
-            OutlineButton(
-              onPressed: _refreshInspector,
-              child: Label(
-                FlutterIcons.refresh,
-                'Refresh Tree',
-                minIncludeTextWidth: 750,
+            const SizedBox(width: denseSpacing),
+            Container(
+              height: Theme.of(context).buttonTheme.height,
+              child: OutlineButton(
+                onPressed: _refreshInspector,
+                child: Label(
+                  FlutterIcons.refresh,
+                  'Refresh Tree',
+                  minIncludeTextWidth: 750,
+                ),
               ),
             ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
           ],
         ),
+        const SizedBox(height: denseRowSpacing),
         Expanded(
           child: Split(
             axis: splitAxis,
@@ -153,10 +165,12 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         minIncludeTextWidth: 1050,
         extensions: [extensions.slowAnimations],
       ),
+      const SizedBox(width: denseSpacing),
       ServiceExtensionButtonGroup(
         minIncludeTextWidth: 1050,
         extensions: [extensions.debugPaint, extensions.debugPaintBaselines],
       ),
+      const SizedBox(width: denseSpacing),
       ServiceExtensionButtonGroup(
         minIncludeTextWidth: 1250,
         extensions: [extensions.repaintRainbow, extensions.debugAllowBanner],
