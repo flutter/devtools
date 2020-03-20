@@ -100,18 +100,7 @@ class TraceEvent {
 
   TimelineEventType _type;
 
-  TimelineEventType get type {
-    if (_type == null) {
-      if (args[typeKey] == 'ui') {
-        _type = TimelineEventType.ui;
-      } else if (args[typeKey] == 'raster') {
-        _type = TimelineEventType.raster;
-      } else {
-        _type = TimelineEventType.unknown;
-      }
-    }
-    return _type;
-  }
+  TimelineEventType get type => _type ??= TimelineEventType.unknown;
 
   set type(TimelineEventType t) => _type = t;
 

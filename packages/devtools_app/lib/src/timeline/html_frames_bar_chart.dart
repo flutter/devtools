@@ -191,7 +191,7 @@ class PlotlyDivGraph extends CoreElement {
 
   // Add current frame data to chunks of data for later plotting.
   void processNextFrame() async {
-    final frame =
+    final TimelineFrame frame =
         timelineController.frameBasedTimeline.frameAddedNotifier.value;
     if (frame == null) return;
 
@@ -207,7 +207,7 @@ class PlotlyDivGraph extends CoreElement {
       // TODO(terry): HACK - Ignore the event.
       log(
         'Ignored onFrameAdded - bad data.\n [uiDuration: '
-        '${frame.uiDuration}, gpuDuration: ${frame.rasterDuration}',
+        '${frame.uiDuration}, gpuDuration: ${frame.gpuDuration}',
         LogLevel.warning,
       );
     }
