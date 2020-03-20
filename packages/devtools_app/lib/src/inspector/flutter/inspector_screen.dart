@@ -108,7 +108,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
     return Column(
       children: <Widget>[
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ValueListenableBuilder(
               valueListenable: serviceManager.serviceExtensionManager
@@ -127,9 +127,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
             ),
             const SizedBox(width: denseSpacing),
             Container(
-              // This value sizes the refresh OutlineButton to the same height
-              // as the ServiceExtensionButtonGroup ToggleButtons.
-              height: 33.0,
+              height: Theme.of(context).buttonTheme.height,
               child: OutlineButton(
                 onPressed: _refreshInspector,
                 child: Label(
