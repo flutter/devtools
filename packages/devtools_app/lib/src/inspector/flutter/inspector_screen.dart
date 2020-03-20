@@ -35,21 +35,15 @@ class InspectorScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    if (!enabled()) {
-      if (!serviceManager.connectedApp.isFlutterAppRaw) {
-        return const DisabledForNonFlutterAppMessage();
-      }
-      if (serviceManager.connectedApp.isProfileBuildRaw) {
-        return const DisabledForProfileModeMessage();
-      }
+    final isFlutterApp = serviceManager.connectedApp.isFlutterAppRaw;
+    final isProfileBuild = serviceManager.connectedApp.isProfileBuildRaw;
+    if (!isFlutterApp || isProfileBuild) {
+      return !isFlutterApp
+          ? const DisabledForNonFlutterAppMessage()
+          : const DisabledForProfileModeMessage();
     }
     return const InspectorScreenBody();
   }
-
-  @override
-  bool enabled() =>
-      serviceManager.connectedApp.isFlutterAppRaw &&
-      !serviceManager.connectedApp.isProfileBuildRaw;
 }
 
 class InspectorScreenBody extends StatefulWidget {

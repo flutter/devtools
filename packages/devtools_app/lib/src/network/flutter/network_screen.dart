@@ -33,13 +33,10 @@ class NetworkScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return enabled()
+    return !serviceManager.connectedApp.isDartWebAppRaw
         ? const NetworkScreenBody()
         : const DisabledForWebAppMessage();
   }
-
-  @override
-  bool enabled() => !serviceManager.connectedApp.isDartWebAppRaw;
 }
 
 class NetworkScreenBody extends StatefulWidget {

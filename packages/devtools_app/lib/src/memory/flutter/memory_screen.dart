@@ -60,11 +60,10 @@ class MemoryScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return enabled() ? const MemoryBody() : const DisabledForWebAppMessage();
+    return !serviceManager.connectedApp.isDartWebAppRaw
+        ? const MemoryBody()
+        : const DisabledForWebAppMessage();
   }
-
-  @override
-  bool enabled() => !serviceManager.connectedApp.isDartWebAppRaw;
 }
 
 class MemoryBody extends StatefulWidget {

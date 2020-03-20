@@ -41,13 +41,10 @@ class PerformanceScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return enabled()
+    return !serviceManager.connectedApp.isDartWebAppRaw
         ? const PerformanceScreenBody()
         : const DisabledForWebAppMessage();
   }
-
-  @override
-  bool enabled() => !serviceManager.connectedApp.isDartWebAppRaw;
 }
 
 class PerformanceScreenBody extends StatefulWidget {

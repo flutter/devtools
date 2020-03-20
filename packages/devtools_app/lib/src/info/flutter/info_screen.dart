@@ -27,13 +27,10 @@ class InfoScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return enabled()
+    return !serviceManager.connectedApp.isDartWebAppRaw
         ? const InfoScreenBody()
         : const DisabledForWebAppMessage();
   }
-
-  @override
-  bool enabled() => !serviceManager.connectedApp.isDartWebAppRaw;
 
   /// The key to identify the flutter version view.
   @visibleForTesting
