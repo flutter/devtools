@@ -252,8 +252,9 @@ class TimelineController implements DisposableController {
 
     // TODO(kenz): once each trace event has a ui/gpu distinction bit added to
     // the trace, we will not need to infer thread ids. This is not robust.
-    final uiThreadId = _threadIdForEvent(uiEventName, traceEvents);
-    final gpuThreadId = _threadIdForEvent(gpuEventName, traceEvents);
+    final uiThreadId =
+        _threadIdForEvents([uiEventName, uiEventNameOld], traceEvents);
+    final gpuThreadId = _threadIdForEvents([gpuEventName], traceEvents);
 
     offlineTimelineData = offlineData.shallowClone();
     data = offlineData.shallowClone();
@@ -275,14 +276,23 @@ class TimelineController implements DisposableController {
     _loadOfflineDataController.add(offlineTimelineData);
   }
 
-  int _threadIdForEvent(
-    String targetEventName,
+  int _threadIdForEvents(
+    List<String> targetEventNames,
     List<TraceEventWrapper> traceEvents,
   ) {
     const invalidThreadId = -1;
     return traceEvents
-            .firstWhere((trace) => trace.event.name == targetEventName,
-                orElse: () => null)
+            .firstWhere(
+              (trace) {
+                for (final target in targetEventNames) {
+                  if (trace.event.name == target) {
+                    return true;
+                  }
+                }
+                return false;
+              },
+              orElse: () => null,
+            )
             ?.event
             ?.threadId ??
         invalidThreadId;
