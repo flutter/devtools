@@ -207,7 +207,7 @@ class PlotlyDivGraph extends CoreElement {
       // TODO(terry): HACK - Ignore the event.
       log(
         'Ignored onFrameAdded - bad data.\n [uiDuration: '
-        '${frame.uiDuration}, gpuDuration: ${frame.gpuDuration}',
+        '${frame.uiDuration}, gpuDuration: ${frame.rasterDuration}',
         LogLevel.warning,
       );
     }

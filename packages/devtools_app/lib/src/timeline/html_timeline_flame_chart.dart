@@ -37,7 +37,7 @@ class FrameBasedTimelineFlameChartCanvas
   @override
   void initUiElements() {
     super.initUiElements();
-    expandRows(data.uiEventFlow.depth + data.gpuEventFlow.depth);
+    expandRows(data.uiEventFlow.depth + data.rasterEventFlow.depth);
 
     final int frameStartOffset = data.time.start.inMicroseconds;
     double getTopForRow(int row) {
@@ -65,7 +65,7 @@ class FrameBasedTimelineFlameChartCanvas
     // Add GPU section label.
     final gpuSectionLabel = sectionLabel(
       'GPU',
-      mainGpuColor,
+      mainRasterColor,
       top: getTopForRow(gpuSectionStartRow),
       width: 42.0,
     );
@@ -108,7 +108,7 @@ class FrameBasedTimelineFlameChartCanvas
     }
 
     createChartNodes(data.uiEventFlow, 0);
-    createChartNodes(data.gpuEventFlow, gpuSectionStartRow);
+    createChartNodes(data.rasterEventFlow, gpuSectionStartRow);
   }
 
   @override
@@ -288,7 +288,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
           sectionLabelBackgroundColor = mainUiColor;
           break;
         case FullTimelineData.gpuKey:
-          sectionLabelBackgroundColor = mainGpuColor;
+          sectionLabelBackgroundColor = mainRasterColor;
           break;
         case FullTimelineData.unknownKey:
           sectionLabelBackgroundColor = mainUnknownColor;
@@ -532,7 +532,7 @@ Color _nextUiColor() {
 int _gpuColorOffset = 0;
 
 Color _nextGpuColor() {
-  final color = gpuColorPalette[_gpuColorOffset % gpuColorPalette.length];
+  final color = rasterColorPalette[_gpuColorOffset % rasterColorPalette.length];
   _gpuColorOffset++;
   return color;
 }

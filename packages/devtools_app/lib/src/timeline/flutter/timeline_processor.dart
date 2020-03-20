@@ -38,7 +38,7 @@ List<Map<String, dynamic>> debugHandledTraceEvents = [];
 /// be able to dump this buffer to a downloadable text file.
 StringBuffer debugFrameTracking = StringBuffer();
 
-const String gpuEventName = 'GPURasterizer::Draw';
+const String rasterEventName = 'GPURasterizer::Draw';
 
 const String uiEventName = 'VSYNC';
 
@@ -104,11 +104,11 @@ class TimelineProcessor {
   /// This is guaranteed because we process the events in timestamp order.
   SyncTimelineEvent _pendingRootCompleteEvent;
 
-  // TODO(kenz): Remove the [uiThreadId] and [gpuThreadId] once ui/gpu
+  // TODO(kenz): Remove the [uiThreadId] and [rasterThreadId] once ui/raster
   //  distinction changes and frame ids are available in the engine.
   int uiThreadId;
 
-  int gpuThreadId;
+  int rasterThreadId;
 
   Future<void> processTimeline(
     List<TraceEventWrapper> traceEvents,
@@ -514,9 +514,9 @@ class TimelineProcessor {
 
   /// Add event to an available frame in [pendingFrames] if we can.
   void _maybeAddFlutterFrameEvent(SyncTimelineEvent event) {
-    if (!event.isUiEventFlow && !event.isGpuEventFlow) {
+    if (!event.isUiEventFlow && !event.isRasterEventFlow) {
       // We do not care about events that are neither the main flow of UI
-      // events nor the main flow of GPU events.
+      // events nor the main flow of Raster events.
       return;
     }
 
@@ -541,7 +541,7 @@ class TimelineProcessor {
     // Ensure the frame does not already have an event of this type and that
     // the event fits within the frame's time boundaries.
     if (frame.eventFlows[event.type.index] != null ||
-        !satisfiesUiGpuOrder(event, frame)) return false;
+        !satisfiesUiRasterOrder(event, frame)) return false;
 
     frame.setEventFlow(event);
 
@@ -552,18 +552,18 @@ class TimelineProcessor {
     return true;
   }
 
-  // The [gpuEventFlow] should always start after the [uiEventFlow].
+  // The [rasterEventFlow] should always start after the [uiEventFlow].
   @visibleForTesting
-  bool satisfiesUiGpuOrder(SyncTimelineEvent e, TimelineFrame f) {
-    if (e.isUiEventFlow && f.gpuEventFlow != null) {
+  bool satisfiesUiRasterOrder(SyncTimelineEvent e, TimelineFrame f) {
+    if (e.isUiEventFlow && f.rasterEventFlow != null) {
       return e.time.start.inMicroseconds <
-          f.gpuEventFlow.time.start.inMicroseconds;
-    } else if (e.isGpuEventFlow && f.uiEventFlow != null) {
+          f.rasterEventFlow.time.start.inMicroseconds;
+    } else if (e.isRasterEventFlow && f.uiEventFlow != null) {
       return e.time.start.inMicroseconds >
           f.uiEventFlow.time.start.inMicroseconds;
     }
     // We do not have enough information about the frame to compare UI and
-    // GPU start times, so return true.
+    // Raster start times, so return true.
     return true;
   }
 
@@ -594,9 +594,10 @@ class TimelineProcessor {
     _progressNotifier.value = 0.0;
   }
 
-  void primeThreadIds({@required int uiThreadId, @required int gpuThreadId}) {
+  void primeThreadIds(
+      {@required int uiThreadId, @required int rasterThreadId}) {
     this.uiThreadId = uiThreadId;
-    this.gpuThreadId = gpuThreadId;
+    this.rasterThreadId = rasterThreadId;
   }
 
   @visibleForTesting
@@ -607,8 +608,8 @@ class TimelineProcessor {
       return TimelineEventType.async;
     } else if (event.threadId == uiThreadId) {
       return TimelineEventType.ui;
-    } else if (event.threadId == gpuThreadId) {
-      return TimelineEventType.gpu;
+    } else if (event.threadId == rasterThreadId) {
+      return TimelineEventType.raster;
     } else {
       return TimelineEventType.unknown;
     }

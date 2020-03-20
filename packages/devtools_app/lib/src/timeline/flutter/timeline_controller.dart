@@ -191,10 +191,10 @@ class TimelineController implements DisposableController {
       frame.uiEventFlow.format(buf, '  ');
       buf.writeln('\nUI trace for frame ${frame.id}');
       frame.uiEventFlow.writeTraceToBuffer(buf);
-      buf.writeln('\nGPU timeline event frame ${frame.id}:');
-      frame.gpuEventFlow.format(buf, '  ');
-      buf.writeln('\nGPU trace for frame ${frame.id}');
-      frame.gpuEventFlow.writeTraceToBuffer(buf);
+      buf.writeln('\Raster timeline event frame ${frame.id}:');
+      frame.rasterEventFlow.format(buf, '  ');
+      buf.writeln('\nRaster trace for frame ${frame.id}');
+      frame.rasterEventFlow.writeTraceToBuffer(buf);
       log(buf.toString());
     }
   }
@@ -250,10 +250,10 @@ class TimelineController implements DisposableController {
         )
     ];
 
-    // TODO(kenz): once each trace event has a ui/gpu distinction bit added to
+    // TODO(kenz): once each trace event has a ui/raster distinction bit added to
     // the trace, we will not need to infer thread ids. This is not robust.
     final uiThreadId = _threadIdForEvent(uiEventName, traceEvents);
-    final gpuThreadId = _threadIdForEvent(gpuEventName, traceEvents);
+    final rasterThreadId = _threadIdForEvent(rasterEventName, traceEvents);
 
     offlineTimelineData = offlineData.shallowClone();
     data = offlineData.shallowClone();
@@ -261,7 +261,7 @@ class TimelineController implements DisposableController {
     // Process offline data.
     processor.primeThreadIds(
       uiThreadId: uiThreadId,
-      gpuThreadId: gpuThreadId,
+      rasterThreadId: rasterThreadId,
     );
     await processTraceEvents(traceEvents, 0);
     if (data.cpuProfileData != null) {

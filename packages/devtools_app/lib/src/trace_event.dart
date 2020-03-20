@@ -104,8 +104,8 @@ class TraceEvent {
     if (_type == null) {
       if (args[typeKey] == 'ui') {
         _type = TimelineEventType.ui;
-      } else if (args[typeKey] == 'gpu') {
-        _type = TimelineEventType.gpu;
+      } else if (args[typeKey] == 'raster') {
+        _type = TimelineEventType.raster;
       } else {
         _type = TimelineEventType.unknown;
       }
@@ -117,7 +117,7 @@ class TraceEvent {
 
   bool get isUiEvent => type == TimelineEventType.ui;
 
-  bool get isGpuEvent => type == TimelineEventType.gpu;
+  bool get isRasterEvent => type == TimelineEventType.raster;
 
   @override
   String toString() => '$type event [$idKey: $id] [$phaseKey: $phase] '
@@ -151,7 +151,7 @@ class TraceEventWrapper implements Comparable<TraceEventWrapper> {
 
 enum TimelineEventType {
   ui,
-  gpu,
+  raster,
   async,
   unknown,
 }

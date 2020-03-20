@@ -48,8 +48,8 @@ void main() {
       expect(find.text(EventDetails.instructions), findsNothing);
     });
 
-    testWidgets('builds for GPU event', (WidgetTester tester) async {
-      await pumpEventDetails(goldenGpuTimelineEvent, tester);
+    testWidgets('builds for Raster event', (WidgetTester tester) async {
+      await pumpEventDetails(goldenRasterTimelineEvent, tester);
       expect(find.byType(CpuProfiler), findsNothing);
       expect(find.byType(CpuProfilerDisabled), findsNothing);
       expect(find.byType(EventSummary), findsOneWidget);
@@ -122,7 +122,7 @@ void main() {
     });
 
     testWidgets('event with args', (WidgetTester tester) async {
-      eventSummary = EventSummary(goldenGpuTimelineEvent);
+      eventSummary = EventSummary(goldenRasterTimelineEvent);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text('Time'), findsOneWidget);

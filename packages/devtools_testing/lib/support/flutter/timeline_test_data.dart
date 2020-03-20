@@ -14,7 +14,7 @@ import '../cpu_profile_test_data.dart';
 import 'test_utils.dart';
 
 const testUiThreadId = 1;
-const testGpuThreadId = 2;
+const testRasterThreadId = 2;
 const testUnknownThreadId = 3;
 
 final frameStartEvent = testTraceEventWrapper({
@@ -31,7 +31,7 @@ final frameStartEvent = testTraceEventWrapper({
 final frameEndEvent = testTraceEventWrapper({
   'name': 'PipelineItem',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 94955,
   'ts': 118039679872,
   'ph': 'f',
@@ -42,11 +42,11 @@ final frameEndEvent = testTraceEventWrapper({
 
 final testFrame0 = TimelineFrame('id_0')
   ..setEventFlow(goldenUiTimelineEvent)
-  ..setEventFlow(goldenGpuTimelineEvent);
+  ..setEventFlow(goldenRasterTimelineEvent);
 
 final testFrame1 = TimelineFrame('id_1')
   ..setEventFlow(goldenUiTimelineEvent)
-  ..setEventFlow(goldenGpuTimelineEvent);
+  ..setEventFlow(goldenRasterTimelineEvent);
 
 // Mark: UI golden data.
 // None of the following data should be modified. If you have a need to modify
@@ -372,26 +372,26 @@ final endEngineBeginFrameTrace = testTraceEventWrapper({
   'args': {}
 });
 
-// Mark: GPU golden data. This data is abbreviated in comparison to the UI
+// Mark: Raster golden data. This data is abbreviated in comparison to the UI
 // golden data. We do not need both data sets to be complete for testing.
 // None of the following data should be modified. If you have a need to modify
 // any of the below events for a test, make a copy and modify the copy.
 final gpuRasterizerDrawEvent = testSyncTimelineEvent(gpuRasterizerDrawTrace)
-  ..type = TimelineEventType.gpu
+  ..type = TimelineEventType.raster
   ..addEndEvent(endGpuRasterizerDrawTrace);
 
 final pipelineConsumeEvent = testSyncTimelineEvent(pipelineConsumeTrace)
-  ..type = TimelineEventType.gpu
+  ..type = TimelineEventType.raster
   ..addEndEvent(endPipelineConsumeTrace);
 
-final goldenGpuTimelineEvent = gpuRasterizerDrawEvent
+final goldenRasterTimelineEvent = gpuRasterizerDrawEvent
   ..addChild(pipelineConsumeEvent);
 
-const goldenGpuString =
+const goldenRasterString =
     '  GPURasterizer::Draw [118039651469 μs - 118039679873 μs]\n'
     '    PipelineConsume [118039651470 μs - 118039679870 μs]\n';
 
-final goldenGpuTraceEvents = [
+final goldenRasterTraceEvents = [
   gpuRasterizerDrawTrace,
   pipelineConsumeTrace,
   endPipelineConsumeTrace,
@@ -401,7 +401,7 @@ final goldenGpuTraceEvents = [
 final gpuRasterizerDrawTrace = testTraceEventWrapper({
   'name': 'GPURasterizer::Draw',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 94955,
   'ts': 118039651469,
   'ph': 'B',
@@ -412,7 +412,7 @@ final gpuRasterizerDrawTrace = testTraceEventWrapper({
 final pipelineConsumeTrace = testTraceEventWrapper({
   'name': 'PipelineConsume',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 94955,
   'ts': 118039651470,
   'ph': 'B',
@@ -421,7 +421,7 @@ final pipelineConsumeTrace = testTraceEventWrapper({
 final endPipelineConsumeTrace = testTraceEventWrapper({
   'name': 'PipelineConsume',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 94955,
   'ts': 118039679870,
   'ph': 'E',
@@ -430,7 +430,7 @@ final endPipelineConsumeTrace = testTraceEventWrapper({
 final endGpuRasterizerDrawTrace = testTraceEventWrapper({
   'name': 'GPURasterizer::Draw',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 94955,
   'ts': 118039679873,
   'ph': 'E',
@@ -944,7 +944,7 @@ final unknownEventEndTrace = testTraceEventWrapper({
 // Mark: OfflineTimelineData.
 final goldenTraceEventsJson = List.from(
     goldenUiTraceEvents.map((trace) => trace.json).toList()
-      ..addAll(goldenGpuTraceEvents.map((trace) => trace.json).toList()));
+      ..addAll(goldenRasterTraceEvents.map((trace) => trace.json).toList()));
 
 final offlineTimelineDataJson = {
   TimelineData.traceEventsKey: goldenTraceEventsJson,
@@ -959,7 +959,7 @@ final offlineTimelineDataJson = {
 final transformLayerStart1 = testTraceEventWrapper({
   'name': 'TransformLayer::Preroll',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 22283,
   'ts': 118039651669,
   'tts': 733287,
@@ -969,7 +969,7 @@ final transformLayerStart1 = testTraceEventWrapper({
 final transformLayerStart2 = testTraceEventWrapper({
   'name': 'TransformLayer::Preroll',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 22283,
   'ts': 118039651869,
   'tts': 733289,
@@ -979,7 +979,7 @@ final transformLayerStart2 = testTraceEventWrapper({
 final transformLayerEnd2 = testTraceEventWrapper({
   'name': 'TransformLayer::Preroll',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 22283,
   'ts': 118039679673,
   'tts': 733656,
@@ -989,7 +989,7 @@ final transformLayerEnd2 = testTraceEventWrapper({
 final transformLayerEnd1 = testTraceEventWrapper({
   'name': 'TransformLayer::Preroll',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 22283,
   'ts': 118039679673,
   'tts': 733656,

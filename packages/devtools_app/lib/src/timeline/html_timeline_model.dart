@@ -550,7 +550,7 @@ class TimelineFrame {
   TimelineEvent get uiEventFlow => eventFlows[TimelineEventType.ui.index];
 
   /// Flow of events describing the GPU work for the frame.
-  TimelineEvent get gpuEventFlow => eventFlows[TimelineEventType.gpu.index];
+  TimelineEvent get gpuEventFlow => eventFlows[TimelineEventType.raster.index];
 
   /// Whether the frame is ready for the timeline.
   ///
@@ -596,7 +596,7 @@ class TimelineFrame {
     if (type == TimelineEventType.ui) {
       time.start = event?.time?.start;
     }
-    if (type == TimelineEventType.gpu) {
+    if (type == TimelineEventType.raster) {
       time.end = event?.time?.end;
     }
     eventFlows[type.index] = event;
@@ -605,7 +605,7 @@ class TimelineFrame {
 
   TimelineEvent findTimelineEvent(TimelineEvent event) {
     if (event.type == TimelineEventType.ui ||
-        event.type == TimelineEventType.gpu) {
+        event.type == TimelineEventType.raster) {
       return eventFlows[event.type.index].firstChildWithCondition(
           (e) => e.name == event.name && e.time == event.time);
     }
@@ -658,7 +658,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
 
   bool get isUiEvent => type == TimelineEventType.ui;
 
-  bool get isGpuEvent => type == TimelineEventType.gpu;
+  bool get isGpuEvent => type == TimelineEventType.raster;
 
   bool get isAsyncEvent => type == TimelineEventType.async;
 

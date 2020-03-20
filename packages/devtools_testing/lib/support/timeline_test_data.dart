@@ -377,11 +377,11 @@ final endEngineBeginFrameTrace = testTraceEventWrapper({
 // None of the following data should be modified. If you have a need to modify
 // any of the below events for a test, make a copy and modify the copy.
 final gpuRasterizerDrawEvent = testSyncTimelineEvent(gpuRasterizerDrawTrace)
-  ..type = TimelineEventType.gpu
+  ..type = TimelineEventType.raster
   ..addEndEvent(endGpuRasterizerDrawTrace);
 
 final pipelineConsumeEvent = testSyncTimelineEvent(pipelineConsumeTrace)
-  ..type = TimelineEventType.gpu
+  ..type = TimelineEventType.raster
   ..addEndEvent(endPipelineConsumeTrace);
 
 final goldenGpuTimelineEvent = gpuRasterizerDrawEvent
@@ -968,7 +968,7 @@ final offlineFullTimelineDataJson = {
 final transformLayerStart1 = testTraceEventWrapper({
   'name': 'TransformLayer::Preroll',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 22283,
   'ts': 118039651669,
   'tts': 733287,
@@ -978,7 +978,7 @@ final transformLayerStart1 = testTraceEventWrapper({
 final transformLayerStart2 = testTraceEventWrapper({
   'name': 'TransformLayer::Preroll',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 22283,
   'ts': 118039651869,
   'tts': 733289,
@@ -988,7 +988,7 @@ final transformLayerStart2 = testTraceEventWrapper({
 final transformLayerEnd2 = testTraceEventWrapper({
   'name': 'TransformLayer::Preroll',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 22283,
   'ts': 118039679673,
   'tts': 733656,
@@ -998,7 +998,7 @@ final transformLayerEnd2 = testTraceEventWrapper({
 final transformLayerEnd1 = testTraceEventWrapper({
   'name': 'TransformLayer::Preroll',
   'cat': 'Embedder',
-  'tid': testGpuThreadId,
+  'tid': testRasterThreadId,
   'pid': 22283,
   'ts': 118039679673,
   'tts': 733656,

@@ -23,7 +23,7 @@ void main() {
         timelineEvents: [
           goldenAsyncTimelineEvent,
           goldenUiTimelineEvent,
-          goldenGpuTimelineEvent,
+          goldenRasterTimelineEvent,
           unknownEvent,
         ],
       );
@@ -76,7 +76,7 @@ void main() {
         timelineEvents: [
           goldenAsyncTimelineEvent,
           goldenUiTimelineEvent,
-          goldenGpuTimelineEvent,
+          goldenRasterTimelineEvent,
           unknownEvent,
         ],
       )
@@ -112,7 +112,7 @@ void main() {
         equals(1),
       );
       expect(
-        timelineData.eventGroups[TimelineData.gpuKey].rows[0].events.length,
+        timelineData.eventGroups[TimelineData.rasterKey].rows[0].events.length,
         equals(1),
       );
       expect(
@@ -123,8 +123,8 @@ void main() {
     });
 
     test('event bucket compare', () {
-      expect(TimelineData.eventGroupComparator('UI', 'GPU'), equals(-1));
-      expect(TimelineData.eventGroupComparator('GPU', 'UI'), equals(1));
+      expect(TimelineData.eventGroupComparator('UI', 'Raster'), equals(-1));
+      expect(TimelineData.eventGroupComparator('Raster', 'UI'), equals(1));
       expect(TimelineData.eventGroupComparator('UI', 'UI'), equals(0));
       expect(TimelineData.eventGroupComparator('UI', 'Async'), equals(1));
       expect(TimelineData.eventGroupComparator('A', 'B'), equals(-1));

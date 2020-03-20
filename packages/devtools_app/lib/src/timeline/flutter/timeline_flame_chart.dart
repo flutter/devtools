@@ -174,14 +174,14 @@ class TimelineFlameChartState
         backgroundColor = nextAsyncColor(resetOffset: event.isRoot);
       } else if (event.isUiEvent) {
         backgroundColor = nextUiColor(resetOffset: event.isRoot);
-      } else if (event.isGpuEvent) {
-        backgroundColor = nextGpuColor(resetOffset: event.isRoot);
+      } else if (event.isRasterEvent) {
+        backgroundColor = nextRasterColor(resetOffset: event.isRoot);
       } else {
         backgroundColor = nextUnknownColor(resetOffset: event.isRoot);
       }
 
       Color textColor;
-      if (event.isGpuEvent) {
+      if (event.isRasterEvent) {
         textColor = ThemedColor.fromSingleColor(contrastForegroundWhite);
       } else {
         textColor = ThemedColor.fromSingleColor(Colors.black);
@@ -239,8 +239,8 @@ class TimelineFlameChartState
         case TimelineData.uiKey:
           sectionLabelBackgroundColor = mainUiColor;
           break;
-        case TimelineData.gpuKey:
-          sectionLabelBackgroundColor = mainGpuColor;
+        case TimelineData.rasterKey:
+          sectionLabelBackgroundColor = mainRasterColor;
           break;
         case TimelineData.unknownKey:
           sectionLabelBackgroundColor = mainUnknownColor;

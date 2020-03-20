@@ -688,10 +688,11 @@ class HtmlTimelineScreen extends HtmlScreen {
             timelineProtocol.currentEventNodes[TimelineEventType.ui.index]
                 .format(buf, '   ');
           }
-          if (timelineProtocol.currentEventNodes[TimelineEventType.gpu.index] !=
+          if (timelineProtocol
+                  .currentEventNodes[TimelineEventType.raster.index] !=
               null) {
             buf.writeln('\n Current GPU event node:');
-            timelineProtocol.currentEventNodes[TimelineEventType.gpu.index]
+            timelineProtocol.currentEventNodes[TimelineEventType.raster.index]
                 .format(buf, '   ');
           }
           if (timelineProtocol.heaps[TimelineEventType.ui.index].isNotEmpty) {
@@ -702,10 +703,11 @@ class HtmlTimelineScreen extends HtmlScreen {
               buf.writeln(wrapper.event.json.toString());
             }
           }
-          if (timelineProtocol.heaps[TimelineEventType.gpu.index].isNotEmpty) {
+          if (timelineProtocol
+              .heaps[TimelineEventType.raster.index].isNotEmpty) {
             buf.writeln('\nGPU heap');
             for (TraceEventWrapper wrapper in timelineProtocol
-                .heaps[TimelineEventType.gpu.index]
+                .heaps[TimelineEventType.raster.index]
                 .toList()) {
               buf.writeln(wrapper.event.json.toString());
             }

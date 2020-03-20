@@ -174,7 +174,7 @@ class FramesBarPlotly {
           ),
         ),
         marker: Marker(
-          color: colorToCss(mainGpuColor),
+          color: colorToCss(mainRasterColor),
         ),
         width: [0],
       ),
@@ -188,16 +188,16 @@ class FramesBarPlotly {
         x: [xCoordNotUsed],
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
-          bgcolor: colorToCss(selectedGpuColor),
+          bgcolor: colorToCss(selectedRasterColor),
           font: Font(
             color: colorToCss(hoverTextColor),
           ),
-          bordercolor: colorToCss(selectedGpuColor),
+          bordercolor: colorToCss(selectedRasterColor),
         ),
         showlegend: false,
         type: 'bar',
         marker: Marker(
-          color: colorToCss(selectedGpuColor),
+          color: colorToCss(selectedRasterColor),
         ),
       ),
     );

@@ -77,7 +77,8 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
         isTrue,
       );
       expect(timelineController.processor.uiThreadId, equals(testUiThreadId));
-      expect(timelineController.processor.gpuThreadId, equals(testGpuThreadId));
+      expect(timelineController.processor.rasterThreadId,
+          equals(testRasterThreadId));
 
       await env.tearDownEnvironment();
     });

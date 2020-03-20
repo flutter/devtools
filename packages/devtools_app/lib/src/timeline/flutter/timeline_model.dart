@@ -39,7 +39,7 @@ class TimelineData {
 
   static const uiKey = 'UI';
 
-  static const gpuKey = 'GPU';
+  static const rasterKey = 'Raster';
 
   static const unknownKey = 'Unknown';
 
@@ -104,8 +104,8 @@ class TimelineData {
       return event.name;
     } else if (event.isUiEvent) {
       return uiKey;
-    } else if (event.isGpuEvent) {
-      return gpuKey;
+    } else if (event.isRasterEvent) {
+      return rasterKey;
     } else {
       return unknownKey;
     }
@@ -136,14 +136,14 @@ class TimelineData {
     if (a == unknownKey) return 1;
     if (b == unknownKey) return -1;
 
-    // Order the GPU event bucket after the UI event bucket.
-    if ((a == uiKey && b == gpuKey) || (a == gpuKey && b == uiKey)) {
+    // Order the Raster event bucket after the UI event bucket.
+    if ((a == uiKey && b == rasterKey) || (a == rasterKey && b == uiKey)) {
       return -1 * a.compareTo(b);
     }
 
-    // Order non-UI and non-GPU buckets before the UI / GPU buckets.
-    if (a == uiKey || a == gpuKey) return 1;
-    if (b == uiKey || b == gpuKey) return -1;
+    // Order non-UI and non-raster buckets before the UI / Raster buckets.
+    if (a == uiKey || a == rasterKey) return 1;
+    if (b == uiKey || b == rasterKey) return -1;
 
     // Alphabetize all other buckets.
     return a.compareTo(b);
@@ -391,20 +391,21 @@ class OfflineTimelineEvent extends TimelineEvent {
 ///
 /// Each TimelineFrame should have 2 distinct pieces of data:
 /// * [uiEventFlow] : flow of events showing the UI work for the frame.
-/// * [gpuEventFlow] : flow of events showing the GPU work for the frame.
+/// * [rasterEventFlow] : flow of events showing the Raster work for the frame.
 class TimelineFrame {
   TimelineFrame(this.id);
 
   final String id;
 
-  /// Event flows for the UI and GPU work for the frame.
+  /// Event flows for the UI and Raster work for the frame.
   final List<SyncTimelineEvent> eventFlows = List.generate(2, (_) => null);
 
   /// Flow of events describing the UI work for the frame.
   SyncTimelineEvent get uiEventFlow => eventFlows[TimelineEventType.ui.index];
 
-  /// Flow of events describing the GPU work for the frame.
-  SyncTimelineEvent get gpuEventFlow => eventFlows[TimelineEventType.gpu.index];
+  /// Flow of events describing the Raster work for the frame.
+  SyncTimelineEvent get rasterEventFlow =>
+      eventFlows[TimelineEventType.raster.index];
 
   /// Whether the frame is ready for the timeline.
   ///
@@ -412,7 +413,7 @@ class TimelineFrame {
   /// [_pipelineItemStartTime] and [_pipelineItemEndTime].
   bool get isReadyForTimeline {
     return uiEventFlow != null &&
-        gpuEventFlow != null &&
+        rasterEventFlow != null &&
         pipelineItemTime.start?.inMicroseconds != null &&
         pipelineItemTime.end?.inMicroseconds != null;
   }
@@ -439,9 +440,10 @@ class TimelineFrame {
 
   double get uiDurationMs => uiDuration != null ? uiDuration / 1000 : null;
 
-  int get gpuDuration => gpuEventFlow?.time?.duration?.inMicroseconds;
+  int get rasterDuration => rasterEventFlow?.time?.duration?.inMicroseconds;
 
-  double get gpuDurationMs => gpuDuration != null ? gpuDuration / 1000 : null;
+  double get rasterDurationMs =>
+      rasterDuration != null ? rasterDuration / 1000 : null;
 
   CpuProfileData cpuProfileData;
 
@@ -450,7 +452,7 @@ class TimelineFrame {
     if (type == TimelineEventType.ui) {
       time.start = event?.time?.start;
     }
-    if (type == TimelineEventType.gpu) {
+    if (type == TimelineEventType.raster) {
       time.end = event?.time?.end;
     }
     eventFlows[type.index] = event;
@@ -459,7 +461,7 @@ class TimelineFrame {
 
   TimelineEvent findTimelineEvent(TimelineEvent event) {
     if (event.type == TimelineEventType.ui ||
-        event.type == TimelineEventType.gpu) {
+        event.type == TimelineEventType.raster) {
       return eventFlows[event.type.index].firstChildWithCondition(
           (e) => e.name == event.name && e.time == event.time);
     }
@@ -469,7 +471,7 @@ class TimelineFrame {
   @override
   String toString() {
     return 'Frame $id - $time, ui: ${uiEventFlow.time}, '
-        'gpu: ${gpuEventFlow.time}';
+        'raster: ${rasterEventFlow.time}';
   }
 }
 
@@ -514,7 +516,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
 
   bool get isUiEvent => type == TimelineEventType.ui;
 
-  bool get isGpuEvent => type == TimelineEventType.gpu;
+  bool get isRasterEvent => type == TimelineEventType.raster;
 
   bool get isAsyncEvent => type == TimelineEventType.async;
 
@@ -739,7 +741,7 @@ class SyncTimelineEvent extends TimelineEvent {
   bool get isUiEventFlow => subtreeHasNodeWithCondition(
       (TimelineEvent event) => event.name.contains('Engine::BeginFrame'));
 
-  bool get isGpuEventFlow => subtreeHasNodeWithCondition(
+  bool get isRasterEventFlow => subtreeHasNodeWithCondition(
       (TimelineEvent event) => event.name.contains('PipelineConsume'));
 
   @override

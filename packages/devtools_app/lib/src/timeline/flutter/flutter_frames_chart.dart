@@ -47,7 +47,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     implements OnChartValueSelectedListener {
   static const maxFrames = 150;
 
-  /// Datapoint entry for each frame duration (UI/GPU) for stacked bars.
+  /// Datapoint entry for each frame duration (UI/Raster) for stacked bars.
   final _frameDurations = <BarEntry>[];
 
   /// Set of all duration information (the data, colors, etc).
@@ -182,7 +182,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
     // Create heap used dataset.
     frameDurationsSet = BarDataSet(_frameDurations, 'Durations')
-      ..setColors1([mainGpuColor, mainUiColor])
+      ..setColors1([mainRasterColor, mainUiColor])
       ..setDrawValues(false);
 
     // Create a data object with all the data sets - stacked bar.
@@ -196,19 +196,19 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     return BarEntry.fromListYVals(x: 0.0, vals: [0.0, 0.0]);
   }
 
-  // TODO(terry): Consider grouped bars (UI/GPU) not stacked.
+  // TODO(terry): Consider grouped bars (UI/Raster) not stacked.
   BarEntry createBarEntry(TimelineFrame frame, int index) {
-    if (frame.uiDurationMs + frame.gpuDurationMs > 250) {
+    if (frame.uiDurationMs + frame.rasterDurationMs > 250) {
       // Constrain the y-axis so outliers don't blow the barchart scale.
       // TODO(terry): Need to have a max where the hover value shows the real #s but the chart just looks pinned to the top.
       _chartController.axisLeft?.setAxisMaximum(250);
     }
 
-    // TODO(terry): Structured class item 0 is GPU, item 1 is UI if not stacked.
+    // TODO(terry): Structured class item 0 is Raster, item 1 is UI if not stacked.
     final entry = BarEntry.fromListYVals(
       x: index.toDouble(),
       vals: [
-        frame.gpuDurationMs.toDouble(),
+        frame.rasterDurationMs.toDouble(),
         frame.uiDurationMs.toDouble(),
       ],
     );
@@ -250,7 +250,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     final yValues = (e as BarEntry).yVals;
     print(
       'onValueSelected - Frame Index = ${e.x}, '
-      'GPU = ${yValues[0]}, UI = ${yValues[1]}',
+      'Raster = ${yValues[0]}, UI = ${yValues[1]}',
     );
   }
 }
@@ -263,7 +263,7 @@ class YAxisUnitFormatter extends ValueFormatter {
 typedef SelectionCallback = void Function(int frameIndex);
 
 /// Selection of a point in the Bar chart displays the data point values
-/// UI duration and GPU duration. Also, highlight the selected stacked bar.
+/// UI duration and Raster duration. Also, highlight the selected stacked bar.
 /// Uses marker/highlight mechanism which lags because it uses onTapUp maybe
 /// onTapDown would be less laggy.
 ///
@@ -307,12 +307,12 @@ class SelectedDataPoint extends LineChartMarker {
     final yValues = (_entry as BarEntry).yVals;
 
     final num uiDuration = yValues[1];
-    final num gpuDuration = yValues[0];
+    final num rasterDuration = yValues[0];
 
     final TextPainter painter = PainterUtils.create(
       null,
       'UI  = ${_formatter.getFormattedValue1(uiDuration)}\n'
-      'GPU = ${_formatter.getFormattedValue1(gpuDuration)}',
+      'Raster = ${_formatter.getFormattedValue1(rasterDuration)}',
       textColor,
       fontSize,
     )..textAlign = TextAlign.left;
