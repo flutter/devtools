@@ -61,7 +61,7 @@ class ConnectedApp {
 
     await serviceManager.serviceExtensionManager.extensionStatesUpdated.future;
 
-    // The debugAllowBanner extension is only available in debug builds.
+    // The debugAllowBanner extension is only available in debug builds
     final hasDebugExtension = serviceManager.serviceExtensionManager
         .isServiceExtensionAvailable(extensions.debugAllowBanner.extension);
     return !hasDebugExtension;
