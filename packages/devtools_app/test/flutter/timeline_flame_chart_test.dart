@@ -22,9 +22,9 @@ void main() {
   group('TimelineFlameChart', () {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
-      when(fakeServiceManager.connectedApp.isDartWebAppRaw).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isFlutterAppRaw).thenReturn(true);
-      when(fakeServiceManager.connectedApp.isDartCliAppRaw).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));

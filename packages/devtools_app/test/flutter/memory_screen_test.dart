@@ -41,7 +41,7 @@ void main() {
     setUp(() async {
       await ensureInspectorDependencies();
       fakeServiceManager = FakeServiceManager(useFakeService: true);
-      when(fakeServiceManager.connectedApp.isDartWebAppRaw).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
@@ -55,7 +55,7 @@ void main() {
 
     testWidgets('builds disabled message when disabled for web app',
         (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isDartWebAppRaw).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(true);
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(MemoryBody), findsNothing);
       expect(find.byType(DisabledForWebAppMessage), findsOneWidget);

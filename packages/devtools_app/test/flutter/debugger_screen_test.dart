@@ -21,7 +21,7 @@ void main() {
   group('DebuggerScreen', () {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
-      when(fakeServiceManager.connectedApp.isProfileBuildRaw).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       screen = const DebuggerScreen();
     });
@@ -33,7 +33,7 @@ void main() {
 
     testWidgets('builds disabled message when disabled for profile mode',
         (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isProfileBuildRaw).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(true);
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(DebuggerScreenBody), findsNothing);
       expect(find.byType(DisabledForProfileModeMessage), findsOneWidget);

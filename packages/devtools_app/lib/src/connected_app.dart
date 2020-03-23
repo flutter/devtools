@@ -13,60 +13,45 @@ const dartHtmlLibraryUri = 'dart:html';
 class ConnectedApp {
   ConnectedApp();
 
-  bool get appTypeKnown => _appTypeKnown;
-  bool _appTypeKnown = false;
+  bool get appTypeKnown =>
+      _isFlutterApp != null && _isProfileBuild != null && _isDartWebApp != null;
 
-  Future<bool> get isFlutterApp async {
-    _isFlutterApp ??= await _libraryUriAvailable(flutterLibraryUri);
-    _updateAppTypeKnown();
-    return _isFlutterApp;
-  }
+  Future<bool> get isFlutterApp async =>
+      _isFlutterApp ??= await _libraryUriAvailable(flutterLibraryUri);
 
-  bool get isFlutterAppRaw {
+  bool get isFlutterAppNow {
     assert(_isFlutterApp != null);
     return _isFlutterApp;
   }
 
   bool _isFlutterApp;
 
-  Future<bool> get isProfileBuild async {
-    _isProfileBuild ??= await _connectedToProfileBuild();
-    _updateAppTypeKnown();
-    return _isProfileBuild;
-  }
+  Future<bool> get isProfileBuild async =>
+      _isProfileBuild ??= await _connectedToProfileBuild();
 
-  bool get isProfileBuildRaw {
+  bool get isProfileBuildNow {
     assert(_isProfileBuild != null);
     return _isProfileBuild;
   }
 
   bool _isProfileBuild;
 
-  Future<bool> get isDartWebApp async {
-    _isDartWebApp ??= await _libraryUriAvailable(dartHtmlLibraryUri);
-    _updateAppTypeKnown();
-    return _isDartWebApp;
-  }
+  Future<bool> get isDartWebApp async =>
+      _isDartWebApp ??= await _libraryUriAvailable(dartHtmlLibraryUri);
 
-  bool get isDartWebAppRaw {
+  bool get isDartWebAppNow {
     assert(_isDartWebApp != null);
     return _isDartWebApp;
   }
 
   bool _isDartWebApp;
 
-  void _updateAppTypeKnown() {
-    _appTypeKnown = _isFlutterApp != null &&
-        _isProfileBuild != null &&
-        _isDartWebApp != null;
-  }
-
   bool get isRunningOnDartVM => serviceManager.vm.name != 'ChromeDebugProxy';
 
   Future<bool> get isDartCliApp async =>
       isRunningOnDartVM && !(await isFlutterApp);
 
-  bool get isDartCliAppRaw => isRunningOnDartVM && !isFlutterAppRaw;
+  bool get isDartCliAppNow => isRunningOnDartVM && !isFlutterAppNow;
 
   Future<bool> _connectedToProfileBuild() async {
     assert(serviceManager.serviceAvailable.isCompleted);
@@ -92,9 +77,6 @@ class ConnectedApp {
   }
 
   Future<void> initializeValues() async {
-    await isFlutterApp;
-    await isProfileBuild;
-    await isDartWebApp;
-    _appTypeKnown = true;
+    await Future.wait([isFlutterApp, isProfileBuild, isDartWebApp]);
   }
 }

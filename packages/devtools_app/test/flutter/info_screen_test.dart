@@ -19,7 +19,7 @@ void main() {
   group('Info Screen', () {
     setUp(() {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
-      when(fakeServiceManager.connectedApp.isDartWebAppRaw).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       setGlobal(
         ServiceConnectionManager,
         fakeServiceManager,
@@ -36,7 +36,7 @@ void main() {
 
     testWidgets('builds disabled message when disabled for web app',
         (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isDartWebAppRaw).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(true);
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InfoScreenBody), findsNothing);
       expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
@@ -52,7 +52,7 @@ void main() {
     testWidgets('builds with no data', (WidgetTester tester) async {
       setGlobal(ServiceConnectionManager, FakeServiceManager());
       when(serviceManager.service.getFlagList()).thenAnswer((_) => null);
-      when(serviceManager.connectedApp.isDartWebAppRaw).thenReturn(false);
+      when(serviceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       mockIsFlutterApp(serviceManager.connectedApp);
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InfoScreenBody), findsOneWidget);

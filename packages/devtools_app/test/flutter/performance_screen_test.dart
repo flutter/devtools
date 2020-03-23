@@ -25,7 +25,7 @@ void main() {
   group('PerformanceScreen', () {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
-      when(fakeServiceManager.connectedApp.isDartWebAppRaw).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       screen = const PerformanceScreen();
     });
@@ -56,7 +56,7 @@ void main() {
 
     testWidgets('builds disabled message when disabled for web app',
         (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isDartWebAppRaw).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(true);
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(PerformanceScreenBody), findsNothing);
       expect(find.byType(DisabledForWebAppMessage), findsOneWidget);

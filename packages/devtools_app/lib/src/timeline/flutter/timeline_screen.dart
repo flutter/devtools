@@ -57,7 +57,7 @@ class TimelineScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return !serviceManager.connectedApp.isDartWebAppRaw
+    return !serviceManager.connectedApp.isDartWebAppNow
         ? const TimelineScreenBody()
         : const DisabledForWebAppMessage();
   }
@@ -129,7 +129,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       children: [
         _timelineControls(),
         const SizedBox(height: denseRowSpacing),
-        if (serviceManager.connectedApp.isFlutterAppRaw)
+        if (serviceManager.connectedApp.isFlutterAppNow)
           const FlutterFramesChart(),
         Expanded(
           child: Split(
@@ -194,7 +194,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       children: [
         ProfileGranularityDropdown(),
         const SizedBox(width: defaultSpacing),
-        if (!serviceManager.connectedApp.isDartCliAppRaw)
+        if (!serviceManager.connectedApp.isDartCliAppNow)
           ServiceExtensionButtonGroup(
             minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
             extensions: [performanceOverlay, profileWidgetBuilds],

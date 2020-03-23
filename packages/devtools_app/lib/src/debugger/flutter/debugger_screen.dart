@@ -27,7 +27,7 @@ class DebuggerScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return !serviceManager.connectedApp.isProfileBuildRaw
+    return !serviceManager.connectedApp.isProfileBuildNow
         ? const DebuggerScreenBody()
         : const DisabledForProfileModeMessage();
   }

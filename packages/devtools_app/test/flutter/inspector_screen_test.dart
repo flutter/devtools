@@ -32,8 +32,8 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
       fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
-      when(fakeServiceManager.connectedApp.isFlutterAppRaw).thenReturn(true);
-      when(fakeServiceManager.connectedApp.isProfileBuildRaw).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       mockIsFlutterApp(serviceManager.connectedApp);
@@ -91,8 +91,8 @@ void main() {
 
     testWidgets('builds disabled message when disabled for non-flutter app',
         (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isFlutterAppRaw).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isProfileBuildRaw).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsNothing);
       expect(find.byType(DisabledForNonFlutterAppMessage), findsOneWidget);
@@ -100,8 +100,8 @@ void main() {
 
     testWidgets('builds disabled message when disabled for profile mode',
         (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isFlutterAppRaw).thenReturn(true);
-      when(fakeServiceManager.connectedApp.isProfileBuildRaw).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(true);
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsNothing);
       expect(find.byType(DisabledForProfileModeMessage), findsOneWidget);

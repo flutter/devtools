@@ -36,8 +36,8 @@ class InspectorScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    final isFlutterApp = serviceManager.connectedApp.isFlutterAppRaw;
-    final isProfileBuild = serviceManager.connectedApp.isProfileBuildRaw;
+    final isFlutterApp = serviceManager.connectedApp.isFlutterAppNow;
+    final isProfileBuild = serviceManager.connectedApp.isProfileBuildNow;
     if (!isFlutterApp || isProfileBuild) {
       return !isFlutterApp
           ? const DisabledForNonFlutterAppMessage()
