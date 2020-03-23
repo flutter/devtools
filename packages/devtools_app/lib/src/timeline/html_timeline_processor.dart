@@ -52,7 +52,11 @@ const Duration traceEventDelay = Duration(milliseconds: 1000);
 
 const String gpuEventName = 'GPURasterizer::Draw';
 
-const String uiEventName = 'VSYNC';
+// For older versions of Flutter, the starting event for the UI portion of a
+// Flutter frame was 'VSYNC'. We need to check for both so that we can still
+// support users on older versions of Flutter.
+const String uiEventNameOld = 'VSYNC';
+const String uiEventName = 'VsyncProcessCallback';
 
 /// Protocol for processing trace events and composing them into
 /// [SyncTimelineEvents] and [TimelineFrames].
@@ -252,6 +256,7 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
     final current = currentEventNodes[event.type.index];
     if (current == null &&
         !(event.name.contains(uiEventName) ||
+            event.name.contains(uiEventNameOld) ||
             event.name.contains(gpuEventName))) {
       return;
     }
