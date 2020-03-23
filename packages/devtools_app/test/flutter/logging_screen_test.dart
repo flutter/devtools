@@ -5,6 +5,7 @@
 @TestOn('vm')
 import 'dart:async';
 
+import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/flutter/logging_screen.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
@@ -23,6 +24,7 @@ void main() {
   LoggingScreen screen;
   group('Logging Screen', () {
     MockLoggingController mockLoggingController;
+    FakeServiceManager fakeServiceManager;
 
     Widget wrap(Widget widget) =>
         wrapWithControllers(widget, logging: mockLoggingController);
@@ -34,12 +36,11 @@ void main() {
       when(mockLoggingController.filteredData).thenReturn([]);
       when(mockLoggingController.onLogsUpdated).thenReturn(Reporter());
 
-      setGlobal(
-        ServiceConnectionManager,
-        FakeServiceManager(useFakeService: true),
-      );
-      when(serviceManager.connectedApp.isDartWebApp)
-          .thenAnswer((_) => Future.value(false));
+      fakeServiceManager = FakeServiceManager(useFakeService: true);
+      when(fakeServiceManager.connectedApp.isFlutterWebAppNow)
+          .thenReturn(false);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
 
       screen = const LoggingScreen();
     });
@@ -47,6 +48,16 @@ void main() {
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
       expect(find.text('Logging'), findsOneWidget);
+    });
+
+    testWidgets('builds disabled message when disabled for flutter web app',
+        (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp.isFlutterWebAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(true);
+      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      expect(find.byType(LoggingScreenBody), findsNothing);
+      expect(find.byType(DisabledForFlutterWebProfileBuildMessage),
+          findsOneWidget);
     });
 
     testWidgets('builds with no data', (WidgetTester tester) async {
@@ -75,6 +86,8 @@ void main() {
 
     testWidgets('can toggle structured errors', (WidgetTester tester) async {
       final serviceManager = FakeServiceManager(useFakeService: false);
+      when(serviceManager.connectedApp.isFlutterWebAppNow).thenReturn(false);
+      when(serviceManager.connectedApp.isProfileBuildNow).thenReturn(false);
       setGlobal(
         ServiceConnectionManager,
         serviceManager,

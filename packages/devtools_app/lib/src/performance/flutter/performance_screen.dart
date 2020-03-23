@@ -10,6 +10,7 @@ import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
+import '../../globals.dart';
 import '../../performance/performance_controller.dart';
 import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
@@ -39,10 +40,16 @@ class PerformanceScreen extends Screen {
   String get docPageId => 'performance';
 
   @override
-  Widget build(BuildContext context) => PerformanceScreenBody();
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const PerformanceScreenBody()
+        : const DisabledForWebAppMessage();
+  }
 }
 
 class PerformanceScreenBody extends StatefulWidget {
+  const PerformanceScreenBody();
+
   @override
   _PerformanceScreenBodyState createState() => _PerformanceScreenBodyState();
 }

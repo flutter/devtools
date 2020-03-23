@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
@@ -58,7 +59,11 @@ class MemoryScreen extends Screen {
   String get docPageId => 'memory';
 
   @override
-  Widget build(BuildContext context) => const MemoryBody();
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const MemoryBody()
+        : const DisabledForWebAppMessage();
+  }
 }
 
 class MemoryBody extends StatefulWidget {

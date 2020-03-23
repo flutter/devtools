@@ -22,6 +22,9 @@ void main() {
   group('TimelineFlameChart', () {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
@@ -44,7 +47,7 @@ void main() {
         ..data = data
         ..selectFrame(testFrame1);
       await tester.pumpWidget(wrapWithControllers(
-        TimelineScreenBody(),
+        const TimelineScreenBody(),
         timeline: controllerWithData,
       ));
       expect(find.byType(TimelineFlameChart), findsOneWidget);
@@ -55,7 +58,7 @@ void main() {
         (WidgetTester tester) async {
       // Set a wide enough screen width that we do not run into overflow.
       await tester.pumpWidget(wrapWithControllers(
-        TimelineScreenBody(),
+        const TimelineScreenBody(),
         timeline: TimelineController(),
       ));
       expect(find.byType(TimelineFlameChart), findsNothing);

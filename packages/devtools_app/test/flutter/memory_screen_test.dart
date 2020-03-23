@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-
+import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/flutter/split.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -41,6 +41,7 @@ void main() {
     setUp(() async {
       await ensureInspectorDependencies();
       fakeServiceManager = FakeServiceManager(useFakeService: true);
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
@@ -50,6 +51,14 @@ void main() {
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
       expect(find.text('Memory'), findsOneWidget);
+    });
+
+    testWidgets('builds disabled message when disabled for web app',
+        (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(true);
+      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      expect(find.byType(MemoryBody), findsNothing);
+      expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds proper content for state', windowSize,

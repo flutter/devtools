@@ -101,12 +101,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       settings: settings,
       builder: (BuildContext context) {
         return DevToolsScaffold.withChild(
-          child: Center(
-            child: Text(
-              'Sorry, $uri was not found.',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ),
+          child: CenteredMessage('Sorry, $uri was not found.'),
         );
       },
     );

@@ -72,7 +72,8 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
             const Padding(padding: EdgeInsets.only(top: 20.0)),
             _buildTextInput(),
             const PaddedDivider(padding: EdgeInsets.symmetric(vertical: 10.0)),
-            // TODO(https://github.com/flutter/devtools/issues/1111): support drag-and-drop of snapshot files here.
+            // TODO(https://github.com/flutter/devtools/issues/1111): support
+            // drag-and-drop of snapshot files here.
           ],
         ),
       ],

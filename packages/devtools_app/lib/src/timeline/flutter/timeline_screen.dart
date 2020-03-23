@@ -56,10 +56,16 @@ class TimelineScreen extends Screen {
   String get docPageId => 'timeline';
 
   @override
-  Widget build(BuildContext context) => TimelineScreenBody();
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const TimelineScreenBody()
+        : const DisabledForWebAppMessage();
+  }
 }
 
 class TimelineScreenBody extends StatefulWidget {
+  const TimelineScreenBody();
+
   @override
   TimelineScreenBodyState createState() => TimelineScreenBodyState();
 }
@@ -123,9 +129,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       children: [
         _timelineControls(),
         const SizedBox(height: denseRowSpacing),
-        // TODO(kenz): hide the bar chart if the connected app is not a Flutter
-        // app.
-        const FlutterFramesChart(),
+        if (serviceManager.connectedApp.isFlutterAppNow)
+          const FlutterFramesChart(),
         Expanded(
           child: Split(
             axis: Axis.vertical,
@@ -189,11 +194,11 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       children: [
         ProfileGranularityDropdown(),
         const SizedBox(width: defaultSpacing),
-        // TODO(kenz): don't show these buttons if connected to a Dart VM app.
-        ServiceExtensionButtonGroup(
-          minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
-          extensions: [performanceOverlay, profileWidgetBuilds],
-        ),
+        if (!serviceManager.connectedApp.isDartCliAppNow)
+          ServiceExtensionButtonGroup(
+            minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+            extensions: [performanceOverlay, profileWidgetBuilds],
+          ),
         // TODO(kenz): hide or disable button if http timeline logging is not
         // available.
         _logNetworkTrafficButton(),
