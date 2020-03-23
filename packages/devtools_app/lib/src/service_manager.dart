@@ -164,7 +164,6 @@ class ServiceConnectionManager {
     _vmFlagManager.service = service;
 
     _stateController.add(true);
-    _connectionAvailableController.add(service);
 
     await _isolateManager._initIsolates(vm.isolates);
     service.onIsolateEvent.listen(_isolateManager._handleIsolateEvent);
@@ -202,6 +201,7 @@ class ServiceConnectionManager {
     }));
 
     await connectedApp.initializeValues();
+    _connectionAvailableController.add(service);
   }
 
   void vmServiceClosed() {
