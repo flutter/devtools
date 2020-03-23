@@ -176,7 +176,7 @@ class HtmlEventDetails extends CoreElement {
     } else if (event.isUiEvent) {
       return mainUiColor;
     } else if (event.isGpuEvent) {
-      return mainGpuColor;
+      return mainRasterColor;
     } else {
       return _defaultTitleBackground;
     }

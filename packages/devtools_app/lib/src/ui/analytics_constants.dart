@@ -49,7 +49,7 @@ const String showOnDeviceInspector = 'showInspector';
 
 // Timeline UX actions:
 const String timelineFrame = 'frame'; // Frame selected in frame chart
-const String timelineFlameGpu = 'flameGPU'; // Selected a GPU flame
+const String timelineFlameRaster = 'flameRaster'; // Selected a Raster flame
 const String timelineFlameUi = 'flameUI'; // Selected a UI flame
 
 // Memory UX actions:

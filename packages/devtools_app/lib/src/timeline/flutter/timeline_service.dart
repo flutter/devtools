@@ -88,14 +88,14 @@ class TimelineService {
       return event.name == 'thread_name';
     }).toList();
 
-    // TODO(kenz): Remove this logic once ui/gpu distinction changes are
+    // TODO(kenz): Remove this logic once ui/raster distinction changes are
     // available in the engine.
     int uiThreadId;
-    int gpuThreadId;
+    int rasterThreadId;
     final threadIdsByName = <String, int>{};
 
     String uiThreadName;
-    String gpuThreadName;
+    String rasterThreadName;
     String platformThreadName;
     for (TraceEvent event in events) {
       final name = event.args['name'];
@@ -109,7 +109,7 @@ class TimelineService {
       // iOS: "io.flutter.1.gpu (12651)"
       // Linux, Windows, Dream (g3): "io.flutter.gpu (12651)"
       // MacOS: Does not exist
-      if (name.contains('.gpu')) gpuThreadName = name;
+      if (name.contains('.gpu')) rasterThreadName = name;
 
       // Android: "1.platform (22585)"
       // iOS: "io.flutter.1.platform (22585)"
@@ -123,22 +123,22 @@ class TimelineService {
     }
 
     // MacOS and Flutter apps with platform views do not have a .gpu thread.
-    // In these cases, the "GPU" events will come on the .platform thread
+    // In these cases, the "Raster" events will come on the .platform thread
     // instead.
-    if (gpuThreadName != null) {
-      gpuThreadId = threadIdsByName[gpuThreadName];
+    if (rasterThreadName != null) {
+      rasterThreadId = threadIdsByName[rasterThreadName];
     } else {
-      gpuThreadId = threadIdsByName[platformThreadName];
+      rasterThreadId = threadIdsByName[platformThreadName];
     }
 
-    if (uiThreadId == null || gpuThreadId == null) {
+    if (uiThreadId == null || rasterThreadId == null) {
       timelineController.logNonFatalError(
-          'Could not find UI thread and / or GPU thread from names: '
+          'Could not find UI thread and / or Raster thread from names: '
           '${threadIdsByName.keys}');
     }
 
     timelineController.processor
-        .primeThreadIds(uiThreadId: uiThreadId, gpuThreadId: gpuThreadId);
+        .primeThreadIds(uiThreadId: uiThreadId, rasterThreadId: rasterThreadId);
   }
 
   Future<void> updateListeningState(bool isCurrentScreen) async {

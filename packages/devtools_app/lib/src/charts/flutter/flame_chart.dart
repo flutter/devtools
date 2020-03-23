@@ -851,7 +851,7 @@ class FlameChartNode<T> {
   }
 
   Rect zoomedRect(double zoom, double chartStartInset) {
-    // If a node is not selectable (e.g. section labels "UI", "GPU", etc.), it
+    // If a node is not selectable (e.g. section labels "UI", "Raster", etc.), it
     // will not be zoomed, so return the original rect.
     if (!selectable) return rect;
 
@@ -877,13 +877,14 @@ mixin FlameChartColorMixin {
     return color;
   }
 
-  int _gpuColorOffset = 0;
-  Color nextGpuColor({bool resetOffset = false}) {
+  int _rasterColorOffset = 0;
+  Color nextRasterColor({bool resetOffset = false}) {
     if (resetOffset) {
-      _gpuColorOffset = 0;
+      _rasterColorOffset = 0;
     }
-    final color = gpuColorPalette[_gpuColorOffset % gpuColorPalette.length];
-    _gpuColorOffset++;
+    final color =
+        rasterColorPalette[_rasterColorOffset % rasterColorPalette.length];
+    _rasterColorOffset++;
     return color;
   }
 
@@ -923,7 +924,7 @@ mixin FlameChartColorMixin {
   void resetColorOffsets() {
     _asyncColorOffset = 0;
     _uiColorOffset = 0;
-    _gpuColorOffset = 0;
+    _rasterColorOffset = 0;
     _unknownColorOffset = 0;
     _selectedColorOffset = 0;
   }

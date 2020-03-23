@@ -150,7 +150,7 @@ void main() {
 
       frame
         ..setEventFlow(null, type: TimelineEventType.ui)
-        ..setEventFlow(gpuEvent, type: TimelineEventType.gpu);
+        ..setEventFlow(gpuEvent, type: TimelineEventType.raster);
       expect(processor.eventOccursWithinFrameBounds(uiEvent, frame), isFalse);
     });
 
@@ -353,7 +353,7 @@ void main() {
       );
       expect(
         processor.inferEventType(gpuRasterizerDrawTrace.event),
-        equals(TimelineEventType.gpu),
+        equals(TimelineEventType.raster),
       );
       expect(
         processor.inferEventType(unknownEventBeginTrace.event),

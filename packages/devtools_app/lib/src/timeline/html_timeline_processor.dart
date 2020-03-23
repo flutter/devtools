@@ -581,7 +581,7 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
         // events, or c) parent multiple event flows - none of which we want.
         event.name != 'MessageLoop::RunExpiredTasks' &&
         // Only process events from the UI or GPU thread.
-        (event.isGpuEvent || event.isUiEvent);
+        (event.isRasterEvent || event.isUiEvent);
   }
 
   @override
@@ -1016,7 +1016,7 @@ abstract class TimelineProcessor {
     } else if (event.threadId == uiThreadId) {
       return TimelineEventType.ui;
     } else if (event.threadId == gpuThreadId) {
-      return TimelineEventType.gpu;
+      return TimelineEventType.raster;
     } else {
       return TimelineEventType.unknown;
     }

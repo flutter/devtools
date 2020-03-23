@@ -14,22 +14,22 @@ import 'package:test/test.dart';
 
 void main() {
   final originalGoldenUiEvent = goldenUiTimelineEvent.deepCopy();
-  final originalGoldenGpuEvent = goldenGpuTimelineEvent.deepCopy();
+  final originalGoldenGpuEvent = goldenRasterTimelineEvent.deepCopy();
   final originalGoldenUiTraceEvents = List.of(goldenUiTraceEvents);
-  final originalGoldenGpuTraceEvents = List.of(goldenGpuTraceEvents);
+  final originalGoldenGpuTraceEvents = List.of(goldenRasterTraceEvents);
 
   setUp(() {
     // If any of these expect statements fail, a golden was modified while the
     // tests were running. Do not modify the goldens. Instead, make a copy and
     // modify the copy.
     expect(originalGoldenUiEvent.toString(), equals(goldenUiString));
-    expect(originalGoldenGpuEvent.toString(), equals(goldenGpuString));
+    expect(originalGoldenGpuEvent.toString(), equals(goldenRasterString));
     expect(
       collectionEquals(goldenUiTraceEvents, originalGoldenUiTraceEvents),
       isTrue,
     );
     expect(
-      collectionEquals(goldenGpuTraceEvents, originalGoldenGpuTraceEvents),
+      collectionEquals(goldenRasterTraceEvents, originalGoldenGpuTraceEvents),
       isTrue,
     );
   });
@@ -41,7 +41,7 @@ void main() {
       processor = TimelineProcessor(MockTimelineController())
         ..primeThreadIds(
           uiThreadId: testUiThreadId,
-          gpuThreadId: testGpuThreadId,
+          rasterThreadId: testRasterThreadId,
         );
     });
 
@@ -78,16 +78,16 @@ void main() {
         ..time = (TimeRange()
           ..start = const Duration(microseconds: 5000)
           ..end = const Duration(microseconds: 6000));
-      final gpuEvent = goldenGpuTimelineEvent.deepCopy()
+      final gpuEvent = goldenRasterTimelineEvent.deepCopy()
         ..time = (TimeRange()
           ..start = const Duration(microseconds: 4000)
           ..end = const Duration(microseconds: 8000));
 
-      expect(processor.satisfiesUiGpuOrder(uiEvent, frame), isTrue);
-      expect(processor.satisfiesUiGpuOrder(gpuEvent, frame), isTrue);
+      expect(processor.satisfiesUiRasterOrder(uiEvent, frame), isTrue);
+      expect(processor.satisfiesUiRasterOrder(gpuEvent, frame), isTrue);
 
       frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
-      expect(processor.satisfiesUiGpuOrder(gpuEvent, frame), isFalse);
+      expect(processor.satisfiesUiRasterOrder(gpuEvent, frame), isFalse);
 
       frame = TimelineFrame('frameId')
         ..pipelineItemTime.start = const Duration(microseconds: frameStartTime)
@@ -95,8 +95,8 @@ void main() {
 
       frame
         ..setEventFlow(null, type: TimelineEventType.ui)
-        ..setEventFlow(gpuEvent, type: TimelineEventType.gpu);
-      expect(processor.satisfiesUiGpuOrder(uiEvent, frame), isFalse);
+        ..setEventFlow(gpuEvent, type: TimelineEventType.raster);
+      expect(processor.satisfiesUiRasterOrder(uiEvent, frame), isFalse);
     });
 
     test('frame completed', () async {
@@ -104,7 +104,7 @@ void main() {
         [
           frameStartEvent,
           ...goldenUiTraceEvents,
-          ...goldenGpuTraceEvents,
+          ...goldenRasterTraceEvents,
           frameEndEvent,
         ],
         vsyncTrace.event.timestampMicros,
@@ -114,7 +114,7 @@ void main() {
 
       final frame = processor.timelineController.data.frames.first;
       expect(frame.uiEventFlow.toString(), equals(goldenUiString));
-      expect(frame.gpuEventFlow.toString(), equals(goldenGpuString));
+      expect(frame.rasterEventFlow.toString(), equals(goldenRasterString));
       expect(frame.isReadyForTimeline, isTrue);
     });
 
@@ -217,7 +217,7 @@ void main() {
       final traceEvents = [
         ...asyncTraceEvents,
         ...goldenUiTraceEvents,
-        ...goldenGpuTraceEvents,
+        ...goldenRasterTraceEvents,
       ];
       expect(
         processor.timelineController.data.timelineEvents,
@@ -234,7 +234,7 @@ void main() {
       );
       expect(
         processor.timelineController.data.timelineEvents[1].toString(),
-        equals(goldenGpuString),
+        equals(goldenRasterString),
       );
       expect(
         processor.timelineController.data.timelineEvents[2].toString(),
@@ -275,7 +275,7 @@ void main() {
       );
       expect(
         processor.inferEventType(gpuRasterizerDrawTrace.event),
-        equals(TimelineEventType.gpu),
+        equals(TimelineEventType.raster),
       );
       expect(
         processor.inferEventType(unknownEventBeginTrace.event),

@@ -84,7 +84,7 @@ class GtagEventDevTools extends GtagEvent {
     String ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
     String flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
 
-    int gpu_duration,
+    int raster_duration,
     int ui_duration,
   });
 
@@ -124,7 +124,7 @@ class GtagEventDevTools extends GtagEvent {
   external String get flutter_client_id;
 
   // Custom metrics:
-  external int get gpu_duration;
+  external int get raster_duration;
 
   external int get ui_duration;
 }
@@ -471,7 +471,7 @@ void select(
 void selectFrame(
   String screenName,
   String selectedItem, [
-  int gpuDuration, // Custom metric
+  int rasterDuration, // Custom metric
   int uiDuration, // Custom metric
 ]) {
   GTag.event(
@@ -479,7 +479,7 @@ void selectFrame(
     GtagEventDevTools(
       event_category: selectEvent,
       event_label: selectedItem,
-      gpu_duration: gpuDuration,
+      raster_duration: rasterDuration,
       ui_duration: uiDuration,
       user_app: userAppType,
       user_build: userBuildType,

@@ -377,11 +377,11 @@ final endEngineBeginFrameTrace = testTraceEventWrapper({
 // None of the following data should be modified. If you have a need to modify
 // any of the below events for a test, make a copy and modify the copy.
 final gpuRasterizerDrawEvent = testSyncTimelineEvent(gpuRasterizerDrawTrace)
-  ..type = TimelineEventType.gpu
+  ..type = TimelineEventType.raster
   ..addEndEvent(endGpuRasterizerDrawTrace);
 
 final pipelineConsumeEvent = testSyncTimelineEvent(pipelineConsumeTrace)
-  ..type = TimelineEventType.gpu
+  ..type = TimelineEventType.raster
   ..addEndEvent(endPipelineConsumeTrace);
 
 final goldenGpuTimelineEvent = gpuRasterizerDrawEvent

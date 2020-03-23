@@ -13,29 +13,29 @@ import 'theme.dart';
 /// Light mode is Light Blue 50 palette and Dark mode is Blue 50 palette.
 /// https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 const mainUiColor = ThemedColor(mainUiColorLight, mainUiColorDark);
-const mainGpuColor = ThemedColor(mainGpuColorLight, mainGpuColorDark);
+const mainRasterColor = ThemedColor(mainRasterColorLight, mainRasterColorDark);
 final mainUnknownColor = ThemedColor.fromSingleColor(const Color(0xFFCAB8E9));
 final mainAsyncColor = ThemedColor.fromSingleColor(const Color(0xFF80CBC4));
 
 const mainUiColorLight = Color(0xFF81D4FA); // Light Blue 50 - 200
-const mainGpuColorLight = Color(0xFF0288D1); // Light Blue 50 - 700
+const mainRasterColorLight = Color(0xFF0288D1); // Light Blue 50 - 700
 
 const mainUiColorSelectedLight = Color(0xFFD4D7DA); // Lighter grey.
-const mainGpuColorSelectedLight = Color(0xFFB5B5B5); // Darker grey.
+const mainRasterColorSelectedLight = Color(0xFFB5B5B5); // Darker grey.
 
 const mainUiColorDark = Color(0xFF9EBEF9); // Blue 200 Material Dark
-const mainGpuColorDark = Color(0xFF1A73E8); // Blue 600 Material Dark
+const mainRasterColorDark = Color(0xFF1A73E8); // Blue 600 Material Dark
 
 const mainUiColorSelectedDark = Colors.white;
-const mainGpuColorSelectedDark = Color(0xFFC9C9C9); // Grey.
+const mainRasterColorSelectedDark = Color(0xFFC9C9C9); // Grey.
 
 const Color selectedUiColor = ThemedColor(
   mainUiColorSelectedLight,
   mainUiColorSelectedDark,
 );
-const Color selectedGpuColor = ThemedColor(
-  mainGpuColorSelectedLight,
-  mainGpuColorSelectedDark,
+const Color selectedRasterColor = ThemedColor(
+  mainRasterColorSelectedLight,
+  mainRasterColorSelectedDark,
 );
 
 // Light Blue 50: 200-400 (light mode) - see https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
@@ -48,8 +48,8 @@ final uiColorPalette = [
 
 // Light Blue 50: 700-900 (light mode) - see https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 // Blue Material Dark: 500-700 (dark mode) - see https://standards.google/guidelines/google-material/color/dark-theme.html#style.
-final gpuColorPalette = [
-  const ThemedColor(mainGpuColorLight, mainGpuColorDark),
+final rasterColorPalette = [
+  const ThemedColor(mainRasterColorLight, mainRasterColorDark),
   const ThemedColor(Color(0xFF0277BD), Color(0xFF1966D2)),
   const ThemedColor(Color(0xFF01579B), Color(0xFF1859BD)),
 ];

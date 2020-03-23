@@ -191,7 +191,7 @@ class PlotlyDivGraph extends CoreElement {
 
   // Add current frame data to chunks of data for later plotting.
   void processNextFrame() async {
-    final frame =
+    final TimelineFrame frame =
         timelineController.frameBasedTimeline.frameAddedNotifier.value;
     if (frame == null) return;
 
