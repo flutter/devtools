@@ -104,17 +104,14 @@ class _ServiceExtensionButtonGroupState
     // TODO(jacobr): respect _available better by displaying whether individual
     // widgets are available (not currently supported by ToggleButtons).
     final available = _extensionStates.any((e) => e.isAvailable);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: ToggleButtons(
-        constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
-        children: <Widget>[
-          for (var extensionState in _extensionStates)
-            _buildExtension(extensionState)
-        ],
-        isSelected: [for (var e in _extensionStates) e.isSelected],
-        onPressed: available ? _onPressed : null,
-      ),
+    return ToggleButtons(
+      constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+      children: <Widget>[
+        for (var extensionState in _extensionStates)
+          _buildExtension(extensionState)
+      ],
+      isSelected: [for (var e in _extensionStates) e.isSelected],
+      onPressed: available ? _onPressed : null,
     );
   }
 

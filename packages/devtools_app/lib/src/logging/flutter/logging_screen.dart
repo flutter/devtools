@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
@@ -104,10 +105,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          RaisedButton(
-            child: const Text('Clear logs'),
-            onPressed: _clearLogs,
-          ),
+          clearButton(onPressed: _clearLogs),
           const Spacer(),
           Container(
             width: 200.0,
@@ -160,6 +158,7 @@ class LogsTable extends StatelessWidget {
   final ColumnData<LogData> when = _WhenColumn();
   final ColumnData<LogData> kind = _KindColumn();
   final ColumnData<LogData> message = _MessageColumn((message) => message);
+
   List<ColumnData<LogData>> get columns => [when, kind, message];
 
   @override

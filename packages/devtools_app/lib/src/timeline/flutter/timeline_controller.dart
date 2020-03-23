@@ -252,8 +252,9 @@ class TimelineController implements DisposableController {
 
     // TODO(kenz): once each trace event has a ui/raster distinction bit added to
     // the trace, we will not need to infer thread ids. This is not robust.
-    final uiThreadId = _threadIdForEvent(uiEventName, traceEvents);
-    final rasterThreadId = _threadIdForEvent(rasterEventName, traceEvents);
+    final uiThreadId =
+        _threadIdForEvents({uiEventName, uiEventNameOld}, traceEvents);
+    final rasterThreadId = _threadIdForEvents({rasterEventName}, traceEvents);
 
     offlineTimelineData = offlineData.shallowClone();
     data = offlineData.shallowClone();
@@ -275,14 +276,16 @@ class TimelineController implements DisposableController {
     _loadOfflineDataController.add(offlineTimelineData);
   }
 
-  int _threadIdForEvent(
-    String targetEventName,
+  int _threadIdForEvents(
+    Set<String> targetEventNames,
     List<TraceEventWrapper> traceEvents,
   ) {
     const invalidThreadId = -1;
     return traceEvents
-            .firstWhere((trace) => trace.event.name == targetEventName,
-                orElse: () => null)
+            .firstWhere(
+              (trace) => targetEventNames.contains(trace.event.name),
+              orElse: () => null,
+            )
             ?.event
             ?.threadId ??
         invalidThreadId;

@@ -12,6 +12,7 @@ import 'common_widgets.dart';
 import 'navigation.dart';
 import 'notifications.dart';
 import 'screen.dart';
+import 'theme.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
 ///
@@ -63,7 +64,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
               'Connect to a Running App',
               style: textTheme.bodyText1,
             ),
-            const SizedBox(height: 6.0),
+            const SizedBox(height: denseRowSpacing),
             Text(
               'Enter a URL to a running Dart or Flutter application',
               style: textTheme.caption,
