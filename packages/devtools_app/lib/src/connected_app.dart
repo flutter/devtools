@@ -46,6 +46,8 @@ class ConnectedApp {
 
   bool _isDartWebApp;
 
+  bool get isFlutterWebAppNow => isFlutterAppNow && isDartWebAppNow;
+
   bool get isRunningOnDartVM => serviceManager.vm.name != 'ChromeDebugProxy';
 
   Future<bool> get isDartCliApp async =>

@@ -29,7 +29,7 @@ class DebuggerScreen extends Screen {
   Widget build(BuildContext context) {
     return !serviceManager.connectedApp.isProfileBuildNow
         ? const DebuggerScreenBody()
-        : const DisabledForProfileModeMessage();
+        : const DisabledForProfileBuildMessage();
   }
 }
 

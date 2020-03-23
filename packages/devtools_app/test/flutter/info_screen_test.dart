@@ -20,12 +20,8 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-      setGlobal(
-        ServiceConnectionManager,
-        fakeServiceManager,
-      );
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
       mockIsFlutterApp(serviceManager.connectedApp);
-
       screen = const InfoScreen();
     });
 

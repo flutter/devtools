@@ -104,7 +104,7 @@ void main() {
       when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(true);
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsNothing);
-      expect(find.byType(DisabledForProfileModeMessage), findsOneWidget);
+      expect(find.byType(DisabledForProfileBuildMessage), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(

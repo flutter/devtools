@@ -41,7 +41,7 @@ class InspectorScreen extends Screen {
     if (!isFlutterApp || isProfileBuild) {
       return !isFlutterApp
           ? const DisabledForNonFlutterAppMessage()
-          : const DisabledForProfileModeMessage();
+          : const DisabledForProfileBuildMessage();
     }
     return const InspectorScreenBody();
   }
