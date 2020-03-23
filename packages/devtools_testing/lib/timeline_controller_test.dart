@@ -83,7 +83,7 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       );
       expect(
         timelineController.frameBasedTimeline.processor.gpuThreadId,
-        equals(testRasterThreadId),
+        equals(testGpuThreadId),
       );
 
       // Full timeline.
@@ -107,7 +107,7 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       );
       expect(
         timelineController.fullTimeline.processor.gpuThreadId,
-        equals(testRasterThreadId),
+        equals(testGpuThreadId),
       );
 
       await env.tearDownEnvironment();
