@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/notifications.dart';
@@ -16,6 +17,7 @@ import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
+import '../../profiler/profile_granularity.dart';
 import '../../service_extensions.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
@@ -54,6 +56,29 @@ class TimelineScreen extends Screen {
 
   @override
   String get docPageId => 'timeline';
+
+  static const _debugModeWarning =
+      DebugModeBannerMessage(DevToolsScreenType.timeline);
+  static const _profileGranularityWarning =
+      ProfileGranularityBannerMessage(DevToolsScreenType.timeline);
+
+  @override
+  List<Widget> messages(BuildContext context) {
+    final showDebugModeWarning = serviceManager.connectedApp.isFlutterAppNow &&
+        !serviceManager.connectedApp.isProfileBuildNow;
+    final timelineController = Controllers.of(context).timeline;
+    final showProfileGranularityWarning = timelineController
+            .cpuProfilerController
+            .service
+            .profileGranularityFlagNotifier
+            .value
+            .valueAsString ==
+        ProfileGranularity.high.value;
+    return [
+      if (showDebugModeWarning) _debugModeWarning,
+      if (showProfileGranularityWarning) _profileGranularityWarning,
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

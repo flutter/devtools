@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
@@ -14,8 +13,8 @@ import '../globals.dart';
 import '../service_manager.dart';
 import '../utils.dart';
 import 'common_widgets.dart';
-import 'notifications.dart';
 import 'screen.dart';
+import 'utils.dart';
 
 const statusLineHeight = 24.0;
 
@@ -96,11 +95,7 @@ class StatusLine extends StatelessWidget {
       return InkWell(
         onTap: () async {
           final url = 'https://flutter.dev/devtools/$docPageId';
-          if (await url_launcher.canLaunch(url)) {
-            await url_launcher.launch(url);
-          } else {
-            Notifications.of(context).push('Unable to open $url.');
-          }
+          await launchUrl(url, context);
         },
         child: Text(
           'flutter.dev/devtools/$docPageId',

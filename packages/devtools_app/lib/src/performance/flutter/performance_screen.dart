@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
@@ -38,6 +40,29 @@ class PerformanceScreen extends Screen {
 
   @override
   String get docPageId => 'performance';
+
+  static const _debugModeWarning =
+      DebugModeBannerMessage(DevToolsScreenType.performance);
+  static const _profileGranularityWarning =
+      ProfileGranularityBannerMessage(DevToolsScreenType.performance);
+
+  @override
+  List<Widget> messages(BuildContext context) {
+    final showDebugModeWarning = serviceManager.connectedApp.isFlutterAppNow &&
+        !serviceManager.connectedApp.isProfileBuildNow;
+    final performanceController = Controllers.of(context).performance;
+    final showProfileGranularityWarning = performanceController
+            .cpuProfilerController
+            .service
+            .profileGranularityFlagNotifier
+            .value
+            .valueAsString ==
+        ProfileGranularity.high.value;
+    return [
+      if (showDebugModeWarning) _debugModeWarning,
+      if (showProfileGranularityWarning) _profileGranularityWarning,
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

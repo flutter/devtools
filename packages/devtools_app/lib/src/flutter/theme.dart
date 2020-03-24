@@ -72,6 +72,13 @@ const devtoolsBlue = ColorSwatch<int>(600, {
   400: Color(0xFF13B9FD),
 });
 
+// Error color selected from
+// https://material.io/design/color/#color-theme-creation.
+const devtoolsError = Color(0xFFB00020);
+
+// Yellow 100 from https://material.io/design/color/#color-theme-creation.
+const devtoolsWarning = Color(0xFFFFF9C4);
+
 /// A short duration to use for animations.
 ///
 /// Use this when you want less emphasis on the animation and more on the

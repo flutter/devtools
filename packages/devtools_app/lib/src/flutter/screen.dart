@@ -68,6 +68,8 @@ abstract class Screen {
   /// Builds the body to display for this tab.
   Widget build(BuildContext context);
 
+  List<Widget> messages(BuildContext context) => [];
+
   /// Build a widget to display in the status line.
   ///
   /// If this method returns `null`, then no page specific status is displayed.

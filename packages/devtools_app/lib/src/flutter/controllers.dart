@@ -11,6 +11,7 @@ import '../logging/logging_controller.dart';
 import '../memory/flutter/memory_controller.dart';
 import '../performance/performance_controller.dart';
 import '../timeline/flutter/timeline_controller.dart';
+import 'banner_messages.dart';
 
 /// Container for controllers that should outlive individual screens of the app.
 ///
@@ -25,10 +26,12 @@ class ProvidedControllers implements DisposableController {
     @required this.timeline,
     @required this.memory,
     @required this.performance,
+    @required this.bannerMessages,
   })  : assert(logging != null),
         assert(timeline != null),
         assert(memory != null),
-        assert(performance != null);
+        assert(performance != null),
+        assert(bannerMessages != null);
 
   /// Builds the default providers for the app.
   factory ProvidedControllers.defaults() {
@@ -44,6 +47,7 @@ class ProvidedControllers implements DisposableController {
       timeline: TimelineController(),
       memory: MemoryController(),
       performance: PerformanceController(),
+      bannerMessages: BannerMessagesController(),
     );
   }
 
@@ -51,6 +55,7 @@ class ProvidedControllers implements DisposableController {
   final TimelineController timeline;
   final MemoryController memory;
   final PerformanceController performance;
+  final BannerMessagesController bannerMessages;
 
   @override
   void dispose() {
@@ -58,6 +63,7 @@ class ProvidedControllers implements DisposableController {
     timeline.dispose();
     memory.dispose();
     performance.dispose();
+    bannerMessages.dispose();
   }
 }
 
