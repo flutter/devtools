@@ -96,16 +96,7 @@ and rebuilding as necessary.
 
 ### DevTools Server
 
-To work on devtools_server you'll need to temporarily update the devtools pubspec to
-reference the local version of devtools_server and make release builds of devtools for
-the server to serve:
-
-- In both `packages/devtools/pubspec.yaml` and `packages/devtools_app/pubspec.yaml`, uncomment
- the `path: ../devtools_server` line
-  and comment out the version number on the line above.
-- Run `pub get` in both packages.
-
-Now you can run and debug the local version of the server with a release build:
+Run and debug the local version of the server with a release build:
 - In VS Code on the Debug side bar, switch to the `Run Server with Release Build` config. Press F5.
 This will produce a release build of DevTools and then debug the server (`bin/devtools.dart`)
 to serve it.
