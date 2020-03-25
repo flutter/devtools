@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -18,15 +19,24 @@ void main() {
   group('Profile Granularity Dropdown', () {
     FakeServiceManager fakeServiceManager;
     ProfileGranularityDropdown dropdown;
+    BannerMessagesController bannerMessagesController;
 
     setUp(() {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       dropdown = ProfileGranularityDropdown();
+      bannerMessagesController = BannerMessagesController();
     });
 
+    Future<void> pumpDropdown(WidgetTester tester) async {
+      await tester.pumpWidget(wrapWithControllers(
+        dropdown,
+        bannerMessages: bannerMessagesController,
+      ));
+    }
+
     testWidgets('displays with default content', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(dropdown));
+      await pumpDropdown(tester);
       expect(find.byWidget(dropdown), findsOneWidget);
       expect(
         find.byKey(ProfileGranularityDropdown.dropdownKey),
@@ -41,7 +51,7 @@ void main() {
     });
 
     testWidgets('selection', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(dropdown));
+      await pumpDropdown(tester);
       expect(find.byWidget(dropdown), findsOneWidget);
       expect(find.text(ProfileGranularity.low.display), findsOneWidget);
       expect(find.text(ProfileGranularity.medium.display), findsOneWidget);
@@ -95,7 +105,7 @@ void main() {
       @required String newFlagValue,
       @required String expectedFlagValue,
     }) async {
-      await tester.pumpWidget(wrap(dropdown));
+      await pumpDropdown(tester);
       expect(find.byWidget(dropdown), findsOneWidget);
       final dropdownButtonFinder =
           find.byKey(ProfileGranularityDropdown.dropdownKey);

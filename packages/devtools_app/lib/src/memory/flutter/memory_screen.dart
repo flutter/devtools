@@ -64,10 +64,12 @@ class MemoryScreen extends Screen {
       DebugModeMemoryMessage(DevToolsScreenType.memory);
 
   @override
-  List<Widget> messages(BuildContext context) {
+  List<BannerMessage> messages(BuildContext context) {
     final showDebugModeWarning = serviceManager.connectedApp.isFlutterAppNow &&
         !serviceManager.connectedApp.isProfileBuildNow;
-    return [if (showDebugModeWarning) debugModeWarning];
+    return [
+      if (showDebugModeWarning) debugModeWarning.build(context),
+    ];
   }
 
   @override

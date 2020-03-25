@@ -28,13 +28,13 @@ const String timelineScreenId = 'timeline';
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
-class TimelineController implements DisposableController {
+class TimelineController
+    with CpuProfilerControllerMixin
+    implements DisposableController {
   TimelineController() {
     timelineService = TimelineService(this);
     processor = TimelineProcessor(this);
   }
-
-  final cpuProfilerController = CpuProfilerController();
 
   /// The currently selected timeline event.
   ValueListenable<TimelineEvent> get selectedTimelineEvent =>

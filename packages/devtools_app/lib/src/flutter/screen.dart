@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:flutter/material.dart';
 
 import '../debugger/flutter/debugger_screen.dart';
@@ -68,7 +69,7 @@ abstract class Screen {
   /// Builds the body to display for this tab.
   Widget build(BuildContext context);
 
-  List<Widget> messages(BuildContext context) => [];
+  List<BannerMessage> messages(BuildContext context) => [];
 
   /// Build a widget to display in the status line.
   ///

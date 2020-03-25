@@ -57,29 +57,14 @@ class TimelineScreen extends Screen {
   @override
   String get docPageId => 'timeline';
 
-  @visibleForTesting
-  static const debugModeWarning =
-      DebugModePerformanceMessage(DevToolsScreenType.timeline);
-  @visibleForTesting
-  static const profileGranularityWarning =
-      HighProfileGranularityMessage(DevToolsScreenType.timeline);
-
   @override
-  List<Widget> messages(BuildContext context) {
-    final showDebugModeWarning = serviceManager.connectedApp.isFlutterAppNow &&
-        !serviceManager.connectedApp.isProfileBuildNow;
-    final timelineController = Controllers.of(context).timeline;
-    final showProfileGranularityWarning = timelineController
-            .cpuProfilerController
-            .service
-            .profileGranularityFlagNotifier
-            .value
-            .valueAsString ==
-        ProfileGranularity.high.value;
-    return [
-      if (showDebugModeWarning) debugModeWarning,
-      if (showProfileGranularityWarning) profileGranularityWarning,
-    ];
+  List<BannerMessage> messages(BuildContext context) {
+    final performanceController = Controllers.of(context).timeline;
+    return performanceMessages(
+      context,
+      performanceController,
+      DevToolsScreenType.timeline,
+    );
   }
 
   @override

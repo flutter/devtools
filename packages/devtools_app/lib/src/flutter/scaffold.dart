@@ -192,18 +192,16 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // Build the screens for each tab and wrap them in the appropriate styling
     final tabBodies = [
       for (var screen in widget.tabs)
-        Padding(
+        Container(
           padding: DevToolsScaffold.appPadding,
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Column(
-              children: <Widget>[
-                BannerMessageContainer(screen: screen),
-                Expanded(
-                  child: screen.build(context),
-                ),
-              ],
-            ),
+          alignment: Alignment.topLeft,
+          child: Column(
+            children: [
+              BannerMessageContainer(screen: screen),
+              Expanded(
+                child: screen.build(context),
+              ),
+            ],
           ),
         ),
     ];

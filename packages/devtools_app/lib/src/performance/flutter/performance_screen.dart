@@ -49,21 +49,13 @@ class PerformanceScreen extends Screen {
       HighProfileGranularityMessage(DevToolsScreenType.performance);
 
   @override
-  List<Widget> messages(BuildContext context) {
-    final showDebugModeWarning = serviceManager.connectedApp.isFlutterAppNow &&
-        !serviceManager.connectedApp.isProfileBuildNow;
+  List<BannerMessage> messages(BuildContext context) {
     final performanceController = Controllers.of(context).performance;
-    final showProfileGranularityWarning = performanceController
-            .cpuProfilerController
-            .service
-            .profileGranularityFlagNotifier
-            .value
-            .valueAsString ==
-        ProfileGranularity.high.value;
-    return [
-      if (showDebugModeWarning) debugModeWarning,
-      if (showProfileGranularityWarning) profileGranularityWarning,
-    ];
+    return performanceMessages(
+      context,
+      performanceController,
+      DevToolsScreenType.performance,
+    );
   }
 
   @override
