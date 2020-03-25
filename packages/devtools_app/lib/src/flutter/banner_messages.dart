@@ -127,7 +127,7 @@ class BannerMessage extends StatelessWidget implements UniqueMessage {
                 ),
               ),
             ),
-            SizedBox(width: denseSpacing),
+            const SizedBox(width: denseSpacing),
             CircularIconButton(
               icon: Icons.close,
               backgroundColor: backgroundColor,
