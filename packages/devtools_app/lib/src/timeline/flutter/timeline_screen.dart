@@ -57,10 +57,12 @@ class TimelineScreen extends Screen {
   @override
   String get docPageId => 'timeline';
 
-  static const _debugModeWarning =
-      DebugModeBannerMessage(DevToolsScreenType.timeline);
-  static const _profileGranularityWarning =
-      ProfileGranularityBannerMessage(DevToolsScreenType.timeline);
+  @visibleForTesting
+  static const debugModeWarning =
+      DebugModePerformanceMessage(DevToolsScreenType.timeline);
+  @visibleForTesting
+  static const profileGranularityWarning =
+      HighProfileGranularityMessage(DevToolsScreenType.timeline);
 
   @override
   List<Widget> messages(BuildContext context) {
@@ -75,8 +77,8 @@ class TimelineScreen extends Screen {
             .valueAsString ==
         ProfileGranularity.high.value;
     return [
-      if (showDebugModeWarning) _debugModeWarning,
-      if (showProfileGranularityWarning) _profileGranularityWarning,
+      if (showDebugModeWarning) debugModeWarning,
+      if (showProfileGranularityWarning) profileGranularityWarning,
     ];
   }
 

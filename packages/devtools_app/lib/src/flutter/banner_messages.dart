@@ -15,6 +15,12 @@ import 'screen.dart';
 import 'theme.dart';
 import 'utils.dart';
 
+const _runInProfileModeDocsUrl =
+    'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';
+
+const _profileGranularityDocsUrl =
+    'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';
+
 class BannerMessagesController implements DisposableController {
   final _dismissedMessageIds = <String>{};
 
@@ -121,6 +127,7 @@ class BannerMessage extends StatelessWidget implements UniqueMessage {
                 ),
               ),
             ),
+            SizedBox(width: denseSpacing),
             CircularIconButton(
               icon: Icons.close,
               backgroundColor: backgroundColor,
@@ -168,16 +175,14 @@ class _BannerWarning extends BannerMessage {
   static const linkColor = Color(0xFF055BF0);
 }
 
-class DebugModeBannerMessage extends StatelessWidget implements UniqueMessage {
-  const DebugModeBannerMessage(this.screenType);
+class DebugModePerformanceMessage extends StatelessWidget
+    implements UniqueMessage {
+  const DebugModePerformanceMessage(this.screenType);
 
   final DevToolsScreenType screenType;
 
-  static const _runInProfileModeDocsUrl =
-      'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';
-
   @override
-  String get id => 'DebugModeBannerMessage - $screenType';
+  String get id => 'DebugModePerformanceMessage - $screenType';
 
   @override
   Widget build(BuildContext context) {
@@ -212,17 +217,14 @@ class DebugModeBannerMessage extends StatelessWidget implements UniqueMessage {
   }
 }
 
-class ProfileGranularityBannerMessage extends StatelessWidget
+class HighProfileGranularityMessage extends StatelessWidget
     implements UniqueMessage {
-  const ProfileGranularityBannerMessage(this.screenType);
+  const HighProfileGranularityMessage(this.screenType);
 
   final DevToolsScreenType screenType;
 
-  static const _profileGranularityDocsUrl =
-      'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';
-
   @override
-  String get id => 'ProfileGranularityBannerMessage - $screenType';
+  String get id => 'HighProfileGranularityMessage - $screenType';
 
   @override
   Widget build(BuildContext context) {
@@ -248,6 +250,47 @@ class ProfileGranularityBannerMessage extends StatelessWidget
         ),
         const TextSpan(
           text: ' to understand the trade-offs associated with this setting.',
+          style: TextStyle(color: _BannerWarning.foreground),
+        ),
+      ],
+      screenType: screenType,
+    );
+  }
+}
+
+class DebugModeMemoryMessage extends StatelessWidget implements UniqueMessage {
+  const DebugModeMemoryMessage(this.screenType);
+
+  final DevToolsScreenType screenType;
+
+  @override
+  String get id => 'DebugModeMemoryMessage - $screenType';
+
+  @override
+  Widget build(BuildContext context) {
+    return _BannerWarning(
+      id: id,
+      textSpans: [
+        const TextSpan(
+          text: 'You are running your app in debug mode. Absolute memory usage '
+              'may be higher in a debug build than in a release build.\n\n'
+              'For the most accurate absolute memory stats, relaunch your '
+              'application with the \'--profile\' argument, or ',
+          style: TextStyle(color: _BannerWarning.foreground),
+        ),
+        TextSpan(
+          text: 'relaunch in profile mode from VS Code or IntelliJ',
+          style: TextStyle(
+            decoration: TextDecoration.underline,
+            color: _BannerWarning.linkColor,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              await launchUrl(_runInProfileModeDocsUrl, context);
+            },
+        ),
+        const TextSpan(
+          text: '.',
           style: TextStyle(color: _BannerWarning.foreground),
         ),
       ],

@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
@@ -57,6 +58,17 @@ class MemoryScreen extends Screen {
 
   @override
   String get docPageId => 'memory';
+
+  @visibleForTesting
+  static const debugModeWarning =
+      DebugModeMemoryMessage(DevToolsScreenType.memory);
+
+  @override
+  List<Widget> messages(BuildContext context) {
+    final showDebugModeWarning = serviceManager.connectedApp.isFlutterAppNow &&
+        !serviceManager.connectedApp.isProfileBuildNow;
+    return [if (showDebugModeWarning) debugModeWarning];
+  }
 
   @override
   Widget build(BuildContext context) {

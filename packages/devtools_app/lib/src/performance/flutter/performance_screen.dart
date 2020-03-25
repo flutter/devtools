@@ -41,10 +41,12 @@ class PerformanceScreen extends Screen {
   @override
   String get docPageId => 'performance';
 
-  static const _debugModeWarning =
-      DebugModeBannerMessage(DevToolsScreenType.performance);
-  static const _profileGranularityWarning =
-      ProfileGranularityBannerMessage(DevToolsScreenType.performance);
+  @visibleForTesting
+  static const debugModeWarning =
+      DebugModePerformanceMessage(DevToolsScreenType.performance);
+  @visibleForTesting
+  static const profileGranularityWarning =
+      HighProfileGranularityMessage(DevToolsScreenType.performance);
 
   @override
   List<Widget> messages(BuildContext context) {
@@ -59,8 +61,8 @@ class PerformanceScreen extends Screen {
             .valueAsString ==
         ProfileGranularity.high.value;
     return [
-      if (showDebugModeWarning) _debugModeWarning,
-      if (showProfileGranularityWarning) _profileGranularityWarning,
+      if (showDebugModeWarning) debugModeWarning,
+      if (showProfileGranularityWarning) profileGranularityWarning,
     ];
   }
 
