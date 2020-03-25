@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -17,6 +16,7 @@ import '../../performance/performance_controller.dart';
 import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
+import '../../profiler/profile_granularity.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
 
 class PerformanceScreen extends Screen {
