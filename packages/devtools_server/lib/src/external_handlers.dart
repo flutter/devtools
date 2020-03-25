@@ -49,28 +49,30 @@ Future<shelf.Handler> defaultHandler(
   if (debugMode) {
     // Start up a flutter run -d web-server instance.
 
+    const webPort = 9101;
+
     // ignore: unawaited_futures
     Process.start(
       'flutter',
-      ['run', '-d', 'web-server', '--web-port=9101'],
+      ['run', '-d', 'web-server', '--web-port=$webPort'],
       workingDirectory: path.join('..', 'devtools_app'),
     ).then((Process process) {
       // Write all flutter run process output to the server's output.
-      process.stdout.transform(utf8.decoder).listen(stdout.write);
-      process.stderr.transform(utf8.decoder).listen(stderr.write);
+      process
+        ..stdout.transform(utf8.decoder).listen(stdout.write)
+        ..stderr.transform(utf8.decoder).listen(stderr.write);
 
       // Proxy all stdin to the flutter run process's input.
       //stdin.pipe(process.stdin);
-      stdin.lineMode = false;
-      stdin.listen((event) {
-        process.stdin.add(event);
-      });
+      stdin
+        ..lineMode = false
+        ..listen((event) => process.stdin.add(event));
 
       // Exit when the flutter run process exits.
       process.exitCode.then(exit);
     });
 
-    debugProxyHandler = proxyHandler(Uri.parse('http://localhost:9101/'));
+    debugProxyHandler = proxyHandler(Uri.parse('http://localhost:$webPort/'));
   }
 
   // The packages folder is renamed in the pub package so this handler serves

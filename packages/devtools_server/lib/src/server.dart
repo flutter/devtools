@@ -29,6 +29,7 @@ const argHelp = 'help';
 const argVmUri = 'vm-uri';
 const argEnableNotifications = 'enable-notifications';
 const argHeadlessMode = 'headless';
+const argDebugMode = 'debug';
 const argLaunchBrowser = 'launch-browser';
 const argMachine = 'machine';
 const argPort = 'port';
@@ -100,7 +101,7 @@ final argParser = ArgParser()
         'Causes the server to spawn Chrome in headless mode for use in automated testing.',
   )
   ..addFlag(
-    'debug',
+    argDebugMode,
     hide: true,
     negatable: false,
     help: 'Run a debug build of the DevTools web frontend.',
@@ -128,7 +129,7 @@ Future<HttpServer> serveDevToolsWithArgs(
   final bool enableNotifications = args[argEnableNotifications];
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
   final bool headlessMode = args[argHeadlessMode];
-  final bool debugMode = args['debug'];
+  final bool debugMode = args[argDebugMode];
   final numPortsToTry =
       args[argTryPorts] != null ? int.tryParse(args[argTryPorts]) ?? 1 : 1;
   final bool verboseMode = args[argVerbose];
