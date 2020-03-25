@@ -55,6 +55,26 @@ To test release performance:
 You can also use `-d headless-server`, which will start a headless server that serves the HTML
 files for the DevTools Flutter app.
 
+## Development (DevTools server + DevTools web app)
+
+To develop with a workflow that excercises the DevTools server <==> DevTools client connection,
+change to the `packages/devtools` directory, and run:
+
+```
+dart bin/devtools.dart --debug
+```
+
+That will:
+- start the devtools server
+- start an instance of `flutter run -d web-server` from the `packages/devtools_app` directory
+- proxy all web traffic the devtools server doesn't handle directly to the `flutter run`
+  development web server
+
+You can then open a browser at the regular DevTools server URL (typically http://127.0.0.1:9100).
+When you make changes on disk, you can hit `r` in your command-line to rebuild the app, and
+refresh in your browser to see the changes. Hit `q` in the command line to terminate both the
+`flutter run` instance and the devtools server instance.
+
 ### Desktop Embedder
 
 You can also try running the app in the Flutter desktop embedder on linux or macos.
