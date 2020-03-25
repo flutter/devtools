@@ -100,6 +100,10 @@ Future<shelf.Handler> defaultHandler(
       return sseHandler.handler(request);
     }
 
+    if (request.url.path == 'api/ping') {
+      return shelf.Response(HttpStatus.ok);
+    }
+
     // The API handler takes all other calls to api/.
     if (ServerApi.canHandle(request)) {
       return ServerApi.handle(request);
