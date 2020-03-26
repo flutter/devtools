@@ -55,9 +55,9 @@ To test release performance:
 You can also use `-d headless-server`, which will start a headless server that serves the HTML
 files for the DevTools Flutter app.
 
-## Development (DevTools server + DevTools web app)
+## Development (DevTools server + DevTools Flutter web app)
 
-To develop with a workflow that excercises the DevTools server <==> DevTools client connection,
+To develop with a workflow that exercises the DevTools server <==> DevTools client connection,
 change to the `packages/devtools` directory, and run:
 
 ```
