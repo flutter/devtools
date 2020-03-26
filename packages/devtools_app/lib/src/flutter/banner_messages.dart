@@ -129,6 +129,7 @@ class BannerMessagesState extends State<_BannerMessagesProvider>
     });
   }
 
+  // TODO(kenz): use an AnimatedList for message changes.
   @override
   Widget build(BuildContext context) {
     return _InheritedBannerMessages(
