@@ -16,6 +16,7 @@ import '../utils.dart';
 import 'common_widgets.dart';
 import 'notifications.dart';
 import 'screen.dart';
+import 'theme.dart';
 
 const statusLineHeight = 24.0;
 
@@ -106,6 +107,7 @@ class StatusLine extends StatelessWidget {
           'flutter.dev/devtools/$docPageId',
           style: textTheme.bodyText2.copyWith(
             decoration: TextDecoration.underline,
+            color: devtoolsLink,
           ),
         ),
       );
