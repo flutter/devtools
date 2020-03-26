@@ -17,7 +17,6 @@ import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
-import '../../profiler/profile_granularity.dart';
 import '../../service_extensions.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
@@ -58,16 +57,6 @@ class TimelineScreen extends Screen {
   String get docPageId => 'timeline';
 
   @override
-  List<BannerMessage> messages(BuildContext context) {
-    final performanceController = Controllers.of(context).timeline;
-    return performanceMessages(
-      context,
-      performanceController,
-      DevToolsScreenType.timeline,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     return !serviceManager.connectedApp.isDartWebAppNow
         ? const TimelineScreenBody()
@@ -99,6 +88,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    maybePushDebugModePerformanceMessage(context, DevToolsScreenType.timeline);
+
     final newController = Controllers.of(context).timeline;
     if (newController == controller) return;
     controller = newController;
@@ -204,7 +195,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        ProfileGranularityDropdown(),
+        const ProfileGranularityDropdown(DevToolsScreenType.timeline),
         const SizedBox(width: defaultSpacing),
         if (!serviceManager.connectedApp.isDartCliAppNow)
           ServiceExtensionButtonGroup(

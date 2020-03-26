@@ -7,7 +7,6 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/flutter/performance_screen.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profiler.dart';
-import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:devtools_app/src/ui/flutter/vm_flag_widgets.dart';
@@ -64,30 +63,6 @@ void main() {
     });
 
     const windowSize = Size(1000.0, 1000.0);
-
-    testWidgetsWithWindowSize(
-        'messages returns proper warning and error messages', windowSize,
-        (WidgetTester tester) async {
-      final controller = PerformanceController();
-      BuildContext buildContext;
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: (context) {
-          buildContext = context;
-          return screen.build(context);
-        }),
-        performance: controller,
-      ));
-      await controller.cpuProfilerController.service
-          .setProfilePeriod(highProfilePeriod);
-      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-
-      final messages = screen.messages(buildContext);
-      expect(messages.length, equals(2));
-      expect(messages.contains(PerformanceScreen.debugModeWarning), isTrue);
-      expect(messages.contains(PerformanceScreen.profileGranularityWarning),
-          isTrue);
-    });
 
     testWidgetsWithWindowSize(
       'builds proper content for recording state',

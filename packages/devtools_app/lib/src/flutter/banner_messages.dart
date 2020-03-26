@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../auto_dispose.dart';
+import '../globals.dart';
 import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
 import 'controllers.dart';
@@ -21,44 +19,79 @@ const _runInProfileModeDocsUrl =
 const _profileGranularityDocsUrl =
     'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';
 
-class BannerMessagesController implements DisposableController {
-  final _dismissedMessageIds = <String>{};
+class BannerMessagesController {
+  final _messages = <DevToolsScreenType, List<BannerMessage>>{};
+  final _dismissedMessageKeys = <Key>{};
 
-  final _refreshMessagesController = StreamController<Null>.broadcast();
-
-  Stream<Null> get onRefreshMessages => _refreshMessagesController.stream;
-
-  @override
-  void dispose() {
-    _refreshMessagesController.close();
+  void addMessage(BannerMessage message) {
+    assert(!isMessageVisible(message));
+    final messages = messagesForScreen(message.screenType);
+    messages.add(message);
   }
 
-  void refreshMessages() {
-    _refreshMessagesController.add(null);
+  void removeMessage(BannerMessage message, {bool dismiss = false}) {
+    final messages = messagesForScreen(message.screenType);
+    messages.remove(message);
+    if (dismiss) {
+      assert(!_dismissedMessageKeys.contains(message.key));
+      _dismissedMessageKeys.add(message.key);
+    }
   }
 
-  void dismissMessage(String messageId) {
-    assert(!isMessageDismissed(messageId));
-    _dismissedMessageIds.add(messageId);
-    refreshMessages();
+  bool isMessageDismissed(BannerMessage message) {
+    return _dismissedMessageKeys.contains(message.key);
   }
 
-  bool isMessageDismissed(String messageId) {
-    return _dismissedMessageIds.contains(messageId);
+  bool isMessageVisible(BannerMessage message) {
+    return messagesForScreen(message.screenType)
+        .where((m) => m.key == message.key)
+        .isNotEmpty;
+  }
+
+  List<BannerMessage> messagesForScreen(DevToolsScreenType screenType) {
+    return _messages.putIfAbsent(screenType, () => []);
   }
 }
 
-class BannerMessageContainer extends StatefulWidget {
-  const BannerMessageContainer({Key key, @required this.screen})
-      : super(key: key);
+class BannerMessages extends StatelessWidget {
+  const BannerMessages({Key key, @required this.screen}) : super(key: key);
 
   final Screen screen;
 
   @override
-  _BannerMessageContainerState createState() => _BannerMessageContainerState();
+  Widget build(BuildContext context) {
+    return _BannerMessagesProvider(screen: screen);
+  }
+
+  static BannerMessagesState of(BuildContext context) {
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<_InheritedBannerMessages>();
+    return provider?.data;
+  }
 }
 
-class _BannerMessageContainerState extends State<BannerMessageContainer>
+class _BannerMessagesProvider extends StatefulWidget {
+  const _BannerMessagesProvider({Key key, this.screen}) : super(key: key);
+
+  final Screen screen;
+
+  @override
+  BannerMessagesState createState() => BannerMessagesState();
+}
+
+class _InheritedBannerMessages extends InheritedWidget {
+  const _InheritedBannerMessages({this.data, Widget child})
+      : super(child: child);
+
+  final BannerMessagesState data;
+
+  @override
+  bool updateShouldNotify(_InheritedBannerMessages oldWidget) {
+    return oldWidget.data != data;
+  }
+}
+
+class BannerMessagesState extends State<_BannerMessagesProvider>
     with AutoDisposeMixin {
   BannerMessagesController controller;
 
@@ -68,50 +101,66 @@ class _BannerMessageContainerState extends State<BannerMessageContainer>
     final newController = Controllers.of(context)?.bannerMessages;
     if (newController == controller) return;
     controller = newController;
+  }
 
-    autoDispose(controller.onRefreshMessages.listen((_) => setState(() {})));
+  void push(BannerMessage message) {
+    if (controller.isMessageDismissed(message) ||
+        controller.isMessageVisible(message)) return;
+    // We push the banner message in a post frame callback because otherwise,we'd be
+    // trying to call setState while the parent widget `BannerMessages` is in the middle
+    // of `build`.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        controller.addMessage(message);
+      });
+    });
+  }
+
+  void remove(BannerMessage message, {bool dismiss = false}) {
+    // We push the banner message in a post frame callback because otherwise,we'd be
+    // trying to call setState while the parent widget `BannerMessages` is in the middle
+    // of `build`.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        controller.removeMessage(message, dismiss: dismiss);
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final messagesForScreen = widget.screen.messages(context);
-    if (messagesForScreen.isNotEmpty) {
-      final messagesToShow = <Widget>[];
-      for (Widget message in messagesForScreen) {
-        assert(message is UniqueMessage);
-        if (!controller.isMessageDismissed((message as UniqueMessage).id)) {
-          messagesToShow.add(message);
-        }
-      }
-      if (messagesToShow.isNotEmpty) {
-        return Column(
-          children: messagesToShow,
-        );
-      }
-    }
-    return const SizedBox();
+    return _InheritedBannerMessages(
+      data: this,
+      child: Column(
+        children: [
+          ...controller?.messagesForScreen(widget.screen.type) ?? [],
+          Expanded(
+            child: widget.screen.build(context),
+          )
+        ],
+      ),
+    );
   }
 }
 
-class BannerMessage extends StatelessWidget implements UniqueMessage {
+class BannerMessage extends StatelessWidget {
   const BannerMessage({
-    @required this.messageId,
+    @required Key key,
     @required this.textSpans,
     @required this.backgroundColor,
     @required this.foregroundColor,
-  });
+    @required this.screenType,
+  }) : super(key: key);
 
-  final String messageId;
   final List<TextSpan> textSpans;
   final Color backgroundColor;
   final Color foregroundColor;
-
-  @override
-  String get id => messageId;
+  final DevToolsScreenType screenType;
 
   @override
   Widget build(BuildContext context) {
-    final bannerMessagesController = Controllers.of(context).bannerMessages;
     return Card(
       color: backgroundColor,
       child: Padding(
@@ -119,11 +168,9 @@ class BannerMessage extends StatelessWidget implements UniqueMessage {
         child: Row(
           children: <Widget>[
             Expanded(
-              child: Container(
-                child: RichText(
-                  text: TextSpan(
-                    children: textSpans,
-                  ),
+              child: RichText(
+                text: TextSpan(
+                  children: textSpans,
                 ),
               ),
             ),
@@ -133,7 +180,8 @@ class BannerMessage extends StatelessWidget implements UniqueMessage {
               backgroundColor: backgroundColor,
               foregroundColor: foregroundColor,
               // TODO(kenz): animate the removal of this message.
-              onPressed: () => bannerMessagesController.dismissMessage(id),
+              onPressed: () =>
+                  BannerMessages.of(context).remove(this, dismiss: true),
             ),
           ],
         ),
@@ -144,50 +192,47 @@ class BannerMessage extends StatelessWidget implements UniqueMessage {
 
 class _BannerError extends BannerMessage {
   const _BannerError({
-    @required String id,
+    @required Key key,
     @required List<TextSpan> textSpans,
     @required DevToolsScreenType screenType,
   }) : super(
-          messageId: id,
+          key: key,
           textSpans: textSpans,
           backgroundColor: devtoolsError,
           foregroundColor: foreground,
+          screenType: screenType,
         );
 
   static const foreground = Colors.white;
-  static const linkColor = Color(0xFF88D7FC);
+  static const linkColor = Color(0xFF54C1EF);
 }
 
 // TODO(kenz): add "Do not show this again" option to warnings.
 class _BannerWarning extends BannerMessage {
   const _BannerWarning({
-    @required String id,
+    @required Key key,
     @required List<TextSpan> textSpans,
     @required DevToolsScreenType screenType,
   }) : super(
-          messageId: id,
+          key: key,
           textSpans: textSpans,
           backgroundColor: devtoolsWarning,
           foregroundColor: foreground,
+          screenType: screenType,
         );
 
   static const foreground = Colors.black87;
-  static const linkColor = Color(0xFF055BF0);
+  static const linkColor = Color(0xFF54C1EF);
 }
 
-class DebugModePerformanceMessage extends StatelessWidget
-    implements UniqueMessage {
+class DebugModePerformanceMessage {
   const DebugModePerformanceMessage(this.screenType);
 
   final DevToolsScreenType screenType;
 
-  @override
-  String get id => 'DebugModePerformanceMessage - $screenType';
-
-  @override
   Widget build(BuildContext context) {
     return _BannerError(
-      id: id,
+      key: Key('DebugModePerformanceMessage - $screenType'),
       textSpans: [
         const TextSpan(
           text:
@@ -217,19 +262,16 @@ class DebugModePerformanceMessage extends StatelessWidget
   }
 }
 
-class HighProfileGranularityMessage extends StatelessWidget
-    implements UniqueMessage {
+class HighProfileGranularityMessage {
   const HighProfileGranularityMessage(this.screenType);
+
+  static const keyPrefix = 'HighProfileGranularityMessage';
 
   final DevToolsScreenType screenType;
 
-  @override
-  String get id => 'HighProfileGranularityMessage - $screenType';
-
-  @override
   Widget build(BuildContext context) {
     return _BannerWarning(
-      id: id,
+      key: Key('$keyPrefix - $screenType'),
       textSpans: [
         const TextSpan(
           text:
@@ -258,18 +300,14 @@ class HighProfileGranularityMessage extends StatelessWidget
   }
 }
 
-class DebugModeMemoryMessage extends StatelessWidget implements UniqueMessage {
+class DebugModeMemoryMessage {
   const DebugModeMemoryMessage(this.screenType);
 
   final DevToolsScreenType screenType;
 
-  @override
-  String get id => 'DebugModeMemoryMessage - $screenType';
-
-  @override
-  Widget build(BuildContext context) {
+  BannerMessage build(BuildContext context) {
     return _BannerWarning(
-      id: id,
+      key: Key('DebugModeMemoryMessage - $screenType'),
       textSpans: [
         const TextSpan(
           text: 'You are running your app in debug mode. Absolute memory usage '
@@ -299,6 +337,22 @@ class DebugModeMemoryMessage extends StatelessWidget implements UniqueMessage {
   }
 }
 
-abstract class UniqueMessage {
-  String get id;
+void maybePushDebugModePerformanceMessage(
+  BuildContext context,
+  DevToolsScreenType screenType,
+) {
+  if (serviceManager.connectedApp.isDebugFlutterAppNow) {
+    BannerMessages.of(context)
+        .push(DebugModePerformanceMessage(screenType).build(context));
+  }
+}
+
+void maybePushDebugModeMemoryMessage(
+  BuildContext context,
+  DevToolsScreenType screenType,
+) {
+  if (serviceManager.connectedApp.isDebugFlutterAppNow) {
+    BannerMessages.of(context)
+        .push(DebugModeMemoryMessage(screenType).build(context));
+  }
 }

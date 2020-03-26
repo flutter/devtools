@@ -61,23 +61,6 @@ void main() {
       expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
     });
 
-    testWidgets('messages returns message for debug mode',
-        (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-      BuildContext buildContext;
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: (context) {
-          buildContext = context;
-          return screen.build(context);
-        }),
-        memory: MemoryController(),
-      ));
-      final messages = screen.messages(buildContext);
-      expect(messages.length, equals(1));
-      expect(messages.contains(MemoryScreen.debugModeWarning), isTrue);
-    });
-
     testWidgetsWithWindowSize('builds proper content for state', windowSize,
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);

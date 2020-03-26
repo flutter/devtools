@@ -5,7 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../flutter/controllers.dart';
+import '../../flutter/banner_messages.dart';
+import '../../flutter/screen.dart';
 import '../../profiler/cpu_profile_service.dart';
 import '../../profiler/profile_granularity.dart';
 
@@ -13,6 +14,10 @@ import '../../profiler/profile_granularity.dart';
 ///
 /// This flag controls the rate at which the vm samples the CPU call stack.
 class ProfileGranularityDropdown extends StatefulWidget {
+  const ProfileGranularityDropdown(this.screenType);
+
+  final DevToolsScreenType screenType;
+
   @override
   ProfileGranularityDropdownState createState() =>
       ProfileGranularityDropdownState();
@@ -42,6 +47,23 @@ class ProfileGranularityDropdownState
         if (safeValue != flag.valueAsString) {
           _onProfileGranularityChanged(safeValue, context);
         }
+
+        final bannerMessages = BannerMessages.of(context);
+        if (safeValue == highProfilePeriod) {
+          bannerMessages.push(
+              HighProfileGranularityMessage(widget.screenType).build(context));
+        } else {
+          final currentMessages =
+              bannerMessages.controller.messagesForScreen(widget.screenType);
+          final highProfileGranularityMessage = currentMessages.firstWhere(
+              (m) => m.key
+                  .toString()
+                  .contains(HighProfileGranularityMessage.keyPrefix),
+              orElse: () => null);
+          if (highProfileGranularityMessage != null) {
+            BannerMessages.of(context).remove(highProfileGranularityMessage);
+          }
+        }
         return DropdownButton<String>(
           key: ProfileGranularityDropdown.dropdownKey,
           value: safeValue,
@@ -68,6 +90,5 @@ class ProfileGranularityDropdownState
     BuildContext context,
   ) async {
     await profilerService.setProfilePeriod(newValue);
-    Controllers.of(context).bannerMessages.refreshMessages();
   }
 }

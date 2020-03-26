@@ -6,7 +6,6 @@
 import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/flutter/split.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/timeline/flutter/event_details.dart';
 import 'package:devtools_app/src/timeline/flutter/flutter_frames_chart.dart';
@@ -86,30 +85,6 @@ void main() {
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(TimelineScreenBody), findsNothing);
       expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
-    });
-
-    testWidgetsWithWindowSize(
-        'messages returns proper warning and error messages', windowSize,
-        (WidgetTester tester) async {
-      controller = TimelineController();
-      BuildContext buildContext;
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: (context) {
-          buildContext = context;
-          return screen.build(context);
-        }),
-        timeline: controller,
-      ));
-      await controller.cpuProfilerController.service
-          .setProfilePeriod(highProfilePeriod);
-      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-
-      final messages = screen.messages(buildContext);
-      expect(messages.length, equals(2));
-      expect(messages.contains(TimelineScreen.debugModeWarning), isTrue);
-      expect(
-          messages.contains(TimelineScreen.profileGranularityWarning), isTrue);
     });
 
     testWidgetsWithWindowSize('builds initial content', windowSize,

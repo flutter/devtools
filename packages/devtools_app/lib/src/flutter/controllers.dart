@@ -63,7 +63,6 @@ class ProvidedControllers implements DisposableController {
     timeline.dispose();
     memory.dispose();
     performance.dispose();
-    bannerMessages.dispose();
   }
 }
 

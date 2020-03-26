@@ -16,7 +16,6 @@ import '../../performance/performance_controller.dart';
 import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
-import '../../profiler/profile_granularity.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
 
 class PerformanceScreen extends Screen {
@@ -49,16 +48,6 @@ class PerformanceScreen extends Screen {
       HighProfileGranularityMessage(DevToolsScreenType.performance);
 
   @override
-  List<BannerMessage> messages(BuildContext context) {
-    final performanceController = Controllers.of(context).performance;
-    return performanceMessages(
-      context,
-      performanceController,
-      DevToolsScreenType.performance,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     return !serviceManager.connectedApp.isDartWebAppNow
         ? const PerformanceScreenBody()
@@ -83,6 +72,11 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    maybePushDebugModePerformanceMessage(
+      context,
+      DevToolsScreenType.performance,
+    );
+
     final newController = Controllers.of(context).performance;
     if (newController == controller) return;
     controller = newController;
@@ -127,7 +121,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildStateControls(controller),
-            ProfileGranularityDropdown(),
+            const ProfileGranularityDropdown(DevToolsScreenType.performance),
           ],
         ),
         Expanded(

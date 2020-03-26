@@ -29,7 +29,7 @@ const String timelineScreenId = 'timeline';
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
 class TimelineController
-    with CpuProfilerControllerMixin
+    with CpuProfilerControllerProviderMixin
     implements DisposableController {
   TimelineController() {
     timelineService = TimelineService(this);

@@ -113,6 +113,6 @@ class CpuProfilerController {
   }
 }
 
-mixin CpuProfilerControllerMixin {
+mixin CpuProfilerControllerProviderMixin {
   final cpuProfilerController = CpuProfilerController();
 }

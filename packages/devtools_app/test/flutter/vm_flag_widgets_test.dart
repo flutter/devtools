@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/flutter/banner_messages.dart';
+import 'package:devtools_app/src/flutter/scaffold.dart';
+import 'package:devtools_app/src/flutter/screen.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -24,13 +26,16 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      dropdown = ProfileGranularityDropdown();
+      dropdown =
+          const ProfileGranularityDropdown(DevToolsScreenType.performance);
       bannerMessagesController = BannerMessagesController();
     });
 
     Future<void> pumpDropdown(WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
-        dropdown,
+        BannerMessages(
+          screen: SimpleScreen(dropdown),
+        ),
         bannerMessages: bannerMessagesController,
       ));
     }
@@ -67,6 +72,29 @@ void main() {
         equals(ProfileGranularity.medium.value),
       );
 
+      // Switch to high granularity.
+      await tester.tap(find.byKey(ProfileGranularityDropdown.dropdownKey));
+      await tester.pumpAndSettle(); // finish the menu animation
+      await tester.tap(find.text(ProfileGranularity.high.display).last);
+      await tester.pumpAndSettle(); // finish the menu animation
+      dropdownButton =
+          tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
+      expect(dropdownButton.value, equals(ProfileGranularity.high.value));
+
+      profilePeriodFlag = await getProfileGranularityFlag(fakeServiceManager);
+      expect(profilePeriodFlag.name, equals(vm_flags.profilePeriod));
+      expect(
+        profilePeriodFlag.valueAsString,
+        equals(ProfileGranularity.high.value),
+      );
+      // Verify we are showing the high profile granularity warning.
+      expect(
+        bannerMessagesController
+            .messagesForScreen(DevToolsScreenType.performance)
+            .length,
+        equals(1),
+      );
+
       // Switch to low granularity.
       await tester.tap(find.byKey(ProfileGranularityDropdown.dropdownKey));
       await tester.pumpAndSettle();
@@ -82,21 +110,10 @@ void main() {
         profilePeriodFlag.valueAsString,
         equals(ProfileGranularity.low.value),
       );
-
-      // Switch to high granularity.
-      await tester.tap(find.byKey(ProfileGranularityDropdown.dropdownKey));
-      await tester.pumpAndSettle(); // finish the menu animation
-      await tester.tap(find.text(ProfileGranularity.high.display).last);
-      await tester.pumpAndSettle(); // finish the menu animation
-      dropdownButton =
-          tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
-      expect(dropdownButton.value, equals(ProfileGranularity.high.value));
-
-      profilePeriodFlag = await getProfileGranularityFlag(fakeServiceManager);
-      expect(profilePeriodFlag.name, equals(vm_flags.profilePeriod));
       expect(
-        profilePeriodFlag.valueAsString,
-        equals(ProfileGranularity.high.value),
+        bannerMessagesController
+            .messagesForScreen(DevToolsScreenType.performance),
+        isEmpty,
       );
     });
 

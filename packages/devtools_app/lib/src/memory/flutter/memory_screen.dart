@@ -64,15 +64,6 @@ class MemoryScreen extends Screen {
       DebugModeMemoryMessage(DevToolsScreenType.memory);
 
   @override
-  List<BannerMessage> messages(BuildContext context) {
-    final showDebugModeWarning = serviceManager.connectedApp.isFlutterAppNow &&
-        !serviceManager.connectedApp.isProfileBuildNow;
-    return [
-      if (showDebugModeWarning) debugModeWarning.build(context),
-    ];
-  }
-
-  @override
   Widget build(BuildContext context) {
     return !serviceManager.connectedApp.isDartWebAppNow
         ? const MemoryBody()
@@ -95,6 +86,7 @@ class MemoryBodyState extends State<MemoryBody> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    maybePushDebugModeMemoryMessage(context, DevToolsScreenType.memory);
 
     final newController = Controllers.of(context).memory;
     if (newController == controller) return;

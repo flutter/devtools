@@ -195,13 +195,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         Container(
           padding: DevToolsScaffold.appPadding,
           alignment: Alignment.topLeft,
-          child: Column(
-            children: [
-              BannerMessageContainer(screen: screen),
-              Expanded(
-                child: screen.build(context),
-              ),
-            ],
+          child: BannerMessages(
+            screen: screen,
           ),
         ),
     ];

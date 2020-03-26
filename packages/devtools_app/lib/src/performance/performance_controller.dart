@@ -9,7 +9,7 @@ import '../profiler/cpu_profile_model.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../utils.dart';
 
-class PerformanceController with CpuProfilerControllerMixin {
+class PerformanceController with CpuProfilerControllerProviderMixin {
   CpuProfileData get cpuProfileData => cpuProfilerController.dataNotifier.value;
 
   /// Notifies that a CPU profile is currently being recorded.
