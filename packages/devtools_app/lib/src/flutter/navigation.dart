@@ -4,14 +4,13 @@
 
 import 'package:flutter/material.dart';
 
-import '../ui/theme.dart' as devtools_theme;
+import 'app.dart';
 
 /// Returns [routeName] with [queryParameters] appended as [Uri] query
 /// parameters.
 ///
 /// If not overridden, this will preserve the theme parameter across
 /// navigations.
-///
 ///
 /// This will fail because we can't determine what the theme value for the app
 /// is.
@@ -28,7 +27,7 @@ String routeNameWithQueryParams(BuildContext context, String routeName,
     previousQuery = ModalRoute.of(context).settings.name;
     // When this function is invoked from an unnamed context,
     // infer from the global theme configuration.
-    previousQuery ??= _inferThemeParameter;
+    previousQuery ??= _inferThemeParameter(context);
   }
 
   final previousQueryParams = Uri.parse(previousQuery).queryParameters;
@@ -45,8 +44,8 @@ String routeNameWithQueryParams(BuildContext context, String routeName,
 
 /// Infers the app's theme from a global constant.
 ///
-/// When calling from an unnamed route, we can't infer the theme
-/// value from the Uri. For example,
+/// When calling from an unnamed route, we can't infer the theme value from the
+/// Uri. For example,
 ///
 /// ```dart
 /// Navigator.of(context).push(MaterialPageRoute(builder: (innerContext) {
@@ -55,5 +54,9 @@ String routeNameWithQueryParams(BuildContext context, String routeName,
 /// ```
 ///
 /// ModalRoute.of`(innerContext)` returns the unnamed page route.
-String get _inferThemeParameter =>
-    devtools_theme.isDarkTheme ? '/unnamedRoute?theme=dark' : '/unnamedRoute';
+String _inferThemeParameter(BuildContext context) {
+  final preferences = DevToolsApp.of(context).preferences;
+  return preferences.darkModeTheme.value
+      ? '/unnamedRoute?theme=dark'
+      : '/unnamedRoute';
+}

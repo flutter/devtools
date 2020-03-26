@@ -74,13 +74,14 @@ class _InitializerState extends State<Initializer>
         // This setState call is alerting a change in the serviceManager's
         // state.
         setState(() {});
-        // TODO(https://github.com/flutter/devtools/issues/1285): On losing
-        // the connection, only provide an option to reconnect; don't
-        // immediately go to the connection page.
-        // If we've become disconnected, attempt to reconnect.
+        // TODO(https://github.com/flutter/devtools/issues/1285): On losing the
+        // connection, only provide an option to reconnect; don't immediately go
+        // to the connection page. If we've become disconnected, attempt to
+        // reconnect.
         _navigateToConnectPage();
       }),
     );
+
     if (widget.url != null) {
       _attemptUrlConnection();
     } else {
@@ -101,13 +102,15 @@ class _InitializerState extends State<Initializer>
     }
   }
 
-  /// Loads the /connect page if the [service.serviceManager] is not currently connected.
+  /// Loads the /connect page if the [service.serviceManager] is not currently
+  /// connected.
   void _navigateToConnectPage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
-        // If this route is on top and the app is not loaded, then we navigate to
-        // the /connect page to get a VM Service connection for serviceManager.
-        // When it completes, the serviceManager will notify this instance.
+        // If this route is on top and the app is not loaded, then we navigate
+        // to the /connect page to get a VM Service connection for
+        // serviceManager. When it completes, the serviceManager will notify
+        // this instance.
         Navigator.of(context).pushNamed(
           routeNameWithQueryParams(context, '/connect'),
         );

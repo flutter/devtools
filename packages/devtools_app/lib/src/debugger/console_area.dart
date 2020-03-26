@@ -20,6 +20,7 @@ class ConsoleArea implements CoreElementView {
       ..flex();
     _editor = CodeMirror.fromElement(_container.element, options: options);
     _editor.setReadOnly(true);
+    // ignore: deprecated_member_use_from_same_package
     if (isDarkTheme) {
       _editor.setTheme('darcula');
     }

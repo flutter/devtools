@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'fake_flutter/fake_flutter.dart';
 import 'flutter_html_shim.dart';
 
@@ -12,20 +14,15 @@ import 'flutter_html_shim.dart';
 ///
 /// Generally Dart code should use [ThemedColor] everywhere colors are used so
 /// that code can be written without directly depending on [isDarkTheme].
+@Deprecated('Prefer calling Controllers.of(context).preferences')
 bool get isDarkTheme => _isDarkTheme;
 bool _isDarkTheme = false;
 
 /// Change the value for the current theme.
 ///
 /// Note: this does not rebuild the widget hierarchy.
-set useDarkTheme(bool value) {
-  _isDarkTheme = value;
-
-  clearColorCache();
-}
-
-void initializeTheme(String theme) {
-  _isDarkTheme = theme == 'dark';
+void setTheme({@required bool darkTheme}) {
+  _isDarkTheme = darkTheme;
   clearColorCache();
 }
 
@@ -71,6 +68,7 @@ class ThemedColor implements Color {
   final Color _light;
   final Color _dark;
 
+  // ignore: deprecated_member_use_from_same_package
   Color get _current => isDarkTheme ? _dark : _light;
 
   @override

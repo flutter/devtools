@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
 import 'dart:html' as html;
+
+import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'config_specific/logger/logger.dart';
@@ -18,7 +19,7 @@ import 'logging/html_logging_screen.dart';
 import 'memory/html_memory_screen.dart';
 import 'model/html_model.dart';
 import 'performance/html_performance_screen.dart';
-import 'server_api_client.dart';
+import 'server_connection.dart';
 import 'service_registrations.dart' as registrations;
 import 'timeline/html_timeline_controller.dart';
 import 'timeline/html_timeline_screen.dart';
@@ -30,8 +31,6 @@ import 'ui/icons.dart';
 import 'ui/primer.dart';
 import 'ui/ui_utils.dart';
 import 'utils.dart';
-
-// TODO(devoncarew): make the screens more robust through restarts
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 
@@ -67,7 +66,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
   static const _reloadActionId = 'reload-action';
   static const _restartActionId = 'restart-action';
 
-  DevToolsServerApiClient devToolsServer;
+  DevToolsServerConnection devToolsServer;
 
   void initGlobalUI() async {
     // Listen for clicks on the 'send feedback' button.
@@ -156,45 +155,38 @@ class HtmlPerfToolFramework extends HtmlFramework {
     screensReady.future.then(app.devToolsReady);
   }
 
-  void initDevToolsServerConnection() {
+  Future initDevToolsServerConnection() async {
     // When running the debug DDC Build, the server won't be running so we
     // can't connect to its API (for now at least, the API is optional).
     if (isDebugBuild()) {
       return;
     }
 
+    DevToolsServerConnection devToolsServer;
+
     try {
-      devToolsServer = DevToolsServerApiClient(this);
-      // If we showed a notification for DevTools and the user manually clicked
-      // into the window instead, we should hide the notification automatically.
-      html.window.onFocus.listen((_) => devToolsServer.dismissNotifications());
-
-      // TODO(dantup): As a workaround for not being able to reconnect DevTools to
-      // a new VM yet (https://github.com/flutter/devtools/issues/989) we reload
-      // the page and pass a querystring variable to know that we need to notify
-      // the user.
-      final uri = Uri.parse(html.window.location.href);
-      if (uri.queryParameters.containsKey('notify')) {
-        final newParams = Map.of(uri.queryParameters)..remove('notify');
-        html.window.history.pushState(
-            null, null, uri.replace(queryParameters: newParams).toString());
-        devToolsServer.notify();
-      }
-
-      onPageChange.listen(devToolsServer.notifyCurrentPage);
-      serviceManager.onStateChange.listen((connected) {
-        try {
-          if (connected) {
-            devToolsServer.notifyConnected(serviceManager.service.connectedUri);
-          } else {
-            devToolsServer.notifyDisconnected();
-          }
-        } catch (e) {
-          print('Failed to notify server of connection status: $e');
-        }
-      });
+      devToolsServer = await DevToolsServerConnection.connect();
     } catch (e) {
       print('Failed to connect to SSE API: $e');
+      return;
+    }
+
+    devToolsServer.setFrameworkController(_FrameworkController(this));
+
+    // If we showed a notification for DevTools and the user manually clicked
+    // into the window instead, we should hide the notification automatically.
+    html.window.onFocus.listen((_) => devToolsServer.dismissNotifications());
+
+    // TODO(dantup): As a workaround for not being able to reconnect DevTools to
+    // a new VM yet (https://github.com/flutter/devtools/issues/989) we reload
+    // the page and pass a querystring variable to know that we need to notify
+    // the user.
+    final uri = Uri.parse(html.window.location.href);
+    if (uri.queryParameters.containsKey('notify')) {
+      final newParams = Map.of(uri.queryParameters)..remove('notify');
+      html.window.history.pushState(
+          null, null, uri.replace(queryParameters: newParams).toString());
+      unawaited(devToolsServer.notify());
     }
   }
 
@@ -411,6 +403,69 @@ class HtmlPerfToolFramework extends HtmlFramework {
       connectionStatus.element.text = 'no device connected';
     }
   }
+}
+
+class _FrameworkController implements FrameworkController {
+  _FrameworkController(this.htmlFramework) {
+    serviceManager.onStateChange.listen((connected) {
+      try {
+        if (connected) {
+          _connectedController.add(serviceManager.service.connectedUri);
+        } else {
+          _disconnectedController.add(null);
+        }
+      } catch (e) {
+        print('Failed to notify server of connection status: $e');
+      }
+    });
+  }
+
+  final HtmlPerfToolFramework htmlFramework;
+
+  final StreamController<Uri> _connectedController =
+      StreamController.broadcast();
+  final StreamController _disconnectedController = StreamController.broadcast();
+
+  @override
+  void showPageId(String pageId) {
+    final screen = htmlFramework.getScreen(pageId);
+    if (screen != null) {
+      htmlFramework.load(screen);
+    }
+  }
+
+  @override
+  void connectToVm(Uri serviceProtocolUri, {bool notify = false}) {
+    // Reload the page with the new VM service URI in the querystring.
+    // TODO(dantup): Remove this code and replace with code that just reconnects
+    // (and optionally notifies based on requestParams['notify']) when it's
+    // supported better (https://github.com/flutter/devtools/issues/989).
+    //
+    // This currently doesn't currently work, as the app does not reinitialize
+    // correctly:
+    //
+    //   _framework.connectDialog.connectTo(Uri.parse(requestParams['uri']));
+    //   if (requestParams['notify'] == true) {
+    //     this.notify();
+    //   }
+    final uri = Uri.parse(html.window.location.href);
+    final newUriParams = Map.of(uri.queryParameters);
+    newUriParams['uri'] = serviceProtocolUri.toString();
+    if (notify) {
+      newUriParams['notify'] = 'true';
+    }
+    html.window.location
+        .replace(uri.replace(queryParameters: newUriParams).toString());
+  }
+
+  @override
+  Stream<Uri> get onConnected => _connectedController.stream;
+
+  @override
+  Stream<String> get onPageChange => htmlFramework.onPageChange;
+
+  @override
+  Stream get onDisconnected => _disconnectedController.stream;
 }
 
 class HtmlNotFoundScreen extends HtmlScreen {

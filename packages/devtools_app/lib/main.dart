@@ -7,11 +7,9 @@ import 'package:flutter/material.dart';
 import 'src/config_specific/flutter/framework_initialize/framework_initialize.dart';
 import 'src/flutter/app.dart';
 
-void main() {
-  initializeFramework();
+void main() async {
+  await initializeFramework();
 
   // Now run the app.
-  runApp(
-    DevToolsApp(),
-  );
+  runApp(DevToolsApp());
 }

@@ -36,6 +36,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
             : MockVmService() {
     _flagManager.service = service;
   }
+
   static final _flagManager = VmFlagManager();
 
   @override

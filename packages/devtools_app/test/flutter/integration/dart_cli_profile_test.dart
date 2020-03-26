@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -49,7 +48,8 @@ Future<void> main() async {
 
   group('Whole app', () {
     testWidgets('CLI Memory Profile Collection', (tester) async {
-      FrameworkCore.init('');
+      FrameworkCore.init();
+
       final app = DefaultAssetBundle(
         bundle: _DiskAssetBundle(),
         child: DevToolsApp(),
@@ -236,6 +236,7 @@ class ParseStdout {
 
 class _DiskAssetBundle extends CachingAssetBundle {
   static const _assetManifestDotJson = 'AssetManifest.json';
+
   @override
   Future<ByteData> load(String key) async {
     if (key == _assetManifestDotJson) {

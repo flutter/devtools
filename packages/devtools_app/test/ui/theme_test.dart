@@ -13,7 +13,7 @@ void main() {
   const Color customColor = ThemedColor(customLight, customDark);
 
   test('light theme', () {
-    initializeTheme('light');
+    setTheme(darkTheme: false);
     expect(defaultBackground.red, equals(255));
     expect(defaultBackground.green, equals(255));
     expect(defaultBackground.blue, equals(255));
@@ -35,7 +35,7 @@ void main() {
   });
 
   test('dark theme', () {
-    initializeTheme('dark');
+    setTheme(darkTheme: true);
     expect(defaultBackground.red, equals(0));
     expect(defaultBackground.green, equals(0));
     expect(defaultBackground.blue, equals(0));

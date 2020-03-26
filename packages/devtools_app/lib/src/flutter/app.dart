@@ -17,11 +17,11 @@ import '../network/flutter/network_screen.dart';
 import '../performance/flutter/performance_screen.dart';
 import '../timeline/flutter/timeline_screen.dart';
 import '../ui/flutter/service_extension_widgets.dart';
-import '../ui/theme.dart' as devtools_theme;
 import 'common_widgets.dart';
 import 'connect_screen.dart';
 import 'initializer.dart';
 import 'notifications.dart';
+import 'preferences.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
@@ -50,49 +50,28 @@ class DevToolsApp extends StatefulWidget {
 // TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
-  ThemeData theme;
-
-  @override
-  void initState() {
-    super.initState();
-
-    theme = themeFor(isDarkTheme: devtools_theme.isDarkTheme);
-  }
+  final PreferencesController preferences = PreferencesController();
 
   /// Generates routes, separating the path from URL query parameters.
   Route _generateRoute(RouteSettings settings) {
     final uri = Uri.parse(settings.name);
     final path = uri.path;
 
-    // Update the theme based on the query parameters.
-    // TODO(djshuckerow): Update this with a NavigatorObserver to load the new
-    // theme a frame earlier.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // On desktop, don't change the theme on route changes.
-      if (!kIsWeb) return;
-
-      setState(() {
-        final themeQueryParameter = uri.queryParameters['theme'];
-        // We refer to the legacy theme to make sure the debugging page stays
-        // in-sync with the rest of the app.
-        devtools_theme.initializeTheme(themeQueryParameter);
-        theme = themeFor(isDarkTheme: devtools_theme.isDarkTheme);
-      });
-    });
 
     // Provide the appropriate page route.
     if (_routes.containsKey(path)) {
       WidgetBuilder builder =
           (context) => _routes[path](context, uri.queryParameters);
+
       assert(() {
-        builder = (context) => _AlternateCheckedModeBanner(
-              builder: (context) => _routes[path](
-                context,
-                uri.queryParameters,
-              ),
-            );
+        builder = (context) {
+          return _AlternateCheckedModeBanner(
+            builder: (context) => _routes[path](context, uri.queryParameters),
+          );
+        };
         return true;
       }());
+
       return MaterialPageRoute(settings: settings, builder: builder);
     }
 
@@ -141,19 +120,17 @@ class DevToolsAppState extends State<DevToolsApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: theme,
-      builder: (context, child) => Notifications(child: child),
-      onGenerateRoute: _generateRoute,
+    return ValueListenableBuilder(
+      valueListenable: preferences.darkModeTheme,
+      builder: (context, value, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: themeFor(isDarkTheme: value),
+          builder: (context, child) => Notifications(child: child),
+          onGenerateRoute: _generateRoute,
+        );
+      },
     );
-  }
-
-  /// Allow clients to force a rebuild for theme changes.
-  void updateTheme() {
-    setState(() {
-      theme = themeFor(isDarkTheme: devtools_theme.isDarkTheme);
-    });
   }
 }
 
@@ -246,32 +223,18 @@ class OpenSettingsAction extends StatelessWidget {
 
 // TODO(devoncarew): Add an analytics setting.
 
-// TODO(devoncarew): Convert the SettingsDialog over to using a controller?
-// Add a settings controller to Controllers that Widgets can access via
-// Controllers.of(context); the SettingsController could manage setting states
-// (where setting values are ValueNotifiers) and have methods to modify them.
-// Widgets (like below) can then just grab the active SettingsController from
-// Controller.of(context).settings and listening to its notifiers.
-
-class SettingsDialog extends StatefulWidget {
+class SettingsDialog extends StatelessWidget {
   const SettingsDialog({
     Key key,
   }) : super(key: key);
 
   @override
-  _SettingsDialogState createState() => _SettingsDialogState();
-}
-
-class _SettingsDialogState extends State<SettingsDialog> {
-  @override
   Widget build(BuildContext context) {
-    void _toggleTheme([bool value]) {
-      value ??= !devtools_theme.isDarkTheme;
-      setState(() {
-        devtools_theme.useDarkTheme = value;
+    final preferences = DevToolsApp.of(context).preferences;
 
-        DevToolsApp.of(context).updateTheme();
-      });
+    void _toggleTheme([bool value]) {
+      value ??= !preferences.darkModeTheme.value;
+      preferences.darkModeTheme.value = value;
     }
 
     return AlertDialog(
@@ -292,9 +255,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
             onTap: _toggleTheme,
             child: Row(
               children: <Widget>[
-                Checkbox(
-                  value: devtools_theme.isDarkTheme,
-                  onChanged: (bool value) => _toggleTheme(value),
+                ValueListenableBuilder(
+                  valueListenable: preferences.darkModeTheme,
+                  builder: (context, value, _) {
+                    return Checkbox(
+                      value: value,
+                      onChanged: _toggleTheme,
+                    );
+                  },
                 ),
                 const Text('Use a dark theme'),
               ],

@@ -68,8 +68,7 @@ class ProvidedControllers implements DisposableController {
 ///
 /// See [Controllers.of] for how to retrieve a [ProvidedControllers] instance.
 class Controllers extends StatefulWidget {
-  const Controllers({Key key, Widget child})
-      : this._(key: key, child: child, overrideProviders: null);
+  const Controllers({Key key, Widget child}) : this._(key: key, child: child);
 
   @visibleForTesting
   const Controllers.overridden({Key key, this.child, this.overrideProviders});
@@ -211,8 +210,9 @@ class _DisposeAfterNotifyElement extends InheritedElement {
   void notifyClients(_InheritedProvider oldWidget) {
     super.notifyClients(oldWidget);
     // For stateful widgets that depend on Controllers.of(context) to subscribe
-    // directly, we don't need a postframe callback and we can just  dispose the
+    // directly, we don't need a postframe callback and we can just dispose the
     // old data.
+    //
     // For ValueListenableBuilder widgets, we need the postframe callback to
     // wait until the builders have a chance to build and update their
     // listeners.

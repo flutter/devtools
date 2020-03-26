@@ -12,18 +12,14 @@ import '../core/message_bus.dart';
 import '../globals.dart';
 import '../service.dart';
 import '../service_manager.dart';
-import '../ui/theme.dart' as theme;
 import '../vm_service_wrapper.dart';
 
 typedef ErrorReporter = void Function(String title, dynamic error);
 
 class FrameworkCore {
-  static void init(String url) {
+  static void init() {
     // Print the version number at startup.
     log('DevTools version ${devtools.version}.');
-
-    final uri = Uri.parse(url);
-    theme.initializeTheme(uri.queryParameters['theme']);
 
     _setGlobals();
   }

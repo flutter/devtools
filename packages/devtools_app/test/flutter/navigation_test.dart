@@ -111,7 +111,7 @@ void main() {
       testWidgets('Builds with global dark mode when dark mode is on',
           (WidgetTester tester) async {
         String generatedRoute;
-        initializeTheme('dark');
+        setTheme(darkTheme: true);
         await tester.pumpWidget(unnamedRouteApp((context) {
           generatedRoute =
               routeNameWithQueryParams(context, '/home', {'foo': 'baz'});
@@ -119,7 +119,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(generatedRoute, '/home?foo=baz&theme=dark');
         // Teardown the global theme change
-        initializeTheme('light');
+        setTheme(darkTheme: false);
       });
 
       testWidgets('Builds with global light mode when dark mode is off',

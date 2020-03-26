@@ -8,7 +8,7 @@ import '_framework_initialize_stub.dart'
     if (dart.library.html) '_framework_initialize_web.dart'
     if (dart.library.io) '_framework_initialize_desktop.dart';
 
-void initializeFramework() {
-  final url = initializePlatform();
-  FrameworkCore.init(url);
+Future initializeFramework() async{
+  await initializePlatform();
+  FrameworkCore.init();
 }
