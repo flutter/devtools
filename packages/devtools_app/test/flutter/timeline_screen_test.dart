@@ -32,7 +32,7 @@ void main() {
   }) async {
     // Set a wide enough screen width that we do not run into overflow.
     await tester.pumpWidget(wrapWithControllers(
-      const TimelineScreenBody(),
+      wrapWithBannerMessages(const TimelineScreenBody()),
       timeline: controller = timelineController ?? TimelineController(),
     ));
     expect(find.byType(TimelineScreenBody), findsOneWidget);
@@ -65,6 +65,8 @@ void main() {
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
       when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
+          .thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));

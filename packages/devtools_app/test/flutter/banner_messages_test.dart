@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/common_widgets.dart';
-import 'package:devtools_app/src/flutter/scaffold.dart';
 import 'package:devtools_app/src/flutter/screen.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -69,22 +68,20 @@ void main() {
       return wrapWithControllers(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: BannerMessages(
-            screen: SimpleScreen(
-              Builder(
-                builder: (context) {
-                  buildContext = context;
-                  return Column(
-                    children: <Widget>[
-                      // This is button is present so that we can tap it and
-                      // simulate a frame being drawn.
-                      RaisedButton(
-                        onPressed: () => {},
-                      ),
-                    ],
-                  );
-                },
-              ),
+          child: wrapWithBannerMessages(
+            Builder(
+              builder: (context) {
+                buildContext = context;
+                return Column(
+                  children: <Widget>[
+                    // This is button is present so that we can tap it and
+                    // simulate a frame being drawn.
+                    RaisedButton(
+                      onPressed: () => {},
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),

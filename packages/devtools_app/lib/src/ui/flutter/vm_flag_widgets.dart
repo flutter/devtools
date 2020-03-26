@@ -55,7 +55,7 @@ class ProfileGranularityDropdownState
         } else {
           final currentMessages =
               bannerMessages.controller.messagesForScreen(widget.screenType);
-          final highProfileGranularityMessage = currentMessages.firstWhere(
+          final highProfileGranularityMessage = currentMessages?.firstWhere(
               (m) => m.key
                   .toString()
                   .contains(HighProfileGranularityMessage.keyPrefix),
