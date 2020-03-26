@@ -187,23 +187,23 @@ const testMessage3ScreenType = DevToolsScreenType.performance;
 const k1 = Key('test message 1');
 const k2 = Key('test message 2');
 const k3 = Key('test message 3');
-final testMessage1 = BannerMessage(
+const testMessage1 = BannerMessage(
   key: k1,
-  textSpans: const [TextSpan(text: 'Test Message 1')],
+  textSpans: [TextSpan(text: 'Test Message 1')],
   backgroundColor: Colors.black,
   foregroundColor: Colors.white,
   screenType: testMessage1ScreenType,
 );
-final testMessage2 = BannerMessage(
+const testMessage2 = BannerMessage(
   key: k2,
-  textSpans: const [TextSpan(text: 'Test Message 2')],
+  textSpans: [TextSpan(text: 'Test Message 2')],
   backgroundColor: Colors.black,
   foregroundColor: Colors.white,
   screenType: testMessage2ScreenType,
 );
-final testMessage3 = BannerMessage(
+const testMessage3 = BannerMessage(
   key: k3,
-  textSpans: const [TextSpan(text: 'Test Message 3')],
+  textSpans: [TextSpan(text: 'Test Message 3')],
   backgroundColor: Colors.black,
   foregroundColor: Colors.white,
   screenType: testMessage3ScreenType,
