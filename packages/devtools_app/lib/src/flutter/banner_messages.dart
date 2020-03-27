@@ -161,13 +161,14 @@ class BannerMessagesState extends State<_BannerMessagesProvider>
   // TODO(kenz): use an AnimatedList for message changes.
   @override
   Widget build(BuildContext context) {
+    final messagesForScreen = controller?.messagesForScreen(widget.screen.type);
     return _InheritedBannerMessages(
       data: this,
       child: Column(
         children: [
-          if (controller != null)
+          if (messagesForScreen != null)
             ValueListenableBuilder<List<BannerMessage>>(
-              valueListenable: controller.messagesForScreen(widget.screen.type),
+              valueListenable: messagesForScreen,
               builder: (context, messages, _) {
                 return Column(
                   children: messages,
