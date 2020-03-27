@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/notifications.dart';
@@ -87,6 +88,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    maybePushDebugModePerformanceMessage(context, DevToolsScreenType.timeline);
+
     final newController = Controllers.of(context).timeline;
     if (newController == controller) return;
     controller = newController;
@@ -192,7 +195,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        ProfileGranularityDropdown(),
+        const ProfileGranularityDropdown(DevToolsScreenType.timeline),
         const SizedBox(width: defaultSpacing),
         if (!serviceManager.connectedApp.isDartCliAppNow)
           ServiceExtensionButtonGroup(

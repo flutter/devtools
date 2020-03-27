@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
@@ -64,6 +65,11 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    maybePushDebugModePerformanceMessage(
+      context,
+      DevToolsScreenType.performance,
+    );
+
     final newController = Controllers.of(context).performance;
     if (newController == controller) return;
     controller = newController;
@@ -108,7 +114,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildStateControls(controller),
-            ProfileGranularityDropdown(),
+            const ProfileGranularityDropdown(DevToolsScreenType.performance),
           ],
         ),
         Expanded(

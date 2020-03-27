@@ -26,6 +26,8 @@ void main() {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
+          .thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       screen = const PerformanceScreen();
     });
@@ -44,6 +46,16 @@ void main() {
       expect(find.byKey(PerformanceScreen.recordingStatusKey), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(CpuProfiler), findsNothing);
+    }
+
+    Future<void> pumpPerformanceBody(
+      WidgetTester tester,
+      PerformanceScreenBody body,
+    ) async {
+      await tester.pumpWidget(wrapWithControllers(
+        wrapWithBannerMessages(body),
+        performance: PerformanceController(),
+      ));
     }
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -69,10 +81,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         const perfScreenBody = PerformanceScreenBody();
-        await tester.pumpWidget(wrapWithControllers(
-          perfScreenBody,
-          performance: PerformanceController(),
-        ));
+        await pumpPerformanceBody(tester, perfScreenBody);
         expect(find.byType(PerformanceScreenBody), findsOneWidget);
         verifyBaseState(perfScreenBody, tester);
 
@@ -103,10 +112,7 @@ void main() {
         (WidgetTester tester) async {
       await serviceManager.service.setFlag(vm_flags.profiler, 'false');
       const perfScreenBody = PerformanceScreenBody();
-      await tester.pumpWidget(wrapWithControllers(
-        perfScreenBody,
-        performance: PerformanceController(),
-      ));
+      await pumpPerformanceBody(tester, perfScreenBody);
       expect(find.byType(CpuProfilerDisabled), findsOneWidget);
       expect(
         find.byKey(PerformanceScreen.recordingInstructionsKey),

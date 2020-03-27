@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/flutter/banner_messages.dart';
+import 'package:devtools_app/src/flutter/scaffold.dart';
+import 'package:devtools_app/src/flutter/screen.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -18,15 +21,27 @@ void main() {
   group('Profile Granularity Dropdown', () {
     FakeServiceManager fakeServiceManager;
     ProfileGranularityDropdown dropdown;
+    BannerMessagesController bannerMessagesController;
 
     setUp(() {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      dropdown = ProfileGranularityDropdown();
+      dropdown =
+          const ProfileGranularityDropdown(DevToolsScreenType.performance);
+      bannerMessagesController = BannerMessagesController();
     });
 
+    Future<void> pumpDropdown(WidgetTester tester) async {
+      await tester.pumpWidget(wrapWithControllers(
+        BannerMessages(
+          screen: SimpleScreen(dropdown),
+        ),
+        bannerMessages: bannerMessagesController,
+      ));
+    }
+
     testWidgets('displays with default content', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(dropdown));
+      await pumpDropdown(tester);
       expect(find.byWidget(dropdown), findsOneWidget);
       expect(
         find.byKey(ProfileGranularityDropdown.dropdownKey),
@@ -41,7 +56,7 @@ void main() {
     });
 
     testWidgets('selection', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(dropdown));
+      await pumpDropdown(tester);
       expect(find.byWidget(dropdown), findsOneWidget);
       expect(find.text(ProfileGranularity.low.display), findsOneWidget);
       expect(find.text(ProfileGranularity.medium.display), findsOneWidget);
@@ -55,22 +70,6 @@ void main() {
       expect(
         profilePeriodFlag.valueAsString,
         equals(ProfileGranularity.medium.value),
-      );
-
-      // Switch to low granularity.
-      await tester.tap(find.byKey(ProfileGranularityDropdown.dropdownKey));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(ProfileGranularity.low.display).last);
-      await tester.pumpAndSettle();
-      dropdownButton =
-          tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
-      expect(dropdownButton.value, equals(ProfileGranularity.low.value));
-
-      profilePeriodFlag = await getProfileGranularityFlag(fakeServiceManager);
-      expect(profilePeriodFlag.name, equals(vm_flags.profilePeriod));
-      expect(
-        profilePeriodFlag.valueAsString,
-        equals(ProfileGranularity.low.value),
       );
 
       // Switch to high granularity.
@@ -88,6 +87,37 @@ void main() {
         profilePeriodFlag.valueAsString,
         equals(ProfileGranularity.high.value),
       );
+      // Verify we are showing the high profile granularity warning.
+      expect(
+        bannerMessagesController
+            .messagesForScreen(DevToolsScreenType.performance)
+            .value
+            .length,
+        equals(1),
+      );
+
+      // Switch to low granularity.
+      await tester.tap(find.byKey(ProfileGranularityDropdown.dropdownKey));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(ProfileGranularity.low.display).last);
+      await tester.pumpAndSettle();
+      dropdownButton =
+          tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
+      expect(dropdownButton.value, equals(ProfileGranularity.low.value));
+
+      profilePeriodFlag = await getProfileGranularityFlag(fakeServiceManager);
+      expect(profilePeriodFlag.name, equals(vm_flags.profilePeriod));
+      expect(
+        profilePeriodFlag.valueAsString,
+        equals(ProfileGranularity.low.value),
+      );
+      // Verify we are not showing the high profile granularity warning.
+      expect(
+        bannerMessagesController
+            .messagesForScreen(DevToolsScreenType.performance)
+            .value,
+        isEmpty,
+      );
     });
 
     void testUpdatesForFlagChange(
@@ -95,7 +125,7 @@ void main() {
       @required String newFlagValue,
       @required String expectedFlagValue,
     }) async {
-      await tester.pumpWidget(wrap(dropdown));
+      await pumpDropdown(tester);
       expect(find.byWidget(dropdown), findsOneWidget);
       final dropdownButtonFinder =
           find.byKey(ProfileGranularityDropdown.dropdownKey);

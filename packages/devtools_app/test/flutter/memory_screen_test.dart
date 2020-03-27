@@ -29,7 +29,7 @@ void main() {
   }) async {
     // Set a wide enough screen width that we do not run into overflow.
     await tester.pumpWidget(wrapWithControllers(
-      const MemoryBody(),
+      wrapWithBannerMessages(const MemoryBody()),
       memory: controller = memoryController ?? MemoryController(),
     ));
     expect(find.byType(MemoryBody), findsOneWidget);
@@ -42,6 +42,8 @@ void main() {
       await ensureInspectorDependencies();
       fakeServiceManager = FakeServiceManager(useFakeService: true);
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
+          .thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));

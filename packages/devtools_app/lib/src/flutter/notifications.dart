@@ -27,7 +27,6 @@ abstract class NotificationService {
 /// Manager for notifications in the app.
 ///
 /// Must be inside of an [Overlay].
-///
 class Notifications extends StatelessWidget {
   const Notifications({Key key, @required this.child}) : super(key: key);
 
