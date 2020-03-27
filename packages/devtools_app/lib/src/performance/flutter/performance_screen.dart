@@ -40,13 +40,6 @@ class PerformanceScreen extends Screen {
   @override
   String get docPageId => 'performance';
 
-  @visibleForTesting
-  static const debugModeWarning =
-      DebugModePerformanceMessage(DevToolsScreenType.performance);
-  @visibleForTesting
-  static const profileGranularityWarning =
-      HighProfileGranularityMessage(DevToolsScreenType.performance);
-
   @override
   Widget build(BuildContext context) {
     return !serviceManager.connectedApp.isDartWebAppNow

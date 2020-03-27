@@ -53,16 +53,10 @@ class ProfileGranularityDropdownState
           bannerMessages.push(
               HighProfileGranularityMessage(widget.screenType).build(context));
         } else {
-          final currentMessages =
-              bannerMessages.controller.messagesForScreen(widget.screenType);
-          final highProfileGranularityMessage = currentMessages?.firstWhere(
-              (m) => m.key
-                  .toString()
-                  .contains(HighProfileGranularityMessage.keyPrefix),
-              orElse: () => null);
-          if (highProfileGranularityMessage != null) {
-            BannerMessages.of(context).remove(highProfileGranularityMessage);
-          }
+          BannerMessages.of(context).removeMessageByKey(
+            HighProfileGranularityMessage(widget.screenType).key,
+            widget.screenType,
+          );
         }
         return DropdownButton<String>(
           key: ProfileGranularityDropdown.dropdownKey,

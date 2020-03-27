@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -20,21 +21,36 @@ const _profileGranularityDocsUrl =
     'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';
 
 class BannerMessagesController {
-  final _messages = <DevToolsScreenType, List<BannerMessage>>{};
+  final _messages = <DevToolsScreenType, ValueNotifier<List<BannerMessage>>>{};
   final _dismissedMessageKeys = <Key>{};
 
   void addMessage(BannerMessage message) {
-    assert(!isMessageVisible(message));
-    final messages = messagesForScreen(message.screenType);
-    messages.add(message);
+    if (isMessageDismissed(message) || isMessageVisible(message)) return;
+    final messages = _messagesForScreen(message.screenType);
+    messages.value.add(message);
+    // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+    messages.notifyListeners();
   }
 
   void removeMessage(BannerMessage message, {bool dismiss = false}) {
-    final messages = messagesForScreen(message.screenType);
-    messages.remove(message);
     if (dismiss) {
       assert(!_dismissedMessageKeys.contains(message.key));
       _dismissedMessageKeys.add(message.key);
+    }
+    final messages = _messagesForScreen(message.screenType);
+    messages.value.remove(message);
+    // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+    messages.notifyListeners();
+  }
+
+  void removeMessageByKey(Key key, DevToolsScreenType screenType) {
+    final currentMessages = _messagesForScreen(screenType);
+    final messageWithKey = currentMessages.value.firstWhere(
+      (m) => m.key == key,
+      orElse: () => null,
+    );
+    if (messageWithKey != null) {
+      removeMessage(messageWithKey);
     }
   }
 
@@ -43,13 +59,23 @@ class BannerMessagesController {
   }
 
   bool isMessageVisible(BannerMessage message) {
-    return messagesForScreen(message.screenType)
+    return _messagesForScreen(message.screenType)
+        .value
         .where((m) => m.key == message.key)
         .isNotEmpty;
   }
 
-  List<BannerMessage> messagesForScreen(DevToolsScreenType screenType) {
-    return _messages.putIfAbsent(screenType, () => []);
+  ValueNotifier<List<BannerMessage>> _messagesForScreen(
+    DevToolsScreenType screenType,
+  ) {
+    return _messages.putIfAbsent(
+        screenType, () => ValueNotifier<List<BannerMessage>>([]));
+  }
+
+  ValueListenable<List<BannerMessage>> messagesForScreen(
+    DevToolsScreenType screenType,
+  ) {
+    return _messagesForScreen(screenType);
   }
 }
 
@@ -104,28 +130,31 @@ class BannerMessagesState extends State<_BannerMessagesProvider>
   }
 
   void push(BannerMessage message) {
-    if (controller.isMessageDismissed(message) ||
-        controller.isMessageVisible(message)) return;
-    // We push the banner message in a post frame callback because otherwise,we'd be
-    // trying to call setState while the parent widget `BannerMessages` is in the middle
-    // of `build`.
+    // We push the banner message in a post frame callback because otherwise,
+    // we'd be trying to call setState while the parent widget `BannerMessages`
+    // is in the middle of `build`.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      setState(() {
-        controller.addMessage(message);
-      });
+      controller.addMessage(message);
     });
   }
 
   void remove(BannerMessage message, {bool dismiss = false}) {
-    // We push the banner message in a post frame callback because otherwise,we'd be
-    // trying to call setState while the parent widget `BannerMessages` is in the middle
-    // of `build`.
+    // We push the banner message in a post frame callback because otherwise,
+    // we'd be trying to call setState while the parent widget `BannerMessages`
+    // is in the middle of `build`.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      setState(() {
-        controller.removeMessage(message, dismiss: dismiss);
-      });
+      controller.removeMessage(message, dismiss: dismiss);
+    });
+  }
+
+  void removeMessageByKey(Key key, DevToolsScreenType screenType) {
+    // We push the banner message in a post frame callback because otherwise,
+    // we'd be trying to call setState while the parent widget `BannerMessages`
+    // is in the middle of `build`.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.removeMessageByKey(key, screenType);
     });
   }
 
@@ -136,7 +165,15 @@ class BannerMessagesState extends State<_BannerMessagesProvider>
       data: this,
       child: Column(
         children: [
-          ...controller?.messagesForScreen(widget.screen.type) ?? [],
+          if (controller != null)
+            ValueListenableBuilder<List<BannerMessage>>(
+              valueListenable: controller.messagesForScreen(widget.screen.type),
+              builder: (context, messages, _) {
+                return Column(
+                  children: messages,
+                );
+              },
+            ),
           Expanded(
             child: widget.screen.build(context),
           )
@@ -236,10 +273,10 @@ class DebugModePerformanceMessage {
       key: Key('DebugModePerformanceMessage - $screenType'),
       textSpans: [
         const TextSpan(
-          text:
-              'You are running your app in debug mode. Debug mode performance '
-              'is not indicative of release performance.\n\nRelaunch your '
-              'application with the \'--profile\' argument, or ',
+          text: '''
+You are running your app in debug mode. Debug mode performance is not indicative of release performance.
+
+Relaunch your application with the '--profile' argument, or ''',
           style: TextStyle(color: _BannerError.foreground),
         ),
         TextSpan(
@@ -264,20 +301,20 @@ class DebugModePerformanceMessage {
 }
 
 class HighProfileGranularityMessage {
-  const HighProfileGranularityMessage(this.screenType);
+  HighProfileGranularityMessage(this.screenType)
+      : key = Key('HighProfileGranularityMessage - $screenType');
 
-  static const keyPrefix = 'HighProfileGranularityMessage';
+  final Key key;
 
   final DevToolsScreenType screenType;
 
   Widget build(BuildContext context) {
     return _BannerWarning(
-      key: Key('$keyPrefix - $screenType'),
+      key: key,
       textSpans: [
         const TextSpan(
-          text:
-              'You are opting in to a high CPU sampling rate. This may affect '
-              'the performance of your application. Please read our ',
+          text: '''
+You are opting in to a high CPU sampling rate. This may affect the performance of your application. Please read our ''',
           style: TextStyle(color: _BannerWarning.foreground),
         ),
         TextSpan(
@@ -311,10 +348,10 @@ class DebugModeMemoryMessage {
       key: Key('DebugModeMemoryMessage - $screenType'),
       textSpans: [
         const TextSpan(
-          text: 'You are running your app in debug mode. Absolute memory usage '
-              'may be higher in a debug build than in a release build.\n\n'
-              'For the most accurate absolute memory stats, relaunch your '
-              'application with the \'--profile\' argument, or ',
+          text: '''
+You are running your app in debug mode. Absolute memory usage may be higher in a debug build than in a release build.
+
+For the most accurate absolute memory stats, relaunch your application with the '--profile' argument, or ''',
           style: TextStyle(color: _BannerWarning.foreground),
         ),
         TextSpan(

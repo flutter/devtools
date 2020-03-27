@@ -59,10 +59,6 @@ class MemoryScreen extends Screen {
   @override
   String get docPageId => 'memory';
 
-  @visibleForTesting
-  static const debugModeWarning =
-      DebugModeMemoryMessage(DevToolsScreenType.memory);
-
   @override
   Widget build(BuildContext context) {
     return !serviceManager.connectedApp.isDartWebAppNow

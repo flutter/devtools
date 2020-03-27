@@ -91,6 +91,7 @@ void main() {
       expect(
         bannerMessagesController
             .messagesForScreen(DevToolsScreenType.performance)
+            .value
             .length,
         equals(1),
       );
@@ -110,9 +111,11 @@ void main() {
         profilePeriodFlag.valueAsString,
         equals(ProfileGranularity.low.value),
       );
+      // Verify we are not showing the high profile granularity warning.
       expect(
         bannerMessagesController
-            .messagesForScreen(DevToolsScreenType.performance),
+            .messagesForScreen(DevToolsScreenType.performance)
+            .value,
         isEmpty,
       );
     });
