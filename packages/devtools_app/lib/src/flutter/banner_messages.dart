@@ -28,6 +28,9 @@ class BannerMessagesController {
     if (isMessageDismissed(message) || isMessageVisible(message)) return;
     final messages = _messagesForScreen(message.screenType);
     messages.value.add(message);
+    // TODO(kenz): we should make a ListValueNotifier class that handles
+    // notifying listeners so we don't have to make an illegal call to a
+    // protected method.
     // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
     messages.notifyListeners();
   }
@@ -54,10 +57,12 @@ class BannerMessagesController {
     }
   }
 
+  @visibleForTesting
   bool isMessageDismissed(BannerMessage message) {
     return _dismissedMessageKeys.contains(message.key);
   }
 
+  @visibleForTesting
   bool isMessageVisible(BannerMessage message) {
     return _messagesForScreen(message.screenType)
         .value

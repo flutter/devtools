@@ -33,22 +33,47 @@ void main() {
       expect(controller.isMessageDismissed(testMessage1), isTrue);
     });
 
-    test('addMessage adds and asserts correctly', () {
+    test('removeMessageByKey removes correct message', () {
+      controller.addMessage(testMessage1);
+      controller.addMessage(testMessage2);
+      expect(controller.messagesForScreen(testMessage1ScreenType).value,
+          contains(testMessage1));
+      expect(controller.messagesForScreen(testMessage1ScreenType).value,
+          contains(testMessage2));
+      controller.removeMessageByKey(k1, testMessage1ScreenType);
+      expect(controller.messagesForScreen(testMessage1ScreenType).value,
+          isNot(contains(testMessage1)));
+      expect(controller.messagesForScreen(testMessage1ScreenType).value,
+          contains(testMessage2));
+    });
+
+    test('addMessage adds messages', () {
       expect(controller.isMessageVisible(testMessage1), isFalse);
       controller.addMessage(testMessage1);
       expect(controller.isMessageVisible(testMessage1), isTrue);
-      // Attempting to add an already-visible message should throw an error.
-      expect(() => controller.addMessage(testMessage1), throwsAssertionError);
+    });
+
+    test('addMessage does not add duplicate messages', () {
+      expect(controller.isMessageVisible(testMessage1), isFalse);
+      controller.addMessage(testMessage1);
+      expect(controller.isMessageVisible(testMessage1), isTrue);
+      expect(controller.messagesForScreen(testMessage1ScreenType).value.length,
+          equals(1));
+      controller.addMessage(testMessage1);
+      expect(controller.messagesForScreen(testMessage1ScreenType).value.length,
+          equals(1));
     });
 
     test('messagesForScreen returns correct messages', () {
-      expect(controller.messagesForScreen(testMessage1ScreenType), isEmpty);
-      expect(controller.messagesForScreen(testMessage3ScreenType), isEmpty);
+      expect(
+          controller.messagesForScreen(testMessage1ScreenType).value, isEmpty);
+      expect(
+          controller.messagesForScreen(testMessage3ScreenType).value, isEmpty);
       controller.addMessage(testMessage1);
       controller.addMessage(testMessage3);
-      expect(controller.messagesForScreen(testMessage1ScreenType),
+      expect(controller.messagesForScreen(testMessage1ScreenType).value,
           contains(testMessage1));
-      expect(controller.messagesForScreen(testMessage3ScreenType),
+      expect(controller.messagesForScreen(testMessage3ScreenType).value,
           contains(testMessage3));
     });
   });
@@ -101,33 +126,6 @@ void main() {
       BannerMessages.of(buildContext).push(testMessage2);
       await pumpTestFrame(tester);
       expect(find.byKey(k2), findsOneWidget);
-    });
-
-    testWidgets('does not push duplicate messages',
-        (WidgetTester tester) async {
-      final bannerMessages = buildBannerMessages();
-      await tester.pumpWidget(bannerMessages);
-      expect(find.byKey(k1), findsNothing);
-      BannerMessages.of(buildContext).push(testMessage1);
-      await pumpTestFrame(tester);
-      expect(find.byKey(k1), findsOneWidget);
-
-      BannerMessages.of(buildContext).push(testMessage1);
-      await pumpTestFrame(tester);
-      expect(find.byKey(k1), findsOneWidget);
-    });
-
-    testWidgets('removes messages', (WidgetTester tester) async {
-      final bannerMessages = buildBannerMessages();
-      await tester.pumpWidget(bannerMessages);
-      expect(find.byKey(k1), findsNothing);
-      BannerMessages.of(buildContext).push(testMessage1);
-      await pumpTestFrame(tester);
-      expect(find.byKey(k1), findsOneWidget);
-
-      BannerMessages.of(buildContext).remove(testMessage1);
-      await pumpTestFrame(tester);
-      expect(find.byKey(k1), findsNothing);
     });
 
     testWidgets('removes and dismisses messages', (WidgetTester tester) async {
