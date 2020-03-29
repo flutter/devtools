@@ -279,7 +279,7 @@ class _DevToolsAboutDialogState extends State<DevToolsAboutDialog> {
           const PaddedDivider(
             padding: EdgeInsets.only(bottom: denseRowSpacing),
           ),
-          SelectableText('DevTools version ${devtools.version}'),
+          const SelectableText('DevTools version ${devtools.version}'),
           //
           const SizedBox(height: defaultSpacing),
           Text('Connected Device Info', style: textTheme.headline6),
