@@ -11,6 +11,7 @@ import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
+import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../performance/performance_controller.dart';
 import '../../profiler/cpu_profile_controller.dart';
@@ -147,13 +148,14 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
           minIncludeTextWidth: minIncludeTextWidth,
           onPressed: controller.startRecording,
         ),
+        const SizedBox(width: denseSpacing),
         stopRecordingButton(
           key: PerformanceScreen.stopRecordingButtonKey,
           recording: recording,
           minIncludeTextWidth: minIncludeTextWidth,
           onPressed: controller.stopRecording,
         ),
-        const SizedBox(width: 8.0),
+        const SizedBox(width: defaultSpacing),
         clearButton(
           key: PerformanceScreen.clearButtonKey,
           minIncludeTextWidth: minIncludeTextWidth,
