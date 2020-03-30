@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:html_shim/html.dart' as html;
+import 'dart:html' as html;
 import 'package:vm_service/vm_service.dart';
 
 import 'config_specific/logger/logger.dart';
@@ -20,8 +20,8 @@ import 'model/html_model.dart';
 import 'performance/html_performance_screen.dart';
 import 'server_api_client.dart';
 import 'service_registrations.dart' as registrations;
+import 'timeline/html_timeline_controller.dart';
 import 'timeline/html_timeline_screen.dart';
-import 'timeline/timeline_controller.dart';
 import 'ui/analytics.dart' as ga;
 import 'ui/analytics_platform.dart' as ga_platform;
 import 'ui/html_custom.dart';
@@ -34,7 +34,6 @@ import 'utils.dart';
 // TODO(devoncarew): make the screens more robust through restarts
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
-const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
 
 class HtmlPerfToolFramework extends HtmlFramework {
   HtmlPerfToolFramework() {

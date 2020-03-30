@@ -31,8 +31,8 @@ class BarChartRenderer extends BarLineScatterCandleBubbleRenderer {
   Paint _shadowPaint;
   Paint _barBorderPaint;
 
-  BarChartRenderer(BarDataProvider chart, ChartAnimator animator,
-      ViewPortHandler viewPortHandler)
+  BarChartRenderer(
+      BarDataProvider chart, Animator animator, ViewPortHandler viewPortHandler)
       : super(animator, viewPortHandler) {
     this._provider = chart;
 
@@ -53,20 +53,26 @@ class BarChartRenderer extends BarLineScatterCandleBubbleRenderer {
     _barRect = value;
   }
 
+  // ignore: unnecessary_getters_setters
   Paint get shadowPaint => _shadowPaint;
 
+  // ignore: unnecessary_getters_setters
   set shadowPaint(Paint value) {
     _shadowPaint = value;
   }
 
+  // ignore: unnecessary_getters_setters
   Paint get barBorderPaint => _barBorderPaint;
 
+  // ignore: unnecessary_getters_setters
   set barBorderPaint(Paint value) {
     _barBorderPaint = value;
   }
 
+  // ignore: unnecessary_getters_setters
   List<BarBuffer> get barBuffers => _barBuffers;
 
+  // ignore: unnecessary_getters_setters
   set barBuffers(List<BarBuffer> value) {
     _barBuffers = value;
   }
@@ -311,8 +317,6 @@ class BarChartRenderer extends BarLineScatterCandleBubbleRenderer {
             }
 
             if (entry.mIcon != null && dataSet.isDrawIconsEnabled()) {
-              Image icon = entry.mIcon;
-
               double px = x;
               double py = val >= 0
                   ? (buffer.buffer[j + 1] + posOffset)
@@ -366,8 +370,6 @@ class BarChartRenderer extends BarLineScatterCandleBubbleRenderer {
               }
 
               if (entry.mIcon != null && dataSet.isDrawIconsEnabled()) {
-                Image icon = entry.mIcon;
-
                 double px = x;
                 double py = buffer.buffer[bufferIndex + 1] +
                     (entry.y >= 0 ? posOffset : negOffset);

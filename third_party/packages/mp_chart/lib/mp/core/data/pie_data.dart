@@ -37,8 +37,8 @@ class PieData extends ChartData<IPieDataSet> {
   IPieDataSet getDataSetByLabel(String label, bool ignorecase) {
     return ignorecase
         ? DartAdapterUtils.equalsIgnoreCase(label, dataSets[0].getLabel())
-        ? dataSets[0]
-        : null
+            ? dataSets[0]
+            : null
         : (label == dataSets[0].getLabel()) ? dataSets[0] : null;
   }
 

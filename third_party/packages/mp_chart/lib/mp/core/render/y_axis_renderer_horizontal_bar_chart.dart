@@ -3,11 +3,12 @@ import 'dart:ui';
 import 'package:flutter/painting.dart';
 import 'package:mp_chart/mp/core/axis/y_axis.dart';
 import 'package:mp_chart/mp/core/enums/axis_dependency.dart';
-import 'package:mp_chart/mp/core/enums/limite_label_postion.dart';
+import 'package:mp_chart/mp/core/enums/limit_label_postion.dart';
 import 'package:mp_chart/mp/core/enums/y_axis_label_position.dart';
 import 'package:mp_chart/mp/core/limit_line.dart';
 import 'package:mp_chart/mp/core/render/y_axis_renderer.dart';
 import 'package:mp_chart/mp/core/transformer/transformer.dart';
+import 'package:mp_chart/mp/core/utils/canvas_utils.dart';
 import 'package:mp_chart/mp/core/utils/painter_utils.dart';
 import 'package:mp_chart/mp/core/view_port.dart';
 import 'package:mp_chart/mp/core/poolable/point.dart';
@@ -291,19 +292,48 @@ class YAxisRendererHorizontalBarChart extends YAxisRenderer {
         if (position == LimitLabelPosition.RIGHT_TOP) {
           final double labelLineHeight =
               Utils.calcTextHeight(axisLabelPaint, label).toDouble();
-          axisLabelPaint.paint(c,
-              Offset(pts[0], viewPortHandler.contentTop() + labelLineHeight));
+          var offset = Offset(pts[0] + l.xOffset,
+              viewPortHandler.contentTop() + labelLineHeight);
+          CanvasUtils.renderLimitLabelBackground(c, axisLabelPaint, offset, l);
+          axisLabelPaint.paint(c, offset);
         } else if (position == LimitLabelPosition.RIGHT_BOTTOM) {
-          axisLabelPaint.paint(
-              c, Offset(pts[0], viewPortHandler.contentBottom()));
+          var offset = Offset(
+              pts[0] + l.xOffset,
+              viewPortHandler.contentBottom() -
+                  l.yOffset -
+                  axisLabelPaint.height);
+          CanvasUtils.renderLimitLabelBackground(c, axisLabelPaint, offset, l);
+          axisLabelPaint.paint(c, offset);
+        } else if (position == LimitLabelPosition.CENTER_BOTTOM) {
+          var offset = Offset(
+              pts[0] - axisLabelPaint.width / 2,
+              viewPortHandler.contentBottom() -
+                  l.yOffset -
+                  axisLabelPaint.height);
+          CanvasUtils.renderLimitLabelBackground(c, axisLabelPaint, offset, l);
+          axisLabelPaint.paint(c, offset);
+        } else if (position == LimitLabelPosition.CENTER_TOP) {
+          final double labelLineHeight =
+              Utils.calcTextHeight(axisLabelPaint, label).toDouble();
+          var offset = Offset(pts[0] - axisLabelPaint.width / 2,
+              viewPortHandler.contentTop() + labelLineHeight);
+          CanvasUtils.renderLimitLabelBackground(c, axisLabelPaint, offset, l);
+          axisLabelPaint.paint(c, offset);
         } else if (position == LimitLabelPosition.LEFT_TOP) {
           final double labelLineHeight =
               Utils.calcTextHeight(axisLabelPaint, label).toDouble();
-          axisLabelPaint.paint(c,
-              Offset(pts[0], viewPortHandler.contentTop() + labelLineHeight));
+          var offset = Offset(pts[0] - l.xOffset - axisLabelPaint.width,
+              viewPortHandler.contentTop() + labelLineHeight);
+          CanvasUtils.renderLimitLabelBackground(c, axisLabelPaint, offset, l);
+          axisLabelPaint.paint(c, offset);
         } else {
-          axisLabelPaint.paint(
-              c, Offset(pts[0], viewPortHandler.contentBottom()));
+          var offset = Offset(
+              pts[0] - l.xOffset - axisLabelPaint.width,
+              viewPortHandler.contentBottom() -
+                  l.yOffset -
+                  axisLabelPaint.height);
+          CanvasUtils.renderLimitLabelBackground(c, axisLabelPaint, offset, l);
+          axisLabelPaint.paint(c, offset);
         }
       }
 

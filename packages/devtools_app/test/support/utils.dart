@@ -40,3 +40,11 @@ Future<Timeline> loadNetworkProfileTimeline() async {
   );
   return Timeline.parse(httpTestData);
 }
+
+Future delay() {
+  return Future.delayed(const Duration(milliseconds: 500));
+}
+
+Future shortDelay() {
+  return Future.delayed(const Duration(milliseconds: 100));
+}

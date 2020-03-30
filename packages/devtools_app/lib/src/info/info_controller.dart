@@ -44,7 +44,7 @@ class InfoController extends DisposableController
   }
 
   Future<void> _listenForFlutterVersionChanges() async {
-    if (await serviceManager.connectedApp.isAnyFlutterApp) {
+    if (await serviceManager.connectedApp.isFlutterApp) {
       final flutterVersionServiceListenable = serviceManager
           .registeredServiceListenable(registrations.flutterVersion.service);
       addAutoDisposeListener(flutterVersionServiceListenable, () async {

@@ -11,13 +11,15 @@ abstract class BarLineScatterCandleBubbleRenderer extends DataRenderer {
   XBounds _xBounds;
 
   BarLineScatterCandleBubbleRenderer(
-      ChartAnimator animator, ViewPortHandler viewPortHandler)
+      Animator animator, ViewPortHandler viewPortHandler)
       : super(animator, viewPortHandler) {
     _xBounds = XBounds(this.animator);
   }
 
+  // ignore: unnecessary_getters_setters
   XBounds get xBounds => _xBounds;
 
+  // ignore: unnecessary_getters_setters
   set xBounds(XBounds value) {
     _xBounds = value;
   }

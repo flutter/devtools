@@ -5,6 +5,8 @@ import 'package:flutter/widgets.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:mp_chart/mp/controller/controller.dart';
 import 'package:mp_chart/mp/core/utils/color_utils.dart';
+import 'package:optimized_gesture_detector/details.dart';
+import 'package:optimized_gesture_detector/optimized_gesture_detector.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 
@@ -22,7 +24,6 @@ abstract class Chart<C extends Controller> extends StatefulWidget {
 abstract class ChartState<T extends Chart> extends State<T> {
   final ScreenshotController _screenshotController = ScreenshotController();
   bool isCapturing = false;
-  bool _singleTap = false;
 
   void setStateIfNotDispose() {
     if (mounted) {
@@ -81,30 +82,42 @@ abstract class ChartState<T extends Chart> extends State<T> {
                       constraints: BoxConstraints(
                           minHeight: double.infinity,
                           minWidth: double.infinity),
-                      child: GestureDetector(
-                          onTapDown: (detail) {
-                            _singleTap = true;
-                            onTapDown(detail);
+                      child: OptimizedGestureDetector(
+                          tapDown: (details) {
+                            onTapDown(details);
                           },
-                          onTapUp: (detail) {
-                            if (_singleTap) {
-                              _singleTap = false;
-                              onSingleTapUp(detail);
-                            }
+                          singleTapUp: (details) {
+                            onSingleTapUp(details);
                           },
-                          onDoubleTap: () {
-                            _singleTap = false;
-                            onDoubleTap();
+                          doubleTapUp: (details) {
+                            onDoubleTapUp(details);
                           },
-                          onScaleStart: (detail) {
-                            onScaleStart(detail);
+                          moveStart: (details) {
+                            onMoveStart(details);
                           },
-                          onScaleUpdate: (detail) {
-                            _singleTap = false;
-                            onScaleUpdate(detail);
+                          moveUpdate: (details) {
+                            onMoveUpdate(details);
                           },
-                          onScaleEnd: (detail) {
-                            onScaleEnd(detail);
+                          moveEnd: (details) {
+                            onMoveEnd(details);
+                          },
+                          scaleStart: (details) {
+                            onScaleStart(details);
+                          },
+                          scaleUpdate: (details) {
+                            onScaleUpdate(details);
+                          },
+                          scaleEnd: (details) {
+                            onScaleEnd(details);
+                          },
+                          dragStart: (details){
+                            onDragStart(details);
+                          },
+                          dragUpdate: (details){
+                            onDragUpdate(details);
+                          },
+                          dragEnd: (details){
+                            onDragEnd(details);
                           },
                           child:
                               CustomPaint(painter: widget.controller.painter))),
@@ -118,15 +131,27 @@ abstract class ChartState<T extends Chart> extends State<T> {
     widget.controller.painter?.reassemble();
   }
 
-  void onDoubleTap();
+  void onTapDown(TapDownDetails details);
 
-  void onScaleStart(ScaleStartDetails detail);
+  void onSingleTapUp(TapUpDetails details);
 
-  void onScaleUpdate(ScaleUpdateDetails detail);
+  void onDoubleTapUp(TapUpDetails details);
 
-  void onScaleEnd(ScaleEndDetails detail);
+  void onMoveStart(OpsMoveStartDetails details);
 
-  void onTapDown(TapDownDetails detail);
+  void onMoveUpdate(OpsMoveUpdateDetails details);
 
-  void onSingleTapUp(TapUpDetails detail);
+  void onMoveEnd(OpsMoveEndDetails details);
+
+  void onScaleStart(OpsScaleStartDetails details);
+
+  void onScaleUpdate(OpsScaleUpdateDetails details);
+
+  void onScaleEnd(OpsScaleEndDetails details);
+
+  void onDragStart(LongPressStartDetails details);
+
+  void onDragUpdate(LongPressMoveUpdateDetails details);
+
+  void onDragEnd(LongPressEndDetails details);
 }

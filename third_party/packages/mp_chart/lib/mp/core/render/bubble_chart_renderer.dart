@@ -19,7 +19,7 @@ import 'package:mp_chart/mp/core/utils/utils.dart';
 class BubbleChartRenderer extends BarLineScatterCandleBubbleRenderer {
   BubbleDataProvider _provider;
 
-  BubbleChartRenderer(BubbleDataProvider chart, ChartAnimator animator,
+  BubbleChartRenderer(BubbleDataProvider chart, Animator animator,
       ViewPortHandler viewPortHandler)
       : super(animator, viewPortHandler) {
     _provider = chart;

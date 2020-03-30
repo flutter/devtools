@@ -9,13 +9,14 @@ import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
+import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
-import '../../profiler/cpu_profiler_controller.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
+import '../../trace_event.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../utils.dart';
-import '../timeline_controller.dart';
-import '../timeline_model.dart';
+import 'timeline_controller.dart';
+import 'timeline_model.dart';
 
 class EventDetails extends StatelessWidget {
   const EventDetails(this.selectedEvent);
@@ -43,7 +44,7 @@ class EventDetails extends StatelessWidget {
             selectedEvent != null
                 ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
                 : noEventSelected,
-            style: textTheme.headline6,
+            style: textTheme.subtitle1,
           ),
         ),
         const PaddedDivider.thin(),
@@ -111,8 +112,7 @@ class EventSummary extends StatelessWidget {
   EventSummary(this.event)
       : _connectedEvents = [
           if (event.isAsyncEvent)
-            ...event.children.where((e) =>
-                e.traceEvents.first.event.phase == TraceEvent.asyncInstantPhase)
+            ...event.children.where((e) => e.isAsyncInstantEvent)
         ],
         _eventArgs = Map.from(event.traceEvents.first.event.args)
           ..addAll({for (var trace in event.traceEvents) ...trace.event.args});

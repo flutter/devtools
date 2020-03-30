@@ -15,23 +15,30 @@ import '../../globals.dart';
 import 'debugger_controller.dart';
 
 class DebuggerScreen extends Screen {
-  const DebuggerScreen() : super(DevToolsScreenType.debugger);
+  const DebuggerScreen()
+      : super(
+          DevToolsScreenType.debugger,
+          title: 'Debugger',
+          icon: Octicons.bug,
+        );
+
+  @override
+  String get docPageId => 'debugger';
+
+  @override
+  bool get showIsolateSelector => true;
 
   @override
   Widget build(BuildContext context) {
-    return DebuggerScreenBody();
-  }
-
-  @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Debugger',
-      icon: Icon(Octicons.bug),
-    );
+    return !serviceManager.connectedApp.isProfileBuildNow
+        ? const DebuggerScreenBody()
+        : const DisabledForProfileBuildMessage();
   }
 }
 
 class DebuggerScreenBody extends StatefulWidget {
+  const DebuggerScreenBody();
+
   @override
   DebuggerScreenBodyState createState() => DebuggerScreenBodyState();
 }

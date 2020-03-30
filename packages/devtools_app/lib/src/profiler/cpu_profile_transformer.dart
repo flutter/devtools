@@ -146,7 +146,7 @@ class CpuProfileTransformer {
 /// Process for converting a [CpuStackFrame] into a bottom-up representation of
 /// the CPU profile.
 class BottomUpProfileTransformer {
-  List<CpuStackFrame> processData(CpuStackFrame stackFrame) {
+  static List<CpuStackFrame> processData(CpuStackFrame stackFrame) {
     final List<CpuStackFrame> bottomUpRoots = getRoots(stackFrame, null, []);
 
     // Set the bottom up sample counts for each sample.
@@ -167,7 +167,7 @@ class BottomUpProfileTransformer {
   /// will not reflect the bottom up sample counts. These steps will occur later
   /// in the bottom-up conversion process.
   @visibleForTesting
-  List<CpuStackFrame> getRoots(
+  static List<CpuStackFrame> getRoots(
     CpuStackFrame node,
     CpuStackFrame currentBottomUpRoot,
     List<CpuStackFrame> bottomUpRoots,
@@ -198,7 +198,7 @@ class BottomUpProfileTransformer {
   /// bottom-up representation. This is an intermediate step between
   /// [getRoots] and [mergeProfileRoots].
   @visibleForTesting
-  void cascadeSampleCounts(CpuStackFrame stackFrame) {
+  static void cascadeSampleCounts(CpuStackFrame stackFrame) {
     stackFrame.inclusiveSampleCount = stackFrame.exclusiveSampleCount;
     for (CpuStackFrame child in stackFrame.children) {
       child.exclusiveSampleCount = stackFrame.exclusiveSampleCount;

@@ -2,16 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../config_specific/flutter/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/flutter/import_export/import_export.dart';
 import '../globals.dart';
 import 'app.dart';
+import 'banner_messages.dart';
+import 'common_widgets.dart';
 import 'controllers.dart';
 import 'notifications.dart';
 import 'screen.dart';
+import 'status_line.dart';
 import 'theme.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
@@ -38,10 +44,16 @@ class DevToolsScaffold extends StatefulWidget {
   static const Key fullWidthKey = Key('Full-width Scaffold');
 
   /// The width at or below which we treat the scaffold as narrow-width.
-  static const double narrowWidthThreshold = 1000.0;
+  static const double narrowWidthThreshold = 1100.0;
 
   /// The size that all actions on this widget are expected to have.
   static const double actionWidgetSize = 48.0;
+
+  // TODO: When changing this value, also update `flameChartContainerOffset`
+  // from flame_chart.dart.
+  /// The border around the content in the DevTools UI.
+  static const EdgeInsets appPadding =
+      EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
@@ -66,21 +78,25 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// The controller for animating between tabs.
   ///
-  /// This will be passed to both the [TabBar] and the [TabBarView] widgets
-  /// to coordinate their animation when the tab selection changes.
+  /// This will be passed to both the [TabBar] and the [TabBarView] widgets to
+  /// coordinate their animation when the tab selection changes.
   TabController _tabController;
+
+  final ValueNotifier<Screen> _currentScreen = ValueNotifier(null);
 
   ImportController _importController;
 
   @override
   void initState() {
     super.initState();
+
     _setupTabController();
   }
 
   @override
   void didUpdateWidget(DevToolsScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (widget.tabs.length != oldWidget.tabs.length) {
       var newIndex = 0;
       // Stay on the current tab if possible when the collection of tabs changes.
@@ -124,6 +140,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   @override
   void dispose() {
     _tabController?.dispose();
+    _currentScreen?.dispose();
     appBarAnimation?.dispose();
     super.dispose();
   }
@@ -131,12 +148,17 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void _setupTabController() {
     _tabController?.dispose();
     _tabController = TabController(length: widget.tabs.length, vsync: this);
+
+    _currentScreen.value = widget.tabs[_tabController.index];
+    _tabController.addListener(() {
+      _currentScreen.value = widget.tabs[_tabController.index];
+    });
   }
 
   /// Pushes tab changes into the navigation history.
   ///
-  /// Note that this currently works very well, but it doesn't
-  /// integrate with the browser's history yet.
+  /// Note that this currently works very well, but it doesn't integrate with
+  /// the browser's history yet.
   void _pushScreenToLocalPageRoute(int newIndex) {
     final previousTabIndex = _tabController.previousIndex;
     if (newIndex != previousTabIndex) {
@@ -167,31 +189,36 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   @override
   Widget build(BuildContext context) {
-    // Build the screens for each tab and wrap them in the appropriate styling.
+    // Build the screens for each tab and wrap them in the appropriate styling
     final tabBodies = [
       for (var screen in widget.tabs)
-        Align(
+        Container(
+          padding: DevToolsScaffold.appPadding,
           alignment: Alignment.topLeft,
-          child: Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: screen.build(context),
+          child: BannerMessages(
+            screen: screen,
           ),
         ),
     ];
-    return DragAndDrop(
-      handleDrop: _importController.importData,
-      child: AnimatedBuilder(
-        animation: appBarCurve,
-        builder: (context, child) {
-          return Scaffold(
-            appBar: _buildAppBar(),
-            body: child,
-          );
-        },
-        child: TabBarView(
-          physics: const NeverScrollableScrollPhysics(),
-          controller: _tabController,
-          children: tabBodies,
+
+    return ValueListenableProvider.value(
+      value: _currentScreen,
+      child: DragAndDrop(
+        handleDrop: _importController.importData,
+        child: AnimatedBuilder(
+          animation: appBarCurve,
+          builder: (context, child) {
+            return Scaffold(
+              appBar: _buildAppBar(),
+              body: child,
+              bottomNavigationBar: _buildStatusLine(context),
+            );
+          },
+          child: TabBarView(
+            physics: const NeverScrollableScrollPhysics(),
+            controller: _tabController,
+            children: tabBodies,
+          ),
         ),
       ),
     );
@@ -199,12 +226,20 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// Builds an [AppBar] with the [TabBar] placed on the side or the bottom,
   /// depending on the screen width.
-  Widget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar() {
     const title = Text('Dart DevTools');
     Widget flexibleSpace;
     Size preferredSize;
+    TabBar tabBar;
+
+    // Add a leading [BulletSpacer] to the actions if the screen is not narrow.
+    final actions = List<Widget>.from(widget.actions ?? []);
+    if (!isNarrow && actions.isNotEmpty) {
+      actions.insert(0, const BulletSpacer(useAccentColor: true));
+    }
+
     if (widget.tabs.length > 1) {
-      final tabs = TabBar(
+      tabBar = TabBar(
         controller: _tabController,
         isScrollable: true,
         onTap: _pushScreenToLocalPageRoute,
@@ -212,17 +247,23 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       );
       preferredSize = Tween<Size>(
         begin: Size.fromHeight(kToolbarHeight),
-        end: Size.fromHeight(kToolbarHeight + tabs.preferredSize.height),
+        end: Size.fromHeight(kToolbarHeight + 40.0),
       ).evaluate(appBarCurve);
       final animatedAlignment = Tween<Alignment>(
         begin: Alignment.centerRight,
-        end: Alignment.bottomCenter,
+        end: Alignment.bottomLeft,
       ).evaluate(appBarCurve);
+
+      final rightAdjust =
+          isNarrow ? 0.0 : DevToolsScaffold.actionWidgetSize / 2;
       final animatedRightPadding = Tween<double>(
-        begin:
-            DevToolsScaffold.actionWidgetSize * (widget.actions?.length ?? 0.0),
+        begin: math.max(
+            0.0,
+            DevToolsScaffold.actionWidgetSize * (actions?.length ?? 0.0) -
+                rightAdjust),
         end: 0.0,
       ).evaluate(appBarCurve);
+
       flexibleSpace = Align(
         alignment: animatedAlignment,
         child: Padding(
@@ -230,30 +271,53 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             top: 4.0,
             right: animatedRightPadding,
           ),
-          child: tabs,
+          child: tabBar,
         ),
       );
     }
 
     final appBar = AppBar(
-      // Turn off the appbar's back button on the web.
-      automaticallyImplyLeading: !kIsWeb,
+      // Turn off the appbar's back button.
+      automaticallyImplyLeading: false,
       title: title,
-      actions: widget.actions,
+      actions: actions,
       flexibleSpace: flexibleSpace,
     );
 
     if (flexibleSpace == null) return appBar;
+
     return PreferredSize(
       key: isNarrow
           ? DevToolsScaffold.narrowWidthKey
           : DevToolsScaffold.fullWidthKey,
       preferredSize: preferredSize,
-      // Place the AppBar inside of a Hero widget to keep it the same
-      // across route transitions.
+      // Place the AppBar inside of a Hero widget to keep it the same across
+      // route transitions.
       child: Hero(
         tag: _appBarTag,
         child: appBar,
+      ),
+    );
+  }
+
+  Widget _buildStatusLine(BuildContext context) {
+    const appPadding = DevToolsScaffold.appPadding;
+
+    return Container(
+      height: 48.0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const PaddedDivider(padding: EdgeInsets.zero),
+          Padding(
+            padding: EdgeInsets.only(
+              left: appPadding.left,
+              right: appPadding.right,
+              bottom: appPadding.bottom,
+            ),
+            child: StatusLine(),
+          ),
+        ],
       ),
     );
   }
@@ -273,10 +337,5 @@ class SimpleScreen extends Screen {
   @override
   Widget build(BuildContext context) {
     return child;
-  }
-
-  @override
-  Widget buildTab(BuildContext context) {
-    return null;
   }
 }

@@ -10,7 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../ui/flutter/label.dart';
-import 'flutter_widgets/tagged_text.dart';
+import 'scaffold.dart';
+import 'theme.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 
@@ -32,83 +33,6 @@ class PaddedDivider extends StatelessWidget {
     return Padding(
       padding: padding,
       child: const Divider(thickness: 1.0),
-    );
-  }
-}
-
-/// A [TaggedText] with builtin DevTools-specific text styling.
-///
-/// This widget is a wrapper around Flutter's [RichText]. It's an alternative
-/// to that for richly-formatted text. The performance is roughly the same,
-/// and it will throw assertion errors in any cases where the text isn't
-/// parsed properly.
-///
-/// The xml styling is much easier to read than creating multiple [TextSpan]s
-/// in a [RichText].  For example, the following are equivalent text
-/// presentations:
-///
-/// ```dart
-/// var taggedText = DefaultTaggedText(
-///   '<bold>bold text</bold>\n'
-///   'normal text',
-/// );
-///
-/// var richText = RichText(
-///   style
-///   text: TextSpan(
-///     text: '',
-///     style: DefaultTextStyle.of(context)
-///     children: [
-///       TextSpan(
-///         text: 'bold text',
-///         style: DefaultTextStyle.of(context).copyWith(fontWeight: FontWeight.w600),
-///       ),
-///       TextSpan(
-///         text: '\nnormal text',
-///       )
-///     ],
-///   ),
-/// );
-/// ```
-///
-/// The [TaggedText] abstraction separates the styling from the content
-/// of the rich strings we show in the UI.
-///
-/// The [TaggedText] also has the benefit of being localizable by a
-/// human translator. The content is passed in to Flutter as a single
-/// string, and the xml markup is understood by many translators.
-class DefaultTaggedText extends StatelessWidget {
-  const DefaultTaggedText(
-    this.content, {
-    this.textAlign = TextAlign.start,
-    Key key,
-  }) : super(key: key);
-
-  /// The XML-markup string to show.
-  final String content;
-
-  /// See [TaggedText.textAlign].
-  final TextAlign textAlign;
-
-  @override
-  Widget build(BuildContext context) {
-    final defaultTextStyle = DefaultTextStyle.of(context).style;
-    final _tagToTextSpanBuilder = {
-      'bold': (text) => TextSpan(
-            text: text,
-            style: semibold(defaultTextStyle),
-          ),
-      'primary-color': (text) =>
-          TextSpan(text: text, style: primaryColor(defaultTextStyle, context)),
-      'primary-color-light': (text) => TextSpan(
-          text: text, style: primaryColorLight(defaultTextStyle, context)),
-    };
-    return TaggedText(
-      content: content,
-      tagToTextSpanBuilder: _tagToTextSpanBuilder,
-      overflow: TextOverflow.visible,
-      textAlign: textAlign,
-      style: defaultTextStyle,
     );
   }
 }
@@ -142,6 +66,9 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
     fontWeight: FontWeight.w300,
   );
 }
+
+// TODO(kenz): Cleanup - audit the following methods and convert them into
+// Widgets where possible.
 
 /// Button to clear data in the UI.
 ///
@@ -307,7 +234,7 @@ Widget _recordingStatus({Key key, String recordedObject}) {
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Text('Recording $recordedObject'),
-      const SizedBox(height: 16.0),
+      const SizedBox(height: defaultSpacing),
       const CircularProgressIndicator(),
     ],
   );
@@ -324,10 +251,10 @@ Widget processingInfo({
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text('Processing $processedObject'),
-        const SizedBox(height: 16.0),
+        const SizedBox(height: defaultSpacing),
         SizedBox(
           width: 200.0,
-          height: 16.0,
+          height: defaultSpacing,
           child: LinearProgressIndicator(
             value: progressValue,
           ),
@@ -356,6 +283,96 @@ Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
   );
 }
 
+/// Display a single bullet character in order to act as a stylized spacer
+/// component.
+class BulletSpacer extends StatelessWidget {
+  const BulletSpacer({this.useAccentColor = false});
+
+  final bool useAccentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    TextTheme textTheme;
+    if (useAccentColor) {
+      textTheme = theme.appBarTheme.textTheme ?? theme.primaryTextTheme;
+    } else {
+      textTheme = theme.textTheme;
+    }
+
+    final textStyle = textTheme.bodyText2;
+    final mutedColor = textStyle?.color?.withAlpha(0x90);
+
+    return Container(
+      width: DevToolsScaffold.actionWidgetSize / 2,
+      height: DevToolsScaffold.actionWidgetSize,
+      alignment: Alignment.center,
+      child: Text(
+        '•',
+        style: textStyle?.copyWith(color: mutedColor),
+      ),
+    );
+  }
+}
+
+/// A widget, commonly used for icon buttons, that provides a tooltip with a
+/// common delay before the tooltip is shown.
+class ActionButton extends StatelessWidget {
+  const ActionButton({
+    @required this.tooltip,
+    @required this.child,
+  });
+
+  final String tooltip;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      waitDuration: tooltipWait,
+      child: child,
+    );
+  }
+}
+
+/// Toggle button for use as a child of a [ToggleButtons] widget.
+class ToggleButton extends StatelessWidget {
+  const ToggleButton({
+    @required this.icon,
+    @required this.text,
+    @required this.enabledTooltip,
+    @required this.disabledTooltip,
+    @required this.minIncludeTextWidth,
+    @required this.selected,
+  });
+
+  final IconData icon;
+  final String text;
+  final String enabledTooltip;
+  final String disabledTooltip;
+  final double minIncludeTextWidth;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: selected ? enabledTooltip : disabledTooltip,
+      waitDuration: tooltipWait,
+      preferBelow: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+        child: MaterialIconLabel(
+          icon,
+          text,
+          minIncludeTextWidth: minIncludeTextWidth,
+        ),
+      ),
+    );
+  }
+}
+
 class OutlinedBorder extends StatelessWidget {
   const OutlinedBorder({Key key, this.child}) : super(key: key);
   final Widget child;
@@ -375,3 +392,110 @@ class OutlinedBorder extends StatelessWidget {
 ///
 /// Makes for nice-looking rectangles.
 final goldenRatio = 1 + sqrt(5) / 2;
+
+class DisabledForProfileBuildMessage extends StatelessWidget {
+  const DisabledForProfileBuildMessage();
+
+  static const message =
+      'This screen is disabled because you are running a profile build of your '
+      'application.';
+
+  @override
+  Widget build(BuildContext context) {
+    return const CenteredMessage(message);
+  }
+}
+
+class DisabledForWebAppMessage extends StatelessWidget {
+  const DisabledForWebAppMessage();
+
+  static const message =
+      'This screen is disabled because you are connected to a web application.';
+
+  @override
+  Widget build(BuildContext context) {
+    return const CenteredMessage(message);
+  }
+}
+
+class DisabledForFlutterWebProfileBuildMessage extends StatelessWidget {
+  const DisabledForFlutterWebProfileBuildMessage();
+
+  static const message =
+      'This screen is disabled because you are connected to a profile build of '
+      'your Flutter Web application.';
+
+  @override
+  Widget build(BuildContext context) {
+    return const CenteredMessage(message);
+  }
+}
+
+class DisabledForNonFlutterAppMessage extends StatelessWidget {
+  const DisabledForNonFlutterAppMessage();
+
+  static const message =
+      'This screen is disabled because you are not running a Flutter '
+      'application.';
+
+  @override
+  Widget build(BuildContext context) {
+    return const CenteredMessage(message);
+  }
+}
+
+class CenteredMessage extends StatelessWidget {
+  const CenteredMessage(this.message);
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        message,
+        style: Theme.of(context).textTheme.headline6,
+      ),
+    );
+  }
+}
+
+class CircularIconButton extends StatelessWidget {
+  const CircularIconButton({
+    @required this.icon,
+    @required this.onPressed,
+    @required this.backgroundColor,
+    @required this.foregroundColor,
+  });
+
+  final IconData icon;
+  final VoidCallback onPressed;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return RawMaterialButton(
+      fillColor: backgroundColor,
+      hoverColor: Theme.of(context).hoverColor,
+      elevation: 0.0,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      constraints: const BoxConstraints.tightFor(
+        width: buttonMinWidth,
+        height: buttonMinWidth,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+        side: BorderSide(
+          width: 2.0,
+          color: foregroundColor,
+        ),
+      ),
+      onPressed: onPressed,
+      child: Icon(
+        icon,
+        color: foregroundColor,
+      ),
+    );
+  }
+}

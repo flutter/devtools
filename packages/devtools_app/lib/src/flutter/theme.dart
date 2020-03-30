@@ -9,8 +9,7 @@ import '../ui/theme.dart';
 
 /// Constructs the light or dark theme for the app.
 ThemeData themeFor({@required bool isDarkTheme}) {
-  final theme = isDarkTheme ? _darkTheme() : _lightTheme();
-  return theme;
+  return isDarkTheme ? _darkTheme() : _lightTheme();
 }
 
 ThemeData _darkTheme() {
@@ -30,15 +29,21 @@ ThemeData _darkTheme() {
 ThemeData _lightTheme() {
   final theme = ThemeData.light();
   return theme.copyWith(
-      primaryColor: devtoolsBlue[600],
-      primaryColorDark: devtoolsBlue[700],
-      primaryColorLight: devtoolsBlue[400],
-      indicatorColor: Colors.yellowAccent[400],
-      accentColor: devtoolsBlue[400],
-      buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth));
+    primaryColor: devtoolsBlue[600],
+    primaryColorDark: devtoolsBlue[700],
+    primaryColorLight: devtoolsBlue[400],
+    indicatorColor: Colors.yellowAccent[400],
+    accentColor: devtoolsBlue[400],
+    buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
+  );
 }
 
 const buttonMinWidth = 36.0;
+const defaultIconSize = 16.0;
+const actionsIconSize = 20.0;
+const defaultSpacing = 16.0;
+const denseSpacing = 8.0;
+const denseRowSpacing = 6.0;
 
 /// Branded grey color.
 ///
@@ -65,6 +70,20 @@ const devtoolsBlue = ColorSwatch<int>(600, {
   600: Color(0xFF0175C2),
   400: Color(0xFF13B9FD),
 });
+
+const devtoolsError = Color(0xFFAF4054);
+
+const devtoolsWarning = Color(0xFFFDFAD5);
+
+const devtoolsLink = ThemedColor(Color(0xFF1976D2), Colors.lightBlueAccent);
+
+/// A short duration to use for animations.
+///
+/// Use this when you want less emphasis on the animation and more on the
+/// animation result, or when you have multiple animations running in sequence
+/// For example, in the timeline we use this when we are zooming the flame chart
+/// and scrolling to an offset immediately after.
+const shortDuration = Duration(milliseconds: 50);
 
 /// The default duration to use for animations.
 const defaultDuration = Duration(milliseconds: 200);
@@ -122,3 +141,13 @@ final chartBoldTypeFace = TypeFace(
   fontFamily: 'OpenSans',
   fontWeight: FontWeight.w800,
 );
+
+const lightSelection = Color(0xFFD4D7DA);
+
+/// Return the fixed font style for DevTools.
+TextStyle fixedFontStyle(BuildContext context) {
+  return Theme.of(context)
+      .textTheme
+      .bodyText2
+      .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
+}

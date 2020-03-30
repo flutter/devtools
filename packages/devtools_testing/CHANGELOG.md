@@ -1,3 +1,3 @@
-## 1.0.0-dev
+## 0.2.3
+Coordinated release with DevTools 0.2.3
 
-Initial release

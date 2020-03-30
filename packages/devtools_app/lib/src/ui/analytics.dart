@@ -8,14 +8,14 @@ library gtags;
 // ignore_for_file: non_constant_identifier_names
 
 import 'dart:convert';
+import 'dart:html';
 
-import 'package:html_shim/html.dart';
+import 'package:devtools_shared/devtools_shared.dart' as server;
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
 import '../../devtools.dart' as devtools show version;
 import '../config_specific/logger/logger.dart';
-import '../devtools_api.dart' as server;
 import '../globals.dart';
 import '../ui/analytics_constants.dart';
 import '../ui/gtags.dart';
@@ -84,7 +84,7 @@ class GtagEventDevTools extends GtagEvent {
     String ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
     String flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
 
-    int gpu_duration,
+    int raster_duration,
     int ui_duration,
   });
 
@@ -124,7 +124,7 @@ class GtagEventDevTools extends GtagEvent {
   external String get flutter_client_id;
 
   // Custom metrics:
-  external int get gpu_duration;
+  external int get raster_duration;
 
   external int get ui_duration;
 }
@@ -254,7 +254,7 @@ Future<String> flutterGAClientID() async {
 
 /// Requests all .devtools properties to be reset to their default values in the
 /// file '~/.devtools'.
-void resetDevToolsFile() async {
+Future<void> resetDevToolsFile() async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(server.apiResetDevTools);
     if (resp?.status == HttpStatus.ok) {
@@ -309,7 +309,7 @@ Future<bool> get isEnabled async {
 
 /// Set the DevTools property 'enabled' (GA enabled) stored in the file
 /// '~/.devtools'.
-void setEnabled([bool value = true]) async {
+Future<void> setEnabled([bool value = true]) async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(
       '${server.apiSetDevToolsEnabled}'
@@ -324,8 +324,33 @@ void setEnabled([bool value = true]) async {
   }
 }
 
-/// Request DevTools property value 'surveyActionTaken' stored in the file
-/// '~\.devtools'.
+/// Set DevTools parameter value for the active survey (e.g. 'Q1-2020').
+///
+/// The value is stored in the file '~\.devtools'.
+///
+/// This method must be called before calling other survey related methods
+/// ([isSurveyActionTaken], [setSurveyActionTaken], [surveyShownCount],
+/// [incrementSurveyShownCount]). If the active survey is not set, warnings are
+/// logged.
+Future<bool> setActiveSurvey(String value) async {
+  if (isDevToolsServerAvailable) {
+    final resp = await _request('${server.apiSetActiveSurvey}'
+        '?${server.activeSurveyName}=$value');
+    if (resp?.status == HttpStatus.ok && json.decode(resp.responseText)) {
+      return true;
+    }
+    if (resp?.status != HttpStatus.ok || !json.decode(resp.responseText)) {
+      _logWarning(resp, server.apiSetActiveSurvey);
+    }
+  }
+  return false;
+}
+
+/// Request DevTools property value 'surveyActionTaken' for the active survey.
+///
+/// The value is stored in the file '~\.devtools'.
+///
+/// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<bool> get isSurveyActionTaken async {
   bool surveyActionTaken = false;
 
@@ -341,27 +366,28 @@ Future<bool> get isSurveyActionTaken async {
   return surveyActionTaken;
 }
 
-/// Set DevTools property value 'surveyActionTaken' stored in the file
-/// '~\.devtools'.
-// TODO(terry): remove the query param logic for this request.
-// setSurveyActionTaken should only be called with the value of true, so
-// we can remove the extra complexity.
-void setSurveyActionTaken() async {
+/// Set DevTools property value 'surveyActionTaken' for the active survey.
+///
+/// The value is stored in the file '~\.devtools'.
+///
+/// Requires [setActiveSurvey] to have been called prior to calling this method.
+Future<void> setSurveyActionTaken() async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(
       '${server.apiSetSurveyActionTaken}'
       '?${server.surveyActionTakenPropertyName}=true',
     );
-    if (resp?.status == HttpStatus.ok) {
-      assert(json.decode(resp.responseText) == true);
-    } else {
+    if (resp?.status != HttpStatus.ok || !json.decode(resp.responseText)) {
       _logWarning(resp, server.apiSetSurveyActionTaken, resp.responseText);
     }
   }
 }
 
-/// Request DevTools property value 'surveyShownCount' stored in the file
-/// '~\.devtools'.
+/// Request DevTools property value 'surveyShownCount' for the active survey.
+///
+/// The value is stored in the file '~\.devtools'.
+///
+/// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<int> get surveyShownCount async {
   int surveyShownCount = 0;
 
@@ -377,8 +403,11 @@ Future<int> get surveyShownCount async {
   return surveyShownCount;
 }
 
-/// Increment DevTools property value 'surveyShownCount' stored in the file
-/// '~\.devtools'.
+/// Increment DevTools property value 'surveyShownCount' for the active survey.
+///
+/// The value is stored in the file '~\.devtools'.
+///
+/// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<int> get incrementSurveyShownCount async {
   // Any failure will still return 0.
   int surveyShownCount = 0;
@@ -442,7 +471,7 @@ void select(
 void selectFrame(
   String screenName,
   String selectedItem, [
-  int gpuDuration, // Custom metric
+  int rasterDuration, // Custom metric
   int uiDuration, // Custom metric
 ]) {
   GTag.event(
@@ -450,7 +479,7 @@ void selectFrame(
     GtagEventDevTools(
       event_category: selectEvent,
       event_label: selectedItem,
-      gpu_duration: gpuDuration,
+      raster_duration: rasterDuration,
       ui_duration: uiDuration,
       user_app: userAppType,
       user_build: userBuildType,
@@ -566,7 +595,6 @@ Future<void> computeUserApplicationCustomGTagData() async {
   final isFlutter = await serviceManager.connectedApp.isFlutterApp;
   final isWebApp = await serviceManager.connectedApp.isDartWebApp;
   final isProfile = await serviceManager.connectedApp.isProfileBuild;
-  final isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
 
   if (isFlutter) {
     userPlatformType = (await serviceManager.service.isProtocolVersionSupported(
@@ -575,13 +603,11 @@ Future<void> computeUserApplicationCustomGTagData() async {
         : 'unknown';
   }
 
-  if (isAnyFlutterApp) {
-    if (isFlutter) {
-      userAppType = appTypeFlutter;
-    }
-    if (isWebApp) {
-      userAppType = appTypeWeb;
-    }
+  if (isFlutter) {
+    userAppType = appTypeFlutter;
+  }
+  if (isWebApp) {
+    userAppType = appTypeWeb;
   }
   userBuildType = isProfile ? buildTypeProfile : buildTypeDebug;
 

@@ -6,18 +6,26 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
+import '../../flutter/theme.dart';
+import '../../globals.dart';
 import '../../performance/performance_controller.dart';
+import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
-import '../../profiler/cpu_profiler_controller.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
 
 class PerformanceScreen extends Screen {
-  const PerformanceScreen() : super(DevToolsScreenType.performance);
+  const PerformanceScreen()
+      : super(
+          DevToolsScreenType.performance,
+          title: 'Performance',
+          icon: Octicons.dashboard,
+        );
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -31,18 +39,19 @@ class PerformanceScreen extends Screen {
   static const recordingStatusKey = Key('Recording Status');
 
   @override
-  Widget build(BuildContext context) => PerformanceScreenBody();
+  String get docPageId => 'performance';
 
   @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Performance',
-      icon: Icon(Octicons.dashboard),
-    );
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const PerformanceScreenBody()
+        : const DisabledForWebAppMessage();
   }
 }
 
 class PerformanceScreenBody extends StatefulWidget {
+  const PerformanceScreenBody();
+
   @override
   _PerformanceScreenBodyState createState() => _PerformanceScreenBodyState();
 }
@@ -57,6 +66,11 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    maybePushDebugModePerformanceMessage(
+      context,
+      DevToolsScreenType.performance,
+    );
+
     final newController = Controllers.of(context).performance;
     if (newController == controller) return;
     controller = newController;
@@ -101,7 +115,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildStateControls(controller),
-            ProfileGranularityDropdown(),
+            const ProfileGranularityDropdown(DevToolsScreenType.performance),
           ],
         ),
         Expanded(
@@ -134,13 +148,14 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
           minIncludeTextWidth: minIncludeTextWidth,
           onPressed: controller.startRecording,
         ),
+        const SizedBox(width: denseSpacing),
         stopRecordingButton(
           key: PerformanceScreen.stopRecordingButtonKey,
           recording: recording,
           minIncludeTextWidth: minIncludeTextWidth,
           onPressed: controller.stopRecording,
         ),
-        const SizedBox(width: 8.0),
+        const SizedBox(width: defaultSpacing),
         clearButton(
           key: PerformanceScreen.clearButtonKey,
           minIncludeTextWidth: minIncludeTextWidth,

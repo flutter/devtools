@@ -27,7 +27,6 @@ abstract class NotificationService {
 /// Manager for notifications in the app.
 ///
 /// Must be inside of an [Overlay].
-///
 class Notifications extends StatelessWidget {
   const Notifications({Key key, @required this.child}) : super(key: key);
 
@@ -214,12 +213,9 @@ class _NotificationState extends State<_Notification>
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
-        return SizedBox(
-          height: _notificationHeight * curve.value,
-          child: Opacity(
-            opacity: curve.value,
-            child: child,
-          ),
+        return Opacity(
+          opacity: curve.value,
+          child: child,
         );
       },
       child: Padding(

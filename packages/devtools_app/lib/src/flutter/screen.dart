@@ -14,21 +14,66 @@ import '../performance/flutter/performance_screen.dart';
 import '../timeline/flutter/timeline_screen.dart';
 import 'connect_screen.dart';
 import 'scaffold.dart';
+import 'theme.dart';
 
 /// Defines pages shown in the tabbar of the app.
 @immutable
 abstract class Screen {
-  const Screen(this.type);
+  const Screen(this.type, {this.title, this.icon, this.tabKey});
 
   final DevToolsScreenType type;
 
-  /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main navbar.
+  /// The user-facing name of the page.
+  final String title;
+
+  final IconData icon;
+
+  /// An optional key to use when creating the Tab widget (for use during
+  /// testing).
+  final Key tabKey;
+
+  /// Whether this screen should display the isolate selector in the status
+  /// line.
   ///
-  /// This will not be used if the [Screen] is the only one shown in the scaffold.
-  Widget buildTab(BuildContext context);
+  /// Some screens act on all isolates; for these screens, displaying a
+  /// selector doesn't make sense.
+  bool get showIsolateSelector => false;
+
+  /// The id to use to synthesize a help URL.
+  ///
+  /// If the screen does not have a custom documentation page, this property
+  /// should return `null`.
+  String get docPageId => null;
+
+  /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main
+  /// navbar.
+  ///
+  /// This will not be used if the [Screen] is the only one shown in the
+  /// scaffold.
+  Widget buildTab(BuildContext context) {
+    return Tab(
+      key: tabKey,
+      child: Row(
+        children: <Widget>[
+          Icon(icon, size: defaultIconSize),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text(title),
+          ),
+        ],
+      ),
+    );
+  }
 
   /// Builds the body to display for this tab.
   Widget build(BuildContext context);
+
+  /// Build a widget to display in the status line.
+  ///
+  /// If this method returns `null`, then no page specific status is displayed.
+  Widget buildStatus(BuildContext context, TextTheme textTheme) {
+    return null;
+  }
 }
 
 enum DevToolsScreenType {

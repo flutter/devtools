@@ -109,6 +109,4 @@ abstract class LineRadarDataSet<T extends Entry>
   String toString() {
     return '${super.toString()}\nLineRadarDataSet{_fillColor: $_fillColor,\n _fillAlpha: $_fillAlpha,\n _lineWidth: $_lineWidth,\n _drawFilled: $_drawFilled}';
   }
-
-
 }

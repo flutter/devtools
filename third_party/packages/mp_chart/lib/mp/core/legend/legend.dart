@@ -102,8 +102,10 @@ class Legend extends ComponentBase {
     this._entries = entries;
   }
 
+  // ignore: unnecessary_getters_setters
   List<LegendEntry> get entries => _entries;
 
+  // ignore: unnecessary_getters_setters
   set entries(List<LegendEntry> value) {
     _entries = value;
   }
@@ -203,50 +205,66 @@ class Legend extends ComponentBase {
 
   bool get isLegendCustom => _isLegendCustom;
 
+  // ignore: unnecessary_getters_setters
   LegendHorizontalAlignment get horizontalAlignment => _horizontalAlignment;
 
+  // ignore: unnecessary_getters_setters
   set horizontalAlignment(LegendHorizontalAlignment value) {
     _horizontalAlignment = value;
   }
 
+  // ignore: unnecessary_getters_setters
   LegendVerticalAlignment get verticalAlignment => _verticalAlignment;
 
+  // ignore: unnecessary_getters_setters
   set verticalAlignment(LegendVerticalAlignment value) {
     _verticalAlignment = value;
   }
 
+  // ignore: unnecessary_getters_setters
   LegendOrientation get orientation => _orientation;
 
+  // ignore: unnecessary_getters_setters
   set orientation(LegendOrientation value) {
     _orientation = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get drawInside => _drawInside;
 
+  // ignore: unnecessary_getters_setters
   set drawInside(bool value) {
     _drawInside = value;
   }
 
+  // ignore: unnecessary_getters_setters
   LegendDirection get direction => _direction;
 
+  // ignore: unnecessary_getters_setters
   set direction(LegendDirection value) {
     _direction = value;
   }
 
+  // ignore: unnecessary_getters_setters
   LegendForm get shape => _shape;
 
+  // ignore: unnecessary_getters_setters
   set shape(LegendForm value) {
     _shape = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get formSize => _formSize;
 
+  // ignore: unnecessary_getters_setters
   set formSize(double value) {
     _formSize = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get formLineWidth => _formLineWidth;
 
+  // ignore: unnecessary_getters_setters
   set formLineWidth(double value) {
     _formLineWidth = value;
   }
@@ -263,38 +281,50 @@ class Legend extends ComponentBase {
     return _formLineDashEffect;
   }
 
+  // ignore: unnecessary_getters_setters
   double get yEntrySpace => _yEntrySpace;
 
+  // ignore: unnecessary_getters_setters
   set yEntrySpace(double value) {
     _yEntrySpace = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get xEntrySpace => _xEntrySpace;
 
+  // ignore: unnecessary_getters_setters
   set xEntrySpace(double value) {
     _xEntrySpace = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get formToTextSpace => _formToTextSpace;
 
+  // ignore: unnecessary_getters_setters
   set formToTextSpace(double value) {
     _formToTextSpace = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get stackSpace => _stackSpace;
 
+  // ignore: unnecessary_getters_setters
   set stackSpace(double value) {
     _stackSpace = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get maxSizePercent => _maxSizePercent;
 
+  // ignore: unnecessary_getters_setters
   set maxSizePercent(double value) {
     _maxSizePercent = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get wordWrapEnabled => _wordWrapEnabled;
 
+  // ignore: unnecessary_getters_setters
   set wordWrapEnabled(bool value) {
     _wordWrapEnabled = value;
   }
@@ -385,8 +415,7 @@ class Legend extends ComponentBase {
           double labelLineHeight = Utils.getLineHeight1(labelpainter);
           double labelLineSpacing =
               Utils.getLineSpacing1(labelpainter) + yEntrySpace;
-          double contentWidth =
-              viewPortHandler.chartWidth() * _maxSizePercent;
+          double contentWidth = viewPortHandler.chartWidth() * _maxSizePercent;
 
           // Start calculating layout
           double maxLineWidth = 0;

@@ -837,7 +837,7 @@ class InspectorController extends DisposableController
     );
   }
 
-  void collapseDetailsToSelected() {
+  Future<void> collapseDetailsToSelected() async {
     details.inspectorTree.collapseToSelected();
     details.animateTo(details.inspectorTree.selection);
   }

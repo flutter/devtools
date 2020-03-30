@@ -1,22 +1,18 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mp_chart/mp/chart/chart.dart';
 import 'package:mp_chart/mp/chart/scatter_chart.dart';
 import 'package:mp_chart/mp/controller/bar_line_scatter_candle_bubble_controller.dart';
-import 'package:mp_chart/mp/controller/controller.dart';
 import 'package:mp_chart/mp/core/axis/y_axis.dart';
 import 'package:mp_chart/mp/core/common_interfaces.dart';
-import 'package:mp_chart/mp/core/data/chart_data.dart';
 import 'package:mp_chart/mp/core/data/scatter_data.dart';
-import 'package:mp_chart/mp/core/data_interfaces/i_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
-import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:mp_chart/mp/core/functions.dart';
 import 'package:mp_chart/mp/core/marker/i_marker.dart';
 import 'package:mp_chart/mp/core/render/x_axis_renderer.dart';
 import 'package:mp_chart/mp/core/render/y_axis_renderer.dart';
+import 'package:mp_chart/mp/core/touch_listener.dart';
+import 'package:mp_chart/mp/core/chart_trans_listener.dart';
 import 'package:mp_chart/mp/core/transformer/transformer.dart';
-import 'package:mp_chart/mp/painter/painter.dart';
 import 'package:mp_chart/mp/painter/scatter_chart_painter.dart';
 
 class ScatterChartController
@@ -54,6 +50,7 @@ class ScatterChartController
     double borderStrokeWidth = 1.0,
     AxisLeftSettingFunction axisLeftSettingFunction,
     AxisRightSettingFunction axisRightSettingFunction,
+    OnTouchEventListener touchEventListener,
     IMarker marker,
     Description description,
     String noDataText = "No chart data available.",
@@ -72,6 +69,8 @@ class ScatterChartController
     double infoTextSize = 12,
     Color descTextColor,
     Color infoTextColor,
+    Color infoBgColor,
+    ChartTransListener chartTransListener,
   }) : super(
             marker: marker,
             description: description,
@@ -91,6 +90,7 @@ class ScatterChartController
             infoTextSize: infoTextSize,
             descTextColor: descTextColor,
             infoTextColor: infoTextColor,
+            infoBgColor: infoBgColor,
             maxVisibleCount: maxVisibleCount,
             autoScaleMinMaxEnabled: autoScaleMinMaxEnabled,
             doubleTapToZoomEnabled: doubleTapToZoomEnabled,
@@ -122,7 +122,9 @@ class ScatterChartController
             borderColor: borderColor,
             borderStrokeWidth: borderStrokeWidth,
             axisLeftSettingFunction: axisLeftSettingFunction,
-            axisRightSettingFunction: axisRightSettingFunction);
+            axisRightSettingFunction: axisRightSettingFunction,
+            touchEventListener: touchEventListener,
+            chartTransListener: chartTransListener);
 
   ScatterData get data => super.data;
 
@@ -145,6 +147,7 @@ class ScatterChartController
         marker,
         description,
         drawMarkers,
+        infoBgColor,
         infoPaint,
         descPaint,
         xAxis,
@@ -178,7 +181,8 @@ class ScatterChartController
         rightAxisTransformer,
         xAxisRenderer,
         zoomMatrixBuffer,
-        customViewPortEnabled);
+        customViewPortEnabled,
+        chartTransListener);
   }
 
   @override

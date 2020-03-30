@@ -12,7 +12,7 @@ ExportControllerDesktop createExportController() {
 class ExportControllerDesktop extends ExportController {
   ExportControllerDesktop() : super.impl();
 
-  static final _fs = FileSystem();
+  static final _fs = FileIO();
 
   @override
   void downloadFile(String filename, String contents) {

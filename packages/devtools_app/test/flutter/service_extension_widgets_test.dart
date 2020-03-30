@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/core/message_bus.dart';
+import 'package:devtools_app/src/flutter/notifications.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -19,15 +21,14 @@ import 'wrappers.dart';
 
 void main() {
   MockServiceManager mockServiceManager;
+
   setUp(() {
     mockServiceManager = MockServiceManager();
     when(mockServiceManager.serviceExtensionManager)
         .thenReturn(FakeServiceExtensionManager());
-    setGlobal(
-      ServiceConnectionManager,
-      mockServiceManager,
-    );
+    setGlobal(ServiceConnectionManager, mockServiceManager);
   });
+
   group('Hot Reload Button', () {
     int reloads = 0;
 
@@ -39,17 +40,21 @@ void main() {
       });
     });
 
-    testWidgets('performs a hot reload when pressed',
+    testWidgetsWithContext('performs a hot reload when pressed',
         (WidgetTester tester) async {
       registerServiceExtension(mockServiceManager, hotReload);
       final button = HotReloadButton();
-      await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
+      await tester.pumpWidget(
+        wrap(wrapWithNotifications(Scaffold(body: Center(child: button)))),
+      );
       expect(find.byWidget(button), findsOneWidget);
       await tester.pumpAndSettle();
       expect(reloads, 0);
       await tester.tap(find.byWidget(button));
       await tester.pumpAndSettle();
       expect(reloads, 1);
+    }, context: {
+      MessageBus: MessageBus(),
     });
 
     testWidgets(
@@ -82,17 +87,21 @@ void main() {
       });
     });
 
-    testWidgets('performs a hot restart when pressed',
+    testWidgetsWithContext('performs a hot restart when pressed',
         (WidgetTester tester) async {
       registerServiceExtension(mockServiceManager, hotRestart);
       final button = HotRestartButton();
-      await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
+      await tester.pumpWidget(
+        wrap(wrapWithNotifications(Scaffold(body: Center(child: button)))),
+      );
       expect(find.byWidget(button), findsOneWidget);
       await tester.pumpAndSettle();
       expect(restarts, 0);
       await tester.tap(find.byWidget(button));
       await tester.pumpAndSettle();
       expect(restarts, 1);
+    }, context: {
+      MessageBus: MessageBus(),
     });
 
     testWidgets(
@@ -172,6 +181,10 @@ void main() {
       expect(toggle.value, false, reason: 'The extension is disabled.');
     });
   });
+}
+
+Widget wrapWithNotifications(Widget child) {
+  return Notifications(child: child);
 }
 
 void registerServiceExtension(

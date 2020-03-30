@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html' as html;
 
 import 'package:codemirror/codemirror.dart';
-import 'package:html_shim/html.dart' as html;
 import 'package:meta/meta.dart';
 import 'package:split/split.dart' as split;
 import 'package:vm_service/vm_service.dart';
@@ -420,8 +420,7 @@ class HtmlDebuggerScreen extends HtmlScreen {
   void onContentAttached() {
     // configure the navigation / editor splitter
     split.flexSplit(
-      html.toDartHtmlElementList(
-          _navEditorPanels.map((e) => e.element).toList()),
+      _navEditorPanels.map((e) => e.element).toList(),
       gutterSize: defaultSplitterWidth,
       sizes: [22, 78],
       minSize: [200, 600],
@@ -429,7 +428,7 @@ class HtmlDebuggerScreen extends HtmlScreen {
 
     // configure the editor / console splitter
     split.flexSplit(
-      html.toDartHtmlElementList([_sourceArea.element, _consoleDiv.element]),
+      [_sourceArea.element, _consoleDiv.element],
       horizontal: false,
       gutterSize: defaultSplitterWidth,
       sizes: [80, 20],
@@ -441,9 +440,8 @@ class HtmlDebuggerScreen extends HtmlScreen {
       'lineNumbers': true,
       'gutters': <String>['breakpoints'],
     };
-    final codeMirror = CodeMirror.fromElement(
-        html.toDartHtmlElement(_sourceArea.element),
-        options: options);
+    final codeMirror =
+        CodeMirror.fromElement(_sourceArea.element, options: options);
     codeMirror.setReadOnly(true);
     if (isDarkTheme) {
       codeMirror.setTheme('darcula');
@@ -842,8 +840,7 @@ class SourceEditor {
         codeMirror.setGutterMarker(
           line,
           'breakpoints',
-          html.toDartHtmlElement(
-              span(c: 'octicon octicon-primitive-dot').element),
+          span(c: 'octicon octicon-primitive-dot').element,
         );
       } else if (breakpoint.location is UnresolvedSourceLocation) {
         final UnresolvedSourceLocation loc = breakpoint.location;
@@ -861,8 +858,7 @@ class SourceEditor {
         codeMirror.setGutterMarker(
           line,
           'breakpoints',
-          html.toDartHtmlElement(
-              span(c: 'octicon octicon-primitive-dot').element),
+          span(c: 'octicon octicon-primitive-dot').element,
         );
       }
     }
@@ -910,7 +906,7 @@ class SourceEditor {
 
       codeMirror.addWidget(
         Position(position.line - 1, position.column - 1),
-        html.toDartHtmlElement(_executionPointElement.element),
+        _executionPointElement.element,
       );
     }
   }

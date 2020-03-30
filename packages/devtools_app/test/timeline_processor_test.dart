@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
-import 'package:devtools_app/src/timeline/timeline_model.dart';
-import 'package:devtools_app/src/timeline/timeline_processor.dart';
+import 'package:devtools_app/src/timeline/html_timeline_controller.dart';
+import 'package:devtools_app/src/timeline/html_timeline_model.dart';
+import 'package:devtools_app/src/timeline/html_timeline_processor.dart';
+import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/test_utils.dart';
 import 'package:devtools_testing/support/timeline_test_data.dart';
@@ -149,7 +150,7 @@ void main() {
 
       frame
         ..setEventFlow(null, type: TimelineEventType.ui)
-        ..setEventFlow(gpuEvent, type: TimelineEventType.gpu);
+        ..setEventFlow(gpuEvent, type: TimelineEventType.raster);
       expect(processor.eventOccursWithinFrameBounds(uiEvent, frame), isFalse);
     });
 
@@ -312,6 +313,20 @@ void main() {
         equals('  D [193937061035 μs - 193938741076 μs]\n'),
       );
     });
+
+    test('processes trace with duplicate events', () async {
+      expect(
+        processor.timelineController.fullTimeline.data.timelineEvents,
+        isEmpty,
+      );
+      await processor.processTimeline(durationEventsWithDuplicateTraces);
+      // If the processor is not handling duplicates properly, this value would
+      // be 0.
+      expect(
+        processor.timelineController.fullTimeline.data.timelineEvents.length,
+        equals(1),
+      );
+    });
   });
 
   group('TimelineProcessor', () {
@@ -338,7 +353,7 @@ void main() {
       );
       expect(
         processor.inferEventType(gpuRasterizerDrawTrace.event),
-        equals(TimelineEventType.gpu),
+        equals(TimelineEventType.raster),
       );
       expect(
         processor.inferEventType(unknownEventBeginTrace.event),
