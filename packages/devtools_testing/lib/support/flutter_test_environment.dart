@@ -60,12 +60,14 @@ class FlutterTestEnvironment {
   // test, but it will also run as part of a final forced tear down so should
   // be tolerable to being called twice after a single test.
   Future<void> Function() _beforeEveryTearDown;
-  set beforeEveryTearDown(Future<void> Function() f) => _beforeEveryTearDown = f;
+  set beforeEveryTearDown(Future<void> Function() f) =>
+      _beforeEveryTearDown = f;
 
   // The function will be called before the final forced teardown at the end
   // of the test suite (which will then stop the Flutter app).
   Future<void> Function() _beforeFinalTearDown;
-  set beforeFinalTearDown(Future<void> Function() f) => _beforeFinalTearDown = f;
+  set beforeFinalTearDown(Future<void> Function() f) =>
+      _beforeFinalTearDown = f;
 
   bool _needsSetup = true;
 

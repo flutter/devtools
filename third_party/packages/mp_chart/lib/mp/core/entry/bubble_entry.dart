@@ -20,11 +20,11 @@ class BubbleEntry extends Entry {
     return c;
   }
 
+  // ignore: unnecessary_getters_setters
   double get size => _size;
 
+  // ignore: unnecessary_getters_setters
   set size(double value) {
     _size = value;
   }
-
-
 }

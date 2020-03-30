@@ -12,10 +12,10 @@ abstract class PainterUtils {
     }
 
     if (painter.text != null && (painter.text is TextSpan)) {
-      var preText = (painter.text as TextSpan).text;
-      var preColor = (painter.text as TextSpan).style.color;
+      var preText = painter.text.text;
+      var preColor = painter.text.style.color;
       preColor = preColor == null ? ColorUtils.BLACK : preColor;
-      var preFontSize = (painter.text as TextSpan).style.fontSize;
+      var preFontSize = painter.text.style.fontSize;
       preFontSize =
           preFontSize == null ? Utils.convertDpToPixel(13) : preFontSize;
       return _create(

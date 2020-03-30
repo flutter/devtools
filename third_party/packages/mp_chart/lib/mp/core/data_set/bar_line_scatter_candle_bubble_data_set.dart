@@ -39,6 +39,4 @@ abstract class BarLineScatterCandleBubbleDataSet<T extends Entry>
   String toString() {
     return '${super.toString()}\nBarLineScatterCandleBubbleDataSet{_highLightColor: $_highLightColor}';
   }
-
-
 }

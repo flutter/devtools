@@ -31,14 +31,6 @@ function flutter {
     fi
 }
 
-if [ -z "$USE_LOCAL_DEPENDENCIES" ]; then
-    echo "Using dependencies from Pub"
-else
-    echo "Updating pubspecs to use local dependencies"
-    perl -pi -e 's/#OVERRIDE_FOR_TESTS//' packages/devtools/pubspec.yaml
-    perl -pi -e 's/#OVERRIDE_FOR_TESTS//' packages/devtools_app/pubspec.yaml
-fi
-
 # Some integration tests assume the devtools package is up to date and located
 # adjacent to the devtools_app package.
 pushd packages/devtools
@@ -74,13 +66,17 @@ if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
 else
     echo "Cloning master Flutter branch"
     git clone https://github.com/flutter/flutter.git ./flutter
-
     # Set the suffix so we use the master goldens
     export DEVTOOLS_GOLDENS_SUFFIX=""
 fi
-export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
+
+export PATH=`pwd`/flutter/bin:$PATH
+export PATH=`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
+export PATH=`pwd`/bin:$PATH
+
 flutter config --no-analytics
 flutter doctor
+
 # We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
 echo "which dart: " `which dart`
 
@@ -115,7 +111,7 @@ if [ "$BOT" = "main" ]; then
     fi
 
     # Make sure the app versions are in sync.
-    dart tool/version_check.dart
+    repo_tool repo-check
 
     # Analyze the source.
     flutter pub global activate tuneup && flutter pub global run tuneup check
@@ -183,24 +179,11 @@ elif [ "$BOT" = "packages" ]; then
 
     popd
 
-    flutter pub global activate tuneup
+    # Get packages
+    repo_tool packages-get
 
-    # Analyze packages/
-    (cd packages/devtools_app; flutter pub get)
-    (cd packages/devtools_server; flutter pub get)
-    (cd packages/devtools_testing; flutter pub get)
-    (cd packages/html_shim; flutter pub get)
-    (cd packages; flutter pub global run tuneup check)
-
-    # Analyze third_party/
-    (cd third_party/packages/ansi_up; flutter pub get)
-    (cd third_party/packages/mp_chart; flutter pub get)
-    (cd third_party/packages/plotly_js; flutter pub get)
-    (cd third_party/packages/split; flutter pub get)
-    (cd third_party/packages; flutter pub global run tuneup check)
-
-    # Analyze Dart code in tool/
-    (cd tool; flutter pub get; flutter pub global run tuneup check)
+    # Analyze the code
+    repo_tool analyze
 
     pushd packages/devtools_app
 

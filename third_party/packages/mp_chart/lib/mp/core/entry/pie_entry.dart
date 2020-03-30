@@ -18,8 +18,10 @@ class PieEntry extends Entry {
     return e;
   }
 
+  // ignore: unnecessary_getters_setters
   String get label => _label;
 
+  // ignore: unnecessary_getters_setters
   set label(String value) {
     _label = value;
   }

@@ -5,19 +5,19 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../globals.dart';
 import '../../version.dart';
 import '../../vm_service_wrapper.dart';
 
-import '../heap_space.dart';
 import 'memory_controller.dart';
 
 class MemoryTracker {
   MemoryTracker(this.service, this.memoryController);
 
-  static const Duration kUpdateDelay = Duration(milliseconds: 200);
+  static const Duration updateDelay = Duration(milliseconds: 200);
 
   VmServiceWrapper service;
 
@@ -28,7 +28,12 @@ class MemoryTracker {
   final List<HeapSample> samples = <HeapSample>[];
   final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
   int heapMax;
+
+  /// Polled VM current RSS.
   int processRss;
+
+  /// Polled adb dumpsys meminfo values.
+  AdbMemoryInfo adbMemoryInfo;
 
   bool get hasConnection => service != null;
 
@@ -64,19 +69,37 @@ class MemoryTracker {
 
   // TODO(terry): Discuss need a record/stop record for memory?  Unless expensive probably not.
   Future<void> _pollMemory() async {
-    if (!hasConnection) {
+    if (!hasConnection || memoryController.memoryTracker == null) {
       return;
     }
 
     final VM vm = await service.getVM();
+
     // TODO(terry): Need to handle a possible Sentinel being returned.
     final List<Isolate> isolates =
         await Future.wait(vm.isolates.map((IsolateRef ref) async {
-      return await service.getIsolate(ref.id);
+      try {
+        return await service.getIsolate(ref.id);
+      } catch (e) {
+        // TODO(terry): Seem to sometimes get a sentinel not sure how? VM issue?
+        // Unhandled Exception: type 'Sentinel' is not a subtype of type 'FutureOr<Isolate>'
+        print('Error [MEMORY_PROTOCOL]: $e');
+        return null;
+      }
     }));
-    _update(vm, isolates);
 
-    _pollingTimer = Timer(kUpdateDelay, _pollMemory);
+    // Polls for current Android meminfo using:
+    //    > adb shell dumpsys meminfo -d <package_name>
+    if (hasConnection && vm.operatingSystem == 'android') {
+      adbMemoryInfo = await _fetchAdbInfo();
+    } else {
+      // TODO(terry): TBD alternative for iOS memory info - all values zero.
+      adbMemoryInfo = AdbMemoryInfo.empty();
+    }
+
+    // Polls for current RSS size.
+    _update(vm, isolates);
+    _pollingTimer = Timer(updateDelay, _pollMemory);
   }
 
   void _update(VM vm, List<Isolate> isolates) {
@@ -85,8 +108,10 @@ class MemoryTracker {
     isolateHeaps.clear();
 
     for (Isolate isolate in isolates) {
-      final List<HeapSpace> heaps = getHeaps(isolate).toList();
-      isolateHeaps[isolate.id] = heaps;
+      if (isolate != null) {
+        final List<HeapSpace> heaps = getHeaps(isolate).toList();
+        isolateHeaps[isolate.id] = heaps;
+      }
     }
 
     _recalculate();
@@ -97,23 +122,25 @@ class MemoryTracker {
     _recalculate(true);
   }
 
-  void _recalculate([bool fromGC = false]) {
+  // Poll ADB meminfo
+  Future<AdbMemoryInfo> _fetchAdbInfo() async =>
+      AdbMemoryInfo.fromJson((await serviceManager.getAdbMemoryInfo()).json);
+
+  void _recalculate([bool fromGC = false]) async {
     int total = 0;
 
     int used = 0;
     int capacity = 0;
     int external = 0;
     for (List<HeapSpace> heaps in isolateHeaps.values) {
-      used += heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.used);
-      capacity +=
-          heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.capacity);
-      external +=
-          heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.external);
+      used += heaps.fold<int>(0, (i, heap) => i + heap.used);
+      capacity += heaps.fold<int>(0, (i, heap) => i + heap.capacity);
+      external += heaps.fold<int>(0, (i, heap) => i + heap.external);
 
       capacity += external;
 
-      total += heaps.fold<int>(
-          0, (int i, HeapSpace heap) => i + heap.capacity + heap.external);
+      total +=
+          heaps.fold<int>(0, (i, heap) => i + heap.capacity + heap.external);
     }
 
     heapMax = total;
@@ -123,7 +150,15 @@ class MemoryTracker {
       time = math.max(time, samples.last.timestamp);
     }
 
-    _addSample(HeapSample(time, processRss, capacity, used, external, fromGC));
+    _addSample(HeapSample(
+      time,
+      processRss,
+      capacity,
+      used,
+      external,
+      fromGC,
+      adbMemoryInfo,
+    ));
 
     memoryController.memoryTimeline.addSample(HeapSample(
       time,
@@ -132,6 +167,7 @@ class MemoryTracker {
       used,
       external,
       fromGC,
+      adbMemoryInfo,
     ));
   }
 
@@ -143,50 +179,13 @@ class MemoryTracker {
 
   // TODO(devoncarew): fix HeapSpace.parse upstream
   static Iterable<HeapSpace> getHeaps(Isolate isolate) {
-    final Map<String, dynamic> heaps = isolate.json['_heaps'];
-    return heaps.values.map((dynamic json) => HeapSpace.parse(json));
+    if (isolate != null) {
+      final Map<String, dynamic> heaps = isolate.json['_heaps'];
+      return heaps.values.map((dynamic json) => HeapSpace.parse(json));
+    }
+
+    return const Iterable.empty();
   }
-}
-
-class HeapSample {
-  HeapSample(
-    this.timestamp,
-    this.rss,
-    this.capacity,
-    this.used,
-    this.external,
-    this.isGC,
-  );
-
-  factory HeapSample.fromJson(Map<String, dynamic> json) => HeapSample(
-        json['timestamp'] as int,
-        json['rss'] as int,
-        json['capacity'] as int,
-        json['used'] as int,
-        json['external'] as int,
-        json['gc'] as bool,
-      );
-
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        'timestamp': timestamp,
-        'rss': rss,
-        'capacity': capacity,
-        'used': used,
-        'external': external,
-        'gc': isGC,
-      };
-
-  final int timestamp;
-
-  final int rss;
-
-  final int capacity;
-
-  final int used;
-
-  final int external;
-
-  final bool isGC;
 }
 
 // Heap Statistics

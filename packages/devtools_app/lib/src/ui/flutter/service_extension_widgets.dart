@@ -6,11 +6,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/message_bus.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
+import '../../flutter/notifications.dart';
+import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../service_registrations.dart';
+import '../../utils.dart';
 import '../fake_flutter/fake_flutter.dart';
 import 'flutter_icon_renderer.dart';
 import 'label.dart';
@@ -100,22 +104,23 @@ class _ServiceExtensionButtonGroupState
     // TODO(jacobr): respect _available better by displaying whether individual
     // widgets are available (not currently supported by ToggleButtons).
     final available = _extensionStates.any((e) => e.isAvailable);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: ToggleButtons(
-        constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
-        children: <Widget>[
-          for (var extensionState in _extensionStates)
-            _buildExtension(extensionState)
-        ],
-        isSelected: [for (var e in _extensionStates) e.isSelected],
-        onPressed: available ? _onPressed : null,
-      ),
+    return ToggleButtons(
+      constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+      children: <Widget>[
+        for (var extensionState in _extensionStates)
+          _buildExtension(extensionState)
+      ],
+      isSelected: [for (var e in _extensionStates) e.isSelected],
+      onPressed: available ? _onPressed : null,
     );
   }
 
   Widget _buildExtension(ExtensionState extensionState) {
     final description = extensionState.description;
+    // TODO(kenz): replace this with `devToolsToggleButton` from common_widgets
+    // when we no longer need to support icons for both the flutter app and the
+    // html app. The incompatible dep here is the custom `Label` widget. See
+    // https://github.com/flutter/devtools/issues/1728.
     return Tooltip(
       message: extensionState.isSelected
           ? description.enabledTooltip
@@ -123,7 +128,7 @@ class _ServiceExtensionButtonGroupState
       waitDuration: tooltipWait,
       preferBelow: false,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
         child: Label(
           description.icon,
           description.description,
@@ -157,35 +162,20 @@ class _ServiceExtensionButtonGroupState
   }
 }
 
-List<Widget> getServiceExtensionWidgets() {
-  return [
-    ServiceExtensionButtonGroup(
-      minIncludeTextWidth: 1200,
-      extensions: [performanceOverlay, slowAnimations],
-    ),
-    ServiceExtensionButtonGroup(
-      minIncludeTextWidth: 1400,
-      extensions: [debugPaint, debugPaintBaselines],
-    ),
-    ServiceExtensionButtonGroup(
-      minIncludeTextWidth: 1600,
-      extensions: [repaintRainbow, debugAllowBanner],
-    ),
-    // TODO(jacobr): implement TogglePlatformSelector.
-    //  TogglePlatformSelector().selector
-  ];
-}
-
 /// Button that performs a hot reload on the [serviceManager].
 class HotReloadButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return _RegisteredServiceExtensionButton._(
-      serviceDescription: hotReload,
-      action: serviceManager.performHotReload,
-      inProgressText: 'Performing hot reload',
-      completedText: 'Hot reload completed',
-      describeError: (error) => 'Unable to hot reload the app: $error',
+    return ActionButton(
+      tooltip: 'Hot reload',
+      child: _RegisteredServiceExtensionButton._(
+        serviceDescription: hotReload,
+        action: () =>
+            _wrapReloadCall('reload', serviceManager.performHotReload),
+        inProgressText: 'Performing hot reload',
+        completedText: 'Hot reload completed.',
+        describeError: (error) => 'Unable to hot reload the app: $error',
+      ),
     );
   }
 }
@@ -194,13 +184,38 @@ class HotReloadButton extends StatelessWidget {
 class HotRestartButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return _RegisteredServiceExtensionButton._(
-      serviceDescription: hotRestart,
-      action: serviceManager.performHotRestart,
-      inProgressText: 'Performing hot restart',
-      completedText: 'Hot restart completed',
-      describeError: (error) => 'Unable to hot restart the app: $error',
+    return ActionButton(
+      tooltip: 'Hot restart',
+      child: _RegisteredServiceExtensionButton._(
+        serviceDescription: hotRestart,
+        action: () =>
+            _wrapReloadCall('restart', serviceManager.performHotRestart),
+        inProgressText: 'Performing hot restart',
+        completedText: 'Hot restart completed.',
+        describeError: (error) => 'Unable to hot restart the app: $error',
+      ),
     );
+  }
+}
+
+Future<void> _wrapReloadCall(
+  String name,
+  Future<void> Function() reloadCall,
+) async {
+  try {
+    final Stopwatch timer = Stopwatch()..start();
+    messageBus.addEvent(BusEvent('$name.start'));
+    await reloadCall();
+    timer.stop();
+    // 'restarted in 1.6s'
+    final String message = '${name}ed in ${renderDuration(timer.elapsed)}';
+    messageBus.addEvent(BusEvent('$name.end', data: message));
+    // TODO(devoncarew): Add analytics.
+    //ga.select(ga.devToolsMain, ga.hotRestart, timer.elapsed.inMilliseconds);
+  } catch (_) {
+    final String message = 'error performing $name';
+    messageBus.addEvent(BusEvent('$name.end', data: message));
+    rethrow;
   }
 }
 
@@ -260,8 +275,8 @@ class _RegisteredServiceExtensionButtonState
       child: Container(
         constraints: const BoxConstraints.tightFor(width: 48.0, height: 48.0),
         alignment: Alignment.center,
-        // TODO(djshuckerow): Just make these icons the right size to fit this box.
-        // The current size is a little tiny by comparison to our other
+        // TODO(djshuckerow): Just make these icons the right size to fit this
+        // box. The current size is a little tiny by comparison to our other
         // material icons.
         child: getIconWidget(widget.serviceDescription.icon),
       ),
@@ -297,6 +312,7 @@ class _ServiceExtensionToggle extends _ServiceExtensionWidget {
           describeError: describeError,
         );
   final ToggleableServiceExtensionDescription service;
+
   @override
   _ServiceExtensionMixin<_ServiceExtensionWidget> createState() =>
       _ServiceExtensionToggleState();
@@ -305,6 +321,7 @@ class _ServiceExtensionToggle extends _ServiceExtensionWidget {
 class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
     with _ServiceExtensionMixin, AutoDisposeMixin {
   bool value = false;
+
   @override
   void initState() {
     super.initState();
@@ -324,7 +341,7 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
       message: value
           ? widget.service.enabledTooltip
           : widget.service.disabledTooltip,
-      waitDuration: const Duration(seconds: 1),
+      waitDuration: tooltipWait,
       child: InkWell(
         onTap: _onClick,
         child: Row(
@@ -336,7 +353,7 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
             Text(widget.service.description),
             // The switch is padded on its sides by 16dp.
             // This balances out the tappable area.
-            const Padding(padding: EdgeInsets.only(left: 16.0)),
+            const Padding(padding: EdgeInsets.only(left: defaultSpacing)),
           ],
         ),
       ),
@@ -403,36 +420,25 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
     if (disabled) {
       return;
     }
+
     setState(() {
       disabled = true;
     });
-    // TODO(https://github.com/flutter/devtools/issues/1249): Avoid adding
-    // and removing snackbars so often as we do here.
-    ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBar;
+
     if (widget.inProgressText != null) {
-      Scaffold.of(context)
-          .removeCurrentSnackBar(reason: SnackBarClosedReason.remove);
-      // Push a snackbar that the action is in progress.
-      snackBar = Scaffold.of(context).showSnackBar(
-        SnackBar(content: Text(widget.inProgressText)),
-      );
+      // TODO(devoncarew): Display this 'starting work' message in the status
+      // bar.
+
     }
+
     try {
       await action();
-      // If the action was successful, remove the snack bar and show a new
-      // one with action success.
-      snackBar?.close();
+
       if (widget.completedText != null) {
-        Scaffold.of(context).showSnackBar(
-          SnackBar(content: Text(widget.completedText)),
-        );
+        Notifications.of(context).push(widget.completedText);
       }
     } catch (e) {
-      // On a failure, remove the snack bar and replace it with the failure.
-      snackBar?.close();
-      Scaffold.of(context).showSnackBar(
-        SnackBar(content: Text(widget.describeError(e))),
-      );
+      Notifications.of(context).push(widget.describeError(e));
     } finally {
       setState(() {
         disabled = false;

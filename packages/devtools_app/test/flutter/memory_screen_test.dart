@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-
+import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/flutter/split.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -29,18 +29,21 @@ void main() {
   }) async {
     // Set a wide enough screen width that we do not run into overflow.
     await tester.pumpWidget(wrapWithControllers(
-      const MemoryBody(),
+      wrapWithBannerMessages(const MemoryBody()),
       memory: controller = memoryController ?? MemoryController(),
     ));
     expect(find.byType(MemoryBody), findsOneWidget);
   }
 
-  const windowSize = Size(1599.0, 1000.0);
+  const windowSize = Size(2225.0, 1000.0);
 
   group('MemoryScreen', () {
     setUp(() async {
       await ensureInspectorDependencies();
       fakeServiceManager = FakeServiceManager(useFakeService: true);
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
+          .thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
@@ -50,6 +53,14 @@ void main() {
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
       expect(find.text('Memory'), findsOneWidget);
+    });
+
+    testWidgets('builds disabled message when disabled for web app',
+        (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(true);
+      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      expect(find.byType(MemoryBody), findsNothing);
+      expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds proper content for state', windowSize,
@@ -81,7 +92,7 @@ void main() {
       splitFinder = find.byType(Split);
       expect(splitFinder, findsOneWidget);
       final Split splitter = tester.widget(splitFinder);
-      expect(splitter.initialFirstFraction, equals(0.25));
+      expect(splitter.initialFirstFraction, equals(0.40));
 
       // Check memory sources available.
       await tester.tap(find.byKey(MemoryScreen.dropdownSourceMenuButtonKey));
@@ -91,9 +102,10 @@ void main() {
       final memorySources = tester.firstWidget(find.byKey(
         MemoryScreen.memorySourcesKey,
       )) as Text;
+
       expect(
         memorySources.data,
-        '${MemoryScreen.memorySourceMenuItemPrefix}${MemoryController.liveFeed}',
+        '${controller.memorySourcePrefix}${MemoryController.liveFeed}',
       );
     });
 

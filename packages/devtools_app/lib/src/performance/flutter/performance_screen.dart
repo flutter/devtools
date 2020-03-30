@@ -5,18 +5,27 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
+import '../../flutter/theme.dart';
+import '../../globals.dart';
 import '../../performance/performance_controller.dart';
+import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
-import '../../profiler/cpu_profiler_controller.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
 
 class PerformanceScreen extends Screen {
-  const PerformanceScreen() : super();
+  const PerformanceScreen()
+      : super(
+          DevToolsScreenType.performance,
+          title: 'Performance',
+          icon: Octicons.dashboard,
+        );
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -30,21 +39,65 @@ class PerformanceScreen extends Screen {
   static const recordingStatusKey = Key('Recording Status');
 
   @override
-  Widget build(BuildContext context) => PerformanceScreenBody();
+  String get docPageId => 'performance';
 
   @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Performance',
-      icon: Icon(Octicons.dashboard),
-    );
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const PerformanceScreenBody()
+        : const DisabledForWebAppMessage();
   }
 }
 
-class PerformanceScreenBody extends StatelessWidget {
+class PerformanceScreenBody extends StatefulWidget {
+  const PerformanceScreenBody();
+
+  @override
+  _PerformanceScreenBodyState createState() => _PerformanceScreenBodyState();
+}
+
+class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
+    with AutoDisposeMixin {
+  PerformanceController controller;
+  bool recording = false;
+  bool processing = false;
+  double processingProgress = 0.0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    maybePushDebugModePerformanceMessage(
+      context,
+      DevToolsScreenType.performance,
+    );
+
+    final newController = Controllers.of(context).performance;
+    if (newController == controller) return;
+    controller = newController;
+
+    cancel();
+    addAutoDisposeListener(controller.recordingNotifier, () {
+      setState(() {
+        recording = controller.recordingNotifier.value;
+      });
+    });
+    addAutoDisposeListener(controller.cpuProfilerController.processingNotifier,
+        () {
+      setState(() {
+        processing = controller.cpuProfilerController.processingNotifier.value;
+      });
+    });
+    addAutoDisposeListener(
+        controller.cpuProfilerController.transformer.progressNotifier, () {
+      setState(() {
+        processingProgress =
+            controller.cpuProfilerController.transformer.progressNotifier.value;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final controller = Controllers.of(context).performance;
     return ValueListenableBuilder<Flag>(
       valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
       builder: (context, profilerFlag, _) {
@@ -62,7 +115,7 @@ class PerformanceScreenBody extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildStateControls(controller),
-            ProfileGranularityDropdown(),
+            const ProfileGranularityDropdown(DevToolsScreenType.performance),
           ],
         ),
         Expanded(
@@ -70,8 +123,9 @@ class PerformanceScreenBody extends StatelessWidget {
             valueListenable: controller.cpuProfilerController.dataNotifier,
             builder: (context, cpuProfileData, _) {
               if (cpuProfileData ==
-                  CpuProfilerController.baseStateCpuProfileData) {
-                return _buildRecordingInfo(controller);
+                      CpuProfilerController.baseStateCpuProfileData ||
+                  cpuProfileData == null) {
+                return _buildRecordingInfo();
               }
               return CpuProfiler(
                 data: cpuProfileData,
@@ -86,46 +140,39 @@ class PerformanceScreenBody extends StatelessWidget {
 
   Widget _buildStateControls(PerformanceController controller) {
     const double minIncludeTextWidth = 600;
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.recordingNotifier,
-      builder: (context, recording, _) {
-        return Row(
-          children: [
-            recordButton(
-              key: PerformanceScreen.recordButtonKey,
-              recording: recording,
-              minIncludeTextWidth: minIncludeTextWidth,
-              onPressed: controller.startRecording,
-            ),
-            stopRecordingButton(
-              key: PerformanceScreen.stopRecordingButtonKey,
-              recording: recording,
-              minIncludeTextWidth: minIncludeTextWidth,
-              onPressed: controller.stopRecording,
-            ),
-            const SizedBox(width: 8.0),
-            clearButton(
-              key: PerformanceScreen.clearButtonKey,
-              minIncludeTextWidth: minIncludeTextWidth,
-              onPressed: recording ? null : controller.clear,
-            ),
-          ],
-        );
-      },
+    return Row(
+      children: [
+        recordButton(
+          key: PerformanceScreen.recordButtonKey,
+          recording: recording,
+          minIncludeTextWidth: minIncludeTextWidth,
+          onPressed: controller.startRecording,
+        ),
+        const SizedBox(width: denseSpacing),
+        stopRecordingButton(
+          key: PerformanceScreen.stopRecordingButtonKey,
+          recording: recording,
+          minIncludeTextWidth: minIncludeTextWidth,
+          onPressed: controller.stopRecording,
+        ),
+        const SizedBox(width: defaultSpacing),
+        clearButton(
+          key: PerformanceScreen.clearButtonKey,
+          minIncludeTextWidth: minIncludeTextWidth,
+          onPressed: recording ? null : controller.clear,
+        ),
+      ],
     );
   }
 
-  Widget _buildRecordingInfo(PerformanceController controller) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.recordingNotifier,
-      builder: (context, recording, _) {
-        return recordingInfo(
-          instructionsKey: PerformanceScreen.recordingInstructionsKey,
-          statusKey: PerformanceScreen.recordingStatusKey,
-          recording: recording,
-          recordedObject: 'CPU samples',
-        );
-      },
+  Widget _buildRecordingInfo() {
+    return recordingInfo(
+      instructionsKey: PerformanceScreen.recordingInstructionsKey,
+      recordingStatusKey: PerformanceScreen.recordingStatusKey,
+      recording: recording,
+      processing: processing,
+      progressValue: processingProgress,
+      recordedObject: 'CPU samples',
     );
   }
 }

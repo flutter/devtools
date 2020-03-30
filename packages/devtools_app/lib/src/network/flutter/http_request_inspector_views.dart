@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:recase/recase.dart';
 
+import '../../http/http.dart';
+import '../../http/http_request_data.dart';
 import '../../utils.dart';
-import '../http.dart';
-import '../http_request_data.dart';
 
 // Approximately double the indent of the expandable tile's title.
 const double _rowIndentPadding = 30;
@@ -62,7 +61,7 @@ class HttpRequestHeadersView extends StatelessWidget {
         children: [
           Text(
             '$key: ',
-            style: Theme.of(context).textTheme.subtitle,
+            style: Theme.of(context).textTheme.subtitle2,
           ),
           Expanded(
             child: Text(
@@ -88,7 +87,9 @@ class HttpRequestHeadersView extends StatelessWidget {
                 for (final entry in data.general.entries)
                   _buildRow(
                     context,
-                    ReCase(entry.key).titleCase,
+                    // TODO(kenz): ensure the default case of `entry.key` looks
+                    // fine.
+                    entry.key,
                     entry.value.toString(),
                     constraints,
                   ),
@@ -181,7 +182,7 @@ class HttpRequestCookiesView extends StatelessWidget {
         label: Expanded(
           child: Text(
             title ?? '--',
-            style: theme.textTheme.subhead,
+            style: theme.textTheme.subtitle1,
             overflow: TextOverflow.fade,
           ),
         ),
@@ -300,7 +301,7 @@ class HttpRequestTimingView extends StatelessWidget {
             children: [
               Text(
                 '$key: ',
-                style: Theme.of(context).textTheme.subtitle,
+                style: Theme.of(context).textTheme.subtitle2,
               ),
               Text(value),
             ],

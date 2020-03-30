@@ -9,33 +9,41 @@ import '../../../devtools.dart' as devtools;
 import '../../flutter/common_widgets.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
+import '../../flutter/theme.dart';
+import '../../globals.dart';
 import '../../version.dart';
 import '../info_controller.dart';
 
 class InfoScreen extends Screen {
-  const InfoScreen();
+  const InfoScreen()
+      : super(
+          DevToolsScreenType.info,
+          title: 'Info',
+          icon: Octicons.info,
+        );
 
   @override
-  Widget build(BuildContext context) => InfoScreenBody();
+  bool get showIsolateSelector => true;
 
   @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      icon: Icon(Octicons.info),
-      text: 'Info',
-    );
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const InfoScreenBody()
+        : const DisabledForWebAppMessage();
   }
-
-  /// The key to identify the flag list view
-  @visibleForTesting
-  static const Key flagListKey = Key('Info Screen Flag List');
 
   /// The key to identify the flutter version view.
   @visibleForTesting
   static const Key flutterVersionKey = Key('Info Screen Flutter Version');
+
+  /// The key to identify the flag list view
+  @visibleForTesting
+  static const Key flagListKey = Key('Info Screen Flag List');
 }
 
 class InfoScreenBody extends StatefulWidget {
+  const InfoScreenBody();
+
   @override
   _InfoScreenBodyState createState() => _InfoScreenBodyState();
 }
@@ -74,14 +82,16 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
       children: [
         Text(
           'Version Information',
-          style: textTheme.headline,
+          style: textTheme.headline5,
         ),
-        const PaddedDivider(),
-        if (_flutterVersion != null) _VersionInformation(_flutterVersion),
-        const Padding(padding: EdgeInsets.only(top: 16.0)),
+        const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
+        if (_flutterVersion != null)
+          _VersionInformation(_flutterVersion),
+        const Padding(padding: EdgeInsets.only(top: defaultSpacing)),
+        // TODO(devoncarew): Move this information into an advanced page.
         Text(
           'Dart VM Flag List',
-          style: textTheme.headline,
+          style: textTheme.headline5,
         ),
         const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
         Expanded(
@@ -107,13 +117,31 @@ class _VersionInformation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTaggedText(
-      '<bold>Flutter: </bold>${flutterVersion.flutterVersionSummary}\n'
-      '<bold>Framework: </bold>${flutterVersion.frameworkVersionSummary}\n'
-      '<bold>Engine: </bold>${flutterVersion.engineVersionSummary}\n'
-      '<bold>Dart SDK: </bold>${flutterVersion.dartSdkVersion}\n'
-      '<bold>DevTools: </bold>${devtools.version}\n',
+    const boldText = TextStyle(fontWeight: FontWeight.bold);
+
+    final versions = {
+      'DevTools': devtools.version,
+      'Flutter': flutterVersion.version,
+      'Framework': flutterVersion.frameworkRevision,
+      'Engine': flutterVersion.engineRevision,
+      'Dart': flutterVersion.dartSdkVersion,
+    };
+
+    return Column(
       key: InfoScreen.flutterVersionKey,
+      children: [
+        for (var name in versions.keys)
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+            child: Row(
+              children: [
+                Text(name, style: boldText),
+                const SizedBox(width: 8.0),
+                Text(versions[name]),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }
@@ -134,7 +162,7 @@ class _FlagList extends StatelessWidget {
           final flag = flagList.flags[index];
           final modifiedStatusText = flag.modified ? 'modified' : 'default';
           return Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

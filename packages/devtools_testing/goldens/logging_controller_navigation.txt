@@ -11,10 +11,9 @@
   "timestamp": <NUMBER>,
   "extensionData": {
     "route": {
-      "description": "MaterialPageRoute<dynamic>(/)",
+      "description": "MaterialPageRoute<dynamic>(null)",
       "settings": {
-        "name": "/",
-        "isInitialRoute": true
+        "name": null
       }
     }
   }

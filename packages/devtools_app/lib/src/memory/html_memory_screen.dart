@@ -4,12 +4,12 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'package:html_shim/html.dart' as html;
+import 'dart:html' as html;
 
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../framework/html_framework.dart';
 import '../globals.dart';
 import '../html_popup.dart';

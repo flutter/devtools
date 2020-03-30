@@ -15,7 +15,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../ui/material_icons.dart';

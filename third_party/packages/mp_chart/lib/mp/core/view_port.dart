@@ -313,8 +313,6 @@ class ViewPortHandler {
   /// setScaleMinima(...) method.
   ///
   /// @param transformedPts the position to center view viewport to
-  /// @param view
-  /// @return save
   void centerViewPort(final List<double> transformedPts) {
     mCenterViewPortMatrixBuffer = Matrix4.identity();
     Matrix4 save = mCenterViewPortMatrixBuffer;

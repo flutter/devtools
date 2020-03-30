@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 import 'ui/fake_flutter/fake_flutter.dart';
 
 // TODO(kenz): consolidate the logic between [VerticalLineSegment] and
@@ -21,6 +23,22 @@ abstract class LineSegment {
   bool intersects(Rect rect) {
     final intersectRect = Rect.fromPoints(start, end).intersect(rect);
     return intersectRect.width >= 0 && intersectRect.height >= 0;
+  }
+
+  LineSegment toZoomed({
+    @required double zoom,
+    @required double unzoomableOffsetLineStart,
+    @required double unzoomableOffsetLineEnd,
+  });
+
+  @visibleForTesting
+  static double zoomedXPosition({
+    @required double x,
+    @required zoom,
+    @required double unzoomableOffset,
+  }) {
+    assert(x >= unzoomableOffset);
+    return (x - unzoomableOffset) * zoom + unzoomableOffset;
   }
 
   @override
@@ -49,6 +67,28 @@ class HorizontalLineSegment extends LineSegment
     }
     return compare;
   }
+
+  @override
+  HorizontalLineSegment toZoomed({
+    @required double zoom,
+    @required double unzoomableOffsetLineStart,
+    @required double unzoomableOffsetLineEnd,
+  }) {
+    final zoomedLineStartX = LineSegment.zoomedXPosition(
+      x: start.dx,
+      zoom: zoom,
+      unzoomableOffset: unzoomableOffsetLineStart,
+    );
+    final zoomedLineEndX = LineSegment.zoomedXPosition(
+      x: end.dx,
+      zoom: zoom,
+      unzoomableOffset: unzoomableOffsetLineEnd,
+    );
+    return HorizontalLineSegment(
+      Offset(zoomedLineStartX, start.dy),
+      Offset(zoomedLineEndX, end.dy),
+    );
+  }
 }
 
 class VerticalLineSegment extends LineSegment
@@ -72,5 +112,22 @@ class VerticalLineSegment extends LineSegment
       return start.dy.compareTo(other.start.dy);
     }
     return compare;
+  }
+
+  @override
+  VerticalLineSegment toZoomed({
+    @required double zoom,
+    @required double unzoomableOffsetLineStart,
+    @required double unzoomableOffsetLineEnd,
+  }) {
+    final zoomedLineStartX = LineSegment.zoomedXPosition(
+      x: start.dx,
+      zoom: zoom,
+      unzoomableOffset: unzoomableOffsetLineStart,
+    );
+    return VerticalLineSegment(
+      Offset(zoomedLineStartX, start.dy),
+      Offset(zoomedLineStartX, end.dy),
+    );
   }
 }

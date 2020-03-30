@@ -5,9 +5,10 @@
 // ignore_for_file: implementation_imports
 import 'dart:convert';
 
-import 'package:devtools_app/src/timeline/timeline_controller.dart'
+import 'package:devtools_app/src/timeline/html_timeline_controller.dart'
     show timelineScreenId, TimelineMode;
-import 'package:devtools_app/src/timeline/timeline_model.dart';
+import 'package:devtools_app/src/timeline/html_timeline_model.dart';
+import 'package:devtools_app/src/trace_event.dart';
 
 import 'cpu_profile_test_data.dart';
 import 'test_utils.dart';
@@ -376,11 +377,11 @@ final endEngineBeginFrameTrace = testTraceEventWrapper({
 // None of the following data should be modified. If you have a need to modify
 // any of the below events for a test, make a copy and modify the copy.
 final gpuRasterizerDrawEvent = testSyncTimelineEvent(gpuRasterizerDrawTrace)
-  ..type = TimelineEventType.gpu
+  ..type = TimelineEventType.raster
   ..addEndEvent(endGpuRasterizerDrawTrace);
 
 final pipelineConsumeEvent = testSyncTimelineEvent(pipelineConsumeTrace)
-  ..type = TimelineEventType.gpu
+  ..type = TimelineEventType.raster
   ..addEndEvent(endPipelineConsumeTrace);
 
 final goldenGpuTimelineEvent = gpuRasterizerDrawEvent
@@ -962,3 +963,53 @@ final offlineFullTimelineDataJson = {
   TimelineData.timelineModeKey: TimelineMode.full.toString(),
   TimelineData.devToolsScreenKey: timelineScreenId,
 };
+
+// Mark: Duration events with duplicate traces
+final transformLayerStart1 = testTraceEventWrapper({
+  'name': 'TransformLayer::Preroll',
+  'cat': 'Embedder',
+  'tid': testGpuThreadId,
+  'pid': 22283,
+  'ts': 118039651669,
+  'tts': 733287,
+  'ph': 'B',
+  'args': {}
+});
+final transformLayerStart2 = testTraceEventWrapper({
+  'name': 'TransformLayer::Preroll',
+  'cat': 'Embedder',
+  'tid': testGpuThreadId,
+  'pid': 22283,
+  'ts': 118039651869,
+  'tts': 733289,
+  'ph': 'B',
+  'args': {}
+});
+final transformLayerEnd2 = testTraceEventWrapper({
+  'name': 'TransformLayer::Preroll',
+  'cat': 'Embedder',
+  'tid': testGpuThreadId,
+  'pid': 22283,
+  'ts': 118039679673,
+  'tts': 733656,
+  'ph': 'E',
+  'args': {}
+});
+final transformLayerEnd1 = testTraceEventWrapper({
+  'name': 'TransformLayer::Preroll',
+  'cat': 'Embedder',
+  'tid': testGpuThreadId,
+  'pid': 22283,
+  'ts': 118039679673,
+  'tts': 733656,
+  'ph': 'E',
+  'args': {}
+});
+final durationEventsWithDuplicateTraces = [
+  gpuRasterizerDrawTrace,
+  transformLayerStart1,
+  transformLayerStart2,
+  transformLayerEnd2,
+  transformLayerEnd1,
+  endGpuRasterizerDrawTrace,
+];

@@ -9,10 +9,20 @@ import 'flutter_html_shim.dart';
 ///
 /// All Dart code that behaves differently depending on whether the current
 /// theme is dark or light should use this flag.
+///
 /// Generally Dart code should use [ThemedColor] everywhere colors are used so
 /// that code can be written without directly depending on [isDarkTheme].
 bool get isDarkTheme => _isDarkTheme;
 bool _isDarkTheme = false;
+
+/// Change the value for the current theme.
+///
+/// Note: this does not rebuild the widget hierarchy.
+set useDarkTheme(bool value) {
+  _isDarkTheme = value;
+
+  clearColorCache();
+}
 
 void initializeTheme(String theme) {
   _isDarkTheme = theme == 'dark';

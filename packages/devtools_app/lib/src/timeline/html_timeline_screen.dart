@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:html' as html;
 import 'dart:math' as math;
 
-import 'package:html_shim/html.dart' as html;
 import 'package:meta/meta.dart';
 import 'package:split/split.dart' as split;
 
@@ -13,6 +13,7 @@ import '../charts/flame_chart_canvas.dart';
 import '../framework/html_framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart';
+import '../trace_event.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/html_custom.dart';
@@ -25,10 +26,10 @@ import '../ui/ui_utils.dart';
 import '../ui/vm_flag_elements.dart';
 import 'html_event_details.dart';
 import 'html_frames_bar_chart.dart';
-import 'timeline_controller.dart';
-import 'timeline_flame_chart.dart';
-import 'timeline_model.dart';
-import 'timeline_processor.dart';
+import 'html_timeline_controller.dart';
+import 'html_timeline_flame_chart.dart';
+import 'html_timeline_model.dart';
+import 'html_timeline_processor.dart';
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
@@ -289,12 +290,14 @@ class HtmlTimelineScreen extends HtmlScreen {
       });
 
     timelineController.onLoadOfflineData.listen((_) {
+      _recordingStatus.hidden(true);
       if (timelineController.offlineTimelineData
           is OfflineFrameBasedTimelineData) {
         final offlineData = timelineController.offlineTimelineData
             as OfflineFrameBasedTimelineData;
         // Relayout the plotly graph so that the frames bar chart reflects the
         // display refresh rate from the imported snapshot.
+        framesBarChart.hidden(false);
         framesBarChart.frameUIgraph.plotlyChart
           ..displayRefreshRate = offlineData.displayRefreshRate
           ..relayoutFPSTimeseriesLayout();
@@ -308,6 +311,8 @@ class HtmlTimelineScreen extends HtmlScreen {
           _selectFrame(
               timelineController.frameBasedTimeline.data.selectedFrame);
         }
+      } else {
+        eventDetails.hidden(false);
       }
 
       if (timelineController.offlineTimelineData.hasCpuProfileData()) {
@@ -406,8 +411,7 @@ class HtmlTimelineScreen extends HtmlScreen {
       // display this UI. On typical devices, the space available is very
       // limited making the UI harder to use than it would be otherwise.
       splitter = split.flexSplit(
-        html.toDartHtmlElementList(
-            [flameChartContainer.element, eventDetails.element]),
+        [flameChartContainer.element, eventDetails.element],
         horizontal: false,
         gutterSize: defaultSplitterWidth,
         sizes: sizes ?? [75, 25],
@@ -441,11 +445,14 @@ class HtmlTimelineScreen extends HtmlScreen {
 
   Future<void> prepareViewForOfflineData(TimelineMode timelineMode) async {
     await clearTimeline();
-    framesBarChart.hidden(timelineMode == TimelineMode.full);
+    framesBarChart.hidden(true);
     _setFlameChart(_emptyFlameChart);
-    flameChartContainer.hidden(timelineMode == TimelineMode.frameBased);
-    eventDetails.hidden(timelineMode == TimelineMode.frameBased);
+    flameChartContainer.hidden(false);
+    eventDetails.hidden(true);
     _recordingInstructions.hidden(true);
+    _recordingStatus.hidden(false);
+    _recordingStatusMessage.text = 'Loading timeline data';
+    _destroySplitter();
   }
 
   Future<void> _exitOfflineMode() async {
@@ -456,8 +463,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     await clearTimeline();
     eventDetails.reset(hide: true);
 
-    // We already cleared the timeline data - do not repeat this action.
-    timelineController.exitOfflineMode(clearTimeline: false);
+    await timelineController.exitOfflineMode();
 
     // This needs to be called before we update the button states because it
     // changes the value of [offlineMode], which the button states depend on.
@@ -503,10 +509,10 @@ class HtmlTimelineScreen extends HtmlScreen {
     _updateButtonStates();
   }
 
-  void _stopFullRecording() {
+  void _stopFullRecording() async {
     assert(timelineController.timelineModeNotifier.value == TimelineMode.full);
     _recordingStatusMessage.text = 'Processing timeline trace';
-    timelineController.fullTimeline.stopRecording();
+    await timelineController.fullTimeline.stopRecording();
     _recordingStatus.hidden(true);
     _updateButtonStates();
   }
@@ -579,6 +585,7 @@ class HtmlTimelineScreen extends HtmlScreen {
       ..disabled = timelineController.fullTimeline.recordingNotifier.value
       ..hidden(offlineMode);
     performanceOverlayButton.button.hidden(offlineMode || isDartCliApp);
+    trackWidgetBuildsButton.button.hidden(offlineMode || isDartCliApp);
     _profileGranularitySelector.selector.hidden(offlineMode);
     exitOfflineModeButton.hidden(!offlineMode);
   }
@@ -681,10 +688,11 @@ class HtmlTimelineScreen extends HtmlScreen {
             timelineProtocol.currentEventNodes[TimelineEventType.ui.index]
                 .format(buf, '   ');
           }
-          if (timelineProtocol.currentEventNodes[TimelineEventType.gpu.index] !=
+          if (timelineProtocol
+                  .currentEventNodes[TimelineEventType.raster.index] !=
               null) {
             buf.writeln('\n Current GPU event node:');
-            timelineProtocol.currentEventNodes[TimelineEventType.gpu.index]
+            timelineProtocol.currentEventNodes[TimelineEventType.raster.index]
                 .format(buf, '   ');
           }
           if (timelineProtocol.heaps[TimelineEventType.ui.index].isNotEmpty) {
@@ -695,10 +703,11 @@ class HtmlTimelineScreen extends HtmlScreen {
               buf.writeln(wrapper.event.json.toString());
             }
           }
-          if (timelineProtocol.heaps[TimelineEventType.gpu.index].isNotEmpty) {
+          if (timelineProtocol
+              .heaps[TimelineEventType.raster.index].isNotEmpty) {
             buf.writeln('\nGPU heap');
             for (TraceEventWrapper wrapper in timelineProtocol
-                .heaps[TimelineEventType.gpu.index]
+                .heaps[TimelineEventType.raster.index]
                 .toList()) {
               buf.writeln(wrapper.event.json.toString());
             }

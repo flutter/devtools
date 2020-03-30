@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import 'config_specific/logger.dart';
+import 'config_specific/logger/logger.dart';
 import 'connected_app.dart';
 import 'eval_on_dart_library.dart';
 import 'service_extensions.dart' as extensions;
@@ -73,7 +73,8 @@ class ServiceConnectionManager {
   VM vm;
   String sdkVersion;
 
-  bool get hasConnection => service != null;
+  bool get hasConnection =>
+      service != null && connectedApp != null && connectedApp.appTypeKnown;
 
   Stream<bool> get onStateChange => _stateController.stream;
   final _stateController = StreamController<bool>.broadcast();
@@ -128,6 +129,7 @@ class ServiceConnectionManager {
     serviceAvailable.complete();
 
     connectedApp = ConnectedApp();
+    serviceExtensionManager.connectedApp = connectedApp;
 
     unawaited(onClosed.then((_) => vmServiceClosed()));
 
@@ -162,7 +164,6 @@ class ServiceConnectionManager {
     _vmFlagManager.service = service;
 
     _stateController.add(true);
-    _connectionAvailableController.add(service);
 
     await _isolateManager._initIsolates(vm.isolates);
     service.onIsolateEvent.listen(_isolateManager._handleIsolateEvent);
@@ -198,6 +199,9 @@ class ServiceConnectionManager {
         }
       }
     }));
+
+    await connectedApp.initializeValues();
+    _connectionAvailableController.add(service);
   }
 
   void vmServiceClosed() {
@@ -205,6 +209,7 @@ class ServiceConnectionManager {
     vm = null;
     sdkVersion = null;
     connectedApp = null;
+    serviceExtensionManager.connectedApp = null;
 
     _stateController.add(false);
     _connectionClosedController.add(null);
@@ -233,8 +238,15 @@ class ServiceConnectionManager {
     );
   }
 
+  Future<Response> getAdbMemoryInfo() async {
+    return await callService(
+      registrations.flutterMemory.service,
+      isolateId: _isolateManager.selectedIsolate.id,
+    );
+  }
+
   Future<double> getDisplayRefreshRate() async {
-    if (connectedApp == null || !await connectedApp.isAnyFlutterApp) {
+    if (connectedApp == null || !await connectedApp.isFlutterApp) {
       return null;
     }
 
@@ -439,6 +451,8 @@ class ServiceExtensionManager {
 
   var extensionStatesUpdated = Completer<void>();
 
+  ConnectedApp connectedApp;
+
   Future<void> _handleExtensionEvent(Event event) async {
     switch (event.extensionKind) {
       case 'Flutter.FirstFrame':
@@ -493,11 +507,13 @@ class ServiceExtensionManager {
     }
     _firstFrameEventReceived = true;
 
-    for (String extension in _pendingServiceExtensions) {
-      await _addServiceExtension(extension);
-    }
-    extensionStatesUpdated.complete();
+    final extensionsToProcess = _pendingServiceExtensions.toList();
     _pendingServiceExtensions.clear();
+    await Future.wait([
+      for (String extension in extensionsToProcess)
+        _addServiceExtension(extension)
+    ]);
+    extensionStatesUpdated.complete();
   }
 
   Future<void> _addRegisteredExtensionRPCs(IsolateRef isolateRef) async {
@@ -506,42 +522,43 @@ class ServiceExtensionManager {
     }
     final Isolate isolate = await _service.getIsolate(isolateRef.id);
     if (isolate.extensionRPCs != null) {
-      for (String extension in isolate.extensionRPCs) {
-        await _maybeAddServiceExtension(extension);
-      }
-
-      if (_pendingServiceExtensions.isEmpty) {
-        extensionStatesUpdated.complete();
-      }
-
-      if (!_firstFrameEventReceived) {
-        bool didSendFirstFrameEvent = false;
-        if (isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
-          final value = await _service.callServiceExtension(
-            extensions.didSendFirstFrameEvent,
-            isolateId: _isolateManager.selectedIsolate.id,
-          );
-          didSendFirstFrameEvent =
-              value != null && value.json['enabled'] == 'true';
-        } else {
-          final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
-            [
-              'package:flutter/src/widgets/binding.dart',
-              'package:flutter_web/src/widgets/binding.dart',
-            ],
-            _service,
-          );
-          final InstanceRef value = await flutterLibrary.eval(
-            'WidgetsBinding.instance.debugDidSendFirstFrameEvent',
-            isAlive: null,
-          );
-
-          didSendFirstFrameEvent =
-              value != null && value.valueAsString == 'true';
+      if (await connectedApp.isFlutterApp) {
+        for (String extension in isolate.extensionRPCs) {
+          await _maybeAddServiceExtension(extension);
         }
 
-        if (didSendFirstFrameEvent) {
-          await _onFrameEventReceived();
+        if (_pendingServiceExtensions.isEmpty) {
+          extensionStatesUpdated.complete();
+        }
+
+        if (!_firstFrameEventReceived) {
+          bool didSendFirstFrameEvent = false;
+          if (isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
+            final value = await _service.callServiceExtension(
+              extensions.didSendFirstFrameEvent,
+              isolateId: _isolateManager.selectedIsolate.id,
+            );
+            didSendFirstFrameEvent = value?.json['enabled'] == 'true';
+          } else {
+            final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
+              ['package:flutter/src/widgets/binding.dart'],
+              _service,
+            );
+            final InstanceRef value = await flutterLibrary.eval(
+              'WidgetsBinding.instance.debugDidSendFirstFrameEvent',
+              isAlive: null,
+            );
+
+            didSendFirstFrameEvent = value?.valueAsString == 'true';
+          }
+
+          if (didSendFirstFrameEvent) {
+            await _onFrameEventReceived();
+          }
+        }
+      } else {
+        for (String extension in isolate.extensionRPCs) {
+          await _addServiceExtension(extension);
         }
       }
     }
@@ -556,7 +573,7 @@ class ServiceExtensionManager {
     }
   }
 
-  Future<void> _addServiceExtension(String name) async {
+  Future<void> _addServiceExtension(String name) {
     final streamController = _getServiceExtensionController(name);
 
     _serviceExtensions.add(name);
@@ -567,11 +584,11 @@ class ServiceExtensionManager {
       // extension. This will restore extension states on the device after a hot
       // restart. [_enabledServiceExtensions] will be empty on page refresh or
       // initial start.
-      await _callServiceExtension(name, _enabledServiceExtensions[name].value);
+      return _callServiceExtension(name, _enabledServiceExtensions[name].value);
     } else {
       // Set any extensions that are already enabled on the device. This will
       // enable extension states in DevTools on page refresh or initial start.
-      await _restoreExtensionFromDevice(name);
+      return _restoreExtensionFromDevice(name);
     }
   }
 

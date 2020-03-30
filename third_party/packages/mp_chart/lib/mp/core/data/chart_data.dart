@@ -181,22 +181,29 @@ class ChartData<T extends IDataSet<Entry>> {
     }
   }
 
+  // ignore: unnecessary_getters_setters
   double get xMax => _xMax;
 
+  // ignore: unnecessary_getters_setters
   double get xMin => _xMin;
 
+  // ignore: unnecessary_getters_setters
   set xMax(double value) {
     _xMax = value;
   }
 
+  // ignore: unnecessary_getters_setters
   List<T> get dataSets => _dataSets;
 
+  // ignore: unnecessary_getters_setters
   set dataSets(List<T> value) {
     _dataSets = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get yMax => _yMax;
 
+  // ignore: unnecessary_getters_setters
   set yMax(double value) {
     _yMax = value;
   }
@@ -612,36 +619,47 @@ class ChartData<T extends IDataSet<Entry>> {
     return max;
   }
 
+  // ignore: unnecessary_getters_setters
   double get yMin => _yMin;
 
+  // ignore: unnecessary_getters_setters
   set yMin(double value) {
     _yMin = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get leftAxisMax => _leftAxisMax;
 
+  // ignore: unnecessary_getters_setters
   set leftAxisMax(double value) {
     _leftAxisMax = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get leftAxisMin => _leftAxisMin;
 
+  // ignore: unnecessary_getters_setters
   set leftAxisMin(double value) {
     _leftAxisMin = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get rightAxisMax => _rightAxisMax;
 
+  // ignore: unnecessary_getters_setters
   set rightAxisMax(double value) {
     _rightAxisMax = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get rightAxisMin => _rightAxisMin;
 
+  // ignore: unnecessary_getters_setters
   set rightAxisMin(double value) {
     _rightAxisMin = value;
   }
 
+  // ignore: unnecessary_getters_setters
   set xMin(double value) {
     _xMin = value;
   }

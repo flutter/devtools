@@ -32,6 +32,9 @@ class _CpuProfileFlameChartState
     extends FlameChartState<CpuProfileFlameChart, CpuStackFrame> {
   static const stackFramePadding = 1;
 
+  @override
+  int get rowOffsetForTopPadding => 1;
+
   int _colorOffset = 0;
 
   final Map<String, double> stackFrameLefts = {};
@@ -41,7 +44,7 @@ class _CpuProfileFlameChartState
     super.initFlameChartElements();
     expandRows(widget.data.cpuProfileRoot.depth +
         rowOffsetForTopPadding +
-        rowOffsetForBottomPadding);
+        FlameChart.rowOffsetForBottomPadding);
 
     void createChartNodes(CpuStackFrame stackFrame, int row) {
       final double width =

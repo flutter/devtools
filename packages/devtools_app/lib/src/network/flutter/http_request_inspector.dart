@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../http_request_data.dart';
+import '../../http/http_request_data.dart';
 import 'http_request_inspector_views.dart';
 
 /// A [Widget] which displays information about an HTTP request.
@@ -85,7 +85,7 @@ class HttpRequestInspector extends StatelessWidget {
                 child: Text(
                   'No request selected',
                   key: noRequestSelectedKey,
-                  style: Theme.of(context).textTheme.title,
+                  style: Theme.of(context).textTheme.headline6,
                 ),
               )
             : tabbedContent,

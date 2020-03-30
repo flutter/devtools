@@ -10,7 +10,7 @@ import 'dart:async';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../vm_service_wrapper.dart';
 import 'memory_protocol.dart';
@@ -87,11 +87,15 @@ class MemoryController {
   // 'reset': true to reset the object allocation accumulators
   Future<List<ClassHeapDetailStats>> getAllocationProfile(
       {bool reset = false}) async {
-    final AllocationProfile allocationProfile =
-        await serviceManager.service.getAllocationProfile(
-      _isolateId,
-      reset: reset,
-    );
+    AllocationProfile allocationProfile;
+    try {
+      allocationProfile = await serviceManager.service.getAllocationProfile(
+        _isolateId,
+        reset: reset,
+      );
+    } on SentinelException catch (_) {
+      return [];
+    }
     return allocationProfile.members
         .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
         .where((ClassHeapDetailStats stats) {
@@ -103,13 +107,17 @@ class MemoryController {
       String classRef, String className, int maxInstances) async {
     // TODO(terry): Expose as a stream to reduce stall when querying for 1000s
     // TODO(terry): of instances.
-    final InstanceSet instanceSet = await serviceManager.service.getInstances(
-      _isolateId,
-      classRef,
-      maxInstances,
-      classId: classRef,
-    );
-
+    InstanceSet instanceSet;
+    try {
+      instanceSet = await serviceManager.service.getInstances(
+        _isolateId,
+        classRef,
+        maxInstances,
+        classId: classRef,
+      );
+    } on SentinelException catch (_) {
+      return [];
+    }
     return instanceSet.instances
         .map((ObjRef ref) => InstanceSummary(classRef, className, ref.id))
         .toList();

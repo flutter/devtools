@@ -6,7 +6,7 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
-import '../timeline/timeline_model.dart';
+import '../trace_event.dart';
 import '../trees.dart';
 import '../utils.dart';
 

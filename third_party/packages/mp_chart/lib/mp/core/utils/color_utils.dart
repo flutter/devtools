@@ -1,31 +1,76 @@
 import 'package:flutter/painting.dart';
 
 abstract class ColorUtils {
-  static final Color BLUE = Color(0xFF0000FF);
-  static final Color COLOR_SKIP = Color(0x00112234);
-  static final Color COLOR_NONE = Color(0x00112233);
-  static final Color DKGRAY = Color(0xFF444444);
-  static final Color GRAY = Color(0xFF999999);
-  static final Color YELLOW = Color(0xFFFFFF00);
-  static final Color BLACK = Color(0xFF000000);
-  static final Color LTGRAY = Color(0xFFCCCCCC);
-  static final Color RED = FADE_RED_END;
-  static final Color HOLO_BLUE = Color.fromARGB(255, 51, 181, 229);
-  static final Color WHITE = Color(0xFFFFFFFF);
-  static final Color PURPLE = Color(0xFF512DA8);
-  static final Color FADE_RED_START = Color(0x00FF0000);
-  static final Color FADE_RED_END = Color(0xFFFF0000);
+  // ignore: non_constant_identifier_names
+  static const Color BLUE = Color(0xFF0000FF);
 
-  static final Color HOLO_ORANGE_LIGHT = Color(0xffffbb33);
-  static final Color HOLO_BLUE_LIGHT = Color(0xff33b5e5);
-  static final Color HOLO_GREEN_LIGHT = Color(0xff99cc00);
-  static final Color HOLO_RED_LIGHT = Color(0xffff4444);
-  static final Color HOLO_BLUE_DARK = Color(0xff0099cc);
-  static final Color HOLO_PURPLE = Color(0xffaa66cc);
-  static final Color HOLO_GREEN_DARK = Color(0xff669900);
-  static final Color HOLO_RED_DARK = Color(0xffcc0000);
-  static final Color HOLO_ORANGE_DARK = Color(0xffff8800);
+  // ignore: non_constant_identifier_names
+  static const Color COLOR_SKIP = Color(0x00112234);
 
+  // ignore: non_constant_identifier_names
+  static const Color COLOR_NONE = Color(0x00112233);
+
+  // ignore: non_constant_identifier_names
+  static const Color DKGRAY = Color(0xFF444444);
+
+  // ignore: non_constant_identifier_names
+  static const Color GRAY = Color(0xFF999999);
+
+  // ignore: non_constant_identifier_names
+  static const Color YELLOW = Color(0xFFFFFF00);
+
+  // ignore: non_constant_identifier_names
+  static const Color BLACK = Color(0xFF000000);
+
+  // ignore: non_constant_identifier_names
+  static const Color LTGRAY = Color(0xFFCCCCCC);
+
+  // ignore: non_constant_identifier_names
+  static const Color RED = FADE_RED_END;
+
+  // ignore: non_constant_identifier_names
+  static const Color HOLO_BLUE = Color.fromARGB(255, 51, 181, 229);
+
+  // ignore: non_constant_identifier_names
+  static const  Color WHITE = Color(0xFFFFFFFF);
+
+  // ignore: non_constant_identifier_names
+  static const Color PURPLE = Color(0xFF512DA8);
+
+  // ignore: non_constant_identifier_names
+  static const Color FADE_RED_START = Color(0x00FF0000);
+
+  // ignore: non_constant_identifier_names
+  static const Color FADE_RED_END = Color(0xFFFF0000);
+
+// ignore: non_constant_identifier_names
+  static const Color HOLO_ORANGE_LIGHT = Color(0xffffbb33);
+
+  // ignore: non_constant_identifier_names
+  static const Color HOLO_BLUE_LIGHT = Color(0xff33b5e5);
+
+  // ignore: non_constant_identifier_names
+  static const Color HOLO_GREEN_LIGHT = Color(0xff99cc00);
+
+  // ignore: non_constant_identifier_names
+  static const Color HOLO_RED_LIGHT = Color(0xffff4444);
+
+  // ignore: non_constant_identifier_names
+  static const Color HOLO_BLUE_DARK = Color(0xff0099cc);
+
+  // ignore: non_constant_identifier_names
+  static const Color HOLO_PURPLE = Color(0xffaa66cc);
+
+  // ignore: non_constant_identifier_names
+  static const Color HOLO_GREEN_DARK = Color(0xff669900);
+
+  // ignore: non_constant_identifier_names
+  static const Color HOLO_RED_DARK = Color(0xffcc0000);
+
+  // ignore: non_constant_identifier_names
+  static const Color HOLO_ORANGE_DARK = Color(0xffff8800);
+
+// ignore: non_constant_identifier_names
   static final List<Color> VORDIPLOM_COLORS = List()
     ..add(Color.fromARGB(255, 192, 255, 140))
     ..add(Color.fromARGB(255, 255, 247, 140))
@@ -33,6 +78,7 @@ abstract class ColorUtils {
     ..add(Color.fromARGB(255, 140, 234, 255))
     ..add(Color.fromARGB(255, 255, 140, 157));
 
+// ignore: non_constant_identifier_names
   static final List<Color> JOYFUL_COLORS = List()
     ..add(Color.fromARGB(255, 217, 80, 138))
     ..add(Color.fromARGB(255, 254, 149, 7))
@@ -40,12 +86,14 @@ abstract class ColorUtils {
     ..add(Color.fromARGB(255, 106, 167, 134))
     ..add(Color.fromARGB(255, 53, 194, 209));
 
+// ignore: non_constant_identifier_names
   static final List<Color> MATERIAL_COLORS = List()
     ..add(Color(0xFF2ecc71))
     ..add(Color(0xFFf1c40f))
     ..add(Color(0xFFe74c3c))
     ..add(Color(0xFF3498db));
 
+// ignore: non_constant_identifier_names
   static final List<Color> COLORFUL_COLORS = List()
     ..add(Color.fromARGB(255, 193, 37, 82))
     ..add(Color.fromARGB(255, 255, 102, 0))
@@ -53,6 +101,7 @@ abstract class ColorUtils {
     ..add(Color.fromARGB(255, 106, 150, 31))
     ..add(Color.fromARGB(255, 179, 100, 53));
 
+// ignore: non_constant_identifier_names
   static final List<Color> LIBERTY_COLORS = List()
     ..add(Color.fromARGB(255, 207, 248, 246))
     ..add(Color.fromARGB(255, 148, 212, 212))
@@ -60,6 +109,7 @@ abstract class ColorUtils {
     ..add(Color.fromARGB(255, 118, 174, 175))
     ..add(Color.fromARGB(255, 42, 109, 130));
 
+// ignore: non_constant_identifier_names
   static final List<Color> PASTEL_COLORS = List()
     ..add(Color.fromARGB(255, 64, 89, 128))
     ..add(Color.fromARGB(255, 149, 165, 124))

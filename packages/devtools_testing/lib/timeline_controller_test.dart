@@ -6,8 +6,8 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
 @TestOn('vm')
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
-import 'package:devtools_app/src/timeline/timeline_model.dart';
+import 'package:devtools_app/src/timeline/html_timeline_controller.dart';
+import 'package:devtools_app/src/timeline/html_timeline_model.dart';
 import 'package:test/test.dart';
 
 import 'support/flutter_test_environment.dart';
@@ -62,7 +62,7 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       // Frame based timeline.
       final offlineFrameBasedTimelineData = OfflineFrameBasedTimelineData.parse(
           offlineFrameBasedTimelineDataJson);
-      timelineController.loadOfflineData(offlineFrameBasedTimelineData);
+      await timelineController.loadOfflineData(offlineFrameBasedTimelineData);
       expect(
         isFrameBasedTimelineDataEqual(
           timelineController.timeline.data,
@@ -89,7 +89,7 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       // Full timeline.
       final offlineFullTimelineData =
           OfflineFullTimelineData.parse(offlineFullTimelineDataJson);
-      timelineController.loadOfflineData(offlineFullTimelineData);
+      await timelineController.loadOfflineData(offlineFullTimelineData);
       expect(
         timelineController.timelineModeNotifier.value,
         equals(TimelineMode.full),
@@ -134,7 +134,7 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       // Select a timeline event.
       expect(timelineController.timeline.data.selectedEvent, isNull);
       expect(timelineController.timeline.data.cpuProfileData, isNull);
-      timelineController.selectTimelineEvent(vsyncEvent);
+      await timelineController.selectTimelineEvent(vsyncEvent);
       expect(
           timelineController.timeline.data.selectedEvent, equals(vsyncEvent));
 
@@ -168,11 +168,11 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       await env.tearDownEnvironment(force: true);
     });
 
-    test('recording', () {
+    test('recording', () async {
       expect(timelineController.fullTimeline.recordingNotifier.value, isFalse);
       timelineController.fullTimeline.startRecording();
       expect(timelineController.fullTimeline.recordingNotifier.value, isTrue);
-      timelineController.fullTimeline.stopRecording();
+      await timelineController.fullTimeline.stopRecording();
       expect(timelineController.fullTimeline.recordingNotifier.value, isFalse);
     });
   });

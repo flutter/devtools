@@ -12,10 +12,21 @@ import 'common_widgets.dart';
 const _notificationHeight = 160.0;
 final _notificationWidth = _notificationHeight * goldenRatio;
 
+/// Interface for pushing notifications in the app.
+///
+/// Use this interface in controllers that need to show notifications.
+///
+/// Using the interface instead of the [NotificationsState] implementation
+/// will allow you to write unit tests for the controller that consumes it
+/// instead of widget tests.
+abstract class NotificationService {
+  /// Pushes a notification [message].
+  void push(String message);
+}
+
 /// Manager for notifications in the app.
 ///
 /// Must be inside of an [Overlay].
-///
 class Notifications extends StatelessWidget {
   const Notifications({Key key, @required this.child}) : super(key: key);
 
@@ -36,9 +47,9 @@ class Notifications extends StatelessWidget {
   }
 
   static NotificationsState of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_InheritedNotifications>()
-        .data;
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<_InheritedNotifications>();
+    return provider?.data;
   }
 }
 
@@ -63,7 +74,8 @@ class _InheritedNotifications extends InheritedWidget {
   }
 }
 
-class NotificationsState extends State<_NotificationsProvider> {
+class NotificationsState extends State<_NotificationsProvider>
+    implements NotificationService {
   OverlayEntry _overlayEntry;
 
   final List<_Notification> _notifications = [];
@@ -91,6 +103,7 @@ class NotificationsState extends State<_NotificationsProvider> {
   }
 
   /// Pushes a notification [message].
+  @override
   void push(String message) {
     setState(() {
       _notifications.add(
@@ -200,12 +213,9 @@ class _NotificationState extends State<_Notification>
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
-        return SizedBox(
-          height: _notificationHeight * curve.value,
-          child: Opacity(
-            opacity: curve.value,
-            child: child,
-          ),
+        return Opacity(
+          opacity: curve.value,
+          child: child,
         );
       },
       child: Padding(
@@ -214,15 +224,15 @@ class _NotificationState extends State<_Notification>
           color: theme.snackBarTheme.backgroundColor,
           child: DefaultTextStyle(
             style: theme.snackBarTheme.contentTextStyle ??
-                theme.primaryTextTheme.subhead,
+                theme.primaryTextTheme.subtitle1,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
                   widget.message,
-                  style: theme.textTheme.body1,
-                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyText1,
+                  overflow: TextOverflow.visible,
                   maxLines: 6,
                 ),
               ),

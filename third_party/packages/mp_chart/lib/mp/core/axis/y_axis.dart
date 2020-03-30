@@ -63,38 +63,50 @@ class YAxis extends AxisBase {
 
   AxisDependency get axisDependency => _axisDependency;
 
+  // ignore: unnecessary_getters_setters
   double get minWidth => _minWidth;
 
+  // ignore: unnecessary_getters_setters
   set minWidth(double value) {
     _minWidth = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get maxWidth => _maxWidth;
 
+  // ignore: unnecessary_getters_setters
   set maxWidth(double value) {
     _maxWidth = value;
   }
 
+  // ignore: unnecessary_getters_setters
   YAxisLabelPosition get position => _position;
 
+  // ignore: unnecessary_getters_setters
   set position(YAxisLabelPosition value) {
     _position = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get drawTopYLabelEntry => _drawTopYLabelEntry;
 
+  // ignore: unnecessary_getters_setters
   set drawTopYLabelEntry(bool value) {
     _drawTopYLabelEntry = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get drawBottomYLabelEntry => _drawBottomYLabelEntry;
 
+  // ignore: unnecessary_getters_setters
   set drawBottomYLabelEntry(bool value) {
     _drawBottomYLabelEntry = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get inverted => _inverted;
 
+  // ignore: unnecessary_getters_setters
   set inverted(bool value) {
     _inverted = value;
   }
@@ -110,20 +122,26 @@ class YAxis extends AxisBase {
       resetAxisMinimum();
   }
 
+  // ignore: unnecessary_getters_setters
   double get spacePercentTop => _spacePercentTop;
 
+  // ignore: unnecessary_getters_setters
   set spacePercentTop(double value) {
     _spacePercentTop = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get spacePercentBottom => _spacePercentBottom;
 
+  // ignore: unnecessary_getters_setters
   set spacePercentBottom(double value) {
     _spacePercentBottom = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get drawZeroLine => _drawZeroLine;
 
+  // ignore: unnecessary_getters_setters
   set drawZeroLine(bool value) {
     _drawZeroLine = value;
   }
@@ -136,14 +154,18 @@ class YAxis extends AxisBase {
     this._drawZeroLine = _drawZeroLine;
   }
 
+  // ignore: unnecessary_getters_setters
   Color get zeroLineColor => _zeroLineColor;
 
+  // ignore: unnecessary_getters_setters
   set zeroLineColor(Color value) {
     _zeroLineColor = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get zeroLineWidth => _zeroLineWidth;
 
+  // ignore: unnecessary_getters_setters
   set zeroLineWidth(double value) {
     _zeroLineWidth = value;
   }
@@ -184,14 +206,18 @@ class YAxis extends AxisBase {
       return false;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get useAutoScaleRestrictionMin => _useAutoScaleRestrictionMin;
 
+  // ignore: unnecessary_getters_setters
   set useAutoScaleRestrictionMin(bool value) {
     _useAutoScaleRestrictionMin = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get useAutoScaleRestrictionMax => _useAutoScaleRestrictionMax;
 
+  // ignore: unnecessary_getters_setters
   set useAutoScaleRestrictionMax(bool value) {
     _useAutoScaleRestrictionMax = value;
   }

@@ -8,13 +8,19 @@ import 'package:flutter/rendering.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
-import '../http_request_data.dart';
+import '../../globals.dart';
+import '../../http/http_request_data.dart';
 import '../network_controller.dart';
 import 'http_request_inspector.dart';
 import 'network_model.dart';
 
 class NetworkScreen extends Screen {
-  const NetworkScreen() : super();
+  const NetworkScreen()
+      : super(
+          DevToolsScreenType.network,
+          title: 'Network',
+          icon: Icons.network_check,
+        );
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -26,15 +32,11 @@ class NetworkScreen extends Screen {
   static const recordingInstructionsKey = Key('Recording Instructions');
 
   @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Network',
-      icon: Icon(Icons.network_check),
-    );
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const NetworkScreenBody()
+        : const DisabledForWebAppMessage();
   }
-
-  @override
-  Widget build(BuildContext context) => const NetworkScreenBody();
 }
 
 class NetworkScreenBody extends StatefulWidget {
@@ -109,8 +111,8 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
   }
 
   Widget _buildHttpRequestTable() {
-    final titleTheme = Theme.of(context).textTheme.title;
-    final subheadTheme = Theme.of(context).textTheme.subhead;
+    final titleTheme = Theme.of(context).textTheme.headline6;
+    final subheadTheme = Theme.of(context).textTheme.subtitle1;
 
     DataColumn buildDataColumn(
       String name,
@@ -190,6 +192,9 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                     child: recordingInfo(
                       instructionsKey: NetworkScreen.recordingInstructionsKey,
                       recording: isRecording,
+                      // TODO(kenz): create a processing notifier if necessary
+                      // for this data.
+                      processing: false,
                       recordedObject: 'HTTP requests',
                       isPause: true,
                     ),

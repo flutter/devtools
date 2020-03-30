@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 import 'dart:convert';
 
-import 'package:html_shim/html.dart' as html;
+import 'dart:html' as html;
 
 import '../globals.dart';
 import '../profiler/html_cpu_profile_flame_chart.dart';
 import '../profiler/html_cpu_profile_tables.dart';
 import '../profiler/html_cpu_profiler.dart';
+import '../trace_event.dart';
 import '../ui/colors.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
@@ -16,8 +17,8 @@ import '../ui/html_elements.dart';
 import '../ui/primer.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
-import 'timeline_controller.dart';
-import 'timeline_model.dart';
+import 'html_timeline_controller.dart';
+import 'html_timeline_model.dart';
 
 class HtmlEventDetails extends CoreElement {
   HtmlEventDetails(this._timelineController) : super('div') {
@@ -175,7 +176,7 @@ class HtmlEventDetails extends CoreElement {
     } else if (event.isUiEvent) {
       return mainUiColor;
     } else if (event.isGpuEvent) {
-      return mainGpuColor;
+      return mainRasterColor;
     } else {
       return _defaultTitleBackground;
     }

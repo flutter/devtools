@@ -51,32 +51,42 @@ class LegendEntry {
   /// The color for drawing the form
   Color _formColor = ColorUtils.COLOR_NONE;
 
+  // ignore: unnecessary_getters_setters
   String get label => _label;
 
+  // ignore: unnecessary_getters_setters
   set label(String value) {
     _label = value;
   }
 
+  // ignore: unnecessary_getters_setters
   LegendForm get form => _form;
 
+  // ignore: unnecessary_getters_setters
   set form(LegendForm value) {
     _form = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get formSize => _formSize;
 
+  // ignore: unnecessary_getters_setters
   set formSize(double value) {
     _formSize = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get formLineWidth => _formLineWidth;
 
+  // ignore: unnecessary_getters_setters
   set formLineWidth(double value) {
     _formLineWidth = value;
   }
 
+  // ignore: unnecessary_getters_setters
   Color get formColor => _formColor;
 
+  // ignore: unnecessary_getters_setters
   set formColor(Color value) {
     _formColor = value;
   }
