@@ -210,6 +210,7 @@ class BannerMessage extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(defaultSpacing),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Expanded(
               child: RichText(
