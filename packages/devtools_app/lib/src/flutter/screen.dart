@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../debugger/flutter/debugger_screen.dart';
+import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
 import '../logging/flutter/logging_screen.dart';
 import '../memory/flutter/memory_screen.dart';
@@ -81,6 +82,7 @@ enum DevToolsScreenType {
   memory,
   performance,
   logging,
+  info,
   connect,
   debugger,
   network,
@@ -100,6 +102,8 @@ extension DevToolsScreenTypeExtension on DevToolsScreenType {
         return const PerformanceScreen();
       case DevToolsScreenType.logging:
         return const LoggingScreen();
+      case DevToolsScreenType.info:
+        return const InfoScreen();
       case DevToolsScreenType.connect:
         return const ConnectScreen();
       case DevToolsScreenType.debugger:

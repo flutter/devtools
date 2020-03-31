@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
@@ -47,4 +48,17 @@ Future delay() {
 
 Future shortDelay() {
   return Future.delayed(const Duration(milliseconds: 100));
+}
+
+Finder findSubstring(Widget widget, String text) {
+  return find.byWidgetPredicate((widget) {
+    if (widget is Text) {
+      if (widget.data != null) return widget.data.contains(text);
+      return widget.textSpan.toPlainText().contains(text);
+    } else if (widget is SelectableText) {
+      if (widget.data != null) return widget.data.contains(text);
+    }
+
+    return false;
+  });
 }
