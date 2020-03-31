@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/flutter/split.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -103,6 +104,23 @@ void main() {
         expectEqualSizes(
             tester.element(find.byKey(_k3)).size, const Size(312, 600));
       });
+
+      testWidgets('with initialFraction rounding errors',
+          (WidgetTester tester) async {
+        const oneThird = 0.333333;
+        final split = buildSplit(
+          Axis.horizontal,
+          children: [_w1, _w2, _w3],
+          initialFractions: [oneThird, oneThird, oneThird],
+        );
+        await tester.pumpWidget(wrap(split));
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(260, 600));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(260, 600));
+        expectEqualSizes(
+            tester.element(find.byKey(_k3)).size, const Size(260, 600));
+      });
     });
 
     group('builds vertical layout', () {
@@ -180,6 +198,23 @@ void main() {
             tester.element(find.byKey(_k2)).size, const Size(800, 232));
         expectEqualSizes(
             tester.element(find.byKey(_k3)).size, const Size(800, 232));
+      });
+
+      testWidgets('with initialFraction rounding errors',
+          (WidgetTester tester) async {
+        const oneThird = 0.333333;
+        final split = buildSplit(
+          Axis.vertical,
+          children: [_w1, _w2, _w3],
+          initialFractions: [oneThird, oneThird, oneThird],
+        );
+        await tester.pumpWidget(wrap(split));
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(800, 193.3333));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(800, 193.3333));
+        expectEqualSizes(
+            tester.element(find.byKey(_k3)).size, const Size(800, 193.3333));
       });
     });
 
@@ -615,14 +650,13 @@ Split buildSplit(
 }
 
 void expectEqualSizes(Size a, Size b) {
-  const epsilon = 1 / 1000000;
   expect(
-    (a.width - b.width).abs() < epsilon,
+    (a.width - b.width).abs() < defaultEpsilon,
     isTrue,
     reason: 'Widths unequal:\nExpected ${b.width}\nActual: ${a.width}',
   );
   expect(
-    (a.height - b.height).abs() < epsilon,
+    (a.height - b.height).abs() < defaultEpsilon,
     isTrue,
     reason: 'Heights unequal:\nExpected ${b.height}\nActual: ${a.height}',
   );

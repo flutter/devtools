@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -16,9 +17,6 @@ import 'package:intl/intl.dart';
 ///
 /// [initialFractions] defines how much space to give each child when building
 /// this widget.
-///
-/// The user can drag the widget with key [dividerKey[index]] to change the
-/// space allocated between children[index] and children[index + 1].
 class Split extends StatefulWidget {
   /// Builds a split oriented along [axis].
   Split({
@@ -36,7 +34,7 @@ class Split extends StatefulWidget {
     for (var fraction in initialFractions) {
       sumFractions += fraction;
     }
-    assert(sumFractions == 1.0);
+    assert((1.0 - sumFractions).abs() < defaultEpsilon);
 
     if (minSizes != null) {
       assert(minSizes.length == children.length);
@@ -66,7 +64,8 @@ class Split extends StatefulWidget {
   /// The minimum size each child is allowed to be.
   final List<double> minSizes;
 
-  /// The key passed to the divider(s) between each child in [children].
+  /// The key passed to the divider between children[index] and
+  /// children[index + 1].
   ///
   /// Visible to grab it in tests.
   @visibleForTesting
@@ -138,36 +137,46 @@ class _SplitState extends State<Split> {
           isHorizontal ? dragDetails.delta.dx : dragDetails.delta.dy;
       final fractionalDelta = dragDelta / axisSize;
 
+      // Returns the actual delta applied to elements before the splitter.
       double updateSpacingBeforeSplitterIndex(double delta) {
+        final startingDelta = delta;
         var index = splitterIndex;
         while (index >= 0) {
           fractions[index] += delta;
           final minFractionForIndex = _minFractionForIndex(index);
           if (fractions[index] >= minFractionForIndex) {
             _clampFraction(index);
-            return 0.0;
+            return delta;
           }
           delta = fractions[index] - minFractionForIndex;
           _clampFraction(index);
           index--;
         }
-        return delta;
+        // At this point, we know that both [startingDelta] and [delta] are
+        // negative, and that [delta] represents the overflow that did not get
+        // applied.
+        return startingDelta - delta;
       }
 
+      // Returns the actual delta applied to elements after the splitter.
       double updateSpacingAfterSplitterIndex(double delta) {
+        final startingDelta = delta;
         var index = splitterIndex + 1;
         while (index < fractions.length) {
           fractions[index] += delta;
           final minFractionForIndex = _minFractionForIndex(index);
           if (fractions[index] >= minFractionForIndex) {
             _clampFraction(index);
-            return 0.0;
+            return delta;
           }
           delta = fractions[index] - minFractionForIndex;
           _clampFraction(index);
           index++;
         }
-        return delta;
+        // At this point, we know that both [startingDelta] and [delta] are
+        // negative, and that [delta] represents the overflow that did not get
+        // applied.
+        return startingDelta - delta;
       }
 
       setState(() {
@@ -175,19 +184,13 @@ class _SplitState extends State<Split> {
         // the shrinking children first so that we do not over-increase the size
         // of the growing children and cause layout overflow errors.
         if (fractionalDelta <= 0.0) {
-          final overflowDelta =
+          final appliedDelta =
               updateSpacingBeforeSplitterIndex(fractionalDelta);
-          final actualDelta = overflowDelta != 0.0
-              ? fractionalDelta - overflowDelta
-              : fractionalDelta;
-          updateSpacingAfterSplitterIndex(-actualDelta);
+          updateSpacingAfterSplitterIndex(-appliedDelta);
         } else {
-          final overflowDelta =
+          final appliedDelta =
               updateSpacingAfterSplitterIndex(-fractionalDelta);
-          final actualDelta = overflowDelta != 0.0
-              ? fractionalDelta + overflowDelta
-              : fractionalDelta;
-          updateSpacingBeforeSplitterIndex(actualDelta);
+          updateSpacingBeforeSplitterIndex(-appliedDelta);
         }
       });
     }
