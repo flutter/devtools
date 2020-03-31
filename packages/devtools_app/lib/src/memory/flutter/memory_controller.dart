@@ -21,6 +21,7 @@ import '../../utils.dart';
 import '../../vm_service_wrapper.dart';
 import '../memory_service.dart';
 import 'memory_protocol.dart';
+import 'memory_snapshot_models.dart';
 
 enum ChartType {
   DartHeaps,
@@ -47,6 +48,21 @@ class MemoryController extends DisposableController
   }
 
   static const String logFilenamePrefix = 'memory_log_';
+
+  final List<Snapshot> snapshots = [];
+
+  Snapshot get lastSnapshot => snapshots.isNotEmpty ? snapshots.last : null;
+
+  /// Notifies that the source of the memory feed has changed.
+  ValueListenable get selectedSnapshotNotifier => _selectedSnapshotNotifier;
+
+  final _selectedSnapshotNotifier = ValueNotifier<String>('');
+
+  set selectedSnapshotTimestamp(String snapshotTimestamp) {
+    _selectedSnapshotNotifier.value = snapshotTimestamp;
+  }
+
+  String get selectedSnapshotTimestamp => _selectedSnapshotNotifier.value;
 
   MemoryTimeline memoryTimeline;
 
@@ -303,6 +319,11 @@ class MemoryController extends DisposableController
     );
   }
 
+  Future<HeapSnapshotGraph> snapshotMemory() async {
+    return await serviceManager.service
+        .getHeapSnapshotGraph(serviceManager.isolateManager.selectedIsolate);
+  }
+
   Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>
       getAllocationProfile(reset: true);
 
@@ -428,6 +449,16 @@ class MemoryController extends DisposableController
     }
 
     return false;
+  }
+
+  List<Reference> snapshotByLibraryData;
+
+  void createSnapshotByLibrary() {
+    snapshotByLibraryData ??= lastSnapshot?.librariesToList();
+  }
+
+  void storeSnapshot(DateTime timestamp, HeapSnapshotGraph graph) {
+    snapshots.add(Snapshot(timestamp, graph));
   }
 
   @override

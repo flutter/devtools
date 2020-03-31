@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/octicons.dart';
@@ -16,6 +18,9 @@ import '../../ui/flutter/label.dart';
 import '../../ui/material_icons.dart';
 import 'memory_chart.dart';
 import 'memory_controller.dart';
+import 'memory_heap_tree_view.dart';
+
+import 'memory_graph_test.dart';
 
 class MemoryScreen extends Screen {
   const MemoryScreen() : super(id, title: 'Memory', icon: Octicons.package);
@@ -71,7 +76,7 @@ class MemoryBody extends StatefulWidget {
   MemoryBodyState createState() => MemoryBodyState();
 }
 
-class MemoryBodyState extends State<MemoryBody> {
+class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   MemoryChart _memoryChart;
 
   MemoryController controller;
@@ -84,6 +89,16 @@ class MemoryBodyState extends State<MemoryBody> {
     final newController = Provider.of<MemoryController>(context);
     if (newController == controller) return;
     controller = newController;
+
+    // Update the chart when the memorySource changes.
+    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
+      setState(() {
+        // TODO(terry): Create the snapshot data to display by Library,
+        //              by Class or by Objects.
+        // Create the snapshot data by Library.
+        controller.createSnapshotByLibrary();
+      });
+    });
 
     _updateListeningState();
   }
@@ -115,7 +130,9 @@ class MemoryBodyState extends State<MemoryBody> {
             initialFractions: const [0.40, 0.60],
             children: [
               _memoryChart,
-              const Text('Memory Panel TBD capacity'),
+              controller.snapshotByLibraryData == null
+                ? const Text('TBD')
+                : HeapTree(controller)
             ],
           ),
         ),
@@ -363,8 +380,61 @@ class MemoryBodyState extends State<MemoryBody> {
     setState(() {});
   }
 
-  void _snapshot() {
-    // TODO(terry): Implementation needed.
+  void _snapshot() async {
+    final timestamp = DateTime.now();
+    final graph = await controller.snapshotMemory();
+
+HeapGraph theGraph = convertHeapGraph(graph);
+print('>>>>> theGraph');
+
+/*
+print("Total size of external Heap ${graph.externalSize}");
+int externalSize = graph.externalProperties.length;
+for (var index = 0; index < externalSize; index++) {
+  final externalProperty = graph.externalProperties[index];
+  print("[$index] name=${externalProperty.name} size=${externalProperty.externalSize}");
+}
+*/
+
+      Map<String, List<HeapGraphElement>> groupedByToString = {};
+      for (HeapGraphClassActual c in theGraph.classes) {
+        for (HeapGraphElement instance in c.getInstances(theGraph)) {
+          StringBuffer sb = StringBuffer();
+          sb.write(c.name);
+          final sbToString = sb.toString();
+          groupedByToString[sbToString] ??= [];
+          groupedByToString[sbToString].add(instance);
+        }
+      }
+
+      // Associate instances to class.
+      groupedByToString.forEach((key, value) {
+//        print(">>> Group key=$key");
+        if (key.startsWith('Terry')) {
+          print(">>>> STOP key = $key");
+
+          value.forEach((HeapGraphElement instance) {
+              if (instance is HeapGraphElementActual) {
+                List<MapEntry<String, HeapGraphElement>> fields = instance.getFields();
+                fields.forEach((element) { 
+                  print(">>> field name ${element.key}");
+                });
+              }
+
+            List<HeapGraphElement> refs = instance.references;
+            print(">>>> Stop references");
+          });
+        }
+      });
+
+print("Stopped grouped");
+
+    controller.storeSnapshot(timestamp, graph);
+    final lastSnapshot = controller.lastSnapshot;
+    lastSnapshot.computeAllLibraries();
+    controller.selectedSnapshotTimestamp = DateFormat('dd-MM-yyyy:Hms').format(timestamp);
+
+    print(">>>> ${graph.classes.length}");
   }
 
   void _reset() {
