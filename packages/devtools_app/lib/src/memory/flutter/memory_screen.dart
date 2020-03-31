@@ -115,9 +115,11 @@ class MemoryBodyState extends State<MemoryBody> {
         Expanded(
           child: Split(
             axis: Axis.vertical,
-            firstChild: _memoryChart,
-            secondChild: const Text('Memory Panel TBD capacity'),
-            initialFirstFraction: 0.40,
+            initialFractions: const [0.40, 0.60],
+            children: [
+              _memoryChart,
+              const Text('Memory Panel TBD capacity'),
+            ],
           ),
         ),
       ],

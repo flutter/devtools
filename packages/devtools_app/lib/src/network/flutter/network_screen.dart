@@ -201,18 +201,18 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                   ),
                 )
               : Split(
-                  initialFirstFraction: 0.5,
+                  initialFractions: const [0.5, 0.5],
                   axis: Axis.horizontal,
-                  firstChild: (_dataTableSource.rowCount == 0)
-                      ? Container(
-                          alignment: Alignment.center,
-                          child: const CircularProgressIndicator(),
-                        )
-                      : _buildHttpRequestTable(),
-                  // Only show the data page when there's data to display.
-                  secondChild: HttpRequestInspector(
-                    data,
-                  ),
+                  children: [
+                    (_dataTableSource.rowCount == 0)
+                        ? Container(
+                            alignment: Alignment.center,
+                            child: const CircularProgressIndicator(),
+                          )
+                        : _buildHttpRequestTable(),
+                    // Only show the data page when there's data to display.
+                    HttpRequestInspector(data),
+                  ],
                 ),
         );
       },

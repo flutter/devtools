@@ -613,3 +613,5 @@ extension SortDirectionExtension on SortDirection {
         : SortDirection.ascending;
   }
 }
+
+const defaultEpsilon = 1 / 1000;
