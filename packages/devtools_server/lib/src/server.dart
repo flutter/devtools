@@ -29,6 +29,7 @@ const argHelp = 'help';
 const argVmUri = 'vm-uri';
 const argEnableNotifications = 'enable-notifications';
 const argHeadlessMode = 'headless';
+const argDebugMode = 'debug';
 const argLaunchBrowser = 'launch-browser';
 const argMachine = 'machine';
 const argPort = 'port';
@@ -100,6 +101,12 @@ final argParser = ArgParser()
         'Causes the server to spawn Chrome in headless mode for use in automated testing.',
   )
   ..addFlag(
+    argDebugMode,
+    hide: true,
+    negatable: false,
+    help: 'Run a debug build of the DevTools web frontend.',
+  )
+  ..addFlag(
     argVerbose,
     hide: true,
     negatable: false,
@@ -110,8 +117,10 @@ final argParser = ArgParser()
 /// Wraps [serveDevTools] `arguments` parsed, as from the command line.
 ///
 /// For more information on `handler`, see [serveDevTools].
-Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
-    {shelf.Handler handler}) async {
+Future<HttpServer> serveDevToolsWithArgs(
+  List<String> arguments, {
+  shelf.Handler handler,
+}) async {
   final args = argParser.parse(arguments);
 
   final help = args[argHelp];
@@ -120,6 +129,7 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
   final bool enableNotifications = args[argEnableNotifications];
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
   final bool headlessMode = args[argHeadlessMode];
+  final bool debugMode = args[argDebugMode];
   final numPortsToTry =
       args[argTryPorts] != null ? int.tryParse(args[argTryPorts]) ?? 1 : 1;
   final bool verboseMode = args[argVerbose];
@@ -131,6 +141,7 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
   return serveDevTools(
     help: help,
     machineMode: machineMode,
+    debugMode: debugMode,
     launchBrowser: launchBrowser,
     enableNotifications: enableNotifications,
     port: port,
@@ -152,6 +163,7 @@ Future<HttpServer> serveDevTools({
   bool help = false,
   bool enableStdinCommands = true,
   bool machineMode = false,
+  bool debugMode = false,
   bool launchBrowser = false,
   bool enableNotifications = false,
   bool headlessMode = false,
@@ -186,7 +198,7 @@ Future<HttpServer> serveDevTools({
 
   clients = ClientManager(enableNotifications);
 
-  handler ??= await defaultHandler(clients);
+  handler ??= await defaultHandler(clients, debugMode: debugMode);
 
   HttpServer server;
   SocketException ex;
@@ -214,13 +226,19 @@ Future<HttpServer> serveDevTools({
   }
 
   if (enableStdinCommands) {
+    String message = 'Serving DevTools at $devToolsUrl';
+    if (!machineMode && debugMode) {
+      // Add bold to help find the correct url to open.
+      message = '\u001b[1m$message\u001b[0m\n';
+    }
+
     printOutput(
-      'Serving DevTools at $devToolsUrl',
+      message,
       {
         'event': 'server.started',
-        // TODO(dantup): Remove this `method` field when we're sure VS Code users
-        // are all on a newer version that uses `event`. We incorrectly used
-        // `method` for the original releases.
+        // TODO(dantup): Remove this `method` field when we're sure VS Code
+        // users are all on a newer version that uses `event`. We incorrectly
+        // used `method` for the original releases.
         'method': 'server.started',
         'params': {
           'host': server.address.host,
@@ -232,183 +250,185 @@ Future<HttpServer> serveDevTools({
       machineMode: machineMode,
     );
 
-    final Stream<Map<String, dynamic>> _stdinCommandStream = stdin
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .where((String line) => line.startsWith('{') && line.endsWith('}'))
-        .map<Map<String, dynamic>>((String line) {
-      return json.decode(line) as Map<String, dynamic>;
-    });
+    if (machineMode) {
+      final Stream<Map<String, dynamic>> _stdinCommandStream = stdin
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .where((String line) => line.startsWith('{') && line.endsWith('}'))
+          .map<Map<String, dynamic>>((String line) {
+        return json.decode(line) as Map<String, dynamic>;
+      });
 
-    // Example input:
-    // {
-    //   "id":0,
-    //   "method":"vm.register",
-    //   "params":{
-    //     "uri":"<vm-service-uri-here>",
-    //   }
-    // }
-    _stdinCommandStream.listen((Map<String, dynamic> json) async {
-      // ID can be String, int or null
-      final dynamic id = json['id'];
-      final Map<String, dynamic> params = json['params'];
+      // Example input:
+      // {
+      //   "id":0,
+      //   "method":"vm.register",
+      //   "params":{
+      //     "uri":"<vm-service-uri-here>",
+      //   }
+      // }
+      _stdinCommandStream.listen((Map<String, dynamic> json) async {
+        // ID can be String, int or null
+        final dynamic id = json['id'];
+        final Map<String, dynamic> params = json['params'];
 
-      switch (json['method']) {
-        case 'vm.register':
-          await _handleVmRegister(
-            id,
-            params,
-            machineMode,
-            headlessMode,
-            devToolsUrl,
-          );
-          break;
-        case 'devTools.launch':
-          await _handleDevToolsLaunch(
-            id,
-            params,
-            machineMode,
-            headlessMode,
-            devToolsUrl,
-          );
-          break;
-        case 'client.list':
-          await _handleClientsList(id, params, machineMode);
-          break;
-        case 'devTools.survey':
-          _devToolsUsage ??= DevToolsUsage();
-          final String surveyRequest = params['surveyRequest'];
-          final String value = params['value'];
-          switch (surveyRequest) {
-            case 'copyAndCreateDevToolsFile':
-              // Backup and delete ~/.devtools file.
-              if (backupAndCreateDevToolsStore()) {
+        switch (json['method']) {
+          case 'vm.register':
+            await _handleVmRegister(
+              id,
+              params,
+              machineMode,
+              headlessMode,
+              devToolsUrl,
+            );
+            break;
+          case 'devTools.launch':
+            await _handleDevToolsLaunch(
+              id,
+              params,
+              machineMode,
+              headlessMode,
+              devToolsUrl,
+            );
+            break;
+          case 'client.list':
+            await _handleClientsList(id, params, machineMode);
+            break;
+          case 'devTools.survey':
+            _devToolsUsage ??= DevToolsUsage();
+            final String surveyRequest = params['surveyRequest'];
+            final String value = params['value'];
+            switch (surveyRequest) {
+              case 'copyAndCreateDevToolsFile':
+                // Backup and delete ~/.devtools file.
+                if (backupAndCreateDevToolsStore()) {
+                  _devToolsUsage = null;
+                  printOutput(
+                    'DevTools Survey',
+                    {
+                      'id': id,
+                      'result': {
+                        'sucess': true,
+                      },
+                    },
+                    machineMode: machineMode,
+                  );
+                }
+                break;
+              case 'restoreDevToolsFile':
                 _devToolsUsage = null;
+                final content = restoreDevToolsStore();
+                if (content != null) {
+                  printOutput(
+                    'DevTools Survey',
+                    {
+                      'id': id,
+                      'result': {
+                        'sucess': true,
+                        'content': content,
+                      },
+                    },
+                    machineMode: machineMode,
+                  );
+
+                  _devToolsUsage = null;
+                }
+                break;
+              case apiSetActiveSurvey:
+                _devToolsUsage.activeSurvey = value;
                 printOutput(
                   'DevTools Survey',
                   {
                     'id': id,
                     'result': {
-                      'sucess': true,
+                      'sucess': _devToolsUsage.activeSurvey == value,
+                      'activeSurvey': _devToolsUsage.activeSurvey,
                     },
                   },
                   machineMode: machineMode,
                 );
-              }
-              break;
-            case 'restoreDevToolsFile':
-              _devToolsUsage = null;
-              final content = restoreDevToolsStore();
-              if (content != null) {
+                break;
+              case apiGetSurveyActionTaken:
                 printOutput(
                   'DevTools Survey',
                   {
                     'id': id,
                     'result': {
-                      'sucess': true,
-                      'content': content,
+                      'activeSurvey': _devToolsUsage.activeSurvey,
+                      'surveyActionTaken': _devToolsUsage.surveyActionTaken,
                     },
                   },
                   machineMode: machineMode,
                 );
-
-                _devToolsUsage = null;
-              }
-              break;
-            case apiSetActiveSurvey:
-              _devToolsUsage.activeSurvey = value;
-              printOutput(
-                'DevTools Survey',
-                {
-                  'id': id,
-                  'result': {
-                    'sucess': _devToolsUsage.activeSurvey == value,
-                    'activeSurvey': _devToolsUsage.activeSurvey,
+                break;
+              case apiSetSurveyActionTaken:
+                _devToolsUsage.surveyActionTaken = jsonDecode(value);
+                printOutput(
+                  'DevTools Survey',
+                  {
+                    'id': id,
+                    'result': {
+                      'activeSurvey': _devToolsUsage.activeSurvey,
+                      'surveyActionTaken': _devToolsUsage.surveyActionTaken,
+                    },
                   },
-                },
-                machineMode: machineMode,
-              );
-              break;
-            case apiGetSurveyActionTaken:
-              printOutput(
-                'DevTools Survey',
-                {
-                  'id': id,
-                  'result': {
-                    'activeSurvey': _devToolsUsage.activeSurvey,
-                    'surveyActionTaken': _devToolsUsage.surveyActionTaken,
+                  machineMode: machineMode,
+                );
+                break;
+              case apiGetSurveyShownCount:
+                printOutput(
+                  'DevTools Survey',
+                  {
+                    'id': id,
+                    'result': {
+                      'activeSurvey': _devToolsUsage.activeSurvey,
+                      'surveyShownCount': _devToolsUsage.surveyShownCount,
+                    },
                   },
-                },
-                machineMode: machineMode,
-              );
-              break;
-            case apiSetSurveyActionTaken:
-              _devToolsUsage.surveyActionTaken = jsonDecode(value);
-              printOutput(
-                'DevTools Survey',
-                {
-                  'id': id,
-                  'result': {
-                    'activeSurvey': _devToolsUsage.activeSurvey,
-                    'surveyActionTaken': _devToolsUsage.surveyActionTaken,
+                  machineMode: machineMode,
+                );
+                break;
+              case apiIncrementSurveyShownCount:
+                _devToolsUsage.incrementSurveyShownCount();
+                printOutput(
+                  'DevTools Survey',
+                  {
+                    'id': id,
+                    'result': {
+                      'activeSurvey': _devToolsUsage.activeSurvey,
+                      'surveyShownCount': _devToolsUsage.surveyShownCount,
+                    },
                   },
-                },
-                machineMode: machineMode,
-              );
-              break;
-            case apiGetSurveyShownCount:
-              printOutput(
-                'DevTools Survey',
-                {
-                  'id': id,
-                  'result': {
-                    'activeSurvey': _devToolsUsage.activeSurvey,
-                    'surveyShownCount': _devToolsUsage.surveyShownCount,
+                  machineMode: machineMode,
+                );
+                break;
+              default:
+                printOutput(
+                  'Unknown DevTools Survey Request $surveyRequest',
+                  {
+                    'id': id,
+                    'result': {
+                      'activeSurvey': _devToolsUsage.activeSurvey,
+                      'surveyActionTaken': _devToolsUsage.surveyActionTaken,
+                      'surveyShownCount': _devToolsUsage.surveyShownCount,
+                    },
                   },
-                },
-                machineMode: machineMode,
-              );
-              break;
-            case apiIncrementSurveyShownCount:
-              _devToolsUsage.incrementSurveyShownCount();
-              printOutput(
-                'DevTools Survey',
-                {
-                  'id': id,
-                  'result': {
-                    'activeSurvey': _devToolsUsage.activeSurvey,
-                    'surveyShownCount': _devToolsUsage.surveyShownCount,
-                  },
-                },
-                machineMode: machineMode,
-              );
-              break;
-            default:
-              printOutput(
-                'Unknown DevTools Survey Request $surveyRequest',
-                {
-                  'id': id,
-                  'result': {
-                    'activeSurvey': _devToolsUsage.activeSurvey,
-                    'surveyActionTaken': _devToolsUsage.surveyActionTaken,
-                    'surveyShownCount': _devToolsUsage.surveyShownCount,
-                  },
-                },
-                machineMode: machineMode,
-              );
-          }
-          break;
-        default:
-          printOutput(
-            'Unknown method ${json['method']}',
-            {
-              'id': id,
-              'error': 'Unknown method ${json['method']}',
-            },
-            machineMode: machineMode,
-          );
-      }
-    });
+                  machineMode: machineMode,
+                );
+            }
+            break;
+          default:
+            printOutput(
+              'Unknown method ${json['method']}',
+              {
+                'id': id,
+                'error': 'Unknown method ${json['method']}',
+              },
+              machineMode: machineMode,
+            );
+        }
+      });
+    }
   }
 
   return server;
@@ -423,8 +443,8 @@ bool backupAndCreateDevToolsStore() {
   assert(_devToolsBackup == null);
   final devToolsStore = File('${DevToolsUsage.userHomeDir()}/.devtools');
   if (devToolsStore.existsSync()) {
-    _devToolsBackup = devToolsStore.copySync('${DevToolsUsage.userHomeDir()}/'
-        '.devtools_backup_test');
+    _devToolsBackup = devToolsStore
+        .copySync('${DevToolsUsage.userHomeDir()}/.devtools_backup_test');
     devToolsStore.deleteSync();
   }
 
@@ -434,8 +454,7 @@ bool backupAndCreateDevToolsStore() {
 String restoreDevToolsStore() {
   if (_devToolsBackup != null) {
     // Read the current ~/.devtools file
-    final devToolsStore = File('${DevToolsUsage.userHomeDir()}/'
-        '.devtools');
+    final devToolsStore = File('${DevToolsUsage.userHomeDir()}/.devtools');
     final content = devToolsStore.readAsStringSync();
 
     // Delete the temporary ~/.devtools file
@@ -782,16 +801,17 @@ bool _isAccessibleToChromeOSNativeBrowser(Uri uri) {
   return uri != null && uri.hasPort && tunneledPorts.contains(uri.port);
 }
 
-bool _isValidVmServiceUri(Uri uri) =>
-    // Lots of things are considered valid URIs (including empty strings
-    // and single letters) since they can be relative, so we need to do some
-    // extra checks.
-    uri != null &&
-    uri.isAbsolute &&
-    (uri.isScheme('ws') ||
-        uri.isScheme('wss') ||
-        uri.isScheme('http') ||
-        uri.isScheme('https'));
+bool _isValidVmServiceUri(Uri uri) {
+  // Lots of things are considered valid URIs (including empty strings and
+  // single letters) since they can be relative, so we need to do some extra
+  // checks.
+  return uri != null &&
+      uri.isAbsolute &&
+      (uri.isScheme('ws') ||
+          uri.isScheme('wss') ||
+          uri.isScheme('http') ||
+          uri.isScheme('https'));
+}
 
 Future<VmService> _connectToVmService(Uri theUri) async {
   // Fix up the various acceptable URI formats into a WebSocket URI to connect.
