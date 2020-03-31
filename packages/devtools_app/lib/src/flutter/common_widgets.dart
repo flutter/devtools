@@ -481,8 +481,8 @@ class CircularIconButton extends StatelessWidget {
       elevation: 0.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       constraints: const BoxConstraints.tightFor(
-        width: buttonMinWidth,
-        height: buttonMinWidth,
+        width: 24.0,
+        height: 24.0,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
@@ -494,6 +494,7 @@ class CircularIconButton extends StatelessWidget {
       onPressed: onPressed,
       child: Icon(
         icon,
+        size: defaultIconSize,
         color: foregroundColor,
       ),
     );
