@@ -459,3 +459,43 @@ class CenteredMessage extends StatelessWidget {
     );
   }
 }
+
+class CircularIconButton extends StatelessWidget {
+  const CircularIconButton({
+    @required this.icon,
+    @required this.onPressed,
+    @required this.backgroundColor,
+    @required this.foregroundColor,
+  });
+
+  final IconData icon;
+  final VoidCallback onPressed;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return RawMaterialButton(
+      fillColor: backgroundColor,
+      hoverColor: Theme.of(context).hoverColor,
+      elevation: 0.0,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      constraints: const BoxConstraints.tightFor(
+        width: buttonMinWidth,
+        height: buttonMinWidth,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+        side: BorderSide(
+          width: 2.0,
+          color: foregroundColor,
+        ),
+      ),
+      onPressed: onPressed,
+      child: Icon(
+        icon,
+        color: foregroundColor,
+      ),
+    );
+  }
+}

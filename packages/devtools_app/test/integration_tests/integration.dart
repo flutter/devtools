@@ -13,7 +13,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 
 import '../support/chrome.dart';
 import '../support/cli_test_driver.dart';
-import 'util.dart';
+import '../support/utils.dart';
 
 const bool verboseTesting = false;
 

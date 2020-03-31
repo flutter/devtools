@@ -25,10 +25,22 @@ void main() {
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
       when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
+          .thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
     });
+
+    Future<void> pumpTimelineBody(
+      WidgetTester tester,
+      TimelineController controller,
+    ) async {
+      await tester.pumpWidget(wrapWithControllers(
+        wrapWithBannerMessages(const TimelineScreenBody()),
+        timeline: controller,
+      ));
+    }
 
     const windowSize = Size(2225.0, 1000.0);
 
@@ -46,10 +58,7 @@ void main() {
         ..allTraceEvents.addAll(goldenUiTraceEvents)
         ..data = data
         ..selectFrame(testFrame1);
-      await tester.pumpWidget(wrapWithControllers(
-        const TimelineScreenBody(),
-        timeline: controllerWithData,
-      ));
+      await pumpTimelineBody(tester, controllerWithData);
       expect(find.byType(TimelineFlameChart), findsOneWidget);
       expect(find.byKey(TimelineScreen.recordingInstructionsKey), findsNothing);
     });
@@ -57,10 +66,7 @@ void main() {
     testWidgetsWithWindowSize('builds flame chart with no data', windowSize,
         (WidgetTester tester) async {
       // Set a wide enough screen width that we do not run into overflow.
-      await tester.pumpWidget(wrapWithControllers(
-        const TimelineScreenBody(),
-        timeline: TimelineController(),
-      ));
+      await pumpTimelineBody(tester, TimelineController());
       expect(find.byType(TimelineFlameChart), findsNothing);
       expect(
         find.byKey(TimelineScreen.recordingInstructionsKey),

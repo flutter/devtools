@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/banner_messages.dart';
+import '../../flutter/screen.dart';
 import '../../profiler/cpu_profile_service.dart';
 import '../../profiler/profile_granularity.dart';
 
@@ -12,6 +14,10 @@ import '../../profiler/profile_granularity.dart';
 ///
 /// This flag controls the rate at which the vm samples the CPU call stack.
 class ProfileGranularityDropdown extends StatefulWidget {
+  const ProfileGranularityDropdown(this.screenType);
+
+  final DevToolsScreenType screenType;
+
   @override
   ProfileGranularityDropdownState createState() =>
       ProfileGranularityDropdownState();
@@ -39,7 +45,18 @@ class ProfileGranularityDropdownState
             ProfileGranularityExtension.fromValue(flag.valueAsString).value;
         // Set the vm flag value to the [safeValue] if we get to this state.
         if (safeValue != flag.valueAsString) {
-          _onProfileGranularityChanged(safeValue);
+          _onProfileGranularityChanged(safeValue, context);
+        }
+
+        final bannerMessages = BannerMessages.of(context);
+        if (safeValue == highProfilePeriod) {
+          bannerMessages.push(
+              HighProfileGranularityMessage(widget.screenType).build(context));
+        } else {
+          BannerMessages.of(context).removeMessageByKey(
+            HighProfileGranularityMessage(widget.screenType).key,
+            widget.screenType,
+          );
         }
         return DropdownButton<String>(
           key: ProfileGranularityDropdown.dropdownKey,
@@ -49,7 +66,7 @@ class ProfileGranularityDropdownState
             _buildMenuItem(ProfileGranularity.medium),
             _buildMenuItem(ProfileGranularity.high),
           ],
-          onChanged: _onProfileGranularityChanged,
+          onChanged: (value) => _onProfileGranularityChanged(value, context),
         );
       },
     );
@@ -62,8 +79,10 @@ class ProfileGranularityDropdownState
     );
   }
 
-  // TODO(kenz): show a warning when ProfileGranularity.high is selected.
-  void _onProfileGranularityChanged(String newValue) {
-    profilerService.setProfilePeriod(newValue);
+  Future<void> _onProfileGranularityChanged(
+    String newValue,
+    BuildContext context,
+  ) async {
+    await profilerService.setProfilePeriod(newValue);
   }
 }
