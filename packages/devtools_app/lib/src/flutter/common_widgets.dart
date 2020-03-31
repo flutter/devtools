@@ -337,6 +337,19 @@ class ActionButton extends StatelessWidget {
   }
 }
 
+/// A FlatButton used to close a containing dialog.
+class DialogCloseButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      onPressed: () {
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+      },
+      child: const Text('CLOSE'),
+    );
+  }
+}
+
 /// Toggle button for use as a child of a [ToggleButtons] widget.
 class ToggleButton extends StatelessWidget {
   const ToggleButton({
