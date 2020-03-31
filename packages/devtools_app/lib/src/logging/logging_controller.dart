@@ -665,9 +665,14 @@ class _StdoutEventHandler {
       buffer = null;
     }
 
+    const maxLength = 200;
     String summary = message;
-    if (message.length > 200) {
-      summary = message.substring(0, 200) + '…';
+    var index = summary.indexOf('\n');
+    if (index == -1 && message.length > maxLength) {
+      index = maxLength;
+    }
+    if (index != -1) {
+      summary = message.substring(0, index) + '…';
     }
 
     final LogData data = LogData(
