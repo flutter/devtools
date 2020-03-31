@@ -83,14 +83,14 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
           'Connected App',
           style: textTheme.headline5,
         ),
-        const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
+        const PaddedDivider(padding: EdgeInsets.only(top: 4.0)),
         if (_flutterVersion != null) _VersionInformation(_flutterVersion),
         const Padding(padding: EdgeInsets.only(top: defaultSpacing)),
         Text(
           'VM Flag List',
           style: textTheme.headline5,
         ),
-        const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
+        const PaddedDivider(padding: EdgeInsets.only(top: 4.0)),
         Expanded(
           child: ValueListenableBuilder<FlagList>(
             valueListenable: _controller.flagListNotifier,
