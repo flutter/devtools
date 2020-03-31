@@ -4,10 +4,10 @@
 
 import 'dart:math';
 
-import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
+import '../utils.dart';
 
 /// A widget that takes a list of children, lays them out along [axis], and
 /// allows the user to resize them.
