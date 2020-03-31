@@ -322,8 +322,6 @@ void main() {
       expect(
         LayoutProperties.deserializeConstraints(constraintsJson),
         const BoxConstraints(
-          minWidth: 0.0,
-          minHeight: 0.0,
           maxWidth: 100.0,
           maxHeight: 100.0,
         ),

@@ -630,7 +630,7 @@ class TimelineGrid {
     }
 
     final firstGridNodeText = msText(
-      const Duration(microseconds: 0),
+      const Duration(),
       fractionDigits: 1,
     );
 

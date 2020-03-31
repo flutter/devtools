@@ -83,7 +83,7 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
           'Dart VM Flag List',
           style: textTheme.headline5,
         ),
-        const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
+        const PaddedDivider(padding: EdgeInsets.only(top: 4.0)),
         Expanded(
           child: ValueListenableBuilder<FlagList>(
             valueListenable: _controller.flagListNotifier,

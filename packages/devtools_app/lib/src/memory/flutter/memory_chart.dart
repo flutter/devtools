@@ -235,7 +235,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         ),
         Expanded(
           child: LineChart(dartChartController),
-          flex: 1,
         ),
         Row(
           children: [
@@ -245,7 +244,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
             ),
             Expanded(
               child: _timelineSlider,
-              flex: 1,
             ),
             const Text('Time Range')
           ],
@@ -253,7 +251,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         controller.isAndroidChartVisible
             ? Expanded(
                 child: LineChart(androidChartController),
-                flex: 1,
               )
             : const Padding(
                 padding: edgeSpacing,

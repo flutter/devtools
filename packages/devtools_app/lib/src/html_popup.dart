@@ -387,7 +387,7 @@ class HtmlPopupAutoCompleteView extends CoreElement {
         // User clicked in the list while matcher was active.
         if (_listView.itemsHadClicked) {
           _listView.highlightedItem = classSelected;
-          matcher?.finish(false);
+          matcher?.finish();
         }
 
         matcher.reset();

@@ -95,7 +95,6 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
     );
     final detailsTree = InspectorTree(
       controller: detailsTreeController,
-      isSummaryTree: false,
     );
     final splitAxis = Split.axisFor(context, 1.3);
     return Column(

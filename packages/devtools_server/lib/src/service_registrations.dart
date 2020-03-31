@@ -24,5 +24,4 @@ const flutterMemory = RegisteredServiceDescription._(
   title: 'Flutter Memory Info',
   // TODO(terry): Better icon - icon w/o a Flutter dependency.
   //  icon: FlutterIcons.snapshot,
-  icon: null,
 );
