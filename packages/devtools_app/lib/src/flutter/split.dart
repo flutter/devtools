@@ -6,20 +6,19 @@ import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-/// A widget that takes two children, lays them out along [axis], and allows
-/// the user to resize them.
+/// A widget that takes a list of children, lays them out along [axis], and
+/// allows the user to resize them.
 ///
 /// The user can customize the amount of space allocated to each child by
 /// dragging a divider between them.
 ///
-/// [initialFirstFraction] defines how much space to give the [firstChild]
-/// when first building this widget. [secondChild] will take the remaining
-/// space.
+/// [initialFractions] defines how much space to give each child when building
+/// this widget.
 ///
-/// The user can drag the widget with key [dividerKey] to change
-/// the space allocated between [firstChild] and [secondChild].
-// TODO(djshuckerow): introduce support for a minimum fraction a child is allowed.
+/// The user can drag the widget with key [dividerKey[index]] to change the
+/// space allocated between children[index] and children[index + 1].
 class Split extends StatefulWidget {
   /// Builds a split oriented along [axis].
   Split({
@@ -27,6 +26,7 @@ class Split extends StatefulWidget {
     @required this.axis,
     @required this.children,
     @required this.initialFractions,
+    this.minSizes,
   })  : assert(axis != null),
         assert(children != null && children.length >= 2),
         assert(initialFractions != null && initialFractions.length >= 2),
@@ -37,6 +37,10 @@ class Split extends StatefulWidget {
       sumFractions += fraction;
     }
     assert(sumFractions == 1.0);
+
+    if (minSizes != null) {
+      assert(minSizes.length == children.length);
+    }
   }
 
   /// The main axis the children will lay out on.
@@ -59,14 +63,16 @@ class Split extends StatefulWidget {
   /// [children].
   final List<double> initialFractions;
 
+  /// The minimum size each child is allowed to be.
+  final List<double> minSizes;
+
   /// The key passed to the divider(s) between each child in [children].
   ///
   /// Visible to grab it in tests.
   @visibleForTesting
   Key dividerKey(int index) => Key('$this dividerKey $index');
 
-  /// The size of the divider between [firstChild] and [secondChild] in
-  /// logical pixels (dp, not px).
+  /// The size of the divider between children in logical pixels (dp, not px).
   static const double dividerMainAxisSize = 10.0;
 
   static Axis axisFor(BuildContext context, double horizontalAspectRatio) {
@@ -101,15 +107,31 @@ class _SplitState extends State<Split> {
     final height = constraints.maxHeight;
     final axisSize = isHorizontal ? width : height;
     final crossAxisSize = isHorizontal ? height : width;
+    final numDividers = widget.children.length - 1;
+
+    // Size calculation helpers.
+    double _minSizeForIndex(int index) =>
+        widget.minSizes != null ? widget.minSizes[index] : 0.0;
+
+    double _minFractionForIndex(int index) =>
+        _minSizeForIndex(index) /
+        (axisSize - numDividers * Split.dividerMainAxisSize);
+
+    void _clampFraction(int index) {
+      fractions[index] =
+          fractions[index].clamp(_minFractionForIndex(index), 1.0);
+    }
+
+    double _sizeForIndex(int index) {
+      final size = (axisSize - numDividers * Split.dividerMainAxisSize) *
+          fractions[index];
+      assert(size >= _minSizeForIndex(index));
+      return size;
+    }
 
     // Determine what fraction to give each child, including enough space to
     // display the divider.
-    final numDividers = widget.children.length - 1;
-    final sizes = List.generate(
-      fractions.length,
-      (i) =>
-          (axisSize - numDividers * Split.dividerMainAxisSize) * fractions[i],
-    );
+    final sizes = List.generate(fractions.length, (i) => _sizeForIndex(i));
 
     void updateSpacing(DragUpdateDetails dragDetails, int splitterIndex) {
       final dragDelta =
@@ -120,11 +142,12 @@ class _SplitState extends State<Split> {
         var index = splitterIndex;
         while (index >= 0) {
           fractions[index] += delta;
-          if (fractions[index] >= 0.0) {
+          final minFractionForIndex = _minFractionForIndex(index);
+          if (fractions[index] >= minFractionForIndex) {
             _clampFraction(index);
             return 0.0;
           }
-          delta = fractions[index];
+          delta = fractions[index] - minFractionForIndex;
           _clampFraction(index);
           index--;
         }
@@ -135,11 +158,12 @@ class _SplitState extends State<Split> {
         var index = splitterIndex + 1;
         while (index < fractions.length) {
           fractions[index] += delta;
-          if (fractions[index] >= 0.0) {
+          final minFractionForIndex = _minFractionForIndex(index);
+          if (fractions[index] >= minFractionForIndex) {
             _clampFraction(index);
             return 0.0;
           }
-          delta = fractions[index];
+          delta = fractions[index] - minFractionForIndex;
           _clampFraction(index);
           index++;
         }
@@ -229,9 +253,5 @@ class _SplitState extends State<Split> {
       ]);
     }
     return Flex(direction: widget.axis, children: children);
-  }
-
-  void _clampFraction(int index) {
-    fractions[index] = fractions[index].clamp(0.0, 1.0);
   }
 }

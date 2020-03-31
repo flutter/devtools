@@ -407,6 +407,55 @@ void main() {
         expectEqualSizes(
             tester.element(find.byKey(_k3)).size, const Size(0, 600));
       });
+
+      testWidgets('with minSizes', (WidgetTester tester) async {
+        final split = buildSplit(
+          Axis.horizontal,
+          initialFractions: [0.5, 0.5],
+          minSizes: [100.0, 100.0],
+        );
+        await tester.pumpWidget(wrap(split));
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(395, 600));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(395, 600));
+
+        // Drag splitter to the left end of the widget.
+        await tester.drag(
+            find.byKey(split.dividerKey(0)), const Offset(-300, 0));
+        await tester.pumpAndSettle();
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(100, 600));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(690, 600));
+
+        // Make sure we can't overdrag.
+        await tester.drag(
+            find.byKey(split.dividerKey(0)), const Offset(-200, 0));
+        await tester.pumpAndSettle();
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(100, 600));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(690, 600));
+
+        // Drag splitter to the right end of the widget.
+        await tester.drag(
+            find.byKey(split.dividerKey(0)), const Offset(597.5, 0));
+        await tester.pumpAndSettle();
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(690, 600));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(100, 600));
+
+        // Make sure we can't overdrag.
+        await tester.drag(
+            find.byKey(split.dividerKey(0)), const Offset(200, 0));
+        await tester.pumpAndSettle();
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(690, 600));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(100, 600));
+      });
     });
 
     group('resizes contents', () {
@@ -554,12 +603,14 @@ Split buildSplit(
   Axis axis, {
   @required List<double> initialFractions,
   List<Widget> children,
+  List<double> minSizes,
 }) {
   children ??= const [_w1, _w2];
   return Split(
     axis: axis,
     children: children,
     initialFractions: initialFractions,
+    minSizes: minSizes,
   );
 }
 
