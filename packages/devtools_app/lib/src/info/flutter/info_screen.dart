@@ -87,7 +87,7 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
         if (_flutterVersion != null) _VersionInformation(_flutterVersion),
         const Padding(padding: EdgeInsets.only(top: defaultSpacing)),
         Text(
-          'Dart VM Flag List',
+          'VM Flag List',
           style: textTheme.headline5,
         ),
         const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
