@@ -132,12 +132,14 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       Expanded(
         child: Split(
           axis: Axis.vertical,
-          firstChild: LogsTable(
-            data: controller.filteredData,
-            onItemSelected: _select,
-          ),
-          secondChild: LogDetails(log: selected),
-          initialFirstFraction: 0.78,
+          initialFractions: const [0.78, 0.22],
+          children: [
+            LogsTable(
+              data: controller.filteredData,
+              onItemSelected: _select,
+            ),
+            LogDetails(log: selected),
+          ],
         ),
       ),
     ]);

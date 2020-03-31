@@ -106,7 +106,7 @@ void main() {
       final splitFinder = find.byType(Split);
       expect(splitFinder, findsOneWidget);
       final Split splitter = tester.widget(splitFinder);
-      expect(splitter.initialFirstFraction, equals(0.6));
+      expect(splitter.initialFractions[0], equals(0.6));
     });
 
     testWidgetsWithWindowSize('starts and stops recording', windowSize,

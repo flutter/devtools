@@ -22,17 +22,22 @@ import 'package:flutter/material.dart';
 // TODO(djshuckerow): introduce support for a minimum fraction a child is allowed.
 class Split extends StatefulWidget {
   /// Builds a split oriented along [axis].
-  const Split({
+  Split({
     Key key,
     @required this.axis,
-    @required this.firstChild,
-    @required this.secondChild,
-    double initialFirstFraction,
-  })  : initialFirstFraction = initialFirstFraction ?? 0.5,
-        assert(axis != null),
-        assert(firstChild != null),
-        assert(secondChild != null),
-        super(key: key);
+    @required this.children,
+    @required this.initialFractions,
+  })  : assert(axis != null),
+        assert(children != null && children.length >= 2),
+        assert(initialFractions != null && initialFractions.length >= 2),
+        assert(children.length == initialFractions.length),
+        super(key: key) {
+    var sumFractions = 0.0;
+    for (var fraction in initialFractions) {
+      sumFractions += fraction;
+    }
+    assert(sumFractions == 1.0);
+  }
 
   /// The main axis the children will lay out on.
   ///
@@ -45,22 +50,20 @@ class Split extends StatefulWidget {
   /// Cannot be null.
   final Axis axis;
 
-  /// The child that will be laid out first along [axis].
-  final Widget firstChild;
+  /// The children that will be laid out along [axis].
+  final List<Widget> children;
 
-  /// The child that will be laid out last along [axis].
-  final Widget secondChild;
-
-  /// The fraction of the layout to allocate to [firstChild].
+  /// The fraction of the layout to allocate to each child in [children].
   ///
-  /// [secondChild] will receive a fraction of `1 - initialFirstFraction`.
-  final double initialFirstFraction;
+  /// The index of [initialFractions] corresponds to the child at index of
+  /// [children].
+  final List<double> initialFractions;
 
-  /// The key passed to the divider between [firstChild] and [secondChild].
+  /// The key passed to the divider(s) between each child in [children].
   ///
   /// Visible to grab it in tests.
   @visibleForTesting
-  Key get dividerKey => Key('$this dividerKey');
+  Key dividerKey(int index) => Key('$this dividerKey $index');
 
   /// The size of the divider between [firstChild] and [secondChild] in
   /// logical pixels (dp, not px).
@@ -78,16 +81,14 @@ class Split extends StatefulWidget {
 }
 
 class _SplitState extends State<Split> {
-  double firstFraction;
-
-  double get secondFraction => 1 - firstFraction;
+  List<double> fractions;
 
   bool get isHorizontal => widget.axis == Axis.horizontal;
 
   @override
   void initState() {
     super.initState();
-    firstFraction = widget.initialFirstFraction;
+    fractions = List.from(widget.initialFractions);
   }
 
   @override
@@ -100,29 +101,70 @@ class _SplitState extends State<Split> {
     final height = constraints.maxHeight;
     final axisSize = isHorizontal ? width : height;
     final crossAxisSize = isHorizontal ? height : width;
-    const halfDivider = Split.dividerMainAxisSize / 2.0;
 
     // Determine what fraction to give each child, including enough space to
     // display the divider.
-    double firstSize = axisSize * firstFraction;
-    double secondSize = axisSize * secondFraction;
+    final numDividers = widget.children.length - 1;
+    final sizes = List.generate(
+      fractions.length,
+      (i) =>
+          (axisSize - numDividers * Split.dividerMainAxisSize) * fractions[i],
+    );
 
-    // Clamp the sizes to be sure there is enough space for the dividers.
-    firstSize = firstSize.clamp(halfDivider, axisSize - halfDivider);
-    secondSize = secondSize.clamp(halfDivider, axisSize - halfDivider);
+    void updateSpacing(DragUpdateDetails dragDetails, int splitterIndex) {
+      final dragDelta =
+          isHorizontal ? dragDetails.delta.dx : dragDetails.delta.dy;
+      final fractionalDelta = dragDelta / axisSize;
 
-    // Remove space from each child to place the divider in the middle.
-    firstSize = firstSize - halfDivider;
-    secondSize = secondSize - halfDivider;
+      double updateSpacingBeforeSplitterIndex(double delta) {
+        var index = splitterIndex;
+        while (index >= 0) {
+          fractions[index] += delta;
+          if (fractions[index] >= 0.0) {
+            _clampFraction(index);
+            return 0.0;
+          }
+          delta = fractions[index];
+          _clampFraction(index);
+          index--;
+        }
+        return delta;
+      }
 
-    void updateSpacing(DragUpdateDetails dragDetails) {
-      final delta = isHorizontal ? dragDetails.delta.dx : dragDetails.delta.dy;
-      final fractionalDelta = delta / axisSize;
+      double updateSpacingAfterSplitterIndex(double delta) {
+        var index = splitterIndex + 1;
+        while (index < fractions.length) {
+          fractions[index] += delta;
+          if (fractions[index] >= 0.0) {
+            _clampFraction(index);
+            return 0.0;
+          }
+          delta = fractions[index];
+          _clampFraction(index);
+          index++;
+        }
+        return delta;
+      }
+
       setState(() {
-        // Update the fraction of space consumed by the children,
-        // being sure not to allocate any negative space.
-        firstFraction += fractionalDelta;
-        firstFraction = firstFraction.clamp(0.0, 1.0);
+        // Update the fraction of space consumed by the children. Always update
+        // the shrinking children first so that we do not over-increase the size
+        // of the growing children and cause layout overflow errors.
+        if (fractionalDelta <= 0.0) {
+          final overflowDelta =
+              updateSpacingBeforeSplitterIndex(fractionalDelta);
+          final actualDelta = overflowDelta != 0.0
+              ? fractionalDelta - overflowDelta
+              : fractionalDelta;
+          updateSpacingAfterSplitterIndex(-actualDelta);
+        } else {
+          final overflowDelta =
+              updateSpacingAfterSplitterIndex(-fractionalDelta);
+          final actualDelta = overflowDelta != 0.0
+              ? fractionalDelta + overflowDelta
+              : fractionalDelta;
+          updateSpacingBeforeSplitterIndex(actualDelta);
+        }
       });
     }
 
@@ -156,35 +198,40 @@ class _SplitState extends State<Split> {
       ],
     );
 
-    final children = [
-      SizedBox(
-        width: isHorizontal ? firstSize : width,
-        height: isHorizontal ? height : firstSize,
-        child: widget.firstChild,
-      ),
-      GestureDetector(
-        key: widget.dividerKey,
-        behavior: HitTestBehavior.translucent,
-        onHorizontalDragUpdate: isHorizontal ? updateSpacing : null,
-        onVerticalDragUpdate: isHorizontal ? null : updateSpacing,
-        // DartStartBehavior.down is needed to keep the mouse pointer stuck to
-        // the drag bar. There still appears to be a few frame lag before the
-        // drag action triggers which is't ideal but isn't a launch blocker.
-        dragStartBehavior: DragStartBehavior.down,
-        child: SizedBox(
-          width: isHorizontal ? Split.dividerMainAxisSize : width,
-          height: isHorizontal ? height : Split.dividerMainAxisSize,
-          child: Center(
-            child: dragIndicator,
-          ),
+    final children = <Widget>[];
+    for (int i = 0; i < widget.children.length; i++) {
+      children.addAll([
+        SizedBox(
+          width: isHorizontal ? sizes[i] : width,
+          height: isHorizontal ? height : sizes[i],
+          child: widget.children[i],
         ),
-      ),
-      SizedBox(
-        width: isHorizontal ? secondSize : width,
-        height: isHorizontal ? height : secondSize,
-        child: widget.secondChild,
-      ),
-    ];
+        if (i < widget.children.length - 1)
+          GestureDetector(
+            key: widget.dividerKey(i),
+            behavior: HitTestBehavior.translucent,
+            onHorizontalDragUpdate: (details) =>
+                isHorizontal ? updateSpacing(details, i) : null,
+            onVerticalDragUpdate: (details) =>
+                isHorizontal ? null : updateSpacing(details, i),
+            // DartStartBehavior.down is needed to keep the mouse pointer stuck to
+            // the drag bar. There still appears to be a few frame lag before the
+            // drag action triggers which is't ideal but isn't a launch blocker.
+            dragStartBehavior: DragStartBehavior.down,
+            child: SizedBox(
+              width: isHorizontal ? Split.dividerMainAxisSize : width,
+              height: isHorizontal ? height : Split.dividerMainAxisSize,
+              child: Center(
+                child: dragIndicator,
+              ),
+            ),
+          ),
+      ]);
+    }
     return Flex(direction: widget.axis, children: children);
+  }
+
+  void _clampFraction(int index) {
+    fractions[index] = fractions[index].clamp(0.0, 1.0);
   }
 }
