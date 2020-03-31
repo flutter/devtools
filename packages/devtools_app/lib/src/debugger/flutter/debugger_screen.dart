@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/flutter/theme.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
@@ -57,27 +58,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     // TODO(djshuckerow): promote this controller to app-level Controllers.
     controller = DebuggerController();
     controller.setVmService(serviceManager.service);
-    addAutoDisposeListener(controller.isPaused, () async {
-      print('Pause status changed');
-      // TODO(https://github.com/flutter/devtools/issues/1648): Allow choice of
-      // the scripts on the stack.
-      if (controller.isPaused.value) {
-        print('Paused is true, updating stack');
-        final currentStack = await controller.getStack();
-        // NOT READY YET: I don't understand why the getStack() call is returning null here.
-        setState(() {
-          print('Updating stack to$stack');
-          stack = currentStack;
-        });
-        if (stack == null) return;
-        final currentScript =
-            await controller.getScript(stack.frames.first.location.script);
-        setState(() {
-          print('Updating script to $script ');
-          script = currentScript;
-        });
-      }
-    });
+    addAutoDisposeListener(controller.isPaused, _onPaused);
     addAutoDisposeListener(controller.breakpoints);
     // TODO(djshuckerow): Make the loading process disposable.
     serviceManager.service
@@ -87,6 +68,23 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         scriptList = scripts;
       });
     });
+  }
+
+  Future<void> _onPaused() async {
+    // TODO(https://github.com/flutter/devtools/issues/1648): Allow choice of
+    // the scripts on the stack.
+    if (controller.isPaused.value) {
+      final currentStack = await controller.getStack();
+      setState(() {
+        stack = currentStack;
+      });
+      if (stack == null || stack.frames.isEmpty) return;
+      final currentScript =
+          await controller.getScript(stack.frames.first.location.script);
+      setState(() {
+        script = currentScript;
+      });
+    }
   }
 
   Future<void> onScriptSelected(ScriptRef ref) async {
@@ -386,14 +384,23 @@ class CodeView extends StatefulWidget {
 class _CodeViewState extends State<CodeView> {
   List<String> lines = [];
   LinkedScrollControllerGroup _horizontalController;
-  Set<int> pausedPositions;
+  ScrollController verticalController;
+  // The paused positions in the current [widget.script] from the [widget.stack].
+  List<int> pausedPositions;
 
   @override
   void initState() {
     super.initState();
+    verticalController = ScrollController();
     _horizontalController = LinkedScrollControllerGroup();
     _updateLines();
     _updatePausedPositions();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    verticalController.dispose();
   }
 
   @override
@@ -415,11 +422,21 @@ class _CodeViewState extends State<CodeView> {
 
   void _updatePausedPositions() {
     setState(() {
-      pausedPositions = {
-        for (var frame in widget.stack?.frames ?? [])
+      final framesInScript = (widget.stack?.frames ?? [])
+          .where((frame) => frame.location.script.id == widget.script.id);
+      pausedPositions = [
+        for (var frame in framesInScript)
           widget.controller.getLineNumber(widget.script, frame.location)
-      };
+      ];
     });
+
+    if (pausedPositions.isNotEmpty) {
+      verticalController.animateTo(
+        pausedPositions.first * ScriptRow.rowHeight,
+        duration: shortDuration,
+        curve: defaultCurve,
+      );
+    }
   }
 
   void _onPressed(int line) {
@@ -445,6 +462,7 @@ class _CodeViewState extends State<CodeView> {
           .copyWith(fontFamily: 'RobotoMono'),
       child: Scrollbar(
         child: ListView.builder(
+          controller: verticalController,
           itemBuilder: (context, index) {
             return ScriptRow(
               group: _horizontalController,

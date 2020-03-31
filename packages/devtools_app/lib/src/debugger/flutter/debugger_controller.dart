@@ -134,8 +134,10 @@ class DebuggerController {
     return _service.setExceptionPauseMode(isolateRef.id, mode);
   }
 
-  Future<Stack> getStack() {
-    return _service.getStack(isolateRef.id);
+  Future<Stack> getStack() async {
+    final stack = await _service.getStack(isolateRef.id);
+    if (stack is Sentinel) return null;
+    return stack;
   }
 
   InstanceRef get reportedException => _reportedException;
@@ -273,7 +275,7 @@ class DebuggerController {
     if (location is UnresolvedSourceLocation && location.line != null) {
       return location.line;
     } else if (location is SourceLocation) {
-      return calculatePosition(script, location.tokenPos).line;
+      return calculatePosition(script, location.tokenPos)?.line;
     }
     throw Exception(
       '$location should be a $UnresolvedSourceLocation or a $SourceLocation',
