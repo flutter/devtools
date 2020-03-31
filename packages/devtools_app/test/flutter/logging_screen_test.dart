@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-
 import 'dart:async';
 
+import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/flutter/logging_screen.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
@@ -24,6 +24,8 @@ void main() {
   LoggingScreen screen;
   group('Logging Screen', () {
     MockLoggingController mockLoggingController;
+    FakeServiceManager fakeServiceManager;
+
     Widget wrap(Widget widget) =>
         wrapWithControllers(widget, logging: mockLoggingController);
 
@@ -31,14 +33,14 @@ void main() {
       await ensureInspectorDependencies();
       mockLoggingController = MockLoggingController();
       when(mockLoggingController.data).thenReturn([]);
+      when(mockLoggingController.filteredData).thenReturn([]);
       when(mockLoggingController.onLogsUpdated).thenReturn(Reporter());
 
-      setGlobal(
-        ServiceConnectionManager,
-        FakeServiceManager(useFakeService: true),
-      );
-      when(serviceManager.connectedApp.isDartWebApp)
-          .thenAnswer((_) => Future.value(false));
+      fakeServiceManager = FakeServiceManager(useFakeService: true);
+      when(fakeServiceManager.connectedApp.isFlutterWebAppNow)
+          .thenReturn(false);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
 
       screen = const LoggingScreen();
     });
@@ -48,24 +50,44 @@ void main() {
       expect(find.text('Logging'), findsOneWidget);
     });
 
+    testWidgets('builds disabled message when disabled for flutter web app',
+        (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp.isFlutterWebAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(true);
+      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      expect(find.byType(LoggingScreenBody), findsNothing);
+      expect(find.byType(DisabledForFlutterWebProfileBuildMessage),
+          findsOneWidget);
+    });
+
     testWidgets('builds with no data', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(LoggingScreenBody), findsOneWidget);
       expect(find.byType(LogsTable), findsOneWidget);
       expect(find.byType(LogDetails), findsOneWidget);
-      expect(find.text('Clear logs'), findsOneWidget);
+      expect(find.text('Clear'), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
       expect(find.byType(StructuredErrorsToggle), findsOneWidget);
     });
 
     testWidgets('can clear logs', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       verifyNever(mockLoggingController.clear());
-      await tester.tap(find.text('Clear logs'));
+      await tester.tap(find.text('Clear'));
       verify(mockLoggingController.clear()).called(1);
+    });
+
+    testWidgets('can enter filter text', (WidgetTester tester) async {
+      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      verifyNever(mockLoggingController.clear());
+      await tester.enterText(find.byType(TextField), 'abc');
+      verify(mockLoggingController.filterText = 'abc');
     });
 
     testWidgets('can toggle structured errors', (WidgetTester tester) async {
       final serviceManager = FakeServiceManager(useFakeService: false);
+      when(serviceManager.connectedApp.isFlutterWebAppNow).thenReturn(false);
+      when(serviceManager.connectedApp.isProfileBuildNow).thenReturn(false);
       setGlobal(
         ServiceConnectionManager,
         serviceManager,
@@ -86,6 +108,7 @@ void main() {
     group('with data', () {
       setUp(() {
         when(mockLoggingController.data).thenReturn(fakeLogData);
+        when(mockLoggingController.filteredData).thenReturn(fakeLogData);
       });
 
       testWidgets('shows most recent logs first', (WidgetTester tester) async {

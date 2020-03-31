@@ -21,7 +21,7 @@ class RadarChartRenderer extends LineRadarRenderer {
   Paint _webPaint;
   Paint _highlightCirclePaint;
 
-  RadarChartRenderer(RadarChartPainter chart, ChartAnimator animator,
+  RadarChartRenderer(RadarChartPainter chart, Animator animator,
       ViewPortHandler viewPortHandler)
       : super(animator, viewPortHandler) {
     _painter = chart;

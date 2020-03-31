@@ -24,7 +24,8 @@ import 'overflow_indicator_painter.dart';
 import 'utils.dart';
 
 const widthIndicatorColor = ThemedColor(Color(0xFF000099), mainUiColorDark);
-const heightIndicatorColor = ThemedColor(mainGpuColorDark, Color(0xFF27AAE1));
+const heightIndicatorColor =
+    ThemedColor(mainRasterColorDark, Color(0xFF27AAE1));
 const margin = 8.0;
 
 const arrowHeadSize = 8.0;
@@ -152,7 +153,7 @@ Widget dimensionDescription(TextSpan description, bool overflow) {
 Widget _visualizeWidthAndHeightWithConstraints({
   @required Widget widget,
   @required LayoutProperties properties,
-  double arrowHeadSize = defaultArrowHeadSize,
+  double arrowHeadSize = defaultIconSize,
 }) {
   final showChildrenWidthsSum =
       properties is FlexLayoutProperties && properties.isOverflowWidth;
@@ -973,9 +974,7 @@ class FlexChildVisualizer extends StatelessWidget {
       return Text(
         'flex: $flexFactor',
         style: flexFactor == properties.flexFactor
-            ? const TextStyle(
-                fontWeight: FontWeight.bold,
-              )
+            ? const TextStyle(fontWeight: FontWeight.bold)
             : null,
       );
     }
@@ -1202,30 +1201,20 @@ class WidgetVisualizer extends StatelessWidget {
                             child: Text(
                               title,
                               style: textColor != null
-                                  ? TextStyle(
-                                      color: textColor,
-                                    )
+                                  ? TextStyle(color: textColor)
                                   : null,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          decoration: BoxDecoration(
-                            color: borderColor,
-                          ),
+                          decoration: BoxDecoration(color: borderColor),
                           padding: const EdgeInsets.all(4.0),
                         ),
                       ),
-                      if (hint != null)
-                        Flexible(
-                          child: hint,
-                        ),
+                      if (hint != null) Flexible(child: hint),
                     ],
                   ),
                 ),
-                if (child != null)
-                  Expanded(
-                    child: child,
-                  ),
+                if (child != null) Expanded(child: child),
               ],
             ),
           ),

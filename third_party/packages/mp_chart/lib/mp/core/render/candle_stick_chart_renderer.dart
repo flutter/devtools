@@ -24,7 +24,7 @@ class CandleStickChartRenderer extends LineScatterCandleRadarRenderer {
   List<double> _openBuffers = List(4);
   List<double> _closeBuffers = List(4);
 
-  CandleStickChartRenderer(CandleDataProvider chart, ChartAnimator animator,
+  CandleStickChartRenderer(CandleDataProvider chart, Animator animator,
       ViewPortHandler viewPortHandler)
       : super(animator, viewPortHandler) {
     _porvider = chart;

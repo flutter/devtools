@@ -720,10 +720,6 @@ typedef SelectionCallback = void Function(int timestamp);
 
 typedef SelectSampleCallback = HeapSample Function(int timestamp);
 
-/// Selection of a point in the Bar chart displays the data point values
-/// UI duration and GPU duration. Also, highlight the selected stacked bar.
-/// Uses marker/highlight mechanism which lags because it uses onTapUp maybe
-/// onTapDown would be less laggy.
 class SelectedDataPoint extends LineChartMarker {
   SelectedDataPoint(
     this.type, {

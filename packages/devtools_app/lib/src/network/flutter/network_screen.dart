@@ -8,13 +8,19 @@ import 'package:flutter/rendering.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
-import '../http_request_data.dart';
+import '../../globals.dart';
+import '../../http/http_request_data.dart';
 import '../network_controller.dart';
 import 'http_request_inspector.dart';
 import 'network_model.dart';
 
 class NetworkScreen extends Screen {
-  const NetworkScreen() : super();
+  const NetworkScreen()
+      : super(
+          DevToolsScreenType.network,
+          title: 'Network',
+          icon: Icons.network_check,
+        );
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -26,15 +32,11 @@ class NetworkScreen extends Screen {
   static const recordingInstructionsKey = Key('Recording Instructions');
 
   @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Network',
-      icon: Icon(Icons.network_check),
-    );
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const NetworkScreenBody()
+        : const DisabledForWebAppMessage();
   }
-
-  @override
-  Widget build(BuildContext context) => const NetworkScreenBody();
 }
 
 class NetworkScreenBody extends StatefulWidget {

@@ -6,8 +6,7 @@ library inspector;
 
 import 'dart:async';
 
-import 'package:html_shim/html.dart' show Element;
-import 'package:html_shim/html.dart' as html;
+import 'dart:html' show Element;
 import 'package:split/split.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -173,7 +172,7 @@ class HtmlInspectorScreen extends HtmlScreen {
     ];
     inspectorContainer.add(elements);
     splitterSubscription = flexSplitBidirectional(
-      html.toDartHtmlElementList(elements),
+      elements,
       gutterSize: defaultSplitterWidth,
       // When we have two columns we want the details tree to be wider.
       horizontalSizes: [35, 65],

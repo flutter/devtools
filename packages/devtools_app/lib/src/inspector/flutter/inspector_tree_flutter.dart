@@ -497,11 +497,12 @@ class InspectorRowContent extends StatelessWidget {
                         turns: expandArrowAnimation,
                         child: const Icon(
                           Icons.expand_more,
-                          size: 16.0,
+                          size: defaultIconSize,
                         ),
                       ),
                     )
-                  : const SizedBox(width: 16.0, height: 16.0),
+                  : const SizedBox(
+                      width: defaultSpacing, height: defaultSpacing),
               DecoratedBox(
                 decoration: BoxDecoration(
                   color: backgroundColor,

@@ -44,7 +44,7 @@ class _CpuProfileFlameChartState
     super.initFlameChartElements();
     expandRows(widget.data.cpuProfileRoot.depth +
         rowOffsetForTopPadding +
-        rowOffsetForBottomPadding);
+        FlameChart.rowOffsetForBottomPadding);
 
     void createChartNodes(CpuStackFrame stackFrame, int row) {
       final double width =

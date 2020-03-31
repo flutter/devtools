@@ -4,8 +4,10 @@
 
 @TestOn('vm')
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/file_utils.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
@@ -110,6 +112,73 @@ void main() {
     } finally {
       server1.kill();
     }
+  }, timeout: const Timeout.factor(10));
+
+  test('Analytics Survey', () async {
+    var serverResponse = await _send('devTools.survey', {
+      'surveyRequest': 'copyAndCreateDevToolsFile',
+    });
+    expect(serverResponse, isNotNull);
+    expect(serverResponse['sucess'], isTrue);
+
+    serverResponse = await _send('devTools.survey', {
+      'surveyRequest': apiSetActiveSurvey,
+      'value': 'Q3-2019',
+    });
+    expect(serverResponse, isNotNull);
+    expect(serverResponse['sucess'], isTrue);
+    expect(serverResponse['activeSurvey'], 'Q3-2019');
+
+    serverResponse = await _send('devTools.survey', {
+      'surveyRequest': apiIncrementSurveyShownCount,
+    });
+    expect(serverResponse, isNotNull);
+    expect(serverResponse['activeSurvey'], 'Q3-2019');
+    expect(serverResponse['surveyShownCount'], equals(1));
+
+    serverResponse = await _send('devTools.survey', {
+      'surveyRequest': apiIncrementSurveyShownCount,
+    });
+    expect(serverResponse, isNotNull);
+    expect(serverResponse['activeSurvey'], 'Q3-2019');
+    expect(serverResponse['surveyShownCount'], equals(2));
+
+    serverResponse = await _send('devTools.survey', {
+      'surveyRequest': apiGetSurveyShownCount,
+    });
+    expect(serverResponse, isNotNull);
+    expect(serverResponse['activeSurvey'], 'Q3-2019');
+    expect(serverResponse['surveyShownCount'], equals(2));
+
+    serverResponse = await _send('devTools.survey', {
+      'surveyRequest': apiGetSurveyActionTaken,
+    });
+    expect(serverResponse, isNotNull);
+    expect(serverResponse['activeSurvey'], 'Q3-2019');
+    expect(serverResponse['surveyActionTaken'], isFalse);
+
+    serverResponse = await _send('devTools.survey', {
+      'surveyRequest': apiSetSurveyActionTaken,
+      'value': json.encode(true),
+    });
+    expect(serverResponse, isNotNull);
+    expect(serverResponse['activeSurvey'], 'Q3-2019');
+    expect(serverResponse['surveyActionTaken'], isTrue);
+
+    serverResponse = await _send('devTools.survey', {
+      'surveyRequest': 'restoreDevToolsFile',
+    });
+    expect(serverResponse, isNotNull);
+    expect(serverResponse['sucess'], isTrue);
+    expect(
+      serverResponse['content'],
+      '{\n'
+      '  \"Q3-2019\": {\n'
+      '    \"surveyActionTaken\": true,\n'
+      '    \"surveyShownCount\": 2\n'
+      '  }\n'
+      '}\n',
+    );
   }, timeout: const Timeout.factor(10));
 
   // TODO(dantup): We can't run tests using the stdin API for devTools.launch unless

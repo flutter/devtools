@@ -10,13 +10,15 @@ import 'package:mp_chart/mp/core/marker/i_marker.dart';
 import 'package:mp_chart/mp/core/poolable/point.dart';
 import 'package:mp_chart/mp/core/render/x_axis_renderer.dart';
 import 'package:mp_chart/mp/core/render/y_axis_renderer.dart';
+import 'package:mp_chart/mp/core/touch_listener.dart';
+import 'package:mp_chart/mp/core/chart_trans_listener.dart';
 import 'package:mp_chart/mp/core/transformer/transformer.dart';
 import 'package:mp_chart/mp/core/utils/color_utils.dart';
 import 'package:mp_chart/mp/core/utils/utils.dart';
 import 'package:mp_chart/mp/painter/bar_line_chart_painter.dart';
 
-abstract class BarLineScatterCandleBubbleController<P extends BarLineChartBasePainter>
-    extends Controller<P> {
+abstract class BarLineScatterCandleBubbleController<
+    P extends BarLineChartBasePainter> extends Controller<P> {
   int maxVisibleCount;
   bool autoScaleMinMaxEnabled;
   bool doubleTapToZoomEnabled;
@@ -51,62 +53,81 @@ abstract class BarLineScatterCandleBubbleController<P extends BarLineChartBasePa
   Color backgroundColor;
   double borderStrokeWidth;
 
+  /// this is used for user get touch event if they needed
+  OnTouchEventListener touchEventListener;
+
+  /// this is used for have a callback when chart translate or scale
+  ChartTransListener chartTransListener;
+
   AxisLeftSettingFunction axisLeftSettingFunction;
   AxisRightSettingFunction axisRightSettingFunction;
 
-  BarLineScatterCandleBubbleController({
-    this.maxVisibleCount = 100,
-    this.autoScaleMinMaxEnabled = true,
-    this.doubleTapToZoomEnabled = true,
-    this.highlightPerDragEnabled = true,
-    this.dragXEnabled = true,
-    this.dragYEnabled = true,
-    this.scaleXEnabled = true,
-    this.scaleYEnabled = true,
-    this.drawGridBackground = false,
-    this.drawBorders = false,
-    this.clipValuesToContent = false,
-    this.minOffset = 30.0,
-    this.drawListener,
-    this.axisLeft,
-    this.axisRight,
-    this.axisRendererLeft,
-    this.axisRendererRight,
-    this.leftAxisTransformer,
-    this.rightAxisTransformer,
-    this.xAxisRenderer,
-    this.customViewPortEnabled = false,
-    this.zoomMatrixBuffer,
-    this.pinchZoomEnabled = true,
-    this.keepPositionOnRotation = false,
-    this.gridBackgroundPaint,
-    this.borderPaint,
-    this.backgroundPaint,
-    this.gridBackColor,
-    this.borderColor,
-    this.backgroundColor,
-    this.borderStrokeWidth = 1.0,
-    this.axisLeftSettingFunction,
-    this.axisRightSettingFunction,
-    IMarker marker,
-    Description description,
-    String noDataText = "No chart data available.",
-    XAxisSettingFunction xAxisSettingFunction,
-    LegendSettingFunction legendSettingFunction,
-    DataRendererSettingFunction rendererSettingFunction,
-    OnChartValueSelectedListener selectionListener,
-    double maxHighlightDistance = 100.0,
-    bool highLightPerTapEnabled = true,
-    double extraTopOffset = 0.0,
-    double extraRightOffset = 0.0,
-    double extraBottomOffset = 0.0,
-    double extraLeftOffset = 0.0,
-    bool drawMarkers = true,
-    double descTextSize = 12,
-    double infoTextSize = 12,
-    Color descTextColor,
-    Color infoTextColor,
-  }) : super(
+  MPPointF _decelerationVelocity = MPPointF.getInstance1(0, 0);
+
+  double _dragDecelerationFrictionCoef = 0.90;
+
+  set dragDecelerationFrictionCoef(double dragDecelerationFrictionCoef) {
+    _dragDecelerationFrictionCoef = dragDecelerationFrictionCoef;
+  }
+
+  int _decelerationLastTime = 0;
+
+  BarLineScatterCandleBubbleController(
+      {this.maxVisibleCount = 100,
+      this.autoScaleMinMaxEnabled = true,
+      this.doubleTapToZoomEnabled = true,
+      this.highlightPerDragEnabled = true,
+      this.dragXEnabled = true,
+      this.dragYEnabled = true,
+      this.scaleXEnabled = true,
+      this.scaleYEnabled = true,
+      this.drawGridBackground = false,
+      this.drawBorders = false,
+      this.clipValuesToContent = false,
+      this.minOffset = 30.0,
+      this.drawListener,
+      this.axisLeft,
+      this.axisRight,
+      this.axisRendererLeft,
+      this.axisRendererRight,
+      this.leftAxisTransformer,
+      this.rightAxisTransformer,
+      this.xAxisRenderer,
+      this.customViewPortEnabled = false,
+      this.zoomMatrixBuffer,
+      this.pinchZoomEnabled = true,
+      this.keepPositionOnRotation = false,
+      this.gridBackgroundPaint,
+      this.borderPaint,
+      this.backgroundPaint,
+      this.gridBackColor,
+      this.borderColor,
+      this.backgroundColor,
+      this.borderStrokeWidth = 1.0,
+      this.axisLeftSettingFunction,
+      this.axisRightSettingFunction,
+      this.touchEventListener,
+      this.chartTransListener,
+      IMarker marker,
+      Description description,
+      String noDataText = "No chart data available.",
+      XAxisSettingFunction xAxisSettingFunction,
+      LegendSettingFunction legendSettingFunction,
+      DataRendererSettingFunction rendererSettingFunction,
+      OnChartValueSelectedListener selectionListener,
+      double maxHighlightDistance = 100.0,
+      bool highLightPerTapEnabled = true,
+      double extraTopOffset = 0.0,
+      double extraRightOffset = 0.0,
+      double extraBottomOffset = 0.0,
+      double extraLeftOffset = 0.0,
+      bool drawMarkers = true,
+      double descTextSize = 12,
+      double infoTextSize = 12,
+      Color descTextColor,
+      Color infoTextColor,
+      Color infoBgColor})
+      : super(
             marker: marker,
             description: description,
             noDataText: noDataText,
@@ -124,6 +145,7 @@ abstract class BarLineScatterCandleBubbleController<P extends BarLineChartBasePa
             descTextSize: descTextSize,
             infoTextSize: infoTextSize,
             descTextColor: descTextColor,
+            infoBgColor: infoBgColor,
             infoTextColor: infoTextColor);
 
   OnDrawListener initDrawListener() {
@@ -165,8 +187,12 @@ abstract class BarLineScatterCandleBubbleController<P extends BarLineChartBasePa
       ..color = backgroundColor == null ? ColorUtils.WHITE : backgroundColor;
 
     drawListener ??= initDrawListener();
-    axisLeft = initAxisLeft();
-    axisRight = initAxisRight();
+    if (axisLeft == null) {
+      axisLeft = initAxisLeft();
+    }
+    if (axisRight == null) {
+      axisRight = initAxisRight();
+    }
     leftAxisTransformer ??= initLeftAxisTransformer();
     rightAxisTransformer ??= initRightAxisTransformer();
     zoomMatrixBuffer ??= initZoomMatrixBuffer();
@@ -202,7 +228,7 @@ abstract class BarLineScatterCandleBubbleController<P extends BarLineChartBasePa
   }
 
   /// Moves the left side of the current viewport to the specified x-position.
-  /// This also refreshes the chart by calling invalidate().
+  /// call state?.setStateIfNotDispose() to invalidate
   ///
   /// @param xValue
   void moveViewToX(double xValue) {
@@ -214,9 +240,24 @@ abstract class BarLineScatterCandleBubbleController<P extends BarLineChartBasePa
     viewPortHandler.centerViewPort(pts);
   }
 
+  /// This will center the viewport to the specified y value on the y-axis.
+  /// call state?.setStateIfNotDispose() to invalidate
+  ///
+  /// @param yValue
+  /// @param axis   - which axis should be used as a reference for the y-axis
+  void moveViewToY(double yValue, AxisDependency axis) {
+    double yInView = getAxisRange(axis) / viewPortHandler.getScaleY();
+    List<double> pts = List();
+    pts.add(0.0);
+    pts.add(yValue + yInView / 2);
+
+    painter?.getTransformer(axis)?.pointValuesToPixel(pts);
+    viewPortHandler.centerViewPort(pts);
+  }
+
   /// This will move the left side of the current viewport to the specified
   /// x-value on the x-axis, and center the viewport to the specified y value on the y-axis.
-  /// This also refreshes the chart by calling invalidate().
+  /// call state?.setStateIfNotDispose() to invalidate
   ///
   /// @param xValue
   /// @param yValue
@@ -232,7 +273,7 @@ abstract class BarLineScatterCandleBubbleController<P extends BarLineChartBasePa
 
   /// This will move the left side of the current viewport to the specified x-value
   /// and center the viewport to the y value animated.
-  /// This also refreshes the chart by calling invalidate().
+  /// call state?.setStateIfNotDispose() to invalidate
   ///
   /// @param xValue
   /// @param yValue
@@ -262,7 +303,7 @@ abstract class BarLineScatterCandleBubbleController<P extends BarLineChartBasePa
   }
 
   /// Centers the viewport to the specified y value on the y-axis.
-  /// This also refreshes the chart by calling invalidate().
+  /// call state?.setStateIfNotDispose() to invalidate
   ///
   /// @param yValue
   /// @param axis   - which axis should be used as a reference for the y-axis
@@ -277,7 +318,7 @@ abstract class BarLineScatterCandleBubbleController<P extends BarLineChartBasePa
 
   /// This will move the center of the current viewport to the specified
   /// x and y value.
-  /// This also refreshes the chart by calling invalidate().
+  /// call state?.setStateIfNotDispose() to invalidate
   ///
   /// @param xValue
   /// @param yValue
@@ -405,6 +446,56 @@ abstract class BarLineScatterCandleBubbleController<P extends BarLineChartBasePa
     double minScale = getAxisRange(axis) / minYRange;
     double maxScale = getAxisRange(axis) / maxYRange;
     viewPortHandler.setMinMaxScaleY(minScale, maxScale);
+  }
+
+  void stopDeceleration() {
+    _decelerationVelocity.x = 0;
+    _decelerationVelocity.y = 0;
+    _decelerationLastTime = 0;
+  }
+
+  void setDecelerationVelocity(Offset velocityOffset) {
+    _decelerationVelocity.x = velocityOffset.dx;
+    _decelerationVelocity.y = velocityOffset.dy;
+  }
+
+  void computeScroll() {
+    if (_decelerationVelocity.x == 0 && _decelerationVelocity.y == 0) {
+      return;
+    }
+
+    int currentTime = DateTime.now().millisecondsSinceEpoch;
+
+    if (_decelerationLastTime == 0) {
+      _decelerationLastTime = currentTime;
+    } else {
+      _decelerationVelocity.x *= _dragDecelerationFrictionCoef;
+      _decelerationVelocity.y *= _dragDecelerationFrictionCoef;
+
+      double timeInterval = (currentTime - _decelerationLastTime) / 1000;
+
+      double distanceX = _decelerationVelocity.x * timeInterval;
+      double distanceY = _decelerationVelocity.y * timeInterval;
+
+      double dragDistanceX = dragXEnabled ? distanceX : 0;
+      double dragDistanceY = dragYEnabled ? distanceY : 0;
+
+      painter.translate(dragDistanceX, dragDistanceY);
+
+      _decelerationLastTime = currentTime;
+    }
+
+    if (_decelerationVelocity.x.abs() >= 20 ||
+        _decelerationVelocity.y.abs() >= 20) {
+      state.setStateIfNotDispose();
+      Future.delayed(Duration(milliseconds: 16), () {
+        computeScroll();
+      });
+    } else {
+      painter.calculateOffsets();
+      state.setStateIfNotDispose();
+      stopDeceleration();
+    }
   }
 }
 

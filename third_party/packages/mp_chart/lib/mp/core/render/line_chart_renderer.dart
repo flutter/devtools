@@ -46,7 +46,7 @@ class LineChartRenderer extends LineRadarRenderer {
   Path _cubicPath = Path();
   Path _cubicFillPath = Path();
 
-  LineChartRenderer(LineDataProvider chart, ChartAnimator animator,
+  LineChartRenderer(LineDataProvider chart, Animator animator,
       ViewPortHandler viewPortHandler)
       : super(animator, viewPortHandler) {
     _provider = chart;
@@ -191,8 +191,6 @@ class LineChartRenderer extends LineRadarRenderer {
 
     List<double> list = List();
 
-    double x = 0.0;
-    double y = 0.0;
     if (xBounds.range >= 1) {
       double prevDx = 0;
       double prevDy = 0;
@@ -205,7 +203,7 @@ class LineChartRenderer extends LineRadarRenderer {
       // And in the `lastIndex`, add +1
 
       final int firstIndex = xBounds.min + 1;
-      final int lastIndex = xBounds.min + xBounds.range;
+//      final int lastIndex = xBounds.min + xBounds.range;
 
       Entry prevPrev;
       Entry prev = dataSet.getEntryForIndex(max(firstIndex - 2, 0));
@@ -214,9 +212,6 @@ class LineChartRenderer extends LineRadarRenderer {
       int nextIndex = -1;
 
       if (cur == null) return;
-
-      x = cur.x;
-      y = cur.y;
 
       // let the spline start
       list.add(cur.x);
@@ -447,8 +442,6 @@ class LineChartRenderer extends LineRadarRenderer {
     }
   }
 
-  Path _generateFilledPathBuffer = Path();
-
   /// Draws a filled linear path on the canvas.
   ///
   /// @param c
@@ -457,8 +450,6 @@ class LineChartRenderer extends LineRadarRenderer {
   /// @param bounds
   void drawLinearFill(
       Canvas c, ILineDataSet dataSet, Transformer trans, XBounds bounds) {
-    final Path filled = _generateFilledPathBuffer;
-
     final int startingIndex = bounds.min;
     final int endingIndex = bounds.range + bounds.min;
     final int indexInterval = 128;
@@ -469,26 +460,25 @@ class LineChartRenderer extends LineRadarRenderer {
 
     // Doing this iteratively in order to avoid OutOfMemory errors that can happen on large bounds sets.
     do {
+      final Path filled = Path();
       currentStartIndex = startingIndex + (iterations * indexInterval);
-      currentEndIndex = currentStartIndex + indexInterval;
-      currentEndIndex =
-          currentEndIndex > endingIndex ? endingIndex : currentEndIndex;
+      currentEndIndex = min(currentStartIndex + indexInterval, endingIndex);
 
       if (currentStartIndex <= currentEndIndex) {
         generateFilledPath(
-            dataSet, currentStartIndex, currentEndIndex, filled, trans);
-
-//        trans.pathValueToPixel(filled);
-
-//        final Drawable drawable = dataSet.getFillDrawable();
-//        if (drawable != null) {
-//
-//          drawFilledPath(c, filled, drawable);
-//        } else {
+          dataSet,
+          currentStartIndex,
+          currentEndIndex,
+          filled,
+          trans,
+        );
 
         drawFilledPath2(
-            c, filled, dataSet.getFillColor().value, dataSet.getFillAlpha());
-//        }
+          c,
+          filled,
+          dataSet.getFillColor().value,
+          dataSet.getFillAlpha(),
+        );
       }
 
       iterations++;
@@ -726,6 +716,7 @@ class LineChartRenderer extends LineRadarRenderer {
     }
   }
 
+  // ignore: unused_element
   Future<Codec> _loadImage(ByteData data) async {
     if (data == null) throw 'Unable to read data';
     return await instantiateImageCodec(data.buffer.asUint8List());

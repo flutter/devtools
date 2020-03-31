@@ -3,12 +3,13 @@ import 'dart:ui';
 import 'package:flutter/painting.dart';
 import 'package:mp_chart/mp/core/axis/y_axis.dart';
 import 'package:mp_chart/mp/core/enums/axis_dependency.dart';
-import 'package:mp_chart/mp/core/enums/limite_label_postion.dart';
+import 'package:mp_chart/mp/core/enums/limit_label_postion.dart';
 import 'package:mp_chart/mp/core/enums/y_axis_label_position.dart';
 import 'package:mp_chart/mp/core/limit_line.dart';
 import 'package:mp_chart/mp/core/poolable/point.dart';
 import 'package:mp_chart/mp/core/render/axis_renderer.dart';
 import 'package:mp_chart/mp/core/transformer/transformer.dart';
+import 'package:mp_chart/mp/core/utils/canvas_utils.dart';
 import 'package:mp_chart/mp/core/utils/color_utils.dart';
 import 'package:mp_chart/mp/core/utils/painter_utils.dart';
 import 'package:mp_chart/mp/core/utils/utils.dart';
@@ -36,8 +37,10 @@ class YAxisRenderer extends AxisRenderer {
 
   YAxis get yAxis => _yAxis;
 
+  // ignore: unnecessary_getters_setters
   Paint get zeroLinePaint => _zeroLinePaint;
 
+  // ignore: unnecessary_getters_setters
   set zeroLinePaint(Paint value) {
     _zeroLinePaint = value;
   }
@@ -283,8 +286,10 @@ class YAxisRenderer extends AxisRenderer {
   List<double> _renderLimitLinesBuffer = List(2);
   Rect _limitLineClippingRect = Rect.zero;
 
+  // ignore: unnecessary_getters_setters
   Rect get limitLineClippingRect => _limitLineClippingRect;
 
+  // ignore: unnecessary_getters_setters
   set limitLineClippingRect(Rect value) {
     _limitLineClippingRect = value;
   }
@@ -350,25 +355,38 @@ class YAxisRenderer extends AxisRenderer {
         painter.layout();
         final LimitLabelPosition position = l.labelPosition;
         if (position == LimitLabelPosition.RIGHT_TOP) {
-          painter.paint(
-              c,
-              Offset(viewPortHandler.contentRight() - xOffset - painter.width,
-                  pts[1] - yOffset + labelLineHeight - painter.height));
+          var offset = Offset(
+              viewPortHandler.contentRight() - xOffset - painter.width,
+              pts[1] - yOffset + labelLineHeight - painter.height);
+          CanvasUtils.renderLimitLabelBackground(c, painter, offset, l);
+          painter.paint(c, offset);
         } else if (position == LimitLabelPosition.RIGHT_BOTTOM) {
-          painter.paint(
-              c,
-              Offset(viewPortHandler.contentRight() - xOffset - painter.width,
-                  pts[1] + yOffset - painter.height));
+          var offset = Offset(
+              viewPortHandler.contentRight() - xOffset - painter.width,
+              pts[1] + yOffset - painter.height);
+          CanvasUtils.renderLimitLabelBackground(c, painter, offset, l);
+          painter.paint(c, offset);
+        } else if (position == LimitLabelPosition.RIGHT_CENTER) {
+          var offset = Offset(
+              viewPortHandler.contentRight() - xOffset - painter.width,
+              pts[1] - (l.lineWidth + labelLineHeight) / 2);
+          CanvasUtils.renderLimitLabelBackground(c, painter, offset, l);
+          painter.paint(c, offset);
+        } else if (position == LimitLabelPosition.LEFT_CENTER) {
+          var offset = Offset(viewPortHandler.contentLeft() + xOffset,
+              pts[1] - (l.lineWidth + labelLineHeight) / 2);
+          CanvasUtils.renderLimitLabelBackground(c, painter, offset, l);
+          painter.paint(c, offset);
         } else if (position == LimitLabelPosition.LEFT_TOP) {
-          painter.paint(
-              c,
-              Offset(viewPortHandler.contentLeft() + xOffset - painter.width,
-                  pts[1] - yOffset + labelLineHeight - painter.height));
+          var offset = Offset(viewPortHandler.contentLeft() + xOffset,
+              pts[1] - yOffset + labelLineHeight - painter.height);
+          CanvasUtils.renderLimitLabelBackground(c, painter, offset, l);
+          painter.paint(c, offset);
         } else {
-          painter.paint(
-              c,
-              Offset(viewPortHandler.offsetLeft() + xOffset - painter.width,
-                  pts[1] + yOffset - painter.height));
+          var offset = Offset(viewPortHandler.offsetLeft() + xOffset,
+              pts[1] + yOffset - painter.height);
+          CanvasUtils.renderLimitLabelBackground(c, painter, offset, l);
+          painter.paint(c, offset);
         }
       }
 
@@ -376,14 +394,18 @@ class YAxisRenderer extends AxisRenderer {
     }
   }
 
+  // ignore: unnecessary_getters_setters
   Rect get gridClippingRect => _gridClippingRect;
 
+  // ignore: unnecessary_getters_setters
   set gridClippingRect(Rect value) {
     _gridClippingRect = value;
   }
 
+  // ignore: unnecessary_getters_setters
   Rect get zeroLineClippingRect => _zeroLineClippingRect;
 
+  // ignore: unnecessary_getters_setters
   set zeroLineClippingRect(Rect value) {
     _zeroLineClippingRect = value;
   }

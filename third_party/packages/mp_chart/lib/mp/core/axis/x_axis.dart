@@ -1,4 +1,4 @@
-import 'package:flutter/src/painting/text_painter.dart';
+import 'package:flutter/painting.dart';
 import 'package:mp_chart/mp/core/axis/axis_base.dart';
 import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/utils/painter_utils.dart';
@@ -35,48 +35,61 @@ class XAxis extends AxisBase {
     yOffset = Utils.convertDpToPixel(4);
   }
 
+  // ignore: unnecessary_getters_setters
   XAxisPosition get position => _position;
 
+  // ignore: unnecessary_getters_setters
   set position(XAxisPosition value) {
     _position = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get labelRotationAngle => _labelRotationAngle;
 
+  // ignore: unnecessary_getters_setters
   set labelRotationAngle(double value) {
     _labelRotationAngle = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get avoidFirstLastClipping => _avoidFirstLastClipping;
 
+  // ignore: unnecessary_getters_setters
   set avoidFirstLastClipping(bool value) {
     _avoidFirstLastClipping = value;
   }
 
+  // ignore: unnecessary_getters_setters
   int get labelRotatedHeight => _labelRotatedHeight;
 
+  // ignore: unnecessary_getters_setters
   set labelRotatedHeight(int value) {
     _labelRotatedHeight = value;
   }
 
+  // ignore: unnecessary_getters_setters
   int get labelRotatedWidth => _labelRotatedWidth;
 
+  // ignore: unnecessary_getters_setters
   set labelRotatedWidth(int value) {
     _labelRotatedWidth = value;
   }
 
+  // ignore: unnecessary_getters_setters
   int get labelHeight => _labelHeight;
 
+  // ignore: unnecessary_getters_setters
   set labelHeight(int value) {
     _labelHeight = value;
   }
 
+  // ignore: unnecessary_getters_setters
   int get labelWidth => _labelWidth;
 
+  // ignore: unnecessary_getters_setters
   set labelWidth(int value) {
     _labelWidth = value;
   }
-
 
   int getRequiredHeightSpace(TextPainter p) {
     p = PainterUtils.create(p, null, null, textSize);

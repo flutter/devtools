@@ -54,8 +54,6 @@ void main() {
   });
 
   group('BottomUpProfileTransformer', () {
-    final bottomUpTransformer = BottomUpProfileTransformer();
-
     test('setBottomUpSampleCounts', () {
       void verifySampleCount(CpuStackFrame stackFrame, int targetCount) {
         expect(stackFrame.exclusiveSampleCount, equals(0));
@@ -66,7 +64,7 @@ void main() {
       }
 
       final stackFrame = testStackFrame.deepCopy();
-      bottomUpTransformer.cascadeSampleCounts(stackFrame);
+      BottomUpProfileTransformer.cascadeSampleCounts(stackFrame);
 
       verifySampleCount(stackFrame, 0);
     });
@@ -74,7 +72,7 @@ void main() {
     test('processData step by step', () {
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
       final List<CpuStackFrame> bottomUpRoots =
-          bottomUpTransformer.getRoots(testStackFrame, null, []);
+          BottomUpProfileTransformer.getRoots(testStackFrame, null, []);
 
       // Verify the original stack frame was not modified.
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
@@ -82,7 +80,7 @@ void main() {
       expect(bottomUpRoots.length, equals(6));
 
       // Set the bottom up sample counts for the roots.
-      bottomUpRoots.forEach(bottomUpTransformer.cascadeSampleCounts);
+      bottomUpRoots.forEach(BottomUpProfileTransformer.cascadeSampleCounts);
 
       final buf = StringBuffer();
       for (CpuStackFrame stackFrame in bottomUpRoots) {
@@ -105,7 +103,7 @@ void main() {
     test('processData', () {
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
       final List<CpuStackFrame> bottomUpRoots =
-          bottomUpTransformer.processData(testStackFrame);
+          BottomUpProfileTransformer.processData(testStackFrame);
 
       // Verify the original stack frame was not modified.
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));

@@ -4,10 +4,13 @@
 
 import 'package:flutter/material.dart';
 
+import '../../flutter/banner_messages.dart';
+import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/material_icons.dart';
@@ -15,7 +18,12 @@ import 'memory_chart.dart';
 import 'memory_controller.dart';
 
 class MemoryScreen extends Screen {
-  const MemoryScreen();
+  const MemoryScreen()
+      : super(
+          DevToolsScreenType.memory,
+          title: 'Memory',
+          icon: Octicons.package,
+        );
 
   @visibleForTesting
   static const pauseButtonKey = Key('Pause Button');
@@ -49,14 +57,13 @@ class MemoryScreen extends Screen {
   static const memorySourceMenuItemPrefix = 'Source: ';
 
   @override
-  Widget build(BuildContext context) => const MemoryBody();
+  String get docPageId => 'memory';
 
   @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Memory',
-      icon: Icon(Octicons.package),
-    );
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const MemoryBody()
+        : const DisabledForWebAppMessage();
   }
 }
 
@@ -75,6 +82,7 @@ class MemoryBodyState extends State<MemoryBody> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    maybePushDebugModeMemoryMessage(context, DevToolsScreenType.memory);
 
     final newController = Controllers.of(context).memory;
     if (newController == controller) return;
@@ -256,7 +264,7 @@ class MemoryBodyState extends State<MemoryBody> {
               minIncludeTextWidth: _primaryControlsMinVerboseWidth,
             ),
           ),
-          const SizedBox(width: 16.0),
+          const SizedBox(width: defaultSpacing),
           OutlineButton(
               key: MemoryScreen.clearButtonKey,
               // TODO(terry): Button needs to be Delete for offline data.
@@ -268,7 +276,7 @@ class MemoryBodyState extends State<MemoryBody> {
                 'Clear',
                 minIncludeTextWidth: _primaryControlsMinVerboseWidth,
               )),
-          const SizedBox(width: 16.0),
+          const SizedBox(width: defaultSpacing),
           _intervalDropdown(),
         ],
       ),
@@ -286,7 +294,7 @@ class MemoryBodyState extends State<MemoryBody> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           _memorySourceDropdown(),
-          const SizedBox(width: 16.0),
+          const SizedBox(width: defaultSpacing),
           Flexible(
             child: OutlineButton(
               key: MemoryScreen.snapshotButtonKey,
@@ -320,7 +328,7 @@ class MemoryBodyState extends State<MemoryBody> {
               ),
             ),
           ),
-          const SizedBox(width: 16.0),
+          const SizedBox(width: defaultSpacing),
           Flexible(
             child: OutlineButton(
               key: MemoryScreen.exportButtonKey,

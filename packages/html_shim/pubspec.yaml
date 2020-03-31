@@ -1,9 +1,0 @@
-name: html_shim
-description: Shim that exposes dart:html in a Flutter application throwing exceptions when not run in a browser. This package is only intended to be used as a temporary dependency to package:devtools while porting to Flutter.
-author: Dart Team <misc@dartlang.org>
-homepage: https://github.com/flutter/devtools/tree/master/packages/html_shim
-
-version: 0.0.2
-
-environment:
-  sdk: '>=2.0.0 <3.0.0'

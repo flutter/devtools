@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../flutter/notifications.dart';
-import '_fake_drag_and_drop.dart'
+import '_drag_and_drop_stub.dart'
     if (dart.library.html) '_drag_and_drop_web.dart'
     if (dart.library.io) '_drag_and_drop_desktop.dart';
 
@@ -39,13 +39,6 @@ abstract class DragAndDropState extends State<DragAndDrop> {
   void didChangeDependencies() {
     notifications = Notifications.of(context);
     super.didChangeDependencies();
-  }
-
-  @override
-  void dispose() {
-// TODO(Kenzie): Disabled see issue https://github.com/flutter/devtools/issues/1637.
-//    notifications?.dispose();
-    super.dispose();
   }
 
   @override

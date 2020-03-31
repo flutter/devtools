@@ -1,9 +1,10 @@
 name: devtools_shared
 description: Package of shared structures between devtools_app and devtools_server.
 
-version: 0.2.0
+# Note: this version should only be updated by running tools/update_version.sh
+# that updates all versions of packages from packages/devtools.
+version: 0.2.4-dev.2
 
-author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools
 
 environment:

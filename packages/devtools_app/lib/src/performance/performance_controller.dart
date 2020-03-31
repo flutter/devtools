@@ -4,14 +4,12 @@
 
 import 'dart:async';
 
+import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_model.dart';
-import '../profiler/cpu_profiler_controller.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../utils.dart';
 
-class PerformanceController {
-  final cpuProfilerController = CpuProfilerController();
-
+class PerformanceController with CpuProfilerControllerProviderMixin {
   CpuProfileData get cpuProfileData => cpuProfilerController.dataNotifier.value;
 
   /// Notifies that a CPU profile is currently being recorded.

@@ -10,8 +10,10 @@ class RadarData extends ChartData<IRadarDataSet> {
 
   RadarData.fromList(List<IRadarDataSet> dataSets) : super.fromList(dataSets);
 
+  // ignore: unnecessary_getters_setters
   List<String> get labels => _labels;
 
+  // ignore: unnecessary_getters_setters
   set labels(List<String> value) {
     _labels = value;
   }

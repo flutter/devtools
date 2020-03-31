@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// The DevTools application version.
-// Note: when updating this, please update the corresponding version in the
-// pubspec.
-const String version = '0.1.15';
+// This version should only be updated by running tools/update_version.sh
+// that updates all versions for DevTools.
+// Note: a regexp in tools/update_version.sh matches the following line so
+// if you change it you must also modify tools/update_version.sh.
+const String version = '0.2.4-dev.2';

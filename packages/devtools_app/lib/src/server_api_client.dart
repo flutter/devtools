@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'package:html_shim/html.dart';
+import 'dart:html';
 
 import 'core/sse/sse_shim.dart';
 import 'main.dart';

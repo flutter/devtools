@@ -310,11 +310,15 @@ class MemoryController extends DisposableController
   // 'reset': true to reset the object allocation accumulators
   Future<List<ClassHeapDetailStats>> getAllocationProfile(
       {bool reset = false}) async {
-    final AllocationProfile allocationProfile =
-        await serviceManager.service.getAllocationProfile(
-      _isolateId,
-      reset: reset,
-    );
+    AllocationProfile allocationProfile;
+    try {
+      allocationProfile = await serviceManager.service.getAllocationProfile(
+        _isolateId,
+        reset: reset,
+      );
+    } on SentinelException catch (_) {
+      return [];
+    }
     return allocationProfile.members
         .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
         .where((ClassHeapDetailStats stats) {
@@ -335,13 +339,17 @@ class MemoryController extends DisposableController
       String classRef, String className, int maxInstances) async {
     // TODO(terry): Expose as a stream to reduce stall when querying for 1000s
     // TODO(terry): of instances.
-    final InstanceSet instanceSet = await serviceManager.service.getInstances(
-      _isolateId,
-      classRef,
-      maxInstances,
-      classId: classRef,
-    );
-
+    InstanceSet instanceSet;
+    try {
+      instanceSet = await serviceManager.service.getInstances(
+        _isolateId,
+        classRef,
+        maxInstances,
+        classId: classRef,
+      );
+    } on SentinelException catch (_) {
+      return [];
+    }
     return instanceSet.instances
         .map((ObjRef ref) => InstanceSummary(classRef, className, ref.id))
         .toList();
@@ -1051,7 +1059,7 @@ class MemoryLog {
   MemoryLog(this.controller);
 
   /// Use in memory or local file system based on Flutter Web/Desktop.
-  static final _fs = FileSystem();
+  static final _fs = FileIO();
 
   MemoryController controller;
 

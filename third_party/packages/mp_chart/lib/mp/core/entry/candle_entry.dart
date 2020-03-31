@@ -55,26 +55,34 @@ class CandleEntry extends Entry {
     return c;
   }
 
+  // ignore: unnecessary_getters_setters
   double get open => _open;
 
+  // ignore: unnecessary_getters_setters
   set open(double value) {
     _open = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get close => _close;
 
+  // ignore: unnecessary_getters_setters
   set close(double value) {
     _close = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get shadowLow => _shadowLow;
 
+  // ignore: unnecessary_getters_setters
   set shadowLow(double value) {
     _shadowLow = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get shadowHigh => _shadowHigh;
 
+  // ignore: unnecessary_getters_setters
   set shadowHigh(double value) {
     _shadowHigh = value;
   }

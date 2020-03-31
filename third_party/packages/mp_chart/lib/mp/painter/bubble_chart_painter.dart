@@ -13,6 +13,7 @@ import 'package:mp_chart/mp/core/render/bubble_chart_renderer.dart';
 import 'package:mp_chart/mp/core/render/legend_renderer.dart';
 import 'package:mp_chart/mp/core/render/x_axis_renderer.dart';
 import 'package:mp_chart/mp/core/render/y_axis_renderer.dart';
+import 'package:mp_chart/mp/core/chart_trans_listener.dart';
 import 'package:mp_chart/mp/core/transformer/transformer.dart';
 import 'package:mp_chart/mp/core/view_port.dart';
 import 'package:mp_chart/mp/painter/bar_line_chart_painter.dart';
@@ -21,7 +22,7 @@ class BubbleChartPainter extends BarLineChartBasePainter<BubbleData>
     implements BubbleDataProvider {
   BubbleChartPainter(
       BubbleData data,
-      ChartAnimator animator,
+      Animator animator,
       ViewPortHandler viewPortHandler,
       double maxHighlightDistance,
       bool highLightPerTapEnabled,
@@ -32,6 +33,7 @@ class BubbleChartPainter extends BarLineChartBasePainter<BubbleData>
       IMarker marker,
       Description desc,
       bool drawMarkers,
+      Color infoBgColor,
       TextPainter infoPainter,
       TextPainter descPainter,
       XAxis xAxis,
@@ -65,7 +67,8 @@ class BubbleChartPainter extends BarLineChartBasePainter<BubbleData>
       Transformer rightAxisTransformer,
       XAxisRenderer xAxisRenderer,
       Matrix4 zoomMatrixBuffer,
-      bool customViewPortEnabled)
+      bool customViewPortEnabled,
+      ChartTransListener chartTransListener)
       : super(
             data,
             animator,
@@ -79,6 +82,7 @@ class BubbleChartPainter extends BarLineChartBasePainter<BubbleData>
             marker,
             desc,
             drawMarkers,
+            infoBgColor,
             infoPainter,
             descPainter,
             xAxis,
@@ -112,7 +116,8 @@ class BubbleChartPainter extends BarLineChartBasePainter<BubbleData>
             xAxisRenderer,
             zoomMatrixBuffer,
             customViewPortEnabled,
-            backgroundPaint);
+            backgroundPaint,
+            chartTransListener);
 
   @override
   void initDefaultWithData() {

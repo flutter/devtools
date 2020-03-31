@@ -11,9 +11,9 @@ import '../config_specific/logger/logger.dart';
 import '../framework/html_framework.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/html_elements.dart';
-import 'frames_bar_plotly.dart';
-import 'timeline_controller.dart';
-import 'timeline_model.dart';
+import 'html_frames_bar_plotly.dart';
+import 'html_timeline_controller.dart';
+import 'html_timeline_model.dart';
 
 class FramesBarChart extends CoreElement with HtmlSetStateMixin {
   FramesBarChart(this.timelineController)
@@ -191,7 +191,7 @@ class PlotlyDivGraph extends CoreElement {
 
   // Add current frame data to chunks of data for later plotting.
   void processNextFrame() async {
-    final frame =
+    final TimelineFrame frame =
         timelineController.frameBasedTimeline.frameAddedNotifier.value;
     if (frame == null) return;
 

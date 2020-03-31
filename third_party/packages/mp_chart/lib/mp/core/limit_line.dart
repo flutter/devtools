@@ -1,7 +1,7 @@
 import 'package:flutter/painting.dart';
 import 'package:mp_chart/mp/core/component.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
-import 'package:mp_chart/mp/core/enums/limite_label_postion.dart';
+import 'package:mp_chart/mp/core/enums/limit_label_postion.dart';
 import 'package:mp_chart/mp/core/utils/utils.dart';
 
 class LimitLine extends ComponentBase {
@@ -14,6 +14,10 @@ class LimitLine extends ComponentBase {
   /// the color of the limit line
   Color _lineColor = Color.fromARGB(255, 237, 91, 91);
 
+  Color _backgroundColor = Color.fromARGB(255, 255, 255, 0);
+
+  bool _drawBackground = false;
+
   /// the style of the label text
   PaintingStyle _textStyle = PaintingStyle.fill;
 
@@ -21,7 +25,7 @@ class LimitLine extends ComponentBase {
   String _label = "";
 
   /// the path effect of this LimitLine that makes dashed lines possible
-  DashPathEffect _dashPathEffect = null;
+  DashPathEffect _dashPathEffect;
 
   /// indicates the position of the LimitLine label
   LimitLabelPosition _labelPosition = LimitLabelPosition.RIGHT_TOP;
@@ -42,8 +46,10 @@ class LimitLine extends ComponentBase {
 
   double get lineWidth => _lineWidth;
 
+  // ignore: unnecessary_getters_setters
   Color get lineColor => _lineColor;
 
+  // ignore: unnecessary_getters_setters
   set lineColor(Color value) {
     _lineColor = value;
   }
@@ -70,27 +76,53 @@ class LimitLine extends ComponentBase {
     return _dashPathEffect == null ? false : true;
   }
 
+  // ignore: unnecessary_getters_setters
   DashPathEffect get dashPathEffect => _dashPathEffect;
 
+  // ignore: unnecessary_getters_setters
   set dashPathEffect(DashPathEffect value) {
     _dashPathEffect = value;
   }
 
+  // ignore: unnecessary_getters_setters
   PaintingStyle get textStyle => _textStyle;
 
+  // ignore: unnecessary_getters_setters
   set textStyle(PaintingStyle value) {
     _textStyle = value;
   }
 
+  // ignore: unnecessary_getters_setters
   LimitLabelPosition get labelPosition => _labelPosition;
 
+  // ignore: unnecessary_getters_setters
   set labelPosition(LimitLabelPosition value) {
     _labelPosition = value;
   }
 
+  // ignore: unnecessary_getters_setters
   String get label => _label;
 
+  // ignore: unnecessary_getters_setters
   set label(String value) {
     _label = value;
   }
+
+  // ignore: unnecessary_getters_setters
+  Color get backgroundColor => _backgroundColor;
+
+  // ignore: unnecessary_getters_setters
+  set backgroundColor(Color value) {
+    _backgroundColor = value;
+  }
+
+  // ignore: unnecessary_getters_setters
+  bool get drawBackground => _drawBackground;
+
+  // ignore: unnecessary_getters_setters
+  set drawBackground(bool value) {
+    _drawBackground = value;
+  }
+
+
 }

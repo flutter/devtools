@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
+import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart'
@@ -16,8 +17,7 @@ import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
-import 'package:devtools_app/src/timeline/timeline_model.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
@@ -204,7 +204,11 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
 
   @override
-  Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
+  Future<bool> isHttpTimelineLoggingAvailable(String isolateId) =>
+      Future.value(true);
+
+  @override
+  Future<HttpTimelineLoggingState> getHttpEnableTimelineLogging(
           String isolateId) async =>
       HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult);
 
@@ -248,6 +252,9 @@ class MockVmService extends Mock implements VmServiceWrapper {}
 
 class MockConnectedApp extends Mock implements ConnectedApp {}
 
+class MockBannerMessagesController extends Mock
+    implements BannerMessagesController {}
+
 class MockLoggingController extends Mock implements LoggingController {}
 
 class MockMemoryController extends Mock implements MemoryController {}
@@ -258,9 +265,6 @@ class MockFlutterMemoryController extends Mock
 class MockTimelineController extends Mock implements TimelineController {}
 
 class MockPerformanceController extends Mock implements PerformanceController {}
-
-class MockFrameBasedTimelineData extends Mock
-    implements FrameBasedTimelineData {}
 
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.
@@ -550,5 +554,5 @@ Future<void> ensureInspectorDependencies() async {
 }
 
 void mockIsFlutterApp(MockConnectedApp connectedApp) {
-  when(connectedApp.isAnyFlutterApp).thenAnswer((_) => Future.value(true));
+  when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(true));
 }
