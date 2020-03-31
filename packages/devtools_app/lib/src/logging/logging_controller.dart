@@ -666,13 +666,10 @@ class _StdoutEventHandler {
     }
 
     const maxLength = 200;
+
     String summary = message;
-    var index = summary.indexOf('\n');
-    if (index == -1 && message.length > maxLength) {
-      index = maxLength;
-    }
-    if (index != -1) {
-      summary = message.substring(0, index) + '…';
+    if (message.length > maxLength) {
+      summary = message.substring(0, maxLength);
     }
 
     final LogData data = LogData(
