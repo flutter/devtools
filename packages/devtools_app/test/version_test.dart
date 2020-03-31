@@ -78,7 +78,7 @@ void main() {
         equals(-1),
       );
       expect(
-        version.compareTo(SemanticVersion(major: 1, minor: 1, patch: 0)),
+        version.compareTo(SemanticVersion(major: 1, minor: 1)),
         equals(1),
       );
       expect(

@@ -26,7 +26,7 @@ external void jsHookupListenerForGA();
 Future<bool> get isAnalyticsAllowed async => await ga.isEnabled;
 
 void setAllowAnalytics() {
-  ga.setEnabled(true);
+  ga.setEnabled();
 }
 
 void setDontAllowAnalytics() {
