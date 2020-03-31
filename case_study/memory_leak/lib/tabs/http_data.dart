@@ -44,7 +44,7 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
       case '${StarWars.starWarsVehicles}':
         return StarWars(restfulApi);
       default:
-        return StarWars('${StarWars.starWarsPeople}');
+        return StarWars();
     }
   }
 
