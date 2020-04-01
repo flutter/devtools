@@ -21,6 +21,8 @@ class DebuggerController extends DisposableController
     autoDispose(_service.onDebugEvent.listen(_handleIsolateEvent));
   }
 
+  // TODO(djshuckerow): Separate the controller from a debugging service object
+  // such that the controller does not need to know about VmService.
   VmService get _service => serviceManager.service;
   InstanceRef get reportedException => _reportedException;
 
