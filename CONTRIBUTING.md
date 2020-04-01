@@ -59,6 +59,11 @@ files for the DevTools Flutter app.
 
 You can also try running the app in the Flutter desktop embedder on linux or macos.
 
+*NOTE:* The Linux desktop version only works with the master branch of Flutter.  Synch'ing
+to a the master branch of Flutter may fail with a runner version error. If this occurs run
+`flutter create .` from `devtools/packages/devtools_app`, re-generates files in the linux and
+macos directories.
+
 Depending on your OS, set up like this:
 - `flutter config --enable-macos-desktop`
 - `flutter config --enable-linux-desktop`
