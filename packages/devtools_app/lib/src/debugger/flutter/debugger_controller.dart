@@ -127,7 +127,7 @@ class DebuggerController extends DisposableController
 
   Future<Success> stepOver() {
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
-    final useAsyncStepping = lastEvent?.atAsyncSuspension == true;
+    final useAsyncStepping = lastEvent?.atAsyncSuspension ?? false;
     return _service.resume(
       isolateRef.id,
       step:
@@ -252,7 +252,7 @@ class DebuggerController extends DisposableController
 
       while (index < row.length - 1) {
         if (row.elementAt(index) == tokenPos) {
-          return SourcePosition(line, row.elementAt(index + 1));
+          return SourcePosition(line: line, column: row.elementAt(index + 1));
         }
         index += 2;
       }
@@ -297,7 +297,7 @@ class DebuggerController extends DisposableController
 }
 
 class SourcePosition {
-  SourcePosition(this.line, [this.column]);
+  SourcePosition({@required this.line, @required this.column});
 
   final int line;
   final int column;

@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:devtools_app/src/ui/flutter/label.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
@@ -345,23 +346,38 @@ class DebuggingControls extends StatelessWidget {
         return Row(children: [
           MaterialButton(
             onPressed: isPaused ? null : controller.pause,
-            child: const Text('Pause'),
+            child: MaterialIconLabel(
+              Icons.pause,
+              'Pause',
+            ),
           ),
           MaterialButton(
             onPressed: isPaused ? controller.resume : null,
-            child: const Text('Resume'),
+            child: MaterialIconLabel(
+              Icons.play_arrow,
+              'Resume',
+            ),
           ),
           MaterialButton(
             onPressed: isPaused ? controller.stepIn : null,
-            child: const Text('Step In'),
+            child: MaterialIconLabel(
+              Icons.keyboard_arrow_down,
+              'Step In',
+            ),
           ),
           MaterialButton(
             onPressed: isPaused ? controller.stepOver : null,
-            child: const Text('Step Over'),
+            child: MaterialIconLabel(
+              Icons.keyboard_arrow_right,
+              'Step Over',
+            ),
           ),
           MaterialButton(
             onPressed: isPaused ? controller.stepOut : null,
-            child: const Text('Step Out'),
+            child: MaterialIconLabel(
+              Icons.keyboard_arrow_up,
+              'Step Out',
+            ),
           ),
         ]);
       },
