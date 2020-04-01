@@ -449,7 +449,6 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
     final nextObjectGroup = objectGroupManager.next;
     final node = await nextObjectGroup.getLayoutExplorerNode(
       getRoot(selectedNode),
-      subtreeDepth: 1,
     );
     if (!nextObjectGroup.disposed) {
       assert(objectGroupManager.next == nextObjectGroup);

@@ -14,12 +14,10 @@ void main() {
 
       expect(printMb(10 * MB, 0), '10');
       expect(printMb(10 * MB), '10.0');
-      expect(printMb(10 * MB, 1), '10.0');
       expect(printMb(10 * MB, 2), '10.00');
 
       expect(printMb(1000 * MB, 0), '1000');
       expect(printMb(1000 * MB), '1000.0');
-      expect(printMb(1000 * MB, 1), '1000.0');
       expect(printMb(1000 * MB, 2), '1000.00');
     });
 

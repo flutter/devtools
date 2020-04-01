@@ -890,7 +890,7 @@ class HtmlMemoryScreen extends HtmlScreen with HtmlSetStateMixin {
       vmSearchField.element.focus();
       heapAutoCompletePopup.show();
     } else {
-      heapAutoCompletePopup.matcher.finish(false); // Cancel popup auto-complete
+      heapAutoCompletePopup.matcher.finish(); // Cancel popup auto-complete
     }
   }
 

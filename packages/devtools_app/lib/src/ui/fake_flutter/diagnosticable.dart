@@ -630,7 +630,6 @@ final TextTreeConfiguration whitespaceTextConfiguration = TextTreeConfiguration(
   prefixLastChildLineOne: '',
   prefixOtherLines: ' ',
   prefixOtherLinesRootNode: '  ',
-  bodyIndent: '',
   propertyPrefixIfChildren: '',
   propertyPrefixNoChildren: '',
   linkCharacter: ' ',
@@ -665,7 +664,6 @@ final TextTreeConfiguration flatTextConfiguration = TextTreeConfiguration(
   prefixLastChildLineOne: '',
   prefixOtherLines: '',
   prefixOtherLinesRootNode: '',
-  bodyIndent: '',
   propertyPrefixIfChildren: '',
   propertyPrefixNoChildren: '',
   linkCharacter: '',
@@ -722,7 +720,6 @@ final TextTreeConfiguration errorPropertyTextConfiguration =
   prefixLineOne: '',
   prefixOtherLines: '',
   prefixLastChildLineOne: '',
-  lineBreak: '\n',
   lineBreakProperties: false,
   addBlankLineIfNoChildren: false,
   showChildren: false,
@@ -730,7 +727,6 @@ final TextTreeConfiguration errorPropertyTextConfiguration =
   propertyPrefixNoChildren: '  ',
   linkCharacter: '',
   prefixOtherLinesRootNode: '',
-  afterName: ':',
   isNameOnOwnLine: true,
 );
 
@@ -750,7 +746,6 @@ final TextTreeConfiguration shallowTextConfiguration = TextTreeConfiguration(
   prefixLastChildLineOne: '',
   prefixOtherLines: ' ',
   prefixOtherLinesRootNode: '  ',
-  bodyIndent: '',
   propertyPrefixIfChildren: '',
   propertyPrefixNoChildren: '',
   linkCharacter: ' ',
@@ -1310,7 +1305,7 @@ class TextTreeRenderer {
         if (propertyLines.length == 1 && !config.lineBreakProperties) {
           builder.write(propertyLines.first);
         } else {
-          builder.write(propertyRender, allowWrap: false);
+          builder.write(propertyRender);
           if (!propertyRender.endsWith('\n')) builder.write('\n');
         }
       } else {
@@ -1729,7 +1724,6 @@ abstract class DiagnosticsNode {
     return TextTreeRenderer(
       minLevel: minLevel,
       wrapWidth: 65,
-      wrapWidthProperties: 65,
     ).render(
       this,
       prefixLineOne: prefixLineOne,

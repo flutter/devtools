@@ -46,7 +46,6 @@ void main() {
         recording: false,
         recordedObject: 'fake object',
         processing: false,
-        isPause: false,
       )));
 
       expect(find.byKey(instructionsKey), findsOneWidget);

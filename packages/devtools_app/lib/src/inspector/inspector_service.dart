@@ -790,7 +790,7 @@ class ObjectGroup {
 
   Future<RemoteDiagnosticsNode> getSummaryTreeWithoutIds() {
     return parseDiagnosticsNodeDaemon(
-        invokeServiceMethodDaemon('getRootWidgetSummaryTree', null));
+        invokeServiceMethodDaemon('getRootWidgetSummaryTree'));
   }
 
   Future<RemoteDiagnosticsNode> getRootRenderObject() {
