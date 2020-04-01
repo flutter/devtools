@@ -1,5 +1,5 @@
 name: devtools_app
-description: Main package implementing web-based performance tooling for Dart and Flutter.
+description: Web-based performance tooling for Dart and Flutter.
 
 # Note: this version should only be updated by running tools/update_version.sh
 # that updates all versions of packages from packages/devtools.
