@@ -7,18 +7,27 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../auto_dispose.dart';
 import '../../globals.dart';
 
 /// Responsible for managing the debug state of the app.
-class DebuggerController {
-  VmService _service;
+class DebuggerController extends DisposableController
+    with AutoDisposeControllerMixin {
+  DebuggerController() {
+    switchToIsolate(serviceManager.isolateManager.selectedIsolate);
+    autoDispose(serviceManager.isolateManager.onSelectedIsolateChanged
+        .listen(switchToIsolate));
 
-  StreamSubscription<Event> _debugSubscription;
+    autoDispose(_service.onDebugEvent.listen(_handleIsolateEvent));
+  }
+
+  VmService get _service => serviceManager.service;
+  InstanceRef get reportedException => _reportedException;
 
   IsolateRef isolateRef;
   List<ScriptRef> scripts;
 
-  final Map<String, Script> _scriptCache = <String, Script>{};
+  final _scriptCache = <String, Script>{};
 
   final _isPaused = ValueNotifier<bool>(false);
   ValueListenable<bool> get isPaused => _isPaused;
@@ -48,13 +57,41 @@ class DebuggerController {
 
   InstanceRef _reportedException;
 
-  void setVmService(VmService service) {
-    _service = service;
-    switchToIsolate(serviceManager.isolateManager.selectedIsolate);
+  String commonScriptPrefix;
+  LibraryRef _rootLib;
+  LibraryRef get rootLib => _rootLib;
+  set rootLib(LibraryRef rootLib) {
+    _rootLib = rootLib;
 
-    _debugSubscription = _service.onDebugEvent.listen(_handleIsolateEvent);
-    serviceManager.isolateManager.onSelectedIsolateChanged
-        .listen(switchToIsolate);
+    String scriptPrefix = rootLib.uri;
+    if (scriptPrefix.startsWith('package:')) {
+      scriptPrefix = scriptPrefix.substring(0, scriptPrefix.indexOf('/') + 1);
+    } else if (scriptPrefix.contains('/lib/')) {
+      scriptPrefix =
+          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/lib/'));
+      if (scriptPrefix.contains('/')) {
+        scriptPrefix =
+            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
+      }
+    } else if (scriptPrefix.contains('/bin/')) {
+      scriptPrefix =
+          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/bin/'));
+      if (scriptPrefix.contains('/')) {
+        scriptPrefix =
+            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
+      }
+    } else if (scriptPrefix.contains('/test/')) {
+      scriptPrefix =
+          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/test/'));
+      if (scriptPrefix.contains('/')) {
+        scriptPrefix =
+            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
+      }
+    } else {
+      scriptPrefix = null;
+    }
+
+    commonScriptPrefix = scriptPrefix;
   }
 
   void switchToIsolate(IsolateRef ref) async {
@@ -69,21 +106,19 @@ class DebuggerController {
       return;
     }
 
-    final dynamic result = await _service.getIsolate(isolateRef.id);
-    if (result is Isolate) {
-      final Isolate isolate = result;
+    final result = await _service.getIsolate(isolateRef.id);
+    final Isolate isolate = result;
 
-      if (isolate.pauseEvent != null &&
-          isolate.pauseEvent.kind != EventKind.kResume) {
-        lastEvent = isolate.pauseEvent;
-        _reportedException = isolate.pauseEvent.exception;
-        _isPaused.value = true;
-      }
-
-      _breakpoints.value = isolate.breakpoints;
-
-      _exceptionPauseMode.value = isolate.exceptionPauseMode;
+    if (isolate.pauseEvent != null &&
+        isolate.pauseEvent.kind != EventKind.kResume) {
+      lastEvent = isolate.pauseEvent;
+      _reportedException = isolate.pauseEvent.exception;
+      _isPaused.value = true;
     }
+
+    _breakpoints.value = isolate.breakpoints;
+
+    _exceptionPauseMode.value = isolate.exceptionPauseMode;
   }
 
   Future<Success> pause() => _service.pause(isolateRef.id);
@@ -92,11 +127,12 @@ class DebuggerController {
 
   Future<Success> stepOver() {
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
-    final bool useAsyncStepping = lastEvent?.atAsyncSuspension == true;
-    return _service.resume(isolateRef.id,
-        step: useAsyncStepping
-            ? StepOption.kOverAsyncSuspension
-            : StepOption.kOver);
+    final useAsyncStepping = lastEvent?.atAsyncSuspension == true;
+    return _service.resume(
+      isolateRef.id,
+      step:
+          useAsyncStepping ? StepOption.kOverAsyncSuspension : StepOption.kOver,
+    );
   }
 
   Future<Success> stepIn() {
@@ -108,7 +144,7 @@ class DebuggerController {
   }
 
   Future<void> clearBreakpoints() async {
-    final List<Breakpoint> breakpoints = _breakpoints.value.toList();
+    final breakpoints = _breakpoints.value.toList();
     await Future.forEach(breakpoints, (Breakpoint breakpoint) {
       return removeBreakpoint(breakpoint);
     });
@@ -119,7 +155,7 @@ class DebuggerController {
   }
 
   Future<void> addBreakpointByPathFragment(String path, int line) async {
-    final ScriptRef ref =
+    final ref =
         scripts.firstWhere((ref) => ref.uri.endsWith(path), orElse: () => null);
     if (ref != null) {
       return _service.addBreakpoint(isolateRef.id, ref.id, line);
@@ -140,12 +176,8 @@ class DebuggerController {
     return stack;
   }
 
-  InstanceRef get reportedException => _reportedException;
-
   void _handleIsolateEvent(Event event) {
-    if (event.isolate.id != isolateRef.id) {
-      return;
-    }
+    if (event.isolate.id != isolateRef.id) return;
 
     _hasFrames.value = event.topFrame != null;
     lastEvent = event;
@@ -164,6 +196,8 @@ class DebuggerController {
         _reportedException = event.exception;
         _isPaused.value = true;
         break;
+      // TODO(djshuckerow): switch the _breakpoints notifier to a 'ListNotifier'
+      // that knows how to notify when performing a list edit operation.
       case EventKind.kBreakpointAdded:
         _breakpoints.value = [..._breakpoints.value, event.breakpoint];
         break;
@@ -187,14 +221,10 @@ class DebuggerController {
     _reportedException = null;
   }
 
-  void dispose() {
-    _debugSubscription?.cancel();
-  }
-
   /// Get the populated [Instance] object, given an [InstanceRef].
   ///
   /// The return value can be one of [Instance] or [Sentinel].
-  Future<dynamic> getInstance(InstanceRef instanceRef) {
+  Future<Object> getInstance(InstanceRef instanceRef) {
     return _service.getObject(isolateRef.id, instanceRef.id);
   }
 
@@ -231,44 +261,7 @@ class DebuggerController {
     return null;
   }
 
-  String commonScriptPrefix;
-  LibraryRef rootLib;
-
-  void setRootLib(LibraryRef rootLib) {
-    this.rootLib = rootLib;
-
-    String scriptPrefix = rootLib.uri;
-    if (scriptPrefix.startsWith('package:')) {
-      scriptPrefix = scriptPrefix.substring(0, scriptPrefix.indexOf('/') + 1);
-    } else if (scriptPrefix.contains('/lib/')) {
-      scriptPrefix =
-          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/lib/'));
-      if (scriptPrefix.contains('/')) {
-        scriptPrefix =
-            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
-      }
-    } else if (scriptPrefix.contains('/bin/')) {
-      scriptPrefix =
-          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/bin/'));
-      if (scriptPrefix.contains('/')) {
-        scriptPrefix =
-            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
-      }
-    } else if (scriptPrefix.contains('/test/')) {
-      scriptPrefix =
-          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/test/'));
-      if (scriptPrefix.contains('/')) {
-        scriptPrefix =
-            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
-      }
-    } else {
-      scriptPrefix = null;
-    }
-
-    commonScriptPrefix = scriptPrefix;
-  }
-
-  int getLineNumber(Script script, dynamic location) {
+  int lineNumber(Script script, dynamic location) {
     if (script == null || location == null) {
       return null;
     }
@@ -282,7 +275,7 @@ class DebuggerController {
     );
   }
 
-  String getShortScriptName(String uri) {
+  String shortScriptName(String uri) {
     if (commonScriptPrefix == null) {
       return uri;
     }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
@@ -57,7 +59,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     super.initState();
     // TODO(djshuckerow): promote this controller to app-level Controllers.
     controller = DebuggerController();
-    controller.setVmService(serviceManager.service);
     addAutoDisposeListener(controller.isPaused, _onPaused);
     addAutoDisposeListener(controller.breakpoints);
     // TODO(djshuckerow): Make the loading process disposable.
@@ -110,7 +111,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final bps = controller.breakpoints.value
         .where((b) => b != null && getScriptId(b) == script.id);
     return {
-      for (var b in bps) controller.getLineNumber(script, b.location): b,
+      for (var b in bps) controller.lineNumber(script, b.location): b,
     };
   }
 
@@ -138,6 +139,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             Expanded(
               child: BreakpointPicker(
                 breakpoints: controller.breakpoints.value,
+                controller: controller,
               ),
             ),
             const Divider(),
@@ -167,7 +169,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                       script: script,
                       stack: stack,
                       controller: controller,
-                      breakpoints: getBreakpointsForLines(),
+                      lineNumberToBreakpoint: getBreakpointsForLines(),
                       onSelected: toggleBreakpoint,
                     ),
             ),
@@ -179,7 +181,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 }
 
 class BreakpointPicker extends StatelessWidget {
-  const BreakpointPicker({Key key, this.breakpoints, this.controller})
+  const BreakpointPicker(
+      {Key key, @required this.breakpoints, @required this.controller})
       : super(key: key);
   final List<Breakpoint> breakpoints;
   final DebuggerController controller;
@@ -220,7 +223,11 @@ class BreakpointPicker extends StatelessWidget {
 
 /// Picker that takes a [ScriptList] and allows selection of one of the scripts inside.
 class ScriptPicker extends StatefulWidget {
-  const ScriptPicker({Key key, this.scripts, this.onSelected, this.selected})
+  const ScriptPicker(
+      {Key key,
+      @required this.scripts,
+      @required this.onSelected,
+      @required this.selected})
       : super(key: key);
 
   final ScriptList scripts;
@@ -329,6 +336,7 @@ class DebuggingControls extends StatelessWidget {
       : super(key: key);
 
   final DebuggerController controller;
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
@@ -362,17 +370,17 @@ class DebuggingControls extends StatelessWidget {
 }
 
 class CodeView extends StatefulWidget {
-  const CodeView(
-      {Key key,
-      this.script,
-      this.stack,
-      this.controller,
-      this.onSelected,
-      this.breakpoints})
-      : super(key: key);
+  const CodeView({
+    Key key,
+    this.script,
+    this.stack,
+    this.controller,
+    this.onSelected,
+    this.lineNumberToBreakpoint,
+  }) : super(key: key);
 
   final DebuggerController controller;
-  final Map<int, Breakpoint> breakpoints;
+  final Map<int, Breakpoint> lineNumberToBreakpoint;
   final Script script;
   final Stack stack;
   final void Function(Script script, int line) onSelected;
@@ -426,7 +434,7 @@ class _CodeViewState extends State<CodeView> {
           .where((frame) => frame.location.script.id == widget.script.id);
       pausedPositions = [
         for (var frame in framesInScript)
-          widget.controller.getLineNumber(widget.script, frame.location)
+          widget.controller.lineNumber(widget.script, frame.location)
       ];
     });
 
@@ -467,9 +475,10 @@ class _CodeViewState extends State<CodeView> {
             return ScriptRow(
               group: _horizontalController,
               lineNumber: index,
+              totalLines: lines.length,
               lineContents: lines[index],
               onPressed: () => _onPressed(index),
-              isBreakpoint: widget.breakpoints.containsKey(index),
+              isBreakpoint: widget.lineNumberToBreakpoint.containsKey(index),
               isPausedHere: pausedPositions.contains(index),
             );
           },
@@ -488,18 +497,23 @@ class ScriptRow extends StatefulWidget {
     this.lineNumber,
     this.lineContents,
     this.onPressed,
+    this.totalLines,
     @required this.isPausedHere,
     @required this.isBreakpoint,
   }) : super(key: key);
 
   final int lineNumber;
+  final int totalLines;
   final String lineContents;
   final LinkedScrollControllerGroup group;
   final VoidCallback onPressed;
+  // TODO(djshuckerow): Add support for multiple breakpoints in a line and
+  // different types of decorators than just breakpoints.
   final bool isBreakpoint;
   final bool isPausedHere;
 
   static const rowHeight = 32.0;
+  static const assumedCharacterWidth = 16.0;
 
   @override
   _ScriptRowState createState() => _ScriptRowState();
@@ -531,6 +545,13 @@ class _ScriptRowState extends State<ScriptRow> {
 
   @override
   Widget build(BuildContext context) {
+    // Apply the log change-of-base formula, then add 16dp
+    // padding for every digit in the maximum number of lines.
+    final gutterWidth = widget.totalLines == 0
+        ? ScriptRow.assumedCharacterWidth
+        : ScriptRow.assumedCharacterWidth *
+            (math.log(widget.totalLines) / math.ln10);
+
     return Container(
       alignment: Alignment.centerLeft,
       height: ScriptRow.rowHeight,
@@ -542,8 +563,7 @@ class _ScriptRowState extends State<ScriptRow> {
           controller: linkedController,
           children: [
             Container(
-              // TODO(djshuckerow): Measure the longest line number for sizing.
-              width: 48.0,
+              width: gutterWidth,
               padding: const EdgeInsets.only(left: 4.0),
               decoration: widget.isBreakpoint
                   ? BoxDecoration(

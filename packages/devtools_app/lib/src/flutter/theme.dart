@@ -15,15 +15,16 @@ ThemeData themeFor({@required bool isDarkTheme}) {
 ThemeData _darkTheme() {
   final theme = ThemeData.dark();
   return theme.copyWith(
-      primaryColor: devtoolsGrey[900],
-      primaryColorDark: devtoolsBlue[700],
-      primaryColorLight: devtoolsBlue[400],
-      indicatorColor: devtoolsBlue[400],
-      accentColor: devtoolsBlue[400],
-      backgroundColor: devtoolsGrey[600],
-      toggleableActiveColor: devtoolsBlue[400],
-      selectedRowColor: devtoolsGrey[600],
-      buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth));
+    primaryColor: devtoolsGrey[900],
+    primaryColorDark: devtoolsBlue[700],
+    primaryColorLight: devtoolsBlue[400],
+    indicatorColor: devtoolsBlue[400],
+    accentColor: devtoolsBlue[400],
+    backgroundColor: devtoolsGrey[600],
+    toggleableActiveColor: devtoolsBlue[400],
+    selectedRowColor: devtoolsGrey[600],
+    buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
+  );
 }
 
 ThemeData _lightTheme() {
