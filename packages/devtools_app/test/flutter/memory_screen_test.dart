@@ -92,7 +92,7 @@ void main() {
       splitFinder = find.byType(Split);
       expect(splitFinder, findsOneWidget);
       final Split splitter = tester.widget(splitFinder);
-      expect(splitter.initialFirstFraction, equals(0.40));
+      expect(splitter.initialFractions[0], equals(0.40));
 
       // Check memory sources available.
       await tester.tap(find.byKey(MemoryScreen.dropdownSourceMenuButtonKey));

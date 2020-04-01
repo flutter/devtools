@@ -154,14 +154,16 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         Expanded(
           child: Split(
             axis: splitAxis,
-            initialFirstFraction: 0.40,
-            firstChild: summaryTree,
-            secondChild: InspectorDetailsTabController(
-              detailsTree: detailsTree,
-              controller: inspectorController,
-              actionButtons: _expandCollapseButtons(),
-              layoutExplorerSupported: _layoutExplorerSupported,
-            ),
+            initialFractions: const [0.40, 0.60],
+            children: [
+              summaryTree,
+              InspectorDetailsTabController(
+                detailsTree: detailsTree,
+                controller: inspectorController,
+                actionButtons: _expandCollapseButtons(),
+                layoutExplorerSupported: _layoutExplorerSupported,
+              ),
+            ],
           ),
         ),
       ],

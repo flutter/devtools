@@ -79,23 +79,25 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
   Widget build(BuildContext context) {
     return Split(
       axis: Axis.horizontal,
-      initialFirstFraction: 0.25,
+      initialFractions: const [0.25, 0.75],
       // TODO(https://github.com/flutter/devtools/issues/1648): Debug panes.
-      firstChild: OutlinedBorder(
-        child: ScriptPicker(
-          scripts: scriptList,
-          onSelected: onScriptSelected,
-          selected: loadingScript,
+      children: [
+        OutlinedBorder(
+          child: ScriptPicker(
+            scripts: scriptList,
+            onSelected: onScriptSelected,
+            selected: loadingScript,
+          ),
         ),
-      ),
-      // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
-      secondChild: OutlinedBorder(
-        child: loadingScript != null && script == null
-            ? const Center(child: CircularProgressIndicator())
-            : CodeView(
-                script: script,
-              ),
-      ),
+        // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
+        OutlinedBorder(
+          child: loadingScript != null && script == null
+              ? const Center(child: CircularProgressIndicator())
+              : CodeView(
+                  script: script,
+                ),
+        ),
+      ],
     );
   }
 }

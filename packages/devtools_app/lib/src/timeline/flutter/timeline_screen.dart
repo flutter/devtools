@@ -137,9 +137,11 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         Expanded(
           child: Split(
             axis: Axis.vertical,
-            firstChild: _buildFlameChartSection(selectedEvent),
-            secondChild: EventDetails(selectedEvent),
-            initialFirstFraction: 0.6,
+            initialFractions: const [0.6, 0.4],
+            children: [
+              _buildFlameChartSection(selectedEvent),
+              EventDetails(selectedEvent),
+            ],
           ),
         ),
       ],
