@@ -49,7 +49,6 @@ class StatusLine extends StatelessWidget {
       if (pageStatus != null) {
         children.add(Expanded(
           child: Align(
-            alignment: Alignment.center,
             child: buildPageStatus(context, currentScreen, textTheme),
           ),
         ));
@@ -61,7 +60,6 @@ class StatusLine extends StatelessWidget {
     if (currentScreen != null && currentScreen.showIsolateSelector) {
       children.add(Expanded(
         child: Align(
-          alignment: Alignment.center,
           child: buildIsolateSelector(context, textTheme),
         ),
       ));

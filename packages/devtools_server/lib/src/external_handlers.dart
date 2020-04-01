@@ -10,7 +10,9 @@ import 'dart:isolate';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
+import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf;
+import 'package:shelf_proxy/shelf_proxy.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:sse/server/sse_handler.dart';
 
@@ -25,40 +27,83 @@ import 'usage.dart';
 ///
 /// This serves files out from the build results of running a pub build of the
 /// DevTools project.
-Future<shelf.Handler> defaultHandler(ClientManager clients) async {
+Future<shelf.Handler> defaultHandler(
+  ClientManager clients, {
+  bool debugMode = false,
+}) async {
   final resourceUri = await Isolate.resolvePackageUri(
       Uri(scheme: 'package', path: 'devtools/devtools.dart'));
 
   final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
 
   // Default static handler for all non-package requests.
-  final buildDir = path.join(packageDir, 'build');
-  final buildHandler = createStaticHandler(
-    buildDir,
-    defaultDocument: 'index.html',
-  );
+  Handler buildDirHandler;
+  if (!debugMode) {
+    buildDirHandler = createStaticHandler(
+      path.join(packageDir, 'build'),
+      defaultDocument: 'index.html',
+    );
+  }
+
+  Handler debugProxyHandler;
+  if (debugMode) {
+    // Start up a flutter run -d web-server instance.
+
+    const webPort = 9101;
+
+    // ignore: unawaited_futures
+    Process.start(
+      'flutter',
+      ['run', '-d', 'web-server', '--web-port=$webPort'],
+      workingDirectory: path.join('..', 'devtools_app'),
+    ).then((Process process) {
+      // Write all flutter run process output to the server's output.
+      process
+        ..stdout.transform(utf8.decoder).listen(stdout.write)
+        ..stderr.transform(utf8.decoder).listen(stderr.write);
+
+      // Proxy all stdin to the flutter run process's input.
+      //stdin.pipe(process.stdin);
+      stdin
+        ..lineMode = false
+        ..listen((event) => process.stdin.add(event));
+
+      // Exit when the flutter run process exits.
+      process.exitCode.then(exit);
+    });
+
+    debugProxyHandler = proxyHandler(Uri.parse('http://localhost:$webPort/'));
+  }
 
   // The packages folder is renamed in the pub package so this handler serves
   // out of the `pack` folder.
-  final packagesDir = path.join(packageDir, 'build', 'pack');
-  final packHandler = createStaticHandler(
-    packagesDir,
-    defaultDocument: 'index.html',
-  );
+  Handler packHandler;
+  if (!debugMode) {
+    packHandler = createStaticHandler(
+      path.join(packageDir, 'build', 'pack'),
+      defaultDocument: 'index.html',
+    );
+  }
 
   final sseHandler = SseHandler(Uri.parse('/api/sse'))
     ..connections.rest.listen(clients.acceptClient);
 
   // Make a handler that delegates based on path.
   final handler = (shelf.Request request) {
-    if (request.url.path.startsWith('packages/')) {
-      // request.change here will strip the `packages` prefix from the path
-      // so it's relative to packHandler's root.
-      return packHandler(request.change(path: 'packages'));
+    if (!debugMode) {
+      if (request.url.path.startsWith('packages/')) {
+        // request.change here will strip the `packages` prefix from the path
+        // so it's relative to packHandler's root.
+        return packHandler(request.change(path: 'packages'));
+      }
     }
 
     if (request.url.path.startsWith('api/sse')) {
       return sseHandler.handler(request);
+    }
+
+    if (request.url.path == 'api/ping') {
+      return shelf.Response(HttpStatus.ok);
     }
 
     // The API handler takes all other calls to api/.
@@ -66,7 +111,11 @@ Future<shelf.Handler> defaultHandler(ClientManager clients) async {
       return ServerApi.handle(request);
     }
 
-    return buildHandler(request);
+    if (debugMode) {
+      return debugProxyHandler(request);
+    } else {
+      return buildDirHandler(request);
+    }
   };
 
   return handler;
@@ -222,6 +271,8 @@ class ServerApi {
 
   // Accessing DevTools usage file e.g., ~/.devtools
   static final DevToolsUsage _devToolsUsage = DevToolsUsage();
+
+  static DevToolsUsage get devToolsPreferences => _devToolsUsage;
 
   /// Logs a page view in the DevTools server.
   ///

@@ -131,52 +131,53 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   Widget build(BuildContext context) {
     return Split(
       axis: Axis.horizontal,
-      initialFirstFraction: 0.25,
+      initialFractions: const [0.25, 0.75],
       // TODO(https://github.com/flutter/devtools/issues/1648): Debug panes.
-      firstChild: OutlinedBorder(
-        child: Column(
-          children: [
-            const Text('Breakpoints'),
-            Expanded(
-              child: BreakpointPicker(
-                breakpoints: controller.breakpoints.value,
+      children: [
+        OutlinedBorder(
+          child: Column(
+            children: [
+              const Text('Breakpoints'),
+              Expanded(
+                child: BreakpointPicker(
+                  breakpoints: controller.breakpoints.value,
+                  controller: controller,
+                ),
+              ),
+              const Divider(),
+              const Text('Scripts'),
+              Expanded(
+                child: ScriptPicker(
+                  scripts: scriptList,
+                  onSelected: onScriptSelected,
+                  selected: loadingScript,
+                ),
+              ),
+            ],
+          ),
+        ),
+        OutlinedBorder(
+          child: Column(
+            children: [
+              DebuggingControls(
                 controller: controller,
               ),
-            ),
-            const Divider(),
-            const Text('Scripts'),
-            Expanded(
-              child: ScriptPicker(
-                scripts: scriptList,
-                onSelected: onScriptSelected,
-                selected: loadingScript,
+              const Divider(height: 0.0),
+              Expanded(
+                child: loadingScript != null && script == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : CodeView(
+                        script: script,
+                        stack: stack,
+                        controller: controller,
+                        lineNumberToBreakpoint: getBreakpointsForLines(),
+                        onSelected: toggleBreakpoint,
+                      ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
-      secondChild: OutlinedBorder(
-        child: Column(
-          children: [
-            DebuggingControls(
-              controller: controller,
-            ),
-            const Divider(height: 0.0),
-            Expanded(
-              child: loadingScript != null && script == null
-                  ? const Center(child: CircularProgressIndicator())
-                  : CodeView(
-                      script: script,
-                      stack: stack,
-                      controller: controller,
-                      lineNumberToBreakpoint: getBreakpointsForLines(),
-                      onSelected: toggleBreakpoint,
-                    ),
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 }
@@ -343,43 +344,46 @@ class DebuggingControls extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller.isPaused,
       builder: (context, isPaused, child) {
-        return Row(children: [
-          MaterialButton(
-            onPressed: isPaused ? null : controller.pause,
-            child: MaterialIconLabel(
-              Icons.pause,
-              'Pause',
+        return ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            MaterialButton(
+              onPressed: isPaused ? null : controller.pause,
+              child: MaterialIconLabel(
+                Icons.pause,
+                'Pause',
+              ),
             ),
-          ),
-          MaterialButton(
-            onPressed: isPaused ? controller.resume : null,
-            child: MaterialIconLabel(
-              Icons.play_arrow,
-              'Resume',
+            MaterialButton(
+              onPressed: isPaused ? controller.resume : null,
+              child: MaterialIconLabel(
+                Icons.play_arrow,
+                'Resume',
+              ),
             ),
-          ),
-          MaterialButton(
-            onPressed: isPaused ? controller.stepIn : null,
-            child: MaterialIconLabel(
-              Icons.keyboard_arrow_down,
-              'Step In',
+            MaterialButton(
+              onPressed: isPaused ? controller.stepIn : null,
+              child: MaterialIconLabel(
+                Icons.keyboard_arrow_down,
+                'Step In',
+              ),
             ),
-          ),
-          MaterialButton(
-            onPressed: isPaused ? controller.stepOver : null,
-            child: MaterialIconLabel(
-              Icons.keyboard_arrow_right,
-              'Step Over',
+            MaterialButton(
+              onPressed: isPaused ? controller.stepOver : null,
+              child: MaterialIconLabel(
+                Icons.keyboard_arrow_right,
+                'Step Over',
+              ),
             ),
-          ),
-          MaterialButton(
-            onPressed: isPaused ? controller.stepOut : null,
-            child: MaterialIconLabel(
-              Icons.keyboard_arrow_up,
-              'Step Out',
+            MaterialButton(
+              onPressed: isPaused ? controller.stepOut : null,
+              child: MaterialIconLabel(
+                Icons.keyboard_arrow_up,
+                'Step Out',
+              ),
             ),
-          ),
-        ]);
+          ],
+        );
       },
     );
   }
@@ -456,7 +460,7 @@ class _CodeViewState extends State<CodeView> {
   void _updatePausedPositions() {
     setState(() {
       final framesInScript = (widget.stack?.frames ?? [])
-          .where((frame) => frame.location.script.id == widget.script.id);
+          .where((frame) => frame.location.script.id == widget.script?.id);
       pausedPositions = [
         for (var frame in framesInScript)
           widget.controller.lineNumber(widget.script, frame.location)

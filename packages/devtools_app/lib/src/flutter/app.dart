@@ -5,8 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
+import '../../devtools.dart' as devtools;
 import '../../src/framework/framework_core.dart';
 import '../debugger/flutter/debugger_screen.dart';
 import '../info/flutter/info_screen.dart';
@@ -24,6 +24,7 @@ import 'initializer.dart';
 import 'notifications.dart';
 import 'scaffold.dart';
 import 'theme.dart';
+import 'utils.dart';
 
 // TODO(bkonyi): remove this bool when page is ready.
 const showNetworkPage = false;
@@ -121,7 +122,7 @@ class DevToolsAppState extends State<DevToolsApp> {
             actions: [
               HotReloadButton(),
               HotRestartButton(),
-              ReportBugAction(),
+              DevToolsInfoAction(),
               OpenSettingsAction(),
             ],
           ),
@@ -176,31 +177,24 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
   }
 }
 
-class ReportBugAction extends StatelessWidget {
+class DevToolsInfoAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionButton(
-      tooltip: 'Report an issue',
+      tooltip: 'Info',
       child: InkWell(
         onTap: () async {
-          // TODO(devoncarew): Support analytics.
-          // ga.select(ga.devToolsMain, ga.feedback);
-
-          const reportIssuesUrl =
-              'https://github.com/flutter/devtools/issues/new';
-          if (await url_launcher.canLaunch(reportIssuesUrl)) {
-            await url_launcher.launch(reportIssuesUrl);
-          } else {
-            Notifications.of(context).push('Unable to open url.');
-            Notifications.of(context).push('File issues at $reportIssuesUrl.');
-          }
+          unawaited(showDialog(
+            context: context,
+            builder: (context) => DevToolsInfoDialog(),
+          ));
         },
         child: Container(
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
           child: Icon(
-            Icons.bug_report,
+            Icons.info,
             size: actionsIconSize,
           ),
         ),
@@ -229,6 +223,68 @@ class OpenSettingsAction extends StatelessWidget {
             Icons.settings,
             size: actionsIconSize,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class DevToolsInfoDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return AlertDialog(
+      actions: [
+        DialogCloseButton(),
+      ],
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ..._header(textTheme, 'DevTools'),
+          _devtoolsInfo(context),
+          const SizedBox(height: defaultSpacing),
+          ..._header(textTheme, 'Feedback'),
+          Wrap(
+            children: [
+              const Text('Encountered an issue? Let us know at '),
+              _createFeedbackLink(context, textTheme),
+              const Text('.')
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _header(TextTheme textTheme, String title) {
+    return [
+      Text(title, style: textTheme.headline6),
+      const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
+    ];
+  }
+
+  Widget _devtoolsInfo(BuildContext context) {
+    return const SelectableText('DevTools version ${devtools.version}');
+  }
+
+  Widget _createFeedbackLink(BuildContext context, TextTheme textTheme) {
+    const urlPath = 'github.com/flutter/devtools/issues';
+
+    return InkWell(
+      onTap: () async {
+        // TODO(devoncarew): Support analytics.
+        // ga.select(ga.devToolsMain, ga.feedback);
+
+        const reportIssuesUrl = 'https://$urlPath';
+        await launchUrl(reportIssuesUrl, context);
+      },
+      child: Text(
+        urlPath,
+        style: textTheme.bodyText2.copyWith(
+          decoration: TextDecoration.underline,
+          color: devtoolsLink,
         ),
       ),
     );
@@ -267,13 +323,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
     return AlertDialog(
       title: const Text('Settings'),
-      actions: <Widget>[
-        FlatButton(
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-          child: const Text('CLOSE'),
-        ),
+      actions: [
+        DialogCloseButton(),
       ],
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -282,7 +333,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           InkWell(
             onTap: _toggleTheme,
             child: Row(
-              children: <Widget>[
+              children: [
                 Checkbox(
                   value: devtools_theme.isDarkTheme,
                   onChanged: (bool value) => _toggleTheme(value),

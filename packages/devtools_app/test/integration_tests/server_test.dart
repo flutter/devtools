@@ -421,7 +421,6 @@ Future<Map<String, dynamic>> _waitForClients({
           (requiredPage == null || clients.any(isOnPage)) &&
           (requiredConnectionState == null || clients.any(hasConnectionState));
     },
-    timeout: const Duration(seconds: 10),
     timeoutMessage: timeoutMessage,
     delay: const Duration(seconds: 1),
   );

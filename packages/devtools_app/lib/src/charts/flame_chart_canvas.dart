@@ -630,8 +630,7 @@ class TimelineGrid {
     }
 
     final firstGridNodeText = msText(
-      const Duration(microseconds: 0),
-      fractionDigits: 1,
+      const Duration(),
     );
 
     // Set canvas styles and handle the first grid node since it will have a

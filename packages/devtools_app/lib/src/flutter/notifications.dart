@@ -132,7 +132,6 @@ class NotificationsState extends State<_NotificationsProvider>
         width: _notificationWidth,
         child: SingleChildScrollView(
           reverse: true,
-          scrollDirection: Axis.vertical,
           child: Column(
             verticalDirection: VerticalDirection.down,
             mainAxisSize: MainAxisSize.min,

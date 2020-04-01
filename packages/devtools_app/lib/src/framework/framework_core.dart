@@ -39,13 +39,13 @@ class FrameworkCore {
     Uri explicitUri,
     @required ErrorReporter errorReporter,
   }) async {
-    final Uri uri = explicitUri ?? _getUriFromQuerystring(url);
     if (serviceManager.hasConnection) {
       // TODO(https://github.com/flutter/devtools/issues/1568): why do we call
       // this multiple times?
       return true;
     }
 
+    final Uri uri = explicitUri ?? _getUriFromQuerystring(url);
     if (uri != null) {
       final finishedCompleter = Completer<void>();
 

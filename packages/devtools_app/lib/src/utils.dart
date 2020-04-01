@@ -613,3 +613,31 @@ extension SortDirectionExtension on SortDirection {
         : SortDirection.ascending;
   }
 }
+
+/// A small double value, used to ensure that comparisons between double are
+/// valid.
+const defaultEpsilon = 1 / 1000;
+
+/// Have a quiet period after a callback to ensure that rapid invocations of a
+/// callback only result in one call.
+class CallbackDwell {
+  CallbackDwell(
+    this.callback, {
+    this.dwell = const Duration(milliseconds: 250),
+  });
+
+  final VoidCallback callback;
+  final Duration dwell;
+
+  Timer _timer;
+
+  void invoke() {
+    if (_timer == null) {
+      _timer = Timer(dwell, () {
+        _timer = null;
+      });
+
+      callback();
+    }
+  }
+}

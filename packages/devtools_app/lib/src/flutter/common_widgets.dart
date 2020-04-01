@@ -337,6 +337,19 @@ class ActionButton extends StatelessWidget {
   }
 }
 
+/// A FlatButton used to close a containing dialog.
+class DialogCloseButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      onPressed: () {
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+      },
+      child: const Text('CLOSE'),
+    );
+  }
+}
+
 /// Toggle button for use as a child of a [ToggleButtons] widget.
 class ToggleButton extends StatelessWidget {
   const ToggleButton({
@@ -481,8 +494,8 @@ class CircularIconButton extends StatelessWidget {
       elevation: 0.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       constraints: const BoxConstraints.tightFor(
-        width: buttonMinWidth,
-        height: buttonMinWidth,
+        width: 24.0,
+        height: 24.0,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
@@ -494,6 +507,7 @@ class CircularIconButton extends StatelessWidget {
       onPressed: onPressed,
       child: Icon(
         icon,
+        size: defaultIconSize,
         color: foregroundColor,
       ),
     );
