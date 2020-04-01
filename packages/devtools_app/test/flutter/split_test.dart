@@ -105,6 +105,22 @@ void main() {
             tester.element(find.byKey(_k3)).size, const Size(312, 600));
       });
 
+      testWidgets('with custom splitters', (WidgetTester tester) async {
+        final split = buildSplit(
+          Axis.horizontal,
+          children: [_w1, _w2, _w3],
+          initialFractions: [0.2, 0.4, 0.4],
+          splitters: [_mediumSplitter, _largeSplitter],
+        );
+        await tester.pumpWidget(wrap(split));
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(148, 600));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(296, 600));
+        expectEqualSizes(
+            tester.element(find.byKey(_k3)).size, const Size(296, 600));
+      });
+
       testWidgets('with initialFraction rounding errors',
           (WidgetTester tester) async {
         const oneThird = 0.333333;
@@ -198,6 +214,22 @@ void main() {
             tester.element(find.byKey(_k2)).size, const Size(800, 232));
         expectEqualSizes(
             tester.element(find.byKey(_k3)).size, const Size(800, 232));
+      });
+
+      testWidgets('with custom splitters', (WidgetTester tester) async {
+        final split = buildSplit(
+          Axis.vertical,
+          children: [_w1, _w2, _w3],
+          initialFractions: [0.2, 0.4, 0.4],
+          splitters: [_mediumSplitter, _largeSplitter],
+        );
+        await tester.pumpWidget(wrap(split));
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(800, 108));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(800, 216));
+        expectEqualSizes(
+            tester.element(find.byKey(_k3)).size, const Size(800, 216));
       });
 
       testWidgets('with initialFraction rounding errors',
@@ -634,11 +666,14 @@ const _k3 = Key('child 3');
 const _w1 = Text('content1', key: _k1);
 const _w2 = Text('content2', key: _k2);
 const _w3 = Text('content3', key: _k3);
+const _mediumSplitter = SizedBox(height: 20, width: 20);
+const _largeSplitter = SizedBox(height: 40, width: 40);
 Split buildSplit(
   Axis axis, {
   @required List<double> initialFractions,
   List<Widget> children,
   List<double> minSizes,
+  List<SizedBox> splitters,
 }) {
   children ??= const [_w1, _w2];
   return Split(
@@ -646,6 +681,7 @@ Split buildSplit(
     children: children,
     initialFractions: initialFractions,
     minSizes: minSizes,
+    splitters: splitters,
   );
 }
 

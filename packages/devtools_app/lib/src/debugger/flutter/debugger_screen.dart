@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/common_widgets.dart';
+import '../../flutter/flex_split_column.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../flutter/theme.dart';
 import '../../globals.dart';
 
 class DebuggerScreen extends Screen {
@@ -41,6 +43,12 @@ class DebuggerScreenBody extends StatefulWidget {
 }
 
 class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
+  static const callStackTitle = 'Call Stack';
+  static const variablesTitle = 'Variables';
+  static const breakpointsTitle = 'Breakpoints';
+  static const librariesTitle = 'Libraries';
+  static const debuggerPaneHeaderHeight = 60.0;
+
   ScriptRef loadingScript;
   Script script;
   ScriptList scriptList;
@@ -82,13 +90,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
       initialFractions: const [0.25, 0.75],
       // TODO(https://github.com/flutter/devtools/issues/1648): Debug panes.
       children: [
-        OutlinedBorder(
-          child: ScriptPicker(
-            scripts: scriptList,
-            onSelected: onScriptSelected,
-            selected: loadingScript,
-          ),
-        ),
+        OutlinedBorder(child: debuggerPanes()),
         // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
         OutlinedBorder(
           child: loadingScript != null && script == null
@@ -98,6 +100,60 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
                 ),
         ),
       ],
+    );
+  }
+
+  Widget debuggerPanes() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final paneWidth = constraints.maxWidth;
+        return FlexSplitColumn(
+          totalHeight: constraints.maxHeight,
+          initialFractions: const [0.25, 0.25, 0.25, 0.25],
+          minSizes: const [0.0, 0.0, 0.0, 0.0],
+          headers: [
+            _debuggerPaneHeader(callStackTitle, paneWidth),
+            _debuggerPaneHeader(variablesTitle, paneWidth),
+            _debuggerPaneHeader(breakpointsTitle, paneWidth),
+            _debuggerPaneHeader(librariesTitle, paneWidth),
+          ],
+          children: [
+            const Center(child: Text('TODO: call stack')),
+            const Center(child: Text('TODO: variables')),
+            const Center(child: Text('TODO: breakpoints')),
+            ScriptPicker(
+              scripts: scriptList,
+              onSelected: onScriptSelected,
+              selected: loadingScript,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  FlexSplitColumnHeader _debuggerPaneHeader(
+    String title,
+    double debuggerPaneWidth,
+  ) {
+    return FlexSplitColumnHeader(
+      height: debuggerPaneHeaderHeight,
+      width: debuggerPaneWidth,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Theme.of(context).focusColor),
+          ),
+          color: Theme.of(context).primaryColor,
+        ),
+        padding: EdgeInsets.only(left: defaultSpacing),
+        alignment: Alignment.centerLeft,
+        height: debuggerPaneHeaderHeight,
+        child: Text(
+          title,
+          style: Theme.of(context).textTheme.headline6,
+        ),
+      ),
     );
   }
 }
@@ -181,29 +237,36 @@ class ScriptPickerState extends State<ScriptPicker> {
       return const Center(child: CircularProgressIndicator());
     }
     final items = _filtered;
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        TextField(
-          controller: filterController,
-          onChanged: updateFilter,
-        ),
-        Expanded(
-          child: Scrollbar(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: ListView.builder(
-                  itemBuilder: (context, index) => _buildScript(items[index]),
-                  itemCount: items.length,
-                  itemExtent: 32.0,
+    return Padding(
+      padding: const EdgeInsets.only(left: denseSpacing),
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Filter',
+              border: UnderlineInputBorder(),
+            ),
+            controller: filterController,
+            onChanged: updateFilter,
+          ),
+          Expanded(
+            child: Scrollbar(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: ListView.builder(
+                    itemBuilder: (context, index) => _buildScript(items[index]),
+                    itemCount: items.length,
+                    itemExtent: 32.0,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
