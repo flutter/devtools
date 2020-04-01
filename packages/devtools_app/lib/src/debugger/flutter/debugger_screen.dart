@@ -211,7 +211,7 @@ class BreakpointPicker extends StatelessWidget {
           width: MediaQuery.of(context).size.width,
           child: ListView.builder(
             itemBuilder: (context, index) => SizedBox(
-              height: ScriptRow.rowHeight,
+              height: _CodeViewState.rowHeight,
               child: Text(textFor(breakpoints[index])),
             ),
             itemCount: breakpoints.length,
@@ -407,16 +407,23 @@ class CodeView extends StatefulWidget {
 
 class _CodeViewState extends State<CodeView> {
   List<String> lines = [];
-  LinkedScrollControllerGroup _horizontalController;
-  ScrollController verticalController;
+  ScrollController _horizontalController;
+  LinkedScrollControllerGroup verticalController;
+  ScrollController gutterController;
+  ScrollController textController;
   // The paused positions in the current [widget.script] from the [widget.stack].
   List<int> pausedPositions;
+
+  static const rowHeight = 32.0;
+  static const assumedCharacterWidth = 16.0;
 
   @override
   void initState() {
     super.initState();
-    verticalController = ScrollController();
-    _horizontalController = LinkedScrollControllerGroup();
+    _horizontalController = ScrollController();
+    verticalController = LinkedScrollControllerGroup();
+    gutterController = verticalController.addAndGet();
+    textController = verticalController.addAndGet();
     _updateLines();
     _updatePausedPositions();
   }
@@ -424,7 +431,9 @@ class _CodeViewState extends State<CodeView> {
   @override
   void dispose() {
     super.dispose();
-    verticalController.dispose();
+    _horizontalController.dispose();
+    gutterController.dispose();
+    textController.dispose();
   }
 
   @override
@@ -456,7 +465,7 @@ class _CodeViewState extends State<CodeView> {
 
     if (pausedPositions.isNotEmpty) {
       verticalController.animateTo(
-        pausedPositions.first * ScriptRow.rowHeight,
+        pausedPositions.first * rowHeight,
         duration: shortDuration,
         curve: defaultCurve,
       );
@@ -479,124 +488,128 @@ class _CodeViewState extends State<CodeView> {
         ),
       );
     }
+    // Apply the log change-of-base formula, then add 16dp
+    // padding for every digit in the maximum number of lines.
+    final gutterWidth = lines.isEmpty
+        ? _CodeViewState.assumedCharacterWidth
+        : _CodeViewState.assumedCharacterWidth *
+            (math.log(lines.length) / math.ln10);
     return DefaultTextStyle(
       style: Theme.of(context)
           .textTheme
           .bodyText2
           .copyWith(fontFamily: 'RobotoMono'),
       child: Scrollbar(
-        child: ListView.builder(
-          controller: verticalController,
-          itemBuilder: (context, index) {
-            return ScriptRow(
-              group: _horizontalController,
-              lineNumber: index,
-              totalLines: lines.length,
-              lineContents: lines[index],
-              onPressed: () => _onPressed(index),
-              isBreakpoint: widget.lineNumberToBreakpoint.containsKey(index),
-              isPausedHere: pausedPositions.contains(index),
-            );
-          },
-          itemCount: lines.length,
-          itemExtent: ScriptRow.rowHeight,
+        child: Row(
+          children: [
+            SizedBox(
+              width: gutterWidth,
+              child: ListView(
+                controller: gutterController,
+                children: [
+                  for (var i = 0; i < lines.length; i++)
+                    GutterRow(
+                      lineNumber: i,
+                      totalLines: lines.length,
+                      onPressed: () => _onPressed(i),
+                      isBreakpoint:
+                          widget.lineNumberToBreakpoint.containsKey(i),
+                    ),
+                ],
+                itemExtent: rowHeight,
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                controller: _horizontalController,
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: assumedCharacterWidth *
+                      lines
+                          .map((s) => s.length)
+                          .reduce((a, b) => math.max(a, b)),
+                  child: ListView(
+                    controller: textController,
+                    children: [
+                      for (var i = 0; i < lines.length; i++)
+                        ScriptRow(
+                          lineContents: lines[i],
+                          onPressed: () => _onPressed(i),
+                          isPausedHere: pausedPositions.contains(i),
+                        )
+                    ],
+                    itemExtent: rowHeight,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class ScriptRow extends StatefulWidget {
-  const ScriptRow({
+class GutterRow extends StatelessWidget {
+  const GutterRow({
     Key key,
-    this.group,
-    this.lineNumber,
-    this.lineContents,
-    this.onPressed,
-    this.totalLines,
-    @required this.isPausedHere,
+    @required this.lineNumber,
+    @required this.totalLines,
+    @required this.onPressed,
     @required this.isBreakpoint,
   }) : super(key: key);
-
   final int lineNumber;
   final int totalLines;
-  final String lineContents;
-  final LinkedScrollControllerGroup group;
   final VoidCallback onPressed;
   // TODO(djshuckerow): Add support for multiple breakpoints in a line and
   // different types of decorators than just breakpoints.
   final bool isBreakpoint;
-  final bool isPausedHere;
-
-  static const rowHeight = 32.0;
-  static const assumedCharacterWidth = 16.0;
-
-  @override
-  _ScriptRowState createState() => _ScriptRowState();
-}
-
-class _ScriptRowState extends State<ScriptRow> {
-  ScrollController linkedController;
-
-  @override
-  void initState() {
-    super.initState();
-    linkedController = widget.group.addAndGet();
-  }
-
-  @override
-  void didUpdateWidget(ScriptRow oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.group != oldWidget.group) {
-      linkedController.dispose();
-      linkedController = widget.group.addAndGet();
-    }
-  }
-
-  @override
-  void dispose() {
-    linkedController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    // Apply the log change-of-base formula, then add 16dp
-    // padding for every digit in the maximum number of lines.
-    final gutterWidth = widget.totalLines == 0
-        ? ScriptRow.assumedCharacterWidth
-        : ScriptRow.assumedCharacterWidth *
-            (math.log(widget.totalLines) / math.ln10);
-
-    return Container(
-      alignment: Alignment.centerLeft,
-      height: ScriptRow.rowHeight,
-      color: widget.isPausedHere ? Theme.of(context).selectedRowColor : null,
-      child: InkWell(
-        onTap: widget.onPressed,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          controller: linkedController,
-          children: [
-            Container(
-              width: gutterWidth,
-              padding: const EdgeInsets.only(left: 4.0),
-              decoration: widget.isBreakpoint
-                  ? BoxDecoration(
-                      border: Border.all(color: Theme.of(context).accentColor),
-                      color: Theme.of(context).primaryColorDark,
-                    )
-                  : BoxDecoration(color: Theme.of(context).primaryColorDark),
-              child: Text(
-                '${widget.lineNumber}',
-                style: TextStyle(
-                  color: Theme.of(context).primaryTextTheme.bodyText2.color,
-                ),
-              ),
-            ),
-            Text(widget.lineContents),
-          ],
+    return InkWell(
+      onTap: onPressed,
+      child: Container(
+        height: _CodeViewState.rowHeight,
+        padding: const EdgeInsets.only(left: 4.0),
+        decoration: isBreakpoint
+            ? BoxDecoration(
+                border: Border.all(color: Theme.of(context).accentColor),
+                color: Theme.of(context).primaryColorDark,
+              )
+            : BoxDecoration(color: Theme.of(context).primaryColorDark),
+        child: Text(
+          '$lineNumber',
+          style: TextStyle(
+            color: Theme.of(context).primaryTextTheme.bodyText2.color,
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class ScriptRow extends StatelessWidget {
+  const ScriptRow({
+    Key key,
+    @required this.lineContents,
+    @required this.onPressed,
+    @required this.isPausedHere,
+  }) : super(key: key);
+
+  final String lineContents;
+  final VoidCallback onPressed;
+  final bool isPausedHere;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onPressed,
+      child: Container(
+        alignment: Alignment.centerLeft,
+        height: _CodeViewState.rowHeight,
+        color: isPausedHere ? Theme.of(context).selectedRowColor : null,
+        child: Text(lineContents),
       ),
     );
   }
