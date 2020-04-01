@@ -158,6 +158,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         ),
         OutlinedBorder(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               DebuggingControls(
                 controller: controller,
@@ -339,50 +340,55 @@ class DebuggingControls extends StatelessWidget {
 
   final DebuggerController controller;
 
+  static const controlsHeight = 56.0;
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: controller.isPaused,
       builder: (context, isPaused, child) {
-        return ListView(
-          scrollDirection: Axis.horizontal,
-          children: [
-            MaterialButton(
-              onPressed: isPaused ? null : controller.pause,
-              child: MaterialIconLabel(
-                Icons.pause,
-                'Pause',
+        return SizedBox(
+          height: controlsHeight,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              MaterialButton(
+                onPressed: isPaused ? null : controller.pause,
+                child: MaterialIconLabel(
+                  Icons.pause,
+                  'Pause',
+                ),
               ),
-            ),
-            MaterialButton(
-              onPressed: isPaused ? controller.resume : null,
-              child: MaterialIconLabel(
-                Icons.play_arrow,
-                'Resume',
+              MaterialButton(
+                onPressed: isPaused ? controller.resume : null,
+                child: MaterialIconLabel(
+                  Icons.play_arrow,
+                  'Resume',
+                ),
               ),
-            ),
-            MaterialButton(
-              onPressed: isPaused ? controller.stepIn : null,
-              child: MaterialIconLabel(
-                Icons.keyboard_arrow_down,
-                'Step In',
+              MaterialButton(
+                onPressed: isPaused ? controller.stepIn : null,
+                child: MaterialIconLabel(
+                  Icons.keyboard_arrow_down,
+                  'Step In',
+                ),
               ),
-            ),
-            MaterialButton(
-              onPressed: isPaused ? controller.stepOver : null,
-              child: MaterialIconLabel(
-                Icons.keyboard_arrow_right,
-                'Step Over',
+              MaterialButton(
+                onPressed: isPaused ? controller.stepOver : null,
+                child: MaterialIconLabel(
+                  Icons.keyboard_arrow_right,
+                  'Step Over',
+                ),
               ),
-            ),
-            MaterialButton(
-              onPressed: isPaused ? controller.stepOut : null,
-              child: MaterialIconLabel(
-                Icons.keyboard_arrow_up,
-                'Step Out',
+              MaterialButton(
+                onPressed: isPaused ? controller.stepOut : null,
+                child: MaterialIconLabel(
+                  Icons.keyboard_arrow_up,
+                  'Step Out',
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
