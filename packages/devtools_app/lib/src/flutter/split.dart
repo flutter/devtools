@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -25,19 +25,18 @@ class Split extends StatefulWidget {
     @required this.children,
     @required this.initialFractions,
     this.minSizes,
+    this.splitters,
   })  : assert(axis != null),
         assert(children != null && children.length >= 2),
         assert(initialFractions != null && initialFractions.length >= 2),
         assert(children.length == initialFractions.length),
         super(key: key) {
-    var sumFractions = 0.0;
-    for (var fraction in initialFractions) {
-      sumFractions += fraction;
-    }
-    assert((1.0 - sumFractions).abs() < defaultEpsilon);
-
+    _verifyFractionsSumTo1(initialFractions);
     if (minSizes != null) {
       assert(minSizes.length == children.length);
+    }
+    if (splitters != null) {
+      assert(splitters.length == children.length - 1);
     }
   }
 
@@ -64,6 +63,11 @@ class Split extends StatefulWidget {
   /// The minimum size each child is allowed to be.
   final List<double> minSizes;
 
+  /// Splitter widgets to divide [children].
+  ///
+  /// If this is null, a default splitter will be used to divide [children].
+  final List<SizedBox> splitters;
+
   /// The key passed to the divider between children[index] and
   /// children[index + 1].
   ///
@@ -71,8 +75,8 @@ class Split extends StatefulWidget {
   @visibleForTesting
   Key dividerKey(int index) => Key('$this dividerKey $index');
 
-  /// The size of the divider between children in logical pixels (dp, not px).
-  static const double dividerMainAxisSize = 10.0;
+  /// The default size of the divider between children.
+  static const double defaultSplitterSize = 10.0;
 
   static Axis axisFor(BuildContext context, double horizontalAspectRatio) {
     final screenSize = MediaQuery.of(context).size;
@@ -105,16 +109,13 @@ class _SplitState extends State<Split> {
     final width = constraints.maxWidth;
     final height = constraints.maxHeight;
     final axisSize = isHorizontal ? width : height;
-    final crossAxisSize = isHorizontal ? height : width;
-    final numDividers = widget.children.length - 1;
 
     // Size calculation helpers.
     double _minSizeForIndex(int index) =>
         widget.minSizes != null ? widget.minSizes[index] : 0.0;
 
     double _minFractionForIndex(int index) =>
-        _minSizeForIndex(index) /
-        (axisSize - numDividers * Split.dividerMainAxisSize);
+        _minSizeForIndex(index) / (axisSize - _totalSplitterSize());
 
     void _clampFraction(int index) {
       fractions[index] =
@@ -122,8 +123,7 @@ class _SplitState extends State<Split> {
     }
 
     double _sizeForIndex(int index) {
-      final size = (axisSize - numDividers * Split.dividerMainAxisSize) *
-          fractions[index];
+      final size = (axisSize - _totalSplitterSize()) * fractions[index];
       assert(size >= _minSizeForIndex(index));
       return size;
     }
@@ -146,7 +146,7 @@ class _SplitState extends State<Split> {
           final minFractionForIndex = _minFractionForIndex(index);
           if (fractions[index] >= minFractionForIndex) {
             _clampFraction(index);
-            return delta;
+            return startingDelta;
           }
           delta = fractions[index] - minFractionForIndex;
           _clampFraction(index);
@@ -167,7 +167,7 @@ class _SplitState extends State<Split> {
           final minFractionForIndex = _minFractionForIndex(index);
           if (fractions[index] >= minFractionForIndex) {
             _clampFraction(index);
-            return delta;
+            return startingDelta;
           }
           delta = fractions[index] - minFractionForIndex;
           _clampFraction(index);
@@ -193,37 +193,8 @@ class _SplitState extends State<Split> {
           updateSpacingBeforeSplitterIndex(-appliedDelta);
         }
       });
+      _verifyFractionsSumTo1(fractions);
     }
-
-    // TODO(https://github.com/flutter/flutter/issues/43747): use an icon.
-    // The material icon for a drag handle is not currently available.
-    // For now, draw an indicator that is 3 lines running in the direction
-    // of the main axis, like a hamburger menu.
-    // TODO(https://github.com/flutter/devtools/issues/1265): update mouse
-    // to indicate that this is resizable.
-    final dragIndicator = Flex(
-      direction: isHorizontal ? Axis.vertical : Axis.horizontal,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var i = 0; i < min(crossAxisSize / 6.0, 3).floor(); i++)
-          Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: isHorizontal ? 2.0 : 0.0,
-              horizontal: isHorizontal ? 0.0 : 2.0,
-            ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Theme.of(context).dividerColor,
-                borderRadius: BorderRadius.circular(Split.dividerMainAxisSize),
-              ),
-              child: SizedBox(
-                height: isHorizontal ? 2.0 : Split.dividerMainAxisSize - 2.0,
-                width: isHorizontal ? Split.dividerMainAxisSize - 2.0 : 2.0,
-              ),
-            ),
-          ),
-      ],
-    );
 
     final children = <Widget>[];
     for (int i = 0; i < widget.children.length; i++) {
@@ -245,16 +216,81 @@ class _SplitState extends State<Split> {
             // the drag bar. There still appears to be a few frame lag before the
             // drag action triggers which is't ideal but isn't a launch blocker.
             dragStartBehavior: DragStartBehavior.down,
-            child: SizedBox(
-              width: isHorizontal ? Split.dividerMainAxisSize : width,
-              height: isHorizontal ? height : Split.dividerMainAxisSize,
-              child: Center(
-                child: dragIndicator,
-              ),
-            ),
+            child: widget.splitters != null
+                ? widget.splitters[i]
+                : _defaultSplitter(layoutHeight: height, layoutWidth: width),
           ),
       ]);
     }
     return Flex(direction: widget.axis, children: children);
   }
+
+  double _totalSplitterSize() {
+    final numSplitters = widget.children.length - 1;
+    if (widget.splitters == null) {
+      return numSplitters * Split.defaultSplitterSize;
+    } else {
+      var totalSize = 0.0;
+      for (var splitter in widget.splitters) {
+        totalSize += isHorizontal ? splitter.width : splitter.height;
+      }
+      return totalSize;
+    }
+  }
+
+  Widget _defaultSplitter({
+    @required double layoutWidth,
+    @required double layoutHeight,
+  }) {
+    final crossAxisSize = isHorizontal ? layoutHeight : layoutWidth;
+
+    // TODO(https://github.com/flutter/flutter/issues/43747): use an icon.
+    // The material icon for a drag handle is not currently available.
+    // For now, draw an indicator that is 3 lines running in the direction
+    // of the main axis, like a hamburger menu.
+    // TODO(https://github.com/flutter/devtools/issues/1265): update mouse
+    // to indicate that this is resizable.
+    final defaultDragIndicator = Flex(
+      direction: isHorizontal ? Axis.vertical : Axis.horizontal,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < math.min(crossAxisSize / 6.0, 3).floor(); i++)
+          Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: isHorizontal ? 2.0 : 0.0,
+              horizontal: isHorizontal ? 0.0 : 2.0,
+            ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(context).dividerColor,
+                borderRadius: BorderRadius.circular(Split.defaultSplitterSize),
+              ),
+              child: SizedBox(
+                height: isHorizontal ? 2.0 : Split.defaultSplitterSize - 2.0,
+                width: isHorizontal ? Split.defaultSplitterSize - 2.0 : 2.0,
+              ),
+            ),
+          ),
+      ],
+    );
+
+    return SizedBox(
+      width: isHorizontal ? Split.defaultSplitterSize : layoutWidth,
+      height: isHorizontal ? layoutHeight : Split.defaultSplitterSize,
+      child: Center(
+        child: defaultDragIndicator,
+      ),
+    );
+  }
+}
+
+void _verifyFractionsSumTo1(List<double> fractions) {
+  var sumFractions = 0.0;
+  for (var fraction in fractions) {
+    sumFractions += fraction;
+  }
+  assert(
+    (1.0 - sumFractions).abs() < defaultEpsilon,
+    'Fractions should sum to 1.0, but instead sum to $sumFractions:\n$fractions',
+  );
 }
