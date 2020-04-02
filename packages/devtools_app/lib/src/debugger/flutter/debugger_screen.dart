@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
+import '../../flutter/flex_split_column.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
@@ -49,6 +50,12 @@ class DebuggerScreenBody extends StatefulWidget {
 
 class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     with AutoDisposeMixin {
+  static const callStackTitle = 'Call Stack';
+  static const variablesTitle = 'Variables';
+  static const breakpointsTitle = 'Breakpoints';
+  static const librariesTitle = 'Libraries';
+  static const debuggerPaneHeaderHeight = 60.0;
+
   DebuggerController controller;
   ScriptRef loadingScript;
   Script script;
@@ -134,28 +141,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       initialFractions: const [0.25, 0.75],
       // TODO(https://github.com/flutter/devtools/issues/1648): Debug panes.
       children: [
-        OutlinedBorder(
-          child: Column(
-            children: [
-              const Text('Breakpoints'),
-              Expanded(
-                child: BreakpointPicker(
-                  breakpoints: controller.breakpoints.value,
-                  controller: controller,
-                ),
-              ),
-              const Divider(),
-              const Text('Scripts'),
-              Expanded(
-                child: ScriptPicker(
-                  scripts: scriptList,
-                  onSelected: onScriptSelected,
-                  selected: loadingScript,
-                ),
-              ),
-            ],
-          ),
-        ),
+        OutlinedBorder(child: debuggerPanes()),
+        // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
         OutlinedBorder(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -179,6 +166,58 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           ),
         ),
       ],
+    );
+  }
+
+  Widget debuggerPanes() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return FlexSplitColumn(
+          totalHeight: constraints.maxHeight,
+          initialFractions: const [0.25, 0.25, 0.25, 0.25],
+          minSizes: const [0.0, 0.0, 0.0, 0.0],
+          headers: [
+            _debuggerPaneHeader(callStackTitle),
+            _debuggerPaneHeader(variablesTitle),
+            _debuggerPaneHeader(breakpointsTitle),
+            _debuggerPaneHeader(librariesTitle),
+          ],
+          children: [
+            const Center(child: Text('TODO: call stack')),
+            const Center(child: Text('TODO: variables')),
+            BreakpointPicker(
+              breakpoints: controller.breakpoints.value,
+              controller: controller,
+            ),
+            ScriptPicker(
+              scripts: scriptList,
+              onSelected: onScriptSelected,
+              selected: loadingScript,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  FlexSplitColumnHeader _debuggerPaneHeader(String title) {
+    return FlexSplitColumnHeader(
+      height: debuggerPaneHeaderHeight,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Theme.of(context).focusColor),
+          ),
+          color: Theme.of(context).primaryColor,
+        ),
+        padding: const EdgeInsets.only(left: defaultSpacing),
+        alignment: Alignment.centerLeft,
+        height: debuggerPaneHeaderHeight,
+        child: Text(
+          title,
+          style: Theme.of(context).textTheme.headline6,
+        ),
+      ),
     );
   }
 }
@@ -307,29 +346,35 @@ class ScriptPickerState extends State<ScriptPicker> {
       return const Center(child: CircularProgressIndicator());
     }
     final items = _filtered;
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        TextField(
-          controller: filterController,
-          onChanged: updateFilter,
-        ),
-        Expanded(
-          child: Scrollbar(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: ListView.builder(
-                  itemBuilder: (context, index) => _buildScript(items[index]),
-                  itemCount: items.length,
-                  itemExtent: 32.0,
+    return Padding(
+      padding: const EdgeInsets.only(left: denseSpacing),
+      child: Column(
+        children: [
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Filter',
+              border: UnderlineInputBorder(),
+            ),
+            controller: filterController,
+            onChanged: updateFilter,
+          ),
+          Expanded(
+            child: Scrollbar(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: ListView.builder(
+                    itemBuilder: (context, index) => _buildScript(items[index]),
+                    itemCount: items.length,
+                    itemExtent: 32.0,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

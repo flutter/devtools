@@ -175,11 +175,23 @@ class StatusLine extends StatelessWidget {
                 '${vm.targetCPU}-${vm.architectureBits} ${vm.operatingSystem}';
           }
 
-          return Text(
-            'Connected ($description)',
-            style: textTheme.bodyText2,
-            overflow: TextOverflow.clip,
-            //maxLines: 1,
+          // TODO(devoncarew): Add an interactive dialog to the device status
+          // line.
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'Device: $description',
+                style: textTheme.bodyText2,
+                overflow: TextOverflow.clip,
+              ),
+              const SizedBox(width: 2.0),
+              Icon(
+                Icons.phone_android,
+                size: defaultIconSize,
+              ),
+            ],
           );
         } else {
           return Text(
