@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// An abstract implementation of a key value store.
-/// 
+///
 /// We have concrete implementations for Flutter web, Flutter desktop, and
 /// Flutter web when launched from the DevTools server.
 abstract class Storage {
