@@ -15,21 +15,18 @@ void main() {
     const children = [SizedBox(), SizedBox(), SizedBox(), SizedBox()];
     const firstHeaderKey = Key('first header');
     const headers = [
-      FlexSplitColumnHeader(
-        height: 50.0,
-        width: 50.0,
-        child: SizedBox(key: firstHeaderKey),
-      ),
-      FlexSplitColumnHeader(height: 50.0, width: 50.0, child: SizedBox()),
-      FlexSplitColumnHeader(height: 50.0, width: 50.0, child: SizedBox()),
-      FlexSplitColumnHeader(height: 50.0, width: 50.0, child: SizedBox()),
+      FlexSplitColumnHeader(height: 50.0, child: SizedBox(key: firstHeaderKey)),
+      FlexSplitColumnHeader(height: 50.0, child: SizedBox()),
+      FlexSplitColumnHeader(height: 50.0, child: SizedBox()),
+      FlexSplitColumnHeader(height: 50.0, child: SizedBox()),
     ];
     const initialFractions = [0.25, 0.25, 0.25, 0.25];
     const minSizes = [10.0, 10.0, 10.0, 10.0];
     const totalHeight = 1200.0;
 
-    test('adjustInitialFractions', () {
-      final adjustedFractions = FlexSplitColumn.adjustInitialFractions(
+    test('modifyInitialFractionsToIncludeFirstHeader', () {
+      final adjustedFractions =
+          FlexSplitColumn.modifyInitialFractionsToIncludeFirstHeader(
         initialFractions,
         headers,
         totalHeight,
@@ -48,8 +45,9 @@ void main() {
       );
     });
 
-    test('adjustInitialFractions', () {
-      final adjustedFractions = FlexSplitColumn.adjustMinSizes(
+    test('modifyMinSizesToIncludeFirstHeader', () {
+      final adjustedFractions =
+          FlexSplitColumn.modifyMinSizesToIncludeFirstHeader(
         minSizes,
         headers,
       );
@@ -57,15 +55,16 @@ void main() {
           isTrue);
     });
 
-    testWidgets('adjustInitialChildren', (WidgetTester tester) async {
+    testWidgets('buildChildrenWithFirstHeader', (WidgetTester tester) async {
       await tester.pumpWidget(Column(children: children));
       expect(find.byKey(firstHeaderKey), findsNothing);
 
       // Wrap each child in a container so we can build the elements in a
       // arbitrary column to check for [firstHeaderKey].
-      final adjustedChildren = FlexSplitColumn.adjustChildren(children, headers)
-          .map((child) => Container(height: 100.0, child: child))
-          .toList();
+      final adjustedChildren =
+          FlexSplitColumn.buildChildrenWithFirstHeader(children, headers)
+              .map((child) => Container(height: 100.0, child: child))
+              .toList();
       await tester.pumpWidget(Column(children: adjustedChildren));
       expect(find.byKey(firstHeaderKey), findsOneWidget);
     });

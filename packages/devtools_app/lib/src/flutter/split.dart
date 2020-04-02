@@ -31,7 +31,7 @@ class Split extends StatefulWidget {
         assert(initialFractions != null && initialFractions.length >= 2),
         assert(children.length == initialFractions.length),
         super(key: key) {
-    _verifyFractionsSum(initialFractions);
+    _verifyFractionsSumTo1(initialFractions);
     if (minSizes != null) {
       assert(minSizes.length == children.length);
     }
@@ -75,8 +75,7 @@ class Split extends StatefulWidget {
   @visibleForTesting
   Key dividerKey(int index) => Key('$this dividerKey $index');
 
-  /// The default size of the divider between children in logical pixels (dp,
-  /// not px).
+  /// The default size of the divider between children.
   static const double defaultSplitterSize = 10.0;
 
   static Axis axisFor(BuildContext context, double horizontalAspectRatio) {
@@ -194,7 +193,7 @@ class _SplitState extends State<Split> {
           updateSpacingBeforeSplitterIndex(-appliedDelta);
         }
       });
-      _verifyFractionsSum(fractions);
+      _verifyFractionsSumTo1(fractions);
     }
 
     final children = <Widget>[];
@@ -285,7 +284,7 @@ class _SplitState extends State<Split> {
   }
 }
 
-void _verifyFractionsSum(List<double> fractions) {
+void _verifyFractionsSumTo1(List<double> fractions) {
   var sumFractions = 0.0;
   for (var fraction in fractions) {
     sumFractions += fraction;

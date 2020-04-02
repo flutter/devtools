@@ -16,10 +16,10 @@ class FlexSplitColumn extends StatelessWidget {
   })  : assert(children != null && children.length >= 2),
         assert(initialFractions != null && initialFractions.length >= 2),
         assert(children.length == initialFractions.length),
-        adjustedChildren = adjustChildren(children, headers),
-        adjustedInitialFractions =
-            adjustInitialFractions(initialFractions, headers, totalHeight),
-        adjustedMinSizes = adjustMinSizes(minSizes, headers),
+        _children = buildChildrenWithFirstHeader(children, headers),
+        _initialFractions = modifyInitialFractionsToIncludeFirstHeader(
+            initialFractions, headers, totalHeight),
+        _minSizes = modifyMinSizesToIncludeFirstHeader(minSizes, headers),
         super(key: key) {
     if (minSizes != null) {
       assert(minSizes.length == children.length);
@@ -37,35 +37,39 @@ class FlexSplitColumn extends StatelessWidget {
   /// We do this because the first header will not actually be a splitter as
   /// there is not any content above it for it to split.
   ///
-  /// We adjust other values [adjustedChildren], [adjustedInitialFractions], and
-  /// [adjustedMinSizes] to account for the first header. We do this adjustment
-  /// here so that the creators of [FlexSplitColumn] can be unaware of
-  /// the under-the-hood calculations necessary to achieve the UI requirements
-  /// specified by [initialFractions] and [minSizes].
+  /// We modify other values [_children], [_initialFractions], and [_minSizes]
+  /// from [children], [initialFractions], and [minSizes], respectively, to
+  /// account for the first header. We do this adjustment here so that the
+  /// creators of [FlexSplitColumn] can be unaware of the under-the-hood
+  /// calculations necessary to achieve the UI requirements specified by
+  /// [initialFractions] and [minSizes].
   final List<FlexSplitColumnHeader> headers;
 
   /// The children that will be laid out below each corresponding header in
   /// [headers].
   ///
   /// All [children] except the first will be passed into [Split.children]
-  /// unmodified. We need to adjust the first child from [children] to account
+  /// unmodified. We need to modify the first child from [children] to account
   /// for the first header (see above).
-  final List<Widget> adjustedChildren;
+  final List<Widget> _children;
 
   /// The fraction of the layout to allocate to each child in [children].
   ///
-  /// We need to adjust the values given by [initialFractions] to account for
+  /// We need to modify the values given by [initialFractions] to account for
   /// the first header (see above).
-  final List<double> adjustedInitialFractions;
+  final List<double> _initialFractions;
 
   /// The minimum size each child is allowed to be.
-  final List<double> adjustedMinSizes;
+  ///
+  /// We need to modify the values given by [minSizes] to account for the first
+  /// header (see above).
+  final List<double> _minSizes;
 
   /// The total height of the column, including all [headers] and [children].
   final double totalHeight;
 
   @visibleForTesting
-  static List<Widget> adjustChildren(
+  static List<Widget> buildChildrenWithFirstHeader(
     List<Widget> children,
     List<FlexSplitColumnHeader> headers,
   ) {
@@ -81,13 +85,16 @@ class FlexSplitColumn extends StatelessWidget {
   }
 
   @visibleForTesting
-  static List<double> adjustInitialFractions(
+  static List<double> modifyInitialFractionsToIncludeFirstHeader(
     List<double> initialFractions,
     List<FlexSplitColumnHeader> headers,
     double totalHeight,
   ) {
-    final intendedContentHeight = totalHeight -
-        headers.map((header) => header.height).reduce((a, b) => a + b);
+    var totalHeaderHeight = 0.0;
+    for (var header in headers) {
+      totalHeaderHeight += header.height;
+    }
+    final intendedContentHeight = totalHeight - totalHeaderHeight;
     final intendedChildHeights = List<double>.generate(initialFractions.length,
         (i) => intendedContentHeight * initialFractions[i]);
     final trueContentHeight = intendedContentHeight + headers[0].height;
@@ -101,7 +108,7 @@ class FlexSplitColumn extends StatelessWidget {
   }
 
   @visibleForTesting
-  static List<double> adjustMinSizes(
+  static List<double> modifyMinSizesToIncludeFirstHeader(
     List<double> minSizes,
     List<FlexSplitColumnHeader> headers,
   ) {
@@ -115,18 +122,18 @@ class FlexSplitColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Split(
       axis: Axis.vertical,
-      children: adjustedChildren,
-      initialFractions: adjustedInitialFractions,
-      minSizes: adjustedMinSizes,
+      children: _children,
+      initialFractions: _initialFractions,
+      minSizes: _minSizes,
       splitters: headers.sublist(1),
     );
   }
 }
 
+// TODO(kenz): add support for arbitrarily sized widgets.
 class FlexSplitColumnHeader extends SizedBox {
   const FlexSplitColumnHeader({
-    @required double width,
     @required double height,
     @required Widget child,
-  }) : super(width: width, height: height, child: child);
+  }) : super(height: height, child: child);
 }

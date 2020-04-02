@@ -106,16 +106,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
   Widget debuggerPanes() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final paneWidth = constraints.maxWidth;
         return FlexSplitColumn(
           totalHeight: constraints.maxHeight,
           initialFractions: const [0.25, 0.25, 0.25, 0.25],
           minSizes: const [0.0, 0.0, 0.0, 0.0],
           headers: [
-            _debuggerPaneHeader(callStackTitle, paneWidth),
-            _debuggerPaneHeader(variablesTitle, paneWidth),
-            _debuggerPaneHeader(breakpointsTitle, paneWidth),
-            _debuggerPaneHeader(librariesTitle, paneWidth),
+            _debuggerPaneHeader(callStackTitle),
+            _debuggerPaneHeader(variablesTitle),
+            _debuggerPaneHeader(breakpointsTitle),
+            _debuggerPaneHeader(librariesTitle),
           ],
           children: [
             const Center(child: Text('TODO: call stack')),
@@ -132,13 +131,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
     );
   }
 
-  FlexSplitColumnHeader _debuggerPaneHeader(
-    String title,
-    double debuggerPaneWidth,
-  ) {
+  FlexSplitColumnHeader _debuggerPaneHeader(String title) {
     return FlexSplitColumnHeader(
       height: debuggerPaneHeaderHeight,
-      width: debuggerPaneWidth,
       child: Container(
         decoration: BoxDecoration(
           border: Border(
@@ -146,7 +141,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
           ),
           color: Theme.of(context).primaryColor,
         ),
-        padding: EdgeInsets.only(left: defaultSpacing),
+        padding: const EdgeInsets.only(left: defaultSpacing),
         alignment: Alignment.centerLeft,
         height: debuggerPaneHeaderHeight,
         child: Text(
