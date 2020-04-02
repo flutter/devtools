@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../flutter/banner_messages.dart';
+import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
@@ -58,7 +60,11 @@ class MemoryScreen extends Screen {
   String get docPageId => 'memory';
 
   @override
-  Widget build(BuildContext context) => const MemoryBody();
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const MemoryBody()
+        : const DisabledForWebAppMessage();
+  }
 }
 
 class MemoryBody extends StatefulWidget {
@@ -76,6 +82,7 @@ class MemoryBodyState extends State<MemoryBody> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    maybePushDebugModeMemoryMessage(context, DevToolsScreenType.memory);
 
     final newController = Controllers.of(context).memory;
     if (newController == controller) return;
@@ -108,9 +115,11 @@ class MemoryBodyState extends State<MemoryBody> {
         Expanded(
           child: Split(
             axis: Axis.vertical,
-            firstChild: _memoryChart,
-            secondChild: const Text('Memory Panel TBD capacity'),
-            initialFirstFraction: 0.40,
+            initialFractions: const [0.40, 0.60],
+            children: [
+              _memoryChart,
+              const Text('Memory Panel TBD capacity'),
+            ],
           ),
         ),
       ],

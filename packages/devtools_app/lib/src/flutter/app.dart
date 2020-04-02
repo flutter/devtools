@@ -5,8 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
+import '../../devtools.dart' as devtools;
 import '../../src/framework/framework_core.dart';
 import '../debugger/flutter/debugger_screen.dart';
 import '../info/flutter/info_screen.dart';
@@ -24,6 +24,7 @@ import 'notifications.dart';
 import 'preferences.dart';
 import 'scaffold.dart';
 import 'theme.dart';
+import 'utils.dart';
 
 // TODO(bkonyi): remove this bool when page is ready.
 const showNetworkPage = false;
@@ -57,7 +58,6 @@ class DevToolsAppState extends State<DevToolsApp> {
     final uri = Uri.parse(settings.name);
     final path = uri.path;
 
-
     // Provide the appropriate page route.
     if (_routes.containsKey(path)) {
       WidgetBuilder builder =
@@ -80,12 +80,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       settings: settings,
       builder: (BuildContext context) {
         return DevToolsScaffold.withChild(
-          child: Center(
-            child: Text(
-              'Sorry, $uri was not found.',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ),
+          child: CenteredMessage('Sorry, $uri was not found.'),
         );
       },
     );
@@ -109,8 +104,8 @@ class DevToolsAppState extends State<DevToolsApp> {
             actions: [
               HotReloadButton(),
               HotRestartButton(),
-              ReportBugAction(),
               OpenSettingsAction(),
+              OpenAboutAction(),
             ],
           ),
         ),
@@ -162,31 +157,24 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
   }
 }
 
-class ReportBugAction extends StatelessWidget {
+class OpenAboutAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionButton(
-      tooltip: 'Report an issue',
+      tooltip: 'About DevTools',
       child: InkWell(
         onTap: () async {
-          // TODO(devoncarew): Support analytics.
-          // ga.select(ga.devToolsMain, ga.feedback);
-
-          const reportIssuesUrl =
-              'https://github.com/flutter/devtools/issues/new';
-          if (await url_launcher.canLaunch(reportIssuesUrl)) {
-            await url_launcher.launch(reportIssuesUrl);
-          } else {
-            Notifications.of(context).push('Unable to open url.');
-            Notifications.of(context).push('File issues at $reportIssuesUrl.');
-          }
+          unawaited(showDialog(
+            context: context,
+            builder: (context) => DevToolsAboutDialog(),
+          ));
         },
         child: Container(
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
           child: Icon(
-            Icons.bug_report,
+            Icons.info_outline,
             size: actionsIconSize,
           ),
         ),
@@ -221,6 +209,68 @@ class OpenSettingsAction extends StatelessWidget {
   }
 }
 
+List<Widget> _header(TextTheme textTheme, String title) {
+  return [
+    Text(title, style: textTheme.headline6),
+    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
+  ];
+}
+
+class DevToolsAboutDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return AlertDialog(
+      actions: [
+        DialogCloseButton(),
+      ],
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ..._header(textTheme, 'About DevTools'),
+          _aboutDevTools(context),
+          const SizedBox(height: defaultSpacing),
+          ..._header(textTheme, 'Feedback'),
+          Wrap(
+            children: [
+              const Text('Encountered an issue? Let us know at '),
+              _createFeedbackLink(context, textTheme),
+              const Text('.')
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _aboutDevTools(BuildContext context) {
+    return const SelectableText('DevTools version ${devtools.version}');
+  }
+
+  Widget _createFeedbackLink(BuildContext context, TextTheme textTheme) {
+    const urlPath = 'github.com/flutter/devtools/issues';
+
+    return InkWell(
+      onTap: () async {
+        // TODO(devoncarew): Support analytics.
+        // ga.select(ga.devToolsMain, ga.feedback);
+
+        const reportIssuesUrl = 'https://$urlPath';
+        await launchUrl(reportIssuesUrl, context);
+      },
+      child: Text(
+        urlPath,
+        style: textTheme.bodyText2.copyWith(
+          decoration: TextDecoration.underline,
+          color: devtoolsLink,
+        ),
+      ),
+    );
+  }
+}
+
 // TODO(devoncarew): Add an analytics setting.
 
 class SettingsDialog extends StatelessWidget {
@@ -238,19 +288,14 @@ class SettingsDialog extends StatelessWidget {
     }
 
     return AlertDialog(
-      title: const Text('Settings'),
-      actions: <Widget>[
-        FlatButton(
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-          child: const Text('CLOSE'),
-        ),
+      actions: [
+        DialogCloseButton(),
       ],
       content: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Theme setting
+          ..._header(Theme.of(context).textTheme, 'Settings'),
           InkWell(
             onTap: _toggleTheme,
             child: Row(

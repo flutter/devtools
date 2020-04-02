@@ -8,6 +8,7 @@ import 'package:pedantic/pedantic.dart';
 
 import '../../src/framework/framework_core.dart';
 import '../url_utils.dart';
+import '../utils.dart';
 import 'common_widgets.dart';
 import 'navigation.dart';
 import 'notifications.dart';
@@ -72,7 +73,8 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
             const Padding(padding: EdgeInsets.only(top: 20.0)),
             _buildTextInput(),
             const PaddedDivider(padding: EdgeInsets.symmetric(vertical: 10.0)),
-            // TODO(https://github.com/flutter/devtools/issues/1111): support drag-and-drop of snapshot files here.
+            // TODO(https://github.com/flutter/devtools/issues/1111): support
+            // drag-and-drop of snapshot files here.
           ],
         ),
       ],
@@ -80,13 +82,15 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   }
 
   Widget _buildTextInput() {
+    final CallbackDwell connectDebounce = CallbackDwell(_connect);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         SizedBox(
           width: 350.0,
           child: TextField(
-            onSubmitted: _connect,
+            onSubmitted: (str) => connectDebounce.invoke(),
             autofocus: true,
             decoration: const InputDecoration(
               isDense: true,
@@ -106,13 +110,13 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
         ),
         RaisedButton(
           child: const Text('Connect'),
-          onPressed: _connect,
+          onPressed: connectDebounce.invoke,
         ),
       ],
     );
   }
 
-  Future<void> _connect([_]) async {
+  Future<void> _connect() async {
     final uri = normalizeVmServiceUri(controller.text);
     final connected = await FrameworkCore.initVmService(
       '',

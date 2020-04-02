@@ -14,6 +14,7 @@ import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../flutter/table.dart';
 import '../../flutter/theme.dart';
+import '../../globals.dart';
 import '../../table_data.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../../utils.dart';
@@ -40,7 +41,10 @@ class LoggingScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return LoggingScreenBody();
+    return !(serviceManager.connectedApp.isFlutterWebAppNow &&
+            serviceManager.connectedApp.isProfileBuildNow)
+        ? const LoggingScreenBody()
+        : const DisabledForFlutterWebProfileBuildMessage();
   }
 
   @override
@@ -58,6 +62,8 @@ class LoggingScreen extends Screen {
 }
 
 class LoggingScreenBody extends StatefulWidget {
+  const LoggingScreenBody();
+
   @override
   _LoggingScreenState createState() => _LoggingScreenState();
 }
@@ -126,12 +132,14 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       Expanded(
         child: Split(
           axis: Axis.vertical,
-          firstChild: LogsTable(
-            data: controller.filteredData,
-            onItemSelected: _select,
-          ),
-          secondChild: LogDetails(log: selected),
-          initialFirstFraction: 0.78,
+          initialFractions: const [0.78, 0.22],
+          children: [
+            LogsTable(
+              data: controller.filteredData,
+              onItemSelected: _select,
+            ),
+            LogDetails(log: selected),
+          ],
         ),
       ),
     ]);

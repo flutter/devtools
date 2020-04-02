@@ -72,6 +72,12 @@ const devtoolsBlue = ColorSwatch<int>(600, {
   400: Color(0xFF13B9FD),
 });
 
+const devtoolsError = Color(0xFFAF4054);
+
+const devtoolsWarning = Color(0xFFFDFAD5);
+
+const devtoolsLink = ThemedColor(Color(0xFF1976D2), Colors.lightBlueAccent);
+
 /// A short duration to use for animations.
 ///
 /// Use this when you want less emphasis on the animation and more on the

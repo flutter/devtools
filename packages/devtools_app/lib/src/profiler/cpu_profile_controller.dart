@@ -112,3 +112,7 @@ class CpuProfilerController {
     transformer.dispose();
   }
 }
+
+mixin CpuProfilerControllerProviderMixin {
+  final cpuProfilerController = CpuProfilerController();
+}

@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/blocking_action_mixin.dart';
+import '../../flutter/common_widgets.dart';
 import '../../flutter/initializer.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
@@ -34,7 +35,16 @@ class InspectorScreen extends Screen {
   String get docPageId => 'inspector';
 
   @override
-  Widget build(BuildContext context) => const InspectorScreenBody();
+  Widget build(BuildContext context) {
+    final isFlutterApp = serviceManager.connectedApp.isFlutterAppNow;
+    final isProfileBuild = serviceManager.connectedApp.isProfileBuildNow;
+    if (!isFlutterApp || isProfileBuild) {
+      return !isFlutterApp
+          ? const DisabledForNonFlutterAppMessage()
+          : const DisabledForProfileBuildMessage();
+    }
+    return const InspectorScreenBody();
+  }
 }
 
 class InspectorScreenBody extends StatefulWidget {
@@ -101,7 +111,6 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
     );
     final detailsTree = InspectorTree(
       controller: detailsTreeController,
-      isSummaryTree: false,
     );
 
     final splitAxis = Split.axisFor(context, 0.85);
@@ -145,14 +154,16 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         Expanded(
           child: Split(
             axis: splitAxis,
-            initialFirstFraction: 0.40,
-            firstChild: summaryTree,
-            secondChild: InspectorDetailsTabController(
-              detailsTree: detailsTree,
-              controller: inspectorController,
-              actionButtons: _expandCollapseButtons(),
-              layoutExplorerSupported: _layoutExplorerSupported,
-            ),
+            initialFractions: const [0.40, 0.60],
+            children: [
+              summaryTree,
+              InspectorDetailsTabController(
+                detailsTree: detailsTree,
+                controller: inspectorController,
+                actionButtons: _expandCollapseButtons(),
+                layoutExplorerSupported: _layoutExplorerSupported,
+              ),
+            ],
           ),
         ),
       ],

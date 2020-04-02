@@ -373,7 +373,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   Future<void> hotRestart({bool pause = false}) =>
       _restart(fullRestart: true, pause: pause);
 
-  Future<void> hotReload() => _restart(fullRestart: false);
+  Future<void> hotReload() => _restart();
 
   Future<void> _restart({bool fullRestart = false, bool pause = false}) async {
     if (_currentRunningAppId == null) {

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
+import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart'
@@ -251,6 +252,9 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {}
 class MockVmService extends Mock implements VmServiceWrapper {}
 
 class MockConnectedApp extends Mock implements ConnectedApp {}
+
+class MockBannerMessagesController extends Mock
+    implements BannerMessagesController {}
 
 class MockLoggingController extends Mock implements LoggingController {}
 
@@ -551,5 +555,5 @@ Future<void> ensureInspectorDependencies() async {
 }
 
 void mockIsFlutterApp(MockConnectedApp connectedApp) {
-  when(connectedApp.isAnyFlutterApp).thenAnswer((_) => Future.value(true));
+  when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(true));
 }

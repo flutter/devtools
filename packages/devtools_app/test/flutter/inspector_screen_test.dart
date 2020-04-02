@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_screen.dart';
@@ -31,6 +32,8 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
       fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
+      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       mockIsFlutterApp(serviceManager.connectedApp);
@@ -84,6 +87,24 @@ void main() {
       // await setWindowSize(const Size(1000.0, 1200.0));
       // Verify that description text is no-longer shown.
       // expect(find.text(extensions.debugPaint.description), findsOneWidget);
+    });
+
+    testWidgets('builds disabled message when disabled for non-flutter app',
+        (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      expect(find.byType(InspectorScreenBody), findsNothing);
+      expect(find.byType(DisabledForNonFlutterAppMessage), findsOneWidget);
+    });
+
+    testWidgets('builds disabled message when disabled for profile mode',
+        (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(true);
+      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      expect(find.byType(InspectorScreenBody), findsNothing);
+      expect(find.byType(DisabledForProfileBuildMessage), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(

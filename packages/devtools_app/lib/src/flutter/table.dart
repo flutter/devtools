@@ -786,6 +786,7 @@ class _TableRowState<T> extends State<TableRow<T>>
           '${column.getDisplayValue(node)}',
           overflow: TextOverflow.ellipsis,
           style: fontStyle,
+          maxLines: 1,
         );
 
         if (column == widget.expandableColumn) {

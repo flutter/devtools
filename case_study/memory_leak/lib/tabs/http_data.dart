@@ -44,7 +44,7 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
       case '${StarWars.starWarsVehicles}':
         return StarWars(restfulApi);
       default:
-        return StarWars('${StarWars.starWarsPeople}');
+        return StarWars();
     }
   }
 
@@ -92,7 +92,6 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
               child: Text(
                 currentRestfulAPI.activeFriendlyName,
                 style: TextStyle(
-                  inherit: true,
                   fontSize: 24.0,
                   color: Colors.lightBlueAccent,
                 ),

@@ -12,6 +12,7 @@ import '../config_specific/flutter/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/flutter/import_export/import_export.dart';
 import '../globals.dart';
 import 'app.dart';
+import 'banner_messages.dart';
 import 'common_widgets.dart';
 import 'controllers.dart';
 import 'notifications.dart';
@@ -191,11 +192,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // Build the screens for each tab and wrap them in the appropriate styling
     final tabBodies = [
       for (var screen in widget.tabs)
-        Align(
+        Container(
+          padding: DevToolsScaffold.appPadding,
           alignment: Alignment.topLeft,
-          child: Padding(
-            padding: DevToolsScaffold.appPadding,
-            child: screen.build(context),
+          child: BannerMessages(
+            screen: screen,
           ),
         ),
     ];

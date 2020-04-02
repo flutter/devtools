@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/flutter/notifications.dart';
+import 'package:devtools_app/src/flutter/scaffold.dart';
 import 'package:devtools_app/src/flutter/theme.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
@@ -35,6 +37,7 @@ Widget wrapWithControllers(
   MemoryController memory,
   TimelineController timeline,
   PerformanceController performance,
+  BannerMessagesController bannerMessages,
 }) {
   return MaterialApp(
     theme: themeFor(isDarkTheme: false),
@@ -46,11 +49,18 @@ Widget wrapWithControllers(
             memory: memory ?? MockFlutterMemoryController(),
             timeline: timeline ?? MockTimelineController(),
             performance: performance ?? MockPerformanceController(),
+            bannerMessages: bannerMessages ?? MockBannerMessagesController(),
           );
         },
         child: widget,
       ),
     ),
+  );
+}
+
+Widget wrapWithBannerMessages(Widget widget) {
+  return BannerMessages(
+    screen: SimpleScreen(widget),
   );
 }
 

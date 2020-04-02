@@ -55,9 +55,34 @@ To test release performance:
 You can also use `-d headless-server`, which will start a headless server that serves the HTML
 files for the DevTools Flutter app.
 
+## Development (DevTools server + DevTools Flutter web app)
+
+To develop with a workflow that exercises the DevTools server <==> DevTools client connection,
+change to the `packages/devtools` directory, and run:
+
+```
+dart bin/devtools.dart --debug
+```
+
+That will:
+- start the devtools server
+- start an instance of `flutter run -d web-server` from the `packages/devtools_app` directory
+- proxy all web traffic the devtools server doesn't handle directly to the `flutter run`
+  development web server
+
+You can then open a browser at the regular DevTools server URL (typically http://127.0.0.1:9100).
+When you make changes on disk, you can hit `r` in your command-line to rebuild the app, and
+refresh in your browser to see the changes. Hit `q` in the command line to terminate both the
+`flutter run` instance and the devtools server instance.
+
 ### Desktop Embedder
 
 You can also try running the app in the Flutter desktop embedder on linux or macos.
+
+*NOTE:* The Linux desktop version only works with the master branch of Flutter.  Synch'ing
+to a the master branch of Flutter may fail with a runner version error. If this occurs run
+`flutter create .` from `devtools/packages/devtools_app`, re-generates files in the linux and
+macos directories.
 
 Depending on your OS, set up like this:
 - `flutter config --enable-macos-desktop`
@@ -96,16 +121,7 @@ and rebuilding as necessary.
 
 ### DevTools Server
 
-To work on devtools_server you'll need to temporarily update the devtools pubspec to
-reference the local version of devtools_server and make release builds of devtools for
-the server to serve:
-
-- In both `packages/devtools/pubspec.yaml` and `packages/devtools_app/pubspec.yaml`, uncomment
- the `path: ../devtools_server` line
-  and comment out the version number on the line above.
-- Run `pub get` in both packages.
-
-Now you can run and debug the local version of the server with a release build:
+Run and debug the local version of the server with a release build:
 - In VS Code on the Debug side bar, switch to the `Run Server with Release Build` config. Press F5.
 This will produce a release build of DevTools and then debug the server (`bin/devtools.dart`)
 to serve it.

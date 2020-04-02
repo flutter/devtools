@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../globals.dart';
 import '../../http/http_request_data.dart';
 import '../network_controller.dart';
 import 'http_request_inspector.dart';
@@ -31,7 +32,11 @@ class NetworkScreen extends Screen {
   static const recordingInstructionsKey = Key('Recording Instructions');
 
   @override
-  Widget build(BuildContext context) => const NetworkScreenBody();
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const NetworkScreenBody()
+        : const DisabledForWebAppMessage();
+  }
 }
 
 class NetworkScreenBody extends StatefulWidget {
@@ -196,18 +201,18 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                   ),
                 )
               : Split(
-                  initialFirstFraction: 0.5,
+                  initialFractions: const [0.5, 0.5],
                   axis: Axis.horizontal,
-                  firstChild: (_dataTableSource.rowCount == 0)
-                      ? Container(
-                          alignment: Alignment.center,
-                          child: const CircularProgressIndicator(),
-                        )
-                      : _buildHttpRequestTable(),
-                  // Only show the data page when there's data to display.
-                  secondChild: HttpRequestInspector(
-                    data,
-                  ),
+                  children: [
+                    (_dataTableSource.rowCount == 0)
+                        ? Container(
+                            alignment: Alignment.center,
+                            child: const CircularProgressIndicator(),
+                          )
+                        : _buildHttpRequestTable(),
+                    // Only show the data page when there's data to display.
+                    HttpRequestInspector(data),
+                  ],
                 ),
         );
       },

@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../devtools.dart' as devtools;
 import '../../flutter/common_widgets.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/theme.dart';
+import '../../globals.dart';
 import '../../version.dart';
 import '../info_controller.dart';
 
@@ -25,7 +25,11 @@ class InfoScreen extends Screen {
   bool get showIsolateSelector => true;
 
   @override
-  Widget build(BuildContext context) => InfoScreenBody();
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const InfoScreenBody()
+        : const DisabledForWebAppMessage();
+  }
 
   /// The key to identify the flutter version view.
   @visibleForTesting
@@ -37,6 +41,8 @@ class InfoScreen extends Screen {
 }
 
 class InfoScreenBody extends StatefulWidget {
+  const InfoScreenBody();
+
   @override
   _InfoScreenBodyState createState() => _InfoScreenBodyState();
 }
@@ -74,19 +80,17 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Version Information',
+          'Connected App',
           style: textTheme.headline5,
         ),
-        const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
-        if (_flutterVersion != null)
-          _VersionInformation(_flutterVersion),
+        const PaddedDivider(padding: EdgeInsets.only(top: 4.0)),
+        if (_flutterVersion != null) _VersionInformation(_flutterVersion),
         const Padding(padding: EdgeInsets.only(top: defaultSpacing)),
-        // TODO(devoncarew): Move this information into an advanced page.
         Text(
-          'Dart VM Flag List',
+          'VM Flag List',
           style: textTheme.headline5,
         ),
-        const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
+        const PaddedDivider(padding: EdgeInsets.only(top: 4.0)),
         Expanded(
           child: ValueListenableBuilder<FlagList>(
             valueListenable: _controller.flagListNotifier,
@@ -113,7 +117,6 @@ class _VersionInformation extends StatelessWidget {
     const boldText = TextStyle(fontWeight: FontWeight.bold);
 
     final versions = {
-      'DevTools': devtools.version,
       'Flutter': flutterVersion.version,
       'Framework': flutterVersion.frameworkRevision,
       'Engine': flutterVersion.engineRevision,
@@ -128,8 +131,7 @@ class _VersionInformation extends StatelessWidget {
             padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
             child: Row(
               children: [
-                Text(name, style: boldText),
-                const SizedBox(width: 8.0),
+                Text('$name ', style: boldText),
                 Text(versions[name]),
               ],
             ),
@@ -153,7 +155,7 @@ class _FlagList extends StatelessWidget {
         itemCount: flagList?.flags?.length ?? 0,
         itemBuilder: (context, index) {
           final flag = flagList.flags[index];
-          final modifiedStatusText = flag.modified ? 'modified' : 'default';
+          final modifiedStatusText = flag.modified ? '(modified) ' : '';
           return Padding(
             padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
             child: Row(
@@ -161,31 +163,23 @@ class _FlagList extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Expanded(
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(flag.name, style: semibold(defaultTextTheme)),
-                      Text(flag.comment),
+                      Flexible(
+                          child: Text(
+                        ' ${flag.comment}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      )),
                     ],
                   ),
                 ),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 100.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        flag.valueAsString,
-                        textAlign: TextAlign.end,
-                        style: primaryColor(defaultTextTheme, context),
-                      ),
-                      Text(
-                        modifiedStatusText,
-                        textAlign: TextAlign.end,
-                        style: primaryColorLight(defaultTextTheme, context),
-                      ),
-                    ],
-                  ),
+                Text(
+                  ' $modifiedStatusText${flag.valueAsString}',
+                  textAlign: TextAlign.end,
+                  style: defaultTextTheme,
                 ),
               ],
             ),

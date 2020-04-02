@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
@@ -14,8 +13,9 @@ import '../globals.dart';
 import '../service_manager.dart';
 import '../utils.dart';
 import 'common_widgets.dart';
-import 'notifications.dart';
 import 'screen.dart';
+import 'theme.dart';
+import 'utils.dart';
 
 const statusLineHeight = 24.0;
 
@@ -49,7 +49,6 @@ class StatusLine extends StatelessWidget {
       if (pageStatus != null) {
         children.add(Expanded(
           child: Align(
-            alignment: Alignment.center,
             child: buildPageStatus(context, currentScreen, textTheme),
           ),
         ));
@@ -61,7 +60,6 @@ class StatusLine extends StatelessWidget {
     if (currentScreen != null && currentScreen.showIsolateSelector) {
       children.add(Expanded(
         child: Align(
-          alignment: Alignment.center,
           child: buildIsolateSelector(context, textTheme),
         ),
       ));
@@ -96,16 +94,13 @@ class StatusLine extends StatelessWidget {
       return InkWell(
         onTap: () async {
           final url = 'https://flutter.dev/devtools/$docPageId';
-          if (await url_launcher.canLaunch(url)) {
-            await url_launcher.launch(url);
-          } else {
-            Notifications.of(context).push('Unable to open $url.');
-          }
+          await launchUrl(url, context);
         },
         child: Text(
           'flutter.dev/devtools/$docPageId',
           style: textTheme.bodyText2.copyWith(
             decoration: TextDecoration.underline,
+            color: devtoolsLink,
           ),
         ),
       );
@@ -180,11 +175,23 @@ class StatusLine extends StatelessWidget {
                 '${vm.targetCPU}-${vm.architectureBits} ${vm.operatingSystem}';
           }
 
-          return Text(
-            'Connected ($description)',
-            style: textTheme.bodyText2,
-            overflow: TextOverflow.clip,
-            //maxLines: 1,
+          // TODO(devoncarew): Add an interactive dialog to the device status
+          // line.
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'Device: $description',
+                style: textTheme.bodyText2,
+                overflow: TextOverflow.clip,
+              ),
+              const SizedBox(width: 2.0),
+              Icon(
+                Icons.phone_android,
+                size: defaultIconSize,
+              ),
+            ],
           );
         } else {
           return Text(

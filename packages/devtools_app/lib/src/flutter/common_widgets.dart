@@ -337,6 +337,19 @@ class ActionButton extends StatelessWidget {
   }
 }
 
+/// A FlatButton used to close a containing dialog.
+class DialogCloseButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      onPressed: () {
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+      },
+      child: const Text('CLOSE'),
+    );
+  }
+}
+
 /// Toggle button for use as a child of a [ToggleButtons] widget.
 class ToggleButton extends StatelessWidget {
   const ToggleButton({
@@ -392,3 +405,111 @@ class OutlinedBorder extends StatelessWidget {
 ///
 /// Makes for nice-looking rectangles.
 final goldenRatio = 1 + sqrt(5) / 2;
+
+class DisabledForProfileBuildMessage extends StatelessWidget {
+  const DisabledForProfileBuildMessage();
+
+  static const message =
+      'This screen is disabled because you are running a profile build of your '
+      'application.';
+
+  @override
+  Widget build(BuildContext context) {
+    return const CenteredMessage(message);
+  }
+}
+
+class DisabledForWebAppMessage extends StatelessWidget {
+  const DisabledForWebAppMessage();
+
+  static const message =
+      'This screen is disabled because you are connected to a web application.';
+
+  @override
+  Widget build(BuildContext context) {
+    return const CenteredMessage(message);
+  }
+}
+
+class DisabledForFlutterWebProfileBuildMessage extends StatelessWidget {
+  const DisabledForFlutterWebProfileBuildMessage();
+
+  static const message =
+      'This screen is disabled because you are connected to a profile build of '
+      'your Flutter Web application.';
+
+  @override
+  Widget build(BuildContext context) {
+    return const CenteredMessage(message);
+  }
+}
+
+class DisabledForNonFlutterAppMessage extends StatelessWidget {
+  const DisabledForNonFlutterAppMessage();
+
+  static const message =
+      'This screen is disabled because you are not running a Flutter '
+      'application.';
+
+  @override
+  Widget build(BuildContext context) {
+    return const CenteredMessage(message);
+  }
+}
+
+class CenteredMessage extends StatelessWidget {
+  const CenteredMessage(this.message);
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        message,
+        style: Theme.of(context).textTheme.headline6,
+      ),
+    );
+  }
+}
+
+class CircularIconButton extends StatelessWidget {
+  const CircularIconButton({
+    @required this.icon,
+    @required this.onPressed,
+    @required this.backgroundColor,
+    @required this.foregroundColor,
+  });
+
+  final IconData icon;
+  final VoidCallback onPressed;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return RawMaterialButton(
+      fillColor: backgroundColor,
+      hoverColor: Theme.of(context).hoverColor,
+      elevation: 0.0,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      constraints: const BoxConstraints.tightFor(
+        width: 24.0,
+        height: 24.0,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+        side: BorderSide(
+          width: 2.0,
+          color: foregroundColor,
+        ),
+      ),
+      onPressed: onPressed,
+      child: Icon(
+        icon,
+        size: defaultIconSize,
+        color: foregroundColor,
+      ),
+    );
+  }
+}

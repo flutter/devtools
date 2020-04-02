@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/notifications.dart';
@@ -56,10 +57,16 @@ class TimelineScreen extends Screen {
   String get docPageId => 'timeline';
 
   @override
-  Widget build(BuildContext context) => TimelineScreenBody();
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const TimelineScreenBody()
+        : const DisabledForWebAppMessage();
+  }
 }
 
 class TimelineScreenBody extends StatefulWidget {
+  const TimelineScreenBody();
+
   @override
   TimelineScreenBodyState createState() => TimelineScreenBodyState();
 }
@@ -81,6 +88,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    maybePushDebugModePerformanceMessage(context, DevToolsScreenType.timeline);
+
     final newController = Controllers.of(context).timeline;
     if (newController == controller) return;
     controller = newController;
@@ -123,15 +132,16 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       children: [
         _timelineControls(),
         const SizedBox(height: denseRowSpacing),
-        // TODO(kenz): hide the bar chart if the connected app is not a Flutter
-        // app.
-        const FlutterFramesChart(),
+        if (serviceManager.connectedApp.isFlutterAppNow)
+          const FlutterFramesChart(),
         Expanded(
           child: Split(
             axis: Axis.vertical,
-            firstChild: _buildFlameChartSection(selectedEvent),
-            secondChild: EventDetails(selectedEvent),
-            initialFirstFraction: 0.6,
+            initialFractions: const [0.6, 0.4],
+            children: [
+              _buildFlameChartSection(selectedEvent),
+              EventDetails(selectedEvent),
+            ],
           ),
         ),
       ],
@@ -187,13 +197,13 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        ProfileGranularityDropdown(),
+        const ProfileGranularityDropdown(DevToolsScreenType.timeline),
         const SizedBox(width: defaultSpacing),
-        // TODO(kenz): don't show these buttons if connected to a Dart VM app.
-        ServiceExtensionButtonGroup(
-          minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
-          extensions: [performanceOverlay, profileWidgetBuilds],
-        ),
+        if (!serviceManager.connectedApp.isDartCliAppNow)
+          ServiceExtensionButtonGroup(
+            minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+            extensions: [performanceOverlay, profileWidgetBuilds],
+          ),
         // TODO(kenz): hide or disable button if http timeline logging is not
         // available.
         _logNetworkTrafficButton(),
