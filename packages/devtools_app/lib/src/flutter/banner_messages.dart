@@ -207,6 +207,7 @@ class BannerMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: backgroundColor,
+      margin: const EdgeInsets.only(bottom: denseRowSpacing),
       child: Padding(
         padding: const EdgeInsets.all(defaultSpacing),
         child: Row(

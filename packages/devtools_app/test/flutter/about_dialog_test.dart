@@ -10,21 +10,21 @@ import '../support/utils.dart';
 import 'wrappers.dart';
 
 void main() {
-  DevToolsInfoDialog aboutDialog;
+  DevToolsAboutDialog aboutDialog;
 
-  group('Info Dialog', () {
+  group('About Dialog', () {
     setUp(() {
-      aboutDialog = DevToolsInfoDialog();
+      aboutDialog = DevToolsAboutDialog();
     });
 
     testWidgets('builds dialog', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(aboutDialog));
-      expect(find.text('DevTools'), findsOneWidget);
+      expect(find.text('About DevTools'), findsOneWidget);
     });
 
     testWidgets('DevTools section', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(aboutDialog));
-      expect(find.text('DevTools'), findsOneWidget);
+      expect(find.text('About DevTools'), findsOneWidget);
       expect(findSubstring(aboutDialog, devtools.version), findsOneWidget);
     });
 
