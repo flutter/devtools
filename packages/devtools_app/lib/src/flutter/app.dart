@@ -126,8 +126,8 @@ class DevToolsAppState extends State<DevToolsApp> {
             actions: [
               HotReloadButton(),
               HotRestartButton(),
-              DevToolsInfoAction(),
               OpenSettingsAction(),
+              DevToolsInfoAction(),
             ],
           ),
         ),
@@ -185,7 +185,7 @@ class DevToolsInfoAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionButton(
-      tooltip: 'Info',
+      tooltip: 'About DevTools',
       child: InkWell(
         onTap: () async {
           unawaited(showDialog(
@@ -198,7 +198,7 @@ class DevToolsInfoAction extends StatelessWidget {
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
           child: Icon(
-            Icons.info,
+            Icons.info_outline,
             size: actionsIconSize,
           ),
         ),
@@ -233,6 +233,13 @@ class OpenSettingsAction extends StatelessWidget {
   }
 }
 
+List<Widget> _header(TextTheme textTheme, String title) {
+  return [
+    Text(title, style: textTheme.headline6),
+    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
+  ];
+}
+
 class DevToolsInfoDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -246,7 +253,7 @@ class DevToolsInfoDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ..._header(textTheme, 'DevTools'),
+          ..._header(textTheme, 'About DevTools'),
           _devtoolsInfo(context),
           const SizedBox(height: defaultSpacing),
           ..._header(textTheme, 'Feedback'),
@@ -260,13 +267,6 @@ class DevToolsInfoDialog extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  List<Widget> _header(TextTheme textTheme, String title) {
-    return [
-      Text(title, style: textTheme.headline6),
-      const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
-    ];
   }
 
   Widget _devtoolsInfo(BuildContext context) {
@@ -326,14 +326,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
 
     return AlertDialog(
-      title: const Text('Settings'),
       actions: [
         DialogCloseButton(),
       ],
       content: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Theme setting
+          ..._header(Theme.of(context).textTheme, 'Settings'),
           InkWell(
             onTap: _toggleTheme,
             child: Row(

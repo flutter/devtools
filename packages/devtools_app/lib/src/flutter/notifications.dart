@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'common_widgets.dart';
+import 'status_line.dart' as status_line;
+import 'theme.dart';
 
-const _notificationHeight = 160.0;
+const _notificationHeight = 175.0;
 final _notificationWidth = _notificationHeight * goldenRatio;
 
 /// Interface for pushing notifications in the app.
@@ -128,14 +130,21 @@ class NotificationsState extends State<_NotificationsProvider>
   Widget _buildOverlay(BuildContext context) {
     return Align(
       alignment: Alignment.bottomRight,
-      child: SizedBox(
-        width: _notificationWidth,
-        child: SingleChildScrollView(
-          reverse: true,
-          child: Column(
-            verticalDirection: VerticalDirection.down,
-            mainAxisSize: MainAxisSize.min,
-            children: _notifications,
+      child: Padding(
+        // Clear the status line.
+        padding: const EdgeInsets.only(
+          right: defaultSpacing,
+          bottom: status_line.statusLineHeight + defaultSpacing,
+        ),
+        child: SizedBox(
+          width: _notificationWidth,
+          child: SingleChildScrollView(
+            reverse: true,
+            child: Column(
+              verticalDirection: VerticalDirection.down,
+              mainAxisSize: MainAxisSize.min,
+              children: _notifications,
+            ),
           ),
         ),
       ),
