@@ -10,11 +10,11 @@ import '../support/utils.dart';
 import 'wrappers.dart';
 
 void main() {
-  DevToolsInfoDialog aboutDialog;
+  DevToolsAboutDialog aboutDialog;
 
-  group('Info Dialog', () {
+  group('About Dialog', () {
     setUp(() {
-      aboutDialog = DevToolsInfoDialog();
+      aboutDialog = DevToolsAboutDialog();
     });
 
     testWidgets('builds dialog', (WidgetTester tester) async {

@@ -131,7 +131,8 @@ class NotificationsState extends State<_NotificationsProvider>
     return Align(
       alignment: Alignment.bottomRight,
       child: Padding(
-        // Clear the status line.
+        // Position the notifications in the lower right of the app window, and
+        // high enough up that we don't obscure the status line.
         padding: const EdgeInsets.only(
           right: defaultSpacing,
           bottom: status_line.statusLineHeight + defaultSpacing,

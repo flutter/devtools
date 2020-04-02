@@ -180,14 +180,9 @@ class StatusLine extends StatelessWidget {
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
+            children: [
               Text(
-                'Device: ',
-                style: textTheme.bodyText2,
-                overflow: TextOverflow.clip,
-              ),
-              Text(
-                description,
+                'Device: $description',
                 style: textTheme.bodyText2,
                 overflow: TextOverflow.clip,
               ),

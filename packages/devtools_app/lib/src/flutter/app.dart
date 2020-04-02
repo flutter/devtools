@@ -127,7 +127,7 @@ class DevToolsAppState extends State<DevToolsApp> {
               HotReloadButton(),
               HotRestartButton(),
               OpenSettingsAction(),
-              DevToolsInfoAction(),
+              OpenAboutAction(),
             ],
           ),
         ),
@@ -181,7 +181,7 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
   }
 }
 
-class DevToolsInfoAction extends StatelessWidget {
+class OpenAboutAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionButton(
@@ -190,7 +190,7 @@ class DevToolsInfoAction extends StatelessWidget {
         onTap: () async {
           unawaited(showDialog(
             context: context,
-            builder: (context) => DevToolsInfoDialog(),
+            builder: (context) => DevToolsAboutDialog(),
           ));
         },
         child: Container(
@@ -240,7 +240,7 @@ List<Widget> _header(TextTheme textTheme, String title) {
   ];
 }
 
-class DevToolsInfoDialog extends StatelessWidget {
+class DevToolsAboutDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -254,7 +254,7 @@ class DevToolsInfoDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ..._header(textTheme, 'About DevTools'),
-          _devtoolsInfo(context),
+          _aboutDevTools(context),
           const SizedBox(height: defaultSpacing),
           ..._header(textTheme, 'Feedback'),
           Wrap(
@@ -269,7 +269,7 @@ class DevToolsInfoDialog extends StatelessWidget {
     );
   }
 
-  Widget _devtoolsInfo(BuildContext context) {
+  Widget _aboutDevTools(BuildContext context) {
     return const SelectableText('DevTools version ${devtools.version}');
   }
 
