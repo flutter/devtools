@@ -5,7 +5,7 @@
 import 'dart:convert';
 import 'dart:html';
 
-import 'core/sse/sse_shim.dart';
+import 'config_specific/sse/sse_shim.dart';
 import 'main.dart';
 
 class DevToolsServerApiClient {
@@ -41,6 +41,7 @@ class DevToolsServerApiClient {
   Notification _lastNotification;
 
   int _nextRequestId = 0;
+
   void _send(String method, [Map<String, dynamic> params]) {
     final id = _nextRequestId++;
     final json = jsonEncode({'id': id, 'method': method, 'params': params});
