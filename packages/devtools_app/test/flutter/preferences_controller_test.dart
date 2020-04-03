@@ -17,7 +17,7 @@ void main() {
       expect(controller.darkModeTheme.value, isNotNull);
     });
 
-    test('changes value', () {
+    test('toggleDarkModeTheme', () {
       bool valueChanged = false;
       final originalValue = controller.darkModeTheme.value;
 
@@ -25,7 +25,7 @@ void main() {
         valueChanged = true;
       });
 
-      controller.darkModeTheme.value = !controller.darkModeTheme.value;
+      controller.toggleDarkModeTheme(!controller.darkModeTheme.value);
       expect(valueChanged, isTrue);
       expect(controller.darkModeTheme.value, isNot(originalValue));
     });

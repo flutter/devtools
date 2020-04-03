@@ -277,10 +277,6 @@ class SettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final preferences = DevToolsApp.of(context).preferences;
 
-    void _toggleTheme() {
-      preferences.darkModeTheme.value = !preferences.darkModeTheme.value;
-    }
-
     return AlertDialog(
       actions: [
         DialogCloseButton(),
@@ -291,7 +287,9 @@ class SettingsDialog extends StatelessWidget {
         children: [
           ..._header(Theme.of(context).textTheme, 'Settings'),
           InkWell(
-            onTap: _toggleTheme,
+            onTap: () {
+              preferences.toggleDarkModeTheme(!preferences.darkModeTheme.value);
+            },
             child: Row(
               children: [
                 ValueListenableBuilder(
@@ -300,7 +298,7 @@ class SettingsDialog extends StatelessWidget {
                     return Checkbox(
                       value: value,
                       onChanged: (bool value) {
-                        preferences.darkModeTheme.value = value;
+                        preferences.toggleDarkModeTheme(value);
                       },
                     );
                   },
