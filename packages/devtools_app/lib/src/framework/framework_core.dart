@@ -12,7 +12,7 @@ import '../core/message_bus.dart';
 import '../globals.dart';
 import '../service.dart';
 import '../service_manager.dart';
-import '../ui/theme.dart' as theme;
+import '../ui/theme.dart';
 import '../vm_service_wrapper.dart';
 
 typedef ErrorReporter = void Function(String title, dynamic error);
@@ -22,8 +22,10 @@ class FrameworkCore {
     // Print the version number at startup.
     log('DevTools version ${devtools.version}.');
 
-    final uri = Uri.parse(url);
-    theme.initializeTheme(uri.queryParameters['theme']);
+    // ignore: deprecated_member_use_from_same_package
+    final theme = Uri.parse(url).queryParameters['theme'];
+    // ignore: deprecated_member_use_from_same_package
+    setDarkTheme(theme == 'dark');
 
     _setGlobals();
   }

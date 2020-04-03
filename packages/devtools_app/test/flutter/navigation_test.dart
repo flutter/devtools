@@ -111,7 +111,8 @@ void main() {
       testWidgets('Builds with global dark mode when dark mode is on',
           (WidgetTester tester) async {
         String generatedRoute;
-        initializeTheme('dark');
+        // ignore: deprecated_member_use_from_same_package
+        setDarkTheme(true);
         await tester.pumpWidget(unnamedRouteApp((context) {
           generatedRoute =
               routeNameWithQueryParams(context, '/home', {'foo': 'baz'});
@@ -119,7 +120,8 @@ void main() {
         await tester.pumpAndSettle();
         expect(generatedRoute, '/home?foo=baz&theme=dark');
         // Teardown the global theme change
-        initializeTheme('light');
+        // ignore: deprecated_member_use_from_same_package
+        setDarkTheme(false);
       });
 
       testWidgets('Builds with global light mode when dark mode is off',

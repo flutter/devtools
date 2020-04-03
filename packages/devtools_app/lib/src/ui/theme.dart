@@ -5,6 +5,8 @@
 import 'fake_flutter/fake_flutter.dart';
 import 'flutter_html_shim.dart';
 
+bool _isDarkTheme = false;
+
 /// Whether the application is running with a light or dark theme.
 ///
 /// All Dart code that behaves differently depending on whether the current
@@ -12,20 +14,14 @@ import 'flutter_html_shim.dart';
 ///
 /// Generally Dart code should use [ThemedColor] everywhere colors are used so
 /// that code can be written without directly depending on [isDarkTheme].
-bool get isDarkTheme => _isDarkTheme;
-bool _isDarkTheme = false;
-
-/// Change the value for the current theme.
 ///
-/// Note: this does not rebuild the widget hierarchy.
-set useDarkTheme(bool value) {
-  _isDarkTheme = value;
+/// This getter will be deprecated - prefer using the SettingsController class.
+bool get isDarkTheme => _isDarkTheme;
 
-  clearColorCache();
-}
+@Deprecated('Prefer using the SettingsController')
+void setDarkTheme(bool dark) {
+  _isDarkTheme = dark;
 
-void initializeTheme(String theme) {
-  _isDarkTheme = theme == 'dark';
   clearColorCache();
 }
 
