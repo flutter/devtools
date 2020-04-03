@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
 import 'dart:html';
+
 import 'package:pedantic/pedantic.dart';
 import 'package:platform_detect/platform_detect.dart';
 
@@ -20,7 +20,7 @@ void main() {
       // Initialize the core framework.
       FrameworkCore.init(window.location.toString());
 
-      // Hookup for possbile analytic collection.
+      // Hookup for possible analytic collection.
       ga.exposeGaDevToolsEnabledToJs();
 
       if (ga.isGtagsReset()) {

@@ -73,8 +73,7 @@ class ProvidedControllers implements DisposableController {
 ///
 /// See [Controllers.of] for how to retrieve a [ProvidedControllers] instance.
 class Controllers extends StatefulWidget {
-  const Controllers({Key key, Widget child})
-      : this._(key: key, child: child, overrideProviders: null);
+  const Controllers({Key key, Widget child}) : this._(key: key, child: child);
 
   @visibleForTesting
   const Controllers.overridden({Key key, this.child, this.overrideProviders});
