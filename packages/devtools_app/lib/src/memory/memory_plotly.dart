@@ -215,8 +215,8 @@ class MemoryPlotly {
     if (marker == null) {
       return Data(
         // Null is needed so the trace legend entry appears w/o data.
-        x: [Null],
-        y: [Null],
+        x: [null],
+        y: [null],
         text: [],
         line: line,
         type: 'scatter',
@@ -228,8 +228,8 @@ class MemoryPlotly {
     } else {
       return Data(
         // Null is needed so the trace legend entry appears w/o data.
-        x: [Null],
-        y: [Null],
+        x: [null],
+        y: [null],
         text: [],
         marker: marker,
         type: 'scatter',
@@ -453,8 +453,8 @@ class EventTimeline {
     // Create traces for the event timeline subplot.
     final Data resetTrace = Data(
       // Null is needed so the trace legend entry appears w/o data.
-      x: [Null],
-      y: [Null],
+      x: [null],
+      y: [null],
       name: 'Reset',
       type: 'scatter',
       mode: 'markers',
@@ -474,8 +474,8 @@ class EventTimeline {
 
     final Data snapshotTrace = Data(
       // Null is needed so the trace legend entry appears w/o data.
-      x: [Null],
-      y: [Null],
+      x: [null],
+      y: [null],
       name: 'Snapshot',
       type: 'scatter',
       mode: 'markers',
