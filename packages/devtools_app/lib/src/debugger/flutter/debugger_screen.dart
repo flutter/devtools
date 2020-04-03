@@ -245,17 +245,19 @@ class BreakpointPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scrollbar(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: ListView.builder(
-            itemBuilder: (context, index) => SizedBox(
-              height: _CodeViewState.rowHeight,
-              child: Text(textFor(breakpoints[index])),
+    return _densePadding(
+      child: Scrollbar(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: ListView.builder(
+              itemBuilder: (context, index) => SizedBox(
+                height: _CodeViewState.rowHeight,
+                child: Text(textFor(breakpoints[index])),
+              ),
+              itemCount: breakpoints.length,
             ),
-            itemCount: breakpoints.length,
           ),
         ),
       ),
@@ -346,8 +348,7 @@ class ScriptPickerState extends State<ScriptPicker> {
       return const Center(child: CircularProgressIndicator());
     }
     final items = _filtered;
-    return Padding(
-      padding: const EdgeInsets.only(left: denseSpacing),
+    return _densePadding(
       child: Column(
         children: [
           TextField(
@@ -668,4 +669,9 @@ class ScriptRow extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _densePadding({@required Widget child}) {
+  return Padding(
+      padding: const EdgeInsets.only(left: denseSpacing), child: child);
 }
