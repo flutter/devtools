@@ -2,16 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/flex_split_column.dart';
+import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
+import '../../ui/flutter/label.dart';
+import 'debugger_controller.dart';
 
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
@@ -42,22 +48,28 @@ class DebuggerScreenBody extends StatefulWidget {
   DebuggerScreenBodyState createState() => DebuggerScreenBodyState();
 }
 
-class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
+class DebuggerScreenBodyState extends State<DebuggerScreenBody>
+    with AutoDisposeMixin {
   static const callStackTitle = 'Call Stack';
   static const variablesTitle = 'Variables';
   static const breakpointsTitle = 'Breakpoints';
   static const librariesTitle = 'Libraries';
   static const debuggerPaneHeaderHeight = 60.0;
 
+  DebuggerController controller;
   ScriptRef loadingScript;
   Script script;
   ScriptList scriptList;
+  Stack stack;
 
   @override
   void initState() {
     super.initState();
-    // TODO(https://github.com/flutter/devtools/issues/1648): Make file picker.
-    // Make the loading process disposable.
+    // TODO(djshuckerow): promote this controller to app-level Controllers.
+    controller = DebuggerController();
+    addAutoDisposeListener(controller.isPaused, _onPaused);
+    addAutoDisposeListener(controller.breakpoints);
+    // TODO(djshuckerow): Make the loading process disposable.
     serviceManager.service
         .getScripts(serviceManager.isolateManager.selectedIsolate.id)
         .then((scripts) async {
@@ -65,6 +77,23 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
         scriptList = scripts;
       });
     });
+  }
+
+  Future<void> _onPaused() async {
+    // TODO(https://github.com/flutter/devtools/issues/1648): Allow choice of
+    // the scripts on the stack.
+    if (controller.isPaused.value) {
+      final currentStack = await controller.getStack();
+      setState(() {
+        stack = currentStack;
+      });
+      if (stack == null || stack.frames.isEmpty) return;
+      final currentScript =
+          await controller.getScript(stack.frames.first.location.script);
+      setState(() {
+        script = currentScript;
+      });
+    }
   }
 
   Future<void> onScriptSelected(ScriptRef ref) async {
@@ -83,6 +112,28 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
     });
   }
 
+  Map<int, Breakpoint> getBreakpointsForLines() {
+    if (script == null) return {};
+    String getScriptId(Breakpoint b) => b.location.script.id;
+
+    final bps = controller.breakpoints.value
+        .where((b) => b != null && getScriptId(b) == script.id);
+    return {
+      for (var b in bps) controller.lineNumber(script, b.location): b,
+    };
+  }
+
+  Future<void> toggleBreakpoint(Script script, int line) async {
+    final breakpoints = getBreakpointsForLines();
+    if (breakpoints.containsKey(line)) {
+      await controller.removeBreakpoint(breakpoints[line]);
+    } else {
+      await controller.addBreakpoint(script.id, line);
+    }
+    // The controller's breakpoints value listener will update us at this
+    // point to rebuild.
+  }
+
   @override
   Widget build(BuildContext context) {
     return Split(
@@ -93,11 +144,26 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
         OutlinedBorder(child: debuggerPanes()),
         // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
         OutlinedBorder(
-          child: loadingScript != null && script == null
-              ? const Center(child: CircularProgressIndicator())
-              : CodeView(
-                  script: script,
-                ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DebuggingControls(
+                controller: controller,
+              ),
+              const Divider(height: 0.0),
+              Expanded(
+                child: loadingScript != null && script == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : CodeView(
+                        script: script,
+                        stack: stack,
+                        controller: controller,
+                        lineNumberToBreakpoint: getBreakpointsForLines(),
+                        onSelected: toggleBreakpoint,
+                      ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -119,7 +185,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
           children: [
             const Center(child: Text('TODO: call stack')),
             const Center(child: Text('TODO: variables')),
-            const Center(child: Text('TODO: breakpoints')),
+            BreakpointPicker(
+              breakpoints: controller.breakpoints.value,
+              controller: controller,
+            ),
             ScriptPicker(
               scripts: scriptList,
               onSelected: onScriptSelected,
@@ -153,9 +222,56 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody> {
   }
 }
 
+class BreakpointPicker extends StatelessWidget {
+  const BreakpointPicker(
+      {Key key, @required this.breakpoints, @required this.controller})
+      : super(key: key);
+  final List<Breakpoint> breakpoints;
+  final DebuggerController controller;
+
+  String textFor(Breakpoint breakpoint) {
+    if (breakpoint.resolved) {
+      final location = breakpoint.location as SourceLocation;
+      // TODO(djshuckerow): Resolve the scripts in the background and
+      // switch from token position to line numbers.
+      return '${location.script.uri.split('/').last} Position '
+          '${location.tokenPos} (${location.script.uri})';
+    } else {
+      final location = breakpoint.location as UnresolvedSourceLocation;
+      return '${location.script.uri.split('/').last} Position '
+          '${location.line} (${location.script.uri})';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _densePadding(
+      child: Scrollbar(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: ListView.builder(
+              itemBuilder: (context, index) => SizedBox(
+                height: _CodeViewState.rowHeight,
+                child: Text(textFor(breakpoints[index])),
+              ),
+              itemCount: breakpoints.length,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Picker that takes a [ScriptList] and allows selection of one of the scripts inside.
 class ScriptPicker extends StatefulWidget {
-  const ScriptPicker({Key key, this.scripts, this.onSelected, this.selected})
+  const ScriptPicker(
+      {Key key,
+      @required this.scripts,
+      @required this.onSelected,
+      @required this.selected})
       : super(key: key);
 
   final ScriptList scripts;
@@ -232,10 +348,8 @@ class ScriptPickerState extends State<ScriptPicker> {
       return const Center(child: CircularProgressIndicator());
     }
     final items = _filtered;
-    return Padding(
-      padding: const EdgeInsets.only(left: denseSpacing),
+    return _densePadding(
       child: Column(
-        mainAxisSize: MainAxisSize.max,
         children: [
           TextField(
             decoration: const InputDecoration(
@@ -266,16 +380,163 @@ class ScriptPickerState extends State<ScriptPicker> {
   }
 }
 
-class CodeView extends StatelessWidget {
-  const CodeView({Key key, this.script}) : super(key: key);
+class DebuggingControls extends StatelessWidget {
+  const DebuggingControls({Key key, @required this.controller})
+      : super(key: key);
 
+  final DebuggerController controller;
+
+  static const controlsHeight = 56.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.isPaused,
+      builder: (context, isPaused, child) {
+        return SizedBox(
+          height: controlsHeight,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              MaterialButton(
+                onPressed: isPaused ? null : controller.pause,
+                child: MaterialIconLabel(
+                  Icons.pause,
+                  'Pause',
+                ),
+              ),
+              MaterialButton(
+                onPressed: isPaused ? controller.resume : null,
+                child: MaterialIconLabel(
+                  Icons.play_arrow,
+                  'Resume',
+                ),
+              ),
+              MaterialButton(
+                onPressed: isPaused ? controller.stepIn : null,
+                child: MaterialIconLabel(
+                  Icons.keyboard_arrow_down,
+                  'Step In',
+                ),
+              ),
+              MaterialButton(
+                onPressed: isPaused ? controller.stepOver : null,
+                child: MaterialIconLabel(
+                  Icons.keyboard_arrow_right,
+                  'Step Over',
+                ),
+              ),
+              MaterialButton(
+                onPressed: isPaused ? controller.stepOut : null,
+                child: MaterialIconLabel(
+                  Icons.keyboard_arrow_up,
+                  'Step Out',
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class CodeView extends StatefulWidget {
+  const CodeView({
+    Key key,
+    this.script,
+    this.stack,
+    this.controller,
+    this.onSelected,
+    this.lineNumberToBreakpoint,
+  }) : super(key: key);
+
+  final DebuggerController controller;
+  final Map<int, Breakpoint> lineNumberToBreakpoint;
   final Script script;
+  final Stack stack;
+  final void Function(Script script, int line) onSelected;
+
+  @override
+  _CodeViewState createState() => _CodeViewState();
+}
+
+class _CodeViewState extends State<CodeView> {
+  List<String> lines = [];
+  ScrollController _horizontalController;
+  LinkedScrollControllerGroup verticalController;
+  ScrollController gutterController;
+  ScrollController textController;
+  // The paused positions in the current [widget.script] from the [widget.stack].
+  List<int> pausedPositions;
+
+  static const rowHeight = 32.0;
+  static const assumedCharacterWidth = 16.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _horizontalController = ScrollController();
+    verticalController = LinkedScrollControllerGroup();
+    gutterController = verticalController.addAndGet();
+    textController = verticalController.addAndGet();
+    _updateLines();
+    _updatePausedPositions();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _horizontalController.dispose();
+    gutterController.dispose();
+    textController.dispose();
+  }
+
+  @override
+  void didUpdateWidget(CodeView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.script != oldWidget.script) {
+      _updateLines();
+    }
+    if (widget.stack != oldWidget.stack) {
+      _updatePausedPositions();
+    }
+  }
+
+  void _updateLines() {
+    setState(() {
+      lines = widget.script?.source?.split('\n') ?? [];
+    });
+  }
+
+  void _updatePausedPositions() {
+    setState(() {
+      final framesInScript = (widget.stack?.frames ?? [])
+          .where((frame) => frame.location.script.id == widget.script?.id);
+      pausedPositions = [
+        for (var frame in framesInScript)
+          widget.controller.lineNumber(widget.script, frame.location)
+      ];
+    });
+
+    if (pausedPositions.isNotEmpty) {
+      verticalController.animateTo(
+        pausedPositions.first * rowHeight,
+        duration: shortDuration,
+        curve: defaultCurve,
+      );
+    }
+  }
+
+  void _onPressed(int line) {
+    widget.onSelected(widget.script, line);
+  }
 
   @override
   Widget build(BuildContext context) {
     // TODO(https://github.com/flutter/devtools/issues/1648): Line numbers,
     // syntax highlighting and breakpoint markers.
-    if (script == null) {
+    if (widget.script == null) {
       return Center(
         child: Text(
           'No script selected',
@@ -283,19 +544,134 @@ class CodeView extends StatelessWidget {
         ),
       );
     }
+    // Apply the log change-of-base formula, then add 16dp
+    // padding for every digit in the maximum number of lines.
+    final gutterWidth = lines.isEmpty
+        ? _CodeViewState.assumedCharacterWidth
+        : _CodeViewState.assumedCharacterWidth *
+            (math.log(lines.length) / math.ln10);
     return DefaultTextStyle(
       style: Theme.of(context)
           .textTheme
           .bodyText2
           .copyWith(fontFamily: 'RobotoMono'),
       child: Scrollbar(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SingleChildScrollView(
-            child: Text(script.source),
+        child: Row(
+          children: [
+            SizedBox(
+              width: gutterWidth,
+              child: ListView(
+                controller: gutterController,
+                children: [
+                  for (var i = 0; i < lines.length; i++)
+                    GutterRow(
+                      lineNumber: i,
+                      totalLines: lines.length,
+                      onPressed: () => _onPressed(i),
+                      isBreakpoint:
+                          widget.lineNumberToBreakpoint.containsKey(i),
+                    ),
+                ],
+                itemExtent: rowHeight,
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                controller: _horizontalController,
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: assumedCharacterWidth *
+                      lines
+                          .map((s) => s.length)
+                          .reduce((a, b) => math.max(a, b)),
+                  child: ListView(
+                    controller: textController,
+                    children: [
+                      for (var i = 0; i < lines.length; i++)
+                        ScriptRow(
+                          lineContents: lines[i],
+                          onPressed: () => _onPressed(i),
+                          isPausedHere: pausedPositions.contains(i),
+                        )
+                    ],
+                    itemExtent: rowHeight,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class GutterRow extends StatelessWidget {
+  const GutterRow({
+    Key key,
+    @required this.lineNumber,
+    @required this.totalLines,
+    @required this.onPressed,
+    @required this.isBreakpoint,
+  }) : super(key: key);
+  final int lineNumber;
+  final int totalLines;
+  final VoidCallback onPressed;
+  // TODO(djshuckerow): Add support for multiple breakpoints in a line and
+  // different types of decorators than just breakpoints.
+  final bool isBreakpoint;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onPressed,
+      child: Container(
+        height: _CodeViewState.rowHeight,
+        padding: const EdgeInsets.only(left: 4.0),
+        decoration: isBreakpoint
+            ? BoxDecoration(
+                border: Border.all(color: Theme.of(context).accentColor),
+                color: Theme.of(context).primaryColorDark,
+              )
+            : BoxDecoration(color: Theme.of(context).primaryColorDark),
+        child: Text(
+          '$lineNumber',
+          style: TextStyle(
+            color: Theme.of(context).primaryTextTheme.bodyText2.color,
           ),
         ),
       ),
     );
   }
+}
+
+class ScriptRow extends StatelessWidget {
+  const ScriptRow({
+    Key key,
+    @required this.lineContents,
+    @required this.onPressed,
+    @required this.isPausedHere,
+  }) : super(key: key);
+
+  final String lineContents;
+  final VoidCallback onPressed;
+  final bool isPausedHere;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onPressed,
+      child: Container(
+        alignment: Alignment.centerLeft,
+        height: _CodeViewState.rowHeight,
+        color: isPausedHere ? Theme.of(context).selectedRowColor : null,
+        child: Text(lineContents),
+      ),
+    );
+  }
+}
+
+Widget _densePadding({@required Widget child}) {
+  return Padding(
+      padding: const EdgeInsets.only(left: denseSpacing), child: child);
 }

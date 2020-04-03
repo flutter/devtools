@@ -29,10 +29,6 @@ import 'utils.dart';
 // TODO(bkonyi): remove this bool when page is ready.
 const showNetworkPage = false;
 
-// TODO(https://github.com/flutter/flutter/issues/43783): Put back
-// the debugger screen.
-const showDebuggerPage = false;
-
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
@@ -118,7 +114,7 @@ class DevToolsAppState extends State<DevToolsApp> {
               TimelineScreen(),
               MemoryScreen(),
               PerformanceScreen(),
-              if (showDebuggerPage) DebuggerScreen(),
+              DebuggerScreen(),
               if (showNetworkPage) NetworkScreen(),
               LoggingScreen(),
               InfoScreen(),
