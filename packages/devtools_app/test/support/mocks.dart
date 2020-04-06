@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
+import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
 import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/logging/logging_controller.dart';
@@ -133,6 +134,11 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       );
 
   @override
+  Future<Isolate> getIsolate(String isolateId) {
+    return Future.value(MockIsolate());
+  }
+
+  @override
   Future<Success> setFlag(String name, String value) {
     final List<Flag> flags = _flags['flags'];
     final existingFlag =
@@ -239,16 +245,24 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Stream<Event> get onExtensionEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onDebugEvent => const Stream.empty();
 }
 
 class FakeIsolateManager extends Fake implements IsolateManager {
   @override
   IsolateRef get selectedIsolate => IsolateRef.parse({'id': 'fake_isolate_id'});
+
+  @override
+  Stream<IsolateRef> get onSelectedIsolateChanged => const Stream.empty();
 }
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {}
 
 class MockVmService extends Mock implements VmServiceWrapper {}
+
+class MockIsolate extends Mock implements Isolate {}
 
 class MockConnectedApp extends Mock implements ConnectedApp {}
 
@@ -265,6 +279,8 @@ class MockFlutterMemoryController extends Mock
 class MockTimelineController extends Mock implements TimelineController {}
 
 class MockPerformanceController extends Mock implements PerformanceController {}
+
+class MockDebuggerController extends Mock implements DebuggerController {}
 
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.

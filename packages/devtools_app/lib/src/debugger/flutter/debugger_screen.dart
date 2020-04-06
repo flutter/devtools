@@ -9,6 +9,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
+import '../../flutter/controllers.dart';
 import '../../flutter/flex_split_column.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/octicons.dart';
@@ -65,8 +66,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   @override
   void initState() {
     super.initState();
-    // TODO(djshuckerow): promote this controller to app-level Controllers.
-    controller = DebuggerController();
+    final newController = Controllers.of(context).debugger;
+    if (newController == controller) return;
+    controller = newController;
     addAutoDisposeListener(controller.isPaused, _onPaused);
     addAutoDisposeListener(controller.breakpoints);
     // TODO(djshuckerow): Make the loading process disposable.

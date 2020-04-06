@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../auto_dispose.dart';
+import '../debugger/flutter/debugger_controller.dart';
 import '../globals.dart';
 import '../logging/logging_controller.dart';
 import '../memory/flutter/memory_controller.dart';
@@ -26,11 +27,13 @@ class ProvidedControllers implements DisposableController {
     @required this.timeline,
     @required this.memory,
     @required this.performance,
+    @required this.debugger,
     @required this.bannerMessages,
   })  : assert(logging != null),
         assert(timeline != null),
         assert(memory != null),
         assert(performance != null),
+        assert(debugger != null),
         assert(bannerMessages != null);
 
   /// Builds the default providers for the app.
@@ -47,6 +50,7 @@ class ProvidedControllers implements DisposableController {
       timeline: TimelineController(),
       memory: MemoryController(),
       performance: PerformanceController(),
+      debugger: DebuggerController(),
       bannerMessages: BannerMessagesController(),
     );
   }
@@ -55,6 +59,7 @@ class ProvidedControllers implements DisposableController {
   final TimelineController timeline;
   final MemoryController memory;
   final PerformanceController performance;
+  final DebuggerController debugger;
   final BannerMessagesController bannerMessages;
 
   @override
@@ -63,6 +68,7 @@ class ProvidedControllers implements DisposableController {
     timeline.dispose();
     memory.dispose();
     performance.dispose();
+    debugger.dispose();
   }
 }
 
