@@ -546,6 +546,7 @@ void main() {
       // Expected values returned through accessing Color.value property.
       const color1Value = 4293585900;
       const color2Value = 4294638330;
+      const rowSelectedColorValue = 4294309365;
 
       await tester.pumpWidget(wrap(table));
       await tester.pumpAndSettle();
@@ -584,7 +585,8 @@ void main() {
       crackleRow = tester.widget(crackleFinder);
 
       expect(fooRow.backgroundColor.value, equals(color1Value));
-      expect(barRow.backgroundColor.value, equals(color2Value));
+      // [barRow] has the rowSelected color after being tapped.
+      expect(barRow.backgroundColor.value, equals(rowSelectedColorValue));
       // [crackleRow] has a different background color after collapsing previous
       // row (Bar).
       expect(crackleRow.backgroundColor.value, equals(color1Value));
