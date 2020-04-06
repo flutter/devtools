@@ -5,4 +5,3 @@ targets:
         options:
           dart2js_args:
           - -O1
-          - --use-old-rti
