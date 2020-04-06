@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
+import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
 import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/logging/logging_controller.dart';
@@ -265,6 +266,8 @@ class MockFlutterMemoryController extends Mock
 class MockTimelineController extends Mock implements TimelineController {}
 
 class MockPerformanceController extends Mock implements PerformanceController {}
+
+class MockDebuggerController extends Mock implements DebuggerController {}
 
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.

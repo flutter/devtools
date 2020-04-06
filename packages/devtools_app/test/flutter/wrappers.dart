@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
 import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/flutter/notifications.dart';
@@ -37,6 +38,7 @@ Widget wrapWithControllers(
   MemoryController memory,
   TimelineController timeline,
   PerformanceController performance,
+  DebuggerController debugger,
   BannerMessagesController bannerMessages,
 }) {
   return MaterialApp(
@@ -49,6 +51,7 @@ Widget wrapWithControllers(
             memory: memory ?? MockFlutterMemoryController(),
             timeline: timeline ?? MockTimelineController(),
             performance: performance ?? MockPerformanceController(),
+            debugger: debugger ?? MockDebuggerController(),
             bannerMessages: bannerMessages ?? MockBannerMessagesController(),
           );
         },
