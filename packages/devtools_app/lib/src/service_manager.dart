@@ -288,6 +288,24 @@ class ServiceConnectionManager {
 
     return fps.roundToDouble();
   }
+
+  bool libraryUriAvailableNow(String uri) {
+    assert(serviceAvailable.isCompleted);
+    assert(isolateManager.selectedIsolateAvailable.isCompleted);
+    return isolateManager.selectedIsolateLibraries
+        .map((ref) => ref.uri)
+        .toList()
+        .any((u) => u.startsWith(uri));
+  }
+
+  Future<bool> libraryUriAvailable(String uri) async {
+    assert(serviceAvailable.isCompleted);
+    await isolateManager.selectedIsolateAvailable.future;
+    return isolateManager.selectedIsolateLibraries
+        .map((ref) => ref.uri)
+        .toList()
+        .any((u) => u.startsWith(uri));
+  }
 }
 
 class IsolateManager {

@@ -16,8 +16,9 @@ class ConnectedApp {
   bool get appTypeKnown =>
       _isFlutterApp != null && _isProfileBuild != null && _isDartWebApp != null;
 
-  Future<bool> get isFlutterApp async =>
-      _isFlutterApp ??= await _libraryUriAvailable(flutterLibraryUri);
+  // TODO(kenz): investigate if we can use `libraryUriAvailableNow` instead.
+  Future<bool> get isFlutterApp async => _isFlutterApp ??=
+      await serviceManager.libraryUriAvailable(flutterLibraryUri);
 
   bool get isFlutterAppNow {
     assert(_isFlutterApp != null);
@@ -36,8 +37,9 @@ class ConnectedApp {
 
   bool _isProfileBuild;
 
-  Future<bool> get isDartWebApp async =>
-      _isDartWebApp ??= await _libraryUriAvailable(dartHtmlLibraryUri);
+  // TODO(kenz): investigate if we can use `libraryUriAvailableNow` instead.
+  Future<bool> get isDartWebApp async => _isDartWebApp ??=
+      await serviceManager.libraryUriAvailable(dartHtmlLibraryUri);
 
   bool get isDartWebAppNow {
     assert(_isDartWebApp != null);
@@ -69,15 +71,6 @@ class ConnectedApp {
     final hasDebugExtension = serviceManager.serviceExtensionManager
         .isServiceExtensionAvailable(extensions.debugAllowBanner.extension);
     return !hasDebugExtension;
-  }
-
-  Future<bool> _libraryUriAvailable(String uri) async {
-    assert(serviceManager.serviceAvailable.isCompleted);
-    await serviceManager.isolateManager.selectedIsolateAvailable.future;
-    return serviceManager.isolateManager.selectedIsolateLibraries
-        .map((ref) => ref.uri)
-        .toList()
-        .any((u) => u.startsWith(uri));
   }
 
   Future<void> initializeValues() async {

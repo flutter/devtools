@@ -16,7 +16,7 @@ import 'connect_screen.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-/// Defines pages shown in the tabbar of the app.
+/// Defines a page shown in the DevTools TabBar.
 @immutable
 abstract class Screen {
   const Screen(this.type, {this.title, this.icon, this.tabKey});
@@ -76,6 +76,28 @@ abstract class Screen {
   }
 }
 
+/// Defines a page shown in the DevTools TabBar if [conditionalLibrary] is
+/// present in the connected application.
+abstract class ConditionalScreen extends Screen {
+  const ConditionalScreen(
+    this.conditionalLibrary, {
+    String title,
+    IconData icon,
+    Key tabKey,
+  }) : super(
+          DevToolsScreenType.conditional,
+          title: title,
+          icon: icon,
+          tabKey: tabKey,
+        );
+
+  /// Library name on which we determine whether to include this screen in
+  /// DevTools.
+  ///
+  /// This can either be a full library name or it can be a prefix.
+  final String conditionalLibrary;
+}
+
 enum DevToolsScreenType {
   inspector,
   timeline,
@@ -87,8 +109,11 @@ enum DevToolsScreenType {
   debugger,
   network,
   simple,
+  conditional,
 }
 
+// TODO(kenz): we may need to refactor this code if conditional screens need
+// to be created from imports in the same way that non-conditional screens do.
 extension DevToolsScreenTypeExtension on DevToolsScreenType {
   Screen create() {
     switch (this) {

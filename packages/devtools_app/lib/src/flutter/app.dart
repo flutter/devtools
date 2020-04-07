@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 
 import '../../devtools.dart' as devtools;
-import '../../src/framework/framework_core.dart';
 import '../debugger/flutter/debugger_screen.dart';
+import '../framework/framework_core.dart';
+import '../globals.dart';
 import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
 import '../logging/flutter/logging_screen.dart';
@@ -23,6 +24,7 @@ import 'initializer.dart';
 import 'notifications.dart';
 import 'preferences.dart';
 import 'scaffold.dart';
+import 'screen.dart';
 import 'theme.dart';
 import 'utils.dart';
 
@@ -32,8 +34,12 @@ const showNetworkPage = false;
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
+  const DevToolsApp([this.conditionalScreens]);
+
+  final List<ConditionalScreen> conditionalScreens;
+
   @override
-  State<DevToolsApp> createState() => DevToolsAppState();
+  State<DevToolsApp> createState() => DevToolsAppState(conditionalScreens);
 
   static DevToolsAppState of(BuildContext context) {
     return context.findAncestorStateOfType<DevToolsAppState>();
@@ -47,7 +53,21 @@ class DevToolsApp extends StatefulWidget {
 // TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
+  DevToolsAppState([this.conditionalScreens]);
+
+  final List<ConditionalScreen> conditionalScreens;
+
   final PreferencesController preferences = PreferencesController();
+
+  @override
+  void initState() {
+    super.initState();
+    serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
+      setState(() {
+        _regenerateRoutes();
+      });
+    });
+  }
 
   /// Generates routes, separating the path from URL query parameters.
   Route _generateRoute(RouteSettings settings) {
@@ -55,12 +75,12 @@ class DevToolsAppState extends State<DevToolsApp> {
     final path = uri.path;
 
     // Provide the appropriate page route.
-    if (_routes.containsKey(path)) {
+    if (routes.containsKey(path)) {
       WidgetBuilder builder =
-          (context) => _routes[path](context, uri.queryParameters);
+          (context) => routes[path](context, uri.queryParameters);
       assert(() {
         builder = (context) => _AlternateCheckedModeBanner(
-              builder: (context) => _routes[path](
+              builder: (context) => routes[path](
                 context,
                 uri.queryParameters,
               ),
@@ -82,31 +102,53 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 
   /// The routes that the app exposes.
-  final Map<String, UrlParametersBuilder> _routes = {
-    '/': (_, params) => Initializer(
-          url: params['uri'],
-          builder: (_) => DevToolsScaffold(
-            tabs: const [
-              InspectorScreen(),
-              TimelineScreen(),
-              MemoryScreen(),
-              PerformanceScreen(),
-              DebuggerScreen(),
-              if (showNetworkPage) NetworkScreen(),
-              LoggingScreen(),
-              InfoScreen(),
-            ],
-            actions: [
-              HotReloadButton(),
-              HotRestartButton(),
-              OpenSettingsAction(),
-              OpenAboutAction(),
-            ],
-          ),
-        ),
-    '/connect': (_, __) =>
-        DevToolsScaffold.withChild(child: ConnectScreenBody()),
-  };
+  Map<String, UrlParametersBuilder> get routes => _routes ??= {
+        '/': (_, params) => Initializer(
+              url: params['uri'],
+              builder: (_) => DevToolsScaffold(
+                tabs: [
+                  const InspectorScreen(),
+                  const TimelineScreen(),
+                  const MemoryScreen(),
+                  const PerformanceScreen(),
+                  const DebuggerScreen(),
+                  if (showNetworkPage) const NetworkScreen(),
+                  const LoggingScreen(),
+                  const InfoScreen(),
+                  ..._generateConditionalScreens(),
+                ],
+                actions: [
+                  HotReloadButton(),
+                  HotRestartButton(),
+                  OpenSettingsAction(),
+                  OpenAboutAction(),
+                ],
+              ),
+            ),
+        '/connect': (_, __) =>
+            DevToolsScaffold.withChild(child: ConnectScreenBody()),
+      };
+
+  Map<String, UrlParametersBuilder> _routes;
+
+  void _regenerateRoutes() {
+    _routes = null;
+    routes;
+  }
+
+  List<ConditionalScreen> _generateConditionalScreens() {
+    final conditionals = <ConditionalScreen>[];
+    if (conditionalScreens != null &&
+        serviceManager.serviceAvailable.isCompleted &&
+        serviceManager.isolateManager.selectedIsolateAvailable.isCompleted) {
+      for (var screen in conditionalScreens) {
+        if (serviceManager.libraryUriAvailableNow(screen.conditionalLibrary)) {
+          conditionals.add(screen);
+        }
+      }
+    }
+    return conditionals;
+  }
 
   @override
   Widget build(BuildContext context) {
