@@ -81,28 +81,37 @@ abstract class Screen {
 ///
 /// If [conditionalLibrary] is not present, the screen will be hidden from the
 /// [TabBar], not just disabled like other DevTools [Screen]s.
+///
 /// Example:
 ///
 /// class PackageProviderScreen extends ConditionalScreen {
 ///   const PackageProviderScreen()
 ///       : super(
-///           'package:provider',
+///           conditionalLibrary: 'package:provider',
+///           screenType: const DevToolsScreenType(
+//              'packageProvider',
+//              createOverride: _create,
+//            ),
 ///           title: 'Provider',
 ///           icon: Icons.palette,
 ///         );
+///
+///   static PackageProviderScreen _create() => const PackageProviderScreen();
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return const Center(child: Text('Package provider tools'));
 ///   }
 /// }
 abstract class ConditionalScreen extends Screen {
-  const ConditionalScreen(
-    this.conditionalLibrary, {
+  const ConditionalScreen({
+    @required this.conditionalLibrary,
+    @required DevToolsScreenType screenType,
     String title,
     IconData icon,
     Key tabKey,
   }) : super(
-          DevToolsScreenType.conditional,
+          screenType,
           title: title,
           icon: icon,
           tabKey: tabKey,
@@ -118,46 +127,61 @@ abstract class ConditionalScreen extends Screen {
   final String conditionalLibrary;
 }
 
-enum DevToolsScreenType {
-  inspector,
-  timeline,
-  memory,
-  performance,
-  logging,
-  info,
-  connect,
-  debugger,
-  network,
-  simple,
-  conditional,
-}
+class DevToolsScreenType {
+  const DevToolsScreenType(this.id, {this.createOverride});
 
-// TODO(kenz): we may need to refactor this code if conditional screens need
-// to be created from imports in the same way that non-conditional screens do.
-extension DevToolsScreenTypeExtension on DevToolsScreenType {
+  final String id;
+
+  final Screen Function() createOverride;
+
+  static const inspectorId = 'inspector';
+  static const timelineId = 'timeline';
+  static const memoryId = 'memory';
+  static const performanceId = 'performance';
+  static const networkId = 'network';
+  static const debuggerId = 'debugger';
+  static const loggingId = 'logging';
+  static const infoId = 'info';
+  static const connectId = 'connect';
+  static const simpleId = 'simple';
+
+  static const inspector = DevToolsScreenType(inspectorId);
+  static const timeline = DevToolsScreenType(timelineId);
+  static const memory = DevToolsScreenType(memoryId);
+  static const performance = DevToolsScreenType(performanceId);
+  static const network = DevToolsScreenType(networkId);
+  static const debugger = DevToolsScreenType(debuggerId);
+  static const logging = DevToolsScreenType(loggingId);
+  static const info = DevToolsScreenType(infoId);
+  static const connect = DevToolsScreenType(connectId);
+  static const simple = DevToolsScreenType(simpleId);
+
   Screen create() {
-    switch (this) {
-      case DevToolsScreenType.inspector:
+    switch (id) {
+      case inspectorId:
         return const InspectorScreen();
-      case DevToolsScreenType.timeline:
+      case timelineId:
         return const TimelineScreen();
-      case DevToolsScreenType.memory:
+      case memoryId:
         return const MemoryScreen();
-      case DevToolsScreenType.performance:
+      case performanceId:
         return const PerformanceScreen();
-      case DevToolsScreenType.logging:
-        return const LoggingScreen();
-      case DevToolsScreenType.info:
-        return const InfoScreen();
-      case DevToolsScreenType.connect:
-        return const ConnectScreen();
-      case DevToolsScreenType.debugger:
-        return const DebuggerScreen();
-      case DevToolsScreenType.network:
+      case networkId:
         return const NetworkScreen();
-      case DevToolsScreenType.simple:
+      case debuggerId:
+        return const DebuggerScreen();
+      case loggingId:
+        return const LoggingScreen();
+      case infoId:
+        return const InfoScreen();
+      case connectId:
+        return const ConnectScreen();
+      case simpleId:
         return const SimpleScreen(null);
       default:
+        if (createOverride != null) {
+          return createOverride();
+        }
         return null;
     }
   }
