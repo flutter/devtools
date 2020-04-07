@@ -16,7 +16,7 @@ import 'connect_screen.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-/// Defines a page shown in the DevTools TabBar.
+/// Defines a page shown in the DevTools [TabBar].
 @immutable
 abstract class Screen {
   const Screen(this.type, {this.title, this.icon, this.tabKey});
@@ -76,8 +76,25 @@ abstract class Screen {
   }
 }
 
-/// Defines a page shown in the DevTools TabBar if [conditionalLibrary] is
+/// Defines a page shown in the DevTools [TabBar] if [conditionalLibrary] is
 /// present in the connected application.
+///
+/// If [conditionalLibrary] is not present, the screen will be hidden from the
+/// [TabBar], not just disabled like other DevTools [Screen]s.
+/// Example:
+///
+/// class PackageProviderScreen extends ConditionalScreen {
+///   const PackageProviderScreen()
+///       : super(
+///           'package:provider',
+///           title: 'Provider',
+///           icon: Icons.palette,
+///         );
+///   @override
+///   Widget build(BuildContext context) {
+///     return const Center(child: Text('Package provider tools'));
+///   }
+/// }
 abstract class ConditionalScreen extends Screen {
   const ConditionalScreen(
     this.conditionalLibrary, {
@@ -91,10 +108,13 @@ abstract class ConditionalScreen extends Screen {
           tabKey: tabKey,
         );
 
-  /// Library name on which we determine whether to include this screen in
-  /// DevTools.
+  /// Library uri that determines whether to include this screen in DevTools.
   ///
-  /// This can either be a full library name or it can be a prefix.
+  /// This can either be a full library uri or it can be a prefix.
+  ///
+  /// Examples:
+  ///  'package:provider/provider.dart'
+  ///  'package:provider'
   final String conditionalLibrary;
 }
 

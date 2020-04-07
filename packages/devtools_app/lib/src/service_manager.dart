@@ -301,10 +301,7 @@ class ServiceConnectionManager {
   Future<bool> libraryUriAvailable(String uri) async {
     assert(serviceAvailable.isCompleted);
     await isolateManager.selectedIsolateAvailable.future;
-    return isolateManager.selectedIsolateLibraries
-        .map((ref) => ref.uri)
-        .toList()
-        .any((u) => u.startsWith(uri));
+    return libraryUriAvailableNow(uri);
   }
 }
 

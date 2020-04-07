@@ -39,7 +39,7 @@ class DevToolsApp extends StatefulWidget {
   final List<ConditionalScreen> conditionalScreens;
 
   @override
-  State<DevToolsApp> createState() => DevToolsAppState(conditionalScreens);
+  State<DevToolsApp> createState() => DevToolsAppState();
 
   static DevToolsAppState of(BuildContext context) {
     return context.findAncestorStateOfType<DevToolsAppState>();
@@ -53,10 +53,6 @@ class DevToolsApp extends StatefulWidget {
 // TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
-  DevToolsAppState([this.conditionalScreens]);
-
-  final List<ConditionalScreen> conditionalScreens;
-
   final PreferencesController preferences = PreferencesController();
 
   @override
@@ -64,7 +60,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     super.initState();
     serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
       setState(() {
-        _regenerateRoutes();
+        _clearCachedRoutes();
       });
     });
   }
@@ -102,46 +98,47 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 
   /// The routes that the app exposes.
-  Map<String, UrlParametersBuilder> get routes => _routes ??= {
-        '/': (_, params) => Initializer(
-              url: params['uri'],
-              builder: (_) => DevToolsScaffold(
-                tabs: [
-                  const InspectorScreen(),
-                  const TimelineScreen(),
-                  const MemoryScreen(),
-                  const PerformanceScreen(),
-                  const DebuggerScreen(),
-                  if (showNetworkPage) const NetworkScreen(),
-                  const LoggingScreen(),
-                  const InfoScreen(),
-                  ..._generateConditionalScreens(),
-                ],
-                actions: [
-                  HotReloadButton(),
-                  HotRestartButton(),
-                  OpenSettingsAction(),
-                  OpenAboutAction(),
-                ],
-              ),
+  Map<String, UrlParametersBuilder> get routes {
+    return _routes ??= {
+      '/': (_, params) => Initializer(
+            url: params['uri'],
+            builder: (_) => DevToolsScaffold(
+              tabs: [
+                const InspectorScreen(),
+                const TimelineScreen(),
+                const MemoryScreen(),
+                const PerformanceScreen(),
+                const DebuggerScreen(),
+                if (showNetworkPage) const NetworkScreen(),
+                ..._visibleConditionalScreens(),
+                const LoggingScreen(),
+                const InfoScreen(),
+              ],
+              actions: [
+                HotReloadButton(),
+                HotRestartButton(),
+                OpenSettingsAction(),
+                OpenAboutAction(),
+              ],
             ),
-        '/connect': (_, __) =>
-            DevToolsScaffold.withChild(child: ConnectScreenBody()),
-      };
+          ),
+      '/connect': (_, __) =>
+          DevToolsScaffold.withChild(child: ConnectScreenBody()),
+    };
+  }
 
   Map<String, UrlParametersBuilder> _routes;
 
-  void _regenerateRoutes() {
+  void _clearCachedRoutes() {
     _routes = null;
-    routes;
   }
 
-  List<ConditionalScreen> _generateConditionalScreens() {
+  List<ConditionalScreen> _visibleConditionalScreens() {
     final conditionals = <ConditionalScreen>[];
-    if (conditionalScreens != null &&
+    if (widget.conditionalScreens != null &&
         serviceManager.serviceAvailable.isCompleted &&
         serviceManager.isolateManager.selectedIsolateAvailable.isCompleted) {
-      for (var screen in conditionalScreens) {
+      for (var screen in widget.conditionalScreens) {
         if (serviceManager.libraryUriAvailableNow(screen.conditionalLibrary)) {
           conditionals.add(screen);
         }
