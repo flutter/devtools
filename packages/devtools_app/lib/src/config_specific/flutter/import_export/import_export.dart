@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../enum_utils.dart';
-
 import '../../../flutter/controllers.dart';
 import '../../../flutter/notifications.dart';
 import '../../../flutter/screen.dart';
 import '../../../timeline/flutter/timeline_model.dart';
-
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
@@ -33,9 +30,6 @@ class ImportController {
     this.pushScreenForImport,
   );
 
-  static final _devToolsScreenTypeUtils =
-      EnumUtils<DevToolsScreenType>(DevToolsScreenType.values);
-
   final void Function(DevToolsScreenType type) pushScreenForImport;
 
   final NotificationService _notifications;
@@ -56,8 +50,9 @@ class ImportController {
     }
 
     // TODO(kenz): add UI progress indicator when offline data is loading.
-    switch (_devToolsScreenTypeUtils.enumEntry(devToolsScreen)) {
-      case DevToolsScreenType.timeline:
+    // TODO(kenz): add support for custom / conditional screens.
+    switch (devToolsScreen) {
+      case DevToolsScreenType.timelineId:
         _importTimeline(json);
         break;
       // TODO(jacobr): add the inspector handling case here once the inspector

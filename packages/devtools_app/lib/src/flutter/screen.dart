@@ -16,7 +16,7 @@ import 'connect_screen.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-/// Defines pages shown in the tabbar of the app.
+/// Defines a page shown in the DevTools [TabBar].
 @immutable
 abstract class Screen {
   const Screen(this.type, {this.title, this.icon, this.tabKey});
@@ -76,43 +76,113 @@ abstract class Screen {
   }
 }
 
-enum DevToolsScreenType {
-  inspector,
-  timeline,
-  memory,
-  performance,
-  logging,
-  info,
-  connect,
-  debugger,
-  network,
-  simple,
+/// Defines a page shown in the DevTools [TabBar] if [conditionalLibrary] is
+/// present in the connected application.
+///
+/// If [conditionalLibrary] is not present, the screen will be hidden from the
+/// [TabBar], not just disabled like other DevTools [Screen]s.
+///
+/// ```dart
+/// class PackageProviderScreen extends ConditionalScreen {
+///   const PackageProviderScreen()
+///       : super(
+///           conditionalLibrary: 'package:provider',
+///           screenType: const DevToolsScreenType(
+//              'packageProvider',
+//              createOverride: _create,
+//            ),
+///           title: 'Provider',
+///           icon: Icons.palette,
+///         );
+///
+///   static PackageProviderScreen _create() => const PackageProviderScreen();
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return const Center(child: Text('Package provider tools'));
+///   }
+/// }
+/// ```
+/// {@end-tool}
+abstract class ConditionalScreen extends Screen {
+  const ConditionalScreen({
+    @required this.conditionalLibrary,
+    @required DevToolsScreenType screenType,
+    String title,
+    IconData icon,
+    Key tabKey,
+  }) : super(
+          screenType,
+          title: title,
+          icon: icon,
+          tabKey: tabKey,
+        );
+
+  /// Library uri that determines whether to include this screen in DevTools.
+  ///
+  /// This can either be a full library uri or it can be a prefix.
+  ///
+  /// Examples:
+  ///  * 'package:provider/provider.dart'
+  ///  * 'package:provider/'
+  final String conditionalLibrary;
 }
 
-extension DevToolsScreenTypeExtension on DevToolsScreenType {
+class DevToolsScreenType {
+  const DevToolsScreenType(this.id, {this.createOverride});
+
+  final String id;
+
+  final Screen Function() createOverride;
+
+  static const inspectorId = 'inspector';
+  static const timelineId = 'timeline';
+  static const memoryId = 'memory';
+  static const performanceId = 'performance';
+  static const networkId = 'network';
+  static const debuggerId = 'debugger';
+  static const loggingId = 'logging';
+  static const infoId = 'info';
+  static const connectId = 'connect';
+  static const simpleId = 'simple';
+
+  static const inspector = DevToolsScreenType(inspectorId);
+  static const timeline = DevToolsScreenType(timelineId);
+  static const memory = DevToolsScreenType(memoryId);
+  static const performance = DevToolsScreenType(performanceId);
+  static const network = DevToolsScreenType(networkId);
+  static const debugger = DevToolsScreenType(debuggerId);
+  static const logging = DevToolsScreenType(loggingId);
+  static const info = DevToolsScreenType(infoId);
+  static const connect = DevToolsScreenType(connectId);
+  static const simple = DevToolsScreenType(simpleId);
+
   Screen create() {
-    switch (this) {
-      case DevToolsScreenType.inspector:
+    switch (id) {
+      case inspectorId:
         return const InspectorScreen();
-      case DevToolsScreenType.timeline:
+      case timelineId:
         return const TimelineScreen();
-      case DevToolsScreenType.memory:
+      case memoryId:
         return const MemoryScreen();
-      case DevToolsScreenType.performance:
+      case performanceId:
         return const PerformanceScreen();
-      case DevToolsScreenType.logging:
-        return const LoggingScreen();
-      case DevToolsScreenType.info:
-        return const InfoScreen();
-      case DevToolsScreenType.connect:
-        return const ConnectScreen();
-      case DevToolsScreenType.debugger:
-        return const DebuggerScreen();
-      case DevToolsScreenType.network:
+      case networkId:
         return const NetworkScreen();
-      case DevToolsScreenType.simple:
+      case debuggerId:
+        return const DebuggerScreen();
+      case loggingId:
+        return const LoggingScreen();
+      case infoId:
+        return const InfoScreen();
+      case connectId:
+        return const ConnectScreen();
+      case simpleId:
         return const SimpleScreen(null);
       default:
+        if (createOverride != null) {
+          return createOverride();
+        }
         return null;
     }
   }
