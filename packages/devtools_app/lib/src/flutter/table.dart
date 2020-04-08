@@ -209,6 +209,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   List<T> animatingChildren = [];
   Set<T> animatingChildrenSet = {};
   T animatingNode;
+  T selectedNode;
   List<double> columnWidths;
   List<bool> rootsExpanded;
 
@@ -263,8 +264,10 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   void _onItemPressed(T node) {
     /// Rebuilds the table whenever the tree structure has been updated
-    if (!node.isExpandable) return;
     setState(() {
+      selectedNode = node;
+
+      if (!node.isExpandable) return;
       animatingNode = node;
       List<T> nodeChildren;
       if (node.isExpanded) {
@@ -365,12 +368,15 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     int index,
   ) {
     Widget rowForNode(T node) {
+      final isNodeSelected = selectedNode == node;
       return TableRow<T>(
         key: widget.keyFactory(node),
         linkedScrollControllerGroup: linkedScrollControllerGroup,
         node: node,
         onPressed: _onItemPressed,
-        backgroundColor: TableRow.colorFor(context, index),
+        backgroundColor: isNodeSelected
+            ? Theme.of(context).selectedRowColor
+            : TableRow.colorFor(context, index),
         columns: widget.columns,
         columnWidths: columnWidths,
         expandableColumn: widget.treeColumn,
