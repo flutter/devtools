@@ -110,7 +110,7 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
                 child: Column(
               // Stretch the cards in horizontal axis
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
+              children: [
                 Card(
                   child: Container(
                     child: Text(
