@@ -19,7 +19,13 @@ import 'theme.dart';
 /// Defines a page shown in the DevTools [TabBar].
 @immutable
 abstract class Screen {
-  const Screen(this.type, {this.title, this.icon, this.tabKey});
+  const Screen(
+    this.type, {
+    this.title,
+    this.icon,
+    this.tabKey,
+    this.conditionalLibrary,
+  });
 
   final DevToolsScreenType type;
 
@@ -31,6 +37,16 @@ abstract class Screen {
   /// An optional key to use when creating the Tab widget (for use during
   /// testing).
   final Key tabKey;
+
+  /// Library uri that determines whether to include this screen in DevTools.
+  ///
+  /// This can either be a full library uri or it can be a prefix. If null, this
+  /// screen will be shown unconditionally.
+  ///
+  /// Examples:
+  ///  * 'package:provider/provider.dart'
+  ///  * 'package:provider/'
+  final String conditionalLibrary;
 
   /// Whether this screen should display the isolate selector in the status
   /// line.
@@ -74,58 +90,6 @@ abstract class Screen {
   Widget buildStatus(BuildContext context, TextTheme textTheme) {
     return null;
   }
-}
-
-/// Defines a page shown in the DevTools [TabBar] if [conditionalLibrary] is
-/// present in the connected application.
-///
-/// If [conditionalLibrary] is not present, the screen will be hidden from the
-/// [TabBar], not just disabled like other DevTools [Screen]s.
-///
-/// ```dart
-/// class PackageProviderScreen extends ConditionalScreen {
-///   const PackageProviderScreen()
-///       : super(
-///           conditionalLibrary: 'package:provider',
-///           screenType: const DevToolsScreenType(
-//              'packageProvider',
-//              createOverride: _create,
-//            ),
-///           title: 'Provider',
-///           icon: Icons.palette,
-///         );
-///
-///   static PackageProviderScreen _create() => const PackageProviderScreen();
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return const Center(child: Text('Package provider tools'));
-///   }
-/// }
-/// ```
-/// {@end-tool}
-abstract class ConditionalScreen extends Screen {
-  const ConditionalScreen({
-    @required this.conditionalLibrary,
-    @required DevToolsScreenType screenType,
-    String title,
-    IconData icon,
-    Key tabKey,
-  }) : super(
-          screenType,
-          title: title,
-          icon: icon,
-          tabKey: tabKey,
-        );
-
-  /// Library uri that determines whether to include this screen in DevTools.
-  ///
-  /// This can either be a full library uri or it can be a prefix.
-  ///
-  /// Examples:
-  ///  * 'package:provider/provider.dart'
-  ///  * 'package:provider/'
-  final String conditionalLibrary;
 }
 
 class DevToolsScreenType {

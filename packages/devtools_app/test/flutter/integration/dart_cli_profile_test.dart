@@ -52,7 +52,7 @@ Future<void> main() async {
       FrameworkCore.init('');
       final app = DefaultAssetBundle(
         bundle: _DiskAssetBundle(),
-        child: const DevToolsApp(),
+        child: const DevToolsApp([]),
       );
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
