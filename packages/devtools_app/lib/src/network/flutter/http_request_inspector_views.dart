@@ -246,38 +246,36 @@ class HttpRequestCookiesView extends StatelessWidget {
   Widget build(BuildContext context) {
     final requestCookies = data.requestCookies;
     final responseCookies = data.responseCookies;
-    return Container(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Column(
-            children: [
-              if (responseCookies.isNotEmpty)
-                _buildCookiesTable(
-                  context,
-                  'Response Cookies',
-                  responseCookies,
-                  constraints,
-                  responseCookiesKey,
-                ),
-              // Add padding between the cookie tables if displaying both
-              // response and request cookies.
-              if (responseCookies.isNotEmpty && requestCookies.isNotEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 24.0),
-                ),
-              if (requestCookies.isNotEmpty)
-                _buildCookiesTable(
-                  context,
-                  'Request Cookies',
-                  requestCookies,
-                  constraints,
-                  requestCookiesKey,
-                  requestCookies: true,
-                ),
-            ],
-          );
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Column(
+          children: [
+            if (responseCookies.isNotEmpty)
+              _buildCookiesTable(
+                context,
+                'Response Cookies',
+                responseCookies,
+                constraints,
+                responseCookiesKey,
+              ),
+            // Add padding between the cookie tables if displaying both
+            // response and request cookies.
+            if (responseCookies.isNotEmpty && requestCookies.isNotEmpty)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 24.0),
+              ),
+            if (requestCookies.isNotEmpty)
+              _buildCookiesTable(
+                context,
+                'Request Cookies',
+                requestCookies,
+                constraints,
+                requestCookiesKey,
+                requestCookies: true,
+              ),
+          ],
+        );
+      },
     );
   }
 }

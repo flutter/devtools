@@ -106,29 +106,27 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
       body: ListView.builder(
           itemCount: data == null ? 0 : data.length,
           itemBuilder: (BuildContext context, int index) {
-            return Container(
-              child: Center(
-                  child: Column(
-                // Stretch the cards in horizontal axis
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Card(
-                    child: Container(
-                      child: Text(
-                        // Read the name field value and set it in the Text widget
-                        api?.display(data, index),
+            return Center(
+                child: Column(
+              // Stretch the cards in horizontal axis
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Card(
+                  child: Container(
+                    child: Text(
+                      // Read the name field value and set it in the Text widget
+                      api?.display(data, index),
 
-                        // set some style to text
-                        style: TextStyle(
-                            fontSize: 20.0, color: Colors.lightBlueAccent),
-                      ),
-                      // added padding
-                      padding: const EdgeInsets.all(15.0),
+                      // set some style to text
+                      style: TextStyle(
+                          fontSize: 20.0, color: Colors.lightBlueAccent),
                     ),
-                  )
-                ],
-              )),
-            );
+                    // added padding
+                    padding: const EdgeInsets.all(15.0),
+                  ),
+                )
+              ],
+            ));
           }),
     );
   }
