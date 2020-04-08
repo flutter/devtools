@@ -681,13 +681,11 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
                   children: [
                     Expanded(
                       flex: 2,
-                      child: Container(
-                        child: Text(
-                          describeEnum(alignment),
-                          style: TextStyle(color: color),
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      child: Text(
+                        describeEnum(alignment),
+                        style: TextStyle(color: color),
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Flexible(
@@ -714,13 +712,11 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: Container(
-                          child: Text(
-                            describeEnum(alignment),
-                            style: TextStyle(color: color),
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                        child: Text(
+                          describeEnum(alignment),
+                          style: TextStyle(color: color),
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Flexible(

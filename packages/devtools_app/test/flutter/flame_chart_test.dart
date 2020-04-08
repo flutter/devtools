@@ -30,11 +30,9 @@ void main() {
     );
 
     Future<void> pumpFlameChart(WidgetTester tester) async {
-      await tester.pumpWidget(Container(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: flameChart,
-        ),
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: flameChart,
       ));
     }
 
@@ -173,18 +171,16 @@ void main() {
       WidgetTester tester,
       ScrollingFlameChartRow row,
     ) async {
-      await tester.pumpWidget(Container(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Overlay(
-            initialEntries: [
-              OverlayEntry(
-                builder: (context) {
-                  return currentRow = row;
-                },
-              ),
-            ],
-          ),
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: [
+            OverlayEntry(
+              builder: (context) {
+                return currentRow = row;
+              },
+            ),
+          ],
         ),
       ));
     }
