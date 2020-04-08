@@ -23,7 +23,7 @@ import 'utils.dart';
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
-  const DevToolsApp([this.screens]);
+  const DevToolsApp(this.screens);
 
   final List<Screen> screens;
 
