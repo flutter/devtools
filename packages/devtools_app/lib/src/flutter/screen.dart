@@ -116,4 +116,7 @@ extension DevToolsScreenTypeExtension on DevToolsScreenType {
         return null;
     }
   }
+
+  /// Return a unique identifier for this screen.
+  String get id => toString().split('.')[1];
 }

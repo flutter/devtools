@@ -104,8 +104,9 @@ class DevToolsAppState extends State<DevToolsApp> {
             ],
           ),
         ),
-    '/connect': (_, __) =>
-        DevToolsScaffold.withChild(child: ConnectScreenBody()),
+    '/connect': (_, __) => DevToolsScaffold.withChild(
+          child: ConnectScreenBody(),
+        ),
   };
 
   @override
