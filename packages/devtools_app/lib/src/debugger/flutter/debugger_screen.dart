@@ -64,8 +64,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   Stack stack;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     final newController = Controllers.of(context).debugger;
     if (newController == controller) return;
     controller = newController;
