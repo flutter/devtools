@@ -7,16 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 
 import '../../devtools.dart' as devtools;
-import '../debugger/flutter/debugger_screen.dart';
 import '../framework/framework_core.dart';
 import '../globals.dart';
-import '../info/flutter/info_screen.dart';
-import '../inspector/flutter/inspector_screen.dart';
-import '../logging/flutter/logging_screen.dart';
-import '../memory/flutter/memory_screen.dart';
-import '../network/flutter/network_screen.dart';
-import '../performance/flutter/performance_screen.dart';
-import '../timeline/flutter/timeline_screen.dart';
 import '../ui/flutter/service_extension_widgets.dart';
 import 'common_widgets.dart';
 import 'connect_screen.dart';
@@ -28,15 +20,12 @@ import 'screen.dart';
 import 'theme.dart';
 import 'utils.dart';
 
-// TODO(bkonyi): remove this bool when page is ready.
-const showNetworkPage = false;
-
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
-  const DevToolsApp([this.conditionalScreens]);
+  const DevToolsApp([this.screens]);
 
-  final List<ConditionalScreen> conditionalScreens;
+  final List<Screen> screens;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -109,17 +98,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       '/': (_, params) => Initializer(
             url: params['uri'],
             builder: (_) => DevToolsScaffold(
-              tabs: [
-                const InspectorScreen(),
-                const TimelineScreen(),
-                const MemoryScreen(),
-                const PerformanceScreen(),
-                const DebuggerScreen(),
-                if (showNetworkPage) const NetworkScreen(),
-                ..._visibleConditionalScreens(),
-                const LoggingScreen(),
-                const InfoScreen(),
-              ],
+              tabs: _visibleScreens(),
               actions: [
                 HotReloadButton(),
                 HotRestartButton(),
@@ -139,18 +118,21 @@ class DevToolsAppState extends State<DevToolsApp> {
     _routes = null;
   }
 
-  List<ConditionalScreen> _visibleConditionalScreens() {
-    final conditionals = <ConditionalScreen>[];
-    if (widget.conditionalScreens != null &&
-        serviceManager.serviceAvailable.isCompleted &&
-        serviceManager.isolateManager.selectedIsolateAvailable.isCompleted) {
-      for (var screen in widget.conditionalScreens) {
-        if (serviceManager.libraryUriAvailableNow(screen.conditionalLibrary)) {
-          conditionals.add(screen);
+  List<Screen> _visibleScreens() {
+    final visibleScreens = <Screen>[];
+    for (var screen in widget.screens) {
+      if (screen.conditionalLibrary != null) {
+        if (serviceManager.serviceAvailable.isCompleted &&
+            serviceManager
+                .isolateManager.selectedIsolateAvailable.isCompleted &&
+            serviceManager.libraryUriAvailableNow(screen.conditionalLibrary)) {
+          visibleScreens.add(screen);
         }
+      } else {
+        visibleScreens.add(screen);
       }
     }
-    return conditionals;
+    return visibleScreens;
   }
 
   @override
