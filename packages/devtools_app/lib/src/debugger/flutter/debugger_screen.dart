@@ -63,14 +63,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   ScriptList scriptList;
   Stack stack;
 
+  // TODO(kenz): clean up this lifecycle logic to be more idiomatic to Flutter.
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final newController = Controllers.of(context).debugger;
-    if (newController == controller) return;
-    controller = newController;
-    addAutoDisposeListener(controller.isPaused, _onPaused);
-    addAutoDisposeListener(controller.breakpoints);
+  void initState() {
+    super.initState();
     // TODO(djshuckerow): Make the loading process disposable.
     serviceManager.service
         .getScripts(serviceManager.isolateManager.selectedIsolate.id)
@@ -79,6 +75,16 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         scriptList = scripts;
       });
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newController = Controllers.of(context).debugger;
+    if (newController == controller) return;
+    controller = newController;
+    addAutoDisposeListener(controller.isPaused, _onPaused);
+    addAutoDisposeListener(controller.breakpoints);
   }
 
   Future<void> _onPaused() async {
