@@ -82,8 +82,7 @@ abstract class Screen {
 /// If [conditionalLibrary] is not present, the screen will be hidden from the
 /// [TabBar], not just disabled like other DevTools [Screen]s.
 ///
-/// Example:
-///
+/// ```dart
 /// class PackageProviderScreen extends ConditionalScreen {
 ///   const PackageProviderScreen()
 ///       : super(
@@ -103,6 +102,8 @@ abstract class Screen {
 ///     return const Center(child: Text('Package provider tools'));
 ///   }
 /// }
+/// ```
+/// {@end-tool}
 abstract class ConditionalScreen extends Screen {
   const ConditionalScreen({
     @required this.conditionalLibrary,
@@ -122,8 +123,8 @@ abstract class ConditionalScreen extends Screen {
   /// This can either be a full library uri or it can be a prefix.
   ///
   /// Examples:
-  ///  'package:provider/provider.dart'
-  ///  'package:provider'
+  ///  * 'package:provider/provider.dart'
+  ///  * 'package:provider/'
   final String conditionalLibrary;
 }
 

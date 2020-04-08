@@ -10,7 +10,7 @@ import 'src/flutter/screen.dart';
 
 void main() {
   // TODO(kenz): add some conditional screens.
-  const conditionalScreens = <ConditionalScreen>[PackageProviderScreen()];
+  const conditionalScreens = <ConditionalScreen>[];
 
   initializeFramework();
 

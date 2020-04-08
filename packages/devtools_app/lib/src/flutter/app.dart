@@ -65,6 +65,12 @@ class DevToolsAppState extends State<DevToolsApp> {
     });
   }
 
+  @override
+  void didUpdateWidget(DevToolsApp oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _clearCachedRoutes();
+  }
+
   /// Generates routes, separating the path from URL query parameters.
   Route _generateRoute(RouteSettings settings) {
     final uri = Uri.parse(settings.name);
