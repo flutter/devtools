@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart' hide TableRow;
+import 'package:flutter/services.dart';
 
 import '../table_data.dart';
 import '../trees.dart';
@@ -112,6 +113,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
       sortColumn: widget.sortColumn,
       sortDirection: widget.sortDirection,
       onSortChanged: _sortDataAndUpdate,
+      focusNode: FocusNode(),
     );
   }
 
@@ -210,8 +212,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   Set<T> animatingChildrenSet = {};
   T animatingNode;
   T selectedNode;
+  int selectedNodeIndex;
   List<double> columnWidths;
   List<bool> rootsExpanded;
+
+  final focusNode = FocusNode();
 
   @override
   void initState() {
@@ -225,6 +230,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   @override
   void didUpdateWidget(TreeTable oldWidget) {
     super.didUpdateWidget(oldWidget);
+    FocusScope.of(context).requestFocus(focusNode);
+
     if (widget.sortColumn != oldWidget.sortColumn ||
         widget.sortDirection != oldWidget.sortDirection ||
         !collectionEquals(widget.dataRoots, oldWidget.dataRoots)) {
@@ -266,6 +273,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     /// Rebuilds the table whenever the tree structure has been updated
     setState(() {
       selectedNode = node;
+      selectedNodeIndex = items.indexOf(selectedNode);
 
       if (!node.isExpandable) return;
       animatingNode = node;
@@ -359,6 +367,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       sortColumn: widget.sortColumn,
       sortDirection: widget.sortDirection,
       onSortChanged: _sortDataAndUpdate,
+      focusNode: focusNode,
+      handleKeyEvent: _handleKeyEvent,
     );
   }
 
@@ -412,6 +422,67 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       ..forEach(_sort);
   }
 
+  void _handleKeyEvent(RawKeyEvent event, ScrollController scrollController,
+      BoxConstraints constraints) {
+    if (event is! RawKeyDownEvent) return;
+
+    // If there is no selected node, choose the first one.
+    if (selectedNode == null) {
+      selectedNode = items[0];
+      selectedNodeIndex = 0;
+    }
+    assert(selectedNode == items[selectedNodeIndex]);
+
+    if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
+        event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      _moveSelection(event.logicalKey, scrollController, constraints.maxHeight);
+    }
+    // TODO(gmoothart): Add expand/collapse with left/right keys
+  }
+
+  void _moveSelection(LogicalKeyboardKey key, ScrollController scrollController,
+      double viewportHeight) {
+    // get the index of the first item fully visible in the viewport
+    final firstItemIndex =
+        (scrollController.offset / _Table.defaultRowHeight).ceil();
+
+    final minCompleteItemsInView =
+        (viewportHeight / _Table.defaultRowHeight).floor() - 1;
+    final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
+    var newSelectedNodeIndex = 0; // ??
+
+    if (key == LogicalKeyboardKey.arrowDown) {
+      // move selection down if there is a node lower down.
+      newSelectedNodeIndex = min(selectedNodeIndex + 1, items.length - 1);
+    } else if (key == LogicalKeyboardKey.arrowUp) {
+      // move selection up if there is a node lower down.
+      newSelectedNodeIndex = max(selectedNodeIndex - 1, 0);
+    }
+
+    final newSelectedNode = items[newSelectedNodeIndex];
+    final isBelowViewport = newSelectedNodeIndex > lastItemIndex;
+    final isAboveViewport = newSelectedNodeIndex < firstItemIndex;
+
+    if (isBelowViewport) {
+      // Scroll so selected row is the last full item displayed in the viewport.
+      // To do this we need to be showing the (minCompleteItemsInView - 1)
+      // previous item  at the top.
+      scrollController.animateTo(
+          (newSelectedNodeIndex - minCompleteItemsInView - 1) *
+              _Table.defaultRowHeight,
+          duration: defaultDuration,
+          curve: defaultCurve);
+    } else if (isAboveViewport) {
+      scrollController.animateTo(newSelectedNodeIndex * _Table.defaultRowHeight,
+          duration: defaultDuration, curve: defaultCurve);
+    }
+
+    setState(() {
+      selectedNode = newSelectedNode;
+      selectedNodeIndex = newSelectedNodeIndex;
+    });
+  }
+
   void _sortDataAndUpdate(ColumnData column, SortDirection direction) {
     sortData(column, direction);
     _updateItems();
@@ -428,6 +499,8 @@ class _Table<T> extends StatefulWidget {
     @required this.sortColumn,
     @required this.sortDirection,
     @required this.onSortChanged,
+    @required this.focusNode,
+    this.handleKeyEvent,
     this.reverse = false,
   }) : super(key: key);
 
@@ -440,6 +513,9 @@ class _Table<T> extends StatefulWidget {
   final ColumnData<T> sortColumn;
   final SortDirection sortDirection;
   final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
+  final FocusNode focusNode;
+  final void Function(RawKeyEvent event, ScrollController scrollController,
+      BoxConstraints constraints) handleKeyEvent;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
@@ -458,6 +534,7 @@ class _TableState<T> extends State<_Table<T>> {
   LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
   ColumnData<T> sortColumn;
   SortDirection sortDirection;
+  ScrollController scrollController;
 
   @override
   void initState() {
@@ -465,6 +542,13 @@ class _TableState<T> extends State<_Table<T>> {
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
     sortColumn = widget.sortColumn;
     sortDirection = widget.sortDirection;
+    scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   /// The width of all columns in the table, with additional padding.
@@ -511,9 +595,17 @@ class _TableState<T> extends State<_Table<T>> {
             ),
             Expanded(
               child: Scrollbar(
-                child: ListView.custom(
-                  reverse: widget.reverse,
-                  childrenDelegate: itemDelegate,
+                child: RawKeyboardListener(
+                  onKey: (event) => widget.handleKeyEvent != null
+                      ? widget.handleKeyEvent(
+                          event, scrollController, constraints)
+                      : null,
+                  focusNode: widget.focusNode,
+                  child: ListView.custom(
+                    controller: scrollController,
+                    reverse: widget.reverse,
+                    childrenDelegate: itemDelegate,
+                  ),
                 ),
               ),
             ),
