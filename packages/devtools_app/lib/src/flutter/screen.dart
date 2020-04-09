@@ -16,10 +16,16 @@ import 'connect_screen.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-/// Defines pages shown in the tabbar of the app.
+/// Defines a page shown in the DevTools [TabBar].
 @immutable
 abstract class Screen {
-  const Screen(this.type, {this.title, this.icon, this.tabKey});
+  const Screen(
+    this.type, {
+    this.title,
+    this.icon,
+    this.tabKey,
+    this.conditionalLibrary,
+  });
 
   final DevToolsScreenType type;
 
@@ -31,6 +37,16 @@ abstract class Screen {
   /// An optional key to use when creating the Tab widget (for use during
   /// testing).
   final Key tabKey;
+
+  /// Library uri that determines whether to include this screen in DevTools.
+  ///
+  /// This can either be a full library uri or it can be a prefix. If null, this
+  /// screen will be shown unconditionally.
+  ///
+  /// Examples:
+  ///  * 'package:provider/provider.dart'
+  ///  * 'package:provider/'
+  final String conditionalLibrary;
 
   /// Whether this screen should display the isolate selector in the status
   /// line.
@@ -76,47 +92,62 @@ abstract class Screen {
   }
 }
 
-enum DevToolsScreenType {
-  inspector,
-  timeline,
-  memory,
-  performance,
-  logging,
-  info,
-  connect,
-  debugger,
-  network,
-  simple,
-}
+class DevToolsScreenType {
+  const DevToolsScreenType(this.id, {this.createOverride});
 
-extension DevToolsScreenTypeExtension on DevToolsScreenType {
+  final String id;
+
+  final Screen Function() createOverride;
+
+  static const inspectorId = 'inspector';
+  static const timelineId = 'timeline';
+  static const memoryId = 'memory';
+  static const performanceId = 'performance';
+  static const networkId = 'network';
+  static const debuggerId = 'debugger';
+  static const loggingId = 'logging';
+  static const infoId = 'info';
+  static const connectId = 'connect';
+  static const simpleId = 'simple';
+
+  static const inspector = DevToolsScreenType(inspectorId);
+  static const timeline = DevToolsScreenType(timelineId);
+  static const memory = DevToolsScreenType(memoryId);
+  static const performance = DevToolsScreenType(performanceId);
+  static const network = DevToolsScreenType(networkId);
+  static const debugger = DevToolsScreenType(debuggerId);
+  static const logging = DevToolsScreenType(loggingId);
+  static const info = DevToolsScreenType(infoId);
+  static const connect = DevToolsScreenType(connectId);
+  static const simple = DevToolsScreenType(simpleId);
+
   Screen create() {
-    switch (this) {
-      case DevToolsScreenType.inspector:
+    switch (id) {
+      case inspectorId:
         return const InspectorScreen();
-      case DevToolsScreenType.timeline:
+      case timelineId:
         return const TimelineScreen();
-      case DevToolsScreenType.memory:
+      case memoryId:
         return const MemoryScreen();
-      case DevToolsScreenType.performance:
+      case performanceId:
         return const PerformanceScreen();
-      case DevToolsScreenType.logging:
-        return const LoggingScreen();
-      case DevToolsScreenType.info:
-        return const InfoScreen();
-      case DevToolsScreenType.connect:
-        return const ConnectScreen();
-      case DevToolsScreenType.debugger:
-        return const DebuggerScreen();
-      case DevToolsScreenType.network:
+      case networkId:
         return const NetworkScreen();
-      case DevToolsScreenType.simple:
+      case debuggerId:
+        return const DebuggerScreen();
+      case loggingId:
+        return const LoggingScreen();
+      case infoId:
+        return const InfoScreen();
+      case connectId:
+        return const ConnectScreen();
+      case simpleId:
         return const SimpleScreen(null);
       default:
+        if (createOverride != null) {
+          return createOverride();
+        }
         return null;
     }
   }
-
-  /// Return a unique identifier for this screen.
-  String get id => toString().split('.')[1];
 }

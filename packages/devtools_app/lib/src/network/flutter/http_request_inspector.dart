@@ -51,10 +51,8 @@ class HttpRequestInspector extends StatelessWidget {
           Row(
             children: [
               Flexible(
-                child: Container(
-                  child: TabBar(
-                    tabs: tabs,
-                  ),
+                child: TabBar(
+                  tabs: tabs,
                 ),
               ),
             ],

@@ -213,8 +213,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       enterOfflineMode();
     });
     final availableScreens = widget.tabs;
-    int screenIndex =
-        availableScreens.indexWhere((screen) => screen.type == screenType);
+    int screenIndex = availableScreens
+        .indexWhere((screen) => screen.type.id == screenType.id);
     if (screenIndex == -1) {
       screenIndex = widget.tabs.length;
       widget.tabs.add(screenType.create());

@@ -187,17 +187,15 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
       builder: (context, HttpRequestData data, widget) {
         return Expanded(
           child: (!isRecording && _dataTableSource.rowCount == 0)
-              ? Container(
-                  child: Center(
-                    child: recordingInfo(
-                      instructionsKey: NetworkScreen.recordingInstructionsKey,
-                      recording: isRecording,
-                      // TODO(kenz): create a processing notifier if necessary
-                      // for this data.
-                      processing: false,
-                      recordedObject: 'HTTP requests',
-                      isPause: true,
-                    ),
+              ? Center(
+                  child: recordingInfo(
+                    instructionsKey: NetworkScreen.recordingInstructionsKey,
+                    recording: isRecording,
+                    // TODO(kenz): create a processing notifier if necessary
+                    // for this data.
+                    processing: false,
+                    recordedObject: 'HTTP requests',
+                    isPause: true,
                   ),
                 )
               : Split(
