@@ -1,6 +1,7 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:ui' as dart_ui;
 
@@ -18,7 +19,6 @@ import '../../globals.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
 import '../../utils.dart';
 import '../../vm_service_wrapper.dart';
-
 import '../memory_service.dart';
 import 'memory_protocol.dart';
 

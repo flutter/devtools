@@ -276,7 +276,7 @@ Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
   return OutlineButton(
     key: const Key('exit offline button'),
     onPressed: onPressed,
-    child: MaterialIconLabel(
+    child: const MaterialIconLabel(
       Icons.clear,
       'Exit offline mode',
     ),

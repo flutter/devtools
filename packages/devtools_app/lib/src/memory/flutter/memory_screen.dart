@@ -160,7 +160,7 @@ class MemoryBodyState extends State<MemoryBody> {
       key: MemoryScreen.dropdownIntervalMenuButtonKey,
       value: controller.displayInterval,
       iconSize: 20,
-      style: TextStyle(fontWeight: FontWeight.w100),
+      style: const TextStyle(fontWeight: FontWeight.w100),
       onChanged: (String newValue) {
         setState(
           () {
@@ -204,7 +204,7 @@ class MemoryBodyState extends State<MemoryBody> {
       key: MemoryScreen.dropdownSourceMenuButtonKey,
       value: controller.memorySource,
       iconSize: 20,
-      style: TextStyle(fontWeight: FontWeight.w100),
+      style: const TextStyle(fontWeight: FontWeight.w100),
       onChanged: (String newValue) {
         setState(() {
           controller.memorySource = newValue;
