@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:devtools_app/src/ui/theme.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
@@ -209,14 +210,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 
   FlexSplitColumnHeader _debuggerPaneHeader(String title) {
+    final theme = Theme.of(context);
     return FlexSplitColumnHeader(
       height: debuggerPaneHeaderHeight,
       child: Container(
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: Theme.of(context).focusColor),
+            bottom: BorderSide(color: theme.focusColor),
           ),
-          color: Theme.of(context).primaryColor,
+          color: ThemedColor(devtoolsGrey[50], theme.primaryColor),
         ),
         padding: const EdgeInsets.only(left: defaultSpacing),
         alignment: Alignment.centerLeft,
