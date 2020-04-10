@@ -54,7 +54,7 @@ class SettingsState extends State<Settings> {
           return ListTile(
             leading: Icon(values[key]), // starships
             title: Text(key),
-            trailing: Icon(Icons.arrow_right),
+            trailing: const Icon(Icons.arrow_right),
             onTap: () {
               logs.add('$key Selected');
               setState(() {

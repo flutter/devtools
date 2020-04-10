@@ -29,7 +29,7 @@ The menu, on the main page, has options:
   static const String logDescr = ' display all messages.';
   static const String aboutDescr = ' display this page.';
 
-  final TextStyle defaultStyle = TextStyle(
+  final TextStyle defaultStyle = const TextStyle(
     fontSize: 20,
     color: Colors.blueGrey,
   );
@@ -46,7 +46,7 @@ The menu, on the main page, has options:
           child: RichText(
             text: TextSpan(
               style: defaultStyle,
-              children: <TextSpan>[
+              children: const [
                 TextSpan(
                     text: heading,
                     style: TextStyle(
@@ -54,23 +54,23 @@ The menu, on the main page, has options:
                       fontSize: 38,
                       fontWeight: FontWeight.w700,
                     )),
-                const TextSpan(
+                TextSpan(
                   text: helpText,
                 ),
-                const TextSpan(
+                TextSpan(
                     text: logOption,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                     )),
-                const TextSpan(
+                TextSpan(
                   text: logDescr,
                 ),
-                const TextSpan(
+                TextSpan(
                     text: aboutOption,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                     )),
-                const TextSpan(
+                TextSpan(
                   text: aboutDescr,
                 ),
               ],
