@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:devtools_app/src/ui/theme.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
@@ -19,6 +18,7 @@ import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../ui/flutter/label.dart';
+import '../../ui/theme.dart';
 import 'debugger_controller.dart';
 
 class DebuggerScreen extends Screen {
