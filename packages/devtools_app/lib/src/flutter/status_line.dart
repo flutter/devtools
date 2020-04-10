@@ -187,7 +187,7 @@ class StatusLine extends StatelessWidget {
                 overflow: TextOverflow.clip,
               ),
               const SizedBox(width: 2.0),
-              Icon(
+              const Icon(
                 Icons.phone_android,
                 size: defaultIconSize,
               ),
