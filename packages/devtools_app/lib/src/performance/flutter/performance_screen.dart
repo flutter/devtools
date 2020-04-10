@@ -21,11 +21,7 @@ import '../../ui/flutter/vm_flag_widgets.dart';
 
 class PerformanceScreen extends Screen {
   const PerformanceScreen()
-      : super(
-          DevToolsScreenType.performance,
-          title: 'Performance',
-          icon: Octicons.dashboard,
-        );
+      : super(id, title: 'Performance', icon: Octicons.dashboard);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -38,8 +34,10 @@ class PerformanceScreen extends Screen {
   @visibleForTesting
   static const recordingStatusKey = Key('Recording Status');
 
+  static const id = 'performance';
+
   @override
-  String get docPageId => 'performance';
+  String get docPageId => id;
 
   @override
   Widget build(BuildContext context) {
@@ -66,10 +64,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    maybePushDebugModePerformanceMessage(
-      context,
-      DevToolsScreenType.performance,
-    );
+    maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
     final newController = Controllers.of(context).performance;
     if (newController == controller) return;
@@ -115,7 +110,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildStateControls(controller),
-            const ProfileGranularityDropdown(DevToolsScreenType.performance),
+            const ProfileGranularityDropdown(PerformanceScreen.id),
           ],
         ),
         Expanded(

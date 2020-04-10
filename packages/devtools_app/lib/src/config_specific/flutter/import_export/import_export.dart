@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../flutter/controllers.dart';
 import '../../../flutter/notifications.dart';
-import '../../../flutter/screen.dart';
 import '../../../timeline/flutter/timeline_model.dart';
+import '../../../timeline/flutter/timeline_screen.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
@@ -26,15 +25,13 @@ const emptyTimelineMessage = 'Imported file does not contain timeline data.';
 class ImportController {
   ImportController(
     this._notifications,
-    this._controllers,
-    this.pushScreenForImport,
+    this._pushSnapshotScreenForImport,
   );
 
-  final void Function(DevToolsScreenType type) pushScreenForImport;
+  final void Function(String screenId, Object data)
+      _pushSnapshotScreenForImport;
 
   final NotificationService _notifications;
-
-  final ProvidedControllers _controllers;
 
   bool importing = false;
 
@@ -49,10 +46,8 @@ class ImportController {
       return;
     }
 
-    // TODO(kenz): add UI progress indicator when offline data is loading.
-    // TODO(kenz): add support for custom / conditional screens.
     switch (devToolsScreen) {
-      case DevToolsScreenType.timelineId:
+      case TimelineScreen.id:
         _importTimeline(json);
         break;
       // TODO(jacobr): add the inspector handling case here once the inspector
@@ -72,17 +67,7 @@ class ImportController {
       _notifications.push(emptyTimelineMessage);
       return;
     }
-
-    // TODO(kenz): handle imports when we don't have any active controllers
-    // (i.e. when the connect screen is showing).
-    final timelineController = _controllers?.timeline;
-    if (timelineController == null) {
-      return;
-    }
-
-    pushScreenForImport(DevToolsScreenType.timeline);
-
-    await timelineController.loadOfflineData(offlineData);
+    _pushSnapshotScreenForImport(TimelineScreen.id, offlineData);
   }
 }
 

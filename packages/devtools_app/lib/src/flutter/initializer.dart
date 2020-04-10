@@ -11,6 +11,7 @@ import '../framework/framework_core.dart';
 import '../globals.dart';
 import '../inspector/flutter_widget.dart';
 import '../url_utils.dart';
+import 'app.dart';
 import 'auto_dispose_mixin.dart';
 import 'controllers.dart';
 import 'navigation.dart';
@@ -110,7 +111,7 @@ class _InitializerState extends State<Initializer>
         // the /connect page to get a VM Service connection for serviceManager.
         // When it completes, the serviceManager will notify this instance.
         Navigator.of(context).pushNamed(
-          routeNameWithQueryParams(context, '/connect'),
+          routeNameWithQueryParams(context, connectRoute),
         );
       }
     });

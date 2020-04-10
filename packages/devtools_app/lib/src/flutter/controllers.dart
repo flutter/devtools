@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -12,6 +14,7 @@ import '../logging/logging_controller.dart';
 import '../memory/flutter/memory_controller.dart';
 import '../performance/performance_controller.dart';
 import '../timeline/flutter/timeline_controller.dart';
+import '../timeline/flutter/timeline_screen.dart';
 import 'banner_messages.dart';
 
 /// Container for controllers that should outlive individual screens of the app.
@@ -29,12 +32,7 @@ class ProvidedControllers implements DisposableController {
     @required this.performance,
     @required this.debugger,
     @required this.bannerMessages,
-  })  : assert(logging != null),
-        assert(timeline != null),
-        assert(memory != null),
-        assert(performance != null),
-        assert(debugger != null),
-        assert(bannerMessages != null);
+  });
 
   /// Builds the default providers for the app.
   factory ProvidedControllers.defaults() {
@@ -55,6 +53,25 @@ class ProvidedControllers implements DisposableController {
     );
   }
 
+  /// Builds the default providers for offlineMode.
+  ///
+  /// All screens that support offline imports should have their controller in
+  /// this factory and in [offlineLookup].
+  factory ProvidedControllers.offline() {
+    return ProvidedControllers(
+      logging: null,
+      timeline: TimelineController(),
+      memory: null,
+      performance: null,
+      debugger: null,
+      bannerMessages: null,
+    );
+  }
+
+  Map<String, OfflineControllerMixin> get offlineLookup => {
+        TimelineScreen.id: timeline,
+      };
+
   final LoggingController logging;
   final TimelineController timeline;
   final MemoryController memory;
@@ -64,11 +81,11 @@ class ProvidedControllers implements DisposableController {
 
   @override
   void dispose() {
-    logging.dispose();
-    timeline.dispose();
-    memory.dispose();
-    performance.dispose();
-    debugger.dispose();
+    logging?.dispose();
+    timeline?.dispose();
+    memory?.dispose();
+    performance?.dispose();
+    debugger?.dispose();
   }
 }
 
@@ -87,8 +104,13 @@ class Controllers extends StatefulWidget {
   const Controllers._({Key key, this.child, this.overrideProviders})
       : super(key: key);
 
+  const Controllers.offline({Key key, this.child})
+      : overrideProviders = _offlineProviders;
+
+  static ProvidedControllers _offlineProviders() =>
+      ProvidedControllers.offline();
+
   /// Callback that overrides [ProvidedControllers.defaults].
-  @visibleForTesting
   final ProvidedControllers Function() overrideProviders;
 
   final Widget child;
@@ -230,4 +252,8 @@ class _DisposeAfterNotifyElement extends InheritedElement {
       _oldData?.dispose();
     });
   }
+}
+
+mixin OfflineControllerMixin<T> {
+  FutureOr<void> processOfflineData(T offlineData);
 }

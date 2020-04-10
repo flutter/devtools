@@ -4,8 +4,8 @@
 
 import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/scaffold.dart';
-import 'package:devtools_app/src/flutter/screen.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/performance/flutter/performance_screen.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
@@ -26,8 +26,7 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      dropdown =
-          const ProfileGranularityDropdown(DevToolsScreenType.performance);
+      dropdown = const ProfileGranularityDropdown(PerformanceScreen.id);
       bannerMessagesController = BannerMessagesController();
     });
 
@@ -90,7 +89,7 @@ void main() {
       // Verify we are showing the high profile granularity warning.
       expect(
         bannerMessagesController
-            .messagesForScreen(DevToolsScreenType.performance)
+            .messagesForScreen(PerformanceScreen.id)
             .value
             .length,
         equals(1),
@@ -113,9 +112,7 @@ void main() {
       );
       // Verify we are not showing the high profile granularity warning.
       expect(
-        bannerMessagesController
-            .messagesForScreen(DevToolsScreenType.performance)
-            .value,
+        bannerMessagesController.messagesForScreen(PerformanceScreen.id).value,
         isEmpty,
       );
     });

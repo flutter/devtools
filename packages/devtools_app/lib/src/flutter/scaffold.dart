@@ -14,9 +14,9 @@ import '../globals.dart';
 import 'app.dart';
 import 'banner_messages.dart';
 import 'common_widgets.dart';
-import 'controllers.dart';
 import 'notifications.dart';
 import 'screen.dart';
+import 'snapshot_screen.dart';
 import 'status_line.dart';
 import 'theme.dart';
 
@@ -120,8 +120,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     _importController = ImportController(
       Notifications.of(context),
-      Controllers.of(context),
-      _pushScreenForImport,
+      _pushSnapshotScreenForImport,
     );
 
     // If the animations are null, initialize them.
@@ -172,19 +171,25 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     }
   }
 
-  /// Pushes a screen for an offline import.
-  void _pushScreenForImport(DevToolsScreenType screenType) {
+  /// Pushes the snapshot screen for an offline import.
+  void _pushSnapshotScreenForImport(
+    String screenId,
+    Object data,
+  ) {
+    final args = SnapshotArguments(screenId, data);
+    if (offlineMode) {
+      // If we are already in offline mode, only handle routing from existing
+      // '/snapshot' route. In this case, we need to first pop the existing
+      // '/snapshot' route and push a new one.
+      if (ModalRoute.of(context).settings.name == snapshotRoute) {
+        Navigator.popAndPushNamed(context, snapshotRoute, arguments: args);
+      }
+    } else {
+      Navigator.pushNamed(context, snapshotRoute, arguments: args);
+    }
     setState(() {
       enterOfflineMode();
     });
-    final availableScreens = widget.tabs;
-    int screenIndex = availableScreens
-        .indexWhere((screen) => screen.type.id == screenType.id);
-    if (screenIndex == -1) {
-      screenIndex = widget.tabs.length;
-      widget.tabs.add(screenType.create());
-    }
-    _tabController.animateTo(screenIndex);
   }
 
   @override
@@ -330,7 +335,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 }
 
 class SimpleScreen extends Screen {
-  const SimpleScreen(this.child) : super(DevToolsScreenType.simple);
+  const SimpleScreen(this.child) : super('simple');
 
   final Widget child;
 

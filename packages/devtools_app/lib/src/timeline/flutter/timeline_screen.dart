@@ -31,12 +31,7 @@ import 'timeline_model.dart';
 // where applicable.
 
 class TimelineScreen extends Screen {
-  const TimelineScreen()
-      : super(
-          DevToolsScreenType.timeline,
-          title: 'Timeline',
-          icon: Octicons.pulse,
-        );
+  const TimelineScreen() : super(id, title: 'Timeline', icon: Octicons.pulse);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -53,12 +48,14 @@ class TimelineScreen extends Screen {
   @visibleForTesting
   static const stopRecordingButtonKey = Key('Stop Recording Button');
 
+  static const id = 'timeline';
+
   @override
-  String get docPageId => 'timeline';
+  String get docPageId => id;
 
   @override
   Widget build(BuildContext context) {
-    return !serviceManager.connectedApp.isDartWebAppNow
+    return offlineMode || !serviceManager.connectedApp.isDartWebAppNow
         ? const TimelineScreenBody()
         : const DisabledForWebAppMessage();
   }
@@ -88,7 +85,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    maybePushDebugModePerformanceMessage(context, DevToolsScreenType.timeline);
+    maybePushDebugModePerformanceMessage(context, TimelineScreen.id);
 
     final newController = Controllers.of(context).timeline;
     if (newController == controller) return;
@@ -128,11 +125,15 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
   @override
   Widget build(BuildContext context) {
+    final isOfflineFlutterApp = offlineMode &&
+        controller.offlineTimelineData != null &&
+        controller.offlineTimelineData.frames.isNotEmpty;
     return Column(
       children: [
-        _timelineControls(),
+        if (!offlineMode) _timelineControls(),
         const SizedBox(height: denseRowSpacing),
-        if (serviceManager.connectedApp.isFlutterAppNow)
+        if (isOfflineFlutterApp ||
+            (!offlineMode && serviceManager.connectedApp.isFlutterAppNow))
           const FlutterFramesChart(),
         Expanded(
           child: Split(
@@ -149,19 +150,12 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   Widget _timelineControls() {
-    final _exitOfflineButton = exitOfflineButton(() {
-      setState(() {
-        controller.exitOfflineMode();
-      });
-    });
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: offlineMode
-          ? [_exitOfflineButton]
-          : [
-              _buildPrimaryStateControls(),
-              _buildSecondaryControls(),
-            ],
+      children: [
+        _buildPrimaryStateControls(),
+        _buildSecondaryControls(),
+      ],
     );
   }
 
@@ -197,7 +191,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        const ProfileGranularityDropdown(DevToolsScreenType.timeline),
+        const ProfileGranularityDropdown(TimelineScreen.id),
         const SizedBox(width: defaultSpacing),
         if (!serviceManager.connectedApp.isDartCliAppNow)
           ServiceExtensionButtonGroup(

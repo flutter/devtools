@@ -13,7 +13,7 @@ void main() async {
     TestNotifications notifications;
     setUp(() {
       notifications = TestNotifications();
-      importController = ImportController(notifications, null, null);
+      importController = ImportController(notifications, null);
     });
 
     test('importData pushes proper notifications', () {

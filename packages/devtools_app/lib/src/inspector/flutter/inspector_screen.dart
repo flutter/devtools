@@ -26,13 +26,15 @@ import 'inspector_tree_flutter.dart';
 class InspectorScreen extends Screen {
   const InspectorScreen()
       : super(
-          DevToolsScreenType.inspector,
+          id,
           title: 'Flutter Inspector',
           icon: Octicons.deviceMobile,
         );
 
+  static const id = 'inspector';
+
   @override
-  String get docPageId => 'inspector';
+  String get docPageId => id;
 
   @override
   Widget build(BuildContext context) {

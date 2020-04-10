@@ -21,15 +21,12 @@ import '../../ui/flutter/label.dart';
 import 'debugger_controller.dart';
 
 class DebuggerScreen extends Screen {
-  const DebuggerScreen()
-      : super(
-          DevToolsScreenType.debugger,
-          title: 'Debugger',
-          icon: Octicons.bug,
-        );
+  const DebuggerScreen() : super(id, title: 'Debugger', icon: Octicons.bug);
+
+  static const id = 'debugger';
 
   @override
-  String get docPageId => 'debugger';
+  String get docPageId => id;
 
   @override
   bool get showIsolateSelector => true;

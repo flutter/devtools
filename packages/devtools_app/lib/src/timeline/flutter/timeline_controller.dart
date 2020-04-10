@@ -5,6 +5,7 @@ import 'dart:async';
 
 import '../../auto_dispose.dart';
 import '../../config_specific/logger/logger.dart';
+import '../../flutter/controllers.dart';
 import '../../globals.dart';
 import '../../http/http_service.dart';
 import '../../profiler/cpu_profile_controller.dart';
@@ -29,7 +30,9 @@ const String timelineScreenId = 'timeline';
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
 class TimelineController
-    with CpuProfilerControllerProviderMixin
+    with
+        CpuProfilerControllerProviderMixin,
+        OfflineControllerMixin<OfflineTimelineData>
     implements DisposableController {
   TimelineController() {
     timelineService = TimelineService(this);
@@ -144,17 +147,6 @@ class TimelineController
     }
   }
 
-  // TODO(kenz): remove this method once html app is deleted. This is a
-  // workaround to avoid fixing bugs in the DevTools html app. Modifying
-  // [selectTimelineEvent] to work for Flutter DevTools broke the html app, so
-  // this method fixes the regression without wasting resources to make the html
-  // and flutter code 100% compatible.
-  void htmlSelectTimelineEvent(TimelineEvent event) {
-    if (event == null || data.selectedEvent == event) return;
-    data.selectedEvent = event;
-    _selectedTimelineEventNotifier.value = event;
-  }
-
   Future<void> getCpuProfileForSelectedEvent() async {
     final selectedEvent = data.selectedEvent;
     if (!selectedEvent.isUiEvent) return;
@@ -240,8 +232,9 @@ class TimelineController
     }
   }
 
-  Future<void> loadOfflineData(OfflineTimelineData offlineData) async {
-    await _offlineModeChanged();
+  @override
+  FutureOr<void> processOfflineData(OfflineTimelineData offlineData) async {
+    await clearData();
     final traceEvents = [
       for (var trace in offlineData.traceEvents)
         TraceEventWrapper(
@@ -321,16 +314,6 @@ class TimelineController
     if (offlineTimelineData.cpuProfileData != null) {
       cpuProfilerController.loadOfflineData(offlineTimelineData.cpuProfileData);
     }
-  }
-
-  Future<void> _offlineModeChanged() async {
-    await clearData();
-    await timelineService.updateListeningState(true);
-  }
-
-  Future<void> exitOfflineMode() async {
-    offlineMode = false;
-    await _offlineModeChanged();
   }
 
   Future<void> toggleHttpRequestLogging(bool state) async {

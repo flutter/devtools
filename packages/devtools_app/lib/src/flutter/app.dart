@@ -12,13 +12,19 @@ import '../globals.dart';
 import '../ui/flutter/service_extension_widgets.dart';
 import 'common_widgets.dart';
 import 'connect_screen.dart';
+import 'controllers.dart';
 import 'initializer.dart';
 import 'notifications.dart';
 import 'preferences.dart';
 import 'scaffold.dart';
 import 'screen.dart';
+import 'snapshot_screen.dart';
 import 'theme.dart';
 import 'utils.dart';
+
+const homeRoute = '/';
+const connectRoute = '/connect';
+const snapshotRoute = '/snapshot';
 
 /// Top-level configuration for the app.
 @immutable
@@ -64,16 +70,21 @@ class DevToolsAppState extends State<DevToolsApp> {
   Route _generateRoute(RouteSettings settings) {
     final uri = Uri.parse(settings.name);
     final path = uri.path;
+    final args = settings.arguments;
 
     // Provide the appropriate page route.
     if (routes.containsKey(path)) {
-      WidgetBuilder builder =
-          (context) => routes[path](context, uri.queryParameters);
+      WidgetBuilder builder = (context) => routes[path](
+            context,
+            uri.queryParameters,
+            args,
+          );
       assert(() {
         builder = (context) => _AlternateCheckedModeBanner(
               builder: (context) => routes[path](
                 context,
                 uri.queryParameters,
+                args,
               ),
             );
         return true;
@@ -95,7 +106,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   /// The routes that the app exposes.
   Map<String, UrlParametersBuilder> get routes {
     return _routes ??= {
-      '/': (_, params) => Initializer(
+      homeRoute: (_, params, __) => Initializer(
             url: params['uri'],
             builder: (_) => DevToolsScaffold(
               tabs: _visibleScreens(),
@@ -107,8 +118,18 @@ class DevToolsAppState extends State<DevToolsApp> {
               ],
             ),
           ),
-      '/connect': (_, __) =>
+      connectRoute: (_, __, ___) =>
           DevToolsScaffold.withChild(child: ConnectScreenBody()),
+      snapshotRoute: (_, __, args) {
+        return DevToolsScaffold.withChild(
+          child: Controllers.offline(
+            child: SnapshotScreenBody(
+              args as SnapshotArguments,
+              widget.screens,
+            ),
+          ),
+        );
+      }
     };
   }
 
@@ -151,10 +172,12 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 }
 
-/// A [WidgetBuilder] that takes an additional map of URL query parameters.
+/// A [WidgetBuilder] that takes an additional map of URL query parameters and
+/// args.
 typedef UrlParametersBuilder = Widget Function(
   BuildContext,
   Map<String, String>,
+  Object args,
 );
 
 /// Displays the checked mode banner in the bottom end corner instead of the
