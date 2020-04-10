@@ -18,12 +18,12 @@ export 'package:flutter_test/flutter_test.dart' show EnginePhase;
 
 class TestRenderingFlutterBinding extends BindingBase
     with
+        SchedulerBinding,
         ServicesBinding,
         GestureBinding,
-        SchedulerBinding,
-        PaintingBinding,
         SemanticsBinding,
-        RendererBinding {
+        RendererBinding,
+        PaintingBinding {
   /// Creates a binding for testing rendering library functionality.
   ///
   /// If [onErrors] is not null, it is called if [FlutterError] caught any errors
@@ -125,6 +125,7 @@ class TestRenderingFlutterBinding extends BindingBase
 }
 
 TestRenderingFlutterBinding _renderer;
+
 TestRenderingFlutterBinding get renderer {
   _renderer ??= TestRenderingFlutterBinding();
   return _renderer;
