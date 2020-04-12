@@ -4,11 +4,11 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html';
 
 import 'package:http/http.dart' as http;
 
 import 'config_specific/logger/logger.dart';
+import 'config_specific/notifications/notifications.dart';
 import 'config_specific/sse/sse_shim.dart';
 import 'globals.dart';
 
