@@ -546,7 +546,7 @@ void main() {
       // Expected values returned through accessing Color.value property.
       const color1Value = 4293585900;
       const color2Value = 4294638330;
-      const rowSelectedColorValue = 4294309365;
+      const rowSelectedColorValue = 4278285762;
 
       await tester.pumpWidget(wrap(table));
       await tester.pumpAndSettle();
@@ -649,6 +649,7 @@ void main() {
 
 class TestData extends TreeNode<TestData> {
   TestData(this.name, this.number);
+
   final String name;
   final int number;
 
