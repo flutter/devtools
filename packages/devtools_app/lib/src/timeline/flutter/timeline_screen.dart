@@ -212,7 +212,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           height: Theme.of(context).buttonTheme.height,
           child: OutlineButton(
             onPressed: _exportTimeline,
-            child: MaterialIconLabel(
+            child: const MaterialIconLabel(
               Icons.file_download,
               'Export',
               minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,

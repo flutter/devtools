@@ -282,8 +282,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
       );
       preferredSize = Tween<Size>(
-        begin: Size.fromHeight(kToolbarHeight),
-        end: Size.fromHeight(kToolbarHeight + 40.0),
+        begin: const Size.fromHeight(kToolbarHeight),
+        end: const Size.fromHeight(kToolbarHeight + 40.0),
       ).evaluate(appBarCurve);
       final animatedAlignment = Tween<Alignment>(
         begin: Alignment.centerRight,

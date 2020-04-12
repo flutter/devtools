@@ -17,7 +17,6 @@ else
   echo ""
 fi
 
-
 set -x #echo on
 which flutter
 cd packages/devtools_app

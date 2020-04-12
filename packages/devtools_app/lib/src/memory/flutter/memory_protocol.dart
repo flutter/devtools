@@ -11,7 +11,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../globals.dart';
 import '../../version.dart';
 import '../../vm_service_wrapper.dart';
-
 import 'memory_controller.dart';
 
 class MemoryTracker {

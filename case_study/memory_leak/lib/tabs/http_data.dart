@@ -91,7 +91,7 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
             child: Container(
               child: Text(
                 currentRestfulAPI.activeFriendlyName,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24.0,
                   color: Colors.lightBlueAccent,
                 ),
@@ -118,7 +118,7 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
                       api?.display(data, index),
 
                       // set some style to text
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 20.0, color: Colors.lightBlueAccent),
                     ),
                     // added padding
