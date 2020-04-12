@@ -35,6 +35,9 @@ ThemeData _lightTheme() {
     primaryColorLight: devtoolsBlue[400],
     indicatorColor: Colors.yellowAccent[400],
     accentColor: devtoolsBlue[400],
+    backgroundColor: devtoolsGrey[600],
+    toggleableActiveColor: devtoolsBlue[400],
+    selectedRowColor: devtoolsBlue[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
   );
 }
