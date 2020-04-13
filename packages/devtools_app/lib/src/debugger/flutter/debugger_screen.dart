@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
@@ -11,14 +9,16 @@ import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/flex_split_column.dart';
-import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../ui/flutter/label.dart';
+import 'breakpoints.dart';
+import 'codeview.dart';
 import 'debugger_controller.dart';
+import 'scripts.dart';
 
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
@@ -163,9 +163,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            OutlinedBorder(
-              child: DebuggingControls(controller: controller),
-            ),
+            DebuggingControls(controller: controller),
             const SizedBox(height: denseRowSpacing),
             Expanded(
               child: loadingScript != null && script == null
@@ -263,171 +261,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 }
 
-class BreakpointPicker extends StatelessWidget {
-  const BreakpointPicker(
-      {Key key, @required this.breakpoints, @required this.controller})
-      : super(key: key);
-  final List<Breakpoint> breakpoints;
-  final DebuggerController controller;
-
-  String textFor(Breakpoint breakpoint) {
-    if (breakpoint.resolved) {
-      final location = breakpoint.location as SourceLocation;
-      // TODO(djshuckerow): Resolve the scripts in the background and
-      // switch from token position to line numbers.
-      return '${location.script.uri.split('/').last} Position '
-          '${location.tokenPos} (${location.script.uri})';
-    } else {
-      final location = breakpoint.location as UnresolvedSourceLocation;
-      return '${location.script.uri.split('/').last} Position '
-          '${location.line} (${location.script.uri})';
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _densePadding(
-      Scrollbar(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: ListView.builder(
-              itemBuilder: (context, index) => SizedBox(
-                height: _CodeViewState.rowHeight,
-                child: Text(textFor(breakpoints[index])),
-              ),
-              itemCount: breakpoints.length,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Picker that takes a [ScriptList] and allows selection of one of the scripts inside.
-class ScriptPicker extends StatefulWidget {
-  const ScriptPicker(
-      {Key key,
-      @required this.scripts,
-      @required this.onSelected,
-      @required this.selected})
-      : super(key: key);
-
-  final ScriptList scripts;
-  final void Function(ScriptRef scriptRef) onSelected;
-  final ScriptRef selected;
-
-  @override
-  ScriptPickerState createState() => ScriptPickerState();
-}
-
-class ScriptPickerState extends State<ScriptPicker> {
-  List<ScriptRef> _filtered;
-  TextEditingController filterController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    if (_isNotLoaded) initFilter();
-  }
-
-  @override
-  void didUpdateWidget(ScriptPicker oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_isNotLoaded) {
-      initFilter();
-    } else if (oldWidget.scripts != widget.scripts) {
-      updateFilter(filterController.text);
-    }
-  }
-
-  void initFilter() {
-    // Make an educated guess as to the main package to slim down the initial list of scripts we show.
-    if (widget.scripts?.scripts != null) {
-      final mainFile = widget.scripts.scripts
-          .firstWhere((ref) => ref.uri.contains('main.dart'));
-      filterController.text = mainFile.uri.split('/').first;
-      updateFilter(filterController.text);
-    }
-  }
-
-  void updateFilter(String value) {
-    setState(() {
-      if (widget.scripts?.scripts == null) {
-        _filtered = null;
-      } else {
-        // TODO(djshuckerow): Use DebuggerState.getShortScriptName logic here.
-        _filtered = widget.scripts.scripts
-            .where((ref) => ref.uri.contains(value.toLowerCase()))
-            .toList();
-      }
-    });
-  }
-
-  Widget _buildScript(ScriptRef ref) {
-    final selectedColor = Theme.of(context).selectedRowColor;
-
-    return Material(
-      color: ref == widget.selected ? selectedColor : null,
-      child: InkWell(
-        onTap: () => widget.onSelected(ref),
-        child: Container(
-          padding: const EdgeInsets.all(4.0),
-          alignment: Alignment.centerLeft,
-          child: Text(
-            '${ref?.uri?.split('/')?.last} (${ref?.uri})',
-            style: ref == widget.selected
-                ? TextStyle(color: Theme.of(context).textSelectionColor)
-                : null,
-          ),
-        ),
-      ),
-    );
-  }
-
-  bool get _isNotLoaded => _filtered == null || widget.scripts?.scripts == null;
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isNotLoaded) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final items = _filtered;
-    return Column(
-      children: [
-        TextField(
-          decoration: const InputDecoration(
-            labelText: 'Filter',
-            border: UnderlineInputBorder(),
-          ),
-          controller: filterController,
-          onChanged: updateFilter,
-        ),
-        Expanded(
-          child: _densePadding(
-            Scrollbar(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: ListView.builder(
-                    itemBuilder: (context, index) => _buildScript(items[index]),
-                    itemCount: items.length,
-                    itemExtent: 32.0,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class DebuggingControls extends StatelessWidget {
   const DebuggingControls({Key key, @required this.controller})
       : super(key: key);
@@ -436,15 +269,24 @@ class DebuggingControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(devoncarew): Change to using two sets of ToggleButtons.
+
     return ValueListenableBuilder(
       valueListenable: controller.isPaused,
       builder: (context, isPaused, child) {
         return SizedBox(
-          // Increase the height by one to accommodate for the bottom border.
-          height: DebuggerScreenBodyState.debuggerPaneHeaderHeight + 1.0,
+          height: DebuggerScreenBodyState.debuggerPaneHeaderHeight,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
+              // todo: create a group
+              MaterialButton(
+                onPressed: isPaused ? null : controller.pause,
+                child: const MaterialIconLabel(
+                  Icons.pause,
+                  'Pause',
+                ),
+              ),
               MaterialButton(
                 onPressed: isPaused ? controller.resume : null,
                 child: const MaterialIconLabel(
@@ -453,6 +295,7 @@ class DebuggingControls extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: defaultSpacing),
+              // todo: create a group
               MaterialButton(
                 onPressed: isPaused ? controller.stepIn : null,
                 child: const MaterialIconLabel(
@@ -474,277 +317,10 @@ class DebuggingControls extends StatelessWidget {
                   'Step Out',
                 ),
               ),
-              const SizedBox(width: defaultSpacing),
-              MaterialButton(
-                onPressed: isPaused ? null : controller.pause,
-                child: const MaterialIconLabel(
-                  Icons.pause,
-                  'Pause',
-                ),
-              ),
             ],
           ),
         );
       },
     );
   }
-}
-
-class CodeView extends StatefulWidget {
-  const CodeView({
-    Key key,
-    this.script,
-    this.stack,
-    this.controller,
-    this.onSelected,
-    this.lineNumberToBreakpoint,
-  }) : super(key: key);
-
-  final DebuggerController controller;
-  final Map<int, Breakpoint> lineNumberToBreakpoint;
-  final Script script;
-  final Stack stack;
-  final void Function(Script script, int line) onSelected;
-
-  @override
-  _CodeViewState createState() => _CodeViewState();
-}
-
-class _CodeViewState extends State<CodeView> {
-  List<String> lines = [];
-  ScrollController _horizontalController;
-  LinkedScrollControllerGroup verticalController;
-  ScrollController gutterController;
-  ScrollController textController;
-
-  // The paused positions in the current [widget.script] from the [widget.stack].
-  List<int> pausedPositions;
-
-  static const rowHeight = 24.0;
-  static const assumedCharacterWidth = 16.0;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _horizontalController = ScrollController();
-    verticalController = LinkedScrollControllerGroup();
-    gutterController = verticalController.addAndGet();
-    textController = verticalController.addAndGet();
-    _updateLines();
-    _updatePausedPositions();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-
-    _horizontalController.dispose();
-    gutterController.dispose();
-    textController.dispose();
-  }
-
-  @override
-  void didUpdateWidget(CodeView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.script != oldWidget.script) {
-      _updateLines();
-    }
-
-    if (widget.stack != oldWidget.stack) {
-      _updatePausedPositions();
-    }
-  }
-
-  void _updateLines() {
-    setState(() {
-      lines = widget.script?.source?.split('\n') ?? [];
-    });
-  }
-
-  void _updatePausedPositions() {
-    setState(() {
-      final framesInScript = (widget.stack?.frames ?? [])
-          .where((frame) => frame.location.script.id == widget.script?.id);
-      pausedPositions = [
-        for (var frame in framesInScript)
-          widget.controller.lineNumber(widget.script, frame.location)
-      ];
-    });
-
-    if (pausedPositions.isNotEmpty) {
-      verticalController.animateTo(
-        pausedPositions.first * rowHeight,
-        duration: shortDuration,
-        curve: defaultCurve,
-      );
-    }
-  }
-
-  void _onPressed(int line) {
-    widget.onSelected(widget.script, line);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO(https://github.com/flutter/devtools/issues/1648): Line numbers,
-    // syntax highlighting and breakpoint markers.
-    if (widget.script == null) {
-      return Center(
-        child: Text(
-          'No script selected',
-          style: Theme.of(context).textTheme.subtitle1,
-        ),
-      );
-    }
-
-    // Apply the log change-of-base formula, then add 16dp padding for every
-    // digit in the maximum number of lines.
-    final gutterWidth = lines.isEmpty
-        ? _CodeViewState.assumedCharacterWidth
-        : _CodeViewState.assumedCharacterWidth *
-                (math.log(lines.length) / math.ln10) +
-            _CodeViewState.assumedCharacterWidth;
-
-    return DefaultTextStyle(
-      style: Theme.of(context)
-          .textTheme
-          .bodyText2
-          .copyWith(fontFamily: 'RobotoMono'),
-      child: Scrollbar(
-        child: Row(
-          children: [
-            SizedBox(
-              width: gutterWidth,
-              child: ListView(
-                controller: gutterController,
-                children: [
-                  // TODO(devoncarew): We need to virtualize this.
-                  for (var lineNum = 1; lineNum <= lines.length; lineNum++)
-                    GutterRow(
-                      lineNumber: lineNum,
-                      totalLines: lines.length,
-                      onPressed: () => _onPressed(lineNum),
-                      isBreakpoint:
-                          widget.lineNumberToBreakpoint.containsKey(lineNum),
-                    ),
-                ],
-                itemExtent: rowHeight,
-              ),
-            ),
-            const SizedBox(width: denseSpacing),
-            Expanded(
-              child: SingleChildScrollView(
-                controller: _horizontalController,
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: assumedCharacterWidth *
-                      lines
-                          .map((s) => s.length)
-                          .reduce((a, b) => math.max(a, b)),
-                  child: ListView(
-                    controller: textController,
-                    children: [
-                      // Note: below, lineNum is the 1-based line number (the
-                      // user facing one, and the one that the VM uses);
-                      // lineNum - 1 is the index into the lines array.
-                      // TODO(devoncarew): We need to virtualize this.
-                      for (var lineNum = 1; lineNum <= lines.length; lineNum++)
-                        ScriptRow(
-                          lineContents: lines[lineNum - 1],
-                          onPressed: () => _onPressed(lineNum),
-                          isPausedHere: pausedPositions.contains(lineNum),
-                        )
-                    ],
-                    itemExtent: rowHeight,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class GutterRow extends StatelessWidget {
-  const GutterRow({
-    Key key,
-    @required this.lineNumber,
-    @required this.totalLines,
-    @required this.onPressed,
-    @required this.isBreakpoint,
-  }) : super(key: key);
-
-  final int lineNumber;
-  final int totalLines;
-  final VoidCallback onPressed;
-
-  // TODO(djshuckerow): Add support for multiple breakpoints in a line and
-  // different types of decorators than just breakpoints.
-  final bool isBreakpoint;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onPressed,
-      child: Container(
-        height: _CodeViewState.rowHeight,
-        padding: const EdgeInsets.only(left: 2.0, right: 4.0),
-        alignment: Alignment.centerRight,
-        decoration: BoxDecoration(color: titleSolidBackgroundColor),
-        child: Row(
-          children: [
-            if (isBreakpoint) const Text('●'),
-            Expanded(
-              child: Text(
-                '$lineNumber',
-                textAlign: TextAlign.end,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ScriptRow extends StatelessWidget {
-  const ScriptRow({
-    Key key,
-    @required this.lineContents,
-    @required this.onPressed,
-    @required this.isPausedHere,
-  }) : super(key: key);
-
-  final String lineContents;
-  final VoidCallback onPressed;
-  final bool isPausedHere;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onPressed,
-      child: Container(
-        alignment: Alignment.centerLeft,
-        height: _CodeViewState.rowHeight,
-        color: isPausedHere ? Theme.of(context).selectedRowColor : null,
-        child: Text(
-          lineContents,
-          style: isPausedHere
-              ? TextStyle(color: Theme.of(context).textSelectionColor)
-              : null,
-        ),
-      ),
-    );
-  }
-}
-
-Widget _densePadding(Widget child) {
-  return Padding(
-    padding: const EdgeInsets.all(2.0),
-    child: child,
-  );
 }
