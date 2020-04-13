@@ -18,7 +18,6 @@ import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../ui/flutter/label.dart';
-import '../../ui/theme.dart';
 import 'debugger_controller.dart';
 
 class DebuggerScreen extends Screen {
@@ -56,7 +55,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const variablesTitle = 'Variables';
   static const breakpointsTitle = 'Breakpoints';
   static const librariesTitle = 'Libraries';
-  static const debuggerPaneHeaderHeight = 60.0;
+
+  static const debuggerPaneHeaderHeight = 36.0;
 
   DebuggerController controller;
   ScriptRef loadingScript;
@@ -68,6 +68,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   @override
   void initState() {
     super.initState();
+
     // TODO(djshuckerow): Make the loading process disposable.
     serviceManager.service
         .getScripts(serviceManager.isolateManager.selectedIsolate.id)
@@ -81,6 +82,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     final newController = Controllers.of(context).debugger;
     if (newController == controller) return;
     controller = newController;
@@ -101,6 +103,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           await controller.getScript(stack.frames.first.location.script);
       setState(() {
         script = currentScript;
+      });
+    } else {
+      setState(() {
+        stack = null;
       });
     }
   }
@@ -139,12 +145,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     } else {
       await controller.addBreakpoint(script.id, line);
     }
-    // The controller's breakpoints value listener will update us at this
-    // point to rebuild.
+    // The controller's breakpoints value listener will update us at this point
+    // to rebuild.
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
@@ -152,27 +160,49 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       children: [
         OutlinedBorder(child: debuggerPanes()),
         // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
-        OutlinedBorder(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DebuggingControls(
-                controller: controller,
-              ),
-              const Divider(height: 0.0),
-              Expanded(
-                child: loadingScript != null && script == null
-                    ? const Center(child: CircularProgressIndicator())
-                    : CodeView(
-                        script: script,
-                        stack: stack,
-                        controller: controller,
-                        lineNumberToBreakpoint: getBreakpointsForLines(),
-                        onSelected: toggleBreakpoint,
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            OutlinedBorder(
+              child: DebuggingControls(controller: controller),
+            ),
+            const SizedBox(height: denseRowSpacing),
+            Expanded(
+              child: loadingScript != null && script == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : OutlinedBorder(
+                      child: Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(color: theme.focusColor),
+                              ),
+                              color: titleSolidBackgroundColor,
+                            ),
+                            padding:
+                                const EdgeInsets.only(left: defaultSpacing),
+                            alignment: Alignment.centerLeft,
+                            height: debuggerPaneHeaderHeight,
+                            child: Text(
+                              script == null ? ' ' : '${script.uri}',
+                              style: theme.textTheme.subtitle2,
+                            ),
+                          ),
+                          Expanded(
+                            child: CodeView(
+                              script: script,
+                              stack: stack,
+                              controller: controller,
+                              lineNumberToBreakpoint: getBreakpointsForLines(),
+                              onSelected: toggleBreakpoint,
+                            ),
+                          ),
+                        ],
                       ),
-              ),
-            ],
-          ),
+                    ),
+            ),
+          ],
         ),
       ],
     );
@@ -211,6 +241,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   FlexSplitColumnHeader _debuggerPaneHeader(String title) {
     final theme = Theme.of(context);
+
     return FlexSplitColumnHeader(
       height: debuggerPaneHeaderHeight,
       child: Container(
@@ -218,14 +249,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           border: Border(
             bottom: BorderSide(color: theme.focusColor),
           ),
-          color: ThemedColor(devtoolsGrey[50], theme.primaryColor),
+          color: titleSolidBackgroundColor,
         ),
         padding: const EdgeInsets.only(left: defaultSpacing),
         alignment: Alignment.centerLeft,
         height: debuggerPaneHeaderHeight,
         child: Text(
           title,
-          style: Theme.of(context).textTheme.headline6,
+          style: Theme.of(context).textTheme.subtitle2,
         ),
       ),
     );
@@ -256,7 +287,7 @@ class BreakpointPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _densePadding(
-      child: Scrollbar(
+      Scrollbar(
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: SizedBox(
@@ -337,6 +368,7 @@ class ScriptPickerState extends State<ScriptPicker> {
 
   Widget _buildScript(ScriptRef ref) {
     final selectedColor = Theme.of(context).selectedRowColor;
+
     return Material(
       color: ref == widget.selected ? selectedColor : null,
       child: InkWell(
@@ -344,7 +376,12 @@ class ScriptPickerState extends State<ScriptPicker> {
         child: Container(
           padding: const EdgeInsets.all(4.0),
           alignment: Alignment.centerLeft,
-          child: Text('${ref?.uri?.split('/')?.last} (${ref?.uri})'),
+          child: Text(
+            '${ref?.uri?.split('/')?.last} (${ref?.uri})',
+            style: ref == widget.selected
+                ? TextStyle(color: Theme.of(context).textSelectionColor)
+                : null,
+          ),
         ),
       ),
     );
@@ -357,20 +394,21 @@ class ScriptPickerState extends State<ScriptPicker> {
     if (_isNotLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
+
     final items = _filtered;
-    return _densePadding(
-      child: Column(
-        children: [
-          TextField(
-            decoration: const InputDecoration(
-              labelText: 'Filter',
-              border: UnderlineInputBorder(),
-            ),
-            controller: filterController,
-            onChanged: updateFilter,
+    return Column(
+      children: [
+        TextField(
+          decoration: const InputDecoration(
+            labelText: 'Filter',
+            border: UnderlineInputBorder(),
           ),
-          Expanded(
-            child: Scrollbar(
+          controller: filterController,
+          onChanged: updateFilter,
+        ),
+        Expanded(
+          child: _densePadding(
+            Scrollbar(
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: SizedBox(
@@ -384,8 +422,8 @@ class ScriptPickerState extends State<ScriptPicker> {
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -396,25 +434,17 @@ class DebuggingControls extends StatelessWidget {
 
   final DebuggerController controller;
 
-  static const controlsHeight = 56.0;
-
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: controller.isPaused,
       builder: (context, isPaused, child) {
         return SizedBox(
-          height: controlsHeight,
+          // Increase the height by one to accommodate for the bottom border.
+          height: DebuggerScreenBodyState.debuggerPaneHeaderHeight + 1.0,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              MaterialButton(
-                onPressed: isPaused ? null : controller.pause,
-                child: const MaterialIconLabel(
-                  Icons.pause,
-                  'Pause',
-                ),
-              ),
               MaterialButton(
                 onPressed: isPaused ? controller.resume : null,
                 child: const MaterialIconLabel(
@@ -422,6 +452,7 @@ class DebuggingControls extends StatelessWidget {
                   'Resume',
                 ),
               ),
+              const SizedBox(width: defaultSpacing),
               MaterialButton(
                 onPressed: isPaused ? controller.stepIn : null,
                 child: const MaterialIconLabel(
@@ -441,6 +472,14 @@ class DebuggingControls extends StatelessWidget {
                 child: const MaterialIconLabel(
                   Icons.keyboard_arrow_up,
                   'Step Out',
+                ),
+              ),
+              const SizedBox(width: defaultSpacing),
+              MaterialButton(
+                onPressed: isPaused ? null : controller.pause,
+                child: const MaterialIconLabel(
+                  Icons.pause,
+                  'Pause',
                 ),
               ),
             ],
@@ -481,12 +520,13 @@ class _CodeViewState extends State<CodeView> {
   // The paused positions in the current [widget.script] from the [widget.stack].
   List<int> pausedPositions;
 
-  static const rowHeight = 32.0;
+  static const rowHeight = 24.0;
   static const assumedCharacterWidth = 16.0;
 
   @override
   void initState() {
     super.initState();
+
     _horizontalController = ScrollController();
     verticalController = LinkedScrollControllerGroup();
     gutterController = verticalController.addAndGet();
@@ -498,6 +538,7 @@ class _CodeViewState extends State<CodeView> {
   @override
   void dispose() {
     super.dispose();
+
     _horizontalController.dispose();
     gutterController.dispose();
     textController.dispose();
@@ -506,9 +547,11 @@ class _CodeViewState extends State<CodeView> {
   @override
   void didUpdateWidget(CodeView oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (widget.script != oldWidget.script) {
       _updateLines();
     }
+
     if (widget.stack != oldWidget.stack) {
       _updatePausedPositions();
     }
@@ -555,12 +598,15 @@ class _CodeViewState extends State<CodeView> {
         ),
       );
     }
-    // Apply the log change-of-base formula, then add 16dp
-    // padding for every digit in the maximum number of lines.
+
+    // Apply the log change-of-base formula, then add 16dp padding for every
+    // digit in the maximum number of lines.
     final gutterWidth = lines.isEmpty
         ? _CodeViewState.assumedCharacterWidth
         : _CodeViewState.assumedCharacterWidth *
-            (math.log(lines.length) / math.ln10);
+                (math.log(lines.length) / math.ln10) +
+            _CodeViewState.assumedCharacterWidth;
+
     return DefaultTextStyle(
       style: Theme.of(context)
           .textTheme
@@ -574,18 +620,20 @@ class _CodeViewState extends State<CodeView> {
               child: ListView(
                 controller: gutterController,
                 children: [
-                  for (var i = 0; i < lines.length; i++)
+                  // TODO(devoncarew): We need to virtualize this.
+                  for (var lineNum = 1; lineNum <= lines.length; lineNum++)
                     GutterRow(
-                      lineNumber: i,
+                      lineNumber: lineNum,
                       totalLines: lines.length,
-                      onPressed: () => _onPressed(i),
+                      onPressed: () => _onPressed(lineNum),
                       isBreakpoint:
-                          widget.lineNumberToBreakpoint.containsKey(i),
+                          widget.lineNumberToBreakpoint.containsKey(lineNum),
                     ),
                 ],
                 itemExtent: rowHeight,
               ),
             ),
+            const SizedBox(width: denseSpacing),
             Expanded(
               child: SingleChildScrollView(
                 controller: _horizontalController,
@@ -598,11 +646,15 @@ class _CodeViewState extends State<CodeView> {
                   child: ListView(
                     controller: textController,
                     children: [
-                      for (var i = 0; i < lines.length; i++)
+                      // Note: below, lineNum is the 1-based line number (the
+                      // user facing one, and the one that the VM uses);
+                      // lineNum - 1 is the index into the lines array.
+                      // TODO(devoncarew): We need to virtualize this.
+                      for (var lineNum = 1; lineNum <= lines.length; lineNum++)
                         ScriptRow(
-                          lineContents: lines[i],
-                          onPressed: () => _onPressed(i),
-                          isPausedHere: pausedPositions.contains(i),
+                          lineContents: lines[lineNum - 1],
+                          onPressed: () => _onPressed(lineNum),
+                          isPausedHere: pausedPositions.contains(lineNum),
                         )
                     ],
                     itemExtent: rowHeight,
@@ -625,6 +677,7 @@ class GutterRow extends StatelessWidget {
     @required this.onPressed,
     @required this.isBreakpoint,
   }) : super(key: key);
+
   final int lineNumber;
   final int totalLines;
   final VoidCallback onPressed;
@@ -639,18 +692,19 @@ class GutterRow extends StatelessWidget {
       onTap: onPressed,
       child: Container(
         height: _CodeViewState.rowHeight,
-        padding: const EdgeInsets.only(left: 4.0),
-        decoration: isBreakpoint
-            ? BoxDecoration(
-                border: Border.all(color: Theme.of(context).accentColor),
-                color: Theme.of(context).primaryColorDark,
-              )
-            : BoxDecoration(color: Theme.of(context).primaryColorDark),
-        child: Text(
-          '$lineNumber',
-          style: TextStyle(
-            color: Theme.of(context).primaryTextTheme.bodyText2.color,
-          ),
+        padding: const EdgeInsets.only(left: 2.0, right: 4.0),
+        alignment: Alignment.centerRight,
+        decoration: BoxDecoration(color: titleSolidBackgroundColor),
+        child: Row(
+          children: [
+            if (isBreakpoint) const Text('●'),
+            Expanded(
+              child: Text(
+                '$lineNumber',
+                textAlign: TextAlign.end,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -677,13 +731,20 @@ class ScriptRow extends StatelessWidget {
         alignment: Alignment.centerLeft,
         height: _CodeViewState.rowHeight,
         color: isPausedHere ? Theme.of(context).selectedRowColor : null,
-        child: Text(lineContents),
+        child: Text(
+          lineContents,
+          style: isPausedHere
+              ? TextStyle(color: Theme.of(context).textSelectionColor)
+              : null,
+        ),
       ),
     );
   }
 }
 
-Widget _densePadding({@required Widget child}) {
+Widget _densePadding(Widget child) {
   return Padding(
-      padding: const EdgeInsets.only(left: denseSpacing), child: child);
+    padding: const EdgeInsets.all(2.0),
+    child: child,
+  );
 }
