@@ -535,8 +535,6 @@ void main() {
       await tester.pumpWidget(wrap(table));
       await tester.pumpAndSettle();
 
-      final fooFinder = find.byKey(const Key('Foo'));
-
       final TreeTableState state = tester.state(find.byWidget(table));
       state.focusNode.requestFocus();
       await tester.pumpAndSettle();
