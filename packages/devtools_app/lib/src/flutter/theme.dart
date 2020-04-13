@@ -134,6 +134,9 @@ const defaultCurve = Curves.easeInOutCubic;
 CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
 
+final titleSolidBackgroundColor =
+    ThemedColor(devtoolsGrey[50], devtoolsGrey[900]);
+
 final chartBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
 
 final chartLightTypeFace = TypeFace(

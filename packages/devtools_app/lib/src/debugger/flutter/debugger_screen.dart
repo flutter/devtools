@@ -18,7 +18,6 @@ import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../ui/flutter/label.dart';
-import '../../ui/theme.dart';
 import 'debugger_controller.dart';
 
 class DebuggerScreen extends Screen {
@@ -173,16 +172,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                   ? const Center(child: CircularProgressIndicator())
                   : OutlinedBorder(
                       child: Column(
-                        children: <Widget>[
+                        children: [
                           Container(
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(color: theme.focusColor),
                               ),
-                              color: ThemedColor(
-                                devtoolsGrey[50],
-                                theme.primaryColor,
-                              ),
+                              color: titleSolidBackgroundColor,
                             ),
                             padding:
                                 const EdgeInsets.only(left: defaultSpacing),
@@ -253,7 +249,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           border: Border(
             bottom: BorderSide(color: theme.focusColor),
           ),
-          color: ThemedColor(devtoolsGrey[50], theme.primaryColor),
+          color: titleSolidBackgroundColor,
         ),
         padding: const EdgeInsets.only(left: defaultSpacing),
         alignment: Alignment.centerLeft,
@@ -372,6 +368,12 @@ class ScriptPickerState extends State<ScriptPicker> {
 
   Widget _buildScript(ScriptRef ref) {
     final selectedColor = Theme.of(context).selectedRowColor;
+
+    TextStyle style;
+    if (ref == widget.selected) {
+      style = TextStyle(color: Theme.of(context).textSelectionColor);
+    }
+
     return Material(
       color: ref == widget.selected ? selectedColor : null,
       child: InkWell(
@@ -379,7 +381,10 @@ class ScriptPickerState extends State<ScriptPicker> {
         child: Container(
           padding: const EdgeInsets.all(4.0),
           alignment: Alignment.centerLeft,
-          child: Text('${ref?.uri?.split('/')?.last} (${ref?.uri})'),
+          child: Text(
+            '${ref?.uri?.split('/')?.last} (${ref?.uri})',
+            style: style,
+          ),
         ),
       ),
     );
@@ -438,6 +443,7 @@ class DebuggingControls extends StatelessWidget {
       valueListenable: controller.isPaused,
       builder: (context, isPaused, child) {
         return SizedBox(
+          // Increase the height by one to accommodate for the bottom border.
           height: DebuggerScreenBodyState.debuggerPaneHeaderHeight + 1.0,
           child: ListView(
             scrollDirection: Axis.horizontal,
@@ -682,18 +688,15 @@ class GutterRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final background = ThemedColor(devtoolsGrey[50], theme.primaryColor);
-
     return InkWell(
       onTap: onPressed,
       child: Container(
         height: _CodeViewState.rowHeight,
         padding: const EdgeInsets.only(left: 2.0, right: 4.0),
         alignment: Alignment.centerRight,
-        decoration: BoxDecoration(color: background),
+        decoration: BoxDecoration(color: titleSolidBackgroundColor),
         child: Row(
-          children: <Widget>[
+          children: [
             if (isBreakpoint) const Text('●'),
             Expanded(
               child: Text(
@@ -722,13 +725,21 @@ class ScriptRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextStyle style;
+    if (isPausedHere) {
+      style = TextStyle(color: Theme.of(context).textSelectionColor);
+    }
+
     return InkWell(
       onTap: onPressed,
       child: Container(
         alignment: Alignment.centerLeft,
         height: _CodeViewState.rowHeight,
         color: isPausedHere ? Theme.of(context).selectedRowColor : null,
-        child: Text(lineContents),
+        child: Text(
+          lineContents,
+          style: style,
+        ),
       ),
     );
   }
