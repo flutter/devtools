@@ -26,7 +26,7 @@ void main() async {
       expect(notifications.messages.length, equals(2));
       expect(
         notifications.messages,
-        contains(unsupportedDevToolsFileMessage('info')),
+        contains(attemptingToImportMessage('info')),
       );
     });
 

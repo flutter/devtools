@@ -77,7 +77,7 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
   // they need since it will not be provided by `Controller.of(context)` as is.
   Future<void> _buildScreenAndProcessData() async {
     if (_screen != null && widget.args?.data != null) {
-      _screenController =
+      _screenController = _screen.conditionalController ??
           Controllers.of(context).offlineLookup[_screen.screenId];
       await _screenController?.processOfflineData(widget.args.data);
     }

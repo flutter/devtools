@@ -21,7 +21,7 @@ const showNetworkPage = false;
 
 void main() {
   // Conditional screens can be added to this list, and they will automatically
-  // be shown or hidden based on the [conditionalLibrary] provided.
+  // be shown or hidden based on the [Screen.conditionalLibrary] provided.
   const screens = <Screen>[
     InspectorScreen(),
     TimelineScreen(),
@@ -40,3 +40,37 @@ void main() {
     const DevToolsApp(screens),
   );
 }
+
+// Example of conditional screen that could be added to [screens] above.
+//
+//class PackageProviderScreen extends Screen {
+//  PackageProviderScreen()
+//      : super.conditional(
+//          id: 'packageProvider',
+//          conditionalLibrary: 'package:gallery/',
+//          conditionalController: PackageProviderController(),
+//          title: 'Provider',
+//          icon: Icons.palette,
+//        );
+//
+//  @override
+//  Widget build(BuildContext context) {
+//    final PackageProviderController _controller = conditionalController;
+//    return ValueListenableBuilder(
+//      valueListenable: _controller.title,
+//      builder: (context, value, _) {
+//        return Center(child: Text(value));
+//      },
+//    );
+//  }
+//}
+//
+//class PackageProviderController
+//    with OfflineControllerMixin<Map<String, dynamic>> {
+//  ValueNotifier<String> title = ValueNotifier<String>('');
+//
+//  @override
+//  FutureOr<void> processOfflineData(Map<String, dynamic> offlineData) {
+//    title.value = offlineData['title'];
+//  }
+//}

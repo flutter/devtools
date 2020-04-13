@@ -13,10 +13,8 @@ const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
     ' At this time, DevTools only supports importing files that were originally'
     ' exported from DevTools.';
 
-String unsupportedDevToolsFileMessage(String devToolsScreen) {
-  return 'Could not import file. The imported file is from "$devToolsScreen", '
-      'which is not supported by this version of Dart DevTools. You may need to'
-      ' upgrade your version of Dart DevTools to view this file.';
+String attemptingToImportMessage(String devToolsScreen) {
+  return 'Attempting to import file for screen with id "$devToolsScreen".';
 }
 
 const emptyTimelineMessage = 'Imported file does not contain timeline data.';
@@ -53,9 +51,8 @@ class ImportController {
       // TODO(jacobr): add the inspector handling case here once the inspector
       // can be exported.
       default:
-        _notifications.push(unsupportedDevToolsFileMessage(devToolsScreen));
-        importing = false;
-        return;
+        _notifications.push(attemptingToImportMessage(devToolsScreen));
+        _pushSnapshotScreenForImport(devToolsScreen, json);
     }
 
     importing = false;

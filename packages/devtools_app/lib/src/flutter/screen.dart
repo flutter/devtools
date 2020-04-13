@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import 'controllers.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
@@ -16,7 +17,24 @@ abstract class Screen {
     this.icon,
     this.tabKey,
     this.conditionalLibrary,
+    this.conditionalController,
   });
+
+  const Screen.conditional({
+    @required String id,
+    @required String conditionalLibrary,
+    @required OfflineControllerMixin conditionalController,
+    String title,
+    IconData icon,
+    Key tabKey,
+  }) : this(
+          id,
+          conditionalLibrary: conditionalLibrary,
+          conditionalController: conditionalController,
+          title: title,
+          icon: icon,
+          tabKey: tabKey,
+        );
 
   final String screenId;
 
@@ -38,6 +56,17 @@ abstract class Screen {
   ///  * 'package:provider/provider.dart'
   ///  * 'package:provider/'
   final String conditionalLibrary;
+
+  /// Screen controller for conditional screens.
+  ///
+  /// When non-null, this controller will be used for processing data from
+  /// offline imports. In order for conditional screens to have offline support,
+  /// the screen content returned by [build] needs to use this controller to
+  /// manage data.
+  ///
+  /// If null, we will use the corresponding controller from
+  /// [ProvidedControllers.offline] to process offline data for this screen.
+  final OfflineControllerMixin conditionalController;
 
   /// Whether this screen should display the isolate selector in the status
   /// line.
@@ -82,4 +111,3 @@ abstract class Screen {
     return null;
   }
 }
-
