@@ -12,11 +12,18 @@ import '../model.dart';
 import '../utils.dart';
 
 class PackagesGetCommand extends Command {
+  PackagesGetCommand() {
+    argParser.addFlag('upgrade', negatable: false, help: 'Run pub upgrade.');
+  }
+
   @override
-  String get name => 'packages-get';
+  String get name => 'pub-get';
 
   @override
   String get description => "Run 'flutter pub get' in all DevTools packages.";
+
+  @override
+  List<String> get aliases => const ['packages-get'];
 
   @override
   Future run() async {
@@ -30,7 +37,10 @@ class PackagesGetCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final packages = repo.getPackages();
 
-    log.stdout('Running flutter pub get...');
+    final upgrade = argResults['upgrade'];
+    final command = upgrade ? 'upgrade' : 'get';
+
+    log.stdout('Running flutter pub $command...');
 
     int failureCount = 0;
 
@@ -39,7 +49,7 @@ class PackagesGetCommand extends Command {
 
       final process = await Process.start(
         sdk.flutterToolPath,
-        ['packages', 'get'],
+        ['pub', command],
         workingDirectory: p.packagePath,
       );
       final stderr = process.stderr;
