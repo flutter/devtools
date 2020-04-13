@@ -286,7 +286,7 @@ Relaunch your application with the '--profile' argument, or ''',
         ),
         TextSpan(
           text: 'relaunch in profile mode from VS Code or IntelliJ',
-          style: TextStyle(
+          style: const TextStyle(
             decoration: TextDecoration.underline,
             color: _BannerError.linkColor,
           ),
@@ -324,7 +324,7 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
         ),
         TextSpan(
           text: 'documentation',
-          style: TextStyle(
+          style: const TextStyle(
             decoration: TextDecoration.underline,
             color: _BannerWarning.linkColor,
           ),
@@ -361,7 +361,7 @@ For the most accurate absolute memory stats, relaunch your application with the 
         ),
         TextSpan(
           text: 'relaunch in profile mode from VS Code or IntelliJ',
-          style: TextStyle(
+          style: const TextStyle(
             decoration: TextDecoration.underline,
             color: _BannerWarning.linkColor,
           ),

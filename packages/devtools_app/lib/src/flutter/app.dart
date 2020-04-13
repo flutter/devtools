@@ -218,7 +218,7 @@ class OpenAboutAction extends StatelessWidget {
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: Icon(
+          child: const Icon(
             Icons.info_outline,
             size: actionsIconSize,
           ),
@@ -244,7 +244,7 @@ class OpenSettingsAction extends StatelessWidget {
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: Icon(
+          child: const Icon(
             Icons.settings,
             size: actionsIconSize,
           ),

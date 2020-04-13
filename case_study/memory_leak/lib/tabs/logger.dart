@@ -69,11 +69,10 @@ class LoggerState extends State<Logger> {
         'LOG: $logEntry',
         style: _biggerFont,
       ),
-      trailing: Icon(
+      trailing: const Icon(
 //        alreadySaved ? Icons.favorite : Icons.favorite_border,
 //        color: alreadySaved ? Colors.red : null,
         Icons.favorite_border,
-        color: null,
       ),
       onTap: () {
         setState(() {

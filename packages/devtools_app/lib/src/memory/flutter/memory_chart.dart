@@ -18,6 +18,7 @@ import 'package:mp_chart/mp/core/data_set/line_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:mp_chart/mp/core/enums/axis_dependency.dart';
+
 // TODO(terry): Enable legend when textsize is correct.
 // import 'package:mp_chart/mp/core/enums/legend_vertical_alignment.dart';
 // import 'package:mp_chart/mp/core/enums/legend_form.dart';

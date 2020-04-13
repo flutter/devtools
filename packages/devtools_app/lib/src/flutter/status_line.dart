@@ -131,7 +131,7 @@ class StatusLine extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot<IsolateRef> snapshot) {
         final List<IsolateRef> isolates = isolateManager.isolates;
 
-        // When we have two or more isolates with the same name, append dome
+        // When we have two or more isolates with the same name, append some
         // disambiguating information.
         String disambiguatedName(IsolateRef ref) {
           String name = ref.name;
@@ -187,7 +187,7 @@ class StatusLine extends StatelessWidget {
                 overflow: TextOverflow.clip,
               ),
               const SizedBox(width: 2.0),
-              Icon(
+              const Icon(
                 Icons.phone_android,
                 size: defaultIconSize,
               ),

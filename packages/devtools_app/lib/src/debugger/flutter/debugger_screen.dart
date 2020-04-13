@@ -18,6 +18,7 @@ import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../ui/flutter/label.dart';
+import '../../ui/theme.dart';
 import 'debugger_controller.dart';
 
 class DebuggerScreen extends Screen {
@@ -206,14 +207,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 
   FlexSplitColumnHeader _debuggerPaneHeader(String title) {
+    final theme = Theme.of(context);
     return FlexSplitColumnHeader(
       height: debuggerPaneHeaderHeight,
       child: Container(
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: Theme.of(context).focusColor),
+            bottom: BorderSide(color: theme.focusColor),
           ),
-          color: Theme.of(context).primaryColor,
+          color: ThemedColor(devtoolsGrey[50], theme.primaryColor),
         ),
         padding: const EdgeInsets.only(left: defaultSpacing),
         alignment: Alignment.centerLeft,
@@ -405,35 +407,35 @@ class DebuggingControls extends StatelessWidget {
             children: [
               MaterialButton(
                 onPressed: isPaused ? null : controller.pause,
-                child: MaterialIconLabel(
+                child: const MaterialIconLabel(
                   Icons.pause,
                   'Pause',
                 ),
               ),
               MaterialButton(
                 onPressed: isPaused ? controller.resume : null,
-                child: MaterialIconLabel(
+                child: const MaterialIconLabel(
                   Icons.play_arrow,
                   'Resume',
                 ),
               ),
               MaterialButton(
                 onPressed: isPaused ? controller.stepIn : null,
-                child: MaterialIconLabel(
+                child: const MaterialIconLabel(
                   Icons.keyboard_arrow_down,
                   'Step In',
                 ),
               ),
               MaterialButton(
                 onPressed: isPaused ? controller.stepOver : null,
-                child: MaterialIconLabel(
+                child: const MaterialIconLabel(
                   Icons.keyboard_arrow_right,
                   'Step Over',
                 ),
               ),
               MaterialButton(
                 onPressed: isPaused ? controller.stepOut : null,
-                child: MaterialIconLabel(
+                child: const MaterialIconLabel(
                   Icons.keyboard_arrow_up,
                   'Step Out',
                 ),
@@ -472,6 +474,7 @@ class _CodeViewState extends State<CodeView> {
   LinkedScrollControllerGroup verticalController;
   ScrollController gutterController;
   ScrollController textController;
+
   // The paused positions in the current [widget.script] from the [widget.stack].
   List<int> pausedPositions;
 
@@ -622,6 +625,7 @@ class GutterRow extends StatelessWidget {
   final int lineNumber;
   final int totalLines;
   final VoidCallback onPressed;
+
   // TODO(djshuckerow): Add support for multiple breakpoints in a line and
   // different types of decorators than just breakpoints.
   final bool isBreakpoint;
