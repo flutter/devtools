@@ -335,7 +335,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 }
 
 class SimpleScreen extends Screen {
-  const SimpleScreen(this.child) : super('simple');
+  const SimpleScreen(this.child) : super(id);
+
+  static const id = 'simple';
 
   final Widget child;
 

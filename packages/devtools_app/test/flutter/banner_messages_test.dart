@@ -4,10 +4,10 @@
 
 import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/common_widgets.dart';
+import 'package:devtools_app/src/flutter/scaffold.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/flutter/performance_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/timeline/flutter/timeline_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -177,9 +177,8 @@ void main() {
   });
 }
 
-// These screen types are arbitrary.
-const testMessage1ScreenId = TimelineScreen.id;
-const testMessage2ScreenId = TimelineScreen.id;
+const testMessage1ScreenId = SimpleScreen.id;
+const testMessage2ScreenId = SimpleScreen.id;
 const testMessage3ScreenId = PerformanceScreen.id;
 const k1 = Key('test message 1');
 const k2 = Key('test message 2');

@@ -56,12 +56,12 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       await env.tearDownEnvironment();
     });
 
-    test('loadOfflineData', () async {
+    test('processOfflineData', () async {
       await env.setupEnvironment();
 
       final offlineTimelineData =
           OfflineTimelineData.parse(offlineTimelineDataJson);
-      await timelineController.loadOfflineData(offlineTimelineData);
+      await timelineController.processOfflineData(offlineTimelineData);
       expect(
         isTimelineDataEqual(
           timelineController.data,
