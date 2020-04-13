@@ -1,7 +1,6 @@
 import 'package:devtools_app/src/flutter/table.dart';
 import 'package:devtools_app/src/table_data.dart';
 import 'package:devtools_app/src/trees.dart';
-//import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
@@ -544,13 +543,13 @@ void main() {
 
       expect(state.selectedNode, equals(data.root));
 
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowDown);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
 
       expect(state.selectedNode, equals(data.children[1]));
 
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowUp);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
 
       expect(state.selectedNode, equals(data.children[0]));

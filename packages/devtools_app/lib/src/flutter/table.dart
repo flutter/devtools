@@ -20,6 +20,9 @@ typedef IndexedScrollableWidgetBuilder = Widget Function(
   int index,
 );
 
+typedef TableKeyEventHandler = void Function(RawKeyEvent event,
+    ScrollController scrollController, BoxConstraints constraints);
+
 /// A table that displays in a collection of [data], based on a collection of
 /// [ColumnData].
 ///
@@ -269,11 +272,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     });
   }
 
-  void _onItemPressed(T node) {
+  void _onItemPressed(T node, int nodeIndex) {
     /// Rebuilds the table whenever the tree structure has been updated
     setState(() {
       selectedNode = node;
-      selectedNodeIndex = items.indexOf(selectedNode);
+      selectedNodeIndex = nodeIndex;
 
       if (!node.isExpandable) return;
       animatingNode = node;
@@ -383,7 +386,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         key: widget.keyFactory(node),
         linkedScrollControllerGroup: linkedScrollControllerGroup,
         node: node,
-        onPressed: _onItemPressed,
+        onPressed: (item) => _onItemPressed(item, index),
         backgroundColor: isNodeSelected
             ? Theme.of(context).selectedRowColor
             : TableRow.colorFor(context, index),
@@ -422,9 +425,20 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       ..forEach(_sort);
   }
 
-  void _handleKeyEvent(RawKeyEvent event, ScrollController scrollController,
-      BoxConstraints constraints) {
+  void _handleKeyEvent(
+    RawKeyEvent event,
+    ScrollController scrollController,
+    BoxConstraints constraints,
+  ) {
     if (event is! RawKeyDownEvent) return;
+
+    // Exit early if we aren't handling the key
+    if (![
+      LogicalKeyboardKey.arrowDown,
+      LogicalKeyboardKey.arrowUp,
+      LogicalKeyboardKey.arrowLeft,
+      LogicalKeyboardKey.arrowRight
+    ].contains(event.logicalKey)) return;
 
     // If there is no selected node, choose the first one.
     if (selectedNode == null) {
@@ -440,8 +454,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     // TODO(gmoothart): Add expand/collapse with left/right keys
   }
 
-  void _moveSelection(LogicalKeyboardKey key, ScrollController scrollController,
-      double viewportHeight) {
+  void _moveSelection(
+    LogicalKeyboardKey key,
+    ScrollController scrollController,
+    double viewportHeight,
+  ) {
     // get the index of the first item fully visible in the viewport
     final firstItemIndex =
         (scrollController.offset / _Table.defaultRowHeight).ceil();
@@ -449,7 +466,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     final minCompleteItemsInView =
         (viewportHeight / _Table.defaultRowHeight).floor() - 1;
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
-    var newSelectedNodeIndex = 0; // ??
+    int newSelectedNodeIndex;
 
     if (key == LogicalKeyboardKey.arrowDown) {
       // move selection down if there is a node lower down.
@@ -457,6 +474,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     } else if (key == LogicalKeyboardKey.arrowUp) {
       // move selection up if there is a node lower down.
       newSelectedNodeIndex = max(selectedNodeIndex - 1, 0);
+    } else {
+      // Nowhere to move
+      return;
     }
 
     final newSelectedNode = items[newSelectedNodeIndex];
@@ -468,13 +488,17 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       // To do this we need to be showing the (minCompleteItemsInView - 1)
       // previous item  at the top.
       scrollController.animateTo(
-          (newSelectedNodeIndex - minCompleteItemsInView - 1) *
-              _Table.defaultRowHeight,
-          duration: defaultDuration,
-          curve: defaultCurve);
+        (newSelectedNodeIndex - minCompleteItemsInView - 1) *
+            _Table.defaultRowHeight,
+        duration: defaultDuration,
+        curve: defaultCurve,
+      );
     } else if (isAboveViewport) {
-      scrollController.animateTo(newSelectedNodeIndex * _Table.defaultRowHeight,
-          duration: defaultDuration, curve: defaultCurve);
+      scrollController.animateTo(
+        newSelectedNodeIndex * _Table.defaultRowHeight,
+        duration: defaultDuration,
+        curve: defaultCurve,
+      );
     }
 
     setState(() {
@@ -514,8 +538,7 @@ class _Table<T> extends StatefulWidget {
   final SortDirection sortDirection;
   final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
   final FocusNode focusNode;
-  final void Function(RawKeyEvent event, ScrollController scrollController,
-      BoxConstraints constraints) handleKeyEvent;
+  final TableKeyEventHandler handleKeyEvent;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
@@ -598,7 +621,10 @@ class _TableState<T> extends State<_Table<T>> {
                 child: RawKeyboardListener(
                   onKey: (event) => widget.handleKeyEvent != null
                       ? widget.handleKeyEvent(
-                          event, scrollController, constraints)
+                          event,
+                          scrollController,
+                          constraints,
+                        )
                       : null,
                   focusNode: widget.focusNode,
                   child: ListView.custom(
