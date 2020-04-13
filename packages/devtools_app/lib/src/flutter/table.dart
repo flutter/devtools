@@ -218,8 +218,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   int selectedNodeIndex;
   List<double> columnWidths;
   List<bool> rootsExpanded;
-
-  final focusNode = FocusNode();
+  FocusNode focusNode = FocusNode();
 
   @override
   void initState() {

@@ -537,22 +537,22 @@ void main() {
 
       final fooFinder = find.byKey(const Key('Foo'));
 
-      await tester.tap(fooFinder);
-      await tester.pumpAndSettle();
       final TreeTableState state = tester.state(find.byWidget(table));
-
-      expect(state.selectedNode, equals(data.root));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      state.focusNode.requestFocus();
       await tester.pumpAndSettle();
 
-      expect(state.selectedNode, equals(data.children[1]));
+      expect(state.selectedNode, equals(null));
+
+      // the root is selected by default when there is no selection. Pressing
+      // arrowDown should take us to the first child, Bar
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expect(state.selectedNode, equals(data.children[0]));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
 
-      expect(state.selectedNode, equals(data.children[0]));
+      expect(state.selectedNode, equals(data.root));
     });
 
     testWidgets('properly colors rows with alternating colors',
