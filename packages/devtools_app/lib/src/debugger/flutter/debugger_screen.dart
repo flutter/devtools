@@ -369,11 +369,6 @@ class ScriptPickerState extends State<ScriptPicker> {
   Widget _buildScript(ScriptRef ref) {
     final selectedColor = Theme.of(context).selectedRowColor;
 
-    TextStyle style;
-    if (ref == widget.selected) {
-      style = TextStyle(color: Theme.of(context).textSelectionColor);
-    }
-
     return Material(
       color: ref == widget.selected ? selectedColor : null,
       child: InkWell(
@@ -383,7 +378,9 @@ class ScriptPickerState extends State<ScriptPicker> {
           alignment: Alignment.centerLeft,
           child: Text(
             '${ref?.uri?.split('/')?.last} (${ref?.uri})',
-            style: style,
+            style: ref == widget.selected
+                ? TextStyle(color: Theme.of(context).textSelectionColor)
+                : null,
           ),
         ),
       ),
@@ -649,6 +646,9 @@ class _CodeViewState extends State<CodeView> {
                   child: ListView(
                     controller: textController,
                     children: [
+                      // Note: below, lineNum is the 1-based line number (the
+                      // user facing one, and the one that the VM uses);
+                      // lineNum - 1 is the index into the lines array.
                       // TODO(devoncarew): We need to virtualize this.
                       for (var lineNum = 1; lineNum <= lines.length; lineNum++)
                         ScriptRow(
@@ -725,11 +725,6 @@ class ScriptRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle style;
-    if (isPausedHere) {
-      style = TextStyle(color: Theme.of(context).textSelectionColor);
-    }
-
     return InkWell(
       onTap: onPressed,
       child: Container(
@@ -738,7 +733,9 @@ class ScriptRow extends StatelessWidget {
         color: isPausedHere ? Theme.of(context).selectedRowColor : null,
         child: Text(
           lineContents,
-          style: style,
+          style: isPausedHere
+              ? TextStyle(color: Theme.of(context).textSelectionColor)
+              : null,
         ),
       ),
     );
