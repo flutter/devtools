@@ -9,19 +9,18 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
 import '../../globals.dart';
-import 'debugger_service.dart';
 
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
   DebuggerController() {
     switchToIsolate(serviceManager.isolateManager.selectedIsolate);
-    autoDispose(
-        debuggerService.onSelectedIsolateChanged.listen(switchToIsolate));
-    autoDispose(debuggerService.onDebugEvent.listen(_handleIsolateEvent));
+    autoDispose(serviceManager.isolateManager.onSelectedIsolateChanged
+        .listen(switchToIsolate));
+    autoDispose(_service.onDebugEvent.listen(_handleIsolateEvent));
   }
 
-  final debuggerService = DebuggerService();
+  VmService get _service => serviceManager.service;
 
   final _scriptCache = <String, Script>{};
 
@@ -118,7 +117,7 @@ class DebuggerController extends DisposableController
       return;
     }
 
-    final isolate = await debuggerService.getIsolate(isolateRef.id);
+    final isolate = await _service.getIsolate(isolateRef.id);
 
     if (isolate.pauseEvent != null &&
         isolate.pauseEvent.kind != EventKind.kResume) {
@@ -132,14 +131,14 @@ class DebuggerController extends DisposableController
     _exceptionPauseMode.value = isolate.exceptionPauseMode;
   }
 
-  Future<Success> pause() => debuggerService.pause(isolateRef.id);
+  Future<Success> pause() => _service.pause(isolateRef.id);
 
-  Future<Success> resume() => debuggerService.resume(isolateRef.id);
+  Future<Success> resume() => _service.resume(isolateRef.id);
 
   Future<Success> stepOver() {
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
     final useAsyncStepping = lastEvent?.atAsyncSuspension ?? false;
-    return debuggerService.resume(
+    return _service.resume(
       isolateRef.id,
       step:
           useAsyncStepping ? StepOption.kOverAsyncSuspension : StepOption.kOver,
@@ -147,10 +146,10 @@ class DebuggerController extends DisposableController
   }
 
   Future<Success> stepIn() =>
-      debuggerService.resume(isolateRef.id, step: StepOption.kInto);
+      _service.resume(isolateRef.id, step: StepOption.kInto);
 
   Future<Success> stepOut() =>
-      debuggerService.resume(isolateRef.id, step: StepOption.kOut);
+      _service.resume(isolateRef.id, step: StepOption.kOut);
 
   Future<void> clearBreakpoints() async {
     final breakpoints = _breakpoints.value.toList();
@@ -160,7 +159,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> addBreakpoint(String scriptId, int line) =>
-      debuggerService.addBreakpoint(isolateRef.id, scriptId, line);
+      _service.addBreakpoint(isolateRef.id, scriptId, line);
 
   Future<void> addBreakpointByPathFragment(String path, int line) async {
     final ref =
@@ -171,12 +170,12 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> removeBreakpoint(Breakpoint breakpoint) =>
-      debuggerService.removeBreakpoint(isolateRef.id, breakpoint.id);
+      _service.removeBreakpoint(isolateRef.id, breakpoint.id);
 
   Future<void> setExceptionPauseMode(String mode) =>
-      debuggerService.setExceptionPauseMode(isolateRef.id, mode);
+      _service.setExceptionPauseMode(isolateRef.id, mode);
 
-  Future<Stack> getStack() => debuggerService.getStack(isolateRef.id);
+  Future<Stack> getStack() => _service.getStack(isolateRef.id);
 
   void _handleIsolateEvent(Event event) async {
     if (event.isolate.id != isolateRef.id) return;
@@ -238,13 +237,13 @@ class DebuggerController extends DisposableController
   ///
   /// The return value can be one of [Instance] or [Sentinel].
   Future<Object> getInstance(InstanceRef instanceRef) {
-    return debuggerService.getObject(isolateRef.id, instanceRef.id);
+    return _service.getObject(isolateRef.id, instanceRef.id);
   }
 
   Future<Script> getScript(ScriptRef scriptRef) async {
     if (!_scriptCache.containsKey(scriptRef.id)) {
       _scriptCache[scriptRef.id] =
-          await debuggerService.getScript(isolateRef.id, scriptRef.id);
+          await _service.getObject(isolateRef.id, scriptRef.id);
     }
     return _scriptCache[scriptRef.id];
   }
@@ -252,11 +251,11 @@ class DebuggerController extends DisposableController
   Future<void> selectScript(ScriptRef ref) async {
     if (ref == null) return;
     _currentScript.value =
-        await debuggerService.getScript(isolateRef.id, ref.id);
+        await _service.getObject(isolateRef.id, ref.id) as Script;
   }
 
   Future<void> getScripts() async {
-    _scriptList.value = await debuggerService.getScripts(isolateRef.id);
+    _scriptList.value = await _service.getScripts(isolateRef.id);
   }
 
   SourcePosition calculatePosition(Script script, int tokenPos) {

@@ -63,9 +63,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   DebuggerController controller;
   ScriptRef loadingScript;
   Script script;
-  ScriptList scriptList;
-  Stack stack;
-  List<Breakpoint> breakpoints;
 
   @override
   void didChangeDependencies() {
@@ -80,22 +77,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         script = controller.currentScript.value;
       });
     });
-    addAutoDisposeListener(controller.currentStack, () {
-      setState(() {
-        stack = controller.currentStack.value;
-      });
-    });
-    addAutoDisposeListener(controller.scriptList, () {
-      setState(() {
-        scriptList = controller.scriptList.value;
-      });
-    });
-    breakpoints = controller.breakpoints.value;
-    addAutoDisposeListener(controller.breakpoints, () {
-      setState(() {
-        breakpoints = controller.breakpoints.value;
-      });
-    });
+    addAutoDisposeListener(controller.currentStack);
+    addAutoDisposeListener(controller.scriptList);
+    addAutoDisposeListener(controller.breakpoints);
 
     controller.getScripts();
   }
@@ -111,10 +95,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   Map<int, Breakpoint> _breakpointsForLines() {
     if (script == null) return {};
-    final bps = breakpoints
-        .where((b) => b != null && b.location.script.id == script.id);
     return {
-      for (var b in bps) controller.lineNumber(script, b.location): b,
+      for (var b in controller.breakpoints.value
+          .where((b) => b != null && b.location.script.id == script.id))
+        controller.lineNumber(script, b.location): b,
     };
   }
 
@@ -161,7 +145,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                           Expanded(
                             child: CodeView(
                               script: script,
-                              stack: stack,
+                              stack: controller.currentStack.value,
                               controller: controller,
                               lineNumberToBreakpoint: _breakpointsForLines(),
                               onSelected: toggleBreakpoint,
@@ -198,7 +182,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             const Center(child: Text('TODO: variables')),
             BreakpointPicker(controller: controller),
             ScriptPicker(
-              scripts: scriptList,
+              scripts: controller.scriptList.value,
               onSelected: _onScriptSelected,
               selected: loadingScript,
             ),
