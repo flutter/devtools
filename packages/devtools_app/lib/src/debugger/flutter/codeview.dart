@@ -11,6 +11,8 @@ import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/theme.dart';
 import 'debugger_controller.dart';
 
+// TODO(kenz): consider moving lines / pausedPositions calculations to the
+// controller.
 class CodeView extends StatefulWidget {
   const CodeView({
     Key key,

@@ -5,17 +5,18 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/theme.dart';
 import 'common.dart';
 
 /// Picker that takes a [ScriptList] and allows selection of one of the scripts
 /// inside.
 class ScriptPicker extends StatefulWidget {
-  const ScriptPicker(
-      {Key key,
-      @required this.scripts,
-      @required this.onSelected,
-      @required this.selected})
-      : super(key: key);
+  const ScriptPicker({
+    Key key,
+    @required this.scripts,
+    @required this.onSelected,
+    @required this.selected,
+  }) : super(key: key);
 
   final ScriptList scripts;
   final void Function(ScriptRef scriptRef) onSelected;
@@ -116,9 +117,9 @@ class ScriptPickerState extends State<ScriptPicker> {
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: ListView.builder(
-                    itemBuilder: (context, index) => _buildScript(items[index]),
                     itemCount: items.length,
-                    itemExtent: 32.0,
+                    itemExtent: defaultListItemHeight,
+                    itemBuilder: (context, index) => _buildScript(items[index]),
                   ),
                 ),
               ),

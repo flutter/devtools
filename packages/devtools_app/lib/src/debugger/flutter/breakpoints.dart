@@ -5,15 +5,14 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/theme.dart';
 import 'codeview.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 
 class BreakpointPicker extends StatelessWidget {
-  const BreakpointPicker(
-      {Key key, @required this.breakpoints, @required this.controller})
+  const BreakpointPicker({Key key, @required this.controller})
       : super(key: key);
-  final List<Breakpoint> breakpoints;
   final DebuggerController controller;
 
   String textFor(Breakpoint breakpoint) {
@@ -38,12 +37,18 @@ class BreakpointPicker extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: SizedBox(
             width: MediaQuery.of(context).size.width,
-            child: ListView.builder(
-              itemBuilder: (context, index) => SizedBox(
-                height: CodeView.rowHeight,
-                child: Text(textFor(breakpoints[index])),
-              ),
-              itemCount: breakpoints.length,
+            child: ValueListenableBuilder(
+              valueListenable: controller.breakpoints,
+              builder: (context, breakpoints, _) {
+                return ListView.builder(
+                  itemCount: breakpoints.length,
+                  itemExtent: defaultListItemHeight,
+                  itemBuilder: (context, index) => SizedBox(
+                    height: CodeView.rowHeight,
+                    child: Text(textFor(breakpoints[index])),
+                  ),
+                );
+              },
             ),
           ),
         ),
