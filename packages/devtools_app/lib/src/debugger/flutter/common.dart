@@ -14,6 +14,21 @@ Widget densePadding(Widget child) {
   );
 }
 
+class Badge extends StatelessWidget {
+  const Badge({@required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(
+      label: child,
+      visualDensity: VisualDensity.compact,
+      backgroundColor: Theme.of(context).accentColor,
+    );
+  }
+}
+
 /// Create a header area for a debugger component.
 ///
 /// Either one of [text] or [child] must be supplied.
@@ -31,11 +46,6 @@ Container debuggerSectionTitle(ThemeData theme, {String text, Widget child}) {
     padding: const EdgeInsets.only(left: defaultSpacing),
     alignment: Alignment.centerLeft,
     height: DebuggerScreen.debuggerPaneHeaderHeight,
-    child: child != null
-        ? child
-        : Text(
-            text,
-            style: theme.textTheme.subtitle2,
-          ),
+    child: child != null ? child : Text(text, style: theme.textTheme.subtitle2),
   );
 }

@@ -213,7 +213,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             _debuggerPaneHeader(callStackTitle, needsTopBorder: false),
             _debuggerPaneHeader(variablesTitle),
             _debuggerPaneHeader(breakpointsTitle),
-            _debuggerPaneHeader(librariesTitle),
+            _debuggerPaneHeader(
+              librariesTitle,
+              rightChild: const Badge(
+                child: Text('123'),
+              ),
+            ),
           ],
           children: [
             const Center(child: Text('TODO: call stack')),
@@ -224,8 +229,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             ),
             ScriptPicker(
               scripts: scriptList,
-              onSelected: onScriptSelected,
               selected: loadingScript,
+              onSelected: onScriptSelected,
             ),
           ],
         );
@@ -236,6 +241,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   FlexSplitColumnHeader _debuggerPaneHeader(
     String title, {
     bool needsTopBorder = true,
+    Widget rightChild,
   }) {
     final theme = Theme.of(context);
 
@@ -251,12 +257,19 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           ),
           color: titleSolidBackgroundColor,
         ),
-        padding: const EdgeInsets.only(left: defaultSpacing),
+        padding: const EdgeInsets.only(left: defaultSpacing, right: 4.0),
         alignment: Alignment.centerLeft,
         height: DebuggerScreen.debuggerPaneHeaderHeight,
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.subtitle2,
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.subtitle2,
+              ),
+            ),
+            if (rightChild != null) rightChild,
+          ],
         ),
       ),
     );

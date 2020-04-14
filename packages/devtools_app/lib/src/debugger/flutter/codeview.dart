@@ -163,6 +163,8 @@ class _CodeViewState extends State<CodeView> {
               child: SingleChildScrollView(
                 controller: _horizontalController,
                 scrollDirection: Axis.horizontal,
+                // TODO: Improve our sizing here - currently we do
+                // CodeView.assumedCharacterWidth * max line width
                 child: SizedBox(
                   width: CodeView.assumedCharacterWidth *
                       lines
