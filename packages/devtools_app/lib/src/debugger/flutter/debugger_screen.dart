@@ -17,6 +17,8 @@ import '../../globals.dart';
 import '../../ui/flutter/label.dart';
 import 'breakpoints.dart';
 import 'codeview.dart';
+import 'common.dart';
+import 'console.dart';
 import 'debugger_controller.dart';
 import 'scripts.dart';
 
@@ -27,6 +29,8 @@ class DebuggerScreen extends Screen {
           title: 'Debugger',
           icon: Octicons.bug,
         );
+
+  static const debuggerPaneHeaderHeight = 36.0;
 
   @override
   String get docPageId => 'debugger';
@@ -55,8 +59,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const variablesTitle = 'Variables';
   static const breakpointsTitle = 'Breakpoints';
   static const librariesTitle = 'Libraries';
-
-  static const debuggerPaneHeaderHeight = 36.0;
 
   DebuggerController controller;
   ScriptRef loadingScript;
@@ -152,6 +154,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loading = loadingScript != null && script == null;
 
     return Split(
       axis: Axis.horizontal,
@@ -166,27 +169,17 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             DebuggingControls(controller: controller),
             const SizedBox(height: denseRowSpacing),
             Expanded(
-              child: loadingScript != null && script == null
-                  ? const Center(child: CircularProgressIndicator())
-                  : OutlinedBorder(
+              child: Split(
+                axis: Axis.vertical,
+                initialFractions: const [0.75, 0.25],
+                children: [
+                  if (loading) const Center(child: CircularProgressIndicator()),
+                  if (!loading)
+                    OutlinedBorder(
                       child: Column(
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(color: theme.focusColor),
-                              ),
-                              color: titleSolidBackgroundColor,
-                            ),
-                            padding:
-                                const EdgeInsets.only(left: defaultSpacing),
-                            alignment: Alignment.centerLeft,
-                            height: debuggerPaneHeaderHeight,
-                            child: Text(
-                              script == null ? ' ' : '${script.uri}',
-                              style: theme.textTheme.subtitle2,
-                            ),
-                          ),
+                          debuggerSectionTitle(theme,
+                              text: script == null ? ' ' : '${script.uri}'),
                           Expanded(
                             child: CodeView(
                               script: script,
@@ -199,6 +192,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                         ],
                       ),
                     ),
+                  Console(),
+                ],
+              ),
             ),
           ],
         ),
@@ -214,7 +210,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           initialFractions: const [0.25, 0.25, 0.25, 0.25],
           minSizes: const [0.0, 0.0, 0.0, 0.0],
           headers: [
-            _debuggerPaneHeader(callStackTitle),
+            _debuggerPaneHeader(callStackTitle, needsTopBorder: false),
             _debuggerPaneHeader(variablesTitle),
             _debuggerPaneHeader(breakpointsTitle),
             _debuggerPaneHeader(librariesTitle),
@@ -237,21 +233,27 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     );
   }
 
-  FlexSplitColumnHeader _debuggerPaneHeader(String title) {
+  FlexSplitColumnHeader _debuggerPaneHeader(
+    String title, {
+    bool needsTopBorder = true,
+  }) {
     final theme = Theme.of(context);
 
     return FlexSplitColumnHeader(
-      height: debuggerPaneHeaderHeight,
+      height: DebuggerScreen.debuggerPaneHeaderHeight,
       child: Container(
         decoration: BoxDecoration(
           border: Border(
+            top: needsTopBorder
+                ? BorderSide(color: theme.focusColor)
+                : BorderSide.none,
             bottom: BorderSide(color: theme.focusColor),
           ),
           color: titleSolidBackgroundColor,
         ),
         padding: const EdgeInsets.only(left: defaultSpacing),
         alignment: Alignment.centerLeft,
-        height: debuggerPaneHeaderHeight,
+        height: DebuggerScreen.debuggerPaneHeaderHeight,
         child: Text(
           title,
           style: Theme.of(context).textTheme.subtitle2,
@@ -269,52 +271,60 @@ class DebuggingControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(devoncarew): Change to using two sets of ToggleButtons.
-
     return ValueListenableBuilder(
       valueListenable: controller.isPaused,
       builder: (context, isPaused, child) {
         return SizedBox(
-          height: DebuggerScreenBodyState.debuggerPaneHeaderHeight,
+          height: DebuggerScreen.debuggerPaneHeaderHeight,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              // todo: create a group
-              MaterialButton(
-                onPressed: isPaused ? null : controller.pause,
-                child: const MaterialIconLabel(
-                  Icons.pause,
-                  'Pause',
+              OutlinedBorder(
+                child: Row(
+                  children: [
+                    MaterialButton(
+                      onPressed: isPaused ? null : controller.pause,
+                      child: const MaterialIconLabel(
+                        Icons.pause,
+                        'Pause',
+                      ),
+                    ),
+                    MaterialButton(
+                      onPressed: isPaused ? controller.resume : null,
+                      child: const MaterialIconLabel(
+                        Icons.play_arrow,
+                        'Resume',
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              MaterialButton(
-                onPressed: isPaused ? controller.resume : null,
-                child: const MaterialIconLabel(
-                  Icons.play_arrow,
-                  'Resume',
-                ),
-              ),
-              const SizedBox(width: defaultSpacing),
-              // todo: create a group
-              MaterialButton(
-                onPressed: isPaused ? controller.stepIn : null,
-                child: const MaterialIconLabel(
-                  Icons.keyboard_arrow_down,
-                  'Step In',
-                ),
-              ),
-              MaterialButton(
-                onPressed: isPaused ? controller.stepOver : null,
-                child: const MaterialIconLabel(
-                  Icons.keyboard_arrow_right,
-                  'Step Over',
-                ),
-              ),
-              MaterialButton(
-                onPressed: isPaused ? controller.stepOut : null,
-                child: const MaterialIconLabel(
-                  Icons.keyboard_arrow_up,
-                  'Step Out',
+              const SizedBox(width: denseSpacing),
+              OutlinedBorder(
+                child: Row(
+                  children: [
+                    MaterialButton(
+                      onPressed: isPaused ? controller.stepIn : null,
+                      child: const MaterialIconLabel(
+                        Icons.keyboard_arrow_down,
+                        'Step In',
+                      ),
+                    ),
+                    MaterialButton(
+                      onPressed: isPaused ? controller.stepOver : null,
+                      child: const MaterialIconLabel(
+                        Icons.keyboard_arrow_right,
+                        'Step Over',
+                      ),
+                    ),
+                    MaterialButton(
+                      onPressed: isPaused ? controller.stepOut : null,
+                      child: const MaterialIconLabel(
+                        Icons.keyboard_arrow_up,
+                        'Step Out',
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

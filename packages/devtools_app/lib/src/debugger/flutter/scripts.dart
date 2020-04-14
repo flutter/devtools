@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/theme.dart';
 import 'common.dart';
 
 /// Picker that takes a [ScriptList] and allows selection of one of the scripts
@@ -32,12 +33,14 @@ class ScriptPickerState extends State<ScriptPicker> {
   @override
   void initState() {
     super.initState();
+
     if (_isNotLoaded) initFilter();
   }
 
   @override
   void didUpdateWidget(ScriptPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (_isNotLoaded) {
       initFilter();
     } else if (oldWidget.scripts != widget.scripts) {
@@ -46,7 +49,8 @@ class ScriptPickerState extends State<ScriptPicker> {
   }
 
   void initFilter() {
-    // Make an educated guess as to the main package to slim down the initial list of scripts we show.
+    // Make an educated guess as to the main package to slim down the initial
+    // list of scripts we show.
     if (widget.scripts?.scripts != null) {
       final mainFile = widget.scripts.scripts
           .firstWhere((ref) => ref.uri.contains('main.dart'));
@@ -107,6 +111,7 @@ class ScriptPickerState extends State<ScriptPicker> {
           ),
           controller: filterController,
           onChanged: updateFilter,
+          style: Theme.of(context).textTheme.bodyText2,
         ),
         Expanded(
           child: densePadding(
@@ -116,9 +121,9 @@ class ScriptPickerState extends State<ScriptPicker> {
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: ListView.builder(
-                    itemBuilder: (context, index) => _buildScript(items[index]),
                     itemCount: items.length,
-                    itemExtent: 32.0,
+                    itemExtent: defaultListItemHeight,
+                    itemBuilder: (context, index) => _buildScript(items[index]),
                   ),
                 ),
               ),
