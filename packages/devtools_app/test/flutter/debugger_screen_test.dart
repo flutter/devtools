@@ -10,6 +10,7 @@ import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../support/mocks.dart';
 import 'wrappers.dart';
@@ -43,6 +44,9 @@ void main() {
       final debuggerController = MockDebuggerController();
       when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
       when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
+      when(debuggerController.scriptList)
+          .thenReturn(ValueNotifier(ScriptList(scripts: [])));
+      when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
         debugger: debuggerController,

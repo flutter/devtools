@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/theme.dart';
+import '../../utils.dart';
+import 'common.dart';
 
-// todo: improve display
-// todo: add a count
-// todo: make the filter smaller
+// TODO(devoncarew): Show the filtered count in the scripts header.
 
 /// Picker that takes a [ScriptList] and allows selection of one of the scripts
 /// inside.
@@ -21,7 +21,7 @@ class ScriptPicker extends StatefulWidget {
     @required this.onSelected,
   }) : super(key: key);
 
-  final ScriptList scripts;
+  final List<ScriptRef> scripts;
   final ScriptRef selected;
   final void Function(ScriptRef scriptRef) onSelected;
 
@@ -53,28 +53,37 @@ class ScriptPickerState extends State<ScriptPicker> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isNotLoaded) {
+    if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final items = _filteredScripts;
+    // TODO(devoncarew): Convert the filter to an action in the scripts header.
+    // const Icon(Icons.filter_list, size: defaultIconSize),
 
     return Column(
       children: [
-        TextField(
-          decoration: const InputDecoration(
-            labelText: 'Filter',
-            border: UnderlineInputBorder(),
+        Padding(
+          padding: const EdgeInsets.all(denseSpacing),
+          child: SizedBox(
+            height: 36.0,
+            child: TextField(
+              decoration: const InputDecoration(
+                labelText: 'Filter',
+                border: OutlineInputBorder(),
+              ),
+              controller: _filterController,
+              onChanged: (value) => updateFilter(),
+              style: Theme.of(context).textTheme.bodyText2,
+            ),
           ),
-          controller: _filterController,
-          onChanged: (value) => updateFilter(),
-          style: Theme.of(context).textTheme.bodyText2,
         ),
         Expanded(
           child: ListView.builder(
-            itemCount: items.length,
+            itemCount: _filteredScripts.length,
             itemExtent: defaultListItemHeight,
-            itemBuilder: (context, index) => _buildScript(items[index]),
+            itemBuilder: (context, index) {
+              return _buildScript(_filteredScripts[index]);
+            },
           ),
         ),
       ],
@@ -82,10 +91,8 @@ class ScriptPickerState extends State<ScriptPicker> {
   }
 
   Widget _buildScript(ScriptRef ref) {
-    // TODO(devoncarew): Should we use DebuggerState.getShortScriptName here?
-
     return Material(
-      color: ref.uri == widget.selected?.uri
+      color: ref.id == widget.selected?.id
           ? Theme.of(context).selectedRowColor
           : null,
       child: InkWell(
@@ -94,10 +101,10 @@ class ScriptPickerState extends State<ScriptPicker> {
           padding: const EdgeInsets.all(4.0),
           alignment: Alignment.centerLeft,
           child: Text(
-            '${ref?.uri}',
+            ref.uri,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: ref == widget.selected
+            style: ref.id == widget.selected?.id
                 ? TextStyle(color: Theme.of(context).textSelectionColor)
                 : null,
           ),
@@ -106,28 +113,27 @@ class ScriptPickerState extends State<ScriptPicker> {
     );
   }
 
-  bool get _isNotLoaded => widget.scripts?.scripts == null;
+  bool get _isLoading => widget.scripts.isEmpty;
 
   void _updateFiltered() {
-    if (widget.scripts?.scripts == null) {
-      _filteredScripts = [];
-    } else {
-      final filterText = _filterController.text.trim().toLowerCase();
+    final filterText = _filterController.text.trim().toLowerCase();
+    _filteredScripts = widget.scripts
+        .where((ref) => ref.uri.toLowerCase().contains(filterText))
+        .toList();
+  }
+}
 
-      // todo: move this logic to the controller?
+class ScriptCountBadge extends StatelessWidget {
+  const ScriptCountBadge({@required this.scripts});
 
-      // TODO(devoncarew): Follow up to see why we need to filter out non-unique
-      // items here.
-      _filteredScripts = Set.of(widget.scripts.scripts)
-          .where((ref) => ref.uri.toLowerCase().contains(filterText))
-          .toList();
+  final List<ScriptRef> scripts;
 
-      // TODO: Sort things like dart:_ after dart:?
-      _filteredScripts.sort((a, b) {
-        return a.uri.compareTo(b.uri);
-      });
-
-      print('_filteredScripts.length: ${_filteredScripts.length}');
-    }
+  @override
+  Widget build(BuildContext context) {
+    return Badge(
+      child: Text(
+        '${nf.format(scripts.length)}',
+      ),
+    );
   }
 }

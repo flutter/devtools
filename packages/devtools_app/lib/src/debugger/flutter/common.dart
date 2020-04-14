@@ -21,10 +21,15 @@ class Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Chip(
-      label: child,
-      visualDensity: VisualDensity.compact,
-      backgroundColor: Theme.of(context).accentColor,
+    // TODO(devoncarew): We'll likely want a badge implementation that's
+    // separate from [Chip].
+
+    return SizedBox(
+      child: Chip(
+        label: child,
+        visualDensity: VisualDensity.compact,
+        padding: const EdgeInsets.symmetric(vertical: -4.0),
+      ),
     );
   }
 }
