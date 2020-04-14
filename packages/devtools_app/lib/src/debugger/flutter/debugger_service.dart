@@ -29,8 +29,8 @@ class DebuggerService {
   Future<Isolate> getIsolate(String isolateId) =>
       serviceManager.service.getIsolate(isolateId);
 
-  Future<Script> getScript(String isolateId, String scriptId) =>
-      getObject(isolateId, scriptId);
+  Future<Script> getScript(String isolateId, String scriptId) async =>
+      await getObject(isolateId, scriptId) as Script;
 
   Future<ScriptList> getScripts(String isolateId) =>
       serviceManager.service.getScripts(isolateId);

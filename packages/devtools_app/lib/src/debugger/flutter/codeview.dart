@@ -23,7 +23,7 @@ class CodeView extends StatefulWidget {
     this.lineNumberToBreakpoint,
   }) : super(key: key);
 
-  static const rowHeight = 24.0;
+  static const rowHeight = 20.0;
   static const assumedCharacterWidth = 16.0;
 
   final DebuggerController controller;
@@ -97,8 +97,11 @@ class _CodeViewState extends State<CodeView> {
     });
 
     if (pausedPositions.isNotEmpty) {
+      final lineIndex = pausedPositions.first - 1;
+      // Back up 10 lines so the execution point isn't right at the top.
+      final scrollPosition = (lineIndex - 10) * CodeView.rowHeight;
       verticalController.animateTo(
-        pausedPositions.first * CodeView.rowHeight,
+        math.max(0, scrollPosition),
         duration: shortDuration,
         curve: defaultCurve,
       );
@@ -140,20 +143,21 @@ class _CodeViewState extends State<CodeView> {
           children: [
             SizedBox(
               width: gutterWidth,
-              child: ListView(
+              child: ListView.builder(
                 controller: gutterController,
-                children: [
-                  // TODO(devoncarew): We need to virtualize this.
-                  for (var lineNum = 1; lineNum <= lines.length; lineNum++)
-                    GutterRow(
-                      lineNumber: lineNum,
-                      totalLines: lines.length,
-                      onPressed: () => _onPressed(lineNum),
-                      isBreakpoint:
-                          widget.lineNumberToBreakpoint.containsKey(lineNum),
-                    ),
-                ],
                 itemExtent: CodeView.rowHeight,
+                itemCount: lines.length,
+                itemBuilder: (context, index) {
+                  final lineNum = index + 1;
+                  return GutterRow(
+                    lineNumber: lineNum,
+                    totalLines: lines.length,
+                    onPressed: () => _onPressed(lineNum),
+                    isBreakpoint:
+                        widget.lineNumberToBreakpoint.containsKey(lineNum),
+                    isPausedHere: pausedPositions.contains(lineNum),
+                  );
+                },
               ),
             ),
             const SizedBox(width: denseSpacing),
@@ -166,21 +170,18 @@ class _CodeViewState extends State<CodeView> {
                       lines
                           .map((s) => s.length)
                           .reduce((a, b) => math.max(a, b)),
-                  child: ListView(
+                  child: ListView.builder(
                     controller: textController,
-                    children: [
-                      // Note: below, lineNum is the 1-based line number (the
-                      // user facing one, and the one that the VM uses);
-                      // lineNum - 1 is the index into the lines array.
-                      // TODO(devoncarew): We need to virtualize this.
-                      for (var lineNum = 1; lineNum <= lines.length; lineNum++)
-                        ScriptRow(
-                          lineContents: lines[lineNum - 1],
-                          onPressed: () => _onPressed(lineNum),
-                          isPausedHere: pausedPositions.contains(lineNum),
-                        )
-                    ],
                     itemExtent: CodeView.rowHeight,
+                    itemCount: lines.length,
+                    itemBuilder: (context, index) {
+                      final lineNum = index + 1;
+                      return ScriptRow(
+                        lineContents: lines[index],
+                        onPressed: () => _onPressed(lineNum),
+                        isPausedHere: pausedPositions.contains(lineNum),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -199,18 +200,24 @@ class GutterRow extends StatelessWidget {
     @required this.totalLines,
     @required this.onPressed,
     @required this.isBreakpoint,
+    this.isPausedHere = false,
   }) : super(key: key);
 
   final int lineNumber;
   final int totalLines;
   final VoidCallback onPressed;
 
-  // TODO(djshuckerow): Add support for multiple breakpoints in a line and
-  // different types of decorators than just breakpoints.
+  // TODO(djshuckerow): Add support for multiple breakpoints in a line.
   final bool isBreakpoint;
+
+  /// Whether the execution point is currently paused here.
+  final bool isPausedHere;
 
   @override
   Widget build(BuildContext context) {
+    // TODO(devoncarew): Improve the layout of the breakpoint and execution
+    // marker.
+
     return InkWell(
       onTap: onPressed,
       child: Container(
@@ -220,7 +227,13 @@ class GutterRow extends StatelessWidget {
         decoration: BoxDecoration(color: titleSolidBackgroundColor),
         child: Row(
           children: [
-            if (isBreakpoint) const Text('●'),
+            if (isPausedHere)
+              const Icon(Icons.play_arrow, size: defaultIconSize),
+            if (isBreakpoint && !isPausedHere)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 4.0),
+                child: Text('●'),
+              ),
             Expanded(
               child: Text(
                 '$lineNumber',

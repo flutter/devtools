@@ -38,5 +38,19 @@ void main() {
       expect(find.byType(DebuggerScreenBody), findsNothing);
       expect(find.byType(DisabledForProfileBuildMessage), findsOneWidget);
     });
+
+    testWidgets('has Console area', (WidgetTester tester) async {
+      final debuggerController = MockDebuggerController();
+      when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
+      when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
+      await tester.pumpWidget(wrapWithControllers(
+        Builder(builder: screen.build),
+        debugger: debuggerController,
+      ));
+
+      expect(find.text('Console'), findsOneWidget);
+
+      expect(find.text('todo:'), findsOneWidget);
+    });
   });
 }

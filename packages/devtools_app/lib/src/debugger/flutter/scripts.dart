@@ -33,12 +33,14 @@ class ScriptPickerState extends State<ScriptPicker> {
   @override
   void initState() {
     super.initState();
+
     if (_isNotLoaded) initFilter();
   }
 
   @override
   void didUpdateWidget(ScriptPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (_isNotLoaded) {
       initFilter();
     } else if (oldWidget.scripts != widget.scripts) {
@@ -47,7 +49,8 @@ class ScriptPickerState extends State<ScriptPicker> {
   }
 
   void initFilter() {
-    // Make an educated guess as to the main package to slim down the initial list of scripts we show.
+    // Make an educated guess as to the main package to slim down the initial
+    // list of scripts we show.
     if (widget.scripts?.scripts != null) {
       final mainFile = widget.scripts.scripts
           .firstWhere((ref) => ref.uri.contains('main.dart'));
@@ -108,6 +111,7 @@ class ScriptPickerState extends State<ScriptPicker> {
           ),
           controller: filterController,
           onChanged: updateFilter,
+          style: Theme.of(context).textTheme.bodyText2,
         ),
         Expanded(
           child: densePadding(

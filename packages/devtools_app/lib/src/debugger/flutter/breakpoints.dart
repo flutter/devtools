@@ -13,6 +13,7 @@ import 'debugger_controller.dart';
 class BreakpointPicker extends StatelessWidget {
   const BreakpointPicker({Key key, @required this.controller})
       : super(key: key);
+
   final DebuggerController controller;
 
   String textFor(Breakpoint breakpoint) {
