@@ -14,6 +14,7 @@ class BreakpointPicker extends StatelessWidget {
   const BreakpointPicker(
       {Key key, @required this.breakpoints, @required this.controller})
       : super(key: key);
+
   final List<Breakpoint> breakpoints;
   final DebuggerController controller;
 

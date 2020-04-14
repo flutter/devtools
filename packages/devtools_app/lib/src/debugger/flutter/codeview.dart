@@ -96,6 +96,7 @@ class _CodeViewState extends State<CodeView> {
 
     if (pausedPositions.isNotEmpty) {
       final lineIndex = pausedPositions.first - 1;
+      // Back up 10 lines so the execution point isn't right at the top.
       final scrollPosition = (lineIndex - 10) * CodeView.rowHeight;
       verticalController.animateTo(
         math.max(0, scrollPosition),
@@ -144,7 +145,7 @@ class _CodeViewState extends State<CodeView> {
                 controller: gutterController,
                 itemExtent: CodeView.rowHeight,
                 itemCount: lines.length,
-                itemBuilder: (BuildContext context, int index) {
+                itemBuilder: (context, index) {
                   final lineNum = index + 1;
                   return GutterRow(
                     lineNumber: lineNum,
@@ -171,7 +172,7 @@ class _CodeViewState extends State<CodeView> {
                     controller: textController,
                     itemExtent: CodeView.rowHeight,
                     itemCount: lines.length,
-                    itemBuilder: (BuildContext context, int index) {
+                    itemBuilder: (context, index) {
                       final lineNum = index + 1;
                       return ScriptRow(
                         lineContents: lines[index],

@@ -17,6 +17,7 @@ import '../../globals.dart';
 import '../../ui/flutter/label.dart';
 import 'breakpoints.dart';
 import 'codeview.dart';
+import 'common.dart';
 import 'console.dart';
 import 'debugger_controller.dart';
 import 'scripts.dart';
@@ -177,7 +178,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                     OutlinedBorder(
                       child: Column(
                         children: [
-                          buildScriptTitle(theme),
+                          debuggerSectionTitle(theme,
+                              text: script == null ? ' ' : '${script.uri}'),
                           Expanded(
                             child: CodeView(
                               script: script,
@@ -200,24 +202,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     );
   }
 
-  Container buildScriptTitle(ThemeData theme) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: theme.focusColor),
-        ),
-        color: titleSolidBackgroundColor,
-      ),
-      padding: const EdgeInsets.only(left: defaultSpacing),
-      alignment: Alignment.centerLeft,
-      height: DebuggerScreen.debuggerPaneHeaderHeight,
-      child: Text(
-        script == null ? ' ' : '${script.uri}',
-        style: theme.textTheme.subtitle2,
-      ),
-    );
-  }
-
   Widget debuggerPanes() {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -226,7 +210,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           initialFractions: const [0.25, 0.25, 0.25, 0.25],
           minSizes: const [0.0, 0.0, 0.0, 0.0],
           headers: [
-            _debuggerPaneHeader(callStackTitle),
+            _debuggerPaneHeader(callStackTitle, needsTopBorder: false),
             _debuggerPaneHeader(variablesTitle),
             _debuggerPaneHeader(breakpointsTitle),
             _debuggerPaneHeader(librariesTitle),
@@ -249,7 +233,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     );
   }
 
-  FlexSplitColumnHeader _debuggerPaneHeader(String title) {
+  FlexSplitColumnHeader _debuggerPaneHeader(
+    String title, {
+    bool needsTopBorder = true,
+  }) {
     final theme = Theme.of(context);
 
     return FlexSplitColumnHeader(
@@ -257,6 +244,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       child: Container(
         decoration: BoxDecoration(
           border: Border(
+            top: needsTopBorder
+                ? BorderSide(color: theme.focusColor)
+                : BorderSide.none,
             bottom: BorderSide(color: theme.focusColor),
           ),
           color: titleSolidBackgroundColor,
@@ -291,7 +281,7 @@ class DebuggingControls extends StatelessWidget {
             children: [
               OutlinedBorder(
                 child: Row(
-                  children: <Widget>[
+                  children: [
                     MaterialButton(
                       onPressed: isPaused ? null : controller.pause,
                       child: const MaterialIconLabel(
@@ -312,7 +302,7 @@ class DebuggingControls extends StatelessWidget {
               const SizedBox(width: denseSpacing),
               OutlinedBorder(
                 child: Row(
-                  children: <Widget>[
+                  children: [
                     MaterialButton(
                       onPressed: isPaused ? controller.stepIn : null,
                       child: const MaterialIconLabel(

@@ -50,13 +50,7 @@ void main() {
 
       expect(find.text('Console'), findsOneWidget);
 
-      expect(
-        find.descendant(
-          of: find.byType(DebuggerScreenBody),
-          matching: find.text('todo:'),
-        ),
-        findsOneWidget,
-      );
+      expect(find.text('todo:'), findsOneWidget);
     });
   });
 }
