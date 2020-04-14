@@ -63,23 +63,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   DebuggerController controller;
   ScriptRef loadingScript;
   Script script;
-  ScriptList scriptList;
-  Stack stack;
-
-  // TODO(kenz): clean up this lifecycle logic to be more idiomatic to Flutter.
-  @override
-  void initState() {
-    super.initState();
-
-    // TODO(djshuckerow): Make the loading process disposable.
-    serviceManager.service
-        .getScripts(serviceManager.isolateManager.selectedIsolate.id)
-        .then((scripts) async {
-      setState(() {
-        scriptList = scripts;
-      });
-    });
-  }
 
   @override
   void didChangeDependencies() {
@@ -88,60 +71,39 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final newController = Controllers.of(context).debugger;
     if (newController == controller) return;
     controller = newController;
-    addAutoDisposeListener(controller.isPaused, _onPaused);
+
+    addAutoDisposeListener(controller.currentScript, () {
+      setState(() {
+        script = controller.currentScript.value;
+      });
+    });
+    addAutoDisposeListener(controller.currentStack);
+    addAutoDisposeListener(controller.scriptList);
     addAutoDisposeListener(controller.breakpoints);
+
+    controller.getScripts();
   }
 
-  Future<void> _onPaused() async {
-    // TODO(https://github.com/flutter/devtools/issues/1648): Allow choice of
-    // the scripts on the stack.
-    if (controller.isPaused.value) {
-      final currentStack = await controller.getStack();
-      setState(() {
-        stack = currentStack;
-      });
-      if (stack == null || stack.frames.isEmpty) return;
-      final currentScript =
-          await controller.getScript(stack.frames.first.location.script);
-      setState(() {
-        script = currentScript;
-      });
-    } else {
-      setState(() {
-        stack = null;
-      });
-    }
-  }
-
-  Future<void> onScriptSelected(ScriptRef ref) async {
+  Future<void> _onScriptSelected(ScriptRef ref) async {
     if (ref == null) return;
     setState(() {
       loadingScript = ref;
       script = null;
     });
-    final result = await serviceManager.service.getObject(
-      serviceManager.isolateManager.selectedIsolate.id,
-      ref.id,
-    ) as Script;
-
-    setState(() {
-      script = result;
-    });
+    await controller.selectScript(ref);
   }
 
-  Map<int, Breakpoint> getBreakpointsForLines() {
+  Map<int, Breakpoint> _breakpointsForLines() {
     if (script == null) return {};
-    String getScriptId(Breakpoint b) => b.location.script.id;
-
-    final bps = controller.breakpoints.value
-        .where((b) => b != null && getScriptId(b) == script.id);
     return {
-      for (var b in bps) controller.lineNumber(script, b.location): b,
+      for (var b in controller.breakpoints.value
+          .where((b) => b != null && b.location.script.id == script.id))
+        controller.lineNumber(script, b.location): b,
     };
   }
 
   Future<void> toggleBreakpoint(Script script, int line) async {
-    final breakpoints = getBreakpointsForLines();
+    final breakpoints = _breakpointsForLines();
     if (breakpoints.containsKey(line)) {
       await controller.removeBreakpoint(breakpoints[line]);
     } else {
@@ -183,9 +145,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                           Expanded(
                             child: CodeView(
                               script: script,
-                              stack: stack,
+                              stack: controller.currentStack.value,
                               controller: controller,
-                              lineNumberToBreakpoint: getBreakpointsForLines(),
+                              lineNumberToBreakpoint: _breakpointsForLines(),
                               onSelected: toggleBreakpoint,
                             ),
                           ),
@@ -218,13 +180,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           children: [
             const Center(child: Text('TODO: call stack')),
             const Center(child: Text('TODO: variables')),
-            BreakpointPicker(
-              breakpoints: controller.breakpoints.value,
-              controller: controller,
-            ),
+            BreakpointPicker(controller: controller),
             ScriptPicker(
-              scripts: scriptList,
-              onSelected: onScriptSelected,
+              scripts: controller.scriptList.value,
+              onSelected: _onScriptSelected,
               selected: loadingScript,
             ),
           ],
