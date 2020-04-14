@@ -139,6 +139,11 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
+  Future<ScriptList> getScripts(String isolateId) {
+    return Future.value(ScriptList(scripts: []));
+  }
+
+  @override
   Future<Success> setFlag(String name, String value) {
     final List<Flag> flags = _flags['flags'];
     final existingFlag =

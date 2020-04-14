@@ -49,6 +49,8 @@ const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
 const denseRowSpacing = 6.0;
 
+const defaultListItemHeight = 28.0;
+
 /// Branded grey color.
 ///
 /// Source: https://drive.google.com/open?id=1QBhMJqXyRt-CpRsHR6yw2LAfQtiNat4g
