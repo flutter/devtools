@@ -15,7 +15,7 @@ Widget densePadding(Widget child) {
 }
 
 /// Create a header area for a debugger component.
-/// 
+///
 /// Either one of [text] or [child] must be supplied.
 Container debuggerSectionTitle(ThemeData theme, {String text, Widget child}) {
   assert(text != null || child != null);
