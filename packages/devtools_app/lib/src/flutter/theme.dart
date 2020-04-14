@@ -35,6 +35,9 @@ ThemeData _lightTheme() {
     primaryColorLight: devtoolsBlue[400],
     indicatorColor: Colors.yellowAccent[400],
     accentColor: devtoolsBlue[400],
+    backgroundColor: devtoolsGrey[600],
+    toggleableActiveColor: devtoolsBlue[400],
+    selectedRowColor: devtoolsBlue[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
   );
 }
@@ -45,6 +48,8 @@ const actionsIconSize = 20.0;
 const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
 const denseRowSpacing = 6.0;
+
+const defaultListItemHeight = 28.0;
 
 /// Branded grey color.
 ///
@@ -130,6 +135,9 @@ const defaultCurve = Curves.easeInOutCubic;
 /// This is the standard curve for animations in DevTools.
 CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
+
+final titleSolidBackgroundColor =
+    ThemedColor(devtoolsGrey[50], devtoolsGrey[900]);
 
 final chartBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
 
