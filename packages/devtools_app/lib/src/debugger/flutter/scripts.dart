@@ -51,7 +51,7 @@ class ScriptPickerState extends State<ScriptPicker> {
   void initFilter() {
     // Make an educated guess as to the main package to slim down the initial
     // list of scripts we show.
-    if (widget.scripts?.scripts != null) {
+    if ((widget.scripts?.scripts ?? []).isNotEmpty) {
       final mainFile = widget.scripts.scripts
           .firstWhere((ref) => ref.uri.contains('main.dart'));
       filterController.text = mainFile.uri.split('/').first;
