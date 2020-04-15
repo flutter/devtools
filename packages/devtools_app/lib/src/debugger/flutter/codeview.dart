@@ -38,7 +38,6 @@ class CodeView extends StatefulWidget {
 
 class _CodeViewState extends State<CodeView> {
   List<String> lines = [];
-  ScrollController _horizontalController;
   LinkedScrollControllerGroup verticalController;
   ScrollController gutterController;
   ScrollController textController;
@@ -50,7 +49,6 @@ class _CodeViewState extends State<CodeView> {
   void initState() {
     super.initState();
 
-    _horizontalController = ScrollController();
     verticalController = LinkedScrollControllerGroup();
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
@@ -62,7 +60,6 @@ class _CodeViewState extends State<CodeView> {
   void dispose() {
     super.dispose();
 
-    _horizontalController.dispose();
     gutterController.dispose();
     textController.dispose();
   }
@@ -114,8 +111,8 @@ class _CodeViewState extends State<CodeView> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(https://github.com/flutter/devtools/issues/1648): Line numbers,
-    // syntax highlighting and breakpoint markers.
+    // TODO(#1648): Implement syntax highlighting.
+
     if (widget.script == null) {
       return Center(
         child: Text(
@@ -162,28 +159,18 @@ class _CodeViewState extends State<CodeView> {
             ),
             const SizedBox(width: denseSpacing),
             Expanded(
-              child: SingleChildScrollView(
-                controller: _horizontalController,
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: CodeView.assumedCharacterWidth *
-                      lines
-                          .map((s) => s.length)
-                          .reduce((a, b) => math.max(a, b)),
-                  child: ListView.builder(
-                    controller: textController,
-                    itemExtent: CodeView.rowHeight,
-                    itemCount: lines.length,
-                    itemBuilder: (context, index) {
-                      final lineNum = index + 1;
-                      return ScriptRow(
-                        lineContents: lines[index],
-                        onPressed: () => _onPressed(lineNum),
-                        isPausedHere: pausedPositions.contains(lineNum),
-                      );
-                    },
-                  ),
-                ),
+              child: ListView.builder(
+                controller: textController,
+                itemExtent: CodeView.rowHeight,
+                itemCount: lines.length,
+                itemBuilder: (context, index) {
+                  final lineNum = index + 1;
+                  return ScriptRow(
+                    lineContents: lines[index],
+                    onPressed: () => _onPressed(lineNum),
+                    isPausedHere: pausedPositions.contains(lineNum),
+                  );
+                },
               ),
             ),
           ],
@@ -207,7 +194,6 @@ class GutterRow extends StatelessWidget {
   final int totalLines;
   final VoidCallback onPressed;
 
-  // TODO(djshuckerow): Add support for multiple breakpoints in a line.
   final bool isBreakpoint;
 
   /// Whether the execution point is currently paused here.
@@ -269,6 +255,8 @@ class ScriptRow extends StatelessWidget {
         color: isPausedHere ? Theme.of(context).selectedRowColor : null,
         child: Text(
           lineContents,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: isPausedHere
               ? TextStyle(color: Theme.of(context).textSelectionColor)
               : null,

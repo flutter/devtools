@@ -56,7 +56,15 @@ class DebuggerController extends DisposableController
 
   final _scriptList = ValueNotifier<ScriptList>(null);
 
+  /// Return the [ScriptList] active in the current isolate.
+  ///
+  /// See also [sortedScripts].
   ValueListenable<ScriptList> get scriptList => _scriptList;
+
+  final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
+
+  /// Return the sorted list of ScriptRefs active in the current isolate.
+  ValueListenable<List<ScriptRef>> get sortedScripts => _sortedScripts;
 
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
@@ -221,7 +229,8 @@ class DebuggerController extends DisposableController
 
           // ignore: unawaited_futures
           getScript(bp.script).then((Script script) {
-            SourcePosition pos = calculatePosition(script, bp.tokenPos);
+            // todo: clean all this up
+            final SourcePosition pos = calculatePosition(script, bp.tokenPos);
             bp = BreakpointAndSourcePosition(event.breakpoint, pos);
 
             final list = _breakpointsWithLocation.value.toList();
@@ -252,7 +261,8 @@ class DebuggerController extends DisposableController
 
         // ignore: unawaited_futures
         getScript(bp.script).then((Script script) {
-          SourcePosition pos = calculatePosition(script, bp.tokenPos);
+          // todo: clean all this up
+          final SourcePosition pos = calculatePosition(script, bp.tokenPos);
           bp = BreakpointAndSourcePosition(event.breakpoint, pos);
 
           final list = _breakpointsWithLocation.value.toList();
@@ -319,6 +329,16 @@ class DebuggerController extends DisposableController
 
   Future<void> getScripts() async {
     _scriptList.value = await _service.getScripts(isolateRef.id);
+
+    // TODO(devoncarew): Follow up to see why we need to filter out non-unique
+    // items here.
+    final scriptRefs = Set.of(_scriptList.value.scripts).toList();
+    scriptRefs.sort((a, b) {
+      // We sort uppercase so that items like dart:foo sort before items like
+      // dart:_foo.
+      return a.uri.toUpperCase().compareTo(b.uri.toUpperCase());
+    });
+    _sortedScripts.value = scriptRefs;
   }
 
   SourcePosition calculatePosition(Script script, int tokenPos) {
