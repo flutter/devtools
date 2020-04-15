@@ -245,6 +245,8 @@ class ScriptRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(#1648): Implement syntax highlighting.
+
     return InkWell(
       onTap: onPressed,
       child: Container(

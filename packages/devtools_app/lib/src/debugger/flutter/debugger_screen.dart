@@ -220,7 +220,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         alignment: Alignment.centerLeft,
         height: DebuggerScreen.debuggerPaneHeaderHeight,
         child: Row(
-          children: <Widget>[
+          children: [
             Expanded(
               child: Text(
                 title,

@@ -14,26 +14,6 @@ Widget densePadding(Widget child) {
   );
 }
 
-class Badge extends StatelessWidget {
-  const Badge({@required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO(devoncarew): We'll likely want a badge implementation that's
-    // separate from [Chip].
-
-    return SizedBox(
-      child: Chip(
-        label: child,
-        visualDensity: VisualDensity.compact,
-        padding: const EdgeInsets.symmetric(vertical: -4.0),
-      ),
-    );
-  }
-}
-
 /// Create a header area for a debugger component.
 ///
 /// Either one of [text] or [child] must be supplied.

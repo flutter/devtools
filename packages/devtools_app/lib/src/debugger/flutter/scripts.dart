@@ -5,9 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
 import '../../utils.dart';
-import 'common.dart';
 
 // TODO(devoncarew): Show the filtered count in the scripts header.
 
@@ -30,7 +30,7 @@ class ScriptPicker extends StatefulWidget {
 }
 
 class ScriptPickerState extends State<ScriptPicker> {
-  final TextEditingController _filterController = TextEditingController();
+  final _filterController = TextEditingController();
   List<ScriptRef> _filteredScripts = [];
 
   @override

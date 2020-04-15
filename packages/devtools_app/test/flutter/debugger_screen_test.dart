@@ -46,6 +46,7 @@ void main() {
       when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
       when(debuggerController.scriptList)
           .thenReturn(ValueNotifier(ScriptList(scripts: [])));
+      when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
       when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
