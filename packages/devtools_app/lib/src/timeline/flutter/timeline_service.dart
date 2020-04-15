@@ -110,6 +110,7 @@ class TimelineService {
       // Linux, Windows, Dream (g3): "io.flutter.raster (12651)"
       // MacOS: Does not exist
       // Also look for .gpu here for older versions of Flutter.
+      // TODO(kenz): remove check for .gpu name in April 2021.
       if (name.contains('.raster') || name.contains('.gpu')) {
         rasterThreadName = name;
       }
