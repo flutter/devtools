@@ -111,6 +111,8 @@ class _CodeViewState extends State<CodeView> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(#1648): Implement syntax highlighting.
+
     if (widget.script == null) {
       return Center(
         child: Text(
@@ -245,8 +247,6 @@ class ScriptRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(#1648): Implement syntax highlighting.
-
     return InkWell(
       onTap: onPressed,
       child: Container(
