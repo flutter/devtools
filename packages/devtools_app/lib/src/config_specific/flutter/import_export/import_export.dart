@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import '../../../../devtools.dart';
 import '../../../flutter/notifications.dart';
 import '../../../globals.dart';
 import '../../../timeline/flutter/timeline_model.dart';
@@ -12,8 +13,9 @@ import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
 
-const dartDevToolsSnapshotKey = 'dartDevToolsSnapshot';
+const devToolsSnapshotKey = 'devToolsSnapshot';
 const activeScreenIdKey = 'activeScreenId';
+const devToolsVersionKey = 'devtoolsVersion';
 const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
     ' At this time, DevTools only supports importing files that were originally'
     ' exported from DevTools.';
@@ -35,11 +37,12 @@ class ImportController {
 
   bool importing = false;
 
+  // TODO(kenz): improve error handling here or in snapshot_screen.dart.
   void importData(Map<String, dynamic> json) {
     if (importing) return;
     importing = true;
 
-    final isDevToolsSnapshot = json[dartDevToolsSnapshotKey];
+    final isDevToolsSnapshot = json[devToolsSnapshotKey];
     if (isDevToolsSnapshot == null || !isDevToolsSnapshot) {
       _notifications.push(nonDevToolsFileMessage);
       importing = false;
@@ -74,8 +77,9 @@ abstract class ExportController {
 
   String encode(String activeScreenId, Map<String, dynamic> contents) {
     final _contents = {
-      dartDevToolsSnapshotKey: true,
-      activeScreenIdKey: activeScreenId
+      devToolsSnapshotKey: true,
+      activeScreenIdKey: activeScreenId,
+      devToolsVersionKey: version,
     };
     // This is a workaround to guarantee that DevTools exports are compatible
     // with other trace viewers (catapult, perfetto, chrome://tracing), which

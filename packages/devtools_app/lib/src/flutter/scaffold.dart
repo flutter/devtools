@@ -178,6 +178,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       // If we are already in offline mode, only handle routing from existing
       // '/snapshot' route. In this case, we need to first pop the existing
       // '/snapshot' route and push a new one.
+      //
+      // If we allow other routes that are not the '/snapshot' route to handle
+      // routing when we are already offline, the other routes will pop their
+      // existing screen ('/connect', or '/') and push '/snapshot' over the top.
+      // We want to avoid this because the routes underneath the existing
+      // '/snapshot' route should remain unchanged while '/snapshot' sits on
+      // top.
       if (ModalRoute.of(context).settings.name == snapshotRoute) {
         Navigator.popAndPushNamed(context, snapshotRoute, arguments: args);
       }

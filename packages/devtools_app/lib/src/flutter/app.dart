@@ -130,10 +130,7 @@ class DevToolsAppState extends State<DevToolsApp> {
         return DevToolsScaffold.withChild(
           child: _providedControllers(
             offline: true,
-            child: SnapshotScreenBody(
-              args as SnapshotArguments,
-              _screens,
-            ),
+            child: SnapshotScreenBody(args, _screens),
           ),
         );
       }
@@ -220,7 +217,7 @@ class DevToolsScreen {
 typedef UrlParametersBuilder = Widget Function(
   BuildContext,
   Map<String, String>,
-  Object args,
+  SnapshotArguments args,
 );
 
 /// Displays the checked mode banner in the bottom end corner instead of the
