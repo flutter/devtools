@@ -46,6 +46,7 @@ void main() {
       when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
       when(debuggerController.scriptList)
           .thenReturn(ValueNotifier(ScriptList(scripts: [])));
+      when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
       when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
@@ -55,6 +56,27 @@ void main() {
       expect(find.text('Console'), findsOneWidget);
 
       expect(find.text('todo:'), findsOneWidget);
+    });
+
+    testWidgets('Scripts show items', (WidgetTester tester) async {
+      final scripts = [ScriptRef(uri: 'package:/test/script.dart')];
+
+      final debuggerController = MockDebuggerController();
+      when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
+      when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
+      when(debuggerController.scriptList)
+          .thenReturn(ValueNotifier(ScriptList(scripts: scripts)));
+      when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
+      when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
+      await tester.pumpWidget(wrapWithControllers(
+        Builder(builder: screen.build),
+        debugger: debuggerController,
+      ));
+
+      expect(find.text('Libraries'), findsOneWidget);
+
+      // test for items in the libraries list
+      expect(find.text(scripts.first.uri), findsOneWidget);
     });
   });
 }

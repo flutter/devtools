@@ -316,6 +316,27 @@ class BulletSpacer extends StatelessWidget {
   }
 }
 
+/// A small element containing some accessory information, often a numeric
+/// value.
+class Badge extends StatelessWidget {
+  const Badge({@required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO(devoncarew): We'll likely want a badge implementation that's
+    // separate from Chip.
+
+    return SizedBox(
+      child: Chip(
+        label: child,
+        visualDensity: VisualDensity.compact,
+      ),
+    );
+  }
+}
+
 /// A widget, commonly used for icon buttons, that provides a tooltip with a
 /// common delay before the tooltip is shown.
 class ActionButton extends StatelessWidget {

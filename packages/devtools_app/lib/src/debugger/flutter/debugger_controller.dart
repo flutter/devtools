@@ -25,10 +25,12 @@ class DebuggerController extends DisposableController
   final _scriptCache = <String, Script>{};
 
   final _isPaused = ValueNotifier<bool>(false);
+
   ValueListenable<bool> get isPaused => _isPaused;
 
   final _hasFrames = ValueNotifier<bool>(false);
   ValueNotifier<bool> _supportsStepping;
+
   ValueListenable<bool> get supportsStepping {
     return _supportsStepping ??= () {
       final notifier = ValueNotifier<bool>(_isPaused.value && _hasFrames.value);
@@ -45,18 +47,31 @@ class DebuggerController extends DisposableController
   Event lastEvent;
 
   final _currentScript = ValueNotifier<Script>(null);
+
   ValueListenable<Script> get currentScript => _currentScript;
 
   final _currentStack = ValueNotifier<Stack>(null);
+
   ValueListenable<Stack> get currentStack => _currentStack;
 
   final _scriptList = ValueNotifier<ScriptList>(null);
+
+  /// Return the [ScriptList] active in the current isolate.
+  ///
+  /// See also [sortedScripts].
   ValueListenable<ScriptList> get scriptList => _scriptList;
 
+  final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
+
+  /// Return the sorted list of ScriptRefs active in the current isolate.
+  ValueListenable<List<ScriptRef>> get sortedScripts => _sortedScripts;
+
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
+
   ValueListenable<List<Breakpoint>> get breakpoints => _breakpoints;
 
   final _exceptionPauseMode = ValueNotifier<String>(null);
+
   ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
 
   IsolateRef isolateRef;
@@ -70,6 +85,7 @@ class DebuggerController extends DisposableController
 
   LibraryRef get rootLib => _rootLib;
   LibraryRef _rootLib;
+
   set rootLib(LibraryRef rootLib) {
     _rootLib = rootLib;
 
@@ -256,6 +272,16 @@ class DebuggerController extends DisposableController
 
   Future<void> getScripts() async {
     _scriptList.value = await _service.getScripts(isolateRef.id);
+
+    // TODO(devoncarew): Follow up to see why we need to filter out non-unique
+    // items here.
+    final scriptRefs = Set.of(_scriptList.value.scripts).toList();
+    scriptRefs.sort((a, b) {
+      // We sort uppercase so that items like dart:foo sort before items like
+      // dart:_foo.
+      return a.uri.toUpperCase().compareTo(b.uri.toUpperCase());
+    });
+    _sortedScripts.value = scriptRefs;
   }
 
   SourcePosition calculatePosition(Script script, int tokenPos) {
