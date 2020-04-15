@@ -5,8 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
-import 'common.dart';
+import '../../utils.dart';
+
+// TODO(devoncarew): Show the filtered count in the scripts header.
 
 /// Picker that takes a [ScriptList] and allows selection of one of the scripts
 /// inside.
@@ -14,77 +17,94 @@ class ScriptPicker extends StatefulWidget {
   const ScriptPicker({
     Key key,
     @required this.scripts,
-    @required this.onSelected,
     @required this.selected,
+    @required this.onSelected,
   }) : super(key: key);
 
-  final ScriptList scripts;
-  final void Function(ScriptRef scriptRef) onSelected;
+  final List<ScriptRef> scripts;
   final ScriptRef selected;
+  final void Function(ScriptRef scriptRef) onSelected;
 
   @override
   ScriptPickerState createState() => ScriptPickerState();
 }
 
 class ScriptPickerState extends State<ScriptPicker> {
-  List<ScriptRef> _filtered;
-  TextEditingController filterController = TextEditingController();
+  final _filterController = TextEditingController();
+  List<ScriptRef> _filteredScripts = [];
 
   @override
   void initState() {
     super.initState();
 
-    if (_isNotLoaded) initFilter();
+    _updateFiltered();
   }
 
   @override
   void didUpdateWidget(ScriptPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (_isNotLoaded) {
-      initFilter();
-    } else if (oldWidget.scripts != widget.scripts) {
-      updateFilter(filterController.text);
-    }
+    updateFilter();
   }
 
-  void initFilter() {
-    // Make an educated guess as to the main package to slim down the initial
-    // list of scripts we show.
-    if ((widget.scripts?.scripts ?? []).isNotEmpty) {
-      final mainFile = widget.scripts.scripts
-          .firstWhere((ref) => ref.uri.contains('main.dart'));
-      filterController.text = mainFile.uri.split('/').first;
-      updateFilter(filterController.text);
-    }
+  void updateFilter() {
+    setState(_updateFiltered);
   }
 
-  void updateFilter(String value) {
-    setState(() {
-      if (widget.scripts?.scripts == null) {
-        _filtered = null;
-      } else {
-        // TODO(djshuckerow): Use DebuggerState.getShortScriptName logic here.
-        _filtered = widget.scripts.scripts
-            .where((ref) => ref.uri.contains(value.toLowerCase()))
-            .toList();
-      }
-    });
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // TODO(devoncarew): Convert the filter to an action in the scripts header.
+    // const Icon(Icons.filter_list, size: defaultIconSize),
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(denseSpacing),
+          child: SizedBox(
+            height: 36.0,
+            child: TextField(
+              decoration: const InputDecoration(
+                labelText: 'Filter',
+                border: OutlineInputBorder(),
+              ),
+              controller: _filterController,
+              onChanged: (value) => updateFilter(),
+              style: Theme.of(context).textTheme.bodyText2,
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: _filteredScripts.length,
+            itemExtent: defaultListItemHeight,
+            itemBuilder: (context, index) {
+              return _buildScript(_filteredScripts[index]);
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildScript(ScriptRef ref) {
-    final selectedColor = Theme.of(context).selectedRowColor;
-
     return Material(
-      color: ref == widget.selected ? selectedColor : null,
+      color: ref.id == widget.selected?.id
+          ? Theme.of(context).selectedRowColor
+          : null,
       child: InkWell(
         onTap: () => widget.onSelected(ref),
         child: Container(
           padding: const EdgeInsets.all(4.0),
           alignment: Alignment.centerLeft,
           child: Text(
-            '${ref?.uri?.split('/')?.last} (${ref?.uri})',
-            style: ref == widget.selected
+            ref.uri,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: ref.id == widget.selected?.id
                 ? TextStyle(color: Theme.of(context).textSelectionColor)
                 : null,
           ),
@@ -93,44 +113,27 @@ class ScriptPickerState extends State<ScriptPicker> {
     );
   }
 
-  bool get _isNotLoaded => _filtered == null || widget.scripts?.scripts == null;
+  bool get _isLoading => widget.scripts.isEmpty;
+
+  void _updateFiltered() {
+    final filterText = _filterController.text.trim().toLowerCase();
+    _filteredScripts = widget.scripts
+        .where((ref) => ref.uri.toLowerCase().contains(filterText))
+        .toList();
+  }
+}
+
+class ScriptCountBadge extends StatelessWidget {
+  const ScriptCountBadge({@required this.scripts});
+
+  final List<ScriptRef> scripts;
 
   @override
   Widget build(BuildContext context) {
-    if (_isNotLoaded) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final items = _filtered;
-    return Column(
-      children: [
-        TextField(
-          decoration: const InputDecoration(
-            labelText: 'Filter',
-            border: UnderlineInputBorder(),
-          ),
-          controller: filterController,
-          onChanged: updateFilter,
-          style: Theme.of(context).textTheme.bodyText2,
-        ),
-        Expanded(
-          child: densePadding(
-            Scrollbar(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: ListView.builder(
-                    itemCount: items.length,
-                    itemExtent: defaultListItemHeight,
-                    itemBuilder: (context, index) => _buildScript(items[index]),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+    return Badge(
+      child: Text(
+        '${nf.format(scripts.length)}',
+      ),
     );
   }
 }

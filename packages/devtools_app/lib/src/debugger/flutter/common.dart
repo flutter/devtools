@@ -31,11 +31,6 @@ Container debuggerSectionTitle(ThemeData theme, {String text, Widget child}) {
     padding: const EdgeInsets.only(left: defaultSpacing),
     alignment: Alignment.centerLeft,
     height: DebuggerScreen.debuggerPaneHeaderHeight,
-    child: child != null
-        ? child
-        : Text(
-            text,
-            style: theme.textTheme.subtitle2,
-          ),
+    child: child != null ? child : Text(text, style: theme.textTheme.subtitle2),
   );
 }

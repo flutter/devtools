@@ -69,13 +69,16 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     if (newController == controller) return;
     controller = newController;
 
+    // TODO(all): We need to be more precise about the changes we listen to.
+    // These coarse listeners are causing us to rebuild much more of the UI than
+    // we need to.
     addAutoDisposeListener(controller.currentScript, () {
       setState(() {
         script = controller.currentScript.value;
       });
     });
     addAutoDisposeListener(controller.currentStack);
-    addAutoDisposeListener(controller.scriptList);
+    addAutoDisposeListener(controller.sortedScripts);
     addAutoDisposeListener(controller.breakpoints);
 
     controller.getScripts();
@@ -83,10 +86,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   Future<void> _onScriptSelected(ScriptRef ref) async {
     if (ref == null) return;
+
     setState(() {
       loadingScript = ref;
       script = null;
     });
+
     await controller.selectScript(ref);
   }
 
@@ -118,10 +123,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
-      // TODO(https://github.com/flutter/devtools/issues/1648): Debug panes.
       children: [
         OutlinedBorder(child: debuggerPanes()),
-        // TODO(https://github.com/flutter/devtools/issues/1648): Debug controls.
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -166,22 +169,27 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       builder: (context, constraints) {
         return FlexSplitColumn(
           totalHeight: constraints.maxHeight,
-          initialFractions: const [0.25, 0.25, 0.25, 0.25],
+          initialFractions: const [0.20, 0.20, 0.20, 0.40],
           minSizes: const [0.0, 0.0, 0.0, 0.0],
           headers: [
             _debuggerPaneHeader(callStackTitle, needsTopBorder: false),
             _debuggerPaneHeader(variablesTitle),
             _debuggerPaneHeader(breakpointsTitle),
-            _debuggerPaneHeader(librariesTitle),
+            _debuggerPaneHeader(
+              librariesTitle,
+              rightChild: ScriptCountBadge(
+                scripts: controller.sortedScripts.value,
+              ),
+            ),
           ],
           children: [
             const Center(child: Text('TODO: call stack')),
             const Center(child: Text('TODO: variables')),
             BreakpointPicker(controller: controller),
             ScriptPicker(
-              scripts: controller.scriptList.value,
-              onSelected: _onScriptSelected,
+              scripts: controller.sortedScripts.value,
               selected: loadingScript,
+              onSelected: _onScriptSelected,
             ),
           ],
         );
@@ -192,6 +200,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   FlexSplitColumnHeader _debuggerPaneHeader(
     String title, {
     bool needsTopBorder = true,
+    Widget rightChild,
   }) {
     final theme = Theme.of(context);
 
@@ -207,12 +216,19 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           ),
           color: titleSolidBackgroundColor,
         ),
-        padding: const EdgeInsets.only(left: defaultSpacing),
+        padding: const EdgeInsets.only(left: defaultSpacing, right: 4.0),
         alignment: Alignment.centerLeft,
         height: DebuggerScreen.debuggerPaneHeaderHeight,
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.subtitle2,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.subtitle2,
+              ),
+            ),
+            if (rightChild != null) rightChild,
+          ],
         ),
       ),
     );
