@@ -12,13 +12,13 @@ import 'dart:async';
 import 'dart:convert';
 
 // TODO(jacobr): remove these dependencies on html_shim.
-import 'package:html_shim/html.dart' show window;
-import 'package:html_shim/js.dart' as js;
-import 'package:html_shim/js_util.dart' as js_util;
+import 'dart:html' show window;
+import 'dart:js' as js;
+import 'dart:js_util' as js_util;
 
 import 'package:vm_service/vm_service.dart';
 
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../debugger/html_debugger_screen.dart';
 import '../framework/html_framework.dart';
 import '../globals.dart';

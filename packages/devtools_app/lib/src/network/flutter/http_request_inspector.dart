@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../http_request_data.dart';
+import '../../http/http_request_data.dart';
 import 'http_request_inspector_views.dart';
 
 /// A [Widget] which displays information about an HTTP request.
@@ -51,10 +51,8 @@ class HttpRequestInspector extends StatelessWidget {
           Row(
             children: [
               Flexible(
-                child: Container(
-                  child: TabBar(
-                    tabs: tabs,
-                  ),
+                child: TabBar(
+                  tabs: tabs,
                 ),
               ),
             ],

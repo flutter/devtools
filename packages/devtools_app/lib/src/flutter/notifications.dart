@@ -8,14 +8,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'common_widgets.dart';
+import 'status_line.dart' as status_line;
+import 'theme.dart';
 
-const _notificationHeight = 160.0;
+const _notificationHeight = 175.0;
 final _notificationWidth = _notificationHeight * goldenRatio;
+
+/// Interface for pushing notifications in the app.
+///
+/// Use this interface in controllers that need to show notifications.
+///
+/// Using the interface instead of the [NotificationsState] implementation
+/// will allow you to write unit tests for the controller that consumes it
+/// instead of widget tests.
+abstract class NotificationService {
+  /// Pushes a notification [message].
+  void push(String message);
+}
 
 /// Manager for notifications in the app.
 ///
 /// Must be inside of an [Overlay].
-///
 class Notifications extends StatelessWidget {
   const Notifications({Key key, @required this.child}) : super(key: key);
 
@@ -36,9 +49,9 @@ class Notifications extends StatelessWidget {
   }
 
   static NotificationsState of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_InheritedNotifications>()
-        .data;
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<_InheritedNotifications>();
+    return provider?.data;
   }
 }
 
@@ -63,7 +76,8 @@ class _InheritedNotifications extends InheritedWidget {
   }
 }
 
-class NotificationsState extends State<_NotificationsProvider> {
+class NotificationsState extends State<_NotificationsProvider>
+    implements NotificationService {
   OverlayEntry _overlayEntry;
 
   final List<_Notification> _notifications = [];
@@ -91,6 +105,7 @@ class NotificationsState extends State<_NotificationsProvider> {
   }
 
   /// Pushes a notification [message].
+  @override
   void push(String message) {
     setState(() {
       _notifications.add(
@@ -115,15 +130,22 @@ class NotificationsState extends State<_NotificationsProvider> {
   Widget _buildOverlay(BuildContext context) {
     return Align(
       alignment: Alignment.bottomRight,
-      child: SizedBox(
-        width: _notificationWidth,
-        child: SingleChildScrollView(
-          reverse: true,
-          scrollDirection: Axis.vertical,
-          child: Column(
-            verticalDirection: VerticalDirection.down,
-            mainAxisSize: MainAxisSize.min,
-            children: _notifications,
+      child: Padding(
+        // Position the notifications in the lower right of the app window, and
+        // high enough up that we don't obscure the status line.
+        padding: const EdgeInsets.only(
+          right: defaultSpacing,
+          bottom: status_line.statusLineHeight + defaultSpacing,
+        ),
+        child: SizedBox(
+          width: _notificationWidth,
+          child: SingleChildScrollView(
+            reverse: true,
+            child: Column(
+              verticalDirection: VerticalDirection.down,
+              mainAxisSize: MainAxisSize.min,
+              children: _notifications,
+            ),
           ),
         ),
       ),
@@ -200,12 +222,9 @@ class _NotificationState extends State<_Notification>
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
-        return SizedBox(
-          height: _notificationHeight * curve.value,
-          child: Opacity(
-            opacity: curve.value,
-            child: child,
-          ),
+        return Opacity(
+          opacity: curve.value,
+          child: child,
         );
       },
       child: Padding(
@@ -222,7 +241,7 @@ class _NotificationState extends State<_Notification>
                 child: Text(
                   widget.message,
                   style: theme.textTheme.bodyText1,
-                  overflow: TextOverflow.ellipsis,
+                  overflow: TextOverflow.visible,
                   maxLines: 6,
                 ),
               ),

@@ -13,8 +13,10 @@ class Entry extends BaseEntry {
     return e;
   }
 
+  // ignore: unnecessary_getters_setters
   double get x => _x;
 
+  // ignore: unnecessary_getters_setters
   set x(double value) {
     _x = value;
   }

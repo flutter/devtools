@@ -81,6 +81,7 @@ class _InitializerState extends State<Initializer>
         _navigateToConnectPage();
       }),
     );
+
     if (widget.url != null) {
       _attemptUrlConnection();
     } else {

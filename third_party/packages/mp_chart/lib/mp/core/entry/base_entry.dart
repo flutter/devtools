@@ -16,20 +16,26 @@ abstract class BaseEntry {
     this._data = data;
   }
 
+  // ignore: unnecessary_getters_setters
   ui.Image get mIcon => _icon;
 
+  // ignore: unnecessary_getters_setters
   set mIcon(ui.Image value) {
     _icon = value;
   }
 
+  // ignore: unnecessary_getters_setters
   Object get mData => _data;
 
+  // ignore: unnecessary_getters_setters
   set mData(Object value) {
     _data = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get y => _y;
 
+  // ignore: unnecessary_getters_setters
   set y(double value) {
     _y = value;
   }

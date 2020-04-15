@@ -33,6 +33,7 @@ abstract class PieRadarController<P extends PieRadarChartPainter>
       double infoTextSize = 12,
       Color descTextColor,
       Color infoTextColor,
+      Color infoBgColor,
       String noDataText = "No chart data available.",
       XAxisSettingFunction xAxisSettingFunction,
       LegendSettingFunction legendSettingFunction,
@@ -55,6 +56,7 @@ abstract class PieRadarController<P extends PieRadarChartPainter>
             descTextSize: descTextSize,
             infoTextSize: infoTextSize,
             descTextColor: descTextColor,
+            infoBgColor: infoBgColor,
             infoTextColor: infoTextColor);
 
   @override

@@ -8,13 +8,19 @@ import 'package:flutter/rendering.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
-import '../http_request_data.dart';
+import '../../globals.dart';
+import '../../http/http_request_data.dart';
 import '../network_controller.dart';
 import 'http_request_inspector.dart';
 import 'network_model.dart';
 
 class NetworkScreen extends Screen {
-  const NetworkScreen() : super();
+  const NetworkScreen()
+      : super(
+          DevToolsScreenType.network,
+          title: 'Network',
+          icon: Icons.network_check,
+        );
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -26,15 +32,11 @@ class NetworkScreen extends Screen {
   static const recordingInstructionsKey = Key('Recording Instructions');
 
   @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Network',
-      icon: Icon(Icons.network_check),
-    );
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const NetworkScreenBody()
+        : const DisabledForWebAppMessage();
   }
-
-  @override
-  Widget build(BuildContext context) => const NetworkScreenBody();
 }
 
 class NetworkScreenBody extends StatefulWidget {
@@ -185,32 +187,30 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
       builder: (context, HttpRequestData data, widget) {
         return Expanded(
           child: (!isRecording && _dataTableSource.rowCount == 0)
-              ? Container(
-                  child: Center(
-                    child: recordingInfo(
-                      instructionsKey: NetworkScreen.recordingInstructionsKey,
-                      recording: isRecording,
-                      // TODO(kenz): create a processing notifier if necessary
-                      // for this data.
-                      processing: false,
-                      recordedObject: 'HTTP requests',
-                      isPause: true,
-                    ),
+              ? Center(
+                  child: recordingInfo(
+                    instructionsKey: NetworkScreen.recordingInstructionsKey,
+                    recording: isRecording,
+                    // TODO(kenz): create a processing notifier if necessary
+                    // for this data.
+                    processing: false,
+                    recordedObject: 'HTTP requests',
+                    isPause: true,
                   ),
                 )
               : Split(
-                  initialFirstFraction: 0.5,
+                  initialFractions: const [0.5, 0.5],
                   axis: Axis.horizontal,
-                  firstChild: (_dataTableSource.rowCount == 0)
-                      ? Container(
-                          alignment: Alignment.center,
-                          child: const CircularProgressIndicator(),
-                        )
-                      : _buildHttpRequestTable(),
-                  // Only show the data page when there's data to display.
-                  secondChild: HttpRequestInspector(
-                    data,
-                  ),
+                  children: [
+                    (_dataTableSource.rowCount == 0)
+                        ? Container(
+                            alignment: Alignment.center,
+                            child: const CircularProgressIndicator(),
+                          )
+                        : _buildHttpRequestTable(),
+                    // Only show the data page when there's data to display.
+                    HttpRequestInspector(data),
+                  ],
                 ),
         );
       },

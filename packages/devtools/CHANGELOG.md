@@ -1,12 +1,46 @@
-## 0.1.16 2020-02-12
-* Add zoomable timeline grid and timestamps to flame chart (#1624)
-* [Layout Explorer] Use registerServiceExtension method instead of evaling directly (#1531)
-* Factor zoom level into flame chart node selection logic (#1623)
-* Update to support devtools_server (#1622)
-* Flame chart zoom and navigation with WASD keys (#1611)
-* Updated to use package:devtools_shared (#1620)
-* Initial devtools_shared package (#1619)
-* Remove --trace-systrace flag from MacOs and Linux configs (#1614)
+## 0.2.4
+* Update package:vm_service dependency to ^4.0.0
+
+## 0.2.3 2020-03-03
+* Disable Q1 DevTools survey - postponing until Q2 [#1695](https://github.com/flutter/devtools/pull/1695)
+* Fix async timeline event rendering bug [#1690](https://github.com/flutter/devtools/pull/1690)
+* Update package:vm_service dependency to ^3.0.0 [#1696](https://github.com/flutter/devtools/pull/1696)
+
+## 0.2.2 2020-02-28
+* Remove cpu profiling timeout [#1683]((https://github.com/flutter/devtools/pull/1683)
+* Prep for Q1 DevTools survey [#1574](https://github.com/flutter/devtools/pull/1574)
+* Use ExtentDelegateListView for flame chart rows [#1676](https://github.com/flutter/devtools/pull/1676)
+* Make the layout explorer more null safe [#1681](https://github.com/flutter/devtools/pull/1681)
+* Store survey data by quarter tags [#1660](https://github.com/flutter/devtools/pull/1660)
+* Don't check for debugDidSendFirstFrameEvent when adding service extensions for Dart VM apps [#1670](https://github.com/flutter/devtools/pull/1670)
+* Restructure HTTP code for shared use with Timeline and check http logging availability [#1668](https://github.com/flutter/devtools/pull/1668)
+* Debugger file picker [#1652](https://github.com/flutter/devtools/pull/1652)
+* Port CPU bottom up table to Flutter [#1659](https://github.com/flutter/devtools/pull/1659)
+* Add extent_delegate_list supporting fast lists where each element has a known custom extent [#1646](https://github.com/flutter/devtools/pull/1646)
+* Workaround VM Regression where first heap sample's rss value is null [#1662](https://github.com/flutter/devtools/pull/1662)
+* Remove the dependency on package:recase [#1656](https://github.com/flutter/devtools/pull/1656)
+* Polish SafeAccess extension methods to use getters and support Iterable [#1647](https://github.com/flutter/devtools/pull/1647)
+* Updated mp_chart to 0.1.7 [#1654](https://github.com/flutter/devtools/pull/1654)
+* Introduce a view for showing the source of a script in Flutter with the monospaced font [#1649](https://github.com/flutter/devtools/pull/1649)
+* Load imported timeline files [#1644](https://github.com/flutter/devtools/pull/1644)
+* Introduce an interface for the notification service for use in controller logic [#1645](https://github.com/flutter/devtools/pull/1645)
+* Fix null error in timeline page [#1641](https://github.com/flutter/devtools/pull/1641)
+* Stop disposing Notifications and Controllers from import_export [#1640](https://github.com/flutter/devtools/pull/1640)
+* Remove dependency on package:flutter_widgets [#1636](https://github.com/flutter/devtools/pull/1636)
+* Created CLI to write Flutter application memory profile statistics to a JSON file [#1628](https://github.com/flutter/devtools/pull/1628)
+* Improve the error reporting on connection issues [#1635](https://github.com/flutter/devtools/pull/1635)
+* Add import / export functionality and support drag-and-drop [#1631](https://github.com/flutter/devtools/pull/1631)
+* Fix timeline bug throwing error for empty recording [#1630](https://github.com/flutter/devtools/pull/1630)
+* Make the rollback help text consistent with the other commands [#1634](https://github.com/flutter/devtools/pull/1634)
+* Introduce a rollback command that pulls an old devtools build and preps it for release [#1617](https://github.com/flutter/devtools/pull/1617)
+* Add zoomable timeline grid and timestamps to flame chart [#1624](https://github.com/flutter/devtools/pull/1624)
+* Use registerServiceExtension method instead of eval directly in layout explorer [#1531](https://github.com/flutter/devtools/pull/1531)
+* Factor zoom level into flame chart node selection logic [#1623](https://github.com/flutter/devtools/pull/1623)
+* Update to support devtools_server [#1622](https://github.com/flutter/devtools/pull/1622)
+* Flame chart zoom and navigation with WASD keys [#1611](https://github.com/flutter/devtools/pull/1611) 
+* Updated to use package:devtools_shared [#1620](https://github.com/flutter/devtools/pull/1620))
+* Initial devtools_shared package [#1619](https://github.com/flutter/devtools/pull/1619)
+* Remove --trace-systrace flag from MacOs and Linux configs [#1614](https://github.com/flutter/devtools/pull/1614)
 
 ## 0.1.15 2020-02-07
 * Fix a stack overflow error that was caused by a change in Dart's RTI implementation [#1615](https://github.com/flutter/devtools/pull/1615).

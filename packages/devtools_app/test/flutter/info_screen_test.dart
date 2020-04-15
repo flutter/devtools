@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/info/flutter/info_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -14,20 +15,27 @@ import 'wrappers.dart';
 
 void main() {
   InfoScreen screen;
+  FakeServiceManager fakeServiceManager;
   group('Info Screen', () {
     setUp(() {
-      setGlobal(
-        ServiceConnectionManager,
-        FakeServiceManager(useFakeService: true),
-      );
+      fakeServiceManager = FakeServiceManager(useFakeService: true);
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
       mockIsFlutterApp(serviceManager.connectedApp);
-
       screen = const InfoScreen();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
       expect(find.text('Info'), findsOneWidget);
+    });
+
+    testWidgets('builds disabled message when disabled for web app',
+        (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(true);
+      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      expect(find.byType(InfoScreenBody), findsNothing);
+      expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
     });
 
     testWidgets('builds with flags data', (WidgetTester tester) async {
@@ -40,6 +48,7 @@ void main() {
     testWidgets('builds with no data', (WidgetTester tester) async {
       setGlobal(ServiceConnectionManager, FakeServiceManager());
       when(serviceManager.service.getFlagList()).thenAnswer((_) => null);
+      when(serviceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       mockIsFlutterApp(serviceManager.connectedApp);
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InfoScreenBody), findsOneWidget);

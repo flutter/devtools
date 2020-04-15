@@ -6,7 +6,7 @@ import 'package:mp_chart/mp/core/render/line_scatter_candle_radar_renderer.dart'
 import 'package:mp_chart/mp/core/view_port.dart';
 
 abstract class LineRadarRenderer extends LineScatterCandleRadarRenderer {
-  LineRadarRenderer(ChartAnimator animator, ViewPortHandler viewPortHandler)
+  LineRadarRenderer(Animator animator, ViewPortHandler viewPortHandler)
       : super(animator, viewPortHandler);
 
   /// Draws the provided path in filled mode with the provided drawable.

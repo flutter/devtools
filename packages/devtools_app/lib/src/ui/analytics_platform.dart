@@ -6,11 +6,11 @@
 library analytics_platform;
 
 import 'dart:async';
-import 'package:html_shim/html.dart' as html;
+import 'dart:html' as html;
 
 import 'package:js/js.dart';
 
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../ui/analytics.dart' as ga;
 
@@ -26,7 +26,7 @@ external void jsHookupListenerForGA();
 Future<bool> get isAnalyticsAllowed async => await ga.isEnabled;
 
 void setAllowAnalytics() {
-  ga.setEnabled(true);
+  ga.setEnabled();
 }
 
 void setDontAllowAnalytics() {

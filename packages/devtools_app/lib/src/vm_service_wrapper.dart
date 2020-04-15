@@ -25,8 +25,12 @@ class VmServiceWrapper implements VmService {
     DisposeHandler disposeHandler,
     this.trackFutures = false,
   }) {
-    _vmService = VmService(inStream, writeMessage,
-        log: log, disposeHandler: disposeHandler);
+    _vmService = VmService(
+      inStream,
+      writeMessage,
+      log: log,
+      disposeHandler: disposeHandler,
+    );
   }
 
   VmService _vmService;
@@ -147,7 +151,7 @@ class VmServiceWrapper implements VmService {
   void dispose() => _vmService.dispose();
 
   @override
-  Future evaluate(
+  Future<Response> evaluate(
     String isolateId,
     String targetId,
     String expression, {
@@ -166,7 +170,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future evaluateInFrame(
+  Future<Response> evaluateInFrame(
     String isolateId,
     int frameIndex,
     String expression, {
@@ -338,24 +342,24 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future getIsolate(String isolateId) {
+  Future<Isolate> getIsolate(String isolateId) {
     return _trackFuture('getIsolate', _vmService.getIsolate(isolateId));
   }
 
   @override
-  Future getIsolateGroup(String isolateGroupId) {
+  Future<IsolateGroup> getIsolateGroup(String isolateGroupId) {
     return _trackFuture(
         'getIsolateGroup', _vmService.getIsolateGroup(isolateGroupId));
   }
 
   @override
-  Future getIsolateGroupMemoryUsage(String isolateGroupId) {
+  Future<MemoryUsage> getIsolateGroupMemoryUsage(String isolateGroupId) {
     return _trackFuture('getIsolateGroupMemoryUsage',
         _vmService.getIsolateGroupMemoryUsage(isolateGroupId));
   }
 
   @override
-  Future<Object> getObject(
+  Future<Obj> getObject(
     String isolateId,
     String objectId, {
     int offset,
@@ -419,14 +423,27 @@ class VmServiceWrapper implements VmService {
     }
   }
 
-  Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
-      String isolateId) async {
+  // TODO(kenz): move this method to
+  // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
+  Future<bool> isHttpTimelineLoggingAvailable(String isolateId) async {
+    final Isolate isolate = await getIsolate(isolateId);
+    return isolate.extensionRPCs
+        .contains('ext.dart.io.setHttpEnableTimelineLogging');
+  }
+
+  Future<HttpTimelineLoggingState> getHttpEnableTimelineLogging(
+    String isolateId,
+  ) async {
+    assert(await isHttpTimelineLoggingAvailable(isolateId));
     return _trackFuture('getHttpEnableTimelineLogging',
         _vmService.getHttpEnableTimelineLogging(isolateId));
   }
 
   Future<Success> setHttpEnableTimelineLogging(
-      String isolateId, bool enable) async {
+    String isolateId,
+    bool enable,
+  ) async {
+    assert(await isHttpTimelineLoggingAvailable(isolateId));
     return _trackFuture('setHttpEnableTimelineLogging',
         _vmService.setHttpEnableTimelineLogging(isolateId, enable));
   }
@@ -454,11 +471,11 @@ class VmServiceWrapper implements VmService {
       _trackFuture('getVersion', _vmService.getVersion());
 
   @override
-  Future<dynamic> getMemoryUsage(String isolateId) =>
+  Future<MemoryUsage> getMemoryUsage(String isolateId) =>
       _trackFuture('getMemoryUsage', _vmService.getMemoryUsage(isolateId));
 
   @override
-  Future invoke(
+  Future<Response> invoke(
     String isolateId,
     String targetId,
     String selector,
@@ -603,7 +620,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<dynamic> setFlag(String name, String value) {
+  Future<Response> setFlag(String name, String value) {
     return _trackFuture('setFlag', _vmService.setFlag(name, value));
   }
 
@@ -667,6 +684,61 @@ class VmServiceWrapper implements VmService {
     }
   }
 
+  @override
+  Future<InboundReferences> getInboundReferences(
+    String isolateId,
+    String targetId,
+    int limit,
+  ) async {
+    if (await isProtocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 3, minor: 25))) {
+      return _trackFuture(
+        'getInboundReferences',
+        _vmService.getInboundReferences(isolateId, targetId, limit),
+      );
+    } else {
+      return _trackFuture(
+        'getInboundReferences',
+        _vmService.callMethod(
+          '_getInboundReferences',
+          isolateId: isolateId,
+          args: {'targetId': targetId, 'limit': limit},
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<RetainingPath> getRetainingPath(
+          String isolateId, String targetId, int limit) =>
+      _trackFuture('getRetainingPath',
+          _vmService.getRetainingPath(isolateId, targetId, limit));
+
+  @override
+  Future<ClientName> getClientName() {
+    return _trackFuture('getClientName', _vmService.getClientName());
+  }
+
+  @override
+  Future<Success> requirePermissionToResume({
+    bool onPauseStart,
+    bool onPauseReload,
+    bool onPauseExit,
+  }) {
+    return _trackFuture(
+        'requirePermissionToResume',
+        _vmService.requirePermissionToResume(
+          onPauseStart: onPauseStart,
+          onPauseReload: onPauseReload,
+          onPauseExit: onPauseExit,
+        ));
+  }
+
+  @override
+  Future<Success> setClientName(String name) {
+    return _trackFuture('setClientName', _vmService.setClientName(name));
+  }
+
   /// Testing only method to indicate that we don't really need to await all
   /// currently pending futures.
   ///
@@ -692,6 +764,39 @@ class VmServiceWrapper implements VmService {
       major: _protocolVersion.major,
       minor: _protocolVersion.minor,
     ).isSupported(supportedVersion: supportedVersion);
+  }
+
+  /// Retrieves the full string value of a [stringRef].
+  ///
+  /// The string value stored with the [stringRef] is returned unless the value
+  /// is truncated in which an extra getObject call is issued to return the
+  /// value. If the [stringRef] has expired so the full string is unavailable,
+  /// [onUnavailable] is called to return how the truncated value should be
+  /// displayed. If [onUnavailable] is not specified, an exception is thrown
+  /// if the full value cannot be retrieved.
+  Future<String> retrieveFullStringValue(
+    String isolateId,
+    InstanceRef stringRef, {
+    String onUnavailable(String truncatedValue),
+  }) async {
+    if (stringRef == null) return null;
+    if (stringRef.valueAsStringIsTruncated != true)
+      return stringRef.valueAsString;
+
+    final result = await getObject(
+      isolateId,
+      stringRef.id,
+      offset: 0,
+      count: stringRef.length,
+    );
+    if (result is Instance) {
+      return result.valueAsString;
+    } else if (onUnavailable != null) {
+      return onUnavailable(stringRef.valueAsString);
+    } else {
+      throw Exception(
+          'The full string for "{stringRef.valueAsString}..." is unavailable');
+    }
   }
 
   /// Gets the name of the service stream for the connected VM service. Pre-v3.22
@@ -726,36 +831,6 @@ class VmServiceWrapper implements VmService {
     );
     return future;
   }
-
-  @override
-  Future getInboundReferences(
-    String isolateId,
-    String targetId,
-    int limit,
-  ) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 25))) {
-      return _trackFuture(
-        'getInboundReferences',
-        _vmService.getInboundReferences(isolateId, targetId, limit),
-      );
-    } else {
-      return _trackFuture(
-        'getInboundReferences',
-        _vmService.callMethod(
-          '_getInboundReferences',
-          isolateId: isolateId,
-          args: {'targetId': targetId, 'limit': limit},
-        ),
-      );
-    }
-  }
-
-  @override
-  Future<RetainingPath> getRetainingPath(
-          String isolateId, String targetId, int limit) =>
-      _trackFuture('getRetainingPath',
-          _vmService.getRetainingPath(isolateId, targetId, limit));
 }
 
 class TrackedFuture<T> {

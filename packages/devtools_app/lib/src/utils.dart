@@ -70,6 +70,16 @@ String msText(
       '${includeUnit ? ' ms' : ''}';
 }
 
+/// Render the given [Duration] to text using either seconds or milliseconds as
+/// the units, depending on the value of the duration.
+String renderDuration(Duration duration) {
+  if (duration.inMilliseconds < 1000) {
+    return '${nf.format(duration.inMilliseconds)}ms';
+  } else {
+    return '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
+  }
+}
+
 T nullSafeMin<T extends num>(T a, T b) {
   if (a == null || b == null) {
     return a ?? b;
@@ -167,6 +177,8 @@ String longestFittingSubstring(
 bool isLetter(int codeUnit) =>
     (codeUnit >= 65 && codeUnit <= 90) || (codeUnit >= 97 && codeUnit <= 122);
 
+String pluralize(String word, int count) => count == 1 ? word : '${word}s';
+
 /// Returns a simplified version of a StackFrame name.
 ///
 /// Given an input such as
@@ -186,6 +198,31 @@ String getSimpleStackFrameName(String name) {
     return newName;
   }
   return newName.split('&').last;
+}
+
+/// Return a Stream that fires events whenever any of the three given parameter
+/// streams fire.
+Stream combineStreams(Stream a, Stream b, Stream c) {
+  StreamController controller;
+
+  StreamSubscription asub;
+  StreamSubscription bsub;
+  StreamSubscription csub;
+
+  controller = StreamController(
+    onListen: () {
+      asub = a.listen(controller.add);
+      bsub = b.listen(controller.add);
+      csub = c.listen(controller.add);
+    },
+    onCancel: () {
+      asub?.cancel();
+      bsub?.cancel();
+      csub?.cancel();
+    },
+  );
+
+  return controller.stream;
 }
 
 class Property<T> {
@@ -502,6 +539,7 @@ class Reporter implements Listenable {
 /// in cases where N is larger.
 class ValueReporter<T> extends Reporter implements ValueListenable<T> {
   ValueReporter(this._value);
+
   @override
   T get value => _value;
 
@@ -533,20 +571,73 @@ class ImmediateValueNotifier<T> extends ValueNotifier<T> {
   }
 }
 
-extension SafeAccess<T> on List<T> {
-  T safeFirst() {
-    return safeGet(0);
+extension SafeAccessList<T> on List<T> {
+  T safeGet(int index) => index < 0 || index >= length ? null : this[index];
+}
+
+extension SafeAccess<T> on Iterable<T> {
+  T get safeFirst => isNotEmpty ? first : null;
+
+  T get safeLast => isNotEmpty ? last : null;
+}
+
+class Range {
+  const Range(this.begin, this.end) : assert(begin <= end);
+
+  final double begin;
+  final double end;
+
+  double get size => end - begin;
+
+  @override
+  String toString() => 'Range($begin, $end)';
+
+  @override
+  bool operator ==(other) {
+    return begin == other.begin && end == other.end;
   }
 
-  T safeLast() {
-    return safeGet(length - 1);
-  }
+  @override
+  int get hashCode => hashValues(begin, end);
+}
 
-  T safeGet(int index) {
-    if (index < 0 || index >= length) {
-      return null;
-    } else {
-      return this[index];
+enum SortDirection {
+  ascending,
+  descending,
+}
+
+extension SortDirectionExtension on SortDirection {
+  SortDirection reverse() {
+    return this == SortDirection.ascending
+        ? SortDirection.descending
+        : SortDirection.ascending;
+  }
+}
+
+/// A small double value, used to ensure that comparisons between double are
+/// valid.
+const defaultEpsilon = 1 / 1000;
+
+/// Have a quiet period after a callback to ensure that rapid invocations of a
+/// callback only result in one call.
+class CallbackDwell {
+  CallbackDwell(
+    this.callback, {
+    this.dwell = const Duration(milliseconds: 250),
+  });
+
+  final VoidCallback callback;
+  final Duration dwell;
+
+  Timer _timer;
+
+  void invoke() {
+    if (_timer == null) {
+      _timer = Timer(dwell, () {
+        _timer = null;
+      });
+
+      callback();
     }
   }
 }

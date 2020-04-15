@@ -14,12 +14,10 @@ void main() {
 
       expect(printMb(10 * MB, 0), '10');
       expect(printMb(10 * MB), '10.0');
-      expect(printMb(10 * MB, 1), '10.0');
       expect(printMb(10 * MB, 2), '10.00');
 
       expect(printMb(1000 * MB, 0), '1000');
       expect(printMb(1000 * MB), '1000.0');
-      expect(printMb(1000 * MB, 1), '1000.0');
       expect(printMb(1000 * MB, 2), '1000.00');
     });
 
@@ -298,6 +296,20 @@ void main() {
       expect(getSimpleStackFrameName(name), equals(name));
     });
 
+    group('pluralize', () {
+      test('zero', () {
+        expect(pluralize('cat', 0), 'cats');
+      });
+
+      test('one', () {
+        expect(pluralize('cat', 1), 'cat');
+      });
+
+      test('many', () {
+        expect(pluralize('cat', 2), 'cats');
+      });
+    });
+
     group('safeDivide', () {
       test('divides a finite result correctly', () {
         expect(safeDivide(2.0, 1.0), 2.0);
@@ -417,25 +429,29 @@ void main() {
 
     group('SafeAccess', () {
       test('safeFirst', () {
-        final list = [];
-        expect(list.safeFirst(), isNull);
+        final list = <int>[];
+        final Iterable<int> iterable = list;
+        expect(list.safeFirst, isNull);
+        expect(iterable.safeFirst, isNull);
         list.addAll([1, 2, 3]);
-        expect(list.safeFirst(), equals(1));
+        expect(list.safeFirst, equals(1));
+        expect(iterable.safeFirst, equals(1));
         list.insert(0, null);
-        expect(list.safeFirst(), isNull);
+        expect(list.safeFirst, isNull);
+        expect(iterable.safeFirst, isNull);
       });
 
       test('safeLast', () {
-        final list = [];
-        expect(list.safeLast(), isNull);
+        final list = <int>[];
+        expect(list.safeLast, isNull);
         list.addAll([1, 2, 3]);
-        expect(list.safeLast(), equals(3));
+        expect(list.safeLast, equals(3));
         list.add(null);
-        expect(list.safeLast(), isNull);
+        expect(list.safeLast, isNull);
       });
 
       test('safeGet', () {
-        final list = [];
+        final list = <int>[];
         expect(list.safeGet(0), isNull);
         list.addAll([1, 2]);
         expect(list.safeGet(0), equals(1));

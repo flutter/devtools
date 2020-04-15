@@ -22,10 +22,12 @@ class DebuggerState {
   final Map<String, Script> _scriptCache = <String, Script>{};
 
   final _isPaused = ValueNotifier<bool>(false);
+
   ValueListenable<bool> get isPaused => _isPaused;
 
   final _hasFrames = ValueNotifier<bool>(false);
   ValueNotifier<bool> _supportsStepping;
+
   ValueListenable<bool> get supportsStepping {
     return _supportsStepping ??= () {
       final notifier = ValueNotifier<bool>(_isPaused.value && _hasFrames.value);
@@ -42,9 +44,11 @@ class DebuggerState {
   Event lastEvent;
 
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
+
   ValueListenable<List<Breakpoint>> get breakpoints => _breakpoints;
 
   final _exceptionPauseMode = ValueNotifier<String>(null);
+
   ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
 
   InstanceRef _reportedException;
@@ -84,11 +88,11 @@ class DebuggerState {
     }
   }
 
-  Future<Success> pause() => _service.pause(isolateRef.id);
+  Future pause() => _service.pause(isolateRef.id);
 
-  Future<Success> resume() => _service.resume(isolateRef.id);
+  Future resume() => _service.resume(isolateRef.id);
 
-  Future<Success> stepOver() {
+  Future stepOver() {
     ga.select(ga.debugger, ga.stepOver);
 
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
@@ -99,13 +103,13 @@ class DebuggerState {
             : StepOption.kOver);
   }
 
-  Future<Success> stepIn() {
+  Future stepIn() {
     ga.select(ga.debugger, ga.stepIn);
 
     return _service.resume(isolateRef.id, step: StepOption.kInto);
   }
 
-  Future<Success> stepOut() {
+  Future stepOut() {
     ga.select(ga.debugger, ga.stepOut);
 
     return _service.resume(isolateRef.id, step: StepOption.kOut);
@@ -118,11 +122,11 @@ class DebuggerState {
     });
   }
 
-  Future<void> addBreakpoint(String scriptId, int line) {
+  Future addBreakpoint(String scriptId, int line) {
     return _service.addBreakpoint(isolateRef.id, scriptId, line);
   }
 
-  Future<void> addBreakpointByPathFragment(String path, int line) async {
+  Future addBreakpointByPathFragment(String path, int line) async {
     final ScriptRef ref =
         scripts.firstWhere((ref) => ref.uri.endsWith(path), orElse: () => null);
     if (ref != null) {
@@ -130,16 +134,18 @@ class DebuggerState {
     }
   }
 
-  Future<void> removeBreakpoint(Breakpoint breakpoint) {
+  Future removeBreakpoint(Breakpoint breakpoint) {
     return _service.removeBreakpoint(isolateRef.id, breakpoint.id);
   }
 
-  Future<void> setExceptionPauseMode(String mode) {
+  Future setExceptionPauseMode(String mode) {
     return _service.setExceptionPauseMode(isolateRef.id, mode);
   }
 
-  Future<Stack> getStack() {
-    return _service.getStack(isolateRef.id);
+  Future<Stack> getStack() async {
+    final stack = await _service.getStack(isolateRef.id);
+    if (stack is Sentinel) return null;
+    return stack;
   }
 
   InstanceRef get reportedException => _reportedException;

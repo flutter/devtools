@@ -1,31 +1,130 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mp_chart/mp/core/common_interfaces.dart';
 
-class ChartAnimator {
-  static const int REFRESH_RATE = 16;
-  static const double MIN = 0.0;
-  static const double MAX = 1.0;
+const double MIN = 0.0;
+const double MAX = 1.0;
 
+abstract class Animator {
   /// object that is updated upon animation update
-  AnimatorUpdateListener _listener;
+  AnimatorUpdateListener listener;
 
   /// The phase of drawn values on the y-axis. 0 - 1
-  double _phaseY = MAX;
+  double phaseY = MAX;
 
   /// The phase of drawn values on the x-axis. 0 - 1
-  double _phaseX = MAX;
+  double phaseX = MAX;
 
-  double _angle;
+  double angle;
+
+  Animator(this.listener);
+
+  void reset();
+
+  void spin(int durationMillis, double fromAngle, double toAngle,
+      EasingFunction easing);
+
+  /// Animates values along the X axis, in a linear fashion.
+  ///
+  /// @param durationMillis animation duration
+  void animateX1(int durationMillis) {
+    animateX2(durationMillis, Easing.Linear);
+  }
+
+  /// Animates values along the X axis.
+  ///
+  /// @param durationMillis animation duration
+  /// @param easing EasingFunction
+  void animateX2(int durationMillis, EasingFunction easing);
+
+  /// Animates values along both the X and Y axes, in a linear fashion.
+  ///
+  /// @param durationMillisX animation duration along the X axis
+  /// @param durationMillisY animation duration along the Y axis
+  void animateXY1(int durationMillisX, int durationMillisY) {
+    animateXY3(durationMillisX, durationMillisY, Easing.Linear, Easing.Linear);
+  }
+
+  /// Animates values along both the X and Y axes.
+  ///
+  /// @param durationMillisX animation duration along the X axis
+  /// @param durationMillisY animation duration along the Y axis
+  /// @param easing EasingFunction for both axes
+  void animateXY2(
+      int durationMillisX, int durationMillisY, EasingFunction easing);
+
+  /// Animates values along both the X and Y axes.
+  ///
+  /// @param durationMillisX animation duration along the X axis
+  /// @param durationMillisY animation duration along the Y axis
+  /// @param easingX EasingFunction for the X axis
+  /// @param easingY EasingFunction for the Y axis
+  void animateXY3(int durationMillisX, int durationMillisY,
+      EasingFunction easingX, EasingFunction easingY);
+
+  /// Animates values along the Y axis, in a linear fashion.
+  ///
+  /// @param durationMillis animation duration
+  void animateY1(int durationMillis) {
+    animateY2(durationMillis, Easing.Linear);
+  }
+
+  /// Animates values along the Y axis.
+  ///
+  /// @param durationMillis animation duration
+  /// @param easing EasingFunction
+  void animateY2(int durationMillis, EasingFunction easing);
+
+  /// Gets the Y axis phase of the animation.
+  ///
+  /// @return double value of {@link #phaseY}
+  double getPhaseY() {
+    return phaseY;
+  }
+
+  /// Sets the Y axis phase of the animation.
+  ///
+  /// @param phase double value between 0 - 1
+  void setPhaseY(double phase) {
+    if (phase > MAX) {
+      phase = MAX;
+    } else if (phase < MIN) {
+      phase = MIN;
+    }
+    phaseY = phase;
+  }
+
+  /// Gets the X axis phase of the animation.
+  ///
+  /// @return double value of {@link #phaseX}
+  double getPhaseX() {
+    return phaseX;
+  }
+
+  /// Sets the X axis phase of the animation.
+  ///
+  /// @param phase double value between 0 - 1
+  void setPhaseX(double phase) {
+    if (phase > MAX) {
+      phase = MAX;
+    } else if (phase < MIN) {
+      phase = MIN;
+    }
+    phaseX = phase;
+  }
+}
+
+class ChartAnimator extends Animator {
+  static const int REFRESH_RATE = 16;
 
   Timer _countdownTimer;
 
   bool _isShowed = false;
 
-  ChartAnimator(AnimatorUpdateListener listener) {
-    _listener = listener;
-  }
+  ChartAnimator(AnimatorUpdateListener listener) : super(listener);
 
   void reset() {
     _isShowed = false;
@@ -44,36 +143,26 @@ class ChartAnimator {
     reset();
     _isShowed = true;
     final double totalTime = durationMillis.toDouble();
-    _angle = fromAngle;
+    angle = fromAngle;
     _countdownTimer =
         Timer.periodic(Duration(milliseconds: REFRESH_RATE), (timer) {
       if (durationMillis < 0) {
-        _angle = toAngle;
+        angle = toAngle;
         _countdownTimer?.cancel();
         _countdownTimer = null;
       } else {
-        _angle += toAngle *
-            (1.0 - easing.getInterpolation(durationMillis / totalTime));
-        if (_angle >= toAngle) {
-          _angle = toAngle;
+        angle = fromAngle +
+            (toAngle - fromAngle) *
+                (1.0 - easing.getInterpolation(durationMillis / totalTime));
+        if (angle >= toAngle) {
+          angle = toAngle;
         }
         durationMillis -= REFRESH_RATE;
       }
-      _listener?.onRotateUpdate(_angle);
+      listener?.onRotateUpdate(angle);
     });
   }
 
-  /// Animates values along the X axis, in a linear fashion.
-  ///
-  /// @param durationMillis animation duration
-  void animateX1(int durationMillis) {
-    animateX2(durationMillis, Easing.Linear);
-  }
-
-  /// Animates values along the X axis.
-  ///
-  /// @param durationMillis animation duration
-  /// @param easing EasingFunction
   void animateX2(int durationMillis, EasingFunction easing) {
     if (_isShowed || _countdownTimer != null || durationMillis < 0) {
       return;
@@ -81,37 +170,24 @@ class ChartAnimator {
     reset();
     _isShowed = true;
     final double totalTime = durationMillis.toDouble();
-    _phaseX = MIN;
+    phaseX = MIN;
     _countdownTimer =
         Timer.periodic(Duration(milliseconds: REFRESH_RATE), (timer) {
       if (durationMillis < 0) {
-        _phaseX = MAX;
+        phaseX = MAX;
         _countdownTimer?.cancel();
         _countdownTimer = null;
       } else {
-        _phaseX = MAX - easing.getInterpolation(durationMillis / totalTime);
-        if (_phaseX >= MAX) {
-          _phaseX = MAX;
+        phaseX = MAX - easing.getInterpolation(durationMillis / totalTime);
+        if (phaseX >= MAX) {
+          phaseX = MAX;
         }
         durationMillis -= REFRESH_RATE;
       }
-      _listener?.onAnimationUpdate(_phaseX, _phaseY);
+      listener?.onAnimationUpdate(phaseX, phaseY);
     });
   }
 
-  /// Animates values along both the X and Y axes, in a linear fashion.
-  ///
-  /// @param durationMillisX animation duration along the X axis
-  /// @param durationMillisY animation duration along the Y axis
-  void animateXY1(int durationMillisX, int durationMillisY) {
-    animateXY3(durationMillisX, durationMillisY, Easing.Linear, Easing.Linear);
-  }
-
-  /// Animates values along both the X and Y axes.
-  ///
-  /// @param durationMillisX animation duration along the X axis
-  /// @param durationMillisY animation duration along the Y axis
-  /// @param easing EasingFunction for both axes
   void animateXY2(
       int durationMillisX, int durationMillisY, EasingFunction easing) {
     if (_isShowed ||
@@ -124,39 +200,33 @@ class ChartAnimator {
     _isShowed = true;
     final double totalTimeX = durationMillisX.toDouble();
     final double totalTimeY = durationMillisY.toDouble();
-    _phaseX = MIN;
-    _phaseY = MIN;
+    phaseX = MIN;
+    phaseY = MIN;
     _countdownTimer =
         Timer.periodic(Duration(milliseconds: REFRESH_RATE), (timer) {
       if (durationMillisX < 0 && durationMillisY < 0) {
-        _phaseX = MAX;
-        _phaseY = MAX;
+        phaseX = MAX;
+        phaseY = MAX;
         _countdownTimer?.cancel();
         _countdownTimer = null;
       } else {
-        _phaseX = MAX - easing.getInterpolation(durationMillisX / totalTimeX);
-        if (_phaseX >= MAX) {
-          _phaseX = MAX;
+        phaseX = MAX - easing.getInterpolation(durationMillisX / totalTimeX);
+        if (phaseX >= MAX) {
+          phaseX = MAX;
         }
 
-        _phaseY = MAX - easing.getInterpolation(durationMillisY / totalTimeY);
-        if (_phaseY >= MAX) {
-          _phaseY = MAX;
+        phaseY = MAX - easing.getInterpolation(durationMillisY / totalTimeY);
+        if (phaseY >= MAX) {
+          phaseY = MAX;
         }
 
         durationMillisX -= REFRESH_RATE;
         durationMillisY -= REFRESH_RATE;
       }
-      _listener?.onAnimationUpdate(_phaseX, _phaseY);
+      listener?.onAnimationUpdate(phaseX, phaseY);
     });
   }
 
-  /// Animates values along both the X and Y axes.
-  ///
-  /// @param durationMillisX animation duration along the X axis
-  /// @param durationMillisY animation duration along the Y axis
-  /// @param easingX EasingFunction for the X axis
-  /// @param easingY EasingFunction for the Y axis
   void animateXY3(int durationMillisX, int durationMillisY,
       EasingFunction easingX, EasingFunction easingY) {
     if (_isShowed ||
@@ -169,44 +239,33 @@ class ChartAnimator {
     _isShowed = true;
     final double totalTimeX = durationMillisX.toDouble();
     final double totalTimeY = durationMillisY.toDouble();
-    _phaseX = MIN;
-    _phaseY = MIN;
+    phaseX = MIN;
+    phaseY = MIN;
     _countdownTimer =
         Timer.periodic(Duration(milliseconds: REFRESH_RATE), (timer) {
       if (durationMillisX < 0 && durationMillisY < 0) {
-        _phaseX = MAX;
-        _phaseY = MAX;
+        phaseX = MAX;
+        phaseY = MAX;
         _countdownTimer?.cancel();
         _countdownTimer = null;
       } else {
-        _phaseX = MAX - easingX.getInterpolation(durationMillisX / totalTimeX);
-        if (_phaseX >= MAX) {
-          _phaseX = MAX;
+        phaseX = MAX - easingX.getInterpolation(durationMillisX / totalTimeX);
+        if (phaseX >= MAX) {
+          phaseX = MAX;
         }
 
-        _phaseY = MAX - easingY.getInterpolation(durationMillisY / totalTimeY);
-        if (_phaseY >= MAX) {
-          _phaseY = MAX;
+        phaseY = MAX - easingY.getInterpolation(durationMillisY / totalTimeY);
+        if (phaseY >= MAX) {
+          phaseY = MAX;
         }
 
         durationMillisX -= REFRESH_RATE;
         durationMillisY -= REFRESH_RATE;
       }
-      _listener?.onAnimationUpdate(_phaseX, _phaseY);
+      listener?.onAnimationUpdate(phaseX, phaseY);
     });
   }
 
-  /// Animates values along the Y axis, in a linear fashion.
-  ///
-  /// @param durationMillis animation duration
-  void animateY1(int durationMillis) {
-    animateY2(durationMillis, Easing.Linear);
-  }
-
-  /// Animates values along the Y axis.
-  ///
-  /// @param durationMillis animation duration
-  /// @param easing EasingFunction
   void animateY2(int durationMillis, EasingFunction easing) {
     if (_isShowed || _countdownTimer != null || durationMillis < 0) {
       return;
@@ -214,60 +273,226 @@ class ChartAnimator {
     reset();
     _isShowed = true;
     final double totalTime = durationMillis.toDouble();
-    _phaseY = MIN;
+    phaseY = MIN;
     _countdownTimer =
         Timer.periodic(Duration(milliseconds: REFRESH_RATE), (timer) {
       if (durationMillis < 0) {
-        _phaseY = MAX;
+        phaseY = MAX;
         _countdownTimer?.cancel();
         _countdownTimer = null;
       } else {
-        _phaseY = MAX - easing.getInterpolation(durationMillis / totalTime);
-        if (_phaseY >= MAX) {
-          _phaseY = MAX;
+        phaseY = MAX - easing.getInterpolation(durationMillis / totalTime);
+        if (phaseY >= MAX) {
+          phaseY = MAX;
         }
         durationMillis -= REFRESH_RATE;
       }
-      _listener?.onAnimationUpdate(_phaseX, _phaseY);
+      listener?.onAnimationUpdate(phaseX, phaseY);
+    });
+  }
+}
+
+class ChartAnimatorBySys extends Animator {
+  static const int ANIMATE_X = 0;
+  static const int ANIMATE_Y = 1;
+  static const int ANIMATE_XY = 2;
+  static const int ANIMATE_SPIN = 3;
+
+  AnimationController _controller;
+  ChartTickerProvider _provider = ChartTickerProvider();
+
+  EasingFunction easingFunction_1;
+  EasingFunction easingFunction_2;
+
+  double fromAngle;
+  double toAngle;
+
+  double durationMinPercent;
+  bool xDurationLong;
+
+  bool animating = false;
+
+  int which = -1;
+
+  ChartAnimatorBySys(AnimatorUpdateListener listener) : super(listener) {
+    _controller = AnimationController(vsync: _provider);
+
+    _controller.addListener(() {
+      double percent = _controller.value;
+      switch (which) {
+        case ANIMATE_X:
+          {
+            phaseX = easingFunction_1.getInterpolation(percent);
+            if (phaseX >= MAX) {
+              phaseX = MAX;
+            }
+            this.listener?.onAnimationUpdate(phaseX, phaseY);
+          }
+          break;
+        case ANIMATE_Y:
+          {
+            phaseY = easingFunction_1.getInterpolation(percent);
+            if (phaseY >= MAX) {
+              phaseY = MAX;
+            }
+            this.listener?.onAnimationUpdate(phaseX, phaseY);
+          }
+          break;
+        case ANIMATE_XY:
+          {
+            if (easingFunction_2 != null) {
+              if (xDurationLong) {
+                phaseX = easingFunction_1.getInterpolation(percent);
+                var percentMin = percent / durationMinPercent;
+                percentMin = percentMin > 1 ? 1 : percentMin;
+                phaseY = easingFunction_2.getInterpolation(percentMin);
+              } else {
+                phaseY = easingFunction_1.getInterpolation(percent);
+                var percentMin = percent / durationMinPercent;
+                percentMin = percentMin > 1 ? 1 : percentMin;
+                phaseX = easingFunction_2.getInterpolation(percentMin);
+              }
+            } else {
+              if (xDurationLong) {
+                phaseX = easingFunction_1.getInterpolation(percent);
+                var percentMin = percent / durationMinPercent;
+                percentMin = percentMin > 1 ? 1 : percentMin;
+                phaseY = easingFunction_1.getInterpolation(percentMin);
+              } else {
+                phaseY = easingFunction_1.getInterpolation(percent);
+                var percentMin = percent / durationMinPercent;
+                percentMin = percentMin > 1 ? 1 : percentMin;
+                phaseX = easingFunction_1.getInterpolation(percentMin);
+              }
+            }
+            this.listener?.onAnimationUpdate(phaseX, phaseY);
+          }
+          break;
+        case ANIMATE_SPIN:
+          {
+            angle = fromAngle +
+                (toAngle - fromAngle) *
+                    easingFunction_1.getInterpolation(percent);
+            if (angle >= toAngle) {
+              angle = toAngle;
+            }
+            this.listener?.onRotateUpdate(angle);
+          }
+          break;
+        default:
+          break;
+      }
+    });
+    _controller.addStatusListener((status) {
+      switch (status) {
+        case AnimationStatus.dismissed:
+          animating = false;
+          break;
+        case AnimationStatus.forward:
+          break;
+        case AnimationStatus.reverse:
+          break;
+        case AnimationStatus.completed:
+          animating = false;
+          break;
+      }
     });
   }
 
-  /// Gets the Y axis phase of the animation.
-  ///
-  /// @return double value of {@link #_phaseY}
-  double getPhaseY() {
-    return _phaseY;
+  @override
+  void animateX2(int durationMillis, EasingFunction easing) {
+    if (animating) return;
+    animating = true;
+
+    phaseX = MIN;
+    phaseY = MAX;
+    _controller.duration = Duration(milliseconds: durationMillis);
+    which = ANIMATE_X;
+    easingFunction_1 = easing;
+    easingFunction_2 = null;
+    _controller.forward();
   }
 
-  /// Sets the Y axis phase of the animation.
-  ///
-  /// @param phase double value between 0 - 1
-  void setPhaseY(double phase) {
-    if (phase > 1) {
-      phase = 1;
-    } else if (phase < 0) {
-      phase = 0;
-    }
-    _phaseY = phase;
+  @override
+  void animateXY2(
+      int durationMillisX, int durationMillisY, EasingFunction easing) {
+    if (animating) return;
+    animating = true;
+
+    phaseX = MIN;
+    phaseY = MIN;
+    xDurationLong = durationMillisX > durationMillisY;
+    durationMinPercent = xDurationLong
+        ? durationMillisY / durationMillisX
+        : durationMillisX / durationMillisY;
+    _controller.duration = Duration(
+        milliseconds: xDurationLong ? durationMillisX : durationMillisY);
+    easingFunction_1 = easing;
+    easingFunction_2 = null;
+    which = ANIMATE_XY;
+    _controller.forward();
   }
 
-  /// Gets the X axis phase of the animation.
-  ///
-  /// @return double value of {@link #_phaseX}
-  double getPhaseX() {
-    return _phaseX;
+  @override
+  void animateXY3(int durationMillisX, int durationMillisY,
+      EasingFunction easingX, EasingFunction easingY) {
+    if (animating) return;
+    animating = true;
+
+    phaseX = MIN;
+    phaseY = MIN;
+    xDurationLong = durationMillisX > durationMillisY;
+    durationMinPercent = xDurationLong
+        ? durationMillisY / durationMillisX
+        : durationMillisX / durationMillisY;
+    _controller.duration = Duration(
+        milliseconds: xDurationLong ? durationMillisX : durationMillisY);
+    easingFunction_1 = easingX;
+    easingFunction_2 = easingY;
+    which = ANIMATE_XY;
+    _controller.forward();
   }
 
-  /// Sets the X axis phase of the animation.
-  ///
-  /// @param phase double value between 0 - 1
-  void setPhaseX(double phase) {
-    if (phase > 1) {
-      phase = 1;
-    } else if (phase < 0) {
-      phase = 0;
-    }
-    _phaseX = phase;
+  @override
+  void animateY2(int durationMillis, EasingFunction easing) {
+    if (animating) return;
+    animating = true;
+
+    phaseX = MAX;
+    phaseY = MIN;
+    _controller.duration = Duration(milliseconds: durationMillis);
+    easingFunction_1 = easing;
+    easingFunction_2 = null;
+    which = ANIMATE_Y;
+    _controller.forward();
+  }
+
+  @override
+  void reset() {
+    _controller?.reset();
+  }
+
+  @override
+  void spin(int durationMillis, double fromAngle, double toAngle,
+      EasingFunction easing) {
+    if (animating || fromAngle >= toAngle) return;
+    animating = true;
+
+    this.fromAngle = fromAngle;
+    this.angle = fromAngle;
+    this.toAngle = toAngle;
+    _controller.duration = Duration(milliseconds: durationMillis);
+    easingFunction_1 = easing;
+    easingFunction_2 = null;
+    which = ANIMATE_SPIN;
+    _controller.forward();
+  }
+}
+
+class ChartTickerProvider extends TickerProvider {
+  @override
+  Ticker createTicker(onTick) {
+    return Ticker(onTick);
   }
 }
 

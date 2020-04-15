@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -9,179 +10,17 @@ import 'package:flutter/material.dart';
 
 import '../../charts/flutter/flame_chart.dart';
 import '../../flutter/controllers.dart';
+import '../../flutter/theme.dart';
 import '../../geometry.dart';
 import '../../ui/colors.dart';
 import '../../ui/theme.dart';
 import '../../utils.dart';
-import '../timeline_controller.dart';
-import '../timeline_model.dart';
+import 'timeline_controller.dart';
+import 'timeline_model.dart';
 
-class TimelineFlameChart extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final controller = Controllers.of(context).timeline;
-    return LayoutBuilder(builder: (context, constraints) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: ValueListenableBuilder(
-          valueListenable: controller.selectedTimelineEventNotifier,
-          builder: (context, selectedEvent, _) {
-            return controller.timelineModeNotifier.value ==
-                    TimelineMode.frameBased
-                ? _buildFrameBasedTimeline(
-                    controller,
-                    constraints,
-                    selectedEvent,
-                  )
-                : _buildFullTimeline(controller, constraints, selectedEvent);
-          },
-        ),
-      );
-    });
-  }
-
-  Widget _buildFrameBasedTimeline(
-    TimelineController controller,
-    BoxConstraints constraints,
-    TimelineEvent selectedEvent,
-  ) {
-    final selectedFrame = controller.frameBasedTimeline.data.selectedFrame;
-    return selectedFrame != null
-        ? FrameBasedTimelineFlameChart(
-            selectedFrame,
-            // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
-            // test horizontal scrolling functionality.
-            width: constraints.maxWidth * 2,
-            selected: selectedEvent,
-            onSelected: (e) => controller.selectTimelineEvent(e),
-          )
-        : const SizedBox();
-  }
-
-  Widget _buildFullTimeline(
-    TimelineController controller,
-    BoxConstraints constraints,
-    TimelineEvent selectedEvent,
-  ) {
-    final fullTimelineEmpty = controller.fullTimeline.data?.isEmpty ?? true;
-    return !fullTimelineEmpty
-        ? FullTimelineFlameChart(
-            controller.fullTimeline.data,
-            // TODO(kenz): remove * 8 once zooming is possible. This is so that we can
-            // test horizontal scrolling functionality.
-            width: constraints.maxWidth * 8,
-            selected: selectedEvent,
-            onSelection: (e) => controller.selectTimelineEvent(e),
-          )
-        : const SizedBox();
-  }
-}
-
-class FrameBasedTimelineFlameChart
-    extends FlameChart<TimelineFrame, TimelineEvent> {
-  FrameBasedTimelineFlameChart(
-    TimelineFrame data, {
-    @required double width,
-    @required TimelineEvent selected,
-    @required Function(TimelineEvent event) onSelected,
-  }) : super(
-          data,
-          time: data.time,
-          totalStartingWidth: width,
-          selected: selected,
-          onSelected: onSelected,
-        );
-
-  @override
-  FrameBasedTimelineFlameChartState createState() =>
-      FrameBasedTimelineFlameChartState();
-}
-
-// TODO(kenz): override buildCustomPaints to provide TimelineGridPainter.
-class FrameBasedTimelineFlameChartState
-    extends FlameChartState<FrameBasedTimelineFlameChart, TimelineEvent> {
-  // Add one for the spacer offset between UI and GPU nodes.
-  int get gpuSectionStartRow =>
-      widget.data.uiEventFlow.depth +
-      rowOffsetForTopPadding +
-      rowOffsetForSectionSpacer;
-
-  // TODO(kenz): when optimizing this code, consider passing in the viewport
-  // to only construct FlameChartNode elements that are in view.
-  @override
-  void initFlameChartElements() {
-    super.initFlameChartElements();
-
-    final uiEventFlowDepth = widget.data.uiEventFlow.depth;
-    final gpuEventFlowDepth = widget.data.gpuEventFlow.depth;
-
-    expandRows(uiEventFlowDepth +
-        gpuEventFlowDepth +
-        rowOffsetForTopPadding +
-        rowOffsetForSectionSpacer +
-        rowOffsetForBottomPadding);
-
-    // Add UI section label.
-    final uiSectionLabel = FlameChartNode.sectionLabel(
-      text: 'UI',
-      textColor: Colors.black,
-      backgroundColor: mainUiColor,
-      top: flameChartNodeTop,
-      width: 28.0,
-    );
-    rows[0 + rowOffsetForTopPadding].addNode(uiSectionLabel, index: 0);
-
-    // Add GPU section label.
-    final gpuSectionLabel = FlameChartNode.sectionLabel(
-      text: 'GPU',
-      textColor: Colors.white,
-      backgroundColor: mainGpuColor,
-      top: flameChartNodeTop,
-      width: 42.0,
-    );
-    rows[gpuSectionStartRow].addNode(gpuSectionLabel, index: 0);
-
-    void createChartNodes(TimelineEvent event, int row) {
-      // Do not round these values. Rounding the left could cause us to have
-      // inaccurately placed events on the chart. Rounding the width could cause
-      // us to lose very small events if the width rounds to zero.
-      final double left = (event.time.start.inMicroseconds - startTimeOffset) *
-              startingPxPerMicro +
-          widget.startInset;
-      final double right = (event.time.end.inMicroseconds - startTimeOffset) *
-              startingPxPerMicro +
-          widget.startInset;
-      final backgroundColor = event.isUiEvent ? nextUiColor() : nextGpuColor();
-
-      final node = FlameChartNode<TimelineEvent>(
-        key: Key('${event.name} ${event.traceEvents.first.id}'),
-        text: event.name,
-        tooltip: '${event.name} - ${msText(event.time.duration)}',
-        rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
-        backgroundColor: backgroundColor,
-        textColor: event.isUiEvent
-            ? ThemedColor.fromSingleColor(Colors.black)
-            : ThemedColor.fromSingleColor(contrastForegroundWhite),
-        data: event,
-        onSelected: (dynamic event) => widget.onSelected(event),
-      );
-
-      rows[row].addNode(node);
-
-      for (TimelineEvent child in event.children) {
-        createChartNodes(child, row + 1);
-      }
-    }
-
-    createChartNodes(widget.data.uiEventFlow, rowOffsetForTopPadding);
-    createChartNodes(widget.data.gpuEventFlow, gpuSectionStartRow);
-  }
-}
-
-class FullTimelineFlameChart
-    extends FlameChart<FullTimelineData, TimelineEvent> {
-  FullTimelineFlameChart(
-    FullTimelineData data, {
+class TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
+  TimelineFlameChart(
+    TimelineData data, {
     @required double width,
     @required TimelineEvent selected,
     @required Function(TimelineEvent event) onSelection,
@@ -194,7 +33,7 @@ class FullTimelineFlameChart
           onSelected: onSelection,
         );
 
-  static double _calculateStartInset(FullTimelineData data) {
+  static double _calculateStartInset(TimelineData data) {
     // TODO(kenz): we need to calculate start inset based on the width of the
     // section labels. We should also set a max, ellipsize, and rely on tooltip
     // to give the full name in the event that the section name exceeds max.
@@ -206,25 +45,100 @@ class FullTimelineFlameChart
     return 140.0;
   }
 
+  /// Offset for drawing async guidelines.
+  static int asyncGuidelineOffset = 1;
+
   @override
-  _FullTimelineFlameChartState createState() => _FullTimelineFlameChartState();
+  TimelineFlameChartState createState() => TimelineFlameChartState();
 }
 
-class _FullTimelineFlameChartState
-    extends FlameChartState<FullTimelineFlameChart, TimelineEvent> {
+class TimelineFlameChartState
+    extends FlameChartState<TimelineFlameChart, TimelineEvent> {
   /// Stores the [FlameChartNode] for each [TimelineEvent] in the chart.
   ///
   /// We need to be able to look up a [FlameChartNode] based on its
   /// corresponding [TimelineEvent] when we traverse the event tree.
-  final Map<TimelineEvent, FlameChartNode> chartNodesByEvent = {};
+  final chartNodesByEvent = <TimelineEvent, FlameChartNode>{};
 
   /// Async guideline segments drawn in the direction of the x-axis.
-  final List<HorizontalLineSegment> horizontalGuidelines = [];
+  final horizontalGuidelines = <HorizontalLineSegment>[];
 
   /// Async guideline segments drawn in the direction of the y-axis.
-  final List<VerticalLineSegment> verticalGuidelines = [];
+  final verticalGuidelines = <VerticalLineSegment>[];
+
+  final eventGroupStartXValues = Expando<double>();
 
   int widestRow = -1;
+
+  TimelineController _timelineController;
+
+  TimelineFrame _selectedFrame;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newController = Controllers.of(context).timeline;
+    if (newController == _timelineController) return;
+    _timelineController = newController;
+
+    addAutoDisposeListener(
+      _timelineController.selectedFrame,
+      _handleSelectedFrame,
+    );
+  }
+
+  void _handleSelectedFrame() async {
+    final TimelineFrame selectedFrame = _timelineController.selectedFrame.value;
+    if (selectedFrame != null) {
+      if (selectedFrame == _selectedFrame) return;
+
+      setState(() {
+        _selectedFrame = selectedFrame;
+      });
+
+      // TODO(kenz): consider using jumpTo for some of these animations to
+      // improve performance.
+
+      // Vertically scroll to the UI event group.
+      final verticalScrollOffset =
+          eventGroupStartXValues[widget.data.eventGroups[TimelineData.uiKey]];
+      await verticalScrollController.animateTo(
+        verticalScrollOffset,
+        duration: shortDuration,
+        curve: defaultCurve,
+      );
+
+      // Bail early if the selection has changed again while the animation was
+      // in progress.
+      if (selectedFrame != _selectedFrame) return;
+
+      // Zoom the frame into view.
+      final targetFrameWidth = widget.totalStartingWidth * 0.8;
+      final startingFrameWidth =
+          selectedFrame.time.duration.inMicroseconds * startingPxPerMicro;
+      final zoom = targetFrameWidth / startingFrameWidth;
+      final mouseXForZoom = (selectedFrame.time.start.inMicroseconds -
+                  startTimeOffset +
+                  selectedFrame.time.duration.inMicroseconds / 2) *
+              startingPxPerMicro +
+          widget.startInset;
+      await zoomTo(zoom, forceMouseX: mouseXForZoom);
+
+      // Bail early if the selection has changed again while the animation was
+      // in progress.
+      if (selectedFrame != _selectedFrame) return;
+
+      // Horizontally scroll to the frame.
+      final relativeStartTime =
+          selectedFrame.time.start.inMicroseconds - startTimeOffset;
+      final ratio =
+          relativeStartTime / widget.data.time.duration.inMicroseconds;
+      final offset = contentWidthWithZoom * ratio +
+          widget.startInset -
+          widget.totalStartingWidth * 0.1;
+      await scrollToX(offset);
+    }
+  }
 
   @override
   void initFlameChartElements() {
@@ -257,17 +171,17 @@ class _FullTimelineFlameChartState
 
       Color backgroundColor;
       if (event.isAsyncEvent) {
-        backgroundColor = nextAsyncColor();
+        backgroundColor = nextAsyncColor(resetOffset: event.isRoot);
       } else if (event.isUiEvent) {
-        backgroundColor = nextUiColor();
-      } else if (event.isGpuEvent) {
-        backgroundColor = nextGpuColor();
+        backgroundColor = nextUiColor(resetOffset: event.isRoot);
+      } else if (event.isRasterEvent) {
+        backgroundColor = nextRasterColor(resetOffset: event.isRoot);
       } else {
-        backgroundColor = nextUnknownColor();
+        backgroundColor = nextUnknownColor(resetOffset: event.isRoot);
       }
 
       Color textColor;
-      if (event.isGpuEvent) {
+      if (event.isRasterEvent) {
         textColor = ThemedColor.fromSingleColor(contrastForegroundWhite);
       } else {
         textColor = ThemedColor.fromSingleColor(Colors.black);
@@ -282,6 +196,9 @@ class _FullTimelineFlameChartState
         textColor: textColor,
         data: event,
         onSelected: (dynamic event) => widget.onSelected(event),
+        useAlternateBackground: (TimelineEvent event) =>
+            _selectedFrame != null && event.root.frameId == _selectedFrame.id,
+        alternateBackgroundColor: nextSelectedColor(resetOffset: event.isRoot),
         sectionIndex: section,
       );
       chartNodesByEvent[event] = node;
@@ -292,13 +209,13 @@ class _FullTimelineFlameChartState
     expandRows(rowOffsetForTopPadding);
     int currentRowIndex = rowOffsetForTopPadding;
     int currentSectionIndex = 0;
+    double xOffset = 0.0;
     for (String groupName in widget.data.eventGroups.keys) {
-      final FullTimelineEventGroup group = widget.data.eventGroups[groupName];
+      final TimelineEventGroup group = widget.data.eventGroups[groupName];
       // Expand rows to fit nodes in [group].
       assert(rows.length == currentRowIndex);
-      final groupDisplaySize = group.rows.length + rowOffsetForSectionSpacer;
-      expandRows(rows.length + groupDisplaySize);
-
+      expandRows(rows.length + group.displaySize);
+      eventGroupStartXValues[group] = xOffset;
       for (int i = 0; i < group.rows.length; i++) {
         for (var event in group.rows[i].events) {
           createChartNode(
@@ -319,13 +236,13 @@ class _FullTimelineFlameChartState
       // Add section label node.
       Color sectionLabelBackgroundColor;
       switch (groupName) {
-        case FullTimelineData.uiKey:
+        case TimelineData.uiKey:
           sectionLabelBackgroundColor = mainUiColor;
           break;
-        case FullTimelineData.gpuKey:
-          sectionLabelBackgroundColor = mainGpuColor;
+        case TimelineData.rasterKey:
+          sectionLabelBackgroundColor = mainRasterColor;
           break;
-        case FullTimelineData.unknownKey:
+        case TimelineData.unknownKey:
           sectionLabelBackgroundColor = mainUnknownColor;
           break;
         default:
@@ -343,8 +260,9 @@ class _FullTimelineFlameChartState
       rows[currentRowIndex].addNode(currentSectionLabel, index: 0);
 
       // Increment for next section.
-      currentRowIndex += groupDisplaySize;
+      currentRowIndex += group.displaySize;
       currentSectionIndex++;
+      xOffset += group.displaySizePx;
     }
 
     // Ensure the nodes in each row are sorted in ascending positional order.
@@ -357,16 +275,28 @@ class _FullTimelineFlameChartState
 
   @override
   List<CustomPaint> buildCustomPaints(BoxConstraints constraints) {
-    // TODO(kenz): add TimelineGridPainter to this list.
     return [
       CustomPaint(
         painter: AsyncGuidelinePainter(
-          zoom: zoom,
+          zoom: zoomController.value,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
           verticalGuidelines: verticalGuidelines,
           horizontalGuidelines: horizontalGuidelines,
+          chartStartInset: widget.startInset,
+        ),
+      ),
+      CustomPaint(
+        painter: TimelineGridPainter(
+          zoom: zoomController.value,
+          constraints: constraints,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
+          chartStartInset: widget.startInset,
+          chartEndInset: widget.endInset,
+          flameChartWidth: widthWithZoom,
+          duration: widget.time.duration,
         ),
       ),
     ];
@@ -384,84 +314,95 @@ class _FullTimelineFlameChartState
       for (var node in row.nodes) {
         if (node.data is AsyncTimelineEvent) {
           final event = node.data as AsyncTimelineEvent;
-          if (event.children.isNotEmpty) {
-            // Vertical guideline that will connect [node] with its children
-            // nodes. The line will end at [node]'s last child.
-            final verticalGuidelineX = node.rect.left + 1;
-            final verticalGuidelineStartY =
-                _calculateVerticalGuidelineStartY(event);
-            final verticalGuidelineEndY =
-                _calculateHorizontalGuidelineY(event.lowestDisplayChild);
-            verticalGuidelines.add(VerticalLineSegment(
-              Offset(verticalGuidelineX, verticalGuidelineStartY),
-              Offset(verticalGuidelineX, verticalGuidelineEndY),
-            ));
+          bool allChildrenAreAsyncInstantEvents = true;
+          for (var child in event.children) {
+            if (!child.isAsyncInstantEvent) {
+              allChildrenAreAsyncInstantEvents = false;
+              break;
+            }
+          }
+          // Continue if there are no children we should draw async guidelines
+          // to.
+          if (event.children.isEmpty || allChildrenAreAsyncInstantEvents) {
+            continue;
+          }
 
-            // Draw the first child since it is guaranteed to be connected to
-            // the main vertical we just created.
-            final firstChild = event.children.first;
-            final horizontalGuidelineEndX =
-                chartNodesByEvent[firstChild].rect.left;
-            final horizontalGuidelineY =
-                _calculateHorizontalGuidelineY(firstChild);
+          // Vertical guideline that will connect [node] with its children
+          // nodes. The line will end at [node]'s last child.
+          final verticalGuidelineX =
+              node.rect.left + TimelineFlameChart.asyncGuidelineOffset;
+          final verticalGuidelineStartY =
+              _calculateVerticalGuidelineStartY(event);
+          final verticalGuidelineEndY =
+              _calculateHorizontalGuidelineY(event.lowestDisplayChild);
+          verticalGuidelines.add(VerticalLineSegment(
+            Offset(verticalGuidelineX, verticalGuidelineStartY),
+            Offset(verticalGuidelineX, verticalGuidelineEndY),
+          ));
+
+          // Draw the first child since it is guaranteed to be connected to
+          // the main vertical we just created.
+          final firstChild = event.children.first;
+          final horizontalGuidelineEndX =
+              chartNodesByEvent[firstChild].rect.left;
+          final horizontalGuidelineY =
+              _calculateHorizontalGuidelineY(firstChild);
+          horizontalGuidelines.add(HorizontalLineSegment(
+            Offset(verticalGuidelineX, horizontalGuidelineY),
+            Offset(horizontalGuidelineEndX, horizontalGuidelineY),
+          ));
+
+          // Horizontal guidelines connecting each child to the vertical
+          // guideline above.
+          for (int i = 1; i < event.children.length; i++) {
+            double horizontalGuidelineStartX = verticalGuidelineX;
+
+            final child = event.children[i];
+            final childNode = chartNodesByEvent[child];
+
+            // Helper method to generate a vertical guideline for subsequent
+            // children after the first child. We will create a new guideline
+            // if it can be created without intersecting previous children.
+            void generateSubsequentVerticalGuideline(double previousXInRow) {
+              double newVerticalGuidelineX;
+
+              // If [child] started after [event] ended, use the right edge of
+              // event's [node] as the x coordinate for the guideline.
+              // Otherwise, take the minimum of
+              // [subsequentChildGuidelineOffset] and half the distance
+              // between [previousXInRow] and child's left edge.
+              if (event.time.end < child.time.start) {
+                newVerticalGuidelineX = node.rect.right;
+              } else {
+                newVerticalGuidelineX = childNode.rect.left -
+                    math.min(
+                      subsequentChildGuidelinePadding,
+                      (childNode.rect.left - previousXInRow) / 2,
+                    );
+              }
+              final newVerticalGuidelineEndY =
+                  _calculateHorizontalGuidelineY(child);
+              verticalGuidelines.add(VerticalLineSegment(
+                Offset(newVerticalGuidelineX, verticalGuidelineStartY),
+                Offset(newVerticalGuidelineX, newVerticalGuidelineEndY),
+              ));
+
+              horizontalGuidelineStartX = newVerticalGuidelineX;
+            }
+
+            if (childNode.row.index == node.row.index + 1) {
+              final previousChildIndex =
+                  childNode.row.nodes.indexOf(childNode) - 1;
+              final previousNode = childNode.row.nodes[previousChildIndex];
+              generateSubsequentVerticalGuideline(previousNode.rect.right);
+            }
+
+            final horizontalGuidelineEndX = childNode.rect.left;
+            final horizontalGuidelineY = _calculateHorizontalGuidelineY(child);
             horizontalGuidelines.add(HorizontalLineSegment(
-              Offset(verticalGuidelineX, horizontalGuidelineY),
+              Offset(horizontalGuidelineStartX, horizontalGuidelineY),
               Offset(horizontalGuidelineEndX, horizontalGuidelineY),
             ));
-
-            // Horizontal guidelines connecting each child to the vertical
-            // guideline above.
-            for (int i = 1; i < event.children.length; i++) {
-              double horizontalGuidelineStartX = verticalGuidelineX;
-
-              final child = event.children[i];
-              final childNode = chartNodesByEvent[child];
-
-              // Helper method to generate a vertical guideline for subsequent
-              // children after the first child. We will create a new guideline
-              // if it can be created without intersecting previous children.
-              void generateSubsequentVerticalGuideline(double previousXInRow) {
-                double newVerticalGuidelineX;
-
-                // If [child] started after [event] ended, use the right edge of
-                // event's [node] as the x coordinate for the guideline.
-                // Otherwise, take the minimum of
-                // [subsequentChildGuidelineOffset] and half the distance
-                // between [previousXInRow] and child's left edge.
-                if (event.time.end < child.time.start) {
-                  newVerticalGuidelineX = node.rect.right;
-                } else {
-                  newVerticalGuidelineX = childNode.rect.left -
-                      math.min(
-                        subsequentChildGuidelinePadding,
-                        (childNode.rect.left - previousXInRow) / 2,
-                      );
-                }
-                final newVerticalGuidelineEndY =
-                    _calculateHorizontalGuidelineY(child);
-                verticalGuidelines.add(VerticalLineSegment(
-                  Offset(newVerticalGuidelineX, verticalGuidelineStartY),
-                  Offset(newVerticalGuidelineX, newVerticalGuidelineEndY),
-                ));
-
-                horizontalGuidelineStartX = newVerticalGuidelineX;
-              }
-
-              if (childNode.row.index == node.row.index + 1) {
-                final previousChildIndex =
-                    childNode.row.nodes.indexOf(childNode) - 1;
-                final previousNode = childNode.row.nodes[previousChildIndex];
-                generateSubsequentVerticalGuideline(previousNode.rect.right);
-              }
-
-              final horizontalGuidelineEndX = childNode.rect.left;
-              final horizontalGuidelineY =
-                  _calculateHorizontalGuidelineY(child);
-              horizontalGuidelines.add(HorizontalLineSegment(
-                Offset(horizontalGuidelineStartX, horizontalGuidelineY),
-                Offset(horizontalGuidelineEndX, horizontalGuidelineY),
-              ));
-            }
           }
         }
       }
@@ -474,7 +415,7 @@ class _FullTimelineFlameChartState
 
   int _spacerRowsBeforeEvent(TimelineEvent event) {
     // Add 1 to account for the first spacer row before section 0 begins.
-    return chartNodesByEvent[event].sectionIndex + 1;
+    return chartNodesByEvent[event].sectionIndex + rowOffsetForTopPadding;
   }
 
   double _calculateVerticalGuidelineStartY(TimelineEvent event) {
@@ -502,6 +443,7 @@ class AsyncGuidelinePainter extends CustomPainter {
     @required this.horizontalScrollOffset,
     @required this.verticalGuidelines,
     @required this.horizontalGuidelines,
+    @required this.chartStartInset,
   });
 
   final double zoom;
@@ -512,9 +454,11 @@ class AsyncGuidelinePainter extends CustomPainter {
 
   final double horizontalScrollOffset;
 
-  List<VerticalLineSegment> verticalGuidelines;
+  final List<VerticalLineSegment> verticalGuidelines;
 
-  List<HorizontalLineSegment> horizontalGuidelines;
+  final List<HorizontalLineSegment> horizontalGuidelines;
+
+  final double chartStartInset;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -525,9 +469,18 @@ class AsyncGuidelinePainter extends CustomPainter {
       constraints.maxHeight,
     );
 
+    // The guideline objects are calculated with a base zoom level of 1.0. We
+    // need to convert the zoomed left offset into the unzoomed left offset for
+    // proper calculation of the first vertical guideline index.
+    final unzoomedOffset = math.max(0.0, visible.left - chartStartInset) / zoom;
+    final leftBoundWithZoom = chartStartInset + unzoomedOffset;
+
     final firstVerticalGuidelineIndex = lowerBound(
       verticalGuidelines,
-      VerticalLineSegment(visible.topLeft, visible.bottomLeft),
+      VerticalLineSegment(
+        Offset(leftBoundWithZoom, visible.top),
+        Offset(leftBoundWithZoom, visible.bottom),
+      ),
     );
     final firstHorizontalGuidelineIndex = lowerBound(
       horizontalGuidelines,
@@ -561,23 +514,48 @@ class AsyncGuidelinePainter extends CustomPainter {
   ) {
     for (int i = firstLineIndex; i < guidelines.length; i++) {
       final line = guidelines[i];
+      // Take [chartStartInset] and
+      // [FullTimelineFlameChart.asyncGuidelineOffset] into account when
+      // calculating [zoomedLine] because these units of space should not scale.
+      final unzoomableOffsetLineStart =
+          TimelineFlameChart.asyncGuidelineOffset + chartStartInset;
+
+      LineSegment zoomedLine;
+      if (line is VerticalLineSegment) {
+        // The unzoomable offset will be the same for start and end because this
+        // is a vertical line, so line.start.dx == line.end.dx.
+        zoomedLine = line.toZoomed(
+          zoom: zoom,
+          unzoomableOffsetLineStart: unzoomableOffsetLineStart,
+          unzoomableOffsetLineEnd: unzoomableOffsetLineStart,
+        );
+      } else {
+        // The unzoomable end offset for a horizontal line is unaffected by
+        // [FullTimelineFlameChart.asyncGuidelineOffset], so we only need to
+        // consider [chartStartInset].
+        zoomedLine = line.toZoomed(
+          zoom: zoom,
+          unzoomableOffsetLineStart: unzoomableOffsetLineStart,
+          unzoomableOffsetLineEnd: chartStartInset,
+        );
+      }
 
       // We are out of range on the cross axis.
-      if (!line.crossAxisIntersects(visible)) break;
+      if (!zoomedLine.crossAxisIntersects(visible)) break;
 
       // Only paint lines that intersect [visible] along both axes.
-      if (line.intersects(visible)) {
+      if (zoomedLine.intersects(visible)) {
         canvas.drawLine(
           Offset(
-            (line.start.dx - horizontalScrollOffset)
+            (zoomedLine.start.dx - horizontalScrollOffset)
                 .clamp(0.0, constraints.maxWidth),
-            (line.start.dy - verticalScrollOffset)
+            (zoomedLine.start.dy - verticalScrollOffset)
                 .clamp(0.0, constraints.maxHeight),
           ),
           Offset(
-            (line.end.dx - horizontalScrollOffset)
+            (zoomedLine.end.dx - horizontalScrollOffset)
                 .clamp(0.0, constraints.maxWidth),
-            (line.end.dy - verticalScrollOffset)
+            (zoomedLine.end.dy - verticalScrollOffset)
                 .clamp(0.0, constraints.maxHeight),
           ),
           Paint()..color = treeGuidelineColor,
@@ -590,4 +568,183 @@ class AsyncGuidelinePainter extends CustomPainter {
   // compare delegates or to just paint?
   @override
   bool shouldRepaint(AsyncGuidelinePainter oldDelegate) => true;
+}
+
+class TimelineGridPainter extends CustomPainter {
+  TimelineGridPainter({
+    @required this.zoom,
+    @required this.constraints,
+    @required this.verticalScrollOffset,
+    @required this.horizontalScrollOffset,
+    @required this.chartStartInset,
+    @required this.chartEndInset,
+    @required this.flameChartWidth,
+    @required this.duration,
+  });
+
+  static const baseGridIntervalPx = 150.0;
+  static const gridLineColor = ThemedColor(
+    Color(0xFFCCCCCC),
+    Color(0xFF585858),
+  );
+  static const timestampOffset = 6.0;
+  static const timestampColor = ThemedColor(
+    Color(0xFF24292E),
+    Color(0xFFFAFBFC),
+  );
+
+  static const origin = 0.0;
+
+  final double zoom;
+
+  final BoxConstraints constraints;
+
+  final double verticalScrollOffset;
+
+  final double horizontalScrollOffset;
+
+  final double chartStartInset;
+
+  final double chartEndInset;
+
+  final double flameChartWidth;
+
+  final Duration duration;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // The absolute coordinates of the flame chart's visible section.
+    final visible = Rect.fromLTWH(
+      horizontalScrollOffset,
+      verticalScrollOffset,
+      constraints.maxWidth,
+      constraints.maxHeight,
+    );
+
+    // Paint background for the section that will contain the timestamps. This
+    // section will appear sticky to the top of the viewport.
+    canvas.drawRect(
+      Rect.fromLTWH(
+        origin,
+        origin,
+        constraints.maxWidth,
+        math.min(constraints.maxHeight, rowHeight),
+      ),
+      Paint()..color = chartBackgroundColor,
+    );
+
+    // Paint the timeline grid lines and corresponding timestamps in the flame
+    // chart.
+    final intervalWidth = _intervalWidth();
+    final microsPerInterval = _microsPerInterval(intervalWidth);
+    int timestampMicros = _startingTimestamp(intervalWidth, microsPerInterval);
+    double lineX;
+    if (visible.left <= chartStartInset) {
+      lineX = chartStartInset - visible.left;
+    } else {
+      lineX =
+          intervalWidth - ((visible.left - chartStartInset) % intervalWidth);
+    }
+
+    while (lineX < constraints.maxWidth) {
+      _paintTimestamp(canvas, timestampMicros, intervalWidth, lineX);
+      _paintGridLine(canvas, lineX);
+      lineX += intervalWidth;
+      timestampMicros += microsPerInterval;
+    }
+  }
+
+  void _paintTimestamp(
+    Canvas canvas,
+    int timestampMicros,
+    double intervalWidth,
+    double lineX,
+  ) {
+    final timestampText = msText(
+      Duration(microseconds: timestampMicros),
+      fractionDigits: timestampMicros == 0 ? 1 : 3,
+    );
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: timestampText,
+        style: const TextStyle(color: timestampColor),
+      ),
+      textAlign: TextAlign.right,
+      textDirection: TextDirection.ltr,
+    )..layout(maxWidth: intervalWidth);
+
+    // TODO(kenz): figure out a way for the timestamps to scroll out of view
+    // smoothly instead of dropping off. Consider using a horizontal list view
+    // of text widgets for the timestamps instead of painting them.
+    final xOffset = lineX - textPainter.width - timestampOffset;
+    if (xOffset > 0) {
+      textPainter.paint(canvas, Offset(xOffset, origin + 5.0));
+    }
+  }
+
+  void _paintGridLine(Canvas canvas, double lineX) {
+    canvas.drawLine(
+      Offset(lineX, origin),
+      Offset(lineX, constraints.maxHeight),
+      Paint()..color = gridLineColor,
+    );
+  }
+
+  double _intervalWidth() {
+    final log2ZoomLevel = log2(zoom);
+
+    final gridZoomFactor = math.pow(2, log2ZoomLevel);
+    final gridIntervalPx = baseGridIntervalPx / gridZoomFactor;
+
+    /// The physical pixel width of the grid interval at [zoom].
+    return gridIntervalPx * zoom;
+  }
+
+  int _microsPerInterval(double intervalWidth) {
+    final contentWidth = flameChartWidth - chartStartInset - chartEndInset;
+    final numCompleteIntervals =
+        (flameChartWidth - chartStartInset - chartEndInset) ~/ intervalWidth;
+    final remainderContentWidth =
+        contentWidth - (numCompleteIntervals * intervalWidth);
+    final remainderMicros =
+        remainderContentWidth * duration.inMicroseconds / contentWidth;
+    return ((duration.inMicroseconds - remainderMicros) / numCompleteIntervals)
+        .round();
+  }
+
+  int _startingTimestamp(double intervalWidth, int microsPerInterval) {
+    final startingIntervalIndex = horizontalScrollOffset < chartStartInset
+        ? 0
+        : (horizontalScrollOffset - chartStartInset) ~/ intervalWidth + 1;
+    return startingIntervalIndex * microsPerInterval;
+  }
+
+  @override
+  bool shouldRepaint(TimelineGridPainter oldDelegate) => this != oldDelegate;
+
+  @override
+  bool operator ==(other) {
+    return zoom == other.zoom &&
+        constraints == other.constraints &&
+        flameChartWidth == other.flameChartWidth &&
+        horizontalScrollOffset == other.horizontalScrollOffset &&
+        duration == other.duration;
+  }
+
+  @override
+  int get hashCode => hashValues(
+        zoom,
+        constraints,
+        flameChartWidth,
+        horizontalScrollOffset,
+        duration,
+      );
+}
+
+extension TimelineEventGroupDisplayExtension on TimelineEventGroup {
+  int get displaySize => rows.length + FlameChart.rowOffsetForSectionSpacer;
+
+  double get displaySizePx =>
+      rows.length * rowHeightWithPadding +
+      FlameChart.rowOffsetForSectionSpacer * sectionSpacing;
 }

@@ -2,38 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
+import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
+import '../../flutter/notifications.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../flutter/theme.dart';
+import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
-import '../timeline_controller.dart';
-import '../timeline_model.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
+import 'timeline_controller.dart';
 import 'timeline_flame_chart.dart';
+import 'timeline_model.dart';
 
 // TODO(kenz): handle small screen widths better by using Wrap instead of Row
 // where applicable.
 
 class TimelineScreen extends Screen {
-  const TimelineScreen() : super();
+  const TimelineScreen()
+      : super(
+          DevToolsScreenType.timeline,
+          title: 'Timeline',
+          icon: Octicons.pulse,
+        );
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
   static const flameChartSectionKey = Key('Flame Chart Section');
-  @visibleForTesting
-  static const pauseButtonKey = Key('Pause Button');
-  @visibleForTesting
-  static const resumeButtonKey = Key('Resume Button');
   @visibleForTesting
   static const emptyTimelineRecordingKey = Key('Empty Timeline Recording');
   @visibleForTesting
@@ -46,35 +54,42 @@ class TimelineScreen extends Screen {
   static const stopRecordingButtonKey = Key('Stop Recording Button');
 
   @override
-  Widget build(BuildContext context) => TimelineScreenBody();
+  String get docPageId => 'timeline';
 
   @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      text: 'Timeline',
-      icon: Icon(Octicons.pulse),
-    );
+  Widget build(BuildContext context) {
+    return !serviceManager.connectedApp.isDartWebAppNow
+        ? const TimelineScreenBody()
+        : const DisabledForWebAppMessage();
   }
 }
 
 class TimelineScreenBody extends StatefulWidget {
+  const TimelineScreenBody();
+
   @override
   TimelineScreenBodyState createState() => TimelineScreenBodyState();
 }
 
 class TimelineScreenBodyState extends State<TimelineScreenBody>
     with AutoDisposeMixin {
+  static const _primaryControlsMinIncludeTextWidth = 825.0;
+  static const _secondaryControlsMinIncludeTextWidth = 1205.0;
+
   TimelineController controller;
 
-  TimelineMode get timelineMode => controller.timelineModeNotifier.value;
+  final _exportController = ExportController();
 
   bool recording = false;
   bool processing = false;
   double processingProgress = 0.0;
+  TimelineEvent selectedEvent;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    maybePushDebugModePerformanceMessage(context, DevToolsScreenType.timeline);
+
     final newController = Controllers.of(context).timeline;
     if (newController == controller) return;
     controller = newController;
@@ -82,30 +97,31 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     controller.timelineService.updateListeningState(true);
 
     cancel();
-    addAutoDisposeListener(controller.timelineModeNotifier);
-    addAutoDisposeListener(controller.fullTimeline.recordingNotifier, () {
+    addAutoDisposeListener(controller.recording, () {
       setState(() {
-        recording = controller.fullTimeline.recordingNotifier.value;
+        recording = controller.recording.value;
       });
     });
-    addAutoDisposeListener(controller.fullTimeline.processingNotifier, () {
+    addAutoDisposeListener(controller.processing, () {
       setState(() {
-        processing = controller.fullTimeline.processingNotifier.value;
+        processing = controller.processing.value;
       });
     });
-    addAutoDisposeListener(controller.fullTimeline.processor.progressNotifier,
-        () {
+    addAutoDisposeListener(controller.processor.progressNotifier, () {
       setState(() {
-        processingProgress =
-            controller.fullTimeline.processor.progressNotifier.value;
+        processingProgress = controller.processor.progressNotifier.value;
+      });
+    });
+    addAutoDisposeListener(controller.selectedFrame);
+    addAutoDisposeListener(controller.selectedTimelineEvent, () {
+      setState(() {
+        selectedEvent = controller.selectedTimelineEvent.value;
       });
     });
   }
 
   @override
   void dispose() {
-    // TODO(kenz): make TimelineController disposable via
-    // DisposableController and dispose here.
     controller.timelineService.updateListeningState(false);
     super.dispose();
   }
@@ -114,115 +130,65 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildPrimaryStateControls(),
-            _buildSecondaryControls(),
-          ],
-        ),
-        if (timelineMode == TimelineMode.frameBased) const FlutterFramesChart(),
-        ValueListenableBuilder<TimelineFrame>(
-          valueListenable: controller.frameBasedTimeline.selectedFrameNotifier,
-          builder: (context, selectedFrame, _) {
-            return (timelineMode == TimelineMode.full || selectedFrame != null)
-                ? Expanded(
-                    child: Split(
-                      axis: Axis.vertical,
-                      firstChild: _buildFlameChartSection(),
-                      secondChild: _buildEventDetailsSection(),
-                      initialFirstFraction: 0.6,
-                    ),
-                  )
-                : const SizedBox();
-          },
+        _timelineControls(),
+        const SizedBox(height: denseRowSpacing),
+        if (serviceManager.connectedApp.isFlutterAppNow)
+          const FlutterFramesChart(),
+        Expanded(
+          child: Split(
+            axis: Axis.vertical,
+            initialFractions: const [0.6, 0.4],
+            children: [
+              _buildFlameChartSection(selectedEvent),
+              EventDetails(selectedEvent),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildPrimaryStateControls() {
-    const double minIncludeTextWidth = 950;
-    final sharedWidgets = [
-      const SizedBox(width: 8.0),
-      clearButton(
-        key: TimelineScreen.clearButtonKey,
-        minIncludeTextWidth: minIncludeTextWidth,
-        onPressed: () async {
-          await _clearTimeline();
-        },
-      ),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Row(
-          children: [
-            Switch(
-              value: timelineMode == TimelineMode.frameBased,
-              onChanged: _onTimelineModeChanged,
-            ),
-            const Text('Show frames'),
-          ],
-        ),
-      ),
-    ];
-    return timelineMode == TimelineMode.frameBased
-        ? _buildFrameBasedTimelineButtons(sharedWidgets, minIncludeTextWidth)
-        : _buildFullTimelineButtons(sharedWidgets, minIncludeTextWidth);
-  }
-
-  Widget _buildFrameBasedTimelineButtons(
-    List<Widget> sharedWidgets,
-    double minIncludeTextWidth,
-  ) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.frameBasedTimeline.pausedNotifier,
-      builder: (context, paused, _) {
-        return Row(
-          children: [
-            OutlineButton(
-              key: TimelineScreen.pauseButtonKey,
-              onPressed: paused ? null : _pauseLiveTimeline,
-              child: MaterialIconLabel(
-                Icons.pause,
-                'Pause',
-                minIncludeTextWidth: minIncludeTextWidth,
-              ),
-            ),
-            OutlineButton(
-              key: TimelineScreen.resumeButtonKey,
-              onPressed: !paused ? null : _resumeLiveTimeline,
-              child: MaterialIconLabel(
-                Icons.play_arrow,
-                'Resume',
-                minIncludeTextWidth: minIncludeTextWidth,
-              ),
-            ),
-            ...sharedWidgets,
-          ],
-        );
-      },
+  Widget _timelineControls() {
+    final _exitOfflineButton = exitOfflineButton(() {
+      setState(() {
+        controller.exitOfflineMode();
+      });
+    });
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: offlineMode
+          ? [_exitOfflineButton]
+          : [
+              _buildPrimaryStateControls(),
+              _buildSecondaryControls(),
+            ],
     );
   }
 
-  Widget _buildFullTimelineButtons(
-    List<Widget> sharedWidgets,
-    double minIncludeTextWidth,
-  ) {
+  Widget _buildPrimaryStateControls() {
     return Row(
       children: [
         recordButton(
           key: TimelineScreen.recordButtonKey,
           recording: recording,
-          minIncludeTextWidth: minIncludeTextWidth,
+          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: _startRecording,
         ),
+        const SizedBox(width: denseSpacing),
         stopRecordingButton(
           key: TimelineScreen.stopRecordingButtonKey,
           recording: recording,
-          minIncludeTextWidth: minIncludeTextWidth,
+          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: _stopRecording,
         ),
-        ...sharedWidgets,
+        const SizedBox(width: defaultSpacing),
+        clearButton(
+          key: TimelineScreen.clearButtonKey,
+          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
+          onPressed: () async {
+            await _clearTimeline();
+          },
+        ),
       ],
     );
   }
@@ -231,34 +197,62 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ProfileGranularityDropdown(),
-        ),
-        ServiceExtensionButtonGroup(
-          minIncludeTextWidth: 1300,
-          extensions: [performanceOverlay, profileWidgetBuilds],
-        ),
-        const SizedBox(width: 8.0),
-        OutlineButton(
-          onPressed: _exportTimeline,
-          child: MaterialIconLabel(
-            Icons.file_download,
-            'Export',
-            minIncludeTextWidth: 1300,
+        const ProfileGranularityDropdown(DevToolsScreenType.timeline),
+        const SizedBox(width: defaultSpacing),
+        if (!serviceManager.connectedApp.isDartCliAppNow)
+          ServiceExtensionButtonGroup(
+            minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+            extensions: [performanceOverlay, profileWidgetBuilds],
+          ),
+        // TODO(kenz): hide or disable button if http timeline logging is not
+        // available.
+        _logNetworkTrafficButton(),
+        const SizedBox(width: defaultSpacing),
+        Container(
+          height: Theme.of(context).buttonTheme.height,
+          child: OutlineButton(
+            onPressed: _exportTimeline,
+            child: const MaterialIconLabel(
+              Icons.file_download,
+              'Export',
+              minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildFlameChartSection() {
+  Widget _logNetworkTrafficButton() {
+    return ValueListenableBuilder(
+      valueListenable: controller.httpTimelineLoggingEnabled,
+      builder: (context, enabled, _) {
+        return ToggleButtons(
+          constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+          children: [
+            ToggleButton(
+              icon: Icons.language,
+              text: 'Network',
+              enabledTooltip: 'Stop logging network traffic',
+              disabledTooltip: 'Log network traffic',
+              minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+              selected: enabled,
+            ),
+          ],
+          isSelected: [enabled],
+          onPressed: (_) => controller.toggleHttpRequestLogging(!enabled),
+        );
+      },
+    );
+  }
+
+  Widget _buildFlameChartSection(TimelineEvent selectedEvent) {
     Widget content;
-    final fullTimelineEmpty = controller.fullTimeline.data?.isEmpty ?? true;
-    if (timelineMode == TimelineMode.full &&
-        (recording || processing || fullTimelineEmpty)) {
+    final timelineEmpty = (controller.data?.isEmpty ?? true) ||
+        controller.data.eventGroups.isEmpty;
+    if (recording || processing || timelineEmpty) {
       content = ValueListenableBuilder<bool>(
-        valueListenable: controller.fullTimeline.emptyRecordingNotifier,
+        valueListenable: controller.emptyRecording,
         builder: (context, emptyRecording, _) {
           return emptyRecording
               ? const Center(
@@ -269,15 +263,27 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         },
       );
     } else {
-      content = TimelineFlameChart();
+      content = LayoutBuilder(
+        builder: (context, constraints) {
+          return TimelineFlameChart(
+            controller.data,
+            width: constraints.maxWidth,
+            selected: selectedEvent,
+            onSelection: (e) => controller.selectTimelineEvent(e),
+          );
+        },
+      );
     }
 
-    return Container(
-      key: TimelineScreen.flameChartSectionKey,
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).focusColor),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Container(
+        key: TimelineScreen.flameChartSectionKey,
+        decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).focusColor),
+        ),
+        child: content,
       ),
-      child: content,
     );
   }
 
@@ -292,36 +298,13 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Widget _buildEventDetailsSection() {
-    return ValueListenableBuilder<TimelineEvent>(
-      valueListenable: controller.selectedTimelineEventNotifier,
-      builder: (context, selectedEvent, _) {
-        return EventDetails(selectedEvent);
-      },
-    );
-  }
-
-  void _pauseLiveTimeline() {
-    setState(() {
-      controller.frameBasedTimeline.pause(manual: true);
-      controller.timelineService.updateListeningState(true);
-    });
-  }
-
-  void _resumeLiveTimeline() {
-    setState(() {
-      controller.frameBasedTimeline.resume();
-      controller.timelineService.updateListeningState(true);
-    });
-  }
-
-  void _startRecording() async {
+  Future<void> _startRecording() async {
     await _clearTimeline();
-    controller.fullTimeline.startRecording();
+    await controller.startRecording();
   }
 
-  void _stopRecording() async {
-    await controller.fullTimeline.stopRecording();
+  Future<void> _stopRecording() async {
+    await controller.stopRecording();
   }
 
   Future<void> _clearTimeline() async {
@@ -330,12 +313,27 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   void _exportTimeline() {
-    // TODO(kenz): implement.
+    final exportedFile = _exportData();
+    // TODO(kenz): investigate if we need to do any error handling here. Is the
+    // download always successful?
+    Notifications.of(context)
+        .push('Successfully exported $exportedFile to ~/Downloads directory');
   }
 
-  void _onTimelineModeChanged(bool frameBased) async {
-    await _clearTimeline();
-    controller.selectTimelineMode(
-        frameBased ? TimelineMode.frameBased : TimelineMode.full);
+  // TODO(kenz): move this to the controller once the dart:html app is deleted.
+  // This code relies on `import_export.dart` which contains a flutter import.
+  /// Exports the current timeline data to a .json file.
+  ///
+  /// This method returns the name of the file that was downloaded.
+  String _exportData() {
+    // TODO(kenz): add analytics for this. It would be helpful to know how
+    // complex the problems are that users are trying to solve.
+    final encodedTimelineData = jsonEncode(controller.data.json);
+    final now = DateTime.now();
+    final timestamp =
+        '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
+    final fileName = 'timeline_$timestamp.json';
+    _exportController.downloadFile(fileName, encodedTimelineData);
+    return fileName;
   }
 }

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html';
 
-import 'package:html_shim/html.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:platform_detect/platform_detect.dart';
 
@@ -20,11 +20,11 @@ void main() {
       // Initialize the core framework.
       FrameworkCore.init(window.location.toString());
 
-      // Hookup for possbile analytic collection.
+      // Hookup for possible analytic collection.
       ga.exposeGaDevToolsEnabledToJs();
 
       if (ga.isGtagsReset()) {
-        ga.resetDevToolsFile();
+        await ga.resetDevToolsFile();
       }
 
       // Load the web app framework.
@@ -65,21 +65,6 @@ void main() {
         return;
       }
 
-      // Show the Q3 DevTools survey. Stop showing the survey after
-      // November 14, 2019 (4 weeks after the survey start date
-      // October 17, 2019).
-      final surveyThresholdDate = DateTime(2019, 11, 14);
-      if (DateTime.now().isBefore(surveyThresholdDate)) {
-        // Do not show the survey if the user has either taken or dismissed it.
-        if (!await ga.isSurveyActionTaken) {
-          // Stop showing the survey toast after 5 times without action.
-          if (await ga.surveyShownCount < 5) {
-            framework.surveyToast(await _generateSurveyUrl());
-            await ga.incrementSurveyShownCount;
-          }
-        }
-      }
-
       unawaited(FrameworkCore.initVmService(
         window.location.toString(),
         errorReporter: (String title, dynamic error) {
@@ -102,34 +87,6 @@ void main() {
       handleUncaughtError: _handleUncaughtError,
     ),
   );
-}
-
-Future<String> _generateSurveyUrl() async {
-  const clientIdKey = 'ClientId';
-  const ideKey = 'IDE';
-  const fromKey = 'From';
-  const internalKey = 'Internal';
-
-  final uri = Uri.parse(window.location.toString());
-  final ideValue = uri.queryParameters[ga.ideLaunchedQuery] ?? 'CLI';
-  final fromValue = uri.fragment ?? '';
-  final clientId = await ga.flutterGAClientID();
-
-  // TODO(djshuckerow): override this value for internal users.
-  const internalValue = 'false';
-
-  final surveyUri = Uri(
-    scheme: 'https',
-    host: 'google.qualtrics.com',
-    path: 'jfe/form/SV_dcfOyXRTiB1qowl',
-    queryParameters: {
-      clientIdKey: clientId,
-      ideKey: ideValue,
-      fromKey: fromValue,
-      internalKey: internalValue,
-    },
-  );
-  return surveyUri.toString();
 }
 
 void _handleUncaughtError(

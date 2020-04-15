@@ -7,10 +7,12 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/blocking_action_mixin.dart';
+import '../../flutter/common_widgets.dart';
 import '../../flutter/initializer.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart' as extensions;
 import '../../ui/flutter/label.dart';
@@ -22,17 +24,26 @@ import 'inspector_screen_details_tab.dart';
 import 'inspector_tree_flutter.dart';
 
 class InspectorScreen extends Screen {
-  const InspectorScreen();
+  const InspectorScreen()
+      : super(
+          DevToolsScreenType.inspector,
+          title: 'Flutter Inspector',
+          icon: Octicons.deviceMobile,
+        );
 
   @override
-  Widget build(BuildContext context) => const InspectorScreenBody();
+  String get docPageId => 'inspector';
 
   @override
-  Widget buildTab(BuildContext context) {
-    return const Tab(
-      icon: Icon(Octicons.deviceMobile),
-      text: 'Flutter Inspector',
-    );
+  Widget build(BuildContext context) {
+    final isFlutterApp = serviceManager.connectedApp.isFlutterAppNow;
+    final isProfileBuild = serviceManager.connectedApp.isProfileBuildNow;
+    if (!isFlutterApp || isProfileBuild) {
+      return !isFlutterApp
+          ? const DisabledForNonFlutterAppMessage()
+          : const DisabledForProfileBuildMessage();
+    }
+    return const InspectorScreenBody();
   }
 }
 
@@ -89,19 +100,24 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final summaryTree = InspectorTree(
-      controller: summaryTreeController,
-      isSummaryTree: true,
+    final summaryTree = Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).focusColor),
+      ),
+      child: InspectorTree(
+        controller: summaryTreeController,
+        isSummaryTree: true,
+      ),
     );
     final detailsTree = InspectorTree(
       controller: detailsTreeController,
-      isSummaryTree: false,
     );
-    final splitAxis = Split.axisFor(context, 1.3);
+
+    final splitAxis = Split.axisFor(context, 0.85);
     return Column(
       children: <Widget>[
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ValueListenableBuilder(
               valueListenable: serviceManager.serviceExtensionManager
@@ -118,29 +134,36 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
                 );
               },
             ),
-            OutlineButton(
-              onPressed: _refreshInspector,
-              child: Label(
-                FlutterIcons.refresh,
-                'Refresh Tree',
-                minIncludeTextWidth: 750,
+            const SizedBox(width: denseSpacing),
+            Container(
+              height: Theme.of(context).buttonTheme.height,
+              child: OutlineButton(
+                onPressed: _refreshInspector,
+                child: Label(
+                  FlutterIcons.refresh,
+                  'Refresh Tree',
+                  minIncludeTextWidth: 750,
+                ),
               ),
             ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
           ],
         ),
+        const SizedBox(height: denseRowSpacing),
         Expanded(
           child: Split(
             axis: splitAxis,
-            initialFirstFraction: 0.35,
-            firstChild: summaryTree,
-            secondChild: InspectorDetailsTabController(
-              detailsTree: detailsTree,
-              controller: inspectorController,
-              actionButtons: _expandCollapseButtons(),
-              layoutExplorerSupported: _layoutExplorerSupported,
-            ),
+            initialFractions: const [0.40, 0.60],
+            children: [
+              summaryTree,
+              InspectorDetailsTabController(
+                detailsTree: detailsTree,
+                controller: inspectorController,
+                actionButtons: _expandCollapseButtons(),
+                layoutExplorerSupported: _layoutExplorerSupported,
+              ),
+            ],
           ),
         ),
       ],
@@ -153,10 +176,12 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         minIncludeTextWidth: 1050,
         extensions: [extensions.slowAnimations],
       ),
+      const SizedBox(width: denseSpacing),
       ServiceExtensionButtonGroup(
         minIncludeTextWidth: 1050,
         extensions: [extensions.debugPaint, extensions.debugPaintBaselines],
       ),
+      const SizedBox(width: denseSpacing),
       ServiceExtensionButtonGroup(
         minIncludeTextWidth: 1250,
         extensions: [extensions.repaintRainbow, extensions.debugAllowBanner],

@@ -4,6 +4,7 @@
 
 import 'dart:ui' as dart_ui;
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
@@ -17,6 +18,7 @@ import 'package:mp_chart/mp/core/data_set/line_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:mp_chart/mp/core/enums/axis_dependency.dart';
+
 // TODO(terry): Enable legend when textsize is correct.
 // import 'package:mp_chart/mp/core/enums/legend_vertical_alignment.dart';
 // import 'package:mp_chart/mp/core/enums/legend_form.dart';
@@ -39,7 +41,6 @@ import '../../flutter/theme.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/theme.dart';
 import 'memory_controller.dart';
-import 'memory_protocol.dart';
 
 class MemoryChart extends StatefulWidget {
   @override
@@ -235,7 +236,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         ),
         Expanded(
           child: LineChart(dartChartController),
-          flex: 1,
         ),
         Row(
           children: [
@@ -245,7 +245,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
             ),
             Expanded(
               child: _timelineSlider,
-              flex: 1,
             ),
             const Text('Time Range')
           ],
@@ -253,7 +252,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         controller.isAndroidChartVisible
             ? Expanded(
                 child: LineChart(androidChartController),
-                flex: 1,
               )
             : const Padding(
                 padding: edgeSpacing,
@@ -723,10 +721,6 @@ typedef SelectionCallback = void Function(int timestamp);
 
 typedef SelectSampleCallback = HeapSample Function(int timestamp);
 
-/// Selection of a point in the Bar chart displays the data point values
-/// UI duration and GPU duration. Also, highlight the selected stacked bar.
-/// Uses marker/highlight mechanism which lags because it uses onTapUp maybe
-/// onTapDown would be less laggy.
 class SelectedDataPoint extends LineChartMarker {
   SelectedDataPoint(
     this.type, {

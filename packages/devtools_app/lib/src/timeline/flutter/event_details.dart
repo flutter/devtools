@@ -9,13 +9,14 @@ import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
+import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
-import '../../profiler/cpu_profiler_controller.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
+import '../../trace_event.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../utils.dart';
-import '../timeline_controller.dart';
-import '../timeline_model.dart';
+import 'timeline_controller.dart';
+import 'timeline_model.dart';
 
 class EventDetails extends StatelessWidget {
   const EventDetails(this.selectedEvent);
@@ -28,6 +29,10 @@ class EventDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(kenz): when in offlineMode and selectedEvent doesn't match the event
+    // from the offline data, show message notifying that CPU profile data is
+    // unavailable for snapshots and provide link to return to offline profile
+    // (see html_event_details.dart).
     final controller = Controllers.of(context).timeline;
     final textTheme = Theme.of(context).textTheme;
     return Column(
@@ -39,7 +44,7 @@ class EventDetails extends StatelessWidget {
             selectedEvent != null
                 ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
                 : noEventSelected,
-            style: textTheme.headline6,
+            style: textTheme.subtitle1,
           ),
         ),
         const PaddedDivider.thin(),
@@ -107,8 +112,7 @@ class EventSummary extends StatelessWidget {
   EventSummary(this.event)
       : _connectedEvents = [
           if (event.isAsyncEvent)
-            ...event.children.where((e) =>
-                e.traceEvents.first.event.phase == TraceEvent.asyncInstantPhase)
+            ...event.children.where((e) => e.isAsyncInstantEvent)
         ],
         _eventArgs = Map.from(event.traceEvents.first.event.args)
           ..addAll({for (var trace in event.traceEvents) ...trace.event.args});
@@ -144,14 +148,23 @@ class EventSummary extends StatelessWidget {
           title: const Text('Category'),
           subtitle: Text(firstTraceEvent.category),
         ),
-        if (event.isAsyncEvent)
-          ListTile(
-            title: const Text('Async id'),
-            subtitle: Text('${(event as AsyncTimelineEvent).asyncId}'),
-          ),
+        if (event.isAsyncEvent) _asyncIdTile(),
         if (_connectedEvents.isNotEmpty) _buildConnectedEvents(),
         if (_eventArgs.isNotEmpty) _buildArguments(),
       ],
+    );
+  }
+
+  Widget _asyncIdTile() {
+    String asyncId;
+    if (event is OfflineTimelineEvent) {
+      asyncId = event.traceEvents.first.event.id;
+    } else {
+      asyncId = (event as AsyncTimelineEvent).asyncId;
+    }
+    return ListTile(
+      title: const Text('Async id'),
+      subtitle: Text(asyncId),
     );
   }
 

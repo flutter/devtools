@@ -44,7 +44,7 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
       case '${StarWars.starWarsVehicles}':
         return StarWars(restfulApi);
       default:
-        return StarWars('${StarWars.starWarsPeople}');
+        return StarWars();
     }
   }
 
@@ -91,8 +91,7 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
             child: Container(
               child: Text(
                 currentRestfulAPI.activeFriendlyName,
-                style: TextStyle(
-                  inherit: true,
+                style: const TextStyle(
                   fontSize: 24.0,
                   color: Colors.lightBlueAccent,
                 ),
@@ -107,29 +106,27 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
       body: ListView.builder(
           itemCount: data == null ? 0 : data.length,
           itemBuilder: (BuildContext context, int index) {
-            return Container(
-              child: Center(
-                  child: Column(
-                // Stretch the cards in horizontal axis
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Card(
-                    child: Container(
-                      child: Text(
-                        // Read the name field value and set it in the Text widget
-                        api?.display(data, index),
+            return Center(
+                child: Column(
+              // Stretch the cards in horizontal axis
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Card(
+                  child: Container(
+                    child: Text(
+                      // Read the name field value and set it in the Text widget
+                      api?.display(data, index),
 
-                        // set some style to text
-                        style: TextStyle(
-                            fontSize: 20.0, color: Colors.lightBlueAccent),
-                      ),
-                      // added padding
-                      padding: const EdgeInsets.all(15.0),
+                      // set some style to text
+                      style: const TextStyle(
+                          fontSize: 20.0, color: Colors.lightBlueAccent),
                     ),
-                  )
-                ],
-              )),
-            );
+                    // added padding
+                    padding: const EdgeInsets.all(15.0),
+                  ),
+                )
+              ],
+            ));
           }),
     );
   }

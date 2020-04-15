@@ -1,10 +1,11 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:async';
-import 'dart:convert';
 import 'dart:ui' as dart_ui;
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
@@ -12,13 +13,12 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
-import '../../config_specific/logger.dart';
+import '../../config_specific/file/file.dart';
+import '../../config_specific/logger/logger.dart';
 import '../../globals.dart';
-import '../../ui/fake_file/fake_file.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
 import '../../utils.dart';
 import '../../vm_service_wrapper.dart';
-
 import '../memory_service.dart';
 import 'memory_protocol.dart';
 
@@ -310,11 +310,15 @@ class MemoryController extends DisposableController
   // 'reset': true to reset the object allocation accumulators
   Future<List<ClassHeapDetailStats>> getAllocationProfile(
       {bool reset = false}) async {
-    final AllocationProfile allocationProfile =
-        await serviceManager.service.getAllocationProfile(
-      _isolateId,
-      reset: reset,
-    );
+    AllocationProfile allocationProfile;
+    try {
+      allocationProfile = await serviceManager.service.getAllocationProfile(
+        _isolateId,
+        reset: reset,
+      );
+    } on SentinelException catch (_) {
+      return [];
+    }
     return allocationProfile.members
         .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
         .where((ClassHeapDetailStats stats) {
@@ -335,13 +339,17 @@ class MemoryController extends DisposableController
       String classRef, String className, int maxInstances) async {
     // TODO(terry): Expose as a stream to reduce stall when querying for 1000s
     // TODO(terry): of instances.
-    final InstanceSet instanceSet = await serviceManager.service.getInstances(
-      _isolateId,
-      classRef,
-      maxInstances,
-      classId: classRef,
-    );
-
+    InstanceSet instanceSet;
+    try {
+      instanceSet = await serviceManager.service.getInstances(
+        _isolateId,
+        classRef,
+        maxInstances,
+        classId: classRef,
+      );
+    } on SentinelException catch (_) {
+      return [];
+    }
     return instanceSet.instances
         .map((ObjRef ref) => InstanceSummary(classRef, className, ref.id))
         .toList();
@@ -880,8 +888,9 @@ class MemoryTimeline {
       final capacity = sample.capacity.toDouble();
       final used = sample.used.toDouble();
       final external = sample.external.toDouble();
+
       // TOOD(terry): Need to plot.
-      final rss = sample.rss.toDouble();
+      final rss = (sample.rss ?? 0).toDouble();
 
       final extEntry = Entry(x: timestamp, y: external, icon: dataPointImage);
       final usedEntry =
@@ -1033,48 +1042,6 @@ class MemoryTimeline {
     }
   }
 
-  static const String _jsonPayloadField = 'samples';
-  static const String _jsonVersionField = 'version';
-  static const String _jsonDataField = 'data';
-
-  /// Given a list of HeapSample, encode as a Json string.
-  static String encodeHeapSamples(List<HeapSample> data) {
-    final result = StringBuffer();
-
-    // Iterate over all HeapSamples collected.
-    data.map((f) {
-      if (result.isNotEmpty) result.write(',\n');
-      final encode = jsonEncode(f);
-      result.write('$encode');
-    }).toList();
-
-    return '{"$_jsonPayloadField": {'
-        '"$_jsonVersionField": $version, "$_jsonDataField": [\n'
-        '$result'
-        '\n]\n}}';
-  }
-
-  /// Given a JSON string representing an array of HeapSample, decode to a
-  /// List of HeapSample.
-  static List<HeapSample> decodeHeapSamples(String jsonString) {
-    final Map<String, dynamic> decodedMap = jsonDecode(jsonString);
-    final Map<String, dynamic> samplesPayload =
-        decodedMap['$_jsonPayloadField'];
-
-    // TODO(terry): Different JSON payload version conversions TBD (none yet).
-    final payloadVersion = samplesPayload['$_jsonVersionField'];
-    assert(payloadVersion == MemoryTimeline.version);
-
-    final List dynamicList = samplesPayload['$_jsonDataField'];
-    final List<HeapSample> samples = [];
-    for (var index = 0; index < dynamicList.length; index++) {
-      final sample = HeapSample.fromJson(dynamicList[index]);
-      samples.add(sample);
-    }
-
-    return samples;
-  }
-
   void addSample(HeapSample sample) {
     // Always record the heap sample in the raw set of data (liveFeed).
     liveData.add(sample);
@@ -1092,7 +1059,7 @@ class MemoryLog {
   MemoryLog(this.controller);
 
   /// Use in memory or local file system based on Flutter Web/Desktop.
-  static final _fs = MemoryFiles();
+  static final _fs = FileIO();
 
   MemoryController controller;
 
@@ -1117,10 +1084,16 @@ class MemoryLog {
       ));
     }
 
-    final jsonPayload = MemoryTimeline.encodeHeapSamples(liveData);
-    final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
-
-    assert(realData.length == liveData.length);
+    final jsonPayload = MemoryJson.encodeHeapSamples(liveData);
+    if (kDebugMode) {
+      // TODO(terry): Remove this check add a unit test instead.
+      // Reload the file just created and validate that the saved data matches
+      // the live data.
+      final memoryJson = MemoryJson.decode(jsonPayload);
+      assert(memoryJson.isMatchedVersion);
+      assert(memoryJson.isMemoryPayload);
+      assert(memoryJson.data.length == liveData.length);
+    }
 
     _fs.writeStringToFile(_memoryLogFilename, jsonPayload);
 
@@ -1145,10 +1118,15 @@ class MemoryLog {
     controller.offline = true;
 
     final jsonPayload = _fs.readStringFromFile(filename);
-    final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
+    final memoryJson = MemoryJson.decode(jsonPayload);
+
+    // TODO(terry): Display notification JSON file isn't version isn't
+    // supported or if the payload isn't an exported memory file.
+    assert(memoryJson.isMatchedVersion);
+    assert(memoryJson.isMemoryPayload);
 
     controller.memoryTimeline.offlineData.clear();
-    controller.memoryTimeline.offlineData.addAll(realData);
+    controller.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
 
   @visibleForTesting

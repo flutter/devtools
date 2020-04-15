@@ -59,8 +59,10 @@ class Highlight {
 
   double get yPx => _yPx;
 
+  // ignore: unnecessary_getters_setters
   int get dataIndex => _dataIndex;
 
+  // ignore: unnecessary_getters_setters
   set dataIndex(int value) {
     _dataIndex = value;
   }

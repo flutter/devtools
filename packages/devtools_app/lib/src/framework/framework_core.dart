@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../../devtools.dart' as devtools show version;
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
 import '../globals.dart';
 import '../service.dart';
 import '../service_manager.dart';
-import '../ui/theme.dart' as theme;
+import '../ui/theme.dart';
 import '../vm_service_wrapper.dart';
 
 typedef ErrorReporter = void Function(String title, dynamic error);
@@ -22,8 +22,10 @@ class FrameworkCore {
     // Print the version number at startup.
     log('DevTools version ${devtools.version}.');
 
-    final uri = Uri.parse(url);
-    theme.initializeTheme(uri.queryParameters['theme']);
+    // ignore: deprecated_member_use_from_same_package
+    final theme = Uri.parse(url).queryParameters['theme'];
+    // ignore: deprecated_member_use_from_same_package
+    setDarkTheme(theme == 'dark');
 
     _setGlobals();
   }
@@ -39,13 +41,13 @@ class FrameworkCore {
     Uri explicitUri,
     @required ErrorReporter errorReporter,
   }) async {
-    final Uri uri = explicitUri ?? _getUriFromQuerystring(url);
     if (serviceManager.hasConnection) {
       // TODO(https://github.com/flutter/devtools/issues/1568): why do we call
       // this multiple times?
       return true;
     }
 
+    final Uri uri = explicitUri ?? _getUriFromQuerystring(url);
     if (uri != null) {
       final finishedCompleter = Completer<void>();
 
@@ -58,13 +60,13 @@ class FrameworkCore {
           );
           return true;
         } else {
-          errorReporter(
-              'Unable to connect to VM service at "$uri" without error', null);
+          errorReporter('Unable to connect to VM service at $uri', null);
           return false;
         }
-      } catch (e) {
-        errorReporter(
-            'Unable to connect to VM service at "$uri" with error $e', e);
+      } catch (e, st) {
+        log('$e\n$st', LogLevel.error);
+
+        errorReporter('Unable to connect to VM service at $uri: $e', e);
         return false;
       }
     } else {

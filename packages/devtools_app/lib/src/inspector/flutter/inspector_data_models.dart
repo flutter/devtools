@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../enum_utils.dart';
 import '../../utils.dart';
 import '../diagnostics_node.dart';
-import '../enum_utils.dart';
 import 'layout_explorer/flex/utils.dart';
 
 const overflowEpsilon = 0.1;
@@ -670,12 +670,12 @@ class RenderProperties {
     Size realSize,
     this.layoutProperties,
     this.isFreeSpace = false,
-  })  : width = size?.width,
-        height = size?.height,
-        realWidth = realSize?.width,
-        realHeight = realSize?.height,
-        dx = offset?.dx,
-        dy = offset?.dy;
+  })  : width = size?.width ?? 0.0,
+        height = size?.height ?? 0.0,
+        realWidth = realSize?.width ?? 0.0,
+        realHeight = realSize?.height ?? 0.0,
+        dx = offset?.dx ?? 0.0,
+        dy = offset?.dy ?? 0.0;
 
   final Axis axis;
 

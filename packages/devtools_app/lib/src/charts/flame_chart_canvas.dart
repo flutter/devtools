@@ -4,12 +4,12 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:html';
 import 'dart:math' as math;
 
-import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
-import '../timeline/timeline_model.dart';
+import '../timeline/html_timeline_model.dart';
 import '../ui/colors.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
@@ -630,8 +630,7 @@ class TimelineGrid {
     }
 
     final firstGridNodeText = msText(
-      const Duration(microseconds: 0),
-      fractionDigits: 1,
+      const Duration(),
     );
 
     // Set canvas styles and handle the first grid node since it will have a

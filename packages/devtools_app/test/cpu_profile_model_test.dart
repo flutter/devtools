@@ -151,9 +151,9 @@ void main() {
     });
 
     test('handles zero values', () {
-      expect(zeroStackFrame.totalTime, const Duration(milliseconds: 0));
+      expect(zeroStackFrame.totalTime, const Duration());
       expect(zeroStackFrame.totalTimeRatio, 0.0);
-      expect(zeroStackFrame.selfTime, const Duration(milliseconds: 0));
+      expect(zeroStackFrame.selfTime, const Duration());
       expect(zeroStackFrame.selfTimeRatio, 0.0);
     });
   });

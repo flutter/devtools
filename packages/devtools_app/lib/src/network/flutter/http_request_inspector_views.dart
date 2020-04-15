@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:recase/recase.dart';
 
+import '../../http/http.dart';
+import '../../http/http_request_data.dart';
 import '../../utils.dart';
-import '../http.dart';
-import '../http_request_data.dart';
 
 // Approximately double the indent of the expandable tile's title.
 const double _rowIndentPadding = 30;
@@ -88,7 +87,9 @@ class HttpRequestHeadersView extends StatelessWidget {
                 for (final entry in data.general.entries)
                   _buildRow(
                     context,
-                    ReCase(entry.key).titleCase,
+                    // TODO(kenz): ensure the default case of `entry.key` looks
+                    // fine.
+                    entry.key,
                     entry.value.toString(),
                     constraints,
                   ),
@@ -245,38 +246,36 @@ class HttpRequestCookiesView extends StatelessWidget {
   Widget build(BuildContext context) {
     final requestCookies = data.requestCookies;
     final responseCookies = data.responseCookies;
-    return Container(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Column(
-            children: [
-              if (responseCookies.isNotEmpty)
-                _buildCookiesTable(
-                  context,
-                  'Response Cookies',
-                  responseCookies,
-                  constraints,
-                  responseCookiesKey,
-                ),
-              // Add padding between the cookie tables if displaying both
-              // response and request cookies.
-              if (responseCookies.isNotEmpty && requestCookies.isNotEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 24.0),
-                ),
-              if (requestCookies.isNotEmpty)
-                _buildCookiesTable(
-                  context,
-                  'Request Cookies',
-                  requestCookies,
-                  constraints,
-                  requestCookiesKey,
-                  requestCookies: true,
-                ),
-            ],
-          );
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Column(
+          children: [
+            if (responseCookies.isNotEmpty)
+              _buildCookiesTable(
+                context,
+                'Response Cookies',
+                responseCookies,
+                constraints,
+                responseCookiesKey,
+              ),
+            // Add padding between the cookie tables if displaying both
+            // response and request cookies.
+            if (responseCookies.isNotEmpty && requestCookies.isNotEmpty)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 24.0),
+              ),
+            if (requestCookies.isNotEmpty)
+              _buildCookiesTable(
+                context,
+                'Request Cookies',
+                requestCookies,
+                constraints,
+                requestCookiesKey,
+                requestCookies: true,
+              ),
+          ],
+        );
+      },
     );
   }
 }

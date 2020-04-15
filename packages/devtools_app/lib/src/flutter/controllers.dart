@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../auto_dispose.dart';
+import '../debugger/flutter/debugger_controller.dart';
 import '../globals.dart';
 import '../logging/logging_controller.dart';
 import '../memory/flutter/memory_controller.dart';
 import '../performance/performance_controller.dart';
-import '../timeline/timeline_controller.dart';
+import '../timeline/flutter/timeline_controller.dart';
+import 'banner_messages.dart';
 
 /// Container for controllers that should outlive individual screens of the app.
 ///
@@ -25,16 +27,22 @@ class ProvidedControllers implements DisposableController {
     @required this.timeline,
     @required this.memory,
     @required this.performance,
+    @required this.debugger,
+    @required this.bannerMessages,
   })  : assert(logging != null),
         assert(timeline != null),
         assert(memory != null),
-        assert(performance != null);
+        assert(performance != null),
+        assert(debugger != null),
+        assert(bannerMessages != null);
 
   /// Builds the default providers for the app.
   factory ProvidedControllers.defaults() {
     return ProvidedControllers(
       logging: LoggingController(
-        onLogCountStatusChanged: (_) {},
+        onLogCountStatusChanged: (_) {
+          // TODO(devoncarew): This callback is not used.
+        },
         // TODO(djshuckerow): Use a notifier pattern for the logging controller.
         // That way, it is visible if it has listeners and invisible otherwise.
         isVisible: () => true,
@@ -42,6 +50,8 @@ class ProvidedControllers implements DisposableController {
       timeline: TimelineController(),
       memory: MemoryController(),
       performance: PerformanceController(),
+      debugger: DebuggerController(),
+      bannerMessages: BannerMessagesController(),
     );
   }
 
@@ -49,6 +59,8 @@ class ProvidedControllers implements DisposableController {
   final TimelineController timeline;
   final MemoryController memory;
   final PerformanceController performance;
+  final DebuggerController debugger;
+  final BannerMessagesController bannerMessages;
 
   @override
   void dispose() {
@@ -56,6 +68,7 @@ class ProvidedControllers implements DisposableController {
     timeline.dispose();
     memory.dispose();
     performance.dispose();
+    debugger.dispose();
   }
 }
 
@@ -66,8 +79,7 @@ class ProvidedControllers implements DisposableController {
 ///
 /// See [Controllers.of] for how to retrieve a [ProvidedControllers] instance.
 class Controllers extends StatefulWidget {
-  const Controllers({Key key, Widget child})
-      : this._(key: key, child: child, overrideProviders: null);
+  const Controllers({Key key, Widget child}) : this._(key: key, child: child);
 
   @visibleForTesting
   const Controllers.overridden({Key key, this.child, this.overrideProviders});
@@ -109,7 +121,7 @@ class Controllers extends StatefulWidget {
   static ProvidedControllers of(BuildContext context) {
     final provider =
         context.dependOnInheritedWidgetOfExactType<_InheritedProvider>();
-    return provider.data;
+    return provider?.data;
   }
 }
 
@@ -208,9 +220,9 @@ class _DisposeAfterNotifyElement extends InheritedElement {
   @override
   void notifyClients(_InheritedProvider oldWidget) {
     super.notifyClients(oldWidget);
-    // For stateful widgets that depend on Controllers.of(context) to
-    // subscribe directly, we don't need a postframe callback and we can just
-    // dispose the old data.
+    // For stateful widgets that depend on Controllers.of(context) to subscribe
+    // directly, we don't need a postframe callback and we can just  dispose the
+    // old data.
     // For ValueListenableBuilder widgets, we need the postframe callback to
     // wait until the builders have a chance to build and update their
     // listeners.

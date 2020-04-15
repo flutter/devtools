@@ -13,10 +13,6 @@ import '../service_registrations.dart' as registrations;
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../version.dart';
 
-// TODO(kenz): we should listen for flag value updates and update the info
-// screen with the new flag values. See
-// https://github.com/flutter/devtools/issues/988.
-
 typedef OnFlutterVersionChanged = void Function(FlutterVersion version);
 
 typedef OnFlagListChanged = void Function(FlagList flagList);
@@ -48,7 +44,7 @@ class InfoController extends DisposableController
   }
 
   Future<void> _listenForFlutterVersionChanges() async {
-    if (await serviceManager.connectedApp.isAnyFlutterApp) {
+    if (await serviceManager.connectedApp.isFlutterApp) {
       final flutterVersionServiceListenable = serviceManager
           .registeredServiceListenable(registrations.flutterVersion.service);
       addAutoDisposeListener(flutterVersionServiceListenable, () async {

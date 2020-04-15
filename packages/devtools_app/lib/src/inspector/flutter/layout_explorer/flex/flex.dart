@@ -24,7 +24,8 @@ import 'overflow_indicator_painter.dart';
 import 'utils.dart';
 
 const widthIndicatorColor = ThemedColor(Color(0xFF000099), mainUiColorDark);
-const heightIndicatorColor = ThemedColor(mainGpuColorDark, Color(0xFF27AAE1));
+const heightIndicatorColor =
+    ThemedColor(mainRasterColorDark, Color(0xFF27AAE1));
 const margin = 8.0;
 
 const arrowHeadSize = 8.0;
@@ -152,7 +153,7 @@ Widget dimensionDescription(TextSpan description, bool overflow) {
 Widget _visualizeWidthAndHeightWithConstraints({
   @required Widget widget,
   @required LayoutProperties properties,
-  double arrowHeadSize = defaultArrowHeadSize,
+  double arrowHeadSize = defaultIconSize,
 }) {
   final showChildrenWidthsSum =
       properties is FlexLayoutProperties && properties.isOverflowWidth;
@@ -446,9 +447,8 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
   Future<FlexLayoutProperties> fetchFlexLayoutProperties() async {
     objectGroupManager?.cancelNext();
     final nextObjectGroup = objectGroupManager.next;
-    final node = await nextObjectGroup.getSummarySubtreeWithRenderObject(
+    final node = await nextObjectGroup.getLayoutExplorerNode(
       getRoot(selectedNode),
-      subtreeDepth: 1,
     );
     if (!nextObjectGroup.disposed) {
       assert(objectGroupManager.next == nextObjectGroup);
@@ -681,13 +681,11 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
                   children: [
                     Expanded(
                       flex: 2,
-                      child: Container(
-                        child: Text(
-                          describeEnum(alignment),
-                          style: TextStyle(color: color),
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      child: Text(
+                        describeEnum(alignment),
+                        style: TextStyle(color: color),
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Flexible(
@@ -714,13 +712,11 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: Container(
-                          child: Text(
-                            describeEnum(alignment),
-                            style: TextStyle(color: color),
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                        child: Text(
+                          describeEnum(alignment),
+                          style: TextStyle(color: color),
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Flexible(
@@ -752,7 +748,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
             final service = await properties.node.inspectorService;
             final valueRef = properties.node.valueRef;
             markAsDirty();
-            await service.invokeTweakFlexProperties(
+            await service.invokeSetFlexProperties(
               valueRef,
               changedProperties.mainAxisAlignment,
               changedProperties.crossAxisAlignment,
@@ -952,7 +948,7 @@ class FlexChildVisualizer extends StatelessWidget {
     final node = properties.node;
     final inspectorService = await node.inspectorService;
     state.markAsDirty();
-    await inspectorService.invokeTweakFlexFactor(
+    await inspectorService.invokeSetFlexFactor(
       node.valueRef,
       newFlexFactor,
     );
@@ -962,7 +958,7 @@ class FlexChildVisualizer extends StatelessWidget {
     final node = properties.node;
     final inspectorService = await node.inspectorService;
     state.markAsDirty();
-    await inspectorService.invokeTweakFlexFit(
+    await inspectorService.invokeSetFlexFit(
       node.valueRef,
       newFlexFit,
     );
@@ -973,9 +969,7 @@ class FlexChildVisualizer extends StatelessWidget {
       return Text(
         'flex: $flexFactor',
         style: flexFactor == properties.flexFactor
-            ? const TextStyle(
-                fontWeight: FontWeight.bold,
-              )
+            ? const TextStyle(fontWeight: FontWeight.bold)
             : null,
       );
     }
@@ -1202,30 +1196,20 @@ class WidgetVisualizer extends StatelessWidget {
                             child: Text(
                               title,
                               style: textColor != null
-                                  ? TextStyle(
-                                      color: textColor,
-                                    )
+                                  ? TextStyle(color: textColor)
                                   : null,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          decoration: BoxDecoration(
-                            color: borderColor,
-                          ),
+                          decoration: BoxDecoration(color: borderColor),
                           padding: const EdgeInsets.all(4.0),
                         ),
                       ),
-                      if (hint != null)
-                        Flexible(
-                          child: hint,
-                        ),
+                      if (hint != null) Flexible(child: hint),
                     ],
                   ),
                 ),
-                if (child != null)
-                  Expanded(
-                    child: child,
-                  ),
+                if (child != null) Expanded(child: child),
               ],
             ),
           ),

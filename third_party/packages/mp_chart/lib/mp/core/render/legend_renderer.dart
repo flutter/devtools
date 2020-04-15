@@ -41,16 +41,20 @@ class LegendRenderer extends Renderer {
       ..style = PaintingStyle.fill;
   }
 
+  // ignore: unnecessary_getters_setters
   Paint get legendFormPaint => _legendFormPaint;
 
+  // ignore: unnecessary_getters_setters
   set legendFormPaint(Paint value) {
     _legendFormPaint = value;
   }
 
   Legend get legend => _legend;
 
+  // ignore: unnecessary_getters_setters
   TextPainter get legendLabelPaint => _legendLabelPaint;
 
+  // ignore: unnecessary_getters_setters
   set legendLabelPaint(TextPainter value) {
     _legendLabelPaint = value;
   }

@@ -12,7 +12,7 @@ import 'package:mp_chart/mp/core/utils/utils.dart';
 
 abstract class DataRenderer extends Renderer {
   /// the animator object used to perform animations on the chart data
-  ChartAnimator _animator;
+  Animator _animator;
 
   /// main paint object used for rendering
   Paint _renderPaint;
@@ -24,7 +24,7 @@ abstract class DataRenderer extends Renderer {
 
   TextPainter _valuePaint;
 
-  DataRenderer(ChartAnimator animator, ViewPortHandler viewPortHandler)
+  DataRenderer(Animator animator, ViewPortHandler viewPortHandler)
       : super(viewPortHandler) {
     this._animator = animator;
 
@@ -49,20 +49,24 @@ abstract class DataRenderer extends Renderer {
         chart.getMaxVisibleCount() * viewPortHandler.getScaleX();
   }
 
+  // ignore: unnecessary_getters_setters
   TextPainter get valuePaint => _valuePaint;
 
+  // ignore: unnecessary_getters_setters
   set valuePaint(TextPainter value) {
     _valuePaint = value;
   }
 
+  // ignore: unnecessary_getters_setters
   Paint get highlightPaint => _highlightPaint;
 
   Paint get renderPaint => _renderPaint;
 
-  ChartAnimator get animator => _animator;
+  Animator get animator => _animator;
 
   Paint get drawPaint => _drawPaint;
 
+  // ignore: unnecessary_getters_setters
   set highlightPaint(Paint value) {
     _highlightPaint = value;
   }

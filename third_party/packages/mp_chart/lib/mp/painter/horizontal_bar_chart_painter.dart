@@ -24,6 +24,7 @@ import 'package:mp_chart/mp/core/render/horizontal_bar_chart_renderer.dart';
 import 'package:mp_chart/mp/core/render/legend_renderer.dart';
 import 'package:mp_chart/mp/core/render/x_axis_renderer.dart';
 import 'package:mp_chart/mp/core/render/y_axis_renderer.dart';
+import 'package:mp_chart/mp/core/chart_trans_listener.dart';
 import 'package:mp_chart/mp/core/transformer/transformer.dart';
 import 'package:mp_chart/mp/core/utils/utils.dart';
 import 'package:mp_chart/mp/core/view_port.dart';
@@ -32,7 +33,7 @@ import 'package:mp_chart/mp/painter/bar_chart_painter.dart';
 class HorizontalBarChartPainter extends BarChartPainter {
   HorizontalBarChartPainter(
       BarData data,
-      ChartAnimator animator,
+      Animator animator,
       ViewPortHandler viewPortHandler,
       double maxHighlightDistance,
       bool highLightPerTapEnabled,
@@ -43,6 +44,7 @@ class HorizontalBarChartPainter extends BarChartPainter {
       IMarker marker,
       Description desc,
       bool drawMarkers,
+      Color infoBgColor,
       TextPainter infoPainter,
       TextPainter descPainter,
       XAxis xAxis,
@@ -80,7 +82,8 @@ class HorizontalBarChartPainter extends BarChartPainter {
       bool highlightFullBarEnabled,
       bool drawValueAboveBar,
       bool drawBarShadow,
-      bool fitBars)
+      bool fitBars,
+      ChartTransListener chartTransListener)
       : super(
             data,
             animator,
@@ -94,6 +97,7 @@ class HorizontalBarChartPainter extends BarChartPainter {
             marker,
             desc,
             drawMarkers,
+            infoBgColor,
             infoPainter,
             descPainter,
             xAxis,
@@ -131,7 +135,8 @@ class HorizontalBarChartPainter extends BarChartPainter {
             highlightFullBarEnabled,
             drawValueAboveBar,
             drawBarShadow,
-            fitBars);
+            fitBars,
+            chartTransListener);
 
   @override
   void initDefaultWithData() {
@@ -147,7 +152,6 @@ class HorizontalBarChartPainter extends BarChartPainter {
     if (legend != null) legendRenderer.computeLegend(getBarData());
     renderer?.initBuffers();
     calcMinMax();
-    compute();
 
     double offsetLeft = 0, offsetRight = 0, offsetTop = 0, offsetBottom = 0;
 

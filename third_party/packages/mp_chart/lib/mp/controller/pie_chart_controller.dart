@@ -8,6 +8,7 @@ import 'package:mp_chart/mp/core/description.dart';
 import 'package:mp_chart/mp/core/functions.dart';
 import 'package:mp_chart/mp/core/marker/bar_chart_marker.dart';
 import 'package:mp_chart/mp/core/marker/i_marker.dart';
+import 'package:mp_chart/mp/core/utils/color_utils.dart';
 import 'package:mp_chart/mp/painter/pie_chart_painter.dart';
 
 class PieChartController extends PieRadarController<PieChartPainter> {
@@ -28,6 +29,7 @@ class PieChartController extends PieRadarController<PieChartPainter> {
   TypeFace centerTextTypeface;
   TypeFace entryLabelTypeface;
   Color backgroundColor;
+  Color holeColor;
 
   PieChartController({
     this.drawEntryLabels = true,
@@ -47,6 +49,7 @@ class PieChartController extends PieRadarController<PieChartPainter> {
     this.centerTextTypeface,
     this.entryLabelTypeface,
     this.backgroundColor,
+    this.holeColor = ColorUtils.WHITE,
     IMarker marker,
     Description description,
     XAxisSettingFunction xAxisSettingFunction,
@@ -69,6 +72,7 @@ class PieChartController extends PieRadarController<PieChartPainter> {
     double infoTextSize = 12,
     Color descTextColor,
     Color infoTextColor,
+    Color infoBgColor,
   }) : super(
             marker: marker,
             noDataText: noDataText,
@@ -88,6 +92,7 @@ class PieChartController extends PieRadarController<PieChartPainter> {
             infoTextSize: infoTextSize,
             descTextColor: descTextColor,
             infoTextColor: infoTextColor,
+            infoBgColor: infoBgColor,
             rotationAngle: rotationAngle,
             rawRotationAngle: rawRotationAngle,
             rotateEnabled: rotateEnabled,
@@ -117,6 +122,7 @@ class PieChartController extends PieRadarController<PieChartPainter> {
       marker,
       description,
       drawMarkers,
+      infoBgColor,
       infoPaint,
       descPaint,
       xAxis,
@@ -145,6 +151,7 @@ class PieChartController extends PieRadarController<PieChartPainter> {
       maxAngle,
       minAngleForSlices,
       backgroundColor,
+      holeColor,
     );
   }
 

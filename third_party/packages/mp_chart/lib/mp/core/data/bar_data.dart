@@ -8,8 +8,10 @@ class BarData extends BarLineScatterCandleBubbleData<IBarDataSet> {
 
   BarData(List<IBarDataSet> dataSets) : super.fromList(dataSets);
 
+  // ignore: unnecessary_getters_setters
   double get barWidth => _barWidth;
 
+  // ignore: unnecessary_getters_setters
   set barWidth(double value) {
     _barWidth = value;
   }

@@ -20,7 +20,7 @@ import 'package:mp_chart/mp/core/utils/utils.dart';
 class ScatterChartRenderer extends LineScatterCandleRadarRenderer {
   ScatterDataProvider _provider;
 
-  ScatterChartRenderer(ScatterDataProvider chart, ChartAnimator animator,
+  ScatterChartRenderer(ScatterDataProvider chart, Animator animator,
       ViewPortHandler viewPortHandler)
       : super(animator, viewPortHandler) {
     _provider = chart;

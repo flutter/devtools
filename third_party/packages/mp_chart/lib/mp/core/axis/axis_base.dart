@@ -98,34 +98,44 @@ abstract class AxisBase extends ComponentBase {
     this._limitLines = List<LimitLine>();
   }
 
+  // ignore: unnecessary_getters_setters
   ValueFormatter get axisValueFormatter => _axisValueFormatter;
 
+  // ignore: unnecessary_getters_setters
   set axisValueFormatter(ValueFormatter value) {
     _axisValueFormatter = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get axisRange => _axisRange;
 
+  // ignore: unnecessary_getters_setters
   set axisRange(double value) {
     _axisRange = value;
   }
 
+  // ignore: unnecessary_getters_setters
   set axisMaximum(double value) {
     _axisMaximum = value;
   }
 
+  // ignore: unnecessary_getters_setters
   set axisMinimum(double value) {
     _axisMinimum = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get drawGridLines => _drawGridLines;
 
+  // ignore: unnecessary_getters_setters
   set drawGridLines(bool value) {
     _drawGridLines = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get drawAxisLine => _drawAxisLine;
 
+  // ignore: unnecessary_getters_setters
   set drawAxisLine(bool value) {
     _drawAxisLine = value;
   }
@@ -138,32 +148,42 @@ abstract class AxisBase extends ComponentBase {
     return _centerAxisLabels && _entryCount > 0;
   }
 
+  // ignore: unnecessary_getters_setters
   Color get gridColor => _gridColor;
 
+  // ignore: unnecessary_getters_setters
   set gridColor(Color value) {
     _gridColor = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get axisLineWidth => _axisLineWidth;
 
+  // ignore: unnecessary_getters_setters
   set axisLineWidth(double value) {
     _axisLineWidth = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get gridLineWidth => _gridLineWidth;
 
+  // ignore: unnecessary_getters_setters
   set gridLineWidth(double value) {
     _gridLineWidth = value;
   }
 
+  // ignore: unnecessary_getters_setters
   Color get axisLineColor => _axisLineColor;
 
+  // ignore: unnecessary_getters_setters
   set axisLineColor(Color value) {
     _axisLineColor = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get drawLabels => _drawLabels;
 
+  // ignore: unnecessary_getters_setters
   set drawLabels(bool value) {
     _drawLabels = value;
   }
@@ -197,8 +217,10 @@ abstract class AxisBase extends ComponentBase {
 
   int get labelCount => _labelCount;
 
+  // ignore: unnecessary_getters_setters
   bool get granularityEnabled => _granularityEnabled;
 
+  // ignore: unnecessary_getters_setters
   set granularityEnabled(bool value) {
     _granularityEnabled = value;
   }
@@ -241,14 +263,18 @@ abstract class AxisBase extends ComponentBase {
     return _limitLines;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get drawLimitLineBehindData => _drawLimitLineBehindData;
 
+  // ignore: unnecessary_getters_setters
   set drawLimitLineBehindData(bool value) {
     _drawLimitLineBehindData = value;
   }
 
+  // ignore: unnecessary_getters_setters
   bool get drawGridLinesBehindData => _drawGridLinesBehindData;
 
+  // ignore: unnecessary_getters_setters
   set drawGridLinesBehindData(bool value) {
     _drawGridLinesBehindData = value;
   }
@@ -315,8 +341,10 @@ abstract class AxisBase extends ComponentBase {
     _gridDashPathEffect = DashPathEffect(lineLength, spaceLength, phase);
   }
 
+  // ignore: unnecessary_getters_setters
   DashPathEffect get gridDashPathEffect => _gridDashPathEffect;
 
+  // ignore: unnecessary_getters_setters
   set gridDashPathEffect(DashPathEffect value) {
     _gridDashPathEffect = value;
   }
@@ -357,16 +385,20 @@ abstract class AxisBase extends ComponentBase {
     return _axisLineDashPathEffect == null ? false : true;
   }
 
+  // ignore: unnecessary_getters_setters
   DashPathEffect get axisLineDashPathEffect => _axisLineDashPathEffect;
 
+  // ignore: unnecessary_getters_setters
   set axisLineDashPathEffect(DashPathEffect value) {
     _axisLineDashPathEffect = value;
   }
 
   /// ###### BELOW CODE RELATED TO CUSTOM AXIS VALUES ######
 
+  // ignore: unnecessary_getters_setters
   double get axisMaximum => _axisMaximum;
 
+  // ignore: unnecessary_getters_setters
   double get axisMinimum => _axisMinimum;
 
   /// By calling this method, any custom maximum value that has been previously set is reseted,
@@ -458,44 +490,58 @@ abstract class AxisBase extends ComponentBase {
     this._axisRange = (max - min).abs();
   }
 
+  // ignore: unnecessary_getters_setters
   double get spaceMin => _spaceMin;
 
+  // ignore: unnecessary_getters_setters
   set spaceMin(double value) {
     _spaceMin = value;
   }
 
+  // ignore: unnecessary_getters_setters
   double get spaceMax => _spaceMax;
 
+  // ignore: unnecessary_getters_setters
   set spaceMax(double value) {
     _spaceMax = value;
   }
 
+  // ignore: unnecessary_getters_setters
   List<double> get entries => _entries;
 
+  // ignore: unnecessary_getters_setters
   set entries(List<double> value) {
     _entries = value;
   }
 
+  // ignore: unnecessary_getters_setters
   List<double> get centeredEntries => _centeredEntries;
 
+  // ignore: unnecessary_getters_setters
   set centeredEntries(List<double> value) {
     _centeredEntries = value;
   }
 
+  // ignore: unnecessary_getters_setters
   int get entryCount => _entryCount;
 
+  // ignore: unnecessary_getters_setters
   set entryCount(int value) {
     _entryCount = value;
   }
 
+  // ignore: unnecessary_getters_setters
   int get decimals => _decimals;
 
+  // ignore: unnecessary_getters_setters
   set decimals(int value) {
     _decimals = value;
   }
 
+  // ignore: unnecessary_getters_setters
   List<LimitLine> get limitLines => _limitLines;
 
+  // ignore: unnecessary_getters_setters
   set limitLines(List<LimitLine> value) {
     _limitLines = value;
   }

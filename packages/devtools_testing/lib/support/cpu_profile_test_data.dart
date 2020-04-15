@@ -344,7 +344,7 @@ final CpuProfileMetaData profileMetaData = CpuProfileMetaData(
   samplePeriod: 50,
   stackDepth: 128,
   time: TimeRange()
-    ..start = const Duration(microseconds: 0)
+    ..start = const Duration()
     ..end = const Duration(microseconds: 100),
 );
 
@@ -513,7 +513,7 @@ final CpuProfileMetaData zeroProfileMetaData = CpuProfileMetaData(
   samplePeriod: 50,
   stackDepth: 128,
   time: TimeRange()
-    ..start = const Duration(microseconds: 0)
+    ..start = const Duration()
     ..end = const Duration(microseconds: 100),
 );
 

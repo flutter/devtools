@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
+import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
+import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart'
@@ -16,13 +18,12 @@ import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
-import 'package:devtools_app/src/timeline/timeline_model.dart';
-import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
@@ -133,6 +134,21 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       );
 
   @override
+  Future<Isolate> getIsolate(String isolateId) {
+    return Future.value(MockIsolate());
+  }
+
+  @override
+  Future<ScriptList> getScripts(String isolateId) {
+    return Future.value(ScriptList(scripts: []));
+  }
+
+  @override
+  Future<Stack> getStack(String isolateId) {
+    return Future.value(Stack(frames: [], messages: []));
+  }
+
+  @override
   Future<Success> setFlag(String name, String value) {
     final List<Flag> flags = _flags['flags'];
     final existingFlag =
@@ -204,7 +220,11 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
 
   @override
-  Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
+  Future<bool> isHttpTimelineLoggingAvailable(String isolateId) =>
+      Future.value(true);
+
+  @override
+  Future<HttpTimelineLoggingState> getHttpEnableTimelineLogging(
           String isolateId) async =>
       HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult);
 
@@ -235,18 +255,29 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Stream<Event> get onExtensionEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onDebugEvent => const Stream.empty();
 }
 
 class FakeIsolateManager extends Fake implements IsolateManager {
   @override
   IsolateRef get selectedIsolate => IsolateRef.parse({'id': 'fake_isolate_id'});
+
+  @override
+  Stream<IsolateRef> get onSelectedIsolateChanged => const Stream.empty();
 }
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {}
 
 class MockVmService extends Mock implements VmServiceWrapper {}
 
+class MockIsolate extends Mock implements Isolate {}
+
 class MockConnectedApp extends Mock implements ConnectedApp {}
+
+class MockBannerMessagesController extends Mock
+    implements BannerMessagesController {}
 
 class MockLoggingController extends Mock implements LoggingController {}
 
@@ -259,8 +290,7 @@ class MockTimelineController extends Mock implements TimelineController {}
 
 class MockPerformanceController extends Mock implements PerformanceController {}
 
-class MockFrameBasedTimelineData extends Mock
-    implements FrameBasedTimelineData {}
+class MockDebuggerController extends Mock implements DebuggerController {}
 
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.
@@ -550,5 +580,5 @@ Future<void> ensureInspectorDependencies() async {
 }
 
 void mockIsFlutterApp(MockConnectedApp connectedApp) {
-  when(connectedApp.isAnyFlutterApp).thenAnswer((_) => Future.value(true));
+  when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(true));
 }

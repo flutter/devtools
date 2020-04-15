@@ -4,11 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:core';
 import 'dart:io';
 import 'dart:isolate';
 
 import 'package:args/args.dart';
 import 'package:browser_launcher/browser_launcher.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -18,16 +20,22 @@ import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart' hide Isolate;
 
 import 'client_manager.dart';
-import 'handlers.dart';
+import 'external_handlers.dart';
+import 'memory_profile.dart';
+import 'usage.dart';
 
 const protocolVersion = '1.1.0';
 const argHelp = 'help';
+const argVmUri = 'vm-uri';
 const argEnableNotifications = 'enable-notifications';
+const argHeadlessMode = 'headless';
+const argDebugMode = 'debug';
 const argLaunchBrowser = 'launch-browser';
 const argMachine = 'machine';
 const argPort = 'port';
-const argHeadlessMode = 'headless';
+const argProfileMemory = 'profile-memory';
 const argTryPorts = 'try-ports';
+const argVerbose = 'verbose';
 const launchDevToolsService = 'launchDevTools';
 
 const errorLaunchingBrowserCode = 500;
@@ -54,6 +62,18 @@ final argParser = ArgParser()
     help:
         'The number of ascending ports to try binding to before failing with an error. ',
   )
+  ..addOption(
+    argVmUri,
+    defaultsTo: '',
+    help: 'VM Authentication URI',
+  )
+  ..addOption(
+    argProfileMemory,
+    defaultsTo: '',
+    help: 'Enable memory profiling e.g.,\n'
+        '--profile-memory /usr/local/home/my_name/profiles/memory_samples.json\n'
+        'writes collected memory statistics to the file specified.',
+  )
   ..addFlag(
     argMachine,
     negatable: false,
@@ -79,13 +99,28 @@ final argParser = ArgParser()
     negatable: false,
     help:
         'Causes the server to spawn Chrome in headless mode for use in automated testing.',
+  )
+  ..addFlag(
+    argDebugMode,
+    hide: true,
+    negatable: false,
+    help: 'Run a debug build of the DevTools web frontend.',
+  )
+  ..addFlag(
+    argVerbose,
+    hide: true,
+    negatable: false,
+    abbr: 'v',
+    help: 'Output more informational messages.',
   );
 
 /// Wraps [serveDevTools] `arguments` parsed, as from the command line.
 ///
 /// For more information on `handler`, see [serveDevTools].
-Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
-    {shelf.Handler handler}) async {
+Future<HttpServer> serveDevToolsWithArgs(
+  List<String> arguments, {
+  shelf.Handler handler,
+}) async {
   final args = argParser.parse(arguments);
 
   final help = args[argHelp];
@@ -94,18 +129,28 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
   final bool enableNotifications = args[argEnableNotifications];
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
   final bool headlessMode = args[argHeadlessMode];
+  final bool debugMode = args[argDebugMode];
   final numPortsToTry =
       args[argTryPorts] != null ? int.tryParse(args[argTryPorts]) ?? 1 : 1;
+  final bool verboseMode = args[argVerbose];
+
+  // Support collecting profile data.
+  final String vmUri = args[argVmUri];
+  final String profileAbsoluteFilename = args[argProfileMemory];
 
   return serveDevTools(
     help: help,
     machineMode: machineMode,
+    debugMode: debugMode,
     launchBrowser: launchBrowser,
     enableNotifications: enableNotifications,
     port: port,
     headlessMode: headlessMode,
     numPortsToTry: numPortsToTry,
     handler: handler,
+    serviceProtocolUri: vmUri,
+    profileFilename: profileAbsoluteFilename,
+    verboseMode: verboseMode,
   );
 }
 
@@ -118,13 +163,17 @@ Future<HttpServer> serveDevTools({
   bool help = false,
   bool enableStdinCommands = true,
   bool machineMode = false,
+  bool debugMode = false,
   bool launchBrowser = false,
   bool enableNotifications = false,
   bool headlessMode = false,
+  bool verboseMode = false,
   String hostname = 'localhost',
   int port = 0,
   int numPortsToTry = 1,
   shelf.Handler handler,
+  String serviceProtocolUri = '',
+  String profileFilename = '',
 }) async {
   if (help) {
     print('Dart DevTools version ${await _getVersion()}');
@@ -134,6 +183,14 @@ Future<HttpServer> serveDevTools({
     print(argParser.usage);
     return null;
   }
+
+  // Collect profiling information
+  if (serviceProtocolUri.isNotEmpty && profileFilename.isNotEmpty) {
+    final observatoryUri = Uri.tryParse(serviceProtocolUri);
+    await _hookupMemoryProfiling(observatoryUri, profileFilename, verboseMode);
+    return null;
+  }
+
   if (machineMode) {
     assert(enableStdinCommands,
         'machineMode only works with enableStdinCommands.');
@@ -141,7 +198,7 @@ Future<HttpServer> serveDevTools({
 
   clients = ClientManager(enableNotifications);
 
-  handler ??= await defaultHandler(clients);
+  handler ??= await defaultHandler(clients, debugMode: debugMode);
 
   HttpServer server;
   SocketException ex;
@@ -169,13 +226,19 @@ Future<HttpServer> serveDevTools({
   }
 
   if (enableStdinCommands) {
+    String message = 'Serving DevTools at $devToolsUrl';
+    if (!machineMode && debugMode) {
+      // Add bold to help find the correct url to open.
+      message = '\u001b[1m$message\u001b[0m\n';
+    }
+
     printOutput(
-      'Serving DevTools at $devToolsUrl',
+      message,
       {
         'event': 'server.started',
-        // TODO(dantup): Remove this `method` field when we're sure VS Code users
-        // are all on a newer version that uses `event`. We incorrectly used
-        // `method` for the original releases.
+        // TODO(dantup): Remove this `method` field when we're sure VS Code
+        // users are all on a newer version that uses `event`. We incorrectly
+        // used `method` for the original releases.
         'method': 'server.started',
         'params': {
           'host': server.address.host,
@@ -187,63 +250,235 @@ Future<HttpServer> serveDevTools({
       machineMode: machineMode,
     );
 
-    final Stream<Map<String, dynamic>> _stdinCommandStream = stdin
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .where((String line) => line.startsWith('{') && line.endsWith('}'))
-        .map<Map<String, dynamic>>((String line) {
-      return json.decode(line) as Map<String, dynamic>;
-    });
+    if (machineMode) {
+      final Stream<Map<String, dynamic>> _stdinCommandStream = stdin
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .where((String line) => line.startsWith('{') && line.endsWith('}'))
+          .map<Map<String, dynamic>>((String line) {
+        return json.decode(line) as Map<String, dynamic>;
+      });
 
-    // Example input:
-    // {
-    //   "id":0,
-    //   "method":"vm.register",
-    //   "params":{
-    //     "uri":"<vm-service-uri-here>",
-    //   }
-    // }
-    _stdinCommandStream.listen((Map<String, dynamic> json) async {
-      // ID can be String, int or null
-      final dynamic id = json['id'];
-      final Map<String, dynamic> params = json['params'];
+      // Example input:
+      // {
+      //   "id":0,
+      //   "method":"vm.register",
+      //   "params":{
+      //     "uri":"<vm-service-uri-here>",
+      //   }
+      // }
+      _stdinCommandStream.listen((Map<String, dynamic> json) async {
+        // ID can be String, int or null
+        final dynamic id = json['id'];
+        final Map<String, dynamic> params = json['params'];
 
-      switch (json['method']) {
-        case 'vm.register':
-          await _handleVmRegister(
-            id,
-            params,
-            machineMode,
-            headlessMode,
-            devToolsUrl,
-          );
-          break;
-        case 'devTools.launch':
-          await _handleDevToolsLaunch(
-            id,
-            params,
-            machineMode,
-            headlessMode,
-            devToolsUrl,
-          );
-          break;
-        case 'client.list':
-          await _handleClientsList(id, params, machineMode);
-          break;
-        default:
-          printOutput(
-            'Unknown method ${json['method']}',
-            {
-              'id': id,
-              'error': 'Unknown method ${json['method']}',
-            },
-            machineMode: machineMode,
-          );
-      }
-    });
+        switch (json['method']) {
+          case 'vm.register':
+            await _handleVmRegister(
+              id,
+              params,
+              machineMode,
+              headlessMode,
+              devToolsUrl,
+            );
+            break;
+          case 'devTools.launch':
+            await _handleDevToolsLaunch(
+              id,
+              params,
+              machineMode,
+              headlessMode,
+              devToolsUrl,
+            );
+            break;
+          case 'client.list':
+            await _handleClientsList(id, params, machineMode);
+            break;
+          case 'devTools.survey':
+            _devToolsUsage ??= DevToolsUsage();
+            final String surveyRequest = params['surveyRequest'];
+            final String value = params['value'];
+            switch (surveyRequest) {
+              case 'copyAndCreateDevToolsFile':
+                // Backup and delete ~/.devtools file.
+                if (backupAndCreateDevToolsStore()) {
+                  _devToolsUsage = null;
+                  printOutput(
+                    'DevTools Survey',
+                    {
+                      'id': id,
+                      'result': {
+                        'sucess': true,
+                      },
+                    },
+                    machineMode: machineMode,
+                  );
+                }
+                break;
+              case 'restoreDevToolsFile':
+                _devToolsUsage = null;
+                final content = restoreDevToolsStore();
+                if (content != null) {
+                  printOutput(
+                    'DevTools Survey',
+                    {
+                      'id': id,
+                      'result': {
+                        'sucess': true,
+                        'content': content,
+                      },
+                    },
+                    machineMode: machineMode,
+                  );
+
+                  _devToolsUsage = null;
+                }
+                break;
+              case apiSetActiveSurvey:
+                _devToolsUsage.activeSurvey = value;
+                printOutput(
+                  'DevTools Survey',
+                  {
+                    'id': id,
+                    'result': {
+                      'sucess': _devToolsUsage.activeSurvey == value,
+                      'activeSurvey': _devToolsUsage.activeSurvey,
+                    },
+                  },
+                  machineMode: machineMode,
+                );
+                break;
+              case apiGetSurveyActionTaken:
+                printOutput(
+                  'DevTools Survey',
+                  {
+                    'id': id,
+                    'result': {
+                      'activeSurvey': _devToolsUsage.activeSurvey,
+                      'surveyActionTaken': _devToolsUsage.surveyActionTaken,
+                    },
+                  },
+                  machineMode: machineMode,
+                );
+                break;
+              case apiSetSurveyActionTaken:
+                _devToolsUsage.surveyActionTaken = jsonDecode(value);
+                printOutput(
+                  'DevTools Survey',
+                  {
+                    'id': id,
+                    'result': {
+                      'activeSurvey': _devToolsUsage.activeSurvey,
+                      'surveyActionTaken': _devToolsUsage.surveyActionTaken,
+                    },
+                  },
+                  machineMode: machineMode,
+                );
+                break;
+              case apiGetSurveyShownCount:
+                printOutput(
+                  'DevTools Survey',
+                  {
+                    'id': id,
+                    'result': {
+                      'activeSurvey': _devToolsUsage.activeSurvey,
+                      'surveyShownCount': _devToolsUsage.surveyShownCount,
+                    },
+                  },
+                  machineMode: machineMode,
+                );
+                break;
+              case apiIncrementSurveyShownCount:
+                _devToolsUsage.incrementSurveyShownCount();
+                printOutput(
+                  'DevTools Survey',
+                  {
+                    'id': id,
+                    'result': {
+                      'activeSurvey': _devToolsUsage.activeSurvey,
+                      'surveyShownCount': _devToolsUsage.surveyShownCount,
+                    },
+                  },
+                  machineMode: machineMode,
+                );
+                break;
+              default:
+                printOutput(
+                  'Unknown DevTools Survey Request $surveyRequest',
+                  {
+                    'id': id,
+                    'result': {
+                      'activeSurvey': _devToolsUsage.activeSurvey,
+                      'surveyActionTaken': _devToolsUsage.surveyActionTaken,
+                      'surveyShownCount': _devToolsUsage.surveyShownCount,
+                    },
+                  },
+                  machineMode: machineMode,
+                );
+            }
+            break;
+          default:
+            printOutput(
+              'Unknown method ${json['method']}',
+              {
+                'id': id,
+                'error': 'Unknown method ${json['method']}',
+              },
+              machineMode: machineMode,
+            );
+        }
+      });
+    }
   }
 
   return server;
+}
+
+// Only used for testing DevToolsUsage (used by survey).
+DevToolsUsage _devToolsUsage;
+
+File _devToolsBackup;
+
+bool backupAndCreateDevToolsStore() {
+  assert(_devToolsBackup == null);
+  final devToolsStore = File('${DevToolsUsage.userHomeDir()}/.devtools');
+  if (devToolsStore.existsSync()) {
+    _devToolsBackup = devToolsStore
+        .copySync('${DevToolsUsage.userHomeDir()}/.devtools_backup_test');
+    devToolsStore.deleteSync();
+  }
+
+  return true;
+}
+
+String restoreDevToolsStore() {
+  if (_devToolsBackup != null) {
+    // Read the current ~/.devtools file
+    final devToolsStore = File('${DevToolsUsage.userHomeDir()}/.devtools');
+    final content = devToolsStore.readAsStringSync();
+
+    // Delete the temporary ~/.devtools file
+    devToolsStore.deleteSync();
+    if (_devToolsBackup.existsSync()) {
+      // Restore the backup ~/.devtools file we created in backupAndCreateDevToolsStore.
+      _devToolsBackup.copySync('${DevToolsUsage.userHomeDir()}/.devtools');
+      _devToolsBackup.deleteSync();
+      _devToolsBackup = null;
+    }
+    return content;
+  }
+
+  return null;
+}
+
+Future<void> _hookupMemoryProfiling(Uri observatoryUri, String profileFile,
+    [bool verboseMode = false]) async {
+  final VmService service = await _connectToVmService(observatoryUri);
+  if (service == null) return;
+
+  MemoryProfile(service, profileFile, verboseMode);
+
+  print('Recording memory profile samples to $profileFile');
 }
 
 Future<void> _handleVmRegister(
@@ -402,6 +637,7 @@ Future<void> registerLaunchDevToolsService(
     // Connect to the vm service and register a method to launch DevTools in
     // chrome.
     final VmService service = await _connectToVmService(vmServiceUri);
+    if (service == null) return;
 
     service.registerServiceCallback(launchDevToolsService, (params) async {
       try {
@@ -565,29 +801,35 @@ bool _isAccessibleToChromeOSNativeBrowser(Uri uri) {
   return uri != null && uri.hasPort && tunneledPorts.contains(uri.port);
 }
 
-bool _isValidVmServiceUri(Uri uri) =>
-    // Lots of things are considered valid URIs (including empty strings
-    // and single letters) since they can be relative, so we need to do some
-    // extra checks.
-    uri != null &&
-    uri.isAbsolute &&
-    (uri.isScheme('ws') ||
-        uri.isScheme('wss') ||
-        uri.isScheme('http') ||
-        uri.isScheme('https'));
+bool _isValidVmServiceUri(Uri uri) {
+  // Lots of things are considered valid URIs (including empty strings and
+  // single letters) since they can be relative, so we need to do some extra
+  // checks.
+  return uri != null &&
+      uri.isAbsolute &&
+      (uri.isScheme('ws') ||
+          uri.isScheme('wss') ||
+          uri.isScheme('http') ||
+          uri.isScheme('https'));
+}
 
-Future<VmService> _connectToVmService(Uri uri) async {
+Future<VmService> _connectToVmService(Uri theUri) async {
   // Fix up the various acceptable URI formats into a WebSocket URI to connect.
-  uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
+  final uri = convertToWebSocketUrl(serviceProtocolUrl: theUri);
 
-  final WebSocket ws = await WebSocket.connect(uri.toString());
+  try {
+    final WebSocket ws = await WebSocket.connect(uri.toString());
 
-  final VmService service = VmService(
-    ws.asBroadcastStream(),
-    (String message) => ws.add(message),
-  );
+    final VmService service = VmService(
+      ws.asBroadcastStream(),
+      (String message) => ws.add(message),
+    );
 
-  return service;
+    return service;
+  } catch (_) {
+    print('ERROR: Unable to connect to VMService $theUri');
+    return null;
+  }
 }
 
 Future<String> _getVersion() async {

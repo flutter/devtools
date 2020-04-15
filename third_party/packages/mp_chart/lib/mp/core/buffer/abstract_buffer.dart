@@ -12,9 +12,11 @@ abstract class AbstractBuffer<T> {
   double _phaseY = 1.0;
 
   /// indicates from which x-index the visible data begins
+  // ignore: unused_field
   int _mFrom = 0;
 
   /// indicates to which x-index the visible data ranges
+  // ignore: unused_field
   int _mTo = 0;
 
   /// Initialization with buffer-size.
@@ -66,8 +68,10 @@ abstract class AbstractBuffer<T> {
 
   List<double> get buffer => _buffer;
 
+  // ignore: unnecessary_getters_setters
   int get index => _index;
 
+  // ignore: unnecessary_getters_setters
   set index(int value) {
     _index = value;
   }
