@@ -37,7 +37,7 @@ class GenerateChangelogCommand extends Command {
   @override
   Future run() async {
     final repo = DevToolsRepo.getInstance();
-    String devtoolsVersionFile =
+    final devtoolsVersionFile =
         await File('${repo.repoPath}/packages/devtools_app/lib/devtools.dart')
             .readAsString();
     const versionDeclarationPrefix = 'const String version = \'';
