@@ -518,7 +518,10 @@ class TimelineProcessor {
 
   /// Add event to an available frame in [pendingFrames] if we can.
   void _maybeAddFlutterFrameEvent(SyncTimelineEvent event) {
-    if (!event.isUiEventFlow && !event.isRasterEventFlow) {
+    if (!(event.isUiEventFlow &&
+            event.traceEvents.first.event.threadId == uiThreadId) &&
+        !(event.isRasterEventFlow &&
+            event.traceEvents.first.event.threadId == rasterThreadId)) {
       // We do not care about events that are neither the main flow of UI
       // events nor the main flow of Raster events.
       return;

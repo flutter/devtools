@@ -2,126 +2,62 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
-import '../auto_dispose.dart';
-import '../debugger/flutter/debugger_controller.dart';
 import '../globals.dart';
-import '../logging/logging_controller.dart';
-import '../memory/flutter/memory_controller.dart';
-import '../performance/performance_controller.dart';
-import '../timeline/flutter/timeline_controller.dart';
-import '../timeline/flutter/timeline_screen.dart';
 import 'banner_messages.dart';
 
 /// Container for controllers that should outlive individual screens of the app.
 ///
 /// Note that [dispose] should only be called when nothing will be using this
-/// particular [ProvidedControllers] instance again.
+/// particular [ProvidedCommonControllers] instance again.
 ///
-/// To get a [ProvidedControllers] instance, use [Controllers.of].
+/// To get a [ProvidedCommonControllers] instance, use [CommonControllers.of].
 @immutable
-class ProvidedControllers implements DisposableController {
-  const ProvidedControllers({
-    @required this.logging,
-    @required this.timeline,
-    @required this.memory,
-    @required this.performance,
-    @required this.debugger,
+class ProvidedCommonControllers {
+  const ProvidedCommonControllers({
     @required this.bannerMessages,
   });
 
   /// Builds the default providers for the app.
-  factory ProvidedControllers.defaults() {
-    return ProvidedControllers(
-      logging: LoggingController(
-        onLogCountStatusChanged: (_) {
-          // TODO(devoncarew): This callback is not used.
-        },
-        // TODO(djshuckerow): Use a notifier pattern for the logging controller.
-        // That way, it is visible if it has listeners and invisible otherwise.
-        isVisible: () => true,
-      ),
-      timeline: TimelineController(),
-      memory: MemoryController(),
-      performance: PerformanceController(),
-      debugger: DebuggerController(),
+  factory ProvidedCommonControllers.defaults() {
+    return ProvidedCommonControllers(
       bannerMessages: BannerMessagesController(),
     );
   }
 
-  /// Builds the default providers for offlineMode.
-  ///
-  /// All screens that support offline imports should have their controller in
-  /// this factory and in [offlineLookup].
-  factory ProvidedControllers.offline() {
-    return ProvidedControllers(
-      logging: null,
-      timeline: TimelineController(),
-      memory: null,
-      performance: null,
-      debugger: null,
-      bannerMessages: null,
-    );
-  }
-
-  Map<String, OfflineControllerMixin> get offlineLookup => {
-        TimelineScreen.id: timeline,
-      };
-
-  final LoggingController logging;
-  final TimelineController timeline;
-  final MemoryController memory;
-  final PerformanceController performance;
-  final DebuggerController debugger;
   final BannerMessagesController bannerMessages;
-
-  @override
-  void dispose() {
-    logging?.dispose();
-    timeline?.dispose();
-    memory?.dispose();
-    performance?.dispose();
-    debugger?.dispose();
-  }
 }
 
 /// Provider for controllers that should outlive individual screens of the app.
 ///
-/// [Initializer] builds a [Controllers] after it has a connection to the VM
+/// [Initializer] builds a [CommonControllers] after it has a connection to the VM
 /// service and it has loaded [ensureInspectorDependencies].
 ///
-/// See [Controllers.of] for how to retrieve a [ProvidedControllers] instance.
-class Controllers extends StatefulWidget {
-  const Controllers({Key key, Widget child}) : this._(key: key, child: child);
+/// See [CommonControllers.of] for how to retrieve a [ProvidedCommonControllers] instance.
+class CommonControllers extends StatefulWidget {
+  const CommonControllers({Key key, Widget child})
+      : this._(key: key, child: child);
 
   @visibleForTesting
-  const Controllers.overridden({Key key, this.child, this.overrideProviders});
+  const CommonControllers.overridden(
+      {Key key, this.child, this.overrideProviders});
 
-  const Controllers._({Key key, this.child, this.overrideProviders})
+  const CommonControllers._({Key key, this.child, this.overrideProviders})
       : super(key: key);
 
-  const Controllers.offline({Key key, this.child})
-      : overrideProviders = _offlineProviders;
-
-  static ProvidedControllers _offlineProviders() =>
-      ProvidedControllers.offline();
-
-  /// Callback that overrides [ProvidedControllers.defaults].
-  final ProvidedControllers Function() overrideProviders;
+  /// Callback that overrides [ProvidedCommonControllers.defaults].
+  final ProvidedCommonControllers Function() overrideProviders;
 
   final Widget child;
 
   @override
-  _ControllersState createState() => _ControllersState();
+  _CommonControllersState createState() => _CommonControllersState();
 
-  /// Provides a [ProvidedControllers].
+  /// Provides a [ProvidedCommonControllers].
   ///
   /// Note that this method cannot be called during [State.initState] or
-  /// [State.dispose]. To retrieve [ProvidedControllers] that you want to use
+  /// [State.dispose]. To retrieve [ProvidedCommonControllers] that you want to use
   /// during a state's entire lifetime, call this method during [State.didChangeDependencies].
   ///
   /// A pattern like the following is appropriate:
@@ -140,7 +76,7 @@ class Controllers extends StatefulWidget {
   ///   }
   /// }
   /// ```
-  static ProvidedControllers of(BuildContext context) {
+  static ProvidedCommonControllers of(BuildContext context) {
     final provider =
         context.dependOnInheritedWidgetOfExactType<_InheritedProvider>();
     return provider?.data;
@@ -153,8 +89,8 @@ class Controllers extends StatefulWidget {
 /// when its widget is updated.
 ///
 /// It is not responsible for passing notifications down
-class _ControllersState extends State<Controllers> {
-  ProvidedControllers data;
+class _CommonControllersState extends State<CommonControllers> {
+  ProvidedCommonControllers data;
 
   @override
   void initState() {
@@ -166,7 +102,7 @@ class _ControllersState extends State<Controllers> {
   }
 
   @override
-  void didUpdateWidget(Controllers oldWidget) {
+  void didUpdateWidget(CommonControllers oldWidget) {
     super.didUpdateWidget(oldWidget);
     _initializeProviderData();
   }
@@ -179,14 +115,8 @@ class _ControllersState extends State<Controllers> {
         'Attempted to build overridden providers, but got a null value.',
       );
     } else {
-      data = ProvidedControllers.defaults();
+      data = ProvidedCommonControllers.defaults();
     }
-  }
-
-  @override
-  void dispose() {
-    data.dispose();
-    super.dispose();
   }
 
   @override
@@ -207,53 +137,17 @@ class _InheritedProvider extends InheritedWidget {
   const _InheritedProvider({@required this.data, @required Widget child})
       : super(child: child);
 
-  final ProvidedControllers data;
+  final ProvidedCommonControllers data;
 
   @override
   bool updateShouldNotify(_InheritedProvider oldWidget) =>
       oldWidget.data != data;
-
-  @override
-  InheritedElement createElement() => _DisposeAfterNotifyElement(this);
 }
 
-/// An [Element] that disposes its [_oldData] on the frame after after
-/// Notifying clients of a data change.
+/// Superclass for all DevTools controller providers.
 ///
-/// This allows clients to unregister listeners from the old data before it is
-/// disposed, and avoid exceptions caused by unregistering from disposed
-/// listeners.
-class _DisposeAfterNotifyElement extends InheritedElement {
-  _DisposeAfterNotifyElement(_InheritedProvider widget) : super(widget);
-
-  @override
-  _InheritedProvider get widget => super.widget;
-
-  ProvidedControllers _oldData;
-
-  @override
-  void updated(_InheritedProvider oldWidget) {
-    if (oldWidget.data != widget.data) {
-      _oldData = oldWidget.data;
-      super.updated(oldWidget);
-    }
-  }
-
-  @override
-  void notifyClients(_InheritedProvider oldWidget) {
-    super.notifyClients(oldWidget);
-    // For stateful widgets that depend on Controllers.of(context) to subscribe
-    // directly, we don't need a postframe callback and we can just  dispose the
-    // old data.
-    // For ValueListenableBuilder widgets, we need the postframe callback to
-    // wait until the builders have a chance to build and update their
-    // listeners.
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      _oldData?.dispose();
-    });
-  }
-}
-
-mixin OfflineControllerMixin<T> {
-  FutureOr<void> processOfflineData(T offlineData);
+/// For an example implementation, see `src/example/provided_controller.dart`.
+abstract class ControllerProvider extends StatefulWidget {
+  const ControllerProvider({Key key, this.child}) : super(key: key);
+  final Widget child;
 }

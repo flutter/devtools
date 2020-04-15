@@ -172,11 +172,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   }
 
   /// Pushes the snapshot screen for an offline import.
-  void _pushSnapshotScreenForImport(
-    String screenId,
-    Object data,
-  ) {
-    final args = SnapshotArguments(screenId, data);
+  void _pushSnapshotScreenForImport(String screenId) {
+    final args = SnapshotArguments(screenId);
     if (offlineMode) {
       // If we are already in offline mode, only handle routing from existing
       // '/snapshot' route. In this case, we need to first pop the existing

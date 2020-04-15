@@ -7,7 +7,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/flex_split_column.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
@@ -65,7 +64,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final newController = Controllers.of(context).debugger;
+    final newController = DebuggerControllerProvider.of(context);
     if (newController == controller) return;
     controller = newController;
 

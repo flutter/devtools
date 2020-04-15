@@ -1,14 +1,10 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../globals.dart';
 import 'common_widgets.dart';
-import 'controllers.dart';
 import 'screen.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
@@ -37,11 +33,7 @@ class SnapshotScreenBody extends StatefulWidget {
 }
 
 class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
-  var _dataProcessed = Completer();
-
   Screen _screen;
-
-  OfflineControllerMixin _screenController;
 
   @override
   void initState() {
@@ -52,7 +44,6 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _buildScreenAndProcessData();
   }
 
   @override
@@ -60,30 +51,15 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
     super.didUpdateWidget(oldWidget);
     if (widget.args != oldWidget.args ||
         widget.possibleScreens != oldWidget.possibleScreens) {
-      _dataProcessed = Completer();
       _initScreen();
-      _buildScreenAndProcessData();
     }
   }
 
   void _initScreen() {
     _screen = widget.possibleScreens.firstWhere(
-      (screen) => screen.screenId == widget.args?.screenId,
+      (s) => s.screenId == widget.args?.screenId,
       orElse: () => null,
     );
-  }
-
-  // TODO(kenz): ensure conditional screens have a way to provide the controller
-  // they need since it will not be provided by `Controller.of(context)` as is.
-  Future<void> _buildScreenAndProcessData() async {
-    if (_screen != null && widget.args?.data != null) {
-      _screenController = _screen.conditionalController ??
-          Controllers.of(context).offlineLookup[_screen.screenId];
-      await _screenController?.processOfflineData(widget.args.data);
-    }
-    setState(() {
-      _dataProcessed.complete();
-    });
   }
 
   @override
@@ -92,38 +68,19 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
       children: [
         Row(
           children: [
-            if (_dataProcessed.isCompleted)
-              exitOfflineButton(() {
-                Navigator.pop(context);
-                reset();
-                offlineMode = false;
-              }),
+            exitOfflineButton(() {
+              Navigator.pop(context);
+              reset();
+              offlineMode = false;
+            }),
           ],
         ),
         Expanded(
-          child: _screen != null && widget.args?.data != null
-              ? _buildSnapshotScreen()
-              : _buildSnapshotError(),
+          child:
+              _screen != null ? _screen.build(context) : _buildSnapshotError(),
         ),
       ],
     );
-  }
-
-  Widget _buildSnapshotScreen() {
-    // We put these two items in a stack because the snapshot screen's UI needs
-    // to be built before the data is processed in order to initialize listeners
-    // that respond to data processing events. The spinner hides the snapshot
-    // screen's empty UI while data is being processed.
-    return Stack(children: [
-      _screen.build(context),
-      if (!_dataProcessed.isCompleted)
-        Container(
-          color: Colors.grey[50],
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
-    ]);
   }
 
   Widget _buildSnapshotError() {
@@ -133,15 +90,13 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
 
   void reset() {
     setState(() {
-      _dataProcessed = Completer();
+      offlineDataJson.clear();
       _screen = null;
-      _screenController = null;
     });
   }
 }
 
 class SnapshotArguments {
-  SnapshotArguments(this.screenId, this.data);
+  SnapshotArguments(this.screenId);
   final String screenId;
-  final Object data;
 }

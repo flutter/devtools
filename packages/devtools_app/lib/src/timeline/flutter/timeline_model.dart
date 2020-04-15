@@ -11,7 +11,6 @@ import '../../service_manager.dart';
 import '../../trace_event.dart';
 import '../../trees.dart';
 import '../../utils.dart';
-import 'timeline_controller.dart';
 
 class TimelineData {
   TimelineData({
@@ -34,8 +33,6 @@ class TimelineData {
   static const selectedEventKey = 'selectedEvent';
 
   static const timelineModeKey = 'timelineMode';
-
-  static const devToolsScreenKey = 'dartDevToolsScreen';
 
   static const uiKey = 'UI';
 
@@ -155,7 +152,6 @@ class TimelineData {
         traceEventsKey: traceEvents,
         cpuProfileKey: cpuProfileData?.json ?? {},
         selectedEventKey: selectedEvent?.json ?? {},
-        devToolsScreenKey: timelineScreenId,
       };
 }
 

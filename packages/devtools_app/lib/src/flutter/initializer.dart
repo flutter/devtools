@@ -13,7 +13,6 @@ import '../inspector/flutter_widget.dart';
 import '../url_utils.dart';
 import 'app.dart';
 import 'auto_dispose_mixin.dart';
-import 'controllers.dart';
 import 'navigation.dart';
 import 'notifications.dart';
 
@@ -120,7 +119,7 @@ class _InitializerState extends State<Initializer>
   @override
   Widget build(BuildContext context) {
     return _checkLoaded() && _dependenciesLoaded
-        ? Controllers(child: widget.builder(context))
+        ? widget.builder(context)
         : const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );

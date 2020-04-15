@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/notifications.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
@@ -69,17 +67,20 @@ class TimelineScreenBody extends StatefulWidget {
 }
 
 class TimelineScreenBodyState extends State<TimelineScreenBody>
-    with AutoDisposeMixin {
+    with
+        AutoDisposeMixin,
+        OfflineScreenMixin<TimelineScreenBody, OfflineTimelineData> {
   static const _primaryControlsMinIncludeTextWidth = 825.0;
   static const _secondaryControlsMinIncludeTextWidth = 1205.0;
 
   TimelineController controller;
 
-  final _exportController = ExportController();
-
   bool recording = false;
+
   bool processing = false;
+
   double processingProgress = 0.0;
+
   TimelineEvent selectedEvent;
 
   @override
@@ -87,7 +88,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     super.didChangeDependencies();
     maybePushDebugModePerformanceMessage(context, TimelineScreen.id);
 
-    final newController = Controllers.of(context).timeline;
+    final newController = TimelineControllerProvider.of(context);
     if (newController == controller) return;
     controller = newController;
 
@@ -115,6 +116,24 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         selectedEvent = controller.selectedTimelineEvent.value;
       });
     });
+
+    // Load offline timeline data if available.
+    if (shouldLoadOfflineData()) {
+      // This is a workaround to guarantee that DevTools exports are compatible
+      // with other trace viewers (catapult, perfetto, chrome://tracing), which
+      // require a top level field named "traceEvents". See how timeline data is
+      // encoded in [ExportController.encode].
+      final timelineJson =
+          Map<String, dynamic>.from(offlineDataJson[TimelineScreen.id])
+            ..addAll({
+              TimelineData.traceEventsKey:
+                  offlineDataJson[TimelineData.traceEventsKey]
+            });
+      final offlineTimelineData = OfflineTimelineData.parse(timelineJson);
+      if (!offlineTimelineData.isEmpty) {
+        loadOfflineData(offlineTimelineData);
+      }
+    }
   }
 
   @override
@@ -128,7 +147,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     final isOfflineFlutterApp = offlineMode &&
         controller.offlineTimelineData != null &&
         controller.offlineTimelineData.frames.isNotEmpty;
-    return Column(
+
+    final timelineScreen = Column(
       children: [
         if (!offlineMode) _timelineControls(),
         const SizedBox(height: denseRowSpacing),
@@ -145,6 +165,23 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
             ],
           ),
         ),
+      ],
+    );
+
+    // We put these two items in a stack because the screen's UI needs to be
+    // built before offline data is processed in order to initialize listeners
+    // that respond to data processing events. The spinner hides the screen's
+    // empty UI while data is being processed.
+    return Stack(
+      children: [
+        timelineScreen,
+        if (loadingOfflineData)
+          Container(
+            color: Colors.grey[50],
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
       ],
     );
   }
@@ -307,27 +344,23 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   void _exportTimeline() {
-    final exportedFile = _exportData();
+    final exportedFile = controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
     Notifications.of(context)
         .push('Successfully exported $exportedFile to ~/Downloads directory');
   }
 
-  // TODO(kenz): move this to the controller once the dart:html app is deleted.
-  // This code relies on `import_export.dart` which contains a flutter import.
-  /// Exports the current timeline data to a .json file.
-  ///
-  /// This method returns the name of the file that was downloaded.
-  String _exportData() {
-    // TODO(kenz): add analytics for this. It would be helpful to know how
-    // complex the problems are that users are trying to solve.
-    final encodedTimelineData = jsonEncode(controller.data.json);
-    final now = DateTime.now();
-    final timestamp =
-        '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
-    final fileName = 'timeline_$timestamp.json';
-    _exportController.downloadFile(fileName, encodedTimelineData);
-    return fileName;
+  @override
+  FutureOr<void> processOfflineData(OfflineTimelineData offlineData) async {
+    await controller.processOfflineData(offlineData);
+  }
+
+  @override
+  bool shouldLoadOfflineData() {
+    return offlineMode &&
+        offlineDataJson.isNotEmpty &&
+        offlineDataJson[TimelineScreen.id] != null &&
+        offlineDataJson[TimelineData.traceEventsKey] != null;
   }
 }

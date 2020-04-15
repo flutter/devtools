@@ -31,7 +31,7 @@ const snapshotRoute = '/snapshot';
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(this.screens);
 
-  final List<Screen> screens;
+  final List<DevToolsScreen> screens;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -49,6 +49,8 @@ class DevToolsApp extends StatefulWidget {
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
   final PreferencesController preferences = PreferencesController();
+
+  List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
   @override
   void initState() {
@@ -108,24 +110,29 @@ class DevToolsAppState extends State<DevToolsApp> {
     return _routes ??= {
       homeRoute: (_, params, __) => Initializer(
             url: params['uri'],
-            builder: (_) => DevToolsScaffold(
-              tabs: _visibleScreens(),
-              actions: [
-                HotReloadButton(),
-                HotRestartButton(),
-                OpenSettingsAction(),
-                OpenAboutAction(),
-              ],
+            builder: (_) => CommonControllers(
+              child: _providedControllers(
+                child: DevToolsScaffold(
+                  tabs: _visibleScreens(),
+                  actions: [
+                    HotReloadButton(),
+                    HotRestartButton(),
+                    OpenSettingsAction(),
+                    OpenAboutAction(),
+                  ],
+                ),
+              ),
             ),
           ),
       connectRoute: (_, __, ___) =>
           DevToolsScaffold.withChild(child: ConnectScreenBody()),
       snapshotRoute: (_, __, args) {
         return DevToolsScaffold.withChild(
-          child: Controllers.offline(
+          child: _providedControllers(
+            offline: true,
             child: SnapshotScreenBody(
               args as SnapshotArguments,
-              widget.screens,
+              _screens,
             ),
           ),
         );
@@ -141,7 +148,7 @@ class DevToolsAppState extends State<DevToolsApp> {
 
   List<Screen> _visibleScreens() {
     final visibleScreens = <Screen>[];
-    for (var screen in widget.screens) {
+    for (var screen in _screens) {
       if (screen.conditionalLibrary != null) {
         if (serviceManager.serviceAvailable.isCompleted &&
             serviceManager
@@ -154,6 +161,23 @@ class DevToolsAppState extends State<DevToolsApp> {
       }
     }
     return visibleScreens;
+  }
+
+  Widget _providedControllers({@required Widget child, bool offline = false}) {
+    final _providers = widget.screens
+        .where((s) =>
+            s.controllerProvider != null &&
+            (offline ? s.supportsOffline : true))
+        .map((s) => s.controllerProvider)
+        .toList();
+
+    Widget provided;
+    Widget _child = child;
+    for (int i = 0; i < _providers.length; i++) {
+      provided = _providers[i](_child);
+      _child = provided;
+    }
+    return _child;
   }
 
   @override
@@ -170,6 +194,25 @@ class DevToolsAppState extends State<DevToolsApp> {
       },
     );
   }
+}
+
+class DevToolsScreen {
+  const DevToolsScreen({
+    @required this.screen,
+    this.controllerProvider,
+    this.supportsOffline = false,
+  });
+  final Screen screen;
+
+  /// Provides the controller provider for this screen, if non-null.
+  ///
+  /// If null, [screen] will be responsible for maintaining its own controller.
+  final ControllerProvider Function(Widget child) controllerProvider;
+
+  /// Whether this screen has implemented offline support.
+  ///
+  /// Defaults to false.
+  final bool supportsOffline;
 }
 
 /// A [WidgetBuilder] that takes an additional map of URL query parameters and

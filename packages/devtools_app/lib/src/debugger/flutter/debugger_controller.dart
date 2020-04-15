@@ -5,10 +5,74 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
+import '../../flutter/controllers.dart';
 import '../../globals.dart';
+
+class DebuggerControllerProvider extends ControllerProvider {
+  const DebuggerControllerProvider({Key key, Widget child})
+      : super(key: key, child: child);
+
+  @override
+  _DebuggerControllerProviderState createState() =>
+      _DebuggerControllerProviderState();
+
+  static DebuggerController of(BuildContext context) {
+    final provider = context
+        .dependOnInheritedWidgetOfExactType<_InheritedDebuggerController>();
+    return provider?.data;
+  }
+}
+
+class _DebuggerControllerProviderState
+    extends State<DebuggerControllerProvider> {
+  DebuggerController data;
+
+  @override
+  void initState() {
+    super.initState();
+    // Everything depends on the serviceManager being available.
+    assert(serviceManager != null);
+
+    _initializeProviderData();
+  }
+
+  @override
+  void didUpdateWidget(DebuggerControllerProvider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _initializeProviderData();
+  }
+
+  void _initializeProviderData() {
+    data = DebuggerController();
+  }
+
+  @override
+  void dispose() {
+    data.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _InheritedDebuggerController(data: data, child: widget.child);
+  }
+}
+
+class _InheritedDebuggerController extends InheritedWidget {
+  const _InheritedDebuggerController(
+      {@required this.data, @required Widget child})
+      : super(child: child);
+
+  final DebuggerController data;
+
+  @override
+  bool updateShouldNotify(_InheritedDebuggerController oldWidget) =>
+      oldWidget.data != data;
+}
 
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController

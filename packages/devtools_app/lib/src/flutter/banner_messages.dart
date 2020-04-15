@@ -125,7 +125,7 @@ class BannerMessagesState extends State<_BannerMessagesProvider>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController = Controllers.of(context)?.bannerMessages;
+    final newController = CommonControllers.of(context)?.bannerMessages;
     if (newController == controller) return;
     controller = newController;
   }

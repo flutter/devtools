@@ -8,16 +8,15 @@ import 'package:vm_service/vm_service.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
-import '../../performance/performance_controller.dart';
 import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
+import 'performance_controller.dart';
 
 class PerformanceScreen extends Screen {
   const PerformanceScreen()
@@ -66,7 +65,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
     super.didChangeDependencies();
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
-    final newController = Controllers.of(context).performance;
+    final newController = PerformanceControllerProvider.of(context);
     if (newController == controller) return;
     controller = newController;
 

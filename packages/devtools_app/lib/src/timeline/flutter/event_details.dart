@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import '../../flutter/common_widgets.dart';
-import '../../flutter/controllers.dart';
 import '../../globals.dart';
 import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
@@ -34,7 +33,7 @@ class EventDetails extends StatelessWidget {
     // from the offline data, show message notifying that CPU profile data is
     // unavailable for snapshots and provide link to return to offline profile
     // (see html_event_details.dart).
-    final controller = Controllers.of(context).timeline;
+    final controller = TimelineControllerProvider.of(context);
     final textTheme = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

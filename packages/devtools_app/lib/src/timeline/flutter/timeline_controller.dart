@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../../auto_dispose.dart';
+import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../flutter/controllers.dart';
 import '../../globals.dart';
@@ -15,9 +18,70 @@ import '../../trace_event.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
 import 'timeline_model.dart';
 import 'timeline_processor.dart';
+import 'timeline_screen.dart';
 import 'timeline_service.dart';
 
-const String timelineScreenId = 'timeline';
+class TimelineControllerProvider extends ControllerProvider {
+  const TimelineControllerProvider({Key key, Widget child})
+      : super(key: key, child: child);
+
+  @override
+  _TimelineControllerProviderState createState() =>
+      _TimelineControllerProviderState();
+
+  static TimelineController of(BuildContext context) {
+    final provider = context
+        .dependOnInheritedWidgetOfExactType<_InheritedTimelineController>();
+    return provider?.data;
+  }
+}
+
+class _TimelineControllerProviderState
+    extends State<TimelineControllerProvider> {
+  TimelineController data;
+
+  @override
+  void initState() {
+    super.initState();
+    // Everything depends on the serviceManager being available.
+    assert(serviceManager != null);
+
+    _initializeProviderData();
+  }
+
+  @override
+  void didUpdateWidget(TimelineControllerProvider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _initializeProviderData();
+  }
+
+  void _initializeProviderData() {
+    data = TimelineController();
+  }
+
+  @override
+  void dispose() {
+    data.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _InheritedTimelineController(data: data, child: widget.child);
+  }
+}
+
+class _InheritedTimelineController extends InheritedWidget {
+  const _InheritedTimelineController(
+      {@required this.data, @required Widget child})
+      : super(child: child);
+
+  final TimelineController data;
+
+  @override
+  bool updateShouldNotify(_InheritedTimelineController oldWidget) =>
+      oldWidget.data != data;
+}
 
 /// This class contains the business logic for [timeline_screen.dart].
 ///
@@ -30,14 +94,13 @@ const String timelineScreenId = 'timeline';
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
 class TimelineController
-    with
-        CpuProfilerControllerProviderMixin,
-        OfflineControllerMixin<OfflineTimelineData>
+    with CpuProfilerControllerProviderMixin
     implements DisposableController {
   TimelineController() {
     timelineService = TimelineService(this);
     processor = TimelineProcessor(this);
   }
+  final _exportController = ExportController();
 
   /// The currently selected timeline event.
   ValueListenable<TimelineEvent> get selectedTimelineEvent =>
@@ -232,7 +295,6 @@ class TimelineController
     }
   }
 
-  @override
   FutureOr<void> processOfflineData(OfflineTimelineData offlineData) async {
     await clearData();
     final traceEvents = [
@@ -314,6 +376,14 @@ class TimelineController
     if (offlineTimelineData.cpuProfileData != null) {
       cpuProfilerController.loadOfflineData(offlineTimelineData.cpuProfileData);
     }
+  }
+
+  /// Exports the current timeline data to a .json file.
+  ///
+  /// This method returns the name of the file that was downloaded.
+  String exportData() {
+    final encodedData = _exportController.encode(TimelineScreen.id, data.json);
+    return _exportController.downloadFile(encodedData);
   }
 
   Future<void> toggleHttpRequestLogging(bool state) async {

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
@@ -81,7 +80,7 @@ class MemoryBodyState extends State<MemoryBody> {
     super.didChangeDependencies();
     maybePushDebugModeMemoryMessage(context, MemoryScreen.id);
 
-    final newController = Controllers.of(context).memory;
+    final newController = MemoryControllerProvider.of(context);
     if (newController == controller) return;
     controller = newController;
 

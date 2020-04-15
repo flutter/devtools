@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../charts/flutter/flame_chart.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/theme.dart';
 import '../../geometry.dart';
 import '../../ui/colors.dart';
@@ -77,7 +76,7 @@ class TimelineFlameChartState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController = Controllers.of(context).timeline;
+    final newController = TimelineControllerProvider.of(context);
     if (newController == _timelineController) return;
     _timelineController = newController;
 

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
@@ -18,7 +17,7 @@ import '../../globals.dart';
 import '../../table_data.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../../utils.dart';
-import '../logging_controller.dart';
+import 'logging_controller.dart';
 
 // TODO(devoncarew): Show rows starting from the top (and have them grow down).
 // TODO(devoncarew): We should keep new items visible (if the last item was
@@ -46,7 +45,7 @@ class LoggingScreen extends Screen {
 
   @override
   Widget buildStatus(BuildContext context, TextTheme textTheme) {
-    final LoggingController controller = Controllers.of(context).logging;
+    final LoggingController controller = LoggingControllerProvider.of(context);
 
     return StreamBuilder<String>(
       initialData: controller.statusText,
@@ -70,7 +69,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   LogData selected;
   TextEditingController filterController;
 
-  LoggingController get controller => Controllers.of(context).logging;
+  LoggingController get controller => LoggingControllerProvider.of(context);
 
   @override
   void initState() {

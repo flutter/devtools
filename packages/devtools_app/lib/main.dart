@@ -5,72 +5,74 @@
 import 'package:flutter/material.dart';
 
 import 'src/config_specific/flutter/framework_initialize/framework_initialize.dart';
+import 'src/debugger/flutter/debugger_controller.dart';
 import 'src/debugger/flutter/debugger_screen.dart';
+// Uncomment to see a sample implementation of a conditional screen.
+//import 'src/example/conditional_screen.dart';
+//import 'src/example/provided_controller.dart';
 import 'src/flutter/app.dart';
-import 'src/flutter/screen.dart';
 import 'src/info/flutter/info_screen.dart';
 import 'src/inspector/flutter/inspector_screen.dart';
+import 'src/logging/flutter/logging_controller.dart';
 import 'src/logging/flutter/logging_screen.dart';
+import 'src/memory/flutter/memory_controller.dart';
 import 'src/memory/flutter/memory_screen.dart';
 import 'src/network/flutter/network_screen.dart';
+import 'src/performance/flutter/performance_controller.dart';
 import 'src/performance/flutter/performance_screen.dart';
+import 'src/timeline/flutter/timeline_controller.dart';
 import 'src/timeline/flutter/timeline_screen.dart';
 
 // TODO(bkonyi): remove this bool when page is ready.
 const showNetworkPage = false;
 
 void main() {
-  // Conditional screens can be added to this list, and they will automatically
-  // be shown or hidden based on the [Screen.conditionalLibrary] provided.
-  const screens = <Screen>[
-    InspectorScreen(),
-    TimelineScreen(),
-    MemoryScreen(),
-    PerformanceScreen(),
-    DebuggerScreen(),
-    if (showNetworkPage) NetworkScreen(),
-    LoggingScreen(),
-    InfoScreen(),
+  /// Screens to initialize DevTools with.
+  ///
+  /// If the screen depends on a provided controller, the provider should be
+  /// provided here.
+  ///
+  /// Conditional screens can be added to this list, and they will automatically
+  /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
+  final screens = <DevToolsScreen>[
+    const DevToolsScreen(screen: InspectorScreen()),
+    DevToolsScreen(
+      screen: const TimelineScreen(),
+      controllerProvider: (child) => TimelineControllerProvider(child: child),
+      supportsOffline: true,
+    ),
+    DevToolsScreen(
+      screen: const MemoryScreen(),
+      controllerProvider: (child) => MemoryControllerProvider(child: child),
+    ),
+    DevToolsScreen(
+      screen: const PerformanceScreen(),
+      controllerProvider: (child) =>
+          PerformanceControllerProvider(child: child),
+    ),
+    DevToolsScreen(
+      screen: const DebuggerScreen(),
+      controllerProvider: (child) => DebuggerControllerProvider(child: child),
+    ),
+    if (showNetworkPage)
+      const DevToolsScreen(screen: NetworkScreen()),
+    DevToolsScreen(
+      screen: const LoggingScreen(),
+      controllerProvider: (child) => LoggingControllerProvider(child: child),
+    ),
+    const DevToolsScreen(screen: InfoScreen()),
+// Uncomment to see a sample implementation of a conditional screen.
+//    DevToolsScreen(
+//      screen: const ExampleConditionalScreen(),
+//      controllerProvider: (child) => ExampleControllerProvider(child: child),
+//      supportsOffline: true,
+//    ),
   ];
 
   initializeFramework();
 
   // Now run the app.
   runApp(
-    const DevToolsApp(screens),
+    DevToolsApp(screens),
   );
 }
-
-// Example of conditional screen that could be added to [screens] above.
-//
-//class PackageProviderScreen extends Screen {
-//  PackageProviderScreen()
-//      : super.conditional(
-//          id: 'packageProvider',
-//          conditionalLibrary: 'package:gallery/',
-//          conditionalController: PackageProviderController(),
-//          title: 'Provider',
-//          icon: Icons.palette,
-//        );
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    final PackageProviderController _controller = conditionalController;
-//    return ValueListenableBuilder(
-//      valueListenable: _controller.title,
-//      builder: (context, value, _) {
-//        return Center(child: Text(value));
-//      },
-//    );
-//  }
-//}
-//
-//class PackageProviderController
-//    with OfflineControllerMixin<Map<String, dynamic>> {
-//  ValueNotifier<String> title = ValueNotifier<String>('');
-//
-//  @override
-//  FutureOr<void> processOfflineData(Map<String, dynamic> offlineData) {
-//    title.value = offlineData['title'];
-//  }
-//}
