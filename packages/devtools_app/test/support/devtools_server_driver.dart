@@ -48,6 +48,7 @@ class DevToolsServerDriver {
   static Future<DevToolsServerDriver> create({
     int port = 0,
     int tryPorts,
+    List<String> additionalArgs = const [],
   }) async {
     // These tests assume that the devtools package is present in a sibling
     // directory of the devtools_app package.
@@ -56,6 +57,7 @@ class DevToolsServerDriver {
       '--machine',
       '--port',
       '$port',
+      ...additionalArgs
     ];
 
     if (tryPorts != null) {
