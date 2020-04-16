@@ -3,12 +3,9 @@
 // found in the LICENSE file.
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
 import '../../auto_dispose.dart';
 import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../config_specific/logger/logger.dart';
-import '../../flutter/controllers.dart';
 import '../../globals.dart';
 import '../../http/http_service.dart';
 import '../../profiler/cpu_profile_controller.dart';
@@ -20,68 +17,6 @@ import 'timeline_model.dart';
 import 'timeline_processor.dart';
 import 'timeline_screen.dart';
 import 'timeline_service.dart';
-
-class TimelineControllerProvider extends ControllerProvider {
-  const TimelineControllerProvider({Key key, Widget child})
-      : super(key: key, child: child);
-
-  @override
-  _TimelineControllerProviderState createState() =>
-      _TimelineControllerProviderState();
-
-  static TimelineController of(BuildContext context) {
-    final provider = context
-        .dependOnInheritedWidgetOfExactType<_InheritedTimelineController>();
-    return provider?.data;
-  }
-}
-
-class _TimelineControllerProviderState
-    extends State<TimelineControllerProvider> {
-  TimelineController data;
-
-  @override
-  void initState() {
-    super.initState();
-    // Everything depends on the serviceManager being available.
-    assert(serviceManager != null);
-
-    _initializeProviderData();
-  }
-
-  @override
-  void didUpdateWidget(TimelineControllerProvider oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _initializeProviderData();
-  }
-
-  void _initializeProviderData() {
-    data = TimelineController();
-  }
-
-  @override
-  void dispose() {
-    data.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _InheritedTimelineController(data: data, child: widget.child);
-  }
-}
-
-class _InheritedTimelineController extends InheritedWidget {
-  const _InheritedTimelineController(
-      {@required this.data, @required Widget child})
-      : super(child: child);
-
-  final TimelineController data;
-
-  @override
-  bool updateShouldNotify(_InheritedTimelineController oldWidget) =>
-      oldWidget.data != data;
-}
 
 /// This class contains the business logic for [timeline_screen.dart].
 ///

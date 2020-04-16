@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
@@ -88,7 +89,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     super.didChangeDependencies();
     maybePushDebugModePerformanceMessage(context, TimelineScreen.id);
 
-    final newController = TimelineControllerProvider.of(context);
+    final newController = Provider.of<TimelineController>(context);
     if (newController == controller) return;
     controller = newController;
 

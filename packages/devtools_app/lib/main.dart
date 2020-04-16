@@ -9,8 +9,8 @@ import 'src/debugger/flutter/debugger_controller.dart';
 import 'src/debugger/flutter/debugger_screen.dart';
 // Uncomment to see a sample implementation of a conditional screen.
 //import 'src/example/conditional_screen.dart';
-//import 'src/example/provided_controller.dart';
 import 'src/flutter/app.dart';
+import 'src/flutter/controllers.dart';
 import 'src/info/flutter/info_screen.dart';
 import 'src/inspector/flutter/inspector_screen.dart';
 import 'src/logging/flutter/logging_controller.dart';
@@ -38,33 +38,57 @@ void main() {
     const DevToolsScreen(screen: InspectorScreen()),
     DevToolsScreen(
       screen: const TimelineScreen(),
-      controllerProvider: (child) => TimelineControllerProvider(child: child),
+      controllerProvider: (child) => ControllerProvider<TimelineController>(
+        child: child,
+        controller: TimelineController(),
+      ),
       supportsOffline: true,
     ),
     DevToolsScreen(
       screen: const MemoryScreen(),
-      controllerProvider: (child) => MemoryControllerProvider(child: child),
+      controllerProvider: (child) => ControllerProvider<MemoryController>(
+        child: child,
+        controller: MemoryController(),
+      ),
     ),
     DevToolsScreen(
       screen: const PerformanceScreen(),
-      controllerProvider: (child) =>
-          PerformanceControllerProvider(child: child),
+      controllerProvider: (child) => ControllerProvider<PerformanceController>(
+        child: child,
+        controller: PerformanceController(),
+      ),
     ),
     DevToolsScreen(
       screen: const DebuggerScreen(),
-      controllerProvider: (child) => DebuggerControllerProvider(child: child),
+      controllerProvider: (child) => ControllerProvider<DebuggerController>(
+        child: child,
+        controller: DebuggerController(),
+      ),
     ),
     if (showNetworkPage)
       const DevToolsScreen(screen: NetworkScreen()),
     DevToolsScreen(
       screen: const LoggingScreen(),
-      controllerProvider: (child) => LoggingControllerProvider(child: child),
+      controllerProvider: (child) => ControllerProvider<LoggingController>(
+        child: child,
+        controller: LoggingController(
+          onLogCountStatusChanged: (_) {
+            // TODO(devoncarew): This callback is not used.
+          },
+          // TODO(djshuckerow): Use a notifier pattern for the logging controller.
+          // That way, it is visible if it has listeners and invisible otherwise.
+          isVisible: () => true,
+        ),
+      ),
     ),
     const DevToolsScreen(screen: InfoScreen()),
 // Uncomment to see a sample implementation of a conditional screen.
 //    DevToolsScreen(
 //      screen: const ExampleConditionalScreen(),
-//      controllerProvider: (child) => ExampleControllerProvider(child: child),
+//      controllerProvider: (child) => ControllerProvider<ExampleController>(
+//        child: child,
+//        controller: ExampleController(),
+//      ),
 //      supportsOffline: true,
 //    ),
   ];

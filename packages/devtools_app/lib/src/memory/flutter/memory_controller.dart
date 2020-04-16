@@ -15,7 +15,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../auto_dispose.dart';
 import '../../config_specific/file/file.dart';
 import '../../config_specific/logger/logger.dart';
-import '../../flutter/controllers.dart';
 import '../../globals.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
 import '../../utils.dart';
@@ -34,67 +33,6 @@ typedef chartStateListener = void Function();
 // Memory Log filename.
 final String _memoryLogFilename =
     '${MemoryController.logFilenamePrefix}${DateFormat("yyyyMMdd_hh_mm").format(DateTime.now())}';
-
-class MemoryControllerProvider extends ControllerProvider {
-  const MemoryControllerProvider({Key key, Widget child})
-      : super(key: key, child: child);
-
-  @override
-  _MemoryControllerProviderState createState() =>
-      _MemoryControllerProviderState();
-
-  static MemoryController of(BuildContext context) {
-    final provider = context
-        .dependOnInheritedWidgetOfExactType<_InheritedMemoryController>();
-    return provider?.data;
-  }
-}
-
-class _MemoryControllerProviderState extends State<MemoryControllerProvider> {
-  MemoryController data;
-
-  @override
-  void initState() {
-    super.initState();
-    // Everything depends on the serviceManager being available.
-    assert(serviceManager != null);
-
-    _initializeProviderData();
-  }
-
-  @override
-  void didUpdateWidget(MemoryControllerProvider oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _initializeProviderData();
-  }
-
-  void _initializeProviderData() {
-    data = MemoryController();
-  }
-
-  @override
-  void dispose() {
-    data.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _InheritedMemoryController(data: data, child: widget.child);
-  }
-}
-
-class _InheritedMemoryController extends InheritedWidget {
-  const _InheritedMemoryController(
-      {@required this.data, @required Widget child})
-      : super(child: child);
-
-  final MemoryController data;
-
-  @override
-  bool updateShouldNotify(_InheritedMemoryController oldWidget) =>
-      oldWidget.data != data;
-}
 
 /// This class contains the business logic for [memory.dart].
 ///

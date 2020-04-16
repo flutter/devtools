@@ -13,7 +13,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../config_specific/logger/logger.dart' as logger;
 import '../../core/message_bus.dart';
-import '../../flutter/controllers.dart';
 import '../../globals.dart';
 import '../../inspector/diagnostics_node.dart';
 import '../../inspector/inspector_service.dart';
@@ -52,74 +51,6 @@ Future<String> _retrieveFullStringValue(
     stringRef,
     onUnavailable: (truncatedValue) => '${stringRef.valueAsString}...',
   );
-}
-
-class LoggingControllerProvider extends ControllerProvider {
-  const LoggingControllerProvider({Key key, Widget child})
-      : super(key: key, child: child);
-
-  @override
-  _LoggingControllerProviderState createState() =>
-      _LoggingControllerProviderState();
-
-  static LoggingController of(BuildContext context) {
-    final provider = context
-        .dependOnInheritedWidgetOfExactType<_InheritedLoggingController>();
-    return provider?.data;
-  }
-}
-
-class _LoggingControllerProviderState extends State<LoggingControllerProvider> {
-  LoggingController data;
-
-  @override
-  void initState() {
-    super.initState();
-    // Everything depends on the serviceManager being available.
-    assert(serviceManager != null);
-
-    _initializeProviderData();
-  }
-
-  @override
-  void didUpdateWidget(LoggingControllerProvider oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _initializeProviderData();
-  }
-
-  void _initializeProviderData() {
-    data = LoggingController(
-      onLogCountStatusChanged: (_) {
-        // TODO(devoncarew): This callback is not used.
-      },
-      // TODO(djshuckerow): Use a notifier pattern for the logging controller.
-      // That way, it is visible if it has listeners and invisible otherwise.
-      isVisible: () => true,
-    );
-  }
-
-  @override
-  void dispose() {
-    data.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _InheritedLoggingController(data: data, child: widget.child);
-  }
-}
-
-class _InheritedLoggingController extends InheritedWidget {
-  const _InheritedLoggingController(
-      {@required this.data, @required Widget child})
-      : super(child: child);
-
-  final LoggingController data;
-
-  @override
-  bool updateShouldNotify(_InheritedLoggingController oldWidget) =>
-      oldWidget.data != data;
 }
 
 class LoggingDetailsController {

@@ -213,6 +213,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     return ValueListenableProvider.value(
       value: _currentScreen,
       child: DragAndDrop(
+        // TODO(kenz): we are handling drops from multiple scaffolds. We need
+        // to make sure we are only handling drops from the active scaffold.
         handleDrop: _importController.importData,
         child: AnimatedBuilder(
           animation: appBarCurve,

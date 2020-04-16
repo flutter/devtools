@@ -16,12 +16,13 @@ class ExportControllerWeb extends ExportController {
   @override
   String downloadFile(String contents) {
     final element = document.createElement('a');
+    final fileName = generateFileName();
     element.setAttribute('href', Url.createObjectUrl(Blob([contents])));
-    element.setAttribute('download', filename);
+    element.setAttribute('download', fileName);
     element.style.display = 'none';
     document.body.append(element);
     element.click();
     element.remove();
-    return filename;
+    return fileName;
   }
 }

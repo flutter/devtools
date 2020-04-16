@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import '../../flutter/common_widgets.dart';
@@ -33,7 +34,7 @@ class EventDetails extends StatelessWidget {
     // from the offline data, show message notifying that CPU profile data is
     // unavailable for snapshots and provide link to return to offline profile
     // (see html_event_details.dart).
-    final controller = TimelineControllerProvider.of(context);
+    final controller = Provider.of<TimelineController>(context);
     final textTheme = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

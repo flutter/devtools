@@ -25,6 +25,7 @@ import 'package:mp_chart/mp/core/utils/color_utils.dart';
 import 'package:mp_chart/mp/core/utils/painter_utils.dart';
 import 'package:mp_chart/mp/core/value_formatter/default_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
+import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/theme.dart';
@@ -94,7 +95,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController = TimelineControllerProvider.of(context);
+    final newController = Provider.of<TimelineController>(context);
     if (newController == _controller) return;
     _controller = newController;
 

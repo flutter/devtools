@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
@@ -80,7 +81,7 @@ class MemoryBodyState extends State<MemoryBody> {
     super.didChangeDependencies();
     maybePushDebugModeMemoryMessage(context, MemoryScreen.id);
 
-    final newController = MemoryControllerProvider.of(context);
+    final newController = Provider.of<MemoryController>(context);
     if (newController == controller) return;
     controller = newController;
 

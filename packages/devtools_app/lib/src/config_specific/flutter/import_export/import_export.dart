@@ -66,13 +66,15 @@ abstract class ExportController {
 
   const ExportController.impl();
 
-  String get filename {
+  String generateFileName() {
     final now = DateTime.now();
     final timestamp =
         '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
     return 'dart_devtools_$timestamp.json';
   }
 
+  /// Downloads a JSON file with [contents] and returns the name of the
+  /// downloaded file.
   String downloadFile(String contents);
 
   String encode(String activeScreenId, Map<String, dynamic> contents) {

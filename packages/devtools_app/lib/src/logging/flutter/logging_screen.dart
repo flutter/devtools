@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
@@ -45,7 +46,8 @@ class LoggingScreen extends Screen {
 
   @override
   Widget buildStatus(BuildContext context, TextTheme textTheme) {
-    final LoggingController controller = LoggingControllerProvider.of(context);
+    final LoggingController controller =
+        Provider.of<LoggingController>(context);
 
     return StreamBuilder<String>(
       initialData: controller.statusText,
@@ -69,7 +71,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   LogData selected;
   TextEditingController filterController;
 
-  LoggingController get controller => LoggingControllerProvider.of(context);
+  LoggingController get controller => Provider.of<LoggingController>(context);
 
   @override
   void initState() {

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
@@ -65,7 +66,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
     super.didChangeDependencies();
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
-    final newController = PerformanceControllerProvider.of(context);
+    final newController = Provider.of<PerformanceController>(context);
     if (newController == controller) return;
     controller = newController;
 

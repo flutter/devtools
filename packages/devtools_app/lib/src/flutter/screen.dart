@@ -100,7 +100,8 @@ abstract class Screen {
 }
 
 mixin OfflineScreenMixin<T extends StatefulWidget, U> on State<T> {
-  bool loadingOfflineData = false;
+  bool get loadingOfflineData => _loadingOfflineData;
+  bool _loadingOfflineData = false;
 
   bool shouldLoadOfflineData();
 
@@ -108,11 +109,11 @@ mixin OfflineScreenMixin<T extends StatefulWidget, U> on State<T> {
 
   Future<void> loadOfflineData(U offlineData) async {
     setState(() {
-      loadingOfflineData = true;
+      _loadingOfflineData = true;
     });
     await processOfflineData(offlineData);
     setState(() {
-      loadingOfflineData = false;
+      _loadingOfflineData = false;
     });
   }
 }

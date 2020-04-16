@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../flutter/screen.dart';
 import '../globals.dart';
-import 'provided_controller.dart';
 
 /// This is an example implementation of a conditional screen that supports
 /// offline mode and uses a provided controller [ExampleController].
@@ -19,12 +19,12 @@ class ExampleConditionalScreen extends Screen {
   const ExampleConditionalScreen()
       : super.conditional(
           id: id,
-          conditionalLibrary: 'package:collection/',
+          conditionalLibrary: 'package:flutter/',
           title: 'Example',
           icon: Icons.palette,
         );
 
-  static const id = 'Example';
+  static const id = 'example';
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class _ExampleConditionalScreenBodyState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController = ExampleControllerProvider.of(context);
+    final newController = Provider.of<ExampleController>(context);
     if (newController == controller) return;
     controller = newController;
 
@@ -97,5 +97,13 @@ class _ExampleConditionalScreenBodyState
     return offlineMode &&
         offlineDataJson.isNotEmpty &&
         offlineDataJson[ExampleConditionalScreen.id] != null;
+  }
+}
+
+class ExampleController {
+  final ValueNotifier<String> title = ValueNotifier('Example screen');
+
+  FutureOr<void> processOfflineData(String offlineData) {
+    title.value = offlineData;
   }
 }

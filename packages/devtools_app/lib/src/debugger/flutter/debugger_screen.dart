@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart' hide Stack;
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
@@ -64,7 +65,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final newController = DebuggerControllerProvider.of(context);
+    final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
 
