@@ -45,33 +45,37 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
   }
 
   Widget buildBreakpoint(BuildContext context, BreakpointAndSourcePosition bp) {
+    final regularStyle =
+        TextStyle(color: Theme.of(context).textTheme.bodyText2.color);
     final subtleStyle =
         TextStyle(color: Theme.of(context).unselectedWidgetColor);
+    final selectedStyle =
+        TextStyle(color: Theme.of(context).textSelectionColor);
+
+    final isSelected = bp.id == widget.selected?.id;
 
     return Material(
-      color: bp.id == widget.selected?.id
-          ? Theme.of(context).selectedRowColor
-          : null,
+      color: isSelected ? Theme.of(context).selectedRowColor : null,
       child: InkWell(
         onTap: () => widget.onSelected(bp),
         child: densePadding(
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                '● ${_descriptionFor(bp)}',
-                overflow: TextOverflow.ellipsis,
-                style: bp.id == widget.selected?.id
-                    ? TextStyle(color: Theme.of(context).textSelectionColor)
-                    : null,
-              ),
               Flexible(
-                child: Text(
-                  ' (${bp.scriptUri})',
+                child: RichText(
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: bp.id == widget.selected?.id
-                      ? TextStyle(color: Theme.of(context).textSelectionColor)
-                      : subtleStyle,
+                  text: TextSpan(
+                    text: '● ${_descriptionFor(bp)}',
+                    style: isSelected ? selectedStyle : regularStyle,
+                    children: [
+                      TextSpan(
+                        text: ' (${bp.scriptUri})',
+                        style: isSelected ? selectedStyle : subtleStyle,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

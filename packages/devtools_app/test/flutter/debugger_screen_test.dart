@@ -94,7 +94,9 @@ void main() {
 
       final breakpointsWithLocation = [
         BreakpointAndSourcePosition(
-            breakpoints.first, SourcePosition(line: 10, column: 1))
+          breakpoints.first,
+          SourcePosition(line: 10, column: 1),
+        )
       ];
 
       final debuggerController = MockDebuggerController();
@@ -116,7 +118,12 @@ void main() {
       expect(find.text('Breakpoints'), findsOneWidget);
 
       // test for items in the breakpoint list
-      expect(find.text('script.dart 10'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((Widget widget) =>
+            widget is RichText &&
+            widget.text.toPlainText().contains('● script.dart:10')),
+        findsOneWidget,
+      );
     });
   });
 }

@@ -114,7 +114,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     if (script == null) return {};
     return {
       for (var b in controller.breakpoints.value
-          .where((b) => b != null && b.location.script.id == script.id))
+          .where((b) => b != null && b.location.script?.id == script.id))
         controller.lineNumber(script, b.location): b,
     };
   }
@@ -248,6 +248,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             Expanded(
               child: Text(
                 title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.subtitle2,
               ),
             ),
