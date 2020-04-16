@@ -150,7 +150,12 @@ class DebuggerController extends DisposableController
     }
 
     _breakpoints.value = isolate.breakpoints;
-    // todo: build _breakpointsWithLocation from _breakpoints
+    // Build _breakpointsWithLocation from _breakpoints.
+    // ignore: unawaited_futures
+    Future.wait(_breakpoints.value.map(_createBreakpointWithLocation))
+        .then((list) {
+      _breakpointsWithLocation.value = list.toList()..sort();
+    });
 
     _exceptionPauseMode.value = isolate.exceptionPauseMode;
   }
@@ -216,66 +221,37 @@ class DebuggerController extends DisposableController
       // TODO(djshuckerow): switch the _breakpoints notifier to a 'ListNotifier'
       // that knows how to notify when performing a list edit operation.
       case EventKind.kBreakpointAdded:
-        print('kBreakpointAdded: ${event.breakpoint}');
-
-        print(event.breakpoint.resolved);
-        print(event.breakpoint.location.runtimeType);
-
         _breakpoints.value = [..._breakpoints.value, event.breakpoint];
 
-        if (event.breakpoint.resolved) {
-          BreakpointAndSourcePosition bp =
-              BreakpointAndSourcePosition(event.breakpoint);
-
-          // ignore: unawaited_futures
-          getScript(bp.script).then((Script script) {
-            // todo: clean all this up
-            final SourcePosition pos = calculatePosition(script, bp.tokenPos);
-            bp = BreakpointAndSourcePosition(event.breakpoint, pos);
-
-            final list = _breakpointsWithLocation.value.toList();
-            list.remove(bp);
-            list.add(bp);
-            list.sort();
-            _breakpointsWithLocation.value = list;
-          });
-        } else {
+        // ignore: unawaited_futures
+        _createBreakpointWithLocation(event.breakpoint).then((bp) {
           final list = [
             ..._breakpointsWithLocation.value,
-            BreakpointAndSourcePosition(event.breakpoint),
+            bp,
           ]..sort();
+
           _breakpointsWithLocation.value = list;
-        }
+        });
 
         break;
       case EventKind.kBreakpointResolved:
-        print('kBreakpointResolved: ${event.breakpoint}');
-
         _breakpoints.value = [
           for (var b in _breakpoints.value) if (b != event.breakpoint) b,
           event.breakpoint
         ];
 
-        BreakpointAndSourcePosition bp =
-            BreakpointAndSourcePosition(event.breakpoint);
-
         // ignore: unawaited_futures
-        getScript(bp.script).then((Script script) {
-          // todo: clean all this up
-          final SourcePosition pos = calculatePosition(script, bp.tokenPos);
-          bp = BreakpointAndSourcePosition(event.breakpoint, pos);
-
+        _createBreakpointWithLocation(event.breakpoint).then((bp) {
           final list = _breakpointsWithLocation.value.toList();
-          list.remove(bp);
-          list.add(bp);
-          list.sort();
+          list
+            ..remove(bp)
+            ..add(bp)
+            ..sort();
           _breakpointsWithLocation.value = list;
         });
 
         break;
       case EventKind.kBreakpointRemoved:
-        print('kBreakpointRemoved: ${event.breakpoint}');
-
         _breakpoints.value = [
           for (var b in _breakpoints.value) if (b != event.breakpoint) b
         ];
@@ -394,6 +370,19 @@ class DebuggerController extends DisposableController
       return uri.substring(commonScriptPrefix.length);
     }
   }
+
+  Future<BreakpointAndSourcePosition> _createBreakpointWithLocation(
+      Breakpoint breakpoint) async {
+    if (breakpoint.resolved) {
+      final bp = BreakpointAndSourcePosition(breakpoint);
+      return getScript(bp.script).then((Script script) {
+        final SourcePosition pos = calculatePosition(script, bp.tokenPos);
+        return BreakpointAndSourcePosition(breakpoint, pos);
+      });
+    } else {
+      return BreakpointAndSourcePosition(breakpoint);
+    }
+  }
 }
 
 class SourcePosition {
@@ -473,6 +462,8 @@ class BreakpointAndSourcePosition
       return null;
     }
   }
+
+  String get id => breakpoint.id;
 
   @override
   int get hashCode => breakpoint.hashCode;

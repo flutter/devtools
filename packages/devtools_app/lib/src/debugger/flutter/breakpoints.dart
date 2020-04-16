@@ -5,16 +5,23 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
 import '../../utils.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 
 class BreakpointPicker extends StatefulWidget {
-  const BreakpointPicker({Key key, @required this.controller})
-      : super(key: key);
+  const BreakpointPicker({
+    Key key,
+    @required this.controller,
+    @required this.selected,
+    @required this.onSelected,
+  }) : super(key: key);
 
   final DebuggerController controller;
+  final BreakpointAndSourcePosition selected;
+  final void Function(BreakpointAndSourcePosition breakpoint) onSelected;
 
   @override
   _BreakpointPickerState createState() => _BreakpointPickerState();
@@ -42,20 +49,28 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
         TextStyle(color: Theme.of(context).unselectedWidgetColor);
 
     return Material(
+      color: bp.id == widget.selected?.id
+          ? Theme.of(context).selectedRowColor
+          : null,
       child: InkWell(
-        // todo:
-        onTap: () => print(bp),
+        onTap: () => widget.onSelected(bp),
         child: densePadding(
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text('● '),
-              Text(_descriptionFor(bp)),
-              Expanded(
-                child: Text(
-                  ' (${bp.scriptUri})',
-                  style: subtleStyle,
-                ),
+              Text(
+                '● ${_descriptionFor(bp)}',
+                overflow: TextOverflow.ellipsis,
+                style: bp.id == widget.selected?.id
+                    ? TextStyle(color: Theme.of(context).textSelectionColor)
+                    : null,
+              ),
+              Text(
+                ' (${bp.scriptUri})',
+                overflow: TextOverflow.ellipsis,
+                style: bp.id == widget.selected?.id
+                    ? TextStyle(color: Theme.of(context).textSelectionColor)
+                    : subtleStyle,
               ),
             ],
           ),
@@ -84,23 +99,6 @@ class BreakpointsCountBadge extends StatelessWidget {
     return Badge(
       child: Text(
         '${nf.format(breakpoints.length)}',
-      ),
-    );
-  }
-}
-
-class Badge extends StatelessWidget {
-  const Badge({@required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      child: Chip(
-        label: child,
-        visualDensity: VisualDensity.compact,
-        padding: const EdgeInsets.symmetric(vertical: -4.0),
       ),
     );
   }
