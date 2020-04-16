@@ -13,6 +13,7 @@ import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../support/chrome.dart';
 import '../support/cli_test_driver.dart';
 import '../support/devtools_server_driver.dart';
 import 'integration.dart';
@@ -302,10 +303,24 @@ void main() {
       }, timeout: const Timeout.factor(10));
 
       test('server removes clients that disconnect from the API', () async {
-        // TODO(dantup): This requires the ability for us to shut down Chrome,
-        // probably via a command to the server, which needs
-        // https://github.com/dart-lang/browser_launcher/pull/12
-      }, timeout: const Timeout.factor(10), skip: true);
+        final event =
+            await events.firstWhere((map) => map['event'] == 'server.started');
+
+        // Spawn our own Chrome process so we can terminate it.
+        final devToolsUri =
+            'http://${event['params']['host']}:${event['params']['port']}';
+        final chrome = await Chrome.locate().start(url: devToolsUri);
+
+        // Wait for DevTools to inform server that it's connected.
+        await _waitForClients();
+
+        // Close the browser, which will disconnect DevTools SSE connection
+        // back to the server.
+        chrome.kill();
+
+        // Ensure the client is completely removed from the list.
+        await _waitForClients(expectNone: true);
+      }, timeout: const Timeout.factor(10));
 
       test('Server reuses DevTools instance if already connected to same VM',
           () async {
@@ -428,10 +443,13 @@ Future<Map<String, dynamic>> _send(String method,
 Future<Map<String, dynamic>> _waitForClients({
   bool requiredConnectionState,
   String requiredPage,
+  bool expectNone = false,
 }) async {
   Map<String, dynamic> serverResponse;
 
-  String timeoutMessage = 'Server did not return any known clients';
+  String timeoutMessage = expectNone
+      ? 'Server returned clients'
+      : 'Server did not return any known clients';
   if (requiredConnectionState != null) {
     timeoutMessage += requiredConnectionState
         ? ' that are connected'
@@ -450,7 +468,7 @@ Future<Map<String, dynamic>> _waitForClients({
       serverResponse = await _send('client.list');
       final clients = serverResponse['clients'];
       return clients is List &&
-          clients.isNotEmpty &&
+          (clients.isEmpty == expectNone) &&
           (requiredPage == null || clients.any(isOnPage)) &&
           (requiredConnectionState == null || clients.any(hasConnectionState));
     },
