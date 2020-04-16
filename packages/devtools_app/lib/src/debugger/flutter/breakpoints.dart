@@ -65,12 +65,14 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
                     ? TextStyle(color: Theme.of(context).textSelectionColor)
                     : null,
               ),
-              Text(
-                ' (${bp.scriptUri})',
-                overflow: TextOverflow.ellipsis,
-                style: bp.id == widget.selected?.id
-                    ? TextStyle(color: Theme.of(context).textSelectionColor)
-                    : subtleStyle,
+              Flexible(
+                child: Text(
+                  ' (${bp.scriptUri})',
+                  overflow: TextOverflow.ellipsis,
+                  style: bp.id == widget.selected?.id
+                      ? TextStyle(color: Theme.of(context).textSelectionColor)
+                      : subtleStyle,
+                ),
               ),
             ],
           ),
