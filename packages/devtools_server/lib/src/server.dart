@@ -28,6 +28,7 @@ const protocolVersion = '1.1.0';
 const argHelp = 'help';
 const argVmUri = 'vm-uri';
 const argEnableNotifications = 'enable-notifications';
+const argAllowEmbedding = 'allow-embedding';
 const argHeadlessMode = 'headless';
 const argDebugMode = 'debug';
 const argLaunchBrowser = 'launch-browser';
@@ -94,6 +95,12 @@ final argParser = ArgParser()
         'Requests notification permissions immediately when a client connects back to the server.',
   )
   ..addFlag(
+    argAllowEmbedding,
+    hide: true,
+    negatable: false,
+    help: 'Allow embedding DevTools inside an iframe.',
+  )
+  ..addFlag(
     argHeadlessMode,
     hide: true,
     negatable: false,
@@ -127,6 +134,7 @@ Future<HttpServer> serveDevToolsWithArgs(
   final bool machineMode = args[argMachine];
   final bool launchBrowser = args[argLaunchBrowser];
   final bool enableNotifications = args[argEnableNotifications];
+  final bool allowEmbedding = args[argAllowEmbedding];
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
   final bool headlessMode = args[argHeadlessMode];
   final bool debugMode = args[argDebugMode];
@@ -144,6 +152,7 @@ Future<HttpServer> serveDevToolsWithArgs(
     debugMode: debugMode,
     launchBrowser: launchBrowser,
     enableNotifications: enableNotifications,
+    allowEmbedding: allowEmbedding,
     port: port,
     headlessMode: headlessMode,
     numPortsToTry: numPortsToTry,
@@ -166,6 +175,7 @@ Future<HttpServer> serveDevTools({
   bool debugMode = false,
   bool launchBrowser = false,
   bool enableNotifications = false,
+  bool allowEmbedding = false,
   bool headlessMode = false,
   bool verboseMode = false,
   String hostname = 'localhost',
@@ -217,6 +227,9 @@ Future<HttpServer> serveDevTools({
     throw ex;
   }
 
+  if (allowEmbedding) {
+    server.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
+  }
   shelf.serveRequests(server, handler);
 
   final devToolsUrl = 'http://${server.address.host}:${server.port}';

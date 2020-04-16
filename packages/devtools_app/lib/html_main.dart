@@ -32,7 +32,12 @@ void main() {
 
       // TODO(terry): Eventually remove the below line localStorage clear().
       /// Nothing is now stored in Chrome's local store - remove old stuff.
-      window.localStorage.clear();
+      try {
+        window.localStorage.clear();
+        // ignore: empty_catches
+      } catch (e) {
+        // window.localStorage will throw permissions errors when embedded.
+      }
 
       // Show the opt-in dialog for collection analytics?
       try {

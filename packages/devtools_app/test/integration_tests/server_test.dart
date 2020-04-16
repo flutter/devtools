@@ -114,6 +114,43 @@ void main() {
     }
   }, timeout: const Timeout.factor(10));
 
+  test('does not allow embedding without flag', () async {
+    final server = await DevToolsServerDriver.create();
+    final httpClient = HttpClient();
+    try {
+      final startedEvent = await server.stdout
+          .firstWhere((map) => map['event'] == 'server.started');
+      final host = startedEvent['params']['host'];
+      final port = startedEvent['params']['port'];
+
+      final req = await httpClient.get(host, port, '/');
+      final resp = await req.close();
+      expect(resp.headers.value('x-frame-options'), equals('SAMEORIGIN'));
+    } finally {
+      httpClient.close();
+      server.kill();
+    }
+  }, timeout: const Timeout.factor(10));
+
+  test('allows embedding with flag', () async {
+    final server = await DevToolsServerDriver.create(
+        additionalArgs: ['--allow-embedding']);
+    final httpClient = HttpClient();
+    try {
+      final startedEvent = await server.stdout
+          .firstWhere((map) => map['event'] == 'server.started');
+      final host = startedEvent['params']['host'];
+      final port = startedEvent['params']['port'];
+
+      final req = await httpClient.get(host, port, '/');
+      final resp = await req.close();
+      expect(resp.headers.value('x-frame-options'), isNull);
+    } finally {
+      httpClient.close();
+      server.kill();
+    }
+  }, timeout: const Timeout.factor(10));
+
   test('Analytics Survey', () async {
     var serverResponse = await _send('devTools.survey', {
       'surveyRequest': 'copyAndCreateDevToolsFile',
