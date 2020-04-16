@@ -24,6 +24,9 @@ final StreamController<Map<String, dynamic>> eventController =
     StreamController.broadcast();
 Stream<Map<String, dynamic>> get events => eventController.stream;
 final Map<String, String> registeredServices = {};
+// A list of PIDs for Chrome instances spawned by tests that should be
+// cleaned up.
+final List<int> browserPids = [];
 
 void main() {
   final bool testInReleaseMode =
@@ -75,6 +78,9 @@ void main() {
   });
 
   tearDown(() async {
+    browserPids
+      ..forEach(Process.killPid)
+      ..clear();
     server?.kill();
     await appFixture?.teardown();
   });
@@ -394,6 +400,10 @@ Future<Map<String, dynamic>> _sendLaunchDevToolsRequest({
     });
   }
   final response = await launchEvent;
+  final pid = response['params']['pid'];
+  if (pid != null) {
+    browserPids.add(pid);
+  }
   return response['params'];
 }
 

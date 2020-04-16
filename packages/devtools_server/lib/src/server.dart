@@ -727,7 +727,10 @@ Future<Map<String, dynamic>> launchDevTools(
         shouldNotify,
       )) {
     _emitLaunchEvent(
-        reused: true, notified: shouldNotify, machineMode: machineMode);
+        reused: true,
+        notified: shouldNotify,
+        pid: null,
+        machineMode: machineMode);
     return {'reused': true, 'notified': shouldNotify};
   }
 
@@ -760,6 +763,7 @@ Future<Map<String, dynamic>> launchDevTools(
   final useNativeBrowser = _isChromeOS &&
       _isAccessibleToChromeOSNativeBrowser(Uri.parse(devToolsUrl)) &&
       _isAccessibleToChromeOSNativeBrowser(vmServiceUri);
+  int browserPid;
   if (useNativeBrowser) {
     await Process.start('x-www-browser', [uriToLaunch.toString()]);
   } else {
@@ -773,10 +777,15 @@ Future<Map<String, dynamic>> launchDevTools(
             '--no-sandbox',
           ]
         : <String>[];
-    await Chrome.start([uriToLaunch.toString()], args: args);
+    final proc = await Chrome.start([uriToLaunch.toString()], args: args);
+    browserPid = proc.pid;
   }
-  _emitLaunchEvent(reused: false, notified: false, machineMode: machineMode);
-  return {'reused': false, 'notified': false};
+  _emitLaunchEvent(
+      reused: false,
+      notified: false,
+      pid: browserPid,
+      machineMode: machineMode);
+  return {'reused': false, 'notified': false, 'pid': browserPid};
 }
 
 /// Prints a launch event to stdout so consumers of the DevTools server
@@ -784,12 +793,13 @@ Future<Map<String, dynamic>> launchDevTools(
 void _emitLaunchEvent(
     {@required bool reused,
     @required bool notified,
+    @required int pid,
     @required bool machineMode}) {
   printOutput(
     null,
     {
       'event': 'client.launch',
-      'params': {'reused': reused, 'notified': notified},
+      'params': {'reused': reused, 'notified': notified, 'pid': pid},
     },
     machineMode: machineMode,
   );
