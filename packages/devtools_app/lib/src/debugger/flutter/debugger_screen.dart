@@ -23,14 +23,13 @@ import 'debugger_controller.dart';
 import 'scripts.dart';
 
 class DebuggerScreen extends Screen {
-  const DebuggerScreen() : super(id, title: 'Debugger', icon: Octicons.bug);
-
-  static const id = 'debugger';
+  const DebuggerScreen()
+      : super('debugger', title: 'Debugger', icon: Octicons.bug);
 
   static const debuggerPaneHeaderHeight = 36.0;
 
   @override
-  String get docPageId => id;
+  String get docPageId => screenId;
 
   @override
   bool get showIsolateSelector => true;

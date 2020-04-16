@@ -16,11 +16,10 @@ import '../info_controller.dart';
 class InfoScreen extends Screen {
   const InfoScreen()
       : super(
-          id,
+          'info',
           title: 'Info',
           icon: Octicons.info,
         );
-  static const id = 'info';
 
   @override
   bool get showIsolateSelector => true;
