@@ -181,11 +181,7 @@ void main() {
     );
   }, timeout: const Timeout.factor(10));
 
-  // TODO(dantup): We can't run tests using the stdin API for devTools.launch unless
-  // we're running with a new server version. This check can be removed (and always use
-  // both) after the next server release (after the PR lands).
-  for (final bool useVmService
-      in serverDevToolsLaunchViaStdin ? [true, false] : [true]) {
+  for (final bool useVmService in [true, false]) {
     group('Server (${useVmService ? 'VM Service' : 'API'})', () {
       test(
           'DevTools connects back to server API and registers that it is connected',
