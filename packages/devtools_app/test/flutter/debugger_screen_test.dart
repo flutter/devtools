@@ -45,6 +45,8 @@ void main() {
       final debuggerController = MockDebuggerController();
       when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
       when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
+      when(debuggerController.breakpointsWithLocation)
+          .thenReturn(ValueNotifier([]));
       when(debuggerController.scriptList)
           .thenReturn(ValueNotifier(ScriptList(scripts: [])));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
@@ -65,6 +67,8 @@ void main() {
       final debuggerController = MockDebuggerController();
       when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
       when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
+      when(debuggerController.breakpointsWithLocation)
+          .thenReturn(ValueNotifier([]));
       when(debuggerController.scriptList)
           .thenReturn(ValueNotifier(ScriptList(scripts: scripts)));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
