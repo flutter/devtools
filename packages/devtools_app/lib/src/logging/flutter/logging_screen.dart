@@ -195,6 +195,7 @@ class _LogDetailsState extends State<LogDetails>
   @override
   void initState() {
     super.initState();
+
     crossFade = defaultAnimationController(this)
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
@@ -204,6 +205,7 @@ class _LogDetailsState extends State<LogDetails>
           });
         }
       });
+
     // We'll use a linear curve for this animation, so no curve needed.
     _computeLogDetails();
   }

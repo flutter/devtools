@@ -8,3 +8,4 @@ dependencies:
   args: any
   cli_util: any
   path: any
+  http: any

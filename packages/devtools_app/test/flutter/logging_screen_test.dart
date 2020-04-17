@@ -86,7 +86,7 @@ void main() {
     });
 
     testWidgets('can toggle structured errors', (WidgetTester tester) async {
-      final serviceManager = FakeServiceManager(useFakeService: false);
+      final serviceManager = FakeServiceManager();
       when(serviceManager.connectedApp.isFlutterWebAppNow).thenReturn(false);
       when(serviceManager.connectedApp.isProfileBuildNow).thenReturn(false);
       setGlobal(

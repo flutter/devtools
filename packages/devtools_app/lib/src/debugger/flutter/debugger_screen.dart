@@ -59,6 +59,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   DebuggerController controller;
   ScriptRef loadingScript;
   Script script;
+  BreakpointAndSourcePosition selectedBreakpoint;
 
   @override
   void didChangeDependencies() {
@@ -68,19 +69,19 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     if (newController == controller) return;
     controller = newController;
 
-    // TODO(all): We need to be more precise about the changes we listen to.
-    // These coarse listeners are causing us to rebuild much more of the UI than
-    // we need to.
+    // TODO(devoncarew): We need to be more precise about the changes we listen
+    // to. These coarse listeners are causing us to rebuild much more of the UI
+    // than we need to.
+    script = controller.currentScript.value;
     addAutoDisposeListener(controller.currentScript, () {
       setState(() {
         script = controller.currentScript.value;
       });
     });
+
     addAutoDisposeListener(controller.currentStack);
     addAutoDisposeListener(controller.sortedScripts);
     addAutoDisposeListener(controller.breakpoints);
-
-    controller.getScripts();
   }
 
   Future<void> _onScriptSelected(ScriptRef ref) async {
@@ -94,11 +95,22 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     await controller.selectScript(ref);
   }
 
+  Future<void> _onBreakpointSelected(BreakpointAndSourcePosition bp) async {
+    if (bp != selectedBreakpoint) {
+      setState(() {
+        selectedBreakpoint = bp;
+      });
+    }
+
+    // TODO(devoncarew): Change the line selection in the code view as well.
+    await controller.selectScript(bp.script);
+  }
+
   Map<int, Breakpoint> _breakpointsForLines() {
     if (script == null) return {};
     return {
       for (var b in controller.breakpoints.value
-          .where((b) => b != null && b.location.script.id == script.id))
+          .where((b) => b != null && b.location.script?.id == script.id))
         controller.lineNumber(script, b.location): b,
     };
   }
@@ -153,7 +165,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                         ],
                       ),
                     ),
-                  Console(),
+                  Console(
+                    controller: controller,
+                  ),
                 ],
               ),
             ),
@@ -173,7 +187,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           headers: [
             _debuggerPaneHeader(callStackTitle, needsTopBorder: false),
             _debuggerPaneHeader(variablesTitle),
-            _debuggerPaneHeader(breakpointsTitle),
+            _debuggerPaneHeader(
+              breakpointsTitle,
+              rightChild: BreakpointsCountBadge(
+                breakpoints: controller.breakpoints.value,
+              ),
+            ),
             _debuggerPaneHeader(
               librariesTitle,
               rightChild: ScriptCountBadge(
@@ -184,7 +203,11 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           children: [
             const Center(child: Text('TODO: call stack')),
             const Center(child: Text('TODO: variables')),
-            BreakpointPicker(controller: controller),
+            BreakpointPicker(
+              controller: controller,
+              selected: selectedBreakpoint,
+              onSelected: _onBreakpointSelected,
+            ),
             ScriptPicker(
               scripts: controller.sortedScripts.value,
               selected: loadingScript,
@@ -223,6 +246,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             Expanded(
               child: Text(
                 title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.subtitle2,
               ),
             ),

@@ -71,6 +71,8 @@ to `launchDevTools`. `params` contains the following fields:
 - `reused` - whether an existing DevTools instance was reused (otherwise a new
   browser was launched)
 - `notified` - whether or not a notification was shown
+- `pid` - the pid of the launched instance of Chrome (omitted if Chrome was not
+  not launched or an existing Chrome instance was reused)
 -->
 
 ### Requests
