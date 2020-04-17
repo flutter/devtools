@@ -120,8 +120,7 @@ class AnsiUp {
         _buffer = _buffer.substring(rpos);
         return pkt;
       }
-      // TODO: Convert the JS code (below) that handles a ']' character
-      // Currently we are only handling '[' characters that are common in ANSI codes
+      // TODO: Convert the JS code (below) that identifies OS commands
       //if (next_char == ']') {
       //  if (len < 4) {
       //    pkt.kind = PacketKind.Incomplete;
