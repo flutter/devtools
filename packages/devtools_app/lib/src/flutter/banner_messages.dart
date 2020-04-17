@@ -5,11 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../globals.dart';
-import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
-import 'controllers.dart';
 import 'screen.dart';
 import 'theme.dart';
 import 'utils.dart';
@@ -25,25 +24,35 @@ class BannerMessagesController {
   final _dismissedMessageKeys = <Key>{};
 
   void addMessage(BannerMessage message) {
-    if (isMessageDismissed(message) || isMessageVisible(message)) return;
-    final messages = _messagesForScreen(message.screenId);
-    messages.value.add(message);
-    // TODO(kenz): we should make a ListValueNotifier class that handles
-    // notifying listeners so we don't have to make an illegal call to a
-    // protected method.
-    // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
-    messages.notifyListeners();
+    // We push the banner message in a post frame callback because otherwise,
+    // we'd be trying to call setState while the parent widget `BannerMessages`
+    // is in the middle of `build`.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (isMessageDismissed(message) || isMessageVisible(message)) return;
+      final messages = _messagesForScreen(message.screenId);
+      messages.value.add(message);
+      // TODO(kenz): we should make a ListValueNotifier class that handles
+      // notifying listeners so we don't have to make an illegal call to a
+      // protected method.
+      // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+      messages.notifyListeners();
+    });
   }
 
   void removeMessage(BannerMessage message, {bool dismiss = false}) {
-    if (dismiss) {
-      assert(!_dismissedMessageKeys.contains(message.key));
-      _dismissedMessageKeys.add(message.key);
-    }
-    final messages = _messagesForScreen(message.screenId);
-    messages.value.remove(message);
-    // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
-    messages.notifyListeners();
+    // We push the banner message in a post frame callback because otherwise,
+    // we'd be trying to call setState while the parent widget `BannerMessages`
+    // is in the middle of `build`.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (dismiss) {
+        assert(!_dismissedMessageKeys.contains(message.key));
+        _dismissedMessageKeys.add(message.key);
+      }
+      final messages = _messagesForScreen(message.screenId);
+      messages.value.remove(message);
+      // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+      messages.notifyListeners();
+    });
   }
 
   void removeMessageByKey(Key key, String screenId) {
@@ -85,103 +94,26 @@ class BannerMessages extends StatelessWidget {
 
   final Screen screen;
 
-  @override
-  Widget build(BuildContext context) {
-    return _BannerMessagesProvider(screen: screen);
-  }
-
-  static BannerMessagesState of(BuildContext context) {
-    final provider =
-        context.dependOnInheritedWidgetOfExactType<_InheritedBannerMessages>();
-    return provider?.data;
-  }
-}
-
-class _BannerMessagesProvider extends StatefulWidget {
-  const _BannerMessagesProvider({Key key, this.screen}) : super(key: key);
-
-  final Screen screen;
-
-  @override
-  BannerMessagesState createState() => BannerMessagesState();
-}
-
-class _InheritedBannerMessages extends InheritedWidget {
-  const _InheritedBannerMessages({this.data, Widget child})
-      : super(child: child);
-
-  final BannerMessagesState data;
-
-  @override
-  bool updateShouldNotify(_InheritedBannerMessages oldWidget) {
-    return oldWidget.data != data;
-  }
-}
-
-class BannerMessagesState extends State<_BannerMessagesProvider>
-    with AutoDisposeMixin {
-  BannerMessagesController controller;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final newController = CommonControllers.of(context)?.bannerMessages;
-    if (newController == controller) return;
-    controller = newController;
-  }
-
-  void push(BannerMessage message) {
-    // We push the banner message in a post frame callback because otherwise,
-    // we'd be trying to call setState while the parent widget `BannerMessages`
-    // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      controller.addMessage(message);
-    });
-  }
-
-  void remove(BannerMessage message, {bool dismiss = false}) {
-    // We push the banner message in a post frame callback because otherwise,
-    // we'd be trying to call setState while the parent widget `BannerMessages`
-    // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      controller.removeMessage(message, dismiss: dismiss);
-    });
-  }
-
-  void removeMessageByKey(Key key, String screenId) {
-    // We push the banner message in a post frame callback because otherwise,
-    // we'd be trying to call setState while the parent widget `BannerMessages`
-    // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.removeMessageByKey(key, screenId);
-    });
-  }
-
   // TODO(kenz): use an AnimatedList for message changes.
   @override
   Widget build(BuildContext context) {
-    final messagesForScreen =
-        controller?.messagesForScreen(widget.screen.screenId);
-    return _InheritedBannerMessages(
-      data: this,
-      child: Column(
-        children: [
-          if (messagesForScreen != null)
-            ValueListenableBuilder<List<BannerMessage>>(
-              valueListenable: messagesForScreen,
-              builder: (context, messages, _) {
-                return Column(
-                  children: messages,
-                );
-              },
-            ),
-          Expanded(
-            child: widget.screen.build(context),
-          )
-        ],
-      ),
+    final controller = Provider.of<BannerMessagesController>(context);
+    final messagesForScreen = controller?.messagesForScreen(screen.screenId);
+    return Column(
+      children: [
+        if (messagesForScreen != null)
+          ValueListenableBuilder<List<BannerMessage>>(
+            valueListenable: messagesForScreen,
+            builder: (context, messages, _) {
+              return Column(
+                children: messages,
+              );
+            },
+          ),
+        Expanded(
+          child: screen.build(context),
+        )
+      ],
     );
   }
 }
@@ -224,7 +156,8 @@ class BannerMessage extends StatelessWidget {
               foregroundColor: foregroundColor,
               // TODO(kenz): animate the removal of this message.
               onPressed: () =>
-                  BannerMessages.of(context).remove(this, dismiss: true),
+                  Provider.of<BannerMessagesController>(context, listen: false)
+                      .removeMessage(this, dismiss: true),
             ),
           ],
         ),
@@ -386,8 +319,8 @@ void maybePushDebugModePerformanceMessage(
 ) {
   if (offlineMode) return;
   if (serviceManager.connectedApp.isDebugFlutterAppNow) {
-    BannerMessages.of(context)
-        .push(DebugModePerformanceMessage(screenId).build(context));
+    Provider.of<BannerMessagesController>(context)
+        .addMessage(DebugModePerformanceMessage(screenId).build(context));
   }
 }
 
@@ -397,7 +330,7 @@ void maybePushDebugModeMemoryMessage(
 ) {
   if (offlineMode) return;
   if (serviceManager.connectedApp.isDebugFlutterAppNow) {
-    BannerMessages.of(context)
-        .push(DebugModeMemoryMessage(screenId).build(context));
+    Provider.of<BannerMessagesController>(context)
+        .addMessage(DebugModeMemoryMessage(screenId).build(context));
   }
 }

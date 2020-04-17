@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
 import 'package:devtools_app/src/flutter/banner_messages.dart';
-import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/flutter/notifications.dart';
 import 'package:devtools_app/src/flutter/scaffold.dart';
 import 'package:devtools_app/src/flutter/theme.dart';
@@ -17,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
+import 'package:provider/provider.dart';
 
 import '../support/mocks.dart';
 
@@ -32,6 +32,10 @@ Widget wrap(Widget widget) {
   );
 }
 
+Widget _wrapWithController<T>(T controller, Widget child) {
+  return Provider<T>(create: (_) => controller, child: child);
+}
+
 Widget wrapWithControllers(
   Widget widget, {
   LoggingController logging,
@@ -41,23 +45,29 @@ Widget wrapWithControllers(
   DebuggerController debugger,
   BannerMessagesController bannerMessages,
 }) {
+  Widget child = widget;
+  if (logging != null) {
+    child = _wrapWithController<LoggingController>(logging, child);
+  }
+  if (memory != null) {
+    child = _wrapWithController<MemoryController>(memory, child);
+  }
+  if (timeline != null) {
+    child = _wrapWithController<TimelineController>(timeline, child);
+  }
+  if (performance != null) {
+    child = _wrapWithController<PerformanceController>(performance, child);
+  }
+  if (debugger != null) {
+    child = _wrapWithController<DebuggerController>(debugger, child);
+  }
+  child = _wrapWithController<BannerMessagesController>(
+    bannerMessages ?? MockBannerMessagesController(),
+    child,
+  );
   return MaterialApp(
     theme: themeFor(isDarkTheme: false),
-    home: Material(
-      child: Controllers.overridden(
-        overrideProviders: () {
-          return ProvidedControllers(
-            logging: logging ?? MockLoggingController(),
-            memory: memory ?? MockFlutterMemoryController(),
-            timeline: timeline ?? MockTimelineController(),
-            performance: performance ?? MockPerformanceController(),
-            debugger: debugger ?? MockDebuggerController(),
-            bannerMessages: bannerMessages ?? MockBannerMessagesController(),
-          );
-        },
-        child: widget,
-      ),
-    ),
+    home: Material(child: child),
   );
 }
 

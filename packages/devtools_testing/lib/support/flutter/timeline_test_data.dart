@@ -952,7 +952,6 @@ final offlineTimelineDataJson = {
   TimelineData.selectedFrameIdKey: 'PipelineItem-1',
   TimelineData.selectedEventKey: vsyncEvent.json,
   TimelineData.displayRefreshRateKey: 120.0,
-  TimelineData.devToolsScreenKey: timelineScreenId,
 };
 
 // Mark: Duration events with duplicate traces

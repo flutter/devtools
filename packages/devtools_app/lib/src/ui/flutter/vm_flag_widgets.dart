@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/banner_messages.dart';
@@ -47,12 +48,13 @@ class ProfileGranularityDropdownState
           _onProfileGranularityChanged(safeValue, context);
         }
 
-        final bannerMessages = BannerMessages.of(context);
+        final bannerMessageController =
+            Provider.of<BannerMessagesController>(context);
         if (safeValue == highProfilePeriod) {
-          bannerMessages.push(
+          bannerMessageController.addMessage(
               HighProfileGranularityMessage(widget.screenId).build(context));
         } else {
-          BannerMessages.of(context).removeMessageByKey(
+          bannerMessageController.removeMessageByKey(
             HighProfileGranularityMessage(widget.screenId).key,
             widget.screenId,
           );

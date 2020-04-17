@@ -48,7 +48,7 @@ class DevToolsApp extends StatefulWidget {
 // TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
-  final PreferencesController preferences = PreferencesController();
+  final preferences = PreferencesController();
 
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
@@ -110,17 +110,15 @@ class DevToolsAppState extends State<DevToolsApp> {
     return _routes ??= {
       homeRoute: (_, params, __) => Initializer(
             url: params['uri'],
-            builder: (_) => CommonControllers(
-              child: _providedControllers(
-                child: DevToolsScaffold(
-                  tabs: _visibleScreens(),
-                  actions: [
-                    HotReloadButton(),
-                    HotRestartButton(),
-                    OpenSettingsAction(),
-                    OpenAboutAction(),
-                  ],
-                ),
+            builder: (_) => _providedControllers(
+              child: DevToolsScaffold(
+                tabs: _visibleScreens(),
+                actions: [
+                  HotReloadButton(),
+                  HotRestartButton(),
+                  OpenSettingsAction(),
+                  OpenAboutAction(),
+                ],
               ),
             ),
           ),

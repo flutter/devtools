@@ -13,7 +13,7 @@ void main() async {
     TestNotifications notifications;
     setUp(() {
       notifications = TestNotifications();
-      importController = ImportController(notifications, (_, __) {});
+      importController = ImportController(notifications, (_) {});
     });
 
     test('importData pushes proper notifications', () {
@@ -28,13 +28,6 @@ void main() async {
         notifications.messages,
         contains(attemptingToImportMessage('info')),
       );
-    });
-
-    test('importing empty timeline notifies', () {
-      expect(notifications.messages, isEmpty);
-      importController.importData(emptyTimelineJson);
-      expect(notifications.messages.length, equals(1));
-      expect(notifications.messages, contains(emptyTimelineMessage));
     });
   });
 }

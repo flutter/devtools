@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/flutter/banner_messages.dart';
-import 'package:devtools_app/src/flutter/scaffold.dart';
+import 'package:devtools_app/src/flutter/theme.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/flutter/performance_screen.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
@@ -12,6 +12,7 @@ import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:devtools_app/src/ui/flutter/vm_flag_widgets.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../support/mocks.dart';
@@ -21,22 +22,33 @@ void main() {
   group('Profile Granularity Dropdown', () {
     FakeServiceManager fakeServiceManager;
     ProfileGranularityDropdown dropdown;
-    BannerMessagesController bannerMessagesController;
+    BuildContext buildContext;
 
     setUp(() {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       dropdown = const ProfileGranularityDropdown(PerformanceScreen.id);
-      bannerMessagesController = BannerMessagesController();
     });
 
     Future<void> pumpDropdown(WidgetTester tester) async {
-      await tester.pumpWidget(wrapWithControllers(
-        BannerMessages(
-          screen: SimpleScreen(dropdown),
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeFor(isDarkTheme: false),
+          home: Material(
+            child: wrapWithControllers(
+              wrapWithBannerMessages(
+                Builder(
+                  builder: (context) {
+                    buildContext = context;
+                    return dropdown;
+                  },
+                ),
+              ),
+              bannerMessages: BannerMessagesController(),
+            ),
+          ),
         ),
-        bannerMessages: bannerMessagesController,
-      ));
+      );
     }
 
     testWidgets('displays with default content', (WidgetTester tester) async {
@@ -88,7 +100,7 @@ void main() {
       );
       // Verify we are showing the high profile granularity warning.
       expect(
-        bannerMessagesController
+        bannerMessagesController(buildContext)
             .messagesForScreen(PerformanceScreen.id)
             .value
             .length,
@@ -112,7 +124,9 @@ void main() {
       );
       // Verify we are not showing the high profile granularity warning.
       expect(
-        bannerMessagesController.messagesForScreen(PerformanceScreen.id).value,
+        bannerMessagesController(buildContext)
+            .messagesForScreen(PerformanceScreen.id)
+            .value,
         isEmpty,
       );
     });
@@ -157,6 +171,10 @@ void main() {
       );
     });
   });
+}
+
+BannerMessagesController bannerMessagesController(BuildContext context) {
+  return Provider.of<BannerMessagesController>(context, listen: false);
 }
 
 Future<Flag> getProfileGranularityFlag(

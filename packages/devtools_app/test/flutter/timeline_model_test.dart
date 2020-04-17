@@ -4,7 +4,6 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/utils.dart';
@@ -48,7 +47,6 @@ void main() {
             TimelineData.selectedFrameIdKey: null,
             TimelineData.selectedEventKey: {},
             TimelineData.displayRefreshRateKey: 60,
-            TimelineData.devToolsScreenKey: timelineScreenId,
           }));
 
       timelineData = TimelineData(displayRefreshRate: 60)
@@ -65,7 +63,6 @@ void main() {
           TimelineData.selectedFrameIdKey: null,
           TimelineData.selectedEventKey: vsyncEvent.json,
           TimelineData.displayRefreshRateKey: 60,
-          TimelineData.devToolsScreenKey: timelineScreenId,
         }),
       );
     });
