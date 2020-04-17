@@ -46,7 +46,7 @@ class DebuggerController extends DisposableController
     }();
   }
 
-  Event lastEvent;
+  Event _lastEvent;
 
   final _currentScript = ValueNotifier<Script>(null);
 
@@ -91,49 +91,8 @@ class DebuggerController extends DisposableController
 
   IsolateRef isolateRef;
 
-  List<ScriptRef> scripts;
-
   InstanceRef get reportedException => _reportedException;
   InstanceRef _reportedException;
-
-  String commonScriptPrefix;
-
-  LibraryRef get rootLib => _rootLib;
-  LibraryRef _rootLib;
-
-  set rootLib(LibraryRef rootLib) {
-    _rootLib = rootLib;
-
-    String scriptPrefix = rootLib.uri;
-    if (scriptPrefix.startsWith('package:')) {
-      scriptPrefix = scriptPrefix.substring(0, scriptPrefix.indexOf('/') + 1);
-    } else if (scriptPrefix.contains('/lib/')) {
-      scriptPrefix =
-          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/lib/'));
-      if (scriptPrefix.contains('/')) {
-        scriptPrefix =
-            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
-      }
-    } else if (scriptPrefix.contains('/bin/')) {
-      scriptPrefix =
-          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/bin/'));
-      if (scriptPrefix.contains('/')) {
-        scriptPrefix =
-            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
-      }
-    } else if (scriptPrefix.contains('/test/')) {
-      scriptPrefix =
-          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/test/'));
-      if (scriptPrefix.contains('/')) {
-        scriptPrefix =
-            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
-      }
-    } else {
-      scriptPrefix = null;
-    }
-
-    commonScriptPrefix = scriptPrefix;
-  }
 
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {
@@ -181,7 +140,7 @@ class DebuggerController extends DisposableController
 
     if (isolate.pauseEvent != null &&
         isolate.pauseEvent.kind != EventKind.kResume) {
-      lastEvent = isolate.pauseEvent;
+      _lastEvent = isolate.pauseEvent;
       _reportedException = isolate.pauseEvent.exception;
       await _pause(true);
     }
@@ -198,6 +157,8 @@ class DebuggerController extends DisposableController
     }
 
     _exceptionPauseMode.value = isolate.exceptionPauseMode;
+
+    await _populateScripts(isolate);
   }
 
   Future<Success> pause() => _service.pause(isolateRef.id);
@@ -206,7 +167,7 @@ class DebuggerController extends DisposableController
 
   Future<Success> stepOver() {
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
-    final useAsyncStepping = lastEvent?.atAsyncSuspension ?? false;
+    final useAsyncStepping = _lastEvent?.atAsyncSuspension ?? false;
     return _service.resume(
       isolateRef.id,
       step:
@@ -242,7 +203,7 @@ class DebuggerController extends DisposableController
     if (event.isolate.id != isolateRef.id) return;
 
     _hasFrames.value = event.topFrame != null;
-    lastEvent = event;
+    _lastEvent = event;
 
     switch (event.kind) {
       case EventKind.kResume:
@@ -331,7 +292,7 @@ class DebuggerController extends DisposableController
 
   void _clearCaches() {
     _scriptCache.clear();
-    lastEvent = null;
+    _lastEvent = null;
     _reportedException = null;
   }
 
@@ -352,11 +313,12 @@ class DebuggerController extends DisposableController
 
   Future<void> selectScript(ScriptRef ref) async {
     if (ref == null) return;
+
     _currentScript.value =
         await _service.getObject(isolateRef.id, ref.id) as Script;
   }
 
-  Future<void> getScripts() async {
+  Future<void> _populateScripts(Isolate isolate) async {
     _scriptList.value = await _service.getScripts(isolateRef.id);
 
     // TODO(devoncarew): Follow up to see why we need to filter out non-unique
@@ -368,6 +330,12 @@ class DebuggerController extends DisposableController
       return a.uri.toUpperCase().compareTo(b.uri.toUpperCase());
     });
     _sortedScripts.value = scriptRefs;
+
+    // Update the selected script.
+    final mainScriptRef = _scriptList.value.scripts.firstWhere((ref) {
+      return ref.uri == isolate.rootLib.uri;
+    }, orElse: () => null);
+    await selectScript(mainScriptRef);
   }
 
   SourcePosition calculatePosition(Script script, int tokenPos) {
@@ -406,22 +374,6 @@ class DebuggerController extends DisposableController
     throw Exception(
       '$location should be a $UnresolvedSourceLocation or a $SourceLocation',
     );
-  }
-
-  String shortScriptName(String uri) {
-    if (commonScriptPrefix == null) {
-      return uri;
-    }
-
-    if (!uri.startsWith(commonScriptPrefix)) {
-      return uri;
-    }
-
-    if (commonScriptPrefix.startsWith('package:')) {
-      return uri.substring('package:'.length);
-    } else {
-      return uri.substring(commonScriptPrefix.length);
-    }
   }
 
   Future<BreakpointAndSourcePosition> _createBreakpointWithLocation(
