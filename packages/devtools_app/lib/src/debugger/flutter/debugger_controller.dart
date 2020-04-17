@@ -18,6 +18,8 @@ class DebuggerController extends DisposableController
     autoDispose(serviceManager.isolateManager.onSelectedIsolateChanged
         .listen(switchToIsolate));
     autoDispose(_service.onDebugEvent.listen(_handleIsolateEvent));
+    autoDispose(_service.onStdoutEvent.listen(_handleStdoutEvent));
+    autoDispose(_service.onStderrEvent.listen(_handleStderrEvent));
   }
 
   VmService get _service => serviceManager.service;
@@ -74,6 +76,13 @@ class DebuggerController extends DisposableController
 
   ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
 
+  final _stdio = ValueNotifier<String>('');
+
+  /// Return the stdout and stderr emitted from the application.
+  ///
+  /// Note that this output might be truncated after significant output.
+  ValueListenable<String> get stdio => _stdio;
+
   IsolateRef isolateRef;
 
   List<ScriptRef> scripts;
@@ -86,7 +95,10 @@ class DebuggerController extends DisposableController
   LibraryRef get rootLib => _rootLib;
   LibraryRef _rootLib;
 
+  // todo: is this called?
   set rootLib(LibraryRef rootLib) {
+    print('set rootLib');
+
     _rootLib = rootLib;
 
     String scriptPrefix = rootLib.uri;
@@ -118,6 +130,13 @@ class DebuggerController extends DisposableController
     }
 
     commonScriptPrefix = scriptPrefix;
+  }
+
+  /// Append to the stdout / stderr buffer.
+  void appendStdio(String text) {
+    // TODO(devoncarew): Check for greater than some amount of text and truncate
+    // _stdio.value.
+    _stdio.value += text;
   }
 
   void switchToIsolate(IsolateRef ref) async {
@@ -230,6 +249,18 @@ class DebuggerController extends DisposableController
         ];
         break;
     }
+  }
+
+  void _handleStdoutEvent(Event event) {
+    final String text = decodeBase64(event.bytes);
+    appendStdio(text);
+  }
+
+  void _handleStderrEvent(Event event) {
+    final String text = decodeBase64(event.bytes);
+    // TODO(devoncarew): Change to reporting stdio along with information about whether
+    // the event was stdout or stderr.
+    appendStdio(text);
   }
 
   Future<void> _pause(bool pause) async {

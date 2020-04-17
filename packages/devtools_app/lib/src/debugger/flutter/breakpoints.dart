@@ -25,8 +25,8 @@ class BreakpointPicker extends StatelessWidget {
           '${location.tokenPos} (${location.script.uri})';
     } else {
       final location = breakpoint.location as UnresolvedSourceLocation;
-      return '${location.script.uri.split('/').last} Position '
-          '${location.line} (${location.script.uri})';
+      return '${location.script?.uri?.split('/')?.last} Position '
+          '${location.line} (${location.script?.uri})';
     }
   }
 
