@@ -82,12 +82,12 @@ class DebuggerController extends DisposableController
 
   ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
 
-  final _stdio = ValueNotifier<String>('');
+  final _stdio = ValueNotifier<List<String>>([]);
 
   /// Return the stdout and stderr emitted from the application.
   ///
   /// Note that this output might be truncated after significant output.
-  ValueListenable<String> get stdio => _stdio;
+  ValueListenable<List<String>> get stdio => _stdio;
 
   IsolateRef isolateRef;
 
@@ -137,9 +137,30 @@ class DebuggerController extends DisposableController
 
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {
-    // TODO(devoncarew): Check for greater than some amount of text and truncate
-    // _stdio.value.
-    _stdio.value += text;
+    const int kMaxLogItemsLowerBound = 5000;
+    const int kMaxLogItemsUpperBound = 5500;
+
+    // Parse out the new lines and append to the end of the existing lines.
+    var lines = _stdio.value.toList();
+    final newLines = text.split('\n');
+
+    if (lines.isNotEmpty && !lines.last.endsWith('\n')) {
+      lines[lines.length - 1] = '${lines[lines.length - 1]}${newLines.first}';
+      if (newLines.length > 1) {
+        lines.addAll(newLines.sublist(1));
+      }
+    } else {
+      lines.addAll(newLines);
+    }
+
+    // For performance reasons, we drop older lines in batches, so the lines
+    // will grow to kMaxLogItemsUpperBound then truncate to
+    // kMaxLogItemsLowerBound.
+    if (lines.length > kMaxLogItemsUpperBound) {
+      lines = lines.sublist(lines.length - kMaxLogItemsLowerBound);
+    }
+
+    _stdio.value = lines;
   }
 
   void switchToIsolate(IsolateRef ref) async {
@@ -292,8 +313,8 @@ class DebuggerController extends DisposableController
 
   void _handleStderrEvent(Event event) {
     final String text = decodeBase64(event.bytes);
-    // TODO(devoncarew): Change to reporting stdio along with information about whether
-    // the event was stdout or stderr.
+    // TODO(devoncarew): Change to reporting stdio along with information about
+    // whether the event was stdout or stderr.
     appendStdio(text);
   }
 

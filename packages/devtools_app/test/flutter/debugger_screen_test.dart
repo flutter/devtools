@@ -51,7 +51,7 @@ void main() {
           .thenReturn(ValueNotifier(ScriptList(scripts: [])));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
       when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
-      when(debuggerController.stdio).thenReturn(ValueNotifier('test stdio'));
+      when(debuggerController.stdio).thenReturn(ValueNotifier(['test stdio']));
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
         debugger: debuggerController,
@@ -75,7 +75,7 @@ void main() {
           .thenReturn(ValueNotifier(ScriptList(scripts: scripts)));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
       when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
-      when(debuggerController.stdio).thenReturn(ValueNotifier(''));
+      when(debuggerController.stdio).thenReturn(ValueNotifier([]));
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
         debugger: debuggerController,
@@ -117,6 +117,7 @@ void main() {
           .thenReturn(ValueNotifier(ScriptList(scripts: [])));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
       when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
+      when(debuggerController.stdio).thenReturn(ValueNotifier([]));
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
         debugger: debuggerController,

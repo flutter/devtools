@@ -46,23 +46,35 @@ class _ConsoleState extends State<Console> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(denseSpacing),
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: ValueListenableBuilder(
-                  valueListenable: widget.controller.stdio,
-                  builder: (context, value, _) {
+              child: ValueListenableBuilder<List<String>>(
+                valueListenable: widget.controller.stdio,
+                builder: (context, lines, _) {
+                  if (scrollController.hasClients) {
                     // If we're at the end already, scroll to expose the new
                     // content.
+                    // TODO(devoncarew): We should generalize the
+                    // auto-scroll-to-bottom feature.
                     final pos = scrollController.position;
                     if (pos.pixels == pos.maxScrollExtent) {
                       SchedulerBinding.instance.addPostFrameCallback((_) {
                         _scrollToBottom();
                       });
                     }
+                  }
 
-                    return Text(value, style: textStyle);
-                  },
-                ),
+                  return ListView.builder(
+                    itemCount: lines.length,
+                    //itemExtent: CodeView.rowHeight,
+                    controller: scrollController,
+                    itemBuilder: (context, index) {
+                      return Text(
+                        lines[index],
+                        maxLines: 1,
+                        style: textStyle,
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ),
@@ -75,7 +87,7 @@ class _ConsoleState extends State<Console> {
     await scrollController.animateTo(
       scrollController.position.maxScrollExtent,
       duration: const Duration(milliseconds: 100),
-      curve: Curves.easeInOut,
+      curve: defaultCurve,
     );
 
     // Scroll again if we've received new content in the interim.
