@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-
 import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -188,6 +187,7 @@ class _TestProvidedControllers extends Fake implements ProvidedControllers {
   _TestProvidedControllers() {
     _disposed[this] = false;
   }
+
   @override
   void dispose() {
     _disposed[this] = true;
@@ -207,6 +207,7 @@ class _TestDependent extends StatefulWidget {
 class _TestDependentState extends State<_TestDependent> {
   int notifications = 0;
   _TestProvidedControllers controllers;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();

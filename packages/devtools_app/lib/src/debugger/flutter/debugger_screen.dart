@@ -76,16 +76,16 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     // TODO(devoncarew): We need to be more precise about the changes we listen
     // to. These coarse listeners are causing us to rebuild much more of the UI
     // than we need to.
+    script = controller.currentScript.value;
     addAutoDisposeListener(controller.currentScript, () {
       setState(() {
         script = controller.currentScript.value;
       });
     });
+
     addAutoDisposeListener(controller.currentStack);
     addAutoDisposeListener(controller.sortedScripts);
     addAutoDisposeListener(controller.breakpoints);
-
-    controller.getScripts();
   }
 
   Future<void> _onScriptSelected(ScriptRef ref) async {
