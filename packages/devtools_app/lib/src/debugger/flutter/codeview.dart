@@ -4,8 +4,9 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart' hide Stack;
-import 'package:vm_service/vm_service.dart';
+import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart' hide Stack;
+import 'package:vm_service/vm_service.dart' as vm show Stack;
 
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/theme.dart';
@@ -29,7 +30,7 @@ class CodeView extends StatefulWidget {
   final DebuggerController controller;
   final Map<int, Breakpoint> lineNumberToBreakpoint;
   final Script script;
-  final Stack stack;
+  final vm.Stack stack;
   final void Function(Script script, int line) onSelected;
 
   @override
@@ -38,6 +39,7 @@ class CodeView extends StatefulWidget {
 
 class _CodeViewState extends State<CodeView> {
   List<String> lines = [];
+  Set<int> executableLines = {};
   LinkedScrollControllerGroup verticalController;
   ScrollController gutterController;
   ScrollController textController;
@@ -80,6 +82,15 @@ class _CodeViewState extends State<CodeView> {
   void _updateLines() {
     setState(() {
       lines = widget.script?.source?.split('\n') ?? [];
+
+      executableLines = {};
+
+      // Recalculate the executable lines.
+      if (widget.script?.tokenPosTable != null) {
+        for (var encodedInfo in widget.script.tokenPosTable) {
+          executableLines.add(encodedInfo[0]);
+        }
+      }
     });
   }
 
@@ -152,6 +163,7 @@ class _CodeViewState extends State<CodeView> {
                     onPressed: () => _onPressed(lineNum),
                     isBreakpoint:
                         widget.lineNumberToBreakpoint.containsKey(lineNum),
+                    isExecutable: executableLines.contains(lineNum),
                     isPausedHere: pausedPositions.contains(lineNum),
                   );
                 },
@@ -185,50 +197,74 @@ class GutterRow extends StatelessWidget {
     Key key,
     @required this.lineNumber,
     @required this.totalLines,
-    @required this.onPressed,
     @required this.isBreakpoint,
-    this.isPausedHere = false,
+    @required this.isExecutable,
+    @required this.isPausedHere,
+    @required this.onPressed,
   }) : super(key: key);
 
   final int lineNumber;
   final int totalLines;
-  final VoidCallback onPressed;
-
   final bool isBreakpoint;
+  final bool isExecutable;
 
   /// Whether the execution point is currently paused here.
   final bool isPausedHere;
 
+  final VoidCallback onPressed;
+
   @override
   Widget build(BuildContext context) {
-    // TODO(devoncarew): Improve the layout of the breakpoint and execution
-    // marker.
+    final theme = Theme.of(context);
+
+    final foregroundColor = theme.textTheme.bodyText2.color;
+    final subtleColor = theme.unselectedWidgetColor;
 
     return InkWell(
       onTap: onPressed,
       child: Container(
         height: CodeView.rowHeight,
-        padding: const EdgeInsets.only(left: 2.0, right: 4.0),
-        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 4.0),
         decoration: BoxDecoration(color: titleSolidBackgroundColor),
-        child: Row(
+        child: Stack(
+          alignment: AlignmentDirectional.centerStart,
+          fit: StackFit.expand,
           children: [
+            if (isExecutable || isBreakpoint)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: Stack(
+                    alignment: AlignmentDirectional.center,
+                    children: [
+                      if (isExecutable) _createCircle(1.5, subtleColor),
+                      if (isBreakpoint) _createCircle(6.0, foregroundColor),
+                    ],
+                  ),
+                ),
+              ),
+            Text('$lineNumber', textAlign: TextAlign.end),
             if (isPausedHere)
-              const Icon(Icons.play_arrow, size: defaultIconSize),
-            if (isBreakpoint && !isPausedHere)
               const Padding(
-                padding: EdgeInsets.only(bottom: 4.0),
-                child: Text('●'),
+                padding: EdgeInsets.only(left: 8.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Icon(Icons.play_arrow, size: defaultIconSize),
+                ),
               ),
-            Expanded(
-              child: Text(
-                '$lineNumber',
-                textAlign: TextAlign.end,
-              ),
-            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _createCircle(double radius, Color color) {
+    return Container(
+      width: radius,
+      height: radius,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }
@@ -247,20 +283,21 @@ class ScriptRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final regularStyle = TextStyle(color: theme.textTheme.bodyText2.color);
+    final selectedStyle = TextStyle(color: theme.textSelectionColor);
+
     return InkWell(
       onTap: onPressed,
       child: Container(
         alignment: Alignment.centerLeft,
         height: CodeView.rowHeight,
-        color: isPausedHere ? Theme.of(context).selectedRowColor : null,
-        child: Text(
-          lineContents,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: isPausedHere
-              ? TextStyle(color: Theme.of(context).textSelectionColor)
-              : null,
-        ),
+        color: isPausedHere ? theme.selectedRowColor : null,
+        child: Text(lineContents,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: isPausedHere ? selectedStyle : regularStyle),
       ),
     );
   }
