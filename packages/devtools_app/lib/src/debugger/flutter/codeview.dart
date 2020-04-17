@@ -10,6 +10,8 @@ import 'package:vm_service/vm_service.dart' as vm show Stack;
 
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/theme.dart';
+import 'breakpoints.dart';
+import 'common.dart';
 import 'debugger_controller.dart';
 
 // TODO(kenz): consider moving lines / pausedPositions calculations to the
@@ -220,6 +222,9 @@ class GutterRow extends StatelessWidget {
     final foregroundColor = theme.textTheme.bodyText2.color;
     final subtleColor = theme.unselectedWidgetColor;
 
+    const bpBoxSize = 12.0;
+    const executionPointIndent = 8.0;
+
     return InkWell(
       onTap: onPressed,
       child: Container(
@@ -234,13 +239,15 @@ class GutterRow extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: SizedBox(
-                  width: 12,
-                  height: 12,
+                  width: bpBoxSize,
+                  height: bpBoxSize,
                   child: Stack(
                     alignment: AlignmentDirectional.center,
                     children: [
-                      if (isExecutable) _createCircle(1.5, subtleColor),
-                      if (isBreakpoint) _createCircle(6.0, foregroundColor),
+                      if (isExecutable)
+                        createCircleWidget(executableLineRadius, subtleColor),
+                      if (isBreakpoint)
+                        createCircleWidget(breakpointRadius, foregroundColor),
                     ],
                   ),
                 ),
@@ -248,7 +255,7 @@ class GutterRow extends StatelessWidget {
             Text('$lineNumber', textAlign: TextAlign.end),
             if (isPausedHere)
               const Padding(
-                padding: EdgeInsets.only(left: 8.0),
+                padding: EdgeInsets.only(left: executionPointIndent),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Icon(Icons.play_arrow, size: defaultIconSize),
@@ -257,14 +264,6 @@ class GutterRow extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _createCircle(double radius, Color color) {
-    return Container(
-      width: radius,
-      height: radius,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }
