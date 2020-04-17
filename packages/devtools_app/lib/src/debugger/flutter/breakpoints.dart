@@ -45,17 +45,16 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
   }
 
   Widget buildBreakpoint(BuildContext context, BreakpointAndSourcePosition bp) {
-    final regularStyle =
-        TextStyle(color: Theme.of(context).textTheme.bodyText2.color);
-    final subtleStyle =
-        TextStyle(color: Theme.of(context).unselectedWidgetColor);
-    final selectedStyle =
-        TextStyle(color: Theme.of(context).textSelectionColor);
+    final theme = Theme.of(context);
+
+    final regularStyle = TextStyle(color: theme.textTheme.bodyText2.color);
+    final subtleStyle = TextStyle(color: theme.unselectedWidgetColor);
+    final selectedStyle = TextStyle(color: theme.textSelectionColor);
 
     final isSelected = bp.id == widget.selected?.id;
 
     return Material(
-      color: isSelected ? Theme.of(context).selectedRowColor : null,
+      color: isSelected ? theme.selectedRowColor : null,
       child: InkWell(
         onTap: () => widget.onSelected(bp),
         child: densePadding(

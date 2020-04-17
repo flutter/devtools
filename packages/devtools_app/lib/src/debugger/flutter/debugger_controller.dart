@@ -246,10 +246,11 @@ class DebuggerController extends DisposableController
         // ignore: unawaited_futures
         _createBreakpointWithLocation(event.breakpoint).then((bp) {
           final list = _breakpointsWithLocation.value.toList();
-          list
-            ..remove(bp)
-            ..add(bp)
-            ..sort();
+          // Remote the bp with the older, unresolved information from the list.
+          list.removeWhere((breakpoint) => bp.breakpoint.id == bp.id);
+          // Add the bp with the newer, resolved information.
+          list.add(bp);
+          list.sort();
           _breakpointsWithLocation.value = list;
         });
 
@@ -379,7 +380,7 @@ class DebuggerController extends DisposableController
     if (breakpoint.resolved) {
       final bp = BreakpointAndSourcePosition(breakpoint);
       return getScript(bp.script).then((Script script) {
-        final SourcePosition pos = calculatePosition(script, bp.tokenPos);
+        final pos = calculatePosition(script, bp.tokenPos);
         return BreakpointAndSourcePosition(breakpoint, pos);
       });
     } else {
