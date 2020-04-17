@@ -124,7 +124,11 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     if (breakpoints.containsKey(line)) {
       await controller.removeBreakpoint(breakpoints[line]);
     } else {
-      await controller.addBreakpoint(script.id, line);
+      try {
+        await controller.addBreakpoint(script.id, line);
+      } catch (_) {
+        // ignore errors setting breakpoints
+      }
     }
     // The controller's breakpoints value listener will update us at this point
     // to rebuild.

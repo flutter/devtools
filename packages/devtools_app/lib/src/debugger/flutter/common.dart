@@ -7,13 +7,6 @@ import 'package:flutter/material.dart';
 import '../../flutter/theme.dart';
 import 'debugger_screen.dart';
 
-Widget densePadding(Widget child) {
-  return Padding(
-    padding: const EdgeInsets.all(2.0),
-    child: child,
-  );
-}
-
 /// Create a header area for a debugger component.
 ///
 /// Either one of [text] or [child] must be supplied.
@@ -32,5 +25,13 @@ Container debuggerSectionTitle(ThemeData theme, {String text, Widget child}) {
     alignment: Alignment.centerLeft,
     height: DebuggerScreen.debuggerPaneHeaderHeight,
     child: child != null ? child : Text(text, style: theme.textTheme.subtitle2),
+  );
+}
+
+Widget createCircleWidget(double radius, Color color) {
+  return Container(
+    width: radius,
+    height: radius,
+    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
   );
 }
