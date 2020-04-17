@@ -23,6 +23,8 @@ typedef IndexedScrollableWidgetBuilder = Widget Function(
 typedef TableKeyEventHandler = void Function(RawKeyEvent event,
     ScrollController scrollController, BoxConstraints constraints);
 
+enum ScrollKind { up, down, parent }
+
 /// A table that displays in a collection of [data], based on a collection of
 /// [ColumnData].
 ///
@@ -273,10 +275,14 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   void _onItemPressed(T node, int nodeIndex) {
     /// Rebuilds the table whenever the tree structure has been updated
-    setState(() {
-      selectedNode = node;
-      selectedNodeIndex = nodeIndex;
+    selectedNode = node;
+    selectedNodeIndex = nodeIndex;
 
+    _toggleNode(node);
+  }
+
+  void _toggleNode(T node) {
+    setState(() {
       if (!node.isExpandable) return;
       animatingNode = node;
       List<T> nodeChildren;
@@ -446,15 +452,38 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
     assert(selectedNode == items[selectedNodeIndex]);
 
-    if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
-        event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      _moveSelection(event.logicalKey, scrollController, constraints.maxHeight);
+    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      _moveSelection(ScrollKind.down, scrollController, constraints.maxHeight);
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      _moveSelection(ScrollKind.up, scrollController, constraints.maxHeight);
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+      // On left arrow collapse the row if it is expanded. If it is not, move
+      // selection to its parent.
+      if (selectedNode.isExpanded) {
+        _toggleNode(selectedNode);
+      } else {
+        _moveSelection(
+          ScrollKind.parent,
+          scrollController,
+          constraints.maxHeight,
+        );
+      }
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+      // On right arrow expand the row if possible, otherwise move selection down.
+      if (!selectedNode.isExpanded) {
+        _toggleNode(selectedNode);
+      } else {
+        _moveSelection(
+          ScrollKind.down,
+          scrollController,
+          constraints.maxHeight,
+        );
+      }
     }
-    // TODO(gmoothart): Add expand/collapse with left/right keys
   }
 
   void _moveSelection(
-    LogicalKeyboardKey key,
+    ScrollKind scrollKind,
     ScrollController scrollController,
     double viewportHeight,
   ) {
@@ -462,20 +491,23 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     final firstItemIndex =
         (scrollController.offset / _Table.defaultRowHeight).ceil();
 
+    // '-1' in the following calculations is needed because the header row
+    // occupies space in the viewport so we must subtract it out.
     final minCompleteItemsInView =
         (viewportHeight / _Table.defaultRowHeight).floor() - 1;
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
     int newSelectedNodeIndex;
 
-    if (key == LogicalKeyboardKey.arrowDown) {
-      // move selection down if there is a node lower down.
-      newSelectedNodeIndex = min(selectedNodeIndex + 1, items.length - 1);
-    } else if (key == LogicalKeyboardKey.arrowUp) {
-      // move selection up if there is a node lower down.
-      newSelectedNodeIndex = max(selectedNodeIndex - 1, 0);
-    } else {
-      // Nowhere to move
-      return;
+    switch (scrollKind) {
+      case ScrollKind.down:
+        newSelectedNodeIndex = min(selectedNodeIndex + 1, items.length - 1);
+        break;
+      case ScrollKind.up:
+        newSelectedNodeIndex = max(selectedNodeIndex - 1, 0);
+        break;
+      case ScrollKind.parent:
+        newSelectedNodeIndex = items.indexOf(selectedNode.parent);
+        break;
     }
 
     final newSelectedNode = items[newSelectedNodeIndex];
@@ -484,10 +516,10 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
     if (isBelowViewport) {
       // Scroll so selected row is the last full item displayed in the viewport.
-      // To do this we need to be showing the (minCompleteItemsInView - 1)
+      // To do this we need to be showing the (minCompleteItemsInView + 1)
       // previous item  at the top.
       scrollController.animateTo(
-        (newSelectedNodeIndex - minCompleteItemsInView - 1) *
+        (newSelectedNodeIndex - minCompleteItemsInView + 1) *
             _Table.defaultRowHeight,
         duration: defaultDuration,
         curve: defaultCurve,
