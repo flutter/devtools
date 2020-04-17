@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
@@ -457,26 +456,28 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       _moveSelection(ScrollKind.down, scrollController, constraints.maxHeight);
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
       _moveSelection(ScrollKind.up, scrollController, constraints.maxHeight);
-    }
-
-    // On left arrow collapse the row if it is expanded. If it is not, move
-    // selection to its parent.
-    else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+      // On left arrow collapse the row if it is expanded. If it is not, move
+      // selection to its parent.
       if (selectedNode.isExpanded) {
         _toggleNode(selectedNode);
       } else {
         _moveSelection(
-            ScrollKind.parent, scrollController, constraints.maxHeight);
+          ScrollKind.parent,
+          scrollController,
+          constraints.maxHeight,
+        );
       }
-    }
-
-    // On right arrow expand the row if possible, otherwise move selection down.
-    else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+      // On right arrow expand the row if possible, otherwise move selection down.
       if (!selectedNode.isExpanded) {
         _toggleNode(selectedNode);
       } else {
         _moveSelection(
-            ScrollKind.down, scrollController, constraints.maxHeight);
+          ScrollKind.down,
+          scrollController,
+          constraints.maxHeight,
+        );
       }
     }
   }
@@ -497,15 +498,16 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
     int newSelectedNodeIndex;
 
-    if (scrollKind == ScrollKind.down) {
-      // move selection down if there is a next node.
-      newSelectedNodeIndex = min(selectedNodeIndex + 1, items.length - 1);
-    } else if (scrollKind == ScrollKind.up) {
-      // move selection up if there is a previous node.
-      newSelectedNodeIndex = max(selectedNodeIndex - 1, 0);
-    } else if (scrollKind == ScrollKind.parent) {
-      // move selection to parent
-      newSelectedNodeIndex = items.indexOf(selectedNode.parent);
+    switch (scrollKind) {
+      case ScrollKind.down:
+        newSelectedNodeIndex = min(selectedNodeIndex + 1, items.length - 1);
+        break;
+      case ScrollKind.up:
+        newSelectedNodeIndex = max(selectedNodeIndex - 1, 0);
+        break;
+      case ScrollKind.parent:
+        newSelectedNodeIndex = items.indexOf(selectedNode.parent);
+        break;
     }
 
     final newSelectedNode = items[newSelectedNodeIndex];
