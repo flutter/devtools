@@ -7,6 +7,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
+import 'codeview.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 
@@ -64,7 +65,7 @@ class _ConsoleState extends State<Console> {
 
                   return ListView.builder(
                     itemCount: lines.length,
-                    //itemExtent: CodeView.rowHeight,
+                    itemExtent: CodeView.rowHeight,
                     controller: scrollController,
                     itemBuilder: (context, index) {
                       return Text(
