@@ -5,54 +5,105 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
-import 'codeview.dart';
+import '../../utils.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 
-class BreakpointPicker extends StatelessWidget {
-  const BreakpointPicker({Key key, @required this.controller})
-      : super(key: key);
+class BreakpointPicker extends StatefulWidget {
+  const BreakpointPicker({
+    Key key,
+    @required this.controller,
+    @required this.selected,
+    @required this.onSelected,
+  }) : super(key: key);
 
   final DebuggerController controller;
+  final BreakpointAndSourcePosition selected;
+  final void Function(BreakpointAndSourcePosition breakpoint) onSelected;
 
-  String textFor(Breakpoint breakpoint) {
-    if (breakpoint.resolved) {
-      final location = breakpoint.location as SourceLocation;
-      // TODO(djshuckerow): Resolve the scripts in the background and
-      // switch from token position to line numbers.
-      return '${location.script.uri.split('/').last} Position '
-          '${location.tokenPos} (${location.script.uri})';
-    } else {
-      final location = breakpoint.location as UnresolvedSourceLocation;
-      return '${location.script.uri.split('/').last} Position '
-          '${location.line} (${location.script.uri})';
-    }
+  @override
+  _BreakpointPickerState createState() => _BreakpointPickerState();
+}
+
+class _BreakpointPickerState extends State<BreakpointPicker> {
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<BreakpointAndSourcePosition>>(
+      valueListenable: widget.controller.breakpointsWithLocation,
+      builder: (context, breakpoints, _) {
+        return ListView.builder(
+          itemCount: breakpoints.length,
+          itemExtent: defaultListItemHeight,
+          itemBuilder: (context, index) {
+            return buildBreakpoint(context, breakpoints[index]);
+          },
+        );
+      },
+    );
   }
+
+  Widget buildBreakpoint(BuildContext context, BreakpointAndSourcePosition bp) {
+    final theme = Theme.of(context);
+
+    final regularStyle = TextStyle(color: theme.textTheme.bodyText2.color);
+    final subtleStyle = TextStyle(color: theme.unselectedWidgetColor);
+    final selectedStyle = TextStyle(color: theme.textSelectionColor);
+
+    final isSelected = bp.id == widget.selected?.id;
+
+    return Material(
+      color: isSelected ? theme.selectedRowColor : null,
+      child: InkWell(
+        onTap: () => widget.onSelected(bp),
+        child: densePadding(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Flexible(
+                child: RichText(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    text: '● ${_descriptionFor(bp)}',
+                    style: isSelected ? selectedStyle : regularStyle,
+                    children: [
+                      TextSpan(
+                        text: ' (${bp.scriptUri})',
+                        style: isSelected ? selectedStyle : subtleStyle,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _descriptionFor(BreakpointAndSourcePosition breakpoint) {
+    final fileName = breakpoint.scriptUri.split('/').last;
+    final line = breakpoint.line;
+
+    return breakpoint.resolved
+        ? '$fileName:$line:${breakpoint.column}'
+        : '$fileName:$line';
+  }
+}
+
+class BreakpointsCountBadge extends StatelessWidget {
+  const BreakpointsCountBadge({@required this.breakpoints});
+
+  final List<Breakpoint> breakpoints;
 
   @override
   Widget build(BuildContext context) {
-    return densePadding(
-      Scrollbar(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: ValueListenableBuilder(
-              valueListenable: controller.breakpoints,
-              builder: (context, breakpoints, _) {
-                return ListView.builder(
-                  itemCount: breakpoints.length,
-                  itemExtent: defaultListItemHeight,
-                  itemBuilder: (context, index) => SizedBox(
-                    height: CodeView.rowHeight,
-                    child: Text(textFor(breakpoints[index])),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
+    return Badge(
+      child: Text(
+        '${nf.format(breakpoints.length)}',
       ),
     );
   }

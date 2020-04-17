@@ -70,6 +70,12 @@ class DebuggerController extends DisposableController
 
   ValueListenable<List<Breakpoint>> get breakpoints => _breakpoints;
 
+  final _breakpointsWithLocation =
+      ValueNotifier<List<BreakpointAndSourcePosition>>([]);
+
+  ValueListenable<List<BreakpointAndSourcePosition>>
+      get breakpointsWithLocation => _breakpointsWithLocation;
+
   final _exceptionPauseMode = ValueNotifier<String>(null);
 
   ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
@@ -130,6 +136,7 @@ class DebuggerController extends DisposableController
 
     if (ref == null) {
       _breakpoints.value = [];
+      _breakpointsWithLocation.value = [];
       return;
     }
 
@@ -143,6 +150,15 @@ class DebuggerController extends DisposableController
     }
 
     _breakpoints.value = isolate.breakpoints;
+
+    // Build _breakpointsWithLocation from _breakpoints.
+    if (breakpoints.value != null) {
+      // ignore: unawaited_futures
+      Future.wait(breakpoints.value.map(_createBreakpointWithLocation))
+          .then((list) {
+        _breakpointsWithLocation.value = list.toList()..sort();
+      });
+    }
 
     _exceptionPauseMode.value = isolate.exceptionPauseMode;
   }
@@ -174,16 +190,8 @@ class DebuggerController extends DisposableController
     });
   }
 
-  Future<void> addBreakpoint(String scriptId, int line) =>
+  Future<Breakpoint> addBreakpoint(String scriptId, int line) =>
       _service.addBreakpoint(isolateRef.id, scriptId, line);
-
-  Future<void> addBreakpointByPathFragment(String path, int line) async {
-    final ref =
-        scripts.firstWhere((ref) => ref.uri.endsWith(path), orElse: () => null);
-    if (ref != null) {
-      return addBreakpoint(ref.id, line);
-    }
-  }
 
   Future<void> removeBreakpoint(Breakpoint breakpoint) =>
       _service.removeBreakpoint(isolateRef.id, breakpoint.id);
@@ -217,17 +225,46 @@ class DebuggerController extends DisposableController
       // that knows how to notify when performing a list edit operation.
       case EventKind.kBreakpointAdded:
         _breakpoints.value = [..._breakpoints.value, event.breakpoint];
+
+        // ignore: unawaited_futures
+        _createBreakpointWithLocation(event.breakpoint).then((bp) {
+          final list = [
+            ..._breakpointsWithLocation.value,
+            bp,
+          ]..sort();
+
+          _breakpointsWithLocation.value = list;
+        });
+
         break;
       case EventKind.kBreakpointResolved:
         _breakpoints.value = [
           for (var b in _breakpoints.value) if (b != event.breakpoint) b,
           event.breakpoint
         ];
+
+        // ignore: unawaited_futures
+        _createBreakpointWithLocation(event.breakpoint).then((bp) {
+          final list = _breakpointsWithLocation.value.toList();
+          // Remote the bp with the older, unresolved information from the list.
+          list.removeWhere((breakpoint) => bp.breakpoint.id == bp.id);
+          // Add the bp with the newer, resolved information.
+          list.add(bp);
+          list.sort();
+          _breakpointsWithLocation.value = list;
+        });
+
         break;
       case EventKind.kBreakpointRemoved:
         _breakpoints.value = [
           for (var b in _breakpoints.value) if (b != event.breakpoint) b
         ];
+
+        _breakpointsWithLocation.value = [
+          for (var b in _breakpointsWithLocation.value)
+            if (b.breakpoint != event.breakpoint) b
+        ];
+
         break;
     }
   }
@@ -337,6 +374,19 @@ class DebuggerController extends DisposableController
       return uri.substring(commonScriptPrefix.length);
     }
   }
+
+  Future<BreakpointAndSourcePosition> _createBreakpointWithLocation(
+      Breakpoint breakpoint) async {
+    if (breakpoint.resolved) {
+      final bp = BreakpointAndSourcePosition(breakpoint);
+      return getScript(bp.script).then((Script script) {
+        final pos = calculatePosition(script, bp.tokenPos);
+        return BreakpointAndSourcePosition(breakpoint, pos);
+      });
+    } else {
+      return BreakpointAndSourcePosition(breakpoint);
+    }
+  }
 }
 
 class SourcePosition {
@@ -347,4 +397,98 @@ class SourcePosition {
 
   @override
   String toString() => '$line $column';
+}
+
+/// A tuple of a breakpoint and a source position.
+class BreakpointAndSourcePosition
+    implements Comparable<BreakpointAndSourcePosition> {
+  BreakpointAndSourcePosition(this.breakpoint, [this.sourcePosition]);
+
+  final Breakpoint breakpoint;
+  final SourcePosition sourcePosition;
+
+  bool get resolved => breakpoint.resolved;
+
+  ScriptRef get script {
+    if (breakpoint.location is UnresolvedSourceLocation) {
+      final UnresolvedSourceLocation location = breakpoint.location;
+      return location.script;
+    } else if (breakpoint.location is SourceLocation) {
+      final SourceLocation location = breakpoint.location;
+      return location.script;
+    } else {
+      return null;
+    }
+  }
+
+  String get scriptUri {
+    if (breakpoint.location is UnresolvedSourceLocation) {
+      final UnresolvedSourceLocation location = breakpoint.location;
+      return location.script?.uri ?? location.scriptUri;
+    } else if (breakpoint.location is SourceLocation) {
+      final SourceLocation location = breakpoint.location;
+      return location.script.uri;
+    } else {
+      return null;
+    }
+  }
+
+  int get line {
+    if (sourcePosition != null) {
+      return sourcePosition.line;
+    } else if (breakpoint.location is UnresolvedSourceLocation) {
+      final UnresolvedSourceLocation location = breakpoint.location;
+      return location.line;
+    } else {
+      return null;
+    }
+  }
+
+  int get column {
+    if (sourcePosition != null) {
+      return sourcePosition.column;
+    } else if (breakpoint.location is UnresolvedSourceLocation) {
+      final UnresolvedSourceLocation location = breakpoint.location;
+      return location.column;
+    } else {
+      return null;
+    }
+  }
+
+  int get tokenPos {
+    if (breakpoint.location is UnresolvedSourceLocation) {
+      final UnresolvedSourceLocation location = breakpoint.location;
+      return location.tokenPos;
+    } else if (breakpoint.location is SourceLocation) {
+      final SourceLocation location = breakpoint.location;
+      return location.tokenPos;
+    } else {
+      return null;
+    }
+  }
+
+  String get id => breakpoint.id;
+
+  @override
+  int get hashCode => breakpoint.hashCode;
+
+  @override
+  bool operator ==(other) {
+    return other is BreakpointAndSourcePosition &&
+        other.breakpoint == breakpoint;
+  }
+
+  @override
+  int compareTo(BreakpointAndSourcePosition other) {
+    final result = scriptUri.compareTo(other.scriptUri);
+    if (result != 0) return result;
+
+    if (resolved != other.resolved) return resolved ? 1 : -1;
+
+    if (resolved) {
+      return tokenPos - other.tokenPos;
+    } else {
+      return line - other.line;
+    }
+  }
 }
