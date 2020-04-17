@@ -150,12 +150,15 @@ class DebuggerController extends DisposableController
     }
 
     _breakpoints.value = isolate.breakpoints;
+
     // Build _breakpointsWithLocation from _breakpoints.
-    // ignore: unawaited_futures
-    Future.wait(_breakpoints.value.map(_createBreakpointWithLocation))
-        .then((list) {
-      _breakpointsWithLocation.value = list.toList()..sort();
-    });
+    if (breakpoints.value != null) {
+      // ignore: unawaited_futures
+      Future.wait(breakpoints.value.map(_createBreakpointWithLocation))
+          .then((list) {
+        _breakpointsWithLocation.value = list.toList()..sort();
+      });
+    }
 
     _exceptionPauseMode.value = isolate.exceptionPauseMode;
   }
