@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/flutter/debugger_screen.dart';
 import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
@@ -44,6 +45,8 @@ void main() {
       final debuggerController = MockDebuggerController();
       when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
       when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
+      when(debuggerController.breakpointsWithLocation)
+          .thenReturn(ValueNotifier([]));
       when(debuggerController.scriptList)
           .thenReturn(ValueNotifier(ScriptList(scripts: [])));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
@@ -66,6 +69,8 @@ void main() {
       final debuggerController = MockDebuggerController();
       when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
       when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
+      when(debuggerController.breakpointsWithLocation)
+          .thenReturn(ValueNotifier([]));
       when(debuggerController.scriptList)
           .thenReturn(ValueNotifier(ScriptList(scripts: scripts)));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
@@ -80,6 +85,52 @@ void main() {
 
       // test for items in the libraries list
       expect(find.text(scripts.first.uri), findsOneWidget);
+    });
+
+    testWidgets('Breakpoints show items', (WidgetTester tester) async {
+      final breakpoints = [
+        Breakpoint(
+          breakpointNumber: 1,
+          resolved: false,
+          location: UnresolvedSourceLocation(
+            scriptUri: 'package:/test/script.dart',
+            line: 10,
+          ),
+        )
+      ];
+
+      final breakpointsWithLocation = [
+        BreakpointAndSourcePosition(
+          breakpoints.first,
+          SourcePosition(line: 10, column: 1),
+        )
+      ];
+
+      final debuggerController = MockDebuggerController();
+      when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
+      when(debuggerController.breakpoints)
+          .thenReturn(ValueNotifier(breakpoints));
+      when(debuggerController.breakpointsWithLocation)
+          .thenReturn(ValueNotifier(breakpointsWithLocation));
+
+      when(debuggerController.scriptList)
+          .thenReturn(ValueNotifier(ScriptList(scripts: [])));
+      when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
+      when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
+      await tester.pumpWidget(wrapWithControllers(
+        Builder(builder: screen.build),
+        debugger: debuggerController,
+      ));
+
+      expect(find.text('Breakpoints'), findsOneWidget);
+
+      // test for items in the breakpoint list
+      expect(
+        find.byWidgetPredicate((Widget widget) =>
+            widget is RichText &&
+            widget.text.toPlainText().contains('● script.dart:10')),
+        findsOneWidget,
+      );
     });
   });
 }
