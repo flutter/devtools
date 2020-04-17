@@ -75,7 +75,7 @@ class _ConsoleState extends State<Console> {
     await scrollController.animateTo(
       scrollController.position.maxScrollExtent,
       duration: const Duration(milliseconds: 100),
-      curve: Curves.linear,
+      curve: Curves.easeInOut,
     );
 
     // Scroll again if we've received new content in the interim.

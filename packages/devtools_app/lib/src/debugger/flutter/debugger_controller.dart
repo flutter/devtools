@@ -95,10 +95,7 @@ class DebuggerController extends DisposableController
   LibraryRef get rootLib => _rootLib;
   LibraryRef _rootLib;
 
-  // todo: is this called?
   set rootLib(LibraryRef rootLib) {
-    print('set rootLib');
-
     _rootLib = rootLib;
 
     String scriptPrefix = rootLib.uri;
