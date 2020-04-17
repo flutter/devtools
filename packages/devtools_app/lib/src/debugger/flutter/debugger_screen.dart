@@ -169,7 +169,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                         ],
                       ),
                     ),
-                  Console(),
+                  Console(
+                    controller: controller,
+                  ),
                 ],
               ),
             ),

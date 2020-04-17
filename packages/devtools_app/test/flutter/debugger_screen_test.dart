@@ -51,6 +51,7 @@ void main() {
           .thenReturn(ValueNotifier(ScriptList(scripts: [])));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
       when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
+      when(debuggerController.stdio).thenReturn(ValueNotifier(['test stdio']));
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
         debugger: debuggerController,
@@ -58,7 +59,8 @@ void main() {
 
       expect(find.text('Console'), findsOneWidget);
 
-      expect(find.text('todo:'), findsOneWidget);
+      // test for stdio output
+      expect(find.text('test stdio'), findsOneWidget);
     });
 
     testWidgets('Scripts show items', (WidgetTester tester) async {
@@ -73,6 +75,7 @@ void main() {
           .thenReturn(ValueNotifier(ScriptList(scripts: scripts)));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
       when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
+      when(debuggerController.stdio).thenReturn(ValueNotifier([]));
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
         debugger: debuggerController,
@@ -114,6 +117,7 @@ void main() {
           .thenReturn(ValueNotifier(ScriptList(scripts: [])));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
       when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
+      when(debuggerController.stdio).thenReturn(ValueNotifier([]));
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
         debugger: debuggerController,
