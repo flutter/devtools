@@ -16,8 +16,9 @@ file.
 - `cd devtools/packages/devtools_app`
 - `flutter pub get`
 
-From a separate terminal:
-- `cd <path/to/flutter-sdk>/examples/flutter_gallery`
+From a separate terminal, start running a flutter app to connect to DevTools:
+- `git clone https://github.com/flutter/gallery.git` (this is an existing application with many examples of Flutter widgets)
+- `cd gallery`
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
 
@@ -61,6 +62,7 @@ To develop with a workflow that exercises the DevTools server <==> DevTools clie
 change to the `packages/devtools` directory, and run:
 
 ```
+flutter pub get
 dart bin/devtools.dart --debug
 ```
 
@@ -79,7 +81,7 @@ refresh in your browser to see the changes. Hit `q` in the command line to termi
 
 You can also try running the app in the Flutter desktop embedder on linux or macos.
 
-*NOTE:* The Linux desktop version only works with the master branch of Flutter.  Synch'ing
+*NOTE:* The Linux desktop version only works with the master branch of Flutter (and sometimes this is true for MacOS as well). Syncing
 to a the master branch of Flutter may fail with a runner version error. If this occurs run
 `flutter create .` from `devtools/packages/devtools_app`, re-generates files in the linux and
 macos directories.
