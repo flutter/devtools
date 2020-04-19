@@ -39,6 +39,16 @@ class LinkedScrollControllerGroup {
     return _attachedControllers.first.offset;
   }
 
+  /// The current scroll position of the group.
+  ScrollPosition get position {
+    assert(
+    _attachedControllers.isNotEmpty,
+    'LinkedScrollControllerGroup does not have any scroll controllers '
+        'attached.',
+    );
+    return _attachedControllers.first.position;
+  }
+
   /// Creates a new controller that is linked to any existing ones.
   ScrollController addAndGet() {
     final initialScrollOffset = _attachedControllers.isEmpty

@@ -1,0 +1,198 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart' hide Stack;
+import 'package:vm_service/vm_service.dart';
+
+import '../../flutter/common_widgets.dart';
+import '../../flutter/theme.dart';
+import '../../ui/flutter/label.dart';
+import 'debugger_controller.dart';
+
+class DebuggingControls extends StatelessWidget {
+  const DebuggingControls({Key key, @required this.controller})
+      : super(key: key);
+
+  final DebuggerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.isPaused,
+      builder: (context, isPaused, child) {
+        final canStep = isPaused && controller.hasFrames.value;
+
+        return SizedBox(
+          height: Theme.of(context).buttonTheme.height,
+          child: Row(
+            children: [
+              RoundedOutlinedBorder(
+                child: Row(
+                  children: [
+                    _DebuggerButton(
+                      title: 'Pause',
+                      icon: Icons.pause,
+                      onPressed: isPaused ? null : controller.pause,
+                    ),
+                    _LeftBorder(
+                      child: _DebuggerButton(
+                        title: 'Resume',
+                        icon: Icons.play_arrow,
+                        onPressed: isPaused ? controller.resume : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: denseSpacing),
+              RoundedOutlinedBorder(
+                child: Row(
+                  children: [
+                    _DebuggerButton(
+                      title: 'Step In',
+                      icon: Icons.keyboard_arrow_down,
+                      onPressed: canStep ? controller.stepIn : null,
+                    ),
+                    _LeftBorder(
+                      child: _DebuggerButton(
+                        title: 'Step Over',
+                        icon: Icons.keyboard_arrow_right,
+                        onPressed: canStep ? controller.stepOver : null,
+                      ),
+                    ),
+                    _LeftBorder(
+                      child: _DebuggerButton(
+                        title: 'Step Out',
+                        icon: Icons.keyboard_arrow_up,
+                        onPressed: canStep ? controller.stepOut : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Expanded(child: SizedBox(width: denseSpacing)),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: BreakOnExceptionsControl(controller: controller),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class BreakOnExceptionsControl extends StatelessWidget {
+  const BreakOnExceptionsControl({
+    Key key,
+    @required this.controller,
+  }) : super(key: key);
+
+  final DebuggerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.exceptionPauseMode,
+      builder: (BuildContext context, String modeId, _) {
+        return DropdownButton<ExceptionMode>(
+          value: ExceptionMode.from(modeId),
+          onChanged: (ExceptionMode mode) {
+            controller.setExceptionPauseMode(mode.id);
+          },
+          isDense: true,
+          items: ExceptionMode.modes.map((mode) {
+            return DropdownMenuItem<ExceptionMode>(
+              value: mode,
+              child: Text(mode.description),
+            );
+          }).toList(),
+          selectedItemBuilder: (BuildContext context) {
+            return ExceptionMode.modes.map((mode) {
+              return DropdownMenuItem<ExceptionMode>(
+                value: mode,
+                child: Text(mode.name),
+              );
+            }).toList();
+          },
+        );
+      },
+    );
+  }
+}
+
+class ExceptionMode {
+  ExceptionMode(this.id, this.name, this.description);
+
+  static final modes = [
+    ExceptionMode(
+      ExceptionPauseMode.kNone,
+      'Ignore exceptions',
+      "Don't stop on exceptions",
+    ),
+    ExceptionMode(
+      ExceptionPauseMode.kUnhandled,
+      'Stop on uncaught',
+      'Stop on uncaught exceptions',
+    ),
+    ExceptionMode(
+      ExceptionPauseMode.kAll,
+      'Stop on exceptions',
+      'Stop on all exceptions',
+    ),
+  ];
+
+  static ExceptionMode from(String id) {
+    return modes.singleWhere((mode) => mode.id == id,
+        orElse: () => modes.first);
+  }
+
+  final String id;
+  final String name;
+  final String description;
+}
+
+class _DebuggerButton extends StatelessWidget {
+  const _DebuggerButton({
+    @required this.title,
+    @required this.icon,
+    @required this.onPressed,
+  });
+
+  final String title;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlineButton(
+      borderSide: BorderSide.none,
+      shape: const ContinuousRectangleBorder(),
+      onPressed: onPressed,
+      child: MaterialIconLabel(
+        icon,
+        title,
+        minIncludeTextWidth: 750,
+      ),
+    );
+  }
+}
+
+class _LeftBorder extends StatelessWidget {
+  const _LeftBorder({this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final leftBorder =
+        Border(left: BorderSide(color: Theme.of(context).focusColor));
+
+    return Container(
+      decoration: BoxDecoration(border: leftBorder),
+      child: child,
+    );
+  }
+}

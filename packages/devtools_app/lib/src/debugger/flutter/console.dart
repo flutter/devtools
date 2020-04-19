@@ -87,7 +87,7 @@ class _ConsoleState extends State<Console> {
   void _scrollToBottom() async {
     await scrollController.animateTo(
       scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 100),
+      duration: shortDuration * 2,
       curve: defaultCurve,
     );
 

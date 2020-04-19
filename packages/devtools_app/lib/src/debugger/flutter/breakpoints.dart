@@ -100,11 +100,10 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
 
   String _descriptionFor(BreakpointAndSourcePosition breakpoint) {
     final fileName = breakpoint.scriptUri.split('/').last;
-    final line = breakpoint.line;
 
-    return breakpoint.resolved
-        ? '$fileName:$line:${breakpoint.column}'
-        : '$fileName:$line';
+    // Consider showing columns in the future if we allow multiple breakpoints
+    // per line.
+    return '$fileName:${breakpoint.line}';
   }
 }
 
@@ -116,9 +115,7 @@ class BreakpointsCountBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Badge(
-      child: Text(
-        '${nf.format(breakpoints.length)}',
-      ),
+      text: '${nf.format(breakpoints.length)}',
     );
   }
 }

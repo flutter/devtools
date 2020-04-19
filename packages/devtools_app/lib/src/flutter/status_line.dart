@@ -41,6 +41,16 @@ class StatusLine extends StatelessWidget {
     ));
     children.add(const BulletSpacer());
 
+    // Optionally display an isolate selector.
+    if (currentScreen != null && currentScreen.showIsolateSelector) {
+      children.add(Expanded(
+        child: Align(
+          child: buildIsolateSelector(context, textTheme),
+        ),
+      ));
+      children.add(const BulletSpacer());
+    }
+
     // Optionally display page specific status.
     if (currentScreen != null) {
       final Widget pageStatus =
@@ -54,16 +64,6 @@ class StatusLine extends StatelessWidget {
         ));
         children.add(const BulletSpacer());
       }
-    }
-
-    // Optionally display an isolate selector.
-    if (currentScreen != null && currentScreen.showIsolateSelector) {
-      children.add(Expanded(
-        child: Align(
-          child: buildIsolateSelector(context, textTheme),
-        ),
-      ));
-      children.add(const BulletSpacer());
     }
 
     // Always display connection status (docked to the right).
