@@ -116,9 +116,7 @@ class BreakpointsCountBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Badge(
-      child: Text(
-        '${nf.format(breakpoints.length)}',
-      ),
+      text: '${nf.format(breakpoints.length)}',
     );
   }
 }
