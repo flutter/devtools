@@ -48,6 +48,8 @@ class DebuggerController extends DisposableController
 
   Event _lastEvent;
 
+  Event get lastEvent => _lastEvent;
+
   final _currentScript = ValueNotifier<Script>(null);
 
   ValueListenable<Script> get currentScript => _currentScript;
@@ -397,7 +399,7 @@ class SourcePosition {
   final int column;
 
   @override
-  String toString() => '$line $column';
+  String toString() => '$line:$column';
 }
 
 /// A tuple of a breakpoint and a source position.

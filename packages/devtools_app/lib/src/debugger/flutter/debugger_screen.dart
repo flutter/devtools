@@ -44,6 +44,12 @@ class DebuggerScreen extends Screen {
         ? const DebuggerScreenBody()
         : const DisabledForProfileBuildMessage();
   }
+
+  @override
+  Widget buildStatus(BuildContext context, TextTheme textTheme) {
+    final controller = Controllers.of(context).debugger;
+    return DebuggerStatus(controller: controller);
+  }
 }
 
 class DebuggerScreenBody extends StatefulWidget {
@@ -336,5 +342,80 @@ class DebuggingControls extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class DebuggerStatus extends StatefulWidget {
+  const DebuggerStatus({
+    Key key,
+    @required this.controller,
+  }) : super(key: key);
+
+  final DebuggerController controller;
+
+  @override
+  _DebuggerStatusState createState() => _DebuggerStatusState();
+}
+
+class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
+  String _status;
+
+  @override
+  void initState() {
+    super.initState();
+
+    addAutoDisposeListener(widget.controller.isPaused, _updateStatus);
+
+    _status = '';
+    _updateStatus();
+  }
+
+  @override
+  void didUpdateWidget(DebuggerStatus oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // todo: should we check that widget.controller != oldWidget.controller?
+    addAutoDisposeListener(widget.controller.isPaused, _updateStatus);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      _status,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  void _updateStatus() async {
+    final paused = widget.controller.isPaused.value;
+
+    if (!paused) {
+      setState(() {
+        _status = 'running';
+      });
+      return;
+    }
+
+    final event = widget.controller.lastEvent;
+    final frame = event.topFrame;
+    final reason =
+        event.kind == EventKind.kPauseException ? ' on exception' : '';
+
+    if (frame == null) {
+      setState(() {
+        _status = 'paused$reason';
+      });
+      return;
+    }
+
+    final fileName = ' at ' + frame.location.script.uri.split('/').last;
+    final script = await widget.controller.getScript(frame.location.script);
+    final pos =
+        widget.controller.calculatePosition(script, frame.location.tokenPos);
+
+    setState(() {
+      _status = 'paused$reason$fileName $pos';
+    });
   }
 }
