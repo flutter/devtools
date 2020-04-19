@@ -42,9 +42,9 @@ class LinkedScrollControllerGroup {
   /// The current scroll position of the group.
   ScrollPosition get position {
     assert(
-    _attachedControllers.isNotEmpty,
-    'LinkedScrollControllerGroup does not have any scroll controllers '
-        'attached.',
+      _attachedControllers.isNotEmpty,
+      'LinkedScrollControllerGroup does not have any scroll controllers '
+      'attached.',
     );
     return _attachedControllers.first.position;
   }
