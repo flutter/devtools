@@ -8,7 +8,6 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
-
 import 'package:mp_chart/mp/chart/line_chart.dart';
 import 'package:mp_chart/mp/controller/line_chart_controller.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
@@ -18,12 +17,6 @@ import 'package:mp_chart/mp/core/data_set/line_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:mp_chart/mp/core/enums/axis_dependency.dart';
-
-// TODO(terry): Enable legend when textsize is correct.
-// import 'package:mp_chart/mp/core/enums/legend_vertical_alignment.dart';
-// import 'package:mp_chart/mp/core/enums/legend_form.dart';
-// import 'package:mp_chart/mp/core/enums/legend_horizontal_alignment.dart';
-// import 'package:mp_chart/mp/core/enums/legend_orientation.dart';
 import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/enums/y_axis_label_position.dart';
 import 'package:mp_chart/mp/core/highlight/highlight.dart';
@@ -202,7 +195,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         child: MaterialIconLabel(
           controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
           'Android Memory',
-          minIncludeTextWidth: 900,
+          includeTextWidth: 900,
         ),
       );
 

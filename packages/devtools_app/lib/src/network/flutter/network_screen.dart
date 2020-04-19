@@ -83,19 +83,20 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
   /// Builds the row of buttons that control the HTTP profiler (e.g., record,
   /// pause, etc.)
   Row _buildHttpProfilerControlRow(bool isRecording) {
-    const double minIncludeTextWidth = 600;
+    const double includeTextWidth = 600;
+
     return Row(
       children: [
         recordButton(
           key: NetworkScreen.recordButtonKey,
           recording: isRecording,
-          minIncludeTextWidth: minIncludeTextWidth,
+          includeTextWidth: includeTextWidth,
           onPressed: networkController.startRecording,
         ),
         pauseButton(
           key: NetworkScreen.pauseButtonKey,
           paused: !isRecording,
-          minIncludeTextWidth: minIncludeTextWidth,
+          includeTextWidth: includeTextWidth,
           onPressed: networkController.pauseRecording,
         ),
         const SizedBox(width: 8.0),

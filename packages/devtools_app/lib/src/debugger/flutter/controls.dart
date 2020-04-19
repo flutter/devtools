@@ -30,13 +30,13 @@ class DebuggingControls extends StatelessWidget {
               RoundedOutlinedBorder(
                 child: Row(
                   children: [
-                    _DebuggerButton(
+                    DebuggerButton(
                       title: 'Pause',
                       icon: Icons.pause,
                       onPressed: isPaused ? null : controller.pause,
                     ),
                     _LeftBorder(
-                      child: _DebuggerButton(
+                      child: DebuggerButton(
                         title: 'Resume',
                         icon: Icons.play_arrow,
                         onPressed: isPaused ? controller.resume : null,
@@ -49,20 +49,20 @@ class DebuggingControls extends StatelessWidget {
               RoundedOutlinedBorder(
                 child: Row(
                   children: [
-                    _DebuggerButton(
+                    DebuggerButton(
                       title: 'Step In',
                       icon: Icons.keyboard_arrow_down,
                       onPressed: canStep ? controller.stepIn : null,
                     ),
                     _LeftBorder(
-                      child: _DebuggerButton(
+                      child: DebuggerButton(
                         title: 'Step Over',
                         icon: Icons.keyboard_arrow_right,
                         onPressed: canStep ? controller.stepOver : null,
                       ),
                     ),
                     _LeftBorder(
-                      child: _DebuggerButton(
+                      child: DebuggerButton(
                         title: 'Step Out',
                         icon: Icons.keyboard_arrow_up,
                         onPressed: canStep ? controller.stepOut : null,
@@ -154,8 +154,9 @@ class ExceptionMode {
   final String description;
 }
 
-class _DebuggerButton extends StatelessWidget {
-  const _DebuggerButton({
+@visibleForTesting
+class DebuggerButton extends StatelessWidget {
+  const DebuggerButton({
     @required this.title,
     @required this.icon,
     @required this.onPressed,
@@ -167,14 +168,17 @@ class _DebuggerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlineButton(
-      borderSide: BorderSide.none,
-      shape: const ContinuousRectangleBorder(),
-      onPressed: onPressed,
-      child: MaterialIconLabel(
-        icon,
-        title,
-        minIncludeTextWidth: 750,
+    return ActionButton(
+      tooltip: title,
+      child: OutlineButton(
+        borderSide: BorderSide.none,
+        shape: const ContinuousRectangleBorder(),
+        onPressed: onPressed,
+        child: MaterialIconLabel(
+          icon,
+          title,
+          includeTextWidth: mediumDeviceWidth,
+        ),
       ),
     );
   }

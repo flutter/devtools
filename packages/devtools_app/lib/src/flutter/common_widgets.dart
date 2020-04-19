@@ -15,6 +15,11 @@ import 'theme.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 
+/// The width of the package:flutter_test debugger device.
+const debuggerDeviceWidth = 800.0;
+
+const mediumDeviceWidth = 1000.0;
+
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
@@ -72,12 +77,12 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 
 /// Button to clear data in the UI.
 ///
-/// * `minIncludeTextWidth`: The minimum width the button can be before the text
-///    is omitted.
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget clearButton({
   Key key,
-  double minIncludeTextWidth,
+  double includeTextWidth,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
@@ -86,7 +91,7 @@ StatelessWidget clearButton({
     child: MaterialIconLabel(
       Icons.block,
       'Clear',
-      minIncludeTextWidth: minIncludeTextWidth,
+      includeTextWidth: includeTextWidth,
     ),
   );
 }
@@ -94,13 +99,13 @@ StatelessWidget clearButton({
 /// Button to start recording data.
 ///
 /// * `recording`: Whether recording is in progress.
-/// * `minIncludeTextWidth`: The minimum width the button can be before the text
-///    is omitted.
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget recordButton({
   Key key,
   @required bool recording,
-  double minIncludeTextWidth,
+  double includeTextWidth,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
@@ -109,7 +114,7 @@ StatelessWidget recordButton({
     child: MaterialIconLabel(
       Icons.fiber_manual_record,
       'Record',
-      minIncludeTextWidth: minIncludeTextWidth,
+      includeTextWidth: includeTextWidth,
     ),
   );
 }
@@ -117,13 +122,13 @@ StatelessWidget recordButton({
 /// Button to stop recording data.
 ///
 /// * `recording`: Whether recording is in progress.
-/// * `minIncludeTextWidth`: The minimum width the button can be before the text
-///    is omitted.
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget stopRecordingButton({
   Key key,
   @required bool recording,
-  double minIncludeTextWidth,
+  double includeTextWidth,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
@@ -132,7 +137,7 @@ StatelessWidget stopRecordingButton({
     child: MaterialIconLabel(
       Icons.stop,
       'Stop',
-      minIncludeTextWidth: minIncludeTextWidth,
+      includeTextWidth: includeTextWidth,
     ),
   );
 }
@@ -140,13 +145,13 @@ StatelessWidget stopRecordingButton({
 /// Button to pause recording data.
 ///
 /// * `recording`: Whether recording is in progress.
-/// * `minIncludeTextWidth`: The minimum width the button can be before the text
-///    is omitted.
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget pauseButton({
   Key key,
   @required bool paused,
-  double minIncludeTextWidth,
+  double includeTextWidth,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
@@ -155,7 +160,7 @@ StatelessWidget pauseButton({
     child: MaterialIconLabel(
       Icons.pause,
       'Pause',
-      minIncludeTextWidth: minIncludeTextWidth,
+      includeTextWidth: includeTextWidth,
     ),
   );
 }
@@ -378,7 +383,7 @@ class ToggleButton extends StatelessWidget {
     @required this.text,
     @required this.enabledTooltip,
     @required this.disabledTooltip,
-    @required this.minIncludeTextWidth,
+    @required this.includeTextWidth,
     @required this.selected,
   });
 
@@ -386,7 +391,7 @@ class ToggleButton extends StatelessWidget {
   final String text;
   final String enabledTooltip;
   final String disabledTooltip;
-  final double minIncludeTextWidth;
+  final double includeTextWidth;
   final bool selected;
 
   @override
@@ -400,7 +405,7 @@ class ToggleButton extends StatelessWidget {
         child: MaterialIconLabel(
           icon,
           text,
-          minIncludeTextWidth: minIncludeTextWidth,
+          includeTextWidth: includeTextWidth,
         ),
       ),
     );

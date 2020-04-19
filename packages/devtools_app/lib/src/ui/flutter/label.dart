@@ -32,11 +32,11 @@ class Label extends StatelessWidget {
 }
 
 class MaterialIconLabel extends StatelessWidget {
-  const MaterialIconLabel(this.iconData, this.text, {this.minIncludeTextWidth});
+  const MaterialIconLabel(this.iconData, this.text, {this.includeTextWidth});
 
   final IconData iconData;
   final String text;
-  final double minIncludeTextWidth;
+  final double includeTextWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,7 @@ class MaterialIconLabel extends StatelessWidget {
       children: [
         Icon(iconData, size: 18.0),
         // TODO(jacobr): animate showing and hiding the text.
-        if (_showLabelText(context, minIncludeTextWidth))
+        if (_showLabelText(context, includeTextWidth))
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(text),
@@ -56,7 +56,7 @@ class MaterialIconLabel extends StatelessWidget {
   }
 }
 
-bool _showLabelText(BuildContext context, double minIncludeTextWidth) {
-  return minIncludeTextWidth == null ||
-      MediaQuery.of(context).size.width >= minIncludeTextWidth;
+bool _showLabelText(BuildContext context, double includeTextWidth) {
+  return includeTextWidth == null ||
+      MediaQuery.of(context).size.width > includeTextWidth;
 }
