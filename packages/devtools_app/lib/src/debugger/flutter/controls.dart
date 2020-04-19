@@ -72,9 +72,14 @@ class DebuggingControls extends StatelessWidget {
                 ),
               ),
               const Expanded(child: SizedBox(width: denseSpacing)),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: BreakOnExceptionsControl(controller: controller),
+              RoundedOutlinedBorder(
+                child: Center(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: denseSpacing),
+                    child: BreakOnExceptionsControl(controller: controller),
+                  ),
+                ),
               ),
             ],
           ),
@@ -97,26 +102,28 @@ class BreakOnExceptionsControl extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller.exceptionPauseMode,
       builder: (BuildContext context, String modeId, _) {
-        return DropdownButton<ExceptionMode>(
-          value: ExceptionMode.from(modeId),
-          onChanged: (ExceptionMode mode) {
-            controller.setExceptionPauseMode(mode.id);
-          },
-          isDense: true,
-          items: ExceptionMode.modes.map((mode) {
-            return DropdownMenuItem<ExceptionMode>(
-              value: mode,
-              child: Text(mode.description),
-            );
-          }).toList(),
-          selectedItemBuilder: (BuildContext context) {
-            return ExceptionMode.modes.map((mode) {
+        return DropdownButtonHideUnderline(
+          child: DropdownButton<ExceptionMode>(
+            value: ExceptionMode.from(modeId),
+            onChanged: (ExceptionMode mode) {
+              controller.setExceptionPauseMode(mode.id);
+            },
+            isDense: true,
+            items: ExceptionMode.modes.map((mode) {
               return DropdownMenuItem<ExceptionMode>(
                 value: mode,
-                child: Text(mode.name),
+                child: Text(mode.description),
               );
-            }).toList();
-          },
+            }).toList(),
+            selectedItemBuilder: (BuildContext context) {
+              return ExceptionMode.modes.map((mode) {
+                return DropdownMenuItem<ExceptionMode>(
+                  value: mode,
+                  child: Text(mode.name),
+                );
+              }).toList();
+            },
+          ),
         );
       },
     );
