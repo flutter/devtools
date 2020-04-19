@@ -131,7 +131,9 @@ class ScriptCountBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Badge(
-      text: '${nf.format(scripts.length)}',
+      child: Text(
+        '${nf.format(scripts.length)}',
+      ),
     );
   }
 }

@@ -10,9 +10,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../auto_dispose.dart';
 import '../../globals.dart';
 
-// TODO(devoncarew): Add some delayed resume value notifiers (to be used to
-// help debounce stepping operations).
-
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
@@ -38,8 +35,6 @@ class DebuggerController extends DisposableController
   ValueNotifier get hasFrames => _hasFrames;
 
   Event _lastEvent;
-
-  Event get lastEvent => _lastEvent;
 
   final _currentScript = ValueNotifier<Script>(null);
 
@@ -277,13 +272,7 @@ class DebuggerController extends DisposableController
 
   Future<void> _pause(bool pause) async {
     _isPaused.value = pause;
-
-    if (pause) {
-      _currentStack.value = await getStack();
-    } else {
-      _currentStack.value = null;
-    }
-
+    _currentStack.value = await getStack();
     if (_currentStack.value != null && _currentStack.value.frames.isNotEmpty) {
       // TODO(https://github.com/flutter/devtools/issues/1648): Allow choice of
       // the scripts on the stack.
@@ -346,11 +335,22 @@ class DebuggerController extends DisposableController
       return null;
     }
 
-    return SourcePosition(
-      line: script.getLineNumberFromTokenPos(tokenPos),
-      column: script.getColumnNumberFromTokenPos(tokenPos),
-      tokenPos: tokenPos,
-    );
+    for (List<int> row in table) {
+      if (row == null || row.isEmpty) {
+        continue;
+      }
+      final int line = row.elementAt(0);
+      int index = 1;
+
+      while (index < row.length - 1) {
+        if (row.elementAt(index) == tokenPos) {
+          return SourcePosition(line: line, column: row.elementAt(index + 1));
+        }
+        index += 2;
+      }
+    }
+
+    return null;
   }
 
   int lineNumber(Script script, dynamic location) {
@@ -382,14 +382,13 @@ class DebuggerController extends DisposableController
 }
 
 class SourcePosition {
-  SourcePosition({@required this.line, @required this.column, this.tokenPos});
+  SourcePosition({@required this.line, @required this.column});
 
   final int line;
   final int column;
-  final int tokenPos;
 
   @override
-  String toString() => '$line:$column';
+  String toString() => '$line $column';
 }
 
 /// A tuple of a breakpoint and a source position.
