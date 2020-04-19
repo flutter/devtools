@@ -75,8 +75,8 @@ class DebuggingControls extends StatelessWidget {
               RoundedOutlinedBorder(
                 child: Center(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: denseSpacing),
+                    padding: const EdgeInsets.only(
+                        left: denseSpacing, right: borderPadding),
                     child: BreakOnExceptionsControl(controller: controller),
                   ),
                 ),
