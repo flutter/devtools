@@ -31,6 +31,20 @@ class DebuggerController extends DisposableController
   ValueListenable<bool> get isPaused => _isPaused;
 
   final _hasFrames = ValueNotifier<bool>(false);
+  ValueNotifier<bool> _supportsStepping;
+
+  ValueListenable<bool> get supportsStepping {
+    return _supportsStepping ??= () {
+      final notifier = ValueNotifier<bool>(_isPaused.value && _hasFrames.value);
+      void update() {
+        notifier.value = _isPaused.value && _hasFrames.value;
+      }
+
+      _isPaused.addListener(update);
+      _hasFrames.addListener(update);
+      return notifier;
+    }();
+  }
 
   ValueNotifier get hasFrames => _hasFrames;
 
