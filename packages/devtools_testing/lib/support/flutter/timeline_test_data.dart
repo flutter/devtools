@@ -5,8 +5,6 @@
 // ignore_for_file: implementation_imports
 import 'dart:convert';
 
-import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart'
-    show timelineScreenId;
 import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
 
