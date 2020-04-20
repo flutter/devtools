@@ -284,31 +284,20 @@ class AnsiUpColor {
   String className;
 }
 
-mixin PacketKind {
-  static const int EOS = 0;
-  static const int Text = 1;
-
-  /// An Incomplete ESC sequence.
-  static const int Incomplete = 2;
-
-  /// A single ESC char - random.
-  static const int ESC = 3;
-
-  /// A valid CSI but not an SGR code.
-  static const int Unknown = 4;
-
-  /// Select Graphic Rendition.
-  static const int SGR = 5;
-
-  /// Operating System Command.
-  static const int OSCURL = 6;
+enum PacketKind {
+  EOS,
+  Text,
+  Incomplete,
+  ESC,
+  Unknown,
+  SGR,
+  OSCURL,
 }
 
 class TextPacket {
   TextPacket({this.kind, this.text, this.url});
 
-  /// enum like constant from PacketKind describing the packet.
-  int kind;
+  PacketKind kind;
   String text;
   String url;
 }
