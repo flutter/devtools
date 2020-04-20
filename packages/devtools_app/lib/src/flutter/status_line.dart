@@ -144,18 +144,20 @@ class StatusLine extends StatelessWidget {
           return 'isolate: $name';
         }
 
-        return DropdownButton<IsolateRef>(
-          value: snapshot.data,
-          onChanged: (IsolateRef ref) {
-            isolateManager.selectIsolate(ref?.id);
-          },
-          isDense: true,
-          items: isolates.map((IsolateRef ref) {
-            return DropdownMenuItem<IsolateRef>(
-              value: ref,
-              child: Text(disambiguatedName(ref), style: textTheme.bodyText2),
-            );
-          }).toList(),
+        return DropdownButtonHideUnderline(
+          child: DropdownButton<IsolateRef>(
+            value: snapshot.data,
+            onChanged: (IsolateRef ref) {
+              isolateManager.selectIsolate(ref?.id);
+            },
+            isDense: true,
+            items: isolates.map((IsolateRef ref) {
+              return DropdownMenuItem<IsolateRef>(
+                value: ref,
+                child: Text(disambiguatedName(ref), style: textTheme.bodyText2),
+              );
+            }).toList(),
+          ),
         );
       },
     );

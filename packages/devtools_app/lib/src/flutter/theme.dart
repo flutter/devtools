@@ -94,6 +94,12 @@ const devtoolsLink = ThemedColor(Color(0xFF1976D2), Colors.lightBlueAccent);
 /// and scrolling to an offset immediately after.
 const shortDuration = Duration(milliseconds: 50);
 
+/// A longer duration than [shortDuration] but quicker than [defaultDuration].
+///
+/// Use this for thinks that would show a bit of animation, but that we want to
+/// effectively seem immediate to users.
+const rapidDuration = Duration(milliseconds: 50);
+
 /// The default duration to use for animations.
 const defaultDuration = Duration(milliseconds: 200);
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
@@ -14,11 +16,11 @@ import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
-import '../../ui/flutter/label.dart';
 import 'breakpoints.dart';
 import 'codeview.dart';
 import 'common.dart';
 import 'console.dart';
+import 'controls.dart';
 import 'debugger_controller.dart';
 import 'scripts.dart';
 
@@ -63,7 +65,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const librariesTitle = 'Libraries';
 
   DebuggerController controller;
-  ScriptRef loadingScript;
   Script script;
   BreakpointAndSourcePosition selectedBreakpoint;
 
@@ -92,11 +93,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   Future<void> _onScriptSelected(ScriptRef ref) async {
     if (ref == null) return;
-
-    setState(() {
-      loadingScript = ref;
-      script = null;
-    });
 
     await controller.selectScript(ref);
   }
@@ -139,7 +135,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final loading = loadingScript != null && script == null;
 
     return Split(
       axis: Axis.horizontal,
@@ -147,7 +142,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       children: [
         OutlinedBorder(child: debuggerPanes()),
         Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             DebuggingControls(controller: controller),
             const SizedBox(height: denseRowSpacing),
@@ -156,25 +150,23 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                 axis: Axis.vertical,
                 initialFractions: const [0.75, 0.25],
                 children: [
-                  if (loading) const Center(child: CircularProgressIndicator()),
-                  if (!loading)
-                    OutlinedBorder(
-                      child: Column(
-                        children: [
-                          debuggerSectionTitle(theme,
-                              text: script == null ? ' ' : '${script.uri}'),
-                          Expanded(
-                            child: CodeView(
-                              script: script,
-                              stack: controller.currentStack.value,
-                              controller: controller,
-                              lineNumberToBreakpoint: _breakpointsForLines(),
-                              onSelected: toggleBreakpoint,
-                            ),
+                  OutlinedBorder(
+                    child: Column(
+                      children: [
+                        debuggerSectionTitle(theme,
+                            text: script == null ? ' ' : '${script.uri}'),
+                        Expanded(
+                          child: CodeView(
+                            script: script,
+                            stack: controller.currentStack.value,
+                            controller: controller,
+                            lineNumberToBreakpoint: _breakpointsForLines(),
+                            onSelected: toggleBreakpoint,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+                  ),
                   Console(
                     controller: controller,
                   ),
@@ -220,7 +212,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             ),
             ScriptPicker(
               scripts: controller.sortedScripts.value,
-              selected: loadingScript,
+              selected: script,
               onSelected: _onScriptSelected,
             ),
           ],
@@ -265,78 +257,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           ],
         ),
       ),
-    );
-  }
-}
-
-class DebuggingControls extends StatelessWidget {
-  const DebuggingControls({Key key, @required this.controller})
-      : super(key: key);
-
-  final DebuggerController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: controller.isPaused,
-      builder: (context, isPaused, child) {
-        return SizedBox(
-          height: DebuggerScreen.debuggerPaneHeaderHeight,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              OutlinedBorder(
-                child: Row(
-                  children: [
-                    MaterialButton(
-                      onPressed: isPaused ? null : controller.pause,
-                      child: const MaterialIconLabel(
-                        Icons.pause,
-                        'Pause',
-                      ),
-                    ),
-                    MaterialButton(
-                      onPressed: isPaused ? controller.resume : null,
-                      child: const MaterialIconLabel(
-                        Icons.play_arrow,
-                        'Resume',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: denseSpacing),
-              OutlinedBorder(
-                child: Row(
-                  children: [
-                    MaterialButton(
-                      onPressed: isPaused ? controller.stepIn : null,
-                      child: const MaterialIconLabel(
-                        Icons.keyboard_arrow_down,
-                        'Step In',
-                      ),
-                    ),
-                    MaterialButton(
-                      onPressed: isPaused ? controller.stepOver : null,
-                      child: const MaterialIconLabel(
-                        Icons.keyboard_arrow_right,
-                        'Step Over',
-                      ),
-                    ),
-                    MaterialButton(
-                      onPressed: isPaused ? controller.stepOut : null,
-                      child: const MaterialIconLabel(
-                        Icons.keyboard_arrow_up,
-                        'Step Out',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

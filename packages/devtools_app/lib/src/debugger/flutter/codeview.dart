@@ -10,6 +10,8 @@ import 'package:vm_service/vm_service.dart' as vm show Stack;
 
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/theme.dart';
+import '../../ui/theme.dart';
+import '../../utils.dart';
 import 'breakpoints.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
@@ -87,6 +89,8 @@ class _CodeViewState extends State<CodeView> {
 
       executableLines = {};
 
+      // TODO(devoncarew): Improve this with SourceReportRange.possibleBreakpoints.
+      // (see getSourceReport('PossibleBreakpoints').
       // Recalculate the executable lines.
       if (widget.script?.tokenPosTable != null) {
         for (var encodedInfo in widget.script.tokenPosTable) {
@@ -107,14 +111,19 @@ class _CodeViewState extends State<CodeView> {
     });
 
     if (pausedPositions.isNotEmpty) {
-      final lineIndex = pausedPositions.first - 1;
-      // Back up 10 lines so the execution point isn't right at the top.
-      final scrollPosition = (lineIndex - 10) * CodeView.rowHeight;
-      verticalController.animateTo(
-        math.max(0, scrollPosition),
-        duration: shortDuration,
-        curve: defaultCurve,
-      );
+      final position = verticalController.position;
+
+      // TODO(devoncarew): Adjust this so we don't scroll if we're already in
+      // the middle third of the screen.
+      if (lines.length * CodeView.rowHeight > position.extentInside) {
+        // Scroll to the middle of the screen.
+        final lineIndex = pausedPositions.first - 1;
+        final scrollPosition = lineIndex * CodeView.rowHeight -
+            (position.extentInside - CodeView.rowHeight) / 2;
+
+        verticalController.animateTo(math.max(0, scrollPosition),
+            duration: defaultDuration, curve: defaultCurve);
+      }
     }
   }
 
@@ -137,11 +146,10 @@ class _CodeViewState extends State<CodeView> {
 
     // Apply the log change-of-base formula, then add 16dp padding for every
     // digit in the maximum number of lines.
-    final gutterWidth = lines.isEmpty
-        ? CodeView.assumedCharacterWidth
-        : CodeView.assumedCharacterWidth *
-                (math.log(lines.length) / math.ln10) +
-            CodeView.assumedCharacterWidth;
+    final gutterWidth = CodeView.assumedCharacterWidth * 1.5 +
+        CodeView.assumedCharacterWidth *
+            (defaultEpsilon + math.log(math.max(lines.length, 10)) / math.ln10)
+                .truncateToDouble();
 
     return DefaultTextStyle(
       style: Theme.of(context)
@@ -219,11 +227,12 @@ class GutterRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final foregroundColor = theme.textTheme.bodyText2.color;
+    final foregroundColor =
+        isDarkTheme ? theme.textTheme.bodyText2.color : theme.primaryColor;
     final subtleColor = theme.unselectedWidgetColor;
 
     const bpBoxSize = 12.0;
-    const executionPointIndent = 8.0;
+    const executionPointIndent = 10.0;
 
     return InkWell(
       onTap: onPressed,
@@ -241,26 +250,29 @@ class GutterRow extends StatelessWidget {
                 child: SizedBox(
                   width: bpBoxSize,
                   height: bpBoxSize,
-                  child: Stack(
-                    alignment: AlignmentDirectional.center,
-                    children: [
-                      if (isExecutable)
-                        createCircleWidget(executableLineRadius, subtleColor),
-                      if (isBreakpoint)
-                        createCircleWidget(breakpointRadius, foregroundColor),
-                    ],
+                  child: Center(
+                    child: createAnimatedCircleWidget(
+                      isBreakpoint ? breakpointRadius : executableLineRadius,
+                      isBreakpoint ? foregroundColor : subtleColor,
+                    ),
                   ),
                 ),
               ),
             Text('$lineNumber', textAlign: TextAlign.end),
-            if (isPausedHere)
-              const Padding(
-                padding: EdgeInsets.only(left: executionPointIndent),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Icon(Icons.play_arrow, size: defaultIconSize),
+            Container(
+              padding: const EdgeInsets.only(left: executionPointIndent),
+              alignment: Alignment.centerLeft,
+              child: AnimatedOpacity(
+                duration: defaultDuration,
+                curve: defaultCurve,
+                opacity: isPausedHere ? 1.0 : 0.0,
+                child: Icon(
+                  Icons.label,
+                  size: defaultIconSize,
+                  color: foregroundColor,
                 ),
               ),
+            ),
           ],
         ),
       ),
@@ -293,10 +305,12 @@ class ScriptRow extends StatelessWidget {
         alignment: Alignment.centerLeft,
         height: CodeView.rowHeight,
         color: isPausedHere ? theme.selectedRowColor : null,
-        child: Text(lineContents,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: isPausedHere ? selectedStyle : regularStyle),
+        child: Text(
+          lineContents,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: isPausedHere ? selectedStyle : regularStyle,
+        ),
       ),
     );
   }

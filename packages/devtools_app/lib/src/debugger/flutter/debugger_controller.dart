@@ -36,6 +36,8 @@ class DebuggerController extends DisposableController
 
   final _hasFrames = ValueNotifier<bool>(false);
 
+  ValueNotifier get hasFrames => _hasFrames;
+
   Event _lastEvent;
 
   Event get lastEvent => _lastEvent;
@@ -70,7 +72,8 @@ class DebuggerController extends DisposableController
   ValueListenable<List<BreakpointAndSourcePosition>>
       get breakpointsWithLocation => _breakpointsWithLocation;
 
-  final _exceptionPauseMode = ValueNotifier<String>(null);
+  final _exceptionPauseMode =
+      ValueNotifier<String>(ExceptionPauseMode.kUnhandled);
 
   ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
 
@@ -186,8 +189,10 @@ class DebuggerController extends DisposableController
   Future<void> removeBreakpoint(Breakpoint breakpoint) =>
       _service.removeBreakpoint(isolateRef.id, breakpoint.id);
 
-  Future<void> setExceptionPauseMode(String mode) =>
-      _service.setExceptionPauseMode(isolateRef.id, mode);
+  Future<void> setExceptionPauseMode(String mode) async {
+    await _service.setExceptionPauseMode(isolateRef.id, mode);
+    _exceptionPauseMode.value = mode;
+  }
 
   Future<Stack> getStack() => _service.getStack(isolateRef.id);
 

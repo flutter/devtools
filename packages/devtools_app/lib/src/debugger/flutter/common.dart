@@ -35,3 +35,13 @@ Widget createCircleWidget(double radius, Color color) {
     decoration: BoxDecoration(color: color, shape: BoxShape.circle),
   );
 }
+
+Widget createAnimatedCircleWidget(double radius, Color color) {
+  return AnimatedContainer(
+    width: radius,
+    height: radius,
+    curve: defaultCurve,
+    duration: defaultDuration,
+    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+  );
+}

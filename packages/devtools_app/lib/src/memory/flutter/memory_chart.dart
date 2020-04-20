@@ -8,7 +8,6 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
-
 import 'package:mp_chart/mp/chart/line_chart.dart';
 import 'package:mp_chart/mp/controller/line_chart_controller.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
@@ -203,7 +202,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         child: MaterialIconLabel(
           controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
           'Android Memory',
-          minIncludeTextWidth: 900,
+          includeTextWidth: 900,
         ),
       );
 

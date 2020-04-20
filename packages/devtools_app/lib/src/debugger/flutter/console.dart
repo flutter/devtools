@@ -85,16 +85,18 @@ class _ConsoleState extends State<Console> {
   }
 
   void _scrollToBottom() async {
-    await scrollController.animateTo(
-      scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 100),
-      curve: defaultCurve,
-    );
+    if (mounted && scrollController.hasClients) {
+      await scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: rapidDuration,
+        curve: defaultCurve,
+      );
 
-    // Scroll again if we've received new content in the interim.
-    final pos = scrollController.position;
-    if (pos.pixels != pos.maxScrollExtent) {
-      scrollController.jumpTo(pos.maxScrollExtent);
+      // Scroll again if we've received new content in the interim.
+      final pos = scrollController.position;
+      if (pos.pixels != pos.maxScrollExtent) {
+        scrollController.jumpTo(pos.maxScrollExtent);
+      }
     }
   }
 }

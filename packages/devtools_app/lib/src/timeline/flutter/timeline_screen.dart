@@ -203,20 +203,20 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         recordButton(
           key: TimelineScreen.recordButtonKey,
           recording: recording,
-          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
+          includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: _startRecording,
         ),
         const SizedBox(width: denseSpacing),
         stopRecordingButton(
           key: TimelineScreen.stopRecordingButtonKey,
           recording: recording,
-          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
+          includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: _stopRecording,
         ),
         const SizedBox(width: defaultSpacing),
         clearButton(
           key: TimelineScreen.clearButtonKey,
-          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
+          includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: () async {
             await _clearTimeline();
           },
@@ -247,7 +247,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
             child: const MaterialIconLabel(
               Icons.file_download,
               'Export',
-              minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+              includeTextWidth: _secondaryControlsMinIncludeTextWidth,
             ),
           ),
         ),
@@ -267,7 +267,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
               text: 'Network',
               enabledTooltip: 'Stop logging network traffic',
               disabledTooltip: 'Log network traffic',
-              minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+              includeTextWidth: _secondaryControlsMinIncludeTextWidth,
               selected: enabled,
             ),
           ],
