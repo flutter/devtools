@@ -388,13 +388,19 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   }
 
   void _updateStatus() async {
+    final status = await _computeStatus();
+    if (status != _status) {
+      setState(() {
+        _status = status;
+      });
+    }
+  }
+
+  Future<String> _computeStatus() async {
     final paused = widget.controller.isPaused.value;
 
     if (!paused) {
-      setState(() {
-        _status = 'running';
-      });
-      return;
+      return 'running';
     }
 
     final event = widget.controller.lastEvent;
@@ -403,10 +409,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
         event.kind == EventKind.kPauseException ? ' on exception' : '';
 
     if (frame == null) {
-      setState(() {
-        _status = 'paused$reason';
-      });
-      return;
+      return 'paused$reason';
     }
 
     final fileName = ' at ' + frame.location.script.uri.split('/').last;
@@ -414,8 +417,6 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     final pos =
         widget.controller.calculatePosition(script, frame.location.tokenPos);
 
-    setState(() {
-      _status = 'paused$reason$fileName $pos';
-    });
+    return 'paused$reason$fileName $pos';
   }
 }
