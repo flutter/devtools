@@ -5,7 +5,7 @@
 typedef Matcher = bool Function(String text);
 
 /// Create a query a text based filter.
-/// 
+///
 /// The search terms can be positive terms (the query items must contain the
 /// term) or negative terms (the query items must not contain the term).
 ///
@@ -22,7 +22,7 @@ class Filter {
     text = text.toLowerCase().trim().replaceAll(RegExp(r'\s+'), ' ');
     final terms = text.split(' ');
 
-    return Filter._(terms.map((term) {
+    return Filter._(terms.where((term) => term != '-').map((term) {
       if (term.startsWith(r'\-')) {
         return FilterItem(term.substring(1));
       } else if (term.startsWith('-')) {

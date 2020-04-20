@@ -23,6 +23,16 @@ void defineTests() {
       expect(filter.items, hasLength(2));
       expect(filter.items[0].negative, false);
       expect(filter.items[1].negative, true);
+
+      // ignore empty terms
+      filter = Filter.compile('foo');
+      expect(filter.items, hasLength(1));
+
+      filter = Filter.compile('foo ');
+      expect(filter.items, hasLength(1));
+
+      filter = Filter.compile('foo -');
+      expect(filter.items, hasLength(1));
     });
 
     test('matches', () async {
