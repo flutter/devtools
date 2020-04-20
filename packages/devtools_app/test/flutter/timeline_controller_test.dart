@@ -11,9 +11,13 @@ import 'package:devtools_testing/support/flutter_test_driver.dart'
 import 'package:devtools_testing/support/flutter_test_environment.dart';
 
 void main() async {
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
-    const FlutterRunConfiguration(withDebugger: true),
-  );
+  // TODO(devoncarew): Skip the timeline_controller_test.dart tests (#1778).
+  // ignore: dead_code
+  if (false) {
+    final FlutterTestEnvironment env = FlutterTestEnvironment(
+      const FlutterRunConfiguration(withDebugger: true),
+    );
 
-  await runTimelineControllerTests(env);
+    await runTimelineControllerTests(env);
+  }
 }
