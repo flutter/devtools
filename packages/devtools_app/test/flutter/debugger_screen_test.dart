@@ -23,6 +23,14 @@ void main() {
   MockDebuggerController debuggerController;
 
   group('DebuggerScreen', () {
+    Future<void> pumpDebuggerScreen(
+        WidgetTester tester, DebuggerController controller) async {
+      await tester.pumpWidget(wrapWithControllers(
+        const DebuggerScreenBody(),
+        debugger: controller,
+      ));
+    }
+
     setUp(() async {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
       when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
@@ -62,10 +70,7 @@ void main() {
     testWidgets('has Console area', (WidgetTester tester) async {
       when(debuggerController.stdio).thenReturn(ValueNotifier(['test stdio']));
 
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ));
+      await pumpDebuggerScreen(tester, debuggerController);
 
       expect(find.text('Console'), findsOneWidget);
 
@@ -80,10 +85,7 @@ void main() {
           .thenReturn(ValueNotifier(ScriptList(scripts: scripts)));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
 
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ));
+      await pumpDebuggerScreen(tester, debuggerController);
 
       expect(find.text('Libraries'), findsOneWidget);
 
@@ -115,10 +117,14 @@ void main() {
       when(debuggerController.breakpointsWithLocation)
           .thenReturn(ValueNotifier(breakpointsWithLocation));
 
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ));
+      when(debuggerController.scriptList)
+          .thenReturn(ValueNotifier(ScriptList(scripts: [])));
+      when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
+      when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
+      when(debuggerController.stdio).thenReturn(ValueNotifier([]));
+      when(debuggerController.currentScript).thenReturn(ValueNotifier(null));
+
+      await pumpDebuggerScreen(tester, debuggerController);
 
       expect(find.text('Breakpoints'), findsOneWidget);
 

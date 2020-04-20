@@ -14,9 +14,9 @@ import '../globals.dart';
 import 'app.dart';
 import 'banner_messages.dart';
 import 'common_widgets.dart';
-import 'controllers.dart';
 import 'notifications.dart';
 import 'screen.dart';
+import 'snapshot_screen.dart';
 import 'status_line.dart';
 import 'theme.dart';
 
@@ -120,8 +120,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     _importController = ImportController(
       Notifications.of(context),
-      Controllers.of(context),
-      _pushScreenForImport,
+      _pushSnapshotScreenForImport,
     );
 
     // If the animations are null, initialize them.
@@ -172,19 +171,29 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     }
   }
 
-  /// Pushes a screen for an offline import.
-  void _pushScreenForImport(DevToolsScreenType screenType) {
+  /// Pushes the snapshot screen for an offline import.
+  void _pushSnapshotScreenForImport(String screenId) {
+    final args = SnapshotArguments(screenId);
+    if (offlineMode) {
+      // If we are already in offline mode, only handle routing from existing
+      // '/snapshot' route. In this case, we need to first pop the existing
+      // '/snapshot' route and push a new one.
+      //
+      // If we allow other routes that are not the '/snapshot' route to handle
+      // routing when we are already offline, the other routes will pop their
+      // existing screen ('/connect', or '/') and push '/snapshot' over the top.
+      // We want to avoid this because the routes underneath the existing
+      // '/snapshot' route should remain unchanged while '/snapshot' sits on
+      // top.
+      if (ModalRoute.of(context).settings.name == snapshotRoute) {
+        Navigator.popAndPushNamed(context, snapshotRoute, arguments: args);
+      }
+    } else {
+      Navigator.pushNamed(context, snapshotRoute, arguments: args);
+    }
     setState(() {
       enterOfflineMode();
     });
-    final availableScreens = widget.tabs;
-    int screenIndex = availableScreens
-        .indexWhere((screen) => screen.type.id == screenType.id);
-    if (screenIndex == -1) {
-      screenIndex = widget.tabs.length;
-      widget.tabs.add(screenType.create());
-    }
-    _tabController.animateTo(screenIndex);
   }
 
   @override
@@ -203,21 +212,26 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     return ValueListenableProvider.value(
       value: _currentScreen,
-      child: DragAndDrop(
-        handleDrop: _importController.importData,
-        child: AnimatedBuilder(
-          animation: appBarCurve,
-          builder: (context, child) {
-            return Scaffold(
-              appBar: _buildAppBar(),
-              body: child,
-              bottomNavigationBar: _buildStatusLine(context),
-            );
-          },
-          child: TabBarView(
-            physics: const NeverScrollableScrollPhysics(),
-            controller: _tabController,
-            children: tabBodies,
+      child: Provider<BannerMessagesController>(
+        create: (_) => BannerMessagesController(),
+        child: DragAndDrop(
+          // TODO(kenz): we are handling drops from multiple scaffolds. We need
+          // to make sure we are only handling drops from the active scaffold.
+          handleDrop: _importController.importData,
+          child: AnimatedBuilder(
+            animation: appBarCurve,
+            builder: (context, child) {
+              return Scaffold(
+                appBar: _buildAppBar(),
+                body: child,
+                bottomNavigationBar: _buildStatusLine(context),
+              );
+            },
+            child: TabBarView(
+              physics: const NeverScrollableScrollPhysics(),
+              controller: _tabController,
+              children: tabBodies,
+            ),
           ),
         ),
       ),
@@ -330,7 +344,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 }
 
 class SimpleScreen extends Screen {
-  const SimpleScreen(this.child) : super(DevToolsScreenType.simple);
+  const SimpleScreen(this.child) : super(id);
+
+  static const id = 'simple';
 
   final Widget child;
 

@@ -34,7 +34,6 @@ typedef chartStateListener = void Function();
 final String _memoryLogFilename =
     '${MemoryController.logFilenamePrefix}${DateFormat("yyyyMMdd_hh_mm").format(DateTime.now())}';
 
-// TODO(terry): Implement a dispose method and call in ProvidedControllers dispose.
 /// This class contains the business logic for [memory.dart].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests

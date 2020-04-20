@@ -4,6 +4,7 @@
 import 'dart:async';
 
 import '../../auto_dispose.dart';
+import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../globals.dart';
 import '../../http/http_service.dart';
@@ -14,9 +15,8 @@ import '../../trace_event.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
 import 'timeline_model.dart';
 import 'timeline_processor.dart';
+import 'timeline_screen.dart';
 import 'timeline_service.dart';
-
-const String timelineScreenId = 'timeline';
 
 /// This class contains the business logic for [timeline_screen.dart].
 ///
@@ -35,6 +35,7 @@ class TimelineController
     timelineService = TimelineService(this);
     processor = TimelineProcessor(this);
   }
+  final _exportController = ExportController();
 
   /// The currently selected timeline event.
   ValueListenable<TimelineEvent> get selectedTimelineEvent =>
@@ -144,17 +145,6 @@ class TimelineController
     }
   }
 
-  // TODO(kenz): remove this method once html app is deleted. This is a
-  // workaround to avoid fixing bugs in the DevTools html app. Modifying
-  // [selectTimelineEvent] to work for Flutter DevTools broke the html app, so
-  // this method fixes the regression without wasting resources to make the html
-  // and flutter code 100% compatible.
-  void htmlSelectTimelineEvent(TimelineEvent event) {
-    if (event == null || data.selectedEvent == event) return;
-    data.selectedEvent = event;
-    _selectedTimelineEventNotifier.value = event;
-  }
-
   Future<void> getCpuProfileForSelectedEvent() async {
     final selectedEvent = data.selectedEvent;
     if (!selectedEvent.isUiEvent) return;
@@ -240,8 +230,8 @@ class TimelineController
     }
   }
 
-  Future<void> loadOfflineData(OfflineTimelineData offlineData) async {
-    await _offlineModeChanged();
+  FutureOr<void> processOfflineData(OfflineTimelineData offlineData) async {
+    await clearData();
     final traceEvents = [
       for (var trace in offlineData.traceEvents)
         TraceEventWrapper(
@@ -323,14 +313,12 @@ class TimelineController
     }
   }
 
-  Future<void> _offlineModeChanged() async {
-    await clearData();
-    await timelineService.updateListeningState(true);
-  }
-
-  Future<void> exitOfflineMode() async {
-    offlineMode = false;
-    await _offlineModeChanged();
+  /// Exports the current timeline data to a .json file.
+  ///
+  /// This method returns the name of the file that was downloaded.
+  String exportData() {
+    final encodedData = _exportController.encode(TimelineScreen.id, data.json);
+    return _exportController.downloadFile(encodedData);
   }
 
   Future<void> toggleHttpRequestLogging(bool state) async {
