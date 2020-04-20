@@ -121,7 +121,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
               decoration: const InputDecoration(
                 isDense: true,
                 border: OutlineInputBorder(),
-                labelText: 'Search',
+                labelText: 'Filter',
+                // TODO(devoncarew): Include hint text (this currently has an
+                // issue w/ sizing of the search field's contents).
+                //hintText: 'term -term',
               ),
             ),
           ),
@@ -134,11 +137,15 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           axis: Axis.vertical,
           initialFractions: const [0.78, 0.22],
           children: [
-            LogsTable(
-              data: controller.filteredData,
-              onItemSelected: _select,
+            OutlinedBorder(
+              child: LogsTable(
+                data: controller.filteredData,
+                onItemSelected: _select,
+              ),
             ),
-            LogDetails(log: selected),
+            OutlinedBorder(
+              child: LogDetails(log: selected),
+            ),
           ],
         ),
       ),
@@ -185,6 +192,7 @@ class LogsTable extends StatelessWidget {
 
 class LogDetails extends StatefulWidget {
   const LogDetails({Key key, @required this.log}) : super(key: key);
+
   final LogData log;
 
   @override
@@ -193,40 +201,19 @@ class LogDetails extends StatefulWidget {
 
 class _LogDetailsState extends State<LogDetails>
     with SingleTickerProviderStateMixin {
-  AnimationController crossFade;
-
   @override
   void initState() {
     super.initState();
 
-    crossFade = defaultAnimationController(this)
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          setState(() {
-            _oldLog = widget.log;
-            crossFade.value = 0.0;
-          });
-        }
-      });
-
-    // We'll use a linear curve for this animation, so no curve needed.
     _computeLogDetails();
-  }
-
-  @override
-  void dispose() {
-    crossFade.dispose();
-    super.dispose();
   }
 
   @override
   void didUpdateWidget(LogDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.log != oldWidget.log) {
-      _oldLog = oldWidget.log;
-      crossFade.forward();
+      _computeLogDetails();
     }
-    _computeLogDetails();
   }
 
   Future<void> _computeLogDetails() async {
@@ -236,8 +223,6 @@ class _LogDetailsState extends State<LogDetails>
     }
   }
 
-  LogData _oldLog;
-
   bool showInspector(LogData log) => log != null && log.node != null;
 
   bool showSimple(LogData log) =>
@@ -245,26 +230,9 @@ class _LogDetailsState extends State<LogDetails>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: crossFade,
-      builder: (context, _) {
-        return Container(
-          color: Theme.of(context).cardColor,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Opacity(
-                opacity: crossFade.value,
-                child: _buildContent(context, widget.log),
-              ),
-              Opacity(
-                opacity: 1 - crossFade.value,
-                child: _buildContent(context, _oldLog),
-              ),
-            ],
-          ),
-        );
-      },
+    return Container(
+      color: Theme.of(context).cardColor,
+      child: _buildContent(context, widget.log),
     );
   }
 
@@ -278,7 +246,7 @@ class _LogDetailsState extends State<LogDetails>
     return const SizedBox();
   }
 
-  // TODO(https://github.com/flutter/devtools/issues/1370): implement this.
+  // TODO(#1370): implement this.
   Widget _buildInspector(BuildContext context, LogData log) => const SizedBox();
 
   Widget _buildSimpleLog(BuildContext context, LogData log) {
@@ -309,7 +277,7 @@ class _KindColumn extends LogKindColumn implements ColumnRenderer<LogData> {
   String getValue(LogData dataObject) => dataObject.kind;
 
   @override
-  double get fixedWidthPx => 140;
+  double get fixedWidthPx => 145;
 
   @override
   Widget build(BuildContext context, LogData item) {
