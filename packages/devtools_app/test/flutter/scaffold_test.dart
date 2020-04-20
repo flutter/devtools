@@ -86,7 +86,7 @@ void main() {
 class _TestScreen extends Screen {
   const _TestScreen(this.name, this.key, {Key tabKey})
       : super(
-          DevToolsScreenType.simple,
+          'testScreen',
           title: name,
           icon: Icons.computer,
           tabKey: tabKey,

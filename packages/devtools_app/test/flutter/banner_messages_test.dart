@@ -4,12 +4,14 @@
 
 import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/common_widgets.dart';
-import 'package:devtools_app/src/flutter/screen.dart';
+import 'package:devtools_app/src/flutter/scaffold.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/performance/flutter/performance_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
 import '../support/mocks.dart';
 import 'wrappers.dart';
@@ -22,60 +24,6 @@ void main() {
     controller = BannerMessagesController();
     fakeServiceManager = FakeServiceManager(useFakeService: true);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
-  });
-
-  group('BannerMessagesController', () {
-    test('removeMessage removes and dismisses correctly', () {
-      expect(controller.isMessageDismissed(testMessage1), isFalse);
-      controller.removeMessage(testMessage1);
-      expect(controller.isMessageDismissed(testMessage1), isFalse);
-      controller.removeMessage(testMessage1, dismiss: true);
-      expect(controller.isMessageDismissed(testMessage1), isTrue);
-    });
-
-    test('removeMessageByKey removes correct message', () {
-      controller.addMessage(testMessage1);
-      controller.addMessage(testMessage2);
-      expect(controller.messagesForScreen(testMessage1ScreenType).value,
-          contains(testMessage1));
-      expect(controller.messagesForScreen(testMessage1ScreenType).value,
-          contains(testMessage2));
-      controller.removeMessageByKey(k1, testMessage1ScreenType);
-      expect(controller.messagesForScreen(testMessage1ScreenType).value,
-          isNot(contains(testMessage1)));
-      expect(controller.messagesForScreen(testMessage1ScreenType).value,
-          contains(testMessage2));
-    });
-
-    test('addMessage adds messages', () {
-      expect(controller.isMessageVisible(testMessage1), isFalse);
-      controller.addMessage(testMessage1);
-      expect(controller.isMessageVisible(testMessage1), isTrue);
-    });
-
-    test('addMessage does not add duplicate messages', () {
-      expect(controller.isMessageVisible(testMessage1), isFalse);
-      controller.addMessage(testMessage1);
-      expect(controller.isMessageVisible(testMessage1), isTrue);
-      expect(controller.messagesForScreen(testMessage1ScreenType).value.length,
-          equals(1));
-      controller.addMessage(testMessage1);
-      expect(controller.messagesForScreen(testMessage1ScreenType).value.length,
-          equals(1));
-    });
-
-    test('messagesForScreen returns correct messages', () {
-      expect(
-          controller.messagesForScreen(testMessage1ScreenType).value, isEmpty);
-      expect(
-          controller.messagesForScreen(testMessage3ScreenType).value, isEmpty);
-      controller.addMessage(testMessage1);
-      controller.addMessage(testMessage3);
-      expect(controller.messagesForScreen(testMessage1ScreenType).value,
-          contains(testMessage1));
-      expect(controller.messagesForScreen(testMessage3ScreenType).value,
-          contains(testMessage3));
-    });
   });
 
   group('BannerMessages', () {
@@ -93,20 +41,22 @@ void main() {
       return wrapWithControllers(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: wrapWithBannerMessages(
-            Builder(
-              builder: (context) {
-                buildContext = context;
-                return Column(
-                  children: <Widget>[
-                    // This is button is present so that we can tap it and
-                    // simulate a frame being drawn.
-                    RaisedButton(
-                      onPressed: () => {},
-                    ),
-                  ],
-                );
-              },
+          child: BannerMessages(
+            screen: SimpleScreen(
+              Builder(
+                builder: (context) {
+                  buildContext = context;
+                  return Column(
+                    children: <Widget>[
+                      // This is button is present so that we can tap it and
+                      // simulate a frame being drawn.
+                      RaisedButton(
+                        onPressed: () => {},
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -118,41 +68,69 @@ void main() {
       final bannerMessages = buildBannerMessages();
       await tester.pumpWidget(bannerMessages);
       expect(find.byKey(k1), findsNothing);
-      BannerMessages.of(buildContext).push(testMessage1);
+      bannerMessagesController(buildContext).addMessage(testMessage1);
       await pumpTestFrame(tester);
       expect(find.byKey(k1), findsOneWidget);
 
       expect(find.byKey(k2), findsNothing);
-      BannerMessages.of(buildContext).push(testMessage2);
+      bannerMessagesController(buildContext).addMessage(testMessage2);
       await pumpTestFrame(tester);
       expect(find.byKey(k2), findsOneWidget);
+    });
+
+    testWidgets('does not add duplicate messages', (WidgetTester tester) async {
+      final bannerMessages = buildBannerMessages();
+      await tester.pumpWidget(bannerMessages);
+      expect(find.byKey(k1), findsNothing);
+
+      bannerMessagesController(buildContext).addMessage(testMessage1);
+      await pumpTestFrame(tester);
+      expect(find.byKey(k1), findsOneWidget);
+
+      // Verify there is still only one message after adding the duplicate.
+      bannerMessagesController(buildContext).addMessage(testMessage1);
+      await pumpTestFrame(tester);
+      expect(find.byKey(k1), findsOneWidget);
     });
 
     testWidgets('removes and dismisses messages', (WidgetTester tester) async {
       final bannerMessages = buildBannerMessages();
       await tester.pumpWidget(bannerMessages);
       expect(find.byKey(k1), findsNothing);
-      BannerMessages.of(buildContext).push(testMessage1);
+      bannerMessagesController(buildContext).addMessage(testMessage1);
       await pumpTestFrame(tester);
       expect(find.byKey(k1), findsOneWidget);
 
-      BannerMessages.of(buildContext).remove(testMessage1);
+      bannerMessagesController(buildContext).removeMessage(testMessage1);
       await pumpTestFrame(tester);
       expect(find.byKey(k1), findsNothing);
 
       // Verify message can be re-added, since it was not removed with
       // `dismiss = true`.
-      BannerMessages.of(buildContext).push(testMessage1);
+      bannerMessagesController(buildContext).addMessage(testMessage1);
       await pumpTestFrame(tester);
       expect(find.byKey(k1), findsOneWidget);
 
-      BannerMessages.of(buildContext).remove(testMessage1, dismiss: true);
+      // Remove message by key this time.
+      bannerMessagesController(buildContext)
+          .removeMessageByKey(k1, testMessage1ScreenId);
+      await pumpTestFrame(tester);
+      expect(find.byKey(k1), findsNothing);
+
+      // Verify message can be re-added, since it was not removed with
+      // `dismiss = true`.
+      bannerMessagesController(buildContext).addMessage(testMessage1);
+      await pumpTestFrame(tester);
+      expect(find.byKey(k1), findsOneWidget);
+
+      bannerMessagesController(buildContext)
+          .removeMessage(testMessage1, dismiss: true);
       await pumpTestFrame(tester);
       expect(find.byKey(k1), findsNothing);
 
       // Verify message cannot be re-added, since it was removed with
       // `dismiss = true`.
-      BannerMessages.of(buildContext).push(testMessage1);
+      bannerMessagesController(buildContext).addMessage(testMessage1);
       await pumpTestFrame(tester);
       expect(find.byKey(k1), findsNothing);
     });
@@ -161,7 +139,7 @@ void main() {
       final bannerMessages = buildBannerMessages();
       await tester.pumpWidget(bannerMessages);
       expect(find.byKey(k1), findsNothing);
-      BannerMessages.of(buildContext).push(testMessage1);
+      bannerMessagesController(buildContext).addMessage(testMessage1);
       await pumpTestFrame(tester);
       expect(find.byKey(k1), findsOneWidget);
 
@@ -171,17 +149,20 @@ void main() {
 
       // Verify message cannot be re-added, since it was removed with
       // `dismiss = true`.
-      BannerMessages.of(buildContext).push(testMessage1);
+      bannerMessagesController(buildContext).addMessage(testMessage1);
       await pumpTestFrame(tester);
       expect(find.byKey(k1), findsNothing);
     });
   });
 }
 
-// These screen types are arbitrary.
-const testMessage1ScreenType = DevToolsScreenType.simple;
-const testMessage2ScreenType = DevToolsScreenType.simple;
-const testMessage3ScreenType = DevToolsScreenType.performance;
+BannerMessagesController bannerMessagesController(BuildContext context) {
+  return Provider.of<BannerMessagesController>(context, listen: false);
+}
+
+const testMessage1ScreenId = SimpleScreen.id;
+const testMessage2ScreenId = SimpleScreen.id;
+const testMessage3ScreenId = PerformanceScreen.id;
 const k1 = Key('test message 1');
 const k2 = Key('test message 2');
 const k3 = Key('test message 3');
@@ -190,19 +171,19 @@ const testMessage1 = BannerMessage(
   textSpans: [TextSpan(text: 'Test Message 1')],
   backgroundColor: Colors.black,
   foregroundColor: Colors.white,
-  screenType: testMessage1ScreenType,
+  screenId: testMessage1ScreenId,
 );
 const testMessage2 = BannerMessage(
   key: k2,
   textSpans: [TextSpan(text: 'Test Message 2')],
   backgroundColor: Colors.black,
   foregroundColor: Colors.white,
-  screenType: testMessage2ScreenType,
+  screenId: testMessage2ScreenId,
 );
 const testMessage3 = BannerMessage(
   key: k3,
   textSpans: [TextSpan(text: 'Test Message 3')],
   backgroundColor: Colors.black,
   foregroundColor: Colors.white,
-  screenType: testMessage3ScreenType,
+  screenId: testMessage3ScreenId,
 );

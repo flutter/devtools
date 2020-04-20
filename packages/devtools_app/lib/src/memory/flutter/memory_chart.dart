@@ -34,9 +34,9 @@ import 'package:mp_chart/mp/core/utils/color_utils.dart';
 import 'package:mp_chart/mp/core/utils/painter_utils.dart';
 import 'package:mp_chart/mp/core/value_formatter/large_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
+import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/theme.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/theme.dart';
@@ -76,7 +76,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    controller = Controllers.of(context).memory;
+    controller = Provider.of<MemoryController>(context);
 
     // Hookup access to the MemoryController when a data point is clicked
     // in a chart.

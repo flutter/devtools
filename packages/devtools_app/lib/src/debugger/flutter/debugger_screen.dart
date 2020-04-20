@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart' hide Stack;
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/flex_split_column.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
@@ -24,16 +24,12 @@ import 'scripts.dart';
 
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
-      : super(
-          DevToolsScreenType.debugger,
-          title: 'Debugger',
-          icon: Octicons.bug,
-        );
+      : super('debugger', title: 'Debugger', icon: Octicons.bug);
 
   static const debuggerPaneHeaderHeight = 36.0;
 
   @override
-  String get docPageId => 'debugger';
+  String get docPageId => screenId;
 
   @override
   bool get showIsolateSelector => true;
@@ -47,7 +43,7 @@ class DebuggerScreen extends Screen {
 
   @override
   Widget buildStatus(BuildContext context, TextTheme textTheme) {
-    final controller = Controllers.of(context).debugger;
+    final controller = Provider.of<DebuggerController>(context);
     return DebuggerStatus(controller: controller);
   }
 }
@@ -75,7 +71,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final newController = Controllers.of(context).debugger;
+    final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
 

@@ -15,7 +15,9 @@ class ExportControllerDesktop extends ExportController {
   static final _fs = FileIO();
 
   @override
-  void downloadFile(String filename, String contents) {
-    _fs.writeStringToFile(filename, contents);
+  String downloadFile(String contents) {
+    final fileName = generateFileName();
+    _fs.writeStringToFile(fileName, contents);
+    return fileName;
   }
 }

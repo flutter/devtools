@@ -12,20 +12,12 @@ import '../utils.dart';
 import 'common_widgets.dart';
 import 'navigation.dart';
 import 'notifications.dart';
-import 'screen.dart';
 import 'theme.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
 ///
 /// We need to use this screen to get a guarantee that the app has a Dart VM
 /// available.
-class ConnectScreen extends Screen {
-  const ConnectScreen() : super(DevToolsScreenType.connect, title: 'Connect');
-
-  @override
-  Widget build(BuildContext context) => ConnectScreenBody();
-}
-
 class ConnectScreenBody extends StatefulWidget {
   @override
   State<ConnectScreenBody> createState() => _ConnectScreenBodyState();

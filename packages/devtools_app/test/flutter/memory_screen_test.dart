@@ -29,7 +29,7 @@ void main() {
   }) async {
     // Set a wide enough screen width that we do not run into overflow.
     await tester.pumpWidget(wrapWithControllers(
-      wrapWithBannerMessages(const MemoryBody()),
+      const MemoryBody(),
       memory: controller = memoryController ?? MemoryController(),
     ));
     expect(find.byType(MemoryBody), findsOneWidget);

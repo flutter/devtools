@@ -26,13 +26,13 @@ import 'inspector_tree_flutter.dart';
 class InspectorScreen extends Screen {
   const InspectorScreen()
       : super(
-          DevToolsScreenType.inspector,
+          'inspector',
           title: 'Flutter Inspector',
           icon: Octicons.deviceMobile,
         );
 
   @override
-  String get docPageId => 'inspector';
+  String get docPageId => screenId;
 
   @override
   Widget build(BuildContext context) {
@@ -250,6 +250,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
     try {
       // Init the inspector service, or return null.
       await ensureInspectorDependencies();
+      await ensureInspectorServiceDependencies();
       inspectorService =
           await InspectorService.create(service).catchError((e) => null);
     } finally {

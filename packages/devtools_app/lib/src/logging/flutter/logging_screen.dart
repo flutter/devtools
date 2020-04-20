@@ -5,10 +5,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
@@ -30,14 +30,10 @@ import '../logging_controller.dart';
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
   const LoggingScreen()
-      : super(
-          DevToolsScreenType.logging,
-          title: 'Logging',
-          icon: Octicons.clippy,
-        );
+      : super('logging', title: 'Logging', icon: Octicons.clippy);
 
   @override
-  String get docPageId => 'logging';
+  String get docPageId => screenId;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +45,8 @@ class LoggingScreen extends Screen {
 
   @override
   Widget buildStatus(BuildContext context, TextTheme textTheme) {
-    final LoggingController controller = Controllers.of(context).logging;
+    final LoggingController controller =
+        Provider.of<LoggingController>(context);
 
     return StreamBuilder<String>(
       initialData: controller.statusText,
@@ -71,9 +68,10 @@ class LoggingScreenBody extends StatefulWidget {
 class _LoggingScreenState extends State<LoggingScreenBody>
     with AutoDisposeMixin {
   LogData selected;
+
   TextEditingController filterController;
 
-  LoggingController get controller => Controllers.of(context).logging;
+  LoggingController controller;
 
   @override
   void initState() {
@@ -85,6 +83,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final newController = Provider.of<LoggingController>(context);
+    if (newController == controller) return;
+    controller = newController;
 
     cancel();
 

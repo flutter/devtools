@@ -16,11 +16,7 @@ import 'network_model.dart';
 
 class NetworkScreen extends Screen {
   const NetworkScreen()
-      : super(
-          DevToolsScreenType.network,
-          title: 'Network',
-          icon: Icons.network_check,
-        );
+      : super('network', title: 'Network', icon: Icons.network_check);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');

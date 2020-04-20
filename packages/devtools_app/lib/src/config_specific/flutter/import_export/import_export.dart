@@ -2,87 +2,60 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../flutter/controllers.dart';
+import 'dart:convert';
+
+import '../../../../devtools.dart';
 import '../../../flutter/notifications.dart';
-import '../../../flutter/screen.dart';
+import '../../../globals.dart';
 import '../../../timeline/flutter/timeline_model.dart';
+import '../../../timeline/flutter/timeline_screen.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
 
+const devToolsSnapshotKey = 'devToolsSnapshot';
+const activeScreenIdKey = 'activeScreenId';
+const devToolsVersionKey = 'devtoolsVersion';
 const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
     ' At this time, DevTools only supports importing files that were originally'
     ' exported from DevTools.';
 
-String unsupportedDevToolsFileMessage(String devToolsScreen) {
-  return 'Could not import file. The imported file is from "$devToolsScreen", '
-      'which is not supported by this version of Dart DevTools. You may need to'
-      ' upgrade your version of Dart DevTools to view this file.';
+String attemptingToImportMessage(String devToolsScreen) {
+  return 'Attempting to import file for screen with id "$devToolsScreen".';
 }
-
-const emptyTimelineMessage = 'Imported file does not contain timeline data.';
 
 // TODO(kenz): we should support a file picker import for desktop.
 class ImportController {
   ImportController(
     this._notifications,
-    this._controllers,
-    this.pushScreenForImport,
+    this._pushSnapshotScreenForImport,
   );
 
-  final void Function(DevToolsScreenType type) pushScreenForImport;
+  final void Function(String screenId) _pushSnapshotScreenForImport;
 
   final NotificationService _notifications;
 
-  final ProvidedControllers _controllers;
-
   bool importing = false;
 
+  // TODO(kenz): improve error handling here or in snapshot_screen.dart.
   void importData(Map<String, dynamic> json) {
     if (importing) return;
     importing = true;
 
-    final devToolsScreen = json['dartDevToolsScreen'];
-    if (devToolsScreen == null) {
+    final isDevToolsSnapshot = json[devToolsSnapshotKey];
+    if (isDevToolsSnapshot == null || !isDevToolsSnapshot) {
       _notifications.push(nonDevToolsFileMessage);
       importing = false;
       return;
     }
 
-    // TODO(kenz): add UI progress indicator when offline data is loading.
-    // TODO(kenz): add support for custom / conditional screens.
-    switch (devToolsScreen) {
-      case DevToolsScreenType.timelineId:
-        _importTimeline(json);
-        break;
-      // TODO(jacobr): add the inspector handling case here once the inspector
-      // can be exported.
-      default:
-        _notifications.push(unsupportedDevToolsFileMessage(devToolsScreen));
-        importing = false;
-        return;
-    }
+    // TODO(kenz): support imports for more than one screen at a time.
+    final activeScreenId = json[activeScreenIdKey];
+    offlineDataJson = json;
+    _notifications.push(attemptingToImportMessage(activeScreenId));
+    _pushSnapshotScreenForImport(activeScreenId);
 
     importing = false;
-  }
-
-  void _importTimeline(Map<String, dynamic> json) async {
-    final offlineData = OfflineTimelineData.parse(json);
-    if (offlineData.isEmpty) {
-      _notifications.push(emptyTimelineMessage);
-      return;
-    }
-
-    // TODO(kenz): handle imports when we don't have any active controllers
-    // (i.e. when the connect screen is showing).
-    final timelineController = _controllers?.timeline;
-    if (timelineController == null) {
-      return;
-    }
-
-    pushScreenForImport(DevToolsScreenType.timeline);
-
-    await timelineController.loadOfflineData(offlineData);
   }
 }
 
@@ -93,5 +66,32 @@ abstract class ExportController {
 
   const ExportController.impl();
 
-  void downloadFile(String filename, String contents);
+  String generateFileName() {
+    final now = DateTime.now();
+    final timestamp =
+        '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
+    return 'dart_devtools_$timestamp.json';
+  }
+
+  /// Downloads a JSON file with [contents] and returns the name of the
+  /// downloaded file.
+  String downloadFile(String contents);
+
+  String encode(String activeScreenId, Map<String, dynamic> contents) {
+    final _contents = {
+      devToolsSnapshotKey: true,
+      activeScreenIdKey: activeScreenId,
+      devToolsVersionKey: version,
+    };
+    // This is a workaround to guarantee that DevTools exports are compatible
+    // with other trace viewers (catapult, perfetto, chrome://tracing), which
+    // require a top level field named "traceEvents".
+    if (activeScreenId == TimelineScreen.id) {
+      final traceEvents = List<Map<String, dynamic>>.from(
+          contents[TimelineData.traceEventsKey]);
+      _contents[TimelineData.traceEventsKey] = traceEvents;
+      contents.remove(TimelineData.traceEventsKey);
+    }
+    return jsonEncode(_contents..addAll({activeScreenId: contents}));
+  }
 }

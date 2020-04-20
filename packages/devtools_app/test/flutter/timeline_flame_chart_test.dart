@@ -37,7 +37,7 @@ void main() {
       TimelineController controller,
     ) async {
       await tester.pumpWidget(wrapWithControllers(
-        wrapWithBannerMessages(const TimelineScreenBody()),
+        const TimelineScreenBody(),
         timeline: controller,
       ));
     }

@@ -13,7 +13,7 @@ void main() async {
     TestNotifications notifications;
     setUp(() {
       notifications = TestNotifications();
-      importController = ImportController(notifications, null, null);
+      importController = ImportController(notifications, (_) {});
     });
 
     test('importData pushes proper notifications', () {
@@ -22,27 +22,19 @@ void main() async {
       expect(notifications.messages.length, equals(1));
       expect(notifications.messages, contains(nonDevToolsFileMessage));
 
-      importController.importData(unsupportedDevToolsFileJson);
+      importController.importData(devToolsFileJson);
       expect(notifications.messages.length, equals(2));
       expect(
         notifications.messages,
-        contains(unsupportedDevToolsFileMessage('info')),
+        contains(attemptingToImportMessage('example')),
       );
-    });
-
-    test('importing empty timeline notifies', () {
-      expect(notifications.messages, isEmpty);
-      importController.importData(emptyTimelineJson);
-      expect(notifications.messages.length, equals(1));
-      expect(notifications.messages, contains(emptyTimelineMessage));
     });
   });
 }
 
 final nonDevToolsFileJson = <String, dynamic>{};
-final unsupportedDevToolsFileJson = <String, dynamic>{
-  'dartDevToolsScreen': 'info',
-};
-final emptyTimelineJson = <String, dynamic>{
-  'dartDevToolsScreen': 'timeline',
+final devToolsFileJson = <String, dynamic>{
+  'devToolsSnapshot': true,
+  'activeScreenId': 'example',
+  'example': {'title': 'example custom tools'}
 };

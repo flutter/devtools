@@ -11,8 +11,8 @@ import '../framework/framework_core.dart';
 import '../globals.dart';
 import '../inspector/flutter_widget.dart';
 import '../url_utils.dart';
+import 'app.dart';
 import 'auto_dispose_mixin.dart';
-import 'controllers.dart';
 import 'navigation.dart';
 import 'notifications.dart';
 
@@ -110,7 +110,7 @@ class _InitializerState extends State<Initializer>
         // the /connect page to get a VM Service connection for serviceManager.
         // When it completes, the serviceManager will notify this instance.
         Navigator.of(context).pushNamed(
-          routeNameWithQueryParams(context, '/connect'),
+          routeNameWithQueryParams(context, connectRoute),
         );
       }
     });
@@ -119,7 +119,7 @@ class _InitializerState extends State<Initializer>
   @override
   Widget build(BuildContext context) {
     return _checkLoaded() && _dependenciesLoaded
-        ? Controllers(child: widget.builder(context))
+        ? widget.builder(context)
         : const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
