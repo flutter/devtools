@@ -12,6 +12,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart' as logger;
+import '../core/filtering.dart';
 import '../core/message_bus.dart';
 import '../globals.dart';
 import '../inspector/diagnostics_node.dart';
@@ -93,6 +94,7 @@ class LoggingDetailsController {
           if (node != null) {
             tree.maybePopulateChildren(node);
           }
+
           // TODO(jacobr): node.diagnostic.isDiagnosticableValue isn't quite
           // right.
           if (node.diagnostic.isDiagnosticableValue) {
@@ -227,9 +229,11 @@ class LoggingController {
       return _cachedFilteredData;
     }
 
-    final match = filterText.trim().toLowerCase();
-    _cachedFilteredData =
-        data.where((LogData logData) => logData.matchesFilter(match)).toList();
+    // Filter using both positive and negative terms.
+    final filter = Filter.compile(filterText);
+    _cachedFilteredData = data.where((LogData logData) {
+      return filter.matches(logData.matchesFilter);
+    }).toList();
     return _cachedFilteredData;
   }
 
@@ -613,6 +617,7 @@ class LoggingController {
           ),
         );
       });
+
       _listen(messageBus.onEvent(type: 'restart.end'), (BusEvent event) {
         log(
           LogData(
@@ -622,7 +627,35 @@ class LoggingController {
           ),
         );
       });
+
+      // Listen for DevTools internal events.
+      _listen(
+        messageBus
+            .onEvent()
+            .where((event) => event.type.startsWith('devtools.')),
+        _handleDevToolsEvent,
+      );
     }
+  }
+
+  void _handleDevToolsEvent(BusEvent event) {
+    var details = event.data.toString();
+    String summary;
+
+    if (details.contains('\n')) {
+      final lines = details.split('\n');
+      summary = lines.first;
+      details = lines.sublist(1).join('\n');
+    }
+
+    log(
+      LogData(
+        event.type,
+        details,
+        DateTime.now().millisecondsSinceEpoch,
+        summary: summary,
+      ),
+    );
   }
 }
 

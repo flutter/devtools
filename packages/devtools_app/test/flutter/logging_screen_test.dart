@@ -142,10 +142,9 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           find.text('log event 996'),
-          findsNWidgets(3),
-          reason: 'The log details should be visible both in the table and '
-              'the details section. The details view will have two text '
-              'widgets to support its cross-fade animation.',
+          findsNWidgets(2),
+          reason: 'The log details should be visible both in the table and the '
+              'details section.',
         );
       });
 
@@ -174,12 +173,7 @@ void main() {
         );
 
         await tester.pumpAndSettle();
-        expect(
-          find.text(nonJsonOutput),
-          findsNWidgets(2),
-          reason:
-              'The fade transition between details views will have two text widgets.',
-        );
+        expect(find.text(nonJsonOutput), findsOneWidget);
       });
 
       testWidgets('can show details of json log data',
@@ -209,12 +203,7 @@ void main() {
         );
 
         await tester.pumpAndSettle();
-        expect(
-          findJson,
-          findsNWidgets(2),
-          reason:
-              'The fade transition between details views will have two text widgets.',
-        );
+        expect(findJson, findsOneWidget);
       });
     });
   });

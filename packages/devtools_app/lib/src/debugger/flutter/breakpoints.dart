@@ -11,6 +11,9 @@ import '../../utils.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 
+const executableLineRadius = 1.5;
+const breakpointRadius = 6.0;
+
 class BreakpointPicker extends StatefulWidget {
   const BreakpointPicker({
     Key key,
@@ -57,16 +60,27 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
       color: isSelected ? theme.selectedRowColor : null,
       child: InkWell(
         onTap: () => widget.onSelected(bp),
-        child: densePadding(
-          Row(
+        child: Padding(
+          padding: const EdgeInsets.all(borderPadding),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: borderPadding,
+                  right: borderPadding * 2,
+                ),
+                child: createCircleWidget(
+                  breakpointRadius,
+                  (isSelected ? selectedStyle : regularStyle).color,
+                ),
+              ),
               Flexible(
                 child: RichText(
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
-                    text: '● ${_descriptionFor(bp)}',
+                    text: _descriptionFor(bp),
                     style: isSelected ? selectedStyle : regularStyle,
                     children: [
                       TextSpan(
@@ -101,10 +115,6 @@ class BreakpointsCountBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Badge(
-      child: Text(
-        '${nf.format(breakpoints.length)}',
-      ),
-    );
+    return Badge('${nf.format(breakpoints.length)}');
   }
 }
