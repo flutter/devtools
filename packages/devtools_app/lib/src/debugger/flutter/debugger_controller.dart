@@ -37,6 +37,8 @@ class DebuggerController extends DisposableController
 
   Event _lastEvent;
 
+  Event get lastEvent => _lastEvent;
+
   final _currentScript = ValueNotifier<Script>(null);
 
   ValueListenable<Script> get currentScript => _currentScript;
