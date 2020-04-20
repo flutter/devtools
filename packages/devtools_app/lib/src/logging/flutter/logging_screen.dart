@@ -18,7 +18,7 @@ import '../../globals.dart';
 import '../../table_data.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../../utils.dart';
-import 'logging_controller.dart';
+import '../logging_controller.dart';
 
 // TODO(devoncarew): Show rows starting from the top (and have them grow down).
 // TODO(devoncarew): We should keep new items visible (if the last item was

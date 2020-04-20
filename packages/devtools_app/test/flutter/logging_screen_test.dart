@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/flutter/logging_screen.dart';
-import 'package:devtools_app/src/logging/flutter/logging_controller.dart';
+import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/flutter/service_extension_widgets.dart';
@@ -21,7 +21,7 @@ import 'wrappers.dart';
 
 void main() {
   LoggingScreen screen;
-  MockFlutterLoggingController mockLoggingController;
+  MockLoggingController mockLoggingController;
 
   group('Logging Screen', () {
     FakeServiceManager fakeServiceManager;
@@ -35,7 +35,7 @@ void main() {
 
     setUp(() async {
       await ensureInspectorDependencies();
-      mockLoggingController = MockFlutterLoggingController();
+      mockLoggingController = MockLoggingController();
       when(mockLoggingController.data).thenReturn([]);
       when(mockLoggingController.filteredData).thenReturn([]);
       when(mockLoggingController.onLogsUpdated).thenReturn(Reporter());

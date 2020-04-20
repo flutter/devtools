@@ -8,13 +8,11 @@ import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
 import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
-import 'package:devtools_app/src/logging/flutter/logging_controller.dart'
-    as flutter_logging;
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart'
     as flutter_memory;
 import 'package:devtools_app/src/memory/memory_controller.dart';
-import 'package:devtools_app/src/performance/flutter/performance_controller.dart';
+import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
@@ -282,9 +280,6 @@ class MockBannerMessagesController extends Mock
     implements BannerMessagesController {}
 
 class MockLoggingController extends Mock implements LoggingController {}
-
-class MockFlutterLoggingController extends Mock
-    implements flutter_logging.LoggingController {}
 
 class MockMemoryController extends Mock implements MemoryController {}
 

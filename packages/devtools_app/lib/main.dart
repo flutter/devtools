@@ -12,13 +12,13 @@ import 'src/debugger/flutter/debugger_screen.dart';
 import 'src/flutter/app.dart';
 import 'src/info/flutter/info_screen.dart';
 import 'src/inspector/flutter/inspector_screen.dart';
-import 'src/logging/flutter/logging_controller.dart';
 import 'src/logging/flutter/logging_screen.dart';
+import 'src/logging/logging_controller.dart';
 import 'src/memory/flutter/memory_controller.dart';
 import 'src/memory/flutter/memory_screen.dart';
 import 'src/network/flutter/network_screen.dart';
-import 'src/performance/flutter/performance_controller.dart';
 import 'src/performance/flutter/performance_screen.dart';
+import 'src/performance/performance_controller.dart';
 import 'src/timeline/flutter/timeline_controller.dart';
 import 'src/timeline/flutter/timeline_screen.dart';
 

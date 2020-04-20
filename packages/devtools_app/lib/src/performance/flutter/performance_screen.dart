@@ -17,7 +17,7 @@ import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
-import 'performance_controller.dart';
+import '../performance_controller.dart';
 
 class PerformanceScreen extends Screen {
   const PerformanceScreen()
