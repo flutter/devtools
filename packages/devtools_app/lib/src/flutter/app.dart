@@ -187,10 +187,15 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 }
 
-class DevToolsScreen<T> {
+/// DevTools screen wrapper that is responsible for creating and providing the
+/// screen's controller, as well as enabling offline support.
+///
+/// [C] corresponds to the type of the screen's controller, which is created by
+/// [createController] and provided by [controllerProvider].
+class DevToolsScreen<C> {
   const DevToolsScreen(
     this.screen, {
-    this.createController,
+    @required this.createController,
     this.supportsOffline = false,
   });
   final Screen screen;
@@ -199,20 +204,20 @@ class DevToolsScreen<T> {
   ///
   /// The controller will then be provided via [controllerProvider], and
   /// widgets depending on this controller can access it by calling
-  /// `Provider<T>.of(context)`.
+  /// `Provider<C>.of(context)`.
   ///
   /// If null, [screen] will be responsible for creating and maintaining its own
   /// controller.
-  final T Function() createController;
+  final C Function() createController;
 
   /// Whether this screen has implemented offline support.
   ///
   /// Defaults to false.
   final bool supportsOffline;
 
-  Provider<T> get controllerProvider {
+  Provider<C> get controllerProvider {
     assert(createController != null);
-    return Provider<T>(create: (_) => createController());
+    return Provider<C>(create: (_) => createController());
   }
 }
 

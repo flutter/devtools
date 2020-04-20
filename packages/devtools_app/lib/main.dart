@@ -34,7 +34,7 @@ void main() {
   /// Conditional screens can be added to this list, and they will automatically
   /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
   final screens = <DevToolsScreen>[
-    const DevToolsScreen(InspectorScreen()),
+    const DevToolsScreen(InspectorScreen(), createController: null),
     DevToolsScreen<TimelineController>(
       const TimelineScreen(),
       createController: () => TimelineController(),
@@ -53,7 +53,7 @@ void main() {
       createController: () => DebuggerController(),
     ),
     if (showNetworkPage)
-      const DevToolsScreen(NetworkScreen()),
+      const DevToolsScreen(NetworkScreen(), createController: null),
     DevToolsScreen<LoggingController>(
       const LoggingScreen(),
       createController: () => LoggingController(
@@ -65,7 +65,7 @@ void main() {
         isVisible: () => true,
       ),
     ),
-    const DevToolsScreen(InfoScreen()),
+    const DevToolsScreen(InfoScreen(), createController: null),
 // Uncomment to see a sample implementation of a conditional screen.
 //    DevToolsScreen(
 //      screen: const ExampleConditionalScreen(),
