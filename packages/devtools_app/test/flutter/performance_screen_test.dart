@@ -5,7 +5,7 @@
 import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/flutter/performance_screen.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/performance/flutter/performance_controller.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profiler.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
@@ -53,7 +53,7 @@ void main() {
       PerformanceScreenBody body,
     ) async {
       await tester.pumpWidget(wrapWithControllers(
-        wrapWithBannerMessages(body),
+        body,
         performance: PerformanceController(),
       ));
     }

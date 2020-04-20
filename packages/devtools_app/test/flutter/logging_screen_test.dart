@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('vm')
 import 'dart:async';
 
 import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/flutter/logging_screen.dart';
-import 'package:devtools_app/src/logging/logging_controller.dart';
+import 'package:devtools_app/src/logging/flutter/logging_controller.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/flutter/service_extension_widgets.dart';
@@ -22,17 +21,21 @@ import 'wrappers.dart';
 
 void main() {
   LoggingScreen screen;
-  MockLoggingController mockLoggingController;
+  MockFlutterLoggingController mockLoggingController;
 
   group('Logging Screen', () {
     FakeServiceManager fakeServiceManager;
 
-    Widget wrap(Widget widget) =>
-        wrapWithControllers(widget, logging: mockLoggingController);
+    Future<void> pumpLoggingScreen(WidgetTester tester) async {
+      await tester.pumpWidget(wrapWithControllers(
+        const LoggingScreenBody(),
+        logging: mockLoggingController,
+      ));
+    }
 
     setUp(() async {
       await ensureInspectorDependencies();
-      mockLoggingController = MockLoggingController();
+      mockLoggingController = MockFlutterLoggingController();
       when(mockLoggingController.data).thenReturn([]);
       when(mockLoggingController.filteredData).thenReturn([]);
       when(mockLoggingController.onLogsUpdated).thenReturn(Reporter());
@@ -62,7 +65,7 @@ void main() {
     });
 
     testWidgets('builds with no data', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(const LoggingScreenBody()));
+      await pumpLoggingScreen(tester);
       expect(find.byType(LoggingScreenBody), findsOneWidget);
       expect(find.byType(LogsTable), findsOneWidget);
       expect(find.byType(LogDetails), findsOneWidget);
@@ -72,14 +75,14 @@ void main() {
     });
 
     testWidgets('can clear logs', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(const LoggingScreenBody()));
+      await pumpLoggingScreen(tester);
       verifyNever(mockLoggingController.clear());
       await tester.tap(find.text('Clear'));
       verify(mockLoggingController.clear()).called(1);
     });
 
     testWidgets('can enter filter text', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(const LoggingScreenBody()));
+      await pumpLoggingScreen(tester);
       verifyNever(mockLoggingController.clear());
       await tester.enterText(find.byType(TextField), 'abc');
       verify(mockLoggingController.filterText = 'abc');
@@ -93,7 +96,7 @@ void main() {
         ServiceConnectionManager,
         serviceManager,
       );
-      await tester.pumpWidget(wrap(const LoggingScreenBody()));
+      await pumpLoggingScreen(tester);
       Switch toggle = tester.widget(find.byType(Switch));
       expect(toggle.value, false);
 
@@ -113,7 +116,7 @@ void main() {
       });
 
       testWidgets('shows most recent logs first', (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(const LoggingScreenBody()));
+        await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
         expect(find.byType(LogsTable), findsOneWidget);
         expect(
@@ -133,7 +136,7 @@ void main() {
 
       testWidgets('can show non-computing log data',
           (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(const LoggingScreenBody()));
+        await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(ValueKey(fakeLogData[996])));
         await tester.pumpAndSettle();
@@ -147,7 +150,7 @@ void main() {
       });
 
       testWidgets('can show null log data', (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(const LoggingScreenBody()));
+        await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(ValueKey(fakeLogData[997])));
         await tester.pumpAndSettle();
@@ -158,7 +161,7 @@ void main() {
         const index = 998;
         final log = fakeLogData[index];
 
-        await tester.pumpWidget(wrap(const LoggingScreenBody()));
+        await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(ValueKey(log)));
         await tester.pump();
@@ -193,7 +196,7 @@ void main() {
           matching: find.byWidgetPredicate(containsJson),
         );
 
-        await tester.pumpWidget(wrap(const LoggingScreenBody()));
+        await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(ValueKey(fakeLogData[index])));
         await tester.pump();

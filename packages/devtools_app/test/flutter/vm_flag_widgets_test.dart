@@ -36,13 +36,11 @@ void main() {
           theme: themeFor(isDarkTheme: false),
           home: Material(
             child: wrapWithControllers(
-              wrapWithBannerMessages(
-                Builder(
-                  builder: (context) {
-                    buildContext = context;
-                    return dropdown;
-                  },
-                ),
+              Builder(
+                builder: (context) {
+                  buildContext = context;
+                  return dropdown;
+                },
               ),
               bannerMessages: BannerMessagesController(),
             ),

@@ -68,9 +68,10 @@ class LoggingScreenBody extends StatefulWidget {
 class _LoggingScreenState extends State<LoggingScreenBody>
     with AutoDisposeMixin {
   LogData selected;
+
   TextEditingController filterController;
 
-  LoggingController get controller => Provider.of<LoggingController>(context);
+  LoggingController controller;
 
   @override
   void initState() {
@@ -82,6 +83,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final newController = Provider.of<LoggingController>(context);
+    if (newController == controller) return;
+    controller = newController;
 
     cancel();
 

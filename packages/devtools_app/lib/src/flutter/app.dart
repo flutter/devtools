@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:provider/provider.dart';
 
 import '../../devtools.dart' as devtools;
 import '../framework/framework_core.dart';
@@ -12,7 +13,6 @@ import '../globals.dart';
 import '../ui/flutter/service_extension_widgets.dart';
 import 'common_widgets.dart';
 import 'connect_screen.dart';
-import 'controllers.dart';
 import 'initializer.dart';
 import 'notifications.dart';
 import 'preferences.dart';
@@ -166,13 +166,10 @@ class DevToolsAppState extends State<DevToolsApp> {
         .map((s) => s.controllerProvider)
         .toList();
 
-    Widget provided;
-    Widget _child = child;
-    for (int i = 0; i < _providers.length; i++) {
-      provided = _providers[i](_child);
-      _child = provided;
-    }
-    return _child;
+    return MultiProvider(
+      providers: _providers,
+      child: child,
+    );
   }
 
   @override
@@ -199,10 +196,10 @@ class DevToolsScreen {
   });
   final Screen screen;
 
-  /// Provides the controller provider for this screen, if non-null.
+  /// Controller provider for this screen, if non-null.
   ///
   /// If null, [screen] will be responsible for maintaining its own controller.
-  final ControllerProvider Function(Widget child) controllerProvider;
+  final Provider controllerProvider;
 
   /// Whether this screen has implemented offline support.
   ///

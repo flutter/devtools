@@ -5,12 +5,11 @@
 import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
 import 'package:devtools_app/src/flutter/banner_messages.dart';
 import 'package:devtools_app/src/flutter/notifications.dart';
-import 'package:devtools_app/src/flutter/scaffold.dart';
 import 'package:devtools_app/src/flutter/theme.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/logging/logging_controller.dart';
+import 'package:devtools_app/src/logging/flutter/logging_controller.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/performance/flutter/performance_controller.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -32,10 +31,6 @@ Widget wrap(Widget widget) {
   );
 }
 
-Widget _wrapWithController<T>(T controller, Widget child) {
-  return Provider<T>(create: (_) => controller, child: child);
-}
-
 Widget wrapWithControllers(
   Widget widget, {
   LoggingController logging,
@@ -45,35 +40,22 @@ Widget wrapWithControllers(
   DebuggerController debugger,
   BannerMessagesController bannerMessages,
 }) {
-  Widget child = widget;
-  if (logging != null) {
-    child = _wrapWithController<LoggingController>(logging, child);
-  }
-  if (memory != null) {
-    child = _wrapWithController<MemoryController>(memory, child);
-  }
-  if (timeline != null) {
-    child = _wrapWithController<TimelineController>(timeline, child);
-  }
-  if (performance != null) {
-    child = _wrapWithController<PerformanceController>(performance, child);
-  }
-  if (debugger != null) {
-    child = _wrapWithController<DebuggerController>(debugger, child);
-  }
-  child = _wrapWithController<BannerMessagesController>(
-    bannerMessages ?? MockBannerMessagesController(),
-    child,
-  );
-  return MaterialApp(
-    theme: themeFor(isDarkTheme: false),
-    home: Material(child: child),
-  );
-}
-
-Widget wrapWithBannerMessages(Widget widget) {
-  return BannerMessages(
-    screen: SimpleScreen(widget),
+  final _providers = [
+    Provider<BannerMessagesController>.value(
+      value: bannerMessages ?? MockBannerMessagesController(),
+    ),
+    if (logging != null) Provider<LoggingController>.value(value: logging),
+    if (memory != null) Provider<MemoryController>.value(value: memory),
+    if (timeline != null) Provider<TimelineController>.value(value: timeline),
+    if (performance != null)
+      Provider<PerformanceController>.value(value: performance),
+    if (debugger != null) Provider<DebuggerController>.value(value: debugger),
+  ];
+  return wrap(
+    MultiProvider(
+      providers: _providers,
+      child: widget,
+    ),
   );
 }
 

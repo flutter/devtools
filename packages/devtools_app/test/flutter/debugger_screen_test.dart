@@ -21,6 +21,14 @@ void main() {
   FakeServiceManager fakeServiceManager;
 
   group('DebuggerScreen', () {
+    Future<void> pumpDebuggerScreen(
+        WidgetTester tester, DebuggerController controller) async {
+      await tester.pumpWidget(wrapWithControllers(
+        const DebuggerScreenBody(),
+        debugger: controller,
+      ));
+    }
+
     setUp(() async {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
       when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
@@ -54,10 +62,7 @@ void main() {
       when(debuggerController.stdio).thenReturn(ValueNotifier(['test stdio']));
       when(debuggerController.currentScript).thenReturn(ValueNotifier(null));
 
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ));
+      await pumpDebuggerScreen(tester, debuggerController);
 
       expect(find.text('Console'), findsOneWidget);
 
@@ -80,10 +85,7 @@ void main() {
       when(debuggerController.stdio).thenReturn(ValueNotifier([]));
       when(debuggerController.currentScript).thenReturn(ValueNotifier(null));
 
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ));
+      await pumpDebuggerScreen(tester, debuggerController);
 
       expect(find.text('Libraries'), findsOneWidget);
 
@@ -124,10 +126,7 @@ void main() {
       when(debuggerController.stdio).thenReturn(ValueNotifier([]));
       when(debuggerController.currentScript).thenReturn(ValueNotifier(null));
 
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ));
+      await pumpDebuggerScreen(tester, debuggerController);
 
       expect(find.text('Breakpoints'), findsOneWidget);
 

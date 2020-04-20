@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'src/config_specific/flutter/framework_initialize/framework_initialize.dart';
 import 'src/debugger/flutter/debugger_controller.dart';
@@ -10,7 +11,6 @@ import 'src/debugger/flutter/debugger_screen.dart';
 // Uncomment to see a sample implementation of a conditional screen.
 //import 'src/example/conditional_screen.dart';
 import 'src/flutter/app.dart';
-import 'src/flutter/controllers.dart';
 import 'src/info/flutter/info_screen.dart';
 import 'src/inspector/flutter/inspector_screen.dart';
 import 'src/logging/flutter/logging_controller.dart';
@@ -38,40 +38,31 @@ void main() {
     const DevToolsScreen(screen: InspectorScreen()),
     DevToolsScreen(
       screen: const TimelineScreen(),
-      controllerProvider: (child) => ControllerProvider<TimelineController>(
-        child: child,
-        controller: TimelineController(),
-      ),
+      controllerProvider:
+          Provider<TimelineController>(create: (_) => TimelineController()),
       supportsOffline: true,
     ),
     DevToolsScreen(
       screen: const MemoryScreen(),
-      controllerProvider: (child) => ControllerProvider<MemoryController>(
-        child: child,
-        controller: MemoryController(),
-      ),
+      controllerProvider:
+          Provider<MemoryController>(create: (_) => MemoryController()),
     ),
     DevToolsScreen(
       screen: const PerformanceScreen(),
-      controllerProvider: (child) => ControllerProvider<PerformanceController>(
-        child: child,
-        controller: PerformanceController(),
-      ),
+      controllerProvider: Provider<PerformanceController>(
+          create: (_) => PerformanceController()),
     ),
     DevToolsScreen(
       screen: const DebuggerScreen(),
-      controllerProvider: (child) => ControllerProvider<DebuggerController>(
-        child: child,
-        controller: DebuggerController(),
-      ),
+      controllerProvider:
+          Provider<DebuggerController>(create: (_) => DebuggerController()),
     ),
     if (showNetworkPage)
       const DevToolsScreen(screen: NetworkScreen()),
     DevToolsScreen(
       screen: const LoggingScreen(),
-      controllerProvider: (child) => ControllerProvider<LoggingController>(
-        child: child,
-        controller: LoggingController(
+      controllerProvider: Provider<LoggingController>(
+        create: (_) => LoggingController(
           onLogCountStatusChanged: (_) {
             // TODO(devoncarew): This callback is not used.
           },

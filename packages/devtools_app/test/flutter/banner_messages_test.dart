@@ -41,20 +41,22 @@ void main() {
       return wrapWithControllers(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: wrapWithBannerMessages(
-            Builder(
-              builder: (context) {
-                buildContext = context;
-                return Column(
-                  children: <Widget>[
-                    // This is button is present so that we can tap it and
-                    // simulate a frame being drawn.
-                    RaisedButton(
-                      onPressed: () => {},
-                    ),
-                  ],
-                );
-              },
+          child: BannerMessages(
+            screen: SimpleScreen(
+              Builder(
+                builder: (context) {
+                  buildContext = context;
+                  return Column(
+                    children: <Widget>[
+                      // This is button is present so that we can tap it and
+                      // simulate a frame being drawn.
+                      RaisedButton(
+                        onPressed: () => {},
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),
