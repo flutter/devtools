@@ -146,6 +146,13 @@ class _ControllersState extends State<Controllers> {
   @override
   void didUpdateWidget(Controllers oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    // TODO(#1732): We create controllers twice - here, and in initState().
+    // Additionally, when creating new controllers in didUpdateWidget, we never
+    // dispose of the old controllers. For places like the debugger page, this
+    // means that we send many more requests to the VM for the same data than we
+    // need to.
+
     _initializeProviderData();
   }
 
@@ -157,6 +164,8 @@ class _ControllersState extends State<Controllers> {
         'Attempted to build overridden providers, but got a null value.',
       );
     } else {
+      // TODO(#1732): Don't re-create controllers on each hot reload, or,
+      // dispose of the old controllers here.
       data = ProvidedControllers.defaults();
     }
   }

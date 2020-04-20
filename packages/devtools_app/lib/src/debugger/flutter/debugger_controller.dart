@@ -3,12 +3,20 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
+import '../../core/message_bus.dart';
 import '../../globals.dart';
+
+// Note: don't check this in enabled.
+/// Used to debug service protocol traffic. All requests to to the VM service
+/// connection are logged to the Logging page, as well as all responses and
+/// events from the service protocol device.
+const debugLogServiceProtocolEvents = false;
 
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
@@ -20,6 +28,11 @@ class DebuggerController extends DisposableController
     autoDispose(_service.onDebugEvent.listen(_handleIsolateEvent));
     autoDispose(_service.onStdoutEvent.listen(_handleStdoutEvent));
     autoDispose(_service.onStderrEvent.listen(_handleStderrEvent));
+
+    if (debugLogServiceProtocolEvents) {
+      autoDispose(_service.onSend.listen(_logServiceProtocolCalls));
+      autoDispose(_service.onReceive.listen(_logServiceProtocolResponses));
+    }
   }
 
   VmService get _service => serviceManager.service;
@@ -277,6 +290,51 @@ class DebuggerController extends DisposableController
     // TODO(devoncarew): Change to reporting stdio along with information about
     // whether the event was stdout or stderr.
     appendStdio(text);
+  }
+
+  void _logServiceProtocolCalls(String message) {
+    final Map m = jsonDecode(message);
+
+    final String method = m['method'];
+    final String id = m['id'];
+
+    messageBus.addEvent(BusEvent(
+      'devtools.debugger',
+      data: '⇨ #$id $method()\n$message',
+    ));
+  }
+
+  void _logServiceProtocolResponses(String message) {
+    final Map m = jsonDecode(message);
+
+    String details = m['method'];
+    if (details == null) {
+      if (m['result'] != null) {
+        details = m['result']['type'];
+      } else {
+        details = m['error'] ?? '';
+      }
+    } else if (details == 'streamNotify') {
+      details = '';
+    }
+
+    final String id = m['id'];
+    var streamId = '';
+    var kind = '';
+
+    if (m['params'] != null) {
+      final Map p = m['params'];
+      streamId = p['streamId'];
+
+      if (p['event'] != null) {
+        kind = p['event']['extensionKind'] ?? p['event']['kind'];
+      }
+    }
+
+    messageBus.addEvent(BusEvent(
+      'devtools.debugger',
+      data: '  ⇦ ${id == null ? '' : '#$id '}$details$streamId $kind\n$message',
+    ));
   }
 
   Future<void> _pause(bool pause) async {

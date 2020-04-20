@@ -71,6 +71,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
     final newController = Controllers.of(context).debugger;
     if (newController == controller) return;
+
+    // Remove our listeners to the old controller.
+    cancel();
+
     controller = newController;
 
     // TODO(devoncarew): We need to be more precise about the changes we listen
