@@ -118,7 +118,6 @@ class _LoggingScreenState extends State<LoggingScreenBody>
             height: 36.0,
             child: TextField(
               controller: filterController,
-              maxLines: 1,
               decoration: const InputDecoration(
                 isDense: true,
                 border: OutlineInputBorder(),
