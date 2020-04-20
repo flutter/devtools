@@ -61,7 +61,6 @@ void defineTests() {
 
 List<String> applyFilter(Filter filter, List<String> items) {
   return items.where((element) {
-    final m = filter.matches((String text) => element.contains(text));
-    return m;
+    return filter.matches((String text) => element.contains(text));
   }).toList();
 }

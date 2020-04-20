@@ -26,7 +26,7 @@ class Filter {
       if (term.startsWith(r'\-')) {
         return FilterItem(term.substring(1));
       } else if (term.startsWith('-')) {
-        return FilterItem(term.substring(1), true);
+        return FilterItem(term.substring(1), negative: true);
       } else {
         return FilterItem(term);
       }
@@ -51,7 +51,7 @@ class Filter {
 }
 
 class FilterItem {
-  FilterItem(this.text, [this.negative = false]);
+  FilterItem(this.text, {this.negative = false});
 
   final String text;
   final bool negative;
