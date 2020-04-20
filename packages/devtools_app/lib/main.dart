@@ -68,11 +68,8 @@ void main() {
     const DevToolsScreen(InfoScreen(), createController: null),
 // Uncomment to see a sample implementation of a conditional screen.
 //    DevToolsScreen(
-//      screen: const ExampleConditionalScreen(),
-//      controllerProvider: (child) => ControllerProvider<ExampleController>(
-//        child: child,
-//        controller: ExampleController(),
-//      ),
+//      const ExampleConditionalScreen(),
+//      createController: () => ExampleController(),
 //      supportsOffline: true,
 //    ),
   ];
