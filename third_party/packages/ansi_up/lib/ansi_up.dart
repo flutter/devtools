@@ -9,10 +9,9 @@ class AnsiUp {
   AnsiUp() {
     _setupPalettes();
     bold = false;
-    _buffer = '';
   }
 
-  String _buffer;
+  String _text;
   bool bold;
   List<List<AnsiUpColor>> ansiColors;
   List<AnsiUpColor> palette256;
@@ -63,19 +62,19 @@ class AnsiUp {
 
   TextPacket _getNextPacket() {
     final pkt = TextPacket(kind: PacketKind.EOS, text: '', url: '');
-    final len = _buffer.length;
+    final len = _text.length;
     if (len == 0) return pkt;
-    final pos = _buffer.indexOf('\x1B');
+    final pos = _text.indexOf('\x1B');
     if (pos == -1) {
       pkt.kind = PacketKind.Text;
-      pkt.text = _buffer;
-      _buffer = '';
+      pkt.text = _text;
+      _text = '';
       return pkt;
     }
     if (pos > 0) {
       pkt.kind = PacketKind.Text;
-      pkt.text = _buffer.substring(0, pos);
-      _buffer = _buffer.substring(pos);
+      pkt.text = _text.substring(0, pos);
+      _text = _text.substring(pos);
       return pkt;
     }
     if (pos == 0) {
@@ -83,11 +82,11 @@ class AnsiUp {
         pkt.kind = PacketKind.Incomplete;
         return pkt;
       }
-      final String nextChar = _buffer[1];
+      final String nextChar = _text[1];
       if ((nextChar != '[') && (nextChar != ']')) {
         pkt.kind = PacketKind.ESC;
-        pkt.text = _buffer.substring(0, 1);
-        _buffer = _buffer.substring(1);
+        pkt.text = _text.substring(0, 1);
+        _text = _text.substring(1);
         return pkt;
       }
       if (nextChar == '[') {
@@ -119,15 +118,15 @@ class AnsiUp {
             '\n                          '
             '([\\x00-\\x1f:])              # anything illegal'
             '\n                        )\n                    ');
-        final match = _csiRegex.firstMatch(_buffer);
+        final match = _csiRegex.firstMatch(_text);
         if (match == null) {
           pkt.kind = PacketKind.Incomplete;
           return pkt;
         }
         if (match.groupCount > 4) {
           pkt.kind = PacketKind.ESC;
-          pkt.text = _buffer.substring(0, 1);
-          _buffer = _buffer.substring(1);
+          pkt.text = _text.substring(0, 1);
+          _text = _text.substring(1);
           return pkt;
         }
         final String match1 = match.groupCount > 1 ? match.group(1) : null;
@@ -139,7 +138,7 @@ class AnsiUp {
         }
         pkt.text = match.groupCount > 2 ? match.group(2) : null;
         final int rpos = match.group(0).length;
-        _buffer = _buffer.substring(rpos);
+        _text = _text.substring(rpos);
         return pkt;
       }
       // TODO: Convert the JS code (below) that identifies OS commands
@@ -204,10 +203,6 @@ class AnsiUp {
       //}
     }
     return pkt;
-  }
-
-  void _appendBuffer(String text) {
-    _buffer = _buffer + text;
   }
 
   void _processAnsi(TextPacket textPacket) {
@@ -371,7 +366,7 @@ class StyledText {
 /// multiple invocations of this method.
 Iterable<StyledText> decodeAnsiColorEscapeCodes(
     String text, AnsiUp ansiUp) sync* {
-  ansiUp._appendBuffer(text);
+  ansiUp._text = text;
   while (true) {
     final packet = ansiUp._getNextPacket();
 
