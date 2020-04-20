@@ -161,8 +161,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   Widget _providedControllers({@required Widget child, bool offline = false}) {
     final _providers = widget.screens
         .where((s) =>
-            s.controllerProvider != null &&
-            (offline ? s.supportsOffline : true))
+            s.createController != null && (offline ? s.supportsOffline : true))
         .map((s) => s.controllerProvider)
         .toList();
 
@@ -188,23 +187,33 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 }
 
-class DevToolsScreen {
-  const DevToolsScreen({
-    @required this.screen,
-    this.controllerProvider,
+class DevToolsScreen<T> {
+  const DevToolsScreen(
+    this.screen, {
+    this.createController,
     this.supportsOffline = false,
   });
   final Screen screen;
 
-  /// Controller provider for this screen, if non-null.
+  /// Responsible for creating the controller for this screen, if non-null.
   ///
-  /// If null, [screen] will be responsible for maintaining its own controller.
-  final Provider controllerProvider;
+  /// The controller will then be provided via [controllerProvider], and
+  /// widgets depending on this controller can access it by calling
+  /// `Provider<T>.of(context)`.
+  ///
+  /// If null, [screen] will be responsible for creating and maintaining its own
+  /// controller.
+  final T Function() createController;
 
   /// Whether this screen has implemented offline support.
   ///
   /// Defaults to false.
   final bool supportsOffline;
+
+  Provider<T> get controllerProvider {
+    assert(createController != null);
+    return Provider<T>(create: (_) => createController());
+  }
 }
 
 /// A [WidgetBuilder] that takes an additional map of URL query parameters and

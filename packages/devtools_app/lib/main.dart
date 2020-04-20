@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'src/config_specific/flutter/framework_initialize/framework_initialize.dart';
 import 'src/debugger/flutter/debugger_controller.dart';
@@ -35,44 +34,38 @@ void main() {
   /// Conditional screens can be added to this list, and they will automatically
   /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
   final screens = <DevToolsScreen>[
-    const DevToolsScreen(screen: InspectorScreen()),
-    DevToolsScreen(
-      screen: const TimelineScreen(),
-      controllerProvider:
-          Provider<TimelineController>(create: (_) => TimelineController()),
+    const DevToolsScreen(InspectorScreen()),
+    DevToolsScreen<TimelineController>(
+      const TimelineScreen(),
+      createController: () => TimelineController(),
       supportsOffline: true,
     ),
-    DevToolsScreen(
-      screen: const MemoryScreen(),
-      controllerProvider:
-          Provider<MemoryController>(create: (_) => MemoryController()),
+    DevToolsScreen<MemoryController>(
+      const MemoryScreen(),
+      createController: () => MemoryController(),
     ),
-    DevToolsScreen(
-      screen: const PerformanceScreen(),
-      controllerProvider: Provider<PerformanceController>(
-          create: (_) => PerformanceController()),
+    DevToolsScreen<PerformanceController>(
+      const PerformanceScreen(),
+      createController: () => PerformanceController(),
     ),
-    DevToolsScreen(
-      screen: const DebuggerScreen(),
-      controllerProvider:
-          Provider<DebuggerController>(create: (_) => DebuggerController()),
+    DevToolsScreen<DebuggerController>(
+      const DebuggerScreen(),
+      createController: () => DebuggerController(),
     ),
     if (showNetworkPage)
-      const DevToolsScreen(screen: NetworkScreen()),
-    DevToolsScreen(
-      screen: const LoggingScreen(),
-      controllerProvider: Provider<LoggingController>(
-        create: (_) => LoggingController(
-          onLogCountStatusChanged: (_) {
-            // TODO(devoncarew): This callback is not used.
-          },
-          // TODO(djshuckerow): Use a notifier pattern for the logging controller.
-          // That way, it is visible if it has listeners and invisible otherwise.
-          isVisible: () => true,
-        ),
+      const DevToolsScreen(NetworkScreen()),
+    DevToolsScreen<LoggingController>(
+      const LoggingScreen(),
+      createController: () => LoggingController(
+        onLogCountStatusChanged: (_) {
+          // TODO(devoncarew): This callback is not used.
+        },
+        // TODO(djshuckerow): Use a notifier pattern for the logging controller.
+        // That way, it is visible if it has listeners and invisible otherwise.
+        isVisible: () => true,
       ),
     ),
-    const DevToolsScreen(screen: InfoScreen()),
+    const DevToolsScreen(InfoScreen()),
 // Uncomment to see a sample implementation of a conditional screen.
 //    DevToolsScreen(
 //      screen: const ExampleConditionalScreen(),
