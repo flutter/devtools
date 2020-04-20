@@ -324,19 +324,27 @@ class BulletSpacer extends StatelessWidget {
 /// A small element containing some accessory information, often a numeric
 /// value.
 class Badge extends StatelessWidget {
-  const Badge({@required this.child});
+  const Badge(this.text);
 
-  final Widget child;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    // TODO(devoncarew): We'll likely want a badge implementation that's
-    // separate from Chip.
+    final theme = Theme.of(context);
 
-    return SizedBox(
-      child: Chip(
-        label: child,
-        visualDensity: VisualDensity.compact,
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.primaryColor,
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      padding: const EdgeInsets.symmetric(
+        vertical: borderPadding,
+        horizontal: densePadding,
+      ),
+      child: Text(
+        text,
+        // Use a slightly smaller font for the badge.
+        style: theme.primaryTextTheme.bodyText2.apply(fontSizeDelta: -1),
       ),
     );
   }

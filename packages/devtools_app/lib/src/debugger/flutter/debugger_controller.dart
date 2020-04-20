@@ -10,6 +10,9 @@ import 'package:vm_service/vm_service.dart';
 import '../../auto_dispose.dart';
 import '../../globals.dart';
 
+// TODO(devoncarew): Add some delayed resume value notifiers (to be used to
+// help debounce stepping operations).
+
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
@@ -31,24 +34,12 @@ class DebuggerController extends DisposableController
   ValueListenable<bool> get isPaused => _isPaused;
 
   final _hasFrames = ValueNotifier<bool>(false);
-  ValueNotifier<bool> _supportsStepping;
-
-  ValueListenable<bool> get supportsStepping {
-    return _supportsStepping ??= () {
-      final notifier = ValueNotifier<bool>(_isPaused.value && _hasFrames.value);
-      void update() {
-        notifier.value = _isPaused.value && _hasFrames.value;
-      }
-
-      _isPaused.addListener(update);
-      _hasFrames.addListener(update);
-      return notifier;
-    }();
-  }
 
   ValueNotifier get hasFrames => _hasFrames;
 
   Event _lastEvent;
+
+  Event get lastEvent => _lastEvent;
 
   final _currentScript = ValueNotifier<Script>(null);
 
@@ -286,7 +277,9 @@ class DebuggerController extends DisposableController
 
   Future<void> _pause(bool pause) async {
     _isPaused.value = pause;
-    _currentStack.value = await getStack();
+
+    _currentStack.value = pause ? await getStack() : null;
+
     if (_currentStack.value != null && _currentStack.value.frames.isNotEmpty) {
       // TODO(https://github.com/flutter/devtools/issues/1648): Allow choice of
       // the scripts on the stack.
@@ -349,22 +342,11 @@ class DebuggerController extends DisposableController
       return null;
     }
 
-    for (List<int> row in table) {
-      if (row == null || row.isEmpty) {
-        continue;
-      }
-      final int line = row.elementAt(0);
-      int index = 1;
-
-      while (index < row.length - 1) {
-        if (row.elementAt(index) == tokenPos) {
-          return SourcePosition(line: line, column: row.elementAt(index + 1));
-        }
-        index += 2;
-      }
-    }
-
-    return null;
+    return SourcePosition(
+      line: script.getLineNumberFromTokenPos(tokenPos),
+      column: script.getColumnNumberFromTokenPos(tokenPos),
+      tokenPos: tokenPos,
+    );
   }
 
   int lineNumber(Script script, dynamic location) {
@@ -396,13 +378,14 @@ class DebuggerController extends DisposableController
 }
 
 class SourcePosition {
-  SourcePosition({@required this.line, @required this.column});
+  SourcePosition({@required this.line, @required this.column, this.tokenPos});
 
   final int line;
   final int column;
+  final int tokenPos;
 
   @override
-  String toString() => '$line $column';
+  String toString() => '$line:$column';
 }
 
 /// A tuple of a breakpoint and a source position.

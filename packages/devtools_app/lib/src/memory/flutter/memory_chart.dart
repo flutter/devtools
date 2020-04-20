@@ -174,6 +174,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   }
 
   Slider createTimelineSlider() => Slider.adaptive(
+        useV2Slider: true,
         label: timelineSliderLabel(controller.sliderValue),
         activeColor: Colors.indigoAccent,
         min: 0.0,
