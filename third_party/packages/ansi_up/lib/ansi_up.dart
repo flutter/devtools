@@ -129,15 +129,15 @@ class AnsiUp {
           _text = _text.substring(1);
           return pkt;
         }
-        final String match1 = match.groupCount > 1 ? match.group(1) : null;
-        final String match3 = match.groupCount > 3 ? match.group(3) : null;
+        final match1 = match.groupCount > 1 ? match.group(1) : null;
+        final match3 = match.groupCount > 3 ? match.group(3) : null;
         if (match1 != '' || match3 != 'm') {
           pkt.kind = PacketKind.Unknown;
         } else {
           pkt.kind = PacketKind.SGR;
         }
         pkt.text = match.groupCount > 2 ? match.group(2) : null;
-        final int rpos = match.group(0).length;
+        final rpos = match.group(0).length;
         _text = _text.substring(rpos);
         return pkt;
       }
@@ -308,7 +308,7 @@ String _colorToCss(List/*<int>*/ rgb) => 'rgb(${rgb.join(',')})';
 // for readability.
 RegExp cleanAndConvertToRegex(String regexText) {
   final RegExp spacesAndComments =
-      RegExp(r"^\s+|\s+\n|\s*#[\s\S]*?\n|\n", multiLine: true);
+      RegExp(r'^\s+|\s+\n|\s*#[\s\S]*?\n|\n', multiLine: true);
   return RegExp(regexText.replaceAll(spacesAndComments, ''));
 }
 
