@@ -109,19 +109,21 @@ class BreakOnExceptionsControl extends StatelessWidget {
               controller.setExceptionPauseMode(mode.id);
             },
             isDense: true,
-            items: ExceptionMode.modes.map((mode) {
-              return DropdownMenuItem<ExceptionMode>(
-                value: mode,
-                child: Text(mode.description),
-              );
-            }).toList(),
-            selectedItemBuilder: (BuildContext context) {
-              return ExceptionMode.modes.map((mode) {
-                return DropdownMenuItem<ExceptionMode>(
+            items: [
+              for (var mode in ExceptionMode.modes)
+                DropdownMenuItem<ExceptionMode>(
                   value: mode,
-                  child: Text(mode.name),
-                );
-              }).toList();
+                  child: Text(mode.description),
+                )
+            ],
+            selectedItemBuilder: (BuildContext context) {
+              return [
+                for (var mode in ExceptionMode.modes)
+                  DropdownMenuItem<ExceptionMode>(
+                    value: mode,
+                    child: Text(mode.name),
+                  )
+              ];
             },
           ),
         );

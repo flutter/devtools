@@ -259,19 +259,17 @@ class GutterRow extends StatelessWidget {
                 ),
               ),
             Text('$lineNumber', textAlign: TextAlign.end),
-            Padding(
+            Container(
               padding: const EdgeInsets.only(left: executionPointIndent),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: AnimatedOpacity(
-                  duration: defaultDuration,
-                  curve: defaultCurve,
-                  opacity: isPausedHere ? 1.0 : 0.0,
-                  child: Icon(
-                    Icons.label,
-                    size: defaultIconSize,
-                    color: foregroundColor,
-                  ),
+              alignment: Alignment.centerLeft,
+              child: AnimatedOpacity(
+                duration: defaultDuration,
+                curve: defaultCurve,
+                opacity: isPausedHere ? 1.0 : 0.0,
+                child: Icon(
+                  Icons.label,
+                  size: defaultIconSize,
+                  color: foregroundColor,
                 ),
               ),
             ),
