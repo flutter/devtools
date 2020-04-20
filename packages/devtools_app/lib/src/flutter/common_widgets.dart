@@ -319,7 +319,7 @@ class BulletSpacer extends StatelessWidget {
 /// A small element containing some accessory information, often a numeric
 /// value.
 class Badge extends StatelessWidget {
-  const Badge({@required this.text});
+  const Badge(this.text);
 
   final String text;
 
