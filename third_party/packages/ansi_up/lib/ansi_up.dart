@@ -209,9 +209,9 @@ class AnsiUp {
 
   void _processAnsi(TextPacket textPacket) {
     final sgrCmds = textPacket.text.split(';');
-    while (sgrCmds.isNotEmpty) {
-      // TODO: Track an index within sgrCmds instead of removeAt.
-      final sgrCmdStr = sgrCmds.removeAt(0);
+    int index = 0;
+    while (index < sgrCmds.length) {
+      final sgrCmdStr = sgrCmds[index++];
       final num = int.tryParse(sgrCmdStr, radix: 10);
       if (num == null || num == 0) {
         fg = bg = null;
@@ -233,11 +233,11 @@ class AnsiUp {
       } else if ((num >= 100) && (num < 108)) {
         bg = ansiColors[1][(num - 100)];
       } else if (num == 38 || num == 48) {
-        if (sgrCmds.isNotEmpty) {
+        if (index < sgrCmds.length) {
           final isForeground = num == 38;
-          final modeCmd = sgrCmds.removeAt(0);
-          if (modeCmd == '5' && sgrCmds.isNotEmpty) {
-            final paletteIndex = int.tryParse(sgrCmds.removeAt(0), radix: 10);
+          final modeCmd = sgrCmds[index++];
+          if (modeCmd == '5' && index < sgrCmds.length) {
+            final paletteIndex = int.tryParse(sgrCmds[index++], radix: 10);
             if (paletteIndex >= 0 && paletteIndex <= 255) {
               if (isForeground) {
                 fg = palette256[paletteIndex];
@@ -246,10 +246,10 @@ class AnsiUp {
               }
             }
           }
-          if (modeCmd == '2' && sgrCmds.length > 2) {
-            final r = int.tryParse(sgrCmds.removeAt(0), radix: 10);
-            final g = int.tryParse(sgrCmds.removeAt(0), radix: 10);
-            final b = int.tryParse(sgrCmds.removeAt(0), radix: 10);
+          if (modeCmd == '2' && index + 2 < sgrCmds.length) {
+            final r = int.tryParse(sgrCmds[index++], radix: 10);
+            final g = int.tryParse(sgrCmds[index++], radix: 10);
+            final b = int.tryParse(sgrCmds[index++], radix: 10);
             if ((r >= 0 && r <= 255) &&
                 (g >= 0 && g <= 255) &&
                 (b >= 0 && b <= 255)) {
