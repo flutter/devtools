@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:flutter/services.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/collapsible_mixin.dart';
@@ -177,6 +178,7 @@ class _InspectorTreeState extends State<InspectorTree>
   Rect currentAnimateTarget;
 
   AnimationController constraintDisplayController;
+  FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
@@ -199,6 +201,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
       _bindToController();
     }
+    FocusScope.of(context).requestFocus(focusNode);
     super.didUpdateWidget(oldWidget);
   }
 
@@ -329,6 +332,21 @@ class _InspectorTreeState extends State<InspectorTree>
     return maxOffset - viewportDimension;
   }
 
+  void _handleKeyEvent(RawKeyEvent event) {
+    if (event is! RawKeyDownEvent) return;
+
+    // Exit early if we aren't handling the key
+    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      controller.navigateDown();
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      controller.navigateUp();
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+      controller.navigateLeft();
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+      controller.navigateRight();
+    }
+  }
+
   void _bindToController() {
     controller?.client = this;
   }
@@ -353,20 +371,24 @@ class _InspectorTreeState extends State<InspectorTree>
         child: SizedBox(
           width: controller.rowWidth + controller.maxRowIndent,
           child: Scrollbar(
-            child: ListView.custom(
-              itemExtent: rowHeight,
-              childrenDelegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final InspectorTreeRow row = controller.root?.getRow(index);
-                  return _InspectorTreeRowWidget(
-                    key: PageStorageKey(row?.node),
-                    inspectorTreeState: this,
-                    row: row,
-                  );
-                },
-                childCount: controller.numRows,
+            child: RawKeyboardListener(
+              onKey: _handleKeyEvent,
+              focusNode: focusNode,
+              child: ListView.custom(
+                itemExtent: rowHeight,
+                childrenDelegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final InspectorTreeRow row = controller.root?.getRow(index);
+                    return _InspectorTreeRowWidget(
+                      key: PageStorageKey(row?.node),
+                      inspectorTreeState: this,
+                      row: row,
+                    );
+                  },
+                  childCount: controller.numRows,
+                ),
+                controller: _scrollControllerY,
               ),
-              controller: _scrollControllerY,
             ),
           ),
         ),
