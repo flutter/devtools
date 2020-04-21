@@ -63,7 +63,9 @@ class AnsiUp {
   TextPacket _getNextPacket() {
     final pkt = TextPacket(kind: PacketKind.EOS, text: '', url: '');
     final len = _text.length;
-    if (len == 0) return pkt;
+    if (len == 0) {
+      return pkt;
+    }
     final pos = _text.indexOf('\x1B');
     if (pos == -1) {
       pkt.kind = PacketKind.Text;
@@ -141,7 +143,7 @@ class AnsiUp {
         _text = _text.substring(rpos);
         return pkt;
       }
-      // TODO: Convert the JS code (below) that identifies OS commands
+      // TODO: Convert the JS code (below) that identifies OS commands.
       //if (next_char == ']') {
       //  if (len < 4) {
       //    pkt.kind = PacketKind.Incomplete;
@@ -208,7 +210,7 @@ class AnsiUp {
   void _processAnsi(TextPacket textPacket) {
     final sgrCmds = textPacket.text.split(';');
     while (sgrCmds.isNotEmpty) {
-      // TODO: Track an index within sgrCmds instead of removeAt
+      // TODO: Track an index within sgrCmds instead of removeAt.
       final sgrCmdStr = sgrCmds.removeAt(0);
       final num = int.tryParse(sgrCmdStr, radix: 10);
       if (num == null || num == 0) {
