@@ -11,7 +11,7 @@ import '../../devtools.dart' as devtools;
 import '../debugger/flutter/debugger_controller.dart';
 import '../debugger/flutter/debugger_screen.dart';
 // Uncomment to see a sample implementation of a conditional screen.
-import '../example/flutter/conditional_screen.dart';
+//import '../example/flutter/conditional_screen.dart';
 import '../framework/framework_core.dart';
 import '../globals.dart';
 import '../info/flutter/info_screen.dart';
@@ -467,9 +467,9 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
       ),
       const DevToolsScreen(InfoScreen(), createController: null),
 // Uncomment to see a sample implementation of a conditional screen.
-      DevToolsScreen<ExampleController>(
-        const ExampleConditionalScreen(),
-        createController: () => ExampleController(),
-        supportsOffline: true,
-      ),
+//      DevToolsScreen<ExampleController>(
+//        const ExampleConditionalScreen(),
+//        createController: () => ExampleController(),
+//        supportsOffline: true,
+//      ),
     ];
