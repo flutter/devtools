@@ -104,7 +104,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     }
 
     // TODO(devoncarew): Change the line selection in the code view as well.
-        await controller.selectScript(bp.script);
+    await controller.selectScript(bp.script);
   }
 
   Map<int, Breakpoint> _breakpointsForLines() {
