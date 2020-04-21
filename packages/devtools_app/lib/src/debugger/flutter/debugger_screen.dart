@@ -87,7 +87,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
     addAutoDisposeListener(controller.currentStack);
     addAutoDisposeListener(controller.sortedScripts);
-    addAutoDisposeListener(controller.breakpoints);
+    addAutoDisposeListener(controller.breakpointsWithLocation);
   }
 
   Future<void> _onScriptSelected(ScriptRef ref) async {
@@ -104,22 +104,28 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     }
 
     // TODO(devoncarew): Change the line selection in the code view as well.
-    await controller.selectScript(bp.script);
+    if (bp.script != null) {
+      await controller.selectScript(bp.script);
+    } else if (bp.scriptUri != null) {
+      await controller.selectScript(controller.scriptRefForUri(bp.scriptUri));
+    }
   }
 
-  Map<int, Breakpoint> _breakpointsForLines() {
+  Map<int, BreakpointAndSourcePosition> _breakpointsForLines() {
     if (script == null) return {};
+
     return {
-      for (var b in controller.breakpoints.value
-          .where((b) => b != null && b.location.script?.id == script.id))
-        controller.lineNumber(script, b.location): b,
+      for (var b in controller.breakpointsWithLocation.value.where((b) {
+        return b.script?.id == script.id || b.scriptUri == script.uri;
+      }))
+        b.line: b,
     };
   }
 
   Future<void> toggleBreakpoint(Script script, int line) async {
     final breakpoints = _breakpointsForLines();
     if (breakpoints.containsKey(line)) {
-      await controller.removeBreakpoint(breakpoints[line]);
+      await controller.removeBreakpoint(breakpoints[line].breakpoint);
     } else {
       try {
         await controller.addBreakpoint(script.id, line);
@@ -216,7 +222,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               context,
               breakpointsTitle,
               rightChild: BreakpointsCountBadge(
-                breakpoints: controller.breakpoints.value,
+                breakpoints: controller.breakpointsWithLocation.value,
               ),
             ),
           ],

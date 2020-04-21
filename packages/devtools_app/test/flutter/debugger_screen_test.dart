@@ -122,7 +122,7 @@ void main() {
       ];
 
       final breakpointsWithLocation = [
-        BreakpointAndSourcePosition(
+        BreakpointAndSourcePosition.create(
           breakpoints.first,
           SourcePosition(line: 10, column: 1),
         )

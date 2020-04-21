@@ -46,6 +46,9 @@ class DebuggerController extends DisposableController
 
   ValueListenable<Script> get currentScript => _currentScript;
 
+  // A cached map of uris to ScriptRefs.
+  final Map<String, ScriptRef> _uriToScriptMap = {};
+
   final _currentStack = ValueNotifier<Stack>(null);
 
   ValueListenable<Stack> get currentStack => _currentStack;
@@ -320,9 +323,9 @@ class DebuggerController extends DisposableController
     return _scriptCache[scriptRef.id];
   }
 
-  ScriptRef getScriptRefFromUri(String uri) {
-    return _sortedScripts.value
-        .firstWhere((ref) => ref.uri == uri, orElse: () => null);
+  /// Return the [ScriptRef] at the given [uri].
+  ScriptRef scriptRefForUri(String uri) {
+    return _uriToScriptMap[uri];
   }
 
   Future<void> selectScript(ScriptRef ref) async {
@@ -344,6 +347,10 @@ class DebuggerController extends DisposableController
       return a.uri.toUpperCase().compareTo(b.uri.toUpperCase());
     });
     _sortedScripts.value = scriptRefs;
+
+    for (var scriptRef in scriptRefs) {
+      _uriToScriptMap[scriptRef.uri] = scriptRef;
+    }
 
     // Update the selected script.
     final mainScriptRef = _scriptList.value.scripts.firstWhere((ref) {
@@ -382,13 +389,13 @@ class DebuggerController extends DisposableController
   Future<BreakpointAndSourcePosition> _createBreakpointWithLocation(
       Breakpoint breakpoint) async {
     if (breakpoint.resolved) {
-      final bp = BreakpointAndSourcePosition(breakpoint);
+      final bp = BreakpointAndSourcePosition.create(breakpoint);
       return getScript(bp.script).then((Script script) {
         final pos = calculatePosition(script, bp.tokenPos);
-        return BreakpointAndSourcePosition(breakpoint, pos);
+        return BreakpointAndSourcePosition.create(breakpoint, pos);
       });
     } else {
-      return BreakpointAndSourcePosition(breakpoint);
+      return BreakpointAndSourcePosition.create(breakpoint);
     }
   }
 }
@@ -405,72 +412,37 @@ class SourcePosition {
 }
 
 /// A tuple of a breakpoint and a source position.
-class BreakpointAndSourcePosition
+abstract class BreakpointAndSourcePosition
     implements Comparable<BreakpointAndSourcePosition> {
-  BreakpointAndSourcePosition(this.breakpoint, [this.sourcePosition]);
+  BreakpointAndSourcePosition._(this.breakpoint, [this.sourcePosition]);
+
+  factory BreakpointAndSourcePosition.create(Breakpoint breakpoint,
+      [SourcePosition sourcePosition]) {
+    if (breakpoint.location is SourceLocation) {
+      return _BreakpointAndSourcePositionResolved(
+          breakpoint, sourcePosition, breakpoint.location as SourceLocation);
+    } else if (breakpoint.location is UnresolvedSourceLocation) {
+      return _BreakpointAndSourcePositionUnresolved(breakpoint, sourcePosition,
+          breakpoint.location as UnresolvedSourceLocation);
+    } else {
+      throw 'invalid value for breakpoint.location';
+    }
+  }
 
   final Breakpoint breakpoint;
   final SourcePosition sourcePosition;
 
   bool get resolved => breakpoint.resolved;
 
-  ScriptRef get script {
-    if (breakpoint.location is UnresolvedSourceLocation) {
-      final UnresolvedSourceLocation location = breakpoint.location;
-      return location.script;
-    } else if (breakpoint.location is SourceLocation) {
-      final SourceLocation location = breakpoint.location;
-      return location.script;
-    } else {
-      return null;
-    }
-  }
+  ScriptRef get script;
 
-  String get scriptUri {
-    if (breakpoint.location is UnresolvedSourceLocation) {
-      final UnresolvedSourceLocation location = breakpoint.location;
-      return location.script?.uri ?? location.scriptUri;
-    } else if (breakpoint.location is SourceLocation) {
-      final SourceLocation location = breakpoint.location;
-      return location.script.uri;
-    } else {
-      return null;
-    }
-  }
+  String get scriptUri;
 
-  int get line {
-    if (sourcePosition != null) {
-      return sourcePosition.line;
-    } else if (breakpoint.location is UnresolvedSourceLocation) {
-      final UnresolvedSourceLocation location = breakpoint.location;
-      return location.line;
-    } else {
-      return null;
-    }
-  }
+  int get line;
 
-  int get column {
-    if (sourcePosition != null) {
-      return sourcePosition.column;
-    } else if (breakpoint.location is UnresolvedSourceLocation) {
-      final UnresolvedSourceLocation location = breakpoint.location;
-      return location.column;
-    } else {
-      return null;
-    }
-  }
+  int get column;
 
-  int get tokenPos {
-    if (breakpoint.location is UnresolvedSourceLocation) {
-      final UnresolvedSourceLocation location = breakpoint.location;
-      return location.tokenPos;
-    } else if (breakpoint.location is SourceLocation) {
-      final SourceLocation location = breakpoint.location;
-      return location.tokenPos;
-    } else {
-      return null;
-    }
-  }
+  int get tokenPos;
 
   String get id => breakpoint.id;
 
@@ -496,4 +468,51 @@ class BreakpointAndSourcePosition
       return line - other.line;
     }
   }
+}
+
+class _BreakpointAndSourcePositionResolved extends BreakpointAndSourcePosition {
+  _BreakpointAndSourcePositionResolved(
+      Breakpoint breakpoint, SourcePosition sourcePosition, this.location)
+      : super._(breakpoint, sourcePosition);
+
+  final SourceLocation location;
+
+  @override
+  ScriptRef get script => location.script;
+
+  @override
+  String get scriptUri => location.script.uri;
+
+  @override
+  int get tokenPos => location.tokenPos;
+
+  @override
+  int get line => sourcePosition?.line;
+
+  @override
+  int get column => sourcePosition?.column;
+}
+
+class _BreakpointAndSourcePositionUnresolved
+    extends BreakpointAndSourcePosition {
+  _BreakpointAndSourcePositionUnresolved(
+      Breakpoint breakpoint, SourcePosition sourcePosition, this.location)
+      : super._(breakpoint, sourcePosition);
+
+  final UnresolvedSourceLocation location;
+
+  @override
+  ScriptRef get script => location.script;
+
+  @override
+  String get scriptUri => location.script?.uri ?? location.scriptUri;
+
+  @override
+  int get tokenPos => location.tokenPos;
+
+  @override
+  int get line => sourcePosition?.line ?? location.line;
+
+  @override
+  int get column => sourcePosition?.column ?? location.column;
 }
