@@ -32,7 +32,7 @@ class CodeView extends StatefulWidget {
   static const assumedCharacterWidth = 16.0;
 
   final DebuggerController controller;
-  final Map<int, Breakpoint> lineNumberToBreakpoint;
+  final Map<int, BreakpointAndSourcePosition> lineNumberToBreakpoint;
   final Script script;
   final vm.Stack stack;
   final void Function(Script script, int line) onSelected;
@@ -63,14 +63,6 @@ class _CodeViewState extends State<CodeView> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-
-    gutterController.dispose();
-    textController.dispose();
-  }
-
-  @override
   void didUpdateWidget(CodeView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
@@ -81,6 +73,14 @@ class _CodeViewState extends State<CodeView> {
     if (widget.stack != oldWidget.stack) {
       _updatePausedPositions();
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    gutterController.dispose();
+    textController.dispose();
   }
 
   void _updateLines() {
@@ -189,7 +189,6 @@ class _CodeViewState extends State<CodeView> {
                   final lineNum = index + 1;
                   return ScriptRow(
                     lineContents: lines[index],
-                    onPressed: () => _onPressed(lineNum),
                     isPausedHere: pausedPositions.contains(lineNum),
                   );
                 },
@@ -284,12 +283,10 @@ class ScriptRow extends StatelessWidget {
   const ScriptRow({
     Key key,
     @required this.lineContents,
-    @required this.onPressed,
     @required this.isPausedHere,
   }) : super(key: key);
 
   final String lineContents;
-  final VoidCallback onPressed;
   final bool isPausedHere;
 
   @override
@@ -299,18 +296,15 @@ class ScriptRow extends StatelessWidget {
     final regularStyle = TextStyle(color: theme.textTheme.bodyText2.color);
     final selectedStyle = TextStyle(color: theme.textSelectionColor);
 
-    return InkWell(
-      onTap: onPressed,
-      child: Container(
-        alignment: Alignment.centerLeft,
-        height: CodeView.rowHeight,
-        color: isPausedHere ? theme.selectedRowColor : null,
-        child: Text(
-          lineContents,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: isPausedHere ? selectedStyle : regularStyle,
-        ),
+    return Container(
+      alignment: Alignment.centerLeft,
+      height: CodeView.rowHeight,
+      color: isPausedHere ? theme.selectedRowColor : null,
+      child: Text(
+        lineContents,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: isPausedHere ? selectedStyle : regularStyle,
       ),
     );
   }

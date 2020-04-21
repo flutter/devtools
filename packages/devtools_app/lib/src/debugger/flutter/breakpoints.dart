@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
@@ -110,7 +109,7 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
 class BreakpointsCountBadge extends StatelessWidget {
   const BreakpointsCountBadge({@required this.breakpoints});
 
-  final List<Breakpoint> breakpoints;
+  final List<BreakpointAndSourcePosition> breakpoints;
 
   @override
   Widget build(BuildContext context) {
