@@ -117,9 +117,10 @@ class HtmlInspectorScreen extends HtmlScreen {
       inspectorContainer = div(c: 'inspector-container bidirectional'),
     ]);
 
-    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
     if (serviceManager.hasConnection) {
       _handleConnectionStart(serviceManager.service);
+    } else {
+      serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
 
