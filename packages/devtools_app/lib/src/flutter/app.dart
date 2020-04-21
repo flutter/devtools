@@ -8,8 +8,23 @@ import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart';
 
 import '../../devtools.dart' as devtools;
+import '../debugger/flutter/debugger_controller.dart';
+import '../debugger/flutter/debugger_screen.dart';
+// Uncomment to see a sample implementation of a conditional screen.
+import '../example/flutter/conditional_screen.dart';
 import '../framework/framework_core.dart';
 import '../globals.dart';
+import '../info/flutter/info_screen.dart';
+import '../inspector/flutter/inspector_screen.dart';
+import '../logging/flutter/logging_screen.dart';
+import '../logging/logging_controller.dart';
+import '../memory/flutter/memory_controller.dart';
+import '../memory/flutter/memory_screen.dart';
+import '../network/flutter/network_screen.dart';
+import '../performance/flutter/performance_screen.dart';
+import '../performance/performance_controller.dart';
+import '../timeline/flutter/timeline_controller.dart';
+import '../timeline/flutter/timeline_screen.dart';
 import '../ui/flutter/service_extension_widgets.dart';
 import 'common_widgets.dart';
 import 'connect_screen.dart';
@@ -21,6 +36,9 @@ import 'screen.dart';
 import 'snapshot_screen.dart';
 import 'theme.dart';
 import 'utils.dart';
+
+// TODO(bkonyi): remove this bool when page is ready.
+const showNetworkPage = false;
 
 const homeRoute = '/';
 const connectRoute = '/connect';
@@ -407,3 +425,51 @@ class SettingsDialog extends StatelessWidget {
     );
   }
 }
+
+/// Screens to initialize DevTools with.
+///
+/// If the screen depends on a provided controller, the provider should be
+/// provided here.
+///
+/// Conditional screens can be added to this list, and they will automatically
+/// be shown or hidden based on the [Screen.conditionalLibrary] provided.
+List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
+      const DevToolsScreen(InspectorScreen(), createController: null),
+      DevToolsScreen<TimelineController>(
+        const TimelineScreen(),
+        createController: () => TimelineController(),
+        supportsOffline: true,
+      ),
+      DevToolsScreen<MemoryController>(
+        const MemoryScreen(),
+        createController: () => MemoryController(),
+      ),
+      DevToolsScreen<PerformanceController>(
+        const PerformanceScreen(),
+        createController: () => PerformanceController(),
+      ),
+      DevToolsScreen<DebuggerController>(
+        const DebuggerScreen(),
+        createController: () => DebuggerController(),
+      ),
+      if (showNetworkPage)
+        const DevToolsScreen(NetworkScreen(), createController: null),
+      DevToolsScreen<LoggingController>(
+        const LoggingScreen(),
+        createController: () => LoggingController(
+          onLogCountStatusChanged: (_) {
+            // TODO(devoncarew): This callback is not used.
+          },
+          // TODO(djshuckerow): Use a notifier pattern for the logging controller.
+          // That way, it is visible if it has listeners and invisible otherwise.
+          isVisible: () => true,
+        ),
+      ),
+      const DevToolsScreen(InfoScreen(), createController: null),
+// Uncomment to see a sample implementation of a conditional screen.
+      DevToolsScreen<ExampleController>(
+        const ExampleConditionalScreen(),
+        createController: () => ExampleController(),
+        supportsOffline: true,
+      ),
+    ];
