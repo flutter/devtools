@@ -46,6 +46,9 @@ class DebuggerController extends DisposableController
 
   ValueListenable<Script> get currentScript => _currentScript;
 
+  // A cached map of uris to ScriptRefs.
+  final Map<String, ScriptRef> _uriToScriptMap = {};
+
   final _currentStack = ValueNotifier<Stack>(null);
 
   ValueListenable<Stack> get currentStack => _currentStack;
@@ -76,15 +79,6 @@ class DebuggerController extends DisposableController
       ValueNotifier<String>(ExceptionPauseMode.kUnhandled);
 
   ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
-
-  final ValueNotifier<bool> _librariesVisible = ValueNotifier(false);
-
-  ValueNotifier<bool> get librariesVisible => _librariesVisible;
-
-  /// todo: doc
-  void toggleLibrariesVisible() {
-    _librariesVisible.value = !_librariesVisible.value;
-  }
 
   final _stdio = ValueNotifier<List<String>>([]);
 
@@ -319,9 +313,9 @@ class DebuggerController extends DisposableController
     return _scriptCache[scriptRef.id];
   }
 
-  ScriptRef getScriptRefFromUri(String uri) {
-    return _sortedScripts.value
-        .firstWhere((ref) => ref.uri == uri, orElse: () => null);
+  /// Return the [ScriptRef] at the given [uri].
+  ScriptRef scriptRefForUri(String uri) {
+    return _uriToScriptMap[uri];
   }
 
   Future<void> selectScript(ScriptRef ref) async {
@@ -343,6 +337,10 @@ class DebuggerController extends DisposableController
       return a.uri.toUpperCase().compareTo(b.uri.toUpperCase());
     });
     _sortedScripts.value = scriptRefs;
+
+    for (var scriptRef in scriptRefs) {
+      _uriToScriptMap[scriptRef.uri] = scriptRef;
+    }
 
     // Update the selected script.
     final mainScriptRef = _scriptList.value.scripts.firstWhere((ref) {

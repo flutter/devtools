@@ -108,8 +108,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     if (bp.script != null) {
       await controller.selectScript(bp.script);
     } else if (bp.scriptUri != null) {
-      await controller
-          .selectScript(controller.getScriptRefFromUri(bp.scriptUri));
+      await controller.selectScript(controller.scriptRefForUri(bp.scriptUri));
     }
   }
 
