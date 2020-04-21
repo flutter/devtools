@@ -88,7 +88,8 @@ void main() {
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
 
       // Libraries view is hidden
-      when(debuggerController.librariesVisible).thenReturn(ValueNotifier(false));
+      when(debuggerController.librariesVisible)
+          .thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Libraries'), findsNothing);
     });
