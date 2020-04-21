@@ -8,7 +8,7 @@ import 'src/config_specific/flutter/framework_initialize/framework_initialize.da
 import 'src/debugger/flutter/debugger_controller.dart';
 import 'src/debugger/flutter/debugger_screen.dart';
 // Uncomment to see a sample implementation of a conditional screen.
-//import 'src/example/conditional_screen.dart';
+//import 'src/example/flutter/conditional_screen.dart';
 import 'src/flutter/app.dart';
 import 'src/info/flutter/info_screen.dart';
 import 'src/inspector/flutter/inspector_screen.dart';
