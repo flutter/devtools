@@ -81,7 +81,8 @@ class DebuggerController extends DisposableController
 
   ValueListenable<bool> get librariesVisible => _librariesVisible;
 
-  /// todo: doc
+  /// Make the 'Libraries' view on the right-hand side of the screen visible or
+  /// hidden.
   void toggleLibrariesVisible() {
     _librariesVisible.value = !_librariesVisible.value;
   }
