@@ -68,7 +68,7 @@ void main() {
           output.write("<span style='${entry.style}'>${entry.text}</span>");
         } else {
           output.write(entry.text);
-          // TODO: Note that we are not handling links yet
+          // TODO: Note that we are not handling links yet.
         }
       }
       expect(

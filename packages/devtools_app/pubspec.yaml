@@ -20,8 +20,8 @@ environment:
 dependencies:
   ansicolor: ^1.0.2
   ansi_up:
-#    ^0.0.1
-     path: ../../third_party/packages/ansi_up
+    ^0.0.2
+#     path: ../../third_party/packages/ansi_up
   codemirror: ^0.5.10
   collection: ^1.14.11
   devtools_shared: 0.2.4-dev.2
