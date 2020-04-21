@@ -77,6 +77,15 @@ class DebuggerController extends DisposableController
 
   ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
 
+  final ValueNotifier<bool> _librariesVisible = ValueNotifier(false);
+
+  ValueListenable<bool> get librariesVisible => _librariesVisible;
+
+  /// todo: doc
+  void toggleLibrariesVisible() {
+    _librariesVisible.value = !_librariesVisible.value;
+  }
+
   final _stdio = ValueNotifier<List<String>>([]);
 
   /// Return the stdout and stderr emitted from the application.
@@ -308,6 +317,11 @@ class DebuggerController extends DisposableController
           await _service.getObject(isolateRef.id, scriptRef.id);
     }
     return _scriptCache[scriptRef.id];
+  }
+
+  ScriptRef getScriptRefFromUri(String uri) {
+    return _sortedScripts.value
+        .firstWhere((ref) => ref.uri == uri, orElse: () => null);
   }
 
   Future<void> selectScript(ScriptRef ref) async {

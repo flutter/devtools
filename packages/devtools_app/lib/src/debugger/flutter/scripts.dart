@@ -8,19 +8,21 @@ import 'package:vm_service/vm_service.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
 import '../../utils.dart';
-
-// TODO(devoncarew): Show the filtered count in the scripts header.
+import 'debugger_controller.dart';
+import 'debugger_screen.dart';
 
 /// Picker that takes a [ScriptList] and allows selection of one of the scripts
 /// inside.
 class ScriptPicker extends StatefulWidget {
   const ScriptPicker({
     Key key,
+    @required this.controller,
     @required this.scripts,
     @required this.selected,
     @required this.onSelected,
   }) : super(key: key);
 
+  final DebuggerController controller;
   final List<ScriptRef> scripts;
   final ScriptRef selected;
   final void Function(ScriptRef scriptRef) onSelected;
@@ -53,40 +55,58 @@ class ScriptPickerState extends State<ScriptPicker> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final theme = Theme.of(context);
 
-    // TODO(devoncarew): Convert the filter to an action in the scripts header.
-    // const Icon(Icons.filter_list, size: defaultIconSize),
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(denseSpacing),
-          child: SizedBox(
-            height: 36.0,
-            child: TextField(
-              decoration: const InputDecoration(
-                labelText: 'Filter',
-                border: OutlineInputBorder(),
-              ),
-              controller: _filterController,
-              onChanged: (value) => updateFilter(),
-              style: Theme.of(context).textTheme.bodyText2,
+    return OutlinedBorder(
+      child: Column(
+        children: [
+          debuggerPaneHeader(
+            context,
+            'Libraries',
+            needsTopBorder: false,
+            rightChild: ScriptCountBadge(
+              filteredScripts: _filteredScripts,
+              scripts: widget.controller.sortedScripts.value,
             ),
           ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: _filteredScripts.length,
-            itemExtent: defaultListItemHeight,
-            itemBuilder: (context, index) {
-              return _buildScript(_filteredScripts[index]);
-            },
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: theme.focusColor),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(denseSpacing),
+              child: SizedBox(
+                height: 36.0,
+                child: TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Filter',
+                    border: OutlineInputBorder(),
+                  ),
+                  controller: _filterController,
+                  onChanged: (value) => updateFilter(),
+                  style: Theme.of(context).textTheme.bodyText2,
+                ),
+              ),
+            ),
           ),
-        ),
-      ],
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+          if (!_isLoading)
+            Expanded(
+              child: ListView.builder(
+                itemCount: _filteredScripts.length,
+                itemExtent: defaultListItemHeight,
+                itemBuilder: (context, index) {
+                  return _buildScript(_filteredScripts[index]);
+                },
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -124,12 +144,21 @@ class ScriptPickerState extends State<ScriptPicker> {
 }
 
 class ScriptCountBadge extends StatelessWidget {
-  const ScriptCountBadge({@required this.scripts});
+  const ScriptCountBadge({
+    @required this.filteredScripts,
+    @required this.scripts,
+  });
 
+  final List<ScriptRef> filteredScripts;
   final List<ScriptRef> scripts;
 
   @override
   Widget build(BuildContext context) {
-    return Badge('${nf.format(scripts.length)}');
+    if (filteredScripts.length == scripts.length) {
+      return Badge('${nf.format(scripts.length)}');
+    } else {
+      return Badge('${nf.format(filteredScripts.length)} of '
+          '${nf.format(scripts.length)}');
+    }
   }
 }
