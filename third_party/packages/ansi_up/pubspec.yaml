@@ -1,6 +1,5 @@
 name: ansi_up
 description: Minimal package containing 'ansi_up' third_party dependency used by package:devtools.
-author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools/tree/master/third_party/packages/ansi_up
 version: 0.0.2
 
