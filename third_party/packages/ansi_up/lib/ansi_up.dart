@@ -208,6 +208,7 @@ class AnsiUp {
   void _processAnsi(TextPacket textPacket) {
     final sgrCmds = textPacket.text.split(';');
     while (sgrCmds.isNotEmpty) {
+      // TODO: Track an index within sgrCmds instead of removeAt
       final sgrCmdStr = sgrCmds.removeAt(0);
       final num = int.tryParse(sgrCmdStr, radix: 10);
       if (num == null || num == 0) {
@@ -280,8 +281,8 @@ class TextWithAttr {
 class AnsiUpColor {
   AnsiUpColor({this.rgb, this.className});
 
-  List<int> rgb;
-  String className;
+  final List<int> rgb;
+  final String className;
 }
 
 enum PacketKind {
@@ -299,7 +300,7 @@ class TextPacket {
 
   PacketKind kind;
   String text;
-  String url;
+  final String url;
 }
 
 String _colorToCss(List/*<int>*/ rgb) => 'rgb(${rgb.join(',')})';
