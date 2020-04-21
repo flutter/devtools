@@ -332,14 +332,18 @@ class Badge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    // These constants are sized to give 1 digit badges a circular look.
+    const badgeCornerRadius = 12.0;
+    const badgePadding = 6.0;
+
     return Container(
       decoration: BoxDecoration(
         color: theme.primaryColor,
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(badgeCornerRadius),
       ),
       padding: const EdgeInsets.symmetric(
         vertical: borderPadding,
-        horizontal: densePadding,
+        horizontal: badgePadding,
       ),
       child: Text(
         text,
