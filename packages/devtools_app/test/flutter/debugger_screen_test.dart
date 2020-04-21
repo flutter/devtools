@@ -44,6 +44,8 @@ void main() {
       when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
       when(debuggerController.breakpointsWithLocation)
           .thenReturn(ValueNotifier([]));
+      when(debuggerController.librariesVisible)
+          .thenReturn(ValueNotifier(false));
       when(debuggerController.scriptList)
           .thenReturn(ValueNotifier(ScriptList(scripts: [])));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
@@ -78,15 +80,29 @@ void main() {
       expect(find.text('test stdio'), findsOneWidget);
     });
 
-    testWidgets('Scripts show items', (WidgetTester tester) async {
+    testWidgets('Libraries hidden', (WidgetTester tester) async {
       final scripts = [ScriptRef(uri: 'package:/test/script.dart')];
 
       when(debuggerController.scriptList)
           .thenReturn(ValueNotifier(ScriptList(scripts: scripts)));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
 
+      // Libraries view is hidden
+      when(debuggerController.librariesVisible).thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
+      expect(find.text('Libraries'), findsNothing);
+    });
 
+    testWidgets('Libraries visible', (WidgetTester tester) async {
+      final scripts = [ScriptRef(uri: 'package:/test/script.dart')];
+
+      when(debuggerController.scriptList)
+          .thenReturn(ValueNotifier(ScriptList(scripts: scripts)));
+      when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
+
+      // Libraries view is shown
+      when(debuggerController.librariesVisible).thenReturn(ValueNotifier(true));
+      await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Libraries'), findsOneWidget);
 
       // test for items in the libraries list
@@ -193,7 +209,7 @@ void main() {
         Builder(builder: screen.build),
         debugger: debuggerController,
       ));
-      expect(find.text('Ignore exceptions'), findsOneWidget);
+      expect(find.text('Ignore'), findsOneWidget);
     });
   });
 }
