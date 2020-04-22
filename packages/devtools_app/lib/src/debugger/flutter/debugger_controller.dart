@@ -80,6 +80,16 @@ class DebuggerController extends DisposableController
 
   ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
 
+  final _librariesVisible = ValueNotifier(false);
+
+  ValueListenable<bool> get librariesVisible => _librariesVisible;
+
+  /// Make the 'Libraries' view on the right-hand side of the screen visible or
+  /// hidden.
+  void toggleLibrariesVisible() {
+    _librariesVisible.value = !_librariesVisible.value;
+  }
+
   final _stdio = ValueNotifier<List<String>>([]);
 
   /// Return the stdout and stderr emitted from the application.
