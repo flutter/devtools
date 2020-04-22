@@ -10,8 +10,6 @@ import 'package:provider/provider.dart';
 import '../../devtools.dart' as devtools;
 import '../debugger/flutter/debugger_controller.dart';
 import '../debugger/flutter/debugger_screen.dart';
-// Uncomment to see a sample implementation of a conditional screen.
-//import '../example/flutter/conditional_screen.dart';
 import '../framework/framework_core.dart';
 import '../globals.dart';
 import '../info/flutter/info_screen.dart';
@@ -89,7 +87,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   /// Generates routes, separating the path from URL query parameters.
   Route _generateRoute(RouteSettings settings) {
     final uri = Uri.parse(settings.name);
-    final path = uri.path;
+    final path = uri.path.isEmpty ? connectRoute : uri.path;
     final args = settings.arguments;
 
     // Provide the appropriate page route.
@@ -117,7 +115,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       settings: settings,
       builder: (BuildContext context) {
         return DevToolsScaffold.withChild(
-          child: CenteredMessage('Sorry, $uri was not found.'),
+          child: CenteredMessage("'$uri' not found."),
         );
       },
     );
@@ -216,6 +214,7 @@ class DevToolsScreen<C> {
     @required this.createController,
     this.supportsOffline = false,
   });
+
   final Screen screen;
 
   /// Responsible for creating the controller for this screen, if non-null.

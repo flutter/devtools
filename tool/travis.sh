@@ -125,7 +125,7 @@ elif [ "$BOT" = "test_ddc" ]; then
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter config --enable-web
-    flutter build web
+    flutter build web --no-tree-shake-icons
 
     # Run every test except for integration_tests.
     # The flutter tool doesn't support excluding a specific set of targets,
@@ -143,7 +143,7 @@ elif [ "$BOT" = "test_dart2js" ]; then
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter config --enable-web
-    flutter build web
+    flutter build web --no-tree-shake-icons
 
     # Run every test except for integration_tests.
     # The flutter tool doesn't support excluding a specific set of targets,
