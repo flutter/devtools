@@ -21,6 +21,8 @@ class VmServiceTrafficLogger {
     _receiveSub = service.onReceive.listen(_logServiceProtocolResponses);
   }
 
+  static const eventName = 'devtools.service';
+
   StreamSubscription _sendSub;
   StreamSubscription _receiveSub;
 
@@ -31,7 +33,7 @@ class VmServiceTrafficLogger {
     final String id = m['id'];
 
     messageBus.addEvent(BusEvent(
-      'devtools.debugger',
+      eventName,
       data: '⇨ #$id $method()\n$message',
     ));
   }
@@ -64,7 +66,7 @@ class VmServiceTrafficLogger {
     }
 
     messageBus.addEvent(BusEvent(
-      'devtools.debugger',
+      eventName,
       data: '  ⇦ ${id == null ? '' : '#$id '}$details$streamId $kind\n$message',
     ));
   }

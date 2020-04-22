@@ -12,7 +12,7 @@ import 'package:vm_service/vm_service.dart' hide Error;
 import 'config_specific/logger/logger.dart';
 import 'connected_app.dart';
 import 'eval_on_dart_library.dart';
-import 'logging/vm_service.dart';
+import 'logging/vm_service_logger.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
 import 'stream_value_listenable.dart';
