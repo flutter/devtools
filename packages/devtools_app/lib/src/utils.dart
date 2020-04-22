@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+import 'dart:async' show Completer, Future, Stream, StreamController, StreamSubscription, Timer;
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
+import 'package:ansi_up/ansi_up.dart';
 
 import 'ui/fake_flutter/fake_flutter.dart';
 
@@ -640,4 +641,29 @@ class CallbackDwell {
       callback();
     }
   }
+}
+
+List<TextSpan> maybeConvertToAnsiText(String input, TextStyle defaultStyle) {
+  List<TextSpan> children = [];
+  for (var entry
+  in decodeAnsiColorEscapeCodes(input, AnsiUp())) {
+    children.add(TextSpan(
+      text: entry.text,
+      style: entry.style.isEmpty
+          ? defaultStyle
+          : TextStyle(
+        color: entry.fgColor != null && entry.fgColor.length > 2
+            ? Color.fromRGBO(entry.fgColor[0], entry.fgColor[1],
+            entry.fgColor[2], 1)
+            : null,
+        backgroundColor:
+        entry.bgColor != null && entry.bgColor.length > 2
+            ? Color.fromRGBO(entry.bgColor[0], entry.bgColor[1],
+            entry.bgColor[2], 1)
+            : null,
+        fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
+      ),
+    ));
+  }
+  return children;
 }
