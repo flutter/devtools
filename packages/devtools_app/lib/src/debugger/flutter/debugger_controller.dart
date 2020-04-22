@@ -75,6 +75,11 @@ class DebuggerController extends DisposableController
   ValueListenable<List<BreakpointAndSourcePosition>>
       get breakpointsWithLocation => _breakpointsWithLocation;
 
+  final _selectedBreakpoint = ValueNotifier<BreakpointAndSourcePosition>(null);
+
+  ValueListenable<BreakpointAndSourcePosition> get selectedBreakpoint =>
+      _selectedBreakpoint;
+
   final _exceptionPauseMode =
       ValueNotifier<String>(ExceptionPauseMode.kUnhandled);
 
@@ -387,6 +392,10 @@ class DebuggerController extends DisposableController
     } else {
       return BreakpointAndSourcePosition.create(breakpoint);
     }
+  }
+
+  void selectBreakpoint(BreakpointAndSourcePosition bp) {
+    _selectedBreakpoint.value = bp;
   }
 }
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
@@ -14,51 +15,66 @@ const executableLineRadius = 1.5;
 const breakpointRadius = 6.0;
 
 class BreakpointPicker extends StatefulWidget {
-  const BreakpointPicker({
-    Key key,
-    @required this.controller,
-    @required this.selected,
-    @required this.onSelected,
-  }) : super(key: key);
-
-  final DebuggerController controller;
-  final BreakpointAndSourcePosition selected;
-  final void Function(BreakpointAndSourcePosition breakpoint) onSelected;
+  const BreakpointPicker({Key key}) : super(key: key);
 
   @override
   _BreakpointPickerState createState() => _BreakpointPickerState();
 }
 
 class _BreakpointPickerState extends State<BreakpointPicker> {
+  DebuggerController controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final newController = Provider.of<DebuggerController>(context);
+    if (newController == controller) return;
+    controller = newController;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<BreakpointAndSourcePosition>>(
-      valueListenable: widget.controller.breakpointsWithLocation,
+      valueListenable: controller.breakpointsWithLocation,
       builder: (context, breakpoints, _) {
-        return ListView.builder(
-          itemCount: breakpoints.length,
-          itemExtent: defaultListItemHeight,
-          itemBuilder: (context, index) {
-            return buildBreakpoint(context, breakpoints[index]);
+        return ValueListenableBuilder<BreakpointAndSourcePosition>(
+          valueListenable: controller.selectedBreakpoint,
+          builder: (context, selectedBreakpoint, _) {
+            return ListView.builder(
+              itemCount: breakpoints.length,
+              itemExtent: defaultListItemHeight,
+              itemBuilder: (context, index) {
+                return buildBreakpoint(
+                  context,
+                  breakpoints[index],
+                  selectedBreakpoint,
+                );
+              },
+            );
           },
         );
       },
     );
   }
 
-  Widget buildBreakpoint(BuildContext context, BreakpointAndSourcePosition bp) {
+  Widget buildBreakpoint(
+    BuildContext context,
+    BreakpointAndSourcePosition bp,
+    BreakpointAndSourcePosition selectedBreakpoint,
+  ) {
     final theme = Theme.of(context);
 
     final regularStyle = TextStyle(color: theme.textTheme.bodyText2.color);
     final subtleStyle = TextStyle(color: theme.unselectedWidgetColor);
     final selectedStyle = TextStyle(color: theme.textSelectionColor);
 
-    final isSelected = bp.id == widget.selected?.id;
+    final isSelected = bp.id == selectedBreakpoint?.id;
 
     return Material(
       color: isSelected ? theme.selectedRowColor : null,
       child: InkWell(
-        onTap: () => widget.onSelected(bp),
+        onTap: () => _onBreakpointSelected(bp),
         child: Padding(
           padding: const EdgeInsets.all(borderPadding),
           child: Row(
@@ -95,6 +111,17 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
         ),
       ),
     );
+  }
+
+  Future<void> _onBreakpointSelected(BreakpointAndSourcePosition bp) async {
+    controller.selectBreakpoint(bp);
+
+    // TODO(devoncarew): Change the line selection in the code view as well.
+    if (bp.script != null) {
+      await controller.selectScript(bp.script);
+    } else if (bp.scriptUri != null) {
+      await controller.selectScript(controller.scriptRefForUri(bp.scriptUri));
+    }
   }
 
   String _descriptionFor(BreakpointAndSourcePosition breakpoint) {

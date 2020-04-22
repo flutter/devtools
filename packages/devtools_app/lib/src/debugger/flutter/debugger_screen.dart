@@ -66,7 +66,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   DebuggerController controller;
   Script script;
-  BreakpointAndSourcePosition selectedBreakpoint;
 
   @override
   void didChangeDependencies() {
@@ -95,21 +94,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     if (ref == null) return;
 
     await controller.selectScript(ref);
-  }
-
-  Future<void> _onBreakpointSelected(BreakpointAndSourcePosition bp) async {
-    if (bp != selectedBreakpoint) {
-      setState(() {
-        selectedBreakpoint = bp;
-      });
-    }
-
-    // TODO(devoncarew): Change the line selection in the code view as well.
-    if (bp.script != null) {
-      await controller.selectScript(bp.script);
-    } else if (bp.scriptUri != null) {
-      await controller.selectScript(controller.scriptRefForUri(bp.scriptUri));
-    }
   }
 
   Map<int, BreakpointAndSourcePosition> _breakpointsForLines() {
@@ -211,11 +195,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           children: [
             const Center(child: Text('TODO: call stack')),
             const Center(child: Text('TODO: variables')),
-            BreakpointPicker(
-              controller: controller,
-              selected: selectedBreakpoint,
-              onSelected: _onBreakpointSelected,
-            ),
+            const BreakpointPicker(),
             ScriptPicker(
               scripts: controller.sortedScripts.value,
               selected: script,
