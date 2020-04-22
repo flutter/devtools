@@ -78,7 +78,7 @@ void main() {
 
       expect(find.text('Console'), findsOneWidget);
 
-      // test for stdio output
+      // test for stdio output.
       expect(find.text('test stdio'), findsOneWidget);
     });
 
