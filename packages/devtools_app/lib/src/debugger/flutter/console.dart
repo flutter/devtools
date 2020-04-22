@@ -71,8 +71,11 @@ class _ConsoleState extends State<Console> {
                     itemBuilder: (context, index) {
                       return RichText(
                         text: TextSpan(
-                            children: maybeConvertToAnsiText(
-                                lines[index], textStyle)),
+                          children: maybeConvertToAnsiText(
+                            lines[index],
+                            textStyle,
+                          ),
+                        ),
                         maxLines: 1,
                       );
                     },
