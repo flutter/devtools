@@ -62,7 +62,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const callStackTitle = 'Call Stack';
   static const variablesTitle = 'Variables';
   static const breakpointsTitle = 'Breakpoints';
-  static const librariesTitle = 'Libraries';
 
   DebuggerController controller;
   Script script;
@@ -126,6 +125,48 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final codeWidget = OutlinedBorder(
+      child: Column(
+        children: [
+          debuggerSectionTitle(theme,
+              text: script == null ? ' ' : '${script.uri}'),
+          Expanded(
+            child: CodeView(
+              script: script,
+              stack: controller.currentStack.value,
+              controller: controller,
+              lineNumberToBreakpoint: _breakpointsForLines(),
+              onSelected: toggleBreakpoint,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final codeArea = ValueListenableBuilder(
+      valueListenable: controller.librariesVisible,
+      builder: (context, visible, _) {
+        if (visible) {
+          // TODO(devoncarew): Animate this opening and closing.
+          return Split(
+            axis: Axis.horizontal,
+            initialFractions: const [0.70, 0.30],
+            children: [
+              codeWidget,
+              ScriptPicker(
+                controller: controller,
+                scripts: controller.sortedScripts.value,
+                selected: script,
+                onSelected: _onScriptSelected,
+              ),
+            ],
+          );
+        } else {
+          return codeWidget;
+        }
+      },
+    );
+
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
@@ -138,28 +179,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             Expanded(
               child: Split(
                 axis: Axis.vertical,
-                initialFractions: const [0.75, 0.25],
+                initialFractions: const [0.74, 0.26],
                 children: [
-                  OutlinedBorder(
-                    child: Column(
-                      children: [
-                        debuggerSectionTitle(theme,
-                            text: script == null ? ' ' : '${script.uri}'),
-                        Expanded(
-                          child: CodeView(
-                            script: script,
-                            stack: controller.currentStack.value,
-                            controller: controller,
-                            lineNumberToBreakpoint: _breakpointsForLines(),
-                            onSelected: toggleBreakpoint,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Console(
-                    controller: controller,
-                  ),
+                  codeArea,
+                  Console(controller: controller),
                 ],
               ),
             ),
@@ -174,75 +197,26 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       builder: (context, constraints) {
         return FlexSplitColumn(
           totalHeight: constraints.maxHeight,
-          initialFractions: const [0.20, 0.20, 0.20, 0.40],
-          minSizes: const [0.0, 0.0, 0.0, 0.0],
+          initialFractions: const [0.38, 0.38, 0.24],
+          minSizes: const [0.0, 0.0, 0.0],
           headers: [
-            _debuggerPaneHeader(callStackTitle, needsTopBorder: false),
-            _debuggerPaneHeader(variablesTitle),
-            _debuggerPaneHeader(
+            debuggerPaneHeader(context, callStackTitle, needsTopBorder: false),
+            debuggerPaneHeader(context, variablesTitle),
+            debuggerPaneHeader(
+              context,
               breakpointsTitle,
               rightChild: BreakpointsCountBadge(
                 breakpoints: controller.breakpointsWithLocation.value,
               ),
             ),
-            _debuggerPaneHeader(
-              librariesTitle,
-              rightChild: ScriptCountBadge(
-                scripts: controller.sortedScripts.value,
-              ),
-            ),
           ],
-          children: [
-            const Center(child: Text('TODO: call stack')),
-            const Center(child: Text('TODO: variables')),
-            const BreakpointPicker(),
-            ScriptPicker(
-              scripts: controller.sortedScripts.value,
-              selected: script,
-              onSelected: _onScriptSelected,
-            ),
+          children: const [
+            Center(child: Text('TODO: call stack')),
+            Center(child: Text('TODO: variables')),
+            BreakpointPicker(),
           ],
         );
       },
-    );
-  }
-
-  FlexSplitColumnHeader _debuggerPaneHeader(
-    String title, {
-    bool needsTopBorder = true,
-    Widget rightChild,
-  }) {
-    final theme = Theme.of(context);
-
-    return FlexSplitColumnHeader(
-      height: DebuggerScreen.debuggerPaneHeaderHeight,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: needsTopBorder
-                ? BorderSide(color: theme.focusColor)
-                : BorderSide.none,
-            bottom: BorderSide(color: theme.focusColor),
-          ),
-          color: titleSolidBackgroundColor,
-        ),
-        padding: const EdgeInsets.only(left: defaultSpacing, right: 4.0),
-        alignment: Alignment.centerLeft,
-        height: DebuggerScreen.debuggerPaneHeaderHeight,
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.subtitle2,
-              ),
-            ),
-            if (rightChild != null) rightChild,
-          ],
-        ),
-      ),
     );
   }
 }
@@ -321,4 +295,44 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
 
     return 'paused$reason$fileName $pos';
   }
+}
+
+FlexSplitColumnHeader debuggerPaneHeader(
+  BuildContext context,
+  String title, {
+  bool needsTopBorder = true,
+  Widget rightChild,
+}) {
+  final theme = Theme.of(context);
+
+  return FlexSplitColumnHeader(
+    height: DebuggerScreen.debuggerPaneHeaderHeight,
+    child: Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: needsTopBorder
+              ? BorderSide(color: theme.focusColor)
+              : BorderSide.none,
+          bottom: BorderSide(color: theme.focusColor),
+        ),
+        color: titleSolidBackgroundColor,
+      ),
+      padding: const EdgeInsets.only(left: defaultSpacing, right: 4.0),
+      alignment: Alignment.centerLeft,
+      height: DebuggerScreen.debuggerPaneHeaderHeight,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.subtitle2,
+            ),
+          ),
+          if (rightChild != null) rightChild,
+        ],
+      ),
+    ),
+  );
 }

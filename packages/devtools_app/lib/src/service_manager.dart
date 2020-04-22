@@ -12,12 +12,19 @@ import 'package:vm_service/vm_service.dart' hide Error;
 import 'config_specific/logger/logger.dart';
 import 'connected_app.dart';
 import 'eval_on_dart_library.dart';
+import 'logging/vm_service_logger.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
 import 'stream_value_listenable.dart';
 import 'ui/fake_flutter/fake_flutter.dart';
 import 'utils.dart';
 import 'vm_service_wrapper.dart';
+
+// Note: don't check this in enabled.
+/// Used to debug service protocol traffic. All requests to to the VM service
+/// connection are logged to the Logging page, as well as all responses and
+/// events from the service protocol device.
+const debugLogServiceProtocolEvents = false;
 
 // TODO(kenz): add an offline service manager implementation.
 
@@ -41,6 +48,7 @@ class ServiceConnectionManager {
   final serviceAvailable = Completer<void>();
 
   VmServiceCapabilities _serviceCapabilities;
+  VmServiceTrafficLogger serviceTrafficLogger;
 
   Future<VmServiceCapabilities> get serviceCapabilities async {
     if (_serviceCapabilities == null) {
@@ -126,6 +134,10 @@ class ServiceConnectionManager {
 
     this.service = service;
 
+    if (debugLogServiceProtocolEvents) {
+      serviceTrafficLogger = VmServiceTrafficLogger(service);
+    }
+
     serviceAvailable.complete();
 
     connectedApp = ConnectedApp();
@@ -210,6 +222,8 @@ class ServiceConnectionManager {
     sdkVersion = null;
     connectedApp = null;
     serviceExtensionManager.connectedApp = null;
+
+    serviceTrafficLogger?.dispose();
 
     _stateController.add(false);
     _connectionClosedController.add(null);
@@ -833,6 +847,7 @@ class ServiceExtensionState {
 class VmFlagManager {
   VmServiceWrapper get service => _service;
   VmServiceWrapper _service;
+
   set service(VmServiceWrapper service) {
     _service = service;
     // Upon setting the vm service, get initial values for vm flags.

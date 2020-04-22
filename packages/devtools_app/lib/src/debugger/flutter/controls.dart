@@ -71,16 +71,34 @@ class DebuggingControls extends StatelessWidget {
                   ],
                 ),
               ),
-              const Expanded(child: SizedBox(width: denseSpacing)),
+              const SizedBox(width: denseSpacing),
               RoundedOutlinedBorder(
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.only(
-                        left: denseSpacing, right: borderPadding),
+                      left: defaultSpacing,
+                      right: borderPadding,
+                    ),
                     child: BreakOnExceptionsControl(controller: controller),
                   ),
                 ),
               ),
+              const Expanded(child: SizedBox(width: denseSpacing)),
+              ValueListenableBuilder(
+                valueListenable: controller.librariesVisible,
+                builder: (context, visible, _) {
+                  return RoundedOutlinedBorder(
+                    child: Container(
+                      color: visible ? Theme.of(context).highlightColor : null,
+                      child: DebuggerButton(
+                        title: 'Libraries',
+                        icon: Icons.insert_chart,
+                        onPressed: controller.toggleLibrariesVisible,
+                      ),
+                    ),
+                  );
+                },
+              )
             ],
           ),
         );
@@ -138,17 +156,17 @@ class ExceptionMode {
   static final modes = [
     ExceptionMode(
       ExceptionPauseMode.kNone,
-      'Ignore exceptions',
+      'Ignore',
       "Don't stop on exceptions",
     ),
     ExceptionMode(
       ExceptionPauseMode.kUnhandled,
-      'Stop on uncaught',
+      'Uncaught',
       'Stop on uncaught exceptions',
     ),
     ExceptionMode(
       ExceptionPauseMode.kAll,
-      'Stop on exceptions',
+      'All',
       'Stop on all exceptions',
     ),
   ];
