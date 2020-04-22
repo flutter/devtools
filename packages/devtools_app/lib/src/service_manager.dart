@@ -24,7 +24,7 @@ import 'vm_service_wrapper.dart';
 /// Used to debug service protocol traffic. All requests to to the VM service
 /// connection are logged to the Logging page, as well as all responses and
 /// events from the service protocol device.
-const debugLogServiceProtocolEvents = true;
+const debugLogServiceProtocolEvents = false;
 
 // TODO(kenz): add an offline service manager implementation.
 
