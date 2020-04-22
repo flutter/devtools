@@ -80,7 +80,7 @@ class DebuggerController extends DisposableController
 
   ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
 
-  final ValueNotifier<bool> _librariesVisible = ValueNotifier(false);
+  final _librariesVisible = ValueNotifier(false);
 
   ValueListenable<bool> get librariesVisible => _librariesVisible;
 
