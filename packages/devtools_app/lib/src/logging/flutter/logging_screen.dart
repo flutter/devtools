@@ -333,38 +333,6 @@ class _MessageColumn extends LogMessageColumn
 
   @override
   Widget build(BuildContext context, LogData data) {
-    if (data.kind == 'stdout') {
-      const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
-
-      final RichText richText = RichText(
-        text: TextSpan(
-          children: maybeConvertToAnsiText(
-              getDisplayValue(data), fixedFontStyle(context)),
-        ),
-        overflow: TextOverflow.ellipsis,
-      );
-
-      double frameLength = 0.0;
-      try {
-        final int micros = jsonDecode(data.details)['elapsed'];
-        frameLength = micros * 3.0 / 1000.0;
-      } catch (e) {
-        // ignore
-      }
-
-      return Row(
-        children: <Widget>[
-          richText,
-          Flexible(
-            child: Container(
-              height: 12.0,
-              width: frameLength,
-              decoration: const BoxDecoration(color: color),
-            ),
-          ),
-        ],
-      );
-    }
     if (data.kind == 'flutter.frame') {
       const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
       final Text text = Text(
@@ -388,6 +356,31 @@ class _MessageColumn extends LogMessageColumn
             child: Container(
               height: 12.0,
               width: frameLength,
+              decoration: const BoxDecoration(color: color),
+            ),
+          ),
+        ],
+      );
+    } else if (data.kind == 'stdout') {
+      const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
+
+      final RichText richText = RichText(
+        text: TextSpan(
+          children: maybeConvertToAnsiText(
+            // TODO(helin24): Recompute summary length considering ansi codes?
+            //  The current summary is generally the first 200 chars of details.
+              getDisplayValue(data), fixedFontStyle(context)),
+        ),
+        overflow: TextOverflow.ellipsis,
+      );
+
+      return Row(
+        children: <Widget>[
+          richText,
+          Flexible(
+            child: Container(
+              height: 12.0,
+              width: 0.0,
               decoration: const BoxDecoration(color: color),
             ),
           ),
