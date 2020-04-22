@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../http/http_request_data.dart';
 import '../network_controller.dart';
@@ -95,7 +96,7 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
           includeTextWidth: includeTextWidth,
           onPressed: networkController.pauseRecording,
         ),
-        const SizedBox(width: 8.0),
+        const SizedBox(width: denseSpacing),
         clearButton(
           key: NetworkScreen.clearButtonKey,
           onPressed: () {
@@ -226,6 +227,7 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
             return Column(
               children: [
                 _buildHttpProfilerControlRow(isRecording),
+                const SizedBox(height: denseRowSpacing),
                 _buildHttpProfilerBody(isRecording),
               ],
             );

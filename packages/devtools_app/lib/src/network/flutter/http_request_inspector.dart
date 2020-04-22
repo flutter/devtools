@@ -71,6 +71,7 @@ class HttpRequestInspector extends StatelessWidget {
     );
 
     return Card(
+      margin: EdgeInsets.zero,
       color: Theme.of(context).canvasColor,
       child: Container(
         decoration: BoxDecoration(
