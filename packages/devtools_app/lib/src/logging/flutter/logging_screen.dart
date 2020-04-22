@@ -369,9 +369,10 @@ class _MessageColumn extends LogMessageColumn
       final RichText richText = RichText(
         text: TextSpan(
           children: maybeConvertToAnsiText(
-            // TODO(helin24): Recompute summary length considering ansi codes?
-            //  The current summary is generally the first 200 chars of details.
-              getDisplayValue(data), fixedFontStyle(context)),
+              // TODO(helin24): Recompute summary length considering ansi codes?
+              //  The current summary is generally the first 200 chars of details.
+              getDisplayValue(data),
+              fixedFontStyle(context)),
         ),
         overflow: TextOverflow.ellipsis,
       );

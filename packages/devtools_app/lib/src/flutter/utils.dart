@@ -19,22 +19,22 @@ Future<void> launchUrl(String url, BuildContext context) async {
 List<TextSpan> maybeConvertToAnsiText(String input, TextStyle defaultStyle) {
   return decodeAnsiColorEscapeCodes(input, AnsiUp())
       .map((entry) => TextSpan(
-    text: entry.text,
-    style: entry.style.isEmpty
-        ? defaultStyle
-        : TextStyle(
-      color: entry.fgColor != null && entry.fgColor.length > 2
-          ? Color.fromRGBO(entry.fgColor[0], entry.fgColor[1],
-          entry.fgColor[2], 1)
-          : null,
-      backgroundColor:
-      entry.bgColor != null && entry.bgColor.length > 2
-          ? Color.fromRGBO(entry.bgColor[0], entry.bgColor[1],
-          entry.bgColor[2], 1)
-          : null,
-      fontWeight:
-      entry.bold ? FontWeight.bold : FontWeight.normal,
-    ),
-  ))
+            text: entry.text,
+            style: entry.style.isEmpty
+                ? defaultStyle
+                : TextStyle(
+                    color: entry.fgColor != null && entry.fgColor.length > 2
+                        ? Color.fromRGBO(entry.fgColor[0], entry.fgColor[1],
+                            entry.fgColor[2], 1)
+                        : null,
+                    backgroundColor:
+                        entry.bgColor != null && entry.bgColor.length > 2
+                            ? Color.fromRGBO(entry.bgColor[0], entry.bgColor[1],
+                                entry.bgColor[2], 1)
+                            : null,
+                    fontWeight:
+                        entry.bold ? FontWeight.bold : FontWeight.normal,
+                  ),
+          ))
       .toList();
 }

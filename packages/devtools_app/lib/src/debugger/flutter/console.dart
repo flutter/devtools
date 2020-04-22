@@ -70,7 +70,9 @@ class _ConsoleState extends State<Console> {
                     controller: scrollController,
                     itemBuilder: (context, index) {
                       return RichText(
-                        text: TextSpan(children: maybeConvertToAnsiText(lines[index], textStyle)),
+                        text: TextSpan(
+                            children: maybeConvertToAnsiText(
+                                lines[index], textStyle)),
                         maxLines: 1,
                       );
                     },
