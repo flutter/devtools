@@ -161,8 +161,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
     final codeArea = ValueListenableBuilder(
       valueListenable: controller.librariesVisible,
-      builder: (context, value, _) {
-        if (value) {
+      builder: (context, visible, _) {
+        if (visible) {
           // TODO(devoncarew): Animate this opening and closing.
           return Split(
             axis: Axis.horizontal,

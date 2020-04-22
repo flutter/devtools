@@ -100,9 +100,8 @@ class ScriptPickerState extends State<ScriptPicker> {
               child: ListView.builder(
                 itemCount: _filteredScripts.length,
                 itemExtent: defaultListItemHeight,
-                itemBuilder: (context, index) {
-                  return _buildScript(_filteredScripts[index]);
-                },
+                itemBuilder: (context, index) =>
+                    _buildScript(_filteredScripts[index]),
               ),
             ),
         ],

@@ -76,7 +76,9 @@ class DebuggingControls extends StatelessWidget {
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.only(
-                        left: defaultSpacing, right: borderPadding),
+                      left: defaultSpacing,
+                      right: borderPadding,
+                    ),
                     child: BreakOnExceptionsControl(controller: controller),
                   ),
                 ),
@@ -84,16 +86,14 @@ class DebuggingControls extends StatelessWidget {
               const Expanded(child: SizedBox(width: denseSpacing)),
               ValueListenableBuilder(
                 valueListenable: controller.librariesVisible,
-                builder: (BuildContext context, value, Widget child) {
+                builder: (context, visible, _) {
                   return RoundedOutlinedBorder(
                     child: Container(
-                      color: controller.librariesVisible.value
-                          ? Theme.of(context).highlightColor
-                          : null,
+                      color: visible ? Theme.of(context).highlightColor : null,
                       child: DebuggerButton(
                         title: 'Libraries',
                         icon: Icons.insert_chart,
-                        onPressed: () => controller.toggleLibrariesVisible(),
+                        onPressed: controller.toggleLibrariesVisible,
                       ),
                     ),
                   );
