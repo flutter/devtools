@@ -161,7 +161,8 @@ void main() {
       );
     });
 
-    testWidgetsWithWindowSize('call stack show items', Size(1000.0, 4000.0),
+    testWidgetsWithWindowSize(
+        'call stack show items', const Size(1000.0, 4000.0),
         (WidgetTester tester) async {
       final stackFrames = [
         Frame(
