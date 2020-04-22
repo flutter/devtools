@@ -139,12 +139,18 @@ class InspectorTreeControllerFlutter extends Object
     }
     return _maxIndent;
   }
+
+  void setFocus() {
+    client?.setFocus();
+  }
 }
 
 abstract class InspectorControllerClient {
   void onChanged();
 
   void scrollToRect(Rect rect);
+
+  void setFocus();
 }
 
 class InspectorTree extends StatefulWidget {
@@ -201,7 +207,6 @@ class _InspectorTreeState extends State<InspectorTree>
 
       _bindToController();
     }
-    FocusScope.of(context).requestFocus(focusNode);
     super.didUpdateWidget(oldWidget);
   }
 
@@ -212,6 +217,11 @@ class _InspectorTreeState extends State<InspectorTree>
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
     constraintDisplayController?.dispose();
+  }
+
+  @override
+  void setFocus() {
+    FocusScope.of(context).requestFocus(focusNode);
   }
 
   void _onScrollYChange() {
@@ -335,7 +345,6 @@ class _InspectorTreeState extends State<InspectorTree>
   void _handleKeyEvent(RawKeyEvent event) {
     if (event is! RawKeyDownEvent) return;
 
-    // Exit early if we aren't handling the key
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
       controller.navigateDown();
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
