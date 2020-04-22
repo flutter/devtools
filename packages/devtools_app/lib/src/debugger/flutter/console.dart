@@ -7,7 +7,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
-import '../../utils.dart';
+import '../../flutter/utils.dart';
 import 'codeview.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
