@@ -117,7 +117,7 @@ class ScriptPickerState extends State<ScriptPicker> {
       child: InkWell(
         onTap: () => widget.onSelected(ref),
         child: Container(
-          padding: const EdgeInsets.all(4.0),
+          padding: const EdgeInsets.all(densePadding),
           alignment: Alignment.centerLeft,
           child: Text(
             ref.uri,
