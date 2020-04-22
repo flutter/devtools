@@ -49,6 +49,8 @@ void main() {
       when(debuggerController.scriptList)
           .thenReturn(ValueNotifier(ScriptList(scripts: [])));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
+      when(debuggerController.selectedBreakpoint)
+          .thenReturn(ValueNotifier(null));
       when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
       when(debuggerController.stdio).thenReturn(ValueNotifier(['']));
       when(debuggerController.currentScript).thenReturn(ValueNotifier(null));
@@ -76,7 +78,7 @@ void main() {
 
       expect(find.text('Console'), findsOneWidget);
 
-      // test for stdio output
+      // test for stdio output.
       expect(find.text('test stdio'), findsOneWidget);
     });
 
