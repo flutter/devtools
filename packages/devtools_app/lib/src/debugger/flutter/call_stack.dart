@@ -86,11 +86,10 @@ class _CallStackState extends State<CallStack> {
           text: _descriptionFor(frame),
           style: selected ? selectedStyle : regularStyle,
           children: [
-            if (!asyncMarker)
-              TextSpan(
-                text: _locationFor(frame),
-                style: selected ? selectedStyle : subtleStyle,
-              ),
+            TextSpan(
+              text: _locationFor(frame),
+              style: selected ? selectedStyle : subtleStyle,
+            ),
           ],
         ),
       );
