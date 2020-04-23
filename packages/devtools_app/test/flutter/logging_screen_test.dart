@@ -142,7 +142,7 @@ void main() {
         await tester.tap(find.byKey(ValueKey(fakeLogData[996])));
         await tester.pumpAndSettle();
         expect(
-          find.text('log event 996'),
+          find.byWidgetPredicate((widget) => widget is RichText && widget.text.toPlainText() == 'log event 996'),
           findsNWidgets(2),
           reason: 'The log details should be visible both in the table and the '
               'details section.',
