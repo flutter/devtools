@@ -125,24 +125,21 @@ class _BreakpointAndSourcePositionUnresolved
 
 /// A tuple of a stack frame and a source position.
 class StackFrameAndSourcePosition {
-  StackFrameAndSourcePosition._(this.frame, this.sourcePosition, this.location);
+  StackFrameAndSourcePosition._(this.frame, this.sourcePosition);
 
   factory StackFrameAndSourcePosition.create(
-    Frame frame, [
+    Frame frame, {
     SourcePosition position,
-  ]) {
-    return StackFrameAndSourcePosition._(frame, position, frame.location);
+  }) {
+    return StackFrameAndSourcePosition._(frame, position);
   }
 
   final Frame frame;
   final SourcePosition sourcePosition;
-  final SourceLocation location;
 
-  ScriptRef get script => location.script;
+  ScriptRef get script => frame.location?.script;
 
-  String get scriptUri => location.script.uri;
-
-  int get tokenPos => location.tokenPos;
+  String get scriptUri => frame.location?.script?.uri;
 
   int get line => sourcePosition?.line;
 

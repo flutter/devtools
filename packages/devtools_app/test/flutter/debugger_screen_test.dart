@@ -220,7 +220,7 @@ void main() {
           stackFrames.map<StackFrameAndSourcePosition>((frame) {
         return StackFrameAndSourcePosition.create(
           frame,
-          SourcePosition(
+          position: SourcePosition(
             line: stackFrames.indexOf(frame),
             column: 10,
           ),
@@ -238,16 +238,14 @@ void main() {
       expect(
         find.byWidgetPredicate((Widget widget) =>
             widget is RichText &&
-            widget.text
-                .toPlainText()
-                .contains('testCodeRef() (script.dart:0)')),
+            widget.text.toPlainText().contains('testCodeRef() script.dart:0')),
         findsOneWidget,
       );
       // Stack frame 1
       expect(
         find.byWidgetPredicate((Widget widget) =>
             widget is RichText &&
-            widget.text.toPlainText().contains('<none> (script1.dart:1)')),
+            widget.text.toPlainText().contains('<none> script1.dart:1')),
         findsOneWidget,
       );
       // Stack frame 2
@@ -256,7 +254,7 @@ void main() {
             widget is RichText &&
             widget.text
                 .toPlainText()
-                .contains('testCodeRef2() (script2.dart:2)')),
+                .contains('testCodeRef2() script2.dart:2')),
         findsOneWidget,
       );
       // Stack frame 3
@@ -265,18 +263,11 @@ void main() {
             widget is RichText &&
             widget.text
                 .toPlainText()
-                .contains('testCodeRef3.<closure>() (script3.dart:3)')),
+                .contains('testCodeRef3.<closure>() script3.dart:3')),
         findsOneWidget,
       );
       // Stack frame 4
-      expect(
-        find.byWidgetPredicate((Widget widget) =>
-            widget is RichText &&
-            widget.text
-                .toPlainText()
-                .contains('<async break> (script4.dart:4)')),
-        findsOneWidget,
-      );
+      expect(find.text('<async break>'), findsOneWidget);
     });
 
     WidgetPredicate createDebuggerButtonPredicate(String title) {
