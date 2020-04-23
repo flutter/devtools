@@ -9,6 +9,7 @@ import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
 import '../../ui/flutter/label.dart';
 import 'debugger_controller.dart';
+import 'scripts.dart';
 
 class DebuggingControls extends StatelessWidget {
   const DebuggingControls({Key key, @required this.controller})
@@ -92,7 +93,7 @@ class DebuggingControls extends StatelessWidget {
                       color: visible ? Theme.of(context).highlightColor : null,
                       child: DebuggerButton(
                         title: 'Libraries',
-                        icon: Icons.insert_chart,
+                        icon: libraryIcon,
                         onPressed: controller.toggleLibrariesVisible,
                       ),
                     ),
