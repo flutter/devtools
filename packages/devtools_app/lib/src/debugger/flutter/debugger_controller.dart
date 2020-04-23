@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
 import '../../globals.dart';
+import 'debugger_model.dart';
 
 // TODO(devoncarew): Add some delayed resume value notifiers (to be used to
 // help debounce stepping operations).
@@ -49,9 +50,20 @@ class DebuggerController extends DisposableController
   // A cached map of uris to ScriptRefs.
   final Map<String, ScriptRef> _uriToScriptMap = {};
 
-  final _currentStack = ValueNotifier<Stack>(null);
+  final _callStack = ValueNotifier<Stack>(null);
 
-  ValueListenable<Stack> get currentStack => _currentStack;
+  ValueListenable<Stack> get callStack => _callStack;
+
+  final _stackFramesWithLocation =
+      ValueNotifier<List<StackFrameAndSourcePosition>>([]);
+
+  ValueListenable<List<StackFrameAndSourcePosition>>
+      get stackFramesWithLocation => _stackFramesWithLocation;
+
+  final _selectedStackFrame = ValueNotifier<StackFrameAndSourcePosition>(null);
+
+  ValueListenable<StackFrameAndSourcePosition> get selectedStackFrame =>
+      _selectedStackFrame;
 
   final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
 
@@ -144,6 +156,7 @@ class DebuggerController extends DisposableController
     if (ref == null) {
       _breakpoints.value = [];
       _breakpointsWithLocation.value = [];
+      _stackFramesWithLocation.value = [];
       return;
     }
 
@@ -159,9 +172,9 @@ class DebuggerController extends DisposableController
     _breakpoints.value = isolate.breakpoints;
 
     // Build _breakpointsWithLocation from _breakpoints.
-    if (breakpoints.value != null) {
+    if (_breakpoints.value != null) {
       // ignore: unawaited_futures
-      Future.wait(breakpoints.value.map(_createBreakpointWithLocation))
+      Future.wait(_breakpoints.value.map(_createBreakpointWithLocation))
           .then((list) {
         _breakpointsWithLocation.value = list.toList()..sort();
       });
@@ -209,8 +222,6 @@ class DebuggerController extends DisposableController
     await _service.setExceptionPauseMode(isolateRef.id, mode);
     _exceptionPauseMode.value = mode;
   }
-
-  Future<Stack> getStack() => _service.getStack(isolateRef.id);
 
   void _handleIsolateEvent(Event event) async {
     if (event.isolate.id != isolateRef.id) return;
@@ -295,13 +306,20 @@ class DebuggerController extends DisposableController
   Future<void> _pause(bool pause) async {
     _isPaused.value = pause;
 
-    _currentStack.value = pause ? await getStack() : null;
+    _callStack.value = pause ? await _service.getStack(isolateRef.id) : null;
 
-    if (_currentStack.value != null && _currentStack.value.frames.isNotEmpty) {
+    final frames = framesForCallStack();
+
+    await Future.wait(frames.map(_createStackFrameWithLocation)).then((list) {
+      _stackFramesWithLocation.value = list.toList();
+    });
+
+    if (_stackFramesWithLocation.value.isNotEmpty) {
       // TODO(https://github.com/flutter/devtools/issues/1648): Allow choice of
       // the scripts on the stack.
       _currentScript.value =
-          await getScript(_currentStack.value.frames.first.location.script);
+          await getScript(_stackFramesWithLocation.value.first.script);
+      _selectedStackFrame.value = _stackFramesWithLocation.value.first;
     }
   }
 
@@ -426,124 +444,55 @@ class DebuggerController extends DisposableController
     }
   }
 
+  Future<StackFrameAndSourcePosition> _createStackFrameWithLocation(
+    Frame frame,
+  ) {
+    final sf = StackFrameAndSourcePosition.create(frame);
+    return getScript(sf.script).then((Script script) {
+      final pos = calculatePosition(script, sf.tokenPos);
+      return StackFrameAndSourcePosition.create(frame, pos);
+    });
+  }
+
   void selectBreakpoint(BreakpointAndSourcePosition bp) {
     _selectedBreakpoint.value = bp;
   }
-}
 
-class SourcePosition {
-  SourcePosition({@required this.line, @required this.column, this.tokenPos});
+  void selectStackFrame(StackFrameAndSourcePosition frame) {
+    _selectedStackFrame.value = frame;
+  }
 
-  final int line;
-  final int column;
-  final int tokenPos;
+  List<Frame> framesForCallStack() {
+    if (_callStack.value == null) return [];
 
-  @override
-  String toString() => '$line:$column';
-}
+    List<Frame> frames =
+        _callStack.value.asyncCausalFrames ?? _callStack.value.frames;
 
-/// A tuple of a breakpoint and a source position.
-abstract class BreakpointAndSourcePosition
-    implements Comparable<BreakpointAndSourcePosition> {
-  BreakpointAndSourcePosition._(this.breakpoint, [this.sourcePosition]);
+    // Handle breaking-on-exceptions.
+    if (_reportedException != null && frames.isNotEmpty) {
+      final frame = frames.first;
 
-  factory BreakpointAndSourcePosition.create(Breakpoint breakpoint,
-      [SourcePosition sourcePosition]) {
-    if (breakpoint.location is SourceLocation) {
-      return _BreakpointAndSourcePositionResolved(
-          breakpoint, sourcePosition, breakpoint.location as SourceLocation);
-    } else if (breakpoint.location is UnresolvedSourceLocation) {
-      return _BreakpointAndSourcePositionUnresolved(breakpoint, sourcePosition,
-          breakpoint.location as UnresolvedSourceLocation);
-    } else {
-      throw 'invalid value for breakpoint.location';
+      final newFrame = Frame(
+        index: frame.index,
+        function: frame.function,
+        code: frame.code,
+        location: frame.location,
+        kind: frame.kind,
+      );
+
+      newFrame.vars = [
+        BoundVariable(
+          name: '<exception>',
+          value: _reportedException,
+          scopeStartTokenPos: null,
+          scopeEndTokenPos: null,
+          declarationTokenPos: null,
+        ),
+        ...frame.vars ?? []
+      ];
+
+      frames = [newFrame, ...frames.sublist(1)];
     }
+    return frames;
   }
-
-  final Breakpoint breakpoint;
-  final SourcePosition sourcePosition;
-
-  bool get resolved => breakpoint.resolved;
-
-  ScriptRef get script;
-
-  String get scriptUri;
-
-  int get line;
-
-  int get column;
-
-  int get tokenPos;
-
-  String get id => breakpoint.id;
-
-  @override
-  int get hashCode => breakpoint.hashCode;
-
-  @override
-  bool operator ==(other) {
-    return other is BreakpointAndSourcePosition &&
-        other.breakpoint == breakpoint;
-  }
-
-  @override
-  int compareTo(BreakpointAndSourcePosition other) {
-    final result = scriptUri.compareTo(other.scriptUri);
-    if (result != 0) return result;
-
-    if (resolved != other.resolved) return resolved ? 1 : -1;
-
-    if (resolved) {
-      return tokenPos - other.tokenPos;
-    } else {
-      return line - other.line;
-    }
-  }
-}
-
-class _BreakpointAndSourcePositionResolved extends BreakpointAndSourcePosition {
-  _BreakpointAndSourcePositionResolved(
-      Breakpoint breakpoint, SourcePosition sourcePosition, this.location)
-      : super._(breakpoint, sourcePosition);
-
-  final SourceLocation location;
-
-  @override
-  ScriptRef get script => location.script;
-
-  @override
-  String get scriptUri => location.script.uri;
-
-  @override
-  int get tokenPos => location.tokenPos;
-
-  @override
-  int get line => sourcePosition?.line;
-
-  @override
-  int get column => sourcePosition?.column;
-}
-
-class _BreakpointAndSourcePositionUnresolved
-    extends BreakpointAndSourcePosition {
-  _BreakpointAndSourcePositionUnresolved(
-      Breakpoint breakpoint, SourcePosition sourcePosition, this.location)
-      : super._(breakpoint, sourcePosition);
-
-  final UnresolvedSourceLocation location;
-
-  @override
-  ScriptRef get script => location.script;
-
-  @override
-  String get scriptUri => location.script?.uri ?? location.scriptUri;
-
-  @override
-  int get tokenPos => location.tokenPos;
-
-  @override
-  int get line => sourcePosition?.line ?? location.line;
-
-  @override
-  int get column => sourcePosition?.column ?? location.column;
 }

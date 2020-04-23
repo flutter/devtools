@@ -17,11 +17,13 @@ import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import 'breakpoints.dart';
+import 'call_stack.dart';
 import 'codeview.dart';
 import 'common.dart';
 import 'console.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
+import 'debugger_model.dart';
 import 'scripts.dart';
 
 class DebuggerScreen extends Screen {
@@ -84,7 +86,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       });
     });
 
-    addAutoDisposeListener(controller.currentStack);
+    addAutoDisposeListener(controller.callStack);
     addAutoDisposeListener(controller.breakpointsWithLocation);
   }
 
@@ -131,7 +133,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           Expanded(
             child: CodeView(
               script: script,
-              stack: controller.currentStack.value,
+              stack: controller.callStack.value,
               controller: controller,
               lineNumberToBreakpoint: _breakpointsForLines(),
               onSelected: toggleBreakpoint,
@@ -213,7 +215,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             ),
           ],
           children: const [
-            Center(child: Text('TODO: call stack')),
+            CallStack(),
             Center(child: Text('TODO: variables')),
             BreakpointPicker(),
           ],
