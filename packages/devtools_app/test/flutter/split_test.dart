@@ -581,6 +581,110 @@ void main() {
             tester.element(find.byKey(_k3)).size, const Size(72, 200));
       });
 
+      testWidgets('with violated minsize constraints',
+          (WidgetTester tester) async {
+        final split = buildSplit(Axis.horizontal,
+            children: [_w1, _w2, _w3],
+            initialFractions: [0.1, 0.7, 0.2],
+            minSizes: [100.0, 0, 100.0]);
+        await tester.pumpWidget(wrap(
+          Center(
+            child: SizedBox(width: 400.0, height: 400.0, child: split),
+          ),
+        ));
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(100, 400));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(180, 400));
+        expectEqualSizes(
+            tester.element(find.byKey(_k3)).size, const Size(100, 400));
+
+        await tester.pumpWidget(wrap(
+          Center(
+            child: SizedBox(width: 230.0, height: 200.0, child: split),
+          ),
+        ));
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(100.0, 200));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(10, 200));
+        expectEqualSizes(
+            tester.element(find.byKey(_k3)).size, const Size(100, 200));
+
+        // It would be nice if we restored the size of w2 in this case but the
+        // logic is simpler if we don't as this way the layout calculation can
+        // avoid tracking state about what the previous fractions were before
+        // clipping which would add more complexity and shouldn't really matter.
+        await tester.pumpWidget(wrap(
+          Center(
+            child: SizedBox(width: 400.0, height: 400.0, child: split),
+          ),
+        ));
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(180.952380, 400));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(18.0952, 400));
+        expectEqualSizes(
+            tester.element(find.byKey(_k3)).size, const Size(180.952380, 400));
+      });
+
+      testWidgets('with impossible minsize constraints',
+          (WidgetTester tester) async {
+        final split = buildSplit(Axis.horizontal,
+            children: [_w1, _w2, _w3],
+            initialFractions: [0.2, 0.4, 0.4],
+            minSizes: [200.0, 0, 400.0]);
+        await tester.pumpWidget(wrap(
+          Center(
+            child: SizedBox(width: 400.0, height: 400.0, child: split),
+          ),
+        ));
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(126.666666, 400));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(0, 400));
+        expectEqualSizes(
+            tester.element(find.byKey(_k3)).size, const Size(253.33333, 400));
+
+        await tester.pumpWidget(wrap(
+          Center(
+            child: SizedBox(width: 200.0, height: 200.0, child: split),
+          ),
+        ));
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(60.0, 200));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(0, 200));
+        expectEqualSizes(
+            tester.element(find.byKey(_k3)).size, const Size(120, 200));
+
+        // Min size constraints still violated but not violated by as much.
+        await tester.pumpWidget(wrap(
+          Center(
+            child: SizedBox(width: 400.0, height: 400.0, child: split),
+          ),
+        ));
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(126.666666, 400));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(0, 400));
+        expectEqualSizes(
+            tester.element(find.byKey(_k3)).size, const Size(253.33333, 400));
+
+        // Min size constraints are now satisfied.
+        await tester.pumpWidget(wrap(
+          Center(
+            child: SizedBox(width: 800.0, height: 400.0, child: split),
+          ),
+        ));
+        expectEqualSizes(
+            tester.element(find.byKey(_k1)).size, const Size(260, 400));
+        expectEqualSizes(
+            tester.element(find.byKey(_k2)).size, const Size(0, 400));
+        expectEqualSizes(
+            tester.element(find.byKey(_k3)).size, const Size(520, 400));
+      });
+
       testWidgets('in a vertical layout', (WidgetTester tester) async {
         final split = buildSplit(Axis.vertical, initialFractions: [0.0, 1.0]);
         await tester.pumpWidget(wrap(
