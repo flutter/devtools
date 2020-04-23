@@ -17,6 +17,9 @@ Future<void> launchUrl(String url, BuildContext context) async {
 }
 
 List<TextSpan> processAnsiTerminalCodes(String input, TextStyle defaultStyle) {
+  if (input == null) {
+    return [];
+  }
   return decodeAnsiColorEscapeCodes(input, AnsiUp())
       .map((entry) => TextSpan(
             text: entry.text,
