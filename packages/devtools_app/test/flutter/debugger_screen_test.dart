@@ -197,7 +197,7 @@ void main() {
         Frame(
           index: 3,
           code: CodeRef(
-            name: '<anonymous closure> testCodeRef3',
+            name: 'testCodeRef3.<anonymous closure>',
             kind: CodeKind.kDart,
           ),
           location: SourceLocation(
@@ -240,16 +240,14 @@ void main() {
             widget is RichText &&
             widget.text
                 .toPlainText()
-                .contains('testCodeRef (package:/test/script.dart:0)')),
+                .contains('testCodeRef() (script.dart:0)')),
         findsOneWidget,
       );
       // Stack frame 1
       expect(
         find.byWidgetPredicate((Widget widget) =>
             widget is RichText &&
-            widget.text
-                .toPlainText()
-                .contains('<none> (package:/test/script1.dart:1)')),
+            widget.text.toPlainText().contains('<none> (script1.dart:1)')),
         findsOneWidget,
       );
       // Stack frame 2
@@ -258,15 +256,16 @@ void main() {
             widget is RichText &&
             widget.text
                 .toPlainText()
-                .contains('testCodeRef2 (package:/test/script2.dart:2)')),
+                .contains('testCodeRef2() (script2.dart:2)')),
         findsOneWidget,
       );
       // Stack frame 3
       expect(
         find.byWidgetPredicate((Widget widget) =>
             widget is RichText &&
-            widget.text.toPlainText().contains(
-                '<closure> testCodeRef3 (package:/test/script3.dart:3)')),
+            widget.text
+                .toPlainText()
+                .contains('testCodeRef3.<closure>() (script3.dart:3)')),
         findsOneWidget,
       );
       // Stack frame 4
@@ -275,7 +274,7 @@ void main() {
             widget is RichText &&
             widget.text
                 .toPlainText()
-                .contains('<async break> (package:/test/script4.dart:4)')),
+                .contains('<async break> (script4.dart:4)')),
         findsOneWidget,
       );
     });

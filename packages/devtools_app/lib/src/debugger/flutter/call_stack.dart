@@ -111,7 +111,7 @@ class _CallStackState extends State<CallStack> {
       name = name.substring(unoptimized.length);
     }
     name = name.replaceAll(anonymousClosure, closure);
-    name = '$name()';
+    name = name == none ? name : '$name()';
 
     if (frame.frame.kind == FrameKind.kAsyncSuspensionMarker) {
       name = asyncBreak;
