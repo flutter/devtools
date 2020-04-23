@@ -125,13 +125,15 @@ class ScriptPickerState extends State<ScriptPicker> {
     } else if (ref is ClassRef) {
       text = ref.name;
       icon = classIcon;
+    } else {
+      assert(false, 'unexpected object reference: ${ref.type}');
     }
 
     return Material(
       child: InkWell(
         onTap: () => _handleSelected(ref),
         child: Container(
-          padding: const EdgeInsets.all(4.0),
+          padding: const EdgeInsets.all(densePadding),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -159,15 +161,14 @@ class ScriptPickerState extends State<ScriptPicker> {
   void _updateFiltered() {
     final filterText = _filterController.text.trim().toLowerCase();
 
-    _items = [];
-    _items.addAll(widget.scripts);
-    _items.addAll(widget.classes);
+    _items = [...widget.scripts, ...widget.classes];
 
-    _filteredItems = [];
-    _filteredItems.addAll(widget.scripts
-        .where((ref) => ref.uri.toLowerCase().contains(filterText)));
-    _filteredItems.addAll(widget.classes
-        .where((ref) => ref.name.toLowerCase().contains(filterText)));
+    _filteredItems = [
+      ...widget.scripts
+          .where((ref) => ref.uri.toLowerCase().contains(filterText)),
+      ...widget.classes
+          .where((ref) => ref.name.toLowerCase().contains(filterText)),
+    ];
   }
 
   void _handleSelected(ObjRef ref) {
@@ -179,6 +180,8 @@ class ScriptPickerState extends State<ScriptPicker> {
         final Class clas = obj;
         widget.onSelected(clas.location.script);
       });
+    } else {
+      assert(false, 'unexpected object reference: ${ref.type}');
     }
   }
 }
