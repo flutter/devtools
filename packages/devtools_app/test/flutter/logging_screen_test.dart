@@ -4,7 +4,9 @@
 
 @TestOn('vm')
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/flutter/logging_screen.dart';
@@ -213,6 +215,47 @@ void main() {
         await tester.pumpAndSettle();
         expect(findJson, findsOneWidget);
       });
+
+      testWidgets('can process Ansi codes', (WidgetTester tester) async {
+        const index = 995;
+
+        await pumpLoggingScreen(tester);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(ValueKey(fakeLogData[995])));
+        await tester.pumpAndSettle();
+        
+        expect(
+          find.byWidgetPredicate((widget) => widget is RichText && widget.text.toPlainText() == 'Ansi color codes processed for log 995'),
+          findsNWidgets(2),
+          reason: 'Processed text without ansi codes should exist in logs and '
+              'details sections.',
+        );
+
+        find.byWidgetPredicate((widget) =>
+        widget is RichText &&
+            widget.text.toPlainText().contains('Ansi color codes')).evaluate().forEach((element) {
+          final richText = element.widget as RichText;
+          final textSpan = richText.text as TextSpan;
+          final secondSpan = textSpan.children[1] as TextSpan;
+          expect(
+            secondSpan.text,
+            'log 995',
+            reason: 'Text with ansi code should be in separate span',
+          );
+          expect(
+            secondSpan.style.backgroundColor.red,
+            215,
+          );
+          expect(
+            secondSpan.style.backgroundColor.green,
+            95,
+          );
+          expect(
+            secondSpan.style.backgroundColor.blue,
+            135,
+          );
+        });
+      });
     });
   });
 }
@@ -222,6 +265,7 @@ final fakeLogData = List<LogData>.generate(totalLogs, _generate);
 
 LogData _generate(int i) {
   String details = 'log event $i';
+  String kind = 'kind $i';
   String computedDetails;
   switch (i) {
     case 999:
@@ -233,14 +277,26 @@ LogData _generate(int i) {
     case 997:
       details = null;
       break;
+    case 995:
+      kind = 'stdout';
+      details = _ansiCodesOutput();
+      break;
     default:
       break;
   }
   final detailsComputer = computedDetails == null
       ? null
       : () => Future.delayed(const Duration(seconds: 1), () => computedDetails);
-  return LogData('kind $i', details, i, detailsComputer: detailsComputer);
+  return LogData(kind, details, i, detailsComputer: detailsComputer);
 }
 
 const nonJsonOutput = 'Non-json details for log number 998';
 const jsonOutput = '{\n"Details": "of log event 999",\n"logEvent": "999"\n}\n';
+
+String _ansiCodesOutput() {
+  final sb = StringBuffer();
+  sb.write('Ansi color codes processed for ');
+  final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
+  sb.write(pen('log 995'));
+  return sb.toString();
+}
