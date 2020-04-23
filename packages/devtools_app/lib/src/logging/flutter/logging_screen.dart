@@ -368,7 +368,7 @@ class _MessageColumn extends LogMessageColumn
       // TODO(helin24): Move this to logging controller when dart:html is removed.
       const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
 
-      final RichText richText = RichText(
+      return RichText(
         text: TextSpan(
           children: processAnsiTerminalCodes(
             // TODO(helin24): Recompute summary length considering ansi codes.
@@ -378,19 +378,6 @@ class _MessageColumn extends LogMessageColumn
           ),
         ),
         overflow: TextOverflow.ellipsis,
-      );
-
-      return Row(
-        children: <Widget>[
-          richText,
-          Flexible(
-            child: Container(
-              height: 12.0,
-              width: 0.0,
-              decoration: const BoxDecoration(color: color),
-            ),
-          ),
-        ],
       );
     } else {
       return null;
