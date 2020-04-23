@@ -15,6 +15,7 @@ import '../../utils.dart';
 import 'breakpoints.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
+import 'debugger_model.dart';
 
 // TODO(kenz): consider moving lines / pausedPositions calculations to the
 // controller.

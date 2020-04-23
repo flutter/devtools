@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/debugger/flutter/controls.dart';
 import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
+import 'package:devtools_app/src/debugger/flutter/debugger_model.dart';
 import 'package:devtools_app/src/debugger/flutter/debugger_screen.dart';
 import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
@@ -51,7 +52,11 @@ void main() {
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
       when(debuggerController.selectedBreakpoint)
           .thenReturn(ValueNotifier(null));
-      when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
+      when(debuggerController.callStack).thenReturn(ValueNotifier(null));
+      when(debuggerController.stackFramesWithLocation)
+          .thenReturn(ValueNotifier([]));
+      when(debuggerController.selectedStackFrame)
+          .thenReturn(ValueNotifier(null));
       when(debuggerController.stdio).thenReturn(ValueNotifier(['']));
       when(debuggerController.currentScript).thenReturn(ValueNotifier(null));
       when(debuggerController.exceptionPauseMode)
@@ -139,7 +144,7 @@ void main() {
       when(debuggerController.scriptList)
           .thenReturn(ValueNotifier(ScriptList(scripts: [])));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
-      when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
+      when(debuggerController.callStack).thenReturn(ValueNotifier(null));
       when(debuggerController.stdio).thenReturn(ValueNotifier([]));
       when(debuggerController.currentScript).thenReturn(ValueNotifier(null));
 
@@ -152,6 +157,124 @@ void main() {
         find.byWidgetPredicate((Widget widget) =>
             widget is RichText &&
             widget.text.toPlainText().contains('script.dart:10')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgetsWithWindowSize(
+        'call stack show items', const Size(1000.0, 4000.0),
+        (WidgetTester tester) async {
+      final stackFrames = [
+        Frame(
+          index: 0,
+          code: CodeRef(name: 'testCodeRef', kind: CodeKind.kDart),
+          location: SourceLocation(
+            script: ScriptRef(uri: 'package:/test/script.dart'),
+            tokenPos: 10,
+          ),
+          kind: FrameKind.kRegular,
+        ),
+        Frame(
+          index: 1,
+          location: SourceLocation(
+            script: ScriptRef(uri: 'package:/test/script1.dart'),
+            tokenPos: 10,
+          ),
+          kind: FrameKind.kRegular,
+        ),
+        Frame(
+          index: 2,
+          code: CodeRef(
+            name: '[Unoptimized] testCodeRef2',
+            kind: CodeKind.kDart,
+          ),
+          location: SourceLocation(
+            script: ScriptRef(uri: 'package:/test/script2.dart'),
+            tokenPos: 10,
+          ),
+          kind: FrameKind.kRegular,
+        ),
+        Frame(
+          index: 3,
+          code: CodeRef(
+            name: 'testCodeRef3.<anonymous closure>',
+            kind: CodeKind.kDart,
+          ),
+          location: SourceLocation(
+            script: ScriptRef(uri: 'package:/test/script3.dart'),
+            tokenPos: 10,
+          ),
+          kind: FrameKind.kRegular,
+        ),
+        Frame(
+          index: 4,
+          location: SourceLocation(
+            script: ScriptRef(uri: 'package:/test/script4.dart'),
+            tokenPos: 10,
+          ),
+          kind: FrameKind.kAsyncSuspensionMarker,
+        ),
+      ];
+
+      final stackFramesWithLocation =
+          stackFrames.map<StackFrameAndSourcePosition>((frame) {
+        return StackFrameAndSourcePosition.create(
+          frame,
+          SourcePosition(
+            line: stackFrames.indexOf(frame),
+            column: 10,
+          ),
+        );
+      }).toList();
+
+      when(debuggerController.stackFramesWithLocation)
+          .thenReturn(ValueNotifier(stackFramesWithLocation));
+      when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
+      await pumpDebuggerScreen(tester, debuggerController);
+
+      expect(find.text('Call Stack'), findsOneWidget);
+
+      // Stack frame 0
+      expect(
+        find.byWidgetPredicate((Widget widget) =>
+            widget is RichText &&
+            widget.text
+                .toPlainText()
+                .contains('testCodeRef() (script.dart:0)')),
+        findsOneWidget,
+      );
+      // Stack frame 1
+      expect(
+        find.byWidgetPredicate((Widget widget) =>
+            widget is RichText &&
+            widget.text.toPlainText().contains('<none> (script1.dart:1)')),
+        findsOneWidget,
+      );
+      // Stack frame 2
+      expect(
+        find.byWidgetPredicate((Widget widget) =>
+            widget is RichText &&
+            widget.text
+                .toPlainText()
+                .contains('testCodeRef2() (script2.dart:2)')),
+        findsOneWidget,
+      );
+      // Stack frame 3
+      expect(
+        find.byWidgetPredicate((Widget widget) =>
+            widget is RichText &&
+            widget.text
+                .toPlainText()
+                .contains('testCodeRef3.<closure>() (script3.dart:3)')),
+        findsOneWidget,
+      );
+      // Stack frame 4
+      expect(
+        find.byWidgetPredicate((Widget widget) =>
+            widget is RichText &&
+            widget.text
+                .toPlainText()
+                .contains('<async break> (script4.dart:4)')),
         findsOneWidget,
       );
     });

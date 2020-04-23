@@ -10,6 +10,7 @@ import '../../flutter/theme.dart';
 import '../../utils.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
+import 'debugger_model.dart';
 
 const executableLineRadius = 1.5;
 const breakpointRadius = 6.0;
@@ -44,9 +45,8 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
             return ListView.builder(
               itemCount: breakpoints.length,
               itemExtent: defaultListItemHeight,
-              itemBuilder: (context, index) {
+              itemBuilder: (_, index) {
                 return buildBreakpoint(
-                  context,
                   breakpoints[index],
                   selectedBreakpoint,
                 );
@@ -59,7 +59,6 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
   }
 
   Widget buildBreakpoint(
-    BuildContext context,
     BreakpointAndSourcePosition bp,
     BreakpointAndSourcePosition selectedBreakpoint,
   ) {
@@ -117,6 +116,7 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
     controller.selectBreakpoint(bp);
 
     // TODO(devoncarew): Change the line selection in the code view as well.
+    // TODO(kenz): consider un-selecting the selected stack frame here.
     if (bp.script != null) {
       await controller.selectScript(bp.script);
     } else if (bp.scriptUri != null) {
