@@ -366,8 +366,6 @@ class _MessageColumn extends LogMessageColumn
       );
     } else if (data.kind == 'stdout') {
       // TODO(helin24): Move this to logging controller when dart:html is removed.
-      const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
-
       return RichText(
         text: TextSpan(
           children: processAnsiTerminalCodes(
