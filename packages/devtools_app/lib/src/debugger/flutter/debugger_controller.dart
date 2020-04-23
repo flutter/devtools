@@ -53,17 +53,15 @@ class DebuggerController extends DisposableController
 
   ValueListenable<Stack> get currentStack => _currentStack;
 
-  final _scriptList = ValueNotifier<ScriptList>(null);
-
-  /// Return the [ScriptList] active in the current isolate.
-  ///
-  /// See also [sortedScripts].
-  ValueListenable<ScriptList> get scriptList => _scriptList;
-
   final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
 
   /// Return the sorted list of ScriptRefs active in the current isolate.
   ValueListenable<List<ScriptRef>> get sortedScripts => _sortedScripts;
+
+  final _sortedClasses = ValueNotifier<List<ClassRef>>([]);
+
+  /// Return the sorted list of ClassRefs active in the current isolate.
+  ValueListenable<List<ClassRef>> get sortedClasses => _sortedClasses;
 
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
@@ -313,11 +311,11 @@ class DebuggerController extends DisposableController
     _reportedException = null;
   }
 
-  /// Get the populated [Instance] object, given an [InstanceRef].
+  /// Get the populated [Obj] object, given an [ObjRef].
   ///
-  /// The return value can be one of [Instance] or [Sentinel].
-  Future<Object> getInstance(InstanceRef instanceRef) {
-    return _service.getObject(isolateRef.id, instanceRef.id);
+  /// The return value can be one of [Obj] or [Sentinel].
+  Future<Obj> getObject(ObjRef objRef) {
+    return _service.getObject(isolateRef.id, objRef.id);
   }
 
   Future<Script> getScript(ScriptRef scriptRef) async {
@@ -341,11 +339,11 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    _scriptList.value = await _service.getScripts(isolateRef.id);
+    final scriptList = await _service.getScripts(isolateRef.id);
 
     // TODO(devoncarew): Follow up to see why we need to filter out non-unique
     // items here.
-    final scriptRefs = Set.of(_scriptList.value.scripts).toList();
+    final scriptRefs = Set.of(scriptList.scripts).toList();
     scriptRefs.sort((a, b) {
       // We sort uppercase so that items like dart:foo sort before items like
       // dart:_foo.
@@ -353,14 +351,38 @@ class DebuggerController extends DisposableController
     });
     _sortedScripts.value = scriptRefs;
 
+    // TODO(devoncarew): Switch to calling the typed method once it's in the VM
+    // service protocol library.
+    // ignore: unawaited_futures
+    _service
+        .callMethod('getClassList', isolateId: isolateRef.id)
+        .then((Response response) {
+      final List classes = response.json['classes'];
+      final List<ClassRef> classRefs = classes
+          .map((json) => ClassRef.parse(json))
+          .cast<ClassRef>()
+          .where((c) => c.name != null && c.name.isNotEmpty)
+          .toList();
+
+      classRefs.sort((ClassRef a, ClassRef b) {
+        // We sort uppercase so that items like Foo sort before items like _Foo.
+        return a.name.toUpperCase().compareTo(b.name.toUpperCase());
+      });
+
+      _sortedClasses.value = classRefs;
+    }).catchError((e) {
+      // Fail gracefully - not all clients support getClassList().
+    });
+
     for (var scriptRef in scriptRefs) {
       _uriToScriptMap[scriptRef.uri] = scriptRef;
     }
 
     // Update the selected script.
-    final mainScriptRef = _scriptList.value.scripts.firstWhere((ref) {
+    final mainScriptRef = scriptRefs.firstWhere((ref) {
       return ref.uri == isolate.rootLib.uri;
     }, orElse: () => null);
+
     await selectScript(mainScriptRef);
   }
 

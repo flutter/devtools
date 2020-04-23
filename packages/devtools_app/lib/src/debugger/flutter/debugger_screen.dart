@@ -85,10 +85,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     });
 
     addAutoDisposeListener(controller.currentStack);
-    addAutoDisposeListener(controller.sortedScripts);
     addAutoDisposeListener(controller.breakpointsWithLocation);
   }
 
+  // TODO(devoncarew): Support a SourceLocation as well.
   Future<void> _onScriptSelected(ScriptRef ref) async {
     if (ref == null) return;
 
@@ -117,8 +117,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         // ignore errors setting breakpoints
       }
     }
-    // The controller's breakpoints value listener will update us at this point
-    // to rebuild.
   }
 
   @override
@@ -143,10 +141,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       ),
     );
 
-    final codeArea = ValueListenableBuilder(
-      valueListenable: controller.librariesVisible,
-      builder: (context, visible, _) {
-        if (visible) {
+    final codeArea = AnimatedBuilder(
+      animation: Listenable.merge([
+        controller.librariesVisible,
+        controller.sortedScripts,
+        controller.sortedClasses,
+      ]),
+      builder: (_, __) {
+        if (controller.librariesVisible.value) {
           // TODO(devoncarew): Animate this opening and closing.
           return Split(
             axis: Axis.horizontal,
@@ -156,7 +158,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               ScriptPicker(
                 controller: controller,
                 scripts: controller.sortedScripts.value,
-                selected: script,
+                classes: controller.sortedClasses.value,
                 onSelected: _onScriptSelected,
               ),
             ],

@@ -11,20 +11,23 @@ import '../../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_screen.dart';
 
-/// Picker that takes a [ScriptList] and allows selection of one of the scripts
-/// inside.
+const libraryIcon = Icons.insert_chart;
+const classIcon = Icons.album;
+
+/// Picker that takes a list of scripts and classes and allows filtering and
+/// selection of items.
 class ScriptPicker extends StatefulWidget {
   const ScriptPicker({
     Key key,
     @required this.controller,
     @required this.scripts,
-    @required this.selected,
+    @required this.classes,
     @required this.onSelected,
   }) : super(key: key);
 
   final DebuggerController controller;
   final List<ScriptRef> scripts;
-  final ScriptRef selected;
+  final List<ClassRef> classes;
   final void Function(ScriptRef scriptRef) onSelected;
 
   @override
@@ -32,8 +35,11 @@ class ScriptPicker extends StatefulWidget {
 }
 
 class ScriptPickerState extends State<ScriptPicker> {
+  // TODO(devoncarew): How to retain the filter text state?
   final _filterController = TextEditingController();
-  List<ScriptRef> _filteredScripts = [];
+
+  List<ObjRef> _items = [];
+  List<ObjRef> _filteredItems = [];
 
   @override
   void initState() {
@@ -62,11 +68,11 @@ class ScriptPickerState extends State<ScriptPicker> {
         children: [
           debuggerPaneHeader(
             context,
-            'Libraries',
+            'Libraries and Classes',
             needsTopBorder: false,
-            rightChild: ScriptCountBadge(
-              filteredScripts: _filteredScripts,
-              scripts: widget.controller.sortedScripts.value,
+            rightChild: CountBadge(
+              filteredItems: _filteredItems,
+              items: _items,
             ),
           ),
           Container(
@@ -98,10 +104,10 @@ class ScriptPickerState extends State<ScriptPicker> {
           if (!_isLoading)
             Expanded(
               child: ListView.builder(
-                itemCount: _filteredScripts.length,
+                itemCount: _filteredItems.length,
                 itemExtent: defaultListItemHeight,
                 itemBuilder: (context, index) =>
-                    _buildScript(_filteredScripts[index]),
+                    _buildItemWidget(_filteredItems[index]),
               ),
             ),
         ],
@@ -109,23 +115,39 @@ class ScriptPickerState extends State<ScriptPicker> {
     );
   }
 
-  Widget _buildScript(ScriptRef ref) {
+  Widget _buildItemWidget(ObjRef ref) {
+    String text;
+    IconData icon;
+
+    if (ref is ScriptRef) {
+      text = ref.uri;
+      icon = libraryIcon;
+    } else if (ref is ClassRef) {
+      text = ref.name;
+      icon = classIcon;
+    }
+
     return Material(
-      color: ref.id == widget.selected?.id
-          ? Theme.of(context).selectedRowColor
-          : null,
       child: InkWell(
-        onTap: () => widget.onSelected(ref),
+        onTap: () => _handleSelected(ref),
         child: Container(
           padding: const EdgeInsets.all(4.0),
-          alignment: Alignment.centerLeft,
-          child: Text(
-            ref.uri,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: ref.id == widget.selected?.id
-                ? TextStyle(color: Theme.of(context).textSelectionColor)
-                : null,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: defaultIconSize,
+              ),
+              const SizedBox(width: densePadding),
+              Expanded(
+                child: Text(
+                  text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -136,28 +158,47 @@ class ScriptPickerState extends State<ScriptPicker> {
 
   void _updateFiltered() {
     final filterText = _filterController.text.trim().toLowerCase();
-    _filteredScripts = widget.scripts
-        .where((ref) => ref.uri.toLowerCase().contains(filterText))
-        .toList();
+
+    _items = [];
+    _items.addAll(widget.scripts);
+    _items.addAll(widget.classes);
+
+    _filteredItems = [];
+    _filteredItems.addAll(widget.scripts
+        .where((ref) => ref.uri.toLowerCase().contains(filterText)));
+    _filteredItems.addAll(widget.classes
+        .where((ref) => ref.name.toLowerCase().contains(filterText)));
+  }
+
+  void _handleSelected(ObjRef ref) {
+    if (ref is ScriptRef) {
+      widget.onSelected(ref);
+    } else if (ref is ClassRef) {
+      widget.controller.getObject(ref).then((Obj obj) {
+        // TODO(devoncarew): Pass along the SourceLocation information.
+        final Class clas = obj;
+        widget.onSelected(clas.location.script);
+      });
+    }
   }
 }
 
-class ScriptCountBadge extends StatelessWidget {
-  const ScriptCountBadge({
-    @required this.filteredScripts,
-    @required this.scripts,
+class CountBadge extends StatelessWidget {
+  const CountBadge({
+    @required this.filteredItems,
+    @required this.items,
   });
 
-  final List<ScriptRef> filteredScripts;
-  final List<ScriptRef> scripts;
+  final List<ObjRef> filteredItems;
+  final List<ObjRef> items;
 
   @override
   Widget build(BuildContext context) {
-    if (filteredScripts.length == scripts.length) {
-      return Badge('${nf.format(scripts.length)}');
+    if (filteredItems.length == items.length) {
+      return Badge('${nf.format(items.length)}');
     } else {
-      return Badge('${nf.format(filteredScripts.length)} of '
-          '${nf.format(scripts.length)}');
+      return Badge('${nf.format(filteredItems.length)} of '
+          '${nf.format(items.length)}');
     }
   }
 }

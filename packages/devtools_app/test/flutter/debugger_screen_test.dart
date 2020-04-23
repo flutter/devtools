@@ -46,9 +46,8 @@ void main() {
           .thenReturn(ValueNotifier([]));
       when(debuggerController.librariesVisible)
           .thenReturn(ValueNotifier(false));
-      when(debuggerController.scriptList)
-          .thenReturn(ValueNotifier(ScriptList(scripts: [])));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
+      when(debuggerController.sortedClasses).thenReturn(ValueNotifier([]));
       when(debuggerController.selectedBreakpoint)
           .thenReturn(ValueNotifier(null));
       when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
@@ -85,31 +84,30 @@ void main() {
     testWidgets('Libraries hidden', (WidgetTester tester) async {
       final scripts = [ScriptRef(uri: 'package:/test/script.dart')];
 
-      when(debuggerController.scriptList)
-          .thenReturn(ValueNotifier(ScriptList(scripts: scripts)));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
 
       // Libraries view is hidden
       when(debuggerController.librariesVisible)
           .thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Libraries'), findsNothing);
+      expect(find.text('Libraries and Classes'), findsNothing);
     });
 
     testWidgets('Libraries visible', (WidgetTester tester) async {
       final scripts = [ScriptRef(uri: 'package:/test/script.dart')];
+      final classes = [ClassRef(name: 'Foo')];
 
-      when(debuggerController.scriptList)
-          .thenReturn(ValueNotifier(ScriptList(scripts: scripts)));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
+      when(debuggerController.sortedClasses).thenReturn(ValueNotifier(classes));
 
       // Libraries view is shown
       when(debuggerController.librariesVisible).thenReturn(ValueNotifier(true));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Libraries'), findsOneWidget);
+      expect(find.text('Libraries and Classes'), findsOneWidget);
 
-      // test for items in the libraries list
+      // test for items in the libraries and classes list
       expect(find.text(scripts.first.uri), findsOneWidget);
+      expect(find.text(classes.first.name), findsOneWidget);
     });
 
     testWidgets('Breakpoints show items', (WidgetTester tester) async {
@@ -136,8 +134,6 @@ void main() {
       when(debuggerController.breakpointsWithLocation)
           .thenReturn(ValueNotifier(breakpointsWithLocation));
 
-      when(debuggerController.scriptList)
-          .thenReturn(ValueNotifier(ScriptList(scripts: [])));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
       when(debuggerController.currentStack).thenReturn(ValueNotifier(null));
       when(debuggerController.stdio).thenReturn(ValueNotifier([]));
