@@ -11,14 +11,22 @@ import 'http.dart';
 class HttpRequests {
   HttpRequests({
     this.requests = const [],
+    this.invalidRequests = const [],
     this.outstandingRequests = const {},
   })  : assert(requests != null),
+        assert(invalidRequests != null),
         assert(outstandingRequests != null);
 
   /// A list of HTTP requests.
   ///
   /// Individual requests in this list can be either completed or in-progress.
   List<HttpRequestData> requests;
+
+  /// A list of invalid HTTP requests received.
+  ///
+  /// These are requests that have completed but do not contain all the required
+  /// information to display normally in the UI.
+  List<HttpRequestData> invalidRequests;
 
   /// A mapping of timeline IDs to instances of HttpRequestData which are
   /// currently in-progress.
@@ -112,7 +120,7 @@ class HttpRequestData {
 
   /// The duration of the HTTP request, in milliseconds.
   Duration get duration {
-    if (_endEvent == null) {
+    if (_endEvent == null || _startEvent == null) {
       return null;
     }
     // Timestamps are in microseconds
@@ -121,6 +129,16 @@ class HttpRequestData {
       ..end = Duration(microseconds: _endEvent.timestampMicros);
     return range.duration;
   }
+
+  /// Whether the request is safe to display in the UI.
+  ///
+  /// It is possible to get invalid events if we receive an endEvent but no
+  /// matching start event due when we started tracking network traffic. These
+  /// invalid requests will never complete so it wouldn't make sense to work
+  /// around the issue by displaying them as "in-progress". It would be
+  /// reasonable to display them as "unknown start time" but that seems like
+  /// more complexity than it is worth.
+  bool get isValid => _startEvent != null;
 
   /// True if either the request or response contained cookies.
   bool get hasCookies =>

@@ -15,20 +15,26 @@ import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../support/mocks.dart';
 import '../support/utils.dart';
 import 'wrappers.dart';
 
+NetworkController networkController = NetworkController();
+
 Future<NetworkController> pumpNetworkScreen(
   WidgetTester tester, {
   NetworkController networkController,
 }) async {
-  await tester.pumpWidget(wrap(const NetworkScreenBody()));
+  await tester.pumpWidget(wrapWithControllers(
+    const NetworkScreenBody(),
+    network: networkController,
+  ));
   final finder = find.byType(NetworkScreenBody);
   expect(finder, findsOneWidget);
-  return tester.state<NetworkScreenBodyState>(finder).networkController;
+  return Provider.of<NetworkController>(finder.evaluate().first);
 }
 
 /// Clears the timeouts created when calling getHttpTimelineLogging and
@@ -37,7 +43,6 @@ Future<void> clearTimeouts(WidgetTester tester) async =>
     await tester.pumpAndSettle(const Duration(seconds: 5));
 
 void main() {
-  NetworkController controller;
   FakeServiceManager fakeServiceManager;
   Timeline timeline;
 
@@ -55,8 +60,9 @@ void main() {
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(
+      await tester.pumpWidget(wrapWithControllers(
         Builder(builder: const NetworkScreen().buildTab),
+        network: NetworkController(),
       ));
       expect(find.text('Network'), findsOneWidget);
     });
@@ -64,7 +70,7 @@ void main() {
     testWidgetsWithWindowSize('starts and stops', windowSize, (
       WidgetTester tester,
     ) async {
-      controller = await pumpNetworkScreen(tester);
+      final controller = await pumpNetworkScreen(tester);
 
       // Ensure we're not recording initially.
       expect(controller.isPolling, false);
@@ -118,7 +124,7 @@ void main() {
 
     testWidgetsWithWindowSize('builds proper content for state', windowSize,
         (WidgetTester tester) async {
-      controller = await pumpNetworkScreen(tester);
+      await pumpNetworkScreen(tester);
 
       await loadRequestsAndCheck(tester);
 

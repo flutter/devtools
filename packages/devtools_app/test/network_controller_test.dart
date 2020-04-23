@@ -91,8 +91,8 @@ void main() {
       expect(profile.requests.isEmpty, true);
       expect(profile.outstandingRequests.isEmpty, true);
 
-      // The number of requests recorded in the test data.
-      const numRequests = 70;
+      // The number of valid requests recorded in the test data.
+      const numRequests = 69;
 
       // Force a refresh of the HTTP requests. Ensure there's requests populated.
       await addListenerScope(

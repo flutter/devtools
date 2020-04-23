@@ -19,6 +19,7 @@ import '../logging/logging_controller.dart';
 import '../memory/flutter/memory_controller.dart';
 import '../memory/flutter/memory_screen.dart';
 import '../network/flutter/network_screen.dart';
+import '../network/network_controller.dart';
 import '../performance/flutter/performance_screen.dart';
 import '../performance/performance_controller.dart';
 import '../timeline/flutter/timeline_controller.dart';
@@ -34,9 +35,6 @@ import 'screen.dart';
 import 'snapshot_screen.dart';
 import 'theme.dart';
 import 'utils.dart';
-
-// TODO(bkonyi): remove this bool when page is ready.
-const showNetworkPage = false;
 
 const homeRoute = '/';
 const connectRoute = '/connect';
@@ -451,8 +449,10 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
         const DebuggerScreen(),
         createController: () => DebuggerController(),
       ),
-      if (showNetworkPage)
-        const DevToolsScreen(NetworkScreen(), createController: null),
+      DevToolsScreen<NetworkController>(
+        const NetworkScreen(),
+        createController: () => NetworkController(),
+      ),
       DevToolsScreen<LoggingController>(
         const LoggingScreen(),
         createController: () => LoggingController(
