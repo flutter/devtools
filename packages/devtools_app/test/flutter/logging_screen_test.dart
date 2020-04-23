@@ -192,7 +192,8 @@ void main() {
         bool containsJson(Widget widget) {
           if (widget is! RichText) return false;
           final richText = widget as RichText;
-          return richText.text.toPlainText().contains('{') && richText.text.toPlainText().contains('}');
+          return richText.text.toPlainText().contains('{') &&
+              richText.text.toPlainText().contains('}');
         }
 
         final findJson = find.descendant(
@@ -223,17 +224,20 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(ValueKey(fakeLogData[995])));
         await tester.pumpAndSettle();
-        
+
+        final finder = find.byWidgetPredicate((widget) =>
+            widget is RichText &&
+            widget.text.toPlainText() ==
+                'Ansi color codes processed for log 995');
+
         expect(
-          find.byWidgetPredicate((widget) => widget is RichText && widget.text.toPlainText() == 'Ansi color codes processed for log 995'),
+          finder,
           findsNWidgets(2),
           reason: 'Processed text without ansi codes should exist in logs and '
               'details sections.',
         );
 
-        find.byWidgetPredicate((widget) =>
-        widget is RichText &&
-            widget.text.toPlainText().contains('Ansi color codes')).evaluate().forEach((element) {
+        finder.evaluate().forEach((element) {
           final richText = element.widget as RichText;
           final textSpan = richText.text as TextSpan;
           final secondSpan = textSpan.children[1] as TextSpan;
