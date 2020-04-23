@@ -82,8 +82,9 @@ void main() {
 
       expect(find.text('Console'), findsOneWidget);
 
-      // test for stdio output.
-      expect(find.text('test stdio'), findsOneWidget);
+      // test for stdio output
+      expect(find.byWidgetPredicate((widget) =>
+      widget is RichText && widget.text.toPlainText() == 'test stdio'), findsOneWidget);
     });
 
     testWidgets('Libraries hidden', (WidgetTester tester) async {
