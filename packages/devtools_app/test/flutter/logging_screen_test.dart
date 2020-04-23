@@ -142,7 +142,9 @@ void main() {
         await tester.tap(find.byKey(ValueKey(fakeLogData[996])));
         await tester.pumpAndSettle();
         expect(
-          find.byWidgetPredicate((widget) => widget is RichText && widget.text.toPlainText() == 'log event 996'),
+          find.byWidgetPredicate((widget) =>
+              widget is RichText &&
+              widget.text.toPlainText() == 'log event 996'),
           findsNWidgets(2),
           reason: 'The log details should be visible both in the table and the '
               'details section.',
@@ -166,7 +168,8 @@ void main() {
         await tester.tap(find.byKey(ValueKey(log)));
         await tester.pump();
         expect(
-          find.text(nonJsonOutput),
+          find.byWidgetPredicate((widget) =>
+              widget is RichText && widget.text.toPlainText() == nonJsonOutput),
           findsNothing,
           reason:
               "The details of the log haven't computed yet, so they shouldn't "
@@ -174,16 +177,20 @@ void main() {
         );
 
         await tester.pumpAndSettle();
-        expect(find.text(nonJsonOutput), findsOneWidget);
+        expect(
+            find.byWidgetPredicate((widget) =>
+                widget is RichText &&
+                widget.text.toPlainText() == nonJsonOutput),
+            findsOneWidget);
       });
 
       testWidgets('can show details of json log data',
           (WidgetTester tester) async {
         const index = 999;
         bool containsJson(Widget widget) {
-          if (widget is! Text) return false;
-          final text = widget as Text;
-          return text.data.contains('{') && text.data.contains('}');
+          if (widget is! RichText) return false;
+          final richText = widget as RichText;
+          return richText.text.toPlainText().contains('{') && richText.text.toPlainText().contains('}');
         }
 
         final findJson = find.descendant(
