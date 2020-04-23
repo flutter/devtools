@@ -61,6 +61,41 @@ class _CallStackState extends State<CallStack> {
     final subtleStyle = TextStyle(color: theme.unselectedWidgetColor);
     final selectedStyle = TextStyle(color: theme.textSelectionColor);
 
+    Widget child;
+
+    final asyncMarker = frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
+    if (asyncMarker) {
+      child = Row(
+        children: [
+          const SizedBox(width: defaultSpacing, child: Divider()),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: densePadding),
+            child: Text(
+              _descriptionFor(frame),
+              style: selected ? selectedStyle : subtleStyle,
+            ),
+          ),
+          const Expanded(child: Divider()),
+        ],
+      );
+    } else {
+      child = RichText(
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        text: TextSpan(
+          text: _descriptionFor(frame),
+          style: selected ? selectedStyle : regularStyle,
+          children: [
+            if (!asyncMarker)
+              TextSpan(
+                text: _locationFor(frame),
+                style: selected ? selectedStyle : subtleStyle,
+              ),
+          ],
+        ),
+      );
+    }
+
     return Material(
       color: selected ? theme.selectedRowColor : null,
       child: InkWell(
@@ -68,20 +103,7 @@ class _CallStackState extends State<CallStack> {
         child: Container(
           padding: const EdgeInsets.all(densePadding),
           alignment: Alignment.centerLeft,
-          child: RichText(
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            text: TextSpan(
-              text: _descriptionFor(frame),
-              style: selected ? selectedStyle : regularStyle,
-              children: [
-                TextSpan(
-                  text: _locationFor(frame),
-                  style: selected ? selectedStyle : subtleStyle,
-                ),
-              ],
-            ),
-          ),
+          child: child,
         ),
       ),
     );
@@ -106,21 +128,26 @@ class _CallStackState extends State<CallStack> {
     const anonymousClosure = '<anonymous closure>';
     const closure = '<closure>';
     const asyncBreak = '<async break>';
+
+    if (frame.frame.kind == FrameKind.kAsyncSuspensionMarker) {
+      return asyncBreak;
+    }
+
     var name = frame.frame.code?.name ?? none;
     if (name.startsWith(unoptimized)) {
       name = name.substring(unoptimized.length);
     }
     name = name.replaceAll(anonymousClosure, closure);
     name = name == none ? name : '$name()';
-
-    if (frame.frame.kind == FrameKind.kAsyncSuspensionMarker) {
-      name = asyncBreak;
-    }
     return name;
   }
 
   String _locationFor(StackFrameAndSourcePosition frame) {
-    final location = frame.scriptUri.split('/').last;
-    return ' ($location:${frame.line})';
+    final uri = frame.scriptUri;
+    if (uri == null) {
+      return uri;
+    }
+    final file = uri.split('/').last;
+    return ' $file:${frame.line}';
   }
 }

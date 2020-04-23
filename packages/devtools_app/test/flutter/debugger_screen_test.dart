@@ -220,7 +220,7 @@ void main() {
           stackFrames.map<StackFrameAndSourcePosition>((frame) {
         return StackFrameAndSourcePosition.create(
           frame,
-          SourcePosition(
+          position: SourcePosition(
             line: stackFrames.indexOf(frame),
             column: 10,
           ),

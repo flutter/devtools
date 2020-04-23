@@ -424,12 +424,14 @@ class DebuggerController extends DisposableController
 
   Future<StackFrameAndSourcePosition> _createStackFrameWithLocation(
     Frame frame,
-  ) {
-    final sf = StackFrameAndSourcePosition.create(frame);
-    return getScript(sf.script).then((Script script) {
-      final pos = calculatePosition(script, sf.tokenPos);
-      return StackFrameAndSourcePosition.create(frame, pos);
-    });
+  ) async {
+    if (frame.location == null) {
+      return StackFrameAndSourcePosition.create(frame);
+    }
+
+    final script = await getScript(frame.location.script);
+    final pos = calculatePosition(script, frame.location.tokenPos);
+    return StackFrameAndSourcePosition.create(frame, position: pos);
   }
 
   void selectBreakpoint(BreakpointAndSourcePosition bp) {
