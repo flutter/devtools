@@ -46,7 +46,8 @@ class VmServiceTrafficLogger {
       if (m['result'] != null) {
         details = m['result']['type'];
       } else {
-        details = m['error'] ?? '';
+        final Map error = m['error'];
+        details = error == null ? '' : '$error';
       }
     } else if (details == 'streamNotify') {
       details = '';
