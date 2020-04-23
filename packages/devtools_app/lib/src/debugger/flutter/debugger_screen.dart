@@ -55,6 +55,8 @@ class DebuggerScreen extends Screen {
 class DebuggerScreenBody extends StatefulWidget {
   const DebuggerScreenBody();
 
+  static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
+
   @override
   DebuggerScreenBodyState createState() => DebuggerScreenBodyState();
 }
@@ -132,6 +134,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               text: script == null ? ' ' : '${script.uri}'),
           Expanded(
             child: CodeView(
+              key: DebuggerScreenBody.codeViewKey,
               script: script,
               stack: controller.callStack.value,
               controller: controller,

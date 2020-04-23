@@ -69,9 +69,6 @@ class _CodeViewState extends State<CodeView> {
 
     if (widget.script != oldWidget.script) {
       _updateLines();
-    }
-
-    if (widget.stack != oldWidget.stack) {
       _updatePausedPositions();
     }
   }
@@ -85,31 +82,27 @@ class _CodeViewState extends State<CodeView> {
   }
 
   void _updateLines() {
-    setState(() {
-      lines = widget.script?.source?.split('\n') ?? [];
+    lines = widget.script?.source?.split('\n') ?? [];
 
-      executableLines = {};
+    executableLines = {};
 
-      // TODO(devoncarew): Improve this with SourceReportRange.possibleBreakpoints.
-      // (see getSourceReport('PossibleBreakpoints').
-      // Recalculate the executable lines.
-      if (widget.script?.tokenPosTable != null) {
-        for (var encodedInfo in widget.script.tokenPosTable) {
-          executableLines.add(encodedInfo[0]);
-        }
+    // TODO(devoncarew): Improve this with SourceReportRange.possibleBreakpoints.
+    // (see getSourceReport('PossibleBreakpoints').
+    // Recalculate the executable lines.
+    if (widget.script?.tokenPosTable != null) {
+      for (var encodedInfo in widget.script.tokenPosTable) {
+        executableLines.add(encodedInfo[0]);
       }
-    });
+    }
   }
 
   void _updatePausedPositions() {
-    setState(() {
-      final framesInScript = (widget.stack?.frames ?? [])
-          .where((frame) => frame.location.script.id == widget.script?.id);
-      pausedPositions = [
-        for (var frame in framesInScript)
-          widget.controller.lineNumber(widget.script, frame.location)
-      ];
-    });
+    final framesInScript = (widget.stack?.frames ?? [])
+        .where((frame) => frame.location.script.id == widget.script?.id);
+    pausedPositions = [
+      for (var frame in framesInScript)
+        widget.controller.lineNumber(widget.script, frame.location)
+    ];
 
     if (pausedPositions.isNotEmpty) {
       final position = verticalController.position;
