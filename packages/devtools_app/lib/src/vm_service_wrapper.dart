@@ -373,6 +373,13 @@ class VmServiceWrapper implements VmService {
     return _trackFuture('getScripts', _vmService.getScripts(isolateId));
   }
 
+  // TODO(devoncarew): Switch to calling the typed method once it's in the VM
+  // service protocol library.
+  Future<Response> getClassList(String isolateId) {
+    // This returns a list of ClassRef in a 'classes' field.
+    return callMethod('getClassList', isolateId: isolateId);
+  }
+
   @override
   Future<SourceReport> getSourceReport(
     String isolateId,

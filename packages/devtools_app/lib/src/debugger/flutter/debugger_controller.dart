@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
 import '../../globals.dart';
+import '../../vm_service_wrapper.dart';
 import 'debugger_model.dart';
 
 // TODO(devoncarew): Add some delayed resume value notifiers (to be used to
@@ -369,11 +370,9 @@ class DebuggerController extends DisposableController
     });
     _sortedScripts.value = scriptRefs;
 
-    // TODO(devoncarew): Switch to calling the typed method once it's in the VM
-    // service protocol library.
     // ignore: unawaited_futures
-    _service
-        .callMethod('getClassList', isolateId: isolateRef.id)
+    (_service as VmServiceWrapper)
+        .getClassList(isolateRef.id)
         .then((Response response) {
       final List classes = response.json['classes'];
       final List<ClassRef> classRefs = classes
