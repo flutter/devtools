@@ -1,3 +1,7 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
@@ -38,9 +42,7 @@ class _CallStackState extends State<CallStack> {
               itemExtent: defaultListItemHeight,
               itemBuilder: (_, index) {
                 final frame = stackFrames[index];
-                final selected =
-                    selectedFrame == null ? index == 0 : frame == selectedFrame;
-                return _buildStackFrame(frame, selected);
+                return _buildStackFrame(frame, frame == selectedFrame);
               },
             );
           },
@@ -74,7 +76,7 @@ class _CallStackState extends State<CallStack> {
               style: selected ? selectedStyle : regularStyle,
               children: [
                 TextSpan(
-                  text: ' (${frame.scriptUri}:${frame.line})',
+                  text: _locationFor(frame),
                   style: selected ? selectedStyle : subtleStyle,
                 ),
               ],
@@ -99,15 +101,26 @@ class _CallStackState extends State<CallStack> {
   }
 
   String _descriptionFor(StackFrameAndSourcePosition frame) {
-    var name = frame.frame.code?.name ?? '<none>';
-    if (name.startsWith('[Unoptimized] ')) {
-      name = name.substring('[Unoptimized] '.length);
+    const unoptimized = '[Unoptimized] ';
+    const none = '<none>';
+    const anonymousClosure = '<anonymous closure>';
+    const closure = '<closure>';
+    const asyncBreak = '<async break>';
+    var name = frame.frame.code?.name ?? none;
+    if (name.startsWith(unoptimized)) {
+      name = name.substring(unoptimized.length);
     }
-    name = name.replaceAll('<anonymous closure>', '<closure>');
+    name = name.replaceAll(anonymousClosure, closure);
+    name = '$name()';
 
     if (frame.frame.kind == FrameKind.kAsyncSuspensionMarker) {
-      name = '<async break>';
+      name = asyncBreak;
     }
     return name;
+  }
+
+  String _locationFor(StackFrameAndSourcePosition frame) {
+    final location = frame.scriptUri.split('/').last;
+    return ' ($location:${frame.line})';
   }
 }

@@ -311,15 +311,17 @@ class DebuggerController extends DisposableController
     _callStack.value = pause ? await _service.getStack(isolateRef.id) : null;
 
     final frames = framesForCallStack();
-    // ignore: unawaited_futures
-    Future.wait(frames.map(_createStackFrameWithLocation)).then((list) {
+
+    await Future.wait(frames.map(_createStackFrameWithLocation)).then((list) {
       _stackFramesWithLocation.value = list.toList();
     });
 
-    if (frames.isNotEmpty) {
+    if (_stackFramesWithLocation.value.isNotEmpty) {
       // TODO(https://github.com/flutter/devtools/issues/1648): Allow choice of
       // the scripts on the stack.
-      _currentScript.value = await getScript(frames.first.location.script);
+      _currentScript.value =
+          await getScript(_stackFramesWithLocation.value.first.script);
+      _selectedStackFrame.value = _stackFramesWithLocation.value.first;
     }
   }
 
@@ -446,9 +448,9 @@ class DebuggerController extends DisposableController
 
     // Handle breaking-on-exceptions.
     if (_reportedException != null && frames.isNotEmpty) {
-      final Frame frame = frames.first;
+      final frame = frames.first;
 
-      final Frame newFrame = Frame(
+      final newFrame = Frame(
         index: frame.index,
         function: frame.function,
         code: frame.code,
@@ -456,18 +458,18 @@ class DebuggerController extends DisposableController
         kind: frame.kind,
       );
 
-      final List<BoundVariable> newVars = <BoundVariable>[];
-      newVars.add(BoundVariable(
-        name: '<exception>',
-        value: _reportedException,
-        scopeStartTokenPos: null,
-        scopeEndTokenPos: null,
-        declarationTokenPos: null,
-      ));
-      newVars.addAll(frame.vars ?? []);
-      newFrame.vars = newVars;
+      newFrame.vars = [
+        BoundVariable(
+          name: '<exception>',
+          value: _reportedException,
+          scopeStartTokenPos: null,
+          scopeEndTokenPos: null,
+          declarationTokenPos: null,
+        ),
+        ...frame.vars ?? []
+      ];
 
-      frames = <Frame>[newFrame]..addAll(frames.sublist(1));
+      frames = [newFrame, ...frames.sublist(1)];
     }
     return frames;
   }
