@@ -15,26 +15,21 @@ import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../support/mocks.dart';
 import '../support/utils.dart';
 import 'wrappers.dart';
 
-NetworkController networkController = NetworkController();
+NetworkController controller = NetworkController();
 
-Future<NetworkController> pumpNetworkScreen(
-  WidgetTester tester, {
-  NetworkController networkController,
-}) async {
+Future<void> pumpNetworkScreen(WidgetTester tester) async {
   await tester.pumpWidget(wrapWithControllers(
     const NetworkScreenBody(),
-    network: networkController,
+    network: controller,
   ));
   final finder = find.byType(NetworkScreenBody);
   expect(finder, findsOneWidget);
-  return Provider.of<NetworkController>(finder.evaluate().first);
 }
 
 /// Clears the timeouts created when calling getHttpTimelineLogging and
@@ -70,7 +65,8 @@ void main() {
     testWidgetsWithWindowSize('starts and stops', windowSize, (
       WidgetTester tester,
     ) async {
-      final controller = await pumpNetworkScreen(tester);
+      controller = NetworkController();
+      await pumpNetworkScreen(tester);
 
       // Ensure we're not recording initially.
       expect(controller.isPolling, false);
@@ -124,6 +120,7 @@ void main() {
 
     testWidgetsWithWindowSize('builds proper content for state', windowSize,
         (WidgetTester tester) async {
+      controller = NetworkController();
       await pumpNetworkScreen(tester);
 
       await loadRequestsAndCheck(tester);
@@ -281,6 +278,7 @@ void main() {
     testWidgetsWithWindowSize('clear results', windowSize,
         (WidgetTester tester) async {
       // Load the network profiler screen.
+      controller = NetworkController();
       await pumpNetworkScreen(tester);
 
       // Populate the screen with requests.

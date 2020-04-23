@@ -38,9 +38,15 @@ class NetworkController {
   int _timelineMicrosOffset;
   int lastProfileRefreshMicros = 0;
 
+  // The number of active clients helps us track whether we should be polling
+  // or not.
+  int _countActiveClients = 0;
   Timer _pollingTimer;
 
   bool _startRecordingInProgress = false;
+
+  // TODO(jacobr): clear this flag on hot restart.
+  bool _recordingStateInitializedForIsolates = false;
 
   @visibleForTesting
   bool get isPolling => _pollingTimer != null;
@@ -135,25 +141,22 @@ class NetworkController {
 
   Future<void> _toggleHttpTimelineRecording(bool state) async {
     await HttpService.toggleHttpRequestLogging(state);
+    _httpRecordingNotifier.value = state;
 
-    if (_httpRecordingNotifier.value == state) {
-      return;
-    }
+    // Start polling once we've enabled logging.
+    updatePollingState();
+  }
 
-    if (state) {
-      // Start polling once we've enabled logging.
-      assert(_pollingTimer == null);
-      _pollingTimer = Timer.periodic(
+  void updatePollingState() {
+    if (_httpRecordingNotifier.value && _countActiveClients > 0) {
+      _pollingTimer ??= Timer.periodic(
         const Duration(milliseconds: 500),
         (_) => _networkService.refreshHttpRequests(),
       );
     } else {
-      // Stop polling once we've disabled logging.
-      assert(_pollingTimer != null);
-      _pollingTimer.cancel();
+      _pollingTimer?.cancel();
       _pollingTimer = null;
     }
-    _httpRecordingNotifier.value = state;
   }
 
   /// Enables HTTP request recording on all isolates and starts polling.
@@ -168,6 +171,7 @@ class NetworkController {
       // process of starting recording.
       return;
     }
+    _httpRecordingNotifier.value = true;
     _startRecordingInProgress = true;
     try {
       final timestamp = await _networkService.updateLastRefreshTime(
@@ -182,7 +186,7 @@ class NetworkController {
       // fewer flags risks breaking functionality on the timeline view that
       // assumes that all flags are set.
       await allowedError(serviceManager.service
-          .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']));
+          .setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
 
       await _toggleHttpTimelineRecording(true);
     } finally {
@@ -198,14 +202,18 @@ class NetworkController {
 
   /// Checks to see if HTTP requests are currently being output. If so, recording
   /// is automatically started upon initialization.
-  Future<void> initialize() async =>
+  Future<void> addClient() async {
+    _countActiveClients++;
+    if (!_recordingStateInitializedForIsolates) {
+      _recordingStateInitializedForIsolates = true;
       await _networkService.initializeRecordingState();
+    }
+    updatePollingState();
+  }
 
-  void dispose() {
-    _pollingTimer?.cancel();
-    _pollingTimer = null;
-    _httpRecordingNotifier.dispose();
-    _httpRequestsNotifier.dispose();
+  void removeClient() {
+    _countActiveClients--;
+    updatePollingState();
   }
 
   /// Clears the previously collected HTTP timeline events and resets the last

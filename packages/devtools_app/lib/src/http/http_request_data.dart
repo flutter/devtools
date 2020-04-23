@@ -87,7 +87,7 @@ class HttpRequestData {
       } else if (traceEvent.phase == TraceEvent.asyncInstantPhase) {
         instantEvents.add(traceEvent);
       } else {
-        assert(false, 'Unexpected event type');
+        assert(false, 'Unexpected event type: ${traceEvent.phase}');
       }
     }
     final data = HttpRequestData._(

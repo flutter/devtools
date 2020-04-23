@@ -58,8 +58,16 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
 
     final newController = Provider.of<NetworkController>(context);
     if (newController == _networkController) return;
+    _networkController?.removeClient();
+
     _networkController = newController;
-    _networkController.initialize();
+    _networkController.addClient();
+  }
+
+  @override
+  void dispose() {
+    _networkController?.removeClient();
+    super.dispose();
   }
 
   void _onSort(
