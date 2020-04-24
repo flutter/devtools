@@ -10,7 +10,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
 import '../../globals.dart';
-import '../../vm_service_wrapper.dart';
 import 'debugger_model.dart';
 
 // TODO(devoncarew): Add some delayed resume value notifiers (to be used to
@@ -370,26 +369,19 @@ class DebuggerController extends DisposableController
     });
     _sortedScripts.value = scriptRefs;
 
-    // ignore: unawaited_futures
-    (_service as VmServiceWrapper)
-        .getClassList(isolateRef.id)
-        .then((Response response) {
-      final List classes = response.json['classes'];
-      final List<ClassRef> classRefs = classes
-          .map((json) => ClassRef.parse(json))
-          .cast<ClassRef>()
+    try {
+      final classList = await _service.getClassList(isolateRef.id);
+      final classes = classList.classes
           .where((c) => c.name != null && c.name.isNotEmpty)
           .toList();
-
-      classRefs.sort((ClassRef a, ClassRef b) {
+      classes.sort((ClassRef a, ClassRef b) {
         // We sort uppercase so that items like Foo sort before items like _Foo.
         return a.name.toUpperCase().compareTo(b.name.toUpperCase());
       });
-
-      _sortedClasses.value = classRefs;
-    }).catchError((e) {
+      _sortedClasses.value = classes;
+    } catch (e) {
       // Fail gracefully - not all clients support getClassList().
-    });
+    }
 
     for (var scriptRef in scriptRefs) {
       _uriToScriptMap[scriptRef.uri] = scriptRef;
