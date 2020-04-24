@@ -98,7 +98,7 @@ const shortDuration = Duration(milliseconds: 50);
 ///
 /// Use this for thinks that would show a bit of animation, but that we want to
 /// effectively seem immediate to users.
-const rapidDuration = Duration(milliseconds: 50);
+const rapidDuration = Duration(milliseconds: 100);
 
 /// The default duration to use for animations.
 const defaultDuration = Duration(milliseconds: 200);

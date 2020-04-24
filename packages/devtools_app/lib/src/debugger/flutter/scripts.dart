@@ -9,6 +9,7 @@ import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
 import '../../utils.dart';
 import 'debugger_controller.dart';
+import 'debugger_model.dart';
 import 'debugger_screen.dart';
 
 const libraryIcon = Icons.insert_chart;
@@ -28,7 +29,7 @@ class ScriptPicker extends StatefulWidget {
   final DebuggerController controller;
   final List<ScriptRef> scripts;
   final List<ClassRef> classes;
-  final void Function(ScriptRef scriptRef) onSelected;
+  final void Function(ScriptLocation scriptRef) onSelected;
 
   @override
   ScriptPickerState createState() => ScriptPickerState();
@@ -171,15 +172,17 @@ class ScriptPickerState extends State<ScriptPicker> {
     ];
   }
 
-  void _handleSelected(ObjRef ref) {
+  void _handleSelected(ObjRef ref) async {
     if (ref is ScriptRef) {
-      widget.onSelected(ref);
+      widget.onSelected(ScriptLocation(ref));
     } else if (ref is ClassRef) {
-      widget.controller.getObject(ref).then((Obj obj) {
-        // TODO(devoncarew): Pass along the SourceLocation information.
-        final Class clas = obj;
-        widget.onSelected(clas.location.script);
-      });
+      final obj = await widget.controller.getObject(ref);
+      final location = (obj as Class).location;
+      final script = await widget.controller.getScript(location.script);
+      final pos =
+          widget.controller.calculatePosition(script, location.tokenPos);
+
+      widget.onSelected(ScriptLocation(script, location: pos));
     } else {
       assert(false, 'unexpected object reference: ${ref.type}');
     }

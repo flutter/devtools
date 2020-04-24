@@ -114,14 +114,6 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
 
   Future<void> _onBreakpointSelected(BreakpointAndSourcePosition bp) async {
     controller.selectBreakpoint(bp);
-
-    // TODO(devoncarew): Change the line selection in the code view as well.
-    // TODO(kenz): consider un-selecting the selected stack frame here.
-    if (bp.script != null) {
-      await controller.selectScript(bp.script);
-    } else if (bp.scriptUri != null) {
-      await controller.selectScript(controller.scriptRefForUri(bp.scriptUri));
-    }
   }
 
   String _descriptionFor(BreakpointAndSourcePosition breakpoint) {

@@ -44,16 +44,22 @@ class DebuggerController extends DisposableController
 
   Event get lastEvent => _lastEvent;
 
-  final _currentScript = ValueNotifier<Script>(null);
+  final _currentScriptRef = ValueNotifier<ScriptRef>(null);
 
-  ValueListenable<Script> get currentScript => _currentScript;
+  ValueListenable<ScriptRef> get currentScriptRef => _currentScriptRef;
+
+  final _scriptLocation = ValueNotifier<ScriptLocation>(null);
+
+  ValueListenable<ScriptLocation> get scriptLocation => _scriptLocation;
+
+  /// Jump to the given ScriptRef and optional SourcePosition.
+  void showScriptLocation(ScriptLocation scriptLocation) {
+    _currentScriptRef.value = scriptLocation?.scriptRef;
+    _scriptLocation.value = scriptLocation;
+  }
 
   // A cached map of uris to ScriptRefs.
   final Map<String, ScriptRef> _uriToScriptMap = {};
-
-  final _callStack = ValueNotifier<Stack>(null);
-
-  ValueListenable<Stack> get callStack => _callStack;
 
   final _stackFramesWithLocation =
       ValueNotifier<List<StackFrameAndSourcePosition>>([]);
@@ -307,20 +313,15 @@ class DebuggerController extends DisposableController
   Future<void> _pause(bool pause) async {
     _isPaused.value = pause;
 
-    _callStack.value = pause ? await _service.getStack(isolateRef.id) : null;
+    final stack = pause ? await _service.getStack(isolateRef.id) : null;
+    final frames = _framesForCallStack(stack);
 
-    final frames = framesForCallStack();
-
-    await Future.wait(frames.map(_createStackFrameWithLocation)).then((list) {
-      _stackFramesWithLocation.value = list.toList();
-    });
-
-    if (_stackFramesWithLocation.value.isNotEmpty) {
-      // TODO(https://github.com/flutter/devtools/issues/1648): Allow choice of
-      // the scripts on the stack.
-      _currentScript.value =
-          await getScript(_stackFramesWithLocation.value.first.script);
-      _selectedStackFrame.value = _stackFramesWithLocation.value.first;
+    _stackFramesWithLocation.value =
+        await Future.wait(frames.map(_createStackFrameWithLocation));
+    if (_stackFramesWithLocation.value.isEmpty) {
+      selectStackFrame(null);
+    } else {
+      selectStackFrame(_stackFramesWithLocation.value.first);
     }
   }
 
@@ -337,6 +338,24 @@ class DebuggerController extends DisposableController
     return _service.getObject(isolateRef.id, objRef.id);
   }
 
+  /// Return a cached [Script] for the given [ScriptRef], returning null
+  /// if there is no cahced [Script].
+  Script getScriptCached(ScriptRef scriptRef) {
+    // Check to see if this ScriptRef is really a Script.
+    if (scriptRef is Script) {
+      if (_scriptCache[scriptRef.id] == null) {
+        _scriptCache[scriptRef.id] = scriptRef;
+      }
+
+      return scriptRef;
+    }
+
+    return _scriptCache[scriptRef?.id];
+  }
+
+  /// Retrieve the [Script] for the given [ScritpRef].
+  /// 
+  /// This caches the script lookup for future invocations.
   Future<Script> getScript(ScriptRef scriptRef) async {
     if (!_scriptCache.containsKey(scriptRef.id)) {
       _scriptCache[scriptRef.id] =
@@ -348,13 +367,6 @@ class DebuggerController extends DisposableController
   /// Return the [ScriptRef] at the given [uri].
   ScriptRef scriptRefForUri(String uri) {
     return _uriToScriptMap[uri];
-  }
-
-  Future<void> selectScript(ScriptRef ref) async {
-    if (ref == null) return;
-
-    _currentScript.value =
-        await _service.getObject(isolateRef.id, ref.id) as Script;
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
@@ -400,7 +412,7 @@ class DebuggerController extends DisposableController
       return ref.uri == isolate.rootLib.uri;
     }, orElse: () => null);
 
-    await selectScript(mainScriptRef);
+    showScriptLocation(ScriptLocation(mainScriptRef));
   }
 
   SourcePosition calculatePosition(Script script, int tokenPos) {
@@ -416,25 +428,11 @@ class DebuggerController extends DisposableController
     );
   }
 
-  int lineNumber(Script script, dynamic location) {
-    if (script == null || location == null) {
-      return null;
-    }
-    if (location is UnresolvedSourceLocation && location.line != null) {
-      return location.line;
-    } else if (location is SourceLocation) {
-      return calculatePosition(script, location.tokenPos)?.line;
-    }
-    throw Exception(
-      '$location should be a $UnresolvedSourceLocation or a $SourceLocation',
-    );
-  }
-
   Future<BreakpointAndSourcePosition> _createBreakpointWithLocation(
       Breakpoint breakpoint) async {
     if (breakpoint.resolved) {
       final bp = BreakpointAndSourcePosition.create(breakpoint);
-      return getScript(bp.script).then((Script script) {
+      return getScript(bp.scriptRef).then((Script script) {
         final pos = calculatePosition(script, bp.tokenPos);
         return BreakpointAndSourcePosition.create(breakpoint, pos);
       });
@@ -457,17 +455,28 @@ class DebuggerController extends DisposableController
 
   void selectBreakpoint(BreakpointAndSourcePosition bp) {
     _selectedBreakpoint.value = bp;
+
+    if (bp.sourcePosition == null) {
+      showScriptLocation(ScriptLocation(bp.scriptRef));
+    } else {
+      showScriptLocation(
+          ScriptLocation(bp.scriptRef, location: bp.sourcePosition));
+    }
   }
 
   void selectStackFrame(StackFrameAndSourcePosition frame) {
     _selectedStackFrame.value = frame;
+
+    if (frame?.scriptRef != null) {
+      showScriptLocation(
+          ScriptLocation(frame.scriptRef, location: frame.sourcePosition));
+    }
   }
 
-  List<Frame> framesForCallStack() {
-    if (_callStack.value == null) return [];
+  List<Frame> _framesForCallStack(Stack stack) {
+    if (stack == null) return [];
 
-    List<Frame> frames =
-        _callStack.value.asyncCausalFrames ?? _callStack.value.frames;
+    List<Frame> frames = stack.asyncCausalFrames ?? stack.frames;
 
     // Handle breaking-on-exceptions.
     if (_reportedException != null && frames.isNotEmpty) {

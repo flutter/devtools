@@ -618,6 +618,10 @@ extension SortDirectionExtension on SortDirection {
 /// valid.
 const defaultEpsilon = 1 / 1000;
 
+bool equalsWithinEpsilon(double a, double b) {
+  return (a - b).abs() < defaultEpsilon;
+}
+
 /// Have a quiet period after a callback to ensure that rapid invocations of a
 /// callback only result in one call.
 class CallbackDwell {
