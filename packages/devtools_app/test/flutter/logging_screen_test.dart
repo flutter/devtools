@@ -218,8 +218,6 @@ void main() {
       });
 
       testWidgets('can process Ansi codes', (WidgetTester tester) async {
-        const index = 995;
-
         await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(ValueKey(fakeLogData[995])));
@@ -247,16 +245,8 @@ void main() {
             reason: 'Text with ansi code should be in separate span',
           );
           expect(
-            secondSpan.style.backgroundColor.red,
-            215,
-          );
-          expect(
-            secondSpan.style.backgroundColor.green,
-            95,
-          );
-          expect(
-            secondSpan.style.backgroundColor.blue,
-            135,
+            secondSpan.style.backgroundColor,
+            const Color.fromRGBO(215, 95, 135, 1),
           );
         });
       });

@@ -21,21 +21,22 @@ List<TextSpan> processAnsiTerminalCodes(String input, TextStyle defaultStyle) {
     return [];
   }
   return decodeAnsiColorEscapeCodes(input, AnsiUp())
-      .map((entry) => TextSpan(
-            text: entry.text,
-            style: entry.style.isEmpty
-                ? defaultStyle
-                : TextStyle(
-                    color: entry.fgColor != null
-                        ? colorFromAnsi(entry.fgColor)
-                        : null,
-                    backgroundColor: entry.bgColor != null
-                        ? colorFromAnsi(entry.bgColor)
-                        : null,
-                    fontWeight:
-                        entry.bold ? FontWeight.bold : FontWeight.normal,
-                  ),
-          ))
+      .map(
+        (entry) => TextSpan(
+          text: entry.text,
+          style: entry.style.isEmpty
+              ? defaultStyle
+              : TextStyle(
+                  color: entry.fgColor != null
+                      ? colorFromAnsi(entry.fgColor)
+                      : null,
+                  backgroundColor: entry.bgColor != null
+                      ? colorFromAnsi(entry.bgColor)
+                      : null,
+                  fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
+                ),
+        ),
+      )
       .toList();
 }
 
