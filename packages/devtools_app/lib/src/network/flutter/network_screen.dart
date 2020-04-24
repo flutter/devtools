@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
@@ -44,11 +45,30 @@ class NetworkScreenBody extends StatefulWidget {
 }
 
 class NetworkScreenBodyState extends State<NetworkScreenBody> {
-  final networkController = NetworkController();
   final _dataTableSource = HttpRequestDataTableSource();
 
   static bool _sortAscending = false;
   static int _sortColumnIndex;
+
+  NetworkController _networkController;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final newController = Provider.of<NetworkController>(context);
+    if (newController == _networkController) return;
+    _networkController?.removeClient();
+
+    _networkController = newController;
+    _networkController.addClient();
+  }
+
+  @override
+  void dispose() {
+    _networkController?.removeClient();
+    super.dispose();
+  }
 
   void _onSort(
     Function getField,
@@ -65,18 +85,6 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
     });
   }
 
-  @override
-  void initState() {
-    networkController.initialize();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    networkController.dispose();
-    super.dispose();
-  }
-
   /// Builds the row of buttons that control the HTTP profiler (e.g., record,
   /// pause, etc.)
   Row _buildHttpProfilerControlRow(bool isRecording) {
@@ -88,20 +96,20 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
           key: NetworkScreen.recordButtonKey,
           recording: isRecording,
           includeTextWidth: includeTextWidth,
-          onPressed: networkController.startRecording,
+          onPressed: _networkController.startRecording,
         ),
         pauseButton(
           key: NetworkScreen.pauseButtonKey,
           paused: !isRecording,
           includeTextWidth: includeTextWidth,
-          onPressed: networkController.pauseRecording,
+          onPressed: _networkController.pauseRecording,
         ),
         const SizedBox(width: denseSpacing),
         clearButton(
           key: NetworkScreen.clearButtonKey,
           onPressed: () {
             _dataTableSource.clearSelection();
-            networkController.clear();
+            _networkController.clear();
           },
         ),
       ],
@@ -135,8 +143,7 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
-            // TODO(bkonyi): use DevTools specific table when pagination is
-            // supported.
+            // TODO(jacobr): use DevTools specific table.
             child: PaginatedDataTable(
               rowsPerPage: 25,
               // TODO(bkonyi): figure out how to prevent header from scrolling.
@@ -197,7 +204,8 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                   ),
                 )
               : Split(
-                  initialFractions: const [0.5, 0.5],
+                  initialFractions: const [0.7, 0.3],
+                  minSizes: const [300, 300],
                   axis: Axis.horizontal,
                   children: [
                     (_dataTableSource.rowCount == 0)
@@ -218,11 +226,11 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<HttpRequests>(
-      valueListenable: networkController.requestsNotifier,
+      valueListenable: _networkController.requestsNotifier,
       builder: (context, httpRequestProfile, widget) {
         _dataTableSource.data = httpRequestProfile.requests;
         return ValueListenableBuilder<bool>(
-          valueListenable: networkController.recordingNotifier,
+          valueListenable: _networkController.recordingNotifier,
           builder: (context, isRecording, widget) {
             return Column(
               children: [

@@ -19,6 +19,8 @@ class HttpService {
         // The above call won't complete immediately if the isolate is paused, so
         // give up waiting after 500ms. However, the call will complete eventually
         // if the isolate is eventually resumed.
+        // TODO(jacobr): detect whether the isolate is paused using the vm
+        // service and handle this case gracefully rather than timing out.
         await timeout(future, 500);
       }
     });

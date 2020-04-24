@@ -73,8 +73,8 @@ class TimelineService {
         : TimelineData();
 
     await serviceManager.serviceAvailable.future;
-    await allowedError(serviceManager.service
-        .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']));
+    await allowedError(
+        serviceManager.service.setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
     await allowedError(serviceManager.service.clearVMTimeline());
 
     final timeline = await serviceManager.service.getVMTimeline();
@@ -159,9 +159,9 @@ class TimelineService {
       await startTimeline();
     } else if (shouldBeRunning && !isRunning) {
       await allowedError(serviceManager.service
-          .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']));
+          .setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
     } else if (!shouldBeRunning && isRunning) {
-      await allowedError(serviceManager.service.setVMTimelineFlags(<String>[]));
+      await allowedError(serviceManager.service.setVMTimelineFlags([]));
     }
   }
 }
