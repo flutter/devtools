@@ -374,6 +374,11 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
+  Future<ClassList> getClassList(String isolateId) {
+    return _trackFuture('getClassList', _vmService.getClassList(isolateId));
+  }
+
+  @override
   Future<SourceReport> getSourceReport(
     String isolateId,
     List<String> reports, {

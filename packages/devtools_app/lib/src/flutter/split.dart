@@ -110,22 +110,71 @@ class _SplitState extends State<Split> {
     final height = constraints.maxHeight;
     final axisSize = isHorizontal ? width : height;
 
+    final availableSize = axisSize - _totalSplitterSize();
+
     // Size calculation helpers.
-    double _minSizeForIndex(int index) =>
-        widget.minSizes != null ? widget.minSizes[index] : 0.0;
+    double _minSizeForIndex(int index) {
+      if (widget.minSizes == null) return 0.0;
+
+      double totalMinSize = 0;
+      for (var minSize in widget.minSizes) {
+        totalMinSize += minSize;
+      }
+
+      // Reduce the min sizes gracefully if the total required min size for all
+      // children is greater than the available size for children.
+      if (totalMinSize > availableSize) {
+        return widget.minSizes[index] * availableSize / totalMinSize;
+      } else {
+        return widget.minSizes[index];
+      }
+    }
 
     double _minFractionForIndex(int index) =>
-        _minSizeForIndex(index) / (axisSize - _totalSplitterSize());
+        _minSizeForIndex(index) / availableSize;
 
     void _clampFraction(int index) {
       fractions[index] =
           fractions[index].clamp(_minFractionForIndex(index), 1.0);
     }
 
-    double _sizeForIndex(int index) {
-      final size = (axisSize - _totalSplitterSize()) * fractions[index];
-      assert(size >= _minSizeForIndex(index));
-      return size;
+    double _sizeForIndex(int index) => availableSize * fractions[index];
+
+    double fractionDeltaRequired = 0.0;
+    double fractionDeltaAvailable = 0.0;
+
+    double deltaFromMinimumSize(int index) =>
+        fractions[index] - _minFractionForIndex(index);
+
+    for (int i = 0; i < fractions.length; ++i) {
+      final delta = deltaFromMinimumSize(i);
+      if (delta < 0) {
+        fractionDeltaRequired -= delta;
+      } else {
+        fractionDeltaAvailable += delta;
+      }
+    }
+    if (fractionDeltaRequired > 0) {
+      // Likely due to a change in the available size, the current fractions for
+      // the children do not obey the min size constraints.
+      // The min size constraints for children are scaled so it is always
+      // possible to meet them. A scaleFactor greater than 1 would indicate that
+      // it is impossible to meet the constraints.
+      double scaleFactor = fractionDeltaRequired / fractionDeltaAvailable;
+      assert(scaleFactor <= 1 + defaultEpsilon);
+      scaleFactor = math.min(scaleFactor, 1.0);
+      for (int i = 0; i < fractions.length; ++i) {
+        final delta = deltaFromMinimumSize(i);
+        if (delta < 0) {
+          // This is equivalent to adding delta but avoids rounding error.
+          fractions[i] = _minFractionForIndex(i);
+        } else {
+          // Reduce all fractions that are above their minimum size by an amount
+          // proportional to their ability to reduce their size without
+          // violating their minimum size constraints.
+          fractions[i] -= delta * scaleFactor;
+        }
+      }
     }
 
     // Determine what fraction to give each child, including enough space to
