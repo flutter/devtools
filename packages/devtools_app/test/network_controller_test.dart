@@ -50,7 +50,10 @@ void main() {
           expect(notifier.value, true);
           expect(controller.isPolling, true);
         },
-        callback: () async => await controller.startRecording(),
+        callback: () async {
+          await controller.addClient();
+          await controller.startRecording();
+        },
       );
 
       await addListenerScope(
@@ -70,6 +73,7 @@ void main() {
         },
         callback: () async => await controller.startRecording(),
       );
+      controller.removeClient();
     });
 
     test('process HTTP timeline events', () async {
