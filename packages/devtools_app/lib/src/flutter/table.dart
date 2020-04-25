@@ -8,6 +8,7 @@ import '../trees.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
 import 'collapsible_mixin.dart';
+import 'common_widgets.dart' show ScrollControllerAutoScroll;
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'theme.dart';
 
@@ -35,7 +36,7 @@ class FlatTable<T> extends StatefulWidget {
     Key key,
     @required this.columns,
     @required this.data,
-    this.reverse = false,
+    this.autoScrollContent = false,
     @required this.keyFactory,
     @required this.onItemSelected,
     @required this.sortColumn,
@@ -50,11 +51,8 @@ class FlatTable<T> extends StatefulWidget {
 
   final List<T> data;
 
-  /// Display list items reversed and from the bottom up.
-  ///
-  /// Note: this is a workaround for implementing auto-scrolling in order to
-  /// always display newly added items.
-  final bool reverse;
+  /// Auto-scrolling the table to keep new content visible.
+  final bool autoScrollContent;
 
   /// Factory that creates keys for each row in this table.
   final Key Function(T data) keyFactory;
@@ -113,7 +111,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
       itemCount: widget.data.length,
       columns: widget.columns,
       columnWidths: columnWidths,
-      reverse: widget.reverse,
+      autoScrollContent: widget.autoScrollContent,
       rowBuilder: _buildRow,
       sortColumn: widget.sortColumn,
       sortDirection: widget.sortDirection,
@@ -556,12 +554,12 @@ class _Table<T> extends StatefulWidget {
     @required this.onSortChanged,
     @required this.focusNode,
     this.handleKeyEvent,
-    this.reverse = false,
+    this.autoScrollContent = false,
   }) : super(key: key);
 
   final int itemCount;
 
-  final bool reverse;
+  final bool autoScrollContent;
   final List<ColumnData<T>> columns;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
@@ -593,6 +591,7 @@ class _TableState<T> extends State<_Table<T>> {
   @override
   void initState() {
     super.initState();
+
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
     sortColumn = widget.sortColumn;
     sortDirection = widget.sortDirection;
@@ -602,6 +601,7 @@ class _TableState<T> extends State<_Table<T>> {
   @override
   void dispose() {
     scrollController.dispose();
+
     super.dispose();
   }
 
@@ -610,10 +610,6 @@ class _TableState<T> extends State<_Table<T>> {
       widget.columnWidths.reduce((x, y) => x + y) + (2 * defaultSpacing);
 
   Widget _buildItem(BuildContext context, int index) {
-    if (widget.reverse) {
-      index = widget.itemCount - index - 1;
-    }
-
     return widget.rowBuilder(
       context,
       _linkedHorizontalScrollControllerGroup,
@@ -627,6 +623,13 @@ class _TableState<T> extends State<_Table<T>> {
       _buildItem,
       childCount: widget.itemCount,
     );
+
+    // If we're at the end already, scroll to expose the new content.
+    if (widget.autoScrollContent) {
+      if (scrollController.hasClients && scrollController.atScrollBottom) {
+        scrollController.autoScrollToBottom();
+      }
+    }
 
     return LayoutBuilder(builder: (context, constraints) {
       return SizedBox(
@@ -660,7 +663,6 @@ class _TableState<T> extends State<_Table<T>> {
                   focusNode: widget.focusNode,
                   child: ListView.custom(
                     controller: scrollController,
-                    reverse: widget.reverse,
                     childrenDelegate: itemDelegate,
                   ),
                 ),

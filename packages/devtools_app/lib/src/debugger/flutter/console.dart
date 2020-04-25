@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
@@ -50,17 +49,11 @@ class _ConsoleState extends State<Console> {
               child: ValueListenableBuilder<List<String>>(
                 valueListenable: widget.controller.stdio,
                 builder: (context, lines, _) {
-                  if (scrollController.hasClients) {
-                    // If we're at the end already, scroll to expose the new
-                    // content.
-                    // TODO(devoncarew): We should generalize the
-                    // auto-scroll-to-bottom feature.
-                    final pos = scrollController.position;
-                    if (pos.pixels == pos.maxScrollExtent) {
-                      SchedulerBinding.instance.addPostFrameCallback((_) {
-                        _scrollToBottom();
-                      });
-                    }
+                  // If we're at the end already, scroll to expose the new
+                  // content.
+                  if (scrollController.hasClients &&
+                      scrollController.atScrollBottom) {
+                    scrollController.autoScrollToBottom();
                   }
 
                   return ListView.builder(
@@ -82,21 +75,5 @@ class _ConsoleState extends State<Console> {
         ],
       ),
     );
-  }
-
-  void _scrollToBottom() async {
-    if (mounted && scrollController.hasClients) {
-      await scrollController.animateTo(
-        scrollController.position.maxScrollExtent,
-        duration: rapidDuration,
-        curve: defaultCurve,
-      );
-
-      // Scroll again if we've received new content in the interim.
-      final pos = scrollController.position;
-      if (pos.pixels != pos.maxScrollExtent) {
-        scrollController.jumpTo(pos.maxScrollExtent);
-      }
-    }
   }
 }
