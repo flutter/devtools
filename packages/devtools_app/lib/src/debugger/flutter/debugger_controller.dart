@@ -354,7 +354,7 @@ class DebuggerController extends DisposableController
   }
 
   /// Retrieve the [Script] for the given [ScritpRef].
-  /// 
+  ///
   /// This caches the script lookup for future invocations.
   Future<Script> getScript(ScriptRef scriptRef) async {
     if (!_scriptCache.containsKey(scriptRef.id)) {
