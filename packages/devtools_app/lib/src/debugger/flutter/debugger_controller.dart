@@ -9,6 +9,7 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
+import '../../config_specific/logger/logger.dart';
 import '../../globals.dart';
 import 'debugger_model.dart';
 
@@ -358,9 +359,7 @@ class DebuggerController extends DisposableController
 
   Future<void> _populateScripts(Isolate isolate) async {
     final scriptList = await _service.getScripts(isolateRef.id);
-
-    // TODO(devoncarew): Follow up to see why we need to filter out non-unique
-    // items here.
+    // We filter out non-unique ScriptRefs here (dart-lang/sdk/issues/41661).
     final scriptRefs = Set.of(scriptList.scripts).toList();
     scriptRefs.sort((a, b) {
       // We sort uppercase so that items like dart:foo sort before items like
@@ -372,15 +371,16 @@ class DebuggerController extends DisposableController
     try {
       final classList = await _service.getClassList(isolateRef.id);
       final classes = classList.classes
-          .where((c) => c.name != null && c.name.isNotEmpty)
+          .where((c) => c?.name != null && c.name.isNotEmpty)
           .toList();
       classes.sort((ClassRef a, ClassRef b) {
         // We sort uppercase so that items like Foo sort before items like _Foo.
         return a.name.toUpperCase().compareTo(b.name.toUpperCase());
       });
       _sortedClasses.value = classes;
-    } catch (e) {
+    } catch (e, st) {
       // Fail gracefully - not all clients support getClassList().
+      log('$e\n$st');
     }
 
     for (var scriptRef in scriptRefs) {
