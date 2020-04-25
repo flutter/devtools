@@ -81,7 +81,7 @@ void main() {
       expect(controller.recordingNotifier.value, true);
 
       // Stop recording.
-      await tester.tap(find.byKey(NetworkScreen.pauseButtonKey));
+      await tester.tap(find.byKey(NetworkScreen.stopButtonKey));
       await tester.pump();
 
       // Check that we've stopped polling.
@@ -97,9 +97,9 @@ void main() {
       // We're not recording; only expect the instructions and buttons to be
       // visible.
       expect(splitFinder, findsNothing);
-      expect(find.byKey(NetworkScreen.clearButtonKey), findsOneWidget);
       expect(find.byKey(NetworkScreen.recordButtonKey), findsOneWidget);
-      expect(find.byKey(NetworkScreen.pauseButtonKey), findsOneWidget);
+      expect(find.byKey(NetworkScreen.stopButtonKey), findsOneWidget);
+      expect(find.byKey(NetworkScreen.clearButtonKey), findsOneWidget);
       expect(
         find.byKey(NetworkScreen.recordingInstructionsKey),
         findsOneWidget,
@@ -285,7 +285,7 @@ void main() {
       await loadRequestsAndCheck(tester);
 
       // Stop the profiler.
-      await tester.tap(find.byKey(NetworkScreen.pauseButtonKey));
+      await tester.tap(find.byKey(NetworkScreen.stopButtonKey));
       await tester.pumpAndSettle();
 
       // Clear the results.

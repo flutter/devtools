@@ -14,6 +14,12 @@ import 'theme.dart';
 // TODO(devoncarew): We need to render the selected row with a different
 // background color.
 
+/// The maximum height to allow for rows in the table.
+///
+/// When rows in the table expand or collapse, they will animate between a
+/// height of 0 and a height of [defaultRowHeight].
+const defaultRowHeight = 32.0;
+
 typedef IndexedScrollableWidgetBuilder = Widget Function(
   BuildContext,
   LinkedScrollControllerGroup linkedScrollControllerGroup,
@@ -488,13 +494,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     double viewportHeight,
   ) {
     // get the index of the first item fully visible in the viewport
-    final firstItemIndex =
-        (scrollController.offset / _Table.defaultRowHeight).ceil();
+    final firstItemIndex = (scrollController.offset / defaultRowHeight).ceil();
 
     // '-1' in the following calculations is needed because the header row
     // occupies space in the viewport so we must subtract it out.
     final minCompleteItemsInView =
-        (viewportHeight / _Table.defaultRowHeight).floor() - 1;
+        (viewportHeight / defaultRowHeight).floor() - 1;
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
     int newSelectedNodeIndex;
 
@@ -519,14 +524,13 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       // To do this we need to be showing the (minCompleteItemsInView + 1)
       // previous item  at the top.
       scrollController.animateTo(
-        (newSelectedNodeIndex - minCompleteItemsInView + 1) *
-            _Table.defaultRowHeight,
+        (newSelectedNodeIndex - minCompleteItemsInView + 1) * defaultRowHeight,
         duration: defaultDuration,
         curve: defaultCurve,
       );
     } else if (isAboveViewport) {
       scrollController.animateTo(
-        newSelectedNodeIndex * _Table.defaultRowHeight,
+        newSelectedNodeIndex * defaultRowHeight,
         duration: defaultDuration,
         curve: defaultCurve,
       );
@@ -573,12 +577,6 @@ class _Table<T> extends StatefulWidget {
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
-
-  /// The maximum height to allow for rows in the table.
-  ///
-  /// When rows in the table expand or collapse, they will animate between
-  /// a height of 0 and a height of [defaultRowHeight].
-  static const defaultRowHeight = 32.0;
 
   @override
   _TableState<T> createState() => _TableState<T>();
@@ -840,7 +838,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final row = tableRowFor(context);
 
     final box = SizedBox(
-      height: _Table.defaultRowHeight,
+      height: defaultRowHeight,
       child: Material(
         color: widget.backgroundColor ?? Theme.of(context).canvasColor,
         child: widget.onPressed != null
@@ -863,10 +861,10 @@ class _TableRowState<T> extends State<TableRow<T>>
             box,
             for (var c in widget.expansionChildren)
               SizedBox(
-                height: _Table.defaultRowHeight * expandCurve.value,
+                height: defaultRowHeight * expandCurve.value,
                 child: OverflowBox(
                   minHeight: 0.0,
-                  maxHeight: _Table.defaultRowHeight,
+                  maxHeight: defaultRowHeight,
                   alignment: Alignment.topCenter,
                   child: c,
                 ),
@@ -922,7 +920,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                       : Icons.expand_more,
                   size: defaultIconSize,
                 ),
-              const SizedBox(height: _Table.defaultRowHeight, width: 4.0),
+              const SizedBox(height: defaultRowHeight, width: 4.0),
               Text(
                 column.title,
                 overflow: TextOverflow.ellipsis,

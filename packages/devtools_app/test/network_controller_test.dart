@@ -59,7 +59,7 @@ void main() {
           expect(notifier.value, false);
           expect(controller.isPolling, false);
         },
-        callback: () async => await controller.pauseRecording(),
+        callback: () async => await controller.stopRecording(),
       );
 
       await addListenerScope(
