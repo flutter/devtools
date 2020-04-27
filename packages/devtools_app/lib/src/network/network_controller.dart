@@ -43,8 +43,6 @@ class NetworkController {
   int _countActiveClients = 0;
   Timer _pollingTimer;
 
-  bool _startRecordingInProgress = false;
-
   // TODO(jacobr): clear this flag on hot restart.
   bool _recordingStateInitializedForIsolates = false;
 
