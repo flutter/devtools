@@ -116,22 +116,17 @@ void main() {
         when(mockLoggingController.filteredData).thenReturn(fakeLogData);
       });
 
-      testWidgets('shows most recent logs first', (WidgetTester tester) async {
+      testWidgets('shows log items', (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
         expect(find.byType(LogsTable), findsOneWidget);
         expect(
-          find.byKey(ValueKey(fakeLogData.last)),
+          find.byKey(ValueKey(fakeLogData.first)),
           findsOneWidget,
-          reason: 'the most recently added logdata should show in the list by '
-              'default.',
         );
         expect(
-          find.byKey(ValueKey(fakeLogData.first)),
-          findsNothing,
-          reason:
-              'the least recently added logdata should be at the top of the '
-              'list, hidden from view.',
+          find.byKey(ValueKey(fakeLogData.last)),
+          findsOneWidget,
         );
       });
 
@@ -139,10 +134,10 @@ void main() {
           (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
-        await tester.tap(find.byKey(ValueKey(fakeLogData[996])));
+        await tester.tap(find.byKey(ValueKey(fakeLogData[6])));
         await tester.pumpAndSettle();
         expect(
-          find.text('log event 996'),
+          find.text('log event 6'),
           findsNWidgets(2),
           reason: 'The log details should be visible both in the table and the '
               'details section.',
@@ -152,13 +147,13 @@ void main() {
       testWidgets('can show null log data', (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
-        await tester.tap(find.byKey(ValueKey(fakeLogData[997])));
+        await tester.tap(find.byKey(ValueKey(fakeLogData[7])));
         await tester.pumpAndSettle();
       });
 
       testWidgets('can compute details of non-json log data',
           (WidgetTester tester) async {
-        const index = 998;
+        const index = 8;
         final log = fakeLogData[index];
 
         await pumpLoggingScreen(tester);
@@ -179,7 +174,7 @@ void main() {
 
       testWidgets('can show details of json log data',
           (WidgetTester tester) async {
-        const index = 999;
+        const index = 9;
         bool containsJson(Widget widget) {
           if (widget is! Text) return false;
           final text = widget as Text;
@@ -210,30 +205,32 @@ void main() {
   });
 }
 
-const totalLogs = 1000;
+const totalLogs = 10;
+
 final fakeLogData = List<LogData>.generate(totalLogs, _generate);
 
 LogData _generate(int i) {
   String details = 'log event $i';
   String computedDetails;
   switch (i) {
-    case 999:
+    case 9:
       computedDetails = jsonOutput;
       break;
-    case 998:
+    case 8:
       computedDetails = nonJsonOutput;
       break;
-    case 997:
+    case 7:
       details = null;
       break;
     default:
       break;
   }
+
   final detailsComputer = computedDetails == null
       ? null
       : () => Future.delayed(const Duration(seconds: 1), () => computedDetails);
   return LogData('kind $i', details, i, detailsComputer: detailsComputer);
 }
 
-const nonJsonOutput = 'Non-json details for log number 998';
-const jsonOutput = '{\n"Details": "of log event 999",\n"logEvent": "999"\n}\n';
+const nonJsonOutput = 'Non-json details for log number 8';
+const jsonOutput = '{\n"Details": "of log event 9",\n"logEvent": "9"\n}\n';
