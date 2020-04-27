@@ -43,8 +43,11 @@ class DevToolsScaffold extends StatefulWidget {
   /// A [Key] that indicates the scaffold is showing in full-width mode.
   static const Key fullWidthKey = Key('Full-width Scaffold');
 
+  // TODO(jacobr): compute this based on the width of the list of tabs rather
+  // than hardcoding. Computing this width dynamically is even more important
+  // in the presence of conditional screens.
   /// The width at or below which we treat the scaffold as narrow-width.
-  static const double narrowWidthThreshold = 1100.0;
+  static const double narrowWidthThreshold = 1300.0;
 
   /// The size that all actions on this widget are expected to have.
   static const double actionWidgetSize = 48.0;

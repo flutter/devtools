@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../http/http_request_data.dart';
+import '../../utils.dart';
 
 class HttpRequestDataTableSource extends DataTableSource {
   @visibleForTesting
@@ -36,10 +37,7 @@ class HttpRequestDataTableSource extends DataTableSource {
   int get selectedRowCount => _currentSelection.value == null ? 0 : 1;
 
   void sort(Function getField, bool ascending) {
-    _data.sort((
-      HttpRequestData a,
-      HttpRequestData b,
-    ) {
+    _data.sort((HttpRequestData a, HttpRequestData b) {
       if (!ascending) {
         final tmp = a;
         a = b;
@@ -86,15 +84,15 @@ class HttpRequestDataTableSource extends DataTableSource {
 
   @visibleForTesting
   String formatDuration(Duration duration) {
-    final numFormat = NumberFormat.decimalPattern();
     return (duration == null)
         ? 'In Progress'
-        : numFormat.format(duration.inMilliseconds);
+        : nf.format(duration.inMilliseconds);
   }
 
   @visibleForTesting
-  String formatRequestTime(DateTime requestTime) =>
-      DateFormat.Hms().add_yMd().format(requestTime);
+  String formatRequestTime(DateTime requestTime) {
+    return DateFormat.Hms().add_yMd().format(requestTime);
+  }
 
   @override
   DataRow getRow(int index) {
@@ -102,7 +100,6 @@ class HttpRequestDataTableSource extends DataTableSource {
     final status = (data.status == null) ? '--' : data.status.toString();
     final TextStyle statusColor = getStatusColor(data.status);
 
-    // TODO(bkonyi): is this the number format we want?
     final durationMs = formatDuration(data.duration);
     final requestTime = formatRequestTime(data.requestTime);
 

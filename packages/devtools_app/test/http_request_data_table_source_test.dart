@@ -15,12 +15,19 @@ void main() {
   group('HttpRequestDataTableSource', () {
     HttpRequestDataTableSource dataTable;
     List<HttpRequestData> requests;
+    List<HttpRequestData> invalidRequests;
 
     setUpAll(() async {
       final timeline = await loadNetworkProfileTimeline();
       final httpRequests = NetworkController.processHttpTimelineEventsHelper(
-          timeline, 0, [], {});
+        timeline,
+        0,
+        currentValues: [],
+        invalidRequests: [],
+        outstandingRequestsMap: {},
+      );
       requests = httpRequests.requests;
+      invalidRequests = httpRequests.invalidRequests;
     });
 
     setUp(() {
@@ -33,6 +40,11 @@ void main() {
       expect(dataTable.isRowCountApproximate, false);
       expect(dataTable.currentSelectionListenable.value, isNull);
       expect(dataTable.selectedRowCount, 0);
+      expect(requests.length, equals(69));
+      // The first request in the json file is intentionally invalid to simulate
+      // some network events occurring before the time range json is fetched
+      // for.
+      expect(invalidRequests.length, equals(1));
     });
 
     test('time display', () {

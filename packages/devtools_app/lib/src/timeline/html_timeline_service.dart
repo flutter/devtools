@@ -87,8 +87,8 @@ class TimelineService {
     timelineController.fullTimeline.data = FullTimelineData();
 
     await serviceManager.serviceAvailable.future;
-    await allowedError(serviceManager.service
-        .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']));
+    await allowedError(
+        serviceManager.service.setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
     await allowedError(serviceManager.service.clearVMTimeline());
 
     final Timeline timeline = await serviceManager.service.getVMTimeline();
@@ -189,7 +189,7 @@ class TimelineService {
     } else if (!shouldBeRunning && isRunning) {
       // TODO(devoncarew): turn off the events
       timelineController.frameBasedTimeline.pause();
-      await allowedError(serviceManager.service.setVMTimelineFlags(<String>[]));
+      await allowedError(serviceManager.service.setVMTimelineFlags([]));
     }
   }
 }

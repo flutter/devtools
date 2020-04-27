@@ -58,6 +58,10 @@ class TimelineController
   ValueListenable<bool> get processing => _processingNotifier;
   final _processingNotifier = ValueNotifier<bool>(false);
 
+  // TODO(jacobr): this isn't accurate. Another page of DevTools
+  // or a different instance of DevTools could change this value. We need to
+  // sync the value with the server like we do for other vm service extensions
+  // that we track with the vm service extension manager.
   /// Whether http timeline logging is enabled.
   ValueListenable<bool> get httpTimelineLoggingEnabled =>
       _httpTimelineLoggingEnabledNotifier;

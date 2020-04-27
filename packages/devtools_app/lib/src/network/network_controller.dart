@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../config_specific/logger/allowed_error.dart';
+import '../globals.dart';
 import '../http/http_request_data.dart';
 import '../http/http_service.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
@@ -36,7 +38,13 @@ class NetworkController {
   int _timelineMicrosOffset;
   int lastProfileRefreshMicros = 0;
 
+  // The number of active clients helps us track whether we should be polling
+  // or not.
+  int _countActiveClients = 0;
   Timer _pollingTimer;
+
+  // TODO(jacobr): clear this flag on hot restart.
+  bool _recordingStateInitializedForIsolates = false;
 
   @visibleForTesting
   bool get isPolling => _pollingTimer != null;
@@ -44,10 +52,11 @@ class NetworkController {
   @visibleForTesting
   static HttpRequests processHttpTimelineEventsHelper(
     Timeline timeline,
-    int timelineMicrosOffset,
-    List<HttpRequestData> currentValues,
-    Map<String, HttpRequestData> outstandingRequestsMap,
-  ) {
+    int timelineMicrosOffset, {
+    @required List<HttpRequestData> currentValues,
+    @required List<HttpRequestData> invalidRequests,
+    @required Map<String, HttpRequestData> outstandingRequestsMap,
+  }) {
     final events = timeline.traceEvents;
     final httpEventIds = <String>{};
     // Perform initial pass to find the IDs for the HTTP timeline events.
@@ -100,43 +109,51 @@ class NetworkController {
       } else if (requestData.inProgress) {
         outstandingRequestsMap.putIfAbsent(requestId, () => requestData);
       }
-      currentValues.add(requestData);
+      if (requestData.isValid) {
+        currentValues.add(requestData);
+      } else {
+        // Request is complete but missing some information
+        invalidRequests.add(requestData);
+      }
     }
     return HttpRequests(
       requests: currentValues,
+      invalidRequests: invalidRequests,
       outstandingRequests: outstandingRequestsMap,
     );
   }
 
   void processHttpTimelineEvents(Timeline timeline) {
+    // TODO(jacobr): we are creating a copy of the large list of existing
+    // requests each time which is inefficient.
     // Trigger refresh.
     _httpRequestsNotifier.value = processHttpTimelineEventsHelper(
-        timeline,
-        _timelineMicrosOffset,
-        List<HttpRequestData>.from(
-          _httpRequestsNotifier.value.requests,
-        ),
-        Map<String, HttpRequestData>.from(
-            _httpRequestsNotifier.value.outstandingRequests));
+      timeline,
+      _timelineMicrosOffset,
+      currentValues: List.from(_httpRequestsNotifier.value.requests),
+      invalidRequests: [],
+      outstandingRequestsMap:
+          Map.from(_httpRequestsNotifier.value.outstandingRequests),
+    );
   }
 
   Future<void> _toggleHttpTimelineRecording(bool state) async {
     await HttpService.toggleHttpRequestLogging(state);
+    // Start polling once we've enabled logging.
+    updatePollingState(state);
+    _httpRecordingNotifier.value = state;
+  }
 
-    if (state) {
-      // Start polling once we've enabled logging.
-      assert(_pollingTimer == null);
-      _pollingTimer = Timer.periodic(
-        const Duration(seconds: 1),
+  void updatePollingState(bool httpRecordingNotifierValue) {
+    if (httpRecordingNotifierValue && _countActiveClients > 0) {
+      _pollingTimer ??= Timer.periodic(
+        const Duration(milliseconds: 500),
         (_) => _networkService.refreshHttpRequests(),
       );
     } else {
-      // Stop polling once we've disabled logging.
-      assert(_pollingTimer != null);
-      _pollingTimer.cancel();
+      _pollingTimer?.cancel();
       _pollingTimer = null;
     }
-    _httpRecordingNotifier.value = state;
   }
 
   /// Enables HTTP request recording on all isolates and starts polling.
@@ -153,6 +170,12 @@ class NetworkController {
     // wall-time a request was made. This won't be 100% accurate, but it should
     // easily be within a second.
     _timelineMicrosOffset = DateTime.now().microsecondsSinceEpoch - timestamp;
+    // TODO(jacobr): add an intermediate manager class to track which flags are
+    // set. We are setting more flags than we probably need to here but setting
+    // fewer flags risks breaking functionality on the timeline view that
+    // assumes that all flags are set.
+    await allowedError(
+        serviceManager.service.setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
 
     await _toggleHttpTimelineRecording(true);
   }
@@ -160,19 +183,23 @@ class NetworkController {
   /// Pauses the output of HTTP request information to the timeline.
   ///
   /// May result in some incomplete timeline events.
-  Future<void> pauseRecording() async =>
+  Future<void> stopRecording() async =>
       await _toggleHttpTimelineRecording(false);
 
   /// Checks to see if HTTP requests are currently being output. If so, recording
   /// is automatically started upon initialization.
-  Future<void> initialize() async =>
+  Future<void> addClient() async {
+    _countActiveClients++;
+    if (!_recordingStateInitializedForIsolates) {
+      _recordingStateInitializedForIsolates = true;
       await _networkService.initializeRecordingState();
+    }
+    updatePollingState(_httpRecordingNotifier.value);
+  }
 
-  void dispose() {
-    _pollingTimer?.cancel();
-    _pollingTimer = null;
-    _httpRecordingNotifier.dispose();
-    _httpRequestsNotifier.dispose();
+  void removeClient() {
+    _countActiveClients--;
+    updatePollingState(_httpRecordingNotifier.value);
   }
 
   /// Clears the previously collected HTTP timeline events and resets the last
