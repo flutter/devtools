@@ -391,7 +391,7 @@ class _InspectorTreeState extends State<InspectorTree>
           width: controller.rowWidth + controller.maxRowIndent,
           child: Scrollbar(
             child: GestureDetector(
-              onTap: () {
+              onTap: _focusNode.requestFocus,
                 _focusNode.requestFocus();
               },
               child: Focus(
