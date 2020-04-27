@@ -14,6 +14,7 @@ import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../flutter/table.dart';
 import '../../flutter/theme.dart';
+import '../../flutter/utils.dart';
 import '../../globals.dart';
 import '../../table_data.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
@@ -252,12 +253,18 @@ class _LogDetailsState extends State<LogDetails>
   Widget _buildInspector(BuildContext context, LogData log) => const SizedBox();
 
   Widget _buildSimpleLog(BuildContext context, LogData log) {
+    final RichText richText = RichText(
+      text: TextSpan(
+        children: processAnsiTerminalCodes(
+          log.prettyPrinted,
+          fixedFontStyle(context),
+        ),
+      ),
+    );
+
     return Scrollbar(
       child: SingleChildScrollView(
-        child: Text(
-          log.prettyPrinted ?? '',
-          style: fixedFontStyle(context),
-        ),
+        child: richText,
       ),
     );
   }
@@ -356,6 +363,20 @@ class _MessageColumn extends LogMessageColumn
             ),
           ),
         ],
+      );
+    } else if (data.kind == 'stdout') {
+      // TODO(helin24): Move this to logging controller when dart:html is removed.
+      return RichText(
+        text: TextSpan(
+          children: processAnsiTerminalCodes(
+            // TODO(helin24): Recompute summary length considering ansi codes.
+            //  The current summary is generally the first 200 chars of details.
+            getDisplayValue(data),
+            fixedFontStyle(context),
+          ),
+        ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       );
     } else {
       return null;

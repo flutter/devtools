@@ -5,6 +5,7 @@
 @TestOn('vm')
 import 'dart:async';
 
+import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/flutter/logging_screen.dart';
@@ -18,6 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 import '../support/mocks.dart';
+import '../support/utils.dart';
 import 'wrappers.dart';
 
 void main() {
@@ -142,7 +144,7 @@ void main() {
         await tester.tap(find.byKey(ValueKey(fakeLogData[996])));
         await tester.pumpAndSettle();
         expect(
-          find.text('log event 996'),
+          find.richText('log event 996'),
           findsNWidgets(2),
           reason: 'The log details should be visible both in the table and the '
               'details section.',
@@ -166,7 +168,7 @@ void main() {
         await tester.tap(find.byKey(ValueKey(log)));
         await tester.pump();
         expect(
-          find.text(nonJsonOutput),
+          find.richText(nonJsonOutput),
           findsNothing,
           reason:
               "The details of the log haven't computed yet, so they shouldn't "
@@ -174,16 +176,17 @@ void main() {
         );
 
         await tester.pumpAndSettle();
-        expect(find.text(nonJsonOutput), findsOneWidget);
+        expect(find.richText(nonJsonOutput), findsOneWidget);
       });
 
       testWidgets('can show details of json log data',
           (WidgetTester tester) async {
         const index = 999;
         bool containsJson(Widget widget) {
-          if (widget is! Text) return false;
-          final text = widget as Text;
-          return text.data.contains('{') && text.data.contains('}');
+          if (widget is! RichText) return false;
+          final richText = widget as RichText;
+          return richText.text.toPlainText().contains('{') &&
+              richText.text.toPlainText().contains('}');
         }
 
         final findJson = find.descendant(
@@ -206,6 +209,37 @@ void main() {
         await tester.pumpAndSettle();
         expect(findJson, findsOneWidget);
       });
+
+      testWidgets('can process Ansi codes', (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(ValueKey(fakeLogData[995])));
+        await tester.pumpAndSettle();
+
+        final finder = find.richText('Ansi color codes processed for log 995');
+
+        expect(
+          finder,
+          findsNWidgets(2),
+          reason: 'Processed text without ansi codes should exist in logs and '
+              'details sections.',
+        );
+
+        finder.evaluate().forEach((element) {
+          final richText = element.widget as RichText;
+          final textSpan = richText.text as TextSpan;
+          final secondSpan = textSpan.children[1] as TextSpan;
+          expect(
+            secondSpan.text,
+            'log 995',
+            reason: 'Text with ansi code should be in separate span',
+          );
+          expect(
+            secondSpan.style.backgroundColor,
+            const Color.fromRGBO(215, 95, 135, 1),
+          );
+        });
+      });
     });
   });
 }
@@ -215,6 +249,7 @@ final fakeLogData = List<LogData>.generate(totalLogs, _generate);
 
 LogData _generate(int i) {
   String details = 'log event $i';
+  String kind = 'kind $i';
   String computedDetails;
   switch (i) {
     case 999:
@@ -226,14 +261,26 @@ LogData _generate(int i) {
     case 997:
       details = null;
       break;
+    case 995:
+      kind = 'stdout';
+      details = _ansiCodesOutput();
+      break;
     default:
       break;
   }
   final detailsComputer = computedDetails == null
       ? null
       : () => Future.delayed(const Duration(seconds: 1), () => computedDetails);
-  return LogData('kind $i', details, i, detailsComputer: detailsComputer);
+  return LogData(kind, details, i, detailsComputer: detailsComputer);
 }
 
 const nonJsonOutput = 'Non-json details for log number 998';
 const jsonOutput = '{\n"Details": "of log event 999",\n"logEvent": "999"\n}\n';
+
+String _ansiCodesOutput() {
+  final sb = StringBuffer();
+  sb.write('Ansi color codes processed for ');
+  final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
+  sb.write(pen('log 995'));
+  return sb.toString();
+}

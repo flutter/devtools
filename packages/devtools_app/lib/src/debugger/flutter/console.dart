@@ -7,6 +7,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
+import '../../flutter/utils.dart';
 import 'codeview.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
@@ -68,10 +69,14 @@ class _ConsoleState extends State<Console> {
                     itemExtent: CodeView.rowHeight,
                     controller: scrollController,
                     itemBuilder: (context, index) {
-                      return Text(
-                        lines[index],
+                      return RichText(
+                        text: TextSpan(
+                          children: processAnsiTerminalCodes(
+                            lines[index],
+                            textStyle,
+                          ),
+                        ),
                         maxLines: 1,
-                        style: textStyle,
                       );
                     },
                   );
