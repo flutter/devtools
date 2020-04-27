@@ -392,8 +392,6 @@ class _InspectorTreeState extends State<InspectorTree>
           child: Scrollbar(
             child: GestureDetector(
               onTap: _focusNode.requestFocus,
-                _focusNode.requestFocus();
-              },
               child: Focus(
                 onKey: _handleKeyEvent,
                 autofocus: widget.isSummaryTree,
