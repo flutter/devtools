@@ -104,27 +104,14 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(context).focusColor),
       ),
-      child: GestureDetector(
-        child: InspectorTree(
-          controller: summaryTreeController,
-          isSummaryTree: true,
-        ),
-        onTapUp: (TapUpDetails tapUpDetails) {
-          summaryTreeController.setFocus();
-        },
-      ),
-    );
-    final detailsTree = GestureDetector(
       child: InspectorTree(
-        controller: detailsTreeController,
+        controller: summaryTreeController,
+        isSummaryTree: true,
       ),
-      onTapUp: (TapUpDetails tapUpDetails) {
-        detailsTreeController.setFocus();
-      },
     );
-
-    // Set focus on the summary tree by default
-    summaryTreeController.setFocus();
+    final detailsTree = InspectorTree(
+      controller: detailsTreeController,
+    );
 
     final splitAxis = Split.axisFor(context, 0.85);
     return Column(
