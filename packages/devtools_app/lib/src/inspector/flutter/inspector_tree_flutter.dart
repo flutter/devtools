@@ -344,20 +344,26 @@ class _InspectorTreeState extends State<InspectorTree>
     return maxOffset - viewportDimension;
   }
 
+  /// Handle arrow keys for the InspectorTree. Ignore other key events so that
+  /// other widgets have a chance to respond to them.
   bool _handleKeyEvent(FocusNode _, RawKeyEvent event) {
-    if (event is! RawKeyDownEvent) return true;
+    if (event is! RawKeyDownEvent) return false;
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
       controller.navigateDown();
+      return true;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
       controller.navigateUp();
+      return true;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
       controller.navigateLeft();
+      return true;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
       controller.navigateRight();
+      return true;
     }
 
-    return true;
+    return false;
   }
 
   void _bindToController() {
