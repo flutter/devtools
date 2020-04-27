@@ -571,3 +571,34 @@ class CircularIconButton extends StatelessWidget {
     );
   }
 }
+
+/// An extension on [ScrollController] to facilitate having the scrolling widget
+/// auto scroll to the bottom on new content.
+extension ScrollControllerAutoScroll on ScrollController {
+// TODO(devoncarew): We lose dock-to-bottom when we receive content when we're
+// off screen.
+
+  /// Return whether the view is currently scrolled to the bottom.
+  bool get atScrollBottom {
+    final pos = position;
+    return pos.pixels == pos.maxScrollExtent;
+  }
+
+  /// Scroll the content to the bottom using the app's default animation
+  /// duration and curve..
+  void autoScrollToBottom() async {
+    await animateTo(
+      position.maxScrollExtent,
+      duration: rapidDuration,
+      curve: defaultCurve,
+    );
+
+    // Scroll again if we've received new content in the interim.
+    if (hasClients) {
+      final pos = position;
+      if (pos.pixels != pos.maxScrollExtent) {
+        jumpTo(pos.maxScrollExtent);
+      }
+    }
+  }
+}

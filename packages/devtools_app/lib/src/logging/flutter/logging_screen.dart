@@ -21,10 +21,6 @@ import '../../ui/flutter/service_extension_widgets.dart';
 import '../../utils.dart';
 import '../logging_controller.dart';
 
-// TODO(devoncarew): Show rows starting from the top (and have them grow down).
-// TODO(devoncarew): We should keep new items visible (if the last item was
-// already visible).
-
 // TODO(devoncarew): The last column of a table should take up all remaining
 // width.
 
@@ -184,7 +180,7 @@ class LogsTable extends StatelessWidget {
     return FlatTable<LogData>(
       columns: columns,
       data: data,
-      reverse: true,
+      autoScrollContent: true,
       keyFactory: (LogData data) => ValueKey<LogData>(data),
       onItemSelected: onItemSelected,
       sortColumn: when,
