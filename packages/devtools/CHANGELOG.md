@@ -1,5 +1,6 @@
 ## 0.2.4
 * Update package:vm_service dependency to ^4.0.0
+* Enable network profiler in the Flutter version of devtools.
 
 ## 0.2.3 2020-03-03
 * Disable Q1 DevTools survey - postponing until Q2 [#1695](https://github.com/flutter/devtools/pull/1695)
