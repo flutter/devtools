@@ -43,8 +43,6 @@ class NetworkController {
   int _countActiveClients = 0;
   Timer _pollingTimer;
 
-  bool _startRecordingInProgress = false;
-
   // TODO(jacobr): clear this flag on hot restart.
   bool _recordingStateInitializedForIsolates = false;
 
@@ -141,14 +139,13 @@ class NetworkController {
 
   Future<void> _toggleHttpTimelineRecording(bool state) async {
     await HttpService.toggleHttpRequestLogging(state);
-    _httpRecordingNotifier.value = state;
-
     // Start polling once we've enabled logging.
-    updatePollingState();
+    updatePollingState(state);
+    _httpRecordingNotifier.value = state;
   }
 
-  void updatePollingState() {
-    if (_httpRecordingNotifier.value && _countActiveClients > 0) {
+  void updatePollingState(bool httpRecordingNotifierValue) {
+    if (httpRecordingNotifierValue && _countActiveClients > 0) {
       _pollingTimer ??= Timer.periodic(
         const Duration(milliseconds: 500),
         (_) => _networkService.refreshHttpRequests(),
@@ -166,32 +163,21 @@ class NetworkController {
   Future<void> startRecording({
     bool alreadyRecording = false,
   }) async {
-    if (_httpRecordingNotifier.value || _startRecordingInProgress) {
-      // No need to start recording if we are already recording or we are in the
-      // process of starting recording.
-      return;
-    }
-    _httpRecordingNotifier.value = true;
-    _startRecordingInProgress = true;
-    try {
-      final timestamp = await _networkService.updateLastRefreshTime(
-          alreadyRecording: alreadyRecording);
+    final timestamp = await _networkService.updateLastRefreshTime(
+        alreadyRecording: alreadyRecording);
 
-      // Determine the offset that we'll use to calculate the approximate
-      // wall-time a request was made. This won't be 100% accurate, but it should
-      // easily be within a second.
-      _timelineMicrosOffset = DateTime.now().microsecondsSinceEpoch - timestamp;
-      // TODO(jacobr): add an intermediate manager class to track which flags are
-      // set. We are setting more flags than we probably need to here but setting
-      // fewer flags risks breaking functionality on the timeline view that
-      // assumes that all flags are set.
-      await allowedError(serviceManager.service
-          .setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
+    // Determine the offset that we'll use to calculate the approximate
+    // wall-time a request was made. This won't be 100% accurate, but it should
+    // easily be within a second.
+    _timelineMicrosOffset = DateTime.now().microsecondsSinceEpoch - timestamp;
+    // TODO(jacobr): add an intermediate manager class to track which flags are
+    // set. We are setting more flags than we probably need to here but setting
+    // fewer flags risks breaking functionality on the timeline view that
+    // assumes that all flags are set.
+    await allowedError(
+        serviceManager.service.setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
 
-      await _toggleHttpTimelineRecording(true);
-    } finally {
-      _startRecordingInProgress = false;
-    }
+    await _toggleHttpTimelineRecording(true);
   }
 
   /// Pauses the output of HTTP request information to the timeline.
@@ -208,12 +194,12 @@ class NetworkController {
       _recordingStateInitializedForIsolates = true;
       await _networkService.initializeRecordingState();
     }
-    updatePollingState();
+    updatePollingState(_httpRecordingNotifier.value);
   }
 
   void removeClient() {
     _countActiveClients--;
-    updatePollingState();
+    updatePollingState(_httpRecordingNotifier.value);
   }
 
   /// Clears the previously collected HTTP timeline events and resets the last
