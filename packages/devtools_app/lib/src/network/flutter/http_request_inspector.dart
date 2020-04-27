@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../http/http_request_data.dart';
 import 'http_request_inspector_views.dart';
 
@@ -73,12 +74,7 @@ class HttpRequestInspector extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       color: Theme.of(context).canvasColor,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Theme.of(context).focusColor,
-          ),
-        ),
+      child: RoundedOutlinedBorder(
         child: (data == null)
             ? Center(
                 child: Text(
