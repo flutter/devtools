@@ -376,6 +376,7 @@ class _MessageColumn extends LogMessageColumn
           ),
         ),
         overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       );
     } else {
       return null;
