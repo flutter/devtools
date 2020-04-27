@@ -5,12 +5,12 @@
 @TestOn('vm')
 import 'package:devtools_app/src/flutter/split.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/http/http.dart';
+import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/flutter/http_request_inspector.dart';
 import 'package:devtools_app/src/network/flutter/http_request_inspector_views.dart';
 import 'package:devtools_app/src/network/flutter/network_model.dart';
 import 'package:devtools_app/src/network/flutter/network_screen.dart';
-import 'package:devtools_app/src/http/http.dart';
-import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
@@ -81,7 +81,7 @@ void main() {
       expect(controller.recordingNotifier.value, true);
 
       // Stop recording.
-      await tester.tap(find.byKey(NetworkScreen.pauseButtonKey));
+      await tester.tap(find.byKey(NetworkScreen.stopButtonKey));
       await tester.pump();
 
       // Check that we've stopped polling.
@@ -97,21 +97,19 @@ void main() {
       // We're not recording; only expect the instructions and buttons to be
       // visible.
       expect(splitFinder, findsNothing);
-      expect(find.byKey(NetworkScreen.clearButtonKey), findsOneWidget);
       expect(find.byKey(NetworkScreen.recordButtonKey), findsOneWidget);
-      expect(find.byKey(NetworkScreen.pauseButtonKey), findsOneWidget);
+      expect(find.byKey(NetworkScreen.stopButtonKey), findsOneWidget);
+      expect(find.byKey(NetworkScreen.clearButtonKey), findsOneWidget);
       expect(
         find.byKey(NetworkScreen.recordingInstructionsKey),
         findsOneWidget,
       );
 
-      // Start recording but don't advance the clock in order to check the
-      // loading spinner is displayed before requests are populated.
+      // Start recording.
       await tester.tap(find.byKey(NetworkScreen.recordButtonKey));
       await tester.pump();
 
       expect(splitFinder, findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
       // Advance the clock to populate the HTTP requests table.
       await tester.pump(const Duration(seconds: 1));
@@ -285,7 +283,7 @@ void main() {
       await loadRequestsAndCheck(tester);
 
       // Stop the profiler.
-      await tester.tap(find.byKey(NetworkScreen.pauseButtonKey));
+      await tester.tap(find.byKey(NetworkScreen.stopButtonKey));
       await tester.pumpAndSettle();
 
       // Clear the results.
