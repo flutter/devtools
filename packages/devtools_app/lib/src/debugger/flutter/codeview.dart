@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
+import '../../config_specific/logger/logger.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/theme.dart';
@@ -68,12 +69,15 @@ class _CodeViewState extends State<CodeView> {
 
     if (script == null) {
       if (scriptRef != null) {
+        final scriptId = scriptRef.id;
         widget.controller.getScript(scriptRef).then((script) {
-          setState(() {
-            this.script = script;
+          if (mounted && scriptId == scriptRef.id) {
+            setState(() {
+              this.script = script;
 
-            _parseScriptLines();
-          });
+              _parseScriptLines();
+            });
+          }
         });
       }
     } else {
@@ -100,6 +104,7 @@ class _CodeViewState extends State<CodeView> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.controller != oldWidget.controller) {
+      // TODO(devoncarew): Investigate the use of autoDispose().
       oldWidget.controller.scriptLocation
           .removeListener(_handleScriptLocationChanged);
       widget.controller.scriptLocation
@@ -123,7 +128,9 @@ class _CodeViewState extends State<CodeView> {
   }
 
   void _handleScriptLocationChanged() {
-    _updateScrollPosition();
+    if (mounted) {
+      _updateScrollPosition();
+    }
   }
 
   void _updateScrollPosition({bool animate = true}) {
@@ -138,7 +145,8 @@ class _CodeViewState extends State<CodeView> {
 
     if (!verticalController.hasAttachedControllers) {
       // TODO(devoncarew): I'm uncertain why this occurs.
-      print('LinkedScrollControllerGroup has no attached controllers');
+      // todo: ???
+      log('LinkedScrollControllerGroup has no attached controllers');
       return;
     }
 

@@ -112,7 +112,7 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
     );
   }
 
-  Future<void> _onBreakpointSelected(BreakpointAndSourcePosition bp) async {
+  void _onBreakpointSelected(BreakpointAndSourcePosition bp) {
     controller.selectBreakpoint(bp);
   }
 

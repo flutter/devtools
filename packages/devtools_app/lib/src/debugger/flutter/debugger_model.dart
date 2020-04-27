@@ -12,7 +12,7 @@ class ScriptLocation {
 
   final ScriptRef scriptRef;
 
-  /// This field can be nullable.
+  /// This field can be null.
   final SourcePosition location;
 
   @override
@@ -23,7 +23,7 @@ class ScriptLocation {
   }
 
   @override
-  int get hashCode => (scriptRef.hashCode << 7) ^ (location?.hashCode ?? 0);
+  int get hashCode => hashValues(scriptRef, location);
 
   @override
   String toString() => '${scriptRef.uri} $location';
