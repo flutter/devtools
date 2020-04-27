@@ -183,7 +183,7 @@ class NetworkController {
   /// Pauses the output of HTTP request information to the timeline.
   ///
   /// May result in some incomplete timeline events.
-  Future<void> pauseRecording() async =>
+  Future<void> stopRecording() async =>
       await _toggleHttpTimelineRecording(false);
 
   /// Checks to see if HTTP requests are currently being output. If so, recording
