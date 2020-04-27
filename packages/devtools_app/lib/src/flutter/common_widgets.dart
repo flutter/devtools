@@ -101,11 +101,13 @@ StatelessWidget clearButton({
 /// * `recording`: Whether recording is in progress.
 /// * `includeTextWidth`: The minimum width the button can be before the text is
 ///    omitted.
+/// * `labelOverride`: Optional alternative text to use for the button.
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget recordButton({
   Key key,
   @required bool recording,
   double includeTextWidth,
+  String labelOverride,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
@@ -113,7 +115,7 @@ StatelessWidget recordButton({
     onPressed: recording ? null : onPressed,
     child: MaterialIconLabel(
       Icons.fiber_manual_record,
-      'Record',
+      labelOverride ?? 'Record',
       includeTextWidth: includeTextWidth,
     ),
   );
@@ -142,13 +144,13 @@ StatelessWidget stopRecordingButton({
   );
 }
 
-/// Button to pause recording data.
+/// Button to stop recording data.
 ///
 /// * `recording`: Whether recording is in progress.
 /// * `includeTextWidth`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
-StatelessWidget pauseButton({
+StatelessWidget stopButton({
   Key key,
   @required bool paused,
   double includeTextWidth,
@@ -158,8 +160,8 @@ StatelessWidget pauseButton({
     key: key,
     onPressed: paused ? null : onPressed,
     child: MaterialIconLabel(
-      Icons.pause,
-      'Pause',
+      Icons.stop,
+      'Stop',
       includeTextWidth: includeTextWidth,
     ),
   );

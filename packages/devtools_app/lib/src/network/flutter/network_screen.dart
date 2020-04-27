@@ -9,9 +9,11 @@ import 'package:provider/provider.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../flutter/table.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../http/http_request_data.dart';
+import '../../utils.dart';
 import '../network_controller.dart';
 import 'http_request_inspector.dart';
 import 'network_model.dart';
@@ -23,7 +25,7 @@ class NetworkScreen extends Screen {
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
-  static const pauseButtonKey = Key('Pause Button');
+  static const stopButtonKey = Key('Stop Button');
   @visibleForTesting
   static const recordButtonKey = Key('Record Button');
   @visibleForTesting
@@ -34,6 +36,42 @@ class NetworkScreen extends Screen {
     return !serviceManager.connectedApp.isDartWebAppNow
         ? const NetworkScreenBody()
         : const DisabledForWebAppMessage();
+  }
+
+  @override
+  Widget buildStatus(BuildContext context, TextTheme textTheme) {
+    final networkController = Provider.of<NetworkController>(context);
+
+    final color = Theme.of(context).textTheme.bodyText2.color;
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: networkController.recordingNotifier,
+      builder: (context, recording, _) {
+        return ValueListenableBuilder<HttpRequests>(
+          valueListenable: networkController.requestsNotifier,
+          builder: (context, httpRequests, _) {
+            final count = httpRequests.requests.length;
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${nf.format(count)} ${pluralize('request', count)}'),
+                const SizedBox(width: denseSpacing),
+                SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: recording
+                      ? CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(color),
+                        )
+                      : const SizedBox(),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 }
 
@@ -95,16 +133,18 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
         recordButton(
           key: NetworkScreen.recordButtonKey,
           recording: isRecording,
+          labelOverride: 'Record traffic',
           includeTextWidth: includeTextWidth,
           onPressed: _networkController.startRecording,
         ),
-        pauseButton(
-          key: NetworkScreen.pauseButtonKey,
+        const SizedBox(width: denseSpacing),
+        stopButton(
+          key: NetworkScreen.stopButtonKey,
           paused: !isRecording,
           includeTextWidth: includeTextWidth,
-          onPressed: _networkController.pauseRecording,
+          onPressed: _networkController.stopRecording,
         ),
-        const SizedBox(width: denseSpacing),
+        const Expanded(child: SizedBox(width: denseSpacing)),
         clearButton(
           key: NetworkScreen.clearButtonKey,
           onPressed: () {
@@ -131,57 +171,50 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
           style: subheadTheme,
         ),
         numeric: numeric,
-        onSort: (i, j) => _onSort(
-          propertyAccessor,
-          i,
-          j,
-        ),
+        onSort: (i, j) => _onSort(propertyAccessor, i, j),
       );
     }
 
-    return Scrollbar(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            // TODO(jacobr): use DevTools specific table.
-            child: PaginatedDataTable(
-              rowsPerPage: 25,
-              // TODO(bkonyi): figure out how to prevent header from scrolling.
-              header: Text(
-                'HTTP Requests',
-                style: titleTheme,
-              ),
-              source: _dataTableSource,
-              showCheckboxColumn: false,
-              columns: [
-                buildDataColumn(
-                  'Request URI (${_dataTableSource.rowCount})',
-                  (HttpRequestData o) => o.name,
-                ),
-                buildDataColumn(
-                  'Method',
-                  (HttpRequestData o) => o.method,
-                ),
-                buildDataColumn(
-                  'Status',
-                  (HttpRequestData o) => o.status,
-                  numeric: true,
-                ),
-                buildDataColumn(
-                  'Duration (ms)',
-                  (HttpRequestData o) => o.duration,
-                  numeric: true,
-                ),
-                buildDataColumn(
-                  'Timestamp',
-                  (HttpRequestData o) => o.requestTime,
-                ),
-              ],
-              sortColumnIndex: _sortColumnIndex,
-              sortAscending: _sortAscending,
-            ),
-          );
-        },
+    return SingleChildScrollView(
+      // TODO(jacobr): use DevTools specific table.
+      child: PaginatedDataTable(
+        horizontalMargin: defaultSpacing,
+        columnSpacing: defaultSpacing,
+        rowsPerPage: 20,
+        dataRowHeight: defaultRowHeight,
+        // TODO(bkonyi): figure out how to prevent header from scrolling.
+        header: Text(
+          'HTTP Requests',
+          style: titleTheme,
+        ),
+        source: _dataTableSource,
+        showCheckboxColumn: false,
+        columns: [
+          buildDataColumn(
+            'Request Uri',
+            (HttpRequestData o) => o.name,
+          ),
+          buildDataColumn(
+            'Method',
+            (HttpRequestData o) => o.method,
+          ),
+          buildDataColumn(
+            'Status',
+            (HttpRequestData o) => o.status,
+            numeric: true,
+          ),
+          buildDataColumn(
+            'Duration (ms)',
+            (HttpRequestData o) => o.duration,
+            numeric: true,
+          ),
+          buildDataColumn(
+            'Timestamp',
+            (HttpRequestData o) => o.requestTime,
+          ),
+        ],
+        sortColumnIndex: _sortColumnIndex,
+        sortAscending: _sortAscending,
       ),
     );
   }
@@ -204,17 +237,11 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                   ),
                 )
               : Split(
-                  initialFractions: const [0.7, 0.3],
-                  minSizes: const [300, 300],
+                  initialFractions: const [0.6, 0.4],
+                  minSizes: const [250, 250],
                   axis: Axis.horizontal,
                   children: [
-                    (_dataTableSource.rowCount == 0)
-                        ? Container(
-                            alignment: Alignment.center,
-                            child: const CircularProgressIndicator(),
-                          )
-                        : _buildHttpRequestTable(),
-                    // Only show the data page when there's data to display.
+                    _buildHttpRequestTable(),
                     HttpRequestInspector(data),
                   ],
                 ),
