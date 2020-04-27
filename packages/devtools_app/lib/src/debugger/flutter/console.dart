@@ -8,7 +8,6 @@ import 'package:flutter/scheduler.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
 import 'codeview.dart';
-import 'common.dart';
 import 'debugger_controller.dart';
 
 // TODO(devoncarew): Allow scrolling horizontally as well.
@@ -40,46 +39,38 @@ class _ConsoleState extends State<Console> {
         theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
 
     return OutlinedBorder(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          debuggerSectionTitle(theme, text: 'Console'),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(denseSpacing),
-              child: ValueListenableBuilder<List<String>>(
-                valueListenable: widget.controller.stdio,
-                builder: (context, lines, _) {
-                  if (scrollController.hasClients) {
-                    // If we're at the end already, scroll to expose the new
-                    // content.
-                    // TODO(devoncarew): We should generalize the
-                    // auto-scroll-to-bottom feature.
-                    final pos = scrollController.position;
-                    if (pos.pixels == pos.maxScrollExtent) {
-                      SchedulerBinding.instance.addPostFrameCallback((_) {
-                        _scrollToBottom();
-                      });
-                    }
-                  }
+      child: Padding(
+        padding: const EdgeInsets.all(denseSpacing),
+        child: ValueListenableBuilder<List<String>>(
+          valueListenable: widget.controller.stdio,
+          builder: (context, lines, _) {
+            if (scrollController.hasClients) {
+              // If we're at the end already, scroll to expose the new
+              // content.
+              // TODO(devoncarew): We should generalize the
+              // auto-scroll-to-bottom feature.
+              final pos = scrollController.position;
+              if (pos.pixels == pos.maxScrollExtent) {
+                SchedulerBinding.instance.addPostFrameCallback((_) {
+                  _scrollToBottom();
+                });
+              }
+            }
 
-                  return ListView.builder(
-                    itemCount: lines.length,
-                    itemExtent: CodeView.rowHeight,
-                    controller: scrollController,
-                    itemBuilder: (context, index) {
-                      return Text(
-                        lines[index],
-                        maxLines: 1,
-                        style: textStyle,
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
+            return ListView.builder(
+              itemCount: lines.length,
+              itemExtent: CodeView.rowHeight,
+              controller: scrollController,
+              itemBuilder: (context, index) {
+                return Text(
+                  lines[index],
+                  maxLines: 1,
+                  style: textStyle,
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

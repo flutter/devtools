@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
+import '../../config_specific/logger/logger.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/theme.dart';
@@ -82,16 +83,27 @@ class _CodeViewState extends State<CodeView> {
   }
 
   void _parseScriptLines() {
+    // Parse the source into lines.
     lines = script.source?.split('\n') ?? [];
 
-    // TODO(devoncarew): Change to using SourceReportRange.possibleBreakpoints.
-    // (see getSourceReport('PossibleBreakpoints').
+    // Gather the data to display breakable lines.
     executableLines = {};
-    // Recalculate the executable lines.
-    if (script.tokenPosTable != null) {
-      for (var encodedInfo in script.tokenPosTable) {
-        executableLines.add(encodedInfo[0]);
-      }
+
+    if (script != null) {
+      final scriptId = script.id;
+
+      widget.controller
+          .getBreakablePositions(script)
+          .then((List<SourcePosition> positions) {
+        if (scriptId == scriptRef?.id) {
+          setState(() {
+            executableLines = Set.from(positions.map((p) => p.line));
+          });
+        }
+      }).catchError((e, st) {
+        // ignore - not supported for all vm service impls
+        log('$e\n$st');
+      });
     }
   }
 
@@ -211,12 +223,12 @@ class _CodeViewState extends State<CodeView> {
             style: theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono'),
             child: Expanded(
               child: Scrollbar(
-                child: ValueListenableBuilder(
+                child: ValueListenableBuilder<StackFrameAndSourcePosition>(
                   valueListenable: widget.controller.selectedStackFrame,
                   builder: (context, frame, _) {
-                    final pausedLine = frame == null
+                    final pausedFrame = frame == null
                         ? null
-                        : (frame.scriptRef == scriptRef ? frame.line : null);
+                        : (frame.scriptRef == scriptRef ? frame : null);
 
                     return Row(
                       children: [
@@ -229,7 +241,7 @@ class _CodeViewState extends State<CodeView> {
                               gutterWidth: gutterWidth,
                               scrollController: gutterController,
                               lineCount: lines.length,
-                              pausedLine: pausedLine,
+                              pausedFrame: pausedFrame,
                               breakpoints: breakpoints
                                   .where((bp) => bp.scriptRef == scriptRef)
                                   .toList(),
@@ -241,9 +253,9 @@ class _CodeViewState extends State<CodeView> {
                         const SizedBox(width: denseSpacing),
                         Expanded(
                           child: Lines(
-                            textController: textController,
+                            scrollController: textController,
                             lines: lines,
-                            pausedLine: pausedLine,
+                            pausedFrame: pausedFrame,
                           ),
                         ),
                       ],
@@ -266,7 +278,7 @@ class Gutter extends StatelessWidget {
     @required this.gutterWidth,
     @required this.scrollController,
     @required this.lineCount,
-    @required this.pausedLine,
+    @required this.pausedFrame,
     @required this.breakpoints,
     @required this.executableLines,
     @required this.onPressed,
@@ -275,7 +287,7 @@ class Gutter extends StatelessWidget {
   final double gutterWidth;
   final ScrollController scrollController;
   final int lineCount;
-  final int pausedLine;
+  final StackFrameAndSourcePosition pausedFrame;
   final List<BreakpointAndSourcePosition> breakpoints;
   final Set<int> executableLines;
   final IntCallback onPressed;
@@ -297,7 +309,7 @@ class Gutter extends StatelessWidget {
             onPressed: () => onPressed(lineNum),
             isBreakpoint: bpLineSet.contains(lineNum),
             isExecutable: executableLines.contains(lineNum),
-            isPausedHere: pausedLine == lineNum,
+            isPausedHere: pausedFrame?.line == lineNum,
           );
         },
       ),
@@ -386,26 +398,28 @@ class GutterItem extends StatelessWidget {
 class Lines extends StatelessWidget {
   const Lines({
     Key key,
-    @required this.textController,
+    @required this.scrollController,
     @required this.lines,
-    @required this.pausedLine,
+    @required this.pausedFrame,
   }) : super(key: key);
 
-  final ScrollController textController;
+  final ScrollController scrollController;
   final List<String> lines;
-  final int pausedLine;
+  final StackFrameAndSourcePosition pausedFrame;
 
   @override
   Widget build(BuildContext context) {
+    final pausedLine = pausedFrame?.line;
+
     return ListView.builder(
-      controller: textController,
+      controller: scrollController,
       itemExtent: CodeView.rowHeight,
       itemCount: lines.length,
       itemBuilder: (context, index) {
         final lineNum = index + 1;
         return LineItem(
           lineContents: lines[index],
-          isPausedHere: pausedLine == lineNum,
+          pausedFrame: pausedLine == lineNum ? pausedFrame : null,
         );
       },
     );
@@ -416,29 +430,96 @@ class LineItem extends StatelessWidget {
   const LineItem({
     Key key,
     @required this.lineContents,
-    @required this.isPausedHere,
+    this.pausedFrame,
   }) : super(key: key);
 
   final String lineContents;
-  final bool isPausedHere;
+  final StackFrameAndSourcePosition pausedFrame;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final regularStyle = TextStyle(color: theme.textTheme.bodyText2.color);
-    final selectedStyle = TextStyle(color: theme.textSelectionColor);
+    Widget child;
+    if (pausedFrame != null) {
+      final column = pausedFrame.column;
+
+      final foregroundColor =
+          isDarkTheme ? theme.textTheme.bodyText2.color : theme.primaryColor;
+
+      const colIconSize = defaultIconSize;
+      const colLeftOffset = -4.25;
+      const colBottomOffset = 13.0;
+      const colIconRotate = 180 * math.pi / 180;
+
+      child = Stack(
+        children: [
+          Text(
+            lineContents,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Row(
+            children: [
+              Text(' ' * (column - 1)),
+              Transform.translate(
+                offset: const Offset(colLeftOffset, colBottomOffset),
+                child: Transform.rotate(
+                  angle: colIconRotate,
+                  child: Icon(
+                    Icons.file_download,
+                    size: colIconSize,
+                    color: foregroundColor,
+                  ),
+                ),
+              )
+            ],
+          )
+        ],
+      );
+    } else {
+      child = Text(
+        lineContents,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+
+    final backgroundColor = pausedFrame != null
+        ? (isDarkTheme
+            ? _brighten(theme.canvasColor)
+            : _darken(theme.canvasColor))
+        : null;
 
     return Container(
       alignment: Alignment.centerLeft,
       height: CodeView.rowHeight,
-      color: isPausedHere ? theme.selectedRowColor : null,
-      child: Text(
-        lineContents,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: isPausedHere ? selectedStyle : regularStyle,
-      ),
+      color: backgroundColor,
+      child: child,
     );
   }
+}
+
+Color _darken(Color c, [double percent = 0.05]) {
+  assert(0.0 <= percent && percent <= 1.0);
+
+  percent = 1.0 - percent;
+
+  return Color.fromARGB(
+    c.alpha,
+    (c.red * percent).round(),
+    (c.green * percent).round(),
+    (c.blue * percent).round(),
+  );
+}
+
+Color _brighten(Color c, [double percent = 0.05]) {
+  assert(0.0 <= percent && percent <= 1.0);
+
+  return Color.fromARGB(
+    c.alpha,
+    c.red + ((255 - c.red) * percent).round(),
+    c.green + ((255 - c.green) * percent).round(),
+    c.blue + ((255 - c.blue) * percent).round(),
+  );
 }
