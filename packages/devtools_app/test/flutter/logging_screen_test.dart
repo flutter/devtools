@@ -20,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 import '../support/mocks.dart';
+import '../support/utils.dart';
 import 'wrappers.dart';
 
 void main() {
@@ -144,9 +145,7 @@ void main() {
         await tester.tap(find.byKey(ValueKey(fakeLogData[996])));
         await tester.pumpAndSettle();
         expect(
-          find.byWidgetPredicate((widget) =>
-              widget is RichText &&
-              widget.text.toPlainText() == 'log event 996'),
+          find.richText('log event 996'),
           findsNWidgets(2),
           reason: 'The log details should be visible both in the table and the '
               'details section.',
@@ -170,8 +169,7 @@ void main() {
         await tester.tap(find.byKey(ValueKey(log)));
         await tester.pump();
         expect(
-          find.byWidgetPredicate((widget) =>
-              widget is RichText && widget.text.toPlainText() == nonJsonOutput),
+          find.richText(nonJsonOutput),
           findsNothing,
           reason:
               "The details of the log haven't computed yet, so they shouldn't "
@@ -179,11 +177,7 @@ void main() {
         );
 
         await tester.pumpAndSettle();
-        expect(
-            find.byWidgetPredicate((widget) =>
-                widget is RichText &&
-                widget.text.toPlainText() == nonJsonOutput),
-            findsOneWidget);
+        expect(find.richText(nonJsonOutput), findsOneWidget);
       });
 
       testWidgets('can show details of json log data',
@@ -223,10 +217,7 @@ void main() {
         await tester.tap(find.byKey(ValueKey(fakeLogData[995])));
         await tester.pumpAndSettle();
 
-        final finder = find.byWidgetPredicate((widget) =>
-            widget is RichText &&
-            widget.text.toPlainText() ==
-                'Ansi color codes processed for log 995');
+        final finder = find.richText('Ansi color codes processed for log 995');
 
         expect(
           finder,

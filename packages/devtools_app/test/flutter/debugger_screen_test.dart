@@ -17,6 +17,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../support/mocks.dart';
+import '../support/utils.dart';
 import 'wrappers.dart';
 
 void main() {
@@ -83,11 +84,8 @@ void main() {
 
       expect(find.text('Console'), findsOneWidget);
 
-      // test for stdio output
-      expect(
-          find.byWidgetPredicate((widget) =>
-              widget is RichText && widget.text.toPlainText() == 'test stdio'),
-          findsOneWidget);
+      // test for stdio output.
+      expect(find.richText('test stdio'), findsOneWidget);
     });
 
     testWidgets('Console area shows processed ansi text',
@@ -97,10 +95,7 @@ void main() {
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final finder = find.byWidgetPredicate((widget) =>
-          widget is RichText &&
-          widget.text.toPlainText() ==
-              'Ansi color codes processed for console');
+      final finder = find.richText('Ansi color codes processed for console');
       expect(finder, findsOneWidget);
       finder.evaluate().forEach((element) {
         final richText = element.widget as RichText;
