@@ -4,7 +4,6 @@
 
 @TestOn('vm')
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/flutter/common_widgets.dart';
