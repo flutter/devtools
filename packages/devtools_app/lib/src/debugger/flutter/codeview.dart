@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../config_specific/logger/logger.dart';
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/theme.dart';
@@ -40,7 +41,7 @@ class CodeView extends StatefulWidget {
   _CodeViewState createState() => _CodeViewState();
 }
 
-class _CodeViewState extends State<CodeView> {
+class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
   Script script;
   List<String> lines = [];
   Set<int> executableLines = {};
@@ -61,7 +62,32 @@ class _CodeViewState extends State<CodeView> {
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
 
-    widget.controller.scriptLocation.addListener(_handleScriptLocationChanged);
+    addAutoDisposeListener(
+        widget.controller.scriptLocation, _handleScriptLocationChanged);
+  }
+
+  @override
+  void didUpdateWidget(CodeView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.controller != oldWidget.controller) {
+      cancel();
+
+      addAutoDisposeListener(
+          widget.controller.scriptLocation, _handleScriptLocationChanged);
+    }
+
+    if (widget.scriptRef != oldWidget.scriptRef) {
+      _initScriptInfo();
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    gutterController.dispose();
+    textController.dispose();
   }
 
   void _initScriptInfo() {
@@ -97,34 +123,6 @@ class _CodeViewState extends State<CodeView> {
         executableLines.add(encodedInfo[0]);
       }
     }
-  }
-
-  @override
-  void didUpdateWidget(CodeView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.controller != oldWidget.controller) {
-      // TODO(devoncarew): Investigate the use of autoDispose().
-      oldWidget.controller.scriptLocation
-          .removeListener(_handleScriptLocationChanged);
-      widget.controller.scriptLocation
-          .addListener(_handleScriptLocationChanged);
-    }
-
-    if (widget.scriptRef != oldWidget.scriptRef) {
-      _initScriptInfo();
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-
-    gutterController.dispose();
-    textController.dispose();
-
-    widget.controller.scriptLocation
-        .removeListener(_handleScriptLocationChanged);
   }
 
   void _handleScriptLocationChanged() {
