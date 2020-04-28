@@ -64,6 +64,8 @@ class _CallStackState extends State<CallStack> {
     Widget child;
 
     final asyncMarker = frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
+    final noLineInfo = frame.line == null;
+
     if (asyncMarker) {
       child = Row(
         children: [
@@ -84,7 +86,9 @@ class _CallStackState extends State<CallStack> {
         overflow: TextOverflow.ellipsis,
         text: TextSpan(
           text: _descriptionFor(frame),
-          style: selected ? selectedStyle : regularStyle,
+          style: selected
+              ? selectedStyle
+              : (noLineInfo ? subtleStyle : regularStyle),
           children: [
             TextSpan(
               text: _locationFor(frame),
@@ -100,7 +104,7 @@ class _CallStackState extends State<CallStack> {
       child: InkWell(
         onTap: () => _onStackFrameSelected(frame),
         child: Container(
-          padding: const EdgeInsets.all(densePadding),
+          padding: const EdgeInsets.symmetric(horizontal: densePadding),
           alignment: Alignment.centerLeft,
           child: child,
         ),
@@ -110,15 +114,6 @@ class _CallStackState extends State<CallStack> {
 
   Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {
     controller.selectStackFrame(frame);
-
-    // TODO(kenz): Change the line selection in the code view as well.
-    // TODO(kenz): consider un-selecting the selected breakpoint here.
-    if (frame.script != null) {
-      await controller.selectScript(frame.script);
-    } else if (frame.scriptUri != null) {
-      await controller
-          .selectScript(controller.scriptRefForUri(frame.scriptUri));
-    }
   }
 
   String _descriptionFor(StackFrameAndSourcePosition frame) {
@@ -147,6 +142,6 @@ class _CallStackState extends State<CallStack> {
       return uri;
     }
     final file = uri.split('/').last;
-    return ' $file:${frame.line}';
+    return frame.line == null ? ' $file' : ' $file:${frame.line}';
   }
 }

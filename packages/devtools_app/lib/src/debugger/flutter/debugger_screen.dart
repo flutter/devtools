@@ -19,7 +19,6 @@ import '../../globals.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
-import 'common.dart';
 import 'console.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
@@ -55,6 +54,9 @@ class DebuggerScreen extends Screen {
 class DebuggerScreenBody extends StatefulWidget {
   const DebuggerScreenBody();
 
+  static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
+  static final scriptViewKey = GlobalKey(debugLabel: 'scriptViewKey');
+
   @override
   DebuggerScreenBodyState createState() => DebuggerScreenBodyState();
 }
@@ -66,7 +68,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const breakpointsTitle = 'Breakpoints';
 
   DebuggerController controller;
-  Script script;
 
   @override
   void didChangeDependencies() {
@@ -75,43 +76,21 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
-
-    // TODO(devoncarew): We need to be more precise about the changes we listen
-    // to. These coarse listeners are causing us to rebuild much more of the UI
-    // than we need to.
-    script = controller.currentScript.value;
-    addAutoDisposeListener(controller.currentScript, () {
-      setState(() {
-        script = controller.currentScript.value;
-      });
-    });
-
-    addAutoDisposeListener(controller.callStack);
-    addAutoDisposeListener(controller.breakpointsWithLocation);
   }
 
-  // TODO(devoncarew): Support a SourceLocation as well.
-  Future<void> _onScriptSelected(ScriptRef ref) async {
-    if (ref == null) return;
-
-    await controller.selectScript(ref);
+  void _onLocationSelected(ScriptLocation location) {
+    if (location != null) {
+      controller.showScriptLocation(location);
+    }
   }
 
-  Map<int, BreakpointAndSourcePosition> _breakpointsForLines() {
-    if (script == null) return {};
+  Future<void> _toggleBreakpoint(ScriptRef script, int line) async {
+    final bp = controller.breakpointsWithLocation.value.firstWhere((bp) {
+      return bp.scriptRef == script && bp.line == line;
+    }, orElse: () => null);
 
-    return {
-      for (var b in controller.breakpointsWithLocation.value.where((b) {
-        return b.script?.id == script.id || b.scriptUri == script.uri;
-      }))
-        b.line: b,
-    };
-  }
-
-  Future<void> toggleBreakpoint(Script script, int line) async {
-    final breakpoints = _breakpointsForLines();
-    if (breakpoints.containsKey(line)) {
-      await controller.removeBreakpoint(breakpoints[line].breakpoint);
+    if (bp != null) {
+      await controller.removeBreakpoint(bp.breakpoint);
     } else {
       try {
         await controller.addBreakpoint(script.id, line);
@@ -123,50 +102,47 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final codeWidget = OutlinedBorder(
-      child: Column(
-        children: [
-          debuggerSectionTitle(theme,
-              text: script == null ? ' ' : '${script.uri}'),
-          Expanded(
-            child: CodeView(
-              script: script,
-              stack: controller.callStack.value,
-              controller: controller,
-              lineNumberToBreakpoint: _breakpointsForLines(),
-              onSelected: toggleBreakpoint,
-            ),
-          ),
-        ],
-      ),
+    final codeView = ValueListenableBuilder(
+      valueListenable: controller.currentScriptRef,
+      builder: (context, scriptRef, _) {
+        return CodeView(
+          key: DebuggerScreenBody.codeViewKey,
+          controller: controller,
+          scriptRef: scriptRef,
+          onSelected: _toggleBreakpoint,
+        );
+      },
     );
 
-    final codeArea = AnimatedBuilder(
-      animation: Listenable.merge([
-        controller.librariesVisible,
-        controller.sortedScripts,
-        controller.sortedClasses,
-      ]),
-      builder: (_, __) {
-        if (controller.librariesVisible.value) {
+    final codeArea = ValueListenableBuilder(
+      valueListenable: controller.librariesVisible,
+      builder: (context, visible, _) {
+        if (visible) {
           // TODO(devoncarew): Animate this opening and closing.
           return Split(
             axis: Axis.horizontal,
             initialFractions: const [0.70, 0.30],
             children: [
-              codeWidget,
-              ScriptPicker(
-                controller: controller,
-                scripts: controller.sortedScripts.value,
-                classes: controller.sortedClasses.value,
-                onSelected: _onScriptSelected,
+              codeView,
+              AnimatedBuilder(
+                animation: Listenable.merge([
+                  controller.sortedScripts,
+                  controller.sortedClasses,
+                ]),
+                builder: (context, _) {
+                  return ScriptPicker(
+                    key: DebuggerScreenBody.scriptViewKey,
+                    controller: controller,
+                    scripts: controller.sortedScripts.value,
+                    classes: controller.sortedClasses.value,
+                    onSelected: _onLocationSelected,
+                  );
+                },
               ),
             ],
           );
         } else {
-          return codeWidget;
+          return codeView;
         }
       },
     );
@@ -209,8 +185,11 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             debuggerPaneHeader(
               context,
               breakpointsTitle,
-              rightChild: BreakpointsCountBadge(
-                breakpoints: controller.breakpointsWithLocation.value,
+              rightChild: ValueListenableBuilder(
+                valueListenable: controller.breakpointsWithLocation,
+                builder: (context, breakpoints, _) {
+                  return BreakpointsCountBadge(breakpoints: breakpoints);
+                },
               ),
             ),
           ],

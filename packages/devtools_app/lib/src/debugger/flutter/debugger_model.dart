@@ -6,12 +6,47 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
+/// A tuple of a script and an optional location.
+class ScriptLocation {
+  ScriptLocation(this.scriptRef, {this.location});
+
+  final ScriptRef scriptRef;
+
+  /// This field can be null.
+  final SourcePosition location;
+
+  @override
+  bool operator ==(other) {
+    return other is ScriptLocation &&
+        other.scriptRef == scriptRef &&
+        other.location == location;
+  }
+
+  @override
+  int get hashCode => hashValues(scriptRef, location);
+
+  @override
+  String toString() => '${scriptRef.uri} $location';
+}
+
+/// A line, column, and an optional tokenPos.
 class SourcePosition {
   SourcePosition({@required this.line, @required this.column, this.tokenPos});
 
   final int line;
   final int column;
   final int tokenPos;
+
+  @override
+  bool operator ==(other) {
+    return other is SourcePosition &&
+        other.line == line &&
+        other.column == column &&
+        other.tokenPos == tokenPos;
+  }
+
+  @override
+  int get hashCode => (line << 7) ^ column;
 
   @override
   String toString() => '$line:$column';
@@ -40,7 +75,7 @@ abstract class BreakpointAndSourcePosition
 
   bool get resolved => breakpoint.resolved;
 
-  ScriptRef get script;
+  ScriptRef get scriptRef;
 
   String get scriptUri;
 
@@ -84,7 +119,7 @@ class _BreakpointAndSourcePositionResolved extends BreakpointAndSourcePosition {
   final SourceLocation location;
 
   @override
-  ScriptRef get script => location.script;
+  ScriptRef get scriptRef => location.script;
 
   @override
   String get scriptUri => location.script.uri;
@@ -108,7 +143,7 @@ class _BreakpointAndSourcePositionUnresolved
   final UnresolvedSourceLocation location;
 
   @override
-  ScriptRef get script => location.script;
+  ScriptRef get scriptRef => location.script;
 
   @override
   String get scriptUri => location.script?.uri ?? location.scriptUri;
@@ -135,9 +170,11 @@ class StackFrameAndSourcePosition {
   }
 
   final Frame frame;
+
+  /// This can be null.
   final SourcePosition sourcePosition;
 
-  ScriptRef get script => frame.location?.script;
+  ScriptRef get scriptRef => frame.location?.script;
 
   String get scriptUri => frame.location?.script?.uri;
 

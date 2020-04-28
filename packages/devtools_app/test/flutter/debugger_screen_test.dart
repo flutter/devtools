@@ -49,17 +49,17 @@ void main() {
           .thenReturn(ValueNotifier([]));
       when(debuggerController.librariesVisible)
           .thenReturn(ValueNotifier(false));
+      when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
       when(debuggerController.sortedClasses).thenReturn(ValueNotifier([]));
       when(debuggerController.selectedBreakpoint)
           .thenReturn(ValueNotifier(null));
-      when(debuggerController.callStack).thenReturn(ValueNotifier(null));
       when(debuggerController.stackFramesWithLocation)
           .thenReturn(ValueNotifier([]));
       when(debuggerController.selectedStackFrame)
           .thenReturn(ValueNotifier(null));
       when(debuggerController.stdio).thenReturn(ValueNotifier(['']));
-      when(debuggerController.currentScript).thenReturn(ValueNotifier(null));
+      when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
       when(debuggerController.exceptionPauseMode)
           .thenReturn(ValueNotifier('Unhandled'));
     });
@@ -167,9 +167,8 @@ void main() {
           .thenReturn(ValueNotifier(breakpointsWithLocation));
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
-      when(debuggerController.callStack).thenReturn(ValueNotifier(null));
       when(debuggerController.stdio).thenReturn(ValueNotifier([]));
-      when(debuggerController.currentScript).thenReturn(ValueNotifier(null));
+      when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
 
       await pumpDebuggerScreen(tester, debuggerController);
 
