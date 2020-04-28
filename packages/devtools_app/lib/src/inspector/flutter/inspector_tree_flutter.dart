@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:flutter/services.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/collapsible_mixin.dart';
@@ -138,12 +139,18 @@ class InspectorTreeControllerFlutter extends Object
     }
     return _maxIndent;
   }
+
+  void requestFocus() {
+    client?.requestFocus();
+  }
 }
 
 abstract class InspectorControllerClient {
   void onChanged();
 
   void scrollToRect(Rect rect);
+
+  void requestFocus();
 }
 
 class InspectorTree extends StatefulWidget {
@@ -177,6 +184,7 @@ class _InspectorTreeState extends State<InspectorTree>
   Rect currentAnimateTarget;
 
   AnimationController constraintDisplayController;
+  FocusNode _focusNode;
 
   @override
   void initState() {
@@ -187,6 +195,7 @@ class _InspectorTreeState extends State<InspectorTree>
     if (isSummaryTree) {
       constraintDisplayController = longAnimationController(this);
     }
+    _focusNode = FocusNode();
     _bindToController();
   }
 
@@ -209,6 +218,12 @@ class _InspectorTreeState extends State<InspectorTree>
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
     constraintDisplayController?.dispose();
+    _focusNode.dispose();
+  }
+
+  @override
+  void requestFocus() {
+    _focusNode.requestFocus();
   }
 
   void _onScrollYChange() {
@@ -329,6 +344,28 @@ class _InspectorTreeState extends State<InspectorTree>
     return maxOffset - viewportDimension;
   }
 
+  /// Handle arrow keys for the InspectorTree. Ignore other key events so that
+  /// other widgets have a chance to respond to them.
+  bool _handleKeyEvent(FocusNode _, RawKeyEvent event) {
+    if (event is! RawKeyDownEvent) return false;
+
+    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      controller.navigateDown();
+      return true;
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      controller.navigateUp();
+      return true;
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+      controller.navigateLeft();
+      return true;
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+      controller.navigateRight();
+      return true;
+    }
+
+    return false;
+  }
+
   void _bindToController() {
     controller?.client = this;
   }
@@ -353,20 +390,29 @@ class _InspectorTreeState extends State<InspectorTree>
         child: SizedBox(
           width: controller.rowWidth + controller.maxRowIndent,
           child: Scrollbar(
-            child: ListView.custom(
-              itemExtent: rowHeight,
-              childrenDelegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final InspectorTreeRow row = controller.root?.getRow(index);
-                  return _InspectorTreeRowWidget(
-                    key: PageStorageKey(row?.node),
-                    inspectorTreeState: this,
-                    row: row,
-                  );
-                },
-                childCount: controller.numRows,
+            child: GestureDetector(
+              onTap: _focusNode.requestFocus,
+              child: Focus(
+                onKey: _handleKeyEvent,
+                autofocus: widget.isSummaryTree,
+                focusNode: _focusNode,
+                child: ListView.custom(
+                  itemExtent: rowHeight,
+                  childrenDelegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final InspectorTreeRow row =
+                          controller.root?.getRow(index);
+                      return _InspectorTreeRowWidget(
+                        key: PageStorageKey(row?.node),
+                        inspectorTreeState: this,
+                        row: row,
+                      );
+                    },
+                    childCount: controller.numRows,
+                  ),
+                  controller: _scrollControllerY,
+                ),
               ),
-              controller: _scrollControllerY,
             ),
           ),
         ),
@@ -510,6 +556,10 @@ class InspectorRowContent extends StatelessWidget {
                 child: InkWell(
                   onTap: () {
                     controller.onSelectRow(row);
+                    // TODO(gmoothart): It may be possible to capture the tap
+                    // and request focus directly from the InspectorTree. Then
+                    // we wouldn't need this.
+                    controller.requestFocus();
                   },
                   child: Container(
                     height: rowHeight,
