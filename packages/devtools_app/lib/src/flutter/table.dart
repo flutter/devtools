@@ -27,7 +27,7 @@ typedef IndexedScrollableWidgetBuilder = Widget Function(
   int index,
 );
 
-typedef TableKeyEventHandler = void Function(RawKeyEvent event,
+typedef TableKeyEventHandler = bool Function(RawKeyEvent event,
     ScrollController scrollController, BoxConstraints constraints);
 
 enum ScrollKind { up, down, parent }
@@ -122,7 +122,6 @@ class FlatTableState<T> extends State<FlatTable<T>>
       sortColumn: widget.sortColumn,
       sortDirection: widget.sortDirection,
       onSortChanged: _sortDataAndUpdate,
-      focusNode: FocusNode(),
     );
   }
 
@@ -224,7 +223,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   int selectedNodeIndex;
   List<double> columnWidths;
   List<bool> rootsExpanded;
-  FocusNode focusNode = FocusNode();
+  FocusNode focusNode;
 
   @override
   void initState() {
@@ -233,12 +232,13 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     rootsExpanded =
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
+    focusNode = FocusNode();
   }
 
   @override
   void didUpdateWidget(TreeTable oldWidget) {
     super.didUpdateWidget(oldWidget);
-    FocusScope.of(context).requestFocus(focusNode);
+    focusNode.requestFocus();
 
     if (widget.sortColumn != oldWidget.sortColumn ||
         widget.sortDirection != oldWidget.sortDirection ||
@@ -258,6 +258,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   @override
   void dispose() {
     super.dispose();
+    focusNode.dispose();
   }
 
   void _updateItems() {
@@ -434,12 +435,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       ..forEach(_sort);
   }
 
-  void _handleKeyEvent(
+  bool _handleKeyEvent(
     RawKeyEvent event,
     ScrollController scrollController,
     BoxConstraints constraints,
   ) {
-    if (event is! RawKeyDownEvent) return;
+    if (event is! RawKeyDownEvent) return false;
 
     // Exit early if we aren't handling the key
     if (![
@@ -447,7 +448,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       LogicalKeyboardKey.arrowUp,
       LogicalKeyboardKey.arrowLeft,
       LogicalKeyboardKey.arrowRight
-    ].contains(event.logicalKey)) return;
+    ].contains(event.logicalKey)) return false;
 
     // If there is no selected node, choose the first one.
     if (selectedNode == null) {
@@ -474,7 +475,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       }
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
       // On right arrow expand the row if possible, otherwise move selection down.
-      if (!selectedNode.isExpanded) {
+      if (selectedNode.isExpandable && !selectedNode.isExpanded) {
         _toggleNode(selectedNode);
       } else {
         _moveSelection(
@@ -484,6 +485,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         );
       }
     }
+
+    return true;
   }
 
   void _moveSelection(
@@ -509,7 +512,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         newSelectedNodeIndex = max(selectedNodeIndex - 1, 0);
         break;
       case ScrollKind.parent:
-        newSelectedNodeIndex = items.indexOf(selectedNode.parent);
+        newSelectedNodeIndex = max(items.indexOf(selectedNode.parent), 0);
         break;
     }
 
@@ -556,7 +559,7 @@ class _Table<T> extends StatefulWidget {
     @required this.sortColumn,
     @required this.sortDirection,
     @required this.onSortChanged,
-    @required this.focusNode,
+    this.focusNode,
     this.handleKeyEvent,
     this.autoScrollContent = false,
   }) : super(key: key);
@@ -650,14 +653,14 @@ class _TableState<T> extends State<_Table<T>> {
             ),
             Expanded(
               child: Scrollbar(
-                child: RawKeyboardListener(
-                  onKey: (event) => widget.handleKeyEvent != null
+                child: Focus(
+                  onKey: (_, event) => widget.handleKeyEvent != null
                       ? widget.handleKeyEvent(
                           event,
                           scrollController,
                           constraints,
                         )
-                      : null,
+                      : false,
                   focusNode: widget.focusNode,
                   child: ListView.custom(
                     controller: scrollController,

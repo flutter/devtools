@@ -88,6 +88,9 @@ class TreeNode<T extends TreeNode<T>> {
   bool get isExpanded => _isExpanded;
   bool _isExpanded = false;
 
+  // TODO(gmoothart): expand does not check isExpandable, which can lead to
+  // inconsistent state, particular in combination with expandCascading. We
+  // should clean this up.
   void expand() {
     _isExpanded = true;
   }
