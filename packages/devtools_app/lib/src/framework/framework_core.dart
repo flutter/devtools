@@ -11,7 +11,6 @@ import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
 import '../framework_controller.dart';
 import '../globals.dart';
-import '../server_api_client.dart'; // todo:
 import '../service.dart';
 import '../service_manager.dart';
 import '../ui/theme.dart';

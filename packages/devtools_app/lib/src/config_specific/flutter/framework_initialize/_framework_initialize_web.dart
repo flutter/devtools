@@ -4,7 +4,6 @@
 
 import 'dart:html';
 
-import '../../../globals.dart';
 import '../../../server_api_client.dart';
 import '../../logger/logger.dart';
 
