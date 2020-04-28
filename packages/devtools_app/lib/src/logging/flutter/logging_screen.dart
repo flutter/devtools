@@ -5,24 +5,21 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../flutter/table.dart';
 import '../../flutter/theme.dart';
+import '../../flutter/utils.dart';
 import '../../globals.dart';
 import '../../table_data.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../../utils.dart';
 import '../logging_controller.dart';
-
-// TODO(devoncarew): Show rows starting from the top (and have them grow down).
-// TODO(devoncarew): We should keep new items visible (if the last item was
-// already visible).
 
 // TODO(devoncarew): The last column of a table should take up all remaining
 // width.
@@ -30,14 +27,10 @@ import '../logging_controller.dart';
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
   const LoggingScreen()
-      : super(
-          DevToolsScreenType.logging,
-          title: 'Logging',
-          icon: Octicons.clippy,
-        );
+      : super('logging', title: 'Logging', icon: Octicons.clippy);
 
   @override
-  String get docPageId => 'logging';
+  String get docPageId => screenId;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +42,8 @@ class LoggingScreen extends Screen {
 
   @override
   Widget buildStatus(BuildContext context, TextTheme textTheme) {
-    final LoggingController controller = Controllers.of(context).logging;
+    final LoggingController controller =
+        Provider.of<LoggingController>(context);
 
     return StreamBuilder<String>(
       initialData: controller.statusText,
@@ -71,9 +65,10 @@ class LoggingScreenBody extends StatefulWidget {
 class _LoggingScreenState extends State<LoggingScreenBody>
     with AutoDisposeMixin {
   LogData selected;
+
   TextEditingController filterController;
 
-  LoggingController get controller => Controllers.of(context).logging;
+  LoggingController controller;
 
   @override
   void initState() {
@@ -85,6 +80,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final newController = Provider.of<LoggingController>(context);
+    if (newController == controller) return;
+    controller = newController;
 
     cancel();
 
@@ -121,7 +120,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
               decoration: const InputDecoration(
                 isDense: true,
                 border: OutlineInputBorder(),
-                labelText: 'Search',
+                labelText: 'Filter',
+                // TODO(devoncarew): Include hint text (this currently has an
+                // issue w/ sizing of the search field's contents).
+                //hintText: 'term -term',
               ),
             ),
           ),
@@ -134,11 +136,15 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           axis: Axis.vertical,
           initialFractions: const [0.78, 0.22],
           children: [
-            LogsTable(
-              data: controller.filteredData,
-              onItemSelected: _select,
+            OutlinedBorder(
+              child: LogsTable(
+                data: controller.filteredData,
+                onItemSelected: _select,
+              ),
             ),
-            LogDetails(log: selected),
+            OutlinedBorder(
+              child: LogDetails(log: selected),
+            ),
           ],
         ),
       ),
@@ -174,7 +180,7 @@ class LogsTable extends StatelessWidget {
     return FlatTable<LogData>(
       columns: columns,
       data: data,
-      reverse: true,
+      autoScrollContent: true,
       keyFactory: (LogData data) => ValueKey<LogData>(data),
       onItemSelected: onItemSelected,
       sortColumn: when,
@@ -185,6 +191,7 @@ class LogsTable extends StatelessWidget {
 
 class LogDetails extends StatefulWidget {
   const LogDetails({Key key, @required this.log}) : super(key: key);
+
   final LogData log;
 
   @override
@@ -193,38 +200,19 @@ class LogDetails extends StatefulWidget {
 
 class _LogDetailsState extends State<LogDetails>
     with SingleTickerProviderStateMixin {
-  AnimationController crossFade;
-
   @override
   void initState() {
     super.initState();
-    crossFade = defaultAnimationController(this)
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          setState(() {
-            _oldLog = widget.log;
-            crossFade.value = 0.0;
-          });
-        }
-      });
-    // We'll use a linear curve for this animation, so no curve needed.
-    _computeLogDetails();
-  }
 
-  @override
-  void dispose() {
-    crossFade.dispose();
-    super.dispose();
+    _computeLogDetails();
   }
 
   @override
   void didUpdateWidget(LogDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.log != oldWidget.log) {
-      _oldLog = oldWidget.log;
-      crossFade.forward();
+      _computeLogDetails();
     }
-    _computeLogDetails();
   }
 
   Future<void> _computeLogDetails() async {
@@ -234,8 +222,6 @@ class _LogDetailsState extends State<LogDetails>
     }
   }
 
-  LogData _oldLog;
-
   bool showInspector(LogData log) => log != null && log.node != null;
 
   bool showSimple(LogData log) =>
@@ -243,26 +229,9 @@ class _LogDetailsState extends State<LogDetails>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: crossFade,
-      builder: (context, _) {
-        return Container(
-          color: Theme.of(context).cardColor,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Opacity(
-                opacity: crossFade.value,
-                child: _buildContent(context, widget.log),
-              ),
-              Opacity(
-                opacity: 1 - crossFade.value,
-                child: _buildContent(context, _oldLog),
-              ),
-            ],
-          ),
-        );
-      },
+    return Container(
+      color: Theme.of(context).cardColor,
+      child: _buildContent(context, widget.log),
     );
   }
 
@@ -276,16 +245,22 @@ class _LogDetailsState extends State<LogDetails>
     return const SizedBox();
   }
 
-  // TODO(https://github.com/flutter/devtools/issues/1370): implement this.
+  // TODO(#1370): implement this.
   Widget _buildInspector(BuildContext context, LogData log) => const SizedBox();
 
   Widget _buildSimpleLog(BuildContext context, LogData log) {
+    final RichText richText = RichText(
+      text: TextSpan(
+        children: processAnsiTerminalCodes(
+          log.prettyPrinted,
+          fixedFontStyle(context),
+        ),
+      ),
+    );
+
     return Scrollbar(
       child: SingleChildScrollView(
-        child: Text(
-          log.prettyPrinted ?? '',
-          style: fixedFontStyle(context),
-        ),
+        child: richText,
       ),
     );
   }
@@ -307,7 +282,7 @@ class _KindColumn extends LogKindColumn implements ColumnRenderer<LogData> {
   String getValue(LogData dataObject) => dataObject.kind;
 
   @override
-  double get fixedWidthPx => 140;
+  double get fixedWidthPx => 145;
 
   @override
   Widget build(BuildContext context, LogData item) {
@@ -384,6 +359,20 @@ class _MessageColumn extends LogMessageColumn
             ),
           ),
         ],
+      );
+    } else if (data.kind == 'stdout') {
+      // TODO(helin24): Move this to logging controller when dart:html is removed.
+      return RichText(
+        text: TextSpan(
+          children: processAnsiTerminalCodes(
+            // TODO(helin24): Recompute summary length considering ansi codes.
+            //  The current summary is generally the first 200 chars of details.
+            getDisplayValue(data),
+            fixedFontStyle(context),
+          ),
+        ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       );
     } else {
       return null;

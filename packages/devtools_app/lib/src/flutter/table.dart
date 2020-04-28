@@ -1,23 +1,36 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart' hide TableRow;
+import 'package:flutter/services.dart';
 
 import '../table_data.dart';
 import '../trees.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
 import 'collapsible_mixin.dart';
+import 'common_widgets.dart' show ScrollControllerAutoScroll;
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'theme.dart';
 
 // TODO(devoncarew): We need to render the selected row with a different
 // background color.
 
+/// The maximum height to allow for rows in the table.
+///
+/// When rows in the table expand or collapse, they will animate between a
+/// height of 0 and a height of [defaultRowHeight].
+const defaultRowHeight = 32.0;
+
 typedef IndexedScrollableWidgetBuilder = Widget Function(
   BuildContext,
   LinkedScrollControllerGroup linkedScrollControllerGroup,
   int index,
 );
+
+typedef TableKeyEventHandler = void Function(RawKeyEvent event,
+    ScrollController scrollController, BoxConstraints constraints);
+
+enum ScrollKind { up, down, parent }
 
 /// A table that displays in a collection of [data], based on a collection of
 /// [ColumnData].
@@ -29,7 +42,7 @@ class FlatTable<T> extends StatefulWidget {
     Key key,
     @required this.columns,
     @required this.data,
-    this.reverse = false,
+    this.autoScrollContent = false,
     @required this.keyFactory,
     @required this.onItemSelected,
     @required this.sortColumn,
@@ -44,11 +57,8 @@ class FlatTable<T> extends StatefulWidget {
 
   final List<T> data;
 
-  /// Display list items reversed and from the bottom up.
-  ///
-  /// Note: this is a workaround for implementing auto-scrolling in order to
-  /// always display newly added items.
-  final bool reverse;
+  /// Auto-scrolling the table to keep new content visible.
+  final bool autoScrollContent;
 
   /// Factory that creates keys for each row in this table.
   final Key Function(T data) keyFactory;
@@ -107,11 +117,12 @@ class FlatTableState<T> extends State<FlatTable<T>>
       itemCount: widget.data.length,
       columns: widget.columns,
       columnWidths: columnWidths,
-      reverse: widget.reverse,
+      autoScrollContent: widget.autoScrollContent,
       rowBuilder: _buildRow,
       sortColumn: widget.sortColumn,
       sortDirection: widget.sortDirection,
       onSortChanged: _sortDataAndUpdate,
+      focusNode: FocusNode(),
     );
   }
 
@@ -210,8 +221,10 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   Set<T> animatingChildrenSet = {};
   T animatingNode;
   T selectedNode;
+  int selectedNodeIndex;
   List<double> columnWidths;
   List<bool> rootsExpanded;
+  FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
@@ -225,6 +238,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   @override
   void didUpdateWidget(TreeTable oldWidget) {
     super.didUpdateWidget(oldWidget);
+    FocusScope.of(context).requestFocus(focusNode);
+
     if (widget.sortColumn != oldWidget.sortColumn ||
         widget.sortDirection != oldWidget.sortDirection ||
         !collectionEquals(widget.dataRoots, oldWidget.dataRoots)) {
@@ -262,11 +277,16 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     });
   }
 
-  void _onItemPressed(T node) {
+  void _onItemPressed(T node, int nodeIndex) {
     /// Rebuilds the table whenever the tree structure has been updated
-    setState(() {
-      selectedNode = node;
+    selectedNode = node;
+    selectedNodeIndex = nodeIndex;
 
+    _toggleNode(node);
+  }
+
+  void _toggleNode(T node) {
+    setState(() {
       if (!node.isExpandable) return;
       animatingNode = node;
       List<T> nodeChildren;
@@ -359,6 +379,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       sortColumn: widget.sortColumn,
       sortDirection: widget.sortDirection,
       onSortChanged: _sortDataAndUpdate,
+      focusNode: focusNode,
+      handleKeyEvent: _handleKeyEvent,
     );
   }
 
@@ -373,7 +395,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         key: widget.keyFactory(node),
         linkedScrollControllerGroup: linkedScrollControllerGroup,
         node: node,
-        onPressed: _onItemPressed,
+        onPressed: (item) => _onItemPressed(item, index),
         backgroundColor: isNodeSelected
             ? Theme.of(context).selectedRowColor
             : TableRow.colorFor(context, index),
@@ -412,6 +434,112 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       ..forEach(_sort);
   }
 
+  void _handleKeyEvent(
+    RawKeyEvent event,
+    ScrollController scrollController,
+    BoxConstraints constraints,
+  ) {
+    if (event is! RawKeyDownEvent) return;
+
+    // Exit early if we aren't handling the key
+    if (![
+      LogicalKeyboardKey.arrowDown,
+      LogicalKeyboardKey.arrowUp,
+      LogicalKeyboardKey.arrowLeft,
+      LogicalKeyboardKey.arrowRight
+    ].contains(event.logicalKey)) return;
+
+    // If there is no selected node, choose the first one.
+    if (selectedNode == null) {
+      selectedNode = items[0];
+      selectedNodeIndex = 0;
+    }
+    assert(selectedNode == items[selectedNodeIndex]);
+
+    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      _moveSelection(ScrollKind.down, scrollController, constraints.maxHeight);
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      _moveSelection(ScrollKind.up, scrollController, constraints.maxHeight);
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+      // On left arrow collapse the row if it is expanded. If it is not, move
+      // selection to its parent.
+      if (selectedNode.isExpanded) {
+        _toggleNode(selectedNode);
+      } else {
+        _moveSelection(
+          ScrollKind.parent,
+          scrollController,
+          constraints.maxHeight,
+        );
+      }
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+      // On right arrow expand the row if possible, otherwise move selection down.
+      if (!selectedNode.isExpanded) {
+        _toggleNode(selectedNode);
+      } else {
+        _moveSelection(
+          ScrollKind.down,
+          scrollController,
+          constraints.maxHeight,
+        );
+      }
+    }
+  }
+
+  void _moveSelection(
+    ScrollKind scrollKind,
+    ScrollController scrollController,
+    double viewportHeight,
+  ) {
+    // get the index of the first item fully visible in the viewport
+    final firstItemIndex = (scrollController.offset / defaultRowHeight).ceil();
+
+    // '-1' in the following calculations is needed because the header row
+    // occupies space in the viewport so we must subtract it out.
+    final minCompleteItemsInView =
+        (viewportHeight / defaultRowHeight).floor() - 1;
+    final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
+    int newSelectedNodeIndex;
+
+    switch (scrollKind) {
+      case ScrollKind.down:
+        newSelectedNodeIndex = min(selectedNodeIndex + 1, items.length - 1);
+        break;
+      case ScrollKind.up:
+        newSelectedNodeIndex = max(selectedNodeIndex - 1, 0);
+        break;
+      case ScrollKind.parent:
+        newSelectedNodeIndex = items.indexOf(selectedNode.parent);
+        break;
+    }
+
+    final newSelectedNode = items[newSelectedNodeIndex];
+    final isBelowViewport = newSelectedNodeIndex > lastItemIndex;
+    final isAboveViewport = newSelectedNodeIndex < firstItemIndex;
+
+    if (isBelowViewport) {
+      // Scroll so selected row is the last full item displayed in the viewport.
+      // To do this we need to be showing the (minCompleteItemsInView + 1)
+      // previous item  at the top.
+      scrollController.animateTo(
+        (newSelectedNodeIndex - minCompleteItemsInView + 1) * defaultRowHeight,
+        duration: defaultDuration,
+        curve: defaultCurve,
+      );
+    } else if (isAboveViewport) {
+      scrollController.animateTo(
+        newSelectedNodeIndex * defaultRowHeight,
+        duration: defaultDuration,
+        curve: defaultCurve,
+      );
+    }
+
+    setState(() {
+      selectedNode = newSelectedNode;
+      selectedNodeIndex = newSelectedNodeIndex;
+    });
+  }
+
   void _sortDataAndUpdate(ColumnData column, SortDirection direction) {
     sortData(column, direction);
     _updateItems();
@@ -428,27 +556,25 @@ class _Table<T> extends StatefulWidget {
     @required this.sortColumn,
     @required this.sortDirection,
     @required this.onSortChanged,
-    this.reverse = false,
+    @required this.focusNode,
+    this.handleKeyEvent,
+    this.autoScrollContent = false,
   }) : super(key: key);
 
   final int itemCount;
 
-  final bool reverse;
+  final bool autoScrollContent;
   final List<ColumnData<T>> columns;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
   final ColumnData<T> sortColumn;
   final SortDirection sortDirection;
   final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
+  final FocusNode focusNode;
+  final TableKeyEventHandler handleKeyEvent;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
-
-  /// The maximum height to allow for rows in the table.
-  ///
-  /// When rows in the table expand or collapse, they will animate between
-  /// a height of 0 and a height of [defaultRowHeight].
-  static const defaultRowHeight = 32.0;
 
   @override
   _TableState<T> createState() => _TableState<T>();
@@ -458,13 +584,23 @@ class _TableState<T> extends State<_Table<T>> {
   LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
   ColumnData<T> sortColumn;
   SortDirection sortDirection;
+  ScrollController scrollController;
 
   @override
   void initState() {
     super.initState();
+
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
     sortColumn = widget.sortColumn;
     sortDirection = widget.sortDirection;
+    scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+
+    super.dispose();
   }
 
   /// The width of all columns in the table, with additional padding.
@@ -472,10 +608,6 @@ class _TableState<T> extends State<_Table<T>> {
       widget.columnWidths.reduce((x, y) => x + y) + (2 * defaultSpacing);
 
   Widget _buildItem(BuildContext context, int index) {
-    if (widget.reverse) {
-      index = widget.itemCount - index - 1;
-    }
-
     return widget.rowBuilder(
       context,
       _linkedHorizontalScrollControllerGroup,
@@ -489,6 +621,13 @@ class _TableState<T> extends State<_Table<T>> {
       _buildItem,
       childCount: widget.itemCount,
     );
+
+    // If we're at the end already, scroll to expose the new content.
+    if (widget.autoScrollContent) {
+      if (scrollController.hasClients && scrollController.atScrollBottom) {
+        scrollController.autoScrollToBottom();
+      }
+    }
 
     return LayoutBuilder(builder: (context, constraints) {
       return SizedBox(
@@ -511,9 +650,19 @@ class _TableState<T> extends State<_Table<T>> {
             ),
             Expanded(
               child: Scrollbar(
-                child: ListView.custom(
-                  reverse: widget.reverse,
-                  childrenDelegate: itemDelegate,
+                child: RawKeyboardListener(
+                  onKey: (event) => widget.handleKeyEvent != null
+                      ? widget.handleKeyEvent(
+                          event,
+                          scrollController,
+                          constraints,
+                        )
+                      : null,
+                  focusNode: widget.focusNode,
+                  child: ListView.custom(
+                    controller: scrollController,
+                    childrenDelegate: itemDelegate,
+                  ),
                 ),
               ),
             ),
@@ -691,7 +840,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final row = tableRowFor(context);
 
     final box = SizedBox(
-      height: _Table.defaultRowHeight,
+      height: defaultRowHeight,
       child: Material(
         color: widget.backgroundColor ?? Theme.of(context).canvasColor,
         child: widget.onPressed != null
@@ -714,10 +863,10 @@ class _TableRowState<T> extends State<TableRow<T>>
             box,
             for (var c in widget.expansionChildren)
               SizedBox(
-                height: _Table.defaultRowHeight * expandCurve.value,
+                height: defaultRowHeight * expandCurve.value,
                 child: OverflowBox(
                   minHeight: 0.0,
-                  maxHeight: _Table.defaultRowHeight,
+                  maxHeight: defaultRowHeight,
                   alignment: Alignment.topCenter,
                   child: c,
                 ),
@@ -773,7 +922,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                       : Icons.expand_more,
                   size: defaultIconSize,
                 ),
-              const SizedBox(height: _Table.defaultRowHeight, width: 4.0),
+              const SizedBox(height: defaultRowHeight, width: 4.0),
               Text(
                 column.title,
                 overflow: TextOverflow.ellipsis,

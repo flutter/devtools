@@ -28,6 +28,7 @@ const protocolVersion = '1.1.0';
 const argHelp = 'help';
 const argVmUri = 'vm-uri';
 const argEnableNotifications = 'enable-notifications';
+const argAllowEmbedding = 'allow-embedding';
 const argHeadlessMode = 'headless';
 const argDebugMode = 'debug';
 const argLaunchBrowser = 'launch-browser';
@@ -94,6 +95,12 @@ final argParser = ArgParser()
         'Requests notification permissions immediately when a client connects back to the server.',
   )
   ..addFlag(
+    argAllowEmbedding,
+    hide: true,
+    negatable: false,
+    help: 'Allow embedding DevTools inside an iframe.',
+  )
+  ..addFlag(
     argHeadlessMode,
     hide: true,
     negatable: false,
@@ -127,6 +134,7 @@ Future<HttpServer> serveDevToolsWithArgs(
   final bool machineMode = args[argMachine];
   final bool launchBrowser = args[argLaunchBrowser];
   final bool enableNotifications = args[argEnableNotifications];
+  final bool allowEmbedding = args[argAllowEmbedding];
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
   final bool headlessMode = args[argHeadlessMode];
   final bool debugMode = args[argDebugMode];
@@ -144,6 +152,7 @@ Future<HttpServer> serveDevToolsWithArgs(
     debugMode: debugMode,
     launchBrowser: launchBrowser,
     enableNotifications: enableNotifications,
+    allowEmbedding: allowEmbedding,
     port: port,
     headlessMode: headlessMode,
     numPortsToTry: numPortsToTry,
@@ -166,6 +175,7 @@ Future<HttpServer> serveDevTools({
   bool debugMode = false,
   bool launchBrowser = false,
   bool enableNotifications = false,
+  bool allowEmbedding = false,
   bool headlessMode = false,
   bool verboseMode = false,
   String hostname = 'localhost',
@@ -217,6 +227,9 @@ Future<HttpServer> serveDevTools({
     throw ex;
   }
 
+  if (allowEmbedding) {
+    server.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
+  }
   shelf.serveRequests(server, handler);
 
   final devToolsUrl = 'http://${server.address.host}:${server.port}';
@@ -714,7 +727,10 @@ Future<Map<String, dynamic>> launchDevTools(
         shouldNotify,
       )) {
     _emitLaunchEvent(
-        reused: true, notified: shouldNotify, machineMode: machineMode);
+        reused: true,
+        notified: shouldNotify,
+        pid: null,
+        machineMode: machineMode);
     return {'reused': true, 'notified': shouldNotify};
   }
 
@@ -747,6 +763,7 @@ Future<Map<String, dynamic>> launchDevTools(
   final useNativeBrowser = _isChromeOS &&
       _isAccessibleToChromeOSNativeBrowser(Uri.parse(devToolsUrl)) &&
       _isAccessibleToChromeOSNativeBrowser(vmServiceUri);
+  int browserPid;
   if (useNativeBrowser) {
     await Process.start('x-www-browser', [uriToLaunch.toString()]);
   } else {
@@ -760,10 +777,15 @@ Future<Map<String, dynamic>> launchDevTools(
             '--no-sandbox',
           ]
         : <String>[];
-    await Chrome.start([uriToLaunch.toString()], args: args);
+    final proc = await Chrome.start([uriToLaunch.toString()], args: args);
+    browserPid = proc.pid;
   }
-  _emitLaunchEvent(reused: false, notified: false, machineMode: machineMode);
-  return {'reused': false, 'notified': false};
+  _emitLaunchEvent(
+      reused: false,
+      notified: false,
+      pid: browserPid,
+      machineMode: machineMode);
+  return {'reused': false, 'notified': false, 'pid': browserPid};
 }
 
 /// Prints a launch event to stdout so consumers of the DevTools server
@@ -771,12 +793,13 @@ Future<Map<String, dynamic>> launchDevTools(
 void _emitLaunchEvent(
     {@required bool reused,
     @required bool notified,
+    @required int pid,
     @required bool machineMode}) {
   printOutput(
     null,
     {
       'event': 'client.launch',
-      'params': {'reused': reused, 'notified': notified},
+      'params': {'reused': reused, 'notified': notified, 'pid': pid},
     },
     machineMode: machineMode,
   );

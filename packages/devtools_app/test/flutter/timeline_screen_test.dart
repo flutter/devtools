@@ -30,9 +30,8 @@ void main() {
     WidgetTester tester, {
     TimelineController timelineController,
   }) async {
-    // Set a wide enough screen width that we do not run into overflow.
     await tester.pumpWidget(wrapWithControllers(
-      wrapWithBannerMessages(const TimelineScreenBody()),
+      const TimelineScreenBody(),
       timeline: controller = timelineController ?? TimelineController(),
     ));
     expect(find.byType(TimelineScreenBody), findsOneWidget);

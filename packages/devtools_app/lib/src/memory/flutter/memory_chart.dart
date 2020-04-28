@@ -8,7 +8,6 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
-
 import 'package:mp_chart/mp/chart/line_chart.dart';
 import 'package:mp_chart/mp/controller/line_chart_controller.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
@@ -18,7 +17,6 @@ import 'package:mp_chart/mp/core/data_set/line_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:mp_chart/mp/core/enums/axis_dependency.dart';
-
 // TODO(terry): Enable legend when textsize is correct.
 // import 'package:mp_chart/mp/core/enums/legend_vertical_alignment.dart';
 // import 'package:mp_chart/mp/core/enums/legend_form.dart';
@@ -34,9 +32,9 @@ import 'package:mp_chart/mp/core/utils/color_utils.dart';
 import 'package:mp_chart/mp/core/utils/painter_utils.dart';
 import 'package:mp_chart/mp/core/value_formatter/large_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
+import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/theme.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/theme.dart';
@@ -76,7 +74,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    controller = Controllers.of(context).memory;
+    controller = Provider.of<MemoryController>(context);
 
     // Hookup access to the MemoryController when a data point is clicked
     // in a chart.
@@ -177,7 +175,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   Slider createTimelineSlider() => Slider.adaptive(
         label: timelineSliderLabel(controller.sliderValue),
         activeColor: Colors.indigoAccent,
-        min: 0.0,
         max: controller.numberOfStops.toDouble(),
         inactiveColor: Colors.grey,
         onChanged: controller.numberOfStops > 0
@@ -202,7 +199,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         child: MaterialIconLabel(
           controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
           'Android Memory',
-          minIncludeTextWidth: 900,
+          includeTextWidth: 900,
         ),
       );
 

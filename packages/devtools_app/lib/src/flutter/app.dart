@@ -5,10 +5,25 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:provider/provider.dart';
 
 import '../../devtools.dart' as devtools;
+import '../debugger/flutter/debugger_controller.dart';
+import '../debugger/flutter/debugger_screen.dart';
 import '../framework/framework_core.dart';
 import '../globals.dart';
+import '../info/flutter/info_screen.dart';
+import '../inspector/flutter/inspector_screen.dart';
+import '../logging/flutter/logging_screen.dart';
+import '../logging/logging_controller.dart';
+import '../memory/flutter/memory_controller.dart';
+import '../memory/flutter/memory_screen.dart';
+import '../network/flutter/network_screen.dart';
+import '../network/network_controller.dart';
+import '../performance/flutter/performance_screen.dart';
+import '../performance/performance_controller.dart';
+import '../timeline/flutter/timeline_controller.dart';
+import '../timeline/flutter/timeline_screen.dart';
 import '../ui/flutter/service_extension_widgets.dart';
 import 'common_widgets.dart';
 import 'connect_screen.dart';
@@ -17,15 +32,20 @@ import 'notifications.dart';
 import 'preferences.dart';
 import 'scaffold.dart';
 import 'screen.dart';
+import 'snapshot_screen.dart';
 import 'theme.dart';
 import 'utils.dart';
+
+const homeRoute = '/';
+const connectRoute = '/connect';
+const snapshotRoute = '/snapshot';
 
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(this.screens);
 
-  final List<Screen> screens;
+  final List<DevToolsScreen> screens;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -42,7 +62,9 @@ class DevToolsApp extends StatefulWidget {
 // TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
-  final PreferencesController preferences = PreferencesController();
+  final preferences = PreferencesController();
+
+  List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
   @override
   void initState() {
@@ -63,17 +85,22 @@ class DevToolsAppState extends State<DevToolsApp> {
   /// Generates routes, separating the path from URL query parameters.
   Route _generateRoute(RouteSettings settings) {
     final uri = Uri.parse(settings.name);
-    final path = uri.path;
+    final path = uri.path.isEmpty ? connectRoute : uri.path;
+    final args = settings.arguments;
 
     // Provide the appropriate page route.
     if (routes.containsKey(path)) {
-      WidgetBuilder builder =
-          (context) => routes[path](context, uri.queryParameters);
+      WidgetBuilder builder = (context) => routes[path](
+            context,
+            uri.queryParameters,
+            args,
+          );
       assert(() {
         builder = (context) => _AlternateCheckedModeBanner(
               builder: (context) => routes[path](
                 context,
                 uri.queryParameters,
+                args,
               ),
             );
         return true;
@@ -86,7 +113,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       settings: settings,
       builder: (BuildContext context) {
         return DevToolsScaffold.withChild(
-          child: CenteredMessage('Sorry, $uri was not found.'),
+          child: CenteredMessage("'$uri' not found."),
         );
       },
     );
@@ -95,20 +122,30 @@ class DevToolsAppState extends State<DevToolsApp> {
   /// The routes that the app exposes.
   Map<String, UrlParametersBuilder> get routes {
     return _routes ??= {
-      '/': (_, params) => Initializer(
+      homeRoute: (_, params, __) => Initializer(
             url: params['uri'],
-            builder: (_) => DevToolsScaffold(
-              tabs: _visibleScreens(),
-              actions: [
-                HotReloadButton(),
-                HotRestartButton(),
-                OpenSettingsAction(),
-                OpenAboutAction(),
-              ],
+            builder: (_) => _providedControllers(
+              child: DevToolsScaffold(
+                tabs: _visibleScreens(),
+                actions: [
+                  HotReloadButton(),
+                  HotRestartButton(),
+                  OpenSettingsAction(),
+                  OpenAboutAction(),
+                ],
+              ),
             ),
           ),
-      '/connect': (_, __) =>
+      connectRoute: (_, __, ___) =>
           DevToolsScaffold.withChild(child: ConnectScreenBody()),
+      snapshotRoute: (_, __, args) {
+        return DevToolsScaffold.withChild(
+          child: _providedControllers(
+            offline: true,
+            child: SnapshotScreenBody(args, _screens),
+          ),
+        );
+      }
     };
   }
 
@@ -120,7 +157,7 @@ class DevToolsAppState extends State<DevToolsApp> {
 
   List<Screen> _visibleScreens() {
     final visibleScreens = <Screen>[];
-    for (var screen in widget.screens) {
+    for (var screen in _screens) {
       if (screen.conditionalLibrary != null) {
         if (serviceManager.serviceAvailable.isCompleted &&
             serviceManager
@@ -133,6 +170,19 @@ class DevToolsAppState extends State<DevToolsApp> {
       }
     }
     return visibleScreens;
+  }
+
+  Widget _providedControllers({@required Widget child, bool offline = false}) {
+    final _providers = widget.screens
+        .where((s) =>
+            s.createController != null && (offline ? s.supportsOffline : true))
+        .map((s) => s.controllerProvider)
+        .toList();
+
+    return MultiProvider(
+      providers: _providers,
+      child: child,
+    );
   }
 
   @override
@@ -151,10 +201,47 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 }
 
-/// A [WidgetBuilder] that takes an additional map of URL query parameters.
+/// DevTools screen wrapper that is responsible for creating and providing the
+/// screen's controller, as well as enabling offline support.
+///
+/// [C] corresponds to the type of the screen's controller, which is created by
+/// [createController] and provided by [controllerProvider].
+class DevToolsScreen<C> {
+  const DevToolsScreen(
+    this.screen, {
+    @required this.createController,
+    this.supportsOffline = false,
+  });
+
+  final Screen screen;
+
+  /// Responsible for creating the controller for this screen, if non-null.
+  ///
+  /// The controller will then be provided via [controllerProvider], and
+  /// widgets depending on this controller can access it by calling
+  /// `Provider<C>.of(context)`.
+  ///
+  /// If null, [screen] will be responsible for creating and maintaining its own
+  /// controller.
+  final C Function() createController;
+
+  /// Whether this screen has implemented offline support.
+  ///
+  /// Defaults to false.
+  final bool supportsOffline;
+
+  Provider<C> get controllerProvider {
+    assert(createController != null);
+    return Provider<C>(create: (_) => createController());
+  }
+}
+
+/// A [WidgetBuilder] that takes an additional map of URL query parameters and
+/// args.
 typedef UrlParametersBuilder = Widget Function(
   BuildContext,
   Map<String, String>,
+  SnapshotArguments args,
 );
 
 /// Displays the checked mode banner in the bottom end corner instead of the
@@ -335,3 +422,53 @@ class SettingsDialog extends StatelessWidget {
     );
   }
 }
+
+/// Screens to initialize DevTools with.
+///
+/// If the screen depends on a provided controller, the provider should be
+/// provided here.
+///
+/// Conditional screens can be added to this list, and they will automatically
+/// be shown or hidden based on the [Screen.conditionalLibrary] provided.
+List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
+      const DevToolsScreen(InspectorScreen(), createController: null),
+      DevToolsScreen<TimelineController>(
+        const TimelineScreen(),
+        createController: () => TimelineController(),
+        supportsOffline: true,
+      ),
+      DevToolsScreen<MemoryController>(
+        const MemoryScreen(),
+        createController: () => MemoryController(),
+      ),
+      DevToolsScreen<PerformanceController>(
+        const PerformanceScreen(),
+        createController: () => PerformanceController(),
+      ),
+      DevToolsScreen<DebuggerController>(
+        const DebuggerScreen(),
+        createController: () => DebuggerController(),
+      ),
+      DevToolsScreen<NetworkController>(
+        const NetworkScreen(),
+        createController: () => NetworkController(),
+      ),
+      DevToolsScreen<LoggingController>(
+        const LoggingScreen(),
+        createController: () => LoggingController(
+          onLogCountStatusChanged: (_) {
+            // TODO(devoncarew): This callback is not used.
+          },
+          // TODO(djshuckerow): Use a notifier pattern for the logging controller.
+          // That way, it is visible if it has listeners and invisible otherwise.
+          isVisible: () => true,
+        ),
+      ),
+      const DevToolsScreen(InfoScreen(), createController: null),
+// Uncomment to see a sample implementation of a conditional screen.
+//      DevToolsScreen<ExampleController>(
+//        const ExampleConditionalScreen(),
+//        createController: () => ExampleController(),
+//        supportsOffline: true,
+//      ),
+    ];

@@ -4,19 +4,19 @@
 
 import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
 import 'package:devtools_app/src/flutter/banner_messages.dart';
-import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/flutter/notifications.dart';
-import 'package:devtools_app/src/flutter/scaffold.dart';
 import 'package:devtools_app/src/flutter/theme.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart';
+import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
+import 'package:provider/provider.dart';
 
 import '../support/mocks.dart';
 
@@ -39,31 +39,26 @@ Widget wrapWithControllers(
   TimelineController timeline,
   PerformanceController performance,
   DebuggerController debugger,
+  NetworkController network,
   BannerMessagesController bannerMessages,
 }) {
-  return MaterialApp(
-    theme: themeFor(isDarkTheme: false),
-    home: Material(
-      child: Controllers.overridden(
-        overrideProviders: () {
-          return ProvidedControllers(
-            logging: logging ?? MockLoggingController(),
-            memory: memory ?? MockFlutterMemoryController(),
-            timeline: timeline ?? MockTimelineController(),
-            performance: performance ?? MockPerformanceController(),
-            debugger: debugger ?? MockDebuggerController(),
-            bannerMessages: bannerMessages ?? MockBannerMessagesController(),
-          );
-        },
-        child: widget,
-      ),
+  final _providers = [
+    Provider<BannerMessagesController>.value(
+      value: bannerMessages ?? MockBannerMessagesController(),
     ),
-  );
-}
-
-Widget wrapWithBannerMessages(Widget widget) {
-  return BannerMessages(
-    screen: SimpleScreen(widget),
+    if (logging != null) Provider<LoggingController>.value(value: logging),
+    if (memory != null) Provider<MemoryController>.value(value: memory),
+    if (timeline != null) Provider<TimelineController>.value(value: timeline),
+    if (performance != null)
+      Provider<PerformanceController>.value(value: performance),
+    if (network != null) Provider<NetworkController>.value(value: network),
+    if (debugger != null) Provider<DebuggerController>.value(value: debugger),
+  ];
+  return wrap(
+    MultiProvider(
+      providers: _providers,
+      child: widget,
+    ),
   );
 }
 

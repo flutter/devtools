@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/notifications.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
@@ -31,12 +30,7 @@ import 'timeline_model.dart';
 // where applicable.
 
 class TimelineScreen extends Screen {
-  const TimelineScreen()
-      : super(
-          DevToolsScreenType.timeline,
-          title: 'Timeline',
-          icon: Octicons.pulse,
-        );
+  const TimelineScreen() : super(id, title: 'Timeline', icon: Octicons.pulse);
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -53,12 +47,14 @@ class TimelineScreen extends Screen {
   @visibleForTesting
   static const stopRecordingButtonKey = Key('Stop Recording Button');
 
+  static const id = 'timeline';
+
   @override
-  String get docPageId => 'timeline';
+  String get docPageId => id;
 
   @override
   Widget build(BuildContext context) {
-    return !serviceManager.connectedApp.isDartWebAppNow
+    return offlineMode || !serviceManager.connectedApp.isDartWebAppNow
         ? const TimelineScreenBody()
         : const DisabledForWebAppMessage();
   }
@@ -72,25 +68,28 @@ class TimelineScreenBody extends StatefulWidget {
 }
 
 class TimelineScreenBodyState extends State<TimelineScreenBody>
-    with AutoDisposeMixin {
+    with
+        AutoDisposeMixin,
+        OfflineScreenMixin<TimelineScreenBody, OfflineTimelineData> {
   static const _primaryControlsMinIncludeTextWidth = 825.0;
   static const _secondaryControlsMinIncludeTextWidth = 1205.0;
 
   TimelineController controller;
 
-  final _exportController = ExportController();
-
   bool recording = false;
+
   bool processing = false;
+
   double processingProgress = 0.0;
+
   TimelineEvent selectedEvent;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    maybePushDebugModePerformanceMessage(context, DevToolsScreenType.timeline);
+    maybePushDebugModePerformanceMessage(context, TimelineScreen.id);
 
-    final newController = Controllers.of(context).timeline;
+    final newController = Provider.of<TimelineController>(context);
     if (newController == controller) return;
     controller = newController;
 
@@ -118,6 +117,24 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         selectedEvent = controller.selectedTimelineEvent.value;
       });
     });
+
+    // Load offline timeline data if available.
+    if (shouldLoadOfflineData()) {
+      // This is a workaround to guarantee that DevTools exports are compatible
+      // with other trace viewers (catapult, perfetto, chrome://tracing), which
+      // require a top level field named "traceEvents". See how timeline data is
+      // encoded in [ExportController.encode].
+      final timelineJson =
+          Map<String, dynamic>.from(offlineDataJson[TimelineScreen.id])
+            ..addAll({
+              TimelineData.traceEventsKey:
+                  offlineDataJson[TimelineData.traceEventsKey]
+            });
+      final offlineTimelineData = OfflineTimelineData.parse(timelineJson);
+      if (!offlineTimelineData.isEmpty) {
+        loadOfflineData(offlineTimelineData);
+      }
+    }
   }
 
   @override
@@ -128,11 +145,16 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final isOfflineFlutterApp = offlineMode &&
+        controller.offlineTimelineData != null &&
+        controller.offlineTimelineData.frames.isNotEmpty;
+
+    final timelineScreen = Column(
       children: [
-        _timelineControls(),
+        if (!offlineMode) _timelineControls(),
         const SizedBox(height: denseRowSpacing),
-        if (serviceManager.connectedApp.isFlutterAppNow)
+        if (isOfflineFlutterApp ||
+            (!offlineMode && serviceManager.connectedApp.isFlutterAppNow))
           const FlutterFramesChart(),
         Expanded(
           child: Split(
@@ -146,22 +168,32 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         ),
       ],
     );
+
+    // We put these two items in a stack because the screen's UI needs to be
+    // built before offline data is processed in order to initialize listeners
+    // that respond to data processing events. The spinner hides the screen's
+    // empty UI while data is being processed.
+    return Stack(
+      children: [
+        timelineScreen,
+        if (loadingOfflineData)
+          Container(
+            color: Colors.grey[50],
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+      ],
+    );
   }
 
   Widget _timelineControls() {
-    final _exitOfflineButton = exitOfflineButton(() {
-      setState(() {
-        controller.exitOfflineMode();
-      });
-    });
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: offlineMode
-          ? [_exitOfflineButton]
-          : [
-              _buildPrimaryStateControls(),
-              _buildSecondaryControls(),
-            ],
+      children: [
+        _buildPrimaryStateControls(),
+        _buildSecondaryControls(),
+      ],
     );
   }
 
@@ -171,20 +203,20 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         recordButton(
           key: TimelineScreen.recordButtonKey,
           recording: recording,
-          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
+          includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: _startRecording,
         ),
         const SizedBox(width: denseSpacing),
         stopRecordingButton(
           key: TimelineScreen.stopRecordingButtonKey,
           recording: recording,
-          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
+          includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: _stopRecording,
         ),
         const SizedBox(width: defaultSpacing),
         clearButton(
           key: TimelineScreen.clearButtonKey,
-          minIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
+          includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: () async {
             await _clearTimeline();
           },
@@ -197,7 +229,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        const ProfileGranularityDropdown(DevToolsScreenType.timeline),
+        const ProfileGranularityDropdown(TimelineScreen.id),
         const SizedBox(width: defaultSpacing),
         if (!serviceManager.connectedApp.isDartCliAppNow)
           ServiceExtensionButtonGroup(
@@ -215,7 +247,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
             child: const MaterialIconLabel(
               Icons.file_download,
               'Export',
-              minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+              includeTextWidth: _secondaryControlsMinIncludeTextWidth,
             ),
           ),
         ),
@@ -235,7 +267,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
               text: 'Network',
               enabledTooltip: 'Stop logging network traffic',
               disabledTooltip: 'Log network traffic',
-              minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+              includeTextWidth: _secondaryControlsMinIncludeTextWidth,
               selected: enabled,
             ),
           ],
@@ -313,27 +345,23 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   void _exportTimeline() {
-    final exportedFile = _exportData();
+    final exportedFile = controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
     Notifications.of(context)
         .push('Successfully exported $exportedFile to ~/Downloads directory');
   }
 
-  // TODO(kenz): move this to the controller once the dart:html app is deleted.
-  // This code relies on `import_export.dart` which contains a flutter import.
-  /// Exports the current timeline data to a .json file.
-  ///
-  /// This method returns the name of the file that was downloaded.
-  String _exportData() {
-    // TODO(kenz): add analytics for this. It would be helpful to know how
-    // complex the problems are that users are trying to solve.
-    final encodedTimelineData = jsonEncode(controller.data.json);
-    final now = DateTime.now();
-    final timestamp =
-        '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
-    final fileName = 'timeline_$timestamp.json';
-    _exportController.downloadFile(fileName, encodedTimelineData);
-    return fileName;
+  @override
+  FutureOr<void> processOfflineData(OfflineTimelineData offlineData) async {
+    await controller.processOfflineData(offlineData);
+  }
+
+  @override
+  bool shouldLoadOfflineData() {
+    return offlineMode &&
+        offlineDataJson.isNotEmpty &&
+        offlineDataJson[TimelineScreen.id] != null &&
+        offlineDataJson[TimelineData.traceEventsKey] != null;
   }
 }

@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
@@ -18,12 +18,7 @@ import 'memory_chart.dart';
 import 'memory_controller.dart';
 
 class MemoryScreen extends Screen {
-  const MemoryScreen()
-      : super(
-          DevToolsScreenType.memory,
-          title: 'Memory',
-          icon: Octicons.package,
-        );
+  const MemoryScreen() : super(id, title: 'Memory', icon: Octicons.package);
 
   @visibleForTesting
   static const pauseButtonKey = Key('Pause Button');
@@ -56,8 +51,10 @@ class MemoryScreen extends Screen {
 
   static const memorySourceMenuItemPrefix = 'Source: ';
 
+  static const id = 'memory';
+
   @override
-  String get docPageId => 'memory';
+  String get docPageId => id;
 
   @override
   Widget build(BuildContext context) {
@@ -82,9 +79,9 @@ class MemoryBodyState extends State<MemoryBody> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    maybePushDebugModeMemoryMessage(context, DevToolsScreenType.memory);
+    maybePushDebugModeMemoryMessage(context, MemoryScreen.id);
 
-    final newController = Controllers.of(context).memory;
+    final newController = Provider.of<MemoryController>(context);
     if (newController == controller) return;
     controller = newController;
 

@@ -39,7 +39,19 @@ class StatusLine extends StatelessWidget {
         child: buildHelpUrlStatus(context, currentScreen, textTheme),
       ),
     ));
+
     children.add(const BulletSpacer());
+
+    // Optionally display an isolate selector.
+    if (currentScreen != null && currentScreen.showIsolateSelector) {
+      children.add(Expanded(
+        child: Align(
+          child: buildIsolateSelector(context, textTheme),
+        ),
+      ));
+
+      children.add(const BulletSpacer());
+    }
 
     // Optionally display page specific status.
     if (currentScreen != null) {
@@ -52,18 +64,9 @@ class StatusLine extends StatelessWidget {
             child: buildPageStatus(context, currentScreen, textTheme),
           ),
         ));
+
         children.add(const BulletSpacer());
       }
-    }
-
-    // Optionally display an isolate selector.
-    if (currentScreen != null && currentScreen.showIsolateSelector) {
-      children.add(Expanded(
-        child: Align(
-          child: buildIsolateSelector(context, textTheme),
-        ),
-      ));
-      children.add(const BulletSpacer());
     }
 
     // Always display connection status (docked to the right).
@@ -141,18 +144,20 @@ class StatusLine extends StatelessWidget {
           return 'isolate: $name';
         }
 
-        return DropdownButton<IsolateRef>(
-          value: snapshot.data,
-          onChanged: (IsolateRef ref) {
-            isolateManager.selectIsolate(ref?.id);
-          },
-          isDense: true,
-          items: isolates.map((IsolateRef ref) {
-            return DropdownMenuItem<IsolateRef>(
-              value: ref,
-              child: Text(disambiguatedName(ref), style: textTheme.bodyText2),
-            );
-          }).toList(),
+        return DropdownButtonHideUnderline(
+          child: DropdownButton<IsolateRef>(
+            value: snapshot.data,
+            onChanged: (IsolateRef ref) {
+              isolateManager.selectIsolate(ref?.id);
+            },
+            isDense: true,
+            items: isolates.map((IsolateRef ref) {
+              return DropdownMenuItem<IsolateRef>(
+                value: ref,
+                child: Text(disambiguatedName(ref), style: textTheme.bodyText2),
+              );
+            }).toList(),
+          ),
         );
       },
     );

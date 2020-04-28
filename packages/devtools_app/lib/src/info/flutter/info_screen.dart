@@ -16,7 +16,7 @@ import '../info_controller.dart';
 class InfoScreen extends Screen {
   const InfoScreen()
       : super(
-          DevToolsScreenType.info,
+          'info',
           title: 'Info',
           icon: Octicons.info,
         );

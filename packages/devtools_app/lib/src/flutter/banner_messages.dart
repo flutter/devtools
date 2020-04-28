@@ -5,11 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../globals.dart';
-import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
-import 'controllers.dart';
 import 'screen.dart';
 import 'theme.dart';
 import 'utils.dart';
@@ -21,33 +20,43 @@ const _profileGranularityDocsUrl =
     'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';
 
 class BannerMessagesController {
-  final _messages = <DevToolsScreenType, ValueNotifier<List<BannerMessage>>>{};
+  final _messages = <String, ValueNotifier<List<BannerMessage>>>{};
   final _dismissedMessageKeys = <Key>{};
 
   void addMessage(BannerMessage message) {
-    if (isMessageDismissed(message) || isMessageVisible(message)) return;
-    final messages = _messagesForScreen(message.screenType);
-    messages.value.add(message);
-    // TODO(kenz): we should make a ListValueNotifier class that handles
-    // notifying listeners so we don't have to make an illegal call to a
-    // protected method.
-    // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
-    messages.notifyListeners();
+    // We push the banner message in a post frame callback because otherwise,
+    // we'd be trying to call setState while the parent widget `BannerMessages`
+    // is in the middle of `build`.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (isMessageDismissed(message) || isMessageVisible(message)) return;
+      final messages = _messagesForScreen(message.screenId);
+      messages.value.add(message);
+      // TODO(kenz): we should make a ListValueNotifier class that handles
+      // notifying listeners so we don't have to make an illegal call to a
+      // protected method.
+      // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+      messages.notifyListeners();
+    });
   }
 
   void removeMessage(BannerMessage message, {bool dismiss = false}) {
-    if (dismiss) {
-      assert(!_dismissedMessageKeys.contains(message.key));
-      _dismissedMessageKeys.add(message.key);
-    }
-    final messages = _messagesForScreen(message.screenType);
-    messages.value.remove(message);
-    // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
-    messages.notifyListeners();
+    // We push the banner message in a post frame callback because otherwise,
+    // we'd be trying to call setState while the parent widget `BannerMessages`
+    // is in the middle of `build`.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (dismiss) {
+        assert(!_dismissedMessageKeys.contains(message.key));
+        _dismissedMessageKeys.add(message.key);
+      }
+      final messages = _messagesForScreen(message.screenId);
+      messages.value.remove(message);
+      // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+      messages.notifyListeners();
+    });
   }
 
-  void removeMessageByKey(Key key, DevToolsScreenType screenType) {
-    final currentMessages = _messagesForScreen(screenType);
+  void removeMessageByKey(Key key, String screenId) {
+    final currentMessages = _messagesForScreen(screenId);
     final messageWithKey = currentMessages.value.firstWhere(
       (m) => m.key == key,
       orElse: () => null,
@@ -64,23 +73,19 @@ class BannerMessagesController {
 
   @visibleForTesting
   bool isMessageVisible(BannerMessage message) {
-    return _messagesForScreen(message.screenType)
+    return _messagesForScreen(message.screenId)
         .value
         .where((m) => m.key == message.key)
         .isNotEmpty;
   }
 
-  ValueNotifier<List<BannerMessage>> _messagesForScreen(
-    DevToolsScreenType screenType,
-  ) {
+  ValueNotifier<List<BannerMessage>> _messagesForScreen(String screenId) {
     return _messages.putIfAbsent(
-        screenType, () => ValueNotifier<List<BannerMessage>>([]));
+        screenId, () => ValueNotifier<List<BannerMessage>>([]));
   }
 
-  ValueListenable<List<BannerMessage>> messagesForScreen(
-    DevToolsScreenType screenType,
-  ) {
-    return _messagesForScreen(screenType);
+  ValueListenable<List<BannerMessage>> messagesForScreen(String screenId) {
+    return _messagesForScreen(screenId);
   }
 }
 
@@ -89,102 +94,26 @@ class BannerMessages extends StatelessWidget {
 
   final Screen screen;
 
-  @override
-  Widget build(BuildContext context) {
-    return _BannerMessagesProvider(screen: screen);
-  }
-
-  static BannerMessagesState of(BuildContext context) {
-    final provider =
-        context.dependOnInheritedWidgetOfExactType<_InheritedBannerMessages>();
-    return provider?.data;
-  }
-}
-
-class _BannerMessagesProvider extends StatefulWidget {
-  const _BannerMessagesProvider({Key key, this.screen}) : super(key: key);
-
-  final Screen screen;
-
-  @override
-  BannerMessagesState createState() => BannerMessagesState();
-}
-
-class _InheritedBannerMessages extends InheritedWidget {
-  const _InheritedBannerMessages({this.data, Widget child})
-      : super(child: child);
-
-  final BannerMessagesState data;
-
-  @override
-  bool updateShouldNotify(_InheritedBannerMessages oldWidget) {
-    return oldWidget.data != data;
-  }
-}
-
-class BannerMessagesState extends State<_BannerMessagesProvider>
-    with AutoDisposeMixin {
-  BannerMessagesController controller;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final newController = Controllers.of(context)?.bannerMessages;
-    if (newController == controller) return;
-    controller = newController;
-  }
-
-  void push(BannerMessage message) {
-    // We push the banner message in a post frame callback because otherwise,
-    // we'd be trying to call setState while the parent widget `BannerMessages`
-    // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      controller.addMessage(message);
-    });
-  }
-
-  void remove(BannerMessage message, {bool dismiss = false}) {
-    // We push the banner message in a post frame callback because otherwise,
-    // we'd be trying to call setState while the parent widget `BannerMessages`
-    // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      controller.removeMessage(message, dismiss: dismiss);
-    });
-  }
-
-  void removeMessageByKey(Key key, DevToolsScreenType screenType) {
-    // We push the banner message in a post frame callback because otherwise,
-    // we'd be trying to call setState while the parent widget `BannerMessages`
-    // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.removeMessageByKey(key, screenType);
-    });
-  }
-
   // TODO(kenz): use an AnimatedList for message changes.
   @override
   Widget build(BuildContext context) {
-    final messagesForScreen = controller?.messagesForScreen(widget.screen.type);
-    return _InheritedBannerMessages(
-      data: this,
-      child: Column(
-        children: [
-          if (messagesForScreen != null)
-            ValueListenableBuilder<List<BannerMessage>>(
-              valueListenable: messagesForScreen,
-              builder: (context, messages, _) {
-                return Column(
-                  children: messages,
-                );
-              },
-            ),
-          Expanded(
-            child: widget.screen.build(context),
-          )
-        ],
-      ),
+    final controller = Provider.of<BannerMessagesController>(context);
+    final messagesForScreen = controller?.messagesForScreen(screen.screenId);
+    return Column(
+      children: [
+        if (messagesForScreen != null)
+          ValueListenableBuilder<List<BannerMessage>>(
+            valueListenable: messagesForScreen,
+            builder: (context, messages, _) {
+              return Column(
+                children: messages,
+              );
+            },
+          ),
+        Expanded(
+          child: screen.build(context),
+        )
+      ],
     );
   }
 }
@@ -195,13 +124,13 @@ class BannerMessage extends StatelessWidget {
     @required this.textSpans,
     @required this.backgroundColor,
     @required this.foregroundColor,
-    @required this.screenType,
+    @required this.screenId,
   }) : super(key: key);
 
   final List<TextSpan> textSpans;
   final Color backgroundColor;
   final Color foregroundColor;
-  final DevToolsScreenType screenType;
+  final String screenId;
 
   @override
   Widget build(BuildContext context) {
@@ -227,7 +156,8 @@ class BannerMessage extends StatelessWidget {
               foregroundColor: foregroundColor,
               // TODO(kenz): animate the removal of this message.
               onPressed: () =>
-                  BannerMessages.of(context).remove(this, dismiss: true),
+                  Provider.of<BannerMessagesController>(context, listen: false)
+                      .removeMessage(this, dismiss: true),
             ),
           ],
         ),
@@ -240,13 +170,13 @@ class _BannerError extends BannerMessage {
   const _BannerError({
     @required Key key,
     @required List<TextSpan> textSpans,
-    @required DevToolsScreenType screenType,
+    @required String screenId,
   }) : super(
           key: key,
           textSpans: textSpans,
           backgroundColor: devtoolsError,
           foregroundColor: foreground,
-          screenType: screenType,
+          screenId: screenId,
         );
 
   static const foreground = Colors.white;
@@ -258,13 +188,13 @@ class _BannerWarning extends BannerMessage {
   const _BannerWarning({
     @required Key key,
     @required List<TextSpan> textSpans,
-    @required DevToolsScreenType screenType,
+    @required String screenId,
   }) : super(
           key: key,
           textSpans: textSpans,
           backgroundColor: devtoolsWarning,
           foregroundColor: foreground,
-          screenType: screenType,
+          screenId: screenId,
         );
 
   static const foreground = Colors.black87;
@@ -272,13 +202,13 @@ class _BannerWarning extends BannerMessage {
 }
 
 class DebugModePerformanceMessage {
-  const DebugModePerformanceMessage(this.screenType);
+  const DebugModePerformanceMessage(this.screenId);
 
-  final DevToolsScreenType screenType;
+  final String screenId;
 
   Widget build(BuildContext context) {
     return _BannerError(
-      key: Key('DebugModePerformanceMessage - $screenType'),
+      key: Key('DebugModePerformanceMessage - $screenId'),
       textSpans: [
         const TextSpan(
           text: '''
@@ -303,18 +233,18 @@ Relaunch your application with the '--profile' argument, or ''',
           style: TextStyle(color: _BannerError.foreground),
         ),
       ],
-      screenType: screenType,
+      screenId: screenId,
     );
   }
 }
 
 class HighProfileGranularityMessage {
-  HighProfileGranularityMessage(this.screenType)
-      : key = Key('HighProfileGranularityMessage - $screenType');
+  HighProfileGranularityMessage(this.screenId)
+      : key = Key('HighProfileGranularityMessage - $screenId');
 
   final Key key;
 
-  final DevToolsScreenType screenType;
+  final String screenId;
 
   Widget build(BuildContext context) {
     return _BannerWarning(
@@ -341,19 +271,19 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
           style: TextStyle(color: _BannerWarning.foreground),
         ),
       ],
-      screenType: screenType,
+      screenId: screenId,
     );
   }
 }
 
 class DebugModeMemoryMessage {
-  const DebugModeMemoryMessage(this.screenType);
+  const DebugModeMemoryMessage(this.screenId);
 
-  final DevToolsScreenType screenType;
+  final String screenId;
 
   BannerMessage build(BuildContext context) {
     return _BannerWarning(
-      key: Key('DebugModeMemoryMessage - $screenType'),
+      key: Key('DebugModeMemoryMessage - $screenId'),
       textSpans: [
         const TextSpan(
           text: '''
@@ -378,27 +308,29 @@ For the most accurate absolute memory stats, relaunch your application with the 
           style: TextStyle(color: _BannerWarning.foreground),
         ),
       ],
-      screenType: screenType,
+      screenId: screenId,
     );
   }
 }
 
 void maybePushDebugModePerformanceMessage(
   BuildContext context,
-  DevToolsScreenType screenType,
+  String screenId,
 ) {
+  if (offlineMode) return;
   if (serviceManager.connectedApp.isDebugFlutterAppNow) {
-    BannerMessages.of(context)
-        .push(DebugModePerformanceMessage(screenType).build(context));
+    Provider.of<BannerMessagesController>(context)
+        .addMessage(DebugModePerformanceMessage(screenId).build(context));
   }
 }
 
 void maybePushDebugModeMemoryMessage(
   BuildContext context,
-  DevToolsScreenType screenType,
+  String screenId,
 ) {
+  if (offlineMode) return;
   if (serviceManager.connectedApp.isDebugFlutterAppNow) {
-    BannerMessages.of(context)
-        .push(DebugModeMemoryMessage(screenType).build(context));
+    Provider.of<BannerMessagesController>(context)
+        .addMessage(DebugModeMemoryMessage(screenId).build(context));
   }
 }

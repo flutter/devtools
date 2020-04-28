@@ -5,6 +5,7 @@
 import 'package:args/command_runner.dart';
 
 import 'commands/analyze.dart';
+import 'commands/generate_changelog.dart';
 import 'commands/list.dart';
 import 'commands/packages_get.dart';
 import 'commands/repo_check.dart';
@@ -17,6 +18,7 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(RepoCheckCommand());
     addCommand(ListCommand());
     addCommand(PackagesGetCommand());
+    addCommand(GenerateChangelogCommand());
     addCommand(RollbackCommand());
   }
 }

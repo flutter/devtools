@@ -19,11 +19,11 @@ import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
-import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
@@ -136,6 +136,16 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   @override
   Future<Isolate> getIsolate(String isolateId) {
     return Future.value(MockIsolate());
+  }
+
+  @override
+  Future<ScriptList> getScripts(String isolateId) {
+    return Future.value(ScriptList(scripts: []));
+  }
+
+  @override
+  Future<Stack> getStack(String isolateId) {
+    return Future.value(Stack(frames: [], messages: []));
   }
 
   @override

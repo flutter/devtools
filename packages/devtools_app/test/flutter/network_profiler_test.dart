@@ -5,12 +5,12 @@
 @TestOn('vm')
 import 'package:devtools_app/src/flutter/split.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/http/http.dart';
+import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/flutter/http_request_inspector.dart';
 import 'package:devtools_app/src/network/flutter/http_request_inspector_views.dart';
 import 'package:devtools_app/src/network/flutter/network_model.dart';
 import 'package:devtools_app/src/network/flutter/network_screen.dart';
-import 'package:devtools_app/src/http/http.dart';
-import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
@@ -21,14 +21,15 @@ import '../support/mocks.dart';
 import '../support/utils.dart';
 import 'wrappers.dart';
 
-Future<NetworkController> pumpNetworkScreen(
-  WidgetTester tester, {
-  NetworkController networkController,
-}) async {
-  await tester.pumpWidget(wrap(const NetworkScreenBody()));
+NetworkController controller = NetworkController();
+
+Future<void> pumpNetworkScreen(WidgetTester tester) async {
+  await tester.pumpWidget(wrapWithControllers(
+    const NetworkScreenBody(),
+    network: controller,
+  ));
   final finder = find.byType(NetworkScreenBody);
   expect(finder, findsOneWidget);
-  return tester.state<NetworkScreenBodyState>(finder).networkController;
 }
 
 /// Clears the timeouts created when calling getHttpTimelineLogging and
@@ -37,7 +38,6 @@ Future<void> clearTimeouts(WidgetTester tester) async =>
     await tester.pumpAndSettle(const Duration(seconds: 5));
 
 void main() {
-  NetworkController controller;
   FakeServiceManager fakeServiceManager;
   Timeline timeline;
 
@@ -55,8 +55,9 @@ void main() {
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(
+      await tester.pumpWidget(wrapWithControllers(
         Builder(builder: const NetworkScreen().buildTab),
+        network: NetworkController(),
       ));
       expect(find.text('Network'), findsOneWidget);
     });
@@ -64,7 +65,8 @@ void main() {
     testWidgetsWithWindowSize('starts and stops', windowSize, (
       WidgetTester tester,
     ) async {
-      controller = await pumpNetworkScreen(tester);
+      controller = NetworkController();
+      await pumpNetworkScreen(tester);
 
       // Ensure we're not recording initially.
       expect(controller.isPolling, false);
@@ -79,7 +81,7 @@ void main() {
       expect(controller.recordingNotifier.value, true);
 
       // Stop recording.
-      await tester.tap(find.byKey(NetworkScreen.pauseButtonKey));
+      await tester.tap(find.byKey(NetworkScreen.stopButtonKey));
       await tester.pump();
 
       // Check that we've stopped polling.
@@ -95,21 +97,19 @@ void main() {
       // We're not recording; only expect the instructions and buttons to be
       // visible.
       expect(splitFinder, findsNothing);
-      expect(find.byKey(NetworkScreen.clearButtonKey), findsOneWidget);
       expect(find.byKey(NetworkScreen.recordButtonKey), findsOneWidget);
-      expect(find.byKey(NetworkScreen.pauseButtonKey), findsOneWidget);
+      expect(find.byKey(NetworkScreen.stopButtonKey), findsOneWidget);
+      expect(find.byKey(NetworkScreen.clearButtonKey), findsOneWidget);
       expect(
         find.byKey(NetworkScreen.recordingInstructionsKey),
         findsOneWidget,
       );
 
-      // Start recording but don't advance the clock in order to check the
-      // loading spinner is displayed before requests are populated.
+      // Start recording.
       await tester.tap(find.byKey(NetworkScreen.recordButtonKey));
       await tester.pump();
 
       expect(splitFinder, findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
       // Advance the clock to populate the HTTP requests table.
       await tester.pump(const Duration(seconds: 1));
@@ -118,7 +118,8 @@ void main() {
 
     testWidgetsWithWindowSize('builds proper content for state', windowSize,
         (WidgetTester tester) async {
-      controller = await pumpNetworkScreen(tester);
+      controller = NetworkController();
+      await pumpNetworkScreen(tester);
 
       await loadRequestsAndCheck(tester);
 
@@ -275,13 +276,14 @@ void main() {
     testWidgetsWithWindowSize('clear results', windowSize,
         (WidgetTester tester) async {
       // Load the network profiler screen.
+      controller = NetworkController();
       await pumpNetworkScreen(tester);
 
       // Populate the screen with requests.
       await loadRequestsAndCheck(tester);
 
       // Stop the profiler.
-      await tester.tap(find.byKey(NetworkScreen.pauseButtonKey));
+      await tester.tap(find.byKey(NetworkScreen.stopButtonKey));
       await tester.pumpAndSettle();
 
       // Clear the results.

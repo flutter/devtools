@@ -7,20 +7,13 @@
 # Fast fail the script on failures.
 set -ex
 
-# In GitBash on Windows, we have to call dartfmt.bat and flutter.bat so we alias
+# In GitBash on Windows, we have to call pub.bat and flutter.bat so we alias
 # them in this script to call the correct one based on the OS.
 function pub {
 	if [[ $TRAVIS_OS_NAME == "windows" ]]; then
         command pub.bat "$@"
     else
         command pub "$@"
-    fi
-}
-function dartfmt {
-	if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-        command dartfmt.bat "$@"
-    else
-        command dartfmt "$@"
     fi
 }
 function flutter {
@@ -101,12 +94,12 @@ if [ "$BOT" = "main" ]; then
     flutter pub get
     flutter pub global activate webdev
 
-    # Verify that dartfmt has been run.
-    echo "Checking dartfmt..."
+    # Verify that flutter format has been run.
+    echo "Checking flutter format..."
 
-    if [[ $(dartfmt -n --set-exit-if-changed lib/ test/ web/) ]]; then
-        echo "Failed dartfmt check: run dartfmt -w lib/ test/ web/"
-        dartfmt -n --set-exit-if-changed lib/ test/ web/
+    if [[ $(flutter format -n --set-exit-if-changed lib/ test/ web/) ]]; then
+        echo "Failed flutter format check: run flutter format lib/ test/ web/"
+        flutter format -n --set-exit-if-changed lib/ test/ web/
         exit 1
     fi
 
@@ -125,7 +118,7 @@ elif [ "$BOT" = "test_ddc" ]; then
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter config --enable-web
-    flutter build web
+    flutter build web --no-tree-shake-icons
 
     # Run every test except for integration_tests.
     # The flutter tool doesn't support excluding a specific set of targets,
@@ -143,7 +136,7 @@ elif [ "$BOT" = "test_dart2js" ]; then
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter config --enable-web
-    flutter build web
+    flutter build web --no-tree-shake-icons
 
     # Run every test except for integration_tests.
     # The flutter tool doesn't support excluding a specific set of targets,

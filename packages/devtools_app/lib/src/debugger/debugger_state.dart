@@ -22,10 +22,12 @@ class DebuggerState {
   final Map<String, Script> _scriptCache = <String, Script>{};
 
   final _isPaused = ValueNotifier<bool>(false);
+
   ValueListenable<bool> get isPaused => _isPaused;
 
   final _hasFrames = ValueNotifier<bool>(false);
   ValueNotifier<bool> _supportsStepping;
+
   ValueListenable<bool> get supportsStepping {
     return _supportsStepping ??= () {
       final notifier = ValueNotifier<bool>(_isPaused.value && _hasFrames.value);
@@ -42,9 +44,11 @@ class DebuggerState {
   Event lastEvent;
 
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
+
   ValueListenable<List<Breakpoint>> get breakpoints => _breakpoints;
 
   final _exceptionPauseMode = ValueNotifier<String>(null);
+
   ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
 
   InstanceRef _reportedException;
@@ -173,13 +177,15 @@ class DebuggerState {
         break;
       case EventKind.kBreakpointResolved:
         _breakpoints.value = [
-          for (var b in _breakpoints.value) if (b != event.breakpoint) b,
+          for (var b in _breakpoints.value)
+            if (b != event.breakpoint) b,
           event.breakpoint
         ];
         break;
       case EventKind.kBreakpointRemoved:
         _breakpoints.value = [
-          for (var b in _breakpoints.value) if (b != event.breakpoint) b
+          for (var b in _breakpoints.value)
+            if (b != event.breakpoint) b
         ];
         break;
     }

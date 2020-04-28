@@ -15,6 +15,11 @@ import 'theme.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 
+/// The width of the package:flutter_test debugger device.
+const debuggerDeviceWidth = 800.0;
+
+const mediumDeviceWidth = 1000.0;
+
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
@@ -72,12 +77,12 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 
 /// Button to clear data in the UI.
 ///
-/// * `minIncludeTextWidth`: The minimum width the button can be before the text
-///    is omitted.
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget clearButton({
   Key key,
-  double minIncludeTextWidth,
+  double includeTextWidth,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
@@ -86,7 +91,7 @@ StatelessWidget clearButton({
     child: MaterialIconLabel(
       Icons.block,
       'Clear',
-      minIncludeTextWidth: minIncludeTextWidth,
+      includeTextWidth: includeTextWidth,
     ),
   );
 }
@@ -94,13 +99,15 @@ StatelessWidget clearButton({
 /// Button to start recording data.
 ///
 /// * `recording`: Whether recording is in progress.
-/// * `minIncludeTextWidth`: The minimum width the button can be before the text
-///    is omitted.
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
+/// * `labelOverride`: Optional alternative text to use for the button.
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget recordButton({
   Key key,
   @required bool recording,
-  double minIncludeTextWidth,
+  double includeTextWidth,
+  String labelOverride,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
@@ -108,8 +115,8 @@ StatelessWidget recordButton({
     onPressed: recording ? null : onPressed,
     child: MaterialIconLabel(
       Icons.fiber_manual_record,
-      'Record',
-      minIncludeTextWidth: minIncludeTextWidth,
+      labelOverride ?? 'Record',
+      includeTextWidth: includeTextWidth,
     ),
   );
 }
@@ -117,13 +124,13 @@ StatelessWidget recordButton({
 /// Button to stop recording data.
 ///
 /// * `recording`: Whether recording is in progress.
-/// * `minIncludeTextWidth`: The minimum width the button can be before the text
-///    is omitted.
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget stopRecordingButton({
   Key key,
   @required bool recording,
-  double minIncludeTextWidth,
+  double includeTextWidth,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
@@ -132,30 +139,30 @@ StatelessWidget stopRecordingButton({
     child: MaterialIconLabel(
       Icons.stop,
       'Stop',
-      minIncludeTextWidth: minIncludeTextWidth,
+      includeTextWidth: includeTextWidth,
     ),
   );
 }
 
-/// Button to pause recording data.
+/// Button to stop recording data.
 ///
 /// * `recording`: Whether recording is in progress.
-/// * `minIncludeTextWidth`: The minimum width the button can be before the text
-///    is omitted.
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
-StatelessWidget pauseButton({
+StatelessWidget stopButton({
   Key key,
   @required bool paused,
-  double minIncludeTextWidth,
+  double includeTextWidth,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
     key: key,
     onPressed: paused ? null : onPressed,
     child: MaterialIconLabel(
-      Icons.pause,
-      'Pause',
-      minIncludeTextWidth: minIncludeTextWidth,
+      Icons.stop,
+      'Stop',
+      includeTextWidth: includeTextWidth,
     ),
   );
 }
@@ -316,6 +323,39 @@ class BulletSpacer extends StatelessWidget {
   }
 }
 
+/// A small element containing some accessory information, often a numeric
+/// value.
+class Badge extends StatelessWidget {
+  const Badge(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    // These constants are sized to give 1 digit badges a circular look.
+    const badgeCornerRadius = 12.0;
+    const badgePadding = 6.0;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.primaryColor,
+        borderRadius: BorderRadius.circular(badgeCornerRadius),
+      ),
+      padding: const EdgeInsets.symmetric(
+        vertical: borderPadding,
+        horizontal: badgePadding,
+      ),
+      child: Text(
+        text,
+        // Use a slightly smaller font for the badge.
+        style: theme.primaryTextTheme.bodyText2.apply(fontSizeDelta: -1),
+      ),
+    );
+  }
+}
+
 /// A widget, commonly used for icon buttons, that provides a tooltip with a
 /// common delay before the tooltip is shown.
 class ActionButton extends StatelessWidget {
@@ -357,7 +397,7 @@ class ToggleButton extends StatelessWidget {
     @required this.text,
     @required this.enabledTooltip,
     @required this.disabledTooltip,
-    @required this.minIncludeTextWidth,
+    @required this.includeTextWidth,
     @required this.selected,
   });
 
@@ -365,7 +405,7 @@ class ToggleButton extends StatelessWidget {
   final String text;
   final String enabledTooltip;
   final String disabledTooltip;
-  final double minIncludeTextWidth;
+  final double includeTextWidth;
   final bool selected;
 
   @override
@@ -379,7 +419,7 @@ class ToggleButton extends StatelessWidget {
         child: MaterialIconLabel(
           icon,
           text,
-          minIncludeTextWidth: minIncludeTextWidth,
+          includeTextWidth: includeTextWidth,
         ),
       ),
     );
@@ -388,6 +428,7 @@ class ToggleButton extends StatelessWidget {
 
 class OutlinedBorder extends StatelessWidget {
   const OutlinedBorder({Key key, this.child}) : super(key: key);
+
   final Widget child;
 
   @override
@@ -395,6 +436,23 @@ class OutlinedBorder extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(context).focusColor),
+      ),
+      child: child,
+    );
+  }
+}
+
+class RoundedOutlinedBorder extends StatelessWidget {
+  const RoundedOutlinedBorder({Key key, this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).focusColor),
+        borderRadius: BorderRadius.circular(borderPadding),
       ),
       child: child,
     );
@@ -511,5 +569,36 @@ class CircularIconButton extends StatelessWidget {
         color: foregroundColor,
       ),
     );
+  }
+}
+
+/// An extension on [ScrollController] to facilitate having the scrolling widget
+/// auto scroll to the bottom on new content.
+extension ScrollControllerAutoScroll on ScrollController {
+// TODO(devoncarew): We lose dock-to-bottom when we receive content when we're
+// off screen.
+
+  /// Return whether the view is currently scrolled to the bottom.
+  bool get atScrollBottom {
+    final pos = position;
+    return pos.pixels == pos.maxScrollExtent;
+  }
+
+  /// Scroll the content to the bottom using the app's default animation
+  /// duration and curve..
+  void autoScrollToBottom() async {
+    await animateTo(
+      position.maxScrollExtent,
+      duration: rapidDuration,
+      curve: defaultCurve,
+    );
+
+    // Scroll again if we've received new content in the interim.
+    if (hasClients) {
+      final pos = position;
+      if (pos.pixels != pos.maxScrollExtent) {
+        jumpTo(pos.maxScrollExtent);
+      }
+    }
   }
 }

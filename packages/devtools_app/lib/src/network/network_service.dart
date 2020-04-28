@@ -32,6 +32,8 @@ class NetworkService {
 
   /// Force refreshes the HTTP requests logged to the timeline.
   Future<void> refreshHttpRequests() async {
+    if (serviceManager.service == null) return;
+
     final timestamp = await serviceManager.service.getVMTimelineMicros();
     final timeline = await serviceManager.service.getVMTimeline(
       timeOriginMicros: networkController.lastProfileRefreshMicros,
@@ -48,6 +50,8 @@ class NetworkService {
   /// If at least one isolate is already logging, this method will enable logging
   /// on all isolates and enable recording for [NetworkScreen].
   Future<bool> initializeRecordingState() async {
+    // TODO(jacobr): this method does not properly handle isolates that are
+    // restarted.
     bool enabled = false;
     await serviceManager.service.forEachIsolate(
       (isolate) async {

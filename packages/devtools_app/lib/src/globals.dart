@@ -10,6 +10,9 @@ import 'service_manager.dart';
 /// data file.
 bool offlineMode = false;
 
+// TODO(kenz): store this data in an inherited widget.
+Map<String, dynamic> offlineDataJson = {};
+
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 
 ServiceConnectionManager get serviceManager =>

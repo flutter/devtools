@@ -53,7 +53,7 @@ void main() {
       PerformanceScreenBody body,
     ) async {
       await tester.pumpWidget(wrapWithControllers(
-        wrapWithBannerMessages(body),
+        body,
         performance: PerformanceController(),
       ));
     }

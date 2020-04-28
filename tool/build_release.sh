@@ -20,7 +20,7 @@ mv build ../devtools
 # Build the flutter release of the app as well.
 
 rm -rf build
-flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true
+flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true --no-tree-shake-icons
 mkdir build/web/flutter
 mv build/web/main.* build/web/flutter/
 

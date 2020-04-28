@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/banner_messages.dart';
-import '../../flutter/screen.dart';
 import '../../profiler/cpu_profile_service.dart';
 import '../../profiler/profile_granularity.dart';
 
@@ -14,9 +14,9 @@ import '../../profiler/profile_granularity.dart';
 ///
 /// This flag controls the rate at which the vm samples the CPU call stack.
 class ProfileGranularityDropdown extends StatefulWidget {
-  const ProfileGranularityDropdown(this.screenType);
+  const ProfileGranularityDropdown(this.screenId);
 
-  final DevToolsScreenType screenType;
+  final String screenId;
 
   @override
   ProfileGranularityDropdownState createState() =>
@@ -48,14 +48,15 @@ class ProfileGranularityDropdownState
           _onProfileGranularityChanged(safeValue, context);
         }
 
-        final bannerMessages = BannerMessages.of(context);
+        final bannerMessageController =
+            Provider.of<BannerMessagesController>(context);
         if (safeValue == highProfilePeriod) {
-          bannerMessages.push(
-              HighProfileGranularityMessage(widget.screenType).build(context));
+          bannerMessageController.addMessage(
+              HighProfileGranularityMessage(widget.screenId).build(context));
         } else {
-          BannerMessages.of(context).removeMessageByKey(
-            HighProfileGranularityMessage(widget.screenType).key,
-            widget.screenType,
+          bannerMessageController.removeMessageByKey(
+            HighProfileGranularityMessage(widget.screenId).key,
+            widget.screenId,
           );
         }
         return DropdownButton<String>(

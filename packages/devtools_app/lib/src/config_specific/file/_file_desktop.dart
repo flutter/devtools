@@ -22,8 +22,11 @@ class FileSystemDesktop implements FileIO {
     if (_fs.systemTempDirectory.dirname.startsWith('/var/')) {
       // TODO(terry): For now export the file to the user's Downloads.
       final dirPath = _fs.currentDirectory.dirname.split('/');
-      final downloadsPath = '/${dirPath[1]}/${dirPath[2]}/Downloads';
-      return _fs.directory(downloadsPath);
+      // check length prevent Memory tab crash in macos
+      if (dirPath.length > 2) {
+        final downloadsPath = '/${dirPath[1]}/${dirPath[2]}/Downloads';
+        return _fs.directory(downloadsPath);
+      }
     }
     return _fs.systemTempDirectory;
   }

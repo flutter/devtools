@@ -27,8 +27,8 @@ void main() {
       setGlobal(FrameworkController, FrameworkController());
     });
 
-    testWidgetsWithWindowSize(
-        'displays in narrow mode without error', const Size(800.0, 1200.0),
+    testWidgetsWithWindowSize('displays in narrow mode without error',
+        const Size(DevToolsScaffold.narrowWidthThreshold - 200.0, 1200.0),
         (WidgetTester tester) async {
       await tester.pumpWidget(wrap(
         const DevToolsScaffold(
@@ -40,8 +40,8 @@ void main() {
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
     });
 
-    testWidgetsWithWindowSize(
-        'displays in full-width mode without error', const Size(1203.0, 1200.0),
+    testWidgetsWithWindowSize('displays in full-width mode without error',
+        const Size(DevToolsScaffold.narrowWidthThreshold + 3.0, 1200.0),
         (WidgetTester tester) async {
       await tester.pumpWidget(wrap(
         const DevToolsScaffold(
@@ -90,7 +90,7 @@ void main() {
 class _TestScreen extends Screen {
   const _TestScreen(this.name, this.key, {Key tabKey})
       : super(
-          DevToolsScreenType.simple,
+          'testScreen',
           title: name,
           icon: Icons.computer,
           tabKey: tabKey,

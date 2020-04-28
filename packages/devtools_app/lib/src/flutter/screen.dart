@@ -2,17 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
-import '../debugger/flutter/debugger_screen.dart';
-import '../info/flutter/info_screen.dart';
-import '../inspector/flutter/inspector_screen.dart';
-import '../logging/flutter/logging_screen.dart';
-import '../memory/flutter/memory_screen.dart';
-import '../network/flutter/network_screen.dart';
-import '../performance/flutter/performance_screen.dart';
-import '../timeline/flutter/timeline_screen.dart';
-import 'connect_screen.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
@@ -20,14 +13,28 @@ import 'theme.dart';
 @immutable
 abstract class Screen {
   const Screen(
-    this.type, {
+    this.screenId, {
     this.title,
     this.icon,
     this.tabKey,
     this.conditionalLibrary,
   });
 
-  final DevToolsScreenType type;
+  const Screen.conditional({
+    @required String id,
+    @required String conditionalLibrary,
+    String title,
+    IconData icon,
+    Key tabKey,
+  }) : this(
+          id,
+          conditionalLibrary: conditionalLibrary,
+          title: title,
+          icon: icon,
+          tabKey: tabKey,
+        );
+
+  final String screenId;
 
   /// The user-facing name of the page.
   final String title;
@@ -92,62 +99,21 @@ abstract class Screen {
   }
 }
 
-class DevToolsScreenType {
-  const DevToolsScreenType(this.id, {this.createOverride});
+mixin OfflineScreenMixin<T extends StatefulWidget, U> on State<T> {
+  bool get loadingOfflineData => _loadingOfflineData;
+  bool _loadingOfflineData = false;
 
-  final String id;
+  bool shouldLoadOfflineData();
 
-  final Screen Function() createOverride;
+  FutureOr<void> processOfflineData(U offlineData);
 
-  static const inspectorId = 'inspector';
-  static const timelineId = 'timeline';
-  static const memoryId = 'memory';
-  static const performanceId = 'performance';
-  static const networkId = 'network';
-  static const debuggerId = 'debugger';
-  static const loggingId = 'logging';
-  static const infoId = 'info';
-  static const connectId = 'connect';
-  static const simpleId = 'simple';
-
-  static const inspector = DevToolsScreenType(inspectorId);
-  static const timeline = DevToolsScreenType(timelineId);
-  static const memory = DevToolsScreenType(memoryId);
-  static const performance = DevToolsScreenType(performanceId);
-  static const network = DevToolsScreenType(networkId);
-  static const debugger = DevToolsScreenType(debuggerId);
-  static const logging = DevToolsScreenType(loggingId);
-  static const info = DevToolsScreenType(infoId);
-  static const connect = DevToolsScreenType(connectId);
-  static const simple = DevToolsScreenType(simpleId);
-
-  Screen create() {
-    switch (id) {
-      case inspectorId:
-        return const InspectorScreen();
-      case timelineId:
-        return const TimelineScreen();
-      case memoryId:
-        return const MemoryScreen();
-      case performanceId:
-        return const PerformanceScreen();
-      case networkId:
-        return const NetworkScreen();
-      case debuggerId:
-        return const DebuggerScreen();
-      case loggingId:
-        return const LoggingScreen();
-      case infoId:
-        return const InfoScreen();
-      case connectId:
-        return const ConnectScreen();
-      case simpleId:
-        return const SimpleScreen(null);
-      default:
-        if (createOverride != null) {
-          return createOverride();
-        }
-        return null;
-    }
+  Future<void> loadOfflineData(U offlineData) async {
+    setState(() {
+      _loadingOfflineData = true;
+    });
+    await processOfflineData(offlineData);
+    setState(() {
+      _loadingOfflineData = false;
+    });
   }
 }

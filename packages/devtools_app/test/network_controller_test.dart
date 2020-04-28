@@ -36,8 +36,9 @@ void main() {
       expect(controller.isPolling, false);
 
       // Fake service pretends HTTP timeline logging is always enabled.
-      await controller.initialize();
+      await controller.addClient();
       expect(controller.isPolling, true);
+      controller.removeClient();
     });
 
     test('start and pause recording', () async {
@@ -49,7 +50,10 @@ void main() {
           expect(notifier.value, true);
           expect(controller.isPolling, true);
         },
-        callback: () async => await controller.startRecording(),
+        callback: () async {
+          await controller.addClient();
+          await controller.startRecording();
+        },
       );
 
       await addListenerScope(
@@ -58,7 +62,7 @@ void main() {
           expect(notifier.value, false);
           expect(controller.isPolling, false);
         },
-        callback: () async => await controller.pauseRecording(),
+        callback: () async => await controller.stopRecording(),
       );
 
       await addListenerScope(
@@ -69,30 +73,19 @@ void main() {
         },
         callback: () async => await controller.startRecording(),
       );
-    });
-
-    test('disposes', () {
-      controller.dispose();
-      expect(
-        () => controller.recordingNotifier.addListener(() {}),
-        throwsA(anything),
-      );
-      expect(
-        () => controller.requestsNotifier.addListener(() {}),
-        throwsA(anything),
-      );
+      controller.removeClient();
     });
 
     test('process HTTP timeline events', () async {
-      await controller.initialize();
+      await controller.addClient();
       final notifier = controller.requestsNotifier;
       HttpRequests profile = notifier.value;
       // Check profile is initially empty.
       expect(profile.requests.isEmpty, true);
       expect(profile.outstandingRequests.isEmpty, true);
 
-      // The number of requests recorded in the test data.
-      const numRequests = 70;
+      // The number of valid requests recorded in the test data.
+      const numRequests = 69;
 
       // Force a refresh of the HTTP requests. Ensure there's requests populated.
       await addListenerScope(
@@ -142,6 +135,7 @@ void main() {
         },
         callback: () async => await controller.clear(),
       );
+      controller.removeClient();
     });
   });
 }
