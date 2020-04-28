@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/debugger/flutter/controls.dart';
 import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/flutter/debugger_model.dart';
@@ -16,6 +17,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../support/mocks.dart';
+import '../support/utils.dart';
 import 'wrappers.dart';
 
 void main() {
@@ -81,7 +83,32 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
 
       // test for stdio output.
-      expect(find.text('test stdio'), findsOneWidget);
+      expect(find.richText('test stdio'), findsOneWidget);
+    });
+
+    testWidgets('Console area shows processed ansi text',
+        (WidgetTester tester) async {
+      when(debuggerController.stdio)
+          .thenReturn(ValueNotifier([_ansiCodesOutput()]));
+
+      await pumpDebuggerScreen(tester, debuggerController);
+
+      final finder = find.richText('Ansi color codes processed for console');
+      expect(finder, findsOneWidget);
+      finder.evaluate().forEach((element) {
+        final richText = element.widget as RichText;
+        final textSpan = richText.text as TextSpan;
+        final secondSpan = textSpan.children[1] as TextSpan;
+        expect(
+          secondSpan.text,
+          'console',
+          reason: 'Text with ansi code should be in separate span',
+        );
+        expect(
+          secondSpan.style.backgroundColor,
+          const Color.fromRGBO(215, 95, 135, 1),
+        );
+      });
     });
 
     testWidgets('Libraries hidden', (WidgetTester tester) async {
@@ -326,4 +353,12 @@ void main() {
 
 Widget getWidgetFromFinder(Finder finder) {
   return finder.first.evaluate().first.widget;
+}
+
+String _ansiCodesOutput() {
+  final sb = StringBuffer();
+  sb.write('Ansi color codes processed for ');
+  final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
+  sb.write(pen('console'));
+  return sb.toString();
 }

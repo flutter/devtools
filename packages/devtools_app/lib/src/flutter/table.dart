@@ -8,11 +8,18 @@ import '../trees.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
 import 'collapsible_mixin.dart';
+import 'common_widgets.dart' show ScrollControllerAutoScroll;
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'theme.dart';
 
 // TODO(devoncarew): We need to render the selected row with a different
 // background color.
+
+/// The maximum height to allow for rows in the table.
+///
+/// When rows in the table expand or collapse, they will animate between a
+/// height of 0 and a height of [defaultRowHeight].
+const defaultRowHeight = 32.0;
 
 typedef IndexedScrollableWidgetBuilder = Widget Function(
   BuildContext,
@@ -35,7 +42,7 @@ class FlatTable<T> extends StatefulWidget {
     Key key,
     @required this.columns,
     @required this.data,
-    this.reverse = false,
+    this.autoScrollContent = false,
     @required this.keyFactory,
     @required this.onItemSelected,
     @required this.sortColumn,
@@ -50,11 +57,8 @@ class FlatTable<T> extends StatefulWidget {
 
   final List<T> data;
 
-  /// Display list items reversed and from the bottom up.
-  ///
-  /// Note: this is a workaround for implementing auto-scrolling in order to
-  /// always display newly added items.
-  final bool reverse;
+  /// Auto-scrolling the table to keep new content visible.
+  final bool autoScrollContent;
 
   /// Factory that creates keys for each row in this table.
   final Key Function(T data) keyFactory;
@@ -113,7 +117,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
       itemCount: widget.data.length,
       columns: widget.columns,
       columnWidths: columnWidths,
-      reverse: widget.reverse,
+      autoScrollContent: widget.autoScrollContent,
       rowBuilder: _buildRow,
       sortColumn: widget.sortColumn,
       sortDirection: widget.sortDirection,
@@ -488,13 +492,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     double viewportHeight,
   ) {
     // get the index of the first item fully visible in the viewport
-    final firstItemIndex =
-        (scrollController.offset / _Table.defaultRowHeight).ceil();
+    final firstItemIndex = (scrollController.offset / defaultRowHeight).ceil();
 
     // '-1' in the following calculations is needed because the header row
     // occupies space in the viewport so we must subtract it out.
     final minCompleteItemsInView =
-        (viewportHeight / _Table.defaultRowHeight).floor() - 1;
+        (viewportHeight / defaultRowHeight).floor() - 1;
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
     int newSelectedNodeIndex;
 
@@ -519,14 +522,13 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       // To do this we need to be showing the (minCompleteItemsInView + 1)
       // previous item  at the top.
       scrollController.animateTo(
-        (newSelectedNodeIndex - minCompleteItemsInView + 1) *
-            _Table.defaultRowHeight,
+        (newSelectedNodeIndex - minCompleteItemsInView + 1) * defaultRowHeight,
         duration: defaultDuration,
         curve: defaultCurve,
       );
     } else if (isAboveViewport) {
       scrollController.animateTo(
-        newSelectedNodeIndex * _Table.defaultRowHeight,
+        newSelectedNodeIndex * defaultRowHeight,
         duration: defaultDuration,
         curve: defaultCurve,
       );
@@ -556,12 +558,12 @@ class _Table<T> extends StatefulWidget {
     @required this.onSortChanged,
     @required this.focusNode,
     this.handleKeyEvent,
-    this.reverse = false,
+    this.autoScrollContent = false,
   }) : super(key: key);
 
   final int itemCount;
 
-  final bool reverse;
+  final bool autoScrollContent;
   final List<ColumnData<T>> columns;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
@@ -573,12 +575,6 @@ class _Table<T> extends StatefulWidget {
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
-
-  /// The maximum height to allow for rows in the table.
-  ///
-  /// When rows in the table expand or collapse, they will animate between
-  /// a height of 0 and a height of [defaultRowHeight].
-  static const defaultRowHeight = 32.0;
 
   @override
   _TableState<T> createState() => _TableState<T>();
@@ -593,6 +589,7 @@ class _TableState<T> extends State<_Table<T>> {
   @override
   void initState() {
     super.initState();
+
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
     sortColumn = widget.sortColumn;
     sortDirection = widget.sortDirection;
@@ -602,6 +599,7 @@ class _TableState<T> extends State<_Table<T>> {
   @override
   void dispose() {
     scrollController.dispose();
+
     super.dispose();
   }
 
@@ -610,10 +608,6 @@ class _TableState<T> extends State<_Table<T>> {
       widget.columnWidths.reduce((x, y) => x + y) + (2 * defaultSpacing);
 
   Widget _buildItem(BuildContext context, int index) {
-    if (widget.reverse) {
-      index = widget.itemCount - index - 1;
-    }
-
     return widget.rowBuilder(
       context,
       _linkedHorizontalScrollControllerGroup,
@@ -627,6 +621,13 @@ class _TableState<T> extends State<_Table<T>> {
       _buildItem,
       childCount: widget.itemCount,
     );
+
+    // If we're at the end already, scroll to expose the new content.
+    if (widget.autoScrollContent) {
+      if (scrollController.hasClients && scrollController.atScrollBottom) {
+        scrollController.autoScrollToBottom();
+      }
+    }
 
     return LayoutBuilder(builder: (context, constraints) {
       return SizedBox(
@@ -660,7 +661,6 @@ class _TableState<T> extends State<_Table<T>> {
                   focusNode: widget.focusNode,
                   child: ListView.custom(
                     controller: scrollController,
-                    reverse: widget.reverse,
                     childrenDelegate: itemDelegate,
                   ),
                 ),
@@ -840,7 +840,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final row = tableRowFor(context);
 
     final box = SizedBox(
-      height: _Table.defaultRowHeight,
+      height: defaultRowHeight,
       child: Material(
         color: widget.backgroundColor ?? Theme.of(context).canvasColor,
         child: widget.onPressed != null
@@ -863,10 +863,10 @@ class _TableRowState<T> extends State<TableRow<T>>
             box,
             for (var c in widget.expansionChildren)
               SizedBox(
-                height: _Table.defaultRowHeight * expandCurve.value,
+                height: defaultRowHeight * expandCurve.value,
                 child: OverflowBox(
                   minHeight: 0.0,
-                  maxHeight: _Table.defaultRowHeight,
+                  maxHeight: defaultRowHeight,
                   alignment: Alignment.topCenter,
                   child: c,
                 ),
@@ -922,7 +922,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                       : Icons.expand_more,
                   size: defaultIconSize,
                 ),
-              const SizedBox(height: _Table.defaultRowHeight, width: 4.0),
+              const SizedBox(height: defaultRowHeight, width: 4.0),
               Text(
                 column.title,
                 overflow: TextOverflow.ellipsis,

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../config_specific/logger/logger.dart';
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/theme.dart';
@@ -40,7 +41,7 @@ class CodeView extends StatefulWidget {
   _CodeViewState createState() => _CodeViewState();
 }
 
-class _CodeViewState extends State<CodeView> {
+class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
   Script script;
   List<String> lines = [];
   Set<int> executableLines = {};
@@ -61,25 +62,8 @@ class _CodeViewState extends State<CodeView> {
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
 
-    widget.controller.scriptLocation.addListener(_handleScriptLocationChanged);
-  }
-
-  void _initScriptInfo() {
-    script = widget.controller.getScriptCached(scriptRef);
-
-    if (script == null) {
-      if (scriptRef != null) {
-        widget.controller.getScript(scriptRef).then((script) {
-          setState(() {
-            this.script = script;
-
-            _parseScriptLines();
-          });
-        });
-      }
-    } else {
-      _parseScriptLines();
-    }
+    addAutoDisposeListener(
+        widget.controller.scriptLocation, _handleScriptLocationChanged);
   }
 
   void _parseScriptLines() {
@@ -112,10 +96,10 @@ class _CodeViewState extends State<CodeView> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.controller != oldWidget.controller) {
-      oldWidget.controller.scriptLocation
-          .removeListener(_handleScriptLocationChanged);
-      widget.controller.scriptLocation
-          .addListener(_handleScriptLocationChanged);
+      cancel();
+
+      addAutoDisposeListener(
+          widget.controller.scriptLocation, _handleScriptLocationChanged);
     }
 
     if (widget.scriptRef != oldWidget.scriptRef) {
@@ -134,8 +118,31 @@ class _CodeViewState extends State<CodeView> {
         .removeListener(_handleScriptLocationChanged);
   }
 
+  void _initScriptInfo() {
+    script = widget.controller.getScriptCached(scriptRef);
+
+    if (script == null) {
+      if (scriptRef != null) {
+        final scriptId = scriptRef.id;
+        widget.controller.getScript(scriptRef).then((script) {
+          if (mounted && scriptId == scriptRef.id) {
+            setState(() {
+              this.script = script;
+
+              _parseScriptLines();
+            });
+          }
+        });
+      }
+    } else {
+      _parseScriptLines();
+    }
+  }
+
   void _handleScriptLocationChanged() {
-    _updateScrollPosition();
+    if (mounted) {
+      _updateScrollPosition();
+    }
   }
 
   void _updateScrollPosition({bool animate = true}) {
@@ -150,7 +157,8 @@ class _CodeViewState extends State<CodeView> {
 
     if (!verticalController.hasAttachedControllers) {
       // TODO(devoncarew): I'm uncertain why this occurs.
-      print('LinkedScrollControllerGroup has no attached controllers');
+      // todo: ???
+      log('LinkedScrollControllerGroup has no attached controllers');
       return;
     }
 
