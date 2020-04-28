@@ -62,3 +62,10 @@ Finder findSubstring(Widget widget, String text) {
     return false;
   });
 }
+
+extension RichTextChecking on CommonFinders {
+  Finder richText(String text) {
+    return find.byWidgetPredicate(
+        (widget) => widget is RichText && widget.text.toPlainText() == text);
+  }
+}
