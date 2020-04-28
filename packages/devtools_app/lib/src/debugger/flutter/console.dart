@@ -44,8 +44,7 @@ class _ConsoleState extends State<Console> {
         child: ValueListenableBuilder<List<String>>(
           valueListenable: widget.controller.stdio,
           builder: (context, lines, _) {
-            // If we're at the end already, scroll to expose the new
-            // content.
+            // If we're at the end already, scroll to expose the new content.
             if (scrollController.hasClients &&
                 scrollController.atScrollBottom) {
               scrollController.autoScrollToBottom();

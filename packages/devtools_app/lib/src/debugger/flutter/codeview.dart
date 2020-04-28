@@ -79,13 +79,13 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       widget.controller
           .getBreakablePositions(script)
           .then((List<SourcePosition> positions) {
-        if (scriptId == scriptRef?.id) {
+        if (mounted && scriptId == scriptRef?.id) {
           setState(() {
             executableLines = Set.from(positions.map((p) => p.line));
           });
         }
       }).catchError((e, st) {
-        // ignore - not supported for all vm service impls
+        // Ignore - not supported for all vm service implementations.
         log('$e\n$st');
       });
     }
@@ -455,10 +455,12 @@ class LineItem extends StatelessWidget {
       final foregroundColor =
           isDarkTheme ? theme.textTheme.bodyText2.color : theme.primaryColor;
 
-      const colIconSize = defaultIconSize;
-      const colLeftOffset = -4.25;
+      // The following constants are tweaked for using the
+      // 'Icons.label_important' icon.
+      const colIconSize = 13.0;
+      const colLeftOffset = -3.0;
       const colBottomOffset = 13.0;
-      const colIconRotate = 180 * math.pi / 180;
+      const colIconRotate = -90 * math.pi / 180;
 
       child = Stack(
         children: [
@@ -475,7 +477,7 @@ class LineItem extends StatelessWidget {
                 child: Transform.rotate(
                   angle: colIconRotate,
                   child: Icon(
-                    Icons.file_download,
+                    Icons.label_important,
                     size: colIconSize,
                     color: foregroundColor,
                   ),
