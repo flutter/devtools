@@ -28,7 +28,7 @@ Future<String> initializePlatform() async {
   if (serverConnection != null) {
     // Set the DevToolsServerConnection as a global; we'll later init it with
     // the FrameworkController.
-    setGlobal(DevToolsServerConnection, serverConnection);
+    serverConnection.initFrameworkController();
   }
 
   return '${window.location}';

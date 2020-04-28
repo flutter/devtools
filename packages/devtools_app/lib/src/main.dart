@@ -172,6 +172,8 @@ class HtmlPerfToolFramework extends HtmlFramework {
       return;
     }
 
+    devToolsServer.initFrameworkController();
+
     // If we showed a notification for DevTools and the user manually clicked
     // into the window instead, we should hide the notification automatically.
     html.window.onFocus.listen((_) => devToolsServer.dismissNotifications());

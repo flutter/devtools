@@ -36,10 +36,6 @@ class FrameworkCore {
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
     setGlobal(MessageBus, MessageBus());
     setGlobal(FrameworkController, FrameworkController());
-
-    final serverConnection =
-        globals[DevToolsServerConnection] as DevToolsServerConnection;
-    serverConnection?.initFrameworkController();
   }
 
   /// Returns true if we're able to connect to a device and false otherwise.
