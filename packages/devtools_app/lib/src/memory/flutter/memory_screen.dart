@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
@@ -20,7 +19,6 @@ import 'memory_chart.dart';
 import 'memory_controller.dart';
 import 'memory_heap_tree_view.dart';
 
-import 'memory_graph_test.dart';
 
 class MemoryScreen extends Screen {
   const MemoryScreen() : super(id, title: 'Memory', icon: Octicons.package);
@@ -47,8 +45,6 @@ class MemoryScreen extends Screen {
   static const memorySourcesKey = Key('Memory Sources');
   @visibleForTesting
   static const exportButtonKey = Key('Export Button');
-  @visibleForTesting
-  static const snapshotButtonKey = Key('Snapshot Button');
   @visibleForTesting
   static const resetButtonKey = Key('Reset Button');
   @visibleForTesting
@@ -130,9 +126,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
             initialFractions: const [0.40, 0.60],
             children: [
               _memoryChart,
-              controller.snapshotByLibraryData == null
-                ? const Text('TBD')
-                : HeapTree(controller)
+              HeapTree(controller),
             ],
           ),
         ),
@@ -313,17 +307,6 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
           const SizedBox(width: defaultSpacing),
           Flexible(
             child: OutlineButton(
-              key: MemoryScreen.snapshotButtonKey,
-              onPressed: _snapshot,
-              child: Label(
-                memorySnapshot,
-                'Snapshot',
-                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
-              ),
-            ),
-          ),
-          Flexible(
-            child: OutlineButton(
               key: MemoryScreen.resetButtonKey,
               onPressed: _reset,
               child: Label(
@@ -362,7 +345,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
     );
   }
 
-  // Callbacks for button actions:
+  /// Callbacks for button actions:
 
   void _clearTimeline() {
     controller.memoryTimeline.reset();
@@ -380,64 +363,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
     setState(() {});
   }
 
-  void _snapshot() async {
-    final timestamp = DateTime.now();
-    final graph = await controller.snapshotMemory();
-
-HeapGraph theGraph = convertHeapGraph(graph);
-print('>>>>> theGraph');
-
-/*
-print("Total size of external Heap ${graph.externalSize}");
-int externalSize = graph.externalProperties.length;
-for (var index = 0; index < externalSize; index++) {
-  final externalProperty = graph.externalProperties[index];
-  print("[$index] name=${externalProperty.name} size=${externalProperty.externalSize}");
-}
-*/
-
-      Map<String, List<HeapGraphElement>> groupedByToString = {};
-      for (HeapGraphClassActual c in theGraph.classes) {
-        for (HeapGraphElement instance in c.getInstances(theGraph)) {
-          StringBuffer sb = StringBuffer();
-          sb.write(c.name);
-          final sbToString = sb.toString();
-          groupedByToString[sbToString] ??= [];
-          groupedByToString[sbToString].add(instance);
-        }
-      }
-
-      // Associate instances to class.
-      groupedByToString.forEach((key, value) {
-//        print(">>> Group key=$key");
-        if (key.startsWith('Terry')) {
-          print(">>>> STOP key = $key");
-
-          value.forEach((HeapGraphElement instance) {
-              if (instance is HeapGraphElementActual) {
-                List<MapEntry<String, HeapGraphElement>> fields = instance.getFields();
-                fields.forEach((element) { 
-                  print(">>> field name ${element.key}");
-                });
-              }
-
-            List<HeapGraphElement> refs = instance.references;
-            print(">>>> Stop references");
-          });
-        }
-      });
-
-print("Stopped grouped");
-
-    controller.storeSnapshot(timestamp, graph);
-    final lastSnapshot = controller.lastSnapshot;
-    lastSnapshot.computeAllLibraries();
-    controller.selectedSnapshotTimestamp = DateFormat('dd-MM-yyyy:Hms').format(timestamp);
-
-    print(">>>> ${graph.classes.length}");
-  }
-
-  void _reset() {
+  void _reset() async {
     // TODO(terry): TBD real implementation needed.
   }
 

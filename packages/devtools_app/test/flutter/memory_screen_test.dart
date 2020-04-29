@@ -79,7 +79,7 @@ void main() {
 
       expect(controller.memorySource, MemoryController.liveFeed);
 
-      expect(find.byKey(MemoryScreen.snapshotButtonKey), findsOneWidget);
+//      expect(find.byKey(MemoryScreen.snapshotButtonKey), findsOneWidget);
       expect(find.byKey(MemoryScreen.resetButtonKey), findsOneWidget);
       expect(find.byKey(MemoryScreen.gcButtonKey), findsOneWidget);
 

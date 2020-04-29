@@ -9,17 +9,19 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
 import '../../config_specific/file/file.dart';
 import '../../config_specific/logger/logger.dart';
+import '../../flutter/table.dart';
 import '../../globals.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
 import '../../utils.dart';
 import '../../vm_service_wrapper.dart';
 import '../memory_service.dart';
+import 'memory_filter.dart';
+import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
 
@@ -49,6 +51,8 @@ class MemoryController extends DisposableController
 
   static const String logFilenamePrefix = 'memory_log_';
 
+  bool showHeatMap = true;
+
   final List<Snapshot> snapshots = [];
 
   Snapshot get lastSnapshot => snapshots.isNotEmpty ? snapshots.last : null;
@@ -63,6 +67,24 @@ class MemoryController extends DisposableController
   }
 
   String get selectedSnapshotTimestamp => _selectedSnapshotNotifier.value;
+
+  HeapGraph theGraph;
+
+  /// Leaf node of tabletree snapshot selected?  If selected then the instance
+  /// view is displayed to view the fields of an instance.
+  /// Notifies that the timeline has been paused.
+  final _leafSelectedNotifier = ValueNotifier<HeapGraphElementActual>(null);
+
+  ValueListenable get leafSelectedNotifier => _leafSelectedNotifier;
+
+  ValueNotifier<HeapGraphElementActual> get selectedLeaf =>
+      _leafSelectedNotifier;
+
+  bool get isLeafSelected => selectedLeaf.value != null;
+
+  void setSelectedLeaf(HeapGraphElementActual selected) {
+    _leafSelectedNotifier.value = selected;
+  }
 
   MemoryTimeline memoryTimeline;
 
@@ -239,9 +261,58 @@ class MemoryController extends DisposableController
 
   final SettingsModel settings = SettingsModel();
 
+  /// Tree to view Libary/Class/Instance
+  TreeTable<Reference> lciTreeTable;
+
+  /// Tree to view fields of an instance.
+  TreeTable<FieldReference> instanceFieldsTreeTable;
+
+  /// State of filters used by filter dialog (create/modify) and used
+  /// by filtering in grouping.
   final FilteredLibraries libraryFilters = FilteredLibraries();
 
-  LibraryCollection libraryCollection;
+  /// Root of all known libraries.
+  LibraryReference libraryRoot;
+
+  /// Root of known classes (used for group by class).
+  LibraryReference classRoot;
+
+  /// Used by the filter dialog, grouped name displayed in filter dialog
+  /// e.g., dart:*, package:flutter/*
+  ///
+  /// The key is the group name (displayed in dialog), value is list of
+  /// libraries associated to the group. Structure is used to:
+  ///    - allow user to hide/show a library when filtering a snapshot.
+  ///    - create the hide list of libraries to drive the UX on when showing
+  ///      list of libraries/classes/objects in a snapshot table.
+  final filteredLibrariesByGroupName = <String, List<LibraryFilter>>{};
+
+  /// Notify that the filtering has changed.
+  ValueListenable get filterNotifier => _filterNotifier;
+
+  final _filterNotifier = ValueNotifier<int>(0);
+
+  void updateFilter() {
+    _filterNotifier.value++;
+  }
+
+  /// Hide any class that hasn't been constructed (zero instances).
+  bool filterZeroInstances = true;
+
+  /// Hide any private class, prefixed with an underscore.
+  bool filterPrivateClasses = true;
+
+  /// Hide any library with no constructed class instances.
+  bool filterLibraryNoInstances = true;
+
+  /// Table ordered by library, class or instance
+  static const String groupByLibrary = 'Library';
+  static const String groupByClass = 'Class';
+  static const String groupByInstance = 'Instance';
+
+  final groupingBy = ValueNotifier<String>(groupByLibrary);
+
+  ValueListenable get groupingByNotifier => groupingBy;
 
   String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
@@ -375,33 +446,60 @@ class MemoryController extends DisposableController
         .toList();
   }
 
-  void initializeLibraryFilters() {}
+  static const String libraryRootNode = '___LIBRARY___';
+  static const String classRootNode = '___CLASSES___';
 
-  Future computeLibraries() async {
-    if (libraryCollection == null) {
-      // TODO(terry): Review why unawaited is necessary.
-      unawaited(serviceManager.service.getVM().then((vm) {
-        Future.wait(vm.isolates.map((IsolateRef ref) {
-          return serviceManager.service.getIsolate(ref.id);
-        })).then((isolates) {
-          libraryCollection = LibraryCollection(libraryFilters);
-          for (LibraryRef libraryRef in isolates.first.libraries) {
-            serviceManager.service
-                .getObject(_isolateId, libraryRef.id)
-                .then((theLibrary) {
-              libraryCollection.addLibrary(theLibrary);
-            });
-          }
+  /// When new snapshot occurs entire libraries should be rebuilt then rebuild should be true.
+  LibraryReference computeAllLibraries([bool filtered = true, bool rebuild = false]) {
+    if (snapshots.isEmpty) return null;
+    
+    if (filtered && libraryRoot != null && !rebuild) return libraryRoot;
 
-          libraryCollection.computeDisplayClasses();
-        });
-      }));
-    }
+    // Group by library
+    libraryRoot = LibraryReference(this, libraryRootNode, null);
+
+    // Group by class (under root library __CLASSES__).
+    classRoot = LibraryReference(this, classRootNode, null);
+
+    final externalReference = ExternalReference(this);
+    final filteredReference = FilteredReference(this);
+
+    libraryRoot.addChild(externalReference);
+    libraryRoot.addChild(filteredReference);
+
+    // Compute all libraries.
+    final groupBy =
+        filtered ? theGraph.groupByLibrary : theGraph.rawGroupByLibrary;
+
+    groupBy.forEach((libraryName, classes) {
+      LibraryReference libReference = libraryRoot.children.singleWhere((library) {
+        return libraryName == library.name;
+      }, orElse: () => null);
+
+      // Library not found add to list of children.
+      libReference ??= LibraryReference(this, libraryName, classes);
+      libraryRoot.addChild(libReference);
+
+      for (var actualClass in libReference.actualClasses) {
+        monitorClass(
+          className: actualClass.name,
+          message: 'computeAllLibraries',
+        );
+        final classRef = ClassReference(this, actualClass);
+        classRef.addChild(Reference.empty);
+
+        libReference.addChild(classRef);
+
+        // TODO(terry): Consider adding the ability to clear the table tree cache
+        // (root) to reset the level/depth values.
+        final classRefClassGroupBy = ClassReference(this, actualClass);
+        classRefClassGroupBy.addChild(Reference.empty);
+        classRoot.addChild(classRefClassGroupBy);
+      }
+    });
+
+    return libraryRoot;
   }
-
-  // Keys in the libraries map is a normalized library name.
-  List<String> sortLibrariesByNormalizedNames() =>
-      libraryCollection.librarires.keys.toList()..sort();
 
   Future getObject(String objectRef) async =>
       await serviceManager.service.getObject(
@@ -458,7 +556,7 @@ class MemoryController extends DisposableController
   }
 
   void storeSnapshot(DateTime timestamp, HeapSnapshotGraph graph) {
-    snapshots.add(Snapshot(timestamp, graph));
+    snapshots.add(Snapshot(timestamp, this, graph));
   }
 
   @override
@@ -486,174 +584,6 @@ class SettingsModel {
   /// inbound references instances.  Compares hashCodes (using eval causing
   /// memory shaking).  Only works in debug mode.
   bool experiment = false;
-}
-
-const String _dartLibraryUriPrefix = 'dart:';
-const String _flutterLibraryUriPrefix = 'package:flutter';
-
-class FilteredLibraries {
-  final List<String> _filteredLibraries = [
-    normalizedDartLibraryUri,
-    normalizedFlutterLibraryUri,
-  ];
-
-  static const String normalizedDartLibraryUri = 'Dart';
-  static const String normalizedFlutterLibraryUri = 'Flutter';
-
-  static String normalizeLibraryUri(Library library) {
-    final uriParts = library.uri.split('/');
-    final firstPart = uriParts.first;
-    if (firstPart.startsWith(_dartLibraryUriPrefix)) {
-      return FilteredLibraries.normalizedDartLibraryUri;
-    } else if (firstPart.startsWith(_flutterLibraryUriPrefix)) {
-      return FilteredLibraries.normalizedFlutterLibraryUri;
-    } else {
-      return firstPart;
-    }
-  }
-
-  List<String> get librariesFiltered => _filteredLibraries.toList();
-
-  bool get isDartLibraryFiltered =>
-      _filteredLibraries.contains(normalizedDartLibraryUri);
-
-  bool get isFlutterLibraryFiltered =>
-      _filteredLibraries.contains(normalizedFlutterLibraryUri);
-
-  void clearFilters() {
-    _filteredLibraries.clear();
-  }
-
-  void addFilter(String libraryUri) {
-    _filteredLibraries.add(libraryUri);
-  }
-
-  void removeFilter(String libraryUri) {
-    _filteredLibraries.remove(libraryUri);
-  }
-
-  bool isDartLibrary(Library library) =>
-      library.uri.startsWith(_dartLibraryUriPrefix);
-
-  bool isFlutterLibrary(Library library) =>
-      library.uri.startsWith(_flutterLibraryUriPrefix);
-
-  bool isLibraryFiltered(String normalizedLibraryUri) =>
-      _filteredLibraries.contains(normalizedLibraryUri);
-}
-
-class LibraryCollection {
-  LibraryCollection(FilteredLibraries filters) : _libraryFilters = filters;
-
-  final FilteredLibraries _libraryFilters;
-
-  /// <key, value> normalizeLibraryUri, Library
-  final Map<String, List<Library>> librarires = {};
-
-  /// Classes displayed in snapshot - <key, value> classId and libraryId.
-  final Map<String, String> displayClasses = {};
-
-  bool isDisplayClass(String classId) => displayClasses.containsKey(classId);
-
-  void addLibrary(Library library) {
-    final normalizedUri = FilteredLibraries.normalizeLibraryUri(library);
-    if (librarires[normalizedUri] == null) {
-      // Add first library to this normalizedUri.
-      librarires[normalizedUri] = [library];
-    } else {
-      // Add subsequent library to this normalizedUri.
-      librarires[normalizedUri].add(library);
-    }
-
-    _filterOrShowClasses(library);
-  }
-
-  void _filterOrShowClasses(Library library) {
-    final normalizedUri = FilteredLibraries.normalizeLibraryUri(library);
-    if (_libraryFilters.isLibraryFiltered(normalizedUri)) {
-      // We're filtering this library - nothing to show.
-      return;
-    }
-
-    // This library isn't being filtered so show all its classes.
-    for (ClassRef classRef in library.classes) {
-      showClass(classRef.id, library);
-    }
-  }
-
-  /// Called from filter dialog when "apply" is clicked.
-  void computeDisplayClasses([FilteredLibraries filters]) {
-    final librariesFiltered = filters == null ? _libraryFilters : filters;
-    displayClasses.clear();
-
-    librarires.forEach((String normalizedUri, List<Library> libraries) {
-      if (librariesFiltered.librariesFiltered.contains(normalizedUri)) {
-        for (var library in libraries) {
-          for (var theClass in library.classes) {
-            filterClass(theClass.id);
-          }
-        }
-      } else {
-        for (var library in libraries) {
-          for (var theClass in library.classes) {
-            showClass(theClass.id, library);
-          }
-        }
-      }
-    });
-  }
-
-  Library findDartLibrary(String libraryId) =>
-      librarires[FilteredLibraries.normalizedDartLibraryUri].firstWhere(
-          (Library library) => library.id == libraryId,
-          orElse: () => null);
-
-  Library findFlutterLibrary(String libraryId) =>
-      librarires[FilteredLibraries.normalizedFlutterLibraryUri].firstWhere(
-          (Library library) => library.id == libraryId,
-          orElse: () => null);
-
-  Library findOtherLibrary(String libraryId) {
-    for (var libraries in librarires.values) {
-      for (var library in libraries) {
-        if (libraryId == library.id) return library;
-      }
-    }
-
-    return null;
-  }
-
-  /// Class to actively display (otherwise class is filtered out of snapshot).
-  void showClass(String classId, Library library) {
-    displayClasses[classId] = library.id;
-  }
-
-  void filterClass(String classId) {
-    displayClasses.remove(classId);
-  }
-
-  bool isDartLibrary(String classId) {
-    final dartLibrary = findDartLibrary(displayClasses[classId]);
-    if (dartLibrary != null) {
-      assert(dartLibrary.uri.startsWith(_dartLibraryUriPrefix));
-      return true;
-    }
-
-    return false;
-  }
-
-  bool isFlutterLibrary(String classId) {
-    final flutterLibrary = findFlutterLibrary(displayClasses[classId]);
-    if (flutterLibrary != null) {
-      assert(flutterLibrary.uri.startsWith(_dartLibraryUriPrefix));
-      return true;
-    }
-
-    return false;
-  }
-
-  bool isOtherLibrary(String classId) =>
-      findOtherLibrary(displayClasses[classId]) != null;
 }
 
 /// Prepare data to plot in MPChart.
@@ -1100,7 +1030,7 @@ class MemoryLog {
     bool pseudoData = false;
     if (liveData.isEmpty) {
       // TODO(terry): Can eliminate once I add loading a canned data source
-      //              see TODO in memory_screen_test.
+      //              see the todo in memory_screen_test.
       // Used to create empty memory log for test.
       pseudoData = true;
       liveData.add(HeapSample(
