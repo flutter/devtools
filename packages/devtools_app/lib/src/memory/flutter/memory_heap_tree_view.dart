@@ -123,20 +123,10 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Container(
-            child: Expanded(
-              flex: 1,
-              child: snapshotDisplay,
-            ),
-          ),
+          Expanded(child: snapshotDisplay),
           const SizedBox(width: 16.0),
           controller.isLeafSelected
-              ? Container(
-                  child: Expanded(
-                    flex: 1,
-                    child: SnapshotInstanceViewTable(),
-                  ),
-                )
+              ? Expanded(child: SnapshotInstanceViewTable())
               : const Text(''),
         ],
       ),
@@ -174,7 +164,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       key: groupByMenuButtonKey,
       value: controller.groupingBy.value,
       iconSize: 20,
-      style: TextStyle(fontWeight: FontWeight.w100),
+      style: const TextStyle(fontWeight: FontWeight.w100),
       onChanged: (String newValue) {
         setState(
           () {
@@ -237,8 +227,10 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
                   onPressed: snapshotDisplay is MemorySnapshotTable
                       ? () {
                           if (snapshotDisplay is MemorySnapshotTable) {
-                            controller.lciTreeTable.dataRoots[0]
-                                .collapseCascading();
+                            controller.lciTreeTable.dataRoots.every((element) {
+                              element.collapseCascading();
+                              return true;
+                            });
                             if (controller.instanceFieldsTreeTable != null) {
                               // We're collapsing close the fields table.
                               controller.setSelectedLeaf(null);
@@ -256,8 +248,10 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
                   onPressed: snapshotDisplay is MemorySnapshotTable
                       ? () {
                           if (snapshotDisplay is MemorySnapshotTable) {
-                            controller.lciTreeTable.dataRoots[0]
-                                .expandCascading();
+                            controller.lciTreeTable.dataRoots.every((element) {
+                              element.expandCascading();
+                              return true;
+                            });
                             setState(() {});
                           }
                         }
@@ -630,7 +624,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
     }
 
     controller.lciTreeTable = TreeTable<Reference>(
-      dataRoots: [root],
+      dataRoots: root.children,
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (libRef) => PageStorageKey<String>(libRef.name),

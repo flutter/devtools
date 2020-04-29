@@ -278,7 +278,7 @@ class InstructionsSize {
         final List<HeapGraphClassActual> classes = value;
         for (final theClass in classes) {
           final shallowSize = theClass.instancesTotalShallowSizes;
-          final className = theClass.name;
+          var className = theClass.name;
           if (shallowSize == 0 ||
               libraryGroup == null ||
               className == null ||
@@ -290,6 +290,12 @@ class InstructionsSize {
           String libraryName = theClass.libraryUri.toString();
           if (libraryName.isEmpty) {
             libraryName = libraryGroup;
+          }
+
+          // Map class names to familar user names.
+          final predefined = predefinedClasses['$libraryName,$className'];
+          if (predefined != null) {
+            className = predefined.prettyName;
           }
 
           // TODO(terry): Remove testing really big objects.
@@ -443,6 +449,7 @@ class HeatMapSizeAnalyzer extends StatelessWidget {
     return MaterialApp(
       color: Colors.blueGrey,
       home: FlameChart(InstructionsSize.fromSnapshop(heapGraph)),
+      debugShowCheckedModeBanner: false,
     );
 
     // TODO(terry): Testing search needs to be stateful.

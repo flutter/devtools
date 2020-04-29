@@ -210,7 +210,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     // No libraries to compute until a snapshot exist.
     if (controller.snapshots.isEmpty) return;
 
-    final libraries = controller.computeAllLibraries(true).children;
+    final libraries = controller.computeAllLibraries().children;
     libraries..sort((a, b) => a.name.compareTo(b.name));
 
     for (final library in libraries) {
@@ -267,7 +267,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                 children: [
                   Column(
                     children: [
-                      TextField(
+                      const TextField(
                         decoration: InputDecoration(
                             border: InputBorder.none,
                             isDense: true,

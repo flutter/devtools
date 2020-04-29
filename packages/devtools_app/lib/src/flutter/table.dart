@@ -290,7 +290,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       node.leaf();
       return;
     }
-    
+
     setState(() {
       if (!node.isExpandable) return;
       animatingNode = node;

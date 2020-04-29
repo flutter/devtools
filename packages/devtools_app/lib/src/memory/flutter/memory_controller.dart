@@ -399,8 +399,9 @@ class MemoryController extends DisposableController
       getAllocationProfile(reset: true);
 
   // 'reset': true to reset the object allocation accumulators
-  Future<List<ClassHeapDetailStats>> getAllocationProfile(
-      {bool reset = false}) async {
+  Future<List<ClassHeapDetailStats>> getAllocationProfile({
+    bool reset = false,
+  }) async {
     AllocationProfile allocationProfile;
     try {
       allocationProfile = await serviceManager.service.getAllocationProfile(
@@ -427,7 +428,10 @@ class MemoryController extends DisposableController
   }
 
   Future<List<InstanceSummary>> getInstances(
-      String classRef, String className, int maxInstances) async {
+    String classRef,
+    String className,
+    int maxInstances,
+  ) async {
     // TODO(terry): Expose as a stream to reduce stall when querying for 1000s
     // TODO(terry): of instances.
     InstanceSet instanceSet;
@@ -450,9 +454,12 @@ class MemoryController extends DisposableController
   static const String classRootNode = '___CLASSES___';
 
   /// When new snapshot occurs entire libraries should be rebuilt then rebuild should be true.
-  LibraryReference computeAllLibraries([bool filtered = true, bool rebuild = false]) {
+  LibraryReference computeAllLibraries([
+    bool filtered = true,
+    bool rebuild = false,
+  ]) {
     if (snapshots.isEmpty) return null;
-    
+
     if (filtered && libraryRoot != null && !rebuild) return libraryRoot;
 
     // Group by library
@@ -472,7 +479,8 @@ class MemoryController extends DisposableController
         filtered ? theGraph.groupByLibrary : theGraph.rawGroupByLibrary;
 
     groupBy.forEach((libraryName, classes) {
-      LibraryReference libReference = libraryRoot.children.singleWhere((library) {
+      LibraryReference libReference =
+          libraryRoot.children.singleWhere((library) {
         return libraryName == library.name;
       }, orElse: () => null);
 

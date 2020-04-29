@@ -8,15 +8,20 @@ import '../../trees.dart';
 import '../flutter/memory_controller.dart';
 import '../flutter/memory_graph_model.dart';
 
-// Consolidated list of libraries.  External is the external heap and Filtered are
-// the sum of all filtered (hidden) libraries.  
+/// Consolidated list of libraries.  External is the external heap
+/// and Filtered is the sum of all filtered (hidden) libraries.
 const String externalLibraryName = 'External';
 const String filteredLibrariesName = 'Filtered';
+
+/// Name for predefined Reference and FieldReference should never be
+/// seen by user.
+const String emptyName = '<empty>';
+const String sentinelName = '<sentinel>';
 
 class Reference extends TreeNode<Reference> {
   Reference._empty()
       : controller = null,
-        name = '<empty>',
+        name = emptyName,
         isLibrary = false,
         isExternal = false,
         isFiltered = false,
@@ -26,7 +31,7 @@ class Reference extends TreeNode<Reference> {
 
   Reference._sentinel()
       : controller = null,
-        name = '<sentinel>',
+        name = sentinelName,
         isLibrary = false,
         isExternal = false,
         isFiltered = false,
@@ -89,17 +94,6 @@ class Reference extends TreeNode<Reference> {
         isObject = false,
         actualClass = null,
         name = filteredLibrariesName;
-
-  /// Hide the default constructor.
-  Reference._()
-      : controller = null,
-        name = null,
-        isLibrary = false,
-        isExternal = false,
-        isFiltered = false,
-        isClass = false,
-        isObject = false,
-        actualClass = null;
 
   static Reference empty = Reference._empty();
 
@@ -249,7 +243,7 @@ class FieldReference extends TreeNode<FieldReference> {
   FieldReference._empty()
       : controller = null,
         instance = null,
-        name = '<empty>',
+        name = emptyName,
         isScaler = false,
         isObject = false,
         type = null,
@@ -258,7 +252,7 @@ class FieldReference extends TreeNode<FieldReference> {
   FieldReference._sentinel()
       : controller = null,
         instance = null,
-        name = '<sentinel>',
+        name = sentinelName,
         isScaler = false,
         isObject = false,
         type = null,
@@ -278,16 +272,6 @@ class FieldReference extends TreeNode<FieldReference> {
   })  : value = null,
         isScaler = false,
         isObject = true;
-
-  /// Hide the default constructor.
-  FieldReference._()
-      : controller = null,
-        instance = null,
-        name = null,
-        isScaler = false,
-        isObject = false,
-        type = null,
-        value = null;
 
   static FieldReference empty = FieldReference._empty();
 
@@ -511,7 +495,6 @@ FieldReference listToFieldEntries(
         actualListElement,
         'List',
         '[$size]',
-        isNull: false,
       );
     } else if (fullClassName == predefinedMap) {
       // Add the Map field name and the key/value pairs.
@@ -521,7 +504,6 @@ FieldReference listToFieldEntries(
         actualListElement,
         'Map',
         '$fieldName { ${size ~/ 2} }',
-        isNull: false,
       );
 
       // Look for list of Map values.
@@ -588,7 +570,6 @@ FieldReference listToFieldEntries(
                 entryElement,
                 '${predefined.prettyName}',
                 'key \'${entryElement.origin.data}\'',
-                isNull: false,
               );
 
               FieldReference valueEntry;
@@ -602,7 +583,6 @@ FieldReference listToFieldEntries(
                   valueElement,
                   valueClass.name,
                   'value',
-                  isNull: false,
                 );
                 // Compute the object's fields when onExpand hit.
                 valueEntry.addChild(FieldReference.empty);
@@ -624,7 +604,6 @@ FieldReference listToFieldEntries(
             entryElement,
             entryClass.name,
             '[$listIndex]',
-            isNull: false,
           );
         }
 

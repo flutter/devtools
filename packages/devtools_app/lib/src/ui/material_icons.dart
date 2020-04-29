@@ -32,8 +32,7 @@ final DevToolsIcon record = MaterialIcon(
     'fiber_manual_record', defaultButtonIconColor,
     codePoint: Icons.fiber_manual_record.codePoint);
 
-final DevToolsIcon search = MaterialIcon(
-    'serach', defaultButtonIconColor,
+final DevToolsIcon search = MaterialIcon('search', defaultButtonIconColor,
     codePoint: Icons.search.codePoint);
 
 final DevToolsIcon stop = MaterialIcon('stop', defaultButtonIconColor,
@@ -57,8 +56,7 @@ final DevToolsIcon memoryGC = MaterialIcon(
     'delete_sweep', defaultButtonIconColor,
     codePoint: Icons.delete_sweep.codePoint);
 
-final DevToolsIcon settings = MaterialIcon(
-    'settings', defaultButtonIconColor,
+final DevToolsIcon settings = MaterialIcon('settings', defaultButtonIconColor,
     codePoint: Icons.settings.codePoint);
 
 // TODO(jacobr): remove this class completely once the migration to Flutter

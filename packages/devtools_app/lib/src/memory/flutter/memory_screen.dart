@@ -19,7 +19,6 @@ import 'memory_chart.dart';
 import 'memory_controller.dart';
 import 'memory_heap_tree_view.dart';
 
-
 class MemoryScreen extends Screen {
   const MemoryScreen() : super(id, title: 'Memory', icon: Octicons.package);
 
