@@ -89,6 +89,7 @@ class FlameChartRenderObject extends RenderBox {
     markNeedsPaint();
   }
 
+  // TODO(terry): implemented not yet used to be used by search.
   /// Look for the node with a particular name (depth first traversal).
   Node findNode(Map<String, Node> children, String searchName) {
     for (var child in children.entries) {
