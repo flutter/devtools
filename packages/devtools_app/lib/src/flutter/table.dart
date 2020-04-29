@@ -223,7 +223,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   int selectedNodeIndex;
   List<double> columnWidths;
   List<bool> rootsExpanded;
-  FocusNode focusNode;
+  FocusNode _focusNode;
+
+  FocusNode get focusNode => _focusNode;
 
   @override
   void initState() {
@@ -232,13 +234,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     rootsExpanded =
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
-    focusNode = FocusNode();
+    _focusNode = FocusNode();
   }
 
   @override
   void didUpdateWidget(TreeTable oldWidget) {
     super.didUpdateWidget(oldWidget);
-    focusNode.requestFocus();
 
     if (widget.sortColumn != oldWidget.sortColumn ||
         widget.sortDirection != oldWidget.sortDirection ||
@@ -258,7 +259,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   @override
   void dispose() {
     super.dispose();
-    focusNode.dispose();
+    _focusNode.dispose();
   }
 
   void _updateItems() {
@@ -380,7 +381,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       sortColumn: widget.sortColumn,
       sortDirection: widget.sortDirection,
       onSortChanged: _sortDataAndUpdate,
-      focusNode: focusNode,
+      focusNode: _focusNode,
       handleKeyEvent: _handleKeyEvent,
     );
   }
@@ -653,18 +654,23 @@ class _TableState<T> extends State<_Table<T>> {
             ),
             Expanded(
               child: Scrollbar(
-                child: Focus(
-                  onKey: (_, event) => widget.handleKeyEvent != null
-                      ? widget.handleKeyEvent(
-                          event,
-                          scrollController,
-                          constraints,
-                        )
-                      : false,
-                  focusNode: widget.focusNode,
-                  child: ListView.custom(
-                    controller: scrollController,
-                    childrenDelegate: itemDelegate,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTapDown: (a) => widget.focusNode.requestFocus(),
+                  child: Focus(
+                    autofocus: true,
+                    onKey: (_, event) => widget.handleKeyEvent != null
+                        ? widget.handleKeyEvent(
+                            event,
+                            scrollController,
+                            constraints,
+                          )
+                        : false,
+                    focusNode: widget.focusNode,
+                    child: ListView.custom(
+                      controller: scrollController,
+                      childrenDelegate: itemDelegate,
+                    ),
                   ),
                 ),
               ),
