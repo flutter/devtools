@@ -497,8 +497,8 @@ class LineItem extends StatelessWidget {
 
     final backgroundColor = pausedFrame != null
         ? (isDarkTheme
-            ? _brighten(theme.canvasColor)
-            : _darken(theme.canvasColor))
+            ? theme.canvasColor.brighten()
+            : theme.canvasColor.darken())
         : null;
 
     return Container(
@@ -508,28 +508,4 @@ class LineItem extends StatelessWidget {
       child: child,
     );
   }
-}
-
-Color _darken(Color c, [double percent = 0.05]) {
-  assert(0.0 <= percent && percent <= 1.0);
-
-  percent = 1.0 - percent;
-
-  return Color.fromARGB(
-    c.alpha,
-    (c.red * percent).round(),
-    (c.green * percent).round(),
-    (c.blue * percent).round(),
-  );
-}
-
-Color _brighten(Color c, [double percent = 0.05]) {
-  assert(0.0 <= percent && percent <= 1.0);
-
-  return Color.fromARGB(
-    c.alpha,
-    c.red + ((255 - c.red) * percent).round(),
-    c.green + ((255 - c.green) * percent).round(),
-    c.blue + ((255 - c.blue) * percent).round(),
-  );
 }
