@@ -21,6 +21,7 @@ class DevToolsServerConnection {
     sseClient.stream.listen((msg) {
       _handleMessage(msg);
     });
+    initFrameworkController();
   }
 
   static Future<DevToolsServerConnection> connect() async {

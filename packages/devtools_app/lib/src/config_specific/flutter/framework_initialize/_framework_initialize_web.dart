@@ -4,8 +4,9 @@
 
 import 'dart:html';
 
+import 'package:pedantic/pedantic.dart';
+
 import '../../../server_api_client.dart';
-import '../../logger/logger.dart';
 
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {
@@ -17,18 +18,7 @@ Future<String> initializePlatform() async {
   // Here, we try and initialize the connection between the DevTools web app and
   // its local server. DevTools can be launched without the server however, so
   // establishing this connection is a best-effort.
-  DevToolsServerConnection serverConnection;
-  try {
-    serverConnection = await DevToolsServerConnection.connect();
-  } catch (e) {
-    log('Unable connect to the devtools server: $e', LogLevel.warning);
-  }
-
-  if (serverConnection != null) {
-    // Set the DevToolsServerConnection as a global; we'll later init it with
-    // the FrameworkController.
-    serverConnection.initFrameworkController();
-  }
+  unawaited(DevToolsServerConnection.connect());
 
   return '${window.location}';
 }
