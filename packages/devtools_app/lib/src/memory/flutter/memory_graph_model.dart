@@ -6,8 +6,8 @@ import 'package:vm_service/vm_service.dart';
 
 import '../flutter/memory_controller.dart';
 
-  // TODO(terry): Ask Ben, what is a class name of ::?
-  /// Internal class names :: automatically filter out.
+// TODO(terry): Ask Ben, what is a class name of ::?
+/// Internal class names :: automatically filter out.
 const String internalClassName = '::';
 
 // TODO(terry): Bake in types instead of comparing a fully qualified class name.
@@ -26,17 +26,18 @@ class Predefined {
 /// Structure key is fully qualified class name and the value is
 /// a List first entry is pretty name known to users second entry
 /// is if the type is a scalar.
-// TODO(terry): Make the value a structured class if more information added.
 const Map<String, Predefined> predefinedClasses = {
   'dart:core,bool': Predefined('bool', true),
   // TODO(terry): Handle Smi too (Integer)?
-  'dart:core,_Mint': Predefined('int', true),       // Integers not Smi but fit into 64bits.
+  // Integers not Smi but fit into 64bits.
+  'dart:core,_Mint': Predefined('int', true),
   'dart:core,_Double': Predefined('Double', true),
-  predefinedString: Predefined('String', true),     // String representation.
-  predefinedList: Predefined('List', false),        // List
-  predefinedMap: Predefined('Map', false),          // Map
+  predefinedString: Predefined('String', true),
+  predefinedList: Predefined('List', false),
+  predefinedMap: Predefined('Map', false),
 };
 
+/// List of classes to monitor, helps to debug particular class structure.
 final Map<int, String> _monitorClasses = {};
 
 /// Ensure the classId is zero based ()
@@ -69,7 +70,7 @@ HeapGraph convertHeapGraph(
 
   final Map<String, int> builtInClasses = {};
 
-  if (classNamesToMonitor.isNotEmpty) {
+  if (classNamesToMonitor != null && classNamesToMonitor.isNotEmpty) {
     print('WARNING: Remove classNamesToMonitor before PR submission. '
         '$classNamesToMonitor');
   }
@@ -235,16 +236,24 @@ class HeapGraph {
   }
 
   bool computeFilteredGroups() {
+    // Clone groupByClass from raw group.
     groupByClass.clear();
-    groupByClass.addEntries(rawGroupByClass.entries);
+    rawGroupByClass.forEach((key, value) {
+      groupByClass[key] = value.toList();
+    });
+
     // Prune classes that are private or have zero instances.
     groupByClass.removeWhere((className, instances) =>
         (controller.filterZeroInstances && instances.isEmpty) ||
         (controller.filterPrivateClasses && className.startsWith('_')) ||
         className == internalClassName);
 
+    // Clone groupByLibrary from raw group.
     groupByLibrary.clear();
-    groupByLibrary.addEntries(rawGroupByLibrary.entries);
+    rawGroupByLibrary.forEach((key, value) {
+      groupByLibrary[key] = value.toList();
+    });
+
     // Prune libraries if all their classes are private or have zero instances.
     groupByLibrary.removeWhere((libraryName, classes) {
       classes.removeWhere((actual) =>
@@ -254,8 +263,7 @@ class HeapGraph {
           actual.name == internalClassName);
 
       // Hide this library?
-      if (controller.libraryFilters.isLibraryFiltered(libraryName))
-        return true;
+      if (controller.libraryFilters.isLibraryFiltered(libraryName)) return true;
 
       return controller.filterLibraryNoInstances && classes.isEmpty;
     });
@@ -263,32 +271,8 @@ class HeapGraph {
     return true;
   }
 
-/*
-  Map<String, List<HeapGraphElementActual>> computeGroupByClass(
-      HeapGraph theGraph) {
-    // Group objects (instances) by class name.
-    final Map<String, List<HeapGraphElementActual>> groupedByToString = {};
-
-    for (HeapGraphClassActual c in theGraph.classes) {
-      final StringBuffer sb = StringBuffer();
-      for (HeapGraphElementActual instance in c.getInstances(theGraph)) {
-        sb.write(c.name);
-
-        c.instancesTotalShallowSizes += instance.origin.shallowSize;
-
-        final sbToString = sb.toString();
-
-        groupedByToString[sbToString] ??= [];
-        groupedByToString[sbToString].add(instance);
-        sb.clear();
-      }
-    }
-
-    return groupedByToString;
-  }
-*/
-
-  // Need to compute all instances, needed for retained space.
+  // TODO(terry): Need dominator graph for flow.
+  /// Compute all instances, needed for retained space.
   void computeInstancesForClasses() {
     if (!instancesComputed) {
       for (var i = 0; i < elements.length; i++) {
@@ -350,11 +334,13 @@ abstract class HeapGraphElement {
   }
 }
 
+/// Object marked for removal on next GC.
 class HeapGraphElementSentinel extends HeapGraphElement {
   @override
   String toString() => 'HeapGraphElementSentinel';
 }
 
+/// Live element.
 class HeapGraphElementActual extends HeapGraphElement {
   HeapGraphElementActual(this.origin);
 

@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
-import '../../flutter/controllers.dart';
 import '../../flutter/table.dart';
 import '../../flutter/theme.dart';
 import '../../table_data.dart';
@@ -28,8 +28,6 @@ class HeapTree extends StatefulWidget {
   );
 
   final MemoryController controller;
-
-  //List<HeapSnapshotClass> data;
 
   @override
   HeapTreeViewState createState() => HeapTreeViewState();
@@ -66,7 +64,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    controller = Controllers.of(context).memory;
+    controller = Provider.of<MemoryController>(context);
 
     cancel();
 
@@ -231,7 +229,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
           controller.showHeatMap ? const Text('') : _groupByDropdown(),
           const SizedBox(width: 16.0),
           // TODO(terry): Mechanism to handle expand/collapse on both
-          // tables objects/fields. Maybe notion of table focus?
+          // tables objects/fields. Maybe notion in table?
           controller.showHeatMap
               ? const Text('')
               : OutlineButton(
@@ -324,11 +322,11 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     final snapshotCollectionTime = DateTime.now();
 
     // To debug particular classes add their names to the last
-    // parameter classNamesToMonitor e.g., ['Terry', 'TerryEntry']
+    // parameter classNamesToMonitor e.g., ['AppStateModel', 'Terry', 'TerryEntry']
     controller.theGraph = convertHeapGraph(
       controller,
       graph,
-      ['Terry', 'TerryEntry', 'AppStateModel'],
+      [],
     );
     final snapshotGraphTime = DateTime.now();
 
@@ -444,7 +442,7 @@ class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    controller = Controllers.of(context).memory;
+    controller = Provider.of<MemoryController>(context);
 
     cancel();
 
@@ -598,7 +596,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    controller = Controllers.of(context).memory;
+    controller = Provider.of<MemoryController>(context);
 
     cancel();
 
