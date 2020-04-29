@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 import '../../../framework/framework_core.dart';
-
 import '_framework_initialize_stub.dart'
     if (dart.library.html) '_framework_initialize_web.dart'
     if (dart.library.io) '_framework_initialize_desktop.dart';
 
-void initializeFramework() {
-  final url = initializePlatform();
-  FrameworkCore.init(url);
+Future initializeFramework() async {
+  final url = await initializePlatform();
+  FrameworkCore.init(url: url);
 }

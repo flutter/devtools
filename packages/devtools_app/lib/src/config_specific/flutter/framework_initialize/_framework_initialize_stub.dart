@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// Return the url the application is launched from.
-String initializePlatform() {
+Future<String> initializePlatform() {
   throw UnimplementedError(
       'Attempting to initialize framework for unrecognized platform');
 }

@@ -2,93 +2,77 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
-import 'dart:html';
 
+import 'package:http/http.dart' as http;
+
+import 'config_specific/logger/logger.dart';
+import 'config_specific/notifications/notifications.dart';
 import 'config_specific/sse/sse_shim.dart';
-import 'main.dart';
+import 'globals.dart';
 
-class DevToolsServerApiClient {
-  DevToolsServerApiClient(this._framework) : _channel = SseClient('/api/sse') {
-    _channel.stream?.listen((msg) {
-      try {
-        final request = jsonDecode(msg);
-        assert(request['method'] != null);
-        switch (request['method']) {
-          case 'connectToVm':
-            connectToVm(request['params']);
-            return;
-          case 'showPage':
-            showPage(request['params']);
-            return;
-          case 'enableNotifications':
-            Notification.requestPermission();
-            return;
-          case 'notify':
-            notify();
-            return;
-          default:
-            print('Unknown request ${request.method} from server');
-        }
-      } catch (e) {
-        print('Failed to handle API message from server:\n\n$msg\n\n$e');
-      }
+/// This class coordinates the connection between the DevTools server and the
+/// DevTools web app.
+///
+/// See `packages/devtools_server/lib/src/client_manager.dart`.
+class DevToolsServerConnection {
+  DevToolsServerConnection._(this.sseClient) {
+    sseClient.stream.listen((msg) {
+      _handleMessage(msg);
     });
+    initFrameworkController();
   }
 
-  final HtmlPerfToolFramework _framework;
-  final SseClient _channel;
-  Notification _lastNotification;
+  static Future<DevToolsServerConnection> connect() async {
+    final baseUri = Uri.base;
+    final uri = Uri(
+        scheme: baseUri.scheme,
+        host: baseUri.host,
+        port: baseUri.port,
+        path: '/api/ping');
+
+    try {
+      // ignore: unused_local_variable
+      final response = await http.get(uri).timeout(const Duration(seconds: 1));
+      if (response.statusCode != 200) {
+        // unable to locate dev server
+        log('devtools server not available (${response.statusCode})');
+        return null;
+      }
+    } catch (e) {
+      // unable to locate dev server
+      log('devtools server not available ($e)');
+      return null;
+    }
+
+    final client = SseClient('/api/sse');
+    return DevToolsServerConnection._(client);
+  }
+
+  final SseClient sseClient;
 
   int _nextRequestId = 0;
+  Notification _lastNotification;
 
-  void _send(String method, [Map<String, dynamic> params]) {
-    final id = _nextRequestId++;
-    final json = jsonEncode({'id': id, 'method': method, 'params': params});
-    _channel.sink?.add(json);
-  }
+  final Map<String, Completer> _completers = {};
 
-  void notifyConnected(Uri vmServiceUri) {
-    _send('connected', {'uri': vmServiceUri.toString()});
-  }
+  /// Tie the DevTools server connection to the framework controller.
+  ///
+  /// This is called once, sometime after the `DevToolsServerConnection`
+  /// instance is created.
+  void initFrameworkController() {
+    frameworkController.onConnected.listen((vmServiceUri) {
+      _notifyConnected(vmServiceUri);
+    });
 
-  void notifyDisconnected() {
-    _send('disconnected');
-  }
+    frameworkController.onPageChange.listen((pageId) {
+      _notifyCurrentPage(pageId);
+    });
 
-  void notifyCurrentPage(String pageId) {
-    _send('currentPage', {'id': pageId});
-  }
-
-  void connectToVm(Map<String, dynamic> requestParams) {
-    // Reload the page with the new VM service URI in the querystring.
-    // TODO(dantup): Remove this code and replace with code that just reconnects
-    // (and optionally notifies based on requestParams['notify']) when it's
-    // supported better (https://github.com/flutter/devtools/issues/989).
-    //
-    // This currently doesn't currently work, as the app does not reinitialize
-    // correctly:
-    //
-    //   _framework.connectDialog.connectTo(Uri.parse(requestParams['uri']));
-    //   if (requestParams['notify'] == true) {
-    //     this.notify();
-    //   }
-    final uri = Uri.parse(window.location.href);
-    final newUriParams = Map.of(uri.queryParameters);
-    newUriParams['uri'] = requestParams['uri'];
-    if (requestParams['notify'] == true) {
-      newUriParams['notify'] = 'true';
-    }
-    window.location
-        .replace(uri.replace(queryParameters: newUriParams).toString());
-  }
-
-  void showPage(Map<String, dynamic> requestParams) {
-    final String pageId = requestParams['page'];
-    final screen = _framework.getScreen(pageId);
-    if (screen != null) {
-      _framework.load(screen);
-    }
+    frameworkController.onDisconnected.listen((_) {
+      _notifyDisconnected();
+    });
   }
 
   Future<void> notify() async {
@@ -97,15 +81,86 @@ class DevToolsServerApiClient {
       return;
     }
 
-    // Dismiss any earlier notifications first so they don't build up
-    // in the notifications list if the user presses the button multiple times.
+    // Dismiss any earlier notifications first so they don't build up in the
+    // notifications list if the user presses the button multiple times.
     dismissNotifications();
 
-    _lastNotification = Notification('Dart DevTools',
-        body: 'DevTools is available in this existing browser window');
+    _lastNotification = Notification(
+      'Dart DevTools',
+      body: 'DevTools is available in this existing browser window',
+    );
   }
 
   void dismissNotifications() {
     _lastNotification?.close();
+  }
+
+  Future<T> _callMethod<T>(String method, [Map<String, dynamic> params]) {
+    final id = '${_nextRequestId++}';
+    final json = jsonEncode({'id': id, 'method': method, 'params': params});
+    final completer = Completer<T>();
+    _completers[id] = completer;
+    sseClient.sink.add(json);
+    return completer.future;
+  }
+
+  void _handleMessage(dynamic msg) {
+    try {
+      final Map request = jsonDecode(msg);
+
+      if (request.containsKey('method')) {
+        final String method = request['method'];
+        final Map<String, dynamic> params = request['params'];
+        _handleMethod(method, params);
+      } else if (request.containsKey('id')) {
+        _handleResponse(request['id'], request['result']);
+      } else {
+        print('Unable to parse API message from server:\n\n$msg');
+      }
+    } catch (e) {
+      print('Failed to handle API message from server:\n\n$msg\n\n$e');
+    }
+  }
+
+  void _handleMethod(String method, Map<String, dynamic> params) {
+    switch (method) {
+      case 'connectToVm':
+        final String uri = params['uri'];
+        final bool notify = params['notify'] == true;
+        frameworkController.notifyConnectToVmEvent(
+          Uri.parse(uri),
+          notify: notify,
+        );
+        return;
+      case 'showPage':
+        final String pageId = params['page'];
+        frameworkController.notifyShowPageId(pageId);
+        return;
+      case 'enableNotifications':
+        Notification.requestPermission();
+        return;
+      case 'notify':
+        notify();
+        return;
+      default:
+        print('Unknown request $method from server');
+    }
+  }
+
+  void _handleResponse(String id, dynamic result) {
+    final completer = _completers.remove(id);
+    completer?.complete(result);
+  }
+
+  void _notifyConnected(Uri vmServiceUri) {
+    _callMethod('connected', {'uri': vmServiceUri.toString()});
+  }
+
+  void _notifyCurrentPage(String pageId) {
+    _callMethod('currentPage', {'id': pageId});
+  }
+
+  void _notifyDisconnected() {
+    _callMethod('disconnected');
   }
 }

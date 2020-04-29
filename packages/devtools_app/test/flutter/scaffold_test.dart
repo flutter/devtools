@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/flutter/scaffold.dart';
 import 'package:devtools_app/src/flutter/screen.dart';
+import 'package:devtools_app/src/framework_controller.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,10 @@ void main() {
     setUp(() {
       mockServiceManager = MockServiceManager();
       when(mockServiceManager.service).thenReturn(null);
+      when(mockServiceManager.onStateChange)
+          .thenAnswer((_) => const Stream<bool>.empty());
       setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(FrameworkController, FrameworkController());
     });
 
     testWidgetsWithWindowSize('displays in narrow mode without error',

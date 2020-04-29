@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -52,7 +53,7 @@ class DevToolsScaffold extends StatefulWidget {
   /// The size that all actions on this widget are expected to have.
   static const double actionWidgetSize = 48.0;
 
-  // TODO: When changing this value, also update `flameChartContainerOffset`
+  // Note: when changing this value, also update `flameChartContainerOffset`
   // from flame_chart.dart.
   /// The border around the content in the DevTools UI.
   static const EdgeInsets appPadding =
@@ -89,11 +90,16 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   ImportController _importController;
 
+  StreamSubscription<String> _pageIdSubscription;
+
   @override
   void initState() {
     super.initState();
 
     _setupTabController();
+
+    _pageIdSubscription =
+        frameworkController.onShowPageId.listen(_pushScreenByPageId);
   }
 
   @override
@@ -144,6 +150,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     _tabController?.dispose();
     _currentScreen?.dispose();
     appBarAnimation?.dispose();
+    _pageIdSubscription?.cancel();
+
     super.dispose();
   }
 
@@ -153,8 +161,35 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     _currentScreen.value = widget.tabs[_tabController.index];
     _tabController.addListener(() {
-      _currentScreen.value = widget.tabs[_tabController.index];
+      final screen = widget.tabs[_tabController.index];
+
+      if (_currentScreen.value != screen) {
+        _currentScreen.value = screen;
+
+        // Send the page change info to the framework controller (it can then
+        // send it on to the devtools server, if one is connected).
+        frameworkController.notifyPageChange(screen?.screenId);
+      }
     });
+  }
+
+  /// Push the given page ID into the navigation history.
+  void _pushScreenByPageId(String pageId) {
+    final previousTabIndex = _tabController.previousIndex;
+
+    final screen = widget.tabs
+        .firstWhere((screen) => screen.screenId == pageId, orElse: () => null);
+    final newIndex = screen == null ? -1 : widget.tabs.indexOf(screen);
+
+    if (newIndex != -1 && newIndex != previousTabIndex) {
+      ModalRoute.of(context).addLocalHistoryEntry(LocalHistoryEntry(
+        onRemove: () {
+          if (widget.tabs.length >= previousTabIndex) {
+            _tabController.animateTo(previousTabIndex);
+          }
+        },
+      ));
+    }
   }
 
   /// Pushes tab changes into the navigation history.
@@ -201,7 +236,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   @override
   Widget build(BuildContext context) {
-    // Build the screens for each tab and wrap them in the appropriate styling
+    // Build the screens for each tab and wrap them in the appropriate styling.
     final tabBodies = [
       for (var screen in widget.tabs)
         Container(
@@ -245,6 +280,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// depending on the screen width.
   PreferredSizeWidget _buildAppBar() {
     const title = Text('Dart DevTools');
+
     Widget flexibleSpace;
     Size preferredSize;
     TabBar tabBar;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'core/message_bus.dart';
+import 'framework_controller.dart';
 import 'service_manager.dart';
 
 /// Snapshot mode is an offline mode where DevTools can operate on an imported
@@ -18,6 +19,8 @@ ServiceConnectionManager get serviceManager =>
     globals[ServiceConnectionManager];
 
 MessageBus get messageBus => globals[MessageBus];
+
+FrameworkController get frameworkController => globals[FrameworkController];
 
 void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;

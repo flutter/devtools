@@ -18,7 +18,7 @@ void main() {
   runZoned(
     () async {
       // Initialize the core framework.
-      FrameworkCore.init(window.location.toString());
+      FrameworkCore.init(url: '${window.location}');
 
       // Hookup for possible analytic collection.
       ga.exposeGaDevToolsEnabledToJs();
