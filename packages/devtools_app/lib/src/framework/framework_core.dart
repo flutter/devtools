@@ -19,22 +19,19 @@ import '../vm_service_wrapper.dart';
 typedef ErrorReporter = void Function(String title, dynamic error);
 
 class FrameworkCore {
+  static void initGlobals() {
+    setGlobal(ServiceConnectionManager, ServiceConnectionManager());
+    setGlobal(MessageBus, MessageBus());
+    setGlobal(FrameworkController, FrameworkController());
+  }
+
   static void init({String url}) {
     // Print the version number at startup.
     log('DevTools version ${devtools.version}.');
 
-    // ignore: deprecated_member_use_from_same_package
     final theme = url == null ? null : Uri.parse(url).queryParameters['theme'];
     // ignore: deprecated_member_use_from_same_package
-    setDarkTheme(theme == 'dark');
-
-    _setGlobals();
-  }
-
-  static void _setGlobals() {
-    setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-    setGlobal(MessageBus, MessageBus());
-    setGlobal(FrameworkController, FrameworkController());
+    setTheme(darkTheme: theme == 'dark');
   }
 
   /// Returns true if we're able to connect to a device and false otherwise.

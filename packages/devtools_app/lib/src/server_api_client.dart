@@ -62,6 +62,8 @@ class DevToolsServerConnection {
   /// This is called once, sometime after the `DevToolsServerConnection`
   /// instance is created.
   void initFrameworkController() {
+    assert (frameworkController != null);
+
     frameworkController.onConnected.listen((vmServiceUri) {
       _notifyConnected(vmServiceUri);
     });
@@ -162,5 +164,18 @@ class DevToolsServerConnection {
 
   void _notifyDisconnected() {
     _callMethod('disconnected');
+  }
+
+  Future<String> getPreferenceValue(String key) {
+    return _callMethod('getPreferenceValue', {
+      'key': key,
+    });
+  }
+
+  Future setPreferenceValue(String key, String value) async {
+    await _callMethod('setPreferenceValue', {
+      'key': key,
+      'value': value,
+    });
   }
 }
