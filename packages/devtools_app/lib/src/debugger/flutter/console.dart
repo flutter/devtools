@@ -8,7 +8,6 @@ import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
 import '../../flutter/utils.dart';
 import 'codeview.dart';
-import 'common.dart';
 import 'debugger_controller.dart';
 
 // TODO(devoncarew): Allow scrolling horizontally as well.
@@ -40,44 +39,35 @@ class _ConsoleState extends State<Console> {
         theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
 
     return OutlinedBorder(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          debuggerSectionTitle(theme, text: 'Console'),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(denseSpacing),
-              child: ValueListenableBuilder<List<String>>(
-                valueListenable: widget.controller.stdio,
-                builder: (context, lines, _) {
-                  // If we're at the end already, scroll to expose the new
-                  // content.
-                  if (scrollController.hasClients &&
-                      scrollController.atScrollBottom) {
-                    scrollController.autoScrollToBottom();
-                  }
+      child: Padding(
+        padding: const EdgeInsets.all(denseSpacing),
+        child: ValueListenableBuilder<List<String>>(
+          valueListenable: widget.controller.stdio,
+          builder: (context, lines, _) {
+            // If we're at the end already, scroll to expose the new content.
+            if (scrollController.hasClients &&
+                scrollController.atScrollBottom) {
+              scrollController.autoScrollToBottom();
+            }
 
-                  return ListView.builder(
-                    itemCount: lines.length,
-                    itemExtent: CodeView.rowHeight,
-                    controller: scrollController,
-                    itemBuilder: (context, index) {
-                      return RichText(
-                        text: TextSpan(
-                          children: processAnsiTerminalCodes(
-                            lines[index],
-                            textStyle,
-                          ),
-                        ),
-                        maxLines: 1,
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
+            return ListView.builder(
+              itemCount: lines.length,
+              itemExtent: CodeView.rowHeight,
+              controller: scrollController,
+              itemBuilder: (context, index) {
+                return RichText(
+                  text: TextSpan(
+                    children: processAnsiTerminalCodes(
+                      lines[index],
+                      textStyle,
+                    ),
+                  ),
+                  maxLines: 1,
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

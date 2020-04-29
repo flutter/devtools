@@ -77,12 +77,10 @@ void main() {
       expect(find.byType(DisabledForProfileBuildMessage), findsOneWidget);
     });
 
-    testWidgets('has Console area', (WidgetTester tester) async {
+    testWidgets('has Console / stdio area', (WidgetTester tester) async {
       when(debuggerController.stdio).thenReturn(ValueNotifier(['test stdio']));
 
       await pumpDebuggerScreen(tester, debuggerController);
-
-      expect(find.text('Console'), findsOneWidget);
 
       // test for stdio output.
       expect(find.richText('test stdio'), findsOneWidget);
@@ -240,7 +238,7 @@ void main() {
 
       final stackFramesWithLocation =
           stackFrames.map<StackFrameAndSourcePosition>((frame) {
-        return StackFrameAndSourcePosition.create(
+        return StackFrameAndSourcePosition(
           frame,
           position: SourcePosition(
             line: stackFrames.indexOf(frame),
