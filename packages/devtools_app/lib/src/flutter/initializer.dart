@@ -68,11 +68,6 @@ class _InitializerState extends State<Initializer>
     // If we become disconnected, attempt to reconnect.
     autoDispose(
       serviceManager.onStateChange.where((connected) => !connected).listen((_) {
-        // Generally, empty setState calls in Flutter should be avoided.
-        // However, serviceManager is an implicit part of this state.
-        // This setState call is alerting a change in the serviceManager's
-        // state.
-        setState(() {});
         // TODO(https://github.com/flutter/devtools/issues/1285): On losing
         // the connection, only provide an option to reconnect; don't
         // immediately go to the connection page.
@@ -114,7 +109,7 @@ class _InitializerState extends State<Initializer>
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
         // If this route is on top and the app is not connected, then we navigate
         // back to the connect page.
-        Navigator.of(context).pop();
+        Navigator.of(context).popUntil(ModalRoute.withName('/'));
       }
     });
   }
