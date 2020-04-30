@@ -174,8 +174,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   }
 
   /// Switch to the given page ID. This request usually comes from the server API
-  /// for example if the user clicks the Inspector button and DevTools is already
-  /// open on the Memory page, it should transition to the Inspector page.
+  /// for example if the user clicks the Inspector button in the IDE and DevTools
+  /// is already open on the Memory page, it should transition to the Inspector page.
   void _showPageById(String pageId) {
     final existingTabIndex = _tabController.index;
 
