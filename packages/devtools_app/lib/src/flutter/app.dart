@@ -127,6 +127,7 @@ class DevToolsAppState extends State<DevToolsApp> {
             url: params['uri'],
             builder: (_) => _providedControllers(
               child: DevToolsScaffold(
+                initialPage: params['page'],
                 tabs: _visibleScreens(),
                 actions: [
                   HotReloadButton(),
