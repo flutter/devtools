@@ -298,7 +298,7 @@ FlexSplitColumnHeader debuggerPaneHeader(
               : BorderSide.none,
           bottom: BorderSide(color: theme.focusColor),
         ),
-        color: titleSolidBackgroundColor,
+        color: titleSolidBackgroundColor(theme),
       ),
       padding: const EdgeInsets.only(left: defaultSpacing, right: 4.0),
       alignment: Alignment.centerLeft,

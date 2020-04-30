@@ -8,10 +8,6 @@ import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../ui/theme.dart' as devtools_theme;
 
-// TODO(devoncarew): This controller is currently backed by a global in
-// devtools_theme. A future refactor will instead provide a backing store on
-// disk.
-
 /// A controller for global application preferences.
 class PreferencesController {
   PreferencesController() {
@@ -19,6 +15,7 @@ class PreferencesController {
   }
 
   final ValueNotifier<bool> _darkModeTheme =
+      // ignore: deprecated_member_use_from_same_package
       ValueNotifier(devtools_theme.isDarkTheme);
 
   ValueListenable get darkModeTheme => _darkModeTheme;

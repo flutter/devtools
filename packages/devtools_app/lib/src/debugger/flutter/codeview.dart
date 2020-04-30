@@ -12,7 +12,6 @@ import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../flutter/theme.dart';
-import '../../ui/theme.dart';
 import '../../utils.dart';
 import 'breakpoints.dart';
 import 'common.dart';
@@ -157,7 +156,6 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
 
     if (!verticalController.hasAttachedControllers) {
       // TODO(devoncarew): I'm uncertain why this occurs.
-      // todo: ???
       log('LinkedScrollControllerGroup has no attached controllers');
       return;
     }
@@ -349,9 +347,10 @@ class GutterItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final darkTheme = theme.brightness == Brightness.dark;
 
     final foregroundColor =
-        isDarkTheme ? theme.textTheme.bodyText2.color : theme.primaryColor;
+        darkTheme ? theme.textTheme.bodyText2.color : theme.primaryColor;
     final subtleColor = theme.unselectedWidgetColor;
 
     const bpBoxSize = 12.0;
@@ -362,7 +361,7 @@ class GutterItem extends StatelessWidget {
       child: Container(
         height: CodeView.rowHeight,
         padding: const EdgeInsets.only(right: 4.0),
-        decoration: BoxDecoration(color: titleSolidBackgroundColor),
+        decoration: BoxDecoration(color: titleSolidBackgroundColor(theme)),
         child: Stack(
           alignment: AlignmentDirectional.centerStart,
           fit: StackFit.expand,
@@ -447,13 +446,14 @@ class LineItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final darkTheme = theme.brightness == Brightness.dark;
 
     Widget child;
     if (pausedFrame != null) {
       final column = pausedFrame.column;
 
       final foregroundColor =
-          isDarkTheme ? theme.textTheme.bodyText2.color : theme.primaryColor;
+          darkTheme ? theme.textTheme.bodyText2.color : theme.primaryColor;
 
       // The following constants are tweaked for using the
       // 'Icons.label_important' icon.
@@ -496,7 +496,7 @@ class LineItem extends StatelessWidget {
     }
 
     final backgroundColor = pausedFrame != null
-        ? (isDarkTheme
+        ? (darkTheme
             ? theme.canvasColor.brighten()
             : theme.canvasColor.darken())
         : null;

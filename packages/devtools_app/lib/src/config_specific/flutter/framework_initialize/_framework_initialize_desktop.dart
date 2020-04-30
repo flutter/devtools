@@ -20,10 +20,7 @@ Future<String> initializePlatform() async {
 
   setGlobal(Storage, FlutterDesktopStorage());
 
-  // TODO(jacobr): we don't yet have a direct analog to the URL on flutter
-  // desktop. Hard code to the dark theme as the majority of users are on the
-  // dark theme.
-  return '/?theme=dark';
+  return '';
 }
 
 class FlutterDesktopStorage implements Storage {
