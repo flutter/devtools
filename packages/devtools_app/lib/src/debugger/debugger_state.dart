@@ -177,15 +177,13 @@ class DebuggerState {
         break;
       case EventKind.kBreakpointResolved:
         _breakpoints.value = [
-          for (var b in _breakpoints.value)
-            if (b != event.breakpoint) b,
+          for (var b in _breakpoints.value) if (b != event.breakpoint) b,
           event.breakpoint
         ];
         break;
       case EventKind.kBreakpointRemoved:
         _breakpoints.value = [
-          for (var b in _breakpoints.value)
-            if (b != event.breakpoint) b
+          for (var b in _breakpoints.value) if (b != event.breakpoint) b
         ];
         break;
     }

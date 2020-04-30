@@ -25,16 +25,15 @@ class TimelineService {
   final profilerService = CpuProfilerService();
 
   void _initListeners() async {
-    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
-    // Do not start the timeline for Dart web apps.
-    if (serviceManager.hasConnection &&
-        !await serviceManager.connectedApp.isDartWebApp) {
-      _handleConnectionStart(serviceManager.service);
-    }
+    serviceManager.onConnectionAvailable.listen(_initTimelineListener);
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
   }
 
-  void _handleConnectionStart(VmServiceWrapper service) {
+  void _initTimelineListener(VmServiceWrapper service) {
+    assert(serviceManager.hasConnection);
+    // Do not start the timeline for Dart web apps.
+    if (serviceManager.connectedApp.isDartWebAppNow) return;
+
     allowedError(
       profilerService.setProfilePeriod(mediumProfilePeriod),
       logError: false,

@@ -28,18 +28,16 @@ class TimelineService {
   }
 
   void _initListeners() async {
-    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
-    // Do not start the timeline for Dart web apps.
-    if (serviceManager.hasConnection &&
-        !await serviceManager.connectedApp.isDartWebApp) {
-      _handleConnectionStart(serviceManager.service);
-    }
+    _initTimelineListener(serviceManager.service);
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
-
     timelineController.recording.addListener(() => updateListeningState(true));
   }
 
-  void _handleConnectionStart(VmServiceWrapper service) {
+  void _initTimelineListener(VmServiceWrapper service) {
+    assert(serviceManager.hasConnection);
+    // Do not start the timeline for Dart web apps.
+    if (serviceManager.connectedApp.isDartWebAppNow) return;
+
     allowedError(
       profilerService.setProfilePeriod(mediumProfilePeriod),
       logError: false,
