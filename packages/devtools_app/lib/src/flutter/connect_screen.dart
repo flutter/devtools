@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 
 import '../../src/framework/framework_core.dart';
+import '../globals.dart';
 import '../url_utils.dart';
 import '../utils.dart';
 import 'common_widgets.dart';
@@ -109,6 +110,13 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   }
 
   Future<void> _connect() async {
+    if (controller.text?.isEmpty ?? true) {
+      Notifications.of(context).push(
+        'Please enter a VM Service URL.',
+      );
+      return;
+    }
+
     final uri = normalizeVmServiceUri(controller.text);
     final connected = await FrameworkCore.initVmService(
       '',
@@ -118,13 +126,14 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
       },
     );
     if (connected) {
+      final connectedUri = serviceManager.service.connectedUri;
       unawaited(
-        Navigator.popAndPushNamed(
+        Navigator.pushNamed(
           context,
-          routeNameWithQueryParams(context, '/', {'uri': '$uri'}),
+          routeNameWithQueryParams(context, '/', {'uri': '$connectedUri'}),
         ),
       );
-      final shortUri = uri.replace(path: '');
+      final shortUri = connectedUri.replace(path: '');
       Notifications.of(context).push(
         'Successfully connected to $shortUri.',
       );

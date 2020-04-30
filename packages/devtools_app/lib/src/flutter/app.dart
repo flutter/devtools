@@ -37,7 +37,6 @@ import 'theme.dart';
 import 'utils.dart';
 
 const homeRoute = '/';
-const connectRoute = '/connect';
 const snapshotRoute = '/snapshot';
 
 /// Top-level configuration for the app.
@@ -85,7 +84,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   /// Generates routes, separating the path from URL query parameters.
   Route _generateRoute(RouteSettings settings) {
     final uri = Uri.parse(settings.name);
-    final path = uri.path.isEmpty ? connectRoute : uri.path;
+    final path = uri.path.isEmpty ? homeRoute : uri.path;
     final args = settings.arguments;
 
     // Provide the appropriate page route.
@@ -122,7 +121,9 @@ class DevToolsAppState extends State<DevToolsApp> {
   /// The routes that the app exposes.
   Map<String, UrlParametersBuilder> get routes {
     return _routes ??= {
-      homeRoute: (_, params, __) => Initializer(
+      homeRoute: (_, params, __) {
+        if (params['uri']?.isNotEmpty ?? false) {
+          return Initializer(
             url: params['uri'],
             builder: (_) => _providedControllers(
               child: DevToolsScaffold(
@@ -135,9 +136,11 @@ class DevToolsAppState extends State<DevToolsApp> {
                 ],
               ),
             ),
-          ),
-      connectRoute: (_, __, ___) =>
-          DevToolsScaffold.withChild(child: ConnectScreenBody()),
+          );
+        } else {
+          return DevToolsScaffold.withChild(child: ConnectScreenBody());
+        }
+      },
       snapshotRoute: (_, __, args) {
         return DevToolsScaffold.withChild(
           child: _providedControllers(
