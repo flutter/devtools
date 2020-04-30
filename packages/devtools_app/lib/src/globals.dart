@@ -5,6 +5,7 @@
 import 'core/message_bus.dart';
 import 'framework_controller.dart';
 import 'service_manager.dart';
+import 'storage.dart';
 
 /// Snapshot mode is an offline mode where DevTools can operate on an imported
 /// data file.
@@ -21,6 +22,8 @@ ServiceConnectionManager get serviceManager =>
 MessageBus get messageBus => globals[MessageBus];
 
 FrameworkController get frameworkController => globals[FrameworkController];
+
+Storage get storage => globals[Storage];
 
 void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;

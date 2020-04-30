@@ -8,6 +8,7 @@ import '_framework_initialize_stub.dart'
     if (dart.library.io) '_framework_initialize_desktop.dart';
 
 Future initializeFramework() async {
+  FrameworkCore.initGlobals();
   final url = await initializePlatform();
   FrameworkCore.init(url: url);
 }

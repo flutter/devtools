@@ -69,6 +69,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   @override
   void initState() {
     super.initState();
+
     serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
       setState(() {
         _clearCachedRoutes();

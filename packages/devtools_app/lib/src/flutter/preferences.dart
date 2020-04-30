@@ -4,6 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../config_specific/logger/logger.dart';
+import '../globals.dart';
 import '../ui/theme.dart' as devtools_theme;
 
 // TODO(devoncarew): This controller is currently backed by a global in
@@ -22,26 +24,20 @@ class PreferencesController {
   ValueListenable get darkModeTheme => _darkModeTheme;
 
   void _init() {
-    // TODO(devoncarew): Enable when we have storage backed settings.
-    //if (storage == null) {
-    //  // This can happen when running tests.
-    //  log('PreferencesController: storage not initialized');
-    //  return;
-    //}
+    if (storage == null) {
+      // This can happen when running tests.
+      log('PreferencesController: storage not initialized');
+      return;
+    }
 
-    // TODO(devoncarew): Enable when we have storage backed settings.
     // Get the current values and listen for and write back changes.
-    //storage.getValue('ui.darkMode').then((String value) {
-    //  darkModeTheme.value = value == null || value == 'true';
-    //  darkModeTheme.addListener(() {
-    //    setTheme(darkTheme: darkModeTheme.value);
-    //    storage.setValue('ui.darkMode', '${darkModeTheme.value}');
-    //  });
-    //});
-
-    _darkModeTheme.addListener(() {
-      // ignore: deprecated_member_use_from_same_package
-      devtools_theme.setDarkTheme(_darkModeTheme.value);
+    storage.getValue('ui.darkMode').then((String value) {
+      _darkModeTheme.value = value == null || value == 'true';
+      _darkModeTheme.addListener(() {
+        // ignore: deprecated_member_use_from_same_package
+        devtools_theme.setTheme(darkTheme: _darkModeTheme.value);
+        storage.setValue('ui.darkMode', '${_darkModeTheme.value}');
+      });
     });
   }
 

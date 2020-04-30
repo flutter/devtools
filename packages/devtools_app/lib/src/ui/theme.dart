@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'fake_flutter/fake_flutter.dart';
 import 'flutter_html_shim.dart';
 
@@ -19,8 +21,8 @@ bool _isDarkTheme = false;
 bool get isDarkTheme => _isDarkTheme;
 
 @Deprecated('Prefer using the SettingsController')
-void setDarkTheme(bool dark) {
-  _isDarkTheme = dark;
+void setTheme({@required bool darkTheme}) {
+  _isDarkTheme = darkTheme;
 
   clearColorCache();
 }

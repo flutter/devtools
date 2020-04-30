@@ -18,6 +18,7 @@ void main() {
   runZoned(
     () async {
       // Initialize the core framework.
+      FrameworkCore.initGlobals();
       FrameworkCore.init(url: '${window.location}');
 
       // Hookup for possible analytic collection.
