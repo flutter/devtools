@@ -74,9 +74,12 @@ git pull upstream master
 ### Publish
 #### Verify the package works (DevTools)
 
-- cd packages/devtools
-- dart bin/devtools.dart
-- open the page in a browser
+- Launch the devtools server
+```
+cd packages/devtools
+dart bin/devtools.dart
+```
+- open the page in a browser (http://localhost:9100)
 - flutter run an application
 - connect to the running app from devtools, and verify that the pages
   generally work, and there are no exceptions in the chrome devtools log
