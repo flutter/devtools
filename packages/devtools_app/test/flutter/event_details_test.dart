@@ -35,8 +35,7 @@ void main() {
     setUp(() {
       final fakeServiceManager = FakeServiceManager(useFakeService: true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      when(serviceManager.connectedApp.isDartWebApp)
-          .thenAnswer((_) => Future.value(false));
+      when(serviceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     });
 
     testWidgets('builds for UI event', (WidgetTester tester) async {
