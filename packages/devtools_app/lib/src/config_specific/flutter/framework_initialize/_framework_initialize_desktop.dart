@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import '../../../globals.dart';
 import '../../../storage.dart';
+import '../../logger/logger.dart';
 
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {
@@ -38,24 +39,24 @@ class FlutterDesktopStorage implements Storage {
   Future setValue(String key, String value) async {
     try {
       _values = _readValues();
-      _values[key] = value;
+    } catch (e, st) {
+      // ignore the error reading
+      log('$e\n$st');
 
-      const encoder = JsonEncoder.withIndent('  ');
-      _preferencesFile.writeAsStringSync('${encoder.convert(_values)}\n');
-    } catch (_) {
-      // ignore
+      _values = {};
     }
+
+    _values[key] = value;
+
+    const encoder = JsonEncoder.withIndent('  ');
+    _preferencesFile.writeAsStringSync('${encoder.convert(_values)}\n');
   }
 
   Map<String, dynamic> _readValues() {
-    try {
-      final File file = _preferencesFile;
-      if (file.existsSync()) {
-        return jsonDecode(file.readAsStringSync());
-      }
-      return {};
-    } catch (_) {
-      // ignore
+    final File file = _preferencesFile;
+    if (file.existsSync()) {
+      return jsonDecode(file.readAsStringSync());
+    } else {
       return {};
     }
   }

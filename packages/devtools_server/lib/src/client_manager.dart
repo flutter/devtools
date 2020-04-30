@@ -93,13 +93,13 @@ class DevToolsClient {
           _respond(request);
           return;
         case 'getPreferenceValue':
-          final String key = _currentPage = request['params']['key'];
+          final String key = request['params']['key'];
           final dynamic value = ServerApi.devToolsPreferences.properties[key];
           _respondWithResult(request, value);
           return;
         case 'setPreferenceValue':
-          final String key = _currentPage = request['params']['key'];
-          final dynamic value = _currentPage = request['params']['value'];
+          final String key = request['params']['key'];
+          final dynamic value = request['params']['value'];
           ServerApi.devToolsPreferences.properties[key] = value;
           _respond(request);
           return;
