@@ -62,7 +62,7 @@ class DevToolsServerConnection {
   /// This is called once, sometime after the `DevToolsServerConnection`
   /// instance is created.
   void initFrameworkController() {
-    assert (frameworkController != null);
+    assert(frameworkController != null);
 
     frameworkController.onConnected.listen((vmServiceUri) {
       _notifyConnected(vmServiceUri);
