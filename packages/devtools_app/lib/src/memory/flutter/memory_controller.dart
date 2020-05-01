@@ -314,6 +314,17 @@ class MemoryController extends DisposableController
 
   ValueListenable get groupingByNotifier => groupingBy;
 
+  final _searchNotifier = ValueNotifier<String>('');
+
+  /// Notify that the search has changed.
+  ValueListenable get searchNotifier => _searchNotifier;
+
+  set search(String value) {
+    _searchNotifier.value = value;
+  }
+
+  String get search => _searchNotifier.value;
+
   String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
   final StreamController<MemoryTracker> _memoryTrackerController =

@@ -10,37 +10,160 @@ import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter/rendering.dart' hide TextStyle;
 import 'package:flutter/widgets.dart' hide TextStyle;
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
+
+import 'memory_controller.dart';
 import 'memory_graph_model.dart';
 
-class FlameChart extends StatelessWidget {
-  const FlameChart(
-    this.sizes, {
-    // Flame chart has a blueish color.
-    this.lightColor = const Color(0xFFBBDEFB),
-    this.darkColor = const Color(0xFF0D47A1),
-  });
-
-  final InstructionsSize sizes;
-  final Color lightColor;
-  final Color darkColor;
+class HeatMapSizeAnalyzer extends SingleChildRenderObjectWidget {
+  const HeatMapSizeAnalyzer({
+    Key key,
+    Widget child,
+  }) : super(key: key, child: child);
 
   @override
-  Widget build(BuildContext context) {
-    return _FlameChart(sizes, lightColor, darkColor);
+  RenderFlameChart createRenderObject(BuildContext context) {
+    return RenderFlameChart();
   }
 }
 
+class RenderFlameChart extends RenderProxyBox {
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      context.paintChild(child, offset);
+    }
+  }
+}
+
+class FlameChart extends StatefulWidget {
+  const FlameChart(
+    this.controller,
+  );
+
+  final MemoryController controller;
+
+  @override
+  FlameChartState createState() => FlameChartState(controller);
+}
+
+class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
+  FlameChartState(this.controller);
+
+  InstructionsSize sizes;
+
+  Map<String, Function> callbacks = {};
+
+  /// Flame chart has a blueish color.
+  Color lightColor = const Color(0xFFBBDEFB);
+
+  Color darkColor = const Color(0xFF0D47A1);
+
+  MemoryController controller;
+
+  Widget snapshotDisplay;
+
+  _FlameChart _flameChart;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    controller = Provider.of<MemoryController>(context);
+
+    cancel();
+
+    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
+      setState(() {
+        controller.computeAllLibraries(true, true);
+
+        sizes = InstructionsSize.fromSnapshop(controller);
+      });
+    });
+
+    addAutoDisposeListener(controller.filterNotifier, () {
+      setState(() {
+        controller.computeAllLibraries(true, true);
+      });
+    });
+
+    addAutoDisposeListener(controller.searchNotifier, () {
+      setState(() {
+        final searchingValue = controller.search;
+        if (searchingValue.isNotEmpty) {
+          final Node node = findNode(searchingValue);
+          if (node != null) {
+            selectNode(node);
+          }
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    sizes = InstructionsSize.fromSnapshop(controller);
+
+    if (sizes != null) {
+      _flameChart = _FlameChart(sizes, lightColor, darkColor, callbacks);
+      return _flameChart;
+    } else {
+      return const Text('');
+    }
+  }
+
+  Node findNode(String searchValue) {
+    final FindNodeFunction callback = _flameChart.callbacks[findNodeKey];
+    return callback(searchValue);
+  }
+
+  void selectNode(Node nodeValue) {
+    final SelectNodeFunction callback = _flameChart.callbacks[selectNodeKey];
+    callback(nodeValue);
+  }
+}
+
+/// Key in callbacks map.
+const String findNodeKey = 'findNode';
+
+/// findNode callback signature.
+typedef FindNodeFunction = Node Function(String);
+
+/// Key in callbacks map.
+const String selectNodeKey = 'selectNode';
+
+/// selectNode callback signature.
+typedef SelectNodeFunction = void Function(Node);
+
 class _FlameChart extends LeafRenderObjectWidget {
-  const _FlameChart(this.sizes, this.lightColor, this.darkColor);
+  const _FlameChart(
+      this.sizes, this.lightColor, this.darkColor, this.callbacks);
 
   final InstructionsSize sizes;
+
   final Color lightColor;
+
   final Color darkColor;
+
+  final Map<String, Function> callbacks;
 
   @override
   FlameChartRenderObject createRenderObject(BuildContext context) {
     return FlameChartRenderObject()
+      // callbacks must be before sizes as hookup is done in sizes setter.
+      ..callbacks = callbacks
       ..sizes = sizes
       ..lightColor = lightColor
       ..darkColor = darkColor;
@@ -62,7 +185,15 @@ class FlameChartRenderObject extends RenderBox {
   FlameChartRenderObject();
 
   InstructionsSize _sizes;
+
+  Offset paintOffset;
+
+  Map<String, Function> callbacks;
+
   set sizes(InstructionsSize value) {
+    callbacks[findNodeKey] = externalFindNode;
+    callbacks[selectNodeKey] = externalSelectNode;
+
     if (value == _sizes) {
       return;
     }
@@ -72,6 +203,7 @@ class FlameChartRenderObject extends RenderBox {
   }
 
   Color _lightColor;
+
   set lightColor(Color value) {
     if (value == _lightColor) {
       return;
@@ -81,6 +213,7 @@ class FlameChartRenderObject extends RenderBox {
   }
 
   Color _darkColor;
+
   set darkColor(Color value) {
     if (value == _lightColor) {
       return;
@@ -89,7 +222,10 @@ class FlameChartRenderObject extends RenderBox {
     markNeedsPaint();
   }
 
-  // TODO(terry): implemented not yet used to be used by search.
+  Node externalFindNode(String searchName) {
+    return findNode(_sizes.root.children, searchName);
+  }
+
   /// Look for the node with a particular name (depth first traversal).
   Node findNode(Map<String, Node> children, String searchName) {
     for (var child in children.entries) {
@@ -106,12 +242,27 @@ class FlameChartRenderObject extends RenderBox {
     return null;
   }
 
+  void externalSelectNode(Node value) {
+    selectedNode = value;
+
+    // TODO(terry): Need to force a relayout to repaint (paintAncestors) with
+    //              new selection. Calling debugResetSize or size changing
+    //              works.  However, shouldn't hitTestSelf do the same e.g.,
+    //
+    //                  hitTestSelf(Offset(
+    //                    _selectedNode.rect.left + paintOffset.dx,
+    //                    _selectedNode.rect.top - paintOffset.dy,
+    //                  ));
+    size = size;
+  }
+
   Node _selectedNode;
   set selectedNode(Node value) {
     if (value == _selectedNode) {
       return;
     }
     _selectedNode = value;
+
     markNeedsPaint();
   }
 
@@ -120,20 +271,12 @@ class FlameChartRenderObject extends RenderBox {
 
   @override
   bool hitTest(BoxHitTestResult result, {Offset position}) {
-    // TODO(terry): Not enabled for testing search.
-    Node foundNode;
-    if (searchString != null) {
-      foundNode = findNode(_sizes.root.children, searchString);
-    }
+    final computedPosition =
+        Offset(position.dx + paintOffset.dx, position.dy + paintOffset.dy);
 
-    if (foundNode == null) {
-      final node = _selectedNode.findRect(position);
-      if (node != null) {
-        selectedNode = node;
-      }
-    } else {
-      // Found the node select it.
-      selectedNode = foundNode;
+    final node = _selectedNode.findRect(computedPosition);
+    if (node != null) {
+      selectedNode = node;
     }
 
     return super.hitTest(result, position: position);
@@ -141,17 +284,20 @@ class FlameChartRenderObject extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    paintOffset = offset;
+
     final rootWidth = size.width;
     final top = _paintAncestors(context, _selectedNode.ancestors);
 
-    _paintNode(context, _selectedNode, 0, rootWidth, top);
+    _paintNode(
+        context, _selectedNode, 0 + paintOffset.dx, rootWidth, top - offset.dy);
 
     _paintChildren(
       context: context,
-      currentLeft: 1,
+      currentLeft: 1 + offset.dx,
       parentSize: _selectedNode.byteSize,
       children: _selectedNode.children.values,
-      topFactor: top + 51,
+      topFactor: top + 51 - offset.dy,
       maxWidth: rootWidth - 1,
     );
   }
@@ -176,6 +322,7 @@ class FlameChartRenderObject extends RenderBox {
       _darkColor,
       t,
     );
+
     context.canvas.drawRRect(
       RRect.fromRectAndRadius(node.rect, const Radius.circular(2.0)),
       Paint()..color = backgroundColor,
@@ -216,7 +363,8 @@ class FlameChartRenderObject extends RenderBox {
   double _paintAncestors(PaintingContext context, List<Node> nodes) {
     double top = 50;
     for (var node in nodes.reversed) {
-      _paintNode(context, node, 0, size.width, top);
+      _paintNode(
+          context, node, 0 + paintOffset.dx, size.width, top - paintOffset.dy);
       top += 50;
     }
     return top;
@@ -264,7 +412,7 @@ class FlameChartRenderObject extends RenderBox {
 class InstructionsSize {
   const InstructionsSize(this.root);
 
-  factory InstructionsSize.fromSnapshop(HeapGraph graph) {
+  factory InstructionsSize.fromSnapshop(MemoryController controller) {
     final Map<String, Node> rootChildren = <String, Node>{};
     final Node root = Node(
       'root',
@@ -274,7 +422,7 @@ class InstructionsSize {
 
     // TODO(terry): Should heat map be all memory or just the filtered group?
     //              Using rawGroup not graph.groupByLibrary.
-    graph.rawGroupByLibrary.forEach(
+    controller.theGraph.rawGroupByLibrary.forEach(
       (libraryGroup, value) {
         final List<HeapGraphClassActual> classes = value;
         for (final theClass in classes) {
@@ -298,10 +446,6 @@ class InstructionsSize {
           if (predefined != null) {
             className = predefined.prettyName;
           }
-
-          // TODO(terry): Remove testing really big objects.
-//          if (className.startsWith('Terry')) shallowSize *= 100000;
-//          print('l=$libraryName, c=$className, n=new $className, s=$shallowSize');
 
           final symbol = Symbol(
             name: 'new $className',
@@ -330,7 +474,7 @@ class InstructionsSize {
     root.byteSize = root.children.values
         .fold(0, (int current, Node node) => current + node.byteSize);
 
-    final snapshotGraph = heapGraph.controller.snapshots.last.snapshotGraph;
+    final snapshotGraph = controller.snapshots.last.snapshotGraph;
 
     // Add the external heap to the heat map.
     root.children.putIfAbsent('External Heap', () {
@@ -443,55 +587,3 @@ class Symbol {
     ];
   }
 }
-
-class HeatMapSizeAnalyzer extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      color: Colors.blueGrey,
-      home: FlameChart(InstructionsSize.fromSnapshop(heapGraph)),
-      debugShowCheckedModeBanner: false,
-    );
-
-    // TODO(terry): Testing search needs to be stateful.
-    /*
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(width: 16.0),
-            Container(
-              width: 200.0,
-              height: 36.0,
-              child: TextField(
-                onEditingComplete: () {
-                  print('Searching for $searchString');
-                },
-                onChanged: (value) {
-                  searchString = value;
-                },
-                controller: TextEditingController(),
-                decoration: const InputDecoration(
-                  isDense: true,
-                  border: OutlineInputBorder(),
-                  labelText: 'Search',
-                ),
-              ),
-            ),
-          ],
-        ),
-        Expanded(
-          child: MaterialApp(
-            color: Colors.blueGrey,
-            home: FlameChart(InstructionsSize.fromSnapshop(heapGraph)),
-          ),
-        ),
-      ],
-    );
-    */
-  }
-}
-
-HeapGraph heapGraph;
-String searchString;

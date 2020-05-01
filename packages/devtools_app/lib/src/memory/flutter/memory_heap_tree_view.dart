@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
@@ -83,22 +84,39 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     addAutoDisposeListener(controller.leafSelectedNotifier, () {
       setState(() {});
     });
+
+    addAutoDisposeListener(controller.searchNotifier, () {
+      if (escapeHit) {
+        setState(() {
+          escapeHit = false;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
+    // Clean up the controller when the widget is removed from the
+    // widget tree.
+    textFieldController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO(terry): Make HeatMapSizeAnalyzer a stateful widget.
-    heapGraph = controller.theGraph;
-    snapshotDisplay = controller.snapshotByLibraryData == null
-        ? const Text('')
-        : controller.showHeatMap
-            ? HeatMapSizeAnalyzer()
-            : MemorySnapshotTable();
+    if (controller.snapshotByLibraryData != null) {
+      if (controller.showHeatMap) {
+        snapshotDisplay = HeatMapSizeAnalyzer(
+          child: SizedBox.expand(
+            child: FlameChart(controller),
+          ),
+        );
+      } else {
+        snapshotDisplay = MemorySnapshotTable();
+      }
+    } else {
+      snapshotDisplay = const Text('');
+    }
 
     return Column(
       children: [
@@ -263,23 +281,59 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     );
   }
 
+  bool escapeHit = false;
+  TextEditingController textFieldController;
+  TextField searchField;
+
+  TextField createSearchField() {
+    // Creating new TextEditingController.
+    textFieldController = TextEditingController();
+
+    return TextField(
+      autofocus: true,
+      onChanged: (value) {
+        // TODO(terry): Extend search support beyond heat map.
+        if (controller.showHeatMap) {
+          controller.search = value;
+        }
+      },
+      controller: textFieldController,
+      decoration: const InputDecoration(
+        isDense: true,
+        border: OutlineInputBorder(),
+        labelText: 'Search',
+      ),
+    );
+  }
+
   Widget _buildSearchFilterControls() {
+    searchField = createSearchField();
+
+    final searchAndRawKeyboard = RawKeyboardListener(
+      child: searchField,
+      focusNode: FocusNode(),
+      onKey: (RawKeyEvent event) {
+        if (event is RawKeyDownEvent) {
+          if (event.logicalKey.keyId == LogicalKeyboardKey.escape.keyId) {
+            // ESCAPE key pressed clear search TextField.
+            escapeHit = true;
+            controller.search = '';
+            textFieldController.clear();
+          }
+        }
+      },
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Flexible(
-            child: OutlineButton(
-              key: searchButtonKey,
-              onPressed: _search,
-              child: Label(
-                search,
-                'Search',
-                minIncludeTextWidth: 200,
-              ),
-            ),
+          Container(
+            width: 300.0,
+            height: 36.0,
+            child: searchAndRawKeyboard,
           ),
           const SizedBox(width: 16.0),
           Flexible(
@@ -388,10 +442,6 @@ for (var index = 0; index < externalSize; index++) {
             '   class ${actualClass.name} instances count=${instances.length} shallow size=$shallowSizes');
       }
     });
-  }
-
-  void _search() {
-    // TODO(terry): TBD
   }
 
   void _filter() {
