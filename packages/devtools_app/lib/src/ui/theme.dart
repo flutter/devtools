@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 import 'fake_flutter/fake_flutter.dart';
 import 'flutter_html_shim.dart';
 
-bool _isDarkTheme = false;
+bool _isDarkTheme = true;
 
 /// Whether the application is running with a light or dark theme.
 ///
@@ -18,6 +18,7 @@ bool _isDarkTheme = false;
 /// that code can be written without directly depending on [isDarkTheme].
 ///
 /// This getter will be deprecated - prefer using the SettingsController class.
+@Deprecated('Prefer using the SettingsController')
 bool get isDarkTheme => _isDarkTheme;
 
 @Deprecated('Prefer using the SettingsController')
@@ -69,6 +70,7 @@ class ThemedColor implements Color {
   final Color _light;
   final Color _dark;
 
+  // ignore: deprecated_member_use_from_same_package
   Color get _current => isDarkTheme ? _dark : _light;
 
   @override

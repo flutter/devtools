@@ -56,4 +56,5 @@ String routeNameWithQueryParams(BuildContext context, String routeName,
 ///
 /// ModalRoute.of`(innerContext)` returns the unnamed page route.
 String get _inferThemeParameter =>
+    // ignore: deprecated_member_use_from_same_package
     devtools_theme.isDarkTheme ? '/unnamedRoute?theme=dark' : '/unnamedRoute';

@@ -3,12 +3,12 @@ import 'dart:math';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
+import '../flutter/common_widgets.dart';
 import '../table_data.dart';
 import '../trees.dart';
-import '../ui/theme.dart';
 import '../utils.dart';
 import 'collapsible_mixin.dart';
-import 'common_widgets.dart' show ScrollControllerAutoScroll;
+import 'common_widgets.dart' show ColorExtension, ScrollControllerAutoScroll;
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'theme.dart';
 
@@ -797,8 +797,13 @@ class TableRow<T> extends StatefulWidget {
   /// Gets a color to use for this row at a given index.
   static Color colorFor(BuildContext context, int index) {
     final theme = Theme.of(context);
-    final alternateColor = ThemedColor(devtoolsGrey[50], devtoolsGrey[900]);
-    return index % 2 == 0 ? alternateColor : theme.canvasColor;
+    final color = theme.canvasColor;
+
+    if (index % 2 == 0) {
+      return color;
+    } else {
+      return theme.isDarkTheme ? color.brighten() : color.darken();
+    }
   }
 
   @override
