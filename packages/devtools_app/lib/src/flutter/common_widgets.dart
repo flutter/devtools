@@ -632,3 +632,9 @@ extension ColorExtension on Color {
     );
   }
 }
+
+/// Utility extension methods to the [ThemeData] class.
+extension ThemeDataExtension on ThemeData {
+  /// Returns whether we are currently using a dark theme.
+  bool get isDarkTheme => brightness == Brightness.dark;
+}

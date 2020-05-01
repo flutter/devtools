@@ -347,10 +347,10 @@ class GutterItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final darkTheme = theme.brightness == Brightness.dark;
 
-    final foregroundColor =
-        darkTheme ? theme.textTheme.bodyText2.color : theme.primaryColor;
+    final foregroundColor = theme.isDarkTheme
+        ? theme.textTheme.bodyText2.color
+        : theme.primaryColor;
     final subtleColor = theme.unselectedWidgetColor;
 
     const bpBoxSize = 12.0;

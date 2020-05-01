@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
+import '../flutter/common_widgets.dart';
 import '../table_data.dart';
 import '../trees.dart';
 import '../utils.dart';
@@ -792,8 +793,7 @@ class TableRow<T> extends StatefulWidget {
     if (index % 2 == 0) {
       return color;
     } else {
-      final darkTheme = theme.brightness == Brightness.dark;
-      return darkTheme ? color.brighten() : color.darken();
+      return theme.isDarkTheme ? color.brighten() : color.darken();
     }
   }
 
