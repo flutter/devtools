@@ -212,7 +212,7 @@ class MemoryBodyState extends State<MemoryBody> {
   }
 
   void _updateListeningState() async {
-    await serviceManager.serviceAvailable.future;
+    await serviceManager.onServiceAvailable;
 
     if (controller != null && controller.hasStarted) return;
 

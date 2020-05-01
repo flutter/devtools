@@ -43,8 +43,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   @override
   final VmServiceWrapper service;
 
-  @override
-  final Completer serviceAvailable = Completer()..complete();
+//  @override
+//  final Completer serviceAvailable = Completer()..complete();
 
   @override
   final ConnectedApp connectedApp = MockConnectedApp();
