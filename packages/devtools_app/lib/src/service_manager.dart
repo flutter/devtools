@@ -45,14 +45,18 @@ class ServiceConnectionManager {
   final StreamController<VmServiceWrapper> _connectionAvailableController =
       StreamController<VmServiceWrapper>.broadcast();
 
-  final serviceAvailable = Completer<void>();
+  Completer<VmService> _serviceAvailable = Completer();
+
+  Future<VmService> get onServiceAvailable => _serviceAvailable.future;
+
+  bool get isServiceAvailable => _serviceAvailable.isCompleted;
 
   VmServiceCapabilities _serviceCapabilities;
   VmServiceTrafficLogger serviceTrafficLogger;
 
   Future<VmServiceCapabilities> get serviceCapabilities async {
     if (_serviceCapabilities == null) {
-      await serviceAvailable.future;
+      await _serviceAvailable.future;
       final version = await service.getVersion();
       _serviceCapabilities = VmServiceCapabilities(version);
     }
@@ -138,7 +142,7 @@ class ServiceConnectionManager {
       serviceTrafficLogger = VmServiceTrafficLogger(service);
     }
 
-    serviceAvailable.complete();
+    _serviceAvailable.complete(service);
 
     connectedApp = ConnectedApp();
     serviceExtensionManager.connectedApp = connectedApp;
@@ -217,11 +221,14 @@ class ServiceConnectionManager {
   }
 
   void vmServiceClosed() {
+    _serviceAvailable = Completer();
+
     service = null;
     vm = null;
     sdkVersion = null;
     connectedApp = null;
     serviceExtensionManager.connectedApp = null;
+    serviceExtensionManager.resetAvailableExtensions();
 
     serviceTrafficLogger?.dispose();
 
@@ -304,7 +311,7 @@ class ServiceConnectionManager {
   }
 
   bool libraryUriAvailableNow(String uri) {
-    assert(serviceAvailable.isCompleted);
+    assert(_serviceAvailable.isCompleted);
     assert(isolateManager.selectedIsolateAvailable.isCompleted);
     return isolateManager.selectedIsolateLibraries
         .map((ref) => ref.uri)
@@ -313,7 +320,7 @@ class ServiceConnectionManager {
   }
 
   Future<bool> libraryUriAvailable(String uri) async {
-    assert(serviceAvailable.isCompleted);
+    assert(_serviceAvailable.isCompleted);
     await isolateManager.selectedIsolateAvailable.future;
     return libraryUriAvailableNow(uri);
   }

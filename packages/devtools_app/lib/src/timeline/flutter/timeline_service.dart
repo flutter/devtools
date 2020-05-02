@@ -70,7 +70,7 @@ class TimelineService {
           )
         : TimelineData();
 
-    await serviceManager.serviceAvailable.future;
+    await serviceManager.onServiceAvailable;
     await allowedError(
         serviceManager.service.setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
     await allowedError(serviceManager.service.clearVMTimeline());
@@ -146,13 +146,13 @@ class TimelineService {
   Future<void> updateListeningState(bool isCurrentScreen) async {
     final bool shouldBeRunning =
         timelineController.recording.value && !offlineMode && isCurrentScreen;
-    final bool isRunning = serviceManager.serviceAvailable.isCompleted &&
+    final bool isRunning = serviceManager.isServiceAvailable &&
         timelineController.recording.value &&
         (await serviceManager.service.getVMTimelineFlags())
             .recordedStreams
             .isNotEmpty;
 
-    await serviceManager.serviceAvailable.future;
+    await serviceManager.onServiceAvailable;
     if (shouldBeRunning) {
       await startTimeline();
     } else if (shouldBeRunning && !isRunning) {

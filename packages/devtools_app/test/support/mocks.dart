@@ -38,13 +38,17 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
             : MockVmService() {
     _flagManager.service = service;
   }
+
   static final _flagManager = VmFlagManager();
 
   @override
   final VmServiceWrapper service;
 
   @override
-  final Completer serviceAvailable = Completer()..complete();
+  Future<VmService> onServiceAvailable = Future.value();
+
+  @override
+  bool get isServiceAvailable => hasConnection;
 
   @override
   final ConnectedApp connectedApp = MockConnectedApp();

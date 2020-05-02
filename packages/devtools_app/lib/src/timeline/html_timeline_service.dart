@@ -85,7 +85,7 @@ class TimelineService {
     }
     timelineController.fullTimeline.data = FullTimelineData();
 
-    await serviceManager.serviceAvailable.future;
+    await serviceManager.onServiceAvailable;
     await allowedError(
         serviceManager.service.setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
     await allowedError(serviceManager.service.clearVMTimeline());
@@ -166,7 +166,7 @@ class TimelineService {
                 timelineController.fullTimeline.recordingNotifier.value) &&
             !offlineMode &&
             isCurrentScreen;
-    final bool isRunning = serviceManager.serviceAvailable.isCompleted &&
+    final bool isRunning = serviceManager.isServiceAvailable &&
         (!timelineController.frameBasedTimeline.pausedNotifier.value ||
             timelineController.fullTimeline.recordingNotifier.value) &&
         (await serviceManager.service.getVMTimelineFlags())
@@ -184,7 +184,7 @@ class TimelineService {
   }) async {
     // TODO(kenz): instead of awaiting here, should we check that
     // serviceManager.connectedApp != null?
-    await serviceManager.serviceAvailable.future;
+    await serviceManager.onServiceAvailable;
     if (shouldBeRunning) {
       await startTimeline();
     } else if (shouldBeRunning && !isRunning) {

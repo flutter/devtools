@@ -60,7 +60,7 @@ class ConnectedApp {
   bool get isDartCliAppNow => isRunningOnDartVM && !isFlutterAppNow;
 
   Future<bool> _connectedToProfileBuild() async {
-    assert(serviceManager.serviceAvailable.isCompleted);
+    assert(serviceManager.isServiceAvailable);
     // Only flutter apps have profile and non-profile builds. If this changes in
     // the future (flutter web), we can modify this check.
     if (!isRunningOnDartVM || !await isFlutterApp) return false;
