@@ -45,7 +45,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final VmServiceWrapper service;
 
   @override
-  Future<VmService> get onServiceAvailable => Future.value(service);
+  Future<VmService> onServiceAvailable = Future.value();
 
   @override
   bool get isServiceAvailable => hasConnection;
