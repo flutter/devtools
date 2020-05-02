@@ -47,7 +47,7 @@ class ServiceConnectionManager {
 
   Completer<VmService> _serviceAvailable = Completer();
 
-  Future get onServiceAvailable => _serviceAvailable.future;
+  Future<VmService> get onServiceAvailable => _serviceAvailable.future;
 
   bool get isServiceAvailable => _serviceAvailable.isCompleted;
 

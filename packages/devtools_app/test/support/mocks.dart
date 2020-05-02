@@ -45,10 +45,10 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final VmServiceWrapper service;
 
   @override
-  Future get onServiceAvailable => Future.value(service);
+  Future<VmService> get onServiceAvailable => Future.value(service);
 
   @override
-  bool get isServiceAvailable => true;
+  bool get isServiceAvailable => hasConnection;
 
   @override
   final ConnectedApp connectedApp = MockConnectedApp();
