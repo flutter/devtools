@@ -33,6 +33,7 @@ const argHeadlessMode = 'headless';
 const argDebugMode = 'debug';
 const argLaunchBrowser = 'launch-browser';
 const argMachine = 'machine';
+const argHost = 'host';
 const argPort = 'port';
 const argProfileMemory = 'profile-memory';
 const argTryPorts = 'try-ports';
@@ -49,6 +50,11 @@ final argParser = ArgParser()
     negatable: false,
     abbr: 'h',
     help: 'Prints help output.',
+  )
+  ..addOption(
+    argHost,
+    defaultsTo: 'localhost',
+    help: 'Hostname to serve DevTools on.',
   )
   ..addOption(
     argPort,
@@ -141,6 +147,7 @@ Future<HttpServer> serveDevToolsWithArgs(
   final numPortsToTry =
       args[argTryPorts] != null ? int.tryParse(args[argTryPorts]) ?? 1 : 1;
   final bool verboseMode = args[argVerbose];
+  final String hostname = args[argHost];
 
   // Support collecting profile data.
   final String vmUri = args[argVmUri];
@@ -160,6 +167,7 @@ Future<HttpServer> serveDevToolsWithArgs(
     serviceProtocolUri: vmUri,
     profileFilename: profileAbsoluteFilename,
     verboseMode: verboseMode,
+    hostname: hostname,
   );
 }
 
