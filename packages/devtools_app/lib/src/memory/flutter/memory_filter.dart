@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../ui/dialog.dart';
+import '../../ui/flutter/utils.dart';
 
 import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';
@@ -126,6 +127,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     super.initState();
 
     _controllers = LinkedScrollControllerGroup();
+
     _letters = _controllers.addAndGet();
   }
 
@@ -138,6 +140,24 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     controller = widget.controller;
 
     cancel();
+
+    // Detect and handle checkboxes state changing.
+    addAutoDisposeListener(controller.filterPrivateClassesListenable, () {
+      setState(() {
+        privateClasses.notifier.value = controller.filterPrivateClasses.value;
+      });
+    });
+    addAutoDisposeListener(controller.filterLibraryNoInstancesListenable, () {
+      setState(() {
+        libraryNoInstances.notifier.value =
+            controller.filterLibraryNoInstances.value;
+      });
+    });
+    addAutoDisposeListener(controller.filterZeroInstancesListenable, () {
+      setState(() {
+        zeroInstances.notifier.value = controller.filterZeroInstances.value;
+      });
+    });
   }
 
   void addLibrary(String libraryName, {bool hideState = false}) {
@@ -213,9 +233,19 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     });
   }
 
+  NotifierCheckbox privateClasses;
+  NotifierCheckbox zeroInstances;
+  NotifierCheckbox libraryNoInstances;
+
   @override
   Widget build(BuildContext context) {
     buildFilters();
+
+    privateClasses =
+        NotifierCheckbox(notifier: controller.filterPrivateClasses);
+    zeroInstances = NotifierCheckbox(notifier: controller.filterZeroInstances);
+    libraryNoInstances =
+        NotifierCheckbox(notifier: controller.filterLibraryNoInstances);
 
     // Dialog has three main vertical sections:
     //      - three checkboxes
@@ -249,39 +279,21 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Checkbox(
-                              value: controller.filterPrivateClasses,
-                              onChanged: (value) {
-                                setState(() {
-                                  controller.filterPrivateClasses = value;
-                                });
-                              }),
+                          privateClasses,
                           const Text('Hide Private Class e.g.,_className'),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Checkbox(
-                              value: controller.filterZeroInstances,
-                              onChanged: (value) {
-                                setState(() {
-                                  controller.filterZeroInstances = value;
-                                });
-                              }),
+                          zeroInstances,
                           const Text('Hide Classes with No Instances'),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Checkbox(
-                              value: controller.filterLibraryNoInstances,
-                              onChanged: (value) {
-                                setState(() {
-                                  controller.filterLibraryNoInstances = value;
-                                });
-                              }),
+                          libraryNoInstances,
                           const Text('Hide Library with No Instances'),
                         ],
                       ),

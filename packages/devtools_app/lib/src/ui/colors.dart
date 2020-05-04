@@ -9,8 +9,8 @@ import 'theme.dart';
 // TODO(kenz): move colors from other pages to this file for consistency.
 
 /// Memory heat map blueish color incremental colors from Blue 100 to Blue 900.
-Color memoryHeatMapLightColor = const Color(0xFFBBDEFB);  // Material BLUE 100
-Color memoryHeatMapDarkColor = const Color(0xFF0D47A1);   // Material BLUE 900
+Color memoryHeatMapLightColor = const Color(0xFFBBDEFB); // Material BLUE 100
+Color memoryHeatMapDarkColor = const Color(0xFF0D47A1); // Material BLUE 900
 
 /// Mark: Timeline / CPU profiler.
 ///

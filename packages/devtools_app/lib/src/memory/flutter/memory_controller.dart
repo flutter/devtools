@@ -17,6 +17,7 @@ import '../../config_specific/logger/logger.dart';
 import '../../flutter/table.dart';
 import '../../globals.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
+import '../../ui/flutter/utils.dart';
 import '../../utils.dart';
 import '../../vm_service_wrapper.dart';
 import '../memory_service.dart';
@@ -299,13 +300,22 @@ class MemoryController extends DisposableController
   }
 
   /// Hide any class that hasn't been constructed (zero instances).
-  bool filterZeroInstances = true;
+  final filterZeroInstances = CheckboxValueNotifier(true);
+
+  ValueListenable<bool> get filterZeroInstancesListenable =>
+      filterZeroInstances;
 
   /// Hide any private class, prefixed with an underscore.
-  bool filterPrivateClasses = true;
+  final filterPrivateClasses = CheckboxValueNotifier(true);
+
+  ValueListenable<bool> get filterPrivateClassesListenable =>
+      filterPrivateClasses;
 
   /// Hide any library with no constructed class instances.
-  bool filterLibraryNoInstances = true;
+  final filterLibraryNoInstances = CheckboxValueNotifier(true);
+
+  ValueListenable<bool> get filterLibraryNoInstancesListenable =>
+      filterLibraryNoInstances;
 
   /// Table ordered by library, class or instance
   static const String groupByLibrary = 'Library';

@@ -244,8 +244,8 @@ class HeapGraph {
 
     // Prune classes that are private or have zero instances.
     groupByClass.removeWhere((className, instances) =>
-        (controller.filterZeroInstances && instances.isEmpty) ||
-        (controller.filterPrivateClasses && className.startsWith('_')) ||
+        (controller.filterZeroInstances.value && instances.isEmpty) ||
+        (controller.filterPrivateClasses.value && className.startsWith('_')) ||
         className == internalClassName);
 
     // Clone groupByLibrary from raw group.
@@ -257,15 +257,16 @@ class HeapGraph {
     // Prune libraries if all their classes are private or have zero instances.
     groupByLibrary.removeWhere((libraryName, classes) {
       classes.removeWhere((actual) =>
-          (controller.filterZeroInstances &&
+          (controller.filterZeroInstances.value &&
               actual.getInstances(this).isEmpty) ||
-          (controller.filterPrivateClasses && actual.name.startsWith('_')) ||
+          (controller.filterPrivateClasses.value &&
+              actual.name.startsWith('_')) ||
           actual.name == internalClassName);
 
       // Hide this library?
       if (controller.libraryFilters.isLibraryFiltered(libraryName)) return true;
 
-      return controller.filterLibraryNoInstances && classes.isEmpty;
+      return controller.filterLibraryNoInstances.value && classes.isEmpty;
     });
 
     return true;
