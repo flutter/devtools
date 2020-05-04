@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 
+import '../../flutter/tree.dart';
+import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
@@ -18,9 +20,38 @@ class Variables extends StatelessWidget {
       valueListenable: controller.variables,
       builder: (context, variables, _) {
         if (variables.isEmpty) return const SizedBox();
-        // TODO(kenz): display variables in a tree view.
-        return const Center(child: Text('TODO'));
+        // TODO(kenz): preserve expanded state of tree on switching frames and
+        // on stepping.
+        return TreeView<Variable>(
+          dataRoots: variables,
+          dataDisplayProvider: (variable) => displayProvider(context, variable),
+          onItemPressed: (variable) => onItemPressed(variable, controller),
+        );
       },
     );
+  }
+
+  Widget displayProvider(BuildContext context, Variable v) {
+    return RichText(
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        text: '${v.boundVar.name} ',
+        style: regularStyle(context),
+        children: [
+          TextSpan(
+            text: v.displayValue,
+            style: subtleStyle(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void onItemPressed(Variable v, DebuggerController controller) {
+    // On expansion, lazily build the variables tree for performance reasons.
+    if (v.isExpanded) {
+      v.children.forEach(controller.buildVariablesTree);
+    }
   }
 }

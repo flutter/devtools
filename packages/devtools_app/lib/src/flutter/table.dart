@@ -11,6 +11,7 @@ import 'collapsible_mixin.dart';
 import 'common_widgets.dart' show ColorExtension, ScrollControllerAutoScroll;
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'theme.dart';
+import 'tree.dart';
 
 // TODO(devoncarew): We need to render the selected row with a different
 // background color.
@@ -208,14 +209,10 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
 }
 
 class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
-    with TickerProviderStateMixin
+    with TickerProviderStateMixin, TreeMixin<T>
     implements SortableTable<T> {
   /// The number of items to show when animating out the tree table.
   static const itemsToShowWhenAnimating = 50;
-
-  List<T> dataRoots;
-
-  List<T> items;
   List<T> animatingChildren = [];
   Set<T> animatingChildrenSet = {};
   T animatingNode;
@@ -264,7 +261,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   void _updateItems() {
     setState(() {
-      items = _buildFlatList(dataRoots);
+      items = buildFlatList(dataRoots);
       // Leave enough space for the animating children during the animation.
       columnWidths = _computeColumnWidths([...items, ...animatingChildren]);
     });
@@ -294,12 +291,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       List<T> nodeChildren;
       if (node.isExpanded) {
         // Compute the children of the expanded node before collapsing.
-        nodeChildren = _buildFlatList([node]);
+        nodeChildren = buildFlatList([node]);
         node.collapse();
       } else {
         node.expand();
         // Compute the children of the collapsed node after expanding it.
-        nodeChildren = _buildFlatList([node]);
+        nodeChildren = buildFlatList([node]);
       }
       // The first item will be node itself. We will take the next few items
       // to generate a convincing expansion animation without creating
@@ -348,27 +345,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       widths.add(width);
     }
     return widths;
-  }
-
-  void traverse(T node, bool Function(T) callback) {
-    if (node == null) return;
-    final shouldContinue = callback(node);
-    if (shouldContinue) {
-      for (var child in node.children) {
-        traverse(child, callback);
-      }
-    }
-  }
-
-  List<T> _buildFlatList(List<T> roots) {
-    final flatList = <T>[];
-    for (T root in roots) {
-      traverse(root, (n) {
-        flatList.add(n);
-        return n.isExpanded;
-      });
-    }
-    return flatList;
   }
 
   @override

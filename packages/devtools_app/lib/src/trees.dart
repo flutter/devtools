@@ -109,6 +109,10 @@ class TreeNode<T extends TreeNode<T>> {
     _isExpanded = false;
   }
 
+  void toggleExpansion() {
+    _isExpanded = !_isExpanded;
+  }
+
   void addChild(T child) {
     children.add(child);
     child.parent = this;

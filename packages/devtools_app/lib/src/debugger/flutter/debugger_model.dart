@@ -190,14 +190,16 @@ class Variable extends TreeNode<Variable> {
 
   BoundVariable boundVar;
 
-  bool get hasChildren =>
+  bool treeInitialized = false;
+
+  @override
+  bool get isExpandable =>
       boundVar.value is InstanceRef &&
       (boundVar.value as InstanceRef).valueAsString == null;
 
   Object get value => boundVar.value;
 
   String get displayValue {
-    final name = boundVar.name;
     final value = this.value;
 
     String valueStr;
@@ -230,7 +232,7 @@ class Variable extends TreeNode<Variable> {
       valueStr = value.toString();
     }
 
-    return '$name: $valueStr';
+    return valueStr;
   }
 
   @override

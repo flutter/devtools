@@ -463,11 +463,13 @@ class DebuggerController extends DisposableController
     }
   }
 
-  void selectStackFrame(StackFrameAndSourcePosition frame) async {
+  void selectStackFrame(StackFrameAndSourcePosition frame) {
     _selectedStackFrame.value = frame;
 
     if (frame?.frame != null) {
-      _variables.value = await _variablesForFrame(frame.frame);
+      _variables.value = _variablesForFrame(frame.frame);
+    } else {
+      _variables.value = [];
     }
 
     if (frame?.scriptRef != null) {
@@ -476,66 +478,83 @@ class DebuggerController extends DisposableController
     }
   }
 
-  Future<List<Variable>> _variablesForFrame(Frame frame) async {
-    final vars = frame.vars.map((v) => Variable.create(v)).toList();
+  List<Variable> _variablesForFrame(Frame frame) {
+    final variables = frame.vars.map((v) => Variable.create(v)).toList();
+    variables.forEach(buildVariablesTree);
+    return variables;
+  }
 
-    for (var v in vars) {
-      final InstanceRef instanceRef = v.boundVar.value;
+  Future<void> buildVariablesTree(Variable variable) async {
+    if (!variable.isExpandable || variable.treeInitialized) return;
+
+    final InstanceRef instanceRef = variable.boundVar.value;
+    try {
       final dynamic result = await getObject(instanceRef);
       if (result is Instance) {
         if (result.associations != null) {
-          v.children.addAll(result.associations
-              .map((MapAssociation assoc) {
-                // For string keys, quote the key value.
-                String keyString = assoc.key.valueAsString;
-                if (assoc.key is InstanceRef &&
-                    assoc.key.kind == InstanceKind.kString) {
-                  keyString = "'$keyString'";
-                }
-                return BoundVariable(
-                  name: '[$keyString]',
-                  value: assoc.value,
-                  scopeStartTokenPos: null,
-                  scopeEndTokenPos: null,
-                  declarationTokenPos: null,
-                );
-              })
-              .map((bv) => Variable.create(bv))
-              .toList());
+          variable.addAllChildren(_associationsAsVariables(result));
         } else if (result.elements != null) {
-          final List<BoundVariable> boundVars = [];
-          int index = 0;
-
-          for (dynamic value in result.elements) {
-            boundVars.add(BoundVariable(
-              name: '[$index]',
-              value: value,
-              scopeStartTokenPos: null,
-              scopeEndTokenPos: null,
-              declarationTokenPos: null,
-            ));
-            index++;
-          }
-          v.children
-              .addAll(boundVars.map((bv) => Variable.create(bv)).toList());
+          variable.addAllChildren(_elementsAsVariables(result));
         } else if (result.fields != null) {
-          v.children.addAll(result.fields
-              .map((BoundField field) {
-                return BoundVariable(
-                  name: field.decl.name,
-                  value: field.value,
-                  scopeStartTokenPos: null,
-                  scopeEndTokenPos: null,
-                  declarationTokenPos: null,
-                );
-              })
-              .toList()
-              .map((bv) => Variable.create(bv))
-              .toList());
+          variable.addAllChildren(_fieldsAsVariables(result));
         }
       }
+    } on SentinelException catch (_) {
+      // Fail gracefully if calling `getObject` throws a SentinelException.
     }
-    return vars;
+    variable.treeInitialized = true;
+  }
+
+  List<Variable> _associationsAsVariables(Instance instance) {
+    return instance.associations
+        .map((MapAssociation assoc) {
+          // For string keys, quote the key value.
+          String keyString = assoc.key.valueAsString;
+          if (assoc.key is InstanceRef &&
+              assoc.key.kind == InstanceKind.kString) {
+            keyString = "'$keyString'";
+          }
+          return BoundVariable(
+            name: '[$keyString]',
+            value: assoc.value,
+            scopeStartTokenPos: null,
+            scopeEndTokenPos: null,
+            declarationTokenPos: null,
+          );
+        })
+        .map((bv) => Variable.create(bv))
+        .toList();
+  }
+
+  List<Variable> _elementsAsVariables(Instance instance) {
+    final List<BoundVariable> boundVars = [];
+    for (int i = 0; i < instance.elements.length; i++) {
+      final value = instance.elements[i];
+      boundVars.add(BoundVariable(
+        name: '[$i]',
+        value: value,
+        scopeStartTokenPos: null,
+        scopeEndTokenPos: null,
+        declarationTokenPos: null,
+      ));
+    }
+    return boundVars.map((bv) => Variable.create(bv)).toList();
+  }
+
+  List<Variable> _fieldsAsVariables(Instance instance) {
+    return instance.fields
+        .map((BoundField field) {
+          return BoundVariable(
+            name: field.decl.name,
+            value: field.value,
+            scopeStartTokenPos: null,
+            scopeEndTokenPos: null,
+            declarationTokenPos: null,
+          );
+        })
+        .toList()
+        .map((bv) => Variable.create(bv))
+        .toList();
   }
 
   List<Frame> _framesForCallStack(Stack stack) {

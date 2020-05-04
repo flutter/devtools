@@ -45,3 +45,18 @@ Widget createAnimatedCircleWidget(double radius, Color color) {
     decoration: BoxDecoration(color: color, shape: BoxShape.circle),
   );
 }
+
+TextStyle regularStyle(BuildContext context) {
+  final theme = Theme.of(context);
+  return TextStyle(color: theme.textTheme.bodyText2.color);
+}
+
+TextStyle subtleStyle(BuildContext context) {
+  final theme = Theme.of(context);
+  return TextStyle(color: theme.unselectedWidgetColor);
+}
+
+TextStyle selectedStyle(BuildContext context) {
+  final theme = Theme.of(context);
+  return TextStyle(color: theme.textSelectionColor);
+}
