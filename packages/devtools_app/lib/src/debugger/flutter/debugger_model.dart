@@ -162,27 +162,23 @@ class _BreakpointAndSourcePositionUnresolved
 
 /// A tuple of a stack frame and a source position.
 class StackFrameAndSourcePosition {
-  StackFrameAndSourcePosition._(this.frame, this.sourcePosition);
-
-  factory StackFrameAndSourcePosition.create(
-    Frame frame, {
-    SourcePosition position,
-  }) {
-    return StackFrameAndSourcePosition._(frame, position);
-  }
+  StackFrameAndSourcePosition(
+    this.frame, {
+    this.position,
+  });
 
   final Frame frame;
 
   /// This can be null.
-  final SourcePosition sourcePosition;
+  final SourcePosition position;
 
   ScriptRef get scriptRef => frame.location?.script;
 
   String get scriptUri => frame.location?.script?.uri;
 
-  int get line => sourcePosition?.line;
+  int get line => position?.line;
 
-  int get column => sourcePosition?.column;
+  int get column => position?.column;
 }
 
 class Variable extends TreeNode<Variable> {

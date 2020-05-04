@@ -13,28 +13,20 @@ import '../framework_controller.dart';
 import '../globals.dart';
 import '../service.dart';
 import '../service_manager.dart';
-import '../ui/theme.dart';
 import '../vm_service_wrapper.dart';
 
 typedef ErrorReporter = void Function(String title, dynamic error);
 
 class FrameworkCore {
-  static void init({String url}) {
-    // Print the version number at startup.
-    log('DevTools version ${devtools.version}.');
-
-    // ignore: deprecated_member_use_from_same_package
-    final theme = url == null ? null : Uri.parse(url).queryParameters['theme'];
-    // ignore: deprecated_member_use_from_same_package
-    setDarkTheme(theme == 'dark');
-
-    _setGlobals();
-  }
-
-  static void _setGlobals() {
+  static void initGlobals() {
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
     setGlobal(MessageBus, MessageBus());
     setGlobal(FrameworkController, FrameworkController());
+  }
+
+  static void init({String url}) {
+    // Print the version number at startup.
+    log('DevTools version ${devtools.version}.');
   }
 
   /// Returns true if we're able to connect to a device and false otherwise.

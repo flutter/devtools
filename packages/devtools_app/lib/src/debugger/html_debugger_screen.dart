@@ -443,6 +443,7 @@ class HtmlDebuggerScreen extends HtmlScreen {
     final codeMirror =
         CodeMirror.fromElement(_sourceArea.element, options: options);
     codeMirror.setReadOnly(true);
+    // ignore: deprecated_member_use_from_same_package
     if (isDarkTheme) {
       codeMirror.setTheme('darcula');
     }

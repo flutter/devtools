@@ -442,13 +442,14 @@ class DebuggerController extends DisposableController
   Future<StackFrameAndSourcePosition> _createStackFrameWithLocation(
     Frame frame,
   ) async {
-    if (frame.location == null) {
-      return StackFrameAndSourcePosition.create(frame);
+    final location = frame.location;
+    if (location == null) {
+      return StackFrameAndSourcePosition(frame);
     }
 
-    final script = await getScript(frame.location.script);
-    final pos = calculatePosition(script, frame.location.tokenPos);
-    return StackFrameAndSourcePosition.create(frame, position: pos);
+    final script = await getScript(location.script);
+    final position = calculatePosition(script, location.tokenPos);
+    return StackFrameAndSourcePosition(frame, position: position);
   }
 
   void selectBreakpoint(BreakpointAndSourcePosition bp) {
@@ -471,7 +472,7 @@ class DebuggerController extends DisposableController
 
     if (frame?.scriptRef != null) {
       showScriptLocation(
-          ScriptLocation(frame.scriptRef, location: frame.sourcePosition));
+          ScriptLocation(frame.scriptRef, location: frame.position));
     }
   }
 
@@ -568,5 +569,37 @@ class DebuggerController extends DisposableController
       frames = [newFrame, ...frames.sublist(1)];
     }
     return frames;
+  }
+
+  final Map<String, List<SourcePosition>> _breakPositionsMap = {};
+
+  /// Return the list of valid positions for breakpoints for a given script.
+  Future<List<SourcePosition>> getBreakablePositions(Script script) async {
+    if (!_breakPositionsMap.containsKey(script.id)) {
+      _breakPositionsMap[script.id] = await _getBreakablePositions(script);
+    }
+
+    return _breakPositionsMap[script.id];
+  }
+
+  Future<List<SourcePosition>> _getBreakablePositions(Script script) async {
+    final report = await _service.getSourceReport(
+      isolateRef.id,
+      [SourceReportKind.kPossibleBreakpoints],
+      scriptId: script.id,
+      forceCompile: true,
+    );
+
+    final positions = <SourcePosition>[];
+
+    for (SourceReportRange range in report.ranges) {
+      if (range.possibleBreakpoints != null) {
+        for (int tokenPos in range.possibleBreakpoints) {
+          positions.add(calculatePosition(script, tokenPos));
+        }
+      }
+    }
+
+    return positions;
   }
 }

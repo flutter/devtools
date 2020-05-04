@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
 
+import '../flutter/common_widgets.dart';
 import '../ui/theme.dart';
 
 /// Constructs the light or dark theme for the app.
@@ -145,8 +146,9 @@ const defaultCurve = Curves.easeInOutCubic;
 CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
 
-final titleSolidBackgroundColor =
-    ThemedColor(devtoolsGrey[50], devtoolsGrey[900]);
+Color titleSolidBackgroundColor(ThemeData theme) {
+  return theme.isDarkTheme ? devtoolsGrey[900] : devtoolsGrey[50];
+}
 
 final chartBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
 

@@ -602,3 +602,39 @@ extension ScrollControllerAutoScroll on ScrollController {
     }
   }
 }
+
+/// Utility extension methods to the [Color] class.
+extension ColorExtension on Color {
+  /// Return a slightly darker color than the current color.
+  Color darken([double percent = 0.05]) {
+    assert(0.0 <= percent && percent <= 1.0);
+    percent = 1.0 - percent;
+
+    final c = this;
+    return Color.fromARGB(
+      c.alpha,
+      (c.red * percent).round(),
+      (c.green * percent).round(),
+      (c.blue * percent).round(),
+    );
+  }
+
+  /// Return a slightly brighter color than the current color.
+  Color brighten([double percent = 0.05]) {
+    assert(0.0 <= percent && percent <= 1.0);
+
+    final c = this;
+    return Color.fromARGB(
+      c.alpha,
+      c.red + ((255 - c.red) * percent).round(),
+      c.green + ((255 - c.green) * percent).round(),
+      c.blue + ((255 - c.blue) * percent).round(),
+    );
+  }
+}
+
+/// Utility extension methods to the [ThemeData] class.
+extension ThemeDataExtension on ThemeData {
+  /// Returns whether we are currently using a dark theme.
+  bool get isDarkTheme => brightness == Brightness.dark;
+}

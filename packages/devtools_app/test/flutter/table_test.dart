@@ -512,45 +512,86 @@ void main() {
       expect(tree.children[2].name, equals('Baz'));
     });
 
-    testWidgets('selection changes with arrow keys',
-        (WidgetTester tester) async {
-      final data = TestData('Foo', 0)
-        ..children.addAll([
+    group('keyboard navigation', () {
+      TestData data;
+      TreeTable<TestData> table;
+
+      setUp(() {
+        data = TestData('Foo', 0);
+        data.addAllChildren([
           TestData('Bar', 1),
           TestData('Crackle', 5),
-        ])
-        ..expandCascading();
-      final table = TreeTable<TestData>(
-        columns: [
-          _NumberColumn(),
-          treeColumn,
-        ],
-        dataRoots: [data],
-        treeColumn: treeColumn,
-        keyFactory: (d) => Key(d.name),
-        sortColumn: treeColumn,
-        sortDirection: SortDirection.ascending,
-      );
+        ]);
 
-      await tester.pumpWidget(wrap(table));
-      await tester.pumpAndSettle();
+        table = TreeTable<TestData>(
+          columns: [
+            _NumberColumn(),
+            treeColumn,
+          ],
+          dataRoots: [data],
+          treeColumn: treeColumn,
+          keyFactory: (d) => Key(d.name),
+          sortColumn: treeColumn,
+          sortDirection: SortDirection.ascending,
+        );
+      });
 
-      final TreeTableState state = tester.state(find.byWidget(table));
-      state.focusNode.requestFocus();
-      await tester.pumpAndSettle();
+      testWidgets('selection changes with up/down arrow keys',
+          (WidgetTester tester) async {
+        data.expand();
+        await tester.pumpWidget(wrap(table));
+        await tester.pumpAndSettle();
 
-      expect(state.selectedNode, equals(null));
+        final TreeTableState state = tester.state(find.byWidget(table));
+        state.focusNode.requestFocus();
+        await tester.pumpAndSettle();
 
-      // the root is selected by default when there is no selection. Pressing
-      // arrowDown should take us to the first child, Bar
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      await tester.pumpAndSettle();
-      expect(state.selectedNode, equals(data.children[0]));
+        expect(state.selectedNode, equals(null));
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-      await tester.pumpAndSettle();
+        // the root is selected by default when there is no selection. Pressing
+        // arrowDown should take us to the first child, Bar
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pumpAndSettle();
+        expect(state.selectedNode, equals(data.children[0]));
 
-      expect(state.selectedNode, equals(data.root));
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pumpAndSettle();
+
+        expect(state.selectedNode, equals(data.root));
+      });
+
+      testWidgets('selection changes with left/right arrow keys',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(wrap(table));
+        await tester.pumpAndSettle();
+
+        final TreeTableState state = tester.state(find.byWidget(table));
+        state.focusNode.requestFocus();
+        await tester.pumpAndSettle();
+
+        // left arrow on collapsed node with no parent should succeed but have
+        // no effect.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pumpAndSettle();
+
+        expect(state.selectedNode, equals(data.root));
+        expect(state.selectedNode.isExpanded, isFalse);
+
+        // Expand root and navigate down twice
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pumpAndSettle();
+
+        expect(state.selectedNode, equals(data.root.children[1]));
+
+        // Back to parent
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pumpAndSettle();
+
+        expect(state.selectedNode, equals(data.root));
+        expect(state.selectedNode.isExpanded, isTrue);
+      });
     });
 
     testWidgets('properly colors rows with alternating colors',
@@ -586,8 +627,8 @@ void main() {
       final crackleFinder = find.byKey(const Key('Crackle'));
 
       // Expected values returned through accessing Color.value property.
-      const color1Value = 4293585900;
-      const color2Value = 4294638330;
+      const color1Value = 4294638330;
+      const color2Value = 4293848814;
       const rowSelectedColorValue = 4278285762;
 
       await tester.pumpWidget(wrap(table));

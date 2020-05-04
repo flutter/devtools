@@ -53,7 +53,13 @@ Future<shelf.Handler> defaultHandler(
     // ignore: unawaited_futures
     Process.start(
       'flutter',
-      ['run', '-d', 'web-server', '--web-port=$webPort'],
+      [
+        'run',
+        '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+        '-d',
+        'web-server',
+        '--web-port=$webPort',
+      ],
       workingDirectory: path.join('..', 'devtools_app'),
     ).then((Process process) {
       // Write all flutter run process output to the server's output.

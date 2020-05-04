@@ -94,7 +94,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
         html.window.location.href = href;
       });
 
-    await serviceManager.serviceAvailable.future;
+    await serviceManager.onServiceAvailable;
     await addScreens();
     screensReady.complete();
 

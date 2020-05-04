@@ -1012,7 +1012,7 @@ class HtmlMemoryScreen extends HtmlScreen with HtmlSetStateMixin {
   }
 
   void _updateListeningState() async {
-    await serviceManager.serviceAvailable.future;
+    await serviceManager.onServiceAvailable;
 
     final bool shouldBeRunning = isCurrentScreen;
 

@@ -90,7 +90,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   ImportController _importController;
 
-  StreamSubscription<String> _pageIdSubscription;
+  StreamSubscription<String> _showPageSubscription;
 
   @override
   void initState() {
@@ -98,8 +98,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     _setupTabController();
 
-    _pageIdSubscription =
-        frameworkController.onShowPageId.listen(_pushScreenByPageId);
+    _showPageSubscription =
+        frameworkController.onShowPageId.listen(_showPageById);
   }
 
   @override
@@ -150,7 +150,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     _tabController?.dispose();
     _currentScreen?.dispose();
     appBarAnimation?.dispose();
-    _pageIdSubscription?.cancel();
+    _showPageSubscription?.cancel();
 
     super.dispose();
   }
@@ -173,22 +173,19 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     });
   }
 
-  /// Push the given page ID into the navigation history.
-  void _pushScreenByPageId(String pageId) {
-    final previousTabIndex = _tabController.previousIndex;
+  /// Switch to the given page ID. This request usually comes from the server API
+  /// for example if the user clicks the Inspector button in the IDE and DevTools
+  /// is already open on the Memory page, it should transition to the Inspector page.
+  void _showPageById(String pageId) {
+    final existingTabIndex = _tabController.index;
 
     final screen = widget.tabs
         .firstWhere((screen) => screen.screenId == pageId, orElse: () => null);
     final newIndex = screen == null ? -1 : widget.tabs.indexOf(screen);
 
-    if (newIndex != -1 && newIndex != previousTabIndex) {
-      ModalRoute.of(context).addLocalHistoryEntry(LocalHistoryEntry(
-        onRemove: () {
-          if (widget.tabs.length >= previousTabIndex) {
-            _tabController.animateTo(previousTabIndex);
-          }
-        },
-      ));
+    if (newIndex != -1 && newIndex != existingTabIndex) {
+      _tabController.animateTo(newIndex);
+      _pushScreenToLocalPageRoute(newIndex);
     }
   }
 

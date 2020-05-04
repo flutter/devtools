@@ -28,18 +28,16 @@ class TimelineService {
   }
 
   void _initListeners() async {
-    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
-    // Do not start the timeline for Dart web apps.
-    if (serviceManager.hasConnection &&
-        !await serviceManager.connectedApp.isDartWebApp) {
-      _handleConnectionStart(serviceManager.service);
-    }
+    _initTimelineListener(serviceManager.service);
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
-
     timelineController.recording.addListener(() => updateListeningState(true));
   }
 
-  void _handleConnectionStart(VmServiceWrapper service) {
+  void _initTimelineListener(VmServiceWrapper service) {
+    assert(serviceManager.hasConnection);
+    // Do not start the timeline for Dart web apps.
+    if (serviceManager.connectedApp.isDartWebAppNow) return;
+
     allowedError(
       profilerService.setProfilePeriod(mediumProfilePeriod),
       logError: false,
@@ -72,7 +70,7 @@ class TimelineService {
           )
         : TimelineData();
 
-    await serviceManager.serviceAvailable.future;
+    await serviceManager.onServiceAvailable;
     await allowedError(
         serviceManager.service.setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
     await allowedError(serviceManager.service.clearVMTimeline());
@@ -148,13 +146,13 @@ class TimelineService {
   Future<void> updateListeningState(bool isCurrentScreen) async {
     final bool shouldBeRunning =
         timelineController.recording.value && !offlineMode && isCurrentScreen;
-    final bool isRunning = serviceManager.serviceAvailable.isCompleted &&
+    final bool isRunning = serviceManager.isServiceAvailable &&
         timelineController.recording.value &&
         (await serviceManager.service.getVMTimelineFlags())
             .recordedStreams
             .isNotEmpty;
 
-    await serviceManager.serviceAvailable.future;
+    await serviceManager.onServiceAvailable;
     if (shouldBeRunning) {
       await startTimeline();
     } else if (shouldBeRunning && !isRunning) {

@@ -48,7 +48,9 @@ Future<void> main() async {
 
   group('Whole app', () {
     testWidgets('CLI Memory Profile Collection', (tester) async {
+      FrameworkCore.initGlobals();
       FrameworkCore.init();
+
       final app = DefaultAssetBundle(
         bundle: _DiskAssetBundle(),
         child: const DevToolsApp([]),

@@ -69,6 +69,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   @override
   void initState() {
     super.initState();
+
     serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
       setState(() {
         _clearCachedRoutes();
@@ -159,7 +160,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     final visibleScreens = <Screen>[];
     for (var screen in _screens) {
       if (screen.conditionalLibrary != null) {
-        if (serviceManager.serviceAvailable.isCompleted &&
+        if (serviceManager.isServiceAvailable &&
             serviceManager
                 .isolateManager.selectedIsolateAvailable.isCompleted &&
             serviceManager.libraryUriAvailableNow(screen.conditionalLibrary)) {
