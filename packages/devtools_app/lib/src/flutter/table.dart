@@ -45,8 +45,8 @@ class FlatTable<T> extends StatefulWidget {
     this.autoScrollContent = false,
     @required this.keyFactory,
     @required this.onItemSelected,
-    this.sortColumn,
-    this.sortDirection,
+    @required this.sortColumn,
+    @required this.sortDirection,
   })  : assert(columns != null),
         assert(keyFactory != null),
         assert(data != null),
@@ -65,14 +65,8 @@ class FlatTable<T> extends StatefulWidget {
 
   final ItemCallback<T> onItemSelected;
 
-  /// The column to sort the data by.
-  ///
-  /// If null, this table is not sortable.
   final ColumnData<T> sortColumn;
 
-  /// The direction to sort the data by.
-  ///
-  /// If null, this table is not sortable.
   final SortDirection sortDirection;
 
   @override
@@ -105,7 +99,6 @@ class FlatTableState<T> extends State<FlatTable<T>>
 
   void _initData() {
     data = List.from(widget.data);
-    if (widget.sortColumn == null || widget.sortDirection == null) return;
     sortData(widget.sortColumn, widget.sortDirection);
   }
 
@@ -151,7 +144,6 @@ class FlatTableState<T> extends State<FlatTable<T>>
   }
 
   void _sortDataAndUpdate(ColumnData column, SortDirection direction) {
-    assert(column != null && direction != null);
     setState(() {
       sortData(column, direction);
     });
@@ -187,11 +179,10 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     @required this.treeColumn,
     @required this.dataRoots,
     @required this.keyFactory,
-    this.sortColumn,
-    this.sortDirection,
-    this.includeHeader = true,
+    @required this.sortColumn,
+    @required this.sortDirection,
   })  : assert(columns.contains(treeColumn)),
-        assert(sortColumn != null ? columns.contains(sortColumn) : true),
+        assert(columns.contains(sortColumn)),
         assert(columns != null),
         assert(keyFactory != null),
         assert(dataRoots != null),
@@ -209,17 +200,9 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// Factory that creates keys for each row in this table.
   final Key Function(T) keyFactory;
 
-  /// The column to sort the data by.
-  ///
-  /// If null, this table is not sortable.
   final ColumnData<T> sortColumn;
 
-  /// The direction to sort the data by.
-  ///
-  /// If null, this table is not sortable.
   final SortDirection sortDirection;
-
-  final bool includeHeader;
 
   @override
   TreeTableState<T> createState() => TreeTableState<T>();
@@ -269,7 +252,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   void _initData() {
     dataRoots = List.from(widget.dataRoots);
-    if (widget.sortColumn == null || widget.sortDirection == null) return;
     sortData(widget.sortColumn, widget.sortDirection);
   }
 
@@ -399,7 +381,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       onSortChanged: _sortDataAndUpdate,
       focusNode: focusNode,
       handleKeyEvent: _handleKeyEvent,
-      includeHeader: widget.includeHeader,
     );
   }
 
@@ -560,7 +541,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   void _sortDataAndUpdate(ColumnData column, SortDirection direction) {
-    assert(column != null && direction != null);
     sortData(column, direction);
     _updateItems();
   }
@@ -579,13 +559,11 @@ class _Table<T> extends StatefulWidget {
     @required this.focusNode,
     this.handleKeyEvent,
     this.autoScrollContent = false,
-    this.includeHeader = true,
   }) : super(key: key);
 
   final int itemCount;
 
   final bool autoScrollContent;
-  final bool includeHeader;
   final List<ColumnData<T>> columns;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
@@ -660,17 +638,16 @@ class _TableState<T> extends State<_Table<T>> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (widget.includeHeader)
-              TableRow.tableHeader(
-                key: const Key('Table header'),
-                linkedScrollControllerGroup:
-                    _linkedHorizontalScrollControllerGroup,
-                columns: widget.columns,
-                columnWidths: widget.columnWidths,
-                sortColumn: sortColumn,
-                sortDirection: sortDirection,
-                onSortChanged: _sortData,
-              ),
+            TableRow.tableHeader(
+              key: const Key('Table header'),
+              linkedScrollControllerGroup:
+                  _linkedHorizontalScrollControllerGroup,
+              columns: widget.columns,
+              columnWidths: widget.columnWidths,
+              sortColumn: sortColumn,
+              sortDirection: sortDirection,
+              onSortChanged: _sortData,
+            ),
             Expanded(
               child: Scrollbar(
                 child: RawKeyboardListener(
@@ -696,7 +673,6 @@ class _TableState<T> extends State<_Table<T>> {
   }
 
   void _sortData(ColumnData column, SortDirection direction) {
-    if (widget.sortColumn == null || widget.sortDirection == null) return;
     sortDirection = direction;
     sortColumn = column;
     widget.onSortChanged(column, direction);
