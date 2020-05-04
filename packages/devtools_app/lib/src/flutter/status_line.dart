@@ -134,14 +134,9 @@ class StatusLine extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot<IsolateRef> snapshot) {
         final List<IsolateRef> isolates = isolateManager.isolates;
 
-        // When we have two or more isolates with the same name, append some
-        // disambiguating information.
-        String disambiguatedName(IsolateRef ref) {
-          String name = ref.name;
-          if (isolates.where((e) => e.name == ref.name).length >= 2) {
-            name = '$name (${ref.number})';
-          }
-          return 'isolate: $name';
+        String isolateName(IsolateRef ref) {
+          final name = ref.name;
+          return 'Isolate $name #${isolateManager.isolateIndex(ref)}';
         }
 
         return DropdownButtonHideUnderline(
@@ -154,7 +149,7 @@ class StatusLine extends StatelessWidget {
             items: isolates.map((IsolateRef ref) {
               return DropdownMenuItem<IsolateRef>(
                 value: ref,
-                child: Text(disambiguatedName(ref), style: textTheme.bodyText2),
+                child: Text(isolateName(ref), style: textTheme.bodyText2),
               );
             }).toList(),
           ),

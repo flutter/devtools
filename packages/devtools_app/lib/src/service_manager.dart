@@ -232,6 +232,8 @@ class ServiceConnectionManager {
 
     serviceTrafficLogger?.dispose();
 
+    _isolateManager._handleVmServiceClosed();
+
     _stateController.add(false);
     _connectionClosedController.add(null);
   }
@@ -341,6 +343,9 @@ class IsolateManager {
 
   var selectedIsolateAvailable = Completer<void>();
 
+  int _lastIsolateIndex = 0;
+  final Map<String, int> _isolateIndexMap = {};
+
   List<LibraryRef> selectedIsolateLibraries;
 
   List<IsolateRef> get isolates => List<IsolateRef>.unmodifiable(_isolates);
@@ -354,6 +359,20 @@ class IsolateManager {
 
   Stream<IsolateRef> get onIsolateExited => _isolateExitedController.stream;
 
+  /// Return a unique, monotonically increasing number for this Isolate.
+  int isolateIndex(IsolateRef isolateRef) {
+    if (!_isolateIndexMap.containsKey(isolateRef.id)) {
+      _assignIsolateIndex(isolateRef);
+    }
+    return _isolateIndexMap[isolateRef.id];
+  }
+
+  void _assignIsolateIndex(IsolateRef isolateRef) {
+    if (!_isolateIndexMap.containsKey(isolateRef.id)) {
+      _isolateIndexMap[isolateRef.id] = ++_lastIsolateIndex;
+    }
+  }
+
   void selectIsolate(String isolateRefId) {
     final IsolateRef ref = _isolates.firstWhere(
         (IsolateRef ref) => ref.id == isolateRefId,
@@ -363,6 +382,7 @@ class IsolateManager {
 
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
     _isolates = isolates;
+    _isolates.forEach(_assignIsolateIndex);
 
     await _initSelectedIsolate(isolates);
 
@@ -377,13 +397,14 @@ class IsolateManager {
   }
 
   Future<void> _handleIsolateEvent(Event event) async {
-    if (event.kind == 'IsolateStart') {
+    if (event.kind == EventKind.kIsolateStart) {
       _isolates.add(event.isolate);
+      _assignIsolateIndex(event.isolate);
       _isolateCreatedController.add(event.isolate);
       if (_selectedIsolate == null) {
         await _setSelectedIsolate(event.isolate);
       }
-    } else if (event.kind == 'ServiceExtensionAdded') {
+    } else if (event.kind == EventKind.kServiceExtensionAdded) {
       // On hot restart, service extensions are added from here.
       await _serviceExtensionManager
           ._maybeAddServiceExtension(event.extensionRPC);
@@ -392,7 +413,7 @@ class IsolateManager {
       if (_selectedIsolate == null && _isFlutterExtension(event.extensionRPC)) {
         await _setSelectedIsolate(event.isolate);
       }
-    } else if (event.kind == 'IsolateExit') {
+    } else if (event.kind == EventKind.kIsolateExit) {
       _isolates.remove(event.isolate);
       _isolateExitedController.add(event.isolate);
       if (_selectedIsolate == event.isolate) {
@@ -443,8 +464,12 @@ class IsolateManager {
     }
 
     // Store the library uris for the selected isolate.
-    final Isolate isolate = await _service.getIsolate(ref.id);
-    selectedIsolateLibraries = isolate.libraries;
+    if (ref == null) {
+      selectedIsolateLibraries = [];
+    } else {
+      final Isolate isolate = await _service.getIsolate(ref.id);
+      selectedIsolateLibraries = isolate.libraries;
+    }
 
     _selectedIsolate = ref;
     if (!selectedIsolateAvailable.isCompleted) {
@@ -459,6 +484,13 @@ class IsolateManager {
       onData(_selectedIsolate);
     }
     return _selectedIsolateController.stream.listen(onData);
+  }
+
+  void _handleVmServiceClosed() {
+    _lastIsolateIndex = 0;
+    _setSelectedIsolate(null);
+    _isolateIndexMap.clear();
+    _isolates.clear();
   }
 }
 
