@@ -53,6 +53,8 @@ const denseRowSpacing = 6.0;
 const borderPadding = 2.0;
 const densePadding = 4.0;
 
+const smallProgressSize = 12.0;
+
 const defaultListItemHeight = 28.0;
 
 /// Branded grey color.
