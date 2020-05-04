@@ -10,11 +10,33 @@ import '../flutter/memory_controller.dart';
 /// Internal class names :: automatically filter out.
 const String internalClassName = '::';
 
-// TODO(terry): Bake in types instead of comparing a fully qualified class name.
-const String predefinedNull = 'dart:core,Null';
-const String predefinedString = 'dart:core,_OneByteString';
-const String predefinedList = 'dart:core,_List';
-const String predefinedMap = 'dart:collection,_InternalLinkedHashMap';
+class LibraryClass {
+  LibraryClass(this.libraryName, this.className);
+
+  final String libraryName;
+  final String className;
+
+  @override
+  bool operator ==(other) {
+    if (other.runtimeType != runtimeType) return false;
+    return libraryName == other.libraryName && className == other.className;
+  }
+
+  @override
+  int get hashCode => libraryName.hashCode ^ className.hashCode;
+}
+
+const String core = 'dart:core';
+const String collection = 'dart:collection';
+
+// TODO(terry): Bake in types instead of comparing qualified class name.
+LibraryClass predefinedNull = LibraryClass(core, 'Null');
+LibraryClass predefinedString = LibraryClass(core, '_OneByteString');
+LibraryClass predefinedList = LibraryClass(core, '_List');
+LibraryClass predefinedMap = LibraryClass(
+  collection,
+  '_InternalLinkedHashMap',
+);
 
 class Predefined {
   const Predefined(this.prettyName, this.isScalar);
@@ -26,15 +48,15 @@ class Predefined {
 /// Structure key is fully qualified class name and the value is
 /// a List first entry is pretty name known to users second entry
 /// is if the type is a scalar.
-const Map<String, Predefined> predefinedClasses = {
-  'dart:core,bool': Predefined('bool', true),
+Map<LibraryClass, Predefined> predefinedClasses = {
+  LibraryClass(core, 'bool'): const Predefined('bool', true),
   // TODO(terry): Handle Smi too (Integer)?
   // Integers not Smi but fit into 64bits.
-  'dart:core,_Mint': Predefined('int', true),
-  'dart:core,_Double': Predefined('Double', true),
-  predefinedString: Predefined('String', true),
-  predefinedList: Predefined('List', false),
-  predefinedMap: Predefined('Map', false),
+  LibraryClass(core, '_Mint'): const Predefined('int', true),
+  LibraryClass(core, '_Double'): const Predefined('Double', true),
+  predefinedString: const Predefined('String', true),
+  predefinedList: const Predefined('List', false),
+  predefinedMap: const Predefined('Map', false),
 };
 
 /// List of classes to monitor, helps to debug particular class structure.
@@ -68,7 +90,7 @@ HeapGraph convertHeapGraph(
   final HeapGraphClassSentinel classSentinel = HeapGraphClassSentinel();
   final HeapGraphElementSentinel elementSentinel = HeapGraphElementSentinel();
 
-  final Map<String, int> builtInClasses = {};
+  final Map<LibraryClass, int> builtInClasses = {};
 
   if (classNamesToMonitor != null && classNamesToMonitor.isNotEmpty) {
     print('WARNING: Remove classNamesToMonitor before PR submission. '
@@ -76,19 +98,19 @@ HeapGraph convertHeapGraph(
   }
 
   // Construct all the classes in the snapshot.
-  final List<HeapGraphClassActual> classes =
-      List<HeapGraphClassActual>(graph.classes.length);
+  final List<HeapGraphClassLive> classes =
+      List<HeapGraphClassLive>(graph.classes.length);
   for (int i = 0; i < graph.classes.length; i++) {
     final HeapSnapshotClass c = graph.classes[i];
 
     final className = c.name;
     // Remember builtin classes classId e.g., bool, String (_OneByteString), etc.
     // The classId is the index into the graph.classes list.
-    final libraryClassName = '${c.libraryUri},${c.name}';
+    final libraryClass = LibraryClass('${c.libraryUri}', c.name);
     // It's a exact match libraryName,className once we match the classId drives
     // the class matching.
-    if (predefinedClasses.containsKey(libraryClassName)) {
-      builtInClasses.putIfAbsent(libraryClassName, () => i);
+    if (predefinedClasses.containsKey(libraryClass)) {
+      builtInClasses.putIfAbsent(libraryClass, () => i);
     }
 
     // Debugging code to monitor a particular class.  ClassesToMonitor should be
@@ -100,23 +122,23 @@ HeapGraph convertHeapGraph(
       _monitorClasses.putIfAbsent(i, () => className);
     }
 
-    classes[i] = HeapGraphClassActual(c);
+    classes[i] = HeapGraphClassLive(c);
   }
 
   // Pre-allocate the number of objects in the snapshot.
-  final List<HeapGraphElementActual> elements =
-      List<HeapGraphElementActual>(graph.objects.length);
+  final List<HeapGraphElementLive> elements =
+      List<HeapGraphElementLive>(graph.objects.length);
 
   // Construct all objects.
   for (int i = 0; i < graph.objects.length; i++) {
     final HeapSnapshotObject o = graph.objects[i];
-    elements[i] = HeapGraphElementActual(o);
+    elements[i] = HeapGraphElementLive(o);
   }
 
   // Associate each object with a Class.
   for (int i = 0; i < graph.objects.length; i++) {
     final HeapSnapshotObject o = graph.objects[i];
-    final HeapGraphElementActual converted = elements[i];
+    final HeapGraphElementLive converted = elements[i];
     if (o.classId == 0) {
       // classId of zero is a sentinel.
       converted.theClass = classSentinel;
@@ -164,34 +186,36 @@ class HeapGraph {
 
   final MemoryController controller;
 
-  bool instancesComputed = false;
+  bool _instancesComputed = false;
+
+  bool get instancesComputed => _instancesComputed;
 
   /// Known built-in classes.
-  final Map<String, int> builtInClasses;
+  final Map<LibraryClass, int> builtInClasses;
 
   /// Sentinel Class, all class sentinels point to this object.
   final HeapGraphClassSentinel classSentinel;
 
   /// Indexed by classId.
-  final List<HeapGraphClassActual> classes;
+  final List<HeapGraphClassLive> classes;
 
   /// Sentinel Object, all object sentinels point to this object.
   final HeapGraphElementSentinel elementSentinel;
 
   /// Index by objectId.
-  final List<HeapGraphElementActual> elements;
+  final List<HeapGraphElementLive> elements;
 
   /// Group all classes by all libraries.
-  final Map<String, List<HeapGraphClassActual>> rawGroupByLibrary = {};
+  final Map<String, List<HeapGraphClassLive>> rawGroupByLibrary = {};
 
   /// Group all classes by libraries - with applied filters.
-  final Map<String, List<HeapGraphClassActual>> groupByLibrary = {};
+  final Map<String, List<HeapGraphClassLive>> groupByLibrary = {};
 
   /// Group all instances by all classes.
-  final Map<String, List<HeapGraphElementActual>> rawGroupByClass = {};
+  final Map<String, List<HeapGraphElementLive>> rawGroupByClass = {};
 
   /// Group all instances by all classes - with applied filters.
-  final Map<String, List<HeapGraphElementActual>> groupByClass = {};
+  final Map<String, List<HeapGraphElementLive>> groupByClass = {};
 
   String normalizeLibraryName(HeapSnapshotClass theClass) {
     final uri = theClass.libraryUri;
@@ -205,11 +229,11 @@ class HeapGraph {
     return 'src';
   }
 
-  bool computeRawGroups() {
+  void computeRawGroups() {
     // Only compute once.
-    if (rawGroupByLibrary.isNotEmpty || rawGroupByClass.isNotEmpty) return true;
+    if (rawGroupByLibrary.isNotEmpty || rawGroupByClass.isNotEmpty) return;
 
-    for (HeapGraphClassActual c in classes) {
+    for (HeapGraphClassLive c in classes) {
       final StringBuffer sb = StringBuffer();
 
       final libraryKey = normalizeLibraryName(c.origin);
@@ -222,7 +246,7 @@ class HeapGraph {
       sb.clear();
 
       // Collect instances for each class (group by class)
-      for (HeapGraphElementActual instance in c.getInstances(this)) {
+      for (HeapGraphElementLive instance in c.getInstances(this)) {
         sb.write(c.name);
         c.instancesTotalShallowSizes += instance.origin.shallowSize;
         final classSbToString = sb.toString();
@@ -231,8 +255,6 @@ class HeapGraph {
         sb.clear();
       }
     }
-
-    return true;
   }
 
   bool computeFilteredGroups() {
@@ -277,11 +299,11 @@ class HeapGraph {
   void computeInstancesForClasses() {
     if (!instancesComputed) {
       for (var i = 0; i < elements.length; i++) {
-        final HeapGraphElementActual instance = elements[i];
+        final HeapGraphElementLive instance = elements[i];
         instance.theClass.addInstance(instance);
       }
 
-      instancesComputed = true;
+      _instancesComputed = true;
     }
   }
 }
@@ -299,40 +321,6 @@ abstract class HeapGraphElement {
     }
     return _references;
   }
-
-  String getPrettyPrint(Map<Uri, Map<String, List<String>>> prettyPrints) {
-    if (this is HeapGraphElementActual) {
-      final HeapGraphElementActual me = this;
-      if (me.theClass.toString() == '_OneByteString') {
-        return '"${me.origin.data}"';
-      }
-      if (me.theClass.toString() == '_SimpleUri') {
-        return '_SimpleUri['
-            "${me.getField("_uri").getPrettyPrint(prettyPrints)}]";
-      }
-      if (me.theClass.toString() == '_Uri') {
-        return "_Uri[${me.getField("scheme").getPrettyPrint(prettyPrints)}:"
-            "${me.getField("path").getPrettyPrint(prettyPrints)}]";
-      }
-      if (me.theClass is HeapGraphClassActual) {
-        final HeapGraphClassActual c = me.theClass;
-        final Map<String, List<String>> classToFields =
-            prettyPrints[c.libraryUri];
-        if (classToFields != null) {
-          final List<String> fields = classToFields[c.name];
-          if (fields != null) {
-            return '${c.name}[' +
-                fields.map((field) {
-                  return '$field: '
-                      '${me.getField(field)?.getPrettyPrint(prettyPrints)}';
-                }).join(', ') +
-                ']';
-          }
-        }
-      }
-    }
-    return toString();
-  }
 }
 
 /// Object marked for removal on next GC.
@@ -342,15 +330,15 @@ class HeapGraphElementSentinel extends HeapGraphElement {
 }
 
 /// Live element.
-class HeapGraphElementActual extends HeapGraphElement {
-  HeapGraphElementActual(this.origin);
+class HeapGraphElementLive extends HeapGraphElement {
+  HeapGraphElementLive(this.origin);
 
   final HeapSnapshotObject origin;
   HeapGraphClass theClass;
 
   HeapGraphElement getField(String name) {
-    if (theClass is HeapGraphClassActual) {
-      final HeapGraphClassActual c = theClass;
+    if (theClass is HeapGraphClassLive) {
+      final HeapGraphClassLive c = theClass;
       for (HeapSnapshotField field in c.origin.fields) {
         if (field.name == name) {
           return references[field.index];
@@ -362,8 +350,8 @@ class HeapGraphElementActual extends HeapGraphElement {
 
   List<MapEntry<String, HeapGraphElement>> getFields() {
     final List<MapEntry<String, HeapGraphElement>> result = [];
-    if (theClass is HeapGraphClassActual) {
-      final HeapGraphClassActual c = theClass;
+    if (theClass is HeapGraphClassLive) {
+      final HeapGraphClassLive c = theClass;
       for (HeapSnapshotField field in c.origin.fields) {
         // TODO(terry): Some index are out of range, this check should be removed.
         if (field.index < references.length) {
@@ -390,20 +378,20 @@ class HeapGraphElementActual extends HeapGraphElement {
 }
 
 abstract class HeapGraphClass {
-  final List<HeapGraphElementActual> _instances = [];
+  final List<HeapGraphElementLive> _instances = [];
 
   int instancesTotalShallowSizes = 0;
 
-  void addInstance(HeapGraphElementActual instance) {
+  void addInstance(HeapGraphElementLive instance) {
     _instances.add(instance);
   }
 
-  List<HeapGraphElementActual> getInstances(HeapGraph graph) {
+  List<HeapGraphElementLive> getInstances(HeapGraph graph) {
     // TODO(terry): Delay would be much faster but retained space needs
     //              computation. Remove if block just return _instances?
     if (_instances == null) {
       for (int i = 0; i < graph.elements.length; i++) {
-        final HeapGraphElementActual converted = graph.elements[i];
+        final HeapGraphElementLive converted = graph.elements[i];
         if (converted.theClass == this) {
           _instances.add(converted);
         }
@@ -418,8 +406,8 @@ class HeapGraphClassSentinel extends HeapGraphClass {
   String toString() => 'HeapGraphClassSentinel';
 }
 
-class HeapGraphClassActual extends HeapGraphClass {
-  HeapGraphClassActual(this.origin) {
+class HeapGraphClassLive extends HeapGraphClass {
+  HeapGraphClassLive(this.origin) {
     _check();
   }
 
@@ -433,7 +421,8 @@ class HeapGraphClassActual extends HeapGraphClass {
 
   Uri get libraryUri => origin.libraryUri;
 
-  String get fullQualifiedName => '${libraryUri.toString()},$name';
+  LibraryClass get fullQualifiedName =>
+      LibraryClass(libraryUri.toString(), name);
 
   @override
   String toString() => name;

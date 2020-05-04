@@ -57,15 +57,12 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   Widget snapshotDisplay;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    controller = Provider.of<MemoryController>(context);
+    final newController = Provider.of<MemoryController>(context);
+    if (newController == controller) return;
+    controller = newController;
 
     cancel();
 
@@ -441,7 +438,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
                 */
 
   void dumpClassGroupBySingleLine(
-      Map<String, List<HeapGraphElementActual>> classGroup) {
+      Map<String, List<HeapGraphElementLive>> classGroup) {
     print('========== Class by Instance ==========');
     classGroup.forEach((key, instances) {
       final shallowSizes = instances.first.theClass.instancesTotalShallowSizes;
@@ -451,7 +448,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   }
 
   void dumpLibraryGroupBySingleLine(
-      Map<String, List<HeapGraphClassActual>> libraryGroup) {
+      Map<String, List<HeapGraphClassLive>> libraryGroup) {
     print('========== Library by Class ==========');
     libraryGroup.forEach((libraryKey, libraryClasses) {
       print('Library $libraryKey:');

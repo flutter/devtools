@@ -233,6 +233,66 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     });
   }
 
+  Widget createLibraryListBox(BoxConstraints constraints) {
+    return SizedBox(
+      height: constraints.maxHeight / 4,
+      child: ListView(
+        controller: _letters,
+        children:
+            controller.filteredLibrariesByGroupName.keys.map((String key) {
+          return CheckboxListTile(
+            title: Text(key),
+            dense: true,
+            value: controller.filteredLibrariesByGroupName[key].first.hide,
+            onChanged: (bool value) {
+              setState(() {
+                for (var filter
+                    in controller.filteredLibrariesByGroupName[key]) {
+                  filter.hide = value;
+                }
+              });
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget okCancelButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        DialogOkButton(
+          () {
+            // Re-generate librariesFiltered
+            controller.libraryFilters.clearFilters();
+            controller.filteredLibrariesByGroupName.forEach((groupName, value) {
+              if (value.first.hide) {
+                var filteredName = groupName;
+                if (filteredName.endsWith('*')) {
+                  filteredName = filteredName.substring(
+                    0,
+                    filteredName.length - 1,
+                  );
+                }
+                controller.libraryFilters.addFilter(filteredName);
+              }
+            });
+            // Re-filter the groups.
+            controller.libraryRoot = null;
+            if (controller.lastSnapshot != null) {
+              controller.heapGraph.computeFilteredGroups();
+              controller.computeAllLibraries();
+            }
+            cleanupFilteredLibrariesByGroupName();
+            controller.updateFilter();
+          },
+        ),
+        DialogCancelButton(),
+      ],
+    );
+  }
+
   NotifierCheckbox privateClasses;
   NotifierCheckbox zeroInstances;
   NotifierCheckbox libraryNoInstances;
@@ -305,64 +365,9 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                               '(${controller.filteredLibrariesByGroupName.length}):'),
                         ],
                       ),
-                      SizedBox(
-                        height: constraints.maxHeight / 4,
-                        child: ListView(
-                          controller: _letters,
-                          children: controller.filteredLibrariesByGroupName.keys
-                              .map((String key) {
-                            return CheckboxListTile(
-                              title: Text(key),
-                              dense: true,
-                              value: controller
-                                  .filteredLibrariesByGroupName[key].first.hide,
-                              onChanged: (bool value) {
-                                setState(() {
-                                  for (var filter in controller
-                                      .filteredLibrariesByGroupName[key]) {
-                                    filter.hide = value;
-                                  }
-                                });
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      ),
+                      createLibraryListBox(constraints),
                       const Padding(padding: EdgeInsets.only(top: 40)),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          DialogOkButton(
-                            () {
-                              // Re-generate librariesFiltered
-                              controller.libraryFilters.clearFilters();
-                              controller.filteredLibrariesByGroupName
-                                  .forEach((groupName, value) {
-                                if (value.first.hide) {
-                                  var filteredName = groupName;
-                                  if (filteredName.endsWith('*')) {
-                                    filteredName = filteredName.substring(
-                                      0,
-                                      filteredName.length - 1,
-                                    );
-                                  }
-                                  controller.libraryFilters
-                                      .addFilter(filteredName);
-                                }
-                              });
-                              // Re-filter the groups.
-                              controller.libraryRoot = null;
-                              if (controller.lastSnapshot != null) {
-                                controller.heapGraph.computeFilteredGroups();
-                                controller.computeAllLibraries();
-                              }
-                              cleanupFilteredLibrariesByGroupName();
-                              controller.updateFilter();
-                            },
-                          ),
-                          DialogCancelButton(),
-                        ],
-                      ),
+                      okCancelButtons(),
                     ],
                   ),
                 ],

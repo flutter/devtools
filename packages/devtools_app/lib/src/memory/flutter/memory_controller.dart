@@ -76,14 +76,14 @@ class MemoryController extends DisposableController
   /// Leaf node of tabletree snapshot selected?  If selected then the instance
   /// view is displayed to view the fields of an instance.
   /// Notifies that the timeline has been paused.
-  final _leafSelectedNotifier = ValueNotifier<HeapGraphElementActual>(null);
+  final _leafSelectedNotifier = ValueNotifier<HeapGraphElementLive>(null);
 
-  ValueListenable<HeapGraphElementActual> get leafSelectedNotifier =>
+  ValueListenable<HeapGraphElementLive> get leafSelectedNotifier =>
       _leafSelectedNotifier;
 
-  HeapGraphElementActual get selectedLeaf => _leafSelectedNotifier.value;
+  HeapGraphElementLive get selectedLeaf => _leafSelectedNotifier.value;
 
-  set selectedLeaf(HeapGraphElementActual selected) {
+  set selectedLeaf(HeapGraphElementLive selected) {
     _leafSelectedNotifier.value = selected;
   }
 

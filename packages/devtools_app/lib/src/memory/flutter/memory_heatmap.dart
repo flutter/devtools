@@ -430,7 +430,7 @@ class InstructionsSize {
     //              Using rawGroup not graph.groupByLibrary.
     controller.heapGraph.rawGroupByLibrary.forEach(
       (libraryGroup, value) {
-        final List<HeapGraphClassActual> classes = value;
+        final List<HeapGraphClassLive> classes = value;
         for (final theClass in classes) {
           final shallowSize = theClass.instancesTotalShallowSizes;
           var className = theClass.name;
@@ -448,7 +448,8 @@ class InstructionsSize {
           }
 
           // Map class names to familar user names.
-          final predefined = predefinedClasses['$libraryName,$className'];
+          final predefined =
+              predefinedClasses[LibraryClass(libraryName, className)];
           if (predefined != null) {
             className = predefined.prettyName;
           }

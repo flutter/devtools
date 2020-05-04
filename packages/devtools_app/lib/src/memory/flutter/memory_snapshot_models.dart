@@ -105,7 +105,7 @@ class Reference extends TreeNode<Reference> {
 
   final MemoryController controller;
 
-  final HeapGraphClassActual actualClass;
+  final HeapGraphClassLive actualClass;
 
   final String name;
 
@@ -175,7 +175,7 @@ class LibraryReference extends Reference {
           },
         );
 
-  List<HeapGraphClassActual> actualClasses;
+  List<HeapGraphClassLive> actualClasses;
 }
 
 class ExternalReference extends Reference {
@@ -189,7 +189,7 @@ class FilteredReference extends Reference {
 }
 
 class ClassReference extends Reference {
-  ClassReference(MemoryController controller, HeapGraphClassActual actualClass)
+  ClassReference(MemoryController controller, HeapGraphClassLive actualClass)
       : super.createClass(
           controller,
           actualClass,
@@ -213,7 +213,7 @@ class ClassReference extends Reference {
           },
         );
 
-  List<HeapGraphElementActual> get instances =>
+  List<HeapGraphElementLive> get instances =>
       actualClass.getInstances(controller.heapGraph);
 }
 
@@ -221,7 +221,7 @@ class ObjectReference extends Reference {
   ObjectReference(MemoryController controller, int index, this.instance)
       : super.createObject(controller, 'Instance $index');
 
-  final HeapGraphElementActual instance;
+  final HeapGraphElementLive instance;
 }
 
 class Snapshot {
@@ -284,7 +284,7 @@ class FieldReference extends TreeNode<FieldReference> {
 
   final MemoryController controller;
 
-  final HeapGraphElementActual instance;
+  final HeapGraphElementLive instance;
 
   final String type;
 
@@ -310,7 +310,7 @@ class FieldReference extends TreeNode<FieldReference> {
 class ScalarFieldReference extends FieldReference {
   ScalarFieldReference(
     MemoryController controller,
-    HeapGraphElementActual instance,
+    HeapGraphElementLive instance,
     String type,
     String name,
     String value,
@@ -326,7 +326,7 @@ class ScalarFieldReference extends FieldReference {
 class ObjectFieldReference extends FieldReference {
   ObjectFieldReference(
     MemoryController controller,
-    HeapGraphElementActual instance,
+    HeapGraphElementLive instance,
     String type,
     String name, {
     this.isNull = false,
@@ -363,7 +363,7 @@ class ObjectFieldReference extends FieldReference {
 /// Return list of FieldReference nodes (TableTree use) from the fields of an instance.
 List<FieldReference> instanceToFieldNodes(
   MemoryController controller,
-  HeapGraphElementActual instance,
+  HeapGraphElementLive instance,
 ) {
   final List<FieldReference> root = [];
   final List<MapEntry<String, HeapGraphElement>> fields = instance.getFields();
@@ -399,7 +399,7 @@ List<FieldReference> instanceToFieldNodes(
 /// Return a FieldReference node (TableTree use) from the field of an instance.
 FieldReference fieldToFieldReference(
   MemoryController controller,
-  HeapGraphElementActual instance,
+  HeapGraphElementLive instance,
   MapEntry<String, HeapGraphElement> fieldElement,
   int fieldIndex,
 ) {
@@ -408,7 +408,7 @@ FieldReference fieldToFieldReference(
     return FieldReference.sentinel;
   }
 
-  final actual = fieldElement.value as HeapGraphElementActual;
+  final actual = fieldElement.value as HeapGraphElementLive;
   final theGraph = controller.heapGraph;
 
   final int indexIntoClass = actual.origin.classId; // One based Index.
@@ -422,8 +422,8 @@ FieldReference fieldToFieldReference(
   } else {
     final data = actual.origin.data;
     if (data.runtimeType == HeapSnapshotObjectLengthData) {
-      final HeapGraphElementActual actual = instance.references[fieldIndex];
-      final HeapGraphClassActual theClass = actual.theClass;
+      final HeapGraphElementLive actual = instance.references[fieldIndex];
+      final HeapGraphClassLive theClass = actual.theClass;
       final fullClassName = theClass.fullQualifiedName;
       if (fullClassName == predefinedMap) {
         return listToFieldEntries(
@@ -442,7 +442,7 @@ FieldReference fieldToFieldReference(
 FieldReference createScalar(
   MemoryController controller,
   String fieldName,
-  HeapGraphElementActual actual,
+  HeapGraphElementLive actual,
 ) {
   final data = actual.origin.data;
 
@@ -483,10 +483,10 @@ FieldReference listToFieldEntries(
   int size,
 ) {
   bool isMap = false;
-  HeapGraphElementActual actualListElement;
+  HeapGraphElementLive actualListElement;
   ObjectFieldReference listObjectReference;
-  if (reference is HeapGraphElementActual) {
-    final actualListClass = reference.theClass as HeapGraphClassActual;
+  if (reference is HeapGraphElementLive) {
+    final actualListClass = reference.theClass as HeapGraphClassLive;
     final fullClassName = actualListClass.fullQualifiedName;
     if (fullClassName == predefinedList) {
       // Add the list entry.
@@ -509,8 +509,8 @@ FieldReference listToFieldEntries(
 
       // Look for list of Map values.
       for (final reference in actualListElement.references) {
-        if (reference is HeapGraphElementActual) {
-          final HeapGraphClassActual theClass = reference.theClass;
+        if (reference is HeapGraphElementLive) {
+          final HeapGraphClassLive theClass = reference.theClass;
           final fullClassName = theClass.fullQualifiedName;
           if (fullClassName == predefinedList) {
             actualListElement = reference;
@@ -535,9 +535,9 @@ FieldReference listToFieldEntries(
       entryElementIndex < referencesLength;
       entryElementIndex++) {
     final entry = allEntryReferences[entryElementIndex];
-    if (entry is HeapGraphElementActual) {
-      final HeapGraphElementActual entryElement = entry;
-      final HeapGraphClassActual actualClass = entryElement.theClass;
+    if (entry is HeapGraphElementLive) {
+      final HeapGraphElementLive entryElement = entry;
+      final HeapGraphClassLive actualClass = entryElement.theClass;
       if (actualClass.fullQualifiedName != predefinedNull) {
         realEntries.add(entryElement);
       }
@@ -552,16 +552,16 @@ FieldReference listToFieldEntries(
       realEntryIndex < realEntries.length;
       realEntryIndex++) {
     final entryElement = realEntries[realEntryIndex];
-    if (entryElement is HeapGraphElementActual) {
+    if (entryElement is HeapGraphElementLive) {
       final entryClass = entryElement.theClass;
-      if (entryClass is HeapGraphClassActual &&
+      if (entryClass is HeapGraphClassLive &&
           entryClass.fullQualifiedName != predefinedNull) {
         final predefined = predefinedClasses[entryClass.fullQualifiedName];
         FieldReference listEntry;
         if (predefined != null && predefined.isScalar) {
           if (isMap) {
             if (hasKeyValues) {
-              final HeapGraphElementActual valueElement =
+              final HeapGraphElementLive valueElement =
                   realEntries[realEntryIndex + 1];
               realEntryIndex++;
               // The value entry is computed on key expansion.
@@ -574,7 +574,7 @@ FieldReference listToFieldEntries(
               );
 
               FieldReference valueEntry;
-              final HeapGraphClassActual valueClass = valueElement.theClass;
+              final HeapGraphClassLive valueClass = valueElement.theClass;
               predefined = predefinedClasses[valueClass.fullQualifiedName];
               if (predefined != null && predefined.isScalar) {
                 valueEntry = createScalar(controller, 'value', valueElement);
@@ -633,10 +633,10 @@ FieldReference objectToFieldReference(
   MemoryController controller,
   HeapGraph theGraph,
   MapEntry<String, HeapGraphElement> objectEntry,
-  HeapGraphElementActual actual,
+  HeapGraphElementLive actual,
 ) {
-  final elementActual = objectEntry.value as HeapGraphElementActual;
-  final classActual = elementActual.theClass as HeapGraphClassActual;
+  final elementActual = objectEntry.value as HeapGraphElementLive;
+  final classActual = elementActual.theClass as HeapGraphClassLive;
 
   final isNullValue = actual.origin.data == null;
   final reference = ObjectFieldReference(
