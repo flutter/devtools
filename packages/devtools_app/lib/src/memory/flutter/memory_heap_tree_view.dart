@@ -187,7 +187,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       onChanged: (String newValue) {
         setState(
           () {
-            controller.setSelectedLeaf(null);
+            controller.selectedLeaf = null;
             controller.groupingBy.value = newValue;
             if (controller.snapshots.isNotEmpty) {
               doGroupBy();
@@ -228,7 +228,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
                     onChanged: (value) {
                       setState(() {
                         controller.showHeatMap = value;
-                        controller.setSelectedLeaf(null);
+                        controller.selectedLeaf = null;
                       });
                     }),
               ],
@@ -246,13 +246,14 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
                   onPressed: snapshotDisplay is MemorySnapshotTable
                       ? () {
                           if (snapshotDisplay is MemorySnapshotTable) {
-                            controller.lciTreeTable.dataRoots.every((element) {
+                            controller.groupByTreeTable.dataRoots
+                                .every((element) {
                               element.collapseCascading();
                               return true;
                             });
                             if (controller.instanceFieldsTreeTable != null) {
                               // We're collapsing close the fields table.
-                              controller.setSelectedLeaf(null);
+                              controller.selectedLeaf = null;
                             }
                             setState(() {});
                           }
@@ -267,7 +268,8 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
                   onPressed: snapshotDisplay is MemorySnapshotTable
                       ? () {
                           if (snapshotDisplay is MemorySnapshotTable) {
-                            controller.lciTreeTable.dataRoots.every((element) {
+                            controller.groupByTreeTable.dataRoots
+                                .every((element) {
                               element.expandCascading();
                               return true;
                             });
@@ -396,7 +398,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
 
     // To debug particular classes add their names to the last
     // parameter classNamesToMonitor e.g., ['AppStateModel', 'Terry', 'TerryEntry']
-    controller.theGraph = convertHeapGraph(
+    controller.heapGraph = convertHeapGraph(
       controller,
       graph,
       [],
@@ -423,9 +425,9 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   }
 
   Future<void> doGroupBy() async {
-    controller.theGraph.computeInstancesForClasses();
-    controller.theGraph.computeRawGroups();
-    controller.theGraph.computeFilteredGroups();
+    controller.heapGraph.computeInstancesForClasses();
+    controller.heapGraph.computeRawGroups();
+    controller.heapGraph.computeFilteredGroups();
   }
 
   // TODO(terry): Need to add external heap to snapshot table.
@@ -454,7 +456,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     libraryGroup.forEach((libraryKey, libraryClasses) {
       print('Library $libraryKey:');
       for (var actualClass in libraryClasses) {
-        final instances = actualClass.getInstances(controller.theGraph);
+        final instances = actualClass.getInstances(controller.heapGraph);
         final shallowSizes = instances.isEmpty
             ? 0
             : instances.first.theClass.instancesTotalShallowSizes;
@@ -497,8 +499,7 @@ class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
   }
 
   List<FieldReference> computeRoot() {
-    final root =
-        instanceToFieldNodes(controller, controller.selectedLeaf.value);
+    final root = instanceToFieldNodes(controller, controller.selectedLeaf);
     return root.isNotEmpty ? root : [FieldReference.empty];
   }
 
@@ -693,7 +694,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
       root = controller.classRoot;
     }
 
-    controller.lciTreeTable = TreeTable<Reference>(
+    controller.groupByTreeTable = TreeTable<Reference>(
       dataRoots: root.children,
       columns: columns,
       treeColumn: treeColumn,
@@ -702,7 +703,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
       sortDirection: SortDirection.ascending,
     );
 
-    return controller.lciTreeTable;
+    return controller.groupByTreeTable;
   }
 }
 

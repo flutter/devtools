@@ -55,11 +55,13 @@ class MemoryController extends DisposableController
 
   final List<Snapshot> snapshots = [];
 
-  Snapshot get lastSnapshot => snapshots.isNotEmpty ? snapshots.last : null;
+  Snapshot get lastSnapshot => snapshots.safeLast;
 
   /// Notifies that the source of the memory feed has changed.
-  ValueListenable get selectedSnapshotNotifier => _selectedSnapshotNotifier;
+  ValueListenable<String> get selectedSnapshotNotifier =>
+      _selectedSnapshotNotifier;
 
+  /// Stored value is pretty timestamp when the snapshot was done.
   final _selectedSnapshotNotifier = ValueNotifier<String>('');
 
   set selectedSnapshotTimestamp(String snapshotTimestamp) {
@@ -68,23 +70,23 @@ class MemoryController extends DisposableController
 
   String get selectedSnapshotTimestamp => _selectedSnapshotNotifier.value;
 
-  HeapGraph theGraph;
+  HeapGraph heapGraph;
 
   /// Leaf node of tabletree snapshot selected?  If selected then the instance
   /// view is displayed to view the fields of an instance.
   /// Notifies that the timeline has been paused.
   final _leafSelectedNotifier = ValueNotifier<HeapGraphElementActual>(null);
 
-  ValueListenable get leafSelectedNotifier => _leafSelectedNotifier;
-
-  ValueNotifier<HeapGraphElementActual> get selectedLeaf =>
+  ValueListenable<HeapGraphElementActual> get leafSelectedNotifier =>
       _leafSelectedNotifier;
 
-  bool get isLeafSelected => selectedLeaf.value != null;
+  HeapGraphElementActual get selectedLeaf => _leafSelectedNotifier.value;
 
-  void setSelectedLeaf(HeapGraphElementActual selected) {
+  set selectedLeaf(HeapGraphElementActual selected) {
     _leafSelectedNotifier.value = selected;
   }
+
+  bool get isLeafSelected => selectedLeaf != null;
 
   MemoryTimeline memoryTimeline;
 
@@ -261,8 +263,8 @@ class MemoryController extends DisposableController
 
   final SettingsModel settings = SettingsModel();
 
-  /// Tree to view Libary/Class/Instance
-  TreeTable<Reference> lciTreeTable;
+  /// Tree to view Libary/Class/Instance (grouped by)
+  TreeTable<Reference> groupByTreeTable;
 
   /// Tree to view fields of an instance.
   TreeTable<FieldReference> instanceFieldsTreeTable;
@@ -288,7 +290,7 @@ class MemoryController extends DisposableController
   final filteredLibrariesByGroupName = <String, List<LibraryFilter>>{};
 
   /// Notify that the filtering has changed.
-  ValueListenable get filterNotifier => _filterNotifier;
+  ValueListenable<int> get filterNotifier => _filterNotifier;
 
   final _filterNotifier = ValueNotifier<int>(0);
 
@@ -312,7 +314,7 @@ class MemoryController extends DisposableController
 
   final groupingBy = ValueNotifier<String>(groupByLibrary);
 
-  ValueListenable get groupingByNotifier => groupingBy;
+  ValueListenable<String> get groupingByNotifier => groupingBy;
 
   bool clearSearch = false;
 
@@ -489,7 +491,7 @@ class MemoryController extends DisposableController
 
     // Compute all libraries.
     final groupBy =
-        filtered ? theGraph.groupByLibrary : theGraph.rawGroupByLibrary;
+        filtered ? heapGraph.groupByLibrary : heapGraph.rawGroupByLibrary;
 
     groupBy.forEach((libraryName, classes) {
       LibraryReference libReference =

@@ -127,7 +127,7 @@ class Reference extends TreeNode<Reference> {
   void expand() {
     if (onExpand != null) {
       onExpand(this);
-      controller.setSelectedLeaf(null);
+      controller.selectedLeaf = null;
     }
     super.expand();
   }
@@ -137,7 +137,7 @@ class Reference extends TreeNode<Reference> {
     assert(isObject);
 
     final objectReference = this as ObjectReference;
-    controller.setSelectedLeaf(objectReference.instance);
+    controller.selectedLeaf = objectReference.instance;
     if (onLeaf != null) onLeaf(this);
 
     super.leaf();
@@ -164,7 +164,8 @@ class LibraryReference extends Reference {
                 reference.addChild(classRef);
 
                 // Add place holders for the instances.
-                final instances = actualClass.getInstances(controller.theGraph);
+                final instances =
+                    actualClass.getInstances(controller.heapGraph);
                 classRef.addAllChildren(List.filled(
                   instances.length,
                   Reference.empty,
@@ -201,7 +202,7 @@ class ClassReference extends Reference {
               final classReference = reference as ClassReference;
 
               final instances =
-                  classReference.actualClass.getInstances(controller.theGraph);
+                  classReference.actualClass.getInstances(controller.heapGraph);
 
               for (var index = 0; index < instances.length; index++) {
                 final instance = instances[index];
@@ -213,7 +214,7 @@ class ClassReference extends Reference {
         );
 
   List<HeapGraphElementActual> get instances =>
-      actualClass.getInstances(controller.theGraph);
+      actualClass.getInstances(controller.heapGraph);
 }
 
 class ObjectReference extends Reference {
@@ -408,10 +409,10 @@ FieldReference fieldToFieldReference(
   }
 
   final actual = fieldElement.value as HeapGraphElementActual;
-  final theGraph = controller.theGraph;
+  final theGraph = controller.heapGraph;
 
   final int indexIntoClass = actual.origin.classId; // One based Index.
-  if (!controller.theGraph.builtInClasses.containsValue(indexIntoClass - 1)) {
+  if (!controller.heapGraph.builtInClasses.containsValue(indexIntoClass - 1)) {
     return objectToFieldReference(
       controller,
       theGraph,
@@ -460,7 +461,7 @@ FieldReference createScalar(
     default:
       dataValue = data.toString();
       final dataTypeClass =
-          controller.theGraph.classes[actual.origin.classId - 1];
+          controller.heapGraph.classes[actual.origin.classId - 1];
       final predefined = predefinedClasses[dataTypeClass.fullQualifiedName];
       dataType = predefined.prettyName;
   }

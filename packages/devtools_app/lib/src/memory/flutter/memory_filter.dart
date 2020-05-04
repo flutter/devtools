@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
+import '../../ui/dialog.dart';
 
 import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';
@@ -94,12 +95,12 @@ class FilteredLibraries {
 
 /// State of the libraries and packages (hidden or not) for the filter dialog.
 class LibraryFilter {
-  LibraryFilter(this.normalized, this.hide);
+  LibraryFilter(this.displayName, this.hide);
 
   /// Displayed library name.
-  final String normalized;
+  final String displayName;
 
-  /// Classes in this library hidden.
+  /// Whether classes in this library hidden (filtered).
   bool hide;
 }
 
@@ -110,37 +111,6 @@ class SnapshotFilterDialog extends StatefulWidget {
 
   @override
   SnapshotFilterState createState() => SnapshotFilterState();
-}
-
-/// A FlatButton used to close a containing dialog - Cancel.
-class DialogCancelButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return FlatButton(
-      onPressed: () {
-        Navigator.of(context, rootNavigator: false).pop('dialog');
-      },
-      child: const Text('Cancel'),
-    );
-  }
-}
-
-/// A FlatButton used to close a containing dialog - Cancel.
-class DialogOkButton extends StatelessWidget {
-  const DialogOkButton(this.onOk) : super();
-
-  final Function onOk;
-
-  @override
-  Widget build(BuildContext context) {
-    return FlatButton(
-      onPressed: () {
-        if (onOk != null) onOk();
-        Navigator.of(context, rootNavigator: false).pop('dialog');
-      },
-      child: const Text('OK'),
-    );
-  }
 }
 
 class SnapshotFilterState extends State<SnapshotFilterDialog>
@@ -163,17 +133,14 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    if (controller == widget.controller) return;
+
     controller = widget.controller;
 
     cancel();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  void addLibrary(String libraryName, [bool hideState = false]) {
+  void addLibrary(String libraryName, {bool hideState = false}) {
     final filteredGroup = controller.filteredLibrariesByGroupName;
     final filters = controller.libraryFilters;
 
@@ -201,7 +168,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     // to filters
     if (controller.filteredLibrariesByGroupName.isEmpty) {
       for (final library in controller.libraryFilters.librariesFiltered) {
-        addLibrary(library, true);
+        addLibrary(library, hideState: true);
       }
       // If not snapshots, return no libraries to process.
       if (controller.snapshots.isEmpty) return;
@@ -250,19 +217,25 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   Widget build(BuildContext context) {
     buildFilters();
 
+    // Dialog has three main vertical sections:
+    //      - three checkboxes
+    //      - one list of libraries with at least 5 entries
+    //      - one row of buttons Ok/Cancel
+    // For very tall app keep the dialog at a reasonable height w/o too much vertical whitespace.
+    // The listbox area is the area that grows to accomodate the list of known libraries.
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           return Container(
             width: MediaQuery.of(context).size.width / 3,
-            height: constraints.maxHeight < 500
+            height: constraints.maxHeight < 400
                 ? constraints.maxHeight
-                : constraints.maxHeight / 3 + 300,
+                : constraints.maxHeight / 3 + (400 * .7),
             child: Padding(
               padding: const EdgeInsets.only(left: 15),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Column(
@@ -368,7 +341,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                               // Re-filter the groups.
                               controller.libraryRoot = null;
                               if (controller.lastSnapshot != null) {
-                                controller.theGraph.computeFilteredGroups();
+                                controller.heapGraph.computeFilteredGroups();
                                 controller.computeAllLibraries();
                               }
                               cleanupFilteredLibrariesByGroupName();

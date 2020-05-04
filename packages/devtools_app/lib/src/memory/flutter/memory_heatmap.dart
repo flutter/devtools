@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:devtools_app/src/ui/colors.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter/rendering.dart' hide TextStyle;
@@ -14,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../ui/colors.dart';
 
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';
@@ -428,7 +428,7 @@ class InstructionsSize {
 
     // TODO(terry): Should heat map be all memory or just the filtered group?
     //              Using rawGroup not graph.groupByLibrary.
-    controller.theGraph.rawGroupByLibrary.forEach(
+    controller.heapGraph.rawGroupByLibrary.forEach(
       (libraryGroup, value) {
         final List<HeapGraphClassActual> classes = value;
         for (final theClass in classes) {
