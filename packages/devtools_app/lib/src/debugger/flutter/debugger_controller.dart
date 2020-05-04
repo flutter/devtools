@@ -290,15 +290,21 @@ class DebuggerController extends DisposableController
 
         break;
       case EventKind.kBreakpointRemoved:
-        // todo: update _selectedBreakpoint if necessary
+        final breakpoint = event.breakpoint;
+
+        // Update _selectedBreakpoint if necessary.
+        if (_selectedBreakpoint.value?.breakpoint == breakpoint) {
+          _selectedBreakpoint.value = null;
+        }
+
         _breakpoints.value = [
           for (var b in _breakpoints.value)
-            if (b != event.breakpoint) b
+            if (b != breakpoint) b
         ];
 
         _breakpointsWithLocation.value = [
           for (var b in _breakpointsWithLocation.value)
-            if (b.breakpoint != event.breakpoint) b
+            if (b.breakpoint != breakpoint) b
         ];
 
         break;
