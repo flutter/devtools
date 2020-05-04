@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:pedantic/pedantic.dart';
 import 'package:test/test.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, RemoteObject;
@@ -14,6 +15,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 import '../support/chrome.dart';
 import '../support/cli_test_driver.dart';
 import '../support/utils.dart';
+import 'integration_test.dart';
 
 const bool verboseTesting = false;
 
@@ -51,8 +53,10 @@ class DevtoolsManager {
     Uri overrideUri,
     bool waitForConnection = true,
   }) async {
-    final Uri baseAppUri = baseUri.resolve(
-        'index.html?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}');
+    final urlPath = testFlutterWebVersion
+        ? '/#?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}'
+        : 'index.html?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}';
+    final Uri baseAppUri = baseUri.resolve(urlPath);
     await tabInstance.tab.navigate('${overrideUri ?? baseAppUri}');
 
     // wait for app initialization
@@ -281,19 +285,31 @@ class WebdevFixture {
   WebdevFixture._(this.process, this.url, this.verbose);
 
   static Future<WebdevFixture> serve({
+    bool flutter = false,
     bool release = false,
     bool verbose = false,
   }) async {
-    final List<String> cliArgs = [
-      'pub',
-      'run',
-      'build_runner',
-      'serve',
-      'web',
-      '--delete-conflicting-outputs'
-    ];
-    if (release) {
-      cliArgs.add('--release');
+    final List<String> cliArgs = [];
+    String commandName;
+    if (flutter) {
+      commandName = 'flutter run';
+      cliArgs.addAll([
+        'run',
+        '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+        '-d',
+        'web-server',
+      ]);
+    } else {
+      commandName = 'pub run build_runner serve';
+      cliArgs.addAll([
+        'pub',
+        'run',
+        'build_runner',
+        'serve',
+        'web',
+        '--delete-conflicting-outputs',
+        release ? '--release' : '--no-release'
+      ]);
     }
 
     final process = await _runFlutter(cliArgs);
@@ -302,7 +318,7 @@ class WebdevFixture {
 
     _toLines(process.stderr).listen((String line) {
       if (verbose || hasUrl.isCompleted) {
-        print('pub run build_runner serve • ${process.pid}'
+        print('$commandName • ${process.pid}'
             ' • STDERR • ${line.trim()}');
       }
 
@@ -316,11 +332,15 @@ class WebdevFixture {
 
     _toLines(process.stdout).listen((String line) {
       if (verbose) {
-        print('pub run build_runner serve • ${process.pid} • ${line.trim()}');
+        print('$commandName • ${process.pid} • ${line.trim()}');
       }
 
       // Serving `web` on http://localhost:8080
-      if (line.contains('Serving `web`')) {
+      // lib/main.dart is being served at http://localhost:64696
+      final servingPattern =
+          RegExp('Serving `web`|main.dart is being served at');
+
+      if (line.contains(servingPattern)) {
         if (!hasUrl.isCompleted) {
           final String url = line.substring(line.indexOf('http://'));
           hasUrl.complete(url);
@@ -338,6 +358,7 @@ class WebdevFixture {
   }
 
   static Future<void> build({
+    bool flutter = false,
     bool release = false,
     bool verbose = false,
   }) async {
@@ -346,16 +367,31 @@ class WebdevFixture {
     final pubGet = await _runFlutter(['pub', 'get']);
     expect(await pubGet.exitCode, 0);
 
-    final List<String> cliArgs = [
-      'pub',
-      'run',
-      'build_runner',
-      'build',
-      '-o',
-      'web:build',
-      '--delete-conflicting-outputs',
-      release ? '--release' : '--no-release'
-    ];
+    final List<String> cliArgs = [];
+    String commandName;
+    if (flutter && release) {
+      commandName = 'flutter build web';
+      cliArgs.addAll([
+        'build',
+        'web',
+        '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+        '--no-tree-shake-icons'
+      ]);
+    } else if (flutter) {
+      throw 'No debug build for Flutter web';
+    } else {
+      commandName = 'flutter pub run build_runner build';
+      cliArgs.addAll([
+        'pub',
+        'run',
+        'build_runner',
+        'build',
+        '-o',
+        'web:build',
+        '--delete-conflicting-outputs',
+        release ? '--release' : '--no-release'
+      ]);
+    }
 
     final process = await _runFlutter(cliArgs, verbose: verbose);
 
@@ -372,7 +408,7 @@ class WebdevFixture {
 
     _toLines(process.stdout).listen((String line) {
       if (verbose) {
-        print('pub run build_runner build • ${line.trim()}');
+        print('$commandName • ${line.trim()}');
       }
 
       if (!buildFinished.isCompleted) {
@@ -384,8 +420,18 @@ class WebdevFixture {
       }
     });
 
-    await buildFinished.future.catchError((_) {
-      fail('Build failed');
+    unawaited(process.exitCode.then((code) {
+      if (!buildFinished.isCompleted) {
+        if (code == 0) {
+          buildFinished.complete();
+        } else {
+          buildFinished.completeError('Exited with code $code');
+        }
+      }
+    }));
+
+    await buildFinished.future.catchError((e) {
+      fail('Build failed: $e');
     });
 
     await process.exitCode;

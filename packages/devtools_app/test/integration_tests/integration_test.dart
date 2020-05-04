@@ -13,15 +13,18 @@ import 'debugger.dart';
 import 'integration.dart';
 import 'logging.dart';
 
+final bool testInReleaseMode = Platform.environment['WEBDEV_RELEASE'] == 'true';
+final bool testFlutterWebVersion =
+    Platform.environment['TEST_FLUTTER_WEB'] == 'true';
+
 void main() {
   group('integration', () {
     setUpAll(() async {
       compensateForFlutterTestDirectoryBug();
-      final bool testInReleaseMode =
-          Platform.environment['WEBDEV_RELEASE'] == 'true';
-
-      webdevFixture =
-          await WebdevFixture.serve(release: testInReleaseMode, verbose: true);
+      webdevFixture = await WebdevFixture.serve(
+          flutter: testFlutterWebVersion,
+          release: testInReleaseMode,
+          verbose: true);
       browserManager = await BrowserManager.create();
     });
 

@@ -17,6 +17,7 @@ import '../support/chrome.dart';
 import '../support/cli_test_driver.dart';
 import '../support/devtools_server_driver.dart';
 import 'integration.dart';
+import 'integration_test.dart';
 
 CliAppFixture appFixture;
 DevToolsServerDriver server;
@@ -30,29 +31,33 @@ final Map<String, String> registeredServices = {};
 final List<int> browserPids = [];
 
 void main() {
-  final bool testInReleaseMode =
-      Platform.environment['WEBDEV_RELEASE'] == 'true';
-
   setUpAll(() async {
     // Clear the existing build directory.
     if (Directory('build').existsSync()) {
       Directory('build').deleteSync(recursive: true);
     }
     // Build the app, as the server can't start without the build output.
-    await WebdevFixture.build(release: testInReleaseMode, verbose: true);
+    await WebdevFixture.build(
+        release: testInReleaseMode,
+        flutter: testFlutterWebVersion,
+        verbose: true);
 
-    if (!Directory('build/packages').existsSync()) {
-      fail('Build failed');
+    if (!testFlutterWebVersion) {
+      if (!Directory('build/packages').existsSync()) {
+        fail('Build failed');
+      }
+
+      Directory('build/packages').renameSync('build/pack');
     }
 
-    Directory('build/packages').renameSync('build/pack');
     // The devtools package build directory needs to reflect the latest
     // devtools_app package contents.
     if (Directory('../devtools/build').existsSync()) {
       Directory('../devtools/build').deleteSync(recursive: true);
     }
 
-    Directory('build').renameSync('../devtools/build');
+    Directory(testFlutterWebVersion ? 'build/web' : 'build')
+        .renameSync('../devtools/build');
   });
 
   setUp(() async {
