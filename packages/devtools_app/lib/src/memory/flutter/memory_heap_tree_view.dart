@@ -86,9 +86,9 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     });
 
     addAutoDisposeListener(controller.searchNotifier, () {
-      if (escapeHit) {
+      if (controller.clearSearch) {
         setState(() {
-          escapeHit = false;
+          controller.clearSearch = false;
         });
       }
     });
@@ -96,9 +96,10 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
 
   @override
   void dispose() {
-    // Clean up the controller when the widget is removed from the
-    // widget tree.
-    textFieldController.dispose();
+    // Clean up the TextFieldController and FocusNode.
+    searchTextFieldController.dispose();
+    searchFieldFocusNode.dispose();
+
     super.dispose();
   }
 
@@ -281,48 +282,72 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     );
   }
 
-  bool escapeHit = false;
-  TextEditingController textFieldController;
-  TextField searchField;
+  FocusNode searchFieldFocusNode;
+  TextEditingController searchTextFieldController;
+
+  void clearSearchField() {
+    if (controller.search.isNotEmpty) {
+      controller.clearSearch = true;
+      searchTextFieldController.clear();
+      controller.search = '';
+    }
+  }
 
   TextField createSearchField() {
     // Creating new TextEditingController.
-    textFieldController = TextEditingController();
+    searchFieldFocusNode = FocusNode();
+    searchTextFieldController = TextEditingController();
 
-    return TextField(
+    final searchField = TextField(
       autofocus: true,
+      enabled: controller.showHeatMap && controller.snapshots.isNotEmpty,
+      focusNode: searchFieldFocusNode,
+      controller: searchTextFieldController,
       onChanged: (value) {
-        // TODO(terry): Extend search support beyond heat map.
         if (controller.showHeatMap) {
           controller.search = value;
         }
       },
-      controller: textFieldController,
-      decoration: const InputDecoration(
-        isDense: true,
-        border: OutlineInputBorder(),
+      onEditingComplete: () {
+        searchFieldFocusNode.requestFocus();
+      },
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.all(8),
+        border: const OutlineInputBorder(),
         labelText: 'Search',
+        hintText: 'Search',
+        suffix: IconButton(
+          padding: const EdgeInsets.all(0.0),
+          onPressed: () {
+            clearSearchField();
+          },
+          icon: const Icon(Icons.clear, size: 16),
+        ),
       ),
     );
+
+    if (controller.showHeatMap && controller.snapshots.isNotEmpty) {
+      searchFieldFocusNode.requestFocus();
+    }
+
+    return searchField;
   }
 
   Widget _buildSearchFilterControls() {
-    searchField = createSearchField();
-
-    final searchAndRawKeyboard = RawKeyboardListener(
-      child: searchField,
-      focusNode: FocusNode(),
-      onKey: (RawKeyEvent event) {
-        if (event is RawKeyDownEvent) {
-          if (event.logicalKey.keyId == LogicalKeyboardKey.escape.keyId) {
-            // ESCAPE key pressed clear search TextField.
-            escapeHit = true;
-            controller.search = '';
-            textFieldController.clear();
-          }
-        }
-      },
-    );
+    final searchAndRawKeyboard = controller.showHeatMap
+        ? RawKeyboardListener(
+            child: createSearchField(),
+            focusNode: FocusNode(),
+            onKey: (RawKeyEvent event) {
+              if (event is RawKeyDownEvent) {
+                if (event.logicalKey.keyId == LogicalKeyboardKey.escape.keyId) {
+                  // ESCAPE key pressed clear search TextField.
+                  clearSearchField();
+                }
+              }
+            },
+          )
+        : const Text('');
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -332,7 +357,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
         children: [
           Container(
             width: 300.0,
-            height: 36.0,
+            height: 40.0,
             child: searchAndRawKeyboard,
           ),
           const SizedBox(width: 16.0),
@@ -401,22 +426,17 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     controller.theGraph.computeInstancesForClasses();
     controller.theGraph.computeRawGroups();
     controller.theGraph.computeFilteredGroups();
-
-//    dumpClassGroupBySingleLine(controller.theGraph.groupByClass);
-//    dumpLibraryGroupBySingleLine(controller.theGraph.groupByLibrary);
-
-//    dumpAllGroups(controller, controller.theGraph.groupByClass);
   }
 
-// TODO(terry): Need to add external heap to snapshot table.
-/*
-print("Total size of external Heap ${graph.externalSize}");
-int externalSize = graph.externalProperties.length;
-for (var index = 0; index < externalSize; index++) {
-  final externalProperty = graph.externalProperties[index];
-  print("[$index] name=${externalProperty.name} size=${externalProperty.externalSize}");
-}
-*/
+  // TODO(terry): Need to add external heap to snapshot table.
+  /*
+                print("Total size of external Heap ${graph.externalSize}");
+                int externalSize = graph.externalProperties.length;
+                for (var index = 0; index < externalSize; index++) {
+                  final externalProperty = graph.externalProperties[index];
+                  print("[$index] name=${externalProperty.name} size=${externalProperty.externalSize}");
+                }
+                */
 
   void dumpClassGroupBySingleLine(
       Map<String, List<HeapGraphElementActual>> classGroup) {
@@ -461,7 +481,7 @@ class SnapshotInstanceViewTable extends StatefulWidget {
   SnapshotInstanceViewState createState() => SnapshotInstanceViewState();
 }
 
-/// A table of the Memory graph class top-down call tree.
+/// Table of the fields of an instance (type, name and value).
 class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
     with AutoDisposeMixin {
   MemoryController controller;

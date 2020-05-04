@@ -314,6 +314,8 @@ class MemoryController extends DisposableController
 
   ValueListenable get groupingByNotifier => groupingBy;
 
+  bool clearSearch = false;
+
   final _searchNotifier = ValueNotifier<String>('');
 
   /// Notify that the search has changed.

@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:devtools_app/src/ui/colors.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter/rendering.dart' hide TextStyle;
@@ -56,11 +57,6 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
 
   Map<String, Function> callbacks = {};
 
-  /// Flame chart has a blueish color.
-  Color lightColor = const Color(0xFFBBDEFB);
-
-  Color darkColor = const Color(0xFF0D47A1);
-
   MemoryController controller;
 
   Widget snapshotDisplay;
@@ -99,9 +95,7 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
         final searchingValue = controller.search;
         if (searchingValue.isNotEmpty) {
           final Node node = findNode(searchingValue);
-          if (node != null) {
-            selectNode(node);
-          }
+          selectNode(node);
         }
       });
     });
@@ -117,7 +111,12 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
     sizes = InstructionsSize.fromSnapshop(controller);
 
     if (sizes != null) {
-      _flameChart = _FlameChart(sizes, lightColor, darkColor, callbacks);
+      _flameChart = _FlameChart(
+        sizes,
+        memoryHeatMapLightColor,
+        memoryHeatMapDarkColor,
+        callbacks,
+      );
       return _flameChart;
     } else {
       return const Text('');
@@ -243,6 +242,8 @@ class FlameChartRenderObject extends RenderBox {
   }
 
   void externalSelectNode(Node value) {
+    final oldSelected = _selectedNode;
+
     selectedNode = value;
 
     // TODO(terry): Need to force a relayout to repaint (paintAncestors) with
@@ -253,11 +254,16 @@ class FlameChartRenderObject extends RenderBox {
     //                    _selectedNode.rect.left + paintOffset.dx,
     //                    _selectedNode.rect.top - paintOffset.dy,
     //                  ));
-    size = size;
+    if (oldSelected != _selectedNode) {
+      // If nothing changed then don't update.
+      size = size;
+    }
   }
 
   Node _selectedNode;
+
   set selectedNode(Node value) {
+    value ??= _sizes.root;
     if (value == _selectedNode) {
       return;
     }
@@ -297,7 +303,7 @@ class FlameChartRenderObject extends RenderBox {
       currentLeft: 1 + offset.dx,
       parentSize: _selectedNode.byteSize,
       children: _selectedNode.children.values,
-      topFactor: top + 51 - offset.dy,
+      topFactor: top + Node.nodeHeight + 1 - offset.dy,
       maxWidth: rootWidth - 1,
     );
   }
@@ -312,7 +318,7 @@ class FlameChartRenderObject extends RenderBox {
     double width,
     double top,
   ) {
-    node.rect = Rect.fromLTWH(left, size.height - top, width, 50);
+    node.rect = Rect.fromLTWH(left, size.height - top, width, Node.nodeHeight);
     final double t =
         _logs.putIfAbsent(node.byteSize, () => math.log(node.byteSize)) /
             _logs.putIfAbsent(
@@ -361,11 +367,11 @@ class FlameChartRenderObject extends RenderBox {
   }
 
   double _paintAncestors(PaintingContext context, List<Node> nodes) {
-    double top = 50;
+    double top = Node.nodeHeight;
     for (var node in nodes.reversed) {
       _paintNode(
           context, node, 0 + paintOffset.dx, size.width, top - paintOffset.dy);
-      top += 50;
+      top += Node.nodeHeight;
     }
     return top;
   }
@@ -399,7 +405,7 @@ class FlameChartRenderObject extends RenderBox {
             currentLeft: left + factor,
             parentSize: child.byteSize,
             children: child.children.values,
-            topFactor: topFactor + 51,
+            topFactor: topFactor + Node.nodeHeight + 1,
             maxWidth: width - (2 * factor),
           );
         }
@@ -515,6 +521,8 @@ class Node {
   })  : assert(name != null),
         assert(byteSize != null),
         assert(children != null);
+
+  static const double nodeHeight = 50.0;
 
   final String name;
   int byteSize;
