@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
+import '../../trees.dart';
+
 /// A tuple of a script and an optional location.
 class ScriptLocation {
   ScriptLocation(this.scriptRef, {this.location});
@@ -181,4 +183,65 @@ class StackFrameAndSourcePosition {
   int get line => sourcePosition?.line;
 
   int get column => sourcePosition?.column;
+}
+
+class Variable extends TreeNode<Variable> {
+  Variable._(this.boundVar);
+
+  factory Variable.create(BoundVariable variable) {
+    return Variable._(variable);
+  }
+
+  BoundVariable boundVar;
+
+  bool get hasChildren =>
+      boundVar.value is InstanceRef &&
+      (boundVar.value as InstanceRef).valueAsString == null;
+
+  Object get value => boundVar.value;
+
+  String get displayValue {
+    final name = boundVar.name;
+    final value = this.value;
+
+    String valueStr;
+    if (value is InstanceRef) {
+      if (value.valueAsString == null) {
+        valueStr = value.classRef.name;
+      } else {
+        valueStr = value.valueAsString;
+        if (value.valueAsStringIsTruncated) {
+          valueStr += '...';
+        }
+        if (value.kind == InstanceKind.kString) {
+          valueStr = "'$valueStr'";
+        }
+      }
+
+      if (value.kind == InstanceKind.kList) {
+        valueStr = '[${value.length}] $valueStr';
+      } else if (value.kind == InstanceKind.kMap) {
+        valueStr = '{ ${value.length} } $valueStr';
+      } else if (value.kind != null && value.kind.endsWith('List')) {
+        // Uint8List, Uint16List, ...
+        valueStr = '[${value.length}] $valueStr';
+      }
+    } else if (value is Sentinel) {
+      valueStr = value.valueAsString;
+    } else if (value is TypeArgumentsRef) {
+      valueStr = value.name;
+    } else {
+      valueStr = value.toString();
+    }
+
+    return '$name: $valueStr';
+  }
+
+  @override
+  String toString() {
+    final value = boundVar.value is InstanceRef
+        ? (boundVar.value as InstanceRef).valueAsString
+        : boundVar.value;
+    return '${boundVar.name} - $value';
+  }
 }

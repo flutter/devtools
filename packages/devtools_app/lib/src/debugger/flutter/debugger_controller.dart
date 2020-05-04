@@ -72,6 +72,10 @@ class DebuggerController extends DisposableController
   ValueListenable<StackFrameAndSourcePosition> get selectedStackFrame =>
       _selectedStackFrame;
 
+  final _variables = ValueNotifier<List<Variable>>([]);
+
+  ValueListenable<List<Variable>> get variables => _variables;
+
   final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
 
   /// Return the sorted list of ScriptRefs active in the current isolate.
@@ -458,13 +462,79 @@ class DebuggerController extends DisposableController
     }
   }
 
-  void selectStackFrame(StackFrameAndSourcePosition frame) {
+  void selectStackFrame(StackFrameAndSourcePosition frame) async {
     _selectedStackFrame.value = frame;
+
+    if (frame?.frame != null) {
+      _variables.value = await _variablesForFrame(frame.frame);
+    }
 
     if (frame?.scriptRef != null) {
       showScriptLocation(
           ScriptLocation(frame.scriptRef, location: frame.sourcePosition));
     }
+  }
+
+  Future<List<Variable>> _variablesForFrame(Frame frame) async {
+    final vars = frame.vars.map((v) => Variable.create(v)).toList();
+
+    for (var v in vars) {
+      final InstanceRef instanceRef = v.boundVar.value;
+      final dynamic result = await getObject(instanceRef);
+      if (result is Instance) {
+        if (result.associations != null) {
+          v.children.addAll(result.associations
+              .map((MapAssociation assoc) {
+                // For string keys, quote the key value.
+                String keyString = assoc.key.valueAsString;
+                if (assoc.key is InstanceRef &&
+                    assoc.key.kind == InstanceKind.kString) {
+                  keyString = "'$keyString'";
+                }
+                return BoundVariable(
+                  name: '[$keyString]',
+                  value: assoc.value,
+                  scopeStartTokenPos: null,
+                  scopeEndTokenPos: null,
+                  declarationTokenPos: null,
+                );
+              })
+              .map((bv) => Variable.create(bv))
+              .toList());
+        } else if (result.elements != null) {
+          final List<BoundVariable> boundVars = [];
+          int index = 0;
+
+          for (dynamic value in result.elements) {
+            boundVars.add(BoundVariable(
+              name: '[$index]',
+              value: value,
+              scopeStartTokenPos: null,
+              scopeEndTokenPos: null,
+              declarationTokenPos: null,
+            ));
+            index++;
+          }
+          v.children
+              .addAll(boundVars.map((bv) => Variable.create(bv)).toList());
+        } else if (result.fields != null) {
+          v.children.addAll(result.fields
+              .map((BoundField field) {
+                return BoundVariable(
+                  name: field.decl.name,
+                  value: field.value,
+                  scopeStartTokenPos: null,
+                  scopeEndTokenPos: null,
+                  declarationTokenPos: null,
+                );
+              })
+              .toList()
+              .map((bv) => Variable.create(bv))
+              .toList());
+        }
+      }
+    }
+    return vars;
   }
 
   List<Frame> _framesForCallStack(Stack stack) {
