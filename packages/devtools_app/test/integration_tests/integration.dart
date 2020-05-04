@@ -17,9 +17,6 @@ import '../support/cli_test_driver.dart';
 import '../support/utils.dart';
 
 const bool verboseTesting = false;
-final bool testInReleaseMode = Platform.environment['WEBDEV_RELEASE'] == 'true';
-final bool testFlutterWebVersion =
-    Platform.environment['DEVTOOLS_FLUTTER_WEB'] == 'true';
 
 WebdevFixture webdevFixture;
 BrowserManager browserManager;
@@ -55,10 +52,8 @@ class DevtoolsManager {
     Uri overrideUri,
     bool waitForConnection = true,
   }) async {
-    final urlPath = testFlutterWebVersion
-        ? '/#?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}'
-        : 'index.html?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}';
-    final Uri baseAppUri = baseUri.resolve(urlPath);
+    final Uri baseAppUri = baseUri.resolve(
+        'index.html?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}');
     await tabInstance.tab.navigate('${overrideUri ?? baseAppUri}');
 
     // wait for app initialization
@@ -287,31 +282,19 @@ class WebdevFixture {
   WebdevFixture._(this.process, this.url, this.verbose);
 
   static Future<WebdevFixture> serve({
-    bool flutter = false,
     bool release = false,
     bool verbose = false,
   }) async {
-    final List<String> cliArgs = [];
-    String commandName;
-    if (flutter) {
-      commandName = 'flutter run';
-      cliArgs.addAll([
-        'run',
-        '--dart-define=FLUTTER_WEB_USE_SKIA=true',
-        '-d',
-        'web-server',
-      ]);
-    } else {
-      commandName = 'pub run build_runner serve';
-      cliArgs.addAll([
-        'pub',
-        'run',
-        'build_runner',
-        'serve',
-        'web',
-        '--delete-conflicting-outputs',
-        release ? '--release' : '--no-release'
-      ]);
+    final List<String> cliArgs = [
+      'pub',
+      'run',
+      'build_runner',
+      'serve',
+      'web',
+      '--delete-conflicting-outputs'
+    ];
+    if (release) {
+      cliArgs.add('--release');
     }
 
     final process = await _runFlutter(cliArgs);
@@ -320,7 +303,7 @@ class WebdevFixture {
 
     _toLines(process.stderr).listen((String line) {
       if (verbose || hasUrl.isCompleted) {
-        print('$commandName • ${process.pid}'
+        print('pub run build_runner serve • ${process.pid}'
             ' • STDERR • ${line.trim()}');
       }
 
@@ -334,15 +317,11 @@ class WebdevFixture {
 
     _toLines(process.stdout).listen((String line) {
       if (verbose) {
-        print('$commandName • ${process.pid} • ${line.trim()}');
+        print('pub run build_runner serve • ${process.pid} • ${line.trim()}');
       }
 
       // Serving `web` on http://localhost:8080
-      // lib/main.dart is being served at http://localhost:64696
-      final servingPattern =
-          RegExp('Serving `web`|main.dart is being served at');
-
-      if (line.contains(servingPattern)) {
+      if (line.contains('Serving `web`')) {
         if (!hasUrl.isCompleted) {
           final String url = line.substring(line.indexOf('http://'));
           hasUrl.complete(url);

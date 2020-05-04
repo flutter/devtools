@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'dart:io';
 
 import 'package:devtools_testing/support/file_utils.dart';
 import 'package:test/test.dart';
@@ -16,10 +17,11 @@ void main() {
   group('integration', () {
     setUpAll(() async {
       compensateForFlutterTestDirectoryBug();
-      webdevFixture = await WebdevFixture.serve(
-          flutter: testFlutterWebVersion,
-          release: testInReleaseMode,
-          verbose: true);
+      final bool testInReleaseMode =
+          Platform.environment['WEBDEV_RELEASE'] == 'true';
+
+      webdevFixture =
+          await WebdevFixture.serve(release: testInReleaseMode, verbose: true);
       browserManager = await BrowserManager.create();
     });
 

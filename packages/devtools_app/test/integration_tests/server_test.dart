@@ -30,6 +30,11 @@ final Map<String, String> registeredServices = {};
 final List<int> browserPids = [];
 
 void main() {
+  final bool testInReleaseMode =
+      Platform.environment['WEBDEV_RELEASE'] == 'true';
+  final bool testFlutterWebVersion =
+      Platform.environment['DEVTOOLS_FLUTTER_WEB'] == 'true';
+
   setUpAll(() async {
     // Clear the existing build directory.
     if (Directory('build').existsSync()) {
