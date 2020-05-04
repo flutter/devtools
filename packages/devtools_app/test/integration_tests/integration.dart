@@ -15,9 +15,11 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 import '../support/chrome.dart';
 import '../support/cli_test_driver.dart';
 import '../support/utils.dart';
-import 'integration_test.dart';
 
 const bool verboseTesting = false;
+final bool testInReleaseMode = Platform.environment['WEBDEV_RELEASE'] == 'true';
+final bool testFlutterWebVersion =
+    Platform.environment['DEVTOOLS_FLUTTER_WEB'] == 'true';
 
 WebdevFixture webdevFixture;
 BrowserManager browserManager;

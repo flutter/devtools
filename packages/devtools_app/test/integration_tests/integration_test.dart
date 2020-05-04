@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'dart:io';
 
 import 'package:devtools_testing/support/file_utils.dart';
 import 'package:test/test.dart';
@@ -12,10 +11,6 @@ import 'app.dart';
 import 'debugger.dart';
 import 'integration.dart';
 import 'logging.dart';
-
-final bool testInReleaseMode = Platform.environment['WEBDEV_RELEASE'] == 'true';
-final bool testFlutterWebVersion =
-    Platform.environment['TEST_FLUTTER_WEB'] == 'true';
 
 void main() {
   group('integration', () {

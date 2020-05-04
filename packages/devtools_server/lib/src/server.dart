@@ -781,9 +781,10 @@ Future<Map<String, dynamic>> launchDevTools(
 
 String _buildUriToLaunch(
     Map<String, dynamic> uriParams, page, Uri devToolsUri) {
-  // TEMP: When `TEST_FLUTTER_WEB=true` construct the URL in the correct format
+  // TEMP: When `DEVTOOLS_FLUTTER_WEB=true` construct the URL in the correct format
   // for the Flutter version of the web app.
-  final useFlutterVersion = Platform.environment['TEST_FLUTTER_WEB'] == 'true';
+  final useFlutterVersion =
+      Platform.environment['DEVTOOLS_FLUTTER_WEB'] == 'true';
 
   if (useFlutterVersion) {
     final queryStringNameValues = [];

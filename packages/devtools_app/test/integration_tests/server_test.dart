@@ -17,7 +17,6 @@ import '../support/chrome.dart';
 import '../support/cli_test_driver.dart';
 import '../support/devtools_server_driver.dart';
 import 'integration.dart';
-import 'integration_test.dart';
 
 CliAppFixture appFixture;
 DevToolsServerDriver server;
