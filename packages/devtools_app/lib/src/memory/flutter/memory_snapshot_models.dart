@@ -39,8 +39,7 @@ class Reference extends TreeNode<Reference> {
         isObject = false,
         actualClass = null;
 
-  Reference.createLibrary(this.controller, this.name,
-      {this.onExpand, this.onLeaf})
+  Reference.library(this.controller, this.name, {this.onExpand, this.onLeaf})
       : isLibrary = true,
         isExternal = false,
         isFiltered = false,
@@ -48,7 +47,7 @@ class Reference extends TreeNode<Reference> {
         isObject = false,
         actualClass = null;
 
-  Reference.createClass(
+  Reference.aClass(
     this.controller,
     this.actualClass, {
     this.onExpand,
@@ -61,7 +60,7 @@ class Reference extends TreeNode<Reference> {
         isObject = false;
 
   /// name is the object name.
-  Reference.createObject(
+  Reference.object(
     this.controller,
     this.name, {
     this.onExpand,
@@ -75,7 +74,7 @@ class Reference extends TreeNode<Reference> {
 
   // TODO(terry): Investigate expanding to view all external objects/field inspection?
   /// External heap
-  Reference.createExternal(this.controller)
+  Reference.external(this.controller)
       : isLibrary = false,
         isExternal = true,
         isFiltered = false,
@@ -86,7 +85,7 @@ class Reference extends TreeNode<Reference> {
 
   // TODO(terry): Investigate expanding to view filtered items.
   /// All filtered libraries and classes
-  Reference.createFiltered(this.controller)
+  Reference.filtered(this.controller)
       : isLibrary = false,
         isExternal = false,
         isFiltered = true,
@@ -146,8 +145,10 @@ class Reference extends TreeNode<Reference> {
 
 class LibraryReference extends Reference {
   LibraryReference(
-      MemoryController controller, String libraryName, this.actualClasses)
-      : super.createLibrary(
+    MemoryController controller,
+    String libraryName,
+    this.actualClasses,
+  ) : super.library(
           controller,
           libraryName,
           onExpand: (reference) {
@@ -179,18 +180,18 @@ class LibraryReference extends Reference {
 }
 
 class ExternalReference extends Reference {
-  ExternalReference(MemoryController controller)
-      : super.createExternal(controller);
+  ExternalReference(MemoryController controller) : super.external(controller);
 }
 
 class FilteredReference extends Reference {
-  FilteredReference(MemoryController controller)
-      : super.createFiltered(controller);
+  FilteredReference(MemoryController controller) : super.filtered(controller);
 }
 
 class ClassReference extends Reference {
-  ClassReference(MemoryController controller, HeapGraphClassLive actualClass)
-      : super.createClass(
+  ClassReference(
+    MemoryController controller,
+    HeapGraphClassLive actualClass,
+  ) : super.aClass(
           controller,
           actualClass,
           onExpand: (reference) {
@@ -218,14 +219,21 @@ class ClassReference extends Reference {
 }
 
 class ObjectReference extends Reference {
-  ObjectReference(MemoryController controller, int index, this.instance)
-      : super.createObject(controller, 'Instance $index');
+  ObjectReference(
+    MemoryController controller,
+    int index,
+    this.instance,
+  ) : super.object(controller, 'Instance $index');
 
   final HeapGraphElementLive instance;
 }
 
 class Snapshot {
-  Snapshot(this.collectedTimestamp, this.controller, this.snapshotGraph);
+  Snapshot(
+    this.collectedTimestamp,
+    this.controller,
+    this.snapshotGraph,
+  );
 
   final MemoryController controller;
   final DateTime collectedTimestamp;

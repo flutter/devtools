@@ -54,9 +54,14 @@ class MemoryController extends DisposableController
 
   bool showHeatMap = true;
 
-  final List<Snapshot> snapshots = [];
+  final snapshots = <Snapshot>[];
 
   Snapshot get lastSnapshot => snapshots.safeLast;
+
+  /// Root nodes names that contains nodes of either libraries or classes depending on
+  /// group by library or group by class.
+  static const libraryRootNode = '___LIBRARY___';
+  static const classRootNode = '___CLASSES___';
 
   /// Notifies that the source of the memory feed has changed.
   ValueListenable<String> get selectedSnapshotNotifier =>
@@ -75,7 +80,6 @@ class MemoryController extends DisposableController
 
   /// Leaf node of tabletree snapshot selected?  If selected then the instance
   /// view is displayed to view the fields of an instance.
-  /// Notifies that the timeline has been paused.
   final _leafSelectedNotifier = ValueNotifier<HeapGraphElementLive>(null);
 
   ValueListenable<HeapGraphElementLive> get leafSelectedNotifier =>
@@ -474,9 +478,6 @@ class MemoryController extends DisposableController
         .map((ObjRef ref) => InstanceSummary(classRef, className, ref.id))
         .toList();
   }
-
-  static const String libraryRootNode = '___LIBRARY___';
-  static const String classRootNode = '___CLASSES___';
 
   /// When new snapshot occurs entire libraries should be rebuilt then rebuild should be true.
   LibraryReference computeAllLibraries([

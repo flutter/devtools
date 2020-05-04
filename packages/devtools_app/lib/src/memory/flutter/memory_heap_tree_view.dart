@@ -97,6 +97,8 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     searchTextFieldController.dispose();
     searchFieldFocusNode.dispose();
 
+    rawKeyboardFocusNode.dispose();
+
     super.dispose();
   }
 
@@ -113,7 +115,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
         snapshotDisplay = MemorySnapshotTable();
       }
     } else {
-      snapshotDisplay = const Text('');
+      snapshotDisplay = const SizedBox();
     }
 
     return Column(
@@ -143,7 +145,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
           const SizedBox(width: 16.0),
           controller.isLeafSelected
               ? Expanded(child: SnapshotInstanceViewTable())
-              : const Text(''),
+              : const SizedBox(),
         ],
       ),
     );
@@ -232,12 +234,12 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
             ),
           ),
           const SizedBox(width: 16.0),
-          controller.showHeatMap ? const Text('') : _groupByDropdown(),
+          controller.showHeatMap ? const SizedBox() : _groupByDropdown(),
           const SizedBox(width: 16.0),
           // TODO(terry): Mechanism to handle expand/collapse on both
           // tables objects/fields. Maybe notion in table?
           controller.showHeatMap
-              ? const Text('')
+              ? const SizedBox()
               : OutlineButton(
                   key: collapseAllButtonKey,
                   onPressed: snapshotDisplay is MemorySnapshotTable
@@ -259,7 +261,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
                   child: const Text('Collapse All'),
                 ),
           controller.showHeatMap
-              ? const Text('')
+              ? const SizedBox()
               : OutlineButton(
                   key: expandAllButtonKey,
                   onPressed: snapshotDisplay is MemorySnapshotTable
@@ -283,6 +285,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
 
   FocusNode searchFieldFocusNode;
   TextEditingController searchTextFieldController;
+  FocusNode rawKeyboardFocusNode;
 
   void clearSearchField() {
     if (controller.search.isNotEmpty) {
@@ -333,10 +336,12 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   }
 
   Widget _buildSearchFilterControls() {
+    rawKeyboardFocusNode = FocusNode();
+
     final searchAndRawKeyboard = controller.showHeatMap
         ? RawKeyboardListener(
             child: createSearchField(),
-            focusNode: FocusNode(),
+            focusNode: rawKeyboardFocusNode,
             onKey: (RawKeyEvent event) {
               if (event is RawKeyDownEvent) {
                 if (event.logicalKey.keyId == LogicalKeyboardKey.escape.keyId) {
@@ -346,7 +351,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
               }
             },
           )
-        : const Text('');
+        : const SizedBox();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -422,24 +427,14 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   }
 
   Future<void> doGroupBy() async {
-    controller.heapGraph.computeInstancesForClasses();
-    controller.heapGraph.computeRawGroups();
-    controller.heapGraph.computeFilteredGroups();
+    controller.heapGraph
+      ..computeInstancesForClasses()
+      ..computeRawGroups()
+      ..computeFilteredGroups();
   }
-
-  // TODO(terry): Need to add external heap to snapshot table.
-  /*
-                print("Total size of external Heap ${graph.externalSize}");
-                int externalSize = graph.externalProperties.length;
-                for (var index = 0; index < externalSize; index++) {
-                  final externalProperty = graph.externalProperties[index];
-                  print("[$index] name=${externalProperty.name} size=${externalProperty.externalSize}");
-                }
-                */
 
   void dumpClassGroupBySingleLine(
       Map<String, List<HeapGraphElementLive>> classGroup) {
-    print('========== Class by Instance ==========');
     classGroup.forEach((key, instances) {
       final shallowSizes = instances.first.theClass.instancesTotalShallowSizes;
       final count = instances.length;
@@ -449,7 +444,6 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
 
   void dumpLibraryGroupBySingleLine(
       Map<String, List<HeapGraphClassLive>> libraryGroup) {
-    print('========== Library by Class ==========');
     libraryGroup.forEach((libraryKey, libraryClasses) {
       print('Library $libraryKey:');
       for (var actualClass in libraryClasses) {
@@ -504,7 +498,9 @@ class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    controller = Provider.of<MemoryController>(context);
+    final newController = Provider.of<MemoryController>(context);
+    if (newController == controller) return;
+    controller = newController;
 
     cancel();
 
@@ -658,7 +654,9 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    controller = Provider.of<MemoryController>(context);
+    final newController = Provider.of<MemoryController>(context);
+    if (newController == controller) return;
+    controller = newController;
 
     cancel();
 

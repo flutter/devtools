@@ -321,7 +321,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
             width: MediaQuery.of(context).size.width / 3,
             height: constraints.maxHeight < 400
                 ? constraints.maxHeight
-                : constraints.maxHeight / 3 + (400 * .7),
+                : constraints.maxHeight * .3 + (400 * .7),
             child: Padding(
               padding: const EdgeInsets.only(left: 15),
               child: Column(

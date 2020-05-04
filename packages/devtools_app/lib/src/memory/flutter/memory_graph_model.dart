@@ -10,6 +10,11 @@ import '../flutter/memory_controller.dart';
 /// Internal class names :: automatically filter out.
 const String internalClassName = '::';
 
+/// Contains normalized library name and class name. Where
+/// normalized library is dart:xxx, package:xxxx, etc. This is 
+/// how libraries and class names are displayed to the user
+/// to help to reduce the 100s of URIs that would otherwise be
+/// encountered.
 class LibraryClass {
   LibraryClass(this.libraryName, this.className);
 
@@ -17,7 +22,7 @@ class LibraryClass {
   final String className;
 
   @override
-  bool operator ==(other) {
+  bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) return false;
     return libraryName == other.libraryName && className == other.className;
   }
@@ -217,6 +222,14 @@ class HeapGraph {
   /// Group all instances by all classes - with applied filters.
   final Map<String, List<HeapGraphElementLive>> groupByClass = {};
 
+  /// Normalize the library name. Library is a Uri that contains
+  /// the schema e.g., 'dart' or 'package' and pathSegments. The
+  /// segments are paths to a dart file.  Without simple normalization
+  /// 100s maybe 1000s of libraries would be displayed to the
+  /// developer.  Normalizing takes the schema and the first part
+  /// of the path e.g., dart:core, package:flutter, etc. Hopefully,
+  /// this is not too chunky but better than no normalization.  Also,
+  /// the empty library is returned as src e.g., lib/src
   String normalizeLibraryName(HeapSnapshotClass theClass) {
     final uri = theClass.libraryUri;
     final scheme = uri.scheme;
@@ -233,8 +246,8 @@ class HeapGraph {
     // Only compute once.
     if (rawGroupByLibrary.isNotEmpty || rawGroupByClass.isNotEmpty) return;
 
-    for (HeapGraphClassLive c in classes) {
-      final StringBuffer sb = StringBuffer();
+    for (final c in classes) {
+      final sb = StringBuffer();
 
       final libraryKey = normalizeLibraryName(c.origin);
 
@@ -246,7 +259,7 @@ class HeapGraph {
       sb.clear();
 
       // Collect instances for each class (group by class)
-      for (HeapGraphElementLive instance in c.getInstances(this)) {
+      for (final instance in c.getInstances(this)) {
         sb.write(c.name);
         c.instancesTotalShallowSizes += instance.origin.shallowSize;
         final classSbToString = sb.toString();
@@ -298,8 +311,7 @@ class HeapGraph {
   /// Compute all instances, needed for retained space.
   void computeInstancesForClasses() {
     if (!instancesComputed) {
-      for (var i = 0; i < elements.length; i++) {
-        final HeapGraphElementLive instance = elements[i];
+      for (final instance in elements) {
         instance.theClass.addInstance(instance);
       }
 
@@ -352,7 +364,7 @@ class HeapGraphElementLive extends HeapGraphElement {
     final List<MapEntry<String, HeapGraphElement>> result = [];
     if (theClass is HeapGraphClassLive) {
       final HeapGraphClassLive c = theClass;
-      for (HeapSnapshotField field in c.origin.fields) {
+      for (final field in c.origin.fields) {
         // TODO(terry): Some index are out of range, this check should be removed.
         if (field.index < references.length) {
           result.add(MapEntry(field.name, references[field.index]));
@@ -390,7 +402,7 @@ abstract class HeapGraphClass {
     // TODO(terry): Delay would be much faster but retained space needs
     //              computation. Remove if block just return _instances?
     if (_instances == null) {
-      for (int i = 0; i < graph.elements.length; i++) {
+      for (var i = 0; i < graph.elements.length; i++) {
         final HeapGraphElementLive converted = graph.elements[i];
         if (converted.theClass == this) {
           _instances.add(converted);

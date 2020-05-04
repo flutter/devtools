@@ -72,6 +72,7 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    // TODO(terry): Unable to short-circuit need to investigate why?
     controller = Provider.of<MemoryController>(context);
 
     cancel();
@@ -119,7 +120,7 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
       );
       return _flameChart;
     } else {
-      return const Text('');
+      return const SizedBox();
     }
   }
 
@@ -190,8 +191,8 @@ class FlameChartRenderObject extends RenderBox {
   Map<String, Function> callbacks;
 
   set sizes(InstructionsSize value) {
-    callbacks[findNodeKey] = externalFindNode;
-    callbacks[selectNodeKey] = externalSelectNode;
+    callbacks[findNodeKey] = _exposeFindNode;
+    callbacks[selectNodeKey] = _exposeSelectNode;
 
     if (value == _sizes) {
       return;
@@ -221,7 +222,7 @@ class FlameChartRenderObject extends RenderBox {
     markNeedsPaint();
   }
 
-  Node externalFindNode(String searchName) {
+  Node _exposeFindNode(String searchName) {
     return findNode(_sizes.root.children, searchName);
   }
 
@@ -241,21 +242,24 @@ class FlameChartRenderObject extends RenderBox {
     return null;
   }
 
-  void externalSelectNode(Node value) {
+  void _exposeSelectNode(Node value) {
     final oldSelected = _selectedNode;
 
     selectedNode = value;
 
-    // TODO(terry): Need to force a relayout to repaint (paintAncestors) with
-    //              new selection. Calling debugResetSize or size changing
-    //              works.  However, shouldn't hitTestSelf do the same e.g.,
+    // TODO(terry): Force a relayout to repaint (paintAncestors) with new
+    //              selection. Calling debugResetSize or size changing
+    //              works.  Could a custom painter solve this problem?
+    //              However, shouldn't hitTestSelf do the same e.g.,
     //
     //                  hitTestSelf(Offset(
     //                    _selectedNode.rect.left + paintOffset.dx,
     //                    _selectedNode.rect.top - paintOffset.dy,
     //                  ));
+
+    // If nothing changed then don't update.
     if (oldSelected != _selectedNode) {
-      // If nothing changed then don't update.
+      // TODO(terry): This shouldn't be the solution.
       size = size;
     }
   }
