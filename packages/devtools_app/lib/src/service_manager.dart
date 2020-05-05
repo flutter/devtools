@@ -97,6 +97,28 @@ class ServiceConnectionManager {
   Stream<void> get onConnectionClosed => _connectionClosedController.stream;
   final _connectionClosedController = StreamController<void>.broadcast();
 
+  final ValueNotifier<bool> _deviceBusy = ValueNotifier<bool>(false);
+
+  /// Whether the device is currently busy - performing a long-lived, blocking
+  /// operation.
+  ValueListenable<bool> get deviceBusy => _deviceBusy;
+
+  /// Set whether the device is currently busy - performing a long-lived,
+  /// blocking operation.
+  void setDeviceBusy(bool isBusy) {
+    _deviceBusy.value = isBusy;
+  }
+
+  /// Set the device as busy during the duration of the given async task.
+  Future<T> runDeviceBusyTask<T>(Future<T> task) async {
+    try {
+      setDeviceBusy(true);
+      return await task;
+    } finally {
+      setDeviceBusy(false);
+    }
+  }
+
   /// Call a service that is registered by exactly one client.
   Future<Response> callService(
     String name, {
@@ -146,6 +168,8 @@ class ServiceConnectionManager {
 
     connectedApp = ConnectedApp();
     serviceExtensionManager.connectedApp = connectedApp;
+
+    setDeviceBusy(false);
 
     unawaited(onClosed.then((_) => vmServiceClosed()));
 
@@ -233,6 +257,7 @@ class ServiceConnectionManager {
     serviceTrafficLogger?.dispose();
 
     _isolateManager._handleVmServiceClosed();
+    setDeviceBusy(false);
 
     _stateController.add(false);
     _connectionClosedController.add(null);

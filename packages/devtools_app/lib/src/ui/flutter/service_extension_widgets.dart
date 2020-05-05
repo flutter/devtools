@@ -6,10 +6,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../config_specific/logger/logger.dart';
 import '../../core/message_bus.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/notifications.dart';
+import '../../flutter/scaffold.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
@@ -166,13 +168,17 @@ class _ServiceExtensionButtonGroupState
 class HotReloadButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // TODO(devoncarew): Show as disabled when reload service calls are in progress.
+
     return ActionButton(
       tooltip: 'Hot reload',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotReload,
-        action: () =>
+        action: () {
+          return serviceManager.runDeviceBusyTask(
             _wrapReloadCall('reload', serviceManager.performHotReload),
-        inProgressText: 'Performing hot reload',
+          );
+        },
         completedText: 'Hot reload completed.',
         describeError: (error) => 'Unable to hot reload the app: $error',
       ),
@@ -184,13 +190,17 @@ class HotReloadButton extends StatelessWidget {
 class HotRestartButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // TODO(devoncarew): Show as disabled when reload service calls are in progress.
+
     return ActionButton(
       tooltip: 'Hot restart',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotRestart,
-        action: () =>
+        action: () {
+          return serviceManager.runDeviceBusyTask(
             _wrapReloadCall('restart', serviceManager.performHotRestart),
-        inProgressText: 'Performing hot restart',
+          );
+        },
         completedText: 'Hot restart completed.',
         describeError: (error) => 'Unable to hot restart the app: $error',
       ),
@@ -222,18 +232,14 @@ Future<void> _wrapReloadCall(
 /// Button that when clicked invokes a VM Service , such as hot reload or hot
 /// restart.
 ///
-/// This button will attempt to register to the given service description,
+/// This button will attempt to register to the given service description.
 class _RegisteredServiceExtensionButton extends _ServiceExtensionWidget {
   const _RegisteredServiceExtensionButton._({
     @required this.serviceDescription,
     @required this.action,
-    @required String inProgressText,
     @required String completedText,
     @required String Function(dynamic error) describeError,
-  }) : super(
-            inProgressText: inProgressText,
-            completedText: completedText,
-            describeError: describeError);
+  }) : super(completedText: completedText, describeError: describeError);
 
   /// The service to subscribe to.
   final RegisteredServiceDescription serviceDescription;
@@ -273,7 +279,10 @@ class _RegisteredServiceExtensionButtonState
     return InkWell(
       onTap: () => invokeAndCatchErrors(widget.action),
       child: Container(
-        constraints: const BoxConstraints.tightFor(width: 48.0, height: 48.0),
+        constraints: const BoxConstraints.tightFor(
+          width: DevToolsScaffold.actionWidgetSize,
+          height: DevToolsScaffold.actionWidgetSize,
+        ),
         alignment: Alignment.center,
         // TODO(djshuckerow): Just make these icons the right size to fit this
         // box. The current size is a little tiny by comparison to our other
@@ -308,7 +317,6 @@ class _ServiceExtensionToggle extends _ServiceExtensionWidget {
           key: key,
           // Don't show messages on success or when this toggle is in progress.
           completedText: null,
-          inProgressText: null,
           describeError: describeError,
         );
   final ToggleableServiceExtensionDescription service;
@@ -378,17 +386,9 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
 /// Widget that knows how to talk to a service extension and surface the relevant errors.
 abstract class _ServiceExtensionWidget extends StatefulWidget {
   const _ServiceExtensionWidget(
-      {Key key,
-      @required this.inProgressText,
-      @required this.completedText,
-      @required this.describeError})
+      {Key key, @required this.completedText, @required this.describeError})
       : assert(describeError != null),
         super(key: key);
-
-  /// The text to show when the action is in progress.
-  ///
-  /// This will be shown in a [SnackBar] when completed.
-  final String inProgressText;
 
   /// The text to show when the action is completed.
   ///
@@ -404,8 +404,8 @@ abstract class _ServiceExtensionWidget extends StatefulWidget {
   _ServiceExtensionMixin<_ServiceExtensionWidget> createState();
 }
 
-/// State mixin that manages calling an async service extension
-/// and reporting errors consistently.
+/// State mixin that manages calling an async service extension and reports
+/// errors.
 mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
   /// Whether an action is currently in progress.
   ///
@@ -425,19 +425,15 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
       disabled = true;
     });
 
-    if (widget.inProgressText != null) {
-      // TODO(devoncarew): Display this 'starting work' message in the status
-      // bar.
-
-    }
-
     try {
       await action();
 
       if (widget.completedText != null) {
         Notifications.of(context).push(widget.completedText);
       }
-    } catch (e) {
+    } catch (e, st) {
+      log('$e\n$st');
+
       Notifications.of(context).push(widget.describeError(e));
     } finally {
       setState(() {
