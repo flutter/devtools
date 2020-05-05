@@ -1,4 +1,16 @@
 ## 0.2.4
+* Memory Snapshot [#1885](https://github.com/flutter/devtools/pull/1885)
+* Added new debugger page.
+* Added new Network page.
+* Add selected row to TreeTableState [#1795](https://github.com/flutter/devtools/pull/1795)
+* Add an info / about dialog [#1772](https://github.com/flutter/devtools/pull/1772)
+* Add banner message warnings and errors [#1764](https://github.com/flutter/devtools/pull/1764)
+* Implement scroll-to-zoom and alt+scroll for flame charts [#1747](https://github.com/flutter/devtools/pull/1747)
+* Add sorting functionality to flutter tables [#1738](https://github.com/flutter/devtools/pull/1738)
+* Enable toggling http logging from Timeline. [#1688](https://github.com/flutter/devtools/pull/1688)
+* Merge frame-based timeline and full timeline [#1712](https://github.com/flutter/devtools/pull/1712)
+* Stop skipping duplicate trace events in full timeline processor. [#1704](https://github.com/flutter/devtools/pull/1704)
+* Fix bug causing import to fail when DevTools is not connected to an app [#1703](https://github.com/flutter/devtools/pull/1703)
 * Update package:vm_service dependency to ^4.0.0
 
 ## 0.2.3 2020-03-03
