@@ -71,7 +71,9 @@ class _CallStackState extends State<CallStack> {
             padding: const EdgeInsets.symmetric(horizontal: densePadding),
             child: Text(
               _descriptionFor(frame),
-              style: selected ? selectedStyle(context) : subtleStyle(context),
+              style: selected
+                  ? context.selectedTextStyle
+                  : context.subtleTextStyle,
             ),
           ),
           const Expanded(child: Divider()),
@@ -84,12 +86,16 @@ class _CallStackState extends State<CallStack> {
         text: TextSpan(
           text: _descriptionFor(frame),
           style: selected
-              ? selectedStyle(context)
-              : (noLineInfo ? subtleStyle(context) : regularStyle(context)),
+              ? context.selectedTextStyle
+              : (noLineInfo
+                  ? context.subtleTextStyle
+                  : context.regularTextStyle),
           children: [
             TextSpan(
               text: _locationFor(frame),
-              style: selected ? selectedStyle(context) : subtleStyle(context),
+              style: selected
+                  ? context.selectedTextStyle
+                  : context.subtleTextStyle,
             ),
           ],
         ),

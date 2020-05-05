@@ -37,11 +37,11 @@ class Variables extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
       text: TextSpan(
         text: '${v.boundVar.name} ',
-        style: regularStyle(context),
+        style: context.regularTextStyle,
         children: [
           TextSpan(
             text: v.displayValue,
-            style: subtleStyle(context),
+            style: context.subtleTextStyle,
           ),
         ],
       ),

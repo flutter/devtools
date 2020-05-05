@@ -81,7 +81,9 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
                 ),
                 child: createCircleWidget(
                   breakpointRadius,
-                  (isSelected ? selectedStyle(context) : regularStyle(context))
+                  (isSelected
+                          ? context.selectedTextStyle
+                          : context.regularTextStyle)
                       .color,
                 ),
               ),
@@ -92,14 +94,14 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
                   text: TextSpan(
                     text: _descriptionFor(bp),
                     style: isSelected
-                        ? selectedStyle(context)
-                        : regularStyle(context),
+                        ? context.selectedTextStyle
+                        : context.regularTextStyle,
                     children: [
                       TextSpan(
                         text: ' (${bp.scriptUri})',
                         style: isSelected
-                            ? selectedStyle(context)
-                            : subtleStyle(context),
+                            ? context.selectedTextStyle
+                            : context.subtleTextStyle,
                       ),
                     ],
                   ),

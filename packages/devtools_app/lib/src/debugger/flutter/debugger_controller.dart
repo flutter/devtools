@@ -466,8 +466,8 @@ class DebuggerController extends DisposableController
   void selectStackFrame(StackFrameAndSourcePosition frame) {
     _selectedStackFrame.value = frame;
 
-    if (frame?.frame != null) {
-      _variables.value = _variablesForFrame(frame.frame);
+    if (frame != null) {
+      _variables.value = _createVariablesForFrame(frame.frame);
     } else {
       _variables.value = [];
     }
@@ -478,12 +478,17 @@ class DebuggerController extends DisposableController
     }
   }
 
-  List<Variable> _variablesForFrame(Frame frame) {
+  List<Variable> _createVariablesForFrame(Frame frame) {
     final variables = frame.vars.map((v) => Variable.create(v)).toList();
     variables.forEach(buildVariablesTree);
     return variables;
   }
 
+  /// Builds the tree representation for a [Variable] object by querying data,
+  /// creating child Variable objects, and assigning parent-child relationships.
+  ///
+  /// We call this method as we expand variables in the variable tree, because
+  /// building the tree for all variable data at once is very expensive.
   Future<void> buildVariablesTree(Variable variable) async {
     if (!variable.isExpandable || variable.treeInitialized) return;
 
@@ -492,11 +497,11 @@ class DebuggerController extends DisposableController
       final dynamic result = await getObject(instanceRef);
       if (result is Instance) {
         if (result.associations != null) {
-          variable.addAllChildren(_associationsAsVariables(result));
+          variable.addAllChildren(_createVariablesForAssociations(result));
         } else if (result.elements != null) {
-          variable.addAllChildren(_elementsAsVariables(result));
+          variable.addAllChildren(_createVariablesForElements(result));
         } else if (result.fields != null) {
-          variable.addAllChildren(_fieldsAsVariables(result));
+          variable.addAllChildren(_createVariablesForFields(result));
         }
       }
     } on SentinelException catch (_) {
@@ -505,7 +510,7 @@ class DebuggerController extends DisposableController
     variable.treeInitialized = true;
   }
 
-  List<Variable> _associationsAsVariables(Instance instance) {
+  List<Variable> _createVariablesForAssociations(Instance instance) {
     return instance.associations
         .map((MapAssociation assoc) {
           // For string keys, quote the key value.
@@ -526,7 +531,7 @@ class DebuggerController extends DisposableController
         .toList();
   }
 
-  List<Variable> _elementsAsVariables(Instance instance) {
+  List<Variable> _createVariablesForElements(Instance instance) {
     final List<BoundVariable> boundVars = [];
     for (int i = 0; i < instance.elements.length; i++) {
       final value = instance.elements[i];
@@ -541,7 +546,7 @@ class DebuggerController extends DisposableController
     return boundVars.map((bv) => Variable.create(bv)).toList();
   }
 
-  List<Variable> _fieldsAsVariables(Instance instance) {
+  List<Variable> _createVariablesForFields(Instance instance) {
     return instance.fields
         .map((BoundField field) {
           return BoundVariable(
@@ -552,7 +557,6 @@ class DebuggerController extends DisposableController
             declarationTokenPos: null,
           );
         })
-        .toList()
         .map((bv) => Variable.create(bv))
         .toList();
   }

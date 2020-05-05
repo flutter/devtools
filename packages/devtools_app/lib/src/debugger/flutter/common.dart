@@ -46,17 +46,13 @@ Widget createAnimatedCircleWidget(double radius, Color color) {
   );
 }
 
-TextStyle regularStyle(BuildContext context) {
-  final theme = Theme.of(context);
-  return TextStyle(color: theme.textTheme.bodyText2.color);
-}
+extension DebuggerTextStyleExtension on BuildContext {
+  TextStyle get regularTextStyle =>
+      TextStyle(color: Theme.of(this).textTheme.bodyText2.color);
 
-TextStyle subtleStyle(BuildContext context) {
-  final theme = Theme.of(context);
-  return TextStyle(color: theme.unselectedWidgetColor);
-}
+  TextStyle get subtleTextStyle =>
+      TextStyle(color: Theme.of(this).unselectedWidgetColor);
 
-TextStyle selectedStyle(BuildContext context) {
-  final theme = Theme.of(context);
-  return TextStyle(color: theme.textSelectionColor);
+  TextStyle get selectedTextStyle =>
+      TextStyle(color: Theme.of(this).textSelectionColor);
 }
