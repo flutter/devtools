@@ -8,10 +8,10 @@ import '../flutter/memory_controller.dart';
 
 // TODO(terry): Ask Ben, what is a class name of ::?
 /// Internal class names :: automatically filter out.
-const String internalClassName = '::';
+const internalClassName = '::';
 
 /// Contains normalized library name and class name. Where
-/// normalized library is dart:xxx, package:xxxx, etc. This is 
+/// normalized library is dart:xxx, package:xxxx, etc. This is
 /// how libraries and class names are displayed to the user
 /// to help to reduce the 100s of URIs that would otherwise be
 /// encountered.
@@ -23,7 +23,7 @@ class LibraryClass {
 
   @override
   bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
+    if (other.runtimeType != LibraryClass) return false;
     return libraryName == other.libraryName && className == other.className;
   }
 
@@ -31,8 +31,8 @@ class LibraryClass {
   int get hashCode => libraryName.hashCode ^ className.hashCode;
 }
 
-const String core = 'dart:core';
-const String collection = 'dart:collection';
+const core = 'dart:core';
+const collection = 'dart:collection';
 
 // TODO(terry): Bake in types instead of comparing qualified class name.
 LibraryClass predefinedNull = LibraryClass(core, 'Null');

@@ -18,6 +18,23 @@ import '../../ui/colors.dart';
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';
 
+/// UX navigation in a heat map e.g.,
+///     ------------------------------------------------------------
+///     | ||| || |||| |       | new String | | || Foundation (38M) |
+///     ------------------------------------------------------------
+///     || |  |     | |  List | String | |  ||      src (42M)      |
+///     ------------------------------------------------------------
+///     | src (36.4M) |    dart:core (58M)   |package:flutter (42M)|
+///     ------------------------------------------------------------
+///     |                       Root (136M)                        |
+///     ------------------------------------------------------------
+/// Mouse action (click or mouse scroll wheel) over a rectangle for example
+/// package:flutter will to expand its contained children to more rectangles
+/// upwards. The sizes of the contained children (if an aggregated parent).
+/// Mouse action over, upward, children will further expand its children in
+/// a upward fashion too. To collapse a rectangle move the mouse below a child
+/// rectangle (its parent) and click or mouse scroll.
+
 class HeatMapSizeAnalyzer extends SingleChildRenderObjectWidget {
   const HeatMapSizeAnalyzer({
     Key key,
@@ -114,6 +131,7 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
     if (sizes != null) {
       _flameChart = _FlameChart(
         sizes,
+        // TODO(terry): Can the color range match flame chart? Review with UX.
         memoryHeatMapLightColor,
         memoryHeatMapDarkColor,
         callbacks,
@@ -136,13 +154,13 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
 }
 
 /// Key in callbacks map.
-const String findNodeKey = 'findNode';
+const findNodeKey = 'findNode';
 
 /// findNode callback signature.
 typedef FindNodeFunction = Node Function(String);
 
 /// Key in callbacks map.
-const String selectNodeKey = 'selectNode';
+const selectNodeKey = 'selectNode';
 
 /// selectNode callback signature.
 typedef SelectNodeFunction = void Function(Node);

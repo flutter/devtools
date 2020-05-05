@@ -14,15 +14,15 @@ import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';
 
 /// First two libraries are special e.g., dart:* and package:flutter*
-const String _dartLibraryUriPrefix = 'dart:';
-const String _flutterLibraryUriPrefix = 'package:flutter';
-const String _collectionLibraryUri = 'package:collection';
-const String _intlLibraryUri = 'package:intl';
-const String _vectorMathLibraryUri = 'package:vector_math';
+const _dartLibraryUriPrefix = 'dart:';
+const _flutterLibraryUriPrefix = 'package:flutter';
+const _collectionLibraryUri = 'package:collection';
+const _intlLibraryUri = 'package:intl';
+const _vectorMathLibraryUri = 'package:vector_math';
 
 /// Name displayed in filter dialog, for wildcard groups.
-const String _prettyPrintDartAbbreviation = '$_dartLibraryUriPrefix*';
-const String _prettyPrintFlutterAbbreviation = '$_flutterLibraryUriPrefix*';
+const _prettyPrintDartAbbreviation = '$_dartLibraryUriPrefix*';
+const _prettyPrintFlutterAbbreviation = '$_flutterLibraryUriPrefix*';
 
 /// State of the libraries, wildcard included, filtered (shown or hidden).
 /// groupBy uses this class to determine is the library should be filtered.

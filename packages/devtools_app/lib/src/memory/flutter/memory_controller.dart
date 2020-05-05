@@ -50,7 +50,7 @@ class MemoryController extends DisposableController
     memoryLog = MemoryLog(this);
   }
 
-  static const String logFilenamePrefix = 'memory_log_';
+  static const logFilenamePrefix = 'memory_log_';
 
   bool showHeatMap = true;
 
@@ -116,7 +116,7 @@ class MemoryController extends DisposableController
       _selectedAndroidSample = sample;
   }
 
-  static const String liveFeed = 'Live Feed';
+  static const liveFeed = 'Live Feed';
 
   String memorySourcePrefix;
 
@@ -154,10 +154,10 @@ class MemoryController extends DisposableController
   }
 
   /// Automatic pruning of memory statistics (plotted) full data is still retained.
-  static const String displayOneMinute = '1';
-  static const String displayFiveMinutes = '5';
-  static const String displayTenMinutes = '10';
-  static const String displayAllMinutes = 'All';
+  static const displayOneMinute = '1';
+  static const displayFiveMinutes = '5';
+  static const displayTenMinutes = '10';
+  static const displayAllMinutes = 'All';
 
   /// Default is to display last minute of collected data in the chart.
   final _displayIntervalNotifier = ValueNotifier<String>(displayOneMinute);
@@ -322,9 +322,9 @@ class MemoryController extends DisposableController
       filterLibraryNoInstances;
 
   /// Table ordered by library, class or instance
-  static const String groupByLibrary = 'Library';
-  static const String groupByClass = 'Class';
-  static const String groupByInstance = 'Instance';
+  static const groupByLibrary = 'Library';
+  static const groupByClass = 'Class';
+  static const groupByInstance = 'Instance';
 
   final groupingBy = ValueNotifier<String>(groupByLibrary);
 

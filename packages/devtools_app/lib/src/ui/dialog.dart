@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-const String dialogDefault = 'dialog';
+const dialogDefault = 'dialog';
 
 /// A FlatButton used to close a containing dialog - Cancel.
 class DialogCancelButton extends StatelessWidget {

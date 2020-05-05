@@ -900,7 +900,7 @@ class SelectedDataPoint extends LineChartMarker {
     canvas.restore();
   }
 
-  static const String _titlesDartVm = 'Time\n'
+  static const _titlesDartVm = 'Time\n'
       'Capacity\n'
       'Used\n'
       'External\n'
@@ -920,7 +920,7 @@ class SelectedDataPoint extends LineChartMarker {
     const Color(0xff77aed5), // Light-Blue (External)
   ];
 
-  static const String _titlesAndroid = 'Time\n'
+  static const _titlesAndroid = 'Time\n'
       'Total\n'
       'Other\n'
       'Code\n'

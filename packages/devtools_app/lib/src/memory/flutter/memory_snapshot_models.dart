@@ -10,13 +10,13 @@ import '../flutter/memory_graph_model.dart';
 
 /// Consolidated list of libraries.  External is the external heap
 /// and Filtered is the sum of all filtered (hidden) libraries.
-const String externalLibraryName = 'External';
-const String filteredLibrariesName = 'Filtered';
+const externalLibraryName = 'External';
+const filteredLibrariesName = 'Filtered';
 
 /// Name for predefined Reference and FieldReference should never be
 /// seen by user.
-const String emptyName = '<empty>';
-const String sentinelName = '<sentinel>';
+const emptyName = '<empty>';
+const sentinelName = '<sentinel>';
 
 class Reference extends TreeNode<Reference> {
   Reference._empty()

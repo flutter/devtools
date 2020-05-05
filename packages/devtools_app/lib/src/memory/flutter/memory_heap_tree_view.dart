@@ -390,6 +390,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Container(
+            // TODO(terry): Use a more adaptive layout than forcing to 300.0
             width: 300.0,
             height: 40.0,
             child: searchAndRawKeyboard,
