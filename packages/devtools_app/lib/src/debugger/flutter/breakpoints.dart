@@ -63,11 +63,6 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
     BreakpointAndSourcePosition selectedBreakpoint,
   ) {
     final theme = Theme.of(context);
-
-    final regularStyle = TextStyle(color: theme.textTheme.bodyText2.color);
-    final subtleStyle = TextStyle(color: theme.unselectedWidgetColor);
-    final selectedStyle = TextStyle(color: theme.textSelectionColor);
-
     final isSelected = bp.id == selectedBreakpoint?.id;
 
     return Material(
@@ -86,7 +81,10 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
                 ),
                 child: createCircleWidget(
                   breakpointRadius,
-                  (isSelected ? selectedStyle : regularStyle).color,
+                  (isSelected
+                          ? theme.selectedTextStyle
+                          : theme.regularTextStyle)
+                      .color,
                 ),
               ),
               Flexible(
@@ -95,11 +93,15 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
                     text: _descriptionFor(bp),
-                    style: isSelected ? selectedStyle : regularStyle,
+                    style: isSelected
+                        ? theme.selectedTextStyle
+                        : theme.regularTextStyle,
                     children: [
                       TextSpan(
                         text: ' (${bp.scriptUri})',
-                        style: isSelected ? selectedStyle : subtleStyle,
+                        style: isSelected
+                            ? theme.selectedTextStyle
+                            : theme.subtleTextStyle,
                       ),
                     ],
                   ),
