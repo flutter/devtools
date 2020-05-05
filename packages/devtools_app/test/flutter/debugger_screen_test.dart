@@ -62,6 +62,7 @@ void main() {
       when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
       when(debuggerController.exceptionPauseMode)
           .thenReturn(ValueNotifier('Unhandled'));
+      when(debuggerController.variables).thenReturn(ValueNotifier([]));
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -182,7 +183,7 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
-        'call stack show items', const Size(1000.0, 4000.0),
+        'Call Stack shows items', const Size(1000.0, 4000.0),
         (WidgetTester tester) async {
       final stackFrames = [
         Frame(
@@ -290,6 +291,66 @@ void main() {
       expect(find.text('<async break>'), findsOneWidget);
     });
 
+    testWidgetsWithWindowSize(
+        'Variables shows items', const Size(1000.0, 4000.0),
+        (WidgetTester tester) async {
+      when(debuggerController.variables)
+          .thenReturn(ValueNotifier(testVariables));
+      await pumpDebuggerScreen(tester, debuggerController);
+      expect(find.text('Variables'), findsOneWidget);
+
+      final listFinder = find.byWidgetPredicate((Widget widget) =>
+          widget is RichText &&
+          widget.text.toPlainText().contains('Root 1 [2] _GrowableList'));
+      final listChild1Finder = find.byWidgetPredicate((Widget widget) =>
+          widget is RichText && widget.text.toPlainText().contains('[0] 3'));
+      final listChild2Finder = find.byWidgetPredicate((Widget widget) =>
+          widget is RichText && widget.text.toPlainText().contains('[1] 4'));
+
+      final mapFinder = find.byWidgetPredicate((Widget widget) =>
+          widget is RichText &&
+          widget.text
+              .toPlainText()
+              .contains('Root 2 { 2 } _InternalLinkedHashmap'));
+      final mapElement1Finder = find.byWidgetPredicate((Widget widget) =>
+          widget is RichText &&
+          widget.text.toPlainText().contains("['key1'] 1.0"));
+      final mapElement2Finder = find.byWidgetPredicate((Widget widget) =>
+          widget is RichText &&
+          widget.text.toPlainText().contains("['key2'] 1.1"));
+
+      expect(listFinder, findsOneWidget);
+      expect(mapFinder, findsOneWidget);
+      expect(
+        find.byWidgetPredicate((Widget widget) =>
+            widget is RichText &&
+            widget.text.toPlainText().contains("Root 3 'test str...'")),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate((Widget widget) =>
+            widget is RichText &&
+            widget.text.toPlainText().contains('Root 4 true')),
+        findsOneWidget,
+      );
+
+      // Expand list.
+      expect(listChild1Finder, findsNothing);
+      expect(listChild2Finder, findsNothing);
+      await tester.tap(listFinder);
+      await tester.pumpAndSettle();
+      expect(listChild1Finder, findsOneWidget);
+      expect(listChild2Finder, findsOneWidget);
+
+      // Expand map.
+      expect(mapElement1Finder, findsNothing);
+      expect(mapElement2Finder, findsNothing);
+      await tester.tap(mapFinder);
+      await tester.pumpAndSettle();
+      expect(mapElement1Finder, findsOneWidget);
+      expect(mapElement2Finder, findsOneWidget);
+    });
+
     WidgetPredicate createDebuggerButtonPredicate(String title) {
       return (Widget widget) {
         if (widget is DebuggerButton && widget.title == title) {
@@ -362,3 +423,104 @@ String _ansiCodesOutput() {
   sb.write(pen('console'));
   return sb.toString();
 }
+
+final testVariables = [
+  Variable.create(BoundVariable(
+    name: 'Root 1',
+    value: InstanceRef(
+      kind: InstanceKind.kList,
+      classRef: ClassRef(name: '_GrowableList'),
+      length: 2,
+    ),
+    declarationTokenPos: null,
+    scopeEndTokenPos: null,
+    scopeStartTokenPos: null,
+  ))
+    ..addAllChildren([
+      Variable.create(BoundVariable(
+        name: '[0]',
+        value: InstanceRef(
+          kind: InstanceKind.kInt,
+          classRef: ClassRef(name: 'Integer'),
+          valueAsString: '3',
+          valueAsStringIsTruncated: false,
+        ),
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
+      )),
+      Variable.create(BoundVariable(
+        name: '[1]',
+        value: InstanceRef(
+          kind: InstanceKind.kInt,
+          classRef: ClassRef(name: 'Integer'),
+          valueAsString: '4',
+          valueAsStringIsTruncated: false,
+        ),
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
+      )),
+    ]),
+  Variable.create(BoundVariable(
+    name: 'Root 2',
+    value: InstanceRef(
+      kind: InstanceKind.kMap,
+      classRef: ClassRef(name: '_InternalLinkedHashmap'),
+      length: 2,
+    ),
+    declarationTokenPos: null,
+    scopeEndTokenPos: null,
+    scopeStartTokenPos: null,
+  ))
+    ..addAllChildren([
+      Variable.create(BoundVariable(
+        name: "['key1']",
+        value: InstanceRef(
+          kind: InstanceKind.kDouble,
+          classRef: ClassRef(name: 'Double'),
+          valueAsString: '1.0',
+          valueAsStringIsTruncated: false,
+        ),
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
+      )),
+      Variable.create(BoundVariable(
+        name: "['key2']",
+        value: InstanceRef(
+          kind: InstanceKind.kDouble,
+          classRef: ClassRef(name: 'Double'),
+          valueAsString: '1.1',
+          valueAsStringIsTruncated: false,
+        ),
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
+      )),
+    ]),
+  Variable.create(BoundVariable(
+    name: 'Root 3',
+    value: InstanceRef(
+      kind: InstanceKind.kString,
+      classRef: ClassRef(name: 'String'),
+      valueAsString: 'test str',
+      valueAsStringIsTruncated: true,
+    ),
+    declarationTokenPos: null,
+    scopeEndTokenPos: null,
+    scopeStartTokenPos: null,
+  )),
+  Variable.create(BoundVariable(
+    name: 'Root 4',
+    value: InstanceRef(
+      kind: InstanceKind.kBool,
+      classRef: ClassRef(name: 'Boolean'),
+      valueAsString: 'true',
+      valueAsStringIsTruncated: false,
+    ),
+    declarationTokenPos: null,
+    scopeEndTokenPos: null,
+    scopeStartTokenPos: null,
+  )),
+];
