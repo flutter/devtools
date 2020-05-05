@@ -183,9 +183,27 @@ class StatusLine extends StatelessWidget {
           // TODO(devoncarew): Add an interactive dialog to the device status
           // line.
 
+          final color = Theme.of(context).textTheme.bodyText2.color;
+
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              ValueListenableBuilder(
+                valueListenable: serviceManager.deviceBusy,
+                builder: (context, isBusy, _) {
+                  return SizedBox(
+                    width: smallProgressSize,
+                    height: smallProgressSize,
+                    child: isBusy
+                        ? CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(color),
+                          )
+                        : const SizedBox(),
+                  );
+                },
+              ),
+              const SizedBox(width: denseSpacing),
               Text(
                 'Device: $description',
                 style: textTheme.bodyText2,

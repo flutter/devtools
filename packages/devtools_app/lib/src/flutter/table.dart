@@ -285,6 +285,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   void _toggleNode(T node) {
+    if (!node.isExpandable) {
+      node.leaf();
+      return;
+    }
+
     setState(() {
       if (!node.isExpandable) return;
       animatingNode = node;
