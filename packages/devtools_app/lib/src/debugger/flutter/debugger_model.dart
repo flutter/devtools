@@ -199,6 +199,7 @@ class Variable extends TreeNode<Variable> {
 
   Object get value => boundVar.value;
 
+  // TODO(kenz): add custom display for lists with more than 100 elements
   String get displayValue {
     final value = this.value;
 

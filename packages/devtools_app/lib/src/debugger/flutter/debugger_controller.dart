@@ -515,6 +515,8 @@ class DebuggerController extends DisposableController
         .map((MapAssociation assoc) {
           // For string keys, quote the key value.
           String keyString = assoc.key.valueAsString;
+          // TODO(kenz): for maps where keys are not primitive types, support
+          // expanding the keys as well as the values.
           if (assoc.key is InstanceRef &&
               assoc.key.kind == InstanceKind.kString) {
             keyString = "'$keyString'";
@@ -536,7 +538,7 @@ class DebuggerController extends DisposableController
     for (int i = 0; i < instance.elements.length; i++) {
       final value = instance.elements[i];
       boundVars.add(BoundVariable(
-        name: '[$i]',
+        name: '$i:',
         value: value,
         scopeStartTokenPos: null,
         scopeEndTokenPos: null,

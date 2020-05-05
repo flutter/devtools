@@ -32,16 +32,17 @@ class Variables extends StatelessWidget {
   }
 
   Widget displayProvider(BuildContext context, Variable v) {
+    final theme = Theme.of(context);
     return RichText(
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       text: TextSpan(
         text: '${v.boundVar.name} ',
-        style: context.regularTextStyle,
+        style: theme.regularTextStyle,
         children: [
           TextSpan(
             text: v.displayValue,
-            style: context.subtleTextStyle,
+            style: theme.subtleTextStyle,
           ),
         ],
       ),

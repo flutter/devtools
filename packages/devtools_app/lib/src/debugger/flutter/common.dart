@@ -46,13 +46,10 @@ Widget createAnimatedCircleWidget(double radius, Color color) {
   );
 }
 
-extension DebuggerTextStyleExtension on BuildContext {
-  TextStyle get regularTextStyle =>
-      TextStyle(color: Theme.of(this).textTheme.bodyText2.color);
+extension DebuggerTextStyleExtension on ThemeData {
+  TextStyle get regularTextStyle => TextStyle(color: textTheme.bodyText2.color);
 
-  TextStyle get subtleTextStyle =>
-      TextStyle(color: Theme.of(this).unselectedWidgetColor);
+  TextStyle get subtleTextStyle => TextStyle(color: unselectedWidgetColor);
 
-  TextStyle get selectedTextStyle =>
-      TextStyle(color: Theme.of(this).textSelectionColor);
+  TextStyle get selectedTextStyle => TextStyle(color: textSelectionColor);
 }
