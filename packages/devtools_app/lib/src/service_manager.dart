@@ -11,7 +11,9 @@ import 'package:vm_service/vm_service.dart' hide Error;
 
 import 'config_specific/logger/logger.dart';
 import 'connected_app.dart';
+import 'core/message_bus.dart';
 import 'eval_on_dart_library.dart';
+import 'globals.dart';
 import 'logging/vm_service_logger.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
@@ -403,6 +405,8 @@ class IsolateManager {
   }
 
   Future<void> _handleIsolateEvent(Event event) async {
+    _sendToMessageBus(event);
+
     if (event.kind == 'IsolateStart') {
       _isolates.add(event.isolate);
       _isolateCreatedController.add(event.isolate);
@@ -430,6 +434,13 @@ class IsolateManager {
         _serviceExtensionManager.resetAvailableExtensions();
       }
     }
+  }
+
+  void _sendToMessageBus(Event event) {
+    messageBus.addEvent(BusEvent(
+      'debugger',
+      data: event,
+    ));
   }
 
   bool _isFlutterExtension(String extensionName) {
