@@ -188,7 +188,7 @@ class StatusLine extends StatelessWidget {
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              ValueListenableBuilder<bool>(
+              ValueListenableBuilder(
                 valueListenable: serviceManager.deviceBusy,
                 builder: (context, isBusy, _) {
                   return SizedBox(

@@ -174,8 +174,11 @@ class HotReloadButton extends StatelessWidget {
       tooltip: 'Hot reload',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotReload,
-        action: () =>
+        action: () {
+          return serviceManager.runDeviceBusyTask(
             _wrapReloadCall('reload', serviceManager.performHotReload),
+          );
+        },
         completedText: 'Hot reload completed.',
         describeError: (error) => 'Unable to hot reload the app: $error',
       ),
@@ -193,8 +196,11 @@ class HotRestartButton extends StatelessWidget {
       tooltip: 'Hot restart',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotRestart,
-        action: () =>
+        action: () {
+          return serviceManager.runDeviceBusyTask(
             _wrapReloadCall('restart', serviceManager.performHotRestart),
+          );
+        },
         completedText: 'Hot restart completed.',
         describeError: (error) => 'Unable to hot restart the app: $error',
       ),
@@ -207,7 +213,6 @@ Future<void> _wrapReloadCall(
   Future<void> Function() reloadCall,
 ) async {
   try {
-    serviceManager.setDeviceBusy(true);
     final Stopwatch timer = Stopwatch()..start();
     messageBus.addEvent(BusEvent('$name.start'));
     await reloadCall();
@@ -221,8 +226,6 @@ Future<void> _wrapReloadCall(
     final String message = 'error performing $name';
     messageBus.addEvent(BusEvent('$name.end', data: message));
     rethrow;
-  } finally {
-    serviceManager.setDeviceBusy(false);
   }
 }
 

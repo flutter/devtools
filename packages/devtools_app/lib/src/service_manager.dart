@@ -109,6 +109,16 @@ class ServiceConnectionManager {
     _deviceBusy.value = isBusy;
   }
 
+  /// Set the device as busy during the duration of the given async task.
+  Future<T> runDeviceBusyTask<T>(Future<T> task) async {
+    try {
+      setDeviceBusy(true);
+      return await task;
+    } finally {
+      setDeviceBusy(false);
+    }
+  }
+
   /// Call a service that is registered by exactly one client.
   Future<Response> callService(
     String name, {
