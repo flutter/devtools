@@ -109,6 +109,9 @@ class TreeNode<T extends TreeNode<T>> {
     _isExpanded = false;
   }
 
+  /// Override to handle pressing on a Leaf node.
+  void leaf() {}
+
   void addChild(T child) {
     children.add(child);
     child.parent = this;
