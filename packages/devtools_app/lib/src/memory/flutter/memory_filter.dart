@@ -7,7 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
-import '../../ui/dialog.dart';
+import '../../ui/flutter/dialog.dart';
 import '../../ui/flutter/utils.dart';
 
 import 'memory_controller.dart';
