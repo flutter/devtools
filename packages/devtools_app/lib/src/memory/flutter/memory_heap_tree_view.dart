@@ -34,6 +34,14 @@ class HeapTree extends StatefulWidget {
   HeapTreeViewState createState() => HeapTreeViewState();
 }
 
+enum SnapshotStatus {
+  none,
+  streaming,
+  graphing,
+  grouping,
+  done,
+}
+
 class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   @visibleForTesting
   static const snapshotButtonKey = Key('Snapshot Button');
@@ -102,9 +110,31 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     super.dispose();
   }
 
+  SnapshotStatus snapshotState = SnapshotStatus.none;
+
+  bool get _isSnapshotRunning =>
+      snapshotState != SnapshotStatus.done &&
+      snapshotState != SnapshotStatus.none;
+  bool get _isSnapshotStreaming => snapshotState == SnapshotStatus.streaming;
+  bool get _isSnapshotGraphing => snapshotState == SnapshotStatus.graphing;
+  bool get _isSnapshotGrouping => snapshotState == SnapshotStatus.grouping;
+  bool get _isSnapshotComplete => snapshotState == SnapshotStatus.done;
+
   @override
   Widget build(BuildContext context) {
-    if (controller.snapshotByLibraryData != null) {
+    if (_isSnapshotRunning) {
+      snapshotDisplay = Column(children: [
+        const SizedBox(height: 50.0),
+        snapshotDisplay = const CircularProgressIndicator(),
+        Text(_isSnapshotStreaming
+            ? 'Processing...'
+            : _isSnapshotGraphing
+                ? 'Graphing...'
+                : _isSnapshotGrouping
+                    ? 'Grouping...'
+                    : _isSnapshotComplete ? 'Done' : '...'),
+      ]);
+    } else if (controller.snapshotByLibraryData != null) {
       if (controller.showHeatMap) {
         snapshotDisplay = HeatMapSizeAnalyzer(
           child: SizedBox.expand(
@@ -209,7 +239,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
           Flexible(
             child: OutlineButton(
               key: snapshotButtonKey,
-              onPressed: _snapshot,
+              onPressed: _isSnapshotRunning ? null : _snapshot,
               child: Label(
                 memorySnapshot,
                 'Snapshot',
@@ -393,10 +423,18 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   }
 
   void _snapshot() async {
+    setState(() {
+      snapshotState = SnapshotStatus.streaming;
+    });
+
     final snapshotTimestamp = DateTime.now();
 
     final graph = await controller.snapshotMemory();
     final snapshotCollectionTime = DateTime.now();
+
+    setState(() {
+      snapshotState = SnapshotStatus.graphing;
+    });
 
     // To debug particular classes add their names to the last
     // parameter classNamesToMonitor e.g., ['AppStateModel', 'Terry', 'TerryEntry']
@@ -408,6 +446,10 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     final snapshotGraphTime = DateTime.now();
 
     controller.storeSnapshot(snapshotTimestamp, graph);
+
+    setState(() {
+      snapshotState = SnapshotStatus.grouping;
+    });
 
     await doGroupBy();
     controller.computeAllLibraries();
@@ -424,6 +466,10 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
         ' ${snapshotGraphTime.difference(snapshotCollectionTime).inMilliseconds / 1000} seconds');
     print('  Snapshot grouping/libraries computed in'
         ' ${snapshotDoneTime.difference(snapshotGraphTime).inMilliseconds / 1000} seconds');
+
+    setState(() {
+      snapshotState = SnapshotStatus.done;
+    });
   }
 
   Future<void> doGroupBy() async {
