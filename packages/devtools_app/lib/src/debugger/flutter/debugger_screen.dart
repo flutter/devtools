@@ -250,23 +250,22 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 }
 
-class FilterLibraryIntent extends RequestFocusIntent {
+class FilterLibraryIntent extends Intent {
   const FilterLibraryIntent(
-    FocusNode focusNode,
+    this.focusNode,
     this.debuggerController,
   )   : assert(debuggerController != null),
-        super(focusNode);
+        assert(focusNode != null);
 
+  final FocusNode focusNode;
   final DebuggerController debuggerController;
 }
 
-class FilterLibraryAction extends RequestFocusAction {
+class FilterLibraryAction extends Action<FilterLibraryIntent> {
   @override
   void invoke(FilterLibraryIntent intent) {
-    debugPrint('invoking filter action');
-    super.invoke(intent);
-    // TODO: open, don't toggle
-    intent.debuggerController.toggleLibrariesVisible();
+    intent.debuggerController.openLibrariesView();
+    intent.focusNode.requestFocus();
   }
 }
 
