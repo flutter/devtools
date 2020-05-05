@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/flutter/theme.dart';
+import 'package:devtools_app/src/http/http_request_data.dart';
 @TestOn('vm')
 import 'package:devtools_app/src/network/flutter/network_model.dart';
-import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:test/test.dart';
@@ -62,27 +63,27 @@ void main() {
 
     test('verify status colors', () {
       const standard = TextStyle();
-      const green = TextStyle(color: Colors.greenAccent);
-      const yellow = TextStyle(color: Colors.yellowAccent);
-      const red = TextStyle(color: Colors.redAccent);
+
+      const redirect = TextStyle(color: devtoolsBlue);
+      const error = TextStyle(color: devtoolsError);
 
       // Expect no color for status code < 100.
       expect(dataTable.getStatusColor(null), standard);
       expect(dataTable.getStatusColor('99'), standard);
 
       // Expect green for status codes [100, 300).
-      expect(dataTable.getStatusColor('100'), green);
-      expect(dataTable.getStatusColor('299'), green);
+      expect(dataTable.getStatusColor('100'), standard);
+      expect(dataTable.getStatusColor('299'), standard);
 
       // Expect yellow for status codes [300, 400).
-      expect(dataTable.getStatusColor('300'), yellow);
-      expect(dataTable.getStatusColor('399'), yellow);
+      expect(dataTable.getStatusColor('300'), redirect);
+      expect(dataTable.getStatusColor('399'), redirect);
 
       // Expect red for status codes >= 400 or invalid codes.
-      expect(dataTable.getStatusColor('400'), red);
-      expect(dataTable.getStatusColor('500'), red);
-      expect(dataTable.getStatusColor('9001'), red);
-      expect(dataTable.getStatusColor('foobar'), red);
+      expect(dataTable.getStatusColor('400'), error);
+      expect(dataTable.getStatusColor('500'), error);
+      expect(dataTable.getStatusColor('9001'), error);
+      expect(dataTable.getStatusColor('foobar'), error);
     });
 
     test('select row', () async {
