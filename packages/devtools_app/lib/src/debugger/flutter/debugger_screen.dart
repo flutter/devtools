@@ -186,12 +186,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             debuggerPaneHeader(
               context,
               breakpointsTitle,
-              rightChild: ValueListenableBuilder(
-                valueListenable: controller.breakpointsWithLocation,
-                builder: (context, breakpoints, _) {
-                  return BreakpointsCountBadge(breakpoints: breakpoints);
-                },
-              ),
+              rightChild: _breakpointsRightChild(),
             ),
           ],
           children: const [
@@ -200,6 +195,26 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             BreakpointPicker(),
           ],
         );
+      },
+    );
+  }
+
+  Widget _breakpointsRightChild() {
+    return ValueListenableBuilder(
+      valueListenable: controller.breakpointsWithLocation,
+      builder: (context, breakpoints, _) {
+        return Row(children: [
+          ActionButton(
+            child: FlatButton(
+              padding: EdgeInsets.zero,
+              child: const Icon(Icons.delete, size: 24.0),
+              onPressed:
+                  breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
+            ),
+            tooltip: 'Remove all breakpoints',
+          ),
+          BreakpointsCountBadge(breakpoints: breakpoints),
+        ]);
       },
     );
   }
