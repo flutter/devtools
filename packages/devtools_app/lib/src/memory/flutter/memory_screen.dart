@@ -119,6 +119,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildPrimaryStateControls(),
+            const Expanded(child: SizedBox(width: denseSpacing)),
             _buildMemoryControls(),
           ],
         ),
@@ -243,68 +244,54 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   }
 
   Widget _buildPrimaryStateControls() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      // Add a semi-transparent background to the
-      // expand and collapse buttons so they don't interfere
-      // too badly with the tree content when the tree
-      // is narrow.
-      color: Theme.of(context).scaffoldBackgroundColor.withAlpha(200),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          ValueListenableBuilder(
-            valueListenable: controller.paused,
-            builder: (context, paused, _) {
-              return OutlineButton(
-                key: MemoryScreen.pauseButtonKey,
-                onPressed: paused ? null : controller.pauseLiveFeed,
-                child: Label(
-                  pauseIcon,
-                  'Pause',
-                  minIncludeTextWidth: _primaryControlsMinVerboseWidth,
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: denseSpacing),
-          ValueListenableBuilder(
-            valueListenable: controller.paused,
-            builder: (context, paused, _) {
-              return OutlineButton(
-                key: MemoryScreen.resumeButtonKey,
-                onPressed: paused ? controller.resumeLiveFeed : null,
-                child: Label(
-                  playIcon,
-                  'Resume',
-                  minIncludeTextWidth: _primaryControlsMinVerboseWidth,
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: defaultSpacing),
-          OutlineButton(
-              key: MemoryScreen.clearButtonKey,
-              // TODO(terry): Button needs to be Delete for offline data.
-              onPressed: controller.memorySource == MemoryController.liveFeed
-                  ? _clearTimeline
-                  : null,
+    return ValueListenableBuilder(
+      valueListenable: controller.paused,
+      builder: (context, paused, _) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            OutlineButton(
+              key: MemoryScreen.pauseButtonKey,
+              onPressed: paused ? null : controller.pauseLiveFeed,
               child: Label(
-                clearIcon,
-                'Clear',
+                pauseIcon,
+                'Pause',
                 minIncludeTextWidth: _primaryControlsMinVerboseWidth,
-              )),
-          const SizedBox(width: defaultSpacing),
-          _intervalDropdown(),
-        ],
-      ),
+              ),
+            ),
+            const SizedBox(width: denseSpacing),
+            OutlineButton(
+              key: MemoryScreen.resumeButtonKey,
+              onPressed: paused ? controller.resumeLiveFeed : null,
+              child: Label(
+                playIcon,
+                'Resume',
+                minIncludeTextWidth: _primaryControlsMinVerboseWidth,
+              ),
+            ),
+            const SizedBox(width: defaultSpacing),
+            OutlineButton(
+                key: MemoryScreen.clearButtonKey,
+                // TODO(terry): Button needs to be Delete for offline data.
+                onPressed: controller.memorySource == MemoryController.liveFeed
+                    ? _clearTimeline
+                    : null,
+                child: Label(
+                  clearIcon,
+                  'Clear',
+                  minIncludeTextWidth: _primaryControlsMinVerboseWidth,
+                )),
+            const SizedBox(width: defaultSpacing),
+            _intervalDropdown(),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildMemoryControls() {
     return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _memorySourceDropdown(),
         const SizedBox(width: defaultSpacing),
