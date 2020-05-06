@@ -1,4 +1,4 @@
-## 0.2.4
+## 0.2.4+1 2020-05-05
 * Memory Snapshot [#1885](https://github.com/flutter/devtools/pull/1885)
 * Added new debugger page.
 * Added new Network page.
