@@ -361,8 +361,6 @@ class MemoryController extends DisposableController
 
   bool hasStopped;
 
-  VM _vm;
-
   void _handleIsolateChanged() {
     // TODO(terry): Need an event on the controller for this too?
   }
@@ -447,13 +445,8 @@ class MemoryController extends DisposableController
     }).toList();
   }
 
-  void ensureVM() async {
-    _vm ??= await serviceManager.service.getVM();
-  }
-
   bool get isConnectedDeviceAndroid {
-    ensureVM();
-    return (_vm?.operatingSystem) == 'android';
+    return serviceManager.vm.operatingSystem == 'android';
   }
 
   Future<List<InstanceSummary>> getInstances(
