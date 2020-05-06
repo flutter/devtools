@@ -75,6 +75,7 @@ class MemoryTracker {
     final VM vm = await service.getVM();
 
     // TODO(terry): Need to handle a possible Sentinel being returned.
+    // TODO(devoncarew): Switch to using vmService.getMemoryUsage().
     final List<Isolate> isolates =
         await Future.wait(vm.isolates.map((IsolateRef ref) async {
       try {

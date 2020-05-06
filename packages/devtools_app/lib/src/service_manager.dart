@@ -387,15 +387,9 @@ class IsolateManager {
   /// Return a unique, monotonically increasing number for this Isolate.
   int isolateIndex(IsolateRef isolateRef) {
     if (!_isolateIndexMap.containsKey(isolateRef.id)) {
-      _assignIsolateIndex(isolateRef);
-    }
-    return _isolateIndexMap[isolateRef.id];
-  }
-
-  void _assignIsolateIndex(IsolateRef isolateRef) {
-    if (!_isolateIndexMap.containsKey(isolateRef.id)) {
       _isolateIndexMap[isolateRef.id] = ++_lastIsolateIndex;
     }
+    return _isolateIndexMap[isolateRef.id];
   }
 
   void selectIsolate(String isolateRefId) {
@@ -407,7 +401,7 @@ class IsolateManager {
 
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
     _isolates = isolates;
-    _isolates.forEach(_assignIsolateIndex);
+    _isolates.forEach(isolateIndex);
 
     await _initSelectedIsolate(isolates);
 
@@ -424,7 +418,7 @@ class IsolateManager {
   Future<void> _handleIsolateEvent(Event event) async {
     if (event.kind == EventKind.kIsolateStart) {
       _isolates.add(event.isolate);
-      _assignIsolateIndex(event.isolate);
+      isolateIndex(event.isolate);
       _isolateCreatedController.add(event.isolate);
       if (_selectedIsolate == null) {
         await _setSelectedIsolate(event.isolate);

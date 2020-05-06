@@ -333,7 +333,7 @@ class DebuggerController extends DisposableController
     appendStdio(text);
   }
 
-  Future<List<ScriptRef>> _retrieveSortScripts(IsolateRef ref) async {
+  Future<List<ScriptRef>> _retrieveAndSortScripts(IsolateRef ref) async {
     final scriptList = await _service.getScripts(isolateRef.id);
     // We filter out non-unique ScriptRefs here (dart-lang/sdk/issues/41661).
     final scriptRefs = Set.of(scriptList.scripts).toList();
@@ -351,7 +351,7 @@ class DebuggerController extends DisposableController
     final status = reloadEvent.status;
 
     // Refresh the list of scripts.
-    final scriptRefs = await _retrieveSortScripts(isolateRef);
+    final scriptRefs = await _retrieveAndSortScripts(isolateRef);
     for (var scriptRef in scriptRefs) {
       _uriToScriptMap[scriptRef.uri] = scriptRef;
     }
@@ -380,24 +380,35 @@ class DebuggerController extends DisposableController
           .firstWhere((script) => script.uri == uri, orElse: () => null);
 
       if (newScriptRef != null) {
-        // Pre-prime the script info.
-        // ignore: unawaited_futures
-        getScript(newScriptRef).then((script) {
-          showScriptLocation(ScriptLocation(newScriptRef));
-        });
+        // Display the script location.
+        _populateScriptAndShowLocation(newScriptRef);
       }
     }
 
     // TODO(devoncarew): Invalidate the list of classes?
   }
 
+  /// Jump to the given script.
+  ///
+  /// This method ensures that the source for the script is populated in our
+  /// cache, in order to reduce flashing in the editor view.
+  void _populateScriptAndShowLocation(ScriptRef scriptRef) {
+    getScript(scriptRef).then((script) {
+      showScriptLocation(ScriptLocation(scriptRef));
+    });
+  }
+
   void _updateBreakpointsAfterReload(
-      Set<ScriptRef> removedScripts, Set<ScriptRef> addedScripts) {
+    Set<ScriptRef> removedScripts,
+    Set<ScriptRef> addedScripts,
+  ) {
     // TODO(devoncarew): We need to coordinate this with other debugger clients
     // as well as pause before re-setting the breakpoints.
 
     final breakpointsToRemove = <BreakpointAndSourcePosition>[];
 
+    // Find all breakpoints set in files where we have newer versions of those
+    // files.
     for (final scriptRef in removedScripts) {
       for (final bp in breakpointsWithLocation.value) {
         if (bp.scriptRef == scriptRef) {
@@ -406,10 +417,12 @@ class DebuggerController extends DisposableController
       }
     }
 
+    // Remove the breakpoints.
     for (final bp in breakpointsToRemove) {
       removeBreakpoint(bp.breakpoint);
     }
 
+    // Add them back to the newer versions of those scripts.
     for (final scriptRef in addedScripts) {
       for (final bp in breakpointsToRemove) {
         if (scriptRef.uri == bp.scriptUri) {
@@ -482,7 +495,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    final scriptRefs = await _retrieveSortScripts(isolateRef);
+    final scriptRefs = await _retrieveAndSortScripts(isolateRef);
     _sortedScripts.value = scriptRefs;
 
     try {
@@ -509,11 +522,8 @@ class DebuggerController extends DisposableController
       return ref.uri == isolate.rootLib.uri;
     }, orElse: () => null);
 
-    // Pre-prime the script info.
-    // ignore: unawaited_futures
-    getScript(mainScriptRef).then((script) {
-      showScriptLocation(ScriptLocation(mainScriptRef));
-    });
+    // Display the script location.
+    _populateScriptAndShowLocation(mainScriptRef);
   }
 
   SourcePosition calculatePosition(Script script, int tokenPos) {
