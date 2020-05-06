@@ -187,6 +187,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               context,
               breakpointsTitle,
               rightChild: _breakpointsRightChild(),
+              rightPadding: 0.0,
             ),
           ],
           children: const [
@@ -301,6 +302,7 @@ FlexSplitColumnHeader debuggerPaneHeader(
   String title, {
   bool needsTopBorder = true,
   Widget rightChild,
+  double rightPadding = 4.0,
 }) {
   final theme = Theme.of(context);
 
@@ -316,7 +318,7 @@ FlexSplitColumnHeader debuggerPaneHeader(
         ),
         color: titleSolidBackgroundColor(theme),
       ),
-      padding: const EdgeInsets.only(left: defaultSpacing, right: 4.0),
+      padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
       alignment: Alignment.centerLeft,
       height: DebuggerScreen.debuggerPaneHeaderHeight,
       child: Row(
