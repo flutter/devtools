@@ -10,13 +10,9 @@ import 'package:devtools_testing/support/flutter_test_environment.dart';
 import 'package:test/test.dart';
 
 void main() async {
-  // TODO(devoncarew): Skip the service_manager_test.dart tests (#1773).
-  // ignore: dead_code
-  if (false) {
-    final FlutterTestEnvironment env = FlutterTestEnvironment(
-      const FlutterRunConfiguration(withDebugger: true),
-    );
+  final FlutterTestEnvironment env = FlutterTestEnvironment(
+    const FlutterRunConfiguration(withDebugger: true),
+  );
 
-    await runMemoryServiceTests(env);
-  }
+  await runMemoryServiceTests(env);
 }
