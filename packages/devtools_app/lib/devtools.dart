@@ -7,4 +7,4 @@
 // that updates all versions for DevTools.
 // Note: a regexp in tools/update_version.sh matches the following line so
 // if you change it you must also modify tools/update_version.sh.
-const String version = '0.2.4';
+const String version = '0.2.4+1';

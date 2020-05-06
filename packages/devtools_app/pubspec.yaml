@@ -6,7 +6,7 @@ description: Web-based performance tooling for Dart and Flutter.
 # When publishing new versions of this package be sure to publish a new version
 # of package:devtools as well. package:devtools contains a compiled snapshot of
 # this package.
-version: 0.2.4
+version: 0.2.4+1
 
 homepage: https://github.com/flutter/devtools
 
@@ -24,7 +24,7 @@ dependencies:
 #     path: ../../third_party/packages/ansi_up
   codemirror: ^0.5.10
   collection: ^1.14.11
-  devtools_shared: 0.2.4
+  devtools_shared: 0.2.4+1
   file: ^5.1.0
   http: ^0.12.0+1
   intl: ^0.16.0
@@ -69,7 +69,7 @@ dev_dependencies:
   webkit_inspection_protocol: ^0.5.0
   devtools: #^0.1.7
     path: ../devtools
-  devtools_testing: 0.2.4
+  devtools_testing: 0.2.4+1
   flutter_test:
     sdk: flutter
 
