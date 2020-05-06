@@ -57,6 +57,8 @@ const smallProgressSize = 12.0;
 
 const defaultListItemHeight = 28.0;
 
+const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
+
 /// Branded grey color.
 ///
 /// Source: https://drive.google.com/open?id=1QBhMJqXyRt-CpRsHR6yw2LAfQtiNat4g

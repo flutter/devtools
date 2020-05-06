@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../flutter/theme.dart';
 import '../../http/http_request_data.dart';
 import '../../utils.dart';
 
@@ -63,22 +64,18 @@ class HttpRequestDataTableSource extends DataTableSource {
     if (status == null) {
       return const TextStyle();
     }
+
     final statusInt = int.tryParse(status);
     if (statusInt == null || statusInt >= 400) {
       return const TextStyle(
-        color: Colors.redAccent,
+        color: devtoolsError,
       );
-    }
-    if (statusInt >= 100 && statusInt < 300) {
+    } else if (statusInt >= 300 && statusInt < 400) {
       return const TextStyle(
-        color: Colors.greenAccent,
+        color: devtoolsBlue,
       );
     }
-    if (statusInt >= 300 && statusInt < 400) {
-      return const TextStyle(
-        color: Colors.yellowAccent,
-      );
-    }
+
     return const TextStyle();
   }
 
