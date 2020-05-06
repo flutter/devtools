@@ -204,6 +204,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       valueListenable: controller.breakpointsWithLocation,
       builder: (context, breakpoints, _) {
         return Row(children: [
+          BreakpointsCountBadge(breakpoints: breakpoints),
           ActionButton(
             child: FlatButton(
               padding: EdgeInsets.zero,
@@ -213,7 +214,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             ),
             tooltip: 'Remove all breakpoints',
           ),
-          BreakpointsCountBadge(breakpoints: breakpoints),
         ]);
       },
     );
