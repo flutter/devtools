@@ -113,8 +113,8 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
                   ? RotationTransition(
                       turns: expandArrowAnimation,
                       child: const Icon(
-                        Icons.expand_more,
-                        size: defaultIconSize,
+                        Icons.arrow_drop_down,
+                        size: actionsIconSize,
                       ),
                     )
                   : const SizedBox(width: defaultSpacing),
