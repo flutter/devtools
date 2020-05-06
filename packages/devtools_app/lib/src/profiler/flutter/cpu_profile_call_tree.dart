@@ -46,7 +46,7 @@ class CpuCallTreeTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TreeTable<CpuStackFrame>(
-      dataRoots: [data.cpuProfileRoot],
+      dataRoots: [data.cpuProfileRoot.deepCopy()],
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (frame) => PageStorageKey<String>(frame.id),
