@@ -133,6 +133,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       valueListenable: controller.librariesVisible,
       builder: (context, visible, _) {
         if (visible) {
+          // Focus the filter textfield when the ScriptPicker opens
+          _libraryFilterFocusNode.requestFocus();
+
           // TODO(devoncarew): Animate this opening and closing.
           return Split(
             axis: Axis.horizontal,
