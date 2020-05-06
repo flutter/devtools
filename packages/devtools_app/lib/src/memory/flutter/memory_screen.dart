@@ -19,6 +19,9 @@ import 'memory_chart.dart';
 import 'memory_controller.dart';
 import 'memory_heap_tree_view.dart';
 
+/// Width of application when memory buttons loose their text.
+const _primaryControlsMinVerboseWidth = 1100.0;
+
 class MemoryScreen extends Screen {
   const MemoryScreen() : super(id, title: 'Memory', icon: Octicons.package);
 
@@ -169,11 +172,9 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
       iconSize: 20,
       style: const TextStyle(fontWeight: FontWeight.w100),
       onChanged: (String newValue) {
-        setState(
-          () {
-            controller.displayInterval = newValue;
-          },
-        );
+        setState(() {
+          controller.displayInterval = newValue;
+        });
       },
       items: _displayTypes,
     );
@@ -241,9 +242,6 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
 */
   }
 
-  /// Width of application when primary buttons loose their text.
-  static const double _primaryControlsMinVerboseWidth = 1300;
-
   Widget _buildPrimaryStateControls() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -255,23 +253,34 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          OutlineButton(
-            key: MemoryScreen.pauseButtonKey,
-            onPressed: controller.paused ? null : _pauseLiveTimeline,
-            child: Label(
-              pauseIcon,
-              'Pause',
-              minIncludeTextWidth: _primaryControlsMinVerboseWidth,
-            ),
+          ValueListenableBuilder(
+            valueListenable: controller.paused,
+            builder: (context, paused, _) {
+              return OutlineButton(
+                key: MemoryScreen.pauseButtonKey,
+                onPressed: paused ? null : controller.pauseLiveFeed,
+                child: Label(
+                  pauseIcon,
+                  'Pause',
+                  minIncludeTextWidth: _primaryControlsMinVerboseWidth,
+                ),
+              );
+            },
           ),
-          OutlineButton(
-            key: MemoryScreen.resumeButtonKey,
-            onPressed: controller.paused ? _resumeLiveTimeline : null,
-            child: Label(
-              playIcon,
-              'Resume',
-              minIncludeTextWidth: _primaryControlsMinVerboseWidth,
-            ),
+          const SizedBox(width: denseSpacing),
+          ValueListenableBuilder(
+            valueListenable: controller.paused,
+            builder: (context, paused, _) {
+              return OutlineButton(
+                key: MemoryScreen.resumeButtonKey,
+                onPressed: paused ? controller.resumeLiveFeed : null,
+                child: Label(
+                  playIcon,
+                  'Resume',
+                  minIncludeTextWidth: _primaryControlsMinVerboseWidth,
+                ),
+              );
+            },
           ),
           const SizedBox(width: defaultSpacing),
           OutlineButton(
@@ -292,55 +301,44 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
     );
   }
 
-  /// Width of application when memory buttons loose their text.
-  static const double _memoryControlsMinVerboseWidth = 1100;
-
   Widget _buildMemoryControls() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          _memorySourceDropdown(),
-          const SizedBox(width: defaultSpacing),
-          Flexible(
-            child: OutlineButton(
-              key: MemoryScreen.resetButtonKey,
-              onPressed: _reset,
-              child: Label(
-                memoryReset,
-                'Reset',
-                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
-              ),
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        _memorySourceDropdown(),
+        const SizedBox(width: defaultSpacing),
+        OutlineButton(
+          key: MemoryScreen.resetButtonKey,
+          onPressed: _reset,
+          child: Label(
+            memoryReset,
+            'Reset',
+            minIncludeTextWidth: _primaryControlsMinVerboseWidth,
           ),
-          Flexible(
-            child: OutlineButton(
-              key: MemoryScreen.gcButtonKey,
-              onPressed: _gc,
-              child: Label(
-                memoryGC,
-                'GC',
-                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
-              ),
-            ),
+        ),
+        const SizedBox(width: denseSpacing),
+        OutlineButton(
+          key: MemoryScreen.gcButtonKey,
+          onPressed: _gc,
+          child: Label(
+            memoryGC,
+            'GC',
+            minIncludeTextWidth: _primaryControlsMinVerboseWidth,
           ),
-          const SizedBox(width: defaultSpacing),
-          Flexible(
-            child: OutlineButton(
-              key: MemoryScreen.exportButtonKey,
-              onPressed:
-                  controller.offline ? null : controller.memoryLog.exportMemory,
-              child: Label(
-                exportIcon,
-                'Export',
-                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
-              ),
-            ),
+        ),
+        const SizedBox(width: defaultSpacing),
+        OutlineButton(
+          key: MemoryScreen.exportButtonKey,
+          onPressed:
+              controller.offline ? null : controller.memoryLog.exportMemory,
+          child: Label(
+            exportIcon,
+            'Export',
+            minIncludeTextWidth: _primaryControlsMinVerboseWidth,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -348,18 +346,6 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
 
   void _clearTimeline() {
     controller.memoryTimeline.reset();
-  }
-
-  void _pauseLiveTimeline() {
-    // TODO(terry): Implement real pause when connected to live feed.
-    controller.pauseLiveFeed();
-    setState(() {});
-  }
-
-  void _resumeLiveTimeline() {
-    // TODO(terry): Implement real resume when connected to live feed.
-    controller.resumeLiveFeed();
-    setState(() {});
   }
 
   void _reset() async {

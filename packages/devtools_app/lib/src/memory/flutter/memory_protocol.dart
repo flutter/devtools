@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../config_specific/logger/logger.dart';
 import '../../globals.dart';
 import '../../version.dart';
 import '../../vm_service_wrapper.dart';
@@ -16,7 +17,7 @@ import 'memory_controller.dart';
 class MemoryTracker {
   MemoryTracker(this.service, this.memoryController);
 
-  static const Duration updateDelay = Duration(milliseconds: 200);
+  static const Duration _updateDelay = Duration(milliseconds: 1000);
 
   VmServiceWrapper service;
 
@@ -45,13 +46,28 @@ class MemoryTracker {
 
   int get currentExternal => samples.last.external;
 
+  StreamSubscription<Event> _gcStreamListener;
+
   void start() {
-    _pollingTimer = Timer(const Duration(milliseconds: 500), _pollMemory);
-    service.onGCEvent.listen(_handleGCEvent);
+    _updateLiveDataPolling(memoryController.paused.value);
+    memoryController.paused.addListener(_updateLiveDataPolling);
+  }
+
+  void _updateLiveDataPolling([bool paused]) {
+    paused ??= memoryController.paused.value;
+
+    if (paused) {
+      _pollingTimer?.cancel();
+      _gcStreamListener?.cancel();
+    } else {
+      _pollingTimer = Timer(Duration.zero, _pollMemory);
+      _gcStreamListener = service.onGCEvent.listen(_handleGCEvent);
+    }
   }
 
   void stop() {
-    _pollingTimer?.cancel();
+    _updateLiveDataPolling(false);
+    memoryController.paused.removeListener(_updateLiveDataPolling);
     service = null;
   }
 
@@ -82,7 +98,7 @@ class MemoryTracker {
       } catch (e) {
         // TODO(terry): Seem to sometimes get a sentinel not sure how? VM issue?
         // Unhandled Exception: type 'Sentinel' is not a subtype of type 'FutureOr<Isolate>'
-        print('Error [MEMORY_PROTOCOL]: $e');
+        log('Error [MEMORY_PROTOCOL]: $e');
         return null;
       }
     }));
@@ -98,7 +114,7 @@ class MemoryTracker {
 
     // Polls for current RSS size.
     _update(vm, isolates);
-    _pollingTimer = Timer(updateDelay, _pollMemory);
+    _pollingTimer = Timer(_updateDelay, _pollMemory);
   }
 
   void _update(VM vm, List<Isolate> isolates) {

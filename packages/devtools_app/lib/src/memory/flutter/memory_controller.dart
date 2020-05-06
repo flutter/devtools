@@ -247,16 +247,16 @@ class MemoryController extends DisposableController
     processDataset(args);
   }
 
-  bool _paused = false;
+  final _paused = ValueNotifier<bool>(false);
 
-  bool get paused => _paused;
+  ValueListenable<bool> get paused => _paused;
 
   void pauseLiveFeed() {
-    _paused = true;
+    _paused.value = true;
   }
 
   void resumeLiveFeed() {
-    _paused = false;
+    _paused.value = false;
   }
 
   bool _androidChartVisible = false;
@@ -985,7 +985,7 @@ class MemoryTimeline {
             liveData[startingIndex].timestamp.toInt()));
         final endDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(
             liveData[endingIndex].timestamp.toInt()));
-        print('Time range Live data start: $startDT, end: $endDT');
+        log('Time range Live data start: $startDT, end: $endDT');
       }
 
       return args;
@@ -1032,7 +1032,7 @@ class MemoryTimeline {
           data[startingIndex].timestamp.toInt()));
       final endDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(
           data[endingIndex].timestamp.toInt()));
-      print('Recompute Time range Offline data start: $startDT, end: $endDT');
+      log('Recompute Time range Offline data start: $startDT, end: $endDT');
     }
   }
 
