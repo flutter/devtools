@@ -24,6 +24,7 @@ import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'scripts.dart';
+import 'variables.dart';
 
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
@@ -195,7 +196,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           ],
           children: const [
             CallStack(),
-            Center(child: Text('TODO: variables')),
+            Variables(),
             BreakpointPicker(),
           ],
         );

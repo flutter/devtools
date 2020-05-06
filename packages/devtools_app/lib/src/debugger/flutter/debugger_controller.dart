@@ -76,6 +76,10 @@ class DebuggerController extends DisposableController
   ValueListenable<StackFrameAndSourcePosition> get selectedStackFrame =>
       _selectedStackFrame;
 
+  final _variables = ValueNotifier<List<Variable>>([]);
+
+  ValueListenable<List<Variable>> get variables => _variables;
+
   final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
 
   /// Return the sorted list of ScriptRefs active in the current isolate.
@@ -579,10 +583,101 @@ class DebuggerController extends DisposableController
   void selectStackFrame(StackFrameAndSourcePosition frame) {
     _selectedStackFrame.value = frame;
 
+    if (frame != null) {
+      _variables.value = _createVariablesForFrame(frame.frame);
+    } else {
+      _variables.value = [];
+    }
+
     if (frame?.scriptRef != null) {
       showScriptLocation(
           ScriptLocation(frame.scriptRef, location: frame.position));
     }
+  }
+
+  List<Variable> _createVariablesForFrame(Frame frame) {
+    final variables = frame.vars.map((v) => Variable.create(v)).toList();
+    variables.forEach(buildVariablesTree);
+    return variables;
+  }
+
+  /// Builds the tree representation for a [Variable] object by querying data,
+  /// creating child Variable objects, and assigning parent-child relationships.
+  ///
+  /// We call this method as we expand variables in the variable tree, because
+  /// building the tree for all variable data at once is very expensive.
+  Future<void> buildVariablesTree(Variable variable) async {
+    if (!variable.isExpandable || variable.treeInitialized) return;
+
+    final InstanceRef instanceRef = variable.boundVar.value;
+    try {
+      final dynamic result = await getObject(instanceRef);
+      if (result is Instance) {
+        if (result.associations != null) {
+          variable.addAllChildren(_createVariablesForAssociations(result));
+        } else if (result.elements != null) {
+          variable.addAllChildren(_createVariablesForElements(result));
+        } else if (result.fields != null) {
+          variable.addAllChildren(_createVariablesForFields(result));
+        }
+      }
+    } on SentinelException catch (_) {
+      // Fail gracefully if calling `getObject` throws a SentinelException.
+    }
+    variable.treeInitialized = true;
+  }
+
+  List<Variable> _createVariablesForAssociations(Instance instance) {
+    return instance.associations
+        .map((MapAssociation assoc) {
+          // For string keys, quote the key value.
+          String keyString = assoc.key.valueAsString;
+          // TODO(kenz): for maps where keys are not primitive types, support
+          // expanding the keys as well as the values.
+          if (assoc.key is InstanceRef &&
+              assoc.key.kind == InstanceKind.kString) {
+            keyString = "'$keyString'";
+          }
+          return BoundVariable(
+            name: '[$keyString]',
+            value: assoc.value,
+            scopeStartTokenPos: null,
+            scopeEndTokenPos: null,
+            declarationTokenPos: null,
+          );
+        })
+        .map((bv) => Variable.create(bv))
+        .toList();
+  }
+
+  List<Variable> _createVariablesForElements(Instance instance) {
+    final List<BoundVariable> boundVars = [];
+    for (int i = 0; i < instance.elements.length; i++) {
+      final value = instance.elements[i];
+      boundVars.add(BoundVariable(
+        name: '$i:',
+        value: value,
+        scopeStartTokenPos: null,
+        scopeEndTokenPos: null,
+        declarationTokenPos: null,
+      ));
+    }
+    return boundVars.map((bv) => Variable.create(bv)).toList();
+  }
+
+  List<Variable> _createVariablesForFields(Instance instance) {
+    return instance.fields
+        .map((BoundField field) {
+          return BoundVariable(
+            name: field.decl.name,
+            value: field.value,
+            scopeStartTokenPos: null,
+            scopeEndTokenPos: null,
+            declarationTokenPos: null,
+          );
+        })
+        .map((bv) => Variable.create(bv))
+        .toList();
   }
 
   List<Frame> _framesForCallStack(Stack stack) {

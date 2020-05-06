@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/octicons.dart';
@@ -16,6 +17,7 @@ import '../../ui/flutter/label.dart';
 import '../../ui/material_icons.dart';
 import 'memory_chart.dart';
 import 'memory_controller.dart';
+import 'memory_heap_tree_view.dart';
 
 class MemoryScreen extends Screen {
   const MemoryScreen() : super(id, title: 'Memory', icon: Octicons.package);
@@ -43,8 +45,6 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const exportButtonKey = Key('Export Button');
   @visibleForTesting
-  static const snapshotButtonKey = Key('Snapshot Button');
-  @visibleForTesting
   static const resetButtonKey = Key('Reset Button');
   @visibleForTesting
   static const gcButtonKey = Key('GC Button');
@@ -71,7 +71,7 @@ class MemoryBody extends StatefulWidget {
   MemoryBodyState createState() => MemoryBodyState();
 }
 
-class MemoryBodyState extends State<MemoryBody> {
+class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   MemoryChart _memoryChart;
 
   MemoryController controller;
@@ -84,6 +84,16 @@ class MemoryBodyState extends State<MemoryBody> {
     final newController = Provider.of<MemoryController>(context);
     if (newController == controller) return;
     controller = newController;
+
+    // Update the chart when the memorySource changes.
+    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
+      setState(() {
+        // TODO(terry): Create the snapshot data to display by Library,
+        //              by Class or by Objects.
+        // Create the snapshot data by Library.
+        controller.createSnapshotByLibrary();
+      });
+    });
 
     _updateListeningState();
   }
@@ -115,7 +125,7 @@ class MemoryBodyState extends State<MemoryBody> {
             initialFractions: const [0.40, 0.60],
             children: [
               _memoryChart,
-              const Text('Memory Panel TBD capacity'),
+              HeapTree(controller),
             ],
           ),
         ),
@@ -296,17 +306,6 @@ class MemoryBodyState extends State<MemoryBody> {
           const SizedBox(width: defaultSpacing),
           Flexible(
             child: OutlineButton(
-              key: MemoryScreen.snapshotButtonKey,
-              onPressed: _snapshot,
-              child: Label(
-                memorySnapshot,
-                'Snapshot',
-                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
-              ),
-            ),
-          ),
-          Flexible(
-            child: OutlineButton(
               key: MemoryScreen.resetButtonKey,
               onPressed: _reset,
               child: Label(
@@ -345,7 +344,7 @@ class MemoryBodyState extends State<MemoryBody> {
     );
   }
 
-  // Callbacks for button actions:
+  /// Callbacks for button actions:
 
   void _clearTimeline() {
     controller.memoryTimeline.reset();
@@ -363,11 +362,7 @@ class MemoryBodyState extends State<MemoryBody> {
     setState(() {});
   }
 
-  void _snapshot() {
-    // TODO(terry): Implementation needed.
-  }
-
-  void _reset() {
+  void _reset() async {
     // TODO(terry): TBD real implementation needed.
   }
 
