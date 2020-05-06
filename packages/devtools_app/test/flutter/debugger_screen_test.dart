@@ -303,9 +303,9 @@ void main() {
           widget is RichText &&
           widget.text.toPlainText().contains('Root 1 [2] _GrowableList'));
       final listChild1Finder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText && widget.text.toPlainText().contains('[0] 3'));
+          widget is RichText && widget.text.toPlainText().contains('0: 3'));
       final listChild2Finder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText && widget.text.toPlainText().contains('[1] 4'));
+          widget is RichText && widget.text.toPlainText().contains('1: 4'));
 
       final mapFinder = find.byWidgetPredicate((Widget widget) =>
           widget is RichText &&
@@ -438,7 +438,7 @@ final testVariables = [
   ))
     ..addAllChildren([
       Variable.create(BoundVariable(
-        name: '[0]',
+        name: '0:',
         value: InstanceRef(
           kind: InstanceKind.kInt,
           classRef: ClassRef(name: 'Integer'),
@@ -450,7 +450,7 @@ final testVariables = [
         scopeStartTokenPos: null,
       )),
       Variable.create(BoundVariable(
-        name: '[1]',
+        name: '1:',
         value: InstanceRef(
           kind: InstanceKind.kInt,
           classRef: ClassRef(name: 'Integer'),
