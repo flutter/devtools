@@ -186,12 +186,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             debuggerPaneHeader(
               context,
               breakpointsTitle,
-              rightChild: ValueListenableBuilder(
-                valueListenable: controller.breakpointsWithLocation,
-                builder: (context, breakpoints, _) {
-                  return BreakpointsCountBadge(breakpoints: breakpoints);
-                },
-              ),
+              rightChild: _breakpointsRightChild(),
+              rightPadding: 0.0,
             ),
           ],
           children: const [
@@ -200,6 +196,26 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             BreakpointPicker(),
           ],
         );
+      },
+    );
+  }
+
+  Widget _breakpointsRightChild() {
+    return ValueListenableBuilder(
+      valueListenable: controller.breakpointsWithLocation,
+      builder: (context, breakpoints, _) {
+        return Row(children: [
+          BreakpointsCountBadge(breakpoints: breakpoints),
+          ActionButton(
+            child: FlatButton(
+              padding: EdgeInsets.zero,
+              child: const Icon(Icons.delete, size: 24.0),
+              onPressed:
+                  breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
+            ),
+            tooltip: 'Remove all breakpoints',
+          ),
+        ]);
       },
     );
   }
@@ -286,6 +302,7 @@ FlexSplitColumnHeader debuggerPaneHeader(
   String title, {
   bool needsTopBorder = true,
   Widget rightChild,
+  double rightPadding = 4.0,
 }) {
   final theme = Theme.of(context);
 
@@ -301,7 +318,7 @@ FlexSplitColumnHeader debuggerPaneHeader(
         ),
         color: titleSolidBackgroundColor(theme),
       ),
-      padding: const EdgeInsets.only(left: defaultSpacing, right: 4.0),
+      padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
       alignment: Alignment.centerLeft,
       height: DebuggerScreen.debuggerPaneHeaderHeight,
       child: Row(

@@ -31,6 +31,7 @@ class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
     Key key,
     @required this.tabs,
+    this.initialPage,
     this.actions,
   })  : assert(tabs != null),
         super(key: key);
@@ -61,6 +62,9 @@ class DevToolsScaffold extends StatefulWidget {
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
+
+  /// The initial page to render.
+  final String initialPage;
 
   /// Actions that it's possible to perform in this Scaffold.
   ///
@@ -159,6 +163,14 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     _tabController?.dispose();
     _tabController = TabController(length: widget.tabs.length, vsync: this);
 
+    if (widget.initialPage != null) {
+      final initialIndex = widget.tabs
+          .indexWhere((screen) => screen.screenId == widget.initialPage);
+      if (initialIndex != -1) {
+        _tabController.index = initialIndex;
+      }
+    }
+
     _currentScreen.value = widget.tabs[_tabController.index];
     _tabController.addListener(() {
       final screen = widget.tabs[_tabController.index];
@@ -171,6 +183,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         frameworkController.notifyPageChange(screen?.screenId);
       }
     });
+
+    // Broadcast the initial page.
+    frameworkController.notifyPageChange(_currentScreen.value.screenId);
   }
 
   /// Switch to the given page ID. This request usually comes from the server API
@@ -179,9 +194,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void _showPageById(String pageId) {
     final existingTabIndex = _tabController.index;
 
-    final screen = widget.tabs
-        .firstWhere((screen) => screen.screenId == pageId, orElse: () => null);
-    final newIndex = screen == null ? -1 : widget.tabs.indexOf(screen);
+    final newIndex =
+        widget.tabs.indexWhere((screen) => screen.screenId == pageId);
 
     if (newIndex != -1 && newIndex != existingTabIndex) {
       _tabController.animateTo(newIndex);
@@ -194,8 +208,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// Note that this currently works very well, but it doesn't integrate with
   /// the browser's history yet.
   void _pushScreenToLocalPageRoute(int newIndex) {
-    final previousTabIndex = _tabController.previousIndex;
-    if (newIndex != previousTabIndex) {
+    if (_tabController.indexIsChanging) {
+      final previousTabIndex = _tabController.previousIndex;
       ModalRoute.of(context).addLocalHistoryEntry(LocalHistoryEntry(
         onRemove: () {
           if (widget.tabs.length >= previousTabIndex) {
@@ -263,7 +277,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               );
             },
             child: TabBarView(
-              physics: const NeverScrollableScrollPhysics(),
+              physics: defaultTabBarViewPhysics,
               controller: _tabController,
               children: tabBodies,
             ),

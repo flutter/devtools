@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'package:flutter/material.dart';
 
+import '../../flutter/theme.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../cpu_profile_controller.dart';
 import '../cpu_profile_model.dart';
@@ -105,7 +106,7 @@ class _CpuProfilerState extends State<CpuProfiler>
       return widget.data.isEmpty
           ? _buildEmptyDataView()
           : TabBarView(
-              physics: const NeverScrollableScrollPhysics(),
+              physics: defaultTabBarViewPhysics,
               controller: _tabController,
               children: _buildProfilerViews(),
             );

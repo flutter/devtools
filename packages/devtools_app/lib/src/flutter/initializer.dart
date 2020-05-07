@@ -11,9 +11,7 @@ import '../framework/framework_core.dart';
 import '../globals.dart';
 import '../inspector/flutter_widget.dart';
 import '../url_utils.dart';
-import 'app.dart';
 import 'auto_dispose_mixin.dart';
-import 'navigation.dart';
 import 'notifications.dart';
 
 /// Widget that requires business logic to be loaded before building its
@@ -26,7 +24,7 @@ import 'notifications.dart';
 /// connected. As we require additional services to be available, add them
 /// here.
 class Initializer extends StatefulWidget {
-  const Initializer({Key key, this.url, @required this.builder})
+  const Initializer({Key key, @required this.url, @required this.builder})
       : assert(builder != null),
         super(key: key);
 
@@ -67,29 +65,31 @@ class _InitializerState extends State<Initializer>
       });
     });
 
+    // If we become disconnected, attempt to reconnect.
     autoDispose(
-      serviceManager.onStateChange.listen((_) {
-        // Generally, empty setState calls in Flutter should be avoided.
-        // However, serviceManager is an implicit part of this state.
-        // This setState call is alerting a change in the serviceManager's
-        // state.
-        setState(() {});
+      serviceManager.onStateChange.where((connected) => !connected).listen((_) {
         // TODO(https://github.com/flutter/devtools/issues/1285): On losing
         // the connection, only provide an option to reconnect; don't
         // immediately go to the connection page.
-        // If we've become disconnected, attempt to reconnect.
-        _navigateToConnectPage();
+        _attemptUrlConnection();
       }),
     );
+    // Trigger a rebuild when the connection becomes available. This is done
+    // by onConnectionAvailable and not onStateChange because we also need
+    // to have queried what type of app this is before we load the UI.
+    autoDispose(
+      serviceManager.onConnectionAvailable.listen((_) => setState(() {})),
+    );
 
-    if (widget.url != null) {
-      _attemptUrlConnection();
-    } else {
-      _navigateToConnectPage();
-    }
+    _attemptUrlConnection();
   }
 
   Future<void> _attemptUrlConnection() async {
+    if (widget.url == null) {
+      _navigateBackToConnectPage();
+      return;
+    }
+
     final uri = normalizeVmServiceUri(widget.url);
     final connected = await FrameworkCore.initVmService(
       '',
@@ -97,21 +97,19 @@ class _InitializerState extends State<Initializer>
       errorReporter: (message, error) =>
           Notifications.of(context).push('$message, $error'),
     );
+
     if (!connected) {
-      _navigateToConnectPage();
+      _navigateBackToConnectPage();
     }
   }
 
-  /// Loads the /connect page if the [service.serviceManager] is not currently connected.
-  void _navigateToConnectPage() {
+  /// Goes back to the connect page if the [service.serviceManager] is not currently connected.
+  void _navigateBackToConnectPage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
-        // If this route is on top and the app is not loaded, then we navigate to
-        // the /connect page to get a VM Service connection for serviceManager.
-        // When it completes, the serviceManager will notify this instance.
-        Navigator.of(context).pushNamed(
-          routeNameWithQueryParams(context, connectRoute),
-        );
+        // If this route is on top and the app is not connected, then we navigate
+        // back to the connect page.
+        Navigator.of(context).popUntil(ModalRoute.withName('/'));
       }
     });
   }

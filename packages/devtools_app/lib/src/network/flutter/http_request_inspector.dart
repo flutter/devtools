@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../flutter/common_widgets.dart';
+import '../../flutter/theme.dart';
 import '../../http/http_request_data.dart';
 import 'http_request_inspector_views.dart';
 
@@ -13,15 +14,15 @@ class HttpRequestInspector extends StatelessWidget {
   const HttpRequestInspector(this.data);
 
   static const _headersTabTitle = 'Headers';
-  static const _cookiesTabTitle = 'Cookies';
   static const _timingTabTitle = 'Timing';
+  static const _cookiesTabTitle = 'Cookies';
 
-  @visibleForTesting
-  static const cookiesTabKey = Key(_cookiesTabTitle);
   @visibleForTesting
   static const headersTabKey = Key(_headersTabTitle);
   @visibleForTesting
   static const timingTabKey = Key(_timingTabTitle);
+  @visibleForTesting
+  static const cookiesTabKey = Key(_cookiesTabTitle);
   @visibleForTesting
   static const noRequestSelectedKey = Key('No Request Selected');
 
@@ -53,6 +54,7 @@ class HttpRequestInspector extends StatelessWidget {
             children: [
               Flexible(
                 child: TabBar(
+                  labelColor: Theme.of(context).textTheme.bodyText1.color,
                   tabs: tabs,
                 ),
               ),
@@ -60,6 +62,7 @@ class HttpRequestInspector extends StatelessWidget {
           ),
           Expanded(
             child: TabBarView(
+              physics: defaultTabBarViewPhysics,
               children: [
                 HttpRequestHeadersView(data),
                 HttpRequestTimingView(data),

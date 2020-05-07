@@ -29,16 +29,21 @@ void main() {
       );
 
       app = MaterialApp(
+        // This test uses a fake route of /init for the initializer but
+        // in the real app it's loaded based on whether there's a ?uri= on
+        // the querystring, with / loading the connect dialog.
+        initialRoute: '/init',
         routes: {
-          '/connect': (_) => const SizedBox(key: connectKey),
-          '/': (_) => Initializer(
+          '/': (_) => const SizedBox(key: connectKey),
+          '/init': (_) => Initializer(
+                url: null,
                 builder: (_) => const SizedBox(key: initializedKey),
               ),
         },
       );
     });
 
-    testWidgets('navigates to the connection page when uninitialized',
+    testWidgets('navigates back to the connection page when uninitialized',
         (WidgetTester tester) async {
       setGlobal(
         ServiceConnectionManager,
