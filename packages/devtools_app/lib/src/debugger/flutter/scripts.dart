@@ -24,12 +24,14 @@ class ScriptPicker extends StatefulWidget {
     @required this.scripts,
     @required this.classes,
     @required this.onSelected,
+    this.libraryFilterFocusNode,
   }) : super(key: key);
 
   final DebuggerController controller;
   final List<ScriptRef> scripts;
   final List<ClassRef> classes;
   final void Function(ScriptLocation scriptRef) onSelected;
+  final FocusNode libraryFilterFocusNode;
 
   @override
   ScriptPickerState createState() => ScriptPickerState();
@@ -88,12 +90,13 @@ class ScriptPickerState extends State<ScriptPicker> {
                 height: 36.0,
                 child: TextField(
                   decoration: const InputDecoration(
-                    labelText: 'Filter',
+                    labelText: 'Filter (Ctrl + P)',
                     border: OutlineInputBorder(),
                   ),
                   controller: _filterController,
                   onChanged: (value) => updateFilter(),
                   style: Theme.of(context).textTheme.bodyText2,
+                  focusNode: widget.libraryFilterFocusNode,
                 ),
               ),
             ),
