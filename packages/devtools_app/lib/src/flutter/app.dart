@@ -131,8 +131,10 @@ class DevToolsAppState extends State<DevToolsApp> {
                 initialPage: params['page'],
                 tabs: _visibleScreens(),
                 actions: [
-                  HotReloadButton(),
-                  HotRestartButton(),
+                  if (serviceManager.connectedApp.isFlutterAppNow) ...[
+                    HotReloadButton(),
+                    HotRestartButton(),
+                  ],
                   OpenSettingsAction(),
                   OpenAboutAction(),
                 ],
