@@ -1,3 +1,8 @@
+## 0.2.5 2020-05-07
+* Persist connected app URI when switching to Flutter web version of DevTools [#1933](https://github.com/flutter/devtools/pull/1933)
+* Fix CPU profiler bug where we were unintentionally mutating data [#1923](https://github.com/flutter/devtools/pull/1923)
+* Add "Remove all breakpoints" functionality to debugger [#1914](https://github.com/flutter/devtools/pull/1914)
+
 ## 0.2.4+1 2020-05-05
 * Memory Snapshot [#1885](https://github.com/flutter/devtools/pull/1885)
 * Added new debugger page.
