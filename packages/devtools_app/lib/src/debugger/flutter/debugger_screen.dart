@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart' hide Stack;
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -69,6 +70,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const breakpointsTitle = 'Breakpoints';
 
   DebuggerController controller;
+  FocusNode _libraryFilterFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _libraryFilterFocusNode = FocusNode();
+  }
 
   @override
   void didChangeDependencies() {
@@ -77,6 +85,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
+  }
+
+  @override
+  void dispose() {
+    _libraryFilterFocusNode.dispose();
+    super.dispose();
   }
 
   void _onLocationSelected(ScriptLocation location) {
@@ -119,6 +133,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       valueListenable: controller.librariesVisible,
       builder: (context, visible, _) {
         if (visible) {
+          // Focus the filter textfield when the ScriptPicker opens
+          _libraryFilterFocusNode.requestFocus();
+
           // TODO(devoncarew): Animate this opening and closing.
           return Split(
             axis: Axis.horizontal,
@@ -137,6 +154,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                     scripts: controller.sortedScripts.value,
                     classes: controller.sortedClasses.value,
                     onSelected: _onLocationSelected,
+                    libraryFilterFocusNode: _libraryFilterFocusNode,
                   );
                 },
               ),
@@ -148,28 +166,42 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       },
     );
 
-    return Split(
-      axis: Axis.horizontal,
-      initialFractions: const [0.25, 0.75],
-      children: [
-        OutlinedBorder(child: debuggerPanes()),
-        Column(
-          children: [
-            DebuggingControls(controller: controller),
-            const SizedBox(height: denseRowSpacing),
-            Expanded(
-              child: Split(
-                axis: Axis.vertical,
-                initialFractions: const [0.74, 0.26],
+    return Shortcuts(
+      shortcuts: <LogicalKeySet, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyP):
+            FilterLibraryIntent(_libraryFilterFocusNode, controller),
+      },
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          FilterLibraryIntent: FilterLibraryAction(),
+        },
+        child: Focus(
+          autofocus: true,
+          child: Split(
+            axis: Axis.horizontal,
+            initialFractions: const [0.25, 0.75],
+            children: [
+              OutlinedBorder(child: debuggerPanes()),
+              Column(
                 children: [
-                  codeArea,
-                  Console(controller: controller),
+                  DebuggingControls(controller: controller),
+                  const SizedBox(height: denseRowSpacing),
+                  Expanded(
+                    child: Split(
+                      axis: Axis.vertical,
+                      initialFractions: const [0.74, 0.26],
+                      children: [
+                        codeArea,
+                        Console(controller: controller),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ],
+      ),
     );
   }
 
@@ -218,6 +250,25 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         ]);
       },
     );
+  }
+}
+
+class FilterLibraryIntent extends Intent {
+  const FilterLibraryIntent(
+    this.focusNode,
+    this.debuggerController,
+  )   : assert(debuggerController != null),
+        assert(focusNode != null);
+
+  final FocusNode focusNode;
+  final DebuggerController debuggerController;
+}
+
+class FilterLibraryAction extends Action<FilterLibraryIntent> {
+  @override
+  void invoke(FilterLibraryIntent intent) {
+    intent.debuggerController.openLibrariesView();
+    intent.focusNode.requestFocus();
   }
 }
 

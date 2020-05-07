@@ -86,8 +86,10 @@ class HtmlPerfToolFramework extends HtmlFramework {
         var href = '/flutter.html#/';
         // Preserve query parameters when opening the Flutter demo so the
         // user does not need to go through the connect dialog again.
-        final flutterQueryParams =
-            Uri.tryParse(html.window.location.href).queryParameters ?? {};
+        final flutterQueryParams = Map<String, String>.from(
+            Uri.tryParse(html.window.location.href).queryParameters ?? {});
+        // Carry over the current page.
+        flutterQueryParams['page'] = current?.id;
         if (flutterQueryParams.isNotEmpty) {
           href += Uri(queryParameters: flutterQueryParams).toString();
         }
