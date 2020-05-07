@@ -17,7 +17,7 @@ import 'memory_controller.dart';
 class MemoryTracker {
   MemoryTracker(this.service, this.memoryController);
 
-  static const Duration _updateDelay = Duration(milliseconds: 1000);
+  static const Duration _updateDelay = Duration(milliseconds: 500);
 
   VmServiceWrapper service;
 
