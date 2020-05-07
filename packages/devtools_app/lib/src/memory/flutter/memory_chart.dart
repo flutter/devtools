@@ -205,9 +205,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (memoryTimeline.liveData.isEmpty)
-      return const Center(child: Text('No data'));
-
     controller.memoryTimeline.image = _img;
 
     // Compute number of stops for the timeline slider.
@@ -227,12 +224,10 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Padding(
-          padding: edgeSpacing,
-          child: Text('Flutter Framework Heap'),
-        ),
         Expanded(
-          child: LineChart(dartChartController),
+          child: memoryTimeline.liveData.isEmpty
+              ? const SizedBox()
+              : LineChart(dartChartController),
         ),
         Row(
           children: [
@@ -247,13 +242,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ],
         ),
         controller.isAndroidChartVisible
-            ? Expanded(
-                child: LineChart(androidChartController),
-              )
-            : const Padding(
-                padding: edgeSpacing,
-                child: Text(''),
-              ),
+            ? Expanded(child: LineChart(androidChartController))
+            : const SizedBox(),
       ],
     );
   }
@@ -278,8 +268,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..setValueFormatter(LargeValueFormatter())
           ..drawGridLines = true
           ..granularityEnabled = true
-          ..setStartAtZero(
-              true) // Set to baseline min and auto track max axis range.
+          // Set to baseline min and auto track max axis range.
+          ..setStartAtZero(true)
           ..textColor = defaultForeground;
       },
       axisRightSettingFunction: (axisRight, controller) {
