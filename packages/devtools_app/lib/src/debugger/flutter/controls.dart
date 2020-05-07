@@ -34,6 +34,7 @@ class DebuggingControls extends StatelessWidget {
                     DebuggerButton(
                       title: 'Pause',
                       icon: Icons.pause,
+                      autofocus: true,
                       onPressed: isPaused ? null : controller.pause,
                     ),
                     _LeftBorder(
@@ -188,17 +189,20 @@ class DebuggerButton extends StatelessWidget {
     @required this.title,
     @required this.icon,
     @required this.onPressed,
+    this.autofocus = false,
   });
 
   final String title;
   final IconData icon;
   final VoidCallback onPressed;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
     return ActionButton(
       tooltip: title,
       child: OutlineButton(
+        autofocus: autofocus,
         borderSide: BorderSide.none,
         shape: const ContinuousRectangleBorder(),
         onPressed: onPressed,
