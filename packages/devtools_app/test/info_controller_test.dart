@@ -14,9 +14,5 @@ void main() async {
     const FlutterRunConfiguration(withDebugger: true),
   );
 
-  // TODO(kenz): unskip info_controller_test.dart (#1778).
-  // ignore: dead_code
-  if (false) {
-    await runInfoControllerTests(env);
-  }
+  await runInfoControllerTests(env);
 }
