@@ -9,7 +9,6 @@ import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../ui/flutter/dialog.dart';
 import '../../ui/flutter/utils.dart';
-
 import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';
 
