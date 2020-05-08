@@ -840,6 +840,7 @@ class _TableRowState<T> extends State<TableRow<T>>
         color: widget.backgroundColor ?? Theme.of(context).canvasColor,
         child: widget.onPressed != null
             ? InkWell(
+                canRequestFocus: false,
                 key: contentKey,
                 onTap: () => widget.onPressed(widget.node),
                 child: row,
@@ -906,6 +907,7 @@ class _TableRowState<T> extends State<TableRow<T>>
       if (node == null) {
         final isSortColumn = column.title == widget.sortColumn.title;
         content = InkWell(
+          canRequestFocus: false,
           onTap: () => _handleSortChange(column),
           child: Row(
             mainAxisAlignment: _mainAxisAlignmentFor(column),
