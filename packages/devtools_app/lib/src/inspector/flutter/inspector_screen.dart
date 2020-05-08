@@ -17,7 +17,6 @@ import '../../globals.dart';
 import '../../service_extensions.dart' as extensions;
 import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
-import '../../ui/icons.dart';
 import '../inspector_controller.dart';
 import '../inspector_service.dart';
 import 'inspector_screen_details_tab.dart';
@@ -139,10 +138,10 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
               height: Theme.of(context).buttonTheme.height,
               child: OutlineButton(
                 onPressed: _refreshInspector,
-                child: Label(
-                  FlutterIcons.refresh,
+                child: const MaterialIconLabel(
+                  Icons.refresh,
                   'Refresh Tree',
-                  minIncludeTextWidth: 750,
+                  includeTextWidth: 750,
                 ),
               ),
             ),

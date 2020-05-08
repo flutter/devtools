@@ -17,6 +17,7 @@ import 'package:mp_chart/mp/core/data_set/line_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:mp_chart/mp/core/enums/axis_dependency.dart';
+
 // TODO(terry): Enable legend when textsize is correct.
 // import 'package:mp_chart/mp/core/enums/legend_vertical_alignment.dart';
 // import 'package:mp_chart/mp/core/enums/legend_form.dart';
@@ -36,7 +37,6 @@ import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/theme.dart';
-import '../../ui/flutter/label.dart';
 import '../../ui/theme.dart';
 import 'memory_controller.dart';
 
@@ -46,9 +46,6 @@ class MemoryChart extends StatefulWidget {
 }
 
 class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
-  @visibleForTesting
-  static const androidChartButtonKey = Key('Android Chart');
-
   LineChartController dartChartController;
 
   MemoryController controller;
@@ -143,13 +140,13 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     _img ??= await ImageLoader.loadImage('assets/img/star.png');
   }
 
-  Slider _timelineSlider;
+  //Slider _timelineSlider;
 
   SelectedDataPoint _selectedDartChart;
   SelectedDataPoint _selectedAndroidChart;
 
-  /// Compute increments for slider and lables for slider increments based on the
-  /// current display interval time period.
+  /// Compute increments for slider and labels for slider increments based on
+  /// the current display interval time period.
   String timelineSliderLabel(double value) {
     if (value == 0)
       return 'Starting Time';
@@ -172,36 +169,28 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     return '$unitsAgo Minute${unitsAgo != 1 ? 's' : ''} Ago';
   }
 
-  Slider createTimelineSlider() => Slider.adaptive(
-        label: timelineSliderLabel(controller.sliderValue),
-        activeColor: Colors.indigoAccent,
-        max: controller.numberOfStops.toDouble(),
-        inactiveColor: Colors.grey,
-        onChanged: controller.numberOfStops > 0
-            ? (newValue) {
-                final newChunk = newValue.roundToDouble();
-                setState(() {
-                  controller.sliderValue = newChunk;
-                  // TODO(terry): Compute:
-                  //    startingIndex = sliderValue * controller.intervalDurationInMs
-                });
-              }
-            : null,
-        value: controller.sliderValue,
-        divisions: controller.numberOfStops,
-      );
-
-  OutlineButton createToggleAdbMemoryButton() => OutlineButton(
-        key: MemoryChartState.androidChartButtonKey,
-        onPressed: controller.isConnectedDeviceAndroid
-            ? _toggleAndroidChartVisibility
-            : null,
-        child: MaterialIconLabel(
-          controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
-          'Android Memory',
-          includeTextWidth: 900,
-        ),
-      );
+//  Slider _createTimelineSlider() {
+//    return Slider.adaptive(
+//      label: timelineSliderLabel(controller.sliderValue),
+//      activeColor: Colors.indigoAccent,
+//      max: controller.numberOfStops.toDouble(),
+//      inactiveColor: Colors.grey,
+//      onChanged: controller.numberOfStops > 0
+//          ? (newValue) {
+//              final newChunk = newValue.roundToDouble();
+//              setState(
+//                () {
+//                  controller.sliderValue = newChunk;
+//                  // TODO(terry): Compute:
+//                  //    startingIndex = sliderValue * controller.intervalDurationInMs
+//                },
+//              );
+//            }
+//          : null,
+//      value: controller.sliderValue,
+//      divisions: controller.numberOfStops,
+//    );
+//  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,42 +205,26 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     }
     controller.numberOfStops = stops;
 
-    _timelineSlider = createTimelineSlider();
+    //_timelineSlider = _createTimelineSlider();
 
-    const edgeSpacing = EdgeInsets.fromLTRB(20, 10, 0, 5);
-
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Expanded(
-          child: memoryTimeline.liveData.isEmpty
-              ? const SizedBox()
-              : LineChart(dartChartController),
-        ),
-        Row(
-          children: [
-            Padding(
-              padding: edgeSpacing,
-              child: createToggleAdbMemoryButton(),
-            ),
+    return Container(
+      height: liveChartHeight,
+      child: Row(
+        children: [
+          Expanded(
+            child: memoryTimeline.liveData.isEmpty
+                ? const SizedBox()
+                : LineChart(dartChartController),
+          ),
+          if (controller.isAndroidChartVisible)
+            const SizedBox(width: denseSpacing),
+          if (controller.isAndroidChartVisible)
             Expanded(
-              child: _timelineSlider,
+              child: LineChart(androidChartController),
             ),
-            const Text('Time Range')
-          ],
-        ),
-        controller.isAndroidChartVisible
-            ? Expanded(child: LineChart(androidChartController))
-            : const SizedBox(),
-      ],
+        ],
+      ),
     );
-  }
-
-  void _toggleAndroidChartVisibility() {
-    setState(() {
-      controller.toggleAndroidChartVisibility();
-    });
   }
 
   void _setupDartChartController() {
@@ -318,7 +291,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     );
 
     // Compute padding around chart.
-    dartChartController.setViewPortOffsets(50, 20, 10, 0);
+    dartChartController.setViewPortOffsets(
+        defaultSpacing * 3, denseSpacing, defaultSpacing, defaultSpacing);
   }
 
   /// Plots the Android ADB memory info (Flutter Engine).
@@ -387,7 +361,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     );
 
     // Compute padding around chart.
-    androidChartController.setViewPortOffsets(50, 0, 10, 30);
+    androidChartController.setViewPortOffsets(
+        defaultSpacing * 3, denseSpacing, defaultSpacing, defaultSpacing);
   }
 
   void _setupTrace(LineDataSet traceSet, Color color, int alpha) {
