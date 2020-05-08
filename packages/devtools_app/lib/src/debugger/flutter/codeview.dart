@@ -221,7 +221,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
 
     _updateScrollPosition(animate: false);
 
-    return OutlinedBorder(
+    return OutlineDecoration(
       child: Column(
         children: [
           debuggerSectionTitle(theme, text: scriptRef?.uri ?? ' '),

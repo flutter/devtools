@@ -426,8 +426,8 @@ class ToggleButton extends StatelessWidget {
   }
 }
 
-class OutlinedBorder extends StatelessWidget {
-  const OutlinedBorder({Key key, this.child}) : super(key: key);
+class OutlineDecoration extends StatelessWidget {
+  const OutlineDecoration({Key key, this.child}) : super(key: key);
 
   final Widget child;
 
