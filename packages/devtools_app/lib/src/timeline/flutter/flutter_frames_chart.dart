@@ -168,7 +168,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     );
 
     // Compute padding around chart.
-    _chartController.setViewPortOffsets(50, 10, 10, 30);
+    _chartController.setViewPortOffsets(
+        defaultSpacing * 3, denseSpacing, defaultSpacing, defaultSpacing);
   }
 
   void onBarSelected(int index) {
@@ -228,12 +229,14 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Container(
-        height: 160.0,
-        child: BarChart(_chartController),
-      ),
+    return Column(
+      children: [
+        Container(
+          height: liveChartHeight,
+          child: BarChart(_chartController),
+        ),
+        const SizedBox(height: denseSpacing),
+      ],
     );
   }
 

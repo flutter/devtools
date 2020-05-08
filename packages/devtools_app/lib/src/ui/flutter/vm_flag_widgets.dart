@@ -59,15 +59,17 @@ class ProfileGranularityDropdownState
             widget.screenId,
           );
         }
-        return DropdownButton<String>(
-          key: ProfileGranularityDropdown.dropdownKey,
-          value: safeValue,
-          items: [
-            _buildMenuItem(ProfileGranularity.low),
-            _buildMenuItem(ProfileGranularity.medium),
-            _buildMenuItem(ProfileGranularity.high),
-          ],
-          onChanged: (value) => _onProfileGranularityChanged(value, context),
+        return DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            key: ProfileGranularityDropdown.dropdownKey,
+            value: safeValue,
+            items: [
+              _buildMenuItem(ProfileGranularity.low),
+              _buildMenuItem(ProfileGranularity.medium),
+              _buildMenuItem(ProfileGranularity.high),
+            ],
+            onChanged: (value) => _onProfileGranularityChanged(value, context),
+          ),
         );
       },
     );

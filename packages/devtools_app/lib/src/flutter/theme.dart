@@ -57,6 +57,8 @@ const smallProgressSize = 12.0;
 
 const defaultListItemHeight = 28.0;
 
+const liveChartHeight = 160.0;
+
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 
 /// Branded grey color.

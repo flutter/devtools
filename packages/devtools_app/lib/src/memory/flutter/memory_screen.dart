@@ -14,7 +14,6 @@ import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../ui/flutter/label.dart';
-import '../../ui/material_icons.dart';
 import 'memory_chart.dart';
 import 'memory_controller.dart';
 import 'memory_heap_tree_view.dart';
@@ -253,20 +252,20 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
             OutlineButton(
               key: MemoryScreen.pauseButtonKey,
               onPressed: paused ? null : controller.pauseLiveFeed,
-              child: Label(
-                pauseIcon,
+              child: const MaterialIconLabel(
+                Icons.pause,
                 'Pause',
-                minIncludeTextWidth: _primaryControlsMinVerboseWidth,
+                includeTextWidth: _primaryControlsMinVerboseWidth,
               ),
             ),
             const SizedBox(width: denseSpacing),
             OutlineButton(
               key: MemoryScreen.resumeButtonKey,
               onPressed: paused ? controller.resumeLiveFeed : null,
-              child: Label(
-                playIcon,
+              child: const MaterialIconLabel(
+                Icons.play_arrow,
                 'Resume',
-                minIncludeTextWidth: _primaryControlsMinVerboseWidth,
+                includeTextWidth: _primaryControlsMinVerboseWidth,
               ),
             ),
             const SizedBox(width: defaultSpacing),
@@ -276,10 +275,10 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
                 onPressed: controller.memorySource == MemoryController.liveFeed
                     ? _clearTimeline
                     : null,
-                child: Label(
-                  clearIcon,
+                child: const MaterialIconLabel(
+                  Icons.block,
                   'Clear',
-                  minIncludeTextWidth: _primaryControlsMinVerboseWidth,
+                  includeTextWidth: _primaryControlsMinVerboseWidth,
                 )),
             const SizedBox(width: defaultSpacing),
             _intervalDropdown(),
@@ -298,20 +297,20 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         OutlineButton(
           key: MemoryScreen.resetButtonKey,
           onPressed: _reset,
-          child: Label(
-            memoryReset,
+          child: const MaterialIconLabel(
+            Icons.settings_backup_restore,
             'Reset',
-            minIncludeTextWidth: _primaryControlsMinVerboseWidth,
+            includeTextWidth: _primaryControlsMinVerboseWidth,
           ),
         ),
         const SizedBox(width: denseSpacing),
         OutlineButton(
           key: MemoryScreen.gcButtonKey,
           onPressed: _gc,
-          child: Label(
-            memoryGC,
+          child: const MaterialIconLabel(
+            Icons.delete_sweep,
             'GC',
-            minIncludeTextWidth: _primaryControlsMinVerboseWidth,
+            includeTextWidth: _primaryControlsMinVerboseWidth,
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -319,10 +318,10 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
           key: MemoryScreen.exportButtonKey,
           onPressed:
               controller.offline ? null : controller.memoryLog.exportMemory,
-          child: Label(
-            exportIcon,
+          child: const MaterialIconLabel(
+            Icons.file_download,
             'Export',
-            minIncludeTextWidth: _primaryControlsMinVerboseWidth,
+            includeTextWidth: _primaryControlsMinVerboseWidth,
           ),
         ),
       ],
