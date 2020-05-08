@@ -181,7 +181,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             axis: Axis.horizontal,
             initialFractions: const [0.25, 0.75],
             children: [
-              OutlinedBorder(child: debuggerPanes()),
+              OutlineDecoration(child: debuggerPanes()),
               Column(
                 children: [
                   DebuggingControls(controller: controller),

@@ -38,7 +38,7 @@ class _ConsoleState extends State<Console> {
     final textStyle =
         theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
 
-    return OutlinedBorder(
+    return OutlineDecoration(
       child: Padding(
         padding: const EdgeInsets.all(denseSpacing),
         child: ValueListenableBuilder<List<String>>(
