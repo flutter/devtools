@@ -66,7 +66,7 @@ class ScriptPickerState extends State<ScriptPicker> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Outlined(
+    return OutlineDecoration(
       child: Column(
         children: [
           debuggerPaneHeader(

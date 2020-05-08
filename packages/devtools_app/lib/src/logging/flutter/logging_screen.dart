@@ -136,13 +136,13 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           axis: Axis.vertical,
           initialFractions: const [0.78, 0.22],
           children: [
-            Outlined(
+            OutlineDecoration(
               child: LogsTable(
                 data: controller.filteredData,
                 onItemSelected: _select,
               ),
             ),
-            Outlined(
+            OutlineDecoration(
               child: LogDetails(log: selected),
             ),
           ],
