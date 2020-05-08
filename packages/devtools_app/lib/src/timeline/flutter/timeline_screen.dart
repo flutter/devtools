@@ -33,19 +33,11 @@ class TimelineScreen extends Screen {
   const TimelineScreen() : super(id, title: 'Timeline', icon: Octicons.pulse);
 
   @visibleForTesting
+  static const refreshButtonKey = Key('Refresh Button');
+  @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
-  static const flameChartSectionKey = Key('Flame Chart Section');
-  @visibleForTesting
-  static const emptyTimelineRecordingKey = Key('Empty Timeline Recording');
-  @visibleForTesting
-  static const recordButtonKey = Key('Record Button');
-  @visibleForTesting
-  static const recordingInstructionsKey = Key('Recording Instructions');
-  @visibleForTesting
-  static const recordingStatusKey = Key('Recording Status');
-  @visibleForTesting
-  static const stopRecordingButtonKey = Key('Stop Recording Button');
+  static const emptyTimelineKey = Key('Empty Timeline');
 
   static const id = 'timeline';
 
@@ -71,12 +63,10 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     with
         AutoDisposeMixin,
         OfflineScreenMixin<TimelineScreenBody, OfflineTimelineData> {
-  static const _primaryControlsMinIncludeTextWidth = 825.0;
-  static const _secondaryControlsMinIncludeTextWidth = 1205.0;
+  static const _primaryControlsMinIncludeTextWidth = 725.0;
+  static const _secondaryControlsMinIncludeTextWidth = 1100.0;
 
   TimelineController controller;
-
-  bool recording = false;
 
   bool processing = false;
 
@@ -93,14 +83,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     if (newController == controller) return;
     controller = newController;
 
-    controller.timelineService.updateListeningState(true);
-
     cancel();
-    addAutoDisposeListener(controller.recording, () {
-      setState(() {
-        recording = controller.recording.value;
-      });
-    });
     addAutoDisposeListener(controller.processing, () {
       setState(() {
         processing = controller.processing.value;
@@ -117,6 +100,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         selectedEvent = controller.selectedTimelineEvent.value;
       });
     });
+
+    controller.refreshData();
 
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
@@ -135,12 +120,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         loadOfflineData(offlineTimelineData);
       }
     }
-  }
-
-  @override
-  void dispose() {
-    controller.timelineService.updateListeningState(false);
-    super.dispose();
   }
 
   @override
@@ -198,30 +177,29 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   Widget _buildPrimaryStateControls() {
-    return Row(
-      children: [
-        recordButton(
-          key: TimelineScreen.recordButtonKey,
-          recording: recording,
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: _startRecording,
-        ),
-        const SizedBox(width: denseSpacing),
-        stopRecordingButton(
-          key: TimelineScreen.stopRecordingButtonKey,
-          recording: recording,
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: _stopRecording,
-        ),
-        const SizedBox(width: defaultSpacing),
-        clearButton(
-          key: TimelineScreen.clearButtonKey,
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: () async {
-            await _clearTimeline();
-          },
-        ),
-      ],
+    return ValueListenableBuilder(
+      valueListenable: controller.refreshing,
+      builder: (context, refreshing, _) {
+        return Row(
+          children: [
+            refreshButton(
+              key: TimelineScreen.refreshButtonKey,
+              busy: refreshing || processing,
+              includeTextWidth: _primaryControlsMinIncludeTextWidth,
+              onPressed: _refreshTimeline,
+            ),
+            const SizedBox(width: defaultSpacing),
+            clearButton(
+              key: TimelineScreen.clearButtonKey,
+              busy: refreshing || processing,
+              includeTextWidth: _primaryControlsMinIncludeTextWidth,
+              onPressed: () async {
+                await _clearTimeline();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -282,16 +260,16 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     Widget content;
     final timelineEmpty = (controller.data?.isEmpty ?? true) ||
         controller.data.eventGroups.isEmpty;
-    if (recording || processing || timelineEmpty) {
+    if (processing || timelineEmpty) {
       content = ValueListenableBuilder<bool>(
-        valueListenable: controller.emptyRecording,
+        valueListenable: controller.emptyTimeline,
         builder: (context, emptyRecording, _) {
           return emptyRecording
               ? const Center(
-                  key: TimelineScreen.emptyTimelineRecordingKey,
-                  child: Text('No timeline events recorded'),
+                  key: TimelineScreen.emptyTimelineKey,
+                  child: Text('No timeline events'),
                 )
-              : _buildRecordingInfo();
+              : _buildProcessingInfo();
         },
       );
     } else {
@@ -310,7 +288,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Container(
-        key: TimelineScreen.flameChartSectionKey,
         decoration: BoxDecoration(
           border: Border.all(color: Theme.of(context).focusColor),
         ),
@@ -319,24 +296,15 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Widget _buildRecordingInfo() {
-    return recordingInfo(
-      instructionsKey: TimelineScreen.recordingInstructionsKey,
-      recordingStatusKey: TimelineScreen.recordingStatusKey,
-      recording: recording,
-      processing: processing,
+  Widget _buildProcessingInfo() {
+    return processingInfo(
       progressValue: processingProgress,
-      recordedObject: 'timeline trace',
+      processedObject: 'timeline trace',
     );
   }
 
-  Future<void> _startRecording() async {
-    await _clearTimeline();
-    await controller.startRecording();
-  }
-
-  Future<void> _stopRecording() async {
-    await controller.stopRecording();
+  Future<void> _refreshTimeline() async {
+    await controller.refreshData();
   }
 
   Future<void> _clearTimeline() async {

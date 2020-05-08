@@ -82,12 +82,13 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget clearButton({
   Key key,
+  bool busy,
   double includeTextWidth,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
     key: key,
-    onPressed: onPressed,
+    onPressed: busy ? null : onPressed,
     child: MaterialIconLabel(
       Icons.block,
       'Clear',
@@ -116,6 +117,31 @@ StatelessWidget recordButton({
     child: MaterialIconLabel(
       Icons.fiber_manual_record,
       labelOverride ?? 'Record',
+      includeTextWidth: includeTextWidth,
+    ),
+  );
+}
+
+/// Button to refresh data.
+///
+/// * `recording`: Whether recording is in progress.
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
+/// * `labelOverride`: Optional alternative text to use for the button.
+/// * `onPressed`: The callback to be called upon pressing the button.
+StatelessWidget refreshButton({
+  Key key,
+  bool busy,
+  double includeTextWidth,
+  String labelOverride,
+  @required VoidCallback onPressed,
+}) {
+  return OutlineButton(
+    key: key,
+    onPressed: busy ? null : onPressed,
+    child: MaterialIconLabel(
+      Icons.refresh,
+      'Refresh',
       includeTextWidth: includeTextWidth,
     ),
   );

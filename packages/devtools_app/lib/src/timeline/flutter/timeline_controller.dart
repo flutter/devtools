@@ -3,20 +3,25 @@
 // found in the LICENSE file.
 import 'dart:async';
 
+import 'package:pedantic/pedantic.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
+
 import '../../auto_dispose.dart';
 import '../../config_specific/flutter/import_export/import_export.dart';
+import '../../config_specific/logger/allowed_error.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../globals.dart';
 import '../../http/http_service.dart';
 import '../../profiler/cpu_profile_controller.dart';
+import '../../profiler/cpu_profile_service.dart';
 import '../../profiler/cpu_profile_transformer.dart';
+import '../../profiler/profile_granularity.dart';
 import '../../service_manager.dart';
 import '../../trace_event.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
 import 'timeline_model.dart';
 import 'timeline_processor.dart';
 import 'timeline_screen.dart';
-import 'timeline_service.dart';
 
 /// This class contains the business logic for [timeline_screen.dart].
 ///
@@ -32,10 +37,13 @@ class TimelineController
     with CpuProfilerControllerProviderMixin
     implements DisposableController {
   TimelineController() {
-    timelineService = TimelineService(this);
     processor = TimelineProcessor(this);
+    _startTimeline();
   }
+
   final _exportController = ExportController();
+
+  final _cpuProfilerService = CpuProfilerService();
 
   /// The currently selected timeline event.
   ValueListenable<TimelineEvent> get selectedTimelineEvent =>
@@ -47,12 +55,12 @@ class TimelineController
   final _selectedFrameNotifier = ValueNotifier<TimelineFrame>(null);
 
   /// Whether an empty timeline recording was just recorded.
-  ValueListenable<bool> get emptyRecording => _emptyRecordingNotifier;
-  final _emptyRecordingNotifier = ValueNotifier<bool>(false);
+  ValueListenable<bool> get emptyTimeline => _emptyTimeline;
+  final _emptyTimeline = ValueNotifier<bool>(false);
 
   /// Whether the timeline is currently being recorded.
-  ValueListenable<bool> get recording => _recordingNotifier;
-  final _recordingNotifier = ValueNotifier<bool>(false);
+  ValueListenable<bool> get refreshing => _refreshingNotifier;
+  final _refreshingNotifier = ValueNotifier<bool>(false);
 
   /// Whether the recorded timeline data is currently being processed.
   ValueListenable<bool> get processing => _processingNotifier;
@@ -116,15 +124,11 @@ class TimelineController
   /// in selected timeline event, selected frame, etc.).
   TimelineData offlineTimelineData;
 
-  TimelineService timelineService;
-
   TimelineProcessor processor;
 
-  int _vmStartRecordingMicros;
-
-  /// Trace events we received while listening to the Timeline event stream.
+  /// Trace events in the current timeline.
   ///
-  /// This does not include events that we receive while stopped.
+  /// This list is cleared and repopulated each time "Refresh" is clicked.
   List<TraceEventWrapper> allTraceEvents = [];
 
   /// Whether the timeline has been started from [timelineService].
@@ -132,6 +136,16 @@ class TimelineController
   /// [data] is initialized in [timelineService.startTimeline], where the
   /// timeline recorders are also set (Dart, GC, Embedder).
   bool get hasStarted => data != null;
+
+  void _startTimeline() async {
+    await serviceManager.onServiceAvailable;
+    unawaited(allowedError(
+      _cpuProfilerService.setProfilePeriod(mediumProfilePeriod),
+      logError: false,
+    ));
+    await allowedError(
+        serviceManager.service.setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
+  }
 
   Future<void> selectTimelineEvent(TimelineEvent event) async {
     if (event == null || data.selectedEvent == event) return;
@@ -197,40 +211,113 @@ class TimelineController
     data.frames.add(frame);
   }
 
-  Future<void> startRecording() async {
-    _recordingNotifier.value = true;
-    _vmStartRecordingMicros =
-        (await timelineService.vmTimelineMicros()).timestamp;
-    await timelineService.updateListeningState(true);
-  }
+  Future<void> refreshData() async {
+    await clearData(clearVmTimeline: false);
+    data = serviceManager.connectedApp.isFlutterAppNow
+        ? TimelineData(
+            displayRefreshRate: await serviceManager.getDisplayRefreshRate())
+        : TimelineData();
 
-  Future<void> stopRecording() async {
-    _recordingNotifier.value = false;
+    _emptyTimeline.value = false;
+    _refreshingNotifier.value = true;
+    allTraceEvents.clear();
+    final timeline = await serviceManager.service.getVMTimeline();
+    primeThreadIds(timeline);
+    for (final event in timeline.traceEvents) {
+      final eventWrapper = TraceEventWrapper(
+        TraceEvent(event.json),
+        DateTime.now().millisecondsSinceEpoch,
+      );
+      allTraceEvents.add(eventWrapper);
+    }
+
+    _refreshingNotifier.value = false;
 
     if (allTraceEvents.isEmpty) {
-      _emptyRecordingNotifier.value = true;
+      _emptyTimeline.value = true;
       return;
     }
 
     _processingNotifier.value = true;
-    await processTraceEvents(allTraceEvents, _vmStartRecordingMicros);
+    await processTraceEvents(allTraceEvents);
     _processingNotifier.value = false;
     _timelineProcessedController.add(true);
-    await timelineService.updateListeningState(true);
+  }
+
+  void primeThreadIds(vm_service.Timeline timeline) {
+    final threadNameEvents = timeline.traceEvents
+        .map((event) => TraceEvent(event.json))
+        .where((TraceEvent event) {
+      return event.name == 'thread_name';
+    }).toList();
+
+    // TODO(kenz): Remove this logic once ui/raster distinction changes are
+    // available in the engine.
+    int uiThreadId;
+    int rasterThreadId;
+    final threadIdsByName = <String, int>{};
+
+    String uiThreadName;
+    String rasterThreadName;
+    String platformThreadName;
+    for (TraceEvent event in threadNameEvents) {
+      final name = event.args['name'];
+
+      // Android: "1.ui (12652)"
+      // iOS: "io.flutter.1.ui (12652)"
+      // MacOS, Linux, Windows, Dream (g3): "io.flutter.ui (225695)"
+      if (name.contains('.ui')) uiThreadName = name;
+
+      // Android: "1.raster (12651)"
+      // iOS: "io.flutter.1.raster (12651)"
+      // Linux, Windows, Dream (g3): "io.flutter.raster (12651)"
+      // MacOS: Does not exist
+      // Also look for .gpu here for older versions of Flutter.
+      // TODO(kenz): remove check for .gpu name in April 2021.
+      if (name.contains('.raster') || name.contains('.gpu')) {
+        rasterThreadName = name;
+      }
+
+      // Android: "1.platform (22585)"
+      // iOS: "io.flutter.1.platform (22585)"
+      // MacOS, Linux, Windows, Dream (g3): "io.flutter.platform (22596)"
+      if (name.contains('.platform')) platformThreadName = name;
+
+      threadIdsByName[name] = event.threadId;
+    }
+
+    if (uiThreadName != null) {
+      uiThreadId = threadIdsByName[uiThreadName];
+    }
+
+    // MacOS and Flutter apps with platform views do not have a .gpu thread.
+    // In these cases, the "Raster" events will come on the .platform thread
+    // instead.
+    if (rasterThreadName != null) {
+      rasterThreadId = threadIdsByName[rasterThreadName];
+    } else {
+      rasterThreadId = threadIdsByName[platformThreadName];
+    }
+
+    if (uiThreadId == null || rasterThreadId == null) {
+      logNonFatalError(
+          'Could not find UI thread and / or Raster thread from names: '
+          '${threadIdsByName.keys}');
+    }
+
+    processor.primeThreadIds(
+        uiThreadId: uiThreadId, rasterThreadId: rasterThreadId);
   }
 
   void addTimelineEvent(TimelineEvent event) {
     data.addTimelineEvent(event);
   }
 
-  FutureOr<void> processTraceEvents(
-    List<TraceEventWrapper> traceEvents,
-    int startRecordingMicros,
-  ) async {
-    await processor.processTimeline(traceEvents, startRecordingMicros);
+  FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
+    await processor.processTimeline(traceEvents);
     data.initializeEventGroups();
     if (data.eventGroups.isEmpty) {
-      _emptyRecordingNotifier.value = true;
+      _emptyTimeline.value = true;
     }
   }
 
@@ -258,7 +345,7 @@ class TimelineController
       uiThreadId: uiThreadId,
       rasterThreadId: rasterThreadId,
     );
-    await processTraceEvents(traceEvents, 0);
+    await processTraceEvents(traceEvents);
     if (data.cpuProfileData != null) {
       await cpuProfilerController.transformer
           .processData(offlineTimelineData.cpuProfileData);
@@ -330,9 +417,10 @@ class TimelineController
     _httpTimelineLoggingEnabledNotifier.value = state;
   }
 
-  Future<void> clearData() async {
-    if (serviceManager.hasConnection) {
+  Future<void> clearData({bool clearVmTimeline = true}) async {
+    if (clearVmTimeline && serviceManager.hasConnection) {
       await serviceManager.service.clearVMTimeline();
+      _emptyTimeline.value = true;
     }
     allTraceEvents.clear();
     offlineTimelineData = null;
@@ -341,11 +429,8 @@ class TimelineController
     processor?.reset();
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
-    _recordingNotifier.value = false;
     _processingNotifier.value = false;
-    _emptyRecordingNotifier.value = false;
     _clearController.add(true);
-    _vmStartRecordingMicros = null;
   }
 
   void recordTrace(Map<String, dynamic> trace) {
