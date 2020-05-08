@@ -332,6 +332,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                       const TextField(
                         decoration: InputDecoration(
                             border: InputBorder.none,
+                            isDense: true,
                             labelText: 'Filter Snapshot'),
                       ),
                       Row(
