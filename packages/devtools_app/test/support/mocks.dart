@@ -41,6 +41,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   static final _flagManager = VmFlagManager();
 
+  final MockVM _mockVM = MockVM();
+
   @override
   final VmServiceWrapper service;
 
@@ -67,6 +69,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   final IsolateManager isolateManager = FakeIsolateManager();
+
+  @override
+  VM get vm => _mockVM;
 
   @override
   final VmFlagManager vmFlagManager = _flagManager;
@@ -295,6 +300,8 @@ class MockTimelineController extends Mock implements TimelineController {}
 class MockPerformanceController extends Mock implements PerformanceController {}
 
 class MockDebuggerController extends Mock implements DebuggerController {}
+
+class MockVM extends Mock implements VM {}
 
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.

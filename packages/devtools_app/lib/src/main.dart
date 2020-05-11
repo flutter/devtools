@@ -86,8 +86,10 @@ class HtmlPerfToolFramework extends HtmlFramework {
         var href = '/flutter.html#/';
         // Preserve query parameters when opening the Flutter demo so the
         // user does not need to go through the connect dialog again.
-        final flutterQueryParams =
-            Uri.tryParse(html.window.location.href).queryParameters ?? {};
+        final flutterQueryParams = Map<String, String>.from(
+            Uri.tryParse(html.window.location.href).queryParameters ?? {});
+        // Carry over the current page.
+        flutterQueryParams['page'] = current?.id;
         if (flutterQueryParams.isNotEmpty) {
           href += Uri(queryParameters: flutterQueryParams).toString();
         }
@@ -174,7 +176,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
 
     // If we showed a notification for DevTools and the user manually clicked
     // into the window instead, we should hide the notification automatically.
-    html.window.onFocus.listen((_) => devToolsServer.dismissNotifications());
+    html.window.onFocus.listen((_) => devToolsServer?.dismissNotifications());
 
     // TODO(dantup): As a workaround for not being able to reconnect DevTools to
     // a new VM yet (https://github.com/flutter/devtools/issues/989) we reload
@@ -185,7 +187,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
       final newParams = Map.of(uri.queryParameters)..remove('notify');
       html.window.history.pushState(
           null, null, uri.replace(queryParameters: newParams).toString());
-      unawaited(devToolsServer.notify());
+      unawaited(devToolsServer?.notify());
     }
 
     // Handle onShowPageId.

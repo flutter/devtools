@@ -57,8 +57,8 @@ class NetworkScreen extends Screen {
                 Text('${nf.format(count)} ${pluralize('request', count)}'),
                 const SizedBox(width: denseSpacing),
                 SizedBox(
-                  width: 12,
-                  height: 12,
+                  width: smallProgressSize,
+                  height: smallProgressSize,
                   child: recording
                       ? CircularProgressIndicator(
                           strokeWidth: 2,

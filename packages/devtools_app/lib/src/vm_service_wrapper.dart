@@ -506,6 +506,10 @@ class VmServiceWrapper implements VmService {
     );
   }
 
+  Future<HeapSnapshotGraph> getHeapSnapshotGraph(IsolateRef isolateRef) async {
+    return await HeapSnapshotGraph.getSnapshot(_vmService, isolateRef);
+  }
+
   @override
   Future<Success> kill(String isolateId) {
     return _trackFuture('kill', _vmService.kill(isolateId));

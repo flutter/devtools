@@ -6,10 +6,10 @@
 import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/flutter/split.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/memory/flutter/memory_chart.dart';
-import 'package:devtools_app/src/memory/flutter/memory_screen.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart';
+import 'package:devtools_app/src/memory/flutter/memory_screen.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,6 +44,7 @@ void main() {
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
           .thenReturn(false);
+      when(fakeServiceManager.vm.operatingSystem).thenReturn('iOS');
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
@@ -79,7 +80,7 @@ void main() {
 
       expect(controller.memorySource, MemoryController.liveFeed);
 
-      expect(find.byKey(MemoryScreen.snapshotButtonKey), findsOneWidget);
+//      expect(find.byKey(MemoryScreen.snapshotButtonKey), findsOneWidget);
       expect(find.byKey(MemoryScreen.resetButtonKey), findsOneWidget);
       expect(find.byKey(MemoryScreen.gcButtonKey), findsOneWidget);
 

@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/theme.dart';
 import '../inspector_controller.dart';
 import 'layout_explorer/layout_explorer.dart';
 
@@ -100,6 +101,7 @@ class _InspectorDetailsTabControllerState
           ),
           Expanded(
             child: TabBarView(
+              physics: defaultTabBarViewPhysics,
               controller: _tabController,
               children: tabViews,
             ),
