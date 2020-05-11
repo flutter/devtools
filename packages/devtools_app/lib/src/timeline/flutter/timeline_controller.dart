@@ -70,6 +70,7 @@ class TimelineController
   // or a different instance of DevTools could change this value. We need to
   // sync the value with the server like we do for other vm service extensions
   // that we track with the vm service extension manager.
+  // See https://github.com/dart-lang/sdk/issues/41823.
   /// Whether http timeline logging is enabled.
   ValueListenable<bool> get httpTimelineLoggingEnabled =>
       _httpTimelineLoggingEnabledNotifier;
@@ -103,6 +104,22 @@ class TimelineController
   final _clearController = StreamController<bool>.broadcast();
 
   Stream<bool> get onTimelineCleared => _clearController.stream;
+
+  // TODO(kenz): switch to use VmFlagManager-like pattern once
+  // https://github.com/dart-lang/sdk/issues/41822 is fixed.
+  /// Recorded timeline stream values.
+  Map<String, ValueListenable<bool>> get recordedStreams => _recordedStreams;
+  final _recordedStreams = {
+    'Dart': ValueNotifier<bool>(false),
+    'Embedder': ValueNotifier<bool>(false),
+    'GC': ValueNotifier<bool>(false),
+    'API': ValueNotifier<bool>(false),
+    'Compiler': ValueNotifier<bool>(false),
+    'CompilerVerbose': ValueNotifier<bool>(false),
+    'Debugger': ValueNotifier<bool>(false),
+    'Isolate': ValueNotifier<bool>(false),
+    'VM': ValueNotifier<bool>(false),
+  };
 
   /// Active timeline data.
   ///
@@ -143,8 +160,10 @@ class TimelineController
       _cpuProfilerService.setProfilePeriod(mediumProfilePeriod),
       logError: false,
     ));
-    await allowedError(
-        serviceManager.service.setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
+    await toggleTimelineStream('GC', true);
+    await toggleTimelineStream('Dart', true);
+    await toggleTimelineStream('Embedder', true);
+    await toggleHttpRequestLogging(true);
   }
 
   Future<void> selectTimelineEvent(TimelineEvent event) async {
@@ -415,6 +434,21 @@ class TimelineController
   Future<void> toggleHttpRequestLogging(bool state) async {
     await HttpService.toggleHttpRequestLogging(state);
     _httpTimelineLoggingEnabledNotifier.value = state;
+  }
+
+  // TODO(kenz): this is not as robust as we'd like. Revisit once
+  // https://github.com/dart-lang/sdk/issues/41822 is addressed.
+  Future<void> toggleTimelineStream(String name, [bool value]) async {
+    value ??= !_recordedStreams[name].value;
+    final timelineFlags =
+        (await serviceManager.service.getVMTimelineFlags()).recordedStreams;
+    if (timelineFlags.contains(name) && !value) {
+      timelineFlags.remove(name);
+    } else if (!timelineFlags.contains(name) && value) {
+      timelineFlags.add(name);
+    }
+    await serviceManager.service.setVMTimelineFlags(timelineFlags);
+    _recordedStreams[name].value = value;
   }
 
   /// Clears the timeline data currently stored by the controller.

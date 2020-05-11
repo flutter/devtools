@@ -325,13 +325,6 @@ class OpenSettingsAction extends StatelessWidget {
   }
 }
 
-List<Widget> _header(TextTheme textTheme, String title) {
-  return [
-    Text(title, style: textTheme.headline6),
-    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
-  ];
-}
-
 class DevToolsAboutDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -345,10 +338,10 @@ class DevToolsAboutDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ..._header(textTheme, 'About DevTools'),
+          ...headerInColumn(textTheme, 'About DevTools'),
           _aboutDevTools(context),
           const SizedBox(height: defaultSpacing),
-          ..._header(textTheme, 'Feedback'),
+          ...headerInColumn(textTheme, 'Feedback'),
           Wrap(
             children: [
               const Text('Encountered an issue? Let us know at '),
@@ -402,7 +395,7 @@ class SettingsDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ..._header(Theme.of(context).textTheme, 'Settings'),
+          ...headerInColumn(Theme.of(context).textTheme, 'Settings'),
           InkWell(
             onTap: () {
               preferences.toggleDarkModeTheme(!preferences.darkModeTheme.value);

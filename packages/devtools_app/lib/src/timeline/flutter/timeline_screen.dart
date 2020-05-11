@@ -216,7 +216,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           ),
         // TODO(kenz): hide or disable button if http timeline logging is not
         // available.
-        _logNetworkTrafficButton(),
         const SizedBox(width: defaultSpacing),
         Container(
           height: Theme.of(context).buttonTheme.height,
@@ -229,30 +228,25 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
             ),
           ),
         ),
+        const SizedBox(width: defaultSpacing),
+        ActionButton(
+          child: OutlineButton(
+            child: const Icon(
+              Icons.more_vert,
+              size: defaultIconSize,
+            ),
+            onPressed: _openSettingsDialog,
+          ),
+          tooltip: 'More Timeline Configurations',
+        ),
       ],
     );
   }
 
-  Widget _logNetworkTrafficButton() {
-    return ValueListenableBuilder(
-      valueListenable: controller.httpTimelineLoggingEnabled,
-      builder: (context, enabled, _) {
-        return ToggleButtons(
-          constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
-          children: [
-            ToggleButton(
-              icon: Icons.language,
-              text: 'Network',
-              enabledTooltip: 'Stop logging network traffic',
-              disabledTooltip: 'Log network traffic',
-              includeTextWidth: _secondaryControlsMinIncludeTextWidth,
-              selected: enabled,
-            ),
-          ],
-          isSelected: [enabled],
-          onPressed: (_) => controller.toggleHttpRequestLogging(!enabled),
-        );
-      },
+  void _openSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => TimelineConfigurationsDialog(controller),
     );
   }
 
@@ -331,5 +325,81 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         offlineDataJson.isNotEmpty &&
         offlineDataJson[TimelineScreen.id] != null &&
         offlineDataJson[TimelineData.traceEventsKey] != null;
+  }
+}
+
+class TimelineConfigurationsDialog extends StatelessWidget {
+  const TimelineConfigurationsDialog(this.controller);
+
+  static const dialogWidth = 300.0;
+
+  final TimelineController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(defaultDialogRadius)),
+      child: Container(
+        width: dialogWidth,
+        padding: const EdgeInsets.all(defaultSpacing),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...headerInColumn(Theme.of(context).textTheme, 'Recorded Streams'),
+            ..._recordedStreams(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _recordedStreams() {
+    final settings = <Widget>[];
+    for (final streamName in controller.recordedStreams.keys) {
+      final title = Text(streamName);
+      final checkbox = ValueListenableBuilder(
+        valueListenable: controller.recordedStreams[streamName],
+        builder: (context, enabled, _) {
+          return Checkbox(
+            value: enabled,
+            onChanged: (_) => controller.toggleTimelineStream(streamName),
+          );
+        },
+      );
+      settings.add(
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            checkbox,
+            title,
+          ],
+        ),
+      );
+    }
+
+    // Special case "Network Traffic" because it is not implemented as a
+    // Timeline recorded stream in the VM. The user does not need to be aware of
+    // the distinction, however.
+    settings.add(Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        ValueListenableBuilder(
+          valueListenable: controller.httpTimelineLoggingEnabled,
+          builder: (context, value, _) {
+            return Checkbox(
+              value: value,
+              onChanged: controller.toggleHttpRequestLogging,
+            );
+          },
+        ),
+        const Text('Network Traffic'),
+      ],
+    ));
+    return settings;
   }
 }

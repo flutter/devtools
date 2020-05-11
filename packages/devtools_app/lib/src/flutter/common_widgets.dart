@@ -20,6 +20,15 @@ const debuggerDeviceWidth = 800.0;
 
 const mediumDeviceWidth = 1000.0;
 
+const defaultDialogRadius = 20.0;
+
+List<Widget> headerInColumn(TextTheme textTheme, String title) {
+  return [
+    Text(title, style: textTheme.headline6),
+    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
+  ];
+}
+
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
