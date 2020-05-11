@@ -82,7 +82,7 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget clearButton({
   Key key,
-  bool busy,
+  bool busy = false,
   double includeTextWidth,
   @required VoidCallback onPressed,
 }) {
@@ -131,7 +131,7 @@ StatelessWidget recordButton({
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget refreshButton({
   Key key,
-  bool busy,
+  bool busy = false,
   double includeTextWidth,
   String labelOverride,
   @required VoidCallback onPressed,
