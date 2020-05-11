@@ -417,6 +417,11 @@ class TimelineController
     _httpTimelineLoggingEnabledNotifier.value = state;
   }
 
+  /// Clears the timeline data currently stored by the controller.
+  ///
+  /// [clearVmTimeline] defaults to true, but should be set to false if you want
+  /// to clear the data stored by the controller, but do not want to clear the
+  /// data currently stored by the VM.
   Future<void> clearData({bool clearVmTimeline = true}) async {
     if (clearVmTimeline && serviceManager.hasConnection) {
       await serviceManager.service.clearVMTimeline();

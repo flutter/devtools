@@ -138,8 +138,7 @@ class TimelineProcessor {
       // (e.g. thread_name events) as well as events from before we started
       // recording.
       final ts = event.event.timestampMicros;
-      final isTimeValid = ts != null;
-      return isTimeValid && !isMessageLoopFlushTasks;
+      return ts != null && !isMessageLoopFlushTasks;
     }).toList())
       // Events need to be in increasing timestamp order.
       ..sort()
