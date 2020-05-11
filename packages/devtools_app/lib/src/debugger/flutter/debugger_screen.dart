@@ -175,31 +175,28 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         actions: <Type, Action<Intent>>{
           FilterLibraryIntent: FilterLibraryAction(),
         },
-        child: Focus(
-          autofocus: true,
-          child: Split(
-            axis: Axis.horizontal,
-            initialFractions: const [0.25, 0.75],
-            children: [
-              OutlineDecoration(child: debuggerPanes()),
-              Column(
-                children: [
-                  DebuggingControls(controller: controller),
-                  const SizedBox(height: denseRowSpacing),
-                  Expanded(
-                    child: Split(
-                      axis: Axis.vertical,
-                      initialFractions: const [0.74, 0.26],
-                      children: [
-                        codeArea,
-                        Console(controller: controller),
-                      ],
-                    ),
+        child: Split(
+          axis: Axis.horizontal,
+          initialFractions: const [0.25, 0.75],
+          children: [
+            OutlineDecoration(child: debuggerPanes()),
+            Column(
+              children: [
+                DebuggingControls(controller: controller),
+                const SizedBox(height: denseRowSpacing),
+                Expanded(
+                  child: Split(
+                    axis: Axis.vertical,
+                    initialFractions: const [0.74, 0.26],
+                    children: [
+                      codeArea,
+                      Console(controller: controller),
+                    ],
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
