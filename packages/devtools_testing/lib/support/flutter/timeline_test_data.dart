@@ -940,7 +940,7 @@ final unknownEventEndTrace = testTraceEventWrapper({
 });
 
 // Mark: OfflineTimelineData.
-final goldenTraceEventsJson = List.from(
+final goldenTraceEventsJson = List<Map<String, dynamic>>.from(
     goldenUiTraceEvents.map((trace) => trace.json).toList()
       ..addAll(goldenRasterTraceEvents.map((trace) => trace.json).toList()));
 
@@ -1001,3 +1001,22 @@ final durationEventsWithDuplicateTraces = [
   transformLayerEnd1,
   endGpuRasterizerDrawTrace,
 ];
+
+final testTimelineJson = {
+  'type': 'Timeline',
+  'traceEvents': [
+    {
+      'name': 'thread_name',
+      'tid': testUiThreadId,
+      'args': {'name': '1.ui'},
+    },
+    {
+      'name': 'thread_name',
+      'tid': testRasterThreadId,
+      'args': {'name': '1.raster'},
+    },
+    ...goldenTraceEventsJson,
+  ],
+  'timeOriginMicros': 118039650802,
+  'timeExtentMicros': 118039679873 - 118039650802,
+};
