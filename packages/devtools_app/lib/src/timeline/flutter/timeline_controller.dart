@@ -154,9 +154,7 @@ class TimelineController
       _cpuProfilerService.setProfilePeriod(mediumProfilePeriod),
       logError: false,
     ));
-    await toggleTimelineStream('GC', true);
-    await toggleTimelineStream('Dart', true);
-    await toggleTimelineStream('Embedder', true);
+    await setTimelineStreams(['GC', 'Dart', 'Embedder']);
     await toggleHttpRequestLogging(true);
   }
 
@@ -428,6 +426,14 @@ class TimelineController
   Future<void> toggleHttpRequestLogging(bool state) async {
     await HttpService.toggleHttpRequestLogging(state);
     _httpTimelineLoggingEnabledNotifier.value = state;
+  }
+
+  Future<void> setTimelineStreams(List<String> streams) async {
+    for (final stream in streams) {
+      assert(_recordedStreams.containsKey(stream));
+      _recordedStreams[stream].value = true;
+    }
+    await serviceManager.service.setVMTimelineFlags(streams);
   }
 
   // TODO(kenz): this is not as robust as we'd like. Revisit once
