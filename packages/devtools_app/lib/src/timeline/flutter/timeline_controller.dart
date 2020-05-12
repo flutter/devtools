@@ -148,12 +148,6 @@ class TimelineController
   /// This list is cleared and repopulated each time "Refresh" is clicked.
   List<TraceEventWrapper> allTraceEvents = [];
 
-  /// Whether the timeline has been started from [timelineService].
-  ///
-  /// [data] is initialized in [timelineService.startTimeline], where the
-  /// timeline recorders are also set (Dart, GC, Embedder).
-  bool get hasStarted => data != null;
-
   void _startTimeline() async {
     await serviceManager.onServiceAvailable;
     unawaited(allowedError(
@@ -201,7 +195,7 @@ class TimelineController
   }
 
   void selectFrame(TimelineFrame frame) {
-    if (frame == null || data.selectedFrame == frame || !hasStarted) {
+    if (frame == null || data == null || data.selectedFrame == frame) {
       return;
     }
     data.selectedFrame = frame;

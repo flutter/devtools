@@ -50,6 +50,8 @@ void main() {
       const TimelineScreenBody(),
       timeline: controller = timelineController ?? TimelineController(),
     ));
+    // Delay to ensure the timeline has started.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(TimelineScreenBody), findsOneWidget);
   }
 

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/common_widgets.dart';
 import '../../flutter/flutter_widgets/linked_scroll_controller.dart';
 import '../../ui/flutter/dialog.dart';
 import '../../ui/flutter/utils.dart';
@@ -313,7 +314,8 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     // For very tall app keep the dialog at a reasonable height w/o too much vertical whitespace.
     // The listbox area is the area that grows to accomodate the list of known libraries.
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(defaultDialogRadius)),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           return Container(

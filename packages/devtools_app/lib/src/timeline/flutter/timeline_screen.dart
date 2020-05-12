@@ -237,7 +237,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
             ),
             onPressed: _openSettingsDialog,
           ),
-          tooltip: 'More Timeline Configurations',
+          tooltip: 'Timeline Configuration',
         ),
       ],
     );
@@ -359,6 +359,7 @@ class TimelineConfigurationsDialog extends StatelessWidget {
   List<Widget> _recordedStreams() {
     final settings = <Widget>[];
     for (final streamName in controller.recordedStreams.keys) {
+      // TODO(kenz): add subtly styles description for each stream.
       final title = Text(streamName);
       final checkbox = ValueListenableBuilder(
         valueListenable: controller.recordedStreams[streamName],
