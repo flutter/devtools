@@ -45,11 +45,3 @@ Widget createAnimatedCircleWidget(double radius, Color color) {
     decoration: BoxDecoration(color: color, shape: BoxShape.circle),
   );
 }
-
-extension DebuggerTextStyleExtension on ThemeData {
-  TextStyle get regularTextStyle => TextStyle(color: textTheme.bodyText2.color);
-
-  TextStyle get subtleTextStyle => TextStyle(color: unselectedWidgetColor);
-
-  TextStyle get selectedTextStyle => TextStyle(color: textSelectionColor);
-}

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -331,12 +332,13 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 class TimelineConfigurationsDialog extends StatelessWidget {
   const TimelineConfigurationsDialog(this.controller);
 
-  static const dialogWidth = 300.0;
+  static const dialogWidth = 500.0;
 
   final TimelineController controller;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Dialog(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(defaultDialogRadius)),
@@ -348,59 +350,93 @@ class TimelineConfigurationsDialog extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...headerInColumn(Theme.of(context).textTheme, 'Recorded Streams'),
-            ..._recordedStreams(),
+            ...headerInColumn(theme.textTheme, 'Recorded Streams'),
+            ..._defaultRecordedStreams(theme),
+            const SizedBox(height: denseSpacing),
+            ...subHeaderInColumn(theme.textTheme, 'Advanced'),
+            ..._advancedStreams(theme),
           ],
         ),
       ),
     );
   }
 
-  List<Widget> _recordedStreams() {
-    final settings = <Widget>[];
-    for (final streamName in controller.recordedStreams.keys) {
-      // TODO(kenz): add subtly styles description for each stream.
-      final title = Text(streamName);
-      final checkbox = ValueListenableBuilder(
-        valueListenable: controller.recordedStreams[streamName],
-        builder: (context, enabled, _) {
-          return Checkbox(
-            value: enabled,
-            onChanged: (_) => controller.toggleTimelineStream(streamName),
-          );
-        },
-      );
-      settings.add(
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            checkbox,
-            title,
-          ],
-        ),
-      );
-    }
+  List<Widget> _defaultRecordedStreams(ThemeData theme) {
+    return [
+      ..._timelineStreams(theme, advanced: false),
+      // Special case "Network Traffic" because it is not implemented as a
+      // Timeline recorded stream in the VM. The user does not need to be aware of
+      // the distinction, however.
+      _buildStream(
+        name: 'Network',
+        description: ' • Log Http traffic',
+        listenable: controller.httpTimelineLoggingEnabled,
+        onChanged: controller.toggleHttpRequestLogging,
+        theme: theme,
+      ),
+    ];
+  }
 
-    // Special case "Network Traffic" because it is not implemented as a
-    // Timeline recorded stream in the VM. The user does not need to be aware of
-    // the distinction, however.
-    settings.add(Row(
+  List<Widget> _advancedStreams(ThemeData theme) {
+    return _timelineStreams(theme, advanced: true);
+  }
+
+  List<Widget> _timelineStreams(
+    ThemeData theme, {
+    @required bool advanced,
+  }) {
+    final settings = <Widget>[];
+    final streams = controller.recordedStreams
+        .where((s) => s.advanced == advanced)
+        .toList();
+    for (final stream in streams) {
+      settings.add(_buildStream(
+        name: stream.name,
+        description: ' • ${stream.description}',
+        listenable: stream.enabled,
+        onChanged: (_) => controller.toggleTimelineStream(stream),
+        theme: theme,
+      ));
+    }
+    return settings;
+  }
+
+  Widget _buildStream({
+    @required String name,
+    @required String description,
+    @required ValueListenable listenable,
+    @required void Function(bool) onChanged,
+    @required ThemeData theme,
+  }) {
+    return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         ValueListenableBuilder(
-          valueListenable: controller.httpTimelineLoggingEnabled,
+          valueListenable: listenable,
           builder: (context, value, _) {
             return Checkbox(
               value: value,
-              onChanged: controller.toggleHttpRequestLogging,
+              onChanged: onChanged,
             );
           },
         ),
-        const Text('Network Traffic'),
+        Flexible(
+          child: RichText(
+            overflow: TextOverflow.visible,
+            text: TextSpan(
+              text: name,
+              style: theme.regularTextStyle,
+              children: [
+                TextSpan(
+                  text: description,
+                  style: theme.subtleTextStyle,
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
-    ));
-    return settings;
+    );
   }
 }
