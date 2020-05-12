@@ -46,6 +46,8 @@ void main() {
         const TimelineScreenBody(),
         timeline: controller,
       ));
+      // Delay to ensure the timeline has started.
+      await tester.pumpAndSettle(const Duration(seconds: 1));
     }
 
     const windowSize = Size(2225.0, 1000.0);
