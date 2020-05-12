@@ -10,7 +10,6 @@ import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
-import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../ui/flutter/label.dart';
@@ -74,6 +73,9 @@ class MemoryBody extends StatefulWidget {
 }
 
 class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
+  @visibleForTesting
+  static const androidChartButtonKey = Key('Android Chart');
+
   MemoryChart _memoryChart;
 
   MemoryController controller;
@@ -106,6 +108,8 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     final mediaWidth = MediaQuery.of(context).size.width;
+    final textTheme = Theme.of(context).textTheme;
+
     controller.memorySourcePrefix = mediaWidth > verboseDropDownMininumWidth
         ? MemoryScreen.memorySourceMenuItemPrefix
         : '';
@@ -117,26 +121,22 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildPrimaryStateControls(),
+            _buildPrimaryStateControls(textTheme),
             const Expanded(child: SizedBox(width: denseSpacing)),
-            _buildMemoryControls(),
+            _buildMemoryControls(textTheme),
           ],
         ),
+        const SizedBox(height: denseSpacing),
+        _memoryChart,
+        const PaddedDivider(padding: EdgeInsets.zero),
         Expanded(
-          child: Split(
-            axis: Axis.vertical,
-            initialFractions: const [0.40, 0.60],
-            children: [
-              _memoryChart,
-              HeapTree(controller),
-            ],
-          ),
+          child: HeapTree(controller),
         ),
       ],
     );
   }
 
-  Widget _intervalDropdown() {
+  Widget _intervalDropdown(TextTheme textTheme) {
     final files = controller.memoryLog.offlineFiles();
 
     // First item is 'Live Feed', then followed by memory log filenames.
@@ -166,21 +166,22 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
       },
     ).toList();
 
-    return DropdownButton<String>(
-      key: MemoryScreen.dropdownIntervalMenuButtonKey,
-      value: controller.displayInterval,
-      iconSize: 20,
-      style: const TextStyle(fontWeight: FontWeight.w100),
-      onChanged: (String newValue) {
-        setState(() {
-          controller.displayInterval = newValue;
-        });
-      },
-      items: _displayTypes,
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<String>(
+        key: MemoryScreen.dropdownIntervalMenuButtonKey,
+        style: textTheme.bodyText2,
+        value: controller.displayInterval,
+        onChanged: (String newValue) {
+          setState(() {
+            controller.displayInterval = newValue;
+          });
+        },
+        items: _displayTypes,
+      ),
     );
   }
 
-  Widget _memorySourceDropdown() {
+  Widget _memorySourceDropdown(TextTheme textTheme) {
     final files = controller.memoryLog.offlineFiles();
 
     // Can we display dropdowns in verbose mode?
@@ -208,17 +209,18 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
       );
     }).toList();
 
-    return DropdownButton<String>(
-      key: MemoryScreen.dropdownSourceMenuButtonKey,
-      value: controller.memorySource,
-      iconSize: 20,
-      style: const TextStyle(fontWeight: FontWeight.w100),
-      onChanged: (String newValue) {
-        setState(() {
-          controller.memorySource = newValue;
-        });
-      },
-      items: allMemorySources,
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<String>(
+        key: MemoryScreen.dropdownSourceMenuButtonKey,
+        style: textTheme.bodyText2,
+        value: controller.memorySource,
+        onChanged: (String newValue) {
+          setState(() {
+            controller.memorySource = newValue;
+          });
+        },
+        items: allMemorySources,
+      ),
     );
   }
 
@@ -242,7 +244,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
 */
   }
 
-  Widget _buildPrimaryStateControls() {
+  Widget _buildPrimaryStateControls(TextTheme textTheme) {
     return ValueListenableBuilder(
       valueListenable: controller.paused,
       builder: (context, paused, _) {
@@ -281,19 +283,41 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
                   includeTextWidth: _primaryControlsMinVerboseWidth,
                 )),
             const SizedBox(width: defaultSpacing),
-            _intervalDropdown(),
+            _intervalDropdown(textTheme),
           ],
         );
       },
     );
   }
 
-  Widget _buildMemoryControls() {
+  OutlineButton createToggleAdbMemoryButton() {
+    return OutlineButton(
+      key: androidChartButtonKey,
+      onPressed: controller.isConnectedDeviceAndroid
+          ? _toggleAndroidChartVisibility
+          : null,
+      child: MaterialIconLabel(
+        controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
+        'Android Memory',
+        includeTextWidth: 900,
+      ),
+    );
+  }
+
+  void _toggleAndroidChartVisibility() {
+    setState(() {
+      controller.toggleAndroidChartVisibility();
+    });
+  }
+
+  Widget _buildMemoryControls(TextTheme textTheme) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _memorySourceDropdown(),
+        _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
+        createToggleAdbMemoryButton(),
+        const SizedBox(width: denseSpacing),
         OutlineButton(
           key: MemoryScreen.resetButtonKey,
           onPressed: _reset,

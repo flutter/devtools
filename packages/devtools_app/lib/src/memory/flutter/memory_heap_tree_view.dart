@@ -6,17 +6,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/table.dart';
 import '../../flutter/theme.dart';
 import '../../table_data.dart';
 import '../../ui/flutter/label.dart';
-import '../../ui/material_icons.dart';
 import '../../utils.dart';
-
 import 'memory_controller.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
@@ -115,13 +113,19 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   bool get _isSnapshotRunning =>
       snapshotState != SnapshotStatus.done &&
       snapshotState != SnapshotStatus.none;
+
   bool get _isSnapshotStreaming => snapshotState == SnapshotStatus.streaming;
+
   bool get _isSnapshotGraphing => snapshotState == SnapshotStatus.graphing;
+
   bool get _isSnapshotGrouping => snapshotState == SnapshotStatus.grouping;
+
   bool get _isSnapshotComplete => snapshotState == SnapshotStatus.done;
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     if (_isSnapshotRunning) {
       snapshotDisplay = Column(children: [
         const SizedBox(height: 50.0),
@@ -151,9 +155,9 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     return Column(
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSnapshotControls(),
+            _buildSnapshotControls(textTheme),
+            const Expanded(child: SizedBox(width: defaultSpacing)),
             _buildSearchFilterControls(),
           ],
         ),
@@ -172,7 +176,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Expanded(child: snapshotDisplay),
-          const SizedBox(width: 16.0),
+          const SizedBox(width: defaultSpacing),
           controller.isLeafSelected
               ? Expanded(child: SnapshotInstanceViewTable())
               : const SizedBox(),
@@ -188,7 +192,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   @visibleForTesting
   static const groupByKey = Key('Filter Group By');
 
-  Widget _groupByDropdown() {
+  Widget _groupByDropdown(TextTheme textTheme) {
     final _groupByTypes = [
       MemoryController.groupByLibrary,
       MemoryController.groupByClass,
@@ -208,108 +212,100 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       },
     ).toList();
 
-    return DropdownButton<String>(
-      key: groupByMenuButtonKey,
-      value: controller.groupingBy.value,
-      iconSize: 20,
-      style: const TextStyle(fontWeight: FontWeight.w100),
-      onChanged: (String newValue) {
-        setState(
-          () {
-            controller.selectedLeaf = null;
-            controller.groupingBy.value = newValue;
-            if (controller.snapshots.isNotEmpty) {
-              doGroupBy();
-            }
-          },
-        );
-      },
-      items: _groupByTypes,
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<String>(
+        key: groupByMenuButtonKey,
+        style: textTheme.bodyText2,
+        value: controller.groupingBy.value,
+        onChanged: (String newValue) {
+          setState(
+            () {
+              controller.selectedLeaf = null;
+              controller.groupingBy.value = newValue;
+              if (controller.snapshots.isNotEmpty) {
+                doGroupBy();
+              }
+            },
+          );
+        },
+        items: _groupByTypes,
+      ),
     );
   }
 
-  Widget _buildSnapshotControls() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          const SizedBox(width: defaultSpacing),
-          Flexible(
-            child: OutlineButton(
-              key: snapshotButtonKey,
-              onPressed: _isSnapshotRunning ? null : _snapshot,
-              child: Label(
-                memorySnapshot,
-                'Snapshot',
-                minIncludeTextWidth: 200,
+  Widget _buildSnapshotControls(TextTheme textTheme) {
+    return Row(
+      children: [
+        OutlineButton(
+          key: snapshotButtonKey,
+          onPressed: _isSnapshotRunning ? null : _snapshot,
+          child: const MaterialIconLabel(
+            Icons.camera,
+            'Snapshot',
+            includeTextWidth: 200,
+          ),
+        ),
+        const SizedBox(width: defaultSpacing),
+        Row(
+          children: [
+            const Text('Heat Map'),
+            Switch(
+              value: controller.showHeatMap,
+              onChanged: (value) {
+                setState(() {
+                  controller.showHeatMap = value;
+                  controller.selectedLeaf = null;
+                });
+              },
+            ),
+          ],
+        ),
+        const SizedBox(width: defaultSpacing),
+        controller.showHeatMap ? const SizedBox() : _groupByDropdown(textTheme),
+        const SizedBox(width: defaultSpacing),
+        // TODO(terry): Mechanism to handle expand/collapse on both
+        // tables objects/fields. Maybe notion in table?
+        controller.showHeatMap
+            ? const SizedBox()
+            : OutlineButton(
+                key: collapseAllButtonKey,
+                onPressed: snapshotDisplay is MemorySnapshotTable
+                    ? () {
+                        if (snapshotDisplay is MemorySnapshotTable) {
+                          controller.groupByTreeTable.dataRoots
+                              .every((element) {
+                            element.collapseCascading();
+                            return true;
+                          });
+                          if (controller.instanceFieldsTreeTable != null) {
+                            // We're collapsing close the fields table.
+                            controller.selectedLeaf = null;
+                          }
+                          setState(() {});
+                        }
+                      }
+                    : null,
+                child: const Text('Collapse All'),
               ),
-            ),
-          ),
-          const SizedBox(width: 16.0),
-          Flexible(
-            child: Row(
-              children: [
-                const Text('Heat Map'),
-                Switch(
-                    value: controller.showHeatMap,
-                    onChanged: (value) {
-                      setState(() {
-                        controller.showHeatMap = value;
-                        controller.selectedLeaf = null;
-                      });
-                    }),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16.0),
-          controller.showHeatMap ? const SizedBox() : _groupByDropdown(),
-          const SizedBox(width: 16.0),
-          // TODO(terry): Mechanism to handle expand/collapse on both
-          // tables objects/fields. Maybe notion in table?
-          controller.showHeatMap
-              ? const SizedBox()
-              : OutlineButton(
-                  key: collapseAllButtonKey,
-                  onPressed: snapshotDisplay is MemorySnapshotTable
-                      ? () {
-                          if (snapshotDisplay is MemorySnapshotTable) {
-                            controller.groupByTreeTable.dataRoots
-                                .every((element) {
-                              element.collapseCascading();
-                              return true;
-                            });
-                            if (controller.instanceFieldsTreeTable != null) {
-                              // We're collapsing close the fields table.
-                              controller.selectedLeaf = null;
-                            }
-                            setState(() {});
-                          }
+        controller.showHeatMap
+            ? const SizedBox()
+            : OutlineButton(
+                key: expandAllButtonKey,
+                onPressed: snapshotDisplay is MemorySnapshotTable
+                    ? () {
+                        if (snapshotDisplay is MemorySnapshotTable) {
+                          controller.groupByTreeTable.dataRoots
+                              .every((element) {
+                            element.expandCascading();
+                            return true;
+                          });
+                          setState(() {});
                         }
-                      : null,
-                  child: const Text('Collapse All'),
-                ),
-          controller.showHeatMap
-              ? const SizedBox()
-              : OutlineButton(
-                  key: expandAllButtonKey,
-                  onPressed: snapshotDisplay is MemorySnapshotTable
-                      ? () {
-                          if (snapshotDisplay is MemorySnapshotTable) {
-                            controller.groupByTreeTable.dataRoots
-                                .every((element) {
-                              element.expandCascading();
-                              return true;
-                            });
-                            setState(() {});
-                          }
-                        }
-                      : null,
-                  child: const Text('Expand All'),
-                ),
-        ],
-      ),
+                      }
+                    : null,
+                child: const Text('Expand All'),
+              ),
+      ],
     );
   }
 
@@ -383,43 +379,39 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
           )
         : const SizedBox();
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Container(
-            // TODO(terry): Use a more adaptive layout than forcing to 300.0
-            width: 300.0,
-            height: 40.0,
-            child: searchAndRawKeyboard,
-          ),
-          const SizedBox(width: 16.0),
-          Flexible(
-            child: OutlineButton(
-              key: filterButtonKey,
-              onPressed: _filter,
-              child: Label(
-                filterIcon,
-                'Filter',
-                minIncludeTextWidth: 200,
-              ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Container(
+          // TODO(terry): Use a more adaptive layout than forcing to 300.0
+          width: 300.0,
+          height: 40.0,
+          child: searchAndRawKeyboard,
+        ),
+        const SizedBox(width: denseSpacing),
+        Flexible(
+          child: OutlineButton(
+            key: filterButtonKey,
+            onPressed: _filter,
+            child: const MaterialIconLabel(
+              Icons.filter_list,
+              'Filter',
+              includeTextWidth: 200,
             ),
           ),
-          Flexible(
-            child: OutlineButton(
-              key: settingsButtonKey,
-              onPressed: _settings,
-              child: Label(
-                settings,
-                'Settings',
-                minIncludeTextWidth: 200,
-              ),
-            ),
+        ),
+        const SizedBox(width: denseSpacing),
+        OutlineButton(
+          key: settingsButtonKey,
+          onPressed: _settings,
+          child: const MaterialIconLabel(
+            Icons.settings,
+            'Settings',
+            includeTextWidth: 200,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
