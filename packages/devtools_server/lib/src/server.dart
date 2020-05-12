@@ -745,16 +745,7 @@ Future<Map<String, dynamic>> launchDevTools(
   uriParams['uri'] = vmServiceUri.toString();
 
   final devToolsUri = Uri.parse(devToolsUrl);
-  final uriToLaunch = devToolsUri.replace(
-    // If path is empty, we generate 'http://foo:8000?uri=' (missing `/`) and
-    // ChromeOS fails to detect that it's a port that's tunneled, and will
-    // quietly replace the IP with "penguin.linux.test". This is not valid
-    // for us since the server isn't bound to the containers IP (it's bound
-    // to the containers loopback IP).
-    path: devToolsUri.path.isEmpty ? '/' : devToolsUri.path,
-    queryParameters: uriParams,
-    fragment: page,
-  );
+  final uriToLaunch = _buildUriToLaunch(uriParams, page, devToolsUri);
 
   // TODO(dantup): When ChromeOS has support for tunneling all ports we
   // can change this to always use the native browser for ChromeOS
@@ -786,6 +777,41 @@ Future<Map<String, dynamic>> launchDevTools(
       pid: browserPid,
       machineMode: machineMode);
   return {'reused': false, 'notified': false, 'pid': browserPid};
+}
+
+String _buildUriToLaunch(
+    Map<String, dynamic> uriParams, page, Uri devToolsUri) {
+  // TEMP: When `DEVTOOLS_FLUTTER_WEB=true` construct the URL in the correct format
+  // for the Flutter version of the web app.
+  final useFlutterVersion =
+      Platform.environment['DEVTOOLS_FLUTTER_WEB'] == 'true';
+
+  if (useFlutterVersion) {
+    final queryStringNameValues = [];
+    uriParams.forEach((key, value) => queryStringNameValues.add(
+        '${Uri.encodeQueryComponent(key)}=${Uri.encodeQueryComponent(value)}'));
+    if (page != null) {
+      queryStringNameValues.add('page=${Uri.encodeQueryComponent(page)}');
+    }
+    return devToolsUri
+        .replace(
+            path: '${devToolsUri.path.isEmpty ? '/' : devToolsUri.path}',
+            fragment: '?${queryStringNameValues.join('&')}')
+        .toString();
+  } else {
+    return devToolsUri
+        .replace(
+          // If path is empty, we generate 'http://foo:8000?uri=' (missing `/`) and
+          // ChromeOS fails to detect that it's a port that's tunneled, and will
+          // quietly replace the IP with "penguin.linux.test". This is not valid
+          // for us since the server isn't bound to the containers IP (it's bound
+          // to the containers loopback IP).
+          path: '${devToolsUri.path.isEmpty ? '/' : devToolsUri.path}',
+          queryParameters: uriParams,
+          fragment: page,
+        )
+        .toString();
+  }
 }
 
 /// Prints a launch event to stdout so consumers of the DevTools server

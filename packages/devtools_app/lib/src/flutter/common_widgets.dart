@@ -20,6 +20,15 @@ const debuggerDeviceWidth = 800.0;
 
 const mediumDeviceWidth = 1000.0;
 
+const defaultDialogRadius = 20.0;
+
+List<Widget> headerInColumn(TextTheme textTheme, String title) {
+  return [
+    Text(title, style: textTheme.headline6),
+    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
+  ];
+}
+
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
@@ -82,12 +91,13 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget clearButton({
   Key key,
+  bool busy = false,
   double includeTextWidth,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
     key: key,
-    onPressed: onPressed,
+    onPressed: busy ? null : onPressed,
     child: MaterialIconLabel(
       Icons.block,
       'Clear',
@@ -116,6 +126,31 @@ StatelessWidget recordButton({
     child: MaterialIconLabel(
       Icons.fiber_manual_record,
       labelOverride ?? 'Record',
+      includeTextWidth: includeTextWidth,
+    ),
+  );
+}
+
+/// Button to refresh data.
+///
+/// * `recording`: Whether recording is in progress.
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
+/// * `labelOverride`: Optional alternative text to use for the button.
+/// * `onPressed`: The callback to be called upon pressing the button.
+StatelessWidget refreshButton({
+  Key key,
+  bool busy = false,
+  double includeTextWidth,
+  String labelOverride,
+  @required VoidCallback onPressed,
+}) {
+  return OutlineButton(
+    key: key,
+    onPressed: busy ? null : onPressed,
+    child: MaterialIconLabel(
+      Icons.refresh,
+      'Refresh',
       includeTextWidth: includeTextWidth,
     ),
   );

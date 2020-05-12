@@ -155,7 +155,8 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
         clearButton(
           key: PerformanceScreen.clearButtonKey,
           includeTextWidth: includeTextWidth,
-          onPressed: recording ? null : controller.clear,
+          busy: recording,
+          onPressed: controller.clear,
         ),
       ],
     );

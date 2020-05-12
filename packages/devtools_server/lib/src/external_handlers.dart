@@ -84,10 +84,13 @@ Future<shelf.Handler> defaultHandler(
   // out of the `pack` folder.
   Handler packHandler;
   if (!debugMode) {
-    packHandler = createStaticHandler(
-      path.join(packageDir, 'build', 'pack'),
-      defaultDocument: 'index.html',
-    );
+    final packFolder = path.join(packageDir, 'build', 'pack');
+    if (Directory(packFolder).existsSync()) {
+      packHandler = createStaticHandler(
+        packFolder,
+        defaultDocument: 'index.html',
+      );
+    }
   }
 
   final sseHandler = SseHandler(Uri.parse('/api/sse'))
@@ -96,7 +99,7 @@ Future<shelf.Handler> defaultHandler(
   // Make a handler that delegates based on path.
   final handler = (shelf.Request request) {
     if (!debugMode) {
-      if (request.url.path.startsWith('packages/')) {
+      if (packHandler != null && request.url.path.startsWith('packages/')) {
         // request.change here will strip the `packages` prefix from the path
         // so it's relative to packHandler's root.
         return packHandler(request.change(path: 'packages'));
