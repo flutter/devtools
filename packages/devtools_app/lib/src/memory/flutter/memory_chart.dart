@@ -17,12 +17,6 @@ import 'package:mp_chart/mp/core/data_set/line_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:mp_chart/mp/core/enums/axis_dependency.dart';
-
-// TODO(terry): Enable legend when textsize is correct.
-// import 'package:mp_chart/mp/core/enums/legend_vertical_alignment.dart';
-// import 'package:mp_chart/mp/core/enums/legend_form.dart';
-// import 'package:mp_chart/mp/core/enums/legend_horizontal_alignment.dart';
-// import 'package:mp_chart/mp/core/enums/legend_orientation.dart';
 import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/enums/y_axis_label_position.dart';
 import 'package:mp_chart/mp/core/highlight/highlight.dart';
@@ -140,7 +134,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     _img ??= await ImageLoader.loadImage('assets/img/star.png');
   }
 
-  //Slider _timelineSlider;
+  Slider _timelineSlider;
 
   SelectedDataPoint _selectedDartChart;
   SelectedDataPoint _selectedAndroidChart;
@@ -169,28 +163,28 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     return '$unitsAgo Minute${unitsAgo != 1 ? 's' : ''} Ago';
   }
 
-//  Slider _createTimelineSlider() {
-//    return Slider.adaptive(
-//      label: timelineSliderLabel(controller.sliderValue),
-//      activeColor: Colors.indigoAccent,
-//      max: controller.numberOfStops.toDouble(),
-//      inactiveColor: Colors.grey,
-//      onChanged: controller.numberOfStops > 0
-//          ? (newValue) {
-//              final newChunk = newValue.roundToDouble();
-//              setState(
-//                () {
-//                  controller.sliderValue = newChunk;
-//                  // TODO(terry): Compute:
-//                  //    startingIndex = sliderValue * controller.intervalDurationInMs
-//                },
-//              );
-//            }
-//          : null,
-//      value: controller.sliderValue,
-//      divisions: controller.numberOfStops,
-//    );
-//  }
+  Slider _createTimelineSlider() {
+    return Slider.adaptive(
+      label: timelineSliderLabel(controller.sliderValue),
+      activeColor: Colors.indigoAccent,
+      max: controller.numberOfStops.toDouble(),
+      inactiveColor: Colors.grey,
+      onChanged: controller.numberOfStops > 0
+          ? (newValue) {
+              final newChunk = newValue.roundToDouble();
+              setState(
+                () {
+                  controller.sliderValue = newChunk;
+                  // TODO(terry): Compute:
+                  //    startingIndex = sliderValue * controller.intervalDurationInMs
+                },
+              );
+            }
+          : null,
+      value: controller.sliderValue,
+      divisions: controller.numberOfStops,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -205,25 +199,35 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     }
     controller.numberOfStops = stops;
 
-    //_timelineSlider = _createTimelineSlider();
+    _timelineSlider = _createTimelineSlider();
 
-    return Container(
-      height: liveChartHeight,
-      child: Row(
-        children: [
+    return Row(
+      children: [
+        Expanded(
+          child: memoryTimeline.liveData.isEmpty
+              ? const SizedBox()
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: liveChartHeight,
+                      child: LineChart(dartChartController),
+                    ),
+                    _timelineSlider,
+                  ],
+                ),
+        ),
+        if (controller.isAndroidChartVisible)
+          const SizedBox(width: denseSpacing),
+        if (controller.isAndroidChartVisible)
           Expanded(
-            child: memoryTimeline.liveData.isEmpty
-                ? const SizedBox()
-                : LineChart(dartChartController),
-          ),
-          if (controller.isAndroidChartVisible)
-            const SizedBox(width: denseSpacing),
-          if (controller.isAndroidChartVisible)
-            Expanded(
+            child: SizedBox(
+              height: liveChartHeight,
               child: LineChart(androidChartController),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 

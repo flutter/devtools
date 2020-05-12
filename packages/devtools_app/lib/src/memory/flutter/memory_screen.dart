@@ -293,11 +293,9 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   OutlineButton createToggleAdbMemoryButton() {
     return OutlineButton(
       key: androidChartButtonKey,
-      onPressed: () {
-        setState(() {
-          controller.toggleAndroidChartVisibility();
-        });
-      },
+      onPressed: controller.isConnectedDeviceAndroid
+          ? _toggleAndroidChartVisibility
+          : null,
       child: MaterialIconLabel(
         controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
         'Android Memory',
@@ -306,20 +304,20 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
     );
   }
 
+  void _toggleAndroidChartVisibility() {
+    setState(() {
+      controller.toggleAndroidChartVisibility();
+    });
+  }
+
   Widget _buildMemoryControls(TextTheme textTheme) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
-        if (controller.isConnectedDeviceAndroid)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              createToggleAdbMemoryButton(),
-              const SizedBox(width: denseSpacing),
-            ],
-          ),
+        createToggleAdbMemoryButton(),
+        const SizedBox(width: denseSpacing),
         OutlineButton(
           key: MemoryScreen.resetButtonKey,
           onPressed: _reset,
