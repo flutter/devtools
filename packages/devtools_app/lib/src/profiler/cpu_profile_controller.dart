@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 
 import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
-import '../ui/fake_flutter/fake_flutter.dart';
 
 class CpuProfilerController {
   /// Data for the initial value and reset value of [_dataNotifier].

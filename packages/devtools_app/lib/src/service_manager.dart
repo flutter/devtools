@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
@@ -18,7 +19,6 @@ import 'logging/vm_service_logger.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
 import 'stream_value_listenable.dart';
-import 'ui/fake_flutter/fake_flutter.dart';
 import 'utils.dart';
 import 'vm_service_wrapper.dart';
 

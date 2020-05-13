@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:devtools_app/src/geometry.dart';
-import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart'
-    hide TypeMatcher;
 
 import 'package:test/test.dart';
 

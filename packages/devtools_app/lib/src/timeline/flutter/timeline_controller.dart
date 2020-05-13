@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -18,7 +19,6 @@ import '../../profiler/cpu_profile_transformer.dart';
 import '../../profiler/profile_granularity.dart';
 import '../../service_manager.dart';
 import '../../trace_event.dart';
-import '../../ui/fake_flutter/fake_flutter.dart';
 import 'timeline_model.dart';
 import 'timeline_processor.dart';
 import 'timeline_screen.dart';

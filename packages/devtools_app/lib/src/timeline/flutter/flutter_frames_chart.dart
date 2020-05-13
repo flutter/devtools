@@ -30,7 +30,6 @@ import 'package:provider/provider.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/theme.dart';
 import '../../ui/colors.dart';
-import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../ui/theme.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';

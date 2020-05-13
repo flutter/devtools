@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'ui/fake_flutter/fake_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 /// Class that converts enum value names to enum entries and vice versa.
 ///

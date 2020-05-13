@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 
 import '../../flutter/theme.dart';
-import '../../ui/fake_flutter/_real_flutter.dart';
 import '../cpu_profile_controller.dart';
 import '../cpu_profile_model.dart';
 import '../cpu_profile_transformer.dart';

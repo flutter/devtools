@@ -6,10 +6,10 @@ library diagnostics_node;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../enum_utils.dart';
-import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
 import 'flutter_widget.dart';

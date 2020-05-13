@@ -4,9 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_model.dart';
-import '../ui/fake_flutter/fake_flutter.dart';
 import '../utils.dart';
 
 class PerformanceController with CpuProfilerControllerProviderMixin {

@@ -11,12 +11,12 @@
 /// and will help simplify porting this code to work with Hummingbird.
 library inspector_tree;
 
+import 'package:flutter/foundation.dart';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
 import '../config_specific/logger/logger.dart';
-import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../ui/material_icons.dart';
 import '../ui/theme.dart';

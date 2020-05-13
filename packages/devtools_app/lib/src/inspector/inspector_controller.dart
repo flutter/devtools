@@ -16,6 +16,7 @@ library inspector_controller;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -24,7 +25,6 @@ import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../service_extensions.dart' as extensions;
 import '../service_registrations.dart' as registrations;
-import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
 import '../version.dart';

@@ -10,7 +10,6 @@ import 'package:devtools_app/src/memory/flutter/memory_chart.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart';
 import 'package:devtools_app/src/memory/flutter/memory_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';

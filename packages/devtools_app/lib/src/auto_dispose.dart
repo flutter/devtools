@@ -4,9 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
-
-import 'ui/fake_flutter/fake_flutter.dart';
 
 /// Provides functionality to simplify listening to streams and ValueNotifiers.
 ///

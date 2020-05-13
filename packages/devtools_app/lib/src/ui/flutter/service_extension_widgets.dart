@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../config_specific/logger/logger.dart';
@@ -17,7 +18,6 @@ import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../service_registrations.dart';
 import '../../utils.dart';
-import '../fake_flutter/fake_flutter.dart';
 import 'flutter_icon_renderer.dart';
 import 'label.dart';
 
