@@ -135,6 +135,11 @@ class DebuggerController extends DisposableController
 
   IsolateRef isolateRef;
 
+  /// Clears the contents of stdio.
+  void clearStdio() {
+    _stdio.value = [];
+  }
+
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {
     const int kMaxLogItemsLowerBound = 5000;

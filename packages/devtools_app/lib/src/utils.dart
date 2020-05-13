@@ -177,7 +177,13 @@ String longestFittingSubstring(
 bool isLetter(int codeUnit) =>
     (codeUnit >= 65 && codeUnit <= 90) || (codeUnit >= 97 && codeUnit <= 122);
 
-String pluralize(String word, int count) => count == 1 ? word : '${word}s';
+/// Pluralizes a word, following english rules (1, many).
+///
+/// Pass a custom named `plural` for irregular plurals:
+/// `pluralize('index', count, plural: 'indices')`
+/// So it returns `indices` and not `indexs`.
+String pluralize(String word, int count, {String plural}) =>
+    count == 1 ? word : (plural ?? '${word}s');
 
 /// Returns a simplified version of a StackFrame name.
 ///
