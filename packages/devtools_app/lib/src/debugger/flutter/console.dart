@@ -33,8 +33,6 @@ class Console extends StatefulWidget {
 }
 
 class _ConsoleState extends State<Console> {
-  bool canDelete = false;
-
   @override
   Widget build(BuildContext context) {
     return Stack(
