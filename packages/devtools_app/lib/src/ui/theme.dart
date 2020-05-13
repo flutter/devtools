@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
-import 'flutter_html_shim.dart';
-
 bool _isDarkTheme = true;
 
 /// Whether the application is running with a light or dark theme.
@@ -24,8 +22,6 @@ bool get isDarkTheme => _isDarkTheme;
 @Deprecated('Prefer using the SettingsController')
 void setTheme({@required bool darkTheme}) {
   _isDarkTheme = darkTheme;
-
-  clearColorCache();
 }
 
 // Commonly used themed colors.
