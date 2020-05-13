@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/tree.dart';
-import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
