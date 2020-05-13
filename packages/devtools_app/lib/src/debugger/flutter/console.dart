@@ -4,10 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../flutter/common_widgets.dart';
-import '../../flutter/notifications.dart';
 import '../../flutter/theme.dart';
 import '../../flutter/utils.dart';
 import 'codeview.dart';
@@ -20,8 +18,8 @@ import 'debugger_controller.dart';
 // TODO(devoncarew): Support hyperlinking to stack traces.
 
 /// Display the stdout and stderr output from the process under debug.
-class Console extends StatefulWidget {
-  const Console({
+class DebuggerConsole extends StatefulWidget {
+  const DebuggerConsole({
     Key key,
     this.controller,
   }) : super(key: key);
@@ -29,83 +27,111 @@ class Console extends StatefulWidget {
   final DebuggerController controller;
 
   @override
-  _ConsoleState createState() => _ConsoleState();
+  _DebuggerConsoleState createState() => _DebuggerConsoleState();
+
+  static const copyToClipboardButtonKey = Key('debugger_console_copy_to_clipboard_button');
+  static const clearStdioButtonKey = Key('debugger_console_clear_stdio_button');
 }
 
-class _ConsoleState extends State<Console> {
+class _DebuggerConsoleState extends State<DebuggerConsole> {
+  var _lines = <String>[];
+
+  void _onStdioChanged() {
+    setState(() {
+      _lines = widget.controller.stdio.value;
+    });
+  }
+
+  @override
+  void initState() {
+    _lines = widget.controller.stdio.value;
+    widget.controller.stdio.addListener(_onStdioChanged);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.controller.stdio.removeListener(_onStdioChanged);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<String>>(
-      valueListenable: widget.controller.stdio,
-      builder: (context, lines, _) {
-        // Extract this to a reusable ConsoleWithControls StatelessWidget?
-        return Stack(
-          children: [
-            ConsoleOutput(lines: lines),
-            Container(
-              alignment: Alignment.bottomRight,
-              child: ConsoleControls(
-                disabled: lines.isEmpty,
-                onCopyPressed: () {
-                  Clipboard.setData(ClipboardData(
-                    text: lines.join('\n'),
-                  )).then((_) {
-                    Notifications.of(context)?.push(
-                      'Copied!',
-                    );
-                  });
-                },
-                onDeletePressed: widget.controller.clearStdio,
-              ),
-            ),
-          ],
-        );
-      },
+    return Console(
+      lines: _lines,
+      controls: [
+        if (_lines.isNotEmpty) ...[
+          IconButton(
+            icon: const Icon(Icons.content_copy),
+            onPressed: () => copyToClipboard(_lines, context),
+            tooltip: 'Copy to clipboard',
+            key: DebuggerConsole.copyToClipboardButtonKey,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: widget.controller.clearStdio,
+            tooltip: 'Clear console output',
+            key: DebuggerConsole.clearStdioButtonKey,
+          ),
+        ],
+      ],
     );
   }
 }
 
-/// Optionally renders a ButtonBar with Console Controls,
-/// Copy and Clear.
-/// The callbacks for those buttons are passed from the outside.
-class ConsoleControls extends StatelessWidget {
-  const ConsoleControls({
-    this.disabled,
-    this.onCopyPressed,
-    this.onDeletePressed,
+/// Renders a ConsoleOutput widget with ConsoleControls overlaid on the top-right corner.
+///
+/// TODO(ditman): Reuse this in `logging/flutter/logging_screen.dart`?
+class Console extends StatelessWidget {
+  const Console({
+    this.controls = const <Widget>[],
+    this.lines = const <String>[],
   }) : super();
 
-  final Function onCopyPressed;
-  final Function onDeletePressed;
-  final bool disabled;
+  final List<Widget> controls;
+  final List<String> lines;
 
   @override
   Widget build(BuildContext context) {
-    return disabled
-        ? Container()
-        : ButtonBar(
-            buttonPadding: EdgeInsets.zero,
-            alignment: MainAxisAlignment.end,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.content_copy),
-                onPressed: onCopyPressed,
-                tooltip: 'Copy to clipboard.',
-              ),
-              IconButton(
-                icon: const Icon(Icons.block),
-                onPressed: onDeletePressed,
-                tooltip: 'Clear console output.',
-              ),
-            ],
-          );
+    return Stack(
+      children: [
+        _ConsoleOutput(lines: lines),
+        if (controls.isNotEmpty) ...[
+          _ConsoleControls(
+            controls: controls,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Renders a top-right aligned ButtonBar wrapping a List of IconButtons (`controls`).
+class _ConsoleControls extends StatelessWidget {
+  const _ConsoleControls({
+    this.controls,
+  }) : super();
+
+  final List<Widget> controls;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.topRight,
+      child: ButtonBar(
+        buttonPadding: EdgeInsets.zero,
+        alignment: MainAxisAlignment.end,
+        children: controls,
+      ),
+    );
   }
 }
 
 /// Renders a widget with the output of the console.
+///
 /// This is a ListView of text lines, with a monospace font and a border.
-class ConsoleOutput extends StatefulWidget {
-  const ConsoleOutput({
+class _ConsoleOutput extends StatefulWidget {
+  const _ConsoleOutput({
     Key key,
     this.lines,
   }) : super(key: key);
@@ -116,7 +142,7 @@ class ConsoleOutput extends StatefulWidget {
   _ConsoleOutputState createState() => _ConsoleOutputState();
 }
 
-class _ConsoleOutputState extends State<ConsoleOutput> {
+class _ConsoleOutputState extends State<_ConsoleOutput> {
   // The scroll controller must survive ConsoleOutput re-renders
   // to work as intended, so it must be part of the "state".
   final ScrollController _scroll = ScrollController();
@@ -137,9 +163,9 @@ class _ConsoleOutputState extends State<ConsoleOutput> {
         theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
 
     return OutlineDecoration(
-      child: Padding(
-        padding: const EdgeInsets.all(denseSpacing),
+      child: Scrollbar(
         child: ListView.builder(
+          padding: const EdgeInsets.all(denseSpacing),
           itemCount: widget.lines.length,
           itemExtent: CodeView.rowHeight,
           controller: _scroll,

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ansicolor/ansicolor.dart';
+import 'package:devtools_app/src/debugger/flutter/console.dart';
 import 'package:devtools_app/src/debugger/flutter/controls.dart';
 import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/flutter/debugger_model.dart';
@@ -120,8 +121,8 @@ void main() {
 
         await pumpDebuggerScreen(tester, debuggerController);
 
-        expect(find.byTooltip('Clear console output.'), findsNothing);
-        expect(find.byTooltip('Copy to clipboard.'), findsNothing);
+        expect(find.byKey(DebuggerConsole.clearStdioButtonKey), findsNothing);
+        expect(find.byKey(DebuggerConsole.copyToClipboardButtonKey), findsNothing);
       });
 
       testWidgets('Tapping the Console Clear button clears stdio.',
@@ -131,7 +132,7 @@ void main() {
 
         await pumpDebuggerScreen(tester, debuggerController);
 
-        final clearButton = find.byTooltip('Clear console output.');
+        final clearButton = find.byKey(DebuggerConsole.clearStdioButtonKey);
         expect(clearButton, findsOneWidget);
 
         await tester.tap(clearButton);
@@ -171,14 +172,13 @@ void main() {
 
           await pumpDebuggerScreen(tester, debuggerController);
 
-          final copyButton = find.byTooltip('Copy to clipboard.');
+          final copyButton = find.byKey(DebuggerConsole.copyToClipboardButtonKey);
           expect(copyButton, findsOneWidget);
 
           expect(_clipboardContents, isEmpty);
 
           await tester.tap(copyButton);
 
-          expect(_clipboardContents, isNotEmpty);
           expect(_clipboardContents, equals(_expected));
         });
       });

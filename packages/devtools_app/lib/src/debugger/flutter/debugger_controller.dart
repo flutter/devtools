@@ -137,7 +137,7 @@ class DebuggerController extends DisposableController
   InstanceRef get reportedException => _reportedException;
   InstanceRef _reportedException;
 
-  /// Clears the contents of stdio
+  /// Clears the contents of stdio.
   void clearStdio() {
     _stdio.value = [];
   }

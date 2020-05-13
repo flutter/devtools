@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'package:ansi_up/ansi_up.dart';
 
+import '../utils.dart';
 import 'notifications.dart';
 
 Future<void> launchUrl(String url, BuildContext context) async {
@@ -14,6 +16,18 @@ Future<void> launchUrl(String url, BuildContext context) async {
   } else {
     Notifications.of(context).push('Unable to open $url.');
   }
+}
+
+/// Attempts to copy a bunch of `lines` to the clipboard.
+Future<void> copyToClipboard(List<String> lines, BuildContext context) async {
+  await Clipboard.setData(ClipboardData(
+    text: lines.join('\n'),
+  ));
+
+  final numLines = lines.length;
+  Notifications.of(context)?.push(
+    'Copied $numLines ${pluralize("line", numLines)}.',
+  );
 }
 
 List<TextSpan> processAnsiTerminalCodes(String input, TextStyle defaultStyle) {
