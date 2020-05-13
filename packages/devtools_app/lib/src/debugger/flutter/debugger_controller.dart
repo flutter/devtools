@@ -137,6 +137,11 @@ class DebuggerController extends DisposableController
   InstanceRef get reportedException => _reportedException;
   InstanceRef _reportedException;
 
+  /// Clears the contents of stdio.
+  void clearStdio() {
+    _stdio.value = [];
+  }
+
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {
     const int kMaxLogItemsLowerBound = 5000;

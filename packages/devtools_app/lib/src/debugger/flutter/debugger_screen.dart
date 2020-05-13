@@ -190,7 +190,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                     initialFractions: const [0.74, 0.26],
                     children: [
                       codeArea,
-                      Console(controller: controller),
+                      DebuggerConsole(controller: controller),
                     ],
                   ),
                 ),
