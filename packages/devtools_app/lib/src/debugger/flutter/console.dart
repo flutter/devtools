@@ -62,6 +62,7 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
       lines: _lines,
       controls: [
         if (_lines.isNotEmpty) ...[
+          // TODO(ditman) Extract these IconButtons to common_widgets.dart
           IconButton(
             icon: const Icon(Icons.content_copy),
             onPressed: () => copyToClipboard(_lines, context),
