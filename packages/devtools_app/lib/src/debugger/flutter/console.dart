@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../flutter/common_widgets.dart';
+import '../../flutter/notifications.dart';
 import '../../flutter/theme.dart';
 import '../../flutter/utils.dart';
 import 'codeview.dart';
@@ -30,7 +33,84 @@ class Console extends StatefulWidget {
 }
 
 class _ConsoleState extends State<Console> {
-  final scrollController = ScrollController();
+  bool canDelete = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        ConsoleOutput(lines: widget.controller.stdio),
+        Container(
+          alignment: Alignment.bottomRight,
+          child: ConsoleControls(
+            lines: widget.controller.stdio,
+            onCopyPressed: () {
+              Clipboard.setData(ClipboardData(
+                text: widget.controller.stdio.value.join('\n'),
+              )).then((_) {
+                Notifications.of(context)?.push(
+                  'Copied!',
+                );
+              });
+            },
+            onDeletePressed: widget.controller.clearStdio,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Optionally renders a ButtonBar with Console Controls,
+/// Copy and Clear.
+/// The callbacks for those buttons are passed from the outside.
+class ConsoleControls extends StatelessWidget {
+  const ConsoleControls({
+    @required ValueListenable<List<String>> lines,
+    this.onCopyPressed,
+    this.onDeletePressed,
+  })  : _lines = lines,
+        super();
+
+  final Function onCopyPressed;
+  final Function onDeletePressed;
+
+  final ValueListenable<List<String>> _lines;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<String>>(
+        valueListenable: _lines,
+        builder: (context, lines, _) {
+          return lines.isEmpty
+              ? Container()
+              : ButtonBar(
+                  buttonPadding: EdgeInsets.zero,
+                  alignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                        icon: const Icon(Icons.content_copy),
+                        onPressed: onCopyPressed,
+                        tooltip: 'Copy to clipboard.'),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: onDeletePressed,
+                      tooltip: 'Clear console output.',
+                    ),
+                  ],
+                );
+        });
+  }
+}
+
+/// Renders a widget with the output of the console.
+/// This is a ListView of text lines, with monospace font and a border.
+class ConsoleOutput extends StatelessWidget {
+  const ConsoleOutput({@required ValueListenable<List<String>> lines})
+      : _lines = lines,
+        super();
+
+  final ValueListenable<List<String>> _lines;
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +118,13 @@ class _ConsoleState extends State<Console> {
     final textStyle =
         theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
 
+    final scrollController = ScrollController();
+
     return OutlineDecoration(
       child: Padding(
         padding: const EdgeInsets.all(denseSpacing),
         child: ValueListenableBuilder<List<String>>(
-          valueListenable: widget.controller.stdio,
+          valueListenable: _lines,
           builder: (context, lines, _) {
             // If we're at the end already, scroll to expose the new content.
             if (scrollController.hasClients &&
