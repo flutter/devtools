@@ -4,7 +4,6 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/flutter/common_widgets.dart';
-import 'package:devtools_app/src/flutter/split.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/memory/flutter/memory_chart.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart';
@@ -70,10 +69,7 @@ void main() {
       // Should be collecting live feed.
       expect(controller.offline, isFalse);
 
-      var splitFinder = find.byType(Split);
-
       // Verify Memory, Memory Source, and Memory Sources content.
-      expect(splitFinder, findsOneWidget);
       expect(find.byKey(MemoryScreen.pauseButtonKey), findsOneWidget);
       expect(find.byKey(MemoryScreen.resumeButtonKey), findsOneWidget);
 
@@ -87,12 +83,6 @@ void main() {
 
       expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
       expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);
-
-      // Verify the state of the splitter.
-      splitFinder = find.byType(Split);
-      expect(splitFinder, findsOneWidget);
-      final Split splitter = tester.widget(splitFinder);
-      expect(splitter.initialFractions[0], equals(0.40));
 
       // Check memory sources available.
       await tester.tap(find.byKey(MemoryScreen.dropdownSourceMenuButtonKey));

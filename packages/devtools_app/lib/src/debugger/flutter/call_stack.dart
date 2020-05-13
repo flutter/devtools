@@ -6,8 +6,8 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
-import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 

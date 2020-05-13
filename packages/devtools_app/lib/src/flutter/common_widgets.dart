@@ -29,6 +29,13 @@ List<Widget> headerInColumn(TextTheme textTheme, String title) {
   ];
 }
 
+List<Widget> subHeaderInColumn(TextTheme textTheme, String title) {
+  return [
+    Text(title, style: textTheme.subtitle2),
+    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
+  ];
+}
+
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
@@ -672,4 +679,10 @@ extension ColorExtension on Color {
 extension ThemeDataExtension on ThemeData {
   /// Returns whether we are currently using a dark theme.
   bool get isDarkTheme => brightness == Brightness.dark;
+
+  TextStyle get regularTextStyle => TextStyle(color: textTheme.bodyText2.color);
+
+  TextStyle get subtleTextStyle => TextStyle(color: unselectedWidgetColor);
+
+  TextStyle get selectedTextStyle => TextStyle(color: textSelectionColor);
 }
