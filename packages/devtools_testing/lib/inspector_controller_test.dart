@@ -10,12 +10,10 @@ import 'dart:async';
 import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
-import 'package:devtools_app/src/inspector/inspector_tree_legacy.dart';
-import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart' show equalsIgnoringHashCodes;
 import 'package:test/test.dart';
 
-import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';
 import 'support/fake_inspector_tree.dart';
 import 'support/file_utils.dart';
@@ -88,9 +86,9 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
           '    ▼[M]MaterialApp\n'
           '      ▼[S]Scaffold\n'
           '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
+          '      │     [icons/inspector/textArea.png]Text\n'
           '      └─▼[A]AppBar\n'
-          '          [/icons/inspector/textArea.png]Text\n',
+          '          [icons/inspector/textArea.png]Text\n',
         ),
       );
 
@@ -105,6 +103,10 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
       await env.tearDownEnvironment();
     });
 
+    // TODO(kenz): convert these tests to flutter unit or screenshot tests so
+    // that we are testing the actual rendered widgets instead of our fake
+    // implementation.
+    /*
     test('select widget', () async {
       await env.setupEnvironment();
 
@@ -391,6 +393,7 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
 
       await env.tearDownEnvironment();
     });
+    */
 
     // TODO(jacobr): uncomment hotReload test once the hot reload test is not
     // flaky. https://github.com/flutter/devtools/issues/642
@@ -506,5 +509,6 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
 
 void simulateRowClick(FakeInspectorTree tree, {@required int rowIndex}) {
   // The x coordinate does not matter as any tap in the row counts.
-  tree.onTap(Offset(0, tree.getRowY(rowIndex)));
+  final rowOffset = Offset(0, tree.getRowY(rowIndex));
+  tree.selection = tree.getRow(rowOffset).node;
 }

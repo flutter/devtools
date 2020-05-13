@@ -7,6 +7,7 @@
 
 @TestOn('vm')
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/globals.dart';
@@ -16,7 +17,6 @@ import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/table_data.dart';
-import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:test/test.dart';
 
 import 'matchers/matchers.dart';
@@ -122,7 +122,7 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
               onNodeAdded: (_, __) {},
               onSelectionChange: onSelectionChange,
               onExpand: (_) {},
-              onHover: (_, __) {},
+              onHover: (_) {},
             );
         },
       );

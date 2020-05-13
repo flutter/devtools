@@ -3,6 +3,6 @@
     ▼[M]MaterialApp
       ▼[S]Scaffold
       ├───▼[C]Center
-      │     [/icons/inspector/textArea.png]Text
+      │     [icons/inspector/textArea.png]Text
       └─▼[A]AppBar
-          [/icons/inspector/textArea.png]Text
+          [icons/inspector/textArea.png]Text
