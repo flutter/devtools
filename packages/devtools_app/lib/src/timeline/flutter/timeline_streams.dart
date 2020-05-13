@@ -37,15 +37,14 @@ class RecordedTimelineStream {
 final dartTimelineStream = RecordedTimelineStream(
   name: 'Dart',
   description:
-      'Events emitted from dart:developer Timeline or Timeline Task, including'
-      ' Flutter framework events',
+      'Events emitted from dart:developer Timeline APIs (including Flutter '
+      'framework events)',
 );
 
 final embedderTimelineStream = RecordedTimelineStream(
   name: 'Embedder',
   description:
-      'Events emitted from Dart._TimelineEvent, often emitted from the Flutter'
-      ' Engine',
+      'Additional platform events (often emitted from the Flutter engine)',
 );
 
 final gcTimelineStream = RecordedTimelineStream(
@@ -55,7 +54,7 @@ final gcTimelineStream = RecordedTimelineStream(
 
 final apiTimelineStream = RecordedTimelineStream(
   name: 'API',
-  description: 'Calls to the VM\'s embedding API (e.g. Dart._XYZ)',
+  description: 'Calls to the VM embedding API',
   advanced: true,
 );
 
@@ -80,8 +79,7 @@ final debuggerTimelineStream = RecordedTimelineStream(
 
 final isolateTimelineStream = RecordedTimelineStream(
   name: 'Isolate',
-  description:
-      'Isolate-scoped events (startup, shutdown, snapshot loading, etc.)',
+  description: 'Isolate events (startup, shutdown, snapshot loading, etc.)',
   advanced: true,
 );
 

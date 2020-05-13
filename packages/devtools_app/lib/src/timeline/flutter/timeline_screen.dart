@@ -332,7 +332,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 class TimelineConfigurationsDialog extends StatelessWidget {
   const TimelineConfigurationsDialog(this.controller);
 
-  static const dialogWidth = 500.0;
+  static const dialogWidth = 700.0;
 
   final TimelineController controller;
 
@@ -369,7 +369,7 @@ class TimelineConfigurationsDialog extends StatelessWidget {
       // the distinction, however.
       _buildStream(
         name: 'Network',
-        description: ' • Log Http traffic',
+        description: ' • Http traffic',
         listenable: controller.httpTimelineLoggingEnabled,
         onChanged: controller.toggleHttpRequestLogging,
         theme: theme,
