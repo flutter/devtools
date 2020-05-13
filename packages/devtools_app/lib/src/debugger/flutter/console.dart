@@ -29,7 +29,8 @@ class DebuggerConsole extends StatefulWidget {
   @override
   _DebuggerConsoleState createState() => _DebuggerConsoleState();
 
-  static const copyToClipboardButtonKey = Key('debugger_console_copy_to_clipboard_button');
+  static const copyToClipboardButtonKey =
+      Key('debugger_console_copy_to_clipboard_button');
   static const clearStdioButtonKey = Key('debugger_console_clear_stdio_button');
 }
 

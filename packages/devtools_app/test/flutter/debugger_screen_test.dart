@@ -122,7 +122,8 @@ void main() {
         await pumpDebuggerScreen(tester, debuggerController);
 
         expect(find.byKey(DebuggerConsole.clearStdioButtonKey), findsNothing);
-        expect(find.byKey(DebuggerConsole.copyToClipboardButtonKey), findsNothing);
+        expect(
+            find.byKey(DebuggerConsole.copyToClipboardButtonKey), findsNothing);
       });
 
       testWidgets('Tapping the Console Clear button clears stdio.',
@@ -172,7 +173,8 @@ void main() {
 
           await pumpDebuggerScreen(tester, debuggerController);
 
-          final copyButton = find.byKey(DebuggerConsole.copyToClipboardButtonKey);
+          final copyButton =
+              find.byKey(DebuggerConsole.copyToClipboardButtonKey);
           expect(copyButton, findsOneWidget);
 
           expect(_clipboardContents, isEmpty);
