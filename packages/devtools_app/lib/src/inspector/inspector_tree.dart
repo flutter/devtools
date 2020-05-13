@@ -12,13 +12,10 @@
 library inspector_tree;
 
 import 'package:flutter/foundation.dart';
-import 'dart:math' as math;
-
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import '../config_specific/logger/logger.dart';
-import '../ui/icons.dart';
-import '../ui/material_icons.dart';
 import '../ui/theme.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
@@ -32,10 +29,7 @@ final RegExp assertionThrownBuildingError = RegExp(
     r'^(The following assertion was thrown building [a-zA-Z]+)(\(.*\))(:)$');
 
 typedef TreeEventCallback = void Function(InspectorTreeNode node);
-typedef TreeHoverEventCallback = void Function(
-  InspectorTreeNode node,
-  DevToolsIcon icon,
-);
+typedef TreeHoverEventCallback = void Function(InspectorTreeNode node);
 
 const Color selectedRowBackgroundColor = ThemedColor(
   Color.fromARGB(255, 202, 191, 69),
@@ -57,30 +51,8 @@ const double verticalPadding = 10.0;
 const double rowHeight = 24.0;
 const Color arrowColor = Colors.grey;
 
-// TODO(jacobr): these arrows are a bit ugly.
-// We should create pngs instead of trying to stretch the material icons into
-// being good expand collapse arrows.
-final DevToolsIcon collapseArrow = MaterialIcon(
-  'arrow_drop_down',
-  arrowColor,
-  fontSize: 32,
-  iconWidth: columnWidth - iconPadding,
-  codePoint: Icons.arrow_drop_down.codePoint,
-);
-
-final DevToolsIcon expandArrow = MaterialIcon(
-  'arrow_drop_down',
-  arrowColor,
-  fontSize: 32,
-  angle: -math.pi / 2, // -90 degrees
-  iconWidth: columnWidth - iconPadding,
-  codePoint: Icons.arrow_drop_down.codePoint,
-);
-
 abstract class PaintEntry {
   PaintEntry();
-
-  DevToolsIcon get icon;
 
   void attach(InspectorTreeController owner) {}
 }
@@ -93,8 +65,6 @@ abstract class InspectorTreeNodeRenderBuilder<
   });
 
   void appendText(String text, TextStyle textStyle);
-
-  void addIcon(DevToolsIcon icon);
 
   final DiagnosticLevel level;
   final DiagnosticsTreeStyle treeStyle;

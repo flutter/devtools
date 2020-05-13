@@ -17,6 +17,7 @@ library inspector_controller;
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -25,7 +26,6 @@ import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../service_extensions.dart' as extensions;
 import '../service_registrations.dart' as registrations;
-import '../ui/icons.dart';
 import '../utils.dart';
 import '../version.dart';
 import 'diagnostics_node.dart';
@@ -259,14 +259,14 @@ class InspectorController extends DisposableController
   }
 
   void endShowNode() {
-    highlightShowNode(null, null);
+    highlightShowNode(null);
   }
 
   bool highlightShowFromNodeInstanceRef(InspectorInstanceRef ref) {
-    return highlightShowNode(valueToInspectorTreeNode[ref], null);
+    return highlightShowNode(valueToInspectorTreeNode[ref]);
   }
 
-  bool highlightShowNode(InspectorTreeNode node, DevToolsIcon icon) {
+  bool highlightShowNode(InspectorTreeNode node) {
     if (node == null && parent != null) {
       // If nothing is highlighted, highlight the node selected in the parent
       // tree so user has context of where the node selected in the parent is

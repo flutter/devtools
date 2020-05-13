@@ -6,6 +6,7 @@ library flutter_widget;
 
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 
@@ -15,28 +16,56 @@ import '../utils.dart';
 class Category {
   const Category(this.label, this.icon);
 
-  static const Category accessibility =
-      Category('Accessibility', FlutterIcons.accessibility);
-  static const Category animationAndMotion =
-      Category('Animation and Motion', FlutterIcons.animation);
-  static const Category assetsImagesAndIcons =
-      Category('Assets, Images, and Icons', FlutterIcons.assets);
-  static const Category asyncCategory =
-      Category('Async', FlutterIcons.asyncUrlIcon);
-  static const Category basics =
-      Category('Basics', null); // TODO(jacobr): add an icon.
+  static Category accessibility = Category(
+    'Accessibility',
+    createImageIcon('icons/inspector/balloonInformation.png'),
+  );
+  static Category animationAndMotion = Category(
+    'Animation and Motion',
+    createImageIcon('icons/inspector/resume.png'),
+  );
+  static Category assetsImagesAndIcons = Category(
+    'Assets, Images, and Icons',
+    createImageIcon('icons/inspector/any_type.png'),
+  );
+  static Category asyncCategory = Category(
+    'Async',
+    createImageIcon('icons/inspector/threads.png'),
+  );
+  static const Category basics = Category(
+    'Basics',
+    null, // TODO(jacobr): add an icon.
+  );
   static const Category cupertino = Category(
-      'Cupertino (iOS-style widgets)', null); // TODO(jacobr): add an icon.
-  static const Category input = Category('Input', FlutterIcons.input);
-  static const Category paintingAndEffects =
-      Category('Painting and effects', FlutterIcons.painting);
-  static const Category scrolling =
-      Category('Scrolling', FlutterIcons.scrollbar);
-  static const Category stack = Category('Stack', FlutterIcons.stack);
-  static const Category styling = Category('Styling', FlutterIcons.styling);
-  static const Category text = Category('Text', FlutterIcons.text);
+    'Cupertino (iOS-style widgets)',
+    null, // TODO(jacobr): add an icon.
+  );
+  static Category input = Category(
+    'Input',
+    createImageIcon('icons/inspector/renderer.png'),
+  );
+  static Category paintingAndEffects = Category(
+    'Painting and effects',
+    createImageIcon('icons/inspector/colors.png'),
+  );
+  static Category scrolling = Category(
+    'Scrolling',
+    createImageIcon('icons/inspector/scrollbar.png'),
+  );
+  static Category stack = Category(
+    'Stack',
+    createImageIcon('icons/inspector/value.png'),
+  );
+  static Category styling = Category(
+    'Styling',
+    createImageIcon('icons/inspector/atrule.png'),
+  );
+  static Category text = Category(
+    'Text',
+    createImageIcon('icons/inspector/textArea.png'),
+  );
 
-  static const List<Category> values = [
+  static List<Category> values = [
     accessibility,
     animationAndMotion,
     assetsImagesAndIcons,
@@ -52,7 +81,7 @@ class Category {
   ];
 
   final String label;
-  final DevToolsIcon icon;
+  final Image icon;
 
   static Map<String, Category> _categories;
 
@@ -71,16 +100,16 @@ class FlutterWidget {
   FlutterWidget(this.json) : icon = initIcon(json);
 
   final Map<String, Object> json;
-  final DevToolsIcon icon;
+  final Image icon;
 
-  static DevToolsIcon initIcon(Map<String, Object> json) {
+  static Image initIcon(Map<String, Object> json) {
     final List<Object> categories = json['categories'];
     if (categories != null) {
       // TODO(pq): consider priority over first match.
       for (String label in categories) {
         final Category category = Category.forLabel(label);
         if (category != null) {
-          final DevToolsIcon icon = category.icon;
+          final icon = category.icon;
           if (icon != null) return icon;
         }
       }

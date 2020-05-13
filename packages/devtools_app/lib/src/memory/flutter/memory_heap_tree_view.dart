@@ -14,7 +14,6 @@ import '../../flutter/table.dart';
 import '../../flutter/theme.dart';
 import '../../table_data.dart';
 import '../../ui/flutter/label.dart';
-import '../../ui/material_icons.dart';
 import '../../utils.dart';
 
 import 'memory_controller.dart';
@@ -240,10 +239,10 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
             child: OutlineButton(
               key: snapshotButtonKey,
               onPressed: _isSnapshotRunning ? null : _snapshot,
-              child: Label(
-                memorySnapshot,
+              child: const MaterialIconLabel(
+                Icons.camera,
                 'Snapshot',
-                minIncludeTextWidth: 200,
+                includeTextWidth: 200,
               ),
             ),
           ),
@@ -400,10 +399,10 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
             child: OutlineButton(
               key: filterButtonKey,
               onPressed: _filter,
-              child: Label(
-                filterIcon,
+              child: const MaterialIconLabel(
+                Icons.filter_list,
                 'Filter',
-                minIncludeTextWidth: 200,
+                includeTextWidth: 200,
               ),
             ),
           ),
@@ -411,10 +410,10 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
             child: OutlineButton(
               key: settingsButtonKey,
               onPressed: _settings,
-              child: Label(
-                settings,
+              child: const MaterialIconLabel(
+                Icons.settings,
                 'Settings',
-                minIncludeTextWidth: 200,
+                includeTextWidth: 200,
               ),
             ),
           ),
