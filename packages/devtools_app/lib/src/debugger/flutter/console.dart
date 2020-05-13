@@ -35,26 +35,32 @@ class Console extends StatefulWidget {
 class _ConsoleState extends State<Console> {
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        ConsoleOutput(lines: widget.controller.stdio),
-        Container(
-          alignment: Alignment.bottomRight,
-          child: ConsoleControls(
-            lines: widget.controller.stdio,
-            onCopyPressed: () {
-              Clipboard.setData(ClipboardData(
-                text: widget.controller.stdio.value.join('\n'),
-              )).then((_) {
-                Notifications.of(context)?.push(
-                  'Copied!',
-                );
-              });
-            },
-            onDeletePressed: widget.controller.clearStdio,
-          ),
-        ),
-      ],
+    return ValueListenableBuilder<List<String>>(
+      valueListenable: widget.controller.stdio,
+      builder: (context, lines, _) {
+        // Extract this to a reusable ConsoleWithControls StatelessWidget?
+        return Stack(
+          children: [
+            ConsoleOutput(lines: lines),
+            Container(
+              alignment: Alignment.bottomRight,
+              child: ConsoleControls(
+                disabled: lines.isEmpty,
+                onCopyPressed: () {
+                  Clipboard.setData(ClipboardData(
+                    text: lines.join('\n'),
+                  )).then((_) {
+                    Notifications.of(context)?.push(
+                      'Copied!',
+                    );
+                  });
+                },
+                onDeletePressed: widget.controller.clearStdio,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -64,51 +70,65 @@ class _ConsoleState extends State<Console> {
 /// The callbacks for those buttons are passed from the outside.
 class ConsoleControls extends StatelessWidget {
   const ConsoleControls({
-    @required ValueListenable<List<String>> lines,
+    this.disabled,
     this.onCopyPressed,
     this.onDeletePressed,
-  })  : _lines = lines,
-        super();
+  }) : super();
 
   final Function onCopyPressed;
   final Function onDeletePressed;
-
-  final ValueListenable<List<String>> _lines;
+  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<String>>(
-        valueListenable: _lines,
-        builder: (context, lines, _) {
-          return lines.isEmpty
-              ? Container()
-              : ButtonBar(
-                  buttonPadding: EdgeInsets.zero,
-                  alignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                        icon: const Icon(Icons.content_copy),
-                        onPressed: onCopyPressed,
-                        tooltip: 'Copy to clipboard.'),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: onDeletePressed,
-                      tooltip: 'Clear console output.',
-                    ),
-                  ],
-                );
-        });
+    return disabled
+        ? Container()
+        : ButtonBar(
+            buttonPadding: EdgeInsets.zero,
+            alignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.content_copy),
+                onPressed: onCopyPressed,
+                tooltip: 'Copy to clipboard.',
+              ),
+              IconButton(
+                icon: const Icon(Icons.block),
+                onPressed: onDeletePressed,
+                tooltip: 'Clear console output.',
+              ),
+            ],
+          );
   }
 }
 
 /// Renders a widget with the output of the console.
-/// This is a ListView of text lines, with monospace font and a border.
-class ConsoleOutput extends StatelessWidget {
-  const ConsoleOutput({@required ValueListenable<List<String>> lines})
-      : _lines = lines,
-        super();
+/// This is a ListView of text lines, with a monospace font and a border.
+class ConsoleOutput extends StatefulWidget {
+  const ConsoleOutput({
+    Key key,
+    this.lines,
+  }) : super(key: key);
 
-  final ValueListenable<List<String>> _lines;
+  final List<String> lines;
+
+  @override
+  _ConsoleOutputState createState() => _ConsoleOutputState();
+}
+
+class _ConsoleOutputState extends State<ConsoleOutput> {
+  // The scroll controller must survive ConsoleOutput re-renders
+  // to work as intended, so it must be part of the "state".
+  final ScrollController _scroll = ScrollController();
+
+  // Whenever the widget updates, refresh the scroll position if needed.
+  @override
+  void didUpdateWidget(oldWidget) {
+    if (_scroll.hasClients && _scroll.atScrollBottom) {
+      _scroll.autoScrollToBottom();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,35 +136,22 @@ class ConsoleOutput extends StatelessWidget {
     final textStyle =
         theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
 
-    final scrollController = ScrollController();
-
     return OutlineDecoration(
       child: Padding(
         padding: const EdgeInsets.all(denseSpacing),
-        child: ValueListenableBuilder<List<String>>(
-          valueListenable: _lines,
-          builder: (context, lines, _) {
-            // If we're at the end already, scroll to expose the new content.
-            if (scrollController.hasClients &&
-                scrollController.atScrollBottom) {
-              scrollController.autoScrollToBottom();
-            }
-
-            return ListView.builder(
-              itemCount: lines.length,
-              itemExtent: CodeView.rowHeight,
-              controller: scrollController,
-              itemBuilder: (context, index) {
-                return RichText(
-                  text: TextSpan(
-                    children: processAnsiTerminalCodes(
-                      lines[index],
-                      textStyle,
-                    ),
-                  ),
-                  maxLines: 1,
-                );
-              },
+        child: ListView.builder(
+          itemCount: widget.lines.length,
+          itemExtent: CodeView.rowHeight,
+          controller: _scroll,
+          itemBuilder: (context, index) {
+            return RichText(
+              text: TextSpan(
+                children: processAnsiTerminalCodes(
+                  widget.lines[index],
+                  textStyle,
+                ),
+              ),
+              maxLines: 1,
             );
           },
         ),
