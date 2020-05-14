@@ -40,16 +40,6 @@
 			"type": "dart",
 			"request": "launch",
 			"program": "${file}"
-		},
-		{
-			"name": "Debug in Release mode",
-			"type": "dart",
-			"request": "launch",
-			"program": "${file}",
-			"template": "debug-test",
-			"env": {
-				"WEBDEV_RELEASE": true,
-			}
 		}
 	]
 }
