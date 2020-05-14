@@ -361,7 +361,7 @@ class WebdevFixture {
     final Completer<void> buildFinished = Completer<void>();
 
     _toLines(process.stderr).listen((String line) {
-      final err = 'error building with webdev: $line';
+      final err = 'error building flutter: $line';
       if (!buildFinished.isCompleted) {
         buildFinished.completeError(err);
       } else {
@@ -410,7 +410,7 @@ class WebdevFixture {
     process.kill();
     final exitCode = await process.exitCode;
     if (verbose) {
-      print('webdev exited with code $exitCode');
+      print('flutter exited with code $exitCode');
     }
   }
 
