@@ -103,7 +103,7 @@ class _InitializerState extends State<Initializer>
     }
   }
 
-  /// Goes back to the connect page if the [service.serviceManager] is not currently connected.
+  /// Goes to the connect page if the [service.serviceManager] is not currently connected.
   void _navigateToConnectPage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
