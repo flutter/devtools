@@ -91,7 +91,6 @@ class _InitializerState extends State<Initializer>
     }
 
     final uri = normalizeVmServiceUri(widget.url);
-    print('_attemptUrlConnection');
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
@@ -100,7 +99,6 @@ class _InitializerState extends State<Initializer>
     );
 
     if (!connected) {
-      print('going back to connect page!');
       _navigateToConnectPage();
     }
   }
