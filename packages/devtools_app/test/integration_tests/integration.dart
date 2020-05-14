@@ -339,8 +339,6 @@ class WebdevFixture {
   }
 
   static Future<void> build({
-    bool flutter = false,
-    bool release = false,
     bool verbose = false,
   }) async {
     final clean = await _runFlutter(['clean']);
@@ -350,36 +348,20 @@ class WebdevFixture {
 
     final List<String> cliArgs = [];
     String commandName;
-    if (flutter && release) {
-      commandName = 'flutter build web';
-      cliArgs.addAll([
-        'build',
-        'web',
-        '--dart-define=FLUTTER_WEB_USE_SKIA=true',
-        '--no-tree-shake-icons'
-      ]);
-    } else if (flutter) {
-      throw 'No debug build for Flutter web';
-    } else {
-      commandName = 'flutter pub run build_runner build';
-      cliArgs.addAll([
-        'pub',
-        'run',
-        'build_runner',
-        'build',
-        '-o',
-        'web:build',
-        '--delete-conflicting-outputs',
-        release ? '--release' : '--no-release'
-      ]);
-    }
+    commandName = 'flutter build web';
+    cliArgs.addAll([
+      'build',
+      'web',
+      '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+      '--no-tree-shake-icons'
+    ]);
 
     final process = await _runFlutter(cliArgs, verbose: verbose);
 
     final Completer<void> buildFinished = Completer<void>();
 
     _toLines(process.stderr).listen((String line) {
-      final err = 'error building with webdev: $line';
+      final err = 'error building flutter: $line';
       if (!buildFinished.isCompleted) {
         buildFinished.completeError(err);
       } else {
@@ -428,7 +410,7 @@ class WebdevFixture {
     process.kill();
     final exitCode = await process.exitCode;
     if (verbose) {
-      print('webdev exited with code $exitCode');
+      print('flutter exited with code $exitCode');
     }
   }
 
