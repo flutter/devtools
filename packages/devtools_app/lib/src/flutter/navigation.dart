@@ -25,7 +25,7 @@ String routeNameWithQueryParams(BuildContext context, String routeName,
     // We allow null context values to make easy pure-VM tests.
     previousQuery = '';
   } else {
-    previousQuery = ModalRoute.of(context)?.settings?.name;
+    previousQuery = ModalRoute.of(context).settings.name;
     // When this function is invoked from an unnamed context,
     // infer from the global theme configuration.
     previousQuery ??= _inferThemeParameter;
