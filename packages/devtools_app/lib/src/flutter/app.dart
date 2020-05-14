@@ -2,19 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart';
 
 import '../../devtools.dart' as devtools;
-import '../config_specific/html/html.dart';
 import '../debugger/flutter/debugger_controller.dart';
 import '../debugger/flutter/debugger_screen.dart';
 import '../framework/framework_core.dart';
-import '../framework_controller.dart';
 import '../globals.dart';
 import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
@@ -32,7 +28,6 @@ import '../ui/flutter/service_extension_widgets.dart';
 import 'common_widgets.dart';
 import 'connect_screen.dart';
 import 'initializer.dart';
-import 'navigation.dart';
 import 'notifications.dart';
 import 'preferences.dart';
 import 'scaffold.dart';
@@ -67,7 +62,6 @@ class DevToolsApp extends StatefulWidget {
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
   final preferences = PreferencesController();
-  StreamSubscription<ConnectVmEvent> _connectVmSubscription;
 
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
@@ -80,26 +74,6 @@ class DevToolsAppState extends State<DevToolsApp> {
         _clearCachedRoutes();
       });
     });
-    _connectVmSubscription =
-        frameworkController.onConnectVmEvent.listen((event) {
-      final routeName = routeNameWithQueryParams(context, '/', {
-        'uri': event.serviceProtocolUri.toString(),
-        if (event.notify) 'notify': 'true',
-      });
-      // TODO(dantup): This should be something like:
-      //   Navigator.of(context).pushNamed(routeName);
-      // however that NPEs inside pushNamed (perhaps context isn't valid here?).
-      // Currently, this code can only be invoked through the server, which means
-      // we're guaranteed to be running in a web app. Outside of web, this will
-      // throw.
-      Html.navigateTo('/#$routeName');
-    });
-  }
-
-  @override
-  void dispose() {
-    _connectVmSubscription?.cancel();
-    super.dispose();
   }
 
   @override
