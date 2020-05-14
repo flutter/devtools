@@ -86,11 +86,12 @@ class _InitializerState extends State<Initializer>
 
   Future<void> _attemptUrlConnection() async {
     if (widget.url == null) {
-      _navigateBackToConnectPage();
+      _navigateToConnectPage();
       return;
     }
 
     final uri = normalizeVmServiceUri(widget.url);
+    print('_attemptUrlConnection');
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
@@ -99,17 +100,16 @@ class _InitializerState extends State<Initializer>
     );
 
     if (!connected) {
-      _navigateBackToConnectPage();
+      print('going back to connect page!');
+      _navigateToConnectPage();
     }
   }
 
   /// Goes back to the connect page if the [service.serviceManager] is not currently connected.
-  void _navigateBackToConnectPage() {
+  void _navigateToConnectPage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
-        // If this route is on top and the app is not connected, then we navigate
-        // back to the connect page.
-        Navigator.of(context).popUntil(ModalRoute.withName('/'));
+        Navigator.of(context).popAndPushNamed('/');
       }
     });
   }

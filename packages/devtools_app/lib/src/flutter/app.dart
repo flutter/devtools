@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:html';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
@@ -11,6 +14,7 @@ import '../../devtools.dart' as devtools;
 import '../debugger/flutter/debugger_controller.dart';
 import '../debugger/flutter/debugger_screen.dart';
 import '../framework/framework_core.dart';
+import '../framework_controller.dart';
 import '../globals.dart';
 import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
@@ -28,6 +32,7 @@ import '../ui/flutter/service_extension_widgets.dart';
 import 'common_widgets.dart';
 import 'connect_screen.dart';
 import 'initializer.dart';
+import 'navigation.dart';
 import 'notifications.dart';
 import 'preferences.dart';
 import 'scaffold.dart';
@@ -62,6 +67,7 @@ class DevToolsApp extends StatefulWidget {
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
   final preferences = PreferencesController();
+  StreamSubscription<ConnectVmEvent> _connectVmSubscription;
 
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
@@ -74,6 +80,22 @@ class DevToolsAppState extends State<DevToolsApp> {
         _clearCachedRoutes();
       });
     });
+    _connectVmSubscription =
+        frameworkController.onConnectVmEvent.listen((event) {
+      final routeName = routeNameWithQueryParams(context, '/', {
+        'uri': event.serviceProtocolUri.toString(),
+        if (event.notify) 'notify': 'true',
+      });
+      // Why does this NPE?
+      // Navigator.of(context).pushNamed(routeName);
+      window.location.assign('/#$routeName');
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectVmSubscription?.cancel();
+    super.dispose();
   }
 
   @override
