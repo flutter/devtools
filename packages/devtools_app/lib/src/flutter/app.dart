@@ -5,13 +5,13 @@
 import 'dart:async';
 import 'dart:html';
 
-import 'package:devtools_app/src/config_specific/html/html.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart';
 
 import '../../devtools.dart' as devtools;
+import '../config_specific/html/html.dart';
 import '../debugger/flutter/debugger_controller.dart';
 import '../debugger/flutter/debugger_screen.dart';
 import '../framework/framework_core.dart';
