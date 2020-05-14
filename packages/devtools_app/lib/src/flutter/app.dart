@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:html';
 
+import 'package:devtools_app/src/config_specific/html/html.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
@@ -86,9 +87,13 @@ class DevToolsAppState extends State<DevToolsApp> {
         'uri': event.serviceProtocolUri.toString(),
         if (event.notify) 'notify': 'true',
       });
-      // Why does this NPE?
-      // Navigator.of(context).pushNamed(routeName);
-      window.location.assign('/#$routeName');
+      // TODO(dantup): This should be something like:
+      //   Navigator.of(context).pushNamed(routeName);
+      // however that NPEs inside pushNamed (perhaps context isn't valid here?).
+      // Currently, this code can only be invoked through the server, which means
+      // we're guaranteed to be running in a web app. Outside of web, this will
+      // throw.
+      Html.navigateTo('/#$routeName');
     });
   }
 
