@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../config_specific/logger/logger.dart';
@@ -17,8 +18,6 @@ import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../service_registrations.dart';
 import '../../utils.dart';
-import '../fake_flutter/fake_flutter.dart';
-import 'flutter_icon_renderer.dart';
 import 'label.dart';
 
 /// Group of buttons where each button toggles the state of a VMService
@@ -131,7 +130,7 @@ class _ServiceExtensionButtonGroupState
       preferBelow: false,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-        child: Label(
+        child: ImageIconLabel(
           description.icon,
           description.description,
           minIncludeTextWidth: widget.minIncludeTextWidth,
@@ -287,7 +286,7 @@ class _RegisteredServiceExtensionButtonState
         // TODO(djshuckerow): Just make these icons the right size to fit this
         // box. The current size is a little tiny by comparison to our other
         // material icons.
-        child: getIconWidget(widget.serviceDescription.icon),
+        child: widget.serviceDescription.icon,
       ),
     );
   }

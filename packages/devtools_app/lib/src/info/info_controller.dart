@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';
 import '../globals.dart';
 import '../service_registrations.dart' as registrations;
-import '../ui/fake_flutter/fake_flutter.dart';
 import '../version.dart';
 
 typedef OnFlutterVersionChanged = void Function(FlutterVersion version);

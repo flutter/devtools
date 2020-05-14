@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../ui/fake_flutter/fake_flutter.dart';
+import 'package:flutter/material.dart';
+
 import '../ui/theme.dart';
 
 final unimportant = TextStyle(

@@ -7,19 +7,15 @@
 
 @TestOn('vm')
 import 'dart:async';
+import 'dart:ui';
 
-import 'package:devtools_app/src/eval_on_dart_library.dart';
-import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
-import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/table_data.dart';
-import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:test/test.dart';
 
-import 'matchers/matchers.dart';
 import 'support/fake_inspector_tree.dart';
 import 'support/file_utils.dart';
 import 'support/flutter_test_environment.dart';
@@ -122,7 +118,7 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
               onNodeAdded: (_, __) {},
               onSelectionChange: onSelectionChange,
               onExpand: (_) {},
-              onHover: (_, __) {},
+              onHover: (_) {},
             );
         },
       );
@@ -142,25 +138,8 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
   };
 
   group('logging controller tests', () {
-    tearDownAll(() async {
-      await env.tearDownEnvironment(force: true);
-    });
-
-    test('initial state', () async {
-      await env.setupEnvironment();
-
-      expect(loggingController.isVisible(), true);
-      visible = false;
-      expect(loggingController.isVisible(), false);
-      visible = true;
-      expect(loggingController.isVisible(), true);
-      // Simulate that the logging screen is now active.
-      loggingController.entering();
-
-      final tableModel = loggingController.loggingTableModel;
-      expect(tableModel.rowCount, equals(0));
-    });
-
+    // TODO(#1370): rewrite this test for the flutter app.
+    /*
     test('structured errors', () async {
       // Enable structured errors.
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
@@ -277,6 +256,7 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
       }
       await env.tearDownEnvironment();
     });
+     */
   }, timeout: const Timeout.factor(8));
 
   group('LogData', () {

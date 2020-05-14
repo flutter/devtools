@@ -3,20 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide Icon;
+import 'package:flutter/material.dart';
 
 import '../../inspector/diagnostics_node.dart';
 import '../../inspector/inspector_controller.dart';
 import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
 import '../../inspector/inspector_tree.dart';
-import '../../ui/flutter/flutter_icon_renderer.dart';
 import '../../ui/icons.dart';
-import '../../ui/material_icons.dart';
 import '../../utils.dart';
 
 final ColorIconMaker _colorIconMaker = ColorIconMaker();
 final CustomIconMaker _customIconMaker = CustomIconMaker();
-final DevToolsIcon defaultIcon = _customIconMaker.fromInfo('Default');
+final CustomIcon defaultIcon = _customIconMaker.fromInfo('Default');
 
 const bool _showRenderObjectPropertiesAsLinks = false;
 
@@ -33,10 +31,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
   final RemoteDiagnosticsNode diagnostic;
 
-  Widget _toFlutterIcon(DevToolsIcon icon) {
+  Widget _paddedIcon(Widget icon) {
     return Padding(
       padding: const EdgeInsets.only(right: iconPadding),
-      child: getIconWidget(icon),
+      child: icon,
     );
   }
 
@@ -80,7 +78,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     final children = <Widget>[];
 
     if (icon != null) {
-      children.add(_toFlutterIcon(icon));
+      children.add(_paddedIcon(icon));
     }
     final String name = diagnostic.name;
     TextStyle textStyle = textStyleForLevel(diagnostic.level);
@@ -115,8 +113,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               }
 
               final Color color = Color.fromARGB(alpha, red, green, blue);
-              children
-                  .add(_toFlutterIcon(_colorIconMaker.getCustomIcon(color)));
+              children.add(_paddedIcon(_colorIconMaker.getCustomIcon(color)));
               break;
             }
 
@@ -125,10 +122,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               final int codePoint =
                   JsonUtils.getIntMember(properties, 'codePoint');
               if (codePoint > 0) {
-                final DevToolsIcon icon =
+                final Icon icon =
                     FlutterMaterialIcons.getIconForCodePoint(codePoint);
                 if (icon != null) {
-                  children.add(_toFlutterIcon(icon));
+                  children.add(_paddedIcon(icon));
                 }
               }
               break;
@@ -152,7 +149,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       if (diagnostic.level == DiagnosticLevel.fine &&
           diagnostic.hasDefaultValue) {
         children.add(const Text(' '));
-        children.add(_toFlutterIcon(defaultIcon));
+        children.add(_paddedIcon(defaultIcon));
       }
     } else {
       // Non property, regular node case.

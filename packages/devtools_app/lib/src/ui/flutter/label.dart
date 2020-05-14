@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../icons.dart';
-import 'flutter_icon_renderer.dart';
+/// Label including an image icon and optional text.
+class ImageIconLabel extends StatelessWidget {
+  const ImageIconLabel(this.icon, this.text, {this.minIncludeTextWidth});
 
-/// Label including an icon and optional text.
-// TODO(kenz): this class can be removed in favor of [MaterialIconLabel] once we
-// no longer need to support icons for both the flutter app and the html app.
-class Label extends StatelessWidget {
-  const Label(this.icon, this.text, {this.minIncludeTextWidth});
-
-  final DevToolsIcon icon;
+  final Image icon;
   final String text;
   final double minIncludeTextWidth;
 
@@ -19,7 +14,7 @@ class Label extends StatelessWidget {
     // when the text is not shown.
     return Row(
       children: [
-        getIconWidget(icon),
+        icon,
         // TODO(jacobr): animate showing and hiding the text.
         if (_showLabelText(context, minIncludeTextWidth))
           Padding(

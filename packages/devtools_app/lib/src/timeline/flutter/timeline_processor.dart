@@ -4,11 +4,11 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 
 import '../../config_specific/logger/logger.dart';
 import '../../trace_event.dart';
-import '../../ui/fake_flutter/fake_flutter.dart';
 import '../../utils.dart';
 //import '../simple_trace_example.dart';
 import 'timeline_controller.dart';

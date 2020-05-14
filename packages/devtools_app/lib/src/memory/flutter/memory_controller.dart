@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' as dart_ui;
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
@@ -16,7 +17,6 @@ import '../../config_specific/file/file.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../flutter/table.dart';
 import '../../globals.dart';
-import '../../ui/fake_flutter/fake_flutter.dart';
 import '../../ui/flutter/utils.dart';
 import '../../utils.dart';
 import '../../vm_service_wrapper.dart';

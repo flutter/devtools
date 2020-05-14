@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
-
-import 'ui/fake_flutter/fake_flutter.dart';
 
 class FlutterVersion extends SemanticVersion {
   FlutterVersion._({

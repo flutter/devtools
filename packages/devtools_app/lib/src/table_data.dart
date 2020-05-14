@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 
 import 'trees.dart';
-import 'ui/fake_flutter/fake_flutter.dart';
 import 'utils.dart';
 
 class HoverCellData<T> {

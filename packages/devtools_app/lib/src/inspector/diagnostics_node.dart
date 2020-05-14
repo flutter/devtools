@@ -6,10 +6,11 @@ library diagnostics_node;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../enum_utils.dart';
-import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
 import 'flutter_widget.dart';
@@ -594,9 +595,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return Catalog.instance?.getWidget(widgetRuntimeType);
   }
 
-  DevToolsIcon get icon {
+  Widget get icon {
     if (isProperty) return null;
-    DevToolsIcon icon = widget?.icon;
+    Widget icon = widget?.icon;
     if (icon == null && widgetRuntimeType != null) {
       icon ??= iconMaker.fromWidgetName(widgetRuntimeType);
     }

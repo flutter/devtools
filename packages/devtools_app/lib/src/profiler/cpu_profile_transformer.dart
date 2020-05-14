@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 
-import '../ui/fake_flutter/fake_flutter.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
 

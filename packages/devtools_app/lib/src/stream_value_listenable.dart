@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'ui/fake_flutter/fake_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 // TODO(jacobr): remove this class and port the rest of the code in DevTools to
 // use ValueListenable directly instead of StreamBuilder.

@@ -7,10 +7,10 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
-
-import 'ui/fake_flutter/fake_flutter.dart';
 
 bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
 

@@ -11,14 +11,11 @@
 /// and will help simplify porting this code to work with Hummingbird.
 library inspector_tree;
 
-import 'dart:math' as math;
-
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import '../config_specific/logger/logger.dart';
-import '../ui/fake_flutter/fake_flutter.dart';
-import '../ui/icons.dart';
-import '../ui/material_icons.dart';
 import '../ui/theme.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
@@ -32,10 +29,6 @@ final RegExp assertionThrownBuildingError = RegExp(
     r'^(The following assertion was thrown building [a-zA-Z]+)(\(.*\))(:)$');
 
 typedef TreeEventCallback = void Function(InspectorTreeNode node);
-typedef TreeHoverEventCallback = void Function(
-  InspectorTreeNode node,
-  DevToolsIcon icon,
-);
 
 const Color selectedRowBackgroundColor = ThemedColor(
   Color.fromARGB(255, 202, 191, 69),
@@ -45,97 +38,12 @@ const Color hoverColor = ThemedColor(
   Colors.yellowAccent,
   Color.fromARGB(255, 70, 73, 76),
 );
-const Color highlightLineColor = ThemedColor(
-  Colors.black,
-  Color.fromARGB(255, 200, 200, 200),
-);
 
 const double iconPadding = 5.0;
 const double chartLineStrokeWidth = 1.0;
 const double columnWidth = 16.0;
 const double verticalPadding = 10.0;
 const double rowHeight = 24.0;
-const Color arrowColor = Colors.grey;
-
-// TODO(jacobr): these arrows are a bit ugly.
-// We should create pngs instead of trying to stretch the material icons into
-// being good expand collapse arrows.
-final DevToolsIcon collapseArrow = MaterialIcon(
-  'arrow_drop_down',
-  arrowColor,
-  fontSize: 32,
-  iconWidth: columnWidth - iconPadding,
-  codePoint: Icons.arrow_drop_down.codePoint,
-);
-
-final DevToolsIcon expandArrow = MaterialIcon(
-  'arrow_drop_down',
-  arrowColor,
-  fontSize: 32,
-  angle: -math.pi / 2, // -90 degrees
-  iconWidth: columnWidth - iconPadding,
-  codePoint: Icons.arrow_drop_down.codePoint,
-);
-
-abstract class PaintEntry {
-  PaintEntry();
-
-  DevToolsIcon get icon;
-
-  void attach(InspectorTreeController owner) {}
-}
-
-abstract class InspectorTreeNodeRenderBuilder<
-    R extends InspectorTreeNodeRender> {
-  InspectorTreeNodeRenderBuilder({
-    @required this.level,
-    @required this.treeStyle,
-  });
-
-  void appendText(String text, TextStyle textStyle);
-
-  void addIcon(DevToolsIcon icon);
-
-  final DiagnosticLevel level;
-  final DiagnosticsTreeStyle treeStyle;
-
-  InspectorTreeNodeRender build();
-}
-
-abstract class InspectorTreeNodeRender<E> {
-  InspectorTreeNodeRender(this.entries);
-
-  final List<E> entries;
-
-  PaintEntry hitTest(Offset location);
-}
-
-abstract class InspectorTreeNodeRendererLegacy<E extends PaintEntry>
-    extends InspectorTreeNodeRender<E> {
-  InspectorTreeNodeRendererLegacy(List<E> entries, this.size) : super(entries);
-
-  final Size size;
-
-  void attach(InspectorTreeController owner, Offset offset) {
-    if (_owner != owner) {
-      _owner = owner;
-    }
-    _offset = offset;
-
-    for (var entry in entries) {
-      entry.attach(owner);
-    }
-  }
-
-  /// Offset can be updated after the object is created by calling attach
-  /// with a new offset.
-  Offset get offset => _offset;
-  Offset _offset;
-
-  InspectorTreeController _owner;
-
-  Rect get paintBounds => _offset & size;
-}
 
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector
@@ -400,7 +308,7 @@ class InspectorTreeConfig {
   final VoidCallback onSelectionChange;
   final void Function(bool added) onClientActiveChange;
   final TreeEventCallback onExpand;
-  final TreeHoverEventCallback onHover;
+  final TreeEventCallback onHover;
 }
 
 abstract class InspectorTreeController {

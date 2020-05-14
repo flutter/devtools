@@ -30,8 +30,9 @@ void main() {
       await webdevFixture?.teardown();
     });
 
-    group('app', appTests);
-    group('logging', loggingTests);
+    // TODO(#1965): fix and re-enable integration tests.
+    group('app', appTests, skip: true);
+    group('logging', loggingTests, skip: true);
     // Temporarily skip tests. See https://github.com/flutter/devtools/issues/1343.
     group('debugging', debuggingTests, skip: true);
   }, timeout: const Timeout.factor(8));
