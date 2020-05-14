@@ -442,40 +442,41 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _pause(bool paused, {Event pauseEvent}) async {
+    _isPaused.value = paused;
+
+    // Perform an early exit if we're not paused.
     if (!paused) {
-      _isPaused.value = false;
       _stackFramesWithLocation.value = [];
       selectStackFrame(null);
-    } else {
-      _isPaused.value = true;
+      return;
+    }
 
-      // First, notify based on the single 'pauseEvent.topFrame' frame.
-      if (pauseEvent?.topFrame != null) {
-        final tempFrames = _framesForCallStack(
-          [pauseEvent.topFrame],
-          reportedException: pauseEvent?.exception,
-        );
-        _stackFramesWithLocation.value = [
-          await _createStackFrameWithLocation(tempFrames.first),
-        ];
-        selectStackFrame(_stackFramesWithLocation.value.first);
-      }
-
-      // Then, issue an asynchronous request to populate the frame information.
-      final stack = await _service.getStack(isolateRef.id);
-      final frames = _framesForCallStack(
-        stack.frames,
-        asyncCausalFrames: stack.asyncCausalFrames,
+    // First, notify based on the single 'pauseEvent.topFrame' frame.
+    if (pauseEvent?.topFrame != null) {
+      final tempFrames = _framesForCallStack(
+        [pauseEvent.topFrame],
         reportedException: pauseEvent?.exception,
       );
+      _stackFramesWithLocation.value = [
+        await _createStackFrameWithLocation(tempFrames.first),
+      ];
+      selectStackFrame(_stackFramesWithLocation.value.first);
+    }
 
-      _stackFramesWithLocation.value =
-          await Future.wait(frames.map(_createStackFrameWithLocation));
-      if (_stackFramesWithLocation.value.isEmpty) {
-        selectStackFrame(null);
-      } else {
-        selectStackFrame(_stackFramesWithLocation.value.first);
-      }
+    // Then, issue an asynchronous request to populate the frame information.
+    final stack = await _service.getStack(isolateRef.id);
+    final frames = _framesForCallStack(
+      stack.frames,
+      asyncCausalFrames: stack.asyncCausalFrames,
+      reportedException: pauseEvent?.exception,
+    );
+
+    _stackFramesWithLocation.value =
+        await Future.wait(frames.map(_createStackFrameWithLocation));
+    if (_stackFramesWithLocation.value.isEmpty) {
+      selectStackFrame(null);
+    } else {
+      selectStackFrame(_stackFramesWithLocation.value.first);
     }
   }
 
@@ -773,15 +774,6 @@ class ScriptCache {
   /// Return a cached [Script] for the given [ScriptRef], returning null
   /// if there is no cached [Script].
   Script getScriptCached(ScriptRef scriptRef) {
-    // Check to see if this ScriptRef is really a Script.
-    if (scriptRef is Script) {
-      if (_scripts[scriptRef.id] == null) {
-        _scripts[scriptRef.id] = scriptRef;
-      }
-
-      return scriptRef;
-    }
-
     return _scripts[scriptRef?.id];
   }
 
