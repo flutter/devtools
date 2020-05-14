@@ -161,6 +161,8 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
       expect(tableModel.rowCount, equals(0));
     });
 
+    // TODO(#1370): rewrite this test for the flutter app.
+    /*
     test('structured errors', () async {
       // Enable structured errors.
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
@@ -277,6 +279,7 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
       }
       await env.tearDownEnvironment();
     });
+     */
   }, timeout: const Timeout.factor(8));
 
   group('LogData', () {
