@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ansicolor/ansicolor.dart';
+import 'package:devtools_app/src/debugger/flutter/console.dart';
 import 'package:devtools_app/src/debugger/flutter/controls.dart';
 import 'package:devtools_app/src/debugger/flutter/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/flutter/debugger_model.dart';
@@ -11,6 +12,7 @@ import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
@@ -108,6 +110,78 @@ void main() {
           secondSpan.style.backgroundColor,
           const Color.fromRGBO(215, 95, 135, 1),
         );
+      });
+    });
+
+    group('ConsoleControls', () {
+      testWidgets('Console Controls are not rendered when stdio is empty',
+          (WidgetTester tester) async {
+        when(debuggerController.stdio).thenReturn(ValueNotifier([]));
+
+        await pumpDebuggerScreen(tester, debuggerController);
+
+        expect(find.byKey(DebuggerConsole.clearStdioButtonKey), findsNothing);
+        expect(
+            find.byKey(DebuggerConsole.copyToClipboardButtonKey), findsNothing);
+      });
+
+      testWidgets('Tapping the Console Clear button clears stdio.',
+          (WidgetTester tester) async {
+        when(debuggerController.stdio)
+            .thenReturn(ValueNotifier([_ansiCodesOutput()]));
+
+        await pumpDebuggerScreen(tester, debuggerController);
+
+        final clearButton = find.byKey(DebuggerConsole.clearStdioButtonKey);
+        expect(clearButton, findsOneWidget);
+
+        await tester.tap(clearButton);
+
+        verify(debuggerController.clearStdio());
+      });
+
+      group('Clipboard', () {
+        var _clipboardContents = '';
+        final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
+        final _expected = _stdio.join('\n');
+
+        setUp(() {
+          // This intercepts the Clipboard.setData SystemChannel message,
+          // and stores the contents that were (attempted) to be copied.
+          SystemChannels.platform.setMockMethodCallHandler((MethodCall call) {
+            switch (call.method) {
+              case 'Clipboard.setData':
+                _clipboardContents = call.arguments['text'];
+                break;
+              default:
+                break;
+            }
+            return Future.value(true);
+          });
+        });
+
+        tearDown(() {
+          // Cleanup the SystemChannel
+          SystemChannels.platform.setMockMethodCallHandler(null);
+        });
+
+        testWidgets(
+            'Tapping the Copy to Clipboard button attempts to copy stdio to clipboard.',
+            (WidgetTester tester) async {
+          when(debuggerController.stdio).thenReturn(ValueNotifier(_stdio));
+
+          await pumpDebuggerScreen(tester, debuggerController);
+
+          final copyButton =
+              find.byKey(DebuggerConsole.copyToClipboardButtonKey);
+          expect(copyButton, findsOneWidget);
+
+          expect(_clipboardContents, isEmpty);
+
+          await tester.tap(copyButton);
+
+          expect(_clipboardContents, equals(_expected));
+        });
       });
     });
 

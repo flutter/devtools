@@ -11,10 +11,12 @@ import 'package:provider/provider.dart';
 
 import '../config_specific/flutter/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/flutter/import_export/import_export.dart';
+import '../framework_controller.dart';
 import '../globals.dart';
 import 'app.dart';
 import 'banner_messages.dart';
 import 'common_widgets.dart';
+import 'navigation.dart';
 import 'notifications.dart';
 import 'screen.dart';
 import 'snapshot_screen.dart';
@@ -94,6 +96,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   ImportController _importController;
 
+  StreamSubscription<ConnectVmEvent> _connectVmSubscription;
   StreamSubscription<String> _showPageSubscription;
 
   @override
@@ -102,6 +105,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     _setupTabController();
 
+    _connectVmSubscription =
+        frameworkController.onConnectVmEvent.listen(_connectVm);
     _showPageSubscription =
         frameworkController.onShowPageId.listen(_showPageById);
   }
@@ -154,6 +159,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     _tabController?.dispose();
     _currentScreen?.dispose();
     appBarAnimation?.dispose();
+    _connectVmSubscription?.cancel();
     _showPageSubscription?.cancel();
 
     super.dispose();
@@ -186,6 +192,17 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     // Broadcast the initial page.
     frameworkController.notifyPageChange(_currentScreen.value.screenId);
+  }
+
+  /// Connects to the VM with the given URI. This request usually comes from the
+  /// IDE via the server API to reuse the DevTools window after being disconnected
+  /// (for example if the user stops a debug session then launches a new one).
+  void _connectVm(event) {
+    final routeName = routeNameWithQueryParams(context, '/', {
+      'uri': event.serviceProtocolUri.toString(),
+      if (event.notify) 'notify': 'true',
+    });
+    Navigator.of(context).pushReplacementNamed(routeName);
   }
 
   /// Switch to the given page ID. This request usually comes from the server API

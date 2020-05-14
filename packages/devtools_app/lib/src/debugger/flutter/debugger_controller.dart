@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
+import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
@@ -34,7 +35,7 @@ class DebuggerController extends DisposableController
 
   VmService get _service => serviceManager.service;
 
-  final _scriptCache = <String, Script>{};
+  final ScriptCache _scriptCache = ScriptCache();
 
   final _isPaused = ValueNotifier<bool>(false);
 
@@ -134,8 +135,10 @@ class DebuggerController extends DisposableController
 
   IsolateRef isolateRef;
 
-  InstanceRef get reportedException => _reportedException;
-  InstanceRef _reportedException;
+  /// Clears the contents of stdio.
+  void clearStdio() {
+    _stdio.value = [];
+  }
 
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {
@@ -185,8 +188,7 @@ class DebuggerController extends DisposableController
     if (isolate.pauseEvent != null &&
         isolate.pauseEvent.kind != EventKind.kResume) {
       _lastEvent = isolate.pauseEvent;
-      _reportedException = isolate.pauseEvent.exception;
-      await _pause(true);
+      await _pause(true, pauseEvent: isolate.pauseEvent);
     }
 
     _breakpoints.value = isolate.breakpoints;
@@ -252,7 +254,6 @@ class DebuggerController extends DisposableController
     switch (event.kind) {
       case EventKind.kResume:
         await _pause(false);
-        _reportedException = null;
         break;
       case EventKind.kPauseStart:
       case EventKind.kPauseExit:
@@ -260,8 +261,7 @@ class DebuggerController extends DisposableController
       case EventKind.kPauseInterrupted:
       case EventKind.kPauseException:
       case EventKind.kPausePostRequest:
-        _reportedException = event.exception;
-        await _pause(true);
+        await _pause(true, pauseEvent: event);
         break;
       // TODO(djshuckerow): switch the _breakpoints notifier to a 'ListNotifier'
       // that knows how to notify when performing a list edit operation.
@@ -441,11 +441,35 @@ class DebuggerController extends DisposableController
     }
   }
 
-  Future<void> _pause(bool pause) async {
-    _isPaused.value = pause;
+  Future<void> _pause(bool paused, {Event pauseEvent}) async {
+    _isPaused.value = paused;
 
-    final stack = pause ? await _service.getStack(isolateRef.id) : null;
-    final frames = _framesForCallStack(stack);
+    // Perform an early exit if we're not paused.
+    if (!paused) {
+      _stackFramesWithLocation.value = [];
+      selectStackFrame(null);
+      return;
+    }
+
+    // First, notify based on the single 'pauseEvent.topFrame' frame.
+    if (pauseEvent?.topFrame != null) {
+      final tempFrames = _framesForCallStack(
+        [pauseEvent.topFrame],
+        reportedException: pauseEvent?.exception,
+      );
+      _stackFramesWithLocation.value = [
+        await _createStackFrameWithLocation(tempFrames.first),
+      ];
+      selectStackFrame(_stackFramesWithLocation.value.first);
+    }
+
+    // Then, issue an asynchronous request to populate the frame information.
+    final stack = await _service.getStack(isolateRef.id);
+    final frames = _framesForCallStack(
+      stack.frames,
+      asyncCausalFrames: stack.asyncCausalFrames,
+      reportedException: pauseEvent?.exception,
+    );
 
     _stackFramesWithLocation.value =
         await Future.wait(frames.map(_createStackFrameWithLocation));
@@ -459,7 +483,6 @@ class DebuggerController extends DisposableController
   void _clearCaches() {
     _scriptCache.clear();
     _lastEvent = null;
-    _reportedException = null;
     _breakPositionsMap.clear();
     _stdio.value = [];
     _uriToScriptMap.clear();
@@ -473,29 +496,16 @@ class DebuggerController extends DisposableController
   }
 
   /// Return a cached [Script] for the given [ScriptRef], returning null
-  /// if there is no cahced [Script].
+  /// if there is no cached [Script].
   Script getScriptCached(ScriptRef scriptRef) {
-    // Check to see if this ScriptRef is really a Script.
-    if (scriptRef is Script) {
-      if (_scriptCache[scriptRef.id] == null) {
-        _scriptCache[scriptRef.id] = scriptRef;
-      }
-
-      return scriptRef;
-    }
-
-    return _scriptCache[scriptRef?.id];
+    return _scriptCache.getScriptCached(scriptRef);
   }
 
-  /// Retrieve the [Script] for the given [ScritpRef].
+  /// Retrieve the [Script] for the given [ScriptRef].
   ///
   /// This caches the script lookup for future invocations.
-  Future<Script> getScript(ScriptRef scriptRef) async {
-    if (!_scriptCache.containsKey(scriptRef.id)) {
-      _scriptCache[scriptRef.id] =
-          await _service.getObject(isolateRef.id, scriptRef.id);
-    }
-    return _scriptCache[scriptRef.id];
+  Future<Script> getScript(ScriptRef scriptRef) {
+    return _scriptCache.getScript(_service, isolateRef, scriptRef);
   }
 
   /// Return the [ScriptRef] at the given [uri].
@@ -685,13 +695,16 @@ class DebuggerController extends DisposableController
         .toList();
   }
 
-  List<Frame> _framesForCallStack(Stack stack) {
-    if (stack == null) return [];
+  List<Frame> _framesForCallStack(
+    List<Frame> stackFrames, {
+    List<Frame> asyncCausalFrames,
+    InstanceRef reportedException,
+  }) {
+    // Prefer asyncCausalFrames if they exist.
+    List<Frame> frames = asyncCausalFrames ?? stackFrames;
 
-    List<Frame> frames = stack.asyncCausalFrames ?? stack.frames;
-
-    // Handle breaking-on-exceptions.
-    if (_reportedException != null && frames.isNotEmpty) {
+    // Include any reported exception as a variable in the first frame.
+    if (reportedException != null && frames.isNotEmpty) {
       final frame = frames.first;
 
       final newFrame = Frame(
@@ -705,7 +718,7 @@ class DebuggerController extends DisposableController
       newFrame.vars = [
         BoundVariable(
           name: '<exception>',
-          value: _reportedException,
+          value: reportedException,
           scopeStartTokenPos: null,
           scopeEndTokenPos: null,
           declarationTokenPos: null,
@@ -715,6 +728,7 @@ class DebuggerController extends DisposableController
 
       frames = [newFrame, ...frames.sublist(1)];
     }
+
     return frames;
   }
 
@@ -748,5 +762,52 @@ class DebuggerController extends DisposableController
     }
 
     return positions;
+  }
+}
+
+class ScriptCache {
+  ScriptCache();
+
+  Map<String, Script> _scripts = {};
+  final Map<String, Future<Script>> _inProgress = {};
+
+  /// Return a cached [Script] for the given [ScriptRef], returning null
+  /// if there is no cached [Script].
+  Script getScriptCached(ScriptRef scriptRef) {
+    return _scripts[scriptRef?.id];
+  }
+
+  /// Retrieve the [Script] for the given [ScriptRef].
+  ///
+  /// This caches the script lookup for future invocations.
+  Future<Script> getScript(
+      VmService vmService, IsolateRef isolateRef, ScriptRef scriptRef) {
+    if (_scripts.containsKey(scriptRef.id)) {
+      return Future.value(_scripts[scriptRef.id]);
+    }
+
+    if (_inProgress.containsKey(scriptRef.id)) {
+      return _inProgress[scriptRef.id];
+    }
+
+    // We make a copy here as the future could complete after a clear()
+    // operation is performed.
+    final scripts = _scripts;
+
+    final Future<Script> scriptFuture = vmService
+        .getObject(isolateRef.id, scriptRef.id)
+        .then((obj) => obj as Script);
+    _inProgress[scriptRef.id] = scriptFuture;
+
+    unawaited(scriptFuture.then((script) {
+      scripts[scriptRef.id] = script;
+    }));
+
+    return scriptFuture;
+  }
+
+  void clear() {
+    _scripts = {};
+    _inProgress.clear();
   }
 }
