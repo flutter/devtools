@@ -85,24 +85,35 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     controller = newController;
 
     cancel();
+
+    processing = controller.processing.value;
     addAutoDisposeListener(controller.processing, () {
       setState(() {
         processing = controller.processing.value;
       });
     });
+
+    processingProgress = controller.processor.progressNotifier.value;
     addAutoDisposeListener(controller.processor.progressNotifier, () {
       setState(() {
         processingProgress = controller.processor.progressNotifier.value;
       });
     });
+
     addAutoDisposeListener(controller.selectedFrame);
+
+    selectedEvent = controller.selectedTimelineEvent.value;
     addAutoDisposeListener(controller.selectedTimelineEvent, () {
       setState(() {
         selectedEvent = controller.selectedTimelineEvent.value;
       });
     });
 
-    controller.refreshData();
+    // Refresh data on page load if data is null. On subsequent tab changes,
+    // this should not be called.
+    if (controller.data == null) {
+      controller.refreshData();
+    }
 
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
