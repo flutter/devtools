@@ -121,7 +121,7 @@ class MemoryTracker {
       time = math.max(time, samples.last.timestamp);
     }
 
-    _addSample(HeapSample(time, processRss, capacity, used, external, fromGC));
+    _addSample(HeapSample(time, capacity, used, external, fromGC));
   }
 
   void _addSample(HeapSample sample) {

@@ -17,9 +17,9 @@ import '../../config_specific/file/file.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../flutter/table.dart';
 import '../../globals.dart';
+import '../../service_manager.dart';
 import '../../ui/flutter/utils.dart';
 import '../../utils.dart';
-import '../../vm_service_wrapper.dart';
 import '../memory_service.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
@@ -365,8 +365,8 @@ class MemoryController extends DisposableController
     // TODO(terry): Need an event on the controller for this too?
   }
 
-  void _handleConnectionStart(VmServiceWrapper service) {
-    _memoryTracker = MemoryTracker(service, this);
+  void _handleConnectionStart(ServiceConnectionManager serviceManager) {
+    _memoryTracker = MemoryTracker(serviceManager, this);
     _memoryTracker.start();
 
     autoDispose(
@@ -407,10 +407,11 @@ class MemoryController extends DisposableController
     );
 
     autoDispose(
-      serviceManager.onConnectionAvailable.listen(_handleConnectionStart),
+      serviceManager.onConnectionAvailable
+          .listen((_) => _handleConnectionStart(serviceManager)),
     );
     if (serviceManager.hasConnection) {
-      _handleConnectionStart(serviceManager.service);
+      _handleConnectionStart(serviceManager);
     }
     autoDispose(
       serviceManager.onConnectionClosed.listen(_handleConnectionStop),
@@ -765,7 +766,6 @@ class MemoryTimeline {
   static const capcityValueKey = 'capacityValue';
   static const usedValueKey = 'usedValue';
   static const externalValueKey = 'externalValue';
-  static const rssValueKey = 'rssValue';
 
   /// Keys used in a map to store all the MPEngineChart Entries we construct to be plotted,
   /// ADB memory info.
@@ -876,15 +876,11 @@ class MemoryTimeline {
       final used = sample.used.toDouble();
       final external = sample.external.toDouble();
 
-      // TOOD(terry): Need to plot.
-      final rss = (sample.rss ?? 0).toDouble();
-
       final extEntry = Entry(x: timestamp, y: external, icon: dataPointImage);
       final usedEntry =
           Entry(x: timestamp, y: used + external, icon: dataPointImage);
       final capacityEntry =
           Entry(x: timestamp, y: capacity, icon: dataPointImage);
-      final rssEntry = Entry(x: timestamp, y: rss, icon: dataPointImage);
 
       // Engine memory values (ADB Android):
       final javaHeap = sample.adbMemoryInfo.javaHeap.toDouble();
@@ -941,7 +937,6 @@ class MemoryTimeline {
         capcityValueKey: capacityEntry,
         usedValueKey: usedEntry,
         externalValueKey: extEntry,
-        rssValueKey: rssEntry,
         javaHeapValueKey: javaHeapEntry,
         nativeHeapValueKey: nativeHeapEntry,
         codeValueKey: codeEntry,
@@ -1062,7 +1057,6 @@ class MemoryLog {
       pseudoData = true;
       liveData.add(HeapSample(
         DateTime.now().microsecondsSinceEpoch,
-        0,
         0,
         0,
         0,

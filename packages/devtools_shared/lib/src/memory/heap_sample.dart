@@ -8,7 +8,6 @@ import 'adb_memory_info.dart';
 class HeapSample {
   HeapSample(
     this.timestamp,
-    this.rss,
     this.capacity,
     this.used,
     this.external,
@@ -18,7 +17,6 @@ class HeapSample {
 
   factory HeapSample.fromJson(Map<String, dynamic> json) => HeapSample(
         json['timestamp'] as int,
-        json['rss'] as int,
         json['capacity'] as int,
         json['used'] as int,
         json['external'] as int,
@@ -31,7 +29,6 @@ class HeapSample {
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'timestamp': timestamp,
-        'rss': rss,
         'capacity': capacity,
         'used': used,
         'external': external,
@@ -40,8 +37,6 @@ class HeapSample {
       };
 
   final int timestamp;
-
-  final int rss;
 
   final int capacity;
 
@@ -59,7 +54,7 @@ class HeapSample {
   }
 
   @override
-  String toString() => '[HeapSample timestamp: $timestamp, rss: $rss, '
+  String toString() => '[HeapSample timestamp: $timestamp, '
       'capacity: $capacity, used: $used, external: $external, '
       'isGC: $isGC, AdbMemoryInfo: $adbMemoryInfo]';
 }
