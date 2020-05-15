@@ -238,7 +238,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           ActionButton(
             child: FlatButton(
               padding: EdgeInsets.zero,
-              child: const Icon(Icons.delete, size: 24.0),
+              child: const Icon(Icons.delete, size: actionsIconSize),
               onPressed:
                   breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
             ),

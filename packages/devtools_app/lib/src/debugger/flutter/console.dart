@@ -61,29 +61,28 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
     return Console(
       lines: _lines,
       controls: [
-        if (_lines.isNotEmpty) ...[
-          // TODO(ditman) Extract these IconButtons to common_widgets.dart
-          IconButton(
-            icon: const Icon(Icons.content_copy),
-            onPressed: () => copyToClipboard(_lines, context),
-            tooltip: 'Copy to clipboard',
-            key: DebuggerConsole.copyToClipboardButtonKey,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: widget.controller.clearStdio,
-            tooltip: 'Clear console output',
-            key: DebuggerConsole.clearStdioButtonKey,
-          ),
-        ],
+        // TODO(ditman) Extract these IconButtons to common_widgets.dart
+        IconButton(
+          icon: const Icon(Icons.content_copy, size: actionsIconSize),
+          onPressed:
+              _lines.isEmpty ? null : () => copyToClipboard(_lines, context),
+          tooltip: 'Copy to clipboard',
+          key: DebuggerConsole.copyToClipboardButtonKey,
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete, size: actionsIconSize),
+          onPressed: _lines.isEmpty ? null : widget.controller.clearStdio,
+          tooltip: 'Clear console output',
+          key: DebuggerConsole.clearStdioButtonKey,
+        ),
       ],
     );
   }
 }
 
-/// Renders a ConsoleOutput widget with ConsoleControls overlaid on the top-right corner.
-///
-/// TODO(ditman): Reuse this in `logging/flutter/logging_screen.dart`?
+/// Renders a ConsoleOutput widget with ConsoleControls overlaid on the
+/// top-right corner.
+// TODO(ditman): Reuse this in `logging/flutter/logging_screen.dart`?
 class Console extends StatelessWidget {
   const Console({
     this.controls = const <Widget>[],
@@ -98,17 +97,16 @@ class Console extends StatelessWidget {
     return Stack(
       children: [
         _ConsoleOutput(lines: lines),
-        if (controls.isNotEmpty) ...[
-          _ConsoleControls(
-            controls: controls,
-          ),
-        ],
+        _ConsoleControls(
+          controls: controls,
+        ),
       ],
     );
   }
 }
 
-/// Renders a top-right aligned ButtonBar wrapping a List of IconButtons (`controls`).
+/// Renders a top-right aligned ButtonBar wrapping a List of IconButtons
+/// (`controls`).
 class _ConsoleControls extends StatelessWidget {
   const _ConsoleControls({
     this.controls,
