@@ -114,10 +114,10 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
                       turns: expandArrowAnimation,
                       child: const Icon(
                         Icons.arrow_drop_down,
-                        size: actionsIconSize,
+                        size: defaultIconSize,
                       ),
                     )
-                  : const SizedBox(width: defaultSpacing),
+                  : const SizedBox(width: defaultIconSize),
               Expanded(child: widget.display),
             ]),
       ),
