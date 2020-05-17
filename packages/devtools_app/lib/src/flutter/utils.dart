@@ -24,12 +24,7 @@ Future<void> copyToClipboard(List<String> lines, BuildContext context) async {
     text: lines.join('\n'),
   ));
 
-  var numLines = lines.length;
-  // Adjust line count if there's a trailing empty line.
-  if (numLines > 0 && lines.last.trim().isEmpty) {
-    numLines--;
-  }
-
+  final numLines = lines.length;
   Notifications.of(context)?.push(
     'Copied $numLines ${pluralize('line', numLines)}.',
   );

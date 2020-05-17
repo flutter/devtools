@@ -97,9 +97,10 @@ class Console extends StatelessWidget {
     return Stack(
       children: [
         _ConsoleOutput(lines: lines),
-        _ConsoleControls(
-          controls: controls,
-        ),
+        if (controls.isNotEmpty)
+          _ConsoleControls(
+            controls: controls,
+          ),
       ],
     );
   }

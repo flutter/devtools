@@ -114,7 +114,7 @@ void main() {
     });
 
     group('ConsoleControls', () {
-      testWidgets('Console Controls are rendered disables when stdio is empty',
+      testWidgets('Console Controls are rendered disabled when stdio is empty',
           (WidgetTester tester) async {
         when(debuggerController.stdio).thenReturn(ValueNotifier([]));
 
