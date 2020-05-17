@@ -374,7 +374,7 @@ void main() {
 
       final listFinder = find.byWidgetPredicate((Widget widget) =>
           widget is RichText &&
-          widget.text.toPlainText().contains('Root 1 [2] _GrowableList'));
+          widget.text.toPlainText().contains('Root 1 _GrowableList (2 items)'));
       final listChild1Finder = find.byWidgetPredicate((Widget widget) =>
           widget is RichText && widget.text.toPlainText().contains('0: 3'));
       final listChild2Finder = find.byWidgetPredicate((Widget widget) =>
@@ -384,7 +384,7 @@ void main() {
           widget is RichText &&
           widget.text
               .toPlainText()
-              .contains('Root 2 { 2 } _InternalLinkedHashmap'));
+              .contains('Root 2 _InternalLinkedHashmap (2 items)'));
       final mapElement1Finder = find.byWidgetPredicate((Widget widget) =>
           widget is RichText &&
           widget.text.toPlainText().contains("['key1'] 1.0"));
