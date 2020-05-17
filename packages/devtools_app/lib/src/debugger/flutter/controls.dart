@@ -21,88 +21,97 @@ class DebuggingControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: controller.isPaused,
-      builder: (context, isPaused, child) {
-        final canStep = isPaused && controller.hasFrames.value;
+      builder: (context, isPaused, _) {
+        return ValueListenableBuilder(
+          valueListenable: controller.maybeResuming,
+          builder: (context, maybeResuming, Widget _) {
+            final canStep =
+                isPaused && !maybeResuming && controller.hasFrames.value;
 
-        return SizedBox(
-          height: Theme.of(context).buttonTheme.height,
-          child: Row(
-            children: [
-              RoundedOutlinedBorder(
-                child: Row(
-                  children: [
-                    DebuggerButton(
-                      title: 'Pause',
-                      icon: Icons.pause,
-                      autofocus: true,
-                      onPressed: isPaused ? null : controller.pause,
+            return SizedBox(
+              height: Theme.of(context).buttonTheme.height,
+              child: Row(
+                children: [
+                  RoundedOutlinedBorder(
+                    child: Row(
+                      children: [
+                        DebuggerButton(
+                          title: 'Pause',
+                          icon: Icons.pause,
+                          autofocus: true,
+                          onPressed: isPaused ? null : controller.pause,
+                        ),
+                        _LeftBorder(
+                          child: DebuggerButton(
+                            title: 'Resume',
+                            icon: Icons.play_arrow,
+                            onPressed: (isPaused && !maybeResuming)
+                                ? controller.resume
+                                : null,
+                          ),
+                        ),
+                      ],
                     ),
-                    _LeftBorder(
-                      child: DebuggerButton(
-                        title: 'Resume',
-                        icon: Icons.play_arrow,
-                        onPressed: isPaused ? controller.resume : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: denseSpacing),
-              RoundedOutlinedBorder(
-                child: Row(
-                  children: [
-                    DebuggerButton(
-                      title: 'Step In',
-                      icon: Icons.keyboard_arrow_down,
-                      onPressed: canStep ? controller.stepIn : null,
-                    ),
-                    _LeftBorder(
-                      child: DebuggerButton(
-                        title: 'Step Over',
-                        icon: Icons.keyboard_arrow_right,
-                        onPressed: canStep ? controller.stepOver : null,
-                      ),
-                    ),
-                    _LeftBorder(
-                      child: DebuggerButton(
-                        title: 'Step Out',
-                        icon: Icons.keyboard_arrow_up,
-                        onPressed: canStep ? controller.stepOut : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: denseSpacing),
-              RoundedOutlinedBorder(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: defaultSpacing,
-                      right: borderPadding,
-                    ),
-                    child: BreakOnExceptionsControl(controller: controller),
                   ),
-                ),
-              ),
-              const Expanded(child: SizedBox(width: denseSpacing)),
-              ValueListenableBuilder(
-                valueListenable: controller.librariesVisible,
-                builder: (context, visible, _) {
-                  return RoundedOutlinedBorder(
-                    child: Container(
-                      color: visible ? Theme.of(context).highlightColor : null,
-                      child: DebuggerButton(
-                        title: 'Libraries',
-                        icon: libraryIcon,
-                        onPressed: controller.toggleLibrariesVisible,
+                  const SizedBox(width: denseSpacing),
+                  RoundedOutlinedBorder(
+                    child: Row(
+                      children: [
+                        DebuggerButton(
+                          title: 'Step In',
+                          icon: Icons.keyboard_arrow_down,
+                          onPressed: canStep ? controller.stepIn : null,
+                        ),
+                        _LeftBorder(
+                          child: DebuggerButton(
+                            title: 'Step Over',
+                            icon: Icons.keyboard_arrow_right,
+                            onPressed: canStep ? controller.stepOver : null,
+                          ),
+                        ),
+                        _LeftBorder(
+                          child: DebuggerButton(
+                            title: 'Step Out',
+                            icon: Icons.keyboard_arrow_up,
+                            onPressed: canStep ? controller.stepOut : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: denseSpacing),
+                  RoundedOutlinedBorder(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: defaultSpacing,
+                          right: borderPadding,
+                        ),
+                        child: BreakOnExceptionsControl(controller: controller),
                       ),
                     ),
-                  );
-                },
-              )
-            ],
-          ),
+                  ),
+                  const Expanded(child: SizedBox(width: denseSpacing)),
+                  ValueListenableBuilder(
+                    valueListenable: controller.librariesVisible,
+                    builder: (context, visible, _) {
+                      return RoundedOutlinedBorder(
+                        child: Container(
+                          color:
+                              visible ? Theme.of(context).highlightColor : null,
+                          child: DebuggerButton(
+                            title: 'Libraries',
+                            icon: libraryIcon,
+                            onPressed: controller.toggleLibrariesVisible,
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                ],
+              ),
+            );
+          },
         );
       },
     );

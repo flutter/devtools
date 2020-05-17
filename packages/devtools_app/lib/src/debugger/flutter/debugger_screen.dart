@@ -27,6 +27,10 @@ import 'debugger_model.dart';
 import 'scripts.dart';
 import 'variables.dart';
 
+// This is currently a dev-time flag as the overall call depth may not be that
+// interesting to users.
+const bool showCallStackCount = true;
+
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
       : super('debugger', title: 'Debugger', icon: Octicons.bug);
@@ -210,7 +214,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           initialFractions: const [0.38, 0.38, 0.24],
           minSizes: const [0.0, 0.0, 0.0],
           headers: [
-            debuggerPaneHeader(context, callStackTitle, needsTopBorder: false),
+            debuggerPaneHeader(
+              context,
+              callStackTitle,
+              needsTopBorder: false,
+              rightChild: showCallStackCount ? _callStackRightChild() : null,
+            ),
             debuggerPaneHeader(context, variablesTitle),
             debuggerPaneHeader(
               context,
@@ -225,6 +234,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             BreakpointPicker(),
           ],
         );
+      },
+    );
+  }
+
+  Widget _callStackRightChild() {
+    return ValueListenableBuilder(
+      valueListenable: controller.stackFramesWithLocation,
+      builder: (context, stackFrames, _) {
+        return CallStackCountBadge(stackFrames: stackFrames);
       },
     );
   }

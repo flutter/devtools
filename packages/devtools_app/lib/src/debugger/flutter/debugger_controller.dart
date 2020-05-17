@@ -19,6 +19,9 @@ import 'debugger_model.dart';
 // TODO(devoncarew): Add some delayed resume value notifiers (to be used to
 // help debounce stepping operations).
 
+// Make sure this a checked in with `mute: true`.
+final _log = TimingLogger('debugger', mute: false);
+
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
@@ -40,6 +43,12 @@ class DebuggerController extends DisposableController
   final _isPaused = ValueNotifier<bool>(false);
 
   ValueListenable<bool> get isPaused => _isPaused;
+
+  final _maybeResuming = ValueNotifier<bool>(false);
+
+  /// This indicates that we've requested a resume (or step) operation from the
+  /// VM, but haven't yet received the 'resumed' isolate event.
+  ValueListenable<bool> get maybeResuming => _maybeResuming;
 
   final _hasFrames = ValueNotifier<bool>(false);
 
@@ -209,23 +218,39 @@ class DebuggerController extends DisposableController
 
   Future<Success> pause() => _service.pause(isolateRef.id);
 
-  Future<Success> resume() => _service.resume(isolateRef.id);
-
-  Future<Success> stepOver() {
-    // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
-    final useAsyncStepping = _lastEvent?.atAsyncSuspension ?? false;
-    return _service.resume(
-      isolateRef.id,
-      step:
-          useAsyncStepping ? StepOption.kOverAsyncSuspension : StepOption.kOver,
-    );
+  Future<Success> resume() {
+    _log.log('resume()');
+    _maybeResuming.value = true;
+    return _service.resume(isolateRef.id);
   }
 
-  Future<Success> stepIn() =>
-      _service.resume(isolateRef.id, step: StepOption.kInto);
+  Future<Success> stepOver() {
+    _log.log('stepOver()');
+    _maybeResuming.value = true;
 
-  Future<Success> stepOut() =>
-      _service.resume(isolateRef.id, step: StepOption.kOut);
+    // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
+    final useAsyncStepping = _lastEvent?.atAsyncSuspension ?? false;
+    return _service
+        .resume(
+          isolateRef.id,
+          step: useAsyncStepping
+              ? StepOption.kOverAsyncSuspension
+              : StepOption.kOver,
+        )
+        .whenComplete(() => _log.log('stepOver() completed'));
+  }
+
+  Future<Success> stepIn() {
+    _maybeResuming.value = true;
+
+    return _service.resume(isolateRef.id, step: StepOption.kInto);
+  }
+
+  Future<Success> stepOut() {
+    _maybeResuming.value = true;
+
+    return _service.resume(isolateRef.id, step: StepOption.kOut);
+  }
 
   Future<void> clearBreakpoints() async {
     final breakpoints = _breakpoints.value.toList();
@@ -245,15 +270,21 @@ class DebuggerController extends DisposableController
     _exceptionPauseMode.value = mode;
   }
 
-  void _handleDebugEvent(Event event) async {
+  void _handleDebugEvent(Event event) {
+    _log.log('event: ${event.kind}');
+
     if (event.isolate.id != isolateRef?.id) return;
 
     _hasFrames.value = event.topFrame != null;
     _lastEvent = event;
 
+    // Any event we receive here indicates that any resume/step request has been
+    // processed.
+    _maybeResuming.value = false;
+
     switch (event.kind) {
       case EventKind.kResume:
-        await _pause(false);
+        _pause(false);
         break;
       case EventKind.kPauseStart:
       case EventKind.kPauseExit:
@@ -261,7 +292,7 @@ class DebuggerController extends DisposableController
       case EventKind.kPauseInterrupted:
       case EventKind.kPauseException:
       case EventKind.kPausePostRequest:
-        await _pause(true, pauseEvent: event);
+        _pause(true, pauseEvent: event);
         break;
       // TODO(djshuckerow): switch the _breakpoints notifier to a 'ListNotifier'
       // that knows how to notify when performing a list edit operation.
@@ -444,6 +475,8 @@ class DebuggerController extends DisposableController
   Future<void> _pause(bool paused, {Event pauseEvent}) async {
     _isPaused.value = paused;
 
+    _log.log('_pause(running: ${!paused})');
+
     // Perform an early exit if we're not paused.
     if (!paused) {
       _stackFramesWithLocation.value = [];
@@ -460,11 +493,14 @@ class DebuggerController extends DisposableController
       _stackFramesWithLocation.value = [
         await _createStackFrameWithLocation(tempFrames.first),
       ];
+      _log.log('created first frame');
       selectStackFrame(_stackFramesWithLocation.value.first);
     }
 
     // Then, issue an asynchronous request to populate the frame information.
+    _log.log('getStack()');
     final stack = await _service.getStack(isolateRef.id);
+    _log.log('getStack() completed (frames: ${stack.frames.length})');
     final frames = _framesForCallStack(
       stack.frames,
       asyncCausalFrames: stack.asyncCausalFrames,
@@ -473,6 +509,7 @@ class DebuggerController extends DisposableController
 
     _stackFramesWithLocation.value =
         await Future.wait(frames.map(_createStackFrameWithLocation));
+    _log.log('populated frame info');
     if (_stackFramesWithLocation.value.isEmpty) {
       selectStackFrame(null);
     } else {
@@ -634,6 +671,9 @@ class DebuggerController extends DisposableController
           variable.addAllChildren(_createVariablesForElements(result));
         } else if (result.fields != null) {
           variable.addAllChildren(_createVariablesForFields(result));
+        } else if (result.bytes != null) {
+          // TODO: Display children for Uint8List, Int16List, ...
+
         }
       }
     } on SentinelException catch (_) {
@@ -643,56 +683,51 @@ class DebuggerController extends DisposableController
   }
 
   List<Variable> _createVariablesForAssociations(Instance instance) {
-    return instance.associations
-        .map((MapAssociation assoc) {
-          // For string keys, quote the key value.
-          String keyString = assoc.key.valueAsString;
-          // TODO(kenz): for maps where keys are not primitive types, support
-          // expanding the keys as well as the values.
-          if (assoc.key is InstanceRef &&
-              assoc.key.kind == InstanceKind.kString) {
-            keyString = "'$keyString'";
-          }
-          return BoundVariable(
-            name: '[$keyString]',
-            value: assoc.value,
-            scopeStartTokenPos: null,
-            scopeEndTokenPos: null,
-            declarationTokenPos: null,
-          );
-        })
-        .map((bv) => Variable.create(bv))
-        .toList();
+    final boundsVariables = instance.associations.map((association) {
+      // For string keys, quote the key value.
+      String keyString = association.key.valueAsString;
+      // TODO(kenz): for maps where keys are not primitive types, support
+      // expanding the keys as well as the values.
+      if (association.key is InstanceRef &&
+          association.key.kind == InstanceKind.kString) {
+        keyString = "'$keyString'";
+      }
+      return BoundVariable(
+        name: '[$keyString]',
+        value: association.value,
+        scopeStartTokenPos: null,
+        scopeEndTokenPos: null,
+        declarationTokenPos: null,
+      );
+    });
+    return boundsVariables.map((bv) => Variable.create(bv)).toList();
   }
 
   List<Variable> _createVariablesForElements(Instance instance) {
-    final List<BoundVariable> boundVars = [];
+    final boundVariables = <BoundVariable>[];
     for (int i = 0; i < instance.elements.length; i++) {
-      final value = instance.elements[i];
-      boundVars.add(BoundVariable(
-        name: '$i:',
-        value: value,
+      boundVariables.add(BoundVariable(
+        name: '[$i]',
+        value: instance.elements[i],
         scopeStartTokenPos: null,
         scopeEndTokenPos: null,
         declarationTokenPos: null,
       ));
     }
-    return boundVars.map((bv) => Variable.create(bv)).toList();
+    return boundVariables.map((bv) => Variable.create(bv)).toList();
   }
 
   List<Variable> _createVariablesForFields(Instance instance) {
-    return instance.fields
-        .map((BoundField field) {
-          return BoundVariable(
-            name: field.decl.name,
-            value: field.value,
-            scopeStartTokenPos: null,
-            scopeEndTokenPos: null,
-            declarationTokenPos: null,
-          );
-        })
-        .map((bv) => Variable.create(bv))
-        .toList();
+    final boundVariables = instance.fields.map((field) {
+      return BoundVariable(
+        name: field.decl.name,
+        value: field.value,
+        scopeStartTokenPos: null,
+        scopeEndTokenPos: null,
+        declarationTokenPos: null,
+      );
+    });
+    return boundVariables.map((bv) => Variable.create(bv)).toList();
   }
 
   List<Frame> _framesForCallStack(
@@ -809,5 +844,30 @@ class ScriptCache {
   void clear() {
     _scripts = {};
     _inProgress.clear();
+  }
+}
+
+/// A dev time class to help trace DevTools application events.
+class TimingLogger {
+  TimingLogger(this.name, {this.mute});
+
+  final String name;
+  final bool mute;
+
+  Stopwatch _timer;
+
+  void log(String message) {
+    if (mute) return;
+
+    if (_timer != null) {
+      _timer.stop();
+      print('[$name}]   ${_timer.elapsedMilliseconds}ms');
+      _timer.reset();
+    }
+
+    _timer ??= Stopwatch();
+    _timer.start();
+
+    print('[$name] $message');
   }
 }
