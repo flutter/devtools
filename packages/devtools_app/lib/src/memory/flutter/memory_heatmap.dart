@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -17,6 +18,7 @@ import '../../ui/colors.dart';
 
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';
+import 'memory_utils.dart';
 
 /// UX navigation in a heat map e.g.,
 ///     ------------------------------------------------------------
@@ -110,10 +112,41 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
 
     addAutoDisposeListener(controller.searchNotifier, () {
       setState(() {
-        final searchingValue = controller.search;
-        if (searchingValue.isNotEmpty) {
-          final Node node = findNode(searchingValue);
-          selectNode(node);
+        if (controller.search.isNotEmpty) {
+          if (controller.selectTheSearch) {
+            // Select the node.
+            final Node node = findNode(controller.search);
+            selectNode(node);
+
+            closeAutoCompleteOverlay();
+
+            controller.selectTheSearch = false;
+            controller.search = '';
+          } else {
+            // No exact match, return top matches.
+            var matches = matchNames(controller.search);
+            matches.sort();
+            matches = matches.sublist(0, min(topMatches, matches.length));
+
+            controller.searchAutoComplete.value = matches;
+          }
+        } else if (controller.selectTheSearch) {
+          // Escape hit, on empty search.
+          selectNode(null);
+          controller.selectTheSearch = false;
+        }
+      });
+    });
+
+    addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
+      setState(() {
+        if (autoCompleteOverlay == null) {
+          autoCompleteOverlay = createAutoCompleteOverlay(controller);
+          Overlay.of(context).insert(autoCompleteOverlay);
+        } else {
+          closeAutoCompleteOverlay();
+          autoCompleteOverlay = createAutoCompleteOverlay(controller);
+          Overlay.of(context).insert(autoCompleteOverlay);
         }
       });
     });
@@ -142,6 +175,11 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
     }
   }
 
+  List<String> matchNames(String searchValue) {
+    final MatchNamesFunction callback = _flameChart.callbacks[matchNamesKey];
+    return callback(searchValue);
+  }
+
   Node findNode(String searchValue) {
     final FindNodeFunction callback = _flameChart.callbacks[findNodeKey];
     return callback(searchValue);
@@ -152,6 +190,12 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
     callback(nodeValue);
   }
 }
+
+/// Key in callbacks map.
+const matchNamesKey = 'matchNames';
+
+/// matchNames callback signature.
+typedef MatchNamesFunction = List<String> Function(String);
 
 /// Key in callbacks map.
 const findNodeKey = 'findNode';
@@ -209,6 +253,7 @@ class FlameChartRenderObject extends RenderBox {
   Map<String, Function> callbacks;
 
   set sizes(InstructionsSize value) {
+    callbacks[matchNamesKey] = _exposeMatchNames;
     callbacks[findNodeKey] = _exposeFindNode;
     callbacks[selectNodeKey] = _exposeSelectNode;
 
@@ -216,7 +261,7 @@ class FlameChartRenderObject extends RenderBox {
       return;
     }
     _sizes = value;
-    _selectedNode = value.root;
+    _selectedNode ??= value.root;
     markNeedsPaint();
   }
 
@@ -240,19 +285,51 @@ class FlameChartRenderObject extends RenderBox {
     markNeedsPaint();
   }
 
+  List<String> _exposeMatchNames(String searchName) {
+    return matchNodeNames(_sizes.root.children, searchName);
+  }
+
+  /// Look for the node with a particular name (depth first traversal).
+  List<String> matchNodeNames(Map<String, Node> children, String searchName) {
+    final matches = <String>[];
+    final matchName = searchName.toLowerCase();
+    for (var child in children.entries) {
+      final node = child.value;
+      if (node.children.isEmpty) {
+        final lcNodeName = node.name.toLowerCase();
+        if (!lcNodeName.endsWith('.dart') && lcNodeName.startsWith(matchName)) {
+          matches.add(node.name);
+        }
+      } else {
+        final lcNodeName = node.name.toLowerCase();
+        if (!lcNodeName.endsWith('.dart') && lcNodeName.startsWith(matchName)) {
+          matches.add(node.name);
+        }
+        final childMatches = matchNodeNames(node.children, searchName);
+        if (childMatches.isNotEmpty) {
+          matches.addAll(childMatches);
+        }
+        ;
+      }
+    }
+
+    return matches;
+  }
+
   Node _exposeFindNode(String searchName) {
     return findNode(_sizes.root.children, searchName);
   }
 
   /// Look for the node with a particular name (depth first traversal).
   Node findNode(Map<String, Node> children, String searchName) {
+    final matchName = searchName.toLowerCase();
     for (var child in children.entries) {
       final node = child.value;
       if (node.children.isEmpty) {
-        return node.name == searchName ? node : null;
+        return node.name.toLowerCase() == matchName ? node : null;
       } else {
-        if (node.name == searchName) return node;
-        final foundNode = findNode(node.children, searchName);
+        if (node.name.toLowerCase() == matchName) return node;
+        final foundNode = findNode(node.children, matchName);
         if (foundNode != null) return foundNode;
       }
     }
@@ -261,25 +338,7 @@ class FlameChartRenderObject extends RenderBox {
   }
 
   void _exposeSelectNode(Node value) {
-    final oldSelected = _selectedNode;
-
     selectedNode = value;
-
-    // TODO(terry): Force a relayout to repaint (paintAncestors) with new
-    //              selection. Calling debugResetSize or size changing
-    //              works.  Could a custom painter solve this problem?
-    //              However, shouldn't hitTestSelf do the same e.g.,
-    //
-    //                  hitTestSelf(Offset(
-    //                    _selectedNode.rect.left + paintOffset.dx,
-    //                    _selectedNode.rect.top - paintOffset.dy,
-    //                  ));
-
-    // If nothing changed then don't update.
-    if (oldSelected != _selectedNode) {
-      // TODO(terry): This shouldn't be the solution.
-      size = size;
-    }
   }
 
   Node _selectedNode;

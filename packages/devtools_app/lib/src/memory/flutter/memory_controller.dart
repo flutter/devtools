@@ -268,6 +268,9 @@ class MemoryController extends DisposableController
 
   final SettingsModel settings = SettingsModel();
 
+  final selectionNotifier =
+      SelectionNotifier<Selection<Reference>>(Selection<Reference>.empty());
+
   /// Tree to view Libary/Class/Instance (grouped by)
   TreeTable<Reference> groupByTreeTable;
 
@@ -330,7 +333,7 @@ class MemoryController extends DisposableController
 
   ValueListenable<String> get groupingByNotifier => groupingBy;
 
-  bool clearSearch = false;
+  bool selectTheSearch = false;
 
   final _searchNotifier = ValueNotifier<String>('');
 
@@ -342,6 +345,10 @@ class MemoryController extends DisposableController
   }
 
   String get search => _searchNotifier.value;
+
+  final searchAutoComplete = ValueNotifier<List<String>>([]);
+
+  ValueListenable<List<String>> get searchAutoCompleteNotifier => searchAutoComplete;
 
   String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 

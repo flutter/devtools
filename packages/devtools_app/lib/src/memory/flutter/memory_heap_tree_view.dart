@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +21,7 @@ import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_heatmap.dart';
 import 'memory_snapshot_models.dart';
+import 'memory_utils.dart';
 
 class HeapTree extends StatefulWidget {
   const HeapTree(
@@ -89,11 +91,23 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     });
 
     addAutoDisposeListener(controller.searchNotifier, () {
-      if (controller.clearSearch) {
-        setState(() {
-          controller.clearSearch = false;
-        });
-      }
+      setState(() {
+        closeAutoCompleteOverlay();
+      });
+    });
+
+    addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
+      setState(() {
+        if (autoCompleteOverlay == null) {
+          autoCompleteOverlay = createAutoCompleteOverlay(controller);
+          Overlay.of(context).insert(autoCompleteOverlay);
+        } else {
+          closeAutoCompleteOverlay();
+
+          autoCompleteOverlay = createAutoCompleteOverlay(controller);
+          Overlay.of(context).insert(autoCompleteOverlay);
+        }
+      });
     });
   }
 
@@ -253,7 +267,9 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
               value: controller.showHeatMap,
               onChanged: (value) {
                 setState(() {
+                  closeAutoCompleteOverlay();
                   controller.showHeatMap = value;
+                  controller.search = '';
                   controller.selectedLeaf = null;
                 });
               },
@@ -315,41 +331,51 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
 
   void clearSearchField() {
     if (controller.search.isNotEmpty) {
-      controller.clearSearch = true;
       searchTextFieldController.clear();
       controller.search = '';
     }
   }
 
-  TextField createSearchField() {
+  Widget createSearchField() {
     // Creating new TextEditingController.
     searchFieldFocusNode = FocusNode();
-    searchTextFieldController = TextEditingController();
 
-    final searchField = TextField(
-      autofocus: true,
-      enabled: controller.showHeatMap && controller.snapshots.isNotEmpty,
-      focusNode: searchFieldFocusNode,
-      controller: searchTextFieldController,
-      onChanged: (value) {
-        if (controller.showHeatMap) {
+    searchFieldFocusNode.addListener(() {
+      if (!searchFieldFocusNode.hasFocus) {
+        closeAutoCompleteOverlay();
+      }
+    });
+
+    searchTextFieldController = TextEditingController(text: controller.search);
+    searchTextFieldController.selection = TextSelection.fromPosition(
+        TextPosition(offset: controller.search.length));
+
+    final searchField = CompositedTransformTarget(
+      link: autoCompletelayerLink,
+      child: TextField(
+        key: memorySearchFieldKey,
+        autofocus: true,
+        enabled: controller.snapshots.isNotEmpty,
+        focusNode: searchFieldFocusNode,
+        controller: searchTextFieldController,
+        onChanged: (value) {
           controller.search = value;
-        }
-      },
-      onEditingComplete: () {
-        searchFieldFocusNode.requestFocus();
-      },
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.all(8),
-        border: const OutlineInputBorder(),
-        labelText: 'Search',
-        hintText: 'Search',
-        suffix: IconButton(
-          padding: const EdgeInsets.all(0.0),
-          onPressed: () {
-            clearSearchField();
-          },
-          icon: const Icon(Icons.clear, size: 16),
+        },
+        onEditingComplete: () {
+          searchFieldFocusNode.requestFocus();
+        },
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.all(8),
+          border: const OutlineInputBorder(),
+          labelText: 'Search',
+          hintText: 'Search',
+          suffix: IconButton(
+            padding: const EdgeInsets.all(0.0),
+            onPressed: () {
+              clearSearchField();
+            },
+            icon: const Icon(Icons.clear, size: 16),
+          ),
         ),
       ),
     );
@@ -364,20 +390,28 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   Widget _buildSearchFilterControls() {
     rawKeyboardFocusNode = FocusNode();
 
-    final searchAndRawKeyboard = controller.showHeatMap
-        ? RawKeyboardListener(
-            child: createSearchField(),
-            focusNode: rawKeyboardFocusNode,
-            onKey: (RawKeyEvent event) {
-              if (event is RawKeyDownEvent) {
-                if (event.logicalKey.keyId == LogicalKeyboardKey.escape.keyId) {
-                  // ESCAPE key pressed clear search TextField.
-                  clearSearchField();
-                }
+    final searchAndRawKeyboard = RawKeyboardListener(
+      child: createSearchField(),
+      focusNode: rawKeyboardFocusNode,
+      onKey: (RawKeyEvent event) {
+        if (event is RawKeyDownEvent) {
+          if (event.logicalKey.keyId == LogicalKeyboardKey.escape.keyId) {
+            // ESCAPE key pressed clear search TextField.
+            clearSearchField();
+          } else if (event.logicalKey.keyId == LogicalKeyboardKey.enter.keyId) {
+            // Find exact match in autocomplete list - use that as our search value.
+            for (final autoEntry in controller.searchAutoComplete.value) {
+              if (controller.search.toLowerCase() == autoEntry.toLowerCase()) {
+                searchTextFieldController.clear();
+                closeAutoCompleteOverlay();
+                controller.selectTheSearch = true;
+                controller.search = autoEntry;
               }
-            },
-          )
-        : const SizedBox();
+            }
+          }
+        }
+      },
+    );
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -710,6 +744,138 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
         controller.computeAllLibraries(true, true);
       });
     });
+
+    addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
+      setState(() {});
+    });
+
+    addAutoDisposeListener(controller.searchNotifier, () {
+      setState(() {
+        final searchingValue = controller.search;
+        if (searchingValue.isNotEmpty) {
+          if (controller.selectTheSearch) {
+            // Found an exact match.
+            selectItemInTree(searchingValue);
+            controller.selectTheSearch = false;
+            controller.search = '';
+            return;
+          }
+
+          // No exact match, return the list of possible matches.
+          controller.searchAutoComplete.value = [];
+
+          final matches = <String>[];
+
+          switch (controller.groupingBy.value) {
+            case MemoryController.groupByLibrary:
+              for (final reference in controller.groupByTreeTable.dataRoots) {
+                if (reference.isLibrary) {
+                  final LibraryReference libraryReference = reference;
+                  final match = matchSearch(libraryReference, searchingValue);
+                  if (match.isNotEmpty) {
+                    matches.add(match);
+                  }
+
+                  // Check the class names in the library
+                  for (final ClassReference classReference
+                      in libraryReference.children) {
+                    final match = matchSearch(classReference, searchingValue);
+                    if (match.isNotEmpty) {
+                      matches.add(match);
+                    }
+                  }
+                }
+              }
+              break;
+            case MemoryController.groupByClass:
+              for (final reference in controller.groupByTreeTable.dataRoots) {
+                if (reference.isClass) {
+                  final ClassReference classReference = reference;
+                  final match = matchSearch(classReference, searchingValue);
+                  if (match.isNotEmpty) {
+                    matches.add(match);
+                  }
+                }
+              }
+              break;
+            case MemoryController.groupByInstance:
+              // TODO(terry): TBD
+              break;
+          }
+
+          // Use top 10 matches:
+          matches.sort();
+          controller.searchAutoComplete.value =
+              matches.sublist(0, min(topMatches, matches.length));
+        }
+      });
+    });
+  }
+
+  String matchSearch(Reference ref, String matchString) {
+    final knownName = ref.name.toLowerCase();
+    if (knownName.startsWith(matchString.toLowerCase())) {
+      return ref.name;
+    }
+    return '';
+  }
+
+  /// This finds and selects an exact match.
+  bool selectItemInTree(String searchingValue) {
+    switch (controller.groupingBy.value) {
+      case MemoryController.groupByLibrary:
+        for (final reference in controller.groupByTreeTable.dataRoots) {
+          if (reference.isLibrary) {
+            final LibraryReference libraryReference = reference;
+            if (libraryReference.name == searchingValue) {
+              controller.selectionNotifier.value = Selection(
+                node: libraryReference,
+                nodeIndex: libraryReference.index,
+                scrollIntoView: true,
+              );
+              controller.searchAutoComplete.value = [];
+              return true;
+            }
+
+            // Check the class names in the library
+            for (final ClassReference classReference
+                in libraryReference.children) {
+              if (classReference.name == searchingValue) {
+                // Class name match.
+                controller.selectionNotifier.value = Selection(
+                  node: classReference,
+                  nodeIndex: classReference.index,
+                  scrollIntoView: true,
+                );
+                controller.searchAutoComplete.value = [];
+                return true;
+              }
+            }
+          }
+        }
+        break;
+      case MemoryController.groupByClass:
+        for (final reference in controller.groupByTreeTable.dataRoots) {
+          if (reference.isClass) {
+            final ClassReference classReference = reference;
+            if (classReference.name == searchingValue) {
+              controller.selectionNotifier.value = Selection(
+                node: classReference,
+                nodeIndex: classReference.index,
+                scrollIntoView: true,
+              );
+              controller.searchAutoComplete.value = [];
+              return true;
+            }
+          }
+        }
+        break;
+      case MemoryController.groupByInstance:
+        // TODO(terry): TBD
+        break;
+    }
+
+    return false;
   }
 
   void setupColumns() {
@@ -735,6 +901,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
       keyFactory: (libRef) => PageStorageKey<String>(libRef.name),
       sortColumn: columns[0],
       sortDirection: SortDirection.ascending,
+      selectionNotifier: controller.selectionNotifier,
     );
 
     return controller.groupByTreeTable;
