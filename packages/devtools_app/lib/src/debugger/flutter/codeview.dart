@@ -173,7 +173,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       if (animate) {
         verticalController.animateTo(
           scrollPosition,
-          duration: rapidDuration,
+          duration: longDuration,
           curve: defaultCurve,
         );
       } else {
