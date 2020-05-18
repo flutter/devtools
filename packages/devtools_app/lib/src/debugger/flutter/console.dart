@@ -58,24 +58,26 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
 
   @override
   Widget build(BuildContext context) {
-    return Console(
-      lines: _lines,
-      controls: [
-        // TODO(ditman) Extract these IconButtons to common_widgets.dart
-        IconButton(
-          icon: const Icon(Icons.content_copy, size: actionsIconSize),
-          onPressed:
-              _lines.isEmpty ? null : () => copyToClipboard(_lines, context),
-          tooltip: 'Copy to clipboard',
-          key: DebuggerConsole.copyToClipboardButtonKey,
-        ),
-        IconButton(
-          icon: const Icon(Icons.delete, size: actionsIconSize),
-          onPressed: _lines.isEmpty ? null : widget.controller.clearStdio,
-          tooltip: 'Clear console output',
-          key: DebuggerConsole.clearStdioButtonKey,
-        ),
-      ],
+    return Material(
+      child: Console(
+        lines: _lines,
+        controls: [
+          // TODO(ditman) Extract these IconButtons to common_widgets.dart
+          IconButton(
+            icon: const Icon(Icons.content_copy, size: actionsIconSize),
+            onPressed:
+                _lines.isEmpty ? null : () => copyToClipboard(_lines, context),
+            tooltip: 'Copy to clipboard',
+            key: DebuggerConsole.copyToClipboardButtonKey,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, size: actionsIconSize),
+            onPressed: _lines.isEmpty ? null : widget.controller.clearStdio,
+            tooltip: 'Clear console output',
+            key: DebuggerConsole.clearStdioButtonKey,
+          ),
+        ],
+      ),
     );
   }
 }
