@@ -20,7 +20,7 @@ import 'debugger_model.dart';
 // help debounce stepping operations).
 
 // Make sure this a checked in with `mute: true`.
-final _log = TimingLogger('debugger', mute: false);
+final _log = TimingLogger('debugger', mute: true);
 
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController

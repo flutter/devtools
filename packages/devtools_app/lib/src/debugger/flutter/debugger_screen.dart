@@ -29,7 +29,7 @@ import 'variables.dart';
 
 // This is currently a dev-time flag as the overall call depth may not be that
 // interesting to users.
-const bool showCallStackCount = true;
+const bool showCallStackCount = false;
 
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
