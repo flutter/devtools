@@ -6,17 +6,19 @@ import 'adb_memory_info.dart';
 
 /// DevTools Plotted and JSON persisted memory information.
 class HeapSample {
-  HeapSample(
-    this.timestamp,
-    this.capacity,
-    this.used,
-    this.external,
-    this.isGC, [
-    this._adbMemoryInfo,
-  ]);
+  HeapSample(this.timestamp,
+      this.rss,
+      this.capacity,
+      this.used,
+      this.external,
+      this.isGC, [
+        this._adbMemoryInfo,
+      ]);
 
-  factory HeapSample.fromJson(Map<String, dynamic> json) => HeapSample(
+  factory HeapSample.fromJson(Map<String, dynamic> json) =>
+      HeapSample(
         json['timestamp'] as int,
+        json['rss'] as int,
         json['capacity'] as int,
         json['used'] as int,
         json['external'] as int,
@@ -27,8 +29,10 @@ class HeapSample {
   /// Version of HeapSample JSON payload.
   static const version = 1;
 
-  Map<String, dynamic> toJson() => <String, dynamic>{
+  Map<String, dynamic> toJson() =>
+      <String, dynamic>{
         'timestamp': timestamp,
+        'rss': rss,
         'capacity': capacity,
         'used': used,
         'external': external,
@@ -37,6 +41,8 @@ class HeapSample {
       };
 
   final int timestamp;
+
+  final int rss;
 
   final int capacity;
 
@@ -54,7 +60,7 @@ class HeapSample {
   }
 
   @override
-  String toString() => '[HeapSample timestamp: $timestamp, '
+  String toString() => '[HeapSample timestamp: $timestamp, rss: $rss, '
       'capacity: $capacity, used: $used, external: $external, '
       'isGC: $isGC, AdbMemoryInfo: $adbMemoryInfo]';
 }

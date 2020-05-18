@@ -766,6 +766,7 @@ class MemoryTimeline {
   static const capcityValueKey = 'capacityValue';
   static const usedValueKey = 'usedValue';
   static const externalValueKey = 'externalValue';
+  static const rssValueKey = 'rssValue';
 
   /// Keys used in a map to store all the MPEngineChart Entries we construct to be plotted,
   /// ADB memory info.
@@ -876,11 +877,15 @@ class MemoryTimeline {
       final used = sample.used.toDouble();
       final external = sample.external.toDouble();
 
+      // TOOD(terry): Need to plot.
+      final rss = (sample.rss ?? 0).toDouble();
+
       final extEntry = Entry(x: timestamp, y: external, icon: dataPointImage);
       final usedEntry =
           Entry(x: timestamp, y: used + external, icon: dataPointImage);
       final capacityEntry =
           Entry(x: timestamp, y: capacity, icon: dataPointImage);
+      final rssEntry = Entry(x: timestamp, y: rss, icon: dataPointImage);
 
       // Engine memory values (ADB Android):
       final javaHeap = sample.adbMemoryInfo.javaHeap.toDouble();
@@ -937,6 +942,7 @@ class MemoryTimeline {
         capcityValueKey: capacityEntry,
         usedValueKey: usedEntry,
         externalValueKey: extEntry,
+        rssValueKey: rssEntry,
         javaHeapValueKey: javaHeapEntry,
         nativeHeapValueKey: nativeHeapEntry,
         codeValueKey: codeEntry,
@@ -1057,6 +1063,7 @@ class MemoryLog {
       pseudoData = true;
       liveData.add(HeapSample(
         DateTime.now().microsecondsSinceEpoch,
+        0,
         0,
         0,
         0,

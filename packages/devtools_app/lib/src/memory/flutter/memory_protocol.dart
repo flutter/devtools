@@ -30,6 +30,9 @@ class MemoryTracker {
   final List<HeapSample> samples = <HeapSample>[];
   final Map<String, MemoryUsage> isolateHeaps = <String, MemoryUsage>{};
 
+  /// Polled VM current RSS.
+  int processRss;
+
   /// Polled adb dumpsys meminfo values.
   AdbMemoryInfo adbMemoryInfo;
 
@@ -103,12 +106,15 @@ class MemoryTracker {
       adbMemoryInfo = AdbMemoryInfo.empty();
     }
 
-    _update(isolateMemory);
+    // Polls for current RSS size.
+    _update(await service.getVM(), isolateMemory);
 
     _pollingTimer = Timer(_updateDelay, _pollMemory);
   }
 
-  void _update(Map<IsolateRef, MemoryUsage> isolateMemory) {
+  void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
+    processRss = vm.json['_currentRSS'];
+
     isolateHeaps.clear();
 
     for (IsolateRef isolateRef in isolateMemory.keys) {
@@ -145,6 +151,7 @@ class MemoryTracker {
 
     final HeapSample sample = HeapSample(
       time,
+      processRss,
       capacity + external,
       used,
       external,

@@ -231,6 +231,7 @@ class MemoryProfile {
     final time = DateTime.now().millisecondsSinceEpoch;
     final sample = HeapSample(
       time,
+      processRss,
       capacity,
       used,
       external,

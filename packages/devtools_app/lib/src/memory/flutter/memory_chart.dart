@@ -751,6 +751,7 @@ class SelectedDataPoint extends LineChartMarker {
     final num heapCapacity = values.capacity.toDouble();
     final num heapUsed = values.used.toDouble();
     final num external = values.external.toDouble();
+    final num rss = values.rss.toDouble();
     final bool isGced = values.isGC;
 
     // Alpha filled stacked:
@@ -785,6 +786,7 @@ class SelectedDataPoint extends LineChartMarker {
             '${_formatter.getFormattedValue1(heapCapacity)}\n'
             '${_formatter.getFormattedValue1(heapUsed)}\n'
             '${_formatter.getFormattedValue1(external)}\n'
+            '${_formatter.getFormattedValue1(rss)}\n'
             '$isGced',
             textColor,
             fontSize,
@@ -871,6 +873,7 @@ class SelectedDataPoint extends LineChartMarker {
       'Capacity\n'
       'Used\n'
       'External\n'
+      'RSS\n'
       'GC';
 
   final int _titlesDartVmLines = _titlesDartVm.split('\n').length;
