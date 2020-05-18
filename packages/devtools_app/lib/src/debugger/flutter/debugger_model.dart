@@ -7,6 +7,7 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
 import '../../trees.dart';
+import '../../utils.dart';
 
 /// A tuple of a script and an optional location.
 class ScriptLocation {
@@ -204,12 +205,13 @@ class Variable extends TreeNode<Variable> {
     final value = this.value;
 
     String valueStr;
+
     if (value is InstanceRef) {
       if (value.valueAsString == null) {
         valueStr = value.classRef.name;
       } else {
         valueStr = value.valueAsString;
-        if (value.valueAsStringIsTruncated) {
+        if (value.valueAsStringIsTruncated == true) {
           valueStr += '...';
         }
         if (value.kind == InstanceKind.kString) {
@@ -218,12 +220,12 @@ class Variable extends TreeNode<Variable> {
       }
 
       if (value.kind == InstanceKind.kList) {
-        valueStr = '[${value.length}] $valueStr';
+        valueStr = '$valueStr (${_itemCount(value.length)})';
       } else if (value.kind == InstanceKind.kMap) {
-        valueStr = '{ ${value.length} } $valueStr';
+        valueStr = '$valueStr (${_itemCount(value.length)})';
       } else if (value.kind != null && value.kind.endsWith('List')) {
         // Uint8List, Uint16List, ...
-        valueStr = '[${value.length}] $valueStr';
+        valueStr = '$valueStr (${_itemCount(value.length)})';
       }
     } else if (value is Sentinel) {
       valueStr = value.valueAsString;
@@ -234,6 +236,10 @@ class Variable extends TreeNode<Variable> {
     }
 
     return valueStr;
+  }
+
+  String _itemCount(int count) {
+    return '${nf.format(count)} ${pluralize('item', count)}';
   }
 
   @override
