@@ -25,7 +25,8 @@ OverlayEntry createAutoCompleteOverlay(MemoryController controller) {
       ListTile(
         title: Text(matchedName),
         onTap: () {
-          print(matchedName);
+          controller.selectTheSearch = true;
+          controller.search = matchedName;
         },
       ),
     );

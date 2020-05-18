@@ -348,7 +348,8 @@ class MemoryController extends DisposableController
 
   final searchAutoComplete = ValueNotifier<List<String>>([]);
 
-  ValueListenable<List<String>> get searchAutoCompleteNotifier => searchAutoComplete;
+  ValueListenable<List<String>> get searchAutoCompleteNotifier =>
+      searchAutoComplete;
 
   String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 

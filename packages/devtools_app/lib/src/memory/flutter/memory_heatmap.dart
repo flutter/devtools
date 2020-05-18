@@ -309,7 +309,6 @@ class FlameChartRenderObject extends RenderBox {
         if (childMatches.isNotEmpty) {
           matches.addAll(childMatches);
         }
-        ;
       }
     }
 
