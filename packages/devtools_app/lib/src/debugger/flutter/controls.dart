@@ -25,8 +25,7 @@ class DebuggingControls extends StatelessWidget {
         return ValueListenableBuilder(
           valueListenable: controller.resuming,
           builder: (context, resuming, Widget _) {
-            final canStep =
-                isPaused && !resuming && controller.hasFrames.value;
+            final canStep = isPaused && !resuming && controller.hasFrames.value;
 
             return SizedBox(
               height: Theme.of(context).buttonTheme.height,
