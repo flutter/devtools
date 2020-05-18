@@ -651,3 +651,28 @@ class CallbackDwell {
     }
   }
 }
+
+/// A dev time class to help trace DevTools application events.
+class DebugTimingLogger {
+  DebugTimingLogger(this.name, {this.mute});
+
+  final String name;
+  final bool mute;
+
+  Stopwatch _timer;
+
+  void log(String message) {
+    if (mute) return;
+
+    if (_timer != null) {
+      _timer.stop();
+      print('[$name}]   ${_timer.elapsedMilliseconds}ms');
+      _timer.reset();
+    }
+
+    _timer ??= Stopwatch();
+    _timer.start();
+
+    print('[$name] $message');
+  }
+}

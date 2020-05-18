@@ -20,7 +20,7 @@ import 'debugger_model.dart';
 // help debounce stepping operations).
 
 // Make sure this a checked in with `mute: true`.
-final _log = TimingLogger('debugger', mute: true);
+final _log = DebugTimingLogger('debugger', mute: true);
 
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
@@ -44,11 +44,11 @@ class DebuggerController extends DisposableController
 
   ValueListenable<bool> get isPaused => _isPaused;
 
-  final _maybeResuming = ValueNotifier<bool>(false);
+  final _resuming = ValueNotifier<bool>(false);
 
   /// This indicates that we've requested a resume (or step) operation from the
   /// VM, but haven't yet received the 'resumed' isolate event.
-  ValueListenable<bool> get maybeResuming => _maybeResuming;
+  ValueListenable<bool> get resuming => _resuming;
 
   final _hasFrames = ValueNotifier<bool>(false);
 
@@ -220,13 +220,13 @@ class DebuggerController extends DisposableController
 
   Future<Success> resume() {
     _log.log('resume()');
-    _maybeResuming.value = true;
+    _resuming.value = true;
     return _service.resume(isolateRef.id);
   }
 
   Future<Success> stepOver() {
     _log.log('stepOver()');
-    _maybeResuming.value = true;
+    _resuming.value = true;
 
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
     final useAsyncStepping = _lastEvent?.atAsyncSuspension ?? false;
@@ -241,13 +241,13 @@ class DebuggerController extends DisposableController
   }
 
   Future<Success> stepIn() {
-    _maybeResuming.value = true;
+    _resuming.value = true;
 
     return _service.resume(isolateRef.id, step: StepOption.kInto);
   }
 
   Future<Success> stepOut() {
-    _maybeResuming.value = true;
+    _resuming.value = true;
 
     return _service.resume(isolateRef.id, step: StepOption.kOut);
   }
@@ -280,7 +280,7 @@ class DebuggerController extends DisposableController
 
     // Any event we receive here indicates that any resume/step request has been
     // processed.
-    _maybeResuming.value = false;
+    _resuming.value = false;
 
     switch (event.kind) {
       case EventKind.kResume:
@@ -844,30 +844,5 @@ class ScriptCache {
   void clear() {
     _scripts = {};
     _inProgress.clear();
-  }
-}
-
-/// A dev time class to help trace DevTools application events.
-class TimingLogger {
-  TimingLogger(this.name, {this.mute});
-
-  final String name;
-  final bool mute;
-
-  Stopwatch _timer;
-
-  void log(String message) {
-    if (mute) return;
-
-    if (_timer != null) {
-      _timer.stop();
-      print('[$name}]   ${_timer.elapsedMilliseconds}ms');
-      _timer.reset();
-    }
-
-    _timer ??= Stopwatch();
-    _timer.start();
-
-    print('[$name] $message');
   }
 }

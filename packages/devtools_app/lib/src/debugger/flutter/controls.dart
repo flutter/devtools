@@ -23,10 +23,10 @@ class DebuggingControls extends StatelessWidget {
       valueListenable: controller.isPaused,
       builder: (context, isPaused, _) {
         return ValueListenableBuilder(
-          valueListenable: controller.maybeResuming,
-          builder: (context, maybeResuming, Widget _) {
+          valueListenable: controller.resuming,
+          builder: (context, resuming, Widget _) {
             final canStep =
-                isPaused && !maybeResuming && controller.hasFrames.value;
+                isPaused && !resuming && controller.hasFrames.value;
 
             return SizedBox(
               height: Theme.of(context).buttonTheme.height,
@@ -45,7 +45,7 @@ class DebuggingControls extends StatelessWidget {
                           child: DebuggerButton(
                             title: 'Resume',
                             icon: Icons.play_arrow,
-                            onPressed: (isPaused && !maybeResuming)
+                            onPressed: (isPaused && !resuming)
                                 ? controller.resume
                                 : null,
                           ),
