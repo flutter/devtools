@@ -1,10 +1,15 @@
-import '../ui/fake_flutter/fake_flutter.dart';
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+
 import '../ui/theme.dart';
 
 final unimportant = TextStyle(
   color: ThemedColor(Colors.grey.shade500, Colors.grey.shade600),
 );
-const regular = TextStyle(color: defaultForeground);
+const regular = TextStyle();
 final warning = TextStyle(
   color: ThemedColor(Colors.orange.shade900, Colors.orange.shade400),
 );
@@ -28,7 +33,7 @@ final unimportantItalic = unimportant.merge(const TextStyle(
   fontStyle: FontStyle.italic,
 ));
 
-/// Pretty sames for common text styles to make it easier to debug output
+/// Pretty names for common text styles to make it easier to debug output
 /// containing these names.
 final Map<TextStyle, String> debugStyleNames = {
   unimportant: 'grayed',

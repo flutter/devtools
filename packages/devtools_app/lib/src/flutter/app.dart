@@ -37,7 +37,6 @@ import 'theme.dart';
 import 'utils.dart';
 
 const homeRoute = '/';
-const connectRoute = '/connect';
 const snapshotRoute = '/snapshot';
 
 /// Top-level configuration for the app.
@@ -86,7 +85,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   /// Generates routes, separating the path from URL query parameters.
   Route _generateRoute(RouteSettings settings) {
     final uri = Uri.parse(settings.name);
-    final path = uri.path.isEmpty ? connectRoute : uri.path;
+    final path = uri.path.isEmpty ? homeRoute : uri.path;
     final args = settings.arguments;
 
     // Provide the appropriate page route.
@@ -123,22 +122,29 @@ class DevToolsAppState extends State<DevToolsApp> {
   /// The routes that the app exposes.
   Map<String, UrlParametersBuilder> get routes {
     return _routes ??= {
-      homeRoute: (_, params, __) => Initializer(
+      homeRoute: (_, params, __) {
+        if (params['uri']?.isNotEmpty ?? false) {
+          return Initializer(
             url: params['uri'],
             builder: (_) => _providedControllers(
               child: DevToolsScaffold(
+                initialPage: params['page'],
                 tabs: _visibleScreens(),
                 actions: [
-                  HotReloadButton(),
-                  HotRestartButton(),
+                  if (serviceManager.connectedApp.isFlutterAppNow) ...[
+                    HotReloadButton(),
+                    HotRestartButton(),
+                  ],
                   OpenSettingsAction(),
                   OpenAboutAction(),
                 ],
               ),
             ),
-          ),
-      connectRoute: (_, __, ___) =>
-          DevToolsScaffold.withChild(child: ConnectScreenBody()),
+          );
+        } else {
+          return DevToolsScaffold.withChild(child: ConnectScreenBody());
+        }
+      },
       snapshotRoute: (_, __, args) {
         return DevToolsScaffold.withChild(
           child: _providedControllers(
@@ -319,13 +325,6 @@ class OpenSettingsAction extends StatelessWidget {
   }
 }
 
-List<Widget> _header(TextTheme textTheme, String title) {
-  return [
-    Text(title, style: textTheme.headline6),
-    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
-  ];
-}
-
 class DevToolsAboutDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -339,10 +338,10 @@ class DevToolsAboutDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ..._header(textTheme, 'About DevTools'),
+          ...headerInColumn(textTheme, 'About DevTools'),
           _aboutDevTools(context),
           const SizedBox(height: defaultSpacing),
-          ..._header(textTheme, 'Feedback'),
+          ...headerInColumn(textTheme, 'Feedback'),
           Wrap(
             children: [
               const Text('Encountered an issue? Let us know at '),
@@ -396,7 +395,7 @@ class SettingsDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ..._header(Theme.of(context).textTheme, 'Settings'),
+          ...headerInColumn(Theme.of(context).textTheme, 'Settings'),
           InkWell(
             onTap: () {
               preferences.toggleDarkModeTheme(!preferences.darkModeTheme.value);

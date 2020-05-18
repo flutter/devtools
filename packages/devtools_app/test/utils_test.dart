@@ -308,6 +308,11 @@ void main() {
       test('many', () {
         expect(pluralize('cat', 2), 'cats');
       });
+
+      test('irregular plurals', () {
+        expect(pluralize('index', 1, plural: 'indices'), 'index');
+        expect(pluralize('index', 2, plural: 'indices'), 'indices');
+      });
     });
 
     group('safeDivide', () {

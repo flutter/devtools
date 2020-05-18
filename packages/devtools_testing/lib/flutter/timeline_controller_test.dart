@@ -16,8 +16,7 @@ import '../support/flutter_test_environment.dart';
 Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
   TimelineController timelineController;
   env.afterNewSetup = () async {
-    timelineController = TimelineController();
-    await timelineController.timelineService.startTimeline();
+    timelineController = TimelineController()..data = TimelineData();
   };
 
   group('TimelineController', () {
@@ -123,14 +122,6 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
         equals(1),
       );
       await env.tearDownEnvironment();
-    });
-
-    test('recording', () async {
-      expect(timelineController.recording.value, isFalse);
-      await timelineController.startRecording();
-      expect(timelineController.recording.value, isTrue);
-      await timelineController.stopRecording();
-      expect(timelineController.recording.value, isFalse);
     });
   });
 }

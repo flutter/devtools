@@ -9,14 +9,14 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/timeline/flutter/event_details.dart';
 import 'package:devtools_app/src/timeline/flutter/flutter_frames_chart.dart';
-import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
+import 'package:devtools_app/src/timeline/flutter/timeline_flame_chart.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_screen.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
-import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:devtools_testing/support/flutter/timeline_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../support/mocks.dart';
 import 'wrappers.dart';
@@ -26,6 +26,21 @@ void main() {
   TimelineController controller;
   FakeServiceManager fakeServiceManager;
 
+  void _setUpServiceManagerForTimeline(Map<String, dynamic> timelineJson) {
+    fakeServiceManager = FakeServiceManager(
+      useFakeService: true,
+      timelineData: vm_service.Timeline.parse(timelineJson),
+    );
+    when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+    when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
+        .thenReturn(false);
+    when(fakeServiceManager.connectedApp.isDartWebApp)
+        .thenAnswer((_) => Future.value(false));
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+  }
+
   Future<void> pumpTimelineScreen(
     WidgetTester tester, {
     TimelineController timelineController,
@@ -34,25 +49,9 @@ void main() {
       const TimelineScreenBody(),
       timeline: controller = timelineController ?? TimelineController(),
     ));
+    // Delay to ensure the timeline has started.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(TimelineScreenBody), findsOneWidget);
-  }
-
-  Future<void> pumpTimelineWithData(WidgetTester tester) async {
-    final data = TimelineData()
-      ..timelineEvents.addAll([goldenUiTimelineEvent])
-      ..traceEvents.addAll(
-          goldenUiTraceEvents.map((eventWrapper) => eventWrapper.event.json))
-      ..time.start = goldenUiTimelineEvent.time.start
-      ..time.end = goldenUiTimelineEvent.time.end;
-    data.initializeEventGroups();
-    final controllerWithData = TimelineController()
-      ..allTraceEvents.addAll(goldenUiTraceEvents)
-      ..data = data
-      ..selectFrame(testFrame1);
-    await pumpTimelineScreen(
-      tester,
-      timelineController: controllerWithData,
-    );
   }
 
   const windowSize = Size(2050.0, 1000.0);
@@ -60,15 +59,7 @@ void main() {
   group('TimelineScreen', () {
     setUp(() async {
       await ensureInspectorDependencies();
-      fakeServiceManager = FakeServiceManager(useFakeService: true);
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-      when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
-          .thenReturn(false);
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-      when(serviceManager.connectedApp.isDartWebApp)
-          .thenAnswer((_) => Future.value(false));
+      _setUpServiceManagerForTimeline(testTimelineJson);
       screen = const TimelineScreen();
     });
 
@@ -91,15 +82,13 @@ void main() {
     testWidgetsWithWindowSize('builds initial content', windowSize,
         (WidgetTester tester) async {
       await pumpTimelineScreen(tester);
+      await tester.pumpAndSettle();
       expect(find.byType(FlutterFramesChart), findsOneWidget);
-      expect(find.byKey(TimelineScreen.flameChartSectionKey), findsOneWidget);
+      expect(find.byType(TimelineFlameChart), findsOneWidget);
+      expect(find.byKey(TimelineScreen.emptyTimelineKey), findsNothing);
       expect(find.byType(EventDetails), findsOneWidget);
-      expect(find.byKey(TimelineScreen.recordButtonKey), findsOneWidget);
-      expect(find.byKey(TimelineScreen.stopRecordingButtonKey), findsOneWidget);
-      expect(
-        find.byKey(TimelineScreen.recordingInstructionsKey),
-        findsOneWidget,
-      );
+      expect(find.byKey(TimelineScreen.refreshButtonKey), findsOneWidget);
+      expect(find.byKey(TimelineScreen.clearButtonKey), findsOneWidget);
 
       // Verify the state of the splitter.
       final splitFinder = find.byType(Split);
@@ -108,78 +97,36 @@ void main() {
       expect(splitter.initialFractions[0], equals(0.6));
     });
 
-    testWidgetsWithWindowSize('starts and stops recording', windowSize,
-        (WidgetTester tester) async {
-      await pumpTimelineScreen(tester);
-
-      // Verify initial state.
-      expect(
-        find.byKey(TimelineScreen.recordingInstructionsKey),
-        findsOneWidget,
-      );
-      expect(find.byKey(TimelineScreen.recordingStatusKey), findsNothing);
-      expect(controller.recording.value, isFalse);
-
-      // Start recording.
-      await tester.tap(find.byKey(TimelineScreen.recordButtonKey));
-      await tester.pump();
-      expect(find.byKey(TimelineScreen.recordingInstructionsKey), findsNothing);
-      expect(find.byKey(TimelineScreen.recordingStatusKey), findsOneWidget);
-      expect(controller.recording.value, isTrue);
-
-      // Stop recording.
-      await tester.tap(find.byKey(TimelineScreen.stopRecordingButtonKey));
-      await tester.pump();
-      expect(find.byKey(TimelineScreen.recordingInstructionsKey), findsNothing);
-      expect(find.byKey(TimelineScreen.recordingStatusKey), findsNothing);
-      expect(
-        find.byKey(TimelineScreen.emptyTimelineRecordingKey),
-        findsOneWidget,
-      );
-      expect(controller.recording.value, isFalse);
-    });
-
     testWidgetsWithWindowSize('clears timeline on clear', windowSize,
         (WidgetTester tester) async {
-      await pumpTimelineWithData(tester);
+      await pumpTimelineScreen(tester);
+      await tester.pumpAndSettle();
       expect(controller.allTraceEvents, isNotEmpty);
       expect(find.byType(FlutterFramesChart), findsOneWidget);
-      expect(find.byKey(TimelineScreen.flameChartSectionKey), findsOneWidget);
-      expect(find.byKey(TimelineScreen.recordingInstructionsKey), findsNothing);
+      expect(find.byType(TimelineFlameChart), findsOneWidget);
+      expect(find.byKey(TimelineScreen.emptyTimelineKey), findsNothing);
       expect(find.byType(EventDetails), findsOneWidget);
 
       await tester.tap(find.byKey(TimelineScreen.clearButtonKey));
       await tester.pump();
       expect(controller.allTraceEvents, isEmpty);
       expect(find.byType(FlutterFramesChart), findsOneWidget);
-      expect(find.byKey(TimelineScreen.flameChartSectionKey), findsOneWidget);
-      expect(
-          find.byKey(TimelineScreen.recordingInstructionsKey), findsOneWidget);
+      expect(find.byType(TimelineFlameChart), findsNothing);
+      expect(find.byKey(TimelineScreen.emptyTimelineKey), findsOneWidget);
       expect(find.byType(EventDetails), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize('records empty timeline', windowSize,
+    testWidgetsWithWindowSize('refreshes with empty timeline', windowSize,
         (WidgetTester tester) async {
+      _setUpServiceManagerForTimeline({});
       await pumpTimelineScreen(tester);
-      expect(
-          find.byKey(TimelineScreen.recordingInstructionsKey), findsOneWidget);
-      expect(find.byKey(TimelineScreen.recordingStatusKey), findsNothing);
-      expect(
-        find.byKey(TimelineScreen.emptyTimelineRecordingKey),
-        findsNothing,
-      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(TimelineScreen.emptyTimelineKey), findsOneWidget);
 
-      // Record empty timeline.
-      await tester.tap(find.byKey(TimelineScreen.recordButtonKey));
+      // Refresh with empty timeline.
+      await tester.tap(find.byKey(TimelineScreen.refreshButtonKey));
       await tester.pump();
-      await tester.tap(find.byKey(TimelineScreen.stopRecordingButtonKey));
-      await tester.pump();
-      expect(find.byKey(TimelineScreen.recordingInstructionsKey), findsNothing);
-      expect(find.byKey(TimelineScreen.recordingStatusKey), findsNothing);
-      expect(
-        find.byKey(TimelineScreen.emptyTimelineRecordingKey),
-        findsOneWidget,
-      );
+      expect(find.byKey(TimelineScreen.emptyTimelineKey), findsOneWidget);
     });
   });
 }

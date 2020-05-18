@@ -48,7 +48,6 @@ void main() {
     test('creates one new frame per id', () async {
       await processor.processTimeline(
         [frameStartEvent, frameEndEvent],
-        frameStartEvent.event.timestampMicros,
         resetAfterProcessing: false,
       );
       expect(processor.pendingFrames.length, equals(1));
@@ -56,10 +55,7 @@ void main() {
     });
 
     test('duration trace events form timeline event tree', () async {
-      await processor.processTimeline(
-        goldenUiTraceEvents,
-        vsyncTrace.event.timestampMicros,
-      );
+      await processor.processTimeline(goldenUiTraceEvents);
 
       final processedUiEvent =
           processor.timelineController.data.timelineEvents.first;
@@ -100,15 +96,12 @@ void main() {
     });
 
     test('frame completed', () async {
-      await processor.processTimeline(
-        [
-          frameStartEvent,
-          ...goldenUiTraceEvents,
-          ...goldenRasterTraceEvents,
-          frameEndEvent,
-        ],
-        vsyncTrace.event.timestampMicros,
-      );
+      await processor.processTimeline([
+        frameStartEvent,
+        ...goldenUiTraceEvents,
+        ...goldenRasterTraceEvents,
+        frameEndEvent,
+      ]);
       expect(processor.pendingFrames.length, equals(0));
       expect(processor.timelineController.data.frames.length, equals(1));
 
@@ -129,10 +122,7 @@ void main() {
       var traceEvents = List.of(goldenUiTraceEvents);
       traceEvents.insert(1, goldenUiTraceEvents[1]);
 
-      await processor.processTimeline(
-        traceEvents,
-        vsyncTrace.event.timestampMicros,
-      );
+      await processor.processTimeline(traceEvents);
       expect(
           processor.timelineController.data.timelineEvents.length, equals(1));
       expect(
@@ -153,10 +143,7 @@ void main() {
       traceEvents.insert(goldenUiTraceEvents.length - 2,
           goldenUiTraceEvents[goldenUiTraceEvents.length - 2]);
 
-      await processor.processTimeline(
-        traceEvents,
-        vsyncTrace.event.timestampMicros,
-      );
+      await processor.processTimeline(traceEvents);
       expect(
           processor.timelineController.data.timelineEvents.length, equals(1));
       expect(
@@ -203,10 +190,7 @@ void main() {
       traceEvents.insert(2, goldenUiTraceEvents[0]);
       traceEvents.insert(3, goldenUiTraceEvents[1]);
 
-      await processor.processTimeline(
-        traceEvents,
-        vsyncTrace.event.timestampMicros,
-      );
+      await processor.processTimeline(traceEvents);
       expect(
         processor.currentDurationEventNodes[TimelineEventType.ui.index],
         isNull,
@@ -223,7 +207,7 @@ void main() {
         processor.timelineController.data.timelineEvents,
         isEmpty,
       );
-      await processor.processTimeline(traceEvents, 0);
+      await processor.processTimeline(traceEvents);
       expect(
         processor.timelineController.data.timelineEvents.length,
         equals(4),
@@ -251,7 +235,7 @@ void main() {
         processor.timelineController.data.timelineEvents,
         isEmpty,
       );
-      await processor.processTimeline(durationEventsWithDuplicateTraces, 0);
+      await processor.processTimeline(durationEventsWithDuplicateTraces);
       // If the processor is not handling duplicates properly, this value would
       // be 0.
       expect(
@@ -300,7 +284,7 @@ class MockTimelineController extends Mock implements TimelineController {
   }
 
   @override
-  Future<void> clearData() async {
+  Future<void> clearData({bool clearVmTimeline = true}) async {
     data.clear();
   }
 }

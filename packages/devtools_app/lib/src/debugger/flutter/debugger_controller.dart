@@ -6,11 +6,14 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
+import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
 import '../../config_specific/logger/logger.dart';
+import '../../core/message_bus.dart';
 import '../../globals.dart';
+import '../../utils.dart';
 import 'debugger_model.dart';
 
 // TODO(devoncarew): Add some delayed resume value notifiers (to be used to
@@ -21,16 +24,18 @@ class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
   DebuggerController() {
     switchToIsolate(serviceManager.isolateManager.selectedIsolate);
+
     autoDispose(serviceManager.isolateManager.onSelectedIsolateChanged
         .listen(switchToIsolate));
-    autoDispose(_service.onDebugEvent.listen(_handleIsolateEvent));
+    autoDispose(_service.onDebugEvent.listen(_handleDebugEvent));
+    autoDispose(_service.onIsolateEvent.listen(_handleIsolateEvent));
     autoDispose(_service.onStdoutEvent.listen(_handleStdoutEvent));
     autoDispose(_service.onStderrEvent.listen(_handleStderrEvent));
   }
 
   VmService get _service => serviceManager.service;
 
-  final _scriptCache = <String, Script>{};
+  final ScriptCache _scriptCache = ScriptCache();
 
   final _isPaused = ValueNotifier<bool>(false);
 
@@ -72,6 +77,10 @@ class DebuggerController extends DisposableController
   ValueListenable<StackFrameAndSourcePosition> get selectedStackFrame =>
       _selectedStackFrame;
 
+  final _variables = ValueNotifier<List<Variable>>([]);
+
+  ValueListenable<List<Variable>> get variables => _variables;
+
   final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
 
   /// Return the sorted list of ScriptRefs active in the current isolate.
@@ -112,6 +121,11 @@ class DebuggerController extends DisposableController
     _librariesVisible.value = !_librariesVisible.value;
   }
 
+  /// Make the 'Libraries' view on the right-hand side of the screen visible.
+  void openLibrariesView() {
+    _librariesVisible.value = true;
+  }
+
   final _stdio = ValueNotifier<List<String>>([]);
 
   /// Return the stdout and stderr emitted from the application.
@@ -121,8 +135,10 @@ class DebuggerController extends DisposableController
 
   IsolateRef isolateRef;
 
-  InstanceRef get reportedException => _reportedException;
-  InstanceRef _reportedException;
+  /// Clears the contents of stdio.
+  void clearStdio() {
+    _stdio.value = [];
+  }
 
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {
@@ -172,8 +188,7 @@ class DebuggerController extends DisposableController
     if (isolate.pauseEvent != null &&
         isolate.pauseEvent.kind != EventKind.kResume) {
       _lastEvent = isolate.pauseEvent;
-      _reportedException = isolate.pauseEvent.exception;
-      await _pause(true);
+      await _pause(true, pauseEvent: isolate.pauseEvent);
     }
 
     _breakpoints.value = isolate.breakpoints;
@@ -230,8 +245,8 @@ class DebuggerController extends DisposableController
     _exceptionPauseMode.value = mode;
   }
 
-  void _handleIsolateEvent(Event event) async {
-    if (event.isolate.id != isolateRef.id) return;
+  void _handleDebugEvent(Event event) async {
+    if (event.isolate.id != isolateRef?.id) return;
 
     _hasFrames.value = event.topFrame != null;
     _lastEvent = event;
@@ -239,7 +254,6 @@ class DebuggerController extends DisposableController
     switch (event.kind) {
       case EventKind.kResume:
         await _pause(false);
-        _reportedException = null;
         break;
       case EventKind.kPauseStart:
       case EventKind.kPauseExit:
@@ -247,8 +261,7 @@ class DebuggerController extends DisposableController
       case EventKind.kPauseInterrupted:
       case EventKind.kPauseException:
       case EventKind.kPausePostRequest:
-        _reportedException = event.exception;
-        await _pause(true);
+        await _pause(true, pauseEvent: event);
         break;
       // TODO(djshuckerow): switch the _breakpoints notifier to a 'ListNotifier'
       // that knows how to notify when performing a list edit operation.
@@ -286,16 +299,33 @@ class DebuggerController extends DisposableController
 
         break;
       case EventKind.kBreakpointRemoved:
+        final breakpoint = event.breakpoint;
+
+        // Update _selectedBreakpoint if necessary.
+        if (_selectedBreakpoint.value?.breakpoint == breakpoint) {
+          _selectedBreakpoint.value = null;
+        }
+
         _breakpoints.value = [
           for (var b in _breakpoints.value)
-            if (b != event.breakpoint) b
+            if (b != breakpoint) b
         ];
 
         _breakpointsWithLocation.value = [
           for (var b in _breakpointsWithLocation.value)
-            if (b.breakpoint != event.breakpoint) b
+            if (b.breakpoint != breakpoint) b
         ];
 
+        break;
+    }
+  }
+
+  void _handleIsolateEvent(Event event) {
+    if (event.isolate.id != isolateRef?.id) return;
+
+    switch (event.kind) {
+      case EventKind.kIsolateReload:
+        _updateAfterIsolateReload(event);
         break;
     }
   }
@@ -312,11 +342,134 @@ class DebuggerController extends DisposableController
     appendStdio(text);
   }
 
-  Future<void> _pause(bool pause) async {
-    _isPaused.value = pause;
+  Future<List<ScriptRef>> _retrieveAndSortScripts(IsolateRef ref) async {
+    final scriptList = await _service.getScripts(isolateRef.id);
+    // We filter out non-unique ScriptRefs here (dart-lang/sdk/issues/41661).
+    final scriptRefs = Set.of(scriptList.scripts).toList();
+    scriptRefs.sort((a, b) {
+      // We sort uppercase so that items like dart:foo sort before items like
+      // dart:_foo.
+      return a.uri.toUpperCase().compareTo(b.uri.toUpperCase());
+    });
+    return scriptRefs;
+  }
 
-    final stack = pause ? await _service.getStack(isolateRef.id) : null;
-    final frames = _framesForCallStack(stack);
+  void _updateAfterIsolateReload(Event reloadEvent) async {
+    // Generally this has the value 'success'; we update our data in any case.
+    // ignore: unused_local_variable
+    final status = reloadEvent.status;
+
+    // Refresh the list of scripts.
+    final scriptRefs = await _retrieveAndSortScripts(isolateRef);
+    for (var scriptRef in scriptRefs) {
+      _uriToScriptMap[scriptRef.uri] = scriptRef;
+    }
+
+    final removedScripts =
+        Set.of(_sortedScripts.value).difference(Set.of(scriptRefs));
+    final addedScripts =
+        Set.of(scriptRefs).difference(Set.of(_sortedScripts.value));
+
+    _sortedScripts.value = scriptRefs;
+
+    // TODO(devoncarew): Show a message in the logging view.
+
+    // Show a toast.
+    final count = removedScripts.length + addedScripts.length;
+    messageBus.addEvent(BusEvent('toast',
+        data: '${nf.format(count)} ${pluralize('script', count)} updated.'));
+
+    // Update breakpoints.
+    _updateBreakpointsAfterReload(removedScripts, addedScripts);
+
+    // Redirect the current editor screen if necessary.
+    if (removedScripts.contains(currentScriptRef.value)) {
+      final uri = currentScriptRef.value.uri;
+      final newScriptRef = addedScripts
+          .firstWhere((script) => script.uri == uri, orElse: () => null);
+
+      if (newScriptRef != null) {
+        // Display the script location.
+        _populateScriptAndShowLocation(newScriptRef);
+      }
+    }
+
+    // TODO(devoncarew): Invalidate the list of classes?
+  }
+
+  /// Jump to the given script.
+  ///
+  /// This method ensures that the source for the script is populated in our
+  /// cache, in order to reduce flashing in the editor view.
+  void _populateScriptAndShowLocation(ScriptRef scriptRef) {
+    getScript(scriptRef).then((script) {
+      showScriptLocation(ScriptLocation(scriptRef));
+    });
+  }
+
+  void _updateBreakpointsAfterReload(
+    Set<ScriptRef> removedScripts,
+    Set<ScriptRef> addedScripts,
+  ) {
+    // TODO(devoncarew): We need to coordinate this with other debugger clients
+    // as well as pause before re-setting the breakpoints.
+
+    final breakpointsToRemove = <BreakpointAndSourcePosition>[];
+
+    // Find all breakpoints set in files where we have newer versions of those
+    // files.
+    for (final scriptRef in removedScripts) {
+      for (final bp in breakpointsWithLocation.value) {
+        if (bp.scriptRef == scriptRef) {
+          breakpointsToRemove.add(bp);
+        }
+      }
+    }
+
+    // Remove the breakpoints.
+    for (final bp in breakpointsToRemove) {
+      removeBreakpoint(bp.breakpoint);
+    }
+
+    // Add them back to the newer versions of those scripts.
+    for (final scriptRef in addedScripts) {
+      for (final bp in breakpointsToRemove) {
+        if (scriptRef.uri == bp.scriptUri) {
+          addBreakpoint(scriptRef.id, bp.line);
+        }
+      }
+    }
+  }
+
+  Future<void> _pause(bool paused, {Event pauseEvent}) async {
+    _isPaused.value = paused;
+
+    // Perform an early exit if we're not paused.
+    if (!paused) {
+      _stackFramesWithLocation.value = [];
+      selectStackFrame(null);
+      return;
+    }
+
+    // First, notify based on the single 'pauseEvent.topFrame' frame.
+    if (pauseEvent?.topFrame != null) {
+      final tempFrames = _framesForCallStack(
+        [pauseEvent.topFrame],
+        reportedException: pauseEvent?.exception,
+      );
+      _stackFramesWithLocation.value = [
+        await _createStackFrameWithLocation(tempFrames.first),
+      ];
+      selectStackFrame(_stackFramesWithLocation.value.first);
+    }
+
+    // Then, issue an asynchronous request to populate the frame information.
+    final stack = await _service.getStack(isolateRef.id);
+    final frames = _framesForCallStack(
+      stack.frames,
+      asyncCausalFrames: stack.asyncCausalFrames,
+      reportedException: pauseEvent?.exception,
+    );
 
     _stackFramesWithLocation.value =
         await Future.wait(frames.map(_createStackFrameWithLocation));
@@ -330,7 +483,9 @@ class DebuggerController extends DisposableController
   void _clearCaches() {
     _scriptCache.clear();
     _lastEvent = null;
-    _reportedException = null;
+    _breakPositionsMap.clear();
+    _stdio.value = [];
+    _uriToScriptMap.clear();
   }
 
   /// Get the populated [Obj] object, given an [ObjRef].
@@ -341,29 +496,16 @@ class DebuggerController extends DisposableController
   }
 
   /// Return a cached [Script] for the given [ScriptRef], returning null
-  /// if there is no cahced [Script].
+  /// if there is no cached [Script].
   Script getScriptCached(ScriptRef scriptRef) {
-    // Check to see if this ScriptRef is really a Script.
-    if (scriptRef is Script) {
-      if (_scriptCache[scriptRef.id] == null) {
-        _scriptCache[scriptRef.id] = scriptRef;
-      }
-
-      return scriptRef;
-    }
-
-    return _scriptCache[scriptRef?.id];
+    return _scriptCache.getScriptCached(scriptRef);
   }
 
-  /// Retrieve the [Script] for the given [ScritpRef].
+  /// Retrieve the [Script] for the given [ScriptRef].
   ///
   /// This caches the script lookup for future invocations.
-  Future<Script> getScript(ScriptRef scriptRef) async {
-    if (!_scriptCache.containsKey(scriptRef.id)) {
-      _scriptCache[scriptRef.id] =
-          await _service.getObject(isolateRef.id, scriptRef.id);
-    }
-    return _scriptCache[scriptRef.id];
+  Future<Script> getScript(ScriptRef scriptRef) {
+    return _scriptCache.getScript(_service, isolateRef, scriptRef);
   }
 
   /// Return the [ScriptRef] at the given [uri].
@@ -372,14 +514,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    final scriptList = await _service.getScripts(isolateRef.id);
-    // We filter out non-unique ScriptRefs here (dart-lang/sdk/issues/41661).
-    final scriptRefs = Set.of(scriptList.scripts).toList();
-    scriptRefs.sort((a, b) {
-      // We sort uppercase so that items like dart:foo sort before items like
-      // dart:_foo.
-      return a.uri.toUpperCase().compareTo(b.uri.toUpperCase());
-    });
+    final scriptRefs = await _retrieveAndSortScripts(isolateRef);
     _sortedScripts.value = scriptRefs;
 
     try {
@@ -406,7 +541,8 @@ class DebuggerController extends DisposableController
       return ref.uri == isolate.rootLib.uri;
     }, orElse: () => null);
 
-    showScriptLocation(ScriptLocation(mainScriptRef));
+    // Display the script location.
+    _populateScriptAndShowLocation(mainScriptRef);
   }
 
   SourcePosition calculatePosition(Script script, int tokenPos) {
@@ -462,19 +598,113 @@ class DebuggerController extends DisposableController
   void selectStackFrame(StackFrameAndSourcePosition frame) {
     _selectedStackFrame.value = frame;
 
+    if (frame != null) {
+      _variables.value = _createVariablesForFrame(frame.frame);
+    } else {
+      _variables.value = [];
+    }
+
     if (frame?.scriptRef != null) {
       showScriptLocation(
           ScriptLocation(frame.scriptRef, location: frame.position));
     }
   }
 
-  List<Frame> _framesForCallStack(Stack stack) {
-    if (stack == null) return [];
+  List<Variable> _createVariablesForFrame(Frame frame) {
+    final variables = frame.vars.map((v) => Variable.create(v)).toList();
+    variables.forEach(buildVariablesTree);
+    return variables;
+  }
 
-    List<Frame> frames = stack.asyncCausalFrames ?? stack.frames;
+  /// Builds the tree representation for a [Variable] object by querying data,
+  /// creating child Variable objects, and assigning parent-child relationships.
+  ///
+  /// We call this method as we expand variables in the variable tree, because
+  /// building the tree for all variable data at once is very expensive.
+  Future<void> buildVariablesTree(Variable variable) async {
+    if (!variable.isExpandable || variable.treeInitialized) return;
 
-    // Handle breaking-on-exceptions.
-    if (_reportedException != null && frames.isNotEmpty) {
+    final InstanceRef instanceRef = variable.boundVar.value;
+    try {
+      final dynamic result = await getObject(instanceRef);
+      if (result is Instance) {
+        if (result.associations != null) {
+          variable.addAllChildren(_createVariablesForAssociations(result));
+        } else if (result.elements != null) {
+          variable.addAllChildren(_createVariablesForElements(result));
+        } else if (result.fields != null) {
+          variable.addAllChildren(_createVariablesForFields(result));
+        }
+      }
+    } on SentinelException catch (_) {
+      // Fail gracefully if calling `getObject` throws a SentinelException.
+    }
+    variable.treeInitialized = true;
+  }
+
+  List<Variable> _createVariablesForAssociations(Instance instance) {
+    return instance.associations
+        .map((MapAssociation assoc) {
+          // For string keys, quote the key value.
+          String keyString = assoc.key.valueAsString;
+          // TODO(kenz): for maps where keys are not primitive types, support
+          // expanding the keys as well as the values.
+          if (assoc.key is InstanceRef &&
+              assoc.key.kind == InstanceKind.kString) {
+            keyString = "'$keyString'";
+          }
+          return BoundVariable(
+            name: '[$keyString]',
+            value: assoc.value,
+            scopeStartTokenPos: null,
+            scopeEndTokenPos: null,
+            declarationTokenPos: null,
+          );
+        })
+        .map((bv) => Variable.create(bv))
+        .toList();
+  }
+
+  List<Variable> _createVariablesForElements(Instance instance) {
+    final List<BoundVariable> boundVars = [];
+    for (int i = 0; i < instance.elements.length; i++) {
+      final value = instance.elements[i];
+      boundVars.add(BoundVariable(
+        name: '$i:',
+        value: value,
+        scopeStartTokenPos: null,
+        scopeEndTokenPos: null,
+        declarationTokenPos: null,
+      ));
+    }
+    return boundVars.map((bv) => Variable.create(bv)).toList();
+  }
+
+  List<Variable> _createVariablesForFields(Instance instance) {
+    return instance.fields
+        .map((BoundField field) {
+          return BoundVariable(
+            name: field.decl.name,
+            value: field.value,
+            scopeStartTokenPos: null,
+            scopeEndTokenPos: null,
+            declarationTokenPos: null,
+          );
+        })
+        .map((bv) => Variable.create(bv))
+        .toList();
+  }
+
+  List<Frame> _framesForCallStack(
+    List<Frame> stackFrames, {
+    List<Frame> asyncCausalFrames,
+    InstanceRef reportedException,
+  }) {
+    // Prefer asyncCausalFrames if they exist.
+    List<Frame> frames = asyncCausalFrames ?? stackFrames;
+
+    // Include any reported exception as a variable in the first frame.
+    if (reportedException != null && frames.isNotEmpty) {
       final frame = frames.first;
 
       final newFrame = Frame(
@@ -488,7 +718,7 @@ class DebuggerController extends DisposableController
       newFrame.vars = [
         BoundVariable(
           name: '<exception>',
-          value: _reportedException,
+          value: reportedException,
           scopeStartTokenPos: null,
           scopeEndTokenPos: null,
           declarationTokenPos: null,
@@ -498,6 +728,7 @@ class DebuggerController extends DisposableController
 
       frames = [newFrame, ...frames.sublist(1)];
     }
+
     return frames;
   }
 
@@ -531,5 +762,52 @@ class DebuggerController extends DisposableController
     }
 
     return positions;
+  }
+}
+
+class ScriptCache {
+  ScriptCache();
+
+  Map<String, Script> _scripts = {};
+  final Map<String, Future<Script>> _inProgress = {};
+
+  /// Return a cached [Script] for the given [ScriptRef], returning null
+  /// if there is no cached [Script].
+  Script getScriptCached(ScriptRef scriptRef) {
+    return _scripts[scriptRef?.id];
+  }
+
+  /// Retrieve the [Script] for the given [ScriptRef].
+  ///
+  /// This caches the script lookup for future invocations.
+  Future<Script> getScript(
+      VmService vmService, IsolateRef isolateRef, ScriptRef scriptRef) {
+    if (_scripts.containsKey(scriptRef.id)) {
+      return Future.value(_scripts[scriptRef.id]);
+    }
+
+    if (_inProgress.containsKey(scriptRef.id)) {
+      return _inProgress[scriptRef.id];
+    }
+
+    // We make a copy here as the future could complete after a clear()
+    // operation is performed.
+    final scripts = _scripts;
+
+    final Future<Script> scriptFuture = vmService
+        .getObject(isolateRef.id, scriptRef.id)
+        .then((obj) => obj as Script);
+    _inProgress[scriptRef.id] = scriptFuture;
+
+    unawaited(scriptFuture.then((script) {
+      scripts[scriptRef.id] = script;
+    }));
+
+    return scriptFuture;
+  }
+
+  void clear() {
+    _scripts = {};
+    _inProgress.clear();
   }
 }

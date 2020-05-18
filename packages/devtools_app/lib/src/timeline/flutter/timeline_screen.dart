@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -33,19 +34,11 @@ class TimelineScreen extends Screen {
   const TimelineScreen() : super(id, title: 'Timeline', icon: Octicons.pulse);
 
   @visibleForTesting
+  static const refreshButtonKey = Key('Refresh Button');
+  @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
-  static const flameChartSectionKey = Key('Flame Chart Section');
-  @visibleForTesting
-  static const emptyTimelineRecordingKey = Key('Empty Timeline Recording');
-  @visibleForTesting
-  static const recordButtonKey = Key('Record Button');
-  @visibleForTesting
-  static const recordingInstructionsKey = Key('Recording Instructions');
-  @visibleForTesting
-  static const recordingStatusKey = Key('Recording Status');
-  @visibleForTesting
-  static const stopRecordingButtonKey = Key('Stop Recording Button');
+  static const emptyTimelineKey = Key('Empty Timeline');
 
   static const id = 'timeline';
 
@@ -71,12 +64,10 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     with
         AutoDisposeMixin,
         OfflineScreenMixin<TimelineScreenBody, OfflineTimelineData> {
-  static const _primaryControlsMinIncludeTextWidth = 825.0;
-  static const _secondaryControlsMinIncludeTextWidth = 1205.0;
+  static const _primaryControlsMinIncludeTextWidth = 725.0;
+  static const _secondaryControlsMinIncludeTextWidth = 1100.0;
 
   TimelineController controller;
-
-  bool recording = false;
 
   bool processing = false;
 
@@ -93,30 +84,36 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     if (newController == controller) return;
     controller = newController;
 
-    controller.timelineService.updateListeningState(true);
-
     cancel();
-    addAutoDisposeListener(controller.recording, () {
-      setState(() {
-        recording = controller.recording.value;
-      });
-    });
+
+    processing = controller.processing.value;
     addAutoDisposeListener(controller.processing, () {
       setState(() {
         processing = controller.processing.value;
       });
     });
+
+    processingProgress = controller.processor.progressNotifier.value;
     addAutoDisposeListener(controller.processor.progressNotifier, () {
       setState(() {
         processingProgress = controller.processor.progressNotifier.value;
       });
     });
+
     addAutoDisposeListener(controller.selectedFrame);
+
+    selectedEvent = controller.selectedTimelineEvent.value;
     addAutoDisposeListener(controller.selectedTimelineEvent, () {
       setState(() {
         selectedEvent = controller.selectedTimelineEvent.value;
       });
     });
+
+    // Refresh data on page load if data is null. On subsequent tab changes,
+    // this should not be called.
+    if (controller.data == null) {
+      controller.refreshData();
+    }
 
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
@@ -135,12 +132,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         loadOfflineData(offlineTimelineData);
       }
     }
-  }
-
-  @override
-  void dispose() {
-    controller.timelineService.updateListeningState(false);
-    super.dispose();
   }
 
   @override
@@ -198,30 +189,29 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   Widget _buildPrimaryStateControls() {
-    return Row(
-      children: [
-        recordButton(
-          key: TimelineScreen.recordButtonKey,
-          recording: recording,
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: _startRecording,
-        ),
-        const SizedBox(width: denseSpacing),
-        stopRecordingButton(
-          key: TimelineScreen.stopRecordingButtonKey,
-          recording: recording,
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: _stopRecording,
-        ),
-        const SizedBox(width: defaultSpacing),
-        clearButton(
-          key: TimelineScreen.clearButtonKey,
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: () async {
-            await _clearTimeline();
-          },
-        ),
-      ],
+    return ValueListenableBuilder(
+      valueListenable: controller.refreshing,
+      builder: (context, refreshing, _) {
+        return Row(
+          children: [
+            refreshButton(
+              key: TimelineScreen.refreshButtonKey,
+              busy: refreshing || processing,
+              includeTextWidth: _primaryControlsMinIncludeTextWidth,
+              onPressed: _refreshTimeline,
+            ),
+            const SizedBox(width: defaultSpacing),
+            clearButton(
+              key: TimelineScreen.clearButtonKey,
+              busy: refreshing || processing,
+              includeTextWidth: _primaryControlsMinIncludeTextWidth,
+              onPressed: () async {
+                await _clearTimeline();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -238,7 +228,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           ),
         // TODO(kenz): hide or disable button if http timeline logging is not
         // available.
-        _logNetworkTrafficButton(),
         const SizedBox(width: defaultSpacing),
         Container(
           height: Theme.of(context).buttonTheme.height,
@@ -251,30 +240,25 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
             ),
           ),
         ),
+        const SizedBox(width: defaultSpacing),
+        ActionButton(
+          child: OutlineButton(
+            child: const Icon(
+              Icons.more_vert,
+              size: defaultIconSize,
+            ),
+            onPressed: _openSettingsDialog,
+          ),
+          tooltip: 'Timeline Configuration',
+        ),
       ],
     );
   }
 
-  Widget _logNetworkTrafficButton() {
-    return ValueListenableBuilder(
-      valueListenable: controller.httpTimelineLoggingEnabled,
-      builder: (context, enabled, _) {
-        return ToggleButtons(
-          constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
-          children: [
-            ToggleButton(
-              icon: Icons.language,
-              text: 'Network',
-              enabledTooltip: 'Stop logging network traffic',
-              disabledTooltip: 'Log network traffic',
-              includeTextWidth: _secondaryControlsMinIncludeTextWidth,
-              selected: enabled,
-            ),
-          ],
-          isSelected: [enabled],
-          onPressed: (_) => controller.toggleHttpRequestLogging(!enabled),
-        );
-      },
+  void _openSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => TimelineConfigurationsDialog(controller),
     );
   }
 
@@ -282,16 +266,16 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     Widget content;
     final timelineEmpty = (controller.data?.isEmpty ?? true) ||
         controller.data.eventGroups.isEmpty;
-    if (recording || processing || timelineEmpty) {
+    if (processing || timelineEmpty) {
       content = ValueListenableBuilder<bool>(
-        valueListenable: controller.emptyRecording,
+        valueListenable: controller.emptyTimeline,
         builder: (context, emptyRecording, _) {
           return emptyRecording
               ? const Center(
-                  key: TimelineScreen.emptyTimelineRecordingKey,
-                  child: Text('No timeline events recorded'),
+                  key: TimelineScreen.emptyTimelineKey,
+                  child: Text('No timeline events'),
                 )
-              : _buildRecordingInfo();
+              : _buildProcessingInfo();
         },
       );
     } else {
@@ -310,7 +294,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Container(
-        key: TimelineScreen.flameChartSectionKey,
         decoration: BoxDecoration(
           border: Border.all(color: Theme.of(context).focusColor),
         ),
@@ -319,24 +302,15 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Widget _buildRecordingInfo() {
-    return recordingInfo(
-      instructionsKey: TimelineScreen.recordingInstructionsKey,
-      recordingStatusKey: TimelineScreen.recordingStatusKey,
-      recording: recording,
-      processing: processing,
+  Widget _buildProcessingInfo() {
+    return processingInfo(
       progressValue: processingProgress,
-      recordedObject: 'timeline trace',
+      processedObject: 'timeline trace',
     );
   }
 
-  Future<void> _startRecording() async {
-    await _clearTimeline();
-    await controller.startRecording();
-  }
-
-  Future<void> _stopRecording() async {
-    await controller.stopRecording();
+  Future<void> _refreshTimeline() async {
+    await controller.refreshData();
   }
 
   Future<void> _clearTimeline() async {
@@ -363,5 +337,117 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         offlineDataJson.isNotEmpty &&
         offlineDataJson[TimelineScreen.id] != null &&
         offlineDataJson[TimelineData.traceEventsKey] != null;
+  }
+}
+
+class TimelineConfigurationsDialog extends StatelessWidget {
+  const TimelineConfigurationsDialog(this.controller);
+
+  static const dialogWidth = 700.0;
+
+  final TimelineController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Dialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(defaultDialogRadius)),
+      child: Container(
+        width: dialogWidth,
+        padding: const EdgeInsets.all(defaultSpacing),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...headerInColumn(theme.textTheme, 'Recorded Streams'),
+            ..._defaultRecordedStreams(theme),
+            const SizedBox(height: denseSpacing),
+            ...subHeaderInColumn(theme.textTheme, 'Advanced'),
+            ..._advancedStreams(theme),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _defaultRecordedStreams(ThemeData theme) {
+    return [
+      ..._timelineStreams(theme, advanced: false),
+      // Special case "Network Traffic" because it is not implemented as a
+      // Timeline recorded stream in the VM. The user does not need to be aware of
+      // the distinction, however.
+      _buildStream(
+        name: 'Network',
+        description: ' • Http traffic',
+        listenable: controller.httpTimelineLoggingEnabled,
+        onChanged: controller.toggleHttpRequestLogging,
+        theme: theme,
+      ),
+    ];
+  }
+
+  List<Widget> _advancedStreams(ThemeData theme) {
+    return _timelineStreams(theme, advanced: true);
+  }
+
+  List<Widget> _timelineStreams(
+    ThemeData theme, {
+    @required bool advanced,
+  }) {
+    final settings = <Widget>[];
+    final streams = controller.recordedStreams
+        .where((s) => s.advanced == advanced)
+        .toList();
+    for (final stream in streams) {
+      settings.add(_buildStream(
+        name: stream.name,
+        description: ' • ${stream.description}',
+        listenable: stream.enabled,
+        onChanged: (_) => controller.toggleTimelineStream(stream),
+        theme: theme,
+      ));
+    }
+    return settings;
+  }
+
+  Widget _buildStream({
+    @required String name,
+    @required String description,
+    @required ValueListenable listenable,
+    @required void Function(bool) onChanged,
+    @required ThemeData theme,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        ValueListenableBuilder(
+          valueListenable: listenable,
+          builder: (context, value, _) {
+            return Checkbox(
+              value: value,
+              onChanged: onChanged,
+            );
+          },
+        ),
+        Flexible(
+          child: RichText(
+            overflow: TextOverflow.visible,
+            text: TextSpan(
+              text: name,
+              style: theme.regularTextStyle,
+              children: [
+                TextSpan(
+                  text: description,
+                  style: theme.subtleTextStyle,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -5,18 +5,20 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import 'config_specific/logger/logger.dart';
 import 'connected_app.dart';
+import 'core/message_bus.dart';
 import 'eval_on_dart_library.dart';
+import 'globals.dart';
 import 'logging/vm_service_logger.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
 import 'stream_value_listenable.dart';
-import 'ui/fake_flutter/fake_flutter.dart';
 import 'utils.dart';
 import 'vm_service_wrapper.dart';
 
@@ -97,6 +99,28 @@ class ServiceConnectionManager {
   Stream<void> get onConnectionClosed => _connectionClosedController.stream;
   final _connectionClosedController = StreamController<void>.broadcast();
 
+  final ValueNotifier<bool> _deviceBusy = ValueNotifier<bool>(false);
+
+  /// Whether the device is currently busy - performing a long-lived, blocking
+  /// operation.
+  ValueListenable<bool> get deviceBusy => _deviceBusy;
+
+  /// Set whether the device is currently busy - performing a long-lived,
+  /// blocking operation.
+  void setDeviceBusy(bool isBusy) {
+    _deviceBusy.value = isBusy;
+  }
+
+  /// Set the device as busy during the duration of the given async task.
+  Future<T> runDeviceBusyTask<T>(Future<T> task) async {
+    try {
+      setDeviceBusy(true);
+      return await task;
+    } finally {
+      setDeviceBusy(false);
+    }
+  }
+
   /// Call a service that is registered by exactly one client.
   Future<Response> callService(
     String name, {
@@ -146,6 +170,8 @@ class ServiceConnectionManager {
 
     connectedApp = ConnectedApp();
     serviceExtensionManager.connectedApp = connectedApp;
+
+    setDeviceBusy(false);
 
     unawaited(onClosed.then((_) => vmServiceClosed()));
 
@@ -231,6 +257,9 @@ class ServiceConnectionManager {
     serviceExtensionManager.resetAvailableExtensions();
 
     serviceTrafficLogger?.dispose();
+
+    _isolateManager._handleVmServiceClosed();
+    setDeviceBusy(false);
 
     _stateController.add(false);
     _connectionClosedController.add(null);
@@ -341,6 +370,9 @@ class IsolateManager {
 
   var selectedIsolateAvailable = Completer<void>();
 
+  int _lastIsolateIndex = 0;
+  final Map<String, int> _isolateIndexMap = {};
+
   List<LibraryRef> selectedIsolateLibraries;
 
   List<IsolateRef> get isolates => List<IsolateRef>.unmodifiable(_isolates);
@@ -354,6 +386,14 @@ class IsolateManager {
 
   Stream<IsolateRef> get onIsolateExited => _isolateExitedController.stream;
 
+  /// Return a unique, monotonically increasing number for this Isolate.
+  int isolateIndex(IsolateRef isolateRef) {
+    if (!_isolateIndexMap.containsKey(isolateRef.id)) {
+      _isolateIndexMap[isolateRef.id] = ++_lastIsolateIndex;
+    }
+    return _isolateIndexMap[isolateRef.id];
+  }
+
   void selectIsolate(String isolateRefId) {
     final IsolateRef ref = _isolates.firstWhere(
         (IsolateRef ref) => ref.id == isolateRefId,
@@ -363,6 +403,7 @@ class IsolateManager {
 
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
     _isolates = isolates;
+    _isolates.forEach(isolateIndex);
 
     await _initSelectedIsolate(isolates);
 
@@ -377,13 +418,16 @@ class IsolateManager {
   }
 
   Future<void> _handleIsolateEvent(Event event) async {
-    if (event.kind == 'IsolateStart') {
+    _sendToMessageBus(event);
+
+    if (event.kind == EventKind.kIsolateStart) {
       _isolates.add(event.isolate);
+      isolateIndex(event.isolate);
       _isolateCreatedController.add(event.isolate);
       if (_selectedIsolate == null) {
         await _setSelectedIsolate(event.isolate);
       }
-    } else if (event.kind == 'ServiceExtensionAdded') {
+    } else if (event.kind == EventKind.kServiceExtensionAdded) {
       // On hot restart, service extensions are added from here.
       await _serviceExtensionManager
           ._maybeAddServiceExtension(event.extensionRPC);
@@ -392,7 +436,7 @@ class IsolateManager {
       if (_selectedIsolate == null && _isFlutterExtension(event.extensionRPC)) {
         await _setSelectedIsolate(event.isolate);
       }
-    } else if (event.kind == 'IsolateExit') {
+    } else if (event.kind == EventKind.kIsolateExit) {
       _isolates.remove(event.isolate);
       _isolateExitedController.add(event.isolate);
       if (_selectedIsolate == event.isolate) {
@@ -404,6 +448,13 @@ class IsolateManager {
         _serviceExtensionManager.resetAvailableExtensions();
       }
     }
+  }
+
+  void _sendToMessageBus(Event event) {
+    messageBus.addEvent(BusEvent(
+      'debugger',
+      data: event,
+    ));
   }
 
   bool _isFlutterExtension(String extensionName) {
@@ -443,8 +494,12 @@ class IsolateManager {
     }
 
     // Store the library uris for the selected isolate.
-    final Isolate isolate = await _service.getIsolate(ref.id);
-    selectedIsolateLibraries = isolate.libraries;
+    if (ref == null) {
+      selectedIsolateLibraries = [];
+    } else {
+      final Isolate isolate = await _service.getIsolate(ref.id);
+      selectedIsolateLibraries = isolate.libraries;
+    }
 
     _selectedIsolate = ref;
     if (!selectedIsolateAvailable.isCompleted) {
@@ -459,6 +514,13 @@ class IsolateManager {
       onData(_selectedIsolate);
     }
     return _selectedIsolateController.stream.listen(onData);
+  }
+
+  void _handleVmServiceClosed() {
+    _lastIsolateIndex = 0;
+    _setSelectedIsolate(null);
+    _isolateIndexMap.clear();
+    _isolates.clear();
   }
 }
 

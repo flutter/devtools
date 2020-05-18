@@ -5,17 +5,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
-import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../ui/flutter/label.dart';
-import '../../ui/material_icons.dart';
 import 'memory_chart.dart';
 import 'memory_controller.dart';
+import 'memory_heap_tree_view.dart';
+
+/// Width of application when memory buttons loose their text.
+const _primaryControlsMinVerboseWidth = 1100.0;
 
 class MemoryScreen extends Screen {
   const MemoryScreen() : super(id, title: 'Memory', icon: Octicons.package);
@@ -43,8 +46,6 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const exportButtonKey = Key('Export Button');
   @visibleForTesting
-  static const snapshotButtonKey = Key('Snapshot Button');
-  @visibleForTesting
   static const resetButtonKey = Key('Reset Button');
   @visibleForTesting
   static const gcButtonKey = Key('GC Button');
@@ -71,7 +72,10 @@ class MemoryBody extends StatefulWidget {
   MemoryBodyState createState() => MemoryBodyState();
 }
 
-class MemoryBodyState extends State<MemoryBody> {
+class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
+  @visibleForTesting
+  static const androidChartButtonKey = Key('Android Chart');
+
   MemoryChart _memoryChart;
 
   MemoryController controller;
@@ -85,6 +89,16 @@ class MemoryBodyState extends State<MemoryBody> {
     if (newController == controller) return;
     controller = newController;
 
+    // Update the chart when the memorySource changes.
+    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
+      setState(() {
+        // TODO(terry): Create the snapshot data to display by Library,
+        //              by Class or by Objects.
+        // Create the snapshot data by Library.
+        controller.createSnapshotByLibrary();
+      });
+    });
+
     _updateListeningState();
   }
 
@@ -94,6 +108,8 @@ class MemoryBodyState extends State<MemoryBody> {
   @override
   Widget build(BuildContext context) {
     final mediaWidth = MediaQuery.of(context).size.width;
+    final textTheme = Theme.of(context).textTheme;
+
     controller.memorySourcePrefix = mediaWidth > verboseDropDownMininumWidth
         ? MemoryScreen.memorySourceMenuItemPrefix
         : '';
@@ -105,25 +121,22 @@ class MemoryBodyState extends State<MemoryBody> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildPrimaryStateControls(),
-            _buildMemoryControls(),
+            _buildPrimaryStateControls(textTheme),
+            const Expanded(child: SizedBox(width: denseSpacing)),
+            _buildMemoryControls(textTheme),
           ],
         ),
+        const SizedBox(height: denseSpacing),
+        _memoryChart,
+        const PaddedDivider(padding: EdgeInsets.zero),
         Expanded(
-          child: Split(
-            axis: Axis.vertical,
-            initialFractions: const [0.40, 0.60],
-            children: [
-              _memoryChart,
-              const Text('Memory Panel TBD capacity'),
-            ],
-          ),
+          child: HeapTree(controller),
         ),
       ],
     );
   }
 
-  Widget _intervalDropdown() {
+  Widget _intervalDropdown(TextTheme textTheme) {
     final files = controller.memoryLog.offlineFiles();
 
     // First item is 'Live Feed', then followed by memory log filenames.
@@ -153,23 +166,22 @@ class MemoryBodyState extends State<MemoryBody> {
       },
     ).toList();
 
-    return DropdownButton<String>(
-      key: MemoryScreen.dropdownIntervalMenuButtonKey,
-      value: controller.displayInterval,
-      iconSize: 20,
-      style: const TextStyle(fontWeight: FontWeight.w100),
-      onChanged: (String newValue) {
-        setState(
-          () {
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<String>(
+        key: MemoryScreen.dropdownIntervalMenuButtonKey,
+        style: textTheme.bodyText2,
+        value: controller.displayInterval,
+        onChanged: (String newValue) {
+          setState(() {
             controller.displayInterval = newValue;
-          },
-        );
-      },
-      items: _displayTypes,
+          });
+        },
+        items: _displayTypes,
+      ),
     );
   }
 
-  Widget _memorySourceDropdown() {
+  Widget _memorySourceDropdown(TextTheme textTheme) {
     final files = controller.memoryLog.offlineFiles();
 
     // Can we display dropdowns in verbose mode?
@@ -197,17 +209,18 @@ class MemoryBodyState extends State<MemoryBody> {
       );
     }).toList();
 
-    return DropdownButton<String>(
-      key: MemoryScreen.dropdownSourceMenuButtonKey,
-      value: controller.memorySource,
-      iconSize: 20,
-      style: const TextStyle(fontWeight: FontWeight.w100),
-      onChanged: (String newValue) {
-        setState(() {
-          controller.memorySource = newValue;
-        });
-      },
-      items: allMemorySources,
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<String>(
+        key: MemoryScreen.dropdownSourceMenuButtonKey,
+        style: textTheme.bodyText2,
+        value: controller.memorySource,
+        onChanged: (String newValue) {
+          setState(() {
+            controller.memorySource = newValue;
+          });
+        },
+        items: allMemorySources,
+      ),
     );
   }
 
@@ -231,143 +244,121 @@ class MemoryBodyState extends State<MemoryBody> {
 */
   }
 
-  /// Width of application when primary buttons loose their text.
-  static const double _primaryControlsMinVerboseWidth = 1300;
+  Widget _buildPrimaryStateControls(TextTheme textTheme) {
+    return ValueListenableBuilder(
+      valueListenable: controller.paused,
+      builder: (context, paused, _) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            OutlineButton(
+              key: MemoryScreen.pauseButtonKey,
+              onPressed: paused ? null : controller.pauseLiveFeed,
+              child: const MaterialIconLabel(
+                Icons.pause,
+                'Pause',
+                includeTextWidth: _primaryControlsMinVerboseWidth,
+              ),
+            ),
+            const SizedBox(width: denseSpacing),
+            OutlineButton(
+              key: MemoryScreen.resumeButtonKey,
+              onPressed: paused ? controller.resumeLiveFeed : null,
+              child: const MaterialIconLabel(
+                Icons.play_arrow,
+                'Resume',
+                includeTextWidth: _primaryControlsMinVerboseWidth,
+              ),
+            ),
+            const SizedBox(width: defaultSpacing),
+            OutlineButton(
+                key: MemoryScreen.clearButtonKey,
+                // TODO(terry): Button needs to be Delete for offline data.
+                onPressed: controller.memorySource == MemoryController.liveFeed
+                    ? _clearTimeline
+                    : null,
+                child: const MaterialIconLabel(
+                  Icons.block,
+                  'Clear',
+                  includeTextWidth: _primaryControlsMinVerboseWidth,
+                )),
+            const SizedBox(width: defaultSpacing),
+            _intervalDropdown(textTheme),
+          ],
+        );
+      },
+    );
+  }
 
-  Widget _buildPrimaryStateControls() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      // Add a semi-transparent background to the
-      // expand and collapse buttons so they don't interfere
-      // too badly with the tree content when the tree
-      // is narrow.
-      color: Theme.of(context).scaffoldBackgroundColor.withAlpha(200),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          OutlineButton(
-            key: MemoryScreen.pauseButtonKey,
-            onPressed: controller.paused ? null : _pauseLiveTimeline,
-            child: Label(
-              pauseIcon,
-              'Pause',
-              minIncludeTextWidth: _primaryControlsMinVerboseWidth,
-            ),
-          ),
-          OutlineButton(
-            key: MemoryScreen.resumeButtonKey,
-            onPressed: controller.paused ? _resumeLiveTimeline : null,
-            child: Label(
-              playIcon,
-              'Resume',
-              minIncludeTextWidth: _primaryControlsMinVerboseWidth,
-            ),
-          ),
-          const SizedBox(width: defaultSpacing),
-          OutlineButton(
-              key: MemoryScreen.clearButtonKey,
-              // TODO(terry): Button needs to be Delete for offline data.
-              onPressed: controller.memorySource == MemoryController.liveFeed
-                  ? _clearTimeline
-                  : null,
-              child: Label(
-                clearIcon,
-                'Clear',
-                minIncludeTextWidth: _primaryControlsMinVerboseWidth,
-              )),
-          const SizedBox(width: defaultSpacing),
-          _intervalDropdown(),
-        ],
+  OutlineButton createToggleAdbMemoryButton() {
+    return OutlineButton(
+      key: androidChartButtonKey,
+      onPressed: controller.isConnectedDeviceAndroid
+          ? _toggleAndroidChartVisibility
+          : null,
+      child: MaterialIconLabel(
+        controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
+        'Android Memory',
+        includeTextWidth: 900,
       ),
     );
   }
 
-  /// Width of application when memory buttons loose their text.
-  static const double _memoryControlsMinVerboseWidth = 1100;
+  void _toggleAndroidChartVisibility() {
+    setState(() {
+      controller.toggleAndroidChartVisibility();
+    });
+  }
 
-  Widget _buildMemoryControls() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          _memorySourceDropdown(),
-          const SizedBox(width: defaultSpacing),
-          Flexible(
-            child: OutlineButton(
-              key: MemoryScreen.snapshotButtonKey,
-              onPressed: _snapshot,
-              child: Label(
-                memorySnapshot,
-                'Snapshot',
-                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
-              ),
-            ),
+  Widget _buildMemoryControls(TextTheme textTheme) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _memorySourceDropdown(textTheme),
+        const SizedBox(width: defaultSpacing),
+        createToggleAdbMemoryButton(),
+        const SizedBox(width: denseSpacing),
+        OutlineButton(
+          key: MemoryScreen.resetButtonKey,
+          onPressed: _reset,
+          child: const MaterialIconLabel(
+            Icons.settings_backup_restore,
+            'Reset',
+            includeTextWidth: _primaryControlsMinVerboseWidth,
           ),
-          Flexible(
-            child: OutlineButton(
-              key: MemoryScreen.resetButtonKey,
-              onPressed: _reset,
-              child: Label(
-                memoryReset,
-                'Reset',
-                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
-              ),
-            ),
+        ),
+        const SizedBox(width: denseSpacing),
+        OutlineButton(
+          key: MemoryScreen.gcButtonKey,
+          onPressed: _gc,
+          child: const MaterialIconLabel(
+            Icons.delete_sweep,
+            'GC',
+            includeTextWidth: _primaryControlsMinVerboseWidth,
           ),
-          Flexible(
-            child: OutlineButton(
-              key: MemoryScreen.gcButtonKey,
-              onPressed: _gc,
-              child: Label(
-                memoryGC,
-                'GC',
-                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
-              ),
-            ),
+        ),
+        const SizedBox(width: defaultSpacing),
+        OutlineButton(
+          key: MemoryScreen.exportButtonKey,
+          onPressed:
+              controller.offline ? null : controller.memoryLog.exportMemory,
+          child: const MaterialIconLabel(
+            Icons.file_download,
+            'Export',
+            includeTextWidth: _primaryControlsMinVerboseWidth,
           ),
-          const SizedBox(width: defaultSpacing),
-          Flexible(
-            child: OutlineButton(
-              key: MemoryScreen.exportButtonKey,
-              onPressed:
-                  controller.offline ? null : controller.memoryLog.exportMemory,
-              child: Label(
-                exportIcon,
-                'Export',
-                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  // Callbacks for button actions:
+  /// Callbacks for button actions:
 
   void _clearTimeline() {
     controller.memoryTimeline.reset();
   }
 
-  void _pauseLiveTimeline() {
-    // TODO(terry): Implement real pause when connected to live feed.
-    controller.pauseLiveFeed();
-    setState(() {});
-  }
-
-  void _resumeLiveTimeline() {
-    // TODO(terry): Implement real resume when connected to live feed.
-    controller.resumeLiveFeed();
-    setState(() {});
-  }
-
-  void _snapshot() {
-    // TODO(terry): Implementation needed.
-  }
-
-  void _reset() {
+  void _reset() async {
     // TODO(terry): TBD real implementation needed.
   }
 

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
@@ -57,10 +58,6 @@ class _CallStackState extends State<CallStack> {
   ) {
     final theme = Theme.of(context);
 
-    final regularStyle = TextStyle(color: theme.textTheme.bodyText2.color);
-    final subtleStyle = TextStyle(color: theme.unselectedWidgetColor);
-    final selectedStyle = TextStyle(color: theme.textSelectionColor);
-
     Widget child;
 
     final asyncMarker = frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
@@ -74,7 +71,7 @@ class _CallStackState extends State<CallStack> {
             padding: const EdgeInsets.symmetric(horizontal: densePadding),
             child: Text(
               _descriptionFor(frame),
-              style: selected ? selectedStyle : subtleStyle,
+              style: selected ? theme.selectedTextStyle : theme.subtleTextStyle,
             ),
           ),
           const Expanded(child: Divider()),
@@ -87,12 +84,12 @@ class _CallStackState extends State<CallStack> {
         text: TextSpan(
           text: _descriptionFor(frame),
           style: selected
-              ? selectedStyle
-              : (noLineInfo ? subtleStyle : regularStyle),
+              ? theme.selectedTextStyle
+              : (noLineInfo ? theme.subtleTextStyle : theme.regularTextStyle),
           children: [
             TextSpan(
               text: _locationFor(frame),
-              style: selected ? selectedStyle : subtleStyle,
+              style: selected ? theme.selectedTextStyle : theme.subtleTextStyle,
             ),
           ],
         ),

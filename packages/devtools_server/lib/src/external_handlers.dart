@@ -80,29 +80,11 @@ Future<shelf.Handler> defaultHandler(
     debugProxyHandler = proxyHandler(Uri.parse('http://localhost:$webPort/'));
   }
 
-  // The packages folder is renamed in the pub package so this handler serves
-  // out of the `pack` folder.
-  Handler packHandler;
-  if (!debugMode) {
-    packHandler = createStaticHandler(
-      path.join(packageDir, 'build', 'pack'),
-      defaultDocument: 'index.html',
-    );
-  }
-
   final sseHandler = SseHandler(Uri.parse('/api/sse'))
     ..connections.rest.listen(clients.acceptClient);
 
   // Make a handler that delegates based on path.
   final handler = (shelf.Request request) {
-    if (!debugMode) {
-      if (request.url.path.startsWith('packages/')) {
-        // request.change here will strip the `packages` prefix from the path
-        // so it's relative to packHandler's root.
-        return packHandler(request.change(path: 'packages'));
-      }
-    }
-
     if (request.url.path.startsWith('api/sse')) {
       return sseHandler.handler(request);
     }

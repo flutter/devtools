@@ -30,7 +30,6 @@ import 'package:provider/provider.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/theme.dart';
 import '../../ui/colors.dart';
-import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../ui/theme.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
@@ -168,7 +167,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     );
 
     // Compute padding around chart.
-    _chartController.setViewPortOffsets(50, 10, 10, 30);
+    _chartController.setViewPortOffsets(
+        defaultSpacing * 3, denseSpacing, defaultSpacing, defaultSpacing);
   }
 
   void onBarSelected(int index) {
@@ -228,12 +228,14 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Container(
-        height: 160.0,
-        child: BarChart(_chartController),
-      ),
+    return Column(
+      children: [
+        Container(
+          height: liveChartHeight,
+          child: BarChart(_chartController),
+        ),
+        const SizedBox(height: denseSpacing),
+      ],
     );
   }
 

@@ -2,11 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'fake_flutter/fake_flutter.dart';
+import 'package:flutter/material.dart';
+
 import 'theme.dart';
 
 /// This file holds color constants that are used throughout DevTools.
 // TODO(kenz): move colors from other pages to this file for consistency.
+
+/// Memory heat map blueish color incremental colors from Blue 100 to Blue 900.
+Color memoryHeatMapLightColor = const Color(0xFFBBDEFB); // Material BLUE 100
+Color memoryHeatMapDarkColor = const Color(0xFF0D47A1); // Material BLUE 900
 
 /// Mark: Timeline / CPU profiler.
 ///

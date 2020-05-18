@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart' hide Stack;
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -24,6 +25,7 @@ import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'scripts.dart';
+import 'variables.dart';
 
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
@@ -68,6 +70,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const breakpointsTitle = 'Breakpoints';
 
   DebuggerController controller;
+  FocusNode _libraryFilterFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _libraryFilterFocusNode = FocusNode();
+  }
 
   @override
   void didChangeDependencies() {
@@ -76,6 +85,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
+  }
+
+  @override
+  void dispose() {
+    _libraryFilterFocusNode.dispose();
+    super.dispose();
   }
 
   void _onLocationSelected(ScriptLocation location) {
@@ -118,6 +133,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       valueListenable: controller.librariesVisible,
       builder: (context, visible, _) {
         if (visible) {
+          // Focus the filter textfield when the ScriptPicker opens
+          _libraryFilterFocusNode.requestFocus();
+
           // TODO(devoncarew): Animate this opening and closing.
           return Split(
             axis: Axis.horizontal,
@@ -136,6 +154,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                     scripts: controller.sortedScripts.value,
                     classes: controller.sortedClasses.value,
                     onSelected: _onLocationSelected,
+                    libraryFilterFocusNode: _libraryFilterFocusNode,
                   );
                 },
               ),
@@ -147,28 +166,39 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       },
     );
 
-    return Split(
-      axis: Axis.horizontal,
-      initialFractions: const [0.25, 0.75],
-      children: [
-        OutlinedBorder(child: debuggerPanes()),
-        Column(
+    return Shortcuts(
+      shortcuts: <LogicalKeySet, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyP):
+            FilterLibraryIntent(_libraryFilterFocusNode, controller),
+      },
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          FilterLibraryIntent: FilterLibraryAction(),
+        },
+        child: Split(
+          axis: Axis.horizontal,
+          initialFractions: const [0.25, 0.75],
           children: [
-            DebuggingControls(controller: controller),
-            const SizedBox(height: denseRowSpacing),
-            Expanded(
-              child: Split(
-                axis: Axis.vertical,
-                initialFractions: const [0.74, 0.26],
-                children: [
-                  codeArea,
-                  Console(controller: controller),
-                ],
-              ),
+            OutlineDecoration(child: debuggerPanes()),
+            Column(
+              children: [
+                DebuggingControls(controller: controller),
+                const SizedBox(height: denseRowSpacing),
+                Expanded(
+                  child: Split(
+                    axis: Axis.vertical,
+                    initialFractions: const [0.74, 0.26],
+                    children: [
+                      codeArea,
+                      DebuggerConsole(controller: controller),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-      ],
+      ),
     );
   }
 
@@ -185,22 +215,57 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             debuggerPaneHeader(
               context,
               breakpointsTitle,
-              rightChild: ValueListenableBuilder(
-                valueListenable: controller.breakpointsWithLocation,
-                builder: (context, breakpoints, _) {
-                  return BreakpointsCountBadge(breakpoints: breakpoints);
-                },
-              ),
+              rightChild: _breakpointsRightChild(),
+              rightPadding: 0.0,
             ),
           ],
           children: const [
             CallStack(),
-            Center(child: Text('TODO: variables')),
+            Variables(),
             BreakpointPicker(),
           ],
         );
       },
     );
+  }
+
+  Widget _breakpointsRightChild() {
+    return ValueListenableBuilder(
+      valueListenable: controller.breakpointsWithLocation,
+      builder: (context, breakpoints, _) {
+        return Row(children: [
+          BreakpointsCountBadge(breakpoints: breakpoints),
+          ActionButton(
+            child: FlatButton(
+              padding: EdgeInsets.zero,
+              child: const Icon(Icons.delete, size: 24.0),
+              onPressed:
+                  breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
+            ),
+            tooltip: 'Remove all breakpoints',
+          ),
+        ]);
+      },
+    );
+  }
+}
+
+class FilterLibraryIntent extends Intent {
+  const FilterLibraryIntent(
+    this.focusNode,
+    this.debuggerController,
+  )   : assert(debuggerController != null),
+        assert(focusNode != null);
+
+  final FocusNode focusNode;
+  final DebuggerController debuggerController;
+}
+
+class FilterLibraryAction extends Action<FilterLibraryIntent> {
+  @override
+  void invoke(FilterLibraryIntent intent) {
+    intent.debuggerController.openLibrariesView();
+    intent.focusNode.requestFocus();
   }
 }
 
@@ -285,6 +350,7 @@ FlexSplitColumnHeader debuggerPaneHeader(
   String title, {
   bool needsTopBorder = true,
   Widget rightChild,
+  double rightPadding = 4.0,
 }) {
   final theme = Theme.of(context);
 
@@ -300,7 +366,7 @@ FlexSplitColumnHeader debuggerPaneHeader(
         ),
         color: titleSolidBackgroundColor(theme),
       ),
-      padding: const EdgeInsets.only(left: defaultSpacing, right: 4.0),
+      padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
       alignment: Alignment.centerLeft,
       height: DebuggerScreen.debuggerPaneHeaderHeight,
       child: Row(

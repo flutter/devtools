@@ -17,11 +17,6 @@ import 'package:mp_chart/mp/core/data_set/line_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:mp_chart/mp/core/enums/axis_dependency.dart';
-// TODO(terry): Enable legend when textsize is correct.
-// import 'package:mp_chart/mp/core/enums/legend_vertical_alignment.dart';
-// import 'package:mp_chart/mp/core/enums/legend_form.dart';
-// import 'package:mp_chart/mp/core/enums/legend_horizontal_alignment.dart';
-// import 'package:mp_chart/mp/core/enums/legend_orientation.dart';
 import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/enums/y_axis_label_position.dart';
 import 'package:mp_chart/mp/core/highlight/highlight.dart';
@@ -36,7 +31,6 @@ import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/theme.dart';
-import '../../ui/flutter/label.dart';
 import '../../ui/theme.dart';
 import 'memory_controller.dart';
 
@@ -46,9 +40,6 @@ class MemoryChart extends StatefulWidget {
 }
 
 class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
-  @visibleForTesting
-  static const androidChartButtonKey = Key('Android Chart');
-
   LineChartController dartChartController;
 
   MemoryController controller;
@@ -148,8 +139,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   SelectedDataPoint _selectedDartChart;
   SelectedDataPoint _selectedAndroidChart;
 
-  /// Compute increments for slider and lables for slider increments based on the
-  /// current display interval time period.
+  /// Compute increments for slider and labels for slider increments based on
+  /// the current display interval time period.
   String timelineSliderLabel(double value) {
     if (value == 0)
       return 'Starting Time';
@@ -172,42 +163,31 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     return '$unitsAgo Minute${unitsAgo != 1 ? 's' : ''} Ago';
   }
 
-  Slider createTimelineSlider() => Slider.adaptive(
-        label: timelineSliderLabel(controller.sliderValue),
-        activeColor: Colors.indigoAccent,
-        max: controller.numberOfStops.toDouble(),
-        inactiveColor: Colors.grey,
-        onChanged: controller.numberOfStops > 0
-            ? (newValue) {
-                final newChunk = newValue.roundToDouble();
-                setState(() {
+  Slider _createTimelineSlider() {
+    return Slider.adaptive(
+      label: timelineSliderLabel(controller.sliderValue),
+      activeColor: Colors.indigoAccent,
+      max: controller.numberOfStops.toDouble(),
+      inactiveColor: Colors.grey,
+      onChanged: controller.numberOfStops > 0
+          ? (newValue) {
+              final newChunk = newValue.roundToDouble();
+              setState(
+                () {
                   controller.sliderValue = newChunk;
                   // TODO(terry): Compute:
                   //    startingIndex = sliderValue * controller.intervalDurationInMs
-                });
-              }
-            : null,
-        value: controller.sliderValue,
-        divisions: controller.numberOfStops,
-      );
-
-  OutlineButton createToggleAdbMemoryButton() => OutlineButton(
-        key: MemoryChartState.androidChartButtonKey,
-        onPressed: controller.isConnectedDeviceAndroid
-            ? _toggleAndroidChartVisibility
-            : null,
-        child: MaterialIconLabel(
-          controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
-          'Android Memory',
-          includeTextWidth: 900,
-        ),
-      );
+                },
+              );
+            }
+          : null,
+      value: controller.sliderValue,
+      divisions: controller.numberOfStops,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (memoryTimeline.liveData.isEmpty)
-      return const Center(child: Text('No data'));
-
     controller.memoryTimeline.image = _img;
 
     // Compute number of stops for the timeline slider.
@@ -219,49 +199,36 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     }
     controller.numberOfStops = stops;
 
-    _timelineSlider = createTimelineSlider();
+    _timelineSlider = _createTimelineSlider();
 
-    const edgeSpacing = EdgeInsets.fromLTRB(20, 10, 0, 5);
-
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const Padding(
-          padding: edgeSpacing,
-          child: Text('Flutter Framework Heap'),
-        ),
+    return Row(
+      children: [
         Expanded(
-          child: LineChart(dartChartController),
+          child: memoryTimeline.liveData.isEmpty
+              ? const SizedBox()
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: liveChartHeight,
+                      child: LineChart(dartChartController),
+                    ),
+                    _timelineSlider,
+                  ],
+                ),
         ),
-        Row(
-          children: [
-            Padding(
-              padding: edgeSpacing,
-              child: createToggleAdbMemoryButton(),
+        if (controller.isAndroidChartVisible)
+          const SizedBox(width: denseSpacing),
+        if (controller.isAndroidChartVisible)
+          Expanded(
+            child: SizedBox(
+              height: liveChartHeight,
+              child: LineChart(androidChartController),
             ),
-            Expanded(
-              child: _timelineSlider,
-            ),
-            const Text('Time Range')
-          ],
-        ),
-        controller.isAndroidChartVisible
-            ? Expanded(
-                child: LineChart(androidChartController),
-              )
-            : const Padding(
-                padding: edgeSpacing,
-                child: Text(''),
-              ),
+          ),
       ],
     );
-  }
-
-  void _toggleAndroidChartVisibility() {
-    setState(() {
-      controller.toggleAndroidChartVisibility();
-    });
   }
 
   void _setupDartChartController() {
@@ -278,8 +245,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..setValueFormatter(LargeValueFormatter())
           ..drawGridLines = true
           ..granularityEnabled = true
-          ..setStartAtZero(
-              true) // Set to baseline min and auto track max axis range.
+          // Set to baseline min and auto track max axis range.
+          ..setStartAtZero(true)
           ..textColor = defaultForeground;
       },
       axisRightSettingFunction: (axisRight, controller) {
@@ -328,7 +295,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     );
 
     // Compute padding around chart.
-    dartChartController.setViewPortOffsets(50, 20, 10, 0);
+    dartChartController.setViewPortOffsets(
+        defaultSpacing * 3, denseSpacing, defaultSpacing, defaultSpacing);
   }
 
   /// Plots the Android ADB memory info (Flutter Engine).
@@ -397,7 +365,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     );
 
     // Compute padding around chart.
-    androidChartController.setViewPortOffsets(50, 0, 10, 30);
+    androidChartController.setViewPortOffsets(
+        defaultSpacing * 3, denseSpacing, defaultSpacing, defaultSpacing);
   }
 
   void _setupTrace(LineDataSet traceSet, Color color, int alpha) {
@@ -900,7 +869,7 @@ class SelectedDataPoint extends LineChartMarker {
     canvas.restore();
   }
 
-  static const String _titlesDartVm = 'Time\n'
+  static const _titlesDartVm = 'Time\n'
       'Capacity\n'
       'Used\n'
       'External\n'
@@ -920,7 +889,7 @@ class SelectedDataPoint extends LineChartMarker {
     const Color(0xff77aed5), // Light-Blue (External)
   ];
 
-  static const String _titlesAndroid = 'Time\n'
+  static const _titlesAndroid = 'Time\n'
       'Total\n'
       'Other\n'
       'Code\n'

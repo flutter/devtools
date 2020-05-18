@@ -84,13 +84,26 @@ void main() {
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(k2), findsNothing);
     });
+
+    testWidgets('displays the requested initial page',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(wrap(
+        DevToolsScaffold(
+          tabs: const [screen1, screen2],
+          initialPage: screen2.screenId,
+        ),
+      ));
+
+      expect(find.byKey(k1), findsNothing);
+      expect(find.byKey(k2), findsOneWidget);
+    });
   });
 }
 
 class _TestScreen extends Screen {
   const _TestScreen(this.name, this.key, {Key tabKey})
       : super(
-          'testScreen',
+          'testScreen$name',
           title: name,
           icon: Icons.computer,
           tabKey: tabKey,

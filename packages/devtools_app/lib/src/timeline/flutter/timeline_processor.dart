@@ -4,11 +4,11 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 
 import '../../config_specific/logger/logger.dart';
 import '../../trace_event.dart';
-import '../../ui/fake_flutter/fake_flutter.dart';
 import '../../utils.dart';
 //import '../simple_trace_example.dart';
 import 'timeline_controller.dart';
@@ -115,8 +115,7 @@ class TimelineProcessor {
   int rasterThreadId;
 
   Future<void> processTimeline(
-    List<TraceEventWrapper> traceEvents,
-    int startRecordingMicros, {
+    List<TraceEventWrapper> traceEvents, {
     bool resetAfterProcessing = true,
   }) async {
     // Reset the processor before processing.
@@ -139,10 +138,7 @@ class TimelineProcessor {
       // (e.g. thread_name events) as well as events from before we started
       // recording.
       final ts = event.event.timestampMicros;
-      final isTimeValid = ts != null &&
-          startRecordingMicros != null &&
-          ts >= startRecordingMicros;
-      return isTimeValid && !isMessageLoopFlushTasks;
+      return ts != null && !isMessageLoopFlushTasks;
     }).toList())
       // Events need to be in increasing timestamp order.
       ..sort()

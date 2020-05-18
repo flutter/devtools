@@ -9,8 +9,8 @@ import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profile_call_tree.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profiler.dart';
-import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'wrappers.dart';

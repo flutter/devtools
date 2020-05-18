@@ -11,10 +11,12 @@ import 'package:provider/provider.dart';
 
 import '../config_specific/flutter/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/flutter/import_export/import_export.dart';
+import '../framework_controller.dart';
 import '../globals.dart';
 import 'app.dart';
 import 'banner_messages.dart';
 import 'common_widgets.dart';
+import 'navigation.dart';
 import 'notifications.dart';
 import 'screen.dart';
 import 'snapshot_screen.dart';
@@ -31,6 +33,7 @@ class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
     Key key,
     @required this.tabs,
+    this.initialPage,
     this.actions,
   })  : assert(tabs != null),
         super(key: key);
@@ -62,6 +65,9 @@ class DevToolsScaffold extends StatefulWidget {
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
 
+  /// The initial page to render.
+  final String initialPage;
+
   /// Actions that it's possible to perform in this Scaffold.
   ///
   /// These will generally be [RegisteredServiceExtensionButton]s.
@@ -90,6 +96,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   ImportController _importController;
 
+  StreamSubscription<ConnectVmEvent> _connectVmSubscription;
   StreamSubscription<String> _showPageSubscription;
 
   @override
@@ -98,6 +105,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     _setupTabController();
 
+    _connectVmSubscription =
+        frameworkController.onConnectVmEvent.listen(_connectVm);
     _showPageSubscription =
         frameworkController.onShowPageId.listen(_showPageById);
   }
@@ -150,6 +159,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     _tabController?.dispose();
     _currentScreen?.dispose();
     appBarAnimation?.dispose();
+    _connectVmSubscription?.cancel();
     _showPageSubscription?.cancel();
 
     super.dispose();
@@ -158,6 +168,14 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void _setupTabController() {
     _tabController?.dispose();
     _tabController = TabController(length: widget.tabs.length, vsync: this);
+
+    if (widget.initialPage != null) {
+      final initialIndex = widget.tabs
+          .indexWhere((screen) => screen.screenId == widget.initialPage);
+      if (initialIndex != -1) {
+        _tabController.index = initialIndex;
+      }
+    }
 
     _currentScreen.value = widget.tabs[_tabController.index];
     _tabController.addListener(() {
@@ -171,6 +189,20 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         frameworkController.notifyPageChange(screen?.screenId);
       }
     });
+
+    // Broadcast the initial page.
+    frameworkController.notifyPageChange(_currentScreen.value.screenId);
+  }
+
+  /// Connects to the VM with the given URI. This request usually comes from the
+  /// IDE via the server API to reuse the DevTools window after being disconnected
+  /// (for example if the user stops a debug session then launches a new one).
+  void _connectVm(event) {
+    final routeName = routeNameWithQueryParams(context, '/', {
+      'uri': event.serviceProtocolUri.toString(),
+      if (event.notify) 'notify': 'true',
+    });
+    Navigator.of(context).pushReplacementNamed(routeName);
   }
 
   /// Switch to the given page ID. This request usually comes from the server API
@@ -179,9 +211,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void _showPageById(String pageId) {
     final existingTabIndex = _tabController.index;
 
-    final screen = widget.tabs
-        .firstWhere((screen) => screen.screenId == pageId, orElse: () => null);
-    final newIndex = screen == null ? -1 : widget.tabs.indexOf(screen);
+    final newIndex =
+        widget.tabs.indexWhere((screen) => screen.screenId == pageId);
 
     if (newIndex != -1 && newIndex != existingTabIndex) {
       _tabController.animateTo(newIndex);
@@ -194,8 +225,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// Note that this currently works very well, but it doesn't integrate with
   /// the browser's history yet.
   void _pushScreenToLocalPageRoute(int newIndex) {
-    final previousTabIndex = _tabController.previousIndex;
-    if (newIndex != previousTabIndex) {
+    if (_tabController.indexIsChanging) {
+      final previousTabIndex = _tabController.previousIndex;
       ModalRoute.of(context).addLocalHistoryEntry(LocalHistoryEntry(
         onRemove: () {
           if (widget.tabs.length >= previousTabIndex) {
@@ -239,8 +270,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         Container(
           padding: DevToolsScaffold.appPadding,
           alignment: Alignment.topLeft,
-          child: BannerMessages(
-            screen: screen,
+          child: FocusScope(
+            child: BannerMessages(
+              screen: screen,
+            ),
           ),
         ),
     ];
@@ -263,7 +296,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               );
             },
             child: TabBarView(
-              physics: const NeverScrollableScrollPhysics(),
+              physics: defaultTabBarViewPhysics,
               controller: _tabController,
               children: tabBodies,
             ),

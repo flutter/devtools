@@ -39,20 +39,15 @@ void main() {
       Directory('build').deleteSync(recursive: true);
     }
     // Build the app, as the server can't start without the build output.
-    await WebdevFixture.build(release: testInReleaseMode, verbose: true);
+    await WebdevFixture.build(verbose: true);
 
-    if (!Directory('build/packages').existsSync()) {
-      fail('Build failed');
-    }
-
-    Directory('build/packages').renameSync('build/pack');
     // The devtools package build directory needs to reflect the latest
     // devtools_app package contents.
     if (Directory('../devtools/build').existsSync()) {
       Directory('../devtools/build').deleteSync(recursive: true);
     }
 
-    Directory('build').renameSync('../devtools/build');
+    Directory('build/web').renameSync('../devtools/build');
   });
 
   setUp(() async {

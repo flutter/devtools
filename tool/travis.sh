@@ -57,8 +57,8 @@ if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
     # Set the suffix so we use stable goldens.
     export DEVTOOLS_GOLDENS_SUFFIX="_stable"
 else
-    echo "Cloning master Flutter branch"
-    git clone https://github.com/flutter/flutter.git ./flutter
+    echo "Cloning dev Flutter branch"
+    git clone https://github.com/flutter/flutter.git --branch dev ./flutter
     # Set the suffix so we use the master goldens
     export DEVTOOLS_GOLDENS_SUFFIX=""
 fi
@@ -127,7 +127,7 @@ elif [ "$BOT" = "test_ddc" ]; then
         flutter test test/*.dart test/{core,fixtures,flutter,support,ui}/
     elif [ "$PLATFORM" = "chrome" ]; then
         flutter test --platform chrome test/*.dart test/{core,fixtures,flutter,support,ui}/
-    else 
+    else
         echo "unknown test platform"
         exit 1
     fi
@@ -145,7 +145,7 @@ elif [ "$BOT" = "test_dart2js" ]; then
         WEBDEV_RELEASE=true flutter test test/*.dart test/{core,fixtures,flutter,support,ui}/
     elif [ "$PLATFORM" = "chrome" ]; then
         WEBDEV_RELEASE=true flutter test --platform chrome test/*.dart test/{core,fixtures,flutter,support,ui}/
-    else 
+    else
         echo "unknown test platform"
         exit 1
     fi
@@ -155,7 +155,7 @@ elif [ "$BOT" = "integration_ddc" ]; then
 
     # Provision our packages.
     flutter pub get
-    flutter pub global activate webdev
+    flutter config --enable-web
 
     # We need to run integration tests with -j1 to run with no concurrency.
     flutter test -j1 test/integration_tests/
@@ -163,7 +163,7 @@ elif [ "$BOT" = "integration_ddc" ]; then
 elif [ "$BOT" = "integration_dart2js" ]; then
 
     flutter pub get
-    flutter pub global activate webdev
+    flutter config --enable-web
 
     # We need to run integration tests with -j1 to run with no concurrency.
     WEBDEV_RELEASE=true flutter test -j1 test/integration_tests/

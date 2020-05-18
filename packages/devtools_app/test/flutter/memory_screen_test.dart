@@ -4,13 +4,11 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/flutter/common_widgets.dart';
-import 'package:devtools_app/src/flutter/split.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/memory/flutter/memory_chart.dart';
-import 'package:devtools_app/src/memory/flutter/memory_screen.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart';
-import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
+import 'package:devtools_app/src/memory/flutter/memory_screen.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -44,6 +42,7 @@ void main() {
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
           .thenReturn(false);
+      when(fakeServiceManager.vm.operatingSystem).thenReturn('iOS');
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
@@ -70,16 +69,13 @@ void main() {
       // Should be collecting live feed.
       expect(controller.offline, isFalse);
 
-      var splitFinder = find.byType(Split);
-
       // Verify Memory, Memory Source, and Memory Sources content.
-      expect(splitFinder, findsOneWidget);
       expect(find.byKey(MemoryScreen.pauseButtonKey), findsOneWidget);
       expect(find.byKey(MemoryScreen.resumeButtonKey), findsOneWidget);
 
       expect(controller.memorySource, MemoryController.liveFeed);
 
-      expect(find.byKey(MemoryScreen.snapshotButtonKey), findsOneWidget);
+//      expect(find.byKey(MemoryScreen.snapshotButtonKey), findsOneWidget);
       expect(find.byKey(MemoryScreen.resetButtonKey), findsOneWidget);
       expect(find.byKey(MemoryScreen.gcButtonKey), findsOneWidget);
 
@@ -87,12 +83,6 @@ void main() {
 
       expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
       expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);
-
-      // Verify the state of the splitter.
-      splitFinder = find.byType(Split);
-      expect(splitFinder, findsOneWidget);
-      final Split splitter = tester.widget(splitFinder);
-      expect(splitter.initialFractions[0], equals(0.40));
 
       // Check memory sources available.
       await tester.tap(find.byKey(MemoryScreen.dropdownSourceMenuButtonKey));

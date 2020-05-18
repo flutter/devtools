@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
@@ -19,7 +20,6 @@ import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../inspector/inspector_tree.dart';
 import '../table_data.dart';
-import '../ui/fake_flutter/fake_flutter.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 
@@ -628,6 +628,13 @@ class LoggingController {
         );
       });
 
+      // Listen for debugger events.
+      _listen(
+        messageBus.onEvent().where((event) =>
+            event.type == 'debugger' || event.type.startsWith('debugger.')),
+        _handleDebuggerEvent,
+      );
+
       // Listen for DevTools internal events.
       _listen(
         messageBus
@@ -636,6 +643,24 @@ class LoggingController {
         _handleDevToolsEvent,
       );
     }
+  }
+
+  void _handleDebuggerEvent(BusEvent event) {
+    final Event debuggerEvent = event.data;
+
+    // Filter ServiceExtensionAdded events as they're pretty noisy.
+    if (debuggerEvent.kind == EventKind.kServiceExtensionAdded) {
+      return;
+    }
+
+    log(
+      LogData(
+        event.type,
+        jsonEncode(debuggerEvent.json),
+        debuggerEvent.timestamp,
+        summary: '${debuggerEvent.kind} ${debuggerEvent.isolate.id}',
+      ),
+    );
   }
 
   void _handleDevToolsEvent(BusEvent event) {

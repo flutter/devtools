@@ -20,6 +20,22 @@ const debuggerDeviceWidth = 800.0;
 
 const mediumDeviceWidth = 1000.0;
 
+const defaultDialogRadius = 20.0;
+
+List<Widget> headerInColumn(TextTheme textTheme, String title) {
+  return [
+    Text(title, style: textTheme.headline6),
+    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
+  ];
+}
+
+List<Widget> subHeaderInColumn(TextTheme textTheme, String title) {
+  return [
+    Text(title, style: textTheme.subtitle2),
+    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
+  ];
+}
+
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
@@ -82,12 +98,13 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 /// * `onPressed`: The callback to be called upon pressing the button.
 StatelessWidget clearButton({
   Key key,
+  bool busy = false,
   double includeTextWidth,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
     key: key,
-    onPressed: onPressed,
+    onPressed: busy ? null : onPressed,
     child: MaterialIconLabel(
       Icons.block,
       'Clear',
@@ -116,6 +133,31 @@ StatelessWidget recordButton({
     child: MaterialIconLabel(
       Icons.fiber_manual_record,
       labelOverride ?? 'Record',
+      includeTextWidth: includeTextWidth,
+    ),
+  );
+}
+
+/// Button to refresh data.
+///
+/// * `recording`: Whether recording is in progress.
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
+/// * `labelOverride`: Optional alternative text to use for the button.
+/// * `onPressed`: The callback to be called upon pressing the button.
+StatelessWidget refreshButton({
+  Key key,
+  bool busy = false,
+  double includeTextWidth,
+  String labelOverride,
+  @required VoidCallback onPressed,
+}) {
+  return OutlineButton(
+    key: key,
+    onPressed: busy ? null : onPressed,
+    child: MaterialIconLabel(
+      Icons.refresh,
+      'Refresh',
       includeTextWidth: includeTextWidth,
     ),
   );
@@ -426,8 +468,8 @@ class ToggleButton extends StatelessWidget {
   }
 }
 
-class OutlinedBorder extends StatelessWidget {
-  const OutlinedBorder({Key key, this.child}) : super(key: key);
+class OutlineDecoration extends StatelessWidget {
+  const OutlineDecoration({Key key, this.child}) : super(key: key);
 
   final Widget child;
 
@@ -637,4 +679,10 @@ extension ColorExtension on Color {
 extension ThemeDataExtension on ThemeData {
   /// Returns whether we are currently using a dark theme.
   bool get isDarkTheme => brightness == Brightness.dark;
+
+  TextStyle get regularTextStyle => TextStyle(color: textTheme.bodyText2.color);
+
+  TextStyle get subtleTextStyle => TextStyle(color: unselectedWidgetColor);
+
+  TextStyle get selectedTextStyle => TextStyle(color: textSelectionColor);
 }

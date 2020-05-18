@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:pedantic/pedantic.dart';
 import 'package:test/test.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, RemoteObject;
@@ -338,7 +339,6 @@ class WebdevFixture {
   }
 
   static Future<void> build({
-    bool release = false,
     bool verbose = false,
   }) async {
     final clean = await _runFlutter(['clean']);
@@ -346,23 +346,22 @@ class WebdevFixture {
     final pubGet = await _runFlutter(['pub', 'get']);
     expect(await pubGet.exitCode, 0);
 
-    final List<String> cliArgs = [
-      'pub',
-      'run',
-      'build_runner',
+    final List<String> cliArgs = [];
+    String commandName;
+    commandName = 'flutter build web';
+    cliArgs.addAll([
       'build',
-      '-o',
-      'web:build',
-      '--delete-conflicting-outputs',
-      release ? '--release' : '--no-release'
-    ];
+      'web',
+      '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+      '--no-tree-shake-icons'
+    ]);
 
     final process = await _runFlutter(cliArgs, verbose: verbose);
 
     final Completer<void> buildFinished = Completer<void>();
 
     _toLines(process.stderr).listen((String line) {
-      final err = 'error building with webdev: $line';
+      final err = 'error building flutter: $line';
       if (!buildFinished.isCompleted) {
         buildFinished.completeError(err);
       } else {
@@ -372,7 +371,7 @@ class WebdevFixture {
 
     _toLines(process.stdout).listen((String line) {
       if (verbose) {
-        print('pub run build_runner build • ${line.trim()}');
+        print('$commandName • ${line.trim()}');
       }
 
       if (!buildFinished.isCompleted) {
@@ -384,8 +383,18 @@ class WebdevFixture {
       }
     });
 
-    await buildFinished.future.catchError((_) {
-      fail('Build failed');
+    unawaited(process.exitCode.then((code) {
+      if (!buildFinished.isCompleted) {
+        if (code == 0) {
+          buildFinished.complete();
+        } else {
+          buildFinished.completeError('Exited with code $code');
+        }
+      }
+    }));
+
+    await buildFinished.future.catchError((e) {
+      fail('Build failed: $e');
     });
 
     await process.exitCode;
@@ -401,7 +410,7 @@ class WebdevFixture {
     process.kill();
     final exitCode = await process.exitCode;
     if (verbose) {
-      print('webdev exited with code $exitCode');
+      print('flutter exited with code $exitCode');
     }
   }
 

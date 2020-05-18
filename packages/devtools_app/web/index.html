@@ -6,43 +6,14 @@
   found in the LICENSE file.
 -->
 
-<!--
-  NOTE: Changes to this file that affect the debugger screen should also
-  be posted to debugger_screen.html
--->
-
 <html>
-
 <head>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script>
-        const GA_DEVTOOLS_PROPERTY = 'UA-26406144-34'; // Dart DevTools GA Property UA.
-
-        function getDevToolsPropertyID() {
-            return GA_DEVTOOLS_PROPERTY;
-        }
-    </script>
-    <!-- The below URI ?id= must match the GA_DEVTOOLS_PROPERTY above. -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26406144-34"></script>
-    <script type="text/javascript" src="devtools_analytics.js"></script>
-    <!-- End of DevTools Google Analytics -->
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Dart DevTools</title>
     <link href="favicon.png" rel="icon" sizes="64x64">
-
-    <link href="packages/octicons_css/octicons_4.4.0.css" rel="stylesheet">
-    <link href="packages/polymer_css/flex.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/debugger/debugger.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/inspector/inspector.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/logging/logging.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/performance/performance.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/profiler/profiler.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/info/info.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/timeline/timeline.css" rel="stylesheet">
 
     <script type="text/javascript">
         function supportsES6Classes() {
@@ -55,134 +26,20 @@
         if (!supportsES6Classes()) {
             window.location.href = '/unsupported-browser.html';
         }
-
-        (function () {
-            var params = new URLSearchParams(window.location.search);
-            if (params.get('theme') == 'dark') {
-                document.write(
-                    '<link rel="stylesheet" href="packages/primer_css/primer_12.1.0_dark.css">' +
-                    '<link rel="stylesheet" href="styles.css">' +
-                    '<link rel="stylesheet" href="styles_dark.css">'
-                );
-            } else {
-                document.write(
-                    '<link rel="stylesheet" href="packages/primer_css/primer_12.1.0.css">' +
-                    '<link rel="stylesheet" href="styles.css">' +
-                    '<link rel="stylesheet" href="styles_light.css">'
-                )
-            }
-        })();
     </script>
-
-    <link href="packages/codemirror/codemirror.css" rel="stylesheet">
-    <script src="packages/codemirror/codemirror.js"></script>
-
-    <script src="packages/devtools_app/src/ui/plotly.js"></script>
-    <script type="text/javascript" src="packages/plotly_js/plotly.min.js"></script>
-
-    <script type="text/javascript" src="packages/split/split.min.js"></script>
-
-    <!-- Load the main.dart for regular DevTools. Eventually we'll change this
-      to load main.dart.js, which is produced as output by flutter build. -->
-    <script defer src="main.dart.js"></script>
 </head>
 
-<body fullbleed layout vertical>
-    <!-- 
-        TODO(https://github.com/flutter/devtools/issues/1468): Remove content
-        from body when we switch to the flutter build of the app.
-    -->
-    <header flex wrap none class="masthead legacy-dart" id="header" layout horizontal>
-        <a class="masthead-logo" id="title">
-            <span class="optional-550">Dart DevTools</span>
-        </a>
-
-        <div flex horiz-padding></div>
-
-        <nav class="masthead-nav" id="main-nav">
-            <!-- add the known pages -->
-            <a disabled>
-                <span class="octicon octicon-device-mobile"></span>
-                <span>
-                    <span class="optional-1140">Flutter Inspector</span>
-                </span>
-            </a>
-            <a disabled>
-                <span class="octicon octicon-pulse"></span>
-                <span>
-                    <span class="optional-1140">Timeline</span>
-                </span>
-            </a>
-            <a disabled>
-                <span class="octicon octicon-dashboard"></span>
-                <span>
-                    <span class="optional-1140">Performance</span>
-                </span>
-            </a>
-            <a disabled>
-                <span class="octicon octicon-package"></span>
-                <span>
-                    <span class="optional-1140">Memory</span>
-                </span>
-            </a>
-            <a disabled>
-                <span class="octicon octicon-bug"></span>
-                <span>
-                    <span class="optional-1140">Debugger</span>
-                </span>
-            </a>
-            <a disabled>
-                <span class="octicon octicon-clippy"></span>
-                <span>
-                    <span class="optional-1140">Logging</span>
-                </span>
-            </a>
-        </nav>
-
-        <div id="global-actions" class="masthead-nav"></div>
-
-        <div class="masthead-nav">
-            <span horiz-padding class="masthead-item">•</span>
-            <div class="masthead-item action-button active" id="icon-nav">
-                <span class="octicon octicon-info"></span>
-            </div>
-            <div class="masthead-item action-button active" id="send-feedback-button" title="Send Feedback">
-                <span class="octicon octicon-comment"></span>
-            </div>
-            <span horiz-padding class="masthead-item">•</span>
-            <div hidden="true" class="masthead-item action-button active" id="try-flutter-web-devtools" title="Try the alpha version of DevTools &#013;written in Flutter!">
-                <span class="octicon octicon-beaker"></span>
-            </div>
-        </div>
-    </header>
-
-    <div id="messages-container" class="container legacy-dart"></div>
-
-    <form id="ga-dialog" class="container legacy-dart"></form>
-    <form id="connect-dialog" class="container legacy-dart"></form>
-    <form id="snapshot-message" class="container legacy-dart"></form>
-
-    <div id="content" class="container legacy-dart" flex layout vertical style="overflow: auto;">
-        <div class="blankslate">
-            <p>Loading...</p>
-        </div>
-    </div>
-
-    <footer flex layout horizontal none class="footer align-items-center legacy-dart">
-        <div class="footer-status" id="global-status" flex>
-            <select class="form-select select-sm" disabled></select>
-        </div>
-
-        <div class="footer-status text-center" id="page-status" flex horiz-padding>
-        </div>
-
-        <div class="footer-status text-right" id="auxiliary-status" flex>
-            &nbsp;
-        </div>
-    </footer>
-
-    <div id="toast-container" class="legacy-dart">
-    </div>
+<body>
+  <!-- This script installs service_worker.js to provide PWA functionality to
+       application. For more information, see:
+       https://developers.google.com/web/fundamentals/primers/service-workers -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('flutter_service_worker.js');
+      });
+    }
+  </script>
+  <script src="main.dart.js" type="application/javascript"></script>
 </body>
-
 </html>

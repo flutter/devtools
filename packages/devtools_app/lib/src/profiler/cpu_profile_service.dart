@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
 import '../profiler/cpu_profile_model.dart';
-import '../ui/fake_flutter/fake_flutter.dart';
 import '../vm_flags.dart' as vm_flags;
 
 /// Manages interactions between the Cpu Profiler and the VmService.

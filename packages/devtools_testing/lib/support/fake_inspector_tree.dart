@@ -7,92 +7,13 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:devtools_app/src/inspector/inspector_text_styles.dart'
-    as styles;
+import 'package:flutter/material.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
-import 'package:devtools_app/src/inspector/inspector_tree_legacy.dart';
-import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
-import 'package:devtools_app/src/ui/flutter_html_shim.dart' as shim;
 import 'package:devtools_app/src/ui/icons.dart';
-import 'package:devtools_app/src/ui/material_icons.dart';
-import 'package:meta/meta.dart';
-
-class FakePaintEntry extends PaintEntry {
-  FakePaintEntry({this.icon, this.text, this.textStyle, @required this.x});
-
-  @override
-  final DevToolsIcon icon;
-  final String text;
-  final TextStyle textStyle;
-  final double x;
-
-  double get right {
-    double right = x;
-    if (icon != null) {
-      right += icon.iconWidth;
-    }
-    if (text != null) {
-      right += text.length * 10;
-    }
-    return right;
-  }
-}
-
-class FakeInspectorTreeNodeRender
-    extends InspectorTreeNodeRendererLegacy<FakePaintEntry> {
-  FakeInspectorTreeNodeRender(List<FakePaintEntry> entries, Size size)
-      : super(entries, size);
-
-  @override
-  PaintEntry hitTest(Offset location) {
-    location = location - offset;
-    if (location.dy < 0 || location.dy >= size.height) {
-      return null;
-    }
-    // There is no need to optimize this but we could perform a binary search.
-    for (var entry in entries) {
-      if (entry.x <= location.dx && entry.right > location.dx) {
-        return entry;
-      }
-    }
-    return null;
-  }
-}
-
-class FakeInspectorTreeNodeRenderBuilder
-    extends InspectorTreeNodeRenderBuilder {
-  final List<FakePaintEntry> entries = [];
-  double x = 0;
-
-  @override
-  void addIcon(DevToolsIcon icon) {
-    x += 20;
-    entries.add(FakePaintEntry(icon: icon, x: x));
-  }
-
-  @override
-  void appendText(String text, TextStyle textStyle) {
-    x += text.length * 10;
-    entries.add(FakePaintEntry(text: text, textStyle: textStyle, x: x));
-  }
-
-  @override
-  InspectorTreeNodeRender build() {
-    final double rowWidth = entries.isEmpty ? 0 : entries.last.right;
-    return FakeInspectorTreeNodeRender(entries, Size(rowWidth, rowHeight));
-  }
-}
-
-class FakeInspectorTreeNode extends InspectorTreeNodeLegacy {
-  @override
-  InspectorTreeNodeRenderBuilder createRenderBuilder() {
-    return FakeInspectorTreeNodeRenderBuilder();
-  }
-}
 
 const double fakeRowWidth = 200.0;
 
-class FakeInspectorTree extends InspectorTreeControllerLegacy
+class FakeInspectorTree extends InspectorTreeController
     with InspectorTreeFixedRowHeightController {
   FakeInspectorTree();
 
@@ -100,7 +21,7 @@ class FakeInspectorTree extends InspectorTreeControllerLegacy
 
   @override
   InspectorTreeNode createNode() {
-    return FakeInspectorTreeNode();
+    return InspectorTreeNode();
   }
 
   @override
@@ -134,15 +55,6 @@ class FakeInspectorTree extends InspectorTreeControllerLegacy
 
     setStateCalled?.complete(null);
     setStateCalled = null;
-
-    for (int i = 0; i < numRows; i++) {
-      final row = getCachedRow(i);
-      final FakeInspectorTreeNode node = row?.node;
-      (node?.renderObject as FakeInspectorTreeNodeRender)?.attach(
-        this,
-        Offset(row.depth * columnWidth, i * rowHeight),
-      );
-    }
   }
 
   // Debugging string to make it easy to write integration tests.
@@ -183,52 +95,52 @@ class FakeInspectorTree extends InspectorTreeControllerLegacy
           sb.write('  ' * delta);
         }
       }
-      final FakeInspectorTreeNode node = row?.node;
-      final renderObject = node.renderObject;
-      if (renderObject == null) {
+      final InspectorTreeNode node = row?.node;
+      final diagnostic = node?.diagnostic;
+      if (diagnostic == null) {
         sb.write('<empty>\n');
         continue;
       }
-      final entries = renderObject.entries;
-      for (FakePaintEntry entry in entries) {
-        if (entry.icon != null) {
-          // Visualize icons
-          final DevToolsIcon icon = entry.icon;
-          if (icon == collapseArrow) {
-            sb.write('▼');
-          } else if (icon == expandArrow) {
-            sb.write('▶');
-          } else if (icon is UrlIcon) {
-            sb.write('[${icon.src}]');
-          } else if (icon is ColorIcon) {
-            sb.write('[${shim.colorToCss(icon.color)}]');
-          } else if (icon is CustomIcon) {
-            sb.write('[${icon.text}]');
-          } else if (icon is MaterialIcon) {
-            sb.write('[${icon.text}]');
-          }
-        }
-        // TODO(jacobr): optionally visualize colors as well.
-        if (entry.text != null) {
-          if (entry.textStyle != null && includeTextStyles) {
-            final String shortStyle = styles.debugStyleNames[entry.textStyle];
-            if (shortStyle == null) {
-              // Display the style a little like an html style.
-              sb.write('<style ${entry.textStyle}>${entry.text}</style>');
-            } else {
-              if (shortStyle == '') {
-                // Omit the default text style completely for readability of
-                // the debug output.
-                sb.write(entry.text);
-              } else {
-                sb.write('<$shortStyle>${entry.text}</$shortStyle>');
-              }
-            }
-          } else {
-            sb.write(entry.text);
-          }
+
+      if (node.showExpandCollapse) {
+        if (node.isExpanded) {
+          sb.write('▼');
+        } else {
+          sb.write('▶');
         }
       }
+
+      final icon = node.diagnostic.icon;
+      if (icon is CustomIcon) {
+        sb.write('[${icon.text}]');
+      } else if (icon is ColorIcon) {
+        sb.write('[${icon.color.value}]');
+      } else if (icon is Image) {
+        sb.write('[${(icon.image as AssetImage).assetName}]');
+      }
+      sb.write(node.diagnostic.description);
+
+//      // TODO(jacobr): optionally visualize colors as well.
+//      if (entry.text != null) {
+//        if (entry.textStyle != null && includeTextStyles) {
+//          final String shortStyle = styles.debugStyleNames[entry.textStyle];
+//          if (shortStyle == null) {
+//            // Display the style a little like an html style.
+//            sb.write('<style ${entry.textStyle}>${entry.text}</style>');
+//          } else {
+//            if (shortStyle == '') {
+//              // Omit the default text style completely for readability of
+//              // the debug output.
+//              sb.write(entry.text);
+//            } else {
+//              sb.write('<$shortStyle>${entry.text}</$shortStyle>');
+//            }
+//          }
+//        } else {
+//          sb.write(entry.text);
+//        }
+//      }
+
       if (row.isSelected) {
         sb.write(' <-- selected');
       }
@@ -236,7 +148,4 @@ class FakeInspectorTree extends InspectorTreeControllerLegacy
     }
     return sb.toString();
   }
-
-  @override
-  String tooltip = '';
 }

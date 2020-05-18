@@ -1,6 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
-
-import 'ui/fake_flutter/fake_flutter.dart';
 
 // TODO(kenz): consolidate the logic between [VerticalLineSegment] and
 // [HorizontalLineSegment] by using [LineSegment] and switching on the main axis
