@@ -44,6 +44,7 @@ void main() {
 
       debuggerController = MockDebuggerController();
       when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
+      when(debuggerController.resuming).thenReturn(ValueNotifier(false));
       when(debuggerController.hasFrames).thenReturn(ValueNotifier(false));
       when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
       when(debuggerController.breakpointsWithLocation)
