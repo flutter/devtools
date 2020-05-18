@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
+import '../../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
@@ -140,5 +141,16 @@ class _CallStackState extends State<CallStack> {
     }
     final file = uri.split('/').last;
     return frame.line == null ? ' $file' : ' $file:${frame.line}';
+  }
+}
+
+class CallStackCountBadge extends StatelessWidget {
+  const CallStackCountBadge({@required this.stackFrames});
+
+  final List<StackFrameAndSourcePosition> stackFrames;
+
+  @override
+  Widget build(BuildContext context) {
+    return Badge('${nf.format(stackFrames.length)}');
   }
 }
