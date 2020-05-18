@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:ansi_up/ansi_up.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
-import 'package:ansi_up/ansi_up.dart';
 
 import '../utils.dart';
 import 'notifications.dart';
@@ -26,7 +26,7 @@ Future<void> copyToClipboard(List<String> lines, BuildContext context) async {
 
   final numLines = lines.length;
   Notifications.of(context)?.push(
-    'Copied $numLines ${pluralize("line", numLines)}.',
+    'Copied $numLines ${pluralize('line', numLines)}.',
   );
 }
 

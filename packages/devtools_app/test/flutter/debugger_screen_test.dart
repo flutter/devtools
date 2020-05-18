@@ -114,15 +114,20 @@ void main() {
     });
 
     group('ConsoleControls', () {
-      testWidgets('Console Controls are not rendered when stdio is empty',
+      testWidgets('Console Controls are rendered disabled when stdio is empty',
           (WidgetTester tester) async {
         when(debuggerController.stdio).thenReturn(ValueNotifier([]));
 
         await pumpDebuggerScreen(tester, debuggerController);
 
-        expect(find.byKey(DebuggerConsole.clearStdioButtonKey), findsNothing);
-        expect(
-            find.byKey(DebuggerConsole.copyToClipboardButtonKey), findsNothing);
+        expect(find.byKey(DebuggerConsole.clearStdioButtonKey), findsOneWidget);
+        expect(find.byKey(DebuggerConsole.copyToClipboardButtonKey),
+            findsOneWidget);
+
+        final clearStdioElement =
+            find.byKey(DebuggerConsole.clearStdioButtonKey).evaluate().first;
+        final clearStdioButton = clearStdioElement.widget as IconButton;
+        expect(clearStdioButton.onPressed, isNull);
       });
 
       testWidgets('Tapping the Console Clear button clears stdio.',

@@ -127,6 +127,7 @@ class DebuggerController extends DisposableController
   }
 
   final _stdio = ValueNotifier<List<String>>([]);
+  bool _stdioTrailingNewline = false;
 
   /// Return the stdout and stderr emitted from the application.
   ///
@@ -149,13 +150,20 @@ class DebuggerController extends DisposableController
     var lines = _stdio.value.toList();
     final newLines = text.split('\n');
 
-    if (lines.isNotEmpty && !lines.last.endsWith('\n')) {
+    if (lines.isNotEmpty && !_stdioTrailingNewline) {
       lines[lines.length - 1] = '${lines[lines.length - 1]}${newLines.first}';
       if (newLines.length > 1) {
         lines.addAll(newLines.sublist(1));
       }
     } else {
       lines.addAll(newLines);
+    }
+
+    _stdioTrailingNewline = text.endsWith('\n');
+
+    // Don't report trailing blank lines.
+    if (lines.isNotEmpty && lines.last.isEmpty) {
+      lines = lines.sublist(0, lines.length - 1);
     }
 
     // For performance reasons, we drop older lines in batches, so the lines
