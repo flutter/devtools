@@ -40,6 +40,23 @@
 			"type": "dart",
 			"request": "launch",
 			"program": "${file}"
+		},
+		{
+			// This templated launch config will show up in CodeLens to make it
+			// easier to run tests in release mode from the editor.
+			"name": "${debugType} (release)",
+			"type": "dart",
+			"request": "launch",
+			"templateFor": "packages/devtools_app/test/integration_tests",
+			"template": [
+				"run-test",
+				"run-test-file",
+				"debug-test",
+				"debug-test-file"
+			],
+			"env": {
+				"WEBDEV_RELEASE": true,
+			}
 		}
 	]
 }
