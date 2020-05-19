@@ -4,12 +4,12 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/flutter/console.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
+import '../../flutter/console.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
