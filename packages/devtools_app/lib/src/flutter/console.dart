@@ -34,15 +34,16 @@ class Console extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-        child: Stack(
-      children: [
-        _ConsoleOutput(lines: lines),
-        if (controls.isNotEmpty)
-          _ConsoleControls(
-            controls: controls,
-          ),
-      ],
-    ));
+      child: Stack(
+        children: [
+          _ConsoleOutput(lines: lines),
+          if (controls.isNotEmpty)
+            _ConsoleControls(
+              controls: controls,
+            ),
+        ],
+      ),
+    );
   }
 }
 
