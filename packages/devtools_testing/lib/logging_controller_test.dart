@@ -5,7 +5,7 @@
 // ignore_for_file: implementation_imports
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
-// TODO(#1370): rewrite this test for the flutter app.
+// TODO(#1987): rewrite these tests for the flutter app.
 /*
 @TestOn('vm')
 import 'dart:async';

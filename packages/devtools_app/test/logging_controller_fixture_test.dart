@@ -11,7 +11,7 @@ import 'package:devtools_testing/support/flutter_test_driver.dart'
 import 'package:devtools_testing/support/flutter_test_environment.dart';
 
 void main() async {
-  // TODO(#1370): rewrite this test for the flutter app.
+  // TODO(#1987): rewrite this test for the flutter app.
   /*
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
