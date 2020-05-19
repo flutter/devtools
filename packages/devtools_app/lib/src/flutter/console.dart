@@ -127,14 +127,15 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
 // CONTROLS
 
 /// A pre-configured IconButton that fits the ux of the Console widget.
-/// 
+///
 /// The customizations are:
 ///  * Icon size: [actionsIconSize]
 ///  * Do not show [tooltip] if the button is disabled
 ///  * [VisualDensity.compact]
 class ConsoleControl extends StatelessWidget {
-  const ConsoleControl({this.icon, this.tooltip, this.onPressed, this.buttonKey});
-  
+  const ConsoleControl(
+      {this.icon, this.tooltip, this.onPressed, this.buttonKey});
+
   final IconData icon;
   final String tooltip;
   final VoidCallback onPressed;
@@ -154,11 +155,15 @@ class ConsoleControl extends StatelessWidget {
 }
 
 /// A Console Control to "delete" the contents of the console.
-/// 
+///
 /// This just preconfigures a ConsoleControl with the `delete` icon,
 /// and the `onPressed` function passed from the outside.
 class DeleteControl extends StatelessWidget {
-  const DeleteControl({this.onPressed, this.tooltip = 'Clear contents', this.buttonKey,});
+  const DeleteControl({
+    this.onPressed,
+    this.tooltip = 'Clear contents',
+    this.buttonKey,
+  });
 
   final VoidCallback onPressed;
   final String tooltip;
@@ -176,11 +181,15 @@ class DeleteControl extends StatelessWidget {
 }
 
 /// A Console Control that copies `data` to the clipboard.
-/// 
+///
 /// If it succeeds, it displays a notification with `successMessage`.
 class CopyToClipboardControl extends StatelessWidget {
-
-  const CopyToClipboardControl({this.data, this.successMessage = 'Copied to clipboard.', this.tooltip = 'Copy to clipboard', this.buttonKey,});
+  const CopyToClipboardControl({
+    this.data,
+    this.successMessage = 'Copied to clipboard.',
+    this.tooltip = 'Copy to clipboard',
+    this.buttonKey,
+  });
 
   final String data;
   final String successMessage;
@@ -193,7 +202,9 @@ class CopyToClipboardControl extends StatelessWidget {
     return ConsoleControl(
       icon: Icons.content_copy,
       tooltip: tooltip,
-      onPressed: disabled ? null : () => copyToClipboard(data, successMessage, context),
+      onPressed: disabled
+          ? null
+          : () => copyToClipboard(data, successMessage, context),
       buttonKey: buttonKey,
     );
   }
