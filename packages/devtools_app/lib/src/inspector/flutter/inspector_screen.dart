@@ -153,7 +153,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         Expanded(
           child: Split(
             axis: splitAxis,
-            initialFractions: const [0.40, 0.60],
+            initialFractions: const [0.33, 0.67],
             children: [
               summaryTree,
               InspectorDetailsTabController(
