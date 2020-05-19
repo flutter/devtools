@@ -19,15 +19,14 @@ Future<void> launchUrl(String url, BuildContext context) async {
 }
 
 /// Attempts to copy a bunch of `lines` to the clipboard.
-Future<void> copyToClipboard(List<String> lines, BuildContext context) async {
+Future<void> copyToClipboard(String data, String successMessage, BuildContext context) async {
   await Clipboard.setData(ClipboardData(
-    text: lines.join('\n'),
+    text: data,
   ));
 
-  final numLines = lines.length;
-  Notifications.of(context)?.push(
-    'Copied $numLines ${pluralize('line', numLines)}.',
-  );
+  if (successMessage != null) {
+    Notifications.of(context)?.push(successMessage);
+  }
 }
 
 List<TextSpan> processAnsiTerminalCodes(String input, TextStyle defaultStyle) {
