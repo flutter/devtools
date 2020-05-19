@@ -143,9 +143,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
                 onItemSelected: _select,
               ),
             ),
-            OutlineDecoration(
-              child: LogDetails(log: selected),
-            ),
+            LogDetails(log: selected),
           ],
         ),
       ),
