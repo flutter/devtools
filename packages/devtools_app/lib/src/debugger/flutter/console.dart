@@ -58,22 +58,20 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
   Widget build(BuildContext context) {
     final numLines = _lines.length;
     final disabled = numLines == 0;
-    return Material(
-      child: Console(
-        lines: _lines,
-        controls: [
-          CopyToClipboardControl(
-            data: disabled ? null : _lines.join('\n'),
-            successMessage: 'Copied $numLines ${pluralize('line', numLines)}.',
-            buttonKey: DebuggerConsole.copyToClipboardButtonKey,
-          ),
-          DeleteControl(
-            onPressed: disabled ? null : widget.controller.clearStdio,
-            tooltip: 'Clear console output',
-            buttonKey: DebuggerConsole.clearStdioButtonKey,
-          ),
-        ],
-      ),
+    return Console(
+      lines: _lines,
+      controls: [
+        CopyToClipboardControl(
+          data: disabled ? null : _lines.join('\n'),
+          successMessage: 'Copied $numLines ${pluralize('line', numLines)}.',
+          buttonKey: DebuggerConsole.copyToClipboardButtonKey,
+        ),
+        DeleteControl(
+          onPressed: disabled ? null : widget.controller.clearStdio,
+          tooltip: 'Clear console output',
+          buttonKey: DebuggerConsole.clearStdioButtonKey,
+        ),
+      ],
     );
   }
 }

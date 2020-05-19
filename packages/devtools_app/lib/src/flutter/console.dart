@@ -30,7 +30,8 @@ class Console extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Material(
+        child: Stack(
       children: [
         _ConsoleOutput(lines: lines),
         if (controls.isNotEmpty)
@@ -38,7 +39,7 @@ class Console extends StatelessWidget {
             controls: controls,
           ),
       ],
-    );
+    ));
   }
 }
 
@@ -103,7 +104,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
       child: Scrollbar(
         child: ListView.builder(
           padding: const EdgeInsets.all(denseSpacing),
-          itemCount: widget.lines.length,
+          itemCount: widget.lines?.length ?? 0,
           itemExtent: CodeView.rowHeight, // TODO: Get from theme?
           controller: _scroll,
           itemBuilder: (context, index) {
