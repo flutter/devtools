@@ -9,12 +9,6 @@ import '../../flutter/console.dart';
 import '../../utils.dart';
 import 'debugger_controller.dart';
 
-// TODO(devoncarew): Allow scrolling horizontally as well.
-
-// TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
-
-// TODO(devoncarew): Support hyperlinking to stack traces.
-
 /// Display the stdout and stderr output from the process under debug.
 class DebuggerConsole extends StatefulWidget {
   const DebuggerConsole({

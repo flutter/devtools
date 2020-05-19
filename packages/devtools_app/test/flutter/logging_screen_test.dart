@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/flutter/common_widgets.dart';
+import 'package:devtools_app/src/flutter/console.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/flutter/logging_screen.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
@@ -178,10 +179,9 @@ void main() {
           (WidgetTester tester) async {
         const index = 9;
         bool containsJson(Widget widget) {
-          if (widget is! RichText) return false;
-          final richText = widget as RichText;
-          return richText.text.toPlainText().contains('{') &&
-              richText.text.toPlainText().contains('}');
+          if (widget is! Console) return false;
+          final content = (widget as Console).textContent.trim();
+          return content.startsWith('{') && content.endsWith('}');
         }
 
         final findJson = find.descendant(

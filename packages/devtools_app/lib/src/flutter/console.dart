@@ -28,6 +28,9 @@ class Console extends StatelessWidget {
   final List<Widget> controls;
   final List<String> lines;
 
+  @visibleForTesting
+  String get textContent => lines.join('\n');
+
   @override
   Widget build(BuildContext context) {
     return Material(

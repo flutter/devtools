@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
-import '../utils.dart';
 import 'notifications.dart';
 
 Future<void> launchUrl(String url, BuildContext context) async {
@@ -18,7 +17,9 @@ Future<void> launchUrl(String url, BuildContext context) async {
   }
 }
 
-/// Attempts to copy a bunch of `lines` to the clipboard.
+/// Attempts to copy a String of `data` to the clipboard.
+///
+/// Shows a `successMessage` [Notification] on the passed in `context`.
 Future<void> copyToClipboard(
     String data, String successMessage, BuildContext context) async {
   await Clipboard.setData(ClipboardData(
