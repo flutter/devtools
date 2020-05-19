@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app/src/flutter/console.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -230,38 +231,36 @@ class _LogDetailsState extends State<LogDetails>
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Theme.of(context).cardColor,
       child: _buildContent(context, widget.log),
     );
   }
 
   Widget _buildContent(BuildContext context, LogData log) {
-    if (log == null) return const SizedBox();
-    if (log.needsComputing) {
-      return const Center(child: CircularProgressIndicator());
+    if (showInspector(log)) {
+      return _buildInspector(context, log);
+    } else {
+      return Stack(
+        children: [
+          _buildSimpleLog(context, log),
+          if (log != null && log.needsComputing) ...[
+            const Center(child: CircularProgressIndicator()),
+          ],
+        ],
+      );
     }
-    if (showInspector(log)) return _buildInspector(context, log);
-    if (showSimple(log)) return _buildSimpleLog(context, log);
-    return const SizedBox();
   }
 
   // TODO(#1370): implement this.
   Widget _buildInspector(BuildContext context, LogData log) => const SizedBox();
 
   Widget _buildSimpleLog(BuildContext context, LogData log) {
-    final RichText richText = RichText(
-      text: TextSpan(
-        children: processAnsiTerminalCodes(
-          log.prettyPrinted,
-          fixedFontStyle(context),
-        ),
-      ),
-    );
-
-    return Scrollbar(
-      child: SingleChildScrollView(
-        child: richText,
-      ),
+    return Console(
+      lines: log?.prettyPrinted?.split('\n'),
+      controls: [
+        CopyToClipboardControl(
+          data: log?.prettyPrinted,
+        )
+      ],
     );
   }
 }
