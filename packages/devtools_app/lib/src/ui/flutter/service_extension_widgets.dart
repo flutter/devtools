@@ -118,10 +118,6 @@ class _ServiceExtensionButtonGroupState
 
   Widget _buildExtension(ExtensionState extensionState) {
     final description = extensionState.description;
-    // TODO(kenz): replace this with `devToolsToggleButton` from common_widgets
-    // when we no longer need to support icons for both the flutter app and the
-    // html app. The incompatible dep here is the custom `Label` widget. See
-    // https://github.com/flutter/devtools/issues/1728.
     return Tooltip(
       message: extensionState.isSelected
           ? description.enabledTooltip

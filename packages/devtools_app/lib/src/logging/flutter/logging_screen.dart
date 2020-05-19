@@ -171,7 +171,7 @@ class LogsTable extends StatelessWidget {
 
   final ColumnData<LogData> when = _WhenColumn();
   final ColumnData<LogData> kind = _KindColumn();
-  final ColumnData<LogData> message = _MessageColumn((message) => message);
+  final ColumnData<LogData> message = _MessageColumn();
 
   List<ColumnData<LogData>> get columns => [when, kind, message];
 
@@ -266,23 +266,41 @@ class _LogDetailsState extends State<LogDetails>
   }
 }
 
-// TODO(https://github.com/flutter/devtools/issues/1258): merge these classes
-// with their parents when we turn down the html version of the app.
+class _WhenColumn extends ColumnData<LogData> {
+  _WhenColumn() : super('When');
 
-class _WhenColumn extends LogWhenColumn {
+  @override
+  bool get supportsSorting => false;
+
   @override
   double get fixedWidthPx => 120;
+
+  @override
+  String render(dynamic value) {
+    return value == null
+        ? ''
+        : timeFormat.format(DateTime.fromMillisecondsSinceEpoch(value));
+  }
 
   @override
   String getValue(LogData dataObject) => render(dataObject.timestamp);
 }
 
-class _KindColumn extends LogKindColumn implements ColumnRenderer<LogData> {
+class _KindColumn extends ColumnData<LogData>
+    implements ColumnRenderer<LogData> {
+  _KindColumn() : super('Kind');
+
   @override
-  String getValue(LogData dataObject) => dataObject.kind;
+  bool get supportsSorting => false;
 
   @override
   double get fixedWidthPx => 145;
+
+  @override
+  String render(dynamic value) => value;
+
+  @override
+  String getValue(LogData dataObject) => dataObject.kind;
 
   @override
   Widget build(BuildContext context, LogData item) {
@@ -321,10 +339,22 @@ class _KindColumn extends LogKindColumn implements ColumnRenderer<LogData> {
   }
 }
 
-class _MessageColumn extends LogMessageColumn
+class _MessageColumn extends ColumnData<LogData>
     implements ColumnRenderer<LogData> {
-  _MessageColumn(String Function(String) logMessageToHtml)
-      : super(logMessageToHtml);
+  _MessageColumn() : super('Message');
+  @override
+  bool get supportsSorting => false;
+
+  @override
+  String render(dynamic value) {
+    final LogData log = value;
+
+    if (log.summaryHtml != null) {
+      return log.summaryHtml;
+    } else {
+      return log.summary ?? log.details;
+    }
+  }
 
   @override
   String getValue(LogData dataObject) =>
@@ -361,7 +391,6 @@ class _MessageColumn extends LogMessageColumn
         ],
       );
     } else if (data.kind == 'stdout') {
-      // TODO(helin24): Move this to logging controller when dart:html is removed.
       return RichText(
         text: TextSpan(
           children: processAnsiTerminalCodes(
