@@ -137,8 +137,12 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
 ///  * Do not show [tooltip] if the button is disabled
 ///  * [VisualDensity.compact]
 class ConsoleControl extends StatelessWidget {
-  const ConsoleControl(
-      {this.icon, this.tooltip, this.onPressed, this.buttonKey});
+  const ConsoleControl({
+    this.icon,
+    this.tooltip,
+    this.onPressed,
+    this.buttonKey,
+  });
 
   final IconData icon;
   final String tooltip;
