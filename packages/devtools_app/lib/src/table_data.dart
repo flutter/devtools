@@ -398,14 +398,6 @@ abstract class ColumnData<T> {
   /// Get the cell's tooltip value from the given [dataObject].
   String getTooltip(T dataObject) => '';
 
-  /// Given a value from [getValue], render it to a String.
-  String render(dynamic value) {
-    if (value is num) {
-      return fastIntl(value);
-    }
-    return value.toString();
-  }
-
   static String fastIntl(num value) {
     if (value is int && value < 1000) {
       return value.toString();

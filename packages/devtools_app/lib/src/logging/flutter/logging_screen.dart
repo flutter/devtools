@@ -276,14 +276,10 @@ class _WhenColumn extends ColumnData<LogData> {
   double get fixedWidthPx => 120;
 
   @override
-  String render(dynamic value) {
-    return value == null
-        ? ''
-        : timeFormat.format(DateTime.fromMillisecondsSinceEpoch(value));
-  }
-
-  @override
-  String getValue(LogData dataObject) => render(dataObject.timestamp);
+  String getValue(LogData dataObject) => dataObject.timestamp == null
+      ? ''
+      : timeFormat
+          .format(DateTime.fromMillisecondsSinceEpoch(dataObject.timestamp));
 }
 
 class _KindColumn extends ColumnData<LogData>
@@ -295,9 +291,6 @@ class _KindColumn extends ColumnData<LogData>
 
   @override
   double get fixedWidthPx => 145;
-
-  @override
-  String render(dynamic value) => value;
 
   @override
   String getValue(LogData dataObject) => dataObject.kind;
@@ -344,17 +337,6 @@ class _MessageColumn extends ColumnData<LogData>
   _MessageColumn() : super('Message');
   @override
   bool get supportsSorting => false;
-
-  @override
-  String render(dynamic value) {
-    final LogData log = value;
-
-    if (log.summaryHtml != null) {
-      return log.summaryHtml;
-    } else {
-      return log.summary ?? log.details;
-    }
-  }
 
   @override
   String getValue(LogData dataObject) =>
