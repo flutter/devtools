@@ -197,6 +197,9 @@ class LogDetails extends StatefulWidget {
 
   @override
   _LogDetailsState createState() => _LogDetailsState();
+
+  static const copyToClipboardButtonKey =
+      Key('log_details_copy_to_clipboard_button');
 }
 
 class _LogDetailsState extends State<LogDetails>
@@ -259,6 +262,7 @@ class _LogDetailsState extends State<LogDetails>
       controls: [
         CopyToClipboardControl(
           data: log?.prettyPrinted,
+          buttonKey: LogDetails.copyToClipboardButtonKey,
         )
       ],
     );
