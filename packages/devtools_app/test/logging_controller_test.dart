@@ -35,13 +35,7 @@ void main() {
 
       final InspectorService inspectorService = MockInspectorService();
 
-      controller = LoggingController(
-        isVisible: () => true,
-        onLogCountStatusChanged: (String status) {
-          // We don't use the status for these tests.
-        },
-        inspectorService: inspectorService,
-      );
+      controller = LoggingController(inspectorService: inspectorService);
     });
 
     test('initial state', () {
@@ -95,6 +89,25 @@ void main() {
 
       expect(controller.data, hasLength(3));
       expect(controller.filteredData, hasLength(3));
+    });
+  });
+
+  group('LogData', () {
+    test(
+        'pretty prints when details are json, and returns its details otherwise.',
+        () {
+      final nonJson = LogData('some kind', 'Not json', 0);
+      final json = LogData(
+          'some kind', '{"firstValue": "value", "otherValue": "value2"}', 1);
+      final nullDetails = LogData('some kind', null, 1);
+      const prettyJson = '{\n'
+          '  "firstValue": "value",\n'
+          '  "otherValue": "value2"\n'
+          '}';
+
+      expect(json.prettyPrinted, prettyJson);
+      expect(nonJson.prettyPrinted, 'Not json');
+      expect(nullDetails.prettyPrinted, null);
     });
   });
 }

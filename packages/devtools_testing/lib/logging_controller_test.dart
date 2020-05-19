@@ -5,6 +5,8 @@
 // ignore_for_file: implementation_imports
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
+// TODO(#1370): rewrite this test for the flutter app.
+/*
 @TestOn('vm')
 import 'dart:async';
 import 'dart:ui';
@@ -138,8 +140,6 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
   };
 
   group('logging controller tests', () {
-    // TODO(#1370): rewrite this test for the flutter app.
-    /*
     test('structured errors', () async {
       // Enable structured errors.
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
@@ -256,27 +256,7 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
       }
       await env.tearDownEnvironment();
     });
-     */
   }, timeout: const Timeout.factor(8));
-
-  group('LogData', () {
-    test(
-        'pretty prints when details are json, and returns its details otherwise.',
-        () {
-      final nonJson = LogData('some kind', 'Not json', 0);
-      final json = LogData(
-          'some kind', '{"firstValue": "value", "otherValue": "value2"}', 1);
-      final nullDetails = LogData('some kind', null, 1);
-      const prettyJson = '{\n'
-          '  "firstValue": "value",\n'
-          '  "otherValue": "value2"\n'
-          '}';
-
-      expect(json.prettyPrinted, prettyJson);
-      expect(nonJson.prettyPrinted, 'Not json');
-      expect(nullDetails.prettyPrinted, null);
-    });
-  });
 }
 
 /// Normalize text in error messages that is likely unstable.
@@ -290,3 +270,4 @@ String normalizeErrorText(String message) {
     return line.replaceAll(RegExp(r'\d+(\.\d+)?'), '<NUMBER>');
   }).join('\n');
 }
+*/

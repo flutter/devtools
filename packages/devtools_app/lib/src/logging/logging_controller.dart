@@ -18,7 +18,6 @@ import '../globals.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../inspector/inspector_tree.dart';
-import '../table_data.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 
@@ -29,8 +28,6 @@ const int kMaxLogItemsUpperBound = 5500;
 final DateFormat timeFormat = DateFormat('HH:mm:ss.SSS');
 
 bool _verboseDebugging = false;
-
-typedef OnLogCountStatusChanged = void Function(String status);
 
 typedef OnShowDetails = void Function({
   String text,
@@ -155,11 +152,7 @@ class LoggingDetailsController {
 }
 
 class LoggingController {
-  LoggingController({
-    @required this.isVisible,
-    @required this.onLogCountStatusChanged,
-    this.inspectorService,
-  }) {
+  LoggingController({this.inspectorService}) {
     _listen(serviceManager.onConnectionAvailable, _handleConnectionStart);
     if (serviceManager.hasConnection) {
       _handleConnectionStart(serviceManager.service);
@@ -168,8 +161,6 @@ class LoggingController {
     _handleBusEvents();
   }
 
-  LoggingDetailsController detailsController;
-
   /// Listen on a stream and track the stream subscription for automatic
   /// disposal if the dispose method is called.
   StreamSubscription<T> _listen<T>(Stream<T> stream, void onData(T event)) {
@@ -177,28 +168,6 @@ class LoggingController {
     _subscriptions.add(subscription);
     return subscription;
   }
-
-  // TODO(devoncarew): This is not used by the Flutter web version of the app.
-  TableData<LogData> get loggingTableModel => _loggingTableModel;
-  TableData<LogData> _loggingTableModel;
-
-  set loggingTableModel(TableData<LogData> model) {
-    _loggingTableModel = model;
-    _listen(_loggingTableModel.onSelect, (LogData selection) {
-      detailsController?.setData(selection);
-    });
-
-    _updateStatus();
-    _listen(_loggingTableModel.onRowsChanged, (_) {
-      _updateStatus();
-    });
-  }
-
-  /// Callback returning whether the logging screen is visible.
-  final bool Function() isVisible;
-
-  /// Callbacks to apply changes in the controller to other views.
-  final OnLogCountStatusChanged onLogCountStatusChanged;
 
   final StreamController<String> _logStatusController =
       StreamController.broadcast();
@@ -237,10 +206,6 @@ class LoggingController {
   }
 
   final List<StreamSubscription> _subscriptions = [];
-
-  DateTime _lastScrollTime;
-
-  bool _hasPendingUiUpdates = false;
 
   final Reporter onLogsUpdated = Reporter();
 
@@ -283,16 +248,11 @@ class LoggingController {
   void _updateStatus() {
     final label = statusText;
     _logStatusController.add(label);
-
-    // TODO(devoncarew): The Flutter web version does not listen for this event.
-    onLogCountStatusChanged(label);
   }
 
   void clear() {
     data.clear();
     _cachedFilteredData = null;
-    detailsController?.setData(null);
-    _loggingTableModel?.setRows(data);
     _updateStatus();
   }
 
@@ -545,33 +505,8 @@ class LoggingController {
       data = data.sublist(itemsToRemove);
     }
 
-    if (isVisible() && _loggingTableModel != null) {
-      // TODO(jacobr): adding data should be more incremental than this.
-      // We are blowing away state for all already added rows.
-      _loggingTableModel.setRows(data);
-      // Smooth scroll if we haven't scrolled in a while, otherwise use an
-      // immediate scroll because repeatedly smooth scrolling on the web means
-      // you never reach your destination.
-      final DateTime now = DateTime.now();
-      final bool smoothScroll = _lastScrollTime == null ||
-          _lastScrollTime.difference(now).inSeconds > 1;
-      _lastScrollTime = now;
-      _loggingTableModel.scrollTo(data.last,
-          scrollBehavior: smoothScroll ? 'smooth' : 'auto');
-    } else {
-      _hasPendingUiUpdates = true;
-    }
-
     onLogsUpdated.notify();
     _updateStatus();
-  }
-
-  void entering() {
-    if (_hasPendingUiUpdates) {
-      _loggingTableModel?.setRows(data);
-      _loggingTableModel?.scrollTo(data.last, scrollBehavior: 'auto');
-      _hasPendingUiUpdates = false;
-    }
   }
 
   static RemoteDiagnosticsNode _findFirstSummary(RemoteDiagnosticsNode node) {

@@ -455,14 +455,7 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
       ),
       DevToolsScreen<LoggingController>(
         const LoggingScreen(),
-        createController: () => LoggingController(
-          onLogCountStatusChanged: (_) {
-            // TODO(devoncarew): This callback is not used.
-          },
-          // TODO(djshuckerow): Use a notifier pattern for the logging controller.
-          // That way, it is visible if it has listeners and invisible otherwise.
-          isVisible: () => true,
-        ),
+        createController: () => LoggingController(),
       ),
       const DevToolsScreen(InfoScreen(), createController: null),
 // Uncomment to see a sample implementation of a conditional screen.
