@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math' as math;
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -352,15 +351,12 @@ class LoggingController {
       final String frameId = '#${frame.number}';
       final String frameInfoText =
           '$frameId ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms ';
-      final String frameInfo = '<span class="pre">$frameInfoText</span>';
-      final String div = _createFrameDivHtml(frame);
 
       log(LogData(
         e.extensionKind.toLowerCase(),
         jsonEncode(e.extensionData.data),
         e.timestamp,
         summary: frameInfoText,
-        summaryHtml: '$frameInfo$div',
       ));
     } else if (e.extensionKind == NavigationInfo.eventName) {
       final NavigationInfo navInfo = NavigationInfo.from(e.extensionData.data);
@@ -770,9 +766,9 @@ String _valueAsString(InstanceRef ref) {
   }
 }
 
-/// A log data object that includes an optional summary (in either text or html
-/// form), information about whether the log entry represents an error entry,
-/// the log entry kind, and more detailed data for the entry.
+/// A log data object that includes optional summary information about whether
+/// the log entry represents an error entry, the log entry kind, and more
+/// detailed data for the entry.
 ///
 /// The details can optionally be loaded lazily on first use. If this is the
 /// case, this log entry will have a non-null `detailsComputer` field. After the
@@ -784,7 +780,6 @@ class LogData {
     this._details,
     this.timestamp, {
     this.summary,
-    this.summaryHtml,
     this.isError = false,
     this.detailsComputer,
     this.node,
@@ -794,7 +789,6 @@ class LogData {
   final int timestamp;
   final bool isError;
   final String summary;
-  final String summaryHtml;
 
   final RemoteDiagnosticsNode node;
   String _details;
@@ -885,33 +879,4 @@ class ServiceExtensionStateChangedInfo {
 
   final String extension;
   final dynamic value;
-}
-
-String getCssClassForEventKind(LogData item) {
-  String cssClass = '';
-
-  if (item.kind == 'stderr' || item.isError) {
-    cssClass = 'stderr';
-  } else if (item.kind == 'stdout') {
-    cssClass = 'stdout';
-  } else if (item.kind == 'flutter.error') {
-    cssClass = 'stderr';
-  } else if (item.kind.startsWith('flutter')) {
-    cssClass = 'flutter';
-  } else if (item.kind == 'gc') {
-    cssClass = 'gc';
-  }
-
-  return cssClass;
-}
-
-String _createFrameDivHtml(FrameInfo frame) {
-  const double maxFrameEventBarMs = 100.0;
-  final String classes = (frame.elapsedMs >= FrameInfo.kTargetMaxFrameTimeMs)
-      ? 'frame-bar over-budget'
-      : 'frame-bar';
-
-  final int pixelWidth =
-      (math.min(frame.elapsedMs, maxFrameEventBarMs) * 3).round();
-  return '<div class="$classes" style="width: ${pixelWidth}px"/>';
 }
