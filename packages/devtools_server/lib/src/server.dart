@@ -130,10 +130,7 @@ final argParser = ArgParser()
 /// Wraps [serveDevTools] `arguments` parsed, as from the command line.
 ///
 /// For more information on `handler`, see [serveDevTools].
-Future<HttpServer> serveDevToolsWithArgs(
-  List<String> arguments, {
-  shelf.Handler handler,
-}) async {
+Future<HttpServer> serveDevToolsWithArgs(List<String> arguments) async {
   final args = argParser.parse(arguments);
 
   final help = args[argHelp];
@@ -163,7 +160,6 @@ Future<HttpServer> serveDevToolsWithArgs(
     port: port,
     headlessMode: headlessMode,
     numPortsToTry: numPortsToTry,
-    handler: handler,
     serviceProtocolUri: vmUri,
     profileFilename: profileAbsoluteFilename,
     verboseMode: verboseMode,
@@ -189,7 +185,6 @@ Future<HttpServer> serveDevTools({
   String hostname = 'localhost',
   int port = 0,
   int numPortsToTry = 1,
-  shelf.Handler handler,
   String serviceProtocolUri = '',
   String profileFilename = '',
 }) async {
@@ -216,7 +211,7 @@ Future<HttpServer> serveDevTools({
 
   clients = ClientManager(enableNotifications);
 
-  handler ??= await defaultHandler(clients, debugMode: debugMode);
+  final handler = await defaultHandler(clients, debugMode: debugMode);
 
   HttpServer server;
   SocketException ex;
@@ -238,6 +233,9 @@ Future<HttpServer> serveDevTools({
   if (allowEmbedding) {
     server.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
   }
+  // Ensure browsers don't cache older versions of the app.
+  server.defaultResponseHeaders
+      .add(HttpHeaders.cacheControlHeader, 'max-age=900');
   shelf.serveRequests(server, handler);
 
   final devToolsUrl = 'http://${server.address.host}:${server.port}';
