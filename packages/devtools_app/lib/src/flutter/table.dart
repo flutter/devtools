@@ -333,8 +333,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
     final widths = <double>[];
     for (ColumnData<T> column in widget.columns) {
-      double width =
-          column.getNodeIndentPx(deepest, indentForTreeToggle: false);
+      double width = column.getNodeIndentPx(deepest);
       if (column.fixedWidthPx != null) {
         width += column.fixedWidthPx;
       } else {
@@ -928,8 +927,7 @@ class _TableRowState<T> extends State<TableRow<T>>
           ),
         );
       } else {
-        final padding =
-            column.getNodeIndentPx(node, indentForTreeToggle: false);
+        final padding = column.getNodeIndentPx(node);
 
         if (column is ColumnRenderer) {
           content = (column as ColumnRenderer).build(context, node);

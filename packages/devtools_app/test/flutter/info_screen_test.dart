@@ -6,6 +6,7 @@ import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/info/flutter/info_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/service_registrations.dart' as registrations;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -17,11 +18,25 @@ void main() {
   InfoScreen screen;
   FakeServiceManager fakeServiceManager;
   group('Info Screen', () {
-    setUp(() {
-      fakeServiceManager = FakeServiceManager(useFakeService: true);
+    void initServiceManager({
+      bool useFakeService = true,
+      bool flutterVersionServiceAvailable = true,
+    }) {
+      final availableServices = [
+        if (flutterVersionServiceAvailable)
+          registrations.flutterVersion.service,
+      ];
+      fakeServiceManager = FakeServiceManager(
+        useFakeService: useFakeService,
+        availableServices: availableServices,
+      );
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      mockIsFlutterApp(fakeServiceManager.connectedApp);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      mockIsFlutterApp(serviceManager.connectedApp);
+    }
+
+    setUp(() {
+      initServiceManager();
       screen = const InfoScreen();
     });
 
@@ -38,25 +53,24 @@ void main() {
       expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
     });
 
-    testWidgets('builds with flags data', (WidgetTester tester) async {
+    testWidgets('builds with version and flags data',
+        (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       await tester.pumpAndSettle();
-      expect(find.byKey(InfoScreen.flutterVersionKey), findsNothing);
+      expect(find.byKey(InfoScreen.flutterVersionKey), findsOneWidget);
       expect(find.byKey(InfoScreen.flagListKey), findsOneWidget);
     });
 
     testWidgets('builds with no data', (WidgetTester tester) async {
-      setGlobal(ServiceConnectionManager, FakeServiceManager());
+      initServiceManager(
+        useFakeService: false,
+        flutterVersionServiceAvailable: false,
+      );
       when(serviceManager.service.getFlagList()).thenAnswer((_) => null);
-      when(serviceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-      mockIsFlutterApp(serviceManager.connectedApp);
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InfoScreenBody), findsOneWidget);
       expect(find.byKey(InfoScreen.flutterVersionKey), findsNothing);
       expect(find.byKey(InfoScreen.flagListKey), findsNothing);
     });
-
-    // There's not an easy way to mock out the flutter version retrieval,
-    // so we have no tests for it.
   });
 }

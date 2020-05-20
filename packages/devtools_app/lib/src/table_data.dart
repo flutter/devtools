@@ -357,31 +357,14 @@ abstract class ColumnData<T> {
     this.title, {
     this.alignment = ColumnAlignment.left,
     this.fixedWidthPx,
-    this.percentWidth,
-    this.usesHtml = false,
-    this.hover = false,
-    this.cssClass,
-  }) {
-    if (percentWidth != null) {
-      percentWidth.clamp(0, 100);
-    }
-  }
+  });
 
-  ColumnData.wide(
-    this.title, {
-    this.alignment = ColumnAlignment.left,
-    this.usesHtml = false,
-    this.hover = false,
-    this.cssClass,
-  })  : percentWidth = defaultWideColumnPercentWidth,
-        fixedWidthPx = null;
+  ColumnData.wide(this.title, {this.alignment = ColumnAlignment.left})
+      : fixedWidthPx = null;
 
   static const defaultWideColumnPercentWidth = 100;
 
   final String title;
-
-  // TODO(jacobr): remove this field from the data before porting to FlutterWeb.
-  final String cssClass;
 
   /// Width of the column expressed as a fixed number of pixels.
   ///
@@ -389,25 +372,12 @@ abstract class ColumnData<T> {
   /// will be used.
   final double fixedWidthPx;
 
-  /// Width of the column expressed as a percent value between 0 and 100.
-  ///
-  /// TODO(jacobr): make this a double.
-  int percentWidth;
-
   /// How much to indent the data object by.
   ///
   /// This should only be non-zero for [TreeColumnData].
-  // TODO(kenz): remove `indentForTreeToggle` param once we delete the html app.
-  // we only added this so that we could tweak this API without breaking the
-  // dart:html app.
-  double getNodeIndentPx(T dataObject, {bool indentForTreeToggle = true}) =>
-      0.0;
+  double getNodeIndentPx(T dataObject) => 0.0;
 
   final ColumnAlignment alignment;
-
-  final bool usesHtml;
-
-  final bool hover;
 
   bool get numeric => false;
 
@@ -427,14 +397,6 @@ abstract class ColumnData<T> {
 
   /// Get the cell's tooltip value from the given [dataObject].
   String getTooltip(T dataObject) => '';
-
-  /// Given a value from [getValue], render it to a String.
-  String render(dynamic value) {
-    if (value is num) {
-      return fastIntl(value);
-    }
-    return value.toString();
-  }
 
   static String fastIntl(num value) {
     if (value is int && value < 1000) {
@@ -463,13 +425,10 @@ abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
 
   Stream<T> get onNodeCollapsed => nodeCollapsedController.stream;
 
-  // TODO(kenz): remove `indentForTreeToggle` param once we delete the html app.
-  // we only added this so that we could tweak this API without breaking the
-  // dart:html app.
   @override
-  double getNodeIndentPx(T dataObject, {bool indentForTreeToggle = true}) {
+  double getNodeIndentPx(T dataObject) {
     double indentWidth = dataObject.level * treeToggleWidth;
-    if (indentForTreeToggle && !dataObject.isExpandable) {
+    if (!dataObject.isExpandable) {
       // If the object is not expandable, we need to increase the width of our
       // spacer to account for the missing tree toggle.
       indentWidth += TreeColumnData.treeToggleWidth;

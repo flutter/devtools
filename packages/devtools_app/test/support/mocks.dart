@@ -32,6 +32,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({
     bool useFakeService = false,
     this.hasConnection = true,
+    this.availableServices = const [],
     Timeline timelineData,
   }) : service = useFakeService
             ? FakeVmService(_flagManager, timelineData)
@@ -40,6 +41,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   static final _flagManager = VmFlagManager();
+
+  final List<String> availableServices;
 
   final MockVM _mockVM = MockVM();
 
@@ -82,7 +85,26 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   ValueListenable<bool> registeredServiceListenable(String name) {
+    if (availableServices.contains(name)) {
+      return ImmediateValueNotifier(true);
+    }
     return ImmediateValueNotifier(false);
+  }
+
+  @override
+  Future<Response> getFlutterVersion() {
+    return Future.value(Response.parse({
+      'type': 'Success',
+      'frameworkVersion': '1.19.0-2.0.pre.59',
+      'channel': 'unknown',
+      'repositoryUrl': 'unknown source',
+      'frameworkRevision': '74432fa91c8ffbc555ffc2701309e8729380a012',
+      'frameworkCommitDate': '2020-05-14 13:05:34 -0700',
+      'engineRevision': 'ae2222f47e788070c09020311b573542b9706a78',
+      'dartSdkVersion': '2.9.0 (build 2.9.0-8.0.dev d6fed1f624)',
+      'frameworkRevisionShort': '74432fa91c',
+      'engineRevisionShort': 'ae2222f47e',
+    }));
   }
 
   @override
@@ -591,5 +613,6 @@ Future<void> ensureInspectorDependencies() async {
 }
 
 void mockIsFlutterApp(MockConnectedApp connectedApp) {
+  when(connectedApp.isFlutterAppNow).thenReturn(true);
   when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(true));
 }

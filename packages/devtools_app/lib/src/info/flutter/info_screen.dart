@@ -48,23 +48,12 @@ class InfoScreenBody extends StatefulWidget {
 }
 
 class _InfoScreenBodyState extends State<InfoScreenBody> {
-  FlutterVersion _flutterVersion;
-
   InfoController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = InfoController(
-      onFlutterVersionChanged: (flutterVersion) {
-        if (!mounted) return;
-        setState(
-          () {
-            _flutterVersion = flutterVersion;
-          },
-        );
-      },
-    )..entering();
+    _controller = InfoController();
   }
 
   @override
@@ -84,7 +73,11 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
           style: textTheme.headline5,
         ),
         const PaddedDivider(padding: EdgeInsets.only(top: 4.0)),
-        if (_flutterVersion != null) _VersionInformation(_flutterVersion),
+        ValueListenableBuilder(
+          valueListenable: _controller.flutterVersion,
+          builder: (context, version, _) =>
+              version == null ? const SizedBox() : _VersionInformation(version),
+        ),
         const Padding(padding: EdgeInsets.only(top: defaultSpacing)),
         Text(
           'VM Flag List',
