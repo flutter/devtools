@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/flutter/common_widgets.dart';
+import 'package:devtools_app/src/flutter/console.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/flutter/logging_screen.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
@@ -153,6 +154,45 @@ void main() {
         await tester.pumpAndSettle();
       });
 
+      testWidgets('Copy to clipboard button enables/disables correctly',
+          (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+
+        // Locates the copy to clipboard button's IconButton.
+        final copyButton = () => find
+            .byKey(LogDetails.copyToClipboardButtonKey)
+            .evaluate()
+            .first
+            .widget as IconButton;
+
+        expect(
+          copyButton().onPressed,
+          isNull,
+          reason:
+              'Copy to clipboard button should be disabled when no logs are selected',
+        );
+
+        await tester.tap(find.byKey(ValueKey(fakeLogData[5])));
+        await tester.pumpAndSettle();
+
+        expect(
+          copyButton().onPressed,
+          isNotNull,
+          reason:
+              'Copy to clipboard button should be enabled when a log with content is selected',
+        );
+
+        await tester.tap(find.byKey(ValueKey(fakeLogData[7])));
+        await tester.pumpAndSettle();
+
+        expect(
+          copyButton().onPressed,
+          isNull,
+          reason:
+              'Copy to clipboard button should be disabled when the log details are null',
+        );
+      });
+
       testWidgets('can compute details of non-json log data',
           (WidgetTester tester) async {
         const index = 8;
@@ -178,10 +218,9 @@ void main() {
           (WidgetTester tester) async {
         const index = 9;
         bool containsJson(Widget widget) {
-          if (widget is! RichText) return false;
-          final richText = widget as RichText;
-          return richText.text.toPlainText().contains('{') &&
-              richText.text.toPlainText().contains('}');
+          if (widget is! Console) return false;
+          final content = (widget as Console).textContent.trim();
+          return content.startsWith('{') && content.endsWith('}');
         }
 
         final findJson = find.descendant(
