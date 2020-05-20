@@ -8,26 +8,27 @@ import 'dart:math' as math;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/logger.dart';
 import '../../globals.dart';
+import '../../service_manager.dart';
 import '../../version.dart';
 import '../../vm_service_wrapper.dart';
 import 'memory_controller.dart';
 
 class MemoryTracker {
-  MemoryTracker(this.service, this.memoryController);
+  MemoryTracker(this.serviceManager, this.memoryController);
 
   static const Duration _updateDelay = Duration(milliseconds: 500);
 
-  VmServiceWrapper service;
+  ServiceConnectionManager serviceManager;
 
   final MemoryController memoryController;
+
+  VmServiceWrapper get service => serviceManager?.service;
 
   Timer _pollingTimer;
 
   final List<HeapSample> samples = <HeapSample>[];
-  final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
-  int heapMax;
+  final Map<String, MemoryUsage> isolateHeaps = <String, MemoryUsage>{};
 
   /// Polled VM current RSS.
   int processRss;
@@ -68,17 +69,20 @@ class MemoryTracker {
   void stop() {
     _updateLiveDataPolling(false);
     memoryController.paused.removeListener(_updateLiveDataPolling);
-    service = null;
+    serviceManager = null;
   }
 
   void _handleGCEvent(Event event) {
-    //final bool ignore = event.json['reason'] == 'compact';
+    final HeapSpace newHeap = HeapSpace.parse(event.json['new']);
+    final HeapSpace oldHeap = HeapSpace.parse(event.json['old']);
 
-    final List<HeapSpace> heaps = <HeapSpace>[
-      HeapSpace.parse(event.json['new']),
-      HeapSpace.parse(event.json['old'])
-    ];
-    _updateGCEvent(event.isolate.id, heaps);
+    final MemoryUsage memoryUsage = MemoryUsage(
+      externalUsage: newHeap.external + oldHeap.external,
+      heapCapacity: newHeap.capacity + oldHeap.capacity,
+      heapUsage: newHeap.used + oldHeap.used,
+    );
+
+    _updateGCEvent(event.isolate.id, memoryUsage);
     // TODO(terry): expose when GC occured as markers in memory timeline.
   }
 
@@ -88,25 +92,14 @@ class MemoryTracker {
       return;
     }
 
-    final VM vm = await service.getVM();
-
-    // TODO(terry): Need to handle a possible Sentinel being returned.
-    // TODO(devoncarew): Switch to using vmService.getMemoryUsage().
-    final List<Isolate> isolates =
-        await Future.wait(vm.isolates.map((IsolateRef ref) async {
-      try {
-        return await service.getIsolate(ref.id);
-      } catch (e) {
-        // TODO(terry): Seem to sometimes get a sentinel not sure how? VM issue?
-        // Unhandled Exception: type 'Sentinel' is not a subtype of type 'FutureOr<Isolate>'
-        log('Error [MEMORY_PROTOCOL]: $e');
-        return null;
-      }
-    }));
+    final isolateMemory = <IsolateRef, MemoryUsage>{};
+    for (IsolateRef isolateRef in serviceManager.isolateManager.isolates) {
+      isolateMemory[isolateRef] = await service.getMemoryUsage(isolateRef.id);
+    }
 
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-    if (hasConnection && vm.operatingSystem == 'android') {
+    if (hasConnection && serviceManager.vm.operatingSystem == 'android') {
       adbMemoryInfo = await _fetchAdbInfo();
     } else {
       // TODO(terry): TBD alternative for iOS memory info - all values zero.
@@ -114,27 +107,25 @@ class MemoryTracker {
     }
 
     // Polls for current RSS size.
-    _update(vm, isolates);
+    _update(await service.getVM(), isolateMemory);
+
     _pollingTimer = Timer(_updateDelay, _pollMemory);
   }
 
-  void _update(VM vm, List<Isolate> isolates) {
+  void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
     processRss = vm.json['_currentRSS'];
 
     isolateHeaps.clear();
 
-    for (Isolate isolate in isolates) {
-      if (isolate != null) {
-        final List<HeapSpace> heaps = getHeaps(isolate).toList();
-        isolateHeaps[isolate.id] = heaps;
-      }
+    for (IsolateRef isolateRef in isolateMemory.keys) {
+      isolateHeaps[isolateRef.id] = isolateMemory[isolateRef];
     }
 
     _recalculate();
   }
 
-  void _updateGCEvent(String id, List<HeapSpace> heaps) {
-    isolateHeaps[id] = heaps;
+  void _updateGCEvent(String isolateId, MemoryUsage memoryUsage) {
+    isolateHeaps[isolateId] = memoryUsage;
     _recalculate(true);
   }
 
@@ -143,48 +134,33 @@ class MemoryTracker {
       AdbMemoryInfo.fromJson((await serviceManager.getAdbMemoryInfo()).json);
 
   void _recalculate([bool fromGC = false]) async {
-    int total = 0;
-
     int used = 0;
     int capacity = 0;
     int external = 0;
-    for (List<HeapSpace> heaps in isolateHeaps.values) {
-      used += heaps.fold<int>(0, (i, heap) => i + heap.used);
-      capacity += heaps.fold<int>(0, (i, heap) => i + heap.capacity);
-      external += heaps.fold<int>(0, (i, heap) => i + heap.external);
 
-      capacity += external;
-
-      total +=
-          heaps.fold<int>(0, (i, heap) => i + heap.capacity + heap.external);
+    for (MemoryUsage memoryUsage in isolateHeaps.values) {
+      used += memoryUsage.heapUsage;
+      capacity += memoryUsage.heapCapacity;
+      external += memoryUsage.externalUsage;
     }
-
-    heapMax = total;
 
     int time = DateTime.now().millisecondsSinceEpoch;
     if (samples.isNotEmpty) {
       time = math.max(time, samples.last.timestamp);
     }
 
-    _addSample(HeapSample(
+    final HeapSample sample = HeapSample(
       time,
       processRss,
-      capacity,
+      capacity + external,
       used,
       external,
       fromGC,
       adbMemoryInfo,
-    ));
+    );
 
-    memoryController.memoryTimeline.addSample(HeapSample(
-      time,
-      processRss,
-      capacity,
-      used,
-      external,
-      fromGC,
-      adbMemoryInfo,
-    ));
+    _addSample(sample);
+    memoryController.memoryTimeline.addSample(sample);
   }
 
   void _addSample(HeapSample sample) {

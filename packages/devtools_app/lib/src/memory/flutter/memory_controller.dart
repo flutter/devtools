@@ -17,9 +17,9 @@ import '../../config_specific/file/file.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../flutter/table.dart';
 import '../../globals.dart';
+import '../../service_manager.dart';
 import '../../ui/flutter/utils.dart';
 import '../../utils.dart';
-import '../../vm_service_wrapper.dart';
 import '../memory_service.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
@@ -365,8 +365,8 @@ class MemoryController extends DisposableController
     // TODO(terry): Need an event on the controller for this too?
   }
 
-  void _handleConnectionStart(VmServiceWrapper service) {
-    _memoryTracker = MemoryTracker(service, this);
+  void _handleConnectionStart(ServiceConnectionManager serviceManager) {
+    _memoryTracker = MemoryTracker(serviceManager, this);
     _memoryTracker.start();
 
     autoDispose(
@@ -407,10 +407,11 @@ class MemoryController extends DisposableController
     );
 
     autoDispose(
-      serviceManager.onConnectionAvailable.listen(_handleConnectionStart),
+      serviceManager.onConnectionAvailable
+          .listen((_) => _handleConnectionStart(serviceManager)),
     );
     if (serviceManager.hasConnection) {
-      _handleConnectionStart(serviceManager.service);
+      _handleConnectionStart(serviceManager);
     }
     autoDispose(
       serviceManager.onConnectionClosed.listen(_handleConnectionStop),
