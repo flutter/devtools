@@ -656,6 +656,11 @@ class DebuggerController extends DisposableController
   }
 
   List<Variable> _createVariablesForFrame(Frame frame) {
+    // vars can be null for async frames.
+    if (frame.vars == null) {
+      return [];
+    }
+
     final variables = frame.vars.map((v) => Variable.create(v)).toList();
     variables.forEach(buildVariablesTree);
     return variables;

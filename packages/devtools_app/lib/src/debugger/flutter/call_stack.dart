@@ -62,6 +62,9 @@ class _CallStackState extends State<CallStack> {
     Widget child;
 
     final asyncMarker = frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
+    final asyncFrame = frame.frame.kind == FrameKind.kAsyncCausal ||
+        frame.frame.kind == FrameKind.kAsyncActivation ||
+        frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
     final noLineInfo = frame.line == null;
 
     if (asyncMarker) {
@@ -86,7 +89,9 @@ class _CallStackState extends State<CallStack> {
           text: _descriptionFor(frame),
           style: selected
               ? theme.selectedTextStyle
-              : (noLineInfo ? theme.subtleTextStyle : theme.regularTextStyle),
+              : (asyncFrame || noLineInfo
+                  ? theme.subtleTextStyle
+                  : theme.regularTextStyle),
           children: [
             TextSpan(
               text: _locationFor(frame),
