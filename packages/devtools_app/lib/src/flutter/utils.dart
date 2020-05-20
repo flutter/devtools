@@ -21,7 +21,10 @@ Future<void> launchUrl(String url, BuildContext context) async {
 ///
 /// Shows a `successMessage` [Notification] on the passed in `context`.
 Future<void> copyToClipboard(
-    String data, String successMessage, BuildContext context) async {
+  String data,
+  String successMessage,
+  BuildContext context,
+) async {
   await Clipboard.setData(ClipboardData(
     text: data,
   ));

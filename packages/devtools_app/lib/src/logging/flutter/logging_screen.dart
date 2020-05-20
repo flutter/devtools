@@ -261,7 +261,7 @@ class _LogDetailsState extends State<LogDetails>
         CopyToClipboardControl(
           dataProvider: disabled ? null : () => log?.prettyPrinted,
           buttonKey: LogDetails.copyToClipboardButtonKey,
-        )
+        ),
       ],
     );
   }
