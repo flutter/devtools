@@ -243,9 +243,8 @@ class _LogDetailsState extends State<LogDetails>
       return Stack(
         children: [
           _buildSimpleLog(context, log),
-          if (log != null && log.needsComputing) ...[
+          if (log != null && log.needsComputing)
             const Center(child: CircularProgressIndicator()),
-          ],
         ],
       );
     }
@@ -255,11 +254,12 @@ class _LogDetailsState extends State<LogDetails>
   Widget _buildInspector(BuildContext context, LogData log) => const SizedBox();
 
   Widget _buildSimpleLog(BuildContext context, LogData log) {
+    final disabled = log?.details == null || log.details.isEmpty;
     return Console(
       lines: log?.prettyPrinted?.split('\n'),
       controls: [
         CopyToClipboardControl(
-          data: log?.prettyPrinted,
+          dataProvider: disabled ? null : () => log?.prettyPrinted,
           buttonKey: LogDetails.copyToClipboardButtonKey,
         )
       ],

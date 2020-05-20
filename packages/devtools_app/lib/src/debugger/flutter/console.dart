@@ -56,7 +56,7 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
       lines: _lines,
       controls: [
         CopyToClipboardControl(
-          data: disabled ? null : _lines.join('\n'),
+          dataProvider: disabled ? null : () => _lines.join('\n'),
           successMessage: 'Copied $numLines ${pluralize('line', numLines)}.',
           buttonKey: DebuggerConsole.copyToClipboardButtonKey,
         ),
