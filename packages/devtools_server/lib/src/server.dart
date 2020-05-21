@@ -238,6 +238,9 @@ Future<HttpServer> serveDevTools({
   if (allowEmbedding) {
     server.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
   }
+  // Ensure browsers don't cache older versions of the app.
+  server.defaultResponseHeaders
+      .add(HttpHeaders.cacheControlHeader, 'max-age=900');
   shelf.serveRequests(server, handler);
 
   final devToolsUrl = 'http://${server.address.host}:${server.port}';

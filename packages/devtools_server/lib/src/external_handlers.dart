@@ -47,7 +47,6 @@ Future<shelf.Handler> defaultHandler(
   Handler debugProxyHandler;
   if (debugMode) {
     // Start up a flutter run -d web-server instance.
-
     const webPort = 9101;
 
     // ignore: unawaited_futures
