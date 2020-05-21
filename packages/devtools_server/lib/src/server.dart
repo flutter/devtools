@@ -130,7 +130,10 @@ final argParser = ArgParser()
 /// Wraps [serveDevTools] `arguments` parsed, as from the command line.
 ///
 /// For more information on `handler`, see [serveDevTools].
-Future<HttpServer> serveDevToolsWithArgs(List<String> arguments) async {
+Future<HttpServer> serveDevToolsWithArgs(
+  List<String> arguments,
+  shelf.Handler handler,
+) async {
   final args = argParser.parse(arguments);
 
   final help = args[argHelp];
@@ -160,6 +163,7 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments) async {
     port: port,
     headlessMode: headlessMode,
     numPortsToTry: numPortsToTry,
+    handler: handler,
     serviceProtocolUri: vmUri,
     profileFilename: profileAbsoluteFilename,
     verboseMode: verboseMode,
@@ -185,6 +189,7 @@ Future<HttpServer> serveDevTools({
   String hostname = 'localhost',
   int port = 0,
   int numPortsToTry = 1,
+  shelf.Handler handler,
   String serviceProtocolUri = '',
   String profileFilename = '',
 }) async {
@@ -211,7 +216,7 @@ Future<HttpServer> serveDevTools({
 
   clients = ClientManager(enableNotifications);
 
-  final handler = await defaultHandler(clients, debugMode: debugMode);
+  handler ??= await defaultHandler(clients, debugMode: debugMode);
 
   HttpServer server;
   SocketException ex;
