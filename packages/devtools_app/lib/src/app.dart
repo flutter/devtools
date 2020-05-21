@@ -36,6 +36,7 @@ import 'ui/service_extension_widgets.dart';
 import 'utils.dart';
 
 const homeRoute = '/';
+const disconnectedRoute = '/disconnected';
 const snapshotRoute = '/snapshot';
 
 /// Top-level configuration for the app.
@@ -123,12 +124,19 @@ class DevToolsAppState extends State<DevToolsApp> {
     return _routes ??= {
       homeRoute: (_, params, __) {
         if (params['uri']?.isNotEmpty ?? false) {
+          final embed = params['embed'] == 'true';
+          final page = params['page'];
+          final tabs = embed && page != null
+              ? _visibleScreens().where((p) => p.screenId == page).toList()
+              : _visibleScreens();
           return Initializer(
             url: params['uri'],
+            disconnectedRoute: embed ? disconnectedRoute : homeRoute,
             builder: (_) => _providedControllers(
               child: DevToolsScaffold(
-                initialPage: params['page'],
-                tabs: _visibleScreens(),
+                embed: embed,
+                initialPage: page,
+                tabs: tabs,
                 actions: [
                   if (serviceManager.connectedApp.isFlutterAppNow) ...[
                     HotReloadButton(),
@@ -151,6 +159,9 @@ class DevToolsAppState extends State<DevToolsApp> {
             child: SnapshotScreenBody(args, _screens),
           ),
         );
+      },
+      disconnectedRoute: (_, __, ___) {
+        return const CenteredMessage('App Disconnected.');
       }
     };
   }

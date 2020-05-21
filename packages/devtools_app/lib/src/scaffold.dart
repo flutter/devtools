@@ -35,6 +35,7 @@ class DevToolsScaffold extends StatefulWidget {
     @required this.tabs,
     this.initialPage,
     this.actions,
+    this.embed = false,
   })  : assert(tabs != null),
         super(key: key);
 
@@ -67,6 +68,9 @@ class DevToolsScaffold extends StatefulWidget {
 
   /// The initial page to render.
   final String initialPage;
+
+  /// Whether to render the embedded view (without the header).
+  final bool embed;
 
   /// Actions that it's possible to perform in this Scaffold.
   ///
@@ -271,13 +275,14 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           // to make sure we are only handling drops from the active scaffold.
           handleDrop: _importController.importData,
           child: Scaffold(
-            appBar: _buildAppBar(),
+            appBar: widget.embed ? null : _buildAppBar(),
             body: TabBarView(
               physics: defaultTabBarViewPhysics,
               controller: _tabController,
               children: tabBodies,
             ),
-            bottomNavigationBar: _buildStatusLine(context),
+            bottomNavigationBar:
+                widget.embed ? null : _buildStatusLine(context),
           ),
         ),
       ),

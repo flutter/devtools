@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'app.dart';
 import 'auto_dispose_mixin.dart';
 import 'framework/framework_core.dart';
 import 'globals.dart';
@@ -24,8 +25,12 @@ import 'url_utils.dart';
 /// connected. As we require additional services to be available, add them
 /// here.
 class Initializer extends StatefulWidget {
-  const Initializer({Key key, @required this.url, @required this.builder})
-      : assert(builder != null),
+  const Initializer({
+    Key key,
+    @required this.url,
+    @required this.builder,
+    this.disconnectedRoute = homeRoute,
+  })  : assert(builder != null),
         super(key: key);
 
   /// The builder for the widget's children.
@@ -37,6 +42,9 @@ class Initializer extends StatefulWidget {
   ///
   /// If null, the app will navigate to the [ConnectScreen].
   final String url;
+
+  /// The route to navigate to when the VM becomes disconnected.
+  final String disconnectedRoute;
 
   @override
   _InitializerState createState() => _InitializerState();
@@ -86,7 +94,7 @@ class _InitializerState extends State<Initializer>
 
   Future<void> _attemptUrlConnection() async {
     if (widget.url == null) {
-      _navigateToConnectPage();
+      _handleNoConnection();
       return;
     }
 
@@ -99,15 +107,15 @@ class _InitializerState extends State<Initializer>
     );
 
     if (!connected) {
-      _navigateToConnectPage();
+      _handleNoConnection();
     }
   }
 
-  /// Goes to the connect page if the [service.serviceManager] is not currently connected.
-  void _navigateToConnectPage() {
+  /// Goes to the connect/disconnected page if the [service.serviceManager] is not currently connected.
+  void _handleNoConnection() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
-        Navigator.of(context).popAndPushNamed('/');
+        Navigator.of(context).popAndPushNamed(widget.disconnectedRoute);
       }
     });
   }
