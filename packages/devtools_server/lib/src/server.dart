@@ -131,9 +131,9 @@ final argParser = ArgParser()
 ///
 /// For more information on `handler`, see [serveDevTools].
 Future<HttpServer> serveDevToolsWithArgs(
-  List<String> arguments,
+  List<String> arguments, {
   shelf.Handler handler,
-) async {
+}) async {
   final args = argParser.parse(arguments);
 
   final help = args[argHelp];
