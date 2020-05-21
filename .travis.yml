@@ -6,7 +6,7 @@ os:
 
 language: dart
 dart:
-  - "dev/raw/latest"
+  - dev
 # Exclude stable for now as we depend on Flutter features not availabe on
 # stable.
 #  - stable
