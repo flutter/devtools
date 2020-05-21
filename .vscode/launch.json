@@ -15,14 +15,6 @@
 			]
 		},
 		{
-			"type": "chrome",
-			"request": "launch",
-			"name": "Serve DDC app",
-			"url": "http://localhost:8080",
-			"webRoot": "${workspaceFolder}/packages/devtools_app/web",
-			"preLaunchTask": "Serve DDC"
-		},
-		{
 			"type": "dart",
 			"request": "launch",
 			"name": "Run Server with Release Build",
