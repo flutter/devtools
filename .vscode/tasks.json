@@ -2,26 +2,6 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Serve DDC",
-			"type": "shell",
-			"options": {
-				"cwd": "${workspaceFolder}/packages/devtools_app",
-			},
-			"command": "flutter",
-			"args": [
-				"pub",
-				"run",
-				"build_runner",
-				"serve",
-				"web"
-			],
-			"group": "build",
-			"isBackground": true,
-			"problemMatcher": [
-				"$dart-pub-build_runner"
-			]
-		},
-		{
 			"label": "Build Release Package",
 			"type": "shell",
 			"options": {
