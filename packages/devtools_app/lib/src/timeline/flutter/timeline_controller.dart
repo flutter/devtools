@@ -55,6 +55,10 @@ class TimelineController
   ValueListenable<TimelineFrame> get selectedFrame => _selectedFrameNotifier;
   final _selectedFrameNotifier = ValueNotifier<TimelineFrame>(null);
 
+  /// The flutter frames in the current timeline.
+  ValueListenable<List<TimelineFrame>> get flutterFrames => _flutterFrames;
+  final _flutterFrames = ValueNotifier<List<TimelineFrame>>([]);
+
   /// Whether an empty timeline recording was just recorded.
   ValueListenable<bool> get emptyTimeline => _emptyTimeline;
   final _emptyTimeline = ValueNotifier<bool>(false);
@@ -148,6 +152,13 @@ class TimelineController
   /// This list is cleared and repopulated each time "Refresh" is clicked.
   List<TraceEventWrapper> allTraceEvents = [];
 
+  /// Tracks the longest frame portion (UI or Raster) time for the current
+  /// timeline data.
+  ///
+  /// This is used by [FlutterFramesChart] when calculating the scale for the
+  /// chart's Y axis.
+  int longestFramePortionMs = 0;
+
   void _startTimeline() async {
     await serviceManager.onServiceAvailable;
     unawaited(allowedError(
@@ -160,6 +171,11 @@ class TimelineController
       gcTimelineStream,
     ]);
     await toggleHttpRequestLogging(true);
+
+    // Initialize displayRefreshRate.
+    _displayRefreshRate.value =
+        await serviceManager.getDisplayRefreshRate() ?? defaultRefreshRate;
+    data?.displayRefreshRate = _displayRefreshRate.value;
   }
 
   Future<void> selectTimelineEvent(TimelineEvent event) async {
@@ -189,12 +205,8 @@ class TimelineController
     data.cpuProfileData = cpuProfilerController.dataNotifier.value;
   }
 
-  Future<double> get displayRefreshRate async {
-    final refreshRate =
-        await serviceManager.getDisplayRefreshRate() ?? defaultRefreshRate;
-    data?.displayRefreshRate = refreshRate;
-    return refreshRate;
-  }
+  ValueListenable<double> get displayRefreshRate => _displayRefreshRate;
+  final _displayRefreshRate = ValueNotifier<double>(defaultRefreshRate);
 
   void selectFrame(TimelineFrame frame) {
     if (frame == null || data == null || data.selectedFrame == frame) {
@@ -223,7 +235,14 @@ class TimelineController
   }
 
   void addFrame(TimelineFrame frame) {
+    // Ensure we start tracking [longestFramePortionMs] at 0.
+    if (data.frames.isEmpty) longestFramePortionMs = 0;
+
     data.frames.add(frame);
+    if (frame.uiDurationMs > longestFramePortionMs ||
+        frame.rasterDurationMs > longestFramePortionMs) {
+      longestFramePortionMs = frame.time.duration.inMilliseconds;
+    }
   }
 
   Future<void> refreshData() async {
@@ -256,6 +275,9 @@ class TimelineController
     _processingNotifier.value = true;
     await processTraceEvents(allTraceEvents);
     _processingNotifier.value = false;
+
+    _flutterFrames.value = data.frames;
+
     _timelineProcessedController.add(true);
   }
 
@@ -388,6 +410,7 @@ class TimelineController
   }
 
   void setOfflineData() {
+    _flutterFrames.value = offlineTimelineData.frames;
     final frameToSelect = offlineTimelineData.frames.firstWhere(
       (frame) => frame.id == offlineTimelineData.selectedFrameId,
       orElse: () => null,
@@ -471,6 +494,8 @@ class TimelineController
     cpuProfilerController.reset();
     data?.clear();
     processor?.reset();
+    longestFramePortionMs = 0;
+    _flutterFrames.value = [];
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
     _processingNotifier.value = false;

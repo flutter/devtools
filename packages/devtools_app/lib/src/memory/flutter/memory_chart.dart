@@ -211,7 +211,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(
-                      height: liveChartHeight,
+                      height: defaultChartHeight,
                       child: LineChart(dartChartController),
                     ),
                     _timelineSlider,
@@ -223,7 +223,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         if (controller.isAndroidChartVisible)
           Expanded(
             child: SizedBox(
-              height: liveChartHeight,
+              height: defaultChartHeight,
               child: LineChart(androidChartController),
             ),
           ),
