@@ -121,7 +121,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+      builder: (context, constraints) {
         final columnWidths = _computeColumnWidths(constraints.maxWidth);
 
         return _Table<T>(
@@ -934,7 +934,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                       : Icons.expand_more,
                   size: defaultIconSize,
                 ),
-              if (isSortColumn) const SizedBox(width: 4.0),
+              if (isSortColumn) const SizedBox(width: densePadding),
               // TODO: This Flexible wrapper was added to get the
               // network_profiler_test.dart tests to pass.
               Flexible(
