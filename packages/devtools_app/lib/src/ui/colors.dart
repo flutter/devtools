@@ -34,15 +34,6 @@ const mainRasterColorDark = Color(0xFF1A73E8); // Blue 600 Material Dark
 const mainUiColorSelectedDark = Colors.white;
 const mainRasterColorSelectedDark = Color(0xFFC9C9C9); // Grey.
 
-const Color selectedUiColor = ThemedColor(
-  mainUiColorSelectedLight,
-  mainUiColorSelectedDark,
-);
-const Color selectedRasterColor = ThemedColor(
-  mainRasterColorSelectedLight,
-  mainRasterColorSelectedDark,
-);
-
 // Light Blue 50: 200-400 (light mode) - see https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 // Blue Material Dark: 200-400 (dark mode) - see https://standards.google/guidelines/google-material/color/dark-theme.html#style.
 final uiColorPalette = [

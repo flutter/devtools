@@ -157,8 +157,8 @@ Color titleSolidBackgroundColor(ThemeData theme) {
 }
 
 final chartBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
-
 const chartAccentColor = ThemedColor(Color(0xFFCCCCCC), Color(0xFF585858));
+const chartTextColor = ThemedColor(Colors.black, Colors.white);
 
 final chartLightTypeFace = TypeFace(
   fontFamily: 'OpenSans',

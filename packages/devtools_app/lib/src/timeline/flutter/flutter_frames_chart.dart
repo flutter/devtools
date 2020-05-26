@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
-import '../../flutter/common_widgets.dart' show ScrollControllerAutoScroll;
+import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
 import '../../ui/colors.dart';
 import '../../utils.dart';
@@ -120,6 +120,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   Widget _buildChart() {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final themeData = Theme.of(context);
         final chart = ListView.builder(
           controller: scrollController,
           scrollDirection: Axis.horizontal,
@@ -133,6 +134,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
             totalWidth: totalChartWidth,
             displayRefreshRate: widget.displayRefreshRate,
             msPerPx: msPerPx,
+            themeData: themeData,
           ),
         );
         final fpsLinePainter = CustomPaint(
@@ -141,6 +143,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
             totalWidth: totalChartWidth,
             displayRefreshRate: widget.displayRefreshRate,
             msPerPx: msPerPx,
+            themeData: themeData,
           ),
         );
         return Stack(
@@ -163,31 +166,20 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     final selected = frame == _selectedFrame;
     final janky = _isFrameJanky(frame);
 
-    Color uiColor() {
-      if (selected) return selectedFlutterFrameUiColor;
-      if (janky) return uiJankColor;
-      return mainUiColor;
-    }
-
-    Color rasterColor() {
-      if (selected) return selectedFlutterFrameRasterColor;
-      if (janky) return rasterJankColor;
-      return mainRasterColor;
-    }
-
     final ui = Container(
       width: defaultFrameWidth / 2,
       height: (frame.uiDurationMs / msPerPx).clamp(0.0, availableChartHeight),
-      color: uiColor(),
+      color: janky ? uiJankColor : mainUiColor,
     );
     final raster = Container(
       width: defaultFrameWidth / 2,
       height:
           (frame.rasterDurationMs / msPerPx).clamp(0.0, availableChartHeight),
-      color: rasterColor(),
+      color: janky ? rasterJankColor : mainRasterColor,
     );
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: densePadding),
+      color: selected ? chartAccentColor : null,
       child: Column(
         children: [
           // Dummy child so that the InkWell does not take up the entire column.
@@ -219,10 +211,9 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _legendItem('UI (Dart)', mainUiColor),
-        _legendItem('Raster (Flutter Engine)', mainRasterColor),
+        _legendItem('Frame Time (UI)', mainUiColor),
+        _legendItem('Frame Time (Raster)', mainRasterColor),
         _legendItem('Jank (slow frame)', uiJankColor),
-        _legendItem('Selected frame', selectedFlutterFrameUiColor),
       ],
     );
   }
@@ -259,7 +250,10 @@ class ChartAxisPainter extends CustomPainter {
     @required this.totalWidth,
     @required this.displayRefreshRate,
     @required this.msPerPx,
+    @required this.themeData,
   });
+
+  static const yAxisTickWidth = 8.0;
 
   final BoxConstraints constraints;
 
@@ -268,6 +262,8 @@ class ChartAxisPainter extends CustomPainter {
   final double displayRefreshRate;
 
   final double msPerPx;
+
+  final ThemeData themeData;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -293,46 +289,84 @@ class ChartAxisPainter extends CustomPainter {
       Paint()..color = chartAccentColor,
     );
 
-    const yAxisTickWidth = 8.0;
+    _paintYAxisLabels(canvas, chartArea);
+  }
+
+  void _paintYAxisLabels(
+    Canvas canvas,
+    Rect chartArea,
+  ) {
     const yAxisLabelCount = 6;
     final totalMs = msPerPx * constraints.maxHeight;
+
     // Subtract 1 because one of the labels will be 0.0 ms.
-    final timeUnitMs = totalMs ~/ (yAxisLabelCount - 1);
-    for (int i = 0; i < yAxisLabelCount; i++) {
-      final labelMs = i * timeUnitMs;
-      final labelText = msText(
-        Duration(milliseconds: labelMs),
-        fractionDigits: 0,
-      );
+    final int timeUnitMs = totalMs ~/ (yAxisLabelCount - 1);
 
-      // Paint a tick on the axis.
-      final tickY = constraints.maxHeight - labelMs / msPerPx;
-      canvas.drawLine(
-        Offset(chartArea.left - yAxisTickWidth / 2, tickY),
-        Offset(chartArea.left + yAxisTickWidth / 2, tickY),
-        Paint()..color = chartAccentColor,
-      );
+    // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
+    final targetMsPerFrame = 1 / displayRefreshRate * 1000;
+    final targetMsPerFrameRounded = targetMsPerFrame.round();
 
-      // Paint the axis label.
-      final textPainter = TextPainter(
-        text: TextSpan(text: labelText),
-        textAlign: TextAlign.right,
-        textDirection: TextDirection.ltr,
-      )..layout();
+    final yAxisTimes = [
+      0,
+      for (int timeMs = targetMsPerFrameRounded - timeUnitMs;
+          timeMs > 0;
+          timeMs -= timeUnitMs)
+        timeMs,
+      targetMsPerFrameRounded,
+      for (int timeMs = targetMsPerFrameRounded - timeUnitMs;
+          timeMs > 0;
+          timeMs -= timeUnitMs)
+        timeMs,
+    ];
 
-      textPainter.paint(
-        canvas,
-        Offset(
-          0.0,
-          constraints.maxHeight - labelMs / msPerPx - textPainter.height / 2,
-        ),
-      );
+    for (final timeMs in yAxisTimes) {
+      _paintYAxisLabel(canvas, chartArea, timeMs: timeMs);
     }
+  }
+
+  void _paintYAxisLabel(
+    Canvas canvas,
+    Rect chartArea, {
+    @required int timeMs,
+  }) {
+    final labelText = msText(
+      Duration(milliseconds: timeMs),
+      fractionDigits: 0,
+    );
+
+    // Paint a tick on the axis.
+    final tickY = constraints.maxHeight - timeMs / msPerPx;
+    canvas.drawLine(
+      Offset(chartArea.left - yAxisTickWidth / 2, tickY),
+      Offset(chartArea.left + yAxisTickWidth / 2, tickY),
+      Paint()..color = chartAccentColor,
+    );
+
+    // Paint the axis label.
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: labelText,
+        style: const TextStyle(color: chartTextColor),
+      ),
+      textAlign: TextAlign.end,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    textPainter.paint(
+      canvas,
+      Offset(
+        _FlutterFramesChartState.yAxisUnitsSpace -
+            yAxisTickWidth / 2 -
+            densePadding - // Padding between y axis tick and label
+            textPainter.width,
+        constraints.maxHeight - timeMs / msPerPx - textPainter.height / 2,
+      ),
+    );
   }
 
   @override
   bool shouldRepaint(ChartAxisPainter oldDelegate) {
-    return false;
+    return themeData.isDarkTheme != oldDelegate.themeData.isDarkTheme;
   }
 }
 
@@ -342,6 +376,7 @@ class FPSLinePainter extends CustomPainter {
     @required this.totalWidth,
     @required this.displayRefreshRate,
     @required this.msPerPx,
+    @required this.themeData,
   });
 
   static const fpsLineColor = Color.fromARGB(0x80, 0xff, 0x44, 0x44);
@@ -355,6 +390,8 @@ class FPSLinePainter extends CustomPainter {
   final double displayRefreshRate;
 
   final double msPerPx;
+
+  final ThemeData themeData;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -379,7 +416,10 @@ class FPSLinePainter extends CustomPainter {
     );
 
     final textPainter = TextPainter(
-      text: TextSpan(text: '${displayRefreshRate.toStringAsFixed(0)} FPS'),
+      text: TextSpan(
+        text: '${displayRefreshRate.toStringAsFixed(0)} FPS',
+        style: const TextStyle(color: chartTextColor),
+      ),
       textAlign: TextAlign.right,
       textDirection: TextDirection.ltr,
     )..layout();
@@ -394,7 +434,7 @@ class FPSLinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
+  bool shouldRepaint(FPSLinePainter oldDelegate) {
+    return themeData.isDarkTheme != oldDelegate.themeData.isDarkTheme;
   }
 }
