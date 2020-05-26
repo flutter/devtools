@@ -31,7 +31,6 @@ dependencies:
   mp_chart: ^0.1.7
   path: ^1.6.0
   pedantic: ^1.7.0
-  platform_detect: ^1.3.5
   provider: ^4.0.0
   url_launcher: ^5.0.0
   vm_service: ^4.0.2
@@ -54,7 +53,12 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - web/widgets.json
+    - assets/
+    - assets/img/
+    - assets/img/layout_explorer/
+    - assets/img/layout_explorer/cross_axis_alignment/
+    - assets/img/layout_explorer/main_axis_alignment/
+    - assets/scripts/inspector_polyfill_script.dart
     - icons/
     - icons/actions/
     - icons/custom/
@@ -63,12 +67,7 @@ flutter:
     - icons/inspector/
     - icons/memory/
     - icons/perf/
-    - assets/
-    - assets/img/
-    - assets/img/layout_explorer/
-    - assets/img/layout_explorer/main_axis_alignment/
-    - assets/img/layout_explorer/cross_axis_alignment/
-    - assets/scripts/inspector_polyfill_script.dart
+    - web/widgets.json
 
   fonts:
     - family: Roboto
