@@ -93,6 +93,19 @@ class MemoryController extends DisposableController
 
   bool get isLeafSelected => selectedLeaf != null;
 
+  void computeRoot() {
+    if (selectedLeaf != null) {
+      final root = instanceToFieldNodes(this, selectedLeaf);
+      _instanceRoot = root.isNotEmpty ? root : [FieldReference.empty];
+    } else {
+      _instanceRoot = [FieldReference.empty];
+    }
+  }
+
+  List<FieldReference> _instanceRoot;
+
+  List<FieldReference> get instanceRoot => _instanceRoot;
+
   MemoryTimeline memoryTimeline;
 
   MemoryLog memoryLog;
@@ -333,7 +346,13 @@ class MemoryController extends DisposableController
 
   ValueListenable<String> get groupingByNotifier => groupingBy;
 
-  bool selectTheSearch = false;
+  final selectTheSearchNotifier = ValueNotifier<bool>(false);
+
+  bool get selectTheSearch => selectTheSearchNotifier.value;
+
+  set selectTheSearch(bool v) {
+    selectTheSearchNotifier.value = v;
+  }
 
   final _searchNotifier = ValueNotifier<String>('');
 
@@ -496,11 +515,46 @@ class MemoryController extends DisposableController
     // Group by class (under root library __CLASSES__).
     classRoot = LibraryReference(this, classRootNode, null);
 
-    final externalReference = ExternalReference(this);
-    final filteredReference = FilteredReference(this);
+    final snapshotgraph = snapshots.last.snapshotGraph;
+    final externalReferences =
+        ExternalReferences(this, snapshotgraph.externalSize);
+    for (final liveExternal in heapGraph.externals) {
+      final HeapGraphClassLive classLive = liveExternal.live.theClass;
 
-    libraryRoot.addChild(externalReference);
-    libraryRoot.addChild(filteredReference);
+      ExternalReference externalReference;
+
+      if (externalReferences.children.isNotEmpty) {
+        externalReference = externalReferences.children.singleWhere(
+          (knownClass) => knownClass.name == classLive.name,
+          orElse: () => null,
+        );
+      }
+
+      if (externalReference == null) {
+        externalReference =
+            ExternalReference(this, classLive.name, liveExternal);
+        externalReferences.addChild(externalReference);
+      }
+
+      final classInstance = ObjectReference(
+        this,
+        externalReference.children.length,
+        liveExternal.live,
+      );
+
+      externalReference.addChild(classInstance);
+    }
+
+    libraryRoot.addChild(externalReferences);
+
+    // Add our filtered items under the 'Filtered' node.
+    if (filtered) {
+      final filteredReference = FilteredReference(this);
+      final filtered = heapGraph.filteredLibraries;
+      addAllToNode(filteredReference, filtered);
+
+      libraryRoot.addChild(filteredReference);
+    }
 
     // Compute all libraries.
     final groupBy =
@@ -537,17 +591,52 @@ class MemoryController extends DisposableController
     return libraryRoot;
   }
 
+  void addAllToNode(
+      Reference root, Map<String, List<HeapGraphClassLive>> allItems) {
+    allItems.forEach((libraryName, classes) {
+      LibraryReference libReference = root.children.singleWhere((library) {
+        return libraryName == library.name;
+      }, orElse: () => null);
+
+      // Library not found add to list of children.
+      libReference ??= LibraryReference(this, libraryName, classes);
+      root.addChild(libReference);
+
+      for (var actualClass in libReference.actualClasses) {
+        monitorClass(
+          className: actualClass.name,
+          message: 'computeAllLibraries',
+        );
+        final classRef = ClassReference(this, actualClass);
+        classRef.addChild(Reference.empty);
+
+        libReference.addChild(classRef);
+
+        // TODO(terry): Consider adding the ability to clear the table tree cache
+        // (root) to reset the level/depth values.
+        final classRefClassGroupBy = ClassReference(this, actualClass);
+        classRefClassGroupBy.addChild(Reference.empty);
+        classRoot.addChild(classRefClassGroupBy);
+      }
+    });
+  }
+
   Future getObject(String objectRef) async =>
       await serviceManager.service.getObject(
         _isolateId,
         objectRef,
       );
 
+  bool _gcing = false;
+  bool get isGcing => _gcing;
+
   Future<void> gc() async {
+    _gcing = true;
     await serviceManager.service.getAllocationProfile(
       _isolateId,
       gc: true,
     );
+    _gcing = false;
   }
 
   // Temporary hack to allow accessing private fields(e.g., _extra) using eval

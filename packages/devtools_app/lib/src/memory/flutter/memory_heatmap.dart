@@ -110,31 +110,15 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
       });
     });
 
+    addAutoDisposeListener(controller.selectTheSearchNotifier, () {
+      setState(() {
+        _trySelectItem();
+      });
+    });
+
     addAutoDisposeListener(controller.searchNotifier, () {
       setState(() {
-        if (controller.search.isNotEmpty) {
-          if (controller.selectTheSearch) {
-            // Select the node.
-            final Node node = findNode(controller.search);
-            selectNode(node);
-
-            closeAutoCompleteOverlay();
-
-            controller.selectTheSearch = false;
-            controller.search = '';
-          } else {
-            // No exact match, return top matches.
-            var matches = matchNames(controller.search);
-            matches.sort();
-            matches = matches.sublist(0, min(topMatches, matches.length));
-
-            controller.searchAutoComplete.value = matches;
-          }
-        } else if (controller.selectTheSearch) {
-          // Escape hit, on empty search.
-          selectNode(null);
-          controller.selectTheSearch = false;
-        }
+        _trySelectItem();
       });
     });
 
@@ -150,6 +134,32 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
         }
       });
     });
+  }
+
+  void _trySelectItem() {
+    if (controller.search.isNotEmpty) {
+      if (controller.selectTheSearch) {
+        // Select the node.
+        final Node node = findNode(controller.search);
+        selectNode(node);
+
+        closeAutoCompleteOverlay();
+
+        controller.selectTheSearch = false;
+        controller.search = '';
+      } else {
+        // No exact match, return top matches.
+        var matches = matchNames(controller.search);
+        matches.sort();
+        matches = matches.sublist(0, min(topMatches, matches.length));
+
+        controller.searchAutoComplete.value = matches;
+      }
+    } else if (controller.selectTheSearch) {
+      // Escape hit, on empty search.
+      selectNode(null);
+      controller.selectTheSearch = false;
+    }
   }
 
   @override

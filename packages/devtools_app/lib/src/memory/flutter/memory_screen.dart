@@ -328,7 +328,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         const SizedBox(width: denseSpacing),
         OutlineButton(
           key: MemoryScreen.gcButtonKey,
-          onPressed: _gc,
+          onPressed: controller.isGcing ? null : _gc,
           child: const MaterialIconLabel(
             Icons.delete_sweep,
             'GC',
@@ -360,7 +360,16 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
     // TODO(terry): TBD real implementation needed.
   }
 
-  void _gc() {
-    // TODO(terry): Implementation needed.
+  Future<void> _gc() async {
+    // TODO(terry): Record GC in analytics.
+    try {
+      print("GC Starting");
+      
+      await controller.gc();
+
+      print("GC'ed");
+    } catch (e) {
+      /*framework.toast('Unable to GC ${e.toString()}', title: 'Error');*/
+    }
   }
 }

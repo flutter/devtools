@@ -160,19 +160,16 @@ class Selection<T> {
   Selection(
       {this.node,
       this.nodeIndex,
-      this.scrollIntoView = false,
-      this.displayRow});
+      this.scrollIntoView = false,});
 
   Selection.empty()
       : node = null,
         nodeIndex = null,
-        scrollIntoView = false,
-        displayRow = null;
+        scrollIntoView = false;
 
   final T node;
   final int nodeIndex;
   final bool scrollIntoView;
-  int displayRow;
 }
 
 class SelectionNotifier<T> extends ValueNotifier<T> {
@@ -261,6 +258,16 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     _focusNode = FocusNode();
   }
 
+  void expandParents(T parent) {
+    if (parent?.parent?.index != -1) {
+      expandParents(parent?.parent);
+    }
+
+    if (parent != null && !parent.isExpanded) {
+      _toggleNode(parent);
+    }
+  }
+
   @override
   void didUpdateWidget(TreeTable oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -268,13 +275,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     cancel();
 
     addAutoDisposeListener(selectionNotifier, () {
-      selectionNotifier.value.displayRow = _selectionRowNumber();
-
       setState(() {
         final node = selectionNotifier.value.node;
         final parent = node.parent;
-        if (!parent.isExpanded) {
-          _toggleNode(parent);
+        if (parent != null) {
+          expandParents(parent);
         }
       });
     });
@@ -287,55 +292,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     rootsExpanded =
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
-  }
-
-  /// Return the row number of the selected node.  This row number is the visual
-  /// row number including all rows above.
-  int _selectionRowNumber() {
-    final selectedNode = selectionNotifier.value.node;
-
-    final parents = List<T>(selectedNode.level);
-    T scanNode = selectedNode;
-    while (!scanNode.isRoot) {
-      parents[scanNode.parent.level] = scanNode.parent;
-      scanNode = scanNode.parent;
-    }
-
-    var displayRows = -1;
-    for (final T data in dataRoots) {
-      displayRows++;
-      final parentLevel = data.level;
-      if (parents[parentLevel] == data) {
-        // Found the parentage match of the selectedNode, drill down children
-        // of the selectedNode.
-        for (T child in parents[parentLevel].children) {
-          displayRows++;
-          if (child == selectedNode) {
-            return displayRows;
-          }
-        }
-      } else {
-        displayRows += _expandedRows(data);
-      }
-    }
-
-    return displayRows;
-  }
-
-  /// Return total rows displayed in node expanded children and
-  /// any of their expanded nested children.
-  int _expandedRows(T node) {
-    var displayRows = 0;
-
-    if (node.isExpanded) {
-      if (node.children.isNotEmpty) {
-        for (final child in node.children) {
-          displayRows += 1 + _expandedRows(child);
-        }
-      }
-    }
-
-    return displayRows;
   }
 
   void _initData() {
@@ -698,13 +654,60 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
       setState(() {
         final selection = oldWidget.selectionNotifier.value;
         if (selection.scrollIntoView) {
-          final newPosition = selection.displayRow * defaultRowHeight;
-          // TODO(terry): Optimize selecting row that's in the viewport
-          //              otherwise we jumpTo.
-          scrollController.jumpTo(newPosition);
+          final selectedDisplayRow = selectionRowNumber(selection.node);
+
+          // Compute total rows above immediate parent.
+          var parentNode = selection.node.parent;
+          if (parentNode.index != -1) {
+            parentNode = parentNode.parent;
+          }
+          while (parentNode.index != -1) {
+            parentNode = parentNode.parent;
+          }
+
+          final newPos = selectedDisplayRow * defaultRowHeight;
+          // TODO(terry): Optimize selecting row, if row's visible in
+          //              the viewport just select otherwise jumpTo row.
+          scrollController.jumpTo(newPos);
         }
       });
     });
+  }
+
+  /// Return the number of visible rows above the selected node.
+  int selectionRowNumber(dynamic selectedNode) {
+    var scanNode = selectedNode;
+    var parent = scanNode.parent;
+
+    var totalVisibleRowsAboveNode = 0;
+    while (!scanNode.isRoot) {
+      final rowsAbove = parent.children.indexWhere((node) {
+        return scanNode == node;
+      });
+
+      if (rowsAbove > 0) {
+        // Add parent row to the count.
+        totalVisibleRowsAboveNode += rowsAbove + (parent.index >= 0 ? 1 : 0);
+      }
+
+      // Check all scanNode's parent siblings above current scanNode.
+      for (final sibling in parent.children) {
+        if (sibling == scanNode) break;
+
+        // Any parent siblings above expanded? Count those rows too.
+        if (sibling.isExpanded) {
+          // Count of a parent node's children and parent, if expanded,
+          // above selected node.
+          totalVisibleRowsAboveNode += sibling.children.length + 1;
+        }
+      }
+
+      scanNode = parent;
+      parent = scanNode.parent;
+    }
+
+    // Return zero based row.
+    return totalVisibleRowsAboveNode - 1;
   }
 
   @override

@@ -42,6 +42,73 @@ enum SnapshotStatus {
   done,
 }
 
+enum WildcardMatch {
+  exact,
+  startsWith,
+  endsWith,
+  contains,
+}
+
+/// If no wildcard then exact match.
+/// *NNN - ends with NNN
+/// NNN* - starts with NNN
+/// NNN*ZZZ - starts with NNN and ends with ZZZ
+const knowClassesToAnalyzeForImages = <WildcardMatch, List<String>>{
+  // Anything that contains the phrase:
+  WildcardMatch.contains: [
+    'Image',
+  ],
+
+  // Anything that starts with:
+  WildcardMatch.startsWith: [],
+
+  // Anything that exactly matches:
+  WildcardMatch.exact: [
+    '_Int32List',
+    'FrameInfos',
+  ],
+
+  // Anything that ends with:
+  WildcardMatch.endsWith: [],
+};
+
+/// RegEx expressions to handle the WildcardMatches:
+///     Ends with Image:      \[_A-Za-z0-9_]*Image\$
+///     Starts with Image:    ^Image
+///     Contains Image:       Image
+///     Extact Image:         ^Image$
+String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
+  final resultRegEx = StringBuffer();
+  matchingCriteria.forEach((key, value) {
+    if (value.isNotEmpty) {
+      final name = value;
+      String regEx;
+      switch (key) {
+        case WildcardMatch.exact:
+          regEx = '^${name.join("\$|^")}\$';
+          break;
+        case WildcardMatch.startsWith:
+          regEx = '^${name.join("|^")}';
+          break;
+        case WildcardMatch.endsWith:
+          regEx = '^\[_A-Za-z0-9]*${name.join("\|[_A-Za-z0-9]*")}\$';
+          break;
+        case WildcardMatch.contains:
+          regEx = '${name.join("|")}';
+          break;
+        default:
+          assert(false, 'buildRegExs: Unhandled WildcardMatch');
+      }
+      resultRegEx.write(resultRegEx.isEmpty ? '($regEx' : '|$regEx');
+    }
+  });
+
+  resultRegEx.write(')');
+  return resultRegEx.toString();
+}
+
+final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
+
 class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   @visibleForTesting
   static const snapshotButtonKey = Key('Snapshot Button');
@@ -54,9 +121,11 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   @visibleForTesting
   static const expandAllButtonKey = Key('Expand All Button');
   @visibleForTesting
+  static const searchButtonKey = Key('Snapshot Search');
+  @visibleForTesting
   static const filterButtonKey = Key('Snapshot Filter');
   @visibleForTesting
-  static const searchButtonKey = Key('Snapshot Search');
+  static const analyzeButtonKey = Key('Snapshot Analyze');
   @visibleForTesting
   static const settingsButtonKey = Key('Snapshot Settings');
 
@@ -87,7 +156,9 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     });
 
     addAutoDisposeListener(controller.leafSelectedNotifier, () {
-      setState(() {});
+      setState(() {
+        controller.computeRoot();
+      });
     });
 
     addAutoDisposeListener(controller.searchNotifier, () {
@@ -436,6 +507,18 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
           ),
         ),
         const SizedBox(width: denseSpacing),
+        Flexible(
+          child: OutlineButton(
+            key: analyzeButtonKey,
+            onPressed: controller.snapshots.isNotEmpty ? _analyze : null,
+            child: const MaterialIconLabel(
+              Icons.highlight,
+              'Analyze',
+              includeTextWidth: 200,
+            ),
+          ),
+        ),
+        const SizedBox(width: denseSpacing),
         OutlineButton(
           key: settingsButtonKey,
           onPressed: _settings,
@@ -537,6 +620,97 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     );
   }
 
+  bool _classMatcher(HeapGraphClassLive liveClass) {
+    final regExp = RegExp(knownClassesRegExs);
+    return regExp.allMatches(liveClass.name).isNotEmpty;
+  }
+
+  List<ExternalReference> _collect(List dupSearch) {
+    final externalsToAnalyze = <ExternalReference>[];
+
+    // Analyze the external heap for memory information
+    final root = controller.libraryRoot;
+    assert(root != null);
+
+    print(">>>> RegEx = $knownClassesRegExs");
+
+// TODO(terry): Remove dupSearch debug code.
+    for (final library in root.children) {
+      if (library.isExternals) {
+        final ExternalReferences externals = library;
+        for (final ExternalReference external in externals.children) {
+          assert(external.isExternal);
+
+          final liveExternal = external.liveExternal;
+          final size = liveExternal.externalProperty.externalSize;
+          final liveElement = liveExternal.live;
+          final HeapGraphClassLive liveClass = liveElement.theClass;
+          if (_classMatcher(liveClass)) {
+            externalsToAnalyze.add(external);
+          }
+
+          // TODO(terrry): Remove debug code.
+          if (liveClass.name.contains('Image') ||
+              liveClass.name == '_Int32List' ||
+              liveClass.name == 'FrameInfos') {
+            dupSearch.add(liveElement);
+          }
+        }
+      }
+    }
+
+    return externalsToAnalyze;
+  }
+
+  void _analyze() {
+    // TODO(terry): Remove debug code.
+    List debugDupSearch = [];
+
+    final externalsToAnalyze = _collect(debugDupSearch);
+
+    // TODO(terry): Remove this debug code.
+    debugValidateCollecting(externalsToAnalyze, debugDupSearch);
+
+    // Analyze the collected data.
+
+    // TODO(terry): TBD
+    for (final externalRef in externalsToAnalyze) {
+      final liveElement = externalRef.liveExternal.live;
+      final HeapGraphClassLive liveClass = liveElement.theClass;
+      print(liveClass.name);
+      if (liveClass.name == 'ImageCache') {
+        print("STOP");
+      }
+    }
+  }
+
+  // TODO(terry): Remove this debug code.
+  void debugValidateCollecting(externalsToAnalyze, debugDupSearch) {
+    print(
+        "regEx found =  ${externalsToAnalyze.length} dupSearch found = ${debugDupSearch.length}");
+    List regEx = <String>[];
+    List dup = <String>[];
+    for (var item in externalsToAnalyze) {
+      final liveClass = item.liveExternal.live.theClass as HeapGraphClassLive;
+      regEx.add(liveClass.name);
+//      print('  regex found name = ${liveClass.name}');
+    }
+    print('============');
+    for (var item in debugDupSearch) {
+      final live = item as HeapGraphElementLive;
+      final liveClass = live.theClass as HeapGraphClassLive;
+      dup.add(liveClass.name);
+//      print('  dupSearch found name = ${liveClass.name}');
+    }
+    regEx.sort();
+    dup.sort();
+    assert(regEx.length == dup.length);
+    for (var index = 0; index < regEx.length; index++) {
+      assert(regEx[index] == dup[index]);
+    }
+    print('MATCHED regEx and dup');
+  }
+
   void _settings() {
     // TODO(terry): TBD
   }
@@ -562,11 +736,6 @@ class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
     super.initState();
   }
 
-  List<FieldReference> computeRoot() {
-    final root = instanceToFieldNodes(controller, controller.selectedLeaf);
-    return root.isNotEmpty ? root : [FieldReference.empty];
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -583,10 +752,6 @@ class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
         controller.computeAllLibraries(true, true);
       });
     });
-
-    addAutoDisposeListener(controller.leafSelectedNotifier, () {
-      setState(() {});
-    });
   }
 
   void setupColumns() {
@@ -600,7 +765,7 @@ class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
   @override
   Widget build(BuildContext context) {
     controller.instanceFieldsTreeTable = TreeTable<FieldReference>(
-      dataRoots: computeRoot(),
+      dataRoots: controller.instanceRoot,
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name),
@@ -749,67 +914,119 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
       setState(() {});
     });
 
-    addAutoDisposeListener(controller.searchNotifier, () {
+    addAutoDisposeListener(controller.selectTheSearchNotifier, () {
       setState(() {
-        final searchingValue = controller.search;
-        if (searchingValue.isNotEmpty) {
-          if (controller.selectTheSearch) {
-            // Found an exact match.
-            selectItemInTree(searchingValue);
-            controller.selectTheSearch = false;
-            controller.search = '';
-            return;
-          }
-
-          // No exact match, return the list of possible matches.
-          controller.searchAutoComplete.value = [];
-
-          final matches = <String>[];
-
-          switch (controller.groupingBy.value) {
-            case MemoryController.groupByLibrary:
-              for (final reference in controller.groupByTreeTable.dataRoots) {
-                if (reference.isLibrary) {
-                  final LibraryReference libraryReference = reference;
-                  final match = matchSearch(libraryReference, searchingValue);
-                  if (match.isNotEmpty) {
-                    matches.add(match);
-                  }
-
-                  // Check the class names in the library
-                  for (final ClassReference classReference
-                      in libraryReference.children) {
-                    final match = matchSearch(classReference, searchingValue);
-                    if (match.isNotEmpty) {
-                      matches.add(match);
-                    }
-                  }
-                }
-              }
-              break;
-            case MemoryController.groupByClass:
-              for (final reference in controller.groupByTreeTable.dataRoots) {
-                if (reference.isClass) {
-                  final ClassReference classReference = reference;
-                  final match = matchSearch(classReference, searchingValue);
-                  if (match.isNotEmpty) {
-                    matches.add(match);
-                  }
-                }
-              }
-              break;
-            case MemoryController.groupByInstance:
-              // TODO(terry): TBD
-              break;
-          }
-
-          // Use top 10 matches:
-          matches.sort();
-          controller.searchAutoComplete.value =
-              matches.sublist(0, min(topMatches, matches.length));
-        }
+        _trySelectItem();
       });
     });
+
+    addAutoDisposeListener(controller.searchNotifier, () {
+      setState(() {
+        _trySelectItem();
+      });
+    });
+  }
+
+  void _trySelectItem() {
+    final searchingValue = controller.search;
+    if (searchingValue.isNotEmpty) {
+      if (controller.selectTheSearch) {
+        // Found an exact match.
+        selectItemInTree(searchingValue);
+        controller.selectTheSearch = false;
+        controller.search = '';
+        return;
+      }
+
+      // No exact match, return the list of possible matches.
+      controller.searchAutoComplete.value = [];
+
+      final externalMatches = <String>[];
+      final filteredMatches = <String>[];
+      final matches = <String>[];
+
+      switch (controller.groupingBy.value) {
+        case MemoryController.groupByLibrary:
+          for (final reference in controller.groupByTreeTable.dataRoots) {
+            if (reference.isLibrary) {
+              matches.addAll(matchesInLibrary(reference, searchingValue));
+            } else if (reference.isExternals) {
+              final ExternalReferences refs = reference;
+              for (final ExternalReference ext in refs.children) {
+                final match = matchSearch(ext, searchingValue);
+                if (match.isNotEmpty) {
+                  externalMatches.add(match);
+                }
+              }
+            } else if (reference.isFiltered) {
+              // Matches in the filtered nodes.
+              final FilteredReference filteredReference = reference;
+              for (final library in filteredReference.children) {
+                filteredMatches.addAll(matchesInLibrary(
+                  library,
+                  searchingValue,
+                ));
+              }
+            }
+          }
+          break;
+        case MemoryController.groupByClass:
+          matches.addAll(matchClasses(
+              controller.groupByTreeTable.dataRoots, searchingValue));
+          break;
+        case MemoryController.groupByInstance:
+          // TODO(terry): TBD
+          break;
+      }
+
+      // Ordered in importance (matches, external, filtered).
+      matches.addAll(externalMatches);
+      matches.addAll(filteredMatches);
+
+      // Remove duplicates and use top 10 matches:
+      final normalizedMatches = matches.toSet().toList()..sort();
+      controller.searchAutoComplete.value = normalizedMatches.sublist(
+          0,
+          min(
+            topMatches,
+            normalizedMatches.length,
+          ));
+    }
+  }
+
+  List<String> matchesInLibrary(
+    LibraryReference libraryReference,
+    String searchingValue,
+  ) {
+    final matches = <String>[];
+
+    final match = matchSearch(libraryReference, searchingValue);
+    if (match.isNotEmpty) {
+      matches.add(match);
+    }
+
+    final List<Reference> classes = libraryReference.children;
+    matches.addAll(matchClasses(classes, searchingValue));
+
+    return matches;
+  }
+
+  List<String> matchClasses(
+    List<Reference> classReferences,
+    String searchingValue,
+  ) {
+    final matches = <String>[];
+
+    // Check the class names in the library
+    for (final ClassReference classReference in classReferences) {
+      final match = matchSearch(classReference, searchingValue);
+      if (match.isNotEmpty) {
+        matches.add(match);
+      }
+    }
+
+    // Remove duplicates
+    return matches;
   }
 
   String matchSearch(Reference ref, String matchString) {
@@ -826,29 +1043,21 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
       case MemoryController.groupByLibrary:
         for (final reference in controller.groupByTreeTable.dataRoots) {
           if (reference.isLibrary) {
-            final LibraryReference libraryReference = reference;
-            if (libraryReference.name == searchingValue) {
-              controller.selectionNotifier.value = Selection(
-                node: libraryReference,
-                nodeIndex: libraryReference.index,
-                scrollIntoView: true,
-              );
-              controller.searchAutoComplete.value = [];
-              return true;
+            final foundIt = _selectItemInTree(reference, searchingValue);
+            if (foundIt) return true;
+          } else if (reference.isFiltered) {
+            // Matches in the filtered nodes.
+            final FilteredReference filteredReference = reference;
+            for (final library in filteredReference.children) {
+              final foundIt = _selectItemInTree(library, searchingValue);
+              if (foundIt) return true;
             }
-
-            // Check the class names in the library
-            for (final ClassReference classReference
-                in libraryReference.children) {
-              if (classReference.name == searchingValue) {
-                // Class name match.
-                controller.selectionNotifier.value = Selection(
-                  node: classReference,
-                  nodeIndex: classReference.index,
-                  scrollIntoView: true,
-                );
-                controller.searchAutoComplete.value = [];
-                return true;
+          } else if (reference.isExternals) {
+            if (reference.isExternals) {
+              final ExternalReferences refs = reference;
+              for (final ExternalReference external in refs.children) {
+                final foundIt = _selectItemInTree(external, searchingValue);
+                if (foundIt) return true;
               }
             }
           }
@@ -857,22 +1066,48 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
       case MemoryController.groupByClass:
         for (final reference in controller.groupByTreeTable.dataRoots) {
           if (reference.isClass) {
-            final ClassReference classReference = reference;
-            if (classReference.name == searchingValue) {
-              controller.selectionNotifier.value = Selection(
-                node: classReference,
-                nodeIndex: classReference.index,
-                scrollIntoView: true,
-              );
-              controller.searchAutoComplete.value = [];
-              return true;
-            }
+            return _selecteClassInTree(reference, searchingValue);
           }
         }
         break;
       case MemoryController.groupByInstance:
         // TODO(terry): TBD
         break;
+    }
+
+    return false;
+  }
+
+  bool _selectItemInTree(Reference reference, String searchingValue) {
+    // TODO(terry): Only finds first one.
+    if (reference.name == searchingValue) {
+      controller.selectionNotifier.value = Selection(
+        node: reference,
+        nodeIndex: reference.index,
+        scrollIntoView: true,
+      );
+      controller.searchAutoComplete.value = [];
+      return true;
+    }
+
+    // Check the class names in the library
+    return _selecteClassInTree(reference, searchingValue);
+  }
+
+  bool _selecteClassInTree(Reference reference, String searchingValue) {
+    // Check the class names in the library
+    for (final Reference classReference in reference.children) {
+      // TODO(terry): Only finds first one.
+      if (classReference.name == searchingValue) {
+        // Class name match.
+        controller.selectionNotifier.value = Selection(
+          node: classReference,
+          nodeIndex: classReference.index,
+          scrollIntoView: true,
+        );
+        controller.searchAutoComplete.value = [];
+        return true;
+      }
     }
 
     return false;
@@ -961,10 +1196,10 @@ class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
       // Return number of classes.
       final libraryReference = dataObject as LibraryReference;
       return libraryReference.actualClasses.length;
-    } else if (dataObject.isClass) {
-      // Return number of instances.
-      final classReference = dataObject as ClassReference;
-      return classReference.instances.length;
+    } else if (dataObject.isClass ||
+        dataObject.isExternals ||
+        dataObject.isExternal) {
+      return dataObject.children.length;
     }
 
     return '';
@@ -1034,8 +1269,13 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
           sizeAllVisibleLibraries(dataObject.controller.libraryRoot.children);
       final snapshotGraph = dataObject.controller.snapshots.last.snapshotGraph;
       return snapshotGraph.shallowSize - sum;
-    } else if (dataObject.isExternal) {
+    } else if (dataObject.isExternals) {
       return dataObject.controller.snapshots.last.snapshotGraph.externalSize;
+    } else if (dataObject.isExternal) {
+      return (dataObject as ExternalReference)
+          .liveExternal
+          .externalProperty
+          .externalSize;
     }
 
     return '';
@@ -1094,6 +1334,13 @@ class _RetainedSizeColumn extends ColumnData<Reference> {
       // Return number of instances.
       final objectReference = dataObject as ObjectReference;
       return objectReference.instance.origin.shallowSize;
+    } else if (dataObject.isExternals) {
+      return dataObject.controller.snapshots.last.snapshotGraph.externalSize;
+    } else if (dataObject.isExternal) {
+      return (dataObject as ExternalReference)
+          .liveExternal
+          .externalProperty
+          .externalSize;
     }
 
     return '';
