@@ -362,14 +362,9 @@ abstract class ColumnData<T> {
   ColumnData.wide(this.title, {this.alignment = ColumnAlignment.left})
       : fixedWidthPx = null;
 
-  static const defaultWideColumnPercentWidth = 100;
-
   final String title;
 
   /// Width of the column expressed as a fixed number of pixels.
-  ///
-  /// If both [fixedWidthPx] and [percentWidth] are specified, [fixedWidthPx]
-  /// will be used.
   final double fixedWidthPx;
 
   /// How much to indent the data object by.
@@ -393,18 +388,10 @@ abstract class ColumnData<T> {
   dynamic getValue(T dataObject);
 
   /// Get the cell's display value from the given [dataObject].
-  dynamic getDisplayValue(T dataObject) => getValue(dataObject);
+  String getDisplayValue(T dataObject) => getValue(dataObject).toString();
 
   /// Get the cell's tooltip value from the given [dataObject].
-  String getTooltip(T dataObject) => '';
-
-  static String fastIntl(num value) {
-    if (value is int && value < 1000) {
-      return value.toString();
-    } else {
-      return nf.format(value);
-    }
-  }
+  String getTooltip(T dataObject) => getDisplayValue(dataObject);
 
   @override
   String toString() => title;

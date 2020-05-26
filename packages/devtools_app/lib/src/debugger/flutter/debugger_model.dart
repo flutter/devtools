@@ -215,6 +215,7 @@ class Variable extends TreeNode<Variable> {
           valueStr += '...';
         }
         if (value.kind == InstanceKind.kString) {
+          // TODO(devoncarew): Handle multi-line strings.
           valueStr = "'$valueStr'";
         }
       }

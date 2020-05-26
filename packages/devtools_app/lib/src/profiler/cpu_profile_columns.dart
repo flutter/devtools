@@ -88,7 +88,7 @@ class SourceColumn extends ColumnData<CpuStackFrame> {
   dynamic getValue(CpuStackFrame dataObject) => dataObject.url;
 
   @override
-  dynamic getDisplayValue(CpuStackFrame dataObject) {
+  String getDisplayValue(CpuStackFrame dataObject) {
     return getSimplePackageUrl(dataObject.url);
   }
 

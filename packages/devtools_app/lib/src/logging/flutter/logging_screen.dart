@@ -22,9 +22,6 @@ import '../../ui/flutter/service_extension_widgets.dart';
 import '../../utils.dart';
 import '../logging_controller.dart';
 
-// TODO(devoncarew): The last column of a table should take up all remaining
-// width.
-
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
   const LoggingScreen()
@@ -335,7 +332,8 @@ class _KindColumn extends ColumnData<LogData>
 
 class _MessageColumn extends ColumnData<LogData>
     implements ColumnRenderer<LogData> {
-  _MessageColumn() : super('Message');
+  _MessageColumn() : super.wide('Message');
+
   @override
   bool get supportsSorting => false;
 
@@ -348,7 +346,7 @@ class _MessageColumn extends ColumnData<LogData>
     if (data.kind == 'flutter.frame') {
       const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
       final Text text = Text(
-        '${getDisplayValue(data)}',
+        getDisplayValue(data),
         overflow: TextOverflow.ellipsis,
         style: fixedFontStyle(context),
       );
