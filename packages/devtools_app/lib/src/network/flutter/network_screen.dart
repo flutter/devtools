@@ -292,7 +292,6 @@ class DurationColumn extends ColumnData<HttpRequestData> {
     return dataObject.duration?.inMilliseconds;
   }
 
-  // todo: test
   @override
   String getDisplayValue(HttpRequestData dataObject) {
     final ms = getValue(dataObject);

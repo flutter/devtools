@@ -233,7 +233,8 @@ void main() {
         }
       }
 
-      // todo:
+      // TODO(devoncarew): The tests don't pass if we try and test more than one
+      // http request.
       for (final request in controller.requests.value.requests.sublist(0, 1)) {
         // Tap a row and ensure the inspector is populated.
         await tester.tap(find.byKey(ValueKey(request)));
