@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../flutter/table.dart';
+import '../../flutter/theme.dart';
 import '../../http/http.dart';
 import '../../http/http_request_data.dart';
 import '../../utils.dart';
@@ -163,7 +165,9 @@ class HttpRequestCookiesView extends StatelessWidget {
   }
 
   DataCell _buildCell(String value) => DataCell(Text(value ?? '--'));
-  DataCell _buildIconCell(IconData icon) => DataCell(Icon(icon));
+
+  DataCell _buildIconCell(IconData icon) =>
+      DataCell(Icon(icon, size: defaultIconSize));
 
   Widget _buildCookiesTable(
     BuildContext context,
@@ -212,6 +216,7 @@ class HttpRequestCookiesView extends StatelessWidget {
                     ),
               child: DataTable(
                 key: key,
+                dataRowHeight: defaultRowHeight,
                 // NOTE: if this list of columns change, _buildRow will need
                 // to be updated to match.
                 columns: [

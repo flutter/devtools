@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../flutter/common_widgets.dart';
@@ -13,10 +14,10 @@ import '../../flutter/table.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../http/http_request_data.dart';
+import '../../table_data.dart';
 import '../../utils.dart';
 import '../network_controller.dart';
 import 'http_request_inspector.dart';
-import 'network_model.dart';
 
 class NetworkScreen extends Screen {
   const NetworkScreen()
@@ -41,16 +42,16 @@ class NetworkScreen extends Screen {
   @override
   Widget buildStatus(BuildContext context, TextTheme textTheme) {
     final networkController = Provider.of<NetworkController>(context);
-
     final color = Theme.of(context).textTheme.bodyText2.color;
 
     return ValueListenableBuilder<bool>(
       valueListenable: networkController.recordingNotifier,
       builder: (context, recording, _) {
         return ValueListenableBuilder<HttpRequests>(
-          valueListenable: networkController.requestsNotifier,
+          valueListenable: networkController.requests,
           builder: (context, httpRequests, _) {
             final count = httpRequests.requests.length;
+
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -79,15 +80,10 @@ class NetworkScreenBody extends StatefulWidget {
   const NetworkScreenBody();
 
   @override
-  State<StatefulWidget> createState() => NetworkScreenBodyState();
+  State<StatefulWidget> createState() => _NetworkScreenBodyState();
 }
 
-class NetworkScreenBodyState extends State<NetworkScreenBody> {
-  final _dataTableSource = HttpRequestDataTableSource();
-
-  static bool _sortAscending = false;
-  static int _sortColumnIndex;
-
+class _NetworkScreenBodyState extends State<NetworkScreenBody> {
   NetworkController _networkController;
 
   @override
@@ -96,6 +92,7 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
 
     final newController = Provider.of<NetworkController>(context);
     if (newController == _networkController) return;
+
     _networkController?.removeClient();
 
     _networkController = newController;
@@ -108,21 +105,6 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
     super.dispose();
   }
 
-  void _onSort(
-    Function getField,
-    int columnIndex,
-    bool ascending,
-  ) {
-    _dataTableSource.sort(
-      getField,
-      ascending,
-    );
-    setState(() {
-      _sortAscending = ascending;
-      _sortColumnIndex = columnIndex;
-    });
-  }
-
   /// Builds the row of buttons that control the HTTP profiler (e.g., record,
   /// pause, etc.)
   Row _buildHttpProfilerControlRow(bool isRecording) {
@@ -133,7 +115,7 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
         recordButton(
           key: NetworkScreen.recordButtonKey,
           recording: isRecording,
-          labelOverride: 'Record traffic',
+          labelOverride: 'Record HTTP traffic',
           includeTextWidth: includeTextWidth,
           onPressed: _networkController.startRecording,
         ),
@@ -148,7 +130,6 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
         clearButton(
           key: NetworkScreen.clearButtonKey,
           onPressed: () {
-            _dataTableSource.clearSelection();
             _networkController.clear();
           },
         ),
@@ -156,75 +137,13 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
     );
   }
 
-  Widget _buildHttpRequestTable() {
-    final titleTheme = Theme.of(context).textTheme.headline6;
-    final subheadTheme = Theme.of(context).textTheme.subtitle1;
-
-    DataColumn buildDataColumn(
-      String name,
-      Function(HttpRequestData) propertyAccessor, {
-      bool numeric = false,
-    }) {
-      return DataColumn(
-        label: Text(
-          name,
-          style: subheadTheme,
-        ),
-        numeric: numeric,
-        onSort: (i, j) => _onSort(propertyAccessor, i, j),
-      );
-    }
-
-    return SingleChildScrollView(
-      // TODO(jacobr): use DevTools specific table.
-      child: PaginatedDataTable(
-        horizontalMargin: defaultSpacing,
-        columnSpacing: defaultSpacing,
-        rowsPerPage: 20,
-        dataRowHeight: defaultRowHeight,
-        // TODO(bkonyi): figure out how to prevent header from scrolling.
-        header: Text(
-          'HTTP Requests',
-          style: titleTheme,
-        ),
-        source: _dataTableSource,
-        showCheckboxColumn: false,
-        columns: [
-          buildDataColumn(
-            'Request Uri',
-            (HttpRequestData o) => o.name,
-          ),
-          buildDataColumn(
-            'Method',
-            (HttpRequestData o) => o.method,
-          ),
-          buildDataColumn(
-            'Status',
-            (HttpRequestData o) => o.status,
-            numeric: true,
-          ),
-          buildDataColumn(
-            'Duration (ms)',
-            (HttpRequestData o) => o.duration,
-            numeric: true,
-          ),
-          buildDataColumn(
-            'Timestamp',
-            (HttpRequestData o) => o.requestTime,
-          ),
-        ],
-        sortColumnIndex: _sortColumnIndex,
-        sortAscending: _sortAscending,
-      ),
-    );
-  }
-
-  Widget _buildHttpProfilerBody(bool isRecording) {
+  Widget _buildHttpProfilerBody(
+      List<HttpRequestData> requests, bool isRecording) {
     return ValueListenableBuilder<HttpRequestData>(
-      valueListenable: _dataTableSource.currentSelectionListenable,
-      builder: (context, HttpRequestData data, widget) {
+      valueListenable: _networkController.selectedHttpRequest,
+      builder: (context, selectedHttpRequest, _) {
         return Expanded(
-          child: (!isRecording && _dataTableSource.rowCount == 0)
+          child: (!isRecording && requests.isEmpty)
               ? Center(
                   child: recordingInfo(
                     instructionsKey: NetworkScreen.recordingInstructionsKey,
@@ -237,12 +156,15 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                   ),
                 )
               : Split(
-                  initialFractions: const [0.6, 0.4],
-                  minSizes: const [250, 250],
+                  initialFractions: const [0.5, 0.5],
+                  minSizes: const [200, 200],
                   axis: Axis.horizontal,
                   children: [
-                    _buildHttpRequestTable(),
-                    HttpRequestInspector(data),
+                    HttpRequestsTable(
+                      networkController: _networkController,
+                      requests: requests,
+                    ),
+                    HttpRequestInspector(selectedHttpRequest),
                   ],
                 ),
         );
@@ -253,22 +175,147 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<HttpRequests>(
-      valueListenable: _networkController.requestsNotifier,
-      builder: (context, httpRequestProfile, widget) {
-        _dataTableSource.data = httpRequestProfile.requests;
+      valueListenable: _networkController.requests,
+      builder: (context, httpRequests, _) {
         return ValueListenableBuilder<bool>(
           valueListenable: _networkController.recordingNotifier,
-          builder: (context, isRecording, widget) {
+          builder: (context, isRecording, _) {
             return Column(
               children: [
                 _buildHttpProfilerControlRow(isRecording),
                 const SizedBox(height: denseRowSpacing),
-                _buildHttpProfilerBody(isRecording),
+                _buildHttpProfilerBody(httpRequests.requests, isRecording),
               ],
             );
           },
         );
       },
     );
+  }
+}
+
+class HttpRequestsTable extends StatelessWidget {
+  const HttpRequestsTable({
+    Key key,
+    @required this.networkController,
+    @required this.requests,
+  }) : super(key: key);
+
+  static MethodColumn methodColumn = MethodColumn();
+  static UriColumn uriColumn = UriColumn();
+  static StatusColumn statusColumn = StatusColumn();
+  static DurationColumn durationColumn = DurationColumn();
+  static TimestampColumn timestampColumn = TimestampColumn();
+
+  final NetworkController networkController;
+  final List<HttpRequestData> requests;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlineDecoration(
+      child: FlatTable<HttpRequestData>(
+        columns: [
+          methodColumn,
+          uriColumn,
+          statusColumn,
+          durationColumn,
+          timestampColumn,
+        ],
+        data: requests,
+        keyFactory: (HttpRequestData data) => ValueKey<HttpRequestData>(data),
+        onItemSelected: (item) {
+          networkController.selectHttpRequest(item);
+        },
+        autoScrollContent: true,
+        sortColumn: timestampColumn,
+        sortDirection: SortDirection.ascending,
+      ),
+    );
+  }
+}
+
+class UriColumn extends ColumnData<HttpRequestData>
+    implements ColumnRenderer<HttpRequestData> {
+  UriColumn() : super.wide('Request URI');
+
+  @override
+  dynamic getValue(HttpRequestData dataObject) {
+    return dataObject.uri.toString();
+  }
+
+  @override
+  Widget build(BuildContext context, HttpRequestData data) {
+    final value = getDisplayValue(data);
+
+    return Tooltip(
+      message: value,
+      waitDuration: tooltipWait,
+      child: Text(
+        value,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+}
+
+class MethodColumn extends ColumnData<HttpRequestData> {
+  MethodColumn() : super('Method', fixedWidthPx: 70);
+
+  @override
+  dynamic getValue(HttpRequestData dataObject) {
+    return dataObject.method;
+  }
+}
+
+class StatusColumn extends ColumnData<HttpRequestData> {
+  StatusColumn()
+      : super('Status', alignment: ColumnAlignment.right, fixedWidthPx: 62);
+
+  @override
+  dynamic getValue(HttpRequestData dataObject) {
+    return dataObject.status;
+  }
+
+  @override
+  String getDisplayValue(HttpRequestData dataObject) {
+    return dataObject.status == null ? '--' : dataObject.status.toString();
+  }
+}
+
+class DurationColumn extends ColumnData<HttpRequestData> {
+  DurationColumn()
+      : super('Duration', alignment: ColumnAlignment.right, fixedWidthPx: 75);
+
+  @override
+  dynamic getValue(HttpRequestData dataObject) {
+    return dataObject.duration?.inMilliseconds;
+  }
+
+  // todo: test
+  @override
+  String getDisplayValue(HttpRequestData dataObject) {
+    final ms = getValue(dataObject);
+    return ms == null ? '--' : '${nf.format(ms)} ms';
+  }
+}
+
+class TimestampColumn extends ColumnData<HttpRequestData> {
+  TimestampColumn()
+      : super('Timestamp', alignment: ColumnAlignment.right, fixedWidthPx: 165);
+
+  @override
+  dynamic getValue(HttpRequestData dataObject) {
+    return dataObject.requestTime;
+  }
+
+  @override
+  String getDisplayValue(HttpRequestData dataObject) {
+    return formatRequestTime(dataObject.requestTime);
+  }
+
+  @visibleForTesting
+  static String formatRequestTime(DateTime requestTime) {
+    return DateFormat.Hms().add_yMd().format(requestTime);
   }
 }

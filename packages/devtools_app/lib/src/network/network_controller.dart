@@ -20,8 +20,17 @@ class NetworkController {
   }
 
   /// Notifies that new HTTP requests have been processed.
-  ValueListenable<HttpRequests> get requestsNotifier => _httpRequestsNotifier;
-  final _httpRequestsNotifier = ValueNotifier<HttpRequests>(HttpRequests());
+  ValueListenable<HttpRequests> get requests => _requests;
+  final _requests = ValueNotifier<HttpRequests>(HttpRequests());
+
+  void selectHttpRequest(HttpRequestData selection) {
+    _selectedHttpRequest.value = selection;
+  }
+
+  final _selectedHttpRequest = ValueNotifier<HttpRequestData>(null);
+
+  ValueListenable<HttpRequestData> get selectedHttpRequest =>
+      _selectedHttpRequest;
 
   /// Notifies that the timeline is currently being recorded.
   ValueListenable<bool> get recordingNotifier => _httpRecordingNotifier;
@@ -127,13 +136,12 @@ class NetworkController {
     // TODO(jacobr): we are creating a copy of the large list of existing
     // requests each time which is inefficient.
     // Trigger refresh.
-    _httpRequestsNotifier.value = processHttpTimelineEventsHelper(
+    _requests.value = processHttpTimelineEventsHelper(
       timeline,
       _timelineMicrosOffset,
-      currentValues: List.from(_httpRequestsNotifier.value.requests),
+      currentValues: List.from(requests.value.requests),
       invalidRequests: [],
-      outstandingRequestsMap:
-          Map.from(_httpRequestsNotifier.value.outstandingRequests),
+      outstandingRequestsMap: Map.from(requests.value.outstandingRequests),
     );
   }
 
@@ -206,6 +214,7 @@ class NetworkController {
   /// refresh timestamp to the current time.
   Future<void> clear() async {
     await _networkService.updateLastRefreshTime();
-    _httpRequestsNotifier.value = HttpRequests();
+    _requests.value = HttpRequests();
+    _selectedHttpRequest.value = null;
   }
 }
