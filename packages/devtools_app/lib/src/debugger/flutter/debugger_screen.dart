@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../config_specific/host_platform/host_platform.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/flex_split_column.dart';
@@ -168,12 +169,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyP):
-            FilterLibraryIntent(_libraryFilterFocusNode, controller),
+        focusLibraryFilterKeySet:
+            FocusLibraryFilterIntent(_libraryFilterFocusNode, controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
-          FilterLibraryIntent: FilterLibraryAction(),
+          FocusLibraryFilterIntent: FocusLibraryFilterAction(),
         },
         child: Split(
           axis: Axis.horizontal,
@@ -266,8 +267,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 }
 
-class FilterLibraryIntent extends Intent {
-  const FilterLibraryIntent(
+final LogicalKeySet focusLibraryFilterKeySet = LogicalKeySet(
+  HostPlatform.instance.isMacOS
+      ? LogicalKeyboardKey.meta
+      : LogicalKeyboardKey.control,
+  LogicalKeyboardKey.keyP,
+);
+
+class FocusLibraryFilterIntent extends Intent {
+  const FocusLibraryFilterIntent(
     this.focusNode,
     this.debuggerController,
   )   : assert(debuggerController != null),
@@ -277,11 +285,10 @@ class FilterLibraryIntent extends Intent {
   final DebuggerController debuggerController;
 }
 
-class FilterLibraryAction extends Action<FilterLibraryIntent> {
+class FocusLibraryFilterAction extends Action<FocusLibraryFilterIntent> {
   @override
-  void invoke(FilterLibraryIntent intent) {
+  void invoke(FocusLibraryFilterIntent intent) {
     intent.debuggerController.openLibrariesView();
-    intent.focusNode.requestFocus();
   }
 }
 
