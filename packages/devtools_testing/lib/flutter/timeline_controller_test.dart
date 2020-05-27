@@ -8,7 +8,6 @@
 @TestOn('vm')
 import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
-import 'package:devtools_app/src/utils.dart';
 import 'package:test/test.dart';
 
 import '../support/flutter/timeline_test_data.dart';
