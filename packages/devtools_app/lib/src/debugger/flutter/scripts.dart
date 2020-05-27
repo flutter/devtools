@@ -15,21 +15,19 @@ import 'debugger_screen.dart';
 const libraryIcon = Icons.insert_chart;
 const classIcon = Icons.album;
 
-/// Picker that takes a list of scripts and classes and allows filtering and
-/// selection of items.
+/// Picker that takes a list of scripts and allows filtering and selection of
+/// items.
 class ScriptPicker extends StatefulWidget {
   const ScriptPicker({
     Key key,
     @required this.controller,
     @required this.scripts,
-    @required this.classes,
     @required this.onSelected,
     this.libraryFilterFocusNode,
   }) : super(key: key);
 
   final DebuggerController controller;
   final List<ScriptRef> scripts;
-  final List<ClassRef> classes;
   final void Function(ScriptLocation scriptRef) onSelected;
   final FocusNode libraryFilterFocusNode;
 
@@ -71,7 +69,7 @@ class ScriptPickerState extends State<ScriptPicker> {
         children: [
           debuggerPaneHeader(
             context,
-            'Libraries and Classes',
+            'Libraries',
             needsTopBorder: false,
             rightChild: CountBadge(
               filteredItems: _filteredItems,
@@ -165,14 +163,10 @@ class ScriptPickerState extends State<ScriptPicker> {
   void _updateFiltered() {
     final filterText = _filterController.text.trim().toLowerCase();
 
-    _items = [...widget.scripts, ...widget.classes];
-
-    _filteredItems = [
-      ...widget.scripts
-          .where((ref) => ref.uri.toLowerCase().contains(filterText)),
-      ...widget.classes
-          .where((ref) => ref.name.toLowerCase().contains(filterText)),
-    ];
+    _items = widget.scripts;
+    _filteredItems = widget.scripts
+        .where((ref) => ref.uri.toLowerCase().contains(filterText))
+        .toList();
   }
 
   void _handleSelected(ObjRef ref) async {

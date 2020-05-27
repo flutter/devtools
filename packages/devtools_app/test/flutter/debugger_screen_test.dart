@@ -53,7 +53,6 @@ void main() {
           .thenReturn(ValueNotifier(false));
       when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
-      when(debuggerController.sortedClasses).thenReturn(ValueNotifier([]));
       when(debuggerController.selectedBreakpoint)
           .thenReturn(ValueNotifier(null));
       when(debuggerController.stackFramesWithLocation)
@@ -205,19 +204,16 @@ void main() {
 
     testWidgets('Libraries visible', (WidgetTester tester) async {
       final scripts = [ScriptRef(uri: 'package:/test/script.dart')];
-      final classes = [ClassRef(name: 'Foo')];
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
-      when(debuggerController.sortedClasses).thenReturn(ValueNotifier(classes));
 
       // Libraries view is shown
       when(debuggerController.librariesVisible).thenReturn(ValueNotifier(true));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Libraries and Classes'), findsOneWidget);
+      expect(find.text('Libraries'), findsOneWidget);
 
-      // test for items in the libraries and classes list
+      // test for items in the libraries list
       expect(find.text(scripts.first.uri), findsOneWidget);
-      expect(find.text(classes.first.name), findsOneWidget);
     });
 
     testWidgets('Breakpoints show items', (WidgetTester tester) async {
