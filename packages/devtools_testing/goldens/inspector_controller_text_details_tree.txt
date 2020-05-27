@@ -1,4 +1,4 @@
-▼[icons/inspector/textArea.png]Text <-- selected
+▼[T]Text <-- selected
 │ "Hello, World!"
 │ textAlign: null [D]
 │ textDirection: null [D]
@@ -10,7 +10,7 @@
 │ textWidthBasis: null [D]
 │ textHeightBehavior: null [D]
 │ dependencies: [MediaQuery, DefaultTextStyle]
-└─▼[icons/inspector/textArea.png]RichText
+└─▼[R]RichText
     softWrap: wrapping at box width
     maxLines: unlimited
     text: "Hello, World!"

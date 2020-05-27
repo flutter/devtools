@@ -192,39 +192,32 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
 
   Widget _expandCollapseButtons() {
     if (!_expandCollapseSupported) return null;
+
     return Align(
       alignment: Alignment.topRight,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        // Add a semi-transparent background to the
-        // expand and collapse buttons so they don't interfere
-        // too badly with the tree content when the tree
-        // is narrow.
-        color: Theme.of(context).scaffoldBackgroundColor.withAlpha(200),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: OutlineButton(
-                onPressed: enableButtons ? _onExpandClick : null,
-                child: const Text(
-                  'Expand all',
-                  overflow: TextOverflow.ellipsis,
-                ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: OutlineButton(
+              onPressed: enableButtons ? _onExpandClick : null,
+              child: const Text(
+                'Expand all',
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            Flexible(
-              child: OutlineButton(
-                onPressed: enableButtons ? _onResetClick : null,
-                child: const Text(
-                  'Collapse to selected',
-                  overflow: TextOverflow.ellipsis,
-                ),
+          ),
+          Flexible(
+            child: OutlineButton(
+              onPressed: enableButtons ? _onResetClick : null,
+              child: const Text(
+                'Collapse to selected',
+                overflow: TextOverflow.ellipsis,
               ),
-            )
-          ],
-        ),
+            ),
+          )
+        ],
       ),
     );
   }

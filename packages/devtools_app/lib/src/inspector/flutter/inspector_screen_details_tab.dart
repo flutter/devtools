@@ -67,47 +67,57 @@ class _InspectorDetailsTabControllerState
     final _tabController = widget.layoutExplorerSupported
         ? _tabControllerWithLayoutExplorer
         : _tabControllerWithoutLayoutExplorer;
-    final focusColor = Theme.of(context).focusColor;
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: focusColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Row(
-              children: <Widget>[
-                Flexible(
-                  child: Container(
-                    color: focusColor,
-                    child: TabBar(
-                      controller: _tabController,
-                      labelColor: Theme.of(context).textTheme.bodyText1.color,
-                      tabs: tabs,
-                      isScrollable: true,
-                    ),
-                  ),
+
+    final theme = Theme.of(context);
+    final focusColor = theme.focusColor;
+    final borderSide = BorderSide(color: focusColor);
+    final hasActionButtons = widget.actionButtons != null &&
+        _tabController.index == _detailsTreeTabIndex;
+
+    return Column(
+      children: <Widget>[
+        SizedBox(
+          height: 50.0,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              Container(
+                color: focusColor,
+                child: TabBar(
+                  controller: _tabController,
+                  labelColor: theme.textTheme.bodyText1.color,
+                  tabs: tabs,
+                  isScrollable: true,
                 ),
-                if (widget.actionButtons != null &&
-                    _tabController.index == _detailsTreeTabIndex)
-                  Expanded(
-                    child: widget.actionButtons,
-                  ),
-              ],
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            ),
+              ),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(border: Border(bottom: borderSide)),
+                  child: hasActionButtons
+                      ? widget.actionButtons
+                      : const SizedBox(),
+                ),
+              ),
+            ],
           ),
-          Expanded(
+        ),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                left: borderSide,
+                bottom: borderSide,
+                right: borderSide,
+              ),
+            ),
             child: TabBarView(
               physics: defaultTabBarViewPhysics,
               controller: _tabController,
               children: tabViews,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

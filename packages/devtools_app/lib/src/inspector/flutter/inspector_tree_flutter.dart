@@ -6,8 +6,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:flutter/services.dart';
+import 'package:pedantic/pedantic.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/collapsible_mixin.dart';
@@ -191,7 +191,8 @@ class _InspectorTreeState extends State<InspectorTree>
     super.initState();
     _scrollControllerX = ScrollController();
     _scrollControllerY = ScrollController();
-    _scrollControllerY.addListener(_onScrollYChange);
+    // TODO(devoncarew): Commented out as per flutter/devtools/pull/2001.
+    //_scrollControllerY.addListener(_onScrollYChange);
     if (isSummaryTree) {
       constraintDisplayController = longAnimationController(this);
     }
@@ -226,21 +227,22 @@ class _InspectorTreeState extends State<InspectorTree>
     _focusNode.requestFocus();
   }
 
-  void _onScrollYChange() {
-    if (controller == null) return;
-
-    // If the vertical position  is already being animated we should not trigger
-    // a new animation of the horizontal position as a more direct animation of
-    // the horizontal position has already been triggered.
-    if (currentAnimateY != null) return;
-
-    final x = _computeTargetX(_scrollControllerY.offset);
-    _scrollControllerX.animateTo(
-      x,
-      duration: defaultDuration,
-      curve: defaultCurve,
-    );
-  }
+  // TODO(devoncarew): Commented out as per flutter/devtools/pull/2001.
+//  void _onScrollYChange() {
+//    if (controller == null) return;
+//
+//    // If the vertical position  is already being animated we should not trigger
+//    // a new animation of the horizontal position as a more direct animation of
+//    // the horizontal position has already been triggered.
+//    if (currentAnimateY != null) return;
+//
+//    final x = _computeTargetX(_scrollControllerY.offset);
+//    _scrollControllerX.animateTo(
+//      x,
+//      duration: defaultDuration,
+//      curve: defaultCurve,
+//    );
+//  }
 
   /// Compute the goal x scroll given a y scroll value.
   ///

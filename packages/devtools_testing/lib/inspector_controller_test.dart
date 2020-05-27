@@ -86,9 +86,9 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
           '    ▼[M]MaterialApp\n'
           '      ▼[S]Scaffold\n'
           '      ├───▼[C]Center\n'
-          '      │     [icons/inspector/textArea.png]Text\n'
+          '      │     [T]Text\n'
           '      └─▼[A]AppBar\n'
-          '          [icons/inspector/textArea.png]Text\n',
+          '          [T]Text\n',
         ),
       );
 
