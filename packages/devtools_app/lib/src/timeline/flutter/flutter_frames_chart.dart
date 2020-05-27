@@ -20,6 +20,8 @@ class FlutterFramesChart extends StatefulWidget {
     this.displayRefreshRate,
   );
 
+  static const chartLegendKey = Key('Flutter frames chart legend');
+
   final List<TimelineFrame> frames;
 
   final int longestFrameDurationMs;
@@ -35,9 +37,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   static const maxMsForDisplay = 48.0;
   static const minMsForDisplay = 18.0;
 
-  static const defaultFrameWidth = 32.0;
   static const defaultFrameWidthWithPadding =
-      defaultFrameWidth + densePadding * 2;
+      FlutterFramesChartItem.defaultFrameWidth + densePadding * 2;
 
   static const yAxisUnitsSpace = 48.0;
 
@@ -160,54 +161,20 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     );
   }
 
-  // TODO(kenz): add some indicator when a frame is so janky that it exceeds the
-  // available axis space.
   Widget _buildFrame(TimelineFrame frame) {
-    final selected = frame == _selectedFrame;
-    final janky = _isFrameJanky(frame);
-
-    final ui = Container(
-      width: defaultFrameWidth / 2,
-      height: (frame.uiDurationMs / msPerPx).clamp(0.0, availableChartHeight),
-      color: janky ? uiJankColor : mainUiColor,
-    );
-    final raster = Container(
-      width: defaultFrameWidth / 2,
-      height:
-          (frame.rasterDurationMs / msPerPx).clamp(0.0, availableChartHeight),
-      color: janky ? rasterJankColor : mainRasterColor,
-    );
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: densePadding),
-      color: selected ? chartAccentColor : null,
-      child: Column(
-        children: [
-          // Dummy child so that the InkWell does not take up the entire column.
-          const Expanded(child: SizedBox()),
-          InkWell(
-            // TODO(kenz): make tooltip to persist if the frame is selected.
-            // TODO(kenz): change color on hover.
-            onTap: () => _controller.selectFrame(frame),
-            child: Tooltip(
-              message: _tooltipText(frame),
-              padding: const EdgeInsets.all(denseSpacing),
-              preferBelow: false,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  ui,
-                  raster,
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+    return FlutterFramesChartItem(
+      frame: frame,
+      selected: frame == _selectedFrame,
+      onSelected: () => _controller.selectFrame(frame),
+      msPerPx: msPerPx,
+      availableChartHeight: availableChartHeight,
+      displayRefreshRate: widget.displayRefreshRate,
     );
   }
 
   Widget _buildChartLegend() {
     return Column(
+      key: FlutterFramesChart.chartLegendKey,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -231,6 +198,78 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       ],
     );
   }
+}
+
+class FlutterFramesChartItem extends StatelessWidget {
+  const FlutterFramesChartItem({
+    @required this.frame,
+    @required this.selected,
+    @required this.onSelected,
+    @required this.msPerPx,
+    @required this.availableChartHeight,
+    @required this.displayRefreshRate,
+  });
+
+  static const defaultFrameWidth = 32.0;
+
+  final TimelineFrame frame;
+
+  final bool selected;
+
+  final VoidCallback onSelected;
+
+  final double msPerPx;
+
+  final double availableChartHeight;
+
+  final double displayRefreshRate;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool janky = _isFrameJanky(frame);
+    // TODO(kenz): add some indicator when a frame is so janky that it exceeds the
+    // available axis space.
+    final ui = Container(
+      key: Key('frame ${frame.id} - ui'),
+      width: defaultFrameWidth / 2,
+      height: (frame.uiDurationMs / msPerPx).clamp(0.0, availableChartHeight),
+      color: janky ? uiJankColor : mainUiColor,
+    );
+    final raster = Container(
+      key: Key('frame ${frame.id} - raster'),
+      width: defaultFrameWidth / 2,
+      height:
+          (frame.rasterDurationMs / msPerPx).clamp(0.0, availableChartHeight),
+      color: janky ? rasterJankColor : mainRasterColor,
+    );
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: densePadding),
+      color: selected ? chartAccentColor : null,
+      child: Column(
+        children: [
+          // Dummy child so that the InkWell does not take up the entire column.
+          const Expanded(child: SizedBox()),
+          InkWell(
+            // TODO(kenz): make tooltip to persist if the frame is selected.
+            // TODO(kenz): change color on hover.
+            onTap: onSelected,
+            child: Tooltip(
+              message: _tooltipText(frame),
+              padding: const EdgeInsets.all(denseSpacing),
+              preferBelow: false,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  ui,
+                  raster,
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   String _tooltipText(TimelineFrame frame) {
     return 'UI: ${msText(frame.uiEventFlow.time.duration)}\n'
@@ -238,7 +277,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   }
 
   bool _isFrameJanky(TimelineFrame frame) {
-    final targetMsPerFrame = 1 / widget.displayRefreshRate * 1000;
+    final targetMsPerFrame = 1 / displayRefreshRate * 1000;
     return frame.uiDurationMs > targetMsPerFrame ||
         frame.rasterDurationMs > targetMsPerFrame;
   }
