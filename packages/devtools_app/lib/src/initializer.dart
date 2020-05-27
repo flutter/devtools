@@ -29,7 +29,7 @@ class Initializer extends StatefulWidget {
     Key key,
     @required this.url,
     @required this.builder,
-    this.disconnectedRoute = homeRoute,
+    this.allowConnectionScreenOnDisconnect = true,
   })  : assert(builder != null),
         super(key: key);
 
@@ -43,8 +43,8 @@ class Initializer extends StatefulWidget {
   /// If null, the app will navigate to the [ConnectScreen].
   final String url;
 
-  /// The route to navigate to when the VM becomes disconnected.
-  final String disconnectedRoute;
+  /// Whether to allow navigating to the connection screen upon disconnect.
+  final bool allowConnectionScreenOnDisconnect;
 
   @override
   _InitializerState createState() => _InitializerState();
@@ -115,9 +115,44 @@ class _InitializerState extends State<Initializer>
   void _handleNoConnection() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
-        Navigator.of(context).popAndPushNamed(widget.disconnectedRoute);
+        Overlay.of(context).insert(_createDisconnectedOverlay());
       }
     });
+  }
+
+  OverlayEntry _createDisconnectedOverlay() {
+    final theme = Theme.of(context);
+    OverlayEntry overlay;
+    overlay = OverlayEntry(
+      builder: (context) => Container(
+        color: const Color.fromRGBO(128, 128, 128, 0.5),
+        child: Center(
+          child: Column(
+            children: [
+              const Spacer(),
+              Text(
+                'Disconnected',
+                style: theme.textTheme.headline3,
+              ),
+              if (widget.allowConnectionScreenOnDisconnect)
+                RaisedButton(
+                    onPressed: () {
+                      overlay.remove();
+                      Navigator.of(context).popAndPushNamed(homeRoute);
+                    },
+                    child: const Text('Connect to Another App'))
+              else
+                Text(
+                  'Run a new debug session to reconnect',
+                  style: theme.textTheme.bodyText2,
+                ),
+              const Spacer(),
+            ],
+          ),
+        ),
+      ),
+    );
+    return overlay;
   }
 
   @override

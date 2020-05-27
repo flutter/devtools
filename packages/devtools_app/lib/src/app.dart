@@ -36,7 +36,6 @@ import 'ui/service_extension_widgets.dart';
 import 'utils.dart';
 
 const homeRoute = '/';
-const disconnectedRoute = '/disconnected';
 const snapshotRoute = '/snapshot';
 
 /// Top-level configuration for the app.
@@ -131,7 +130,7 @@ class DevToolsAppState extends State<DevToolsApp> {
               : _visibleScreens();
           return Initializer(
             url: params['uri'],
-            disconnectedRoute: embed ? disconnectedRoute : homeRoute,
+            allowConnectionScreenOnDisconnect: !embed,
             builder: (_) => _providedControllers(
               child: DevToolsScaffold(
                 embed: embed,
@@ -160,9 +159,6 @@ class DevToolsAppState extends State<DevToolsApp> {
           ),
         );
       },
-      disconnectedRoute: (_, __, ___) {
-        return const CenteredMessage('App Disconnected.');
-      }
     };
   }
 
