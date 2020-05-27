@@ -8,6 +8,7 @@
 @TestOn('vm')
 import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:test/test.dart';
 
 import '../support/flutter/timeline_test_data.dart';
@@ -86,12 +87,11 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       await env.setupEnvironment();
 
       // Select a frame.
-      final frame_0 = TimelineFrame('id_0');
       expect(timelineController.data.selectedFrame, isNull);
-      timelineController.selectFrame(frame_0);
+      timelineController.selectFrame(testFrame0);
       expect(
         timelineController.data.selectedFrame,
-        equals(frame_0),
+        equals(testFrame0),
       );
 
       // Select a timeline event.
@@ -101,11 +101,10 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       expect(timelineController.data.selectedEvent, equals(vsyncEvent));
 
       // Select a different frame.
-      final frame_1 = TimelineFrame('id_1');
-      timelineController.selectFrame(frame_1);
+      timelineController.selectFrame(testFrame1);
       expect(
         timelineController.data.selectedFrame,
-        equals(frame_1),
+        equals(testFrame1),
       );
       expect(timelineController.data.selectedEvent, isNull);
       expect(timelineController.data.cpuProfileData, isNull);
@@ -116,7 +115,7 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
     test('add frame', () async {
       await env.setupEnvironment();
       expect(timelineController.data.frames, isEmpty);
-      timelineController.addFrame(TimelineFrame('id'));
+      timelineController.addFrame(testFrame1);
       expect(
         timelineController.data.frames.length,
         equals(1),

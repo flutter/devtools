@@ -43,7 +43,7 @@ void main() {
     });
 
     testWidgets('builds with frames', (WidgetTester tester) async {
-      await pumpChart(tester, frames: [testFrame1, testFrame2]);
+      await pumpChart(tester, frames: [testFrame0, testFrame1]);
       expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsNWidgets(2));
     });
@@ -62,33 +62,3 @@ void main() {
     });
   });
 }
-
-final testFrame1 = TimelineFrame('testFrame1')
-  ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
-    ..time = (TimeRange()
-      ..start = const Duration(milliseconds: 10)
-      ..end = const Duration(milliseconds: 20)))
-  ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
-    ..time = (TimeRange()
-      ..start = const Duration(milliseconds: 15)
-      ..end = const Duration(milliseconds: 25)));
-
-final testFrame2 = TimelineFrame('testFrame2')
-  ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
-    ..time = (TimeRange()
-      ..start = const Duration(milliseconds: 30)
-      ..end = const Duration(milliseconds: 35)))
-  ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
-    ..time = (TimeRange()
-      ..start = const Duration(milliseconds: 33)
-      ..end = const Duration(milliseconds: 40)));
-
-final jankyFrame = TimelineFrame('jankyFrame')
-  ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
-    ..time = (TimeRange()
-      ..start = const Duration(milliseconds: 50)
-      ..end = const Duration(milliseconds: 70)))
-  ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
-    ..time = (TimeRange()
-      ..start = const Duration(milliseconds: 68)
-      ..end = const Duration(milliseconds: 75)));
