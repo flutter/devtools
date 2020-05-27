@@ -9,7 +9,6 @@ import 'package:devtools_app/src/timeline/flutter/flutter_frames_chart.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
 import 'package:devtools_app/src/timeline/flutter/timeline_controller.dart';
 import 'package:devtools_app/src/ui/colors.dart';
-import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/flutter/timeline_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
