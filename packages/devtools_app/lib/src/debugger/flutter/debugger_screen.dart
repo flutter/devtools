@@ -137,7 +137,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       valueListenable: controller.librariesVisible,
       builder: (context, visible, _) {
         if (visible) {
-          // Focus the filter textfield when the ScriptPicker opens
+          // Focus the filter textfield when the ScriptPicker opens.
           _libraryFilterFocusNode.requestFocus();
 
           // TODO(devoncarew): Animate this opening and closing.
@@ -146,17 +146,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             initialFractions: const [0.70, 0.30],
             children: [
               codeView,
-              AnimatedBuilder(
-                animation: Listenable.merge([
-                  controller.sortedScripts,
-                  controller.sortedClasses,
-                ]),
-                builder: (context, _) {
+              ValueListenableBuilder(
+                valueListenable: controller.sortedScripts,
+                builder: (context, scripts, _) {
                   return ScriptPicker(
                     key: DebuggerScreenBody.scriptViewKey,
                     controller: controller,
-                    scripts: controller.sortedScripts.value,
-                    classes: controller.sortedClasses.value,
+                    scripts: scripts,
                     onSelected: _onLocationSelected,
                     libraryFilterFocusNode: _libraryFilterFocusNode,
                   );
