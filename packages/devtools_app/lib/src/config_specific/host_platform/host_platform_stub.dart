@@ -7,5 +7,5 @@ class HostPlatform {
   // ignore: prefer_const_declarations
   static final HostPlatform instance = null;
 
-  bool get isMacOS => false;
+  bool get isMacOS => throw UnimplementedError();
 }
