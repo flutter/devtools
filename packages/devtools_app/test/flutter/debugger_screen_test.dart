@@ -84,6 +84,8 @@ void main() {
 
       await pumpDebuggerScreen(tester, debuggerController);
 
+      expect(find.text('Console'), findsOneWidget);
+
       // test for stdio output.
       expect(find.richText('test stdio'), findsOneWidget);
     });

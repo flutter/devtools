@@ -6,10 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../debugger/flutter/codeview.dart';
-
-import './common_widgets.dart';
-import './theme.dart';
-import './utils.dart';
+import 'common_widgets.dart';
+import 'theme.dart';
+import 'utils.dart';
 
 // TODO(devoncarew): Allow scrolling horizontally as well.
 
@@ -104,25 +103,23 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
     final textStyle =
         theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
 
-    return OutlineDecoration(
-      child: Scrollbar(
-        child: ListView.builder(
-          padding: const EdgeInsets.all(denseSpacing),
-          itemCount: widget.lines?.length ?? 0,
-          itemExtent: CodeView.rowHeight, // TODO: Get from theme?
-          controller: _scroll,
-          itemBuilder: (context, index) {
-            return RichText(
-              text: TextSpan(
-                children: processAnsiTerminalCodes(
-                  widget.lines[index],
-                  textStyle,
-                ),
+    return Scrollbar(
+      child: ListView.builder(
+        padding: const EdgeInsets.all(denseSpacing),
+        itemCount: widget.lines?.length ?? 0,
+        itemExtent: CodeView.rowHeight, // TODO: Get from theme?
+        controller: _scroll,
+        itemBuilder: (context, index) {
+          return RichText(
+            text: TextSpan(
+              children: processAnsiTerminalCodes(
+                widget.lines[index],
+                textStyle,
               ),
-              maxLines: 1,
-            );
-          },
-        ),
+            ),
+            maxLines: 1,
+          );
+        },
       ),
     );
   }
