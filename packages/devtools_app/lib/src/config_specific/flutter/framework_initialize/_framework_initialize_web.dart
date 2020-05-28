@@ -25,6 +25,23 @@ Future<String> initializePlatform() async {
     setGlobal(Storage, BrowserStorage());
   }
 
+  // Prevent the browser default behavior for specific keybindings we'll later
+  // handle in the app. This is a workaround for
+  // https://github.com/flutter/flutter/issues/58119.
+  window.onKeyDown.listen((event) {
+    if (!event.metaKey) {
+      return;
+    }
+
+    if (!window.navigator.userAgent.contains('Macintosh')) {
+      return;
+    }
+
+    if (event.key == 'p') {
+      event.preventDefault();
+    }
+  });
+
   return '${window.location}';
 }
 

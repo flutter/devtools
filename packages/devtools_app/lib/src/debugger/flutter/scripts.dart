@@ -5,8 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../config_specific/host_platform/host_platform.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
+import '../../flutter/utils.dart';
 import '../../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
@@ -63,6 +65,7 @@ class ScriptPickerState extends State<ScriptPicker> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMacOS = HostPlatform.instance.isMacOS;
 
     return OutlineDecoration(
       child: Column(
@@ -87,9 +90,10 @@ class ScriptPickerState extends State<ScriptPicker> {
               child: SizedBox(
                 height: 36.0,
                 child: TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Filter (Ctrl + P)',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText:
+                        'Filter (${focusLibraryFilterKeySet.describeKeys(isMacOS: isMacOS)})',
+                    border: const OutlineInputBorder(),
                   ),
                   controller: _filterController,
                   onChanged: (value) => updateFilter(),

@@ -62,3 +62,49 @@ Color colorFromAnsi(List<int> ansiInput) {
   assert(ansiInput.length == 3, 'Ansi color list should contain 3 elements');
   return Color.fromRGBO(ansiInput[0], ansiInput[1], ansiInput[2], 1);
 }
+
+/// An extension on [LogicalKeySet] to provide user-facing names for key
+/// bindings.
+extension LogicalKeySetExtension on LogicalKeySet {
+  static final Set<LogicalKeyboardKey> _modifiers = {
+    LogicalKeyboardKey.alt,
+    LogicalKeyboardKey.control,
+    LogicalKeyboardKey.meta,
+    LogicalKeyboardKey.shift,
+  };
+
+  static final Map<LogicalKeyboardKey, String> _modifierNames = {
+    LogicalKeyboardKey.alt: 'Alt',
+    LogicalKeyboardKey.control: 'Control',
+    LogicalKeyboardKey.meta: 'Meta',
+    LogicalKeyboardKey.shift: 'Shift',
+  };
+
+  /// Return a user-facing name for the [LogicalKeySet].
+  String describeKeys({bool isMacOS = false}) {
+    // Put the modifiers first. If it has a synonym, then it's something like
+    // shiftLeft, altRight, etc.
+    final List<LogicalKeyboardKey> sortedKeys = keys.toList()
+      ..sort((a, b) {
+        final aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
+        final bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
+        if (aIsModifier && !bIsModifier) {
+          return -1;
+        } else if (bIsModifier && !aIsModifier) {
+          return 1;
+        }
+        return a.keyLabel.compareTo(b.keyLabel);
+      });
+
+    return sortedKeys.map((key) {
+      if (_modifiers.contains(key)) {
+        if (isMacOS && key == LogicalKeyboardKey.meta) {
+          return '⌘';
+        }
+        return '${_modifierNames[key]}-';
+      } else {
+        return key.keyLabel.toUpperCase();
+      }
+    }).join();
+  }
+}
