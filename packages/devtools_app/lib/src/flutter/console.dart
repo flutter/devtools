@@ -12,18 +12,18 @@ import 'utils.dart';
 
 // TODO(devoncarew): Allow scrolling horizontally as well.
 
-// TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
-
 // TODO(devoncarew): Support hyperlinking to stack traces.
 
 /// Renders a ConsoleOutput widget with ConsoleControls overlaid on the
 /// top-right corner.
 class Console extends StatelessWidget {
   const Console({
-    this.controls = const <Widget>[],
-    this.lines = const <String>[],
+    this.controls,
+    @required this.lines,
+    this.title,
   }) : super();
 
+  final Widget title;
   final List<Widget> controls;
   final List<String> lines;
 
@@ -32,16 +32,23 @@ class Console extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Stack(
-        children: [
-          _ConsoleOutput(lines: lines),
-          if (controls.isNotEmpty)
-            _ConsoleControls(
-              controls: controls,
+    return Column(
+      children: [
+        if (title != null) title,
+        Expanded(
+          child: Material(
+            child: Stack(
+              children: [
+                _ConsoleOutput(lines: lines),
+                if (controls != null && controls.isNotEmpty)
+                  _ConsoleControls(
+                    controls: controls,
+                  ),
+              ],
             ),
-        ],
-      ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -107,7 +114,8 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
       child: ListView.builder(
         padding: const EdgeInsets.all(denseSpacing),
         itemCount: widget.lines?.length ?? 0,
-        itemExtent: CodeView.rowHeight, // TODO: Get from theme?
+        // TODO: Get from theme?
+        itemExtent: CodeView.rowHeight,
         controller: _scroll,
         itemBuilder: (context, index) {
           return RichText(
