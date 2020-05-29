@@ -583,10 +583,6 @@ class TimelineGridPainter extends CustomPainter {
   });
 
   static const baseGridIntervalPx = 150.0;
-  static const gridLineColor = ThemedColor(
-    Color(0xFFCCCCCC),
-    Color(0xFF585858),
-  );
   static const timestampOffset = 6.0;
   static const timestampColor = ThemedColor(
     Color(0xFF24292E),
@@ -686,7 +682,7 @@ class TimelineGridPainter extends CustomPainter {
     canvas.drawLine(
       Offset(lineX, origin),
       Offset(lineX, constraints.maxHeight),
-      Paint()..color = gridLineColor,
+      Paint()..color = chartAccentColor,
     );
   }
 

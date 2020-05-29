@@ -2,93 +2,72 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:mp_chart/mp/chart/bar_chart.dart';
-import 'package:mp_chart/mp/controller/bar_chart_controller.dart';
-import 'package:mp_chart/mp/core/axis/x_axis.dart';
-import 'package:mp_chart/mp/core/common_interfaces.dart';
-import 'package:mp_chart/mp/core/data/bar_data.dart';
-import 'package:mp_chart/mp/core/data_set/bar_data_set.dart';
-import 'package:mp_chart/mp/core/description.dart';
-import 'package:mp_chart/mp/core/entry/bar_entry.dart';
-import 'package:mp_chart/mp/core/entry/entry.dart';
-import 'package:mp_chart/mp/core/enums/limit_label_postion.dart';
-import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
-import 'package:mp_chart/mp/core/highlight/highlight.dart';
-import 'package:mp_chart/mp/core/limit_line.dart';
-import 'package:mp_chart/mp/core/marker/line_chart_marker.dart';
-import 'package:mp_chart/mp/core/poolable/point.dart';
-import 'package:mp_chart/mp/core/utils/color_utils.dart';
-import 'package:mp_chart/mp/core/utils/painter_utils.dart';
-import 'package:mp_chart/mp/core/value_formatter/default_value_formatter.dart';
-import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 import 'package:provider/provider.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
 import '../../ui/colors.dart';
-import '../../ui/theme.dart';
+import '../../utils.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
 
 class FlutterFramesChart extends StatefulWidget {
-  const FlutterFramesChart();
+  const FlutterFramesChart(
+    this.frames,
+    this.longestFrameDurationMs,
+    this.displayRefreshRate,
+  );
+
+  static const chartLegendKey = Key('Flutter frames chart legend');
+
+  final List<TimelineFrame> frames;
+
+  final int longestFrameDurationMs;
+
+  final double displayRefreshRate;
 
   @override
   _FlutterFramesChartState createState() => _FlutterFramesChartState();
 }
 
 class _FlutterFramesChartState extends State<FlutterFramesChart>
-    with AutoDisposeMixin
-    implements OnChartValueSelectedListener {
-  static const maxFrames = 150;
+    with AutoDisposeMixin {
+  static const maxMsForDisplay = 48.0;
+  static const minMsForDisplay = 18.0;
 
-  /// Datapoint entry for each frame duration (UI/Raster) for stacked bars.
-  final _frameDurations = <BarEntry>[];
+  static const defaultFrameWidthWithPadding =
+      FlutterFramesChartItem.defaultFrameWidth + densePadding * 2;
 
-  /// Set of all duration information (the data, colors, etc).
-  BarDataSet frameDurationsSet;
+  static const yAxisUnitsSpace = 48.0;
 
-  BarChartController _chartController;
-
-  BarChartController get chartController => _chartController;
+  static const legendSquareSize = 16.0;
 
   TimelineController _controller;
 
-  int indexOffset = 0;
+  ScrollController scrollController;
 
-  /// Compute the FPS highwater mark based on the displayRefreshRate from
-  /// FrameBasedTimeline.
-  void _setupFPSHighwaterLine() async {
-    if (_chartController.axisLeftSettingFunction == null) {
-      final fpsRate = await _controller.displayRefreshRate;
+  TimelineFrame _selectedFrame;
 
-      // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
-      final targetMsPerFrame = 1 / fpsRate * 1000;
+  double horizontalScrollOffset = 0.0;
 
-      _chartController.axisLeftSettingFunction = (axisLeft, controller) {
-        axisLeft
-          ..setStartAtZero(true)
-          ..typeface = chartLightTypeFace
-          ..textColor = defaultForeground
-          ..drawGridLines = false
-          ..setValueFormatter(YAxisUnitFormatter())
-          ..addLimitLine(LimitLine(
-            targetMsPerFrame,
-            '${fpsRate.toStringAsFixed(0)} FPS',
-          )
-            // TODO(terry): LEFT_TOP is clipped need to fix in MPFlutterChart.
-            ..labelPosition = LimitLabelPosition.RIGHT_TOP
-            ..textSize = 10
-            ..typeface = chartBoldTypeFace
-            // TODO(terry): Below crashed Flutter in Travis see issues/1338.
-            // ..enableDashedLine(5, 5, 0)
-            ..lineColor = const Color.fromARGB(0x80, 0xff, 0x44, 0x44));
-      };
-    }
+  double get totalChartWidth =>
+      widget.frames.length * defaultFrameWidthWithPadding;
+
+  double get availableChartHeight => defaultChartHeight - defaultSpacing;
+
+  double get msPerPx =>
+      widget.longestFrameDurationMs.clamp(minMsForDisplay, maxMsForDisplay) /
+      availableChartHeight;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController = ScrollController()
+      ..addListener(() {
+        horizontalScrollOffset = scrollController.offset;
+      });
   }
 
   @override
@@ -99,269 +78,402 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     _controller = newController;
 
     cancel();
-    autoDispose(_controller.onTimelineCleared.listen((_) {
+    addAutoDisposeListener(_controller.selectedFrame, () {
       setState(() {
-        _frameDurations.clear();
-        _updateChart();
+        _selectedFrame = _controller.selectedFrame.value;
       });
-    }));
-
-    setState(() {
-      _setupFPSHighwaterLine();
     });
-    autoDispose(_controller.onTimelineProcessed.listen((_) => _loadData()));
-    autoDispose(_controller.onLoadOfflineData.listen((_) => _loadData()));
-  }
-
-  void _loadData() {
-    _frameDurations.clear();
-    final frames = _controller.data?.frames ?? [];
-    if (frames.isNotEmpty) {
-      final startFrameIndex = math.max(0, frames.length - maxFrames);
-      for (int i = startFrameIndex; i < frames.length; i++) {
-        _frameDurations.add(createBarEntry(frames[i], i - startFrameIndex));
-      }
-    }
-    _updateChart();
   }
 
   @override
-  void initState() {
-    _initChartController();
-    _initData();
-    super.initState();
-  }
-
-  void _initChartController() {
-    final desc = Description()..enabled = false;
-    _chartController = BarChartController(
-      backgroundColor: chartBackgroundColor,
-      // The axisLeftSettingFunction is computed in didChangeDependencies,
-      // see _setupFPSHighwaterLine.
-      axisRightSettingFunction: (axisRight, controller) {
-        axisRight.enabled = false;
-      },
-      xAxisSettingFunction: (XAxis xAxis, controller) {
-        xAxis
-          ..enabled = true
-          ..drawLabels = true
-          ..setLabelCount1(3)
-          ..textColor = defaultForeground
-          ..position = XAxisPosition.BOTTOM;
-      },
-      legendSettingFunction: (legend, controller) {
-        legend.enabled = false;
-      },
-      drawGridBackground: false,
-//      dragXEnabled: true,
-//      dragYEnabled: true,
-//      scaleXEnabled: true,
-//      scaleYEnabled: true,
-//      pinchZoomEnabled: false,
-//      maxVisibleCount: 60,
-      drawBarShadow: false,
-      description: desc,
-      highLightPerTapEnabled: true,
-      marker: SelectedDataPoint(onSelected: onBarSelected),
-      selectionListener: this,
-    );
-
-    // Compute padding around chart.
-    _chartController.setViewPortOffsets(
-        defaultSpacing * 3, denseSpacing, defaultSpacing, defaultSpacing);
-  }
-
-  void onBarSelected(int index) {
-    _controller.selectFrame(_controller.data.frames[index + indexOffset]);
-  }
-
-  void _initData() {
-    // Create place holder for empty chart.
-    // TODO(terry): Look at fixing MPFlutterChart to handle empty data entries.
-    _frameDurations.add(createStubBarEntry());
-
-    // Create heap used dataset.
-    frameDurationsSet = BarDataSet(_frameDurations, 'Durations')
-      ..setColors1([mainRasterColor, mainUiColor])
-      ..setDrawValues(false);
-
-    // Create a data object with all the data sets - stacked bar.
-    _chartController.data = BarData([]..add(frameDurationsSet));
-
-    // specify the width each bar should have
-    _chartController.data.barWidth = 0.8;
-  }
-
-  BarEntry createStubBarEntry() {
-    return BarEntry.fromListYVals(x: 0.0, vals: [0.0, 0.0]);
-  }
-
-  // TODO(terry): Consider grouped bars (UI/Raster) not stacked.
-  BarEntry createBarEntry(TimelineFrame frame, int index) {
-    if (frame.uiDurationMs + frame.rasterDurationMs > 250) {
-      // Constrain the y-axis so outliers don't blow the barchart scale.
-      // TODO(terry): Need to have a max where the hover value shows the real #s but the chart just looks pinned to the top.
-      _chartController.axisLeft?.setAxisMaximum(250);
+  void didUpdateWidget(FlutterFramesChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (scrollController.hasClients && scrollController.atScrollBottom) {
+      scrollController.autoScrollToBottom();
     }
-
-    // TODO(terry): Structured class item 0 is Raster, item 1 is UI if not stacked.
-    final entry = BarEntry.fromListYVals(
-      x: index.toDouble(),
-      vals: [
-        frame.rasterDurationMs.toDouble(),
-        frame.uiDurationMs.toDouble(),
-      ],
-    );
-
-    return entry;
   }
 
-  void _updateChart() {
-    _chartController.data = BarData([]..add(frameDurationsSet));
-
-    setState(() {
-      // Signal data has changed.
-      frameDurationsSet.notifyDataSetChanged();
-      _setupFPSHighwaterLine();
-    });
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(
+        left: denseSpacing,
+        right: denseSpacing,
+        bottom: defaultSpacing,
+      ),
+      height: defaultChartHeight,
+      child: Row(
+        children: [
+          Expanded(child: _buildChart()),
+          const SizedBox(width: defaultSpacing),
+          _buildChartLegend(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChart() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final themeData = Theme.of(context);
+        final chart = ListView.builder(
+          controller: scrollController,
+          scrollDirection: Axis.horizontal,
+          itemCount: widget.frames.length,
+          itemExtent: defaultFrameWidthWithPadding,
+          itemBuilder: (context, index) => _buildFrame(widget.frames[index]),
+        );
+        final chartAxisPainter = CustomPaint(
+          painter: ChartAxisPainter(
+            constraints: constraints,
+            totalWidth: totalChartWidth,
+            displayRefreshRate: widget.displayRefreshRate,
+            msPerPx: msPerPx,
+            themeData: themeData,
+          ),
+        );
+        final fpsLinePainter = CustomPaint(
+          painter: FPSLinePainter(
+            constraints: constraints,
+            totalWidth: totalChartWidth,
+            displayRefreshRate: widget.displayRefreshRate,
+            msPerPx: msPerPx,
+            themeData: themeData,
+          ),
+        );
+        return Stack(
+          children: [
+            chartAxisPainter,
+            Padding(
+              padding: const EdgeInsets.only(left: yAxisUnitsSpace),
+              child: chart,
+            ),
+            fpsLinePainter,
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildFrame(TimelineFrame frame) {
+    return FlutterFramesChartItem(
+      frame: frame,
+      selected: frame == _selectedFrame,
+      onSelected: () => _controller.selectFrame(frame),
+      msPerPx: msPerPx,
+      availableChartHeight: availableChartHeight,
+      displayRefreshRate: widget.displayRefreshRate,
+    );
+  }
+
+  Widget _buildChartLegend() {
     return Column(
+      key: FlutterFramesChart.chartLegendKey,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          height: liveChartHeight,
-          child: BarChart(_chartController),
-        ),
-        const SizedBox(height: denseSpacing),
+        _legendItem('Frame Time (UI)', mainUiColor),
+        _legendItem('Frame Time (Raster)', mainRasterColor),
+        _legendItem('Jank (slow frame)', uiJankColor),
       ],
     );
   }
 
-  /// OnChartValueSelectedListener override.
-  @override
-  void onNothingSelected() {
-    print('Nothing Selected');
-  }
-
-  /// OnChartValueSelectedListener override.
-  @override
-  void onValueSelected(Entry e, Highlight h) {
-    // TODO(terry): Either use onTouchDown or add mouse position to laggy.
-    final yValues = (e as BarEntry).yVals;
-    print(
-      'onValueSelected - Frame Index = ${e.x}, '
-      'Raster = ${yValues[0]}, UI = ${yValues[1]}',
+  Widget _legendItem(String description, Color color) {
+    return Row(
+      children: [
+        Container(
+          height: legendSquareSize,
+          width: legendSquareSize,
+          color: color,
+        ),
+        const SizedBox(width: denseSpacing),
+        Text(description),
+      ],
     );
   }
 }
 
-class YAxisUnitFormatter extends ValueFormatter {
-  @override
-  String getFormattedValue1(double value) => '${value.toInt()} ms';
-}
+class FlutterFramesChartItem extends StatelessWidget {
+  const FlutterFramesChartItem({
+    @required this.frame,
+    @required this.selected,
+    @required this.onSelected,
+    @required this.msPerPx,
+    @required this.availableChartHeight,
+    @required this.displayRefreshRate,
+  });
 
-typedef SelectionCallback = void Function(int frameIndex);
+  static const defaultFrameWidth = 32.0;
 
-/// Selection of a point in the Bar chart displays the data point values
-/// UI duration and Raster duration. Also, highlight the selected stacked bar.
-/// Uses marker/highlight mechanism which lags because it uses onTapUp maybe
-/// onTapDown would be less laggy.
-///
-/// TODO(terry): Highlighting is not efficient, a faster mechanism to return
-/// the Entry being clicked is needed.
-///
-/// onSelected callback function invoked when bar entry is selected.
-class SelectedDataPoint extends LineChartMarker {
-  SelectedDataPoint({
-    this.textColor,
-    this.backColor,
-    this.fontSize,
-    this.onSelected,
-  }) {
-    _formatter = DefaultValueFormatter(2);
-    textColor ??= ColorUtils.WHITE;
-    backColor ??= const Color.fromARGB(127, 0, 0, 0);
-    fontSize ??= 10;
-  }
+  final TimelineFrame frame;
 
-  Entry _entry;
+  final bool selected;
 
-  DefaultValueFormatter _formatter;
+  final VoidCallback onSelected;
 
-  Color textColor;
+  final double msPerPx;
 
-  Color backColor;
+  final double availableChartHeight;
 
-  double fontSize;
-
-  int _lastFrameIndex = -1;
-
-  final SelectionCallback onSelected;
+  final double displayRefreshRate;
 
   @override
-  void draw(Canvas canvas, double posX, double posY) {
-    const positionAboveBar = 15;
-    const paddingAroundText = 5;
-    const rectangleCurve = 5.0;
-
-    final yValues = (_entry as BarEntry).yVals;
-
-    final num uiDuration = yValues[1];
-    final num rasterDuration = yValues[0];
-
-    final TextPainter painter = PainterUtils.create(
-      null,
-      'UI  = ${_formatter.getFormattedValue1(uiDuration)}\n'
-      'Raster = ${_formatter.getFormattedValue1(rasterDuration)}',
-      textColor,
-      fontSize,
-    )..textAlign = TextAlign.left;
-
-    final Paint paint = Paint()
-      ..color = backColor
-      ..strokeWidth = 2
-      ..isAntiAlias = true
-      ..style = PaintingStyle.fill;
-
-    final MPPointF offset = getOffsetForDrawingAtPoint(
-      posX,
-      posY,
+  Widget build(BuildContext context) {
+    final bool janky = _isFrameJanky(frame);
+    // TODO(kenz): add some indicator when a frame is so janky that it exceeds the
+    // available axis space.
+    final ui = Container(
+      key: Key('frame ${frame.id} - ui'),
+      width: defaultFrameWidth / 2,
+      height: (frame.uiDurationMs / msPerPx).clamp(0.0, availableChartHeight),
+      color: janky ? uiJankColor : mainUiColor,
     );
-
-    canvas.save();
-    // translate to the correct position and draw
-    painter.layout();
-    final Offset pos = calculatePos(
-      posX + offset.x,
-      posY + offset.y - positionAboveBar,
-      painter.width,
-      painter.height,
+    final raster = Container(
+      key: Key('frame ${frame.id} - raster'),
+      width: defaultFrameWidth / 2,
+      height:
+          (frame.rasterDurationMs / msPerPx).clamp(0.0, availableChartHeight),
+      color: janky ? rasterJankColor : mainRasterColor,
     );
-    canvas.drawRRect(
-      RRect.fromLTRBR(
-        pos.dx - paddingAroundText,
-        pos.dy - paddingAroundText,
-        pos.dx + painter.width + paddingAroundText,
-        pos.dy + painter.height + paddingAroundText,
-        const Radius.circular(rectangleCurve),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: densePadding),
+      color: selected ? chartAccentColor : null,
+      child: Column(
+        children: [
+          // Dummy child so that the InkWell does not take up the entire column.
+          const Expanded(child: SizedBox()),
+          InkWell(
+            // TODO(kenz): make tooltip to persist if the frame is selected.
+            // TODO(kenz): change color on hover.
+            onTap: onSelected,
+            child: Tooltip(
+              message: _tooltipText(frame),
+              padding: const EdgeInsets.all(denseSpacing),
+              preferBelow: false,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  ui,
+                  raster,
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
-      paint,
     );
-    painter.paint(canvas, pos);
-    canvas.restore();
+  }
+
+  String _tooltipText(TimelineFrame frame) {
+    return 'UI: ${msText(frame.uiEventFlow.time.duration)}\n'
+        'Raster: ${msText(frame.rasterEventFlow.time.duration)}';
+  }
+
+  bool _isFrameJanky(TimelineFrame frame) {
+    final targetMsPerFrame = 1 / displayRefreshRate * 1000;
+    return frame.uiDurationMs > targetMsPerFrame ||
+        frame.rasterDurationMs > targetMsPerFrame;
+  }
+}
+
+class ChartAxisPainter extends CustomPainter {
+  ChartAxisPainter({
+    @required this.constraints,
+    @required this.totalWidth,
+    @required this.displayRefreshRate,
+    @required this.msPerPx,
+    @required this.themeData,
+  });
+
+  static const yAxisTickWidth = 8.0;
+
+  final BoxConstraints constraints;
+
+  final double totalWidth;
+
+  final double displayRefreshRate;
+
+  final double msPerPx;
+
+  final ThemeData themeData;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // The absolute coordinates of the chart's visible area.
+    final chartArea = Rect.fromLTWH(
+      _FlutterFramesChartState.yAxisUnitsSpace,
+      0.0,
+      constraints.maxWidth - _FlutterFramesChartState.yAxisUnitsSpace,
+      constraints.maxHeight,
+    );
+
+    // Paint the Y axis.
+    canvas.drawLine(
+      chartArea.topLeft,
+      chartArea.bottomLeft,
+      Paint()..color = chartAccentColor,
+    );
+
+    // Paint the X axis
+    canvas.drawLine(
+      chartArea.bottomLeft,
+      chartArea.bottomRight,
+      Paint()..color = chartAccentColor,
+    );
+
+    _paintYAxisLabels(canvas, chartArea);
+  }
+
+  void _paintYAxisLabels(
+    Canvas canvas,
+    Rect chartArea,
+  ) {
+    const yAxisLabelCount = 6;
+    final totalMs = msPerPx * constraints.maxHeight;
+
+    // Subtract 1 because one of the labels will be 0.0 ms.
+    final int timeUnitMs = totalMs ~/ (yAxisLabelCount - 1);
+
+    // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
+    final targetMsPerFrame = 1 / displayRefreshRate * 1000;
+    final targetMsPerFrameRounded = targetMsPerFrame.round();
+
+    final yAxisTimes = [
+      0,
+      for (int timeMs = targetMsPerFrameRounded - timeUnitMs;
+          timeMs > 0;
+          timeMs -= timeUnitMs)
+        timeMs,
+      targetMsPerFrameRounded,
+      for (int timeMs = targetMsPerFrameRounded - timeUnitMs;
+          timeMs > 0;
+          timeMs -= timeUnitMs)
+        timeMs,
+    ];
+
+    for (final timeMs in yAxisTimes) {
+      _paintYAxisLabel(canvas, chartArea, timeMs: timeMs);
+    }
+  }
+
+  void _paintYAxisLabel(
+    Canvas canvas,
+    Rect chartArea, {
+    @required int timeMs,
+  }) {
+    final labelText = msText(
+      Duration(milliseconds: timeMs),
+      fractionDigits: 0,
+    );
+
+    // Paint a tick on the axis.
+    final tickY = constraints.maxHeight - timeMs / msPerPx;
+    canvas.drawLine(
+      Offset(chartArea.left - yAxisTickWidth / 2, tickY),
+      Offset(chartArea.left + yAxisTickWidth / 2, tickY),
+      Paint()..color = chartAccentColor,
+    );
+
+    // Paint the axis label.
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: labelText,
+        style: const TextStyle(color: chartTextColor),
+      ),
+      textAlign: TextAlign.end,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    textPainter.paint(
+      canvas,
+      Offset(
+        _FlutterFramesChartState.yAxisUnitsSpace -
+            yAxisTickWidth / 2 -
+            densePadding - // Padding between y axis tick and label
+            textPainter.width,
+        constraints.maxHeight - timeMs / msPerPx - textPainter.height / 2,
+      ),
+    );
   }
 
   @override
-  void refreshContent(Entry e, Highlight highlight) async {
-    _entry = e;
-    // TODO(kenz): see if we can make `x` an int - double seems strange.
-    final frameIndex = _entry.x.toInt();
-    if (onSelected != null && _lastFrameIndex != frameIndex) {
-      _lastFrameIndex = frameIndex;
-      WidgetsBinding.instance
-          .addPostFrameCallback((_) => onSelected(frameIndex));
-    }
+  bool shouldRepaint(ChartAxisPainter oldDelegate) {
+    return themeData.isDarkTheme != oldDelegate.themeData.isDarkTheme;
+  }
+}
+
+class FPSLinePainter extends CustomPainter {
+  FPSLinePainter({
+    @required this.constraints,
+    @required this.totalWidth,
+    @required this.displayRefreshRate,
+    @required this.msPerPx,
+    @required this.themeData,
+  });
+
+  static const fpsLineColor = Color.fromARGB(0x80, 0xff, 0x44, 0x44);
+
+  static const fpsTextSpace = 60.0;
+
+  final BoxConstraints constraints;
+
+  final double totalWidth;
+
+  final double displayRefreshRate;
+
+  final double msPerPx;
+
+  final ThemeData themeData;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // The absolute coordinates of the chart's visible area.
+    final chartArea = Rect.fromLTWH(
+      _FlutterFramesChartState.yAxisUnitsSpace,
+      0.0,
+      constraints.maxWidth - _FlutterFramesChartState.yAxisUnitsSpace,
+      constraints.maxHeight,
+    );
+
+    // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
+    final targetMsPerFrame = 1 / displayRefreshRate * 1000;
+    final targetLineY = constraints.maxHeight - targetMsPerFrame / msPerPx;
+
+    canvas.drawLine(
+      Offset(chartArea.left, targetLineY),
+      Offset(chartArea.right - fpsTextSpace, targetLineY),
+      Paint()
+        ..color = fpsLineColor
+        ..strokeWidth = 2.0,
+    );
+
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: '${displayRefreshRate.toStringAsFixed(0)} FPS',
+        style: const TextStyle(color: chartTextColor),
+      ),
+      textAlign: TextAlign.right,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    textPainter.paint(
+      canvas,
+      Offset(
+        chartArea.right - fpsTextSpace + denseSpacing,
+        targetLineY - textPainter.height / 2,
+      ),
+    );
+  }
+
+  @override
+  bool shouldRepaint(FPSLinePainter oldDelegate) {
+    return themeData.isDarkTheme != oldDelegate.themeData.isDarkTheme;
   }
 }
