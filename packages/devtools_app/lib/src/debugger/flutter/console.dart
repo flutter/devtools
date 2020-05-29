@@ -11,6 +11,8 @@ import '../../utils.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 
+// TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
+
 /// Display the stdout and stderr output from the process under debug.
 class DebuggerConsole extends StatefulWidget {
   const DebuggerConsole({
@@ -57,26 +59,19 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
     final disabled = numLines == 0;
 
     return OutlineDecoration(
-      child: Column(
-        children: [
-          debuggerSectionTitle(Theme.of(context), text: 'Console'),
-          Expanded(
-            child: Console(
-              lines: _lines,
-              controls: [
-                CopyToClipboardControl(
-                  dataProvider: disabled ? null : () => _lines.join('\n'),
-                  successMessage:
-                      'Copied $numLines ${pluralize('line', numLines)}.',
-                  buttonKey: DebuggerConsole.copyToClipboardButtonKey,
-                ),
-                DeleteControl(
-                  onPressed: disabled ? null : widget.controller.clearStdio,
-                  tooltip: 'Clear console output',
-                  buttonKey: DebuggerConsole.clearStdioButtonKey,
-                ),
-              ],
-            ),
+      child: Console(
+        title: debuggerSectionTitle(Theme.of(context), text: 'Console'),
+        lines: _lines,
+        controls: [
+          CopyToClipboardControl(
+            dataProvider: disabled ? null : () => _lines.join('\n'),
+            successMessage: 'Copied $numLines ${pluralize('line', numLines)}.',
+            buttonKey: DebuggerConsole.copyToClipboardButtonKey,
+          ),
+          DeleteControl(
+            onPressed: disabled ? null : widget.controller.clearStdio,
+            tooltip: 'Clear console output',
+            buttonKey: DebuggerConsole.clearStdioButtonKey,
           ),
         ],
       ),

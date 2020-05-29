@@ -224,7 +224,35 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     return OutlineDecoration(
       child: Column(
         children: [
-          debuggerSectionTitle(theme, text: scriptRef?.uri ?? ' '),
+          debuggerSectionTitle(
+            theme,
+            child: Row(
+              children: [
+                FlatButton(
+                  child: const Icon(
+                    Icons.chevron_left,
+                    size: actionsIconSize,
+                  ),
+                  padding: EdgeInsets.zero,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  onPressed: () => print('back'),
+                ),
+                FlatButton(
+                  child: const Icon(
+                    Icons.chevron_right,
+                    size: actionsIconSize,
+                  ),
+                  padding: EdgeInsets.zero,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  onPressed: () => print('forward'),
+                ),
+                const SizedBox(width: denseSpacing),
+                const BulletSpacer(),
+                const SizedBox(width: denseSpacing),
+                Text(scriptRef?.uri ?? ' ', style: theme.textTheme.subtitle2),
+              ],
+            ),
+          ),
           DefaultTextStyle(
             style: theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono'),
             child: Expanded(
