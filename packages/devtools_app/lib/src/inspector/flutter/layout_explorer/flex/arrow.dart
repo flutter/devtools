@@ -95,8 +95,6 @@ class ArrowWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Flex(
       direction: direction,
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Expanded(
           child: Container(

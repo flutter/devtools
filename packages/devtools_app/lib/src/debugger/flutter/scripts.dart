@@ -141,7 +141,6 @@ class ScriptPickerState extends State<ScriptPicker> {
         child: Container(
           padding: const EdgeInsets.all(densePadding),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
                 icon,

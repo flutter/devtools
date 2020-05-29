@@ -109,7 +109,6 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   Widget build(BuildContext context) {
     return Column(children: [
       Row(
-        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           clearButton(onPressed: _clearLogs),
           const Spacer(),

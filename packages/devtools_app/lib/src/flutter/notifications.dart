@@ -89,7 +89,6 @@ class NotificationsState extends State<_NotificationsProvider>
     if (_overlayEntry == null) {
       _overlayEntry = OverlayEntry(
         maintainState: true,
-        opaque: false,
         builder: _buildOverlay,
       );
       SchedulerBinding.instance.scheduleFrameCallback((_) {
@@ -142,7 +141,6 @@ class NotificationsState extends State<_NotificationsProvider>
           child: SingleChildScrollView(
             reverse: true,
             child: Column(
-              verticalDirection: VerticalDirection.down,
               mainAxisSize: MainAxisSize.min,
               children: _notifications,
             ),

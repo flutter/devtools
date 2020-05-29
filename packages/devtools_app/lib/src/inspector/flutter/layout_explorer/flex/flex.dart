@@ -557,7 +557,6 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
       decoration: BoxDecoration(
         border: Border.all(
           color: theme.primaryColorLight,
-          width: 1.0,
         ),
       ),
       margin: const EdgeInsets.only(top: margin, left: margin),
@@ -677,7 +676,6 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
               for (var alignment in alignmentEnumEntries)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       flex: 2,
@@ -709,7 +707,6 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
                   padding: const EdgeInsets.symmetric(vertical: margin),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
                         child: Text(
@@ -1024,7 +1021,6 @@ class FlexChildVisualizer extends StatelessWidget {
         left: margin,
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Flexible(

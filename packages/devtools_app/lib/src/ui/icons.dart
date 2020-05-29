@@ -248,6 +248,5 @@ Image createImageIcon(String url) {
     image: AssetImage(url),
     height: defaultIconSize,
     width: defaultIconSize,
-    color: null,
   );
 }

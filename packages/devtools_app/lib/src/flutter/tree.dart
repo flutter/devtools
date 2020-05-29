@@ -106,7 +106,6 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
         padding: EdgeInsets.only(left: nodeIndent(widget.data)),
         child: Row(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
             textBaseline: TextBaseline.alphabetic,
             children: [
               widget.data.isExpandable

@@ -195,7 +195,6 @@ void main() {
         extentDelegate: extentDelegate,
       );
       final RenderViewport root = RenderViewport(
-        axisDirection: AxisDirection.down,
         crossAxisDirection: AxisDirection.right,
         offset: ViewportOffset.zero(),
         cacheExtent: 0,
