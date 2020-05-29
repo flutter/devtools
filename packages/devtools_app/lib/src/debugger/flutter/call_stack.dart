@@ -62,8 +62,7 @@ class _CallStackState extends State<CallStack> {
     Widget child;
 
     final asyncMarker = frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
-    final asyncFrame = frame.frame.kind == FrameKind.kAsyncCausal ||
-        frame.frame.kind == FrameKind.kAsyncActivation ||
+    final asyncFrame = frame.frame.kind == FrameKind.kAsyncActivation ||
         frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
     final noLineInfo = frame.line == null;
 
@@ -145,7 +144,7 @@ class _CallStackState extends State<CallStack> {
       return uri;
     }
     final file = uri.split('/').last;
-    return frame.line == null ? ' $file' : ' $file:${frame.line}';
+    return frame.line == null ? ' $file' : ' $file ${frame.line}';
   }
 }
 
