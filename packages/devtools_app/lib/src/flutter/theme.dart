@@ -156,7 +156,9 @@ Color titleSolidBackgroundColor(ThemeData theme) {
   return theme.isDarkTheme ? devtoolsGrey[900] : devtoolsGrey[50];
 }
 
-final chartBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
+// TODO(kenz): can we access this color from the Theme somehow? This mirrors
+// the background color of the app.
+final defaultBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
 const chartAccentColor = ThemedColor(Color(0xFFCCCCCC), Color(0xFF585858));
 const chartTextColor = ThemedColor(Colors.black, Colors.white);
 

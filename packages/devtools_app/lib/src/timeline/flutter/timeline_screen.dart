@@ -111,7 +111,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
     // Refresh data on page load if data is null. On subsequent tab changes,
     // this should not be called.
-    if (controller.data == null) {
+    if (controller.data == null && !offlineMode) {
       controller.refreshData();
     }
 
@@ -181,7 +181,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         timelineScreen,
         if (loadingOfflineData)
           Container(
-            color: Colors.grey[50],
+            color: defaultBackgroundColor,
             child: const Center(
               child: CircularProgressIndicator(),
             ),

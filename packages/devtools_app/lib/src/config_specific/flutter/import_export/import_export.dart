@@ -35,17 +35,18 @@ class ImportController {
 
   final NotificationService _notifications;
 
-  bool importing = false;
+  int previousImportMs = 0;
 
   // TODO(kenz): improve error handling here or in snapshot_screen.dart.
   void importData(Map<String, dynamic> json) {
-    if (importing) return;
-    importing = true;
+    // Do not allow two different imports within 500 ms of each other. This is a
+    // workaround for the fact that we get two drop events for the same file.
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if ((now - previousImportMs).abs() < 500) return;
 
     final isDevToolsSnapshot = json[devToolsSnapshotKey];
     if (isDevToolsSnapshot == null || !isDevToolsSnapshot) {
       _notifications.push(nonDevToolsFileMessage);
-      importing = false;
       return;
     }
 
@@ -54,8 +55,6 @@ class ImportController {
     offlineDataJson = json;
     _notifications.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);
-
-    importing = false;
   }
 }
 

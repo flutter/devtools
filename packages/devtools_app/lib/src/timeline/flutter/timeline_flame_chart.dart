@@ -626,7 +626,7 @@ class TimelineGridPainter extends CustomPainter {
         constraints.maxWidth,
         math.min(constraints.maxHeight, rowHeight),
       ),
-      Paint()..color = chartBackgroundColor,
+      Paint()..color = defaultBackgroundColor,
     );
 
     // Paint the timeline grid lines and corresponding timestamps in the flame

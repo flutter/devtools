@@ -278,7 +278,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..textSize = 2.0;
 */
       },
-      backgroundColor: chartBackgroundColor,
+      backgroundColor: defaultBackgroundColor,
       doubleTapToZoomEnabled: false,
       // TODO(terry): For now disable zoom with double-click.
       pinchZoomEnabled: false,
@@ -342,7 +342,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..textSize = 2.0;
 */
       },
-      backgroundColor: chartBackgroundColor,
+      backgroundColor: defaultBackgroundColor,
       // TOD(terry): Disable zoom via double-click. Consider +/- button
       //             for a controlled zoom in/zoom out.
       scaleXEnabled: false,
