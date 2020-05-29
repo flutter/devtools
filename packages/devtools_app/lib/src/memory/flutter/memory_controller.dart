@@ -211,7 +211,7 @@ class MemoryController extends DisposableController
     // TODO(terry): need to recomputeOffline data?
   }
 
-  void processDataset(args) {
+  void processDataset(List<Map> args) {
     // Add entries of entries plotted in the chart.  Entries plotted
     // may not match data collected (based on display interval).
     for (var arg in args) {

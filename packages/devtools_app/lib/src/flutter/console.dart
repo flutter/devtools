@@ -97,7 +97,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
 
   // Whenever the widget updates, refresh the scroll position if needed.
   @override
-  void didUpdateWidget(oldWidget) {
+  void didUpdateWidget(Widget oldWidget) {
     if (_scroll.hasClients && _scroll.atScrollBottom) {
       _scroll.autoScrollToBottom();
     }
