@@ -188,7 +188,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                 Expanded(
                   child: Split(
                     axis: Axis.vertical,
-                    initialFractions: const [0.74, 0.26],
+                    initialFractions: const [0.72, 0.28],
                     children: [
                       codeArea,
                       DebuggerConsole(controller: controller),

@@ -255,14 +255,16 @@ class _LogDetailsState extends State<LogDetails>
 
   Widget _buildSimpleLog(BuildContext context, LogData log) {
     final disabled = log?.details == null || log.details.isEmpty;
-    return Console(
-      lines: log?.prettyPrinted?.split('\n'),
-      controls: [
-        CopyToClipboardControl(
-          dataProvider: disabled ? null : () => log?.prettyPrinted,
-          buttonKey: LogDetails.copyToClipboardButtonKey,
-        ),
-      ],
+    return OutlineDecoration(
+      child: Console(
+        lines: log?.prettyPrinted?.split('\n'),
+        controls: [
+          CopyToClipboardControl(
+            dataProvider: disabled ? null : () => log?.prettyPrinted,
+            buttonKey: LogDetails.copyToClipboardButtonKey,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -336,6 +338,7 @@ class _KindColumn extends ColumnData<LogData>
 class _MessageColumn extends ColumnData<LogData>
     implements ColumnRenderer<LogData> {
   _MessageColumn() : super('Message');
+
   @override
   bool get supportsSorting => false;
 
