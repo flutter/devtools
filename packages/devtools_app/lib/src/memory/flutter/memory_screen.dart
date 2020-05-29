@@ -249,7 +249,6 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
       valueListenable: controller.paused,
       builder: (context, paused, _) {
         return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             OutlineButton(
               key: MemoryScreen.pauseButtonKey,
@@ -312,7 +311,6 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
 
   Widget _buildMemoryControls(TextTheme textTheme) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),

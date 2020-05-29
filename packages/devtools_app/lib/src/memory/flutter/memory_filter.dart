@@ -326,7 +326,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
             child: Padding(
               padding: const EdgeInsets.only(left: 15),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Column(
@@ -338,28 +337,24 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                             labelText: 'Filter Snapshot'),
                       ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           privateClasses,
                           const Text('Hide Private Class e.g.,_className'),
                         ],
                       ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           zeroInstances,
                           const Text('Hide Classes with No Instances'),
                         ],
                       ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           libraryNoInstances,
                           const Text('Hide Library with No Instances'),
                         ],
                       ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           const Padding(padding: EdgeInsets.only(top: 30)),
                           Text('Hide Libraries or Packages '

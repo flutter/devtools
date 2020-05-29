@@ -72,7 +72,6 @@ class _BreakpointPickerState extends State<BreakpointPicker> {
         child: Padding(
           padding: const EdgeInsets.all(borderPadding),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Padding(
                 padding: const EdgeInsets.only(

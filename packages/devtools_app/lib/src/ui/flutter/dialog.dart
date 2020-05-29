@@ -12,7 +12,7 @@ class DialogCancelButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FlatButton(
       onPressed: () {
-        Navigator.of(context, rootNavigator: false).pop(dialogDefault);
+        Navigator.of(context).pop(dialogDefault);
       },
       child: const Text('Cancel'),
     );
@@ -30,7 +30,7 @@ class DialogOkButton extends StatelessWidget {
     return FlatButton(
       onPressed: () {
         if (onOk != null) onOk();
-        Navigator.of(context, rootNavigator: false).pop(dialogDefault);
+        Navigator.of(context).pop(dialogDefault);
       },
       child: const Text('OK'),
     );

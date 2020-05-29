@@ -382,7 +382,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Future<Map<String, InstanceRef>> get valueProperties async {
     if (_valueProperties == null) {
       if (propertyType == null || valueRef?.id == null) {
-        _valueProperties = Future.value(null);
+        _valueProperties = Future.value();
         return _valueProperties;
       }
       if (isEnumProperty()) {
@@ -401,7 +401,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
           propertyNames = ['codePoint'];
           break;
         default:
-          _valueProperties = Future.value(null);
+          _valueProperties = Future.value();
           return _valueProperties;
       }
       _valueProperties = (await inspectorService)

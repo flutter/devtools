@@ -532,7 +532,7 @@ class ObjectGroup {
   Future<Object> _callServiceExtension(
       String extension, Map<String, Object> args) {
     if (disposed) {
-      return Future.value(null);
+      return Future.value();
     }
 
     return inspectorLibrary.addRequest(this, () async {
@@ -871,7 +871,7 @@ class ObjectGroup {
   Future<void> setSelectionInspector(
       InspectorInstanceRef selection, bool uiAlreadyUpdated) {
     if (disposed) {
-      return Future.value(null);
+      return Future.value();
     }
     inspectorService._trackClientSelfTriggeredSelection(selection);
     if (useDaemonApi) {
@@ -1032,7 +1032,7 @@ class InspectorObjectGroupManager {
     }
     if (_next == null) {
       // There is no pending update.
-      return Future.value(null);
+      return Future.value();
     }
 
     _pendingNext = Completer();

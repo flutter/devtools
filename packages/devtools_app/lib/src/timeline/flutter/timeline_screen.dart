@@ -365,7 +365,6 @@ class TimelineConfigurationsDialog extends StatelessWidget {
         padding: const EdgeInsets.all(defaultSpacing),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ...headerInColumn(theme.textTheme, 'Recorded Streams'),
@@ -428,7 +427,6 @@ class TimelineConfigurationsDialog extends StatelessWidget {
   }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         ValueListenableBuilder(
           valueListenable: listenable,

@@ -56,7 +56,7 @@ void main() {
       );
 
       expect(
-        dataTable.formatRequestTime(DateTime(2020, 1, 16, 13, 0, 0)),
+        dataTable.formatRequestTime(DateTime(2020, 1, 16, 13)),
         '13:00:00 1/16/2020',
       );
     });
