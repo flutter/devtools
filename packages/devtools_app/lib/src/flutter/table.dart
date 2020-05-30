@@ -259,8 +259,10 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   void expandParents(T parent) {
-    if (parent?.parent?.index != -1) {
-      expandParents(parent?.parent);
+    if (parent == null) return;
+
+    if (parent.parent?.index != -1) {
+      expandParents(parent.parent);
     }
 
     if (parent != null && !parent.isExpanded) {

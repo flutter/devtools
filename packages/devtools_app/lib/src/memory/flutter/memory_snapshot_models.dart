@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../config_specific/logger/logger.dart';
@@ -23,6 +24,7 @@ class Reference extends TreeNode<Reference> {
   Reference._empty()
       : controller = null,
         name = emptyName,
+        isAnalysis = false,
         isLibrary = false,
         isExternals = false,
         isExternal = false,
@@ -34,6 +36,17 @@ class Reference extends TreeNode<Reference> {
   Reference._sentinel()
       : controller = null,
         name = sentinelName,
+        isAnalysis = false,
+        isLibrary = false,
+        isExternals = false,
+        isExternal = false,
+        isFiltered = false,
+        isClass = false,
+        isObject = false,
+        actualClass = null;
+
+  Reference.analysis(this.controller, this.name, {this.onExpand, this.onLeaf})
+      : isAnalysis = true,
         isLibrary = false,
         isExternals = false,
         isExternal = false,
@@ -43,7 +56,8 @@ class Reference extends TreeNode<Reference> {
         actualClass = null;
 
   Reference.library(this.controller, this.name, {this.onExpand, this.onLeaf})
-      : isLibrary = true,
+      : isAnalysis = false,
+        isLibrary = true,
         isExternals = false,
         isExternal = false,
         isFiltered = false,
@@ -56,7 +70,8 @@ class Reference extends TreeNode<Reference> {
     this.actualClass, {
     this.onExpand,
     this.onLeaf,
-  })  : name = actualClass.name,
+  })  : isAnalysis = false,
+        name = actualClass.name,
         isLibrary = false,
         isExternals = false,
         isExternal = false,
@@ -70,7 +85,8 @@ class Reference extends TreeNode<Reference> {
     this.name, {
     this.onExpand,
     this.onLeaf,
-  })  : isLibrary = false,
+  })  : isAnalysis = false,
+        isLibrary = false,
         isExternals = false,
         isExternal = false,
         isFiltered = false,
@@ -82,7 +98,8 @@ class Reference extends TreeNode<Reference> {
   Reference.externals(
     this.controller, {
     this.onExpand,
-  })  : isLibrary = false,
+  })  : isAnalysis = false,
+        isLibrary = false,
         isExternals = true,
         isExternal = false,
         isFiltered = false,
@@ -96,7 +113,8 @@ class Reference extends TreeNode<Reference> {
     this.controller,
     this.name, {
     this.onExpand,
-  })  : isLibrary = false,
+  })  : isAnalysis = false,
+        isLibrary = false,
         isExternals = false,
         isExternal = true,
         isFiltered = false,
@@ -104,10 +122,10 @@ class Reference extends TreeNode<Reference> {
         isObject = false,
         actualClass = null;
 
-  // TODO(terry): Investigate expanding to view filtered items.
   /// All filtered libraries and classes
   Reference.filtered(this.controller)
-      : isLibrary = false,
+      : isAnalysis = false,
+        isLibrary = false,
         isExternals = false,
         isExternal = false,
         isFiltered = true,
@@ -130,6 +148,8 @@ class Reference extends TreeNode<Reference> {
 
   final String name;
 
+  final bool isAnalysis;
+
   final bool isLibrary;
 
   final bool isExternals;
@@ -141,6 +161,10 @@ class Reference extends TreeNode<Reference> {
   final bool isClass;
 
   final bool isObject;
+
+  int count;
+
+  bool get hasCount => count != null;
 
   Function onExpand;
 
@@ -157,14 +181,113 @@ class Reference extends TreeNode<Reference> {
 
   @override
   void leaf() {
-    assert(isObject);
+    if (isObject) {
+      final objectReference = this as ObjectReference;
+      if (controller.selectedAnalysisLeaf != null) {
+        controller.selectedAnalysisLeaf = null;
+      }
+      controller.selectedLeaf = objectReference.instance;
+    } else if (isAnalysis && this is AnalysisInstance) {
+      final AnalysisInstance analysisInstance = this as AnalysisInstance;
+      if (controller.selectedLeaf != null) {
+        controller.selectedLeaf = null;
+      }
+      controller.selectedAnalysisLeaf = analysisInstance;
+    }
 
-    final objectReference = this as ObjectReference;
-    controller.selectedLeaf = objectReference.instance;
     if (onLeaf != null) onLeaf(this);
 
     super.leaf();
   }
+}
+
+/// Container of all snapshot analyses processed.
+class AnalysesReference extends Reference {
+  AnalysesReference()
+      : super.analysis(
+          null,
+          'Analysis',
+/*
+          onExpand: (Reference reference) {
+            assert(reference.isAnalysis);
+            print("TBD");
+          },onLeaf: (ObjectReference reference) {
+            print("Clicking on analysis node");
+          }
+*/
+        );
+}
+
+/// Snapshot being analyzed.
+class AnalysisSnapshotReference extends Reference {
+  AnalysisSnapshotReference(
+    this.dateTime,
+  ) : super.analysis(
+          null,
+          'Snapshot ${_formatter.format(dateTime)}',
+/*
+          onExpand: (Reference reference) {
+            assert(reference.isAnalysis);
+            print("TBD");
+          },
+          onLeaf: (ObjectReference reference) {
+            print("Clicking on analysis node");
+          },
+*/
+        );
+
+  static final _formatter = DateFormat('MMM dd HH:mm:ss');
+
+  final DateTime dateTime;
+}
+
+/// Analysis data.
+class AnalysisReference extends Reference {
+  AnalysisReference(
+    String name, {
+    this.countNote,
+    this.sizeNote,
+  }) : super.analysis(
+          null,
+          name,
+        );
+
+  int countNote;
+  int sizeNote;
+}
+
+/// Analysis instance.
+class AnalysisInstance extends Reference {
+  AnalysisInstance(
+    MemoryController controller,
+    String name,
+    this.fieldsRoot,
+  ) : super.analysis(
+          controller,
+          name,
+        );
+
+  /// quick view of fields analysis.
+  final AnalysisField fieldsRoot;
+}
+
+/// Analysis instance.
+class AnalysisField extends TreeNode<AnalysisField> {
+  AnalysisField(
+    this.name,
+    this.value,
+  );
+
+  AnalysisField._empty()
+      : name = null,
+        value = null;
+
+  static AnalysisField empty = AnalysisField._empty();
+
+  bool get isEmptyReference => this == empty;
+
+  final String name;
+  final String value;
 }
 
 class LibraryReference extends Reference {
@@ -233,10 +356,33 @@ class ExternalReference extends Reference {
         );
 
   final HeapGraphExternalLive liveExternal;
+  int sumExternalSizes = 0;
 }
 
 class FilteredReference extends Reference {
   FilteredReference(MemoryController controller) : super.filtered(controller);
+}
+
+void computeInstanceForClassReference(
+  MemoryController controller,
+  Reference reference,
+) {
+  // Need to construct the children if the first child is Reference.empty.
+  if (reference.children.isNotEmpty &&
+      reference.children.first.isEmptyReference) {
+    reference.children.clear();
+
+    final classReference = reference as ClassReference;
+
+    final instances =
+        classReference.actualClass.getInstances(controller.heapGraph);
+
+    for (var index = 0; index < instances.length; index++) {
+      final instance = instances[index];
+      final objectRef = ObjectReference(controller, index, instance);
+      classReference.addChild(objectRef);
+    }
+  }
 }
 
 class ClassReference extends Reference {
@@ -247,22 +393,8 @@ class ClassReference extends Reference {
           controller,
           actualClass,
           onExpand: (reference) {
-            // Need to construct the children.
-            if (reference.children.isNotEmpty &&
-                reference.children.first.isEmptyReference) {
-              reference.children.clear();
-
-              final classReference = reference as ClassReference;
-
-              final instances =
-                  classReference.actualClass.getInstances(controller.heapGraph);
-
-              for (var index = 0; index < instances.length; index++) {
-                final instance = instances[index];
-                final objectRef = ObjectReference(controller, index, instance);
-                classReference.addChild(objectRef);
-              }
-            }
+            // Insure the children have been computed.
+            computeInstanceForClassReference(controller, reference);
           },
         );
 
@@ -292,6 +424,21 @@ class ObjectReference extends Reference {
         );
 
   final HeapGraphElementLive instance;
+}
+
+class ExternalObjectReference extends ObjectReference {
+  ExternalObjectReference(
+    MemoryController controller,
+    int index,
+    HeapGraphElementLive instance,
+    this.externalSize,
+  ) : super(
+          controller,
+          index,
+          instance,
+        );
+
+  final int externalSize;
 }
 
 class Snapshot {

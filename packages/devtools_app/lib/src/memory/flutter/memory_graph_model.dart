@@ -491,8 +491,6 @@ abstract class HeapGraphClass {
   }
 
   List<HeapGraphElementLive> getInstances(HeapGraph graph) {
-    // TODO(terry): Delay would be much faster but retained space needs
-    //              computation. Remove if block just return _instances?
     if (_instances == null) {
       for (var i = 0; i < graph.elements.length; i++) {
         final HeapGraphElementLive converted = graph.elements[i];
@@ -503,6 +501,10 @@ abstract class HeapGraphClass {
     }
     return _instances;
   }
+
+  /// Quick short-circuit to return real size of null implies '--' yet to be
+  /// computed or N/A.
+  int get instancesCount => _instances == null ? null : _instances.length;
 }
 
 class HeapGraphClassSentinel extends HeapGraphClass {

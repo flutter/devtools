@@ -106,6 +106,39 @@ class MemoryController extends DisposableController
 
   List<FieldReference> get instanceRoot => _instanceRoot;
 
+  /// Leaf node of analysis selected?  If selected then the field
+  /// view is displayed to view an abbreviated fields of an instance.
+  final _leafAnalysisSelectedNotifier = ValueNotifier<AnalysisInstance>(null);
+
+  ValueListenable<AnalysisInstance> get leafAnalysisSelectedNotifier =>
+      _leafAnalysisSelectedNotifier;
+
+  AnalysisInstance get selectedAnalysisLeaf =>
+      _leafAnalysisSelectedNotifier.value;
+
+  set selectedAnalysisLeaf(AnalysisInstance selected) {
+    _leafAnalysisSelectedNotifier.value = selected;
+  }
+
+  bool get isAnalysisLeafSelected => selectedAnalysisLeaf != null;
+
+  void computeAnalysisInstanceRoot() {
+    if (selectedAnalysisLeaf != null) {
+      final analysisFields = selectedAnalysisLeaf.fieldsRoot.children;
+      _analysisInstanceRoot =
+          analysisFields.isNotEmpty ? analysisFields : [AnalysisField.empty];
+    } else {
+      _analysisInstanceRoot = [AnalysisField.empty];
+    }
+  }
+
+  List<AnalysisField> _analysisInstanceRoot;
+
+  List<AnalysisField> get analysisInstanceRoot => _analysisInstanceRoot;
+
+  // List of completed Analysis of Snapshots.
+  final List<AnalysisSnapshotReference> completedAnalyses = [];
+
   MemoryTimeline memoryTimeline;
 
   MemoryLog memoryLog;
@@ -289,6 +322,9 @@ class MemoryController extends DisposableController
 
   /// Tree to view fields of an instance.
   TreeTable<FieldReference> instanceFieldsTreeTable;
+
+  /// Tree to view fields of an analysis.
+  TreeTable<AnalysisField> analysisFieldsTreeTable;
 
   /// State of filters used by filter dialog (create/modify) and used
   /// by filtering in grouping.
@@ -512,6 +548,10 @@ class MemoryController extends DisposableController
     // Group by library
     libraryRoot = LibraryReference(this, libraryRootNode, null);
 
+    final analysesRoot = AnalysesReference();
+    analysesRoot.addChild(AnalysisReference(''));
+    libraryRoot.addChild(analysesRoot);
+
     // Group by class (under root library __CLASSES__).
     classRoot = LibraryReference(this, classRootNode, null);
 
@@ -536,11 +576,16 @@ class MemoryController extends DisposableController
         externalReferences.addChild(externalReference);
       }
 
-      final classInstance = ObjectReference(
+      final classInstance = ExternalObjectReference(
         this,
         externalReference.children.length,
         liveExternal.live,
+        liveExternal.externalProperty.externalSize,
       );
+
+      // Sum up the externalSize of the children, under the externalReference group.
+      externalReference.sumExternalSizes +=
+          liveExternal.externalProperty.externalSize;
 
       externalReference.addChild(classInstance);
     }

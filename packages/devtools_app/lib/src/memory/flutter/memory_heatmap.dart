@@ -112,13 +112,17 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
 
     addAutoDisposeListener(controller.selectTheSearchNotifier, () {
       setState(() {
-        _trySelectItem();
+        if (_trySelectItem()) {
+          closeAutoCompleteOverlay();
+        }
       });
     });
 
     addAutoDisposeListener(controller.searchNotifier, () {
       setState(() {
-        _trySelectItem();
+        if (_trySelectItem()) {
+          closeAutoCompleteOverlay();
+        }
       });
     });
 
@@ -136,7 +140,8 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
     });
   }
 
-  void _trySelectItem() {
+  /// Returns true if node found and node selected.
+  bool _trySelectItem() {
     if (controller.search.isNotEmpty) {
       if (controller.selectTheSearch) {
         // Select the node.
@@ -147,6 +152,7 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
 
         controller.selectTheSearch = false;
         controller.search = '';
+        return true;
       } else {
         // No exact match, return top matches.
         var matches = matchNames(controller.search);
@@ -160,6 +166,8 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
       selectNode(null);
       controller.selectTheSearch = false;
     }
+
+    return false;
   }
 
   @override
