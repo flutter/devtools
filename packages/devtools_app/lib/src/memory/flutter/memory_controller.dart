@@ -139,6 +139,22 @@ class MemoryController extends DisposableController
   // List of completed Analysis of Snapshots.
   final List<AnalysisSnapshotReference> completedAnalyses = [];
 
+  bool enableAnalyzeButton() {
+    if (snapshots.isNotEmpty) {
+      final lastSnapshot = snapshots.last;
+      if (completedAnalyses.isNotEmpty) {
+        final result = completedAnalyses.last.dateTime.compareTo(
+              lastSnapshot.collectedTimestamp,
+            ) !=
+            0;
+        return result;
+      }
+      return true;
+    }
+
+    return false;
+  }
+
   MemoryTimeline memoryTimeline;
 
   MemoryLog memoryLog;

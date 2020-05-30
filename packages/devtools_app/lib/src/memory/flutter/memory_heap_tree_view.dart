@@ -537,7 +537,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
         Flexible(
           child: OutlineButton(
             key: analyzeButtonKey,
-            onPressed: controller.snapshots.isNotEmpty ? _analyze : null,
+            onPressed: controller.enableAnalyzeButton() ? _analyze : null,
             child: const MaterialIconLabel(
               Icons.highlight,
               'Analyze',
@@ -667,7 +667,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
         }
       }
 
-      AnalysisSnapshotReference analyzeSnapshot ;
+      AnalysisSnapshotReference analyzeSnapshot;
       final foundAnalysis = controller.completedAnalyses
           .where((analysis) => analysis.dateTime == currentSnapDT);
       if (foundAnalysis.isNotEmpty) {
@@ -726,6 +726,11 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       nodeIndex: analyzeSnapshot.index,
       scrollIntoView: true,
     );
+
+    // TODO(terry): Could be done if completedAnalyses was a ValueNotifier.
+    //              Although still an empty setState in didChangeDependencies.
+    // Rebuild Analyze button.
+    setState(() {});
   }
 
   void _settings() {
