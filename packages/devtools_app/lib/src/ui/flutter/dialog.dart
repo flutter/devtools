@@ -19,7 +19,7 @@ class DialogCancelButton extends StatelessWidget {
   }
 }
 
-/// A FlatButton used to close a containing dialog - Cancel.
+/// A FlatButton used to close a containing dialog - OK.
 class DialogOkButton extends StatelessWidget {
   const DialogOkButton(this.onOk) : super();
 
