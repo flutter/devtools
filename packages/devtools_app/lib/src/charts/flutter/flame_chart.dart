@@ -33,6 +33,9 @@ const double sideInsetSmall = 40.0;
 // this offset. Use `localPosition` once this is fixed.
 const flameChartContainerOffset = 17.0;
 
+// TODO(kenz): add some indication that we are scrolled out of the relevant area
+// so that users don't get lost in the extra pixels at the end of the chart.
+
 // TODO(kenz): consider cleaning up by changing to a flame chart code to use a
 // composition pattern instead of a class extension pattern.
 abstract class FlameChart<T, V> extends StatefulWidget {
