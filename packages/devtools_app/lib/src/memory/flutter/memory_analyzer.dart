@@ -117,7 +117,6 @@ void imageAnalysis(
 
   // TODO(terry): Any items with <empty> Reference.isEmpty need to be computed e.g., onExpand,
   collectedData.forEach((key, value) {
-    final output = StringBuffer();
     switch (key) {
       case 'externals':
         final externalsNode = AnalysisReference('Externals');
@@ -166,79 +165,244 @@ void imageAnalysis(
           });
           objectNode.addChild(bucketNode);
         }
-        print(output.toString());
-        output.clear();
         break;
       case 'filters':
       case 'libraries':
         final librariesNode = AnalysisReference('Library $key');
-        analysisSnapshot.addChild(librariesNode);
 
-        for (final ClassReference ref in value) {
-          // Insure instances are realized (not Reference.empty).
-          computeInstanceForClassReference(controller, ref);
-          final HeapGraphClassLive liveClass = ref.actualClass;
+        final matches = drillIn(controller, librariesNode, value);
 
-          final objectNode = AnalysisReference(
-            '${ref.name}',
-            countNote: liveClass.instancesCount,
-          );
-          librariesNode.addChild(objectNode);
-
-          switch (ref.name) {
-/*
-              case 'ImageCache':
-                print('TODO');
-                break;
-*/
-
-            default:
-              var instanceIndex = 0;
-              for (final ObjectReference objRef in ref.children) {
-                final fields = objRef.instance.getFields();
-                final AnalysisField fieldsRoot =
-                    AnalysisField('__FIELDS__', null);
-                for (final field in fields) {
-                  if (field.value.isSentinel) continue;
-
-                  final HeapGraphElementLive live = field.value;
-
-                  if (live.references.isNotEmpty) {
-                    final fieldObjectNode = AnalysisField(field.key, '');
-                    displayObject(fieldObjectNode, live);
-                    fieldsRoot.addChild(fieldObjectNode);
-                  }
-
-                  final value = displayData(live);
-                  if (value != null) {
-                    final fieldNode = AnalysisField(field.key, value);
-                    fieldsRoot.addChild(fieldNode);
-                  }
-                }
-
-                final instanceNode = AnalysisInstance(
-                  controller,
-                  'Instance $instanceIndex',
-                  fieldsRoot,
-                );
-                objectNode.addChild(instanceNode);
-
-                instanceIndex++;
-              }
-          }
+        final imageCacheNode = processMatches(controller, matches);
+        if (imageCacheNode != null) {
+          librariesNode.addChild(imageCacheNode);
         }
-        print(output.toString());
-        output.clear();
-        break;
+
+        analysisSnapshot.addChild(librariesNode);
     }
   });
 }
 
+AnalysisReference processMatches(
+  MemoryController controller,
+  Map<String, List<String>> matches,
+) {
+  // Root __FIELDS__ is a container for children, the children
+  // are added, later, to a treenode - if the treenode should
+  // be created.
+  final AnalysisField pending = AnalysisField(
+    '__FIELDS__',
+    null,
+  );
+  final AnalysisField cache = AnalysisField(
+    '__FIELDS__',
+    null,
+  );
+  final AnalysisField live = AnalysisField(
+    '__FIELDS__',
+    null,
+  );
+
+  var countPending = 0;
+  var countCache = 0;
+  var countLive = 0;
+  bool imageCacheFound = false;
+  matches.forEach((key, values) {
+    final fields = key.split('.');
+    imageCacheFound = fields[0] == imageCache;
+
+    for (final value in values) {
+      switch (fields[1]) {
+        case '_pendingImages':
+          countPending++;
+          pending.addChild(AnalysisField('url', value));
+          break;
+        case '_cache':
+          countCache++;
+          cache.addChild(AnalysisField('url', value));
+          break;
+        case '_liveImages':
+          countLive++;
+          live.addChild(AnalysisField('url', value));
+          break;
+      }
+    }
+  });
+
+  if (imageCacheFound) {
+    final imageCacheNode = AnalysisReference(
+      imageCache,
+      countNote: countPending + countCache + countLive,
+    );
+
+    final pendingNode = AnalysisReference(
+      'Pending',
+      countNote: countPending,
+    );
+
+    final cacheNode = AnalysisReference(
+      'Cache',
+      countNote: countCache,
+    );
+
+    final liveNode = AnalysisReference(
+      'Live',
+      countNote: countLive,
+    );
+
+    final pendingInstance = AnalysisInstance(
+      controller,
+      'Images',
+      pending,
+    );
+    final cacheInstance = AnalysisInstance(
+      controller,
+      'Images',
+      cache,
+    );
+    final liveInstance = AnalysisInstance(
+      controller,
+      'Images',
+      live,
+    );
+
+    pendingNode.addChild(pendingInstance);
+    imageCacheNode.addChild(pendingNode);
+
+    cacheNode.addChild(cacheInstance);
+    imageCacheNode.addChild(cacheNode);
+
+    liveNode.addChild(liveInstance);
+    imageCacheNode.addChild(liveNode);
+
+    return imageCacheNode;
+  }
+
+  return null;
+}
+
+// Flag to monitor field/object drill in.
+String monitorDrillIn = '';
+
+void monitor(String msg) {
+  // TODO(terry): Debug code enable to view field drill in.
+  // if (monitorDrillIn.isNotEmpty) print("->$monitorDrillIn:$msg");
+}
+
+ClassFields fieldsStack = ClassFields();
+
+Map<String, List<String>> drillIn(
+  MemoryController controller,
+  AnalysisReference librariesNode,
+  List<Reference> references, {
+  createTreeNodes = false,
+}) {
+  final Map<String, List<String>> result = {};
+
+  final matcher = ObjectMatcher((className, fields, value) {
+    final key = '$className.${fields.join(".")}';
+    result.putIfAbsent(key, () => []);
+    result[key].add(value);
+  });
+
+  for (final ClassReference classRef in references) {
+    if (!matcher.isClassMatched(classRef.name)) continue;
+
+    // Insure instances are realized (not Reference.empty).
+    computeInstanceForClassReference(controller, classRef);
+    final HeapGraphClassLive liveClass = classRef.actualClass;
+
+    AnalysisReference objectNode;
+    if (createTreeNodes) {
+      objectNode = AnalysisReference(
+        '${classRef.name}',
+        countNote: liveClass.instancesCount,
+      );
+      librariesNode.addChild(objectNode);
+    }
+
+    // TODO(terry): Enable debug code, validates an object's fields/values.
+    // monitorDrillIn = classRef.name == imageCache ? '${classRef.name}' : '';
+
+    fieldsStack.push(classRef.name);
+
+    var instanceIndex = 0;
+    monitor('Class ${classRef.name} Instance=$instanceIndex');
+    for (final ObjectReference objRef in classRef.children) {
+      final fields = objRef.instance.getFields();
+      // Root __FIELDS__ is a container for children, the children
+      // are added, later, to a treenode - if the treenode should
+      // be created.
+      final AnalysisField fieldsRoot = AnalysisField(
+        '__FIELDS__',
+        null,
+      );
+
+      for (final field in fields) {
+        if (field.value.isSentinel) continue;
+
+        final HeapGraphElementLive live = field.value;
+
+        if (live.references.isNotEmpty) {
+          monitor('${field.key} OBJECT Start');
+
+          final fieldObjectNode = AnalysisField(field.key, '');
+
+          fieldsStack.push(field.key);
+          displayObject(
+            matcher,
+            fieldObjectNode,
+            live,
+            createTreeNodes: createTreeNodes,
+          );
+          fieldsStack.pop();
+
+          if (createTreeNodes) {
+            fieldsRoot.addChild(fieldObjectNode);
+          }
+          monitor('${field.key} OBJECT End');
+        } else {
+          final value = displayData(live);
+          if (value != null) {
+            fieldsStack.push(field.key);
+            matcher.findFieldMatch(fieldsStack, value);
+            fieldsStack.pop();
+
+            monitor('${field.key} = ${value}');
+            if (createTreeNodes) {
+              final fieldNode = AnalysisField(field.key, value);
+              fieldsRoot.addChild(fieldNode);
+            }
+          } else {
+            monitor('${field.key} Skipped null');
+          }
+        }
+      }
+
+      if (createTreeNodes) {
+        final instanceNode = AnalysisInstance(
+          controller,
+          'Instance $instanceIndex',
+          fieldsRoot,
+        );
+        objectNode.addChild(instanceNode);
+      }
+
+      instanceIndex++;
+    }
+
+    fieldsStack.pop(); // Pop class name.
+  }
+
+  return result;
+}
+
 bool displayObject(
+  ObjectMatcher matcher,
   AnalysisField objectField,
   HeapGraphElementLive live, {
   depth = 0,
   maxDepth = 4,
+  createTreeNodes = false,
 }) {
   if (depth >= maxDepth) return null;
   if (live.references.isEmpty) return true;
@@ -246,27 +410,50 @@ bool displayObject(
   final fields = live.getFields();
   for (final field in fields) {
     if (field.value.isSentinel) continue;
+
     final HeapGraphElementLive liveField = field.value;
     for (final ref in liveField.references) {
       if (ref.isSentinel) continue;
       final HeapGraphElementLive liveRef = ref;
       final objectFields = liveRef.getFields();
-      if (objectFields.isEmpty) return true;
+      if (objectFields.isEmpty) continue;
 
       final newObject = AnalysisField(field.key, '');
+      monitor('${field.key} OBJECT start [depth=$depth]');
 
       depth++;
-      final continueResult = displayObject(newObject, liveRef, depth: depth);
-      // Drilled in enough, stop.
-      if (continueResult == null) return null;
 
-      objectField.addChild(newObject);
+      fieldsStack.push(field.key);
+      final continueResult = displayObject(
+        matcher,
+        newObject,
+        liveRef,
+        depth: depth,
+        createTreeNodes: createTreeNodes,
+      );
+      fieldsStack.pop();
+
+      depth--;
+      // Drilled in enough, stop.
+      if (continueResult == null) continue;
+
+      if (createTreeNodes) {
+        objectField.addChild(newObject);
+      }
+      monitor('${field.key} OBJECT end  [depth=$depth]');
     }
 
     final value = displayData(liveField);
     if (value != null) {
-      final node = AnalysisField(field.key, value);
-      objectField.addChild(node);
+      fieldsStack.push(field.key);
+      matcher.findFieldMatch(fieldsStack, value);
+      fieldsStack.pop();
+
+      monitor('${field.key}=$value');
+      if (createTreeNodes) {
+        final node = AnalysisField(field.key, value);
+        objectField.addChild(node);
+      }
     }
   }
 
@@ -399,4 +586,85 @@ class _AnalysisFieldValueColumn extends ColumnData<AnalysisField> {
 
   @override
   double get fixedWidthPx => 250.0;
+}
+
+class ClassFields {
+  final List<String> _fields = [];
+
+  void clear() {
+    _fields.clear();
+  }
+
+  int get length => _fields.length;
+
+  void push(String name) {
+    _fields.add(name);
+  }
+
+  String pop() => _fields.removeLast();
+
+  String elementAt(int index) => _fields.elementAt(index);
+}
+
+const imageCache = 'ImageCache';
+
+/// Callback function when an ObjectReference's class name and fields all match.
+/// Parameters:
+///   className that matched
+///   fields that all matched
+///   value of the matched objectReference
+///
+typedef CompletedFunction = void Function(
+    String className, List<String> fields, dynamic value);
+
+class ObjectMatcher {
+  ObjectMatcher(this._matchCompleted);
+
+  static const Map<String, List<List<String>>> matcherDrillIn = {
+    '$imageCache': [
+      ['_pendingImages', 'data_', 'completer', 'context_', 'url'],
+      ['_cache', 'data_', 'completer', 'context_', 'url'],
+      ['_liveImages', 'data_', 'completer', 'context_', 'url'],
+    ]
+  };
+
+  final CompletedFunction _matchCompleted;
+
+  bool isClassMatched(String className) =>
+      matcherDrillIn.containsKey(className);
+
+  List<List<String>> _findClassMatch(String className) =>
+      matcherDrillIn[className];
+
+  /// First field name match.
+  bool findFieldMatch(ClassFields classFields, dynamic value) {
+    bool matched = false;
+
+    final className = classFields._fields.elementAt(0);
+    final listOfFieldsToMatch = _findClassMatch(className);
+
+    if (listOfFieldsToMatch != null) {
+      for (final fieldsToMatch in listOfFieldsToMatch) {
+        final fieldsSize = fieldsToMatch.length;
+        if (fieldsSize == classFields._fields.length - 1) {
+          for (var index = 0; index < fieldsSize; index++) {
+            if (fieldsToMatch[index] ==
+                classFields._fields.elementAt(index + 1)) {
+              matched = true;
+            } else {
+              matched = false;
+              break;
+            }
+          }
+        }
+
+        if (matched) {
+          _matchCompleted(className, fieldsToMatch, value);
+          break;
+        }
+      }
+    }
+
+    return matched;
+  }
 }

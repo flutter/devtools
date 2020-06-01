@@ -68,7 +68,6 @@ const knowClassesToAnalyzeForImages = <WildcardMatch, List<String>>{
   WildcardMatch.exact: [
     '_Int32List',
     'FrameInfos',
-    'ImageCache',
   ],
 
   // Anything that ends with:
