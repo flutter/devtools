@@ -12,7 +12,6 @@ import '../debugger/flutter/debugger_controller.dart';
 import '../debugger/flutter/debugger_screen.dart';
 import '../framework/framework_core.dart';
 import '../globals.dart';
-import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
 import '../logging/flutter/logging_screen.dart';
 import '../logging/logging_controller.dart';
@@ -290,7 +289,7 @@ class OpenAboutAction extends StatelessWidget {
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
           child: const Icon(
-            Icons.info_outline,
+            Icons.help_outline,
             size: actionsIconSize,
           ),
         ),
@@ -457,7 +456,6 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
         const LoggingScreen(),
         createController: () => LoggingController(),
       ),
-      const DevToolsScreen(InfoScreen(), createController: null),
 // Uncomment to see a sample implementation of a conditional screen.
 //      DevToolsScreen<ExampleController>(
 //        const ExampleConditionalScreen(),

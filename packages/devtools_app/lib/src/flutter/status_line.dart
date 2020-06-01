@@ -5,14 +5,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
 import '../globals.dart';
+import '../info/info_controller.dart';
 import '../service_manager.dart';
 import '../utils.dart';
 import 'common_widgets.dart';
+import 'device_dialog.dart';
 import 'screen.dart';
 import 'theme.dart';
 import 'utils.dart';
@@ -163,7 +166,7 @@ class StatusLine extends StatelessWidget {
       initialData: serviceManager.service != null,
       stream: serviceManager.onStateChange,
       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-        if (snapshot.data) {
+        if (serviceManager.hasConnection) {
           final app = serviceManager.connectedApp;
 
           String description;
@@ -174,9 +177,6 @@ class StatusLine extends StatelessWidget {
             description =
                 '${vm.targetCPU}-${vm.architectureBits} ${vm.operatingSystem}';
           }
-
-          // TODO(devoncarew): Add an interactive dialog to the device status
-          // line.
 
           final color = Theme.of(context).textTheme.bodyText2.color;
 
@@ -199,15 +199,36 @@ class StatusLine extends StatelessWidget {
                 },
               ),
               const SizedBox(width: denseSpacing),
-              Text(
-                'Device: $description',
-                style: textTheme.bodyText2,
-                overflow: TextOverflow.clip,
-              ),
-              const SizedBox(width: 2.0),
-              const Icon(
-                Icons.phone_android,
-                size: defaultIconSize,
+              ActionButton(
+                tooltip: 'Device Info',
+                child: InkWell(
+                  onTap: () async {
+                    final flutterVersion =
+                        await InfoController.getFlutterVersion();
+
+                    unawaited(showDialog(
+                      context: context,
+                      builder: (context) => DeviceDialog(
+                        connectedApp: app,
+                        flutterVersion: flutterVersion,
+                      ),
+                    ));
+                  },
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.info_outline,
+                        size: actionsIconSize,
+                      ),
+                      const SizedBox(width: denseSpacing),
+                      Text(
+                        description,
+                        style: textTheme.bodyText2,
+                        overflow: TextOverflow.clip,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           );
