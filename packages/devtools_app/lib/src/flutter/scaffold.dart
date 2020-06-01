@@ -81,10 +81,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     with TickerProviderStateMixin {
   /// A tag used for [Hero] widgets to keep the [AppBar] in the same place
   /// across route transitions.
-  static const String _appBarTag = 'DevTools AppBar';
-
-  AnimationController appBarAnimation;
-  CurvedAnimation appBarCurve;
+  static const Object _appBarTag = 'DevTools AppBar';
 
   /// The controller for animating between tabs.
   ///
@@ -140,25 +137,12 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       Notifications.of(context),
       _pushSnapshotScreenForImport,
     );
-
-    // If the animations are null, initialize them.
-    appBarAnimation ??= defaultAnimationController(
-      this,
-      value: isNarrow ? 1.0 : 0.0,
-    );
-    appBarCurve ??= defaultCurvedAnimation(appBarAnimation);
-    if (isNarrow) {
-      appBarAnimation.forward();
-    } else {
-      appBarAnimation.reverse();
-    }
   }
 
   @override
   void dispose() {
     _tabController?.dispose();
     _currentScreen?.dispose();
-    appBarAnimation?.dispose();
     _connectVmSubscription?.cancel();
     _showPageSubscription?.cancel();
 
@@ -286,20 +270,14 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           // TODO(kenz): we are handling drops from multiple scaffolds. We need
           // to make sure we are only handling drops from the active scaffold.
           handleDrop: _importController.importData,
-          child: AnimatedBuilder(
-            animation: appBarCurve,
-            builder: (context, child) {
-              return Scaffold(
-                appBar: _buildAppBar(),
-                body: child,
-                bottomNavigationBar: _buildStatusLine(context),
-              );
-            },
-            child: TabBarView(
+          child: Scaffold(
+            appBar: _buildAppBar(),
+            body: TabBarView(
               physics: defaultTabBarViewPhysics,
               controller: _tabController,
               children: tabBodies,
             ),
+            bottomNavigationBar: _buildStatusLine(context),
           ),
         ),
       ),
@@ -328,31 +306,27 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         onTap: _pushScreenToLocalPageRoute,
         tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
       );
-      preferredSize = Tween<Size>(
-        begin: const Size.fromHeight(kToolbarHeight),
-        end: const Size.fromHeight(kToolbarHeight + 40.0),
-      ).evaluate(appBarCurve);
-      final animatedAlignment = Tween<Alignment>(
-        begin: Alignment.centerRight,
-        end: Alignment.bottomLeft,
-      ).evaluate(appBarCurve);
+      preferredSize = isNarrow
+          ? const Size.fromHeight(kToolbarHeight + 40.0)
+          : const Size.fromHeight(kToolbarHeight);
+      final animatedAlignment =
+          isNarrow ? Alignment.bottomLeft : Alignment.centerRight;
 
       final rightAdjust =
           isNarrow ? 0.0 : DevToolsScaffold.actionWidgetSize / 2;
-      final animatedRightPadding = Tween<double>(
-        begin: math.max(
-            0.0,
-            DevToolsScaffold.actionWidgetSize * (actions?.length ?? 0.0) -
-                rightAdjust),
-        end: 0.0,
-      ).evaluate(appBarCurve);
+      final rightPadding = isNarrow
+          ? 0.0
+          : math.max(
+              0.0,
+              DevToolsScaffold.actionWidgetSize * (actions?.length ?? 0.0) -
+                  rightAdjust);
 
       flexibleSpace = Align(
         alignment: animatedAlignment,
         child: Padding(
           padding: EdgeInsets.only(
             top: 4.0,
-            right: animatedRightPadding,
+            right: rightPadding,
           ),
           child: tabBar,
         ),
