@@ -353,9 +353,9 @@ class ChartAxisPainter extends CustomPainter {
           timeMs -= timeUnitMs)
         timeMs,
       targetMsPerFrameRounded,
-      for (int timeMs = targetMsPerFrameRounded - timeUnitMs;
-          timeMs > 0;
-          timeMs -= timeUnitMs)
+      for (int timeMs = targetMsPerFrameRounded + timeUnitMs;
+          timeMs < totalMs;
+          timeMs += timeUnitMs)
         timeMs,
     ];
 
