@@ -309,8 +309,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       preferredSize = isNarrow
           ? const Size.fromHeight(kToolbarHeight + 40.0)
           : const Size.fromHeight(kToolbarHeight);
-      final animatedAlignment =
-          isNarrow ? Alignment.bottomLeft : Alignment.centerRight;
+      final alignment = isNarrow ? Alignment.bottomLeft : Alignment.centerRight;
 
       final rightAdjust =
           isNarrow ? 0.0 : DevToolsScaffold.actionWidgetSize / 2;
@@ -322,7 +321,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                   rightAdjust);
 
       flexibleSpace = Align(
-        alignment: animatedAlignment,
+        alignment: alignment,
         child: Padding(
           padding: EdgeInsets.only(
             top: 4.0,
