@@ -17,7 +17,7 @@ class FlutterUsage {
     String versionOverride,
     String configDirOverride,
   }) {
-    _analytics = AnalyticsIO('', settingsName, '', documentDirectory: null);
+    _analytics = AnalyticsIO('', settingsName, '');
   }
 
   Analytics _analytics;

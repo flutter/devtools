@@ -65,7 +65,6 @@ class _MyHomePageState extends State<MyHomePage> {
     };
     navigateCallbacks[title] = navigateToDemo;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         const SizedBox(
           width: 50.0,

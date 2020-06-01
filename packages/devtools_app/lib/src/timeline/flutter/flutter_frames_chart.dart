@@ -346,6 +346,9 @@ class ChartAxisPainter extends CustomPainter {
     final targetMsPerFrame = 1 / displayRefreshRate * 1000;
     final targetMsPerFrameRounded = targetMsPerFrame.round();
 
+    // TODO(kenz): maybe we should consider making these round values in
+    // multiples of 5 or 10?
+    // Y axis time units centered around [targetMsPerFrameRounded].
     final yAxisTimes = [
       0,
       for (int timeMs = targetMsPerFrameRounded - timeUnitMs;
@@ -353,9 +356,9 @@ class ChartAxisPainter extends CustomPainter {
           timeMs -= timeUnitMs)
         timeMs,
       targetMsPerFrameRounded,
-      for (int timeMs = targetMsPerFrameRounded - timeUnitMs;
-          timeMs > 0;
-          timeMs -= timeUnitMs)
+      for (int timeMs = targetMsPerFrameRounded + timeUnitMs;
+          timeMs < totalMs;
+          timeMs += timeUnitMs)
         timeMs,
     ];
 
