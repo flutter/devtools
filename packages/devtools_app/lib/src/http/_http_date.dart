@@ -270,7 +270,7 @@ class HttpDate {
       expect("GMT");
     }
     expectEnd();
-    return new DateTime.utc(year, month + 1, day, hours, minutes, seconds, 0);
+    return new DateTime.utc(year, month + 1, day, hours, minutes, seconds);
   }
 
   // Parse a cookie date string.
@@ -397,6 +397,6 @@ class HttpDate {
     if (minute > 59) error();
     if (second > 59) error();
 
-    return new DateTime.utc(year, month, dayOfMonth, hour, minute, second, 0);
+    return new DateTime.utc(year, month, dayOfMonth, hour, minute, second);
   }
 }

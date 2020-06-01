@@ -114,7 +114,6 @@ String addServiceExtensions() {
             groupName: groupName,
             summaryTree: true,
             subtreeDepth: subtreeDepth,
-            includeProperties: false,
             service: instance,
             addAdditionalPropertiesCallback: (node, delegate) {
               final Map<String, Object> additionalJson = <String, Object>{};

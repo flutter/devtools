@@ -156,9 +156,13 @@ Color titleSolidBackgroundColor(ThemeData theme) {
   return theme.isDarkTheme ? devtoolsGrey[900] : devtoolsGrey[50];
 }
 
-final chartBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
+// This is the same as Theme.of(context).scaffoldBackgroundColor, but we use
+// this in places where we do not have access to the context.
+final defaultBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
 const chartAccentColor = ThemedColor(Color(0xFFCCCCCC), Color(0xFF585858));
 const chartTextColor = ThemedColor(Colors.black, Colors.white);
+const chartSubtleColor = ThemedColor(Color(0xFF999999), Color(0xFF8A8A8A));
+const chartFontSizeSmall = 12.0;
 
 final chartLightTypeFace = TypeFace(
   fontFamily: 'OpenSans',

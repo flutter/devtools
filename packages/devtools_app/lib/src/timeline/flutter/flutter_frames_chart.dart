@@ -175,11 +175,12 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   Widget _buildChartLegend() {
     return Column(
       key: FlutterFramesChart.chartLegendKey,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _legendItem('Frame Time (UI)', mainUiColor),
+        const SizedBox(height: denseRowSpacing),
         _legendItem('Frame Time (Raster)', mainRasterColor),
+        const SizedBox(height: denseRowSpacing),
         _legendItem('Jank (slow frame)', uiJankColor),
       ],
     );
@@ -385,11 +386,16 @@ class ChartAxisPainter extends CustomPainter {
     final textPainter = TextPainter(
       text: TextSpan(
         text: labelText,
-        style: const TextStyle(color: chartTextColor),
+        style: const TextStyle(
+          color: chartSubtleColor,
+          fontSize: chartFontSizeSmall,
+        ),
       ),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
     )..layout();
+
+    const baselineAdjust = 2.0;
 
     textPainter.paint(
       canvas,
@@ -398,7 +404,10 @@ class ChartAxisPainter extends CustomPainter {
             yAxisTickWidth / 2 -
             densePadding - // Padding between y axis tick and label
             textPainter.width,
-        constraints.maxHeight - timeMs / msPerPx - textPainter.height / 2,
+        constraints.maxHeight -
+            timeMs / msPerPx -
+            textPainter.height / 2 -
+            baselineAdjust,
       ),
     );
   }
@@ -418,9 +427,7 @@ class FPSLinePainter extends CustomPainter {
     @required this.themeData,
   });
 
-  static const fpsLineColor = Color.fromARGB(0x80, 0xff, 0x44, 0x44);
-
-  static const fpsTextSpace = 60.0;
+  static const fpsTextSpace = 40.0;
 
   final BoxConstraints constraints;
 
@@ -448,16 +455,17 @@ class FPSLinePainter extends CustomPainter {
 
     canvas.drawLine(
       Offset(chartArea.left, targetLineY),
-      Offset(chartArea.right - fpsTextSpace, targetLineY),
-      Paint()
-        ..color = fpsLineColor
-        ..strokeWidth = 2.0,
+      Offset(chartArea.right, targetLineY),
+      Paint()..color = chartAccentColor,
     );
 
     final textPainter = TextPainter(
       text: TextSpan(
         text: '${displayRefreshRate.toStringAsFixed(0)} FPS',
-        style: const TextStyle(color: chartTextColor),
+        style: const TextStyle(
+          color: chartSubtleColor,
+          fontSize: chartFontSizeSmall,
+        ),
       ),
       textAlign: TextAlign.right,
       textDirection: TextDirection.ltr,
@@ -466,8 +474,8 @@ class FPSLinePainter extends CustomPainter {
     textPainter.paint(
       canvas,
       Offset(
-        chartArea.right - fpsTextSpace + denseSpacing,
-        targetLineY - textPainter.height / 2,
+        chartArea.right - fpsTextSpace,
+        targetLineY + borderPadding,
       ),
     );
   }

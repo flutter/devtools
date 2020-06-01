@@ -78,7 +78,6 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
     final CallbackDwell connectDebounce = CallbackDwell(_connect);
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         SizedBox(
           width: 350.0,
