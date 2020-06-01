@@ -40,7 +40,7 @@ class StreamValueListenable<T> extends ChangeNotifier
   String toString() => '${describeIdentity(this)}($value)';
 
   @override
-  void addListener(listener) {
+  void addListener(VoidCallback listener) {
     if (!hasListeners) {
       subscription = _onListen(this);
       _value = _lookupValue();
@@ -49,7 +49,7 @@ class StreamValueListenable<T> extends ChangeNotifier
   }
 
   @override
-  void removeListener(listener) {
+  void removeListener(VoidCallback listener) {
     super.removeListener(listener);
     if (!hasListeners) {
       subscription?.cancel();

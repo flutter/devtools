@@ -33,7 +33,7 @@ abstract class LineSegment {
   @visibleForTesting
   static double zoomedXPosition({
     @required double x,
-    @required zoom,
+    @required double zoom,
     @required double unzoomableOffset,
   }) {
     assert(x >= unzoomableOffset);
