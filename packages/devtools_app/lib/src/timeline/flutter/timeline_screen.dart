@@ -358,8 +358,6 @@ class TimelineConfigurationsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Dialog(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(defaultDialogRadius)),
       child: Container(
         width: dialogWidth,
         padding: const EdgeInsets.all(defaultSpacing),
