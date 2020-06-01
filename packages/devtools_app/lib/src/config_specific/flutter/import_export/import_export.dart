@@ -31,18 +31,26 @@ class ImportController {
     this._pushSnapshotScreenForImport,
   );
 
+  static const repeatImportTimeBufferMs = 500;
+
   final void Function(String screenId) _pushSnapshotScreenForImport;
 
   final NotificationService _notifications;
 
-  int previousImportMs = 0;
+  DateTime previousImportTime;
 
   // TODO(kenz): improve error handling here or in snapshot_screen.dart.
   void importData(Map<String, dynamic> json) {
     // Do not allow two different imports within 500 ms of each other. This is a
     // workaround for the fact that we get two drop events for the same file.
-    final now = DateTime.now().millisecondsSinceEpoch;
-    if ((now - previousImportMs).abs() < 500) return;
+    final now = DateTime.now();
+    if (previousImportTime != null &&
+        (now.millisecondsSinceEpoch - previousImportTime.millisecondsSinceEpoch)
+                .abs() <
+            repeatImportTimeBufferMs) {
+      return;
+    }
+    previousImportTime = now;
 
     final isDevToolsSnapshot = json[devToolsSnapshotKey];
     if (isDevToolsSnapshot == null || !isDevToolsSnapshot) {

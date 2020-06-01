@@ -181,7 +181,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         timelineScreen,
         if (loadingOfflineData)
           Container(
-            color: defaultBackgroundColor,
+            color: Theme.of(context).scaffoldBackgroundColor,
             child: const Center(
               child: CircularProgressIndicator(),
             ),
