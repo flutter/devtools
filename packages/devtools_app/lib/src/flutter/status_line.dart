@@ -165,8 +165,8 @@ class StatusLine extends StatelessWidget {
     return StreamBuilder(
       initialData: serviceManager.service != null,
       stream: serviceManager.onStateChange,
-      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-        if (serviceManager.hasConnection) {
+      builder: (context, AsyncSnapshot<bool> connectedSnapshot) {
+        if (connectedSnapshot.data) {
           final app = serviceManager.connectedApp;
 
           String description;
