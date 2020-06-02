@@ -35,20 +35,22 @@ class DeviceDialog extends StatelessWidget {
     final vm = serviceManager.vm;
 
     var version = vm.version;
+    // Convert '2.9.0-13.0.dev (dev) (Fri May ... +0200) on "macos_x64"' to
+    // '2.9.0-13.0.dev'.
     if (version.contains(' ')) {
       version = version.substring(0, version.indexOf(' '));
     }
 
-    final versions = {
+    final items = {
       'Dart Version': version,
       'CPU / OS':
           '${vm.targetCPU}-${vm.architectureBits} / ${vm.operatingSystem}',
     };
 
     if (flutterVersion != null) {
-      versions['Flutter Version'] =
+      items['Flutter Version'] =
           '${flutterVersion.version} / ${flutterVersion.channel}';
-      versions['Framework / Engine'] = '${flutterVersion.frameworkRevision} / '
+      items['Framework / Engine'] = '${flutterVersion.frameworkRevision} / '
           '${flutterVersion.engineRevision}';
     }
 
@@ -62,13 +64,13 @@ class DeviceDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ...headerInColumn(theme.textTheme, 'Device Info'),
-          for (var name in versions.keys)
+          for (var name in items.keys)
             Padding(
               padding: const EdgeInsets.only(bottom: denseRowSpacing),
               child: Row(
                 children: [
                   Text('$name: ', style: boldText),
-                  Text(versions[name], style: theme.subtleTextStyle),
+                  Text(items[name], style: theme.subtleTextStyle),
                 ],
               ),
             ),
@@ -213,11 +215,10 @@ class _FlagTable extends StatelessWidget {
       child: FlatTable<_DialogFlag>(
         columns: columns,
         data: flags,
-        autoScrollContent: true,
         keyFactory: (_DialogFlag flag) => ValueKey<String>(flag.name),
         sortColumn: name,
         sortDirection: SortDirection.ascending,
-        onItemSelected: (_DialogFlag item) => null,
+        onItemSelected: (_) => null,
       ),
     );
   }
