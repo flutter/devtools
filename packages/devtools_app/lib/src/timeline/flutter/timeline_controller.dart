@@ -64,12 +64,12 @@ class TimelineController
   final _emptyTimeline = ValueNotifier<bool>(false);
 
   /// Whether the timeline is currently being recorded.
-  ValueListenable<bool> get refreshing => _refreshingNotifier;
-  final _refreshingNotifier = ValueNotifier<bool>(false);
+  ValueListenable<bool> get refreshing => _refreshing;
+  final _refreshing = ValueNotifier<bool>(false);
 
   /// Whether the recorded timeline data is currently being processed.
-  ValueListenable<bool> get processing => _processingNotifier;
-  final _processingNotifier = ValueNotifier<bool>(false);
+  ValueListenable<bool> get processing => _processing;
+  final _processing = ValueNotifier<bool>(false);
 
   // TODO(jacobr): this isn't accurate. Another page of DevTools
   // or a different instance of DevTools could change this value. We need to
@@ -78,37 +78,8 @@ class TimelineController
   // See https://github.com/dart-lang/sdk/issues/41823.
   /// Whether http timeline logging is enabled.
   ValueListenable<bool> get httpTimelineLoggingEnabled =>
-      _httpTimelineLoggingEnabledNotifier;
-  final _httpTimelineLoggingEnabledNotifier = ValueNotifier<bool>(false);
-
-  // TODO(kenz): change these streams to ValueListenables or remove altogether
-  // if we can refactor the FlutterFramesChart to be written with more idiomatic
-  // Flutter.
-
-  /// Stream controller that notifies the timeline has been processed.
-  Stream<bool> get onTimelineProcessed => _timelineProcessedController.stream;
-  final _timelineProcessedController = StreamController<bool>.broadcast();
-
-  /// Stream controller that notifies that offline data was loaded into the
-  /// timeline.
-  ///
-  /// Subscribers to this stream will be responsible for updating the UI for the
-  /// new value of [timelineData].
-  Stream<OfflineTimelineData> get onLoadOfflineData =>
-      _loadOfflineDataController.stream;
-  final _loadOfflineDataController =
-      StreamController<OfflineTimelineData>.broadcast();
-
-  /// Stream controller that notifies the timeline screen when a non-fatal error
-  /// should be logged for the timeline.
-  final _nonFatalErrorController = StreamController<String>.broadcast();
-
-  Stream<String> get onNonFatalError => _nonFatalErrorController.stream;
-
-  /// Stream controller that notifies the timeline has been cleared.
-  final _clearController = StreamController<bool>.broadcast();
-
-  Stream<bool> get onTimelineCleared => _clearController.stream;
+      _httpTimelineLoggingEnabled;
+  final _httpTimelineLoggingEnabled = ValueNotifier<bool>(false);
 
   // TODO(kenz): switch to use VmFlagManager-like pattern once
   // https://github.com/dart-lang/sdk/issues/41822 is fixed.
@@ -253,7 +224,7 @@ class TimelineController
         : TimelineData();
 
     _emptyTimeline.value = false;
-    _refreshingNotifier.value = true;
+    _refreshing.value = true;
     allTraceEvents.clear();
     final timeline = await serviceManager.service.getVMTimeline();
     primeThreadIds(timeline);
@@ -265,20 +236,18 @@ class TimelineController
       allTraceEvents.add(eventWrapper);
     }
 
-    _refreshingNotifier.value = false;
+    _refreshing.value = false;
 
     if (allTraceEvents.isEmpty) {
       _emptyTimeline.value = true;
       return;
     }
 
-    _processingNotifier.value = true;
+    _processing.value = true;
     await processTraceEvents(allTraceEvents);
-    _processingNotifier.value = false;
+    _processing.value = false;
 
     _flutterFrames.value = data.frames;
-
-    _timelineProcessedController.add(true);
   }
 
   void primeThreadIds(vm_service.Timeline timeline) {
@@ -337,8 +306,7 @@ class TimelineController
     }
 
     if (uiThreadId == null || rasterThreadId == null) {
-      logNonFatalError(
-          'Could not find UI thread and / or Raster thread from names: '
+      log('Could not find UI thread and / or Raster thread from names: '
           '${threadIdsByName.keys}');
     }
 
@@ -390,8 +358,6 @@ class TimelineController
 
     // Set offline data.
     setOfflineData();
-
-    _loadOfflineDataController.add(offlineTimelineData);
   }
 
   int _threadIdForEvents(
@@ -452,7 +418,7 @@ class TimelineController
 
   Future<void> toggleHttpRequestLogging(bool state) async {
     await HttpService.toggleHttpRequestLogging(state);
-    _httpTimelineLoggingEnabledNotifier.value = state;
+    _httpTimelineLoggingEnabled.value = state;
   }
 
   Future<void> setTimelineStreams(List<RecordedTimelineStream> streams) async {
@@ -498,8 +464,7 @@ class TimelineController
     _flutterFrames.value = [];
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
-    _processingNotifier.value = false;
-    _clearController.add(true);
+    _processing.value = false;
   }
 
   void recordTrace(Map<String, dynamic> trace) {
@@ -514,16 +479,9 @@ class TimelineController
     }
   }
 
-  void logNonFatalError(String message) {
-    _nonFatalErrorController.add(message);
-  }
-
   @override
   void dispose() {
     cpuProfilerController.dispose();
     _selectedTimelineEventNotifier.dispose();
-    _clearController.close();
-    _loadOfflineDataController.close();
-    _nonFatalErrorController.close();
   }
 }
