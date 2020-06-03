@@ -71,14 +71,17 @@ Map<LibraryClass, Predefined> predefinedClasses = {
   predefinedHashMap: const Predefined('HashMap', false),
 };
 
-bool isMap(HeapGraphClassLive live) =>
+// TODO(terry): Investigate if class implements the Map interface?
+bool isBuiltInMap(HeapGraphClassLive live) =>
     live.fullQualifiedName == predefinedMap ||
     live.fullQualifiedName == predefinedHashMap;
 
-bool isHashMap(HeapGraphClassLive live) =>
+/// Is it a built-in HashMap class (predefined).
+bool isBuiltInHashMap(HeapGraphClassLive live) =>
     live.fullQualifiedName == predefinedHashMap;
 
-bool isList(HeapGraphClassLive live) =>
+/// Is it a built-in List class (predefined).
+bool isBuiltInList(HeapGraphClassLive live) =>
     live.fullQualifiedName == predefinedList;
 
 /// List of classes to monitor, helps to debug particular class structure.
@@ -194,18 +197,6 @@ HeapGraph convertHeapGraph(
     externals[index] = HeapGraphExternalLive(snapshotObject, liveElement);
   }
 
-  // TODO(terry): Remove debug code.
-/*
-  print(">>> STOP");
-  print("External objects = ${externals.length}");
-  for (var extern in externals) {
-    print('extern = ${extern.toString()}, '
-        'size=${extern.externalProperty.externalSize}, '
-        'name=${extern.externalProperty.name}, '
-        'class=${extern.live.theClass}, ');
-  }
-*/
-
   return HeapGraph(
     controller,
     builtInClasses,
@@ -248,22 +239,33 @@ class HeapGraph {
   /// Index by objectId of all external properties
   List<HeapGraphExternalLive> externals;
 
-  /// Group all classes by all libraries.
-  final Map<String, List<HeapGraphClassLive>> rawGroupByLibrary = {};
+  /// Group all classes by libraries (key is library, value are classes).
+  /// This is the entire set of objects (no filter applied).
+  final Map<String, Set<HeapGraphClassLive>> rawGroupByLibrary = {};
 
-  /// Group all classes by libraries - with applied filters.
-  final Map<String, List<HeapGraphClassLive>> groupByLibrary = {};
+  /// Group all classes by libraries (key is library, value is classes).
+  /// Filtering out objects that match a given filter. This is always a
+  /// subset of rawGroupByLibrary.
+  final Map<String, Set<HeapGraphClassLive>> groupByLibrary = {};
 
-  /// Group all instances by all classes.
-  final Map<String, List<HeapGraphElementLive>> rawGroupByClass = {};
+  /// Group all instances by class (key is class name, value are class
+  /// instances).  This is the entire set of objects (no filter applied).
+  final Map<String, Set<HeapGraphElementLive>> rawGroupByClass = {};
 
-  /// Group all instances by all classes - with applied filters.
-  final Map<String, List<HeapGraphElementLive>> groupByClass = {};
+  /// Group all instances by class (key is class name, value are class
+  /// instances).  Filtering out objects that match a given filter. This
+  /// is always a subset of rawGroupByClass.
+  final Map<String, Set<HeapGraphElementLive>> groupByClass = {};
 
-  /// Group all filtered out instances by all classes (removed from groupByClass).
-  final Map<String, List<HeapGraphElementLive>> filteredElements = {};
+  /// Group of instances by filtered out classes (key is class name, value
+  /// are instances). These are the instances not in groupByClass, together
+  /// filteredElements and groupByClass are equivalent to rawGroupByClass.
+  final Map<String, Set<HeapGraphElementLive>> filteredElements = {};
 
-  final Map<String, List<HeapGraphClassLive>> filteredLibraries = {};
+  /// Group of libraries by filtered out classes (key is library name, value
+  /// are classes). These are the libraries not in groupByLibrary, together
+  /// filteredLibraries and groupByLibrary are equivalent to rawGroupByLibrary.
+  final Map<String, Set<HeapGraphClassLive>> filteredLibraries = {};
 
   /// Normalize the library name. Library is a Uri that contains
   /// the schema e.g., 'dart' or 'package' and pathSegments. The
@@ -297,7 +299,7 @@ class HeapGraph {
       // Collect classes for each library (group by library).
       sb.write(libraryKey);
       final librarySbToString = sb.toString();
-      rawGroupByLibrary[librarySbToString] ??= [];
+      rawGroupByLibrary[librarySbToString] ??= <HeapGraphClassLive>{};
       rawGroupByLibrary[librarySbToString].add(c);
       sb.clear();
 
@@ -306,7 +308,7 @@ class HeapGraph {
         sb.write(c.name);
         c.instancesTotalShallowSizes += instance.origin.shallowSize;
         final classSbToString = sb.toString();
-        rawGroupByClass[classSbToString] ??= [];
+        rawGroupByClass[classSbToString] ??= <HeapGraphElementLive>{};
         rawGroupByClass[classSbToString].add(instance);
         sb.clear();
       }
@@ -317,7 +319,7 @@ class HeapGraph {
     // Clone groupByClass from raw group.
     groupByClass.clear();
     rawGroupByClass.forEach((key, value) {
-      groupByClass[key] = value.toList();
+      groupByClass[key] = value.cast<HeapGraphElementLive>().toSet();    
     });
 
     // Prune classes that are private or have zero instances.
@@ -338,7 +340,7 @@ class HeapGraph {
     // Clone groupByLibrary from raw group.
     groupByLibrary.clear();
     rawGroupByLibrary.forEach((key, value) {
-      groupByLibrary[key] = value.toList();
+      groupByLibrary[key] = value.cast<HeapGraphClassLive>().toSet();
     });
 
     // Prune libraries if all their classes are private or have zero instances.

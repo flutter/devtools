@@ -152,10 +152,13 @@ class Reference extends TreeNode<Reference> {
 
   final bool isLibrary;
 
+  /// The External heap (contains all external heap items).
   final bool isExternals;
 
+  /// An External heap item.
   final bool isExternal;
 
+  /// Class or Library is filtered.
   final bool isFiltered;
 
   final bool isClass;
@@ -323,7 +326,7 @@ class LibraryReference extends Reference {
           },
         );
 
-  List<HeapGraphClassLive> actualClasses;
+  Set<HeapGraphClassLive> actualClasses;
 }
 
 class ExternalReferences extends Reference {
@@ -407,21 +410,7 @@ class ObjectReference extends Reference {
     MemoryController controller,
     int index,
     this.instance,
-  ) : super.object(
-          controller,
-          'Instance $index',
-/*
-          onLeaf: (ObjectReference reference) {
-            final nonSentinels = reference.instance.references.where((HeapGraphElement element) =>
-                element is! HeapGraphElementSentinel);
-            if (nonSentinels.isEmpty) {
-              log('Sentinel<${reference.name}>', LogLevel.debug);
-            } else {
-              print("Stop");
-            }
-          },
-*/
-        );
+  ) : super.object(controller, 'Instance $index');
 
   final HeapGraphElementLive instance;
 }
@@ -579,43 +568,23 @@ class ObjectFieldReference extends FieldReference {
       objectFieldReference.instance,
     );
 
-    if (objFields.isEmpty) {
-      final className =
-          (objectFieldReference.instance.theClass as HeapGraphClassLive).name;
-      if (className.endsWith('Array') || className.endsWith('List')) {
-        final refs = objectFieldReference.instance.references;
-        if (refs.length == 1 && refs.first.isSentinel) return;
-
-        // Its an external object (probably an UInt8Array, Int16Array, etc.).
-        // Display the total size of opaque blob - nothing else known.
-        final data = objectFieldReference.instance.origin.data;
-        if (data is HeapSnapshotObjectLengthData) {
-          objFields = [
-            FieldReference.createScaler(
-              controller,
-              objectFieldReference.instance,
-              'int',
-              'length (bytes)',
-              '${data.length}',
-            ),
-          ];
-        }
-      }
-    } else {
+    if (objFields.isNotEmpty) {
       final computedFields = <FieldReference>[];
       for (final ref in objFields) {
-        if (ref is FieldReference) {
+        if (ref is ObjectFieldReference) {
+          computedFields.add(ref);
+        } else if (ref is FieldReference) {
           final FieldReference fieldRef = ref;
           final HeapGraphElementLive live = fieldRef.instance;
           final HeapGraphClassLive theClass = live.theClass;
           final predefined = predefinedClasses[theClass.fullQualifiedName];
           if (predefined != null && predefined.isScalar) {
-            computedFields.add(
-                createScalar(controller, fieldRef.name, fieldRef.instance));
+            computedFields.add(createScalar(
+              controller,
+              fieldRef.name,
+              fieldRef.instance,
+            ));
           }
-        } else if (ref is ObjectFieldReference) {
-          final ObjectFieldReference objectRef = ref;
-          // TODO(terry): Compute fields that are objects.
         }
       }
       objFields = computedFields;
@@ -691,8 +660,8 @@ FieldReference fieldToFieldReference(
   } else {
     final data = actual.origin.data;
     if (data.runtimeType == HeapSnapshotObjectLengthData) {
-      final isAMap = isMap(theClass);
-      if (isAMap || isList(theClass)) {
+      final isAMap = isBuiltInMap(theClass);
+      if (isAMap || isBuiltInList(theClass)) {
         return listToFieldEntries(
           controller,
           actual,
@@ -701,12 +670,12 @@ FieldReference fieldToFieldReference(
           isHashMap: isAMap, // TODO(terry): Just a test. &&&&&
         );
       }
-    } else if (isHashMap(theClass)) {
+    } else if (isBuiltInHashMap(theClass)) {
       for (var ref in fieldElement.value.references) {
         if (ref is! HeapGraphElementSentinel) {
           final HeapGraphElementLive actual = ref;
           final HeapGraphClassLive theClass = actual.theClass;
-          if (isList(theClass)) {
+          if (isBuiltInList(theClass)) {
             final hashMapData = actual.origin.data;
             if (hashMapData.runtimeType == HeapSnapshotObjectLengthData) {
               return listToFieldEntries(
@@ -776,7 +745,7 @@ FieldReference listToFieldEntries(
   ObjectFieldReference listObjectReference;
   if (reference is HeapGraphElementLive) {
     final actualListClass = reference.theClass as HeapGraphClassLive;
-    if (isList(actualListClass)) {
+    if (isBuiltInList(actualListClass)) {
       // Add the list entry.
       actualListElement = reference;
       listObjectReference = ObjectFieldReference(
@@ -785,7 +754,7 @@ FieldReference listToFieldEntries(
         isHashMap ? 'HashMap' : 'List',
         isHashMap ? '$fieldName {$size}' : '[$size]',
       );
-    } else if (isMap(actualListClass)) {
+    } else if (isBuiltInMap(actualListClass)) {
       // Add the Map field name and the key/value pairs.
       actualListElement = reference;
       listObjectReference = ObjectFieldReference(

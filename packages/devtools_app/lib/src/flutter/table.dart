@@ -157,10 +157,11 @@ class FlatTableState<T> extends State<FlatTable<T>>
 }
 
 class Selection<T> {
-  Selection(
-      {this.node,
-      this.nodeIndex,
-      this.scrollIntoView = false,});
+  Selection({
+    this.node,
+    this.nodeIndex,
+    this.scrollIntoView = false,
+  });
 
   Selection.empty()
       : node = null,
@@ -279,10 +280,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     addAutoDisposeListener(selectionNotifier, () {
       setState(() {
         final node = selectionNotifier.value.node;
-        final parent = node.parent;
-        if (parent != null) {
-          expandParents(parent);
-        }
+        expandParents(node?.parent);
       });
     });
 
@@ -299,9 +297,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void _initData() {
     dataRoots = List.from(widget.dataRoots);
     sortData(widget.sortColumn, widget.sortDirection);
-    selectionNotifier = widget.selectionNotifier == null
-        ? SelectionNotifier<Selection<T>>(Selection<T>.empty())
-        : widget.selectionNotifier;
+
+    selectionNotifier = widget.selectionNotifier ??
+        SelectionNotifier<Selection<T>>(Selection<T>.empty());
   }
 
   @override
@@ -492,6 +490,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         nodeIndex: 0,
       );
     }
+
     assert(selectionNotifier.value.node ==
         items[selectionNotifier.value.nodeIndex]);
 
@@ -670,6 +669,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
           final newPos = selectedDisplayRow * defaultRowHeight;
           // TODO(terry): Optimize selecting row, if row's visible in
           //              the viewport just select otherwise jumpTo row.
+          // TODO(terry): Should animate too for a nicer interaction.
           scrollController.jumpTo(newPos);
         }
       });
@@ -677,9 +677,13 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   }
 
   /// Return the number of visible rows above the selected node.
+  // TODO(terry): Must refactory should be T not dynamic but that requires hanlding
+  //              for both Table and TreeTable.
   int selectionRowNumber(dynamic selectedNode) {
     var scanNode = selectedNode;
-    var parent = scanNode.parent;
+    var parent = scanNode?.parent;
+
+    assert(parent != null);
 
     var totalVisibleRowsAboveNode = 0;
     while (!scanNode.isRoot) {

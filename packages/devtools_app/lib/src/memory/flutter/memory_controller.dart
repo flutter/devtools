@@ -402,6 +402,8 @@ class MemoryController extends DisposableController
 
   bool get selectTheSearch => selectTheSearchNotifier.value;
 
+  /// Search is very dynamic, with auto-complete or programmatic searching,
+  /// setting the value to true will fire off searching through a snapshot.
   set selectTheSearch(bool v) {
     selectTheSearchNotifier.value = v;
   }
@@ -421,6 +423,10 @@ class MemoryController extends DisposableController
 
   ValueListenable<List<String>> get searchAutoCompleteNotifier =>
       searchAutoComplete;
+
+  void clearSearchAutoComplete() {
+    searchAutoComplete.value = [];
+  }
 
   String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
@@ -628,8 +634,10 @@ class MemoryController extends DisposableController
       }, orElse: () => null);
 
       // Library not found add to list of children.
-      libReference ??= LibraryReference(this, libraryName, classes);
-      libraryRoot.addChild(libReference);
+      if (libReference == null) {
+        libReference = LibraryReference(this, libraryName, classes);
+        libraryRoot.addChild(libReference);
+      }
 
       for (var actualClass in libReference.actualClasses) {
         monitorClass(
@@ -652,8 +660,9 @@ class MemoryController extends DisposableController
     return libraryRoot;
   }
 
+  // TODO(terry): Change to Set of known libraries so it's O(n) instead of O(n^2).
   void addAllToNode(
-      Reference root, Map<String, List<HeapGraphClassLive>> allItems) {
+      Reference root, Map<String, Set<HeapGraphClassLive>> allItems) {
     allItems.forEach((libraryName, classes) {
       LibraryReference libReference = root.children.singleWhere((library) {
         return libraryName == library.name;
@@ -693,11 +702,15 @@ class MemoryController extends DisposableController
 
   Future<void> gc() async {
     _gcing = true;
-    await serviceManager.service.getAllocationProfile(
-      _isolateId,
-      gc: true,
-    );
-    _gcing = false;
+
+    try {
+      await serviceManager.service.getAllocationProfile(
+        _isolateId,
+        gc: true,
+      );
+    } finally {
+      _gcing = false;
+    }
   }
 
   // Temporary hack to allow accessing private fields(e.g., _extra) using eval

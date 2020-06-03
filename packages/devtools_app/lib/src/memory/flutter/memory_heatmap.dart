@@ -127,16 +127,7 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
     });
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
-      setState(() {
-        if (autoCompleteOverlay == null) {
-          autoCompleteOverlay = createAutoCompleteOverlay(controller);
-          Overlay.of(context).insert(autoCompleteOverlay);
-        } else {
-          closeAutoCompleteOverlay();
-          autoCompleteOverlay = createAutoCompleteOverlay(controller);
-          Overlay.of(context).insert(autoCompleteOverlay);
-        }
-      });
+      setState(autoCompleteOverlaySetState(controller, context));
     });
   }
 
@@ -145,7 +136,7 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
     if (controller.search.isNotEmpty) {
       if (controller.selectTheSearch) {
         // Select the node.
-        final Node node = findNode(controller.search);
+        final node = findNode(controller.search);
         selectNode(node);
 
         closeAutoCompleteOverlay();
@@ -154,11 +145,9 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
         controller.search = '';
         return true;
       } else {
+        var matches = matchNames(controller.search)..sort();
         // No exact match, return top matches.
-        var matches = matchNames(controller.search);
-        matches.sort();
-        matches = matches.sublist(0, min(topMatches, matches.length));
-
+        matches = matches.sublist(0, min(topMatchesLimit, matches.length));
         controller.searchAutoComplete.value = matches;
       }
     } else if (controller.selectTheSearch) {
@@ -209,19 +198,22 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
   }
 }
 
-/// Key in callbacks map.
+/// Definitions of exposed callback methods stored in callback Map the key
+/// is the function name (String) and the value a callback function signature.
+
+/// matchNames callback name.
 const matchNamesKey = 'matchNames';
 
 /// matchNames callback signature.
 typedef MatchNamesFunction = List<String> Function(String);
 
-/// Key in callbacks map.
+/// findNode callback name.
 const findNodeKey = 'findNode';
 
 /// findNode callback signature.
 typedef FindNodeFunction = Node Function(String);
 
-/// Key in callbacks map.
+/// selectNode callback name.
 const selectNodeKey = 'selectNode';
 
 /// selectNode callback signature.
@@ -313,16 +305,12 @@ class FlameChartRenderObject extends RenderBox {
     final matchName = searchName.toLowerCase();
     for (var child in children.entries) {
       final node = child.value;
-      if (node.children.isEmpty) {
-        final lcNodeName = node.name.toLowerCase();
-        if (!lcNodeName.endsWith('.dart') && lcNodeName.startsWith(matchName)) {
-          matches.add(node.name);
-        }
-      } else {
-        final lcNodeName = node.name.toLowerCase();
-        if (!lcNodeName.endsWith('.dart') && lcNodeName.startsWith(matchName)) {
-          matches.add(node.name);
-        }
+
+      final lcNodeName = node.name.toLowerCase();
+      if (!lcNodeName.endsWith('.dart') && lcNodeName.startsWith(matchName)) {
+        matches.add(node.name);
+      }
+      if (node.children.isNotEmpty) {
         final childMatches = matchNodeNames(node.children, searchName);
         if (childMatches.isNotEmpty) {
           matches.addAll(childMatches);
@@ -528,7 +516,7 @@ class InstructionsSize {
     //              Using rawGroup not graph.groupByLibrary.
     controller.heapGraph.rawGroupByLibrary.forEach(
       (libraryGroup, value) {
-        final List<HeapGraphClassLive> classes = value;
+        final classes = value;
         for (final theClass in classes) {
           final shallowSize = theClass.instancesTotalShallowSizes;
           var className = theClass.name;

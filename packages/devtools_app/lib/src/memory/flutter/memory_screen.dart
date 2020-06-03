@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../config_specific/logger/logger.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
@@ -363,13 +364,12 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   Future<void> _gc() async {
     // TODO(terry): Record GC in analytics.
     try {
-      print("GC Starting");
-      
+      log('GC Start', LogLevel.warning);
       await controller.gc();
-
-      print("GC'ed");
+      log('GC Complete', LogLevel.warning);
     } catch (e) {
-      /*framework.toast('Unable to GC ${e.toString()}', title: 'Error');*/
+      // TODO(terry): Show toast?
+      log('Unable to GC ${e.toString()}', LogLevel.error);
     }
   }
 }

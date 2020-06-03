@@ -309,12 +309,16 @@ AnalysisReference processMatches(
   return null;
 }
 
-// Flag to monitor field/object drill in.
-String monitorDrillIn = '';
+// TODO(terry): Add a test to insure this output is never seen before checkin.
+// Name of class to monitor field/object drill in, e.g.,
+//
+//   debugMonitorDrillIn = 'ImageCache';
+String debugMonitorClass;
 
-void monitor(String msg) {
-  // TODO(terry): Debug code enable to view field drill in.
-  // if (monitorDrillIn.isNotEmpty) print("->$monitorDrillIn:$msg");
+void debugMonitor(String msg) {
+  // TODO(terry): Enable below to monitor.
+  // if (debugMonitorClass == null) return;
+  // print('--> $debugMonitorClass:$msg');
 }
 
 ClassFields fieldsStack = ClassFields();
@@ -350,12 +354,12 @@ Map<String, List<String>> drillIn(
     }
 
     // TODO(terry): Enable debug code, validates an object's fields/values.
-    // monitorDrillIn = classRef.name == imageCache ? '${classRef.name}' : '';
+    // debugMonitorClass = classRef.name == imageCache ? '${classRef.name}' : '';
 
     fieldsStack.push(classRef.name);
 
     var instanceIndex = 0;
-    monitor('Class ${classRef.name} Instance=$instanceIndex');
+    debugMonitor('Class ${classRef.name} Instance=$instanceIndex');
     for (final ObjectReference objRef in classRef.children) {
       final fields = objRef.instance.getFields();
       // Root __FIELDS__ is a container for children, the children
@@ -372,7 +376,7 @@ Map<String, List<String>> drillIn(
         final HeapGraphElementLive live = field.value;
 
         if (live.references.isNotEmpty) {
-          monitor('${field.key} OBJECT Start');
+          debugMonitor('${field.key} OBJECT Start');
 
           final fieldObjectNode = AnalysisField(field.key, '');
 
@@ -388,7 +392,7 @@ Map<String, List<String>> drillIn(
           if (createTreeNodes) {
             fieldsRoot.addChild(fieldObjectNode);
           }
-          monitor('${field.key} OBJECT End');
+          debugMonitor('${field.key} OBJECT End');
         } else {
           final value = displayData(live);
           if (value != null) {
@@ -396,13 +400,13 @@ Map<String, List<String>> drillIn(
             matcher.findFieldMatch(fieldsStack, value);
             fieldsStack.pop();
 
-            monitor('${field.key} = ${value}');
+            debugMonitor('${field.key} = ${value}');
             if (createTreeNodes) {
               final fieldNode = AnalysisField(field.key, value);
               fieldsRoot.addChild(fieldNode);
             }
           } else {
-            monitor('${field.key} Skipped null');
+            debugMonitor('${field.key} Skipped null');
           }
         }
       }
@@ -448,7 +452,7 @@ bool displayObject(
       if (objectFields.isEmpty) continue;
 
       final newObject = AnalysisField(field.key, '');
-      monitor('${field.key} OBJECT start [depth=$depth]');
+      debugMonitor('${field.key} OBJECT start [depth=$depth]');
 
       depth++;
 
@@ -469,7 +473,7 @@ bool displayObject(
       if (createTreeNodes) {
         objectField.addChild(newObject);
       }
-      monitor('${field.key} OBJECT end  [depth=$depth]');
+      debugMonitor('${field.key} OBJECT end  [depth=$depth]');
     }
 
     final value = displayData(liveField);
@@ -478,7 +482,7 @@ bool displayObject(
       matcher.findFieldMatch(fieldsStack, value);
       fieldsStack.pop();
 
-      monitor('${field.key}=$value');
+      debugMonitor('${field.key}=$value');
       if (createTreeNodes) {
         final node = AnalysisField(field.key, value);
         objectField.addChild(node);

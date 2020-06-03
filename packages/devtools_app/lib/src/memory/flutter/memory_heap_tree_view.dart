@@ -85,6 +85,8 @@ String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
     if (value.isNotEmpty) {
       final name = value;
       String regEx;
+      // TODO(terry): Need to handle $ for identifier names e.g.,
+      //              $FOO is a valid identifier.
       switch (key) {
         case WildcardMatch.exact:
           regEx = '^${name.join("\$|^")}\$';
@@ -176,17 +178,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     });
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
-      setState(() {
-        if (autoCompleteOverlay == null) {
-          autoCompleteOverlay = createAutoCompleteOverlay(controller);
-          Overlay.of(context).insert(autoCompleteOverlay);
-        } else {
-          closeAutoCompleteOverlay();
-
-          autoCompleteOverlay = createAutoCompleteOverlay(controller);
-          Overlay.of(context).insert(autoCompleteOverlay);
-        }
-      });
+      setState(autoCompleteOverlaySetState(controller, context));
     });
   }
 
@@ -270,6 +262,8 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
         children: [
           Expanded(child: snapshotDisplay),
           const SizedBox(width: defaultSpacing),
+          // TODO(terry): Need better focus handling between 2 tables & up/down
+          //              arrows in the right-side field instance view table.
           controller.isLeafSelected
               ? Expanded(child: SnapshotInstanceViewTable())
               : controller.isAnalysisLeafSelected
@@ -931,24 +925,22 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
       });
     });
 
-    addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
-      setState(() {});
-    });
+    addAutoDisposeListener(controller.searchAutoCompleteNotifier);
 
     addAutoDisposeListener(controller.selectTheSearchNotifier, () {
-      setState(() {
-        if (_trySelectItem()) {
+      if (_trySelectItem()) {
+        setState(() {
           closeAutoCompleteOverlay();
-        }
-      });
+        });
+      }
     });
 
     addAutoDisposeListener(controller.searchNotifier, () {
-      setState(() {
-        if (_trySelectItem()) {
+      if (_trySelectItem()) {
+        setState(() {
           closeAutoCompleteOverlay();
-        }
-      });
+        });
+      }
     });
   }
 
@@ -964,7 +956,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
       }
 
       // No exact match, return the list of possible matches.
-      controller.searchAutoComplete.value = [];
+      controller.clearSearchAutoComplete();
 
       final externalMatches = <String>[];
       final filteredMatches = <String>[];
@@ -979,7 +971,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
               final ExternalReferences refs = reference;
               for (final ExternalReference ext in refs.children) {
                 final match = matchSearch(ext, searchingValue);
-                if (match.isNotEmpty) {
+                if (match != null) {
                   externalMatches.add(match);
                 }
               }
@@ -1008,12 +1000,13 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
       matches.addAll(externalMatches);
       matches.addAll(filteredMatches);
 
-      // Remove duplicates and use top 10 matches:
+      // Remove duplicates and sort the matches.
       final normalizedMatches = matches.toSet().toList()..sort();
+      // Use the top 10 matches:
       controller.searchAutoComplete.value = normalizedMatches.sublist(
           0,
           min(
-            topMatches,
+            topMatchesLimit,
             normalizedMatches.length,
           ));
     }
@@ -1021,16 +1014,22 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
     return false;
   }
 
+  List<String> _maybeAddMatch(Reference reference, String search) {
+    final matches = <String>[];
+
+    final match = matchSearch(reference, search);
+    if (match != null) {
+      matches.add(match);
+    }
+
+    return matches;
+  }
+
   List<String> matchesInLibrary(
     LibraryReference libraryReference,
     String searchingValue,
   ) {
-    final matches = <String>[];
-
-    final match = matchSearch(libraryReference, searchingValue);
-    if (match.isNotEmpty) {
-      matches.add(match);
-    }
+    final matches = _maybeAddMatch(libraryReference, searchingValue);
 
     final List<Reference> classes = libraryReference.children;
     matches.addAll(matchClasses(classes, searchingValue));
@@ -1046,25 +1045,24 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
 
     // Check the class names in the library
     for (final ClassReference classReference in classReferences) {
-      final match = matchSearch(classReference, searchingValue);
-      if (match.isNotEmpty) {
-        matches.add(match);
-      }
+      matches.addAll(_maybeAddMatch(classReference, searchingValue));
     }
 
     // Remove duplicates
     return matches;
   }
 
+  /// Return null if no match, otherwise string.
   String matchSearch(Reference ref, String matchString) {
     final knownName = ref.name.toLowerCase();
-    if (knownName.startsWith(matchString.toLowerCase())) {
+    if (knownName.contains(matchString.toLowerCase())) {
       return ref.name;
     }
-    return '';
+    return null;
   }
 
-  /// This finds and selects an exact match.
+  /// This finds and selects an exact match in the tree.
+  /// Returns `true` if [searchingValue] is found in the tree.
   bool selectItemInTree(String searchingValue) {
     switch (controller.groupingBy.value) {
       case MemoryController.groupByLibrary:
@@ -1080,12 +1078,10 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
               if (foundIt) return true;
             }
           } else if (reference.isExternals) {
-            if (reference.isExternals) {
-              final ExternalReferences refs = reference;
-              for (final ExternalReference external in refs.children) {
-                final foundIt = _selectItemInTree(external, searchingValue);
-                if (foundIt) return true;
-              }
+            final ExternalReferences refs = reference;
+            for (final ExternalReference external in refs.children) {
+              final foundIt = _selectItemInTree(external, searchingValue);
+              if (foundIt) return true;
             }
           }
         }
@@ -1105,17 +1101,22 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
     return false;
   }
 
-  bool _selectItemInTree(Reference reference, String searchingValue) {
-    // TODO(terry): Only finds first one.
-    if (reference.name == searchingValue) {
+  bool _selectInTree(Reference reference, search) {
+    if (reference.name == search) {
       controller.selectionNotifier.value = Selection(
         node: reference,
         nodeIndex: reference.index,
         scrollIntoView: true,
       );
-      controller.searchAutoComplete.value = [];
+      controller.clearSearchAutoComplete();
       return true;
     }
+    return false;
+  }
+
+  bool _selectItemInTree(Reference reference, String searchingValue) {
+    // TODO(terry): Only finds first one.
+    if (_selectInTree(reference, searchingValue)) return true;
 
     // Check the class names in the library
     return _selecteClassInTree(reference, searchingValue);
@@ -1125,16 +1126,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
     // Check the class names in the library
     for (final Reference classReference in reference.children) {
       // TODO(terry): Only finds first one.
-      if (classReference.name == searchingValue) {
-        // Class name match.
-        controller.selectionNotifier.value = Selection(
-          node: classReference,
-          nodeIndex: classReference.index,
-          scrollIntoView: true,
-        );
-        controller.searchAutoComplete.value = [];
-        return true;
-      }
+      if (_selectInTree(classReference, searchingValue)) return true;
     }
 
     return false;
