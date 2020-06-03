@@ -8,7 +8,7 @@ import 'package:devtools_app/src/flutter/notifications.dart';
 import 'package:devtools_app/src/ui/flutter/label.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vm_service/vm_service.dart' as vm;
+import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
@@ -45,7 +45,7 @@ class PerformanceScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return !serviceManager.connectedApp.isDartWebAppNow
+    return offlineMode || !serviceManager.connectedApp.isDartWebAppNow
         ? const PerformanceScreenBody()
         : const DisabledForWebAppMessage();
   }
@@ -106,12 +106,8 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
       });
     });
 
-    // Load offline timeline data if available.
+    // Load offline performance data if available.
     if (shouldLoadOfflineData()) {
-      // This is a workaround to guarantee that DevTools exports are compatible
-      // with other trace viewers (catapult, perfetto, chrome://tracing), which
-      // require a top level field named "traceEvents". See how timeline data is
-      // encoded in [ExportController.encode].
       final performanceJson =
           Map<String, dynamic>.from(offlineDataJson[PerformanceScreen.id]);
       final offlinePerformanceData = CpuProfileData.parse(performanceJson);
@@ -123,7 +119,8 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<vm.Flag>(
+    if (offlineMode) return _buildPerformanceBody(controller);
+    return ValueListenableBuilder<Flag>(
       valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
       builder: (context, profilerFlag, _) {
         return profilerFlag.valueAsString == 'true'
@@ -137,6 +134,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
     final performanceScreen = Column(
       children: [
         if (!offlineMode) _buildPerformanceControls(),
+        const SizedBox(height: denseRowSpacing),
         Expanded(
           child: ValueListenableBuilder<CpuProfileData>(
             valueListenable: controller.cpuProfilerController.dataNotifier,
@@ -146,9 +144,6 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
                   cpuProfileData == null) {
                 return _buildRecordingInfo();
               }
-              print('\n--------------------------------');
-              print(cpuProfileData.cpuProfileRoot);
-              print('--------------------------------');
               return CpuProfiler(
                 data: cpuProfileData,
                 controller: controller.cpuProfilerController,
@@ -158,6 +153,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
         ),
       ],
     );
+
     // We put these two items in a stack because the screen's UI needs to be
     // built before offline data is processed in order to initialize listeners
     // that respond to data processing events. The spinner hides the screen's
@@ -257,7 +253,8 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   @override
   FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
-    await controller.clear();
+    if (!offlineMode) await controller.clear();
+    await controller.cpuProfilerController.transformer.processData(offlineData);
     controller.cpuProfilerController.loadOfflineData(offlineData);
   }
 
