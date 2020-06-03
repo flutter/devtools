@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/timeline/flutter/timeline_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
+import 'package:devtools_app/src/utils.dart';
 
 import '../cpu_profile_test_data.dart';
 import 'test_utils.dart';
@@ -45,6 +46,18 @@ final testFrame0 = TimelineFrame('id_0')
 final testFrame1 = TimelineFrame('id_1')
   ..setEventFlow(goldenUiTimelineEvent)
   ..setEventFlow(goldenRasterTimelineEvent);
+
+final jankyFrame = TimelineFrame('jankyFrame')
+  // ignore: invalid_use_of_visible_for_testing_member
+  ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
+    ..time = (TimeRange()
+      ..start = const Duration(milliseconds: 50)
+      ..end = const Duration(milliseconds: 70)))
+  // ignore: invalid_use_of_visible_for_testing_member
+  ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
+    ..time = (TimeRange()
+      ..start = const Duration(milliseconds: 68)
+      ..end = const Duration(milliseconds: 75)));
 
 // Mark: UI golden data.
 // None of the following data should be modified. If you have a need to modify

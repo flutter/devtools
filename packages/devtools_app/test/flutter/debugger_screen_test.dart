@@ -53,7 +53,6 @@ void main() {
           .thenReturn(ValueNotifier(false));
       when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
-      when(debuggerController.sortedClasses).thenReturn(ValueNotifier([]));
       when(debuggerController.selectedBreakpoint)
           .thenReturn(ValueNotifier(null));
       when(debuggerController.stackFramesWithLocation)
@@ -84,6 +83,8 @@ void main() {
       when(debuggerController.stdio).thenReturn(ValueNotifier(['test stdio']));
 
       await pumpDebuggerScreen(tester, debuggerController);
+
+      expect(find.text('Console'), findsOneWidget);
 
       // test for stdio output.
       expect(find.richText('test stdio'), findsOneWidget);
@@ -205,19 +206,16 @@ void main() {
 
     testWidgets('Libraries visible', (WidgetTester tester) async {
       final scripts = [ScriptRef(uri: 'package:/test/script.dart')];
-      final classes = [ClassRef(name: 'Foo')];
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
-      when(debuggerController.sortedClasses).thenReturn(ValueNotifier(classes));
 
       // Libraries view is shown
       when(debuggerController.librariesVisible).thenReturn(ValueNotifier(true));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Libraries and Classes'), findsOneWidget);
+      expect(find.text('Libraries'), findsOneWidget);
 
-      // test for items in the libraries and classes list
+      // test for items in the libraries list
       expect(find.text(scripts.first.uri), findsOneWidget);
-      expect(find.text(classes.first.name), findsOneWidget);
     });
 
     testWidgets('Breakpoints show items', (WidgetTester tester) async {
@@ -338,14 +336,14 @@ void main() {
       expect(
         find.byWidgetPredicate((Widget widget) =>
             widget is RichText &&
-            widget.text.toPlainText().contains('testCodeRef() script.dart:0')),
+            widget.text.toPlainText().contains('testCodeRef() script.dart 0')),
         findsOneWidget,
       );
       // Stack frame 1
       expect(
         find.byWidgetPredicate((Widget widget) =>
             widget is RichText &&
-            widget.text.toPlainText().contains('<none> script1.dart:1')),
+            widget.text.toPlainText().contains('<none> script1.dart 1')),
         findsOneWidget,
       );
       // Stack frame 2
@@ -354,7 +352,7 @@ void main() {
             widget is RichText &&
             widget.text
                 .toPlainText()
-                .contains('testCodeRef2() script2.dart:2')),
+                .contains('testCodeRef2() script2.dart 2')),
         findsOneWidget,
       );
       // Stack frame 3
@@ -363,7 +361,7 @@ void main() {
             widget is RichText &&
             widget.text
                 .toPlainText()
-                .contains('testCodeRef3.<closure>() script3.dart:3')),
+                .contains('testCodeRef3.<closure>() script3.dart 3')),
         findsOneWidget,
       );
       // Stack frame 4
@@ -380,7 +378,9 @@ void main() {
 
       final listFinder = find.byWidgetPredicate((Widget widget) =>
           widget is RichText &&
-          widget.text.toPlainText().contains('Root 1 _GrowableList (2 items)'));
+          widget.text
+              .toPlainText()
+              .contains('Root 1: _GrowableList (2 items)'));
       final listChild1Finder = find.byWidgetPredicate((Widget widget) =>
           widget is RichText && widget.text.toPlainText().contains('0: 3'));
       final listChild2Finder = find.byWidgetPredicate((Widget widget) =>
@@ -390,26 +390,26 @@ void main() {
           widget is RichText &&
           widget.text
               .toPlainText()
-              .contains('Root 2 _InternalLinkedHashmap (2 items)'));
+              .contains('Root 2: _InternalLinkedHashmap (2 items)'));
       final mapElement1Finder = find.byWidgetPredicate((Widget widget) =>
           widget is RichText &&
-          widget.text.toPlainText().contains("['key1'] 1.0"));
+          widget.text.toPlainText().contains("['key1']: 1.0"));
       final mapElement2Finder = find.byWidgetPredicate((Widget widget) =>
           widget is RichText &&
-          widget.text.toPlainText().contains("['key2'] 1.1"));
+          widget.text.toPlainText().contains("['key2']: 1.1"));
 
       expect(listFinder, findsOneWidget);
       expect(mapFinder, findsOneWidget);
       expect(
         find.byWidgetPredicate((Widget widget) =>
             widget is RichText &&
-            widget.text.toPlainText().contains("Root 3 'test str...'")),
+            widget.text.toPlainText().contains("Root 3: 'test str...'")),
         findsOneWidget,
       );
       expect(
         find.byWidgetPredicate((Widget widget) =>
             widget is RichText &&
-            widget.text.toPlainText().contains('Root 4 true')),
+            widget.text.toPlainText().contains('Root 4: true')),
         findsOneWidget,
       );
 
@@ -517,7 +517,7 @@ final testVariables = [
   ))
     ..addAllChildren([
       Variable.create(BoundVariable(
-        name: '0:',
+        name: '0',
         value: InstanceRef(
           kind: InstanceKind.kInt,
           classRef: ClassRef(name: 'Integer'),
@@ -529,7 +529,7 @@ final testVariables = [
         scopeStartTokenPos: null,
       )),
       Variable.create(BoundVariable(
-        name: '1:',
+        name: '1',
         value: InstanceRef(
           kind: InstanceKind.kInt,
           classRef: ClassRef(name: 'Integer'),

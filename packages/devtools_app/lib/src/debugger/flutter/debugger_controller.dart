@@ -10,7 +10,6 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
-import '../../config_specific/logger/logger.dart';
 import '../../core/message_bus.dart';
 import '../../globals.dart';
 import '../../utils.dart';
@@ -94,11 +93,6 @@ class DebuggerController extends DisposableController
 
   /// Return the sorted list of ScriptRefs active in the current isolate.
   ValueListenable<List<ScriptRef>> get sortedScripts => _sortedScripts;
-
-  final _sortedClasses = ValueNotifier<List<ClassRef>>([]);
-
-  /// Return the sorted list of ClassRefs active in the current isolate.
-  ValueListenable<List<ClassRef>> get sortedClasses => _sortedClasses;
 
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
@@ -432,8 +426,6 @@ class DebuggerController extends DisposableController
         _populateScriptAndShowLocation(newScriptRef);
       }
     }
-
-    // TODO(devoncarew): Invalidate the list of classes?
   }
 
   /// Jump to the given script.
@@ -561,21 +553,6 @@ class DebuggerController extends DisposableController
   Future<void> _populateScripts(Isolate isolate) async {
     final scriptRefs = await _retrieveAndSortScripts(isolateRef);
     _sortedScripts.value = scriptRefs;
-
-    try {
-      final classList = await _service.getClassList(isolateRef.id);
-      final classes = classList.classes
-          .where((c) => c?.name != null && c.name.isNotEmpty)
-          .toList();
-      classes.sort((ClassRef a, ClassRef b) {
-        // We sort uppercase so that items like Foo sort before items like _Foo.
-        return a.name.toUpperCase().compareTo(b.name.toUpperCase());
-      });
-      _sortedClasses.value = classes;
-    } catch (e, st) {
-      // Fail gracefully - not all clients support getClassList().
-      log('$e\n$st');
-    }
 
     for (var scriptRef in scriptRefs) {
       _uriToScriptMap[scriptRef.uri] = scriptRef;

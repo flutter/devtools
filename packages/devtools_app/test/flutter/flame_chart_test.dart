@@ -436,7 +436,7 @@ void main() {
       expect(paddedZoomedIntervals[1], equals(const Range(70.0, 120.0)));
       expect(paddedZoomedIntervals[2], equals(const Range(120.0, 180.0)));
       expect(paddedZoomedIntervals[3], equals(const Range(180.0, 240.0)));
-      expect(paddedZoomedIntervals[4], equals(const Range(240.0, 610.0)));
+      expect(paddedZoomedIntervals[4], equals(const Range(240.0, 1000540.0)));
     });
 
     test(
@@ -451,7 +451,7 @@ void main() {
       expect(paddedZoomedIntervals[0], equals(const Range(0.0, 120.0)));
       expect(paddedZoomedIntervals[1], equals(const Range(120.0, 180.0)));
       expect(paddedZoomedIntervals[2], equals(const Range(180.0, 240.0)));
-      expect(paddedZoomedIntervals[3], equals(const Range(240.0, 610.0)));
+      expect(paddedZoomedIntervals[3], equals(const Range(240.0, 1000540.0)));
     });
 
     test(
@@ -466,7 +466,7 @@ void main() {
       expect(paddedZoomedIntervals[1], equals(const Range(70.0, 170.0)));
       expect(paddedZoomedIntervals[2], equals(const Range(170.0, 290.0)));
       expect(paddedZoomedIntervals[3], equals(const Range(290.0, 410.0)));
-      expect(paddedZoomedIntervals[4], equals(const Range(410.0, 1080.0)));
+      expect(paddedZoomedIntervals[4], equals(const Range(410.0, 1001010.0)));
     });
 
     test(
@@ -481,7 +481,7 @@ void main() {
       expect(paddedZoomedIntervals[0], equals(const Range(0.0, 170.0)));
       expect(paddedZoomedIntervals[1], equals(const Range(170.0, 290.0)));
       expect(paddedZoomedIntervals[2], equals(const Range(290.0, 410.0)));
-      expect(paddedZoomedIntervals[3], equals(const Range(410.0, 1080.0)));
+      expect(paddedZoomedIntervals[3], equals(const Range(410.0, 1001010.0)));
     });
   });
 
@@ -549,7 +549,7 @@ void main() {
       expect(
           FlameChartUtils.rightPaddingForNode(4, testNodesWithLabel,
               chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
-          equals(70.0));
+          equals(1000000.0));
 
       // Row without label.
       expect(
@@ -567,7 +567,7 @@ void main() {
       expect(
           FlameChartUtils.rightPaddingForNode(3, testNodesWithoutLabel,
               chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
-          equals(70.0));
+          equals(1000000.0));
     });
 
     test('leftPaddingForNode returns correct value for zoomed row', () {
@@ -613,7 +613,7 @@ void main() {
       expect(
           FlameChartUtils.rightPaddingForNode(4, testNodesWithLabel,
               chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
-          equals(70.0));
+          equals(1000000.0));
     });
 
     test('zoomForNode returns correct values', () {

@@ -37,7 +37,7 @@ class Variables extends StatelessWidget {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       text: TextSpan(
-        text: '${v.boundVar.name} ',
+        text: '${v.boundVar.name}: ',
         style: theme.regularTextStyle,
         children: [
           TextSpan(

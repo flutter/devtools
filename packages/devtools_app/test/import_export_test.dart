@@ -16,12 +16,14 @@ void main() async {
       importController = ImportController(notifications, (_) {});
     });
 
-    test('importData pushes proper notifications', () {
+    test('importData pushes proper notifications', () async {
       expect(notifications.messages, isEmpty);
       importController.importData(nonDevToolsFileJson);
       expect(notifications.messages.length, equals(1));
       expect(notifications.messages, contains(nonDevToolsFileMessage));
 
+      await Future.delayed(const Duration(
+          milliseconds: ImportController.repeatImportTimeBufferMs));
       importController.importData(devToolsFileJson);
       expect(notifications.messages.length, equals(2));
       expect(

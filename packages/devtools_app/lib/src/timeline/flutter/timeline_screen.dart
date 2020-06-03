@@ -111,7 +111,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
     // Refresh data on page load if data is null. On subsequent tab changes,
     // this should not be called.
-    if (controller.data == null) {
+    if (controller.data == null && !offlineMode) {
       controller.refreshData();
     }
 
@@ -146,7 +146,19 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
             (!offlineMode && serviceManager.connectedApp.isFlutterAppNow))
-          const FlutterFramesChart(),
+          ValueListenableBuilder(
+            valueListenable: controller.flutterFrames,
+            builder: (context, frames, _) => ValueListenableBuilder(
+              valueListenable: controller.displayRefreshRate,
+              builder: (context, displayRefreshRate, _) {
+                return FlutterFramesChart(
+                  frames,
+                  controller.longestFramePortionMs,
+                  displayRefreshRate,
+                );
+              },
+            ),
+          ),
         Expanded(
           child: Split(
             axis: Axis.vertical,
@@ -169,7 +181,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         timelineScreen,
         if (loadingOfflineData)
           Container(
-            color: Colors.grey[50],
+            color: Theme.of(context).scaffoldBackgroundColor,
             child: const Center(
               child: CircularProgressIndicator(),
             ),
@@ -293,12 +305,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).focusColor),
-        ),
-        child: content,
-      ),
+      child: OutlineDecoration(child: content),
     );
   }
 
@@ -351,14 +358,11 @@ class TimelineConfigurationsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Dialog(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(defaultDialogRadius)),
       child: Container(
         width: dialogWidth,
         padding: const EdgeInsets.all(defaultSpacing),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ...headerInColumn(theme.textTheme, 'Recorded Streams'),
@@ -421,7 +425,6 @@ class TimelineConfigurationsDialog extends StatelessWidget {
   }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         ValueListenableBuilder(
           valueListenable: listenable,
