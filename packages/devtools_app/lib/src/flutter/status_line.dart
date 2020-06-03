@@ -104,10 +104,7 @@ class StatusLine extends StatelessWidget {
         },
         child: Text(
           'flutter.dev/devtools/$docPageId',
-          style: textTheme.bodyText2.copyWith(
-            decoration: TextDecoration.underline,
-            color: devtoolsLink,
-          ),
+          style: linkTextStyle,
         ),
       );
     } else {

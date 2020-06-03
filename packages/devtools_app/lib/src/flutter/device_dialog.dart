@@ -41,10 +41,14 @@ class DeviceDialog extends StatelessWidget {
       version = version.substring(0, version.indexOf(' '));
     }
 
+    var bits = '';
+    if (vm.architectureBits != -1) {
+      bits = '-${vm.architectureBits}';
+    }
+
     final items = {
       'Dart Version': version,
-      'CPU / OS':
-          '${vm.targetCPU}-${vm.architectureBits} / ${vm.operatingSystem}',
+      'CPU / OS': '${vm.targetCPU}$bits / ${vm.operatingSystem}',
     };
 
     if (flutterVersion != null) {
