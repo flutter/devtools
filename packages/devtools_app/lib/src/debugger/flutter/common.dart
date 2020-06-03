@@ -45,3 +45,24 @@ Widget createAnimatedCircleWidget(double radius, Color color) {
     decoration: BoxDecoration(color: color, shape: BoxShape.circle),
   );
 }
+
+/// A wrapper around a FlatButton and an Icon, used for small toolbar actions.
+class DebuggerToolbarAction extends StatelessWidget {
+  const DebuggerToolbarAction(
+    this.icon, {
+    @required this.onPressed,
+  });
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      padding: EdgeInsets.zero,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      onPressed: onPressed,
+      child: Icon(icon, size: actionsIconSize),
+    );
+  }
+}

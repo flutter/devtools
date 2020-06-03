@@ -21,6 +21,7 @@ import '../../globals.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
+import 'common.dart';
 import 'console.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
@@ -253,9 +254,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         return Row(children: [
           BreakpointsCountBadge(breakpoints: breakpoints),
           ActionButton(
-            child: FlatButton(
-              padding: EdgeInsets.zero,
-              child: const Icon(Icons.delete, size: actionsIconSize),
+            child: DebuggerToolbarAction(
+              Icons.delete,
               onPressed:
                   breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
             ),
