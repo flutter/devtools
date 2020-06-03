@@ -69,7 +69,7 @@ void main() {
       expect(column.getDisplayValue(request), '08:25:34 1/3/1970');
 
       expect(
-        TimestampColumn.formatRequestTime(DateTime(2020, 1, 16, 13, 0, 0)),
+        TimestampColumn.formatRequestTime(DateTime(2020, 1, 16, 13)),
         '13:00:00 1/16/2020',
       );
     });
