@@ -66,7 +66,9 @@ void main() {
       final column = TimestampColumn();
       final request = requests.first;
 
-      expect(column.getDisplayValue(request), '08:25:34 1/3/1970');
+      // The hours field may be unreliable since it depends on the timezone the
+      // test is running in.
+      expect(column.getDisplayValue(request), contains(':25:34 1/3/1970'));
 
       expect(
         TimestampColumn.formatRequestTime(DateTime(2020, 1, 16, 13)),
