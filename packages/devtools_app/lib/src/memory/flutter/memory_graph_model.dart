@@ -319,7 +319,7 @@ class HeapGraph {
     // Clone groupByClass from raw group.
     groupByClass.clear();
     rawGroupByClass.forEach((key, value) {
-      groupByClass[key] = value.cast<HeapGraphElementLive>().toSet();    
+      groupByClass[key] = value.cast<HeapGraphElementLive>().toSet();
     });
 
     // Prune classes that are private or have zero instances.

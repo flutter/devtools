@@ -583,7 +583,10 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
         await tester.pumpAndSettle();
 
-        expect(state.selectionNotifier.value.node, equals(data.root.children[1]));
+        expect(
+          state.selectionNotifier.value.node,
+          equals(data.root.children[1]),
+        );
 
         // Back to parent
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);

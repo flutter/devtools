@@ -62,7 +62,7 @@ void closeAutoCompleteOverlay() {
 }
 
 /// Helper setState callback when searchAutoCompleteNotifier changes, usage:
-/// 
+///
 ///     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
 ///      setState(autoCompleteOverlaySetState(controller, context));
 ///     });
