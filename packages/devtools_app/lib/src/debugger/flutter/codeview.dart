@@ -224,7 +224,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     return OutlineDecoration(
       child: Column(
         children: [
-          debuggerSectionTitle(theme, text: scriptRef?.uri ?? ' '),
+          buildCodeviewTitle(theme),
           DefaultTextStyle(
             style: theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono'),
             child: Expanded(
@@ -274,6 +274,79 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
         ],
       ),
     );
+  }
+
+  Widget buildCodeviewTitle(ThemeData theme) {
+    return ValueListenableBuilder(
+      valueListenable: widget.controller.scriptsHistory,
+      builder: (context, scriptsHistory, _) {
+        return debuggerSectionTitle(
+          theme,
+          child: Row(
+            children: [
+              DebuggerToolbarAction(
+                Icons.chevron_left,
+                onPressed:
+                    scriptsHistory.hasPrevious ? scriptsHistory.moveBack : null,
+              ),
+              DebuggerToolbarAction(
+                Icons.chevron_right,
+                onPressed:
+                    scriptsHistory.hasNext ? scriptsHistory.moveForward : null,
+              ),
+              const SizedBox(width: denseSpacing),
+              const VerticalDivider(),
+              const SizedBox(width: defaultSpacing),
+              Expanded(
+                child: Text(
+                  scriptRef?.uri ?? ' ',
+                  style: theme.textTheme.subtitle2,
+                ),
+              ),
+              const SizedBox(width: denseSpacing),
+              const VerticalDivider(),
+              PopupMenuButton<ScriptRef>(
+                itemBuilder: _buildScriptMenuFromHistory,
+                enabled: scriptsHistory.hasScripts,
+                onSelected: (scriptRef) {
+                  widget.controller
+                      .showScriptLocation(ScriptLocation(scriptRef));
+                },
+                offset: const Offset(
+                  actionsIconSize + denseSpacing,
+                  buttonMinWidth + denseSpacing,
+                ),
+                child: const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: actionsIconSize,
+                ),
+              ),
+              const SizedBox(width: denseSpacing),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  List<PopupMenuEntry<ScriptRef>> _buildScriptMenuFromHistory(
+    BuildContext context,
+  ) {
+    const scriptHistorySize = 16;
+
+    return widget.controller.scriptsHistory.openedScripts
+        .take(scriptHistorySize)
+        .map((scriptRef) {
+      return PopupMenuItem(
+        value: scriptRef,
+        child: Text(
+          scriptRef.uri,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+          style: const TextStyle(fontSize: 14.0),
+        ),
+      );
+    }).toList();
   }
 }
 
