@@ -142,7 +142,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
     final timelineScreen = Column(
       children: [
-        if (!offlineMode) _timelineControls(),
+        if (!offlineMode) _buildTimelineControls(),
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
             (!offlineMode && serviceManager.connectedApp.isFlutterAppNow))
@@ -190,7 +190,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Widget _timelineControls() {
+  Widget _buildTimelineControls() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

@@ -444,6 +444,7 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
       DevToolsScreen<PerformanceController>(
         const PerformanceScreen(),
         createController: () => PerformanceController(),
+        supportsOffline: true,
       ),
       DevToolsScreen<DebuggerController>(
         const DebuggerScreen(),

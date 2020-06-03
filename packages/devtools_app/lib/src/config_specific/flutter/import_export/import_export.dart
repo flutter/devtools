@@ -4,6 +4,9 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app/src/performance/flutter/performance_screen.dart';
+import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
+
 import '../../../../devtools.dart';
 import '../../../flutter/notifications.dart';
 import '../../../globals.dart';

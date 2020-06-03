@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/config_specific/flutter/import_export/import_export.dart';
+import 'package:devtools_app/src/performance/flutter/performance_screen.dart';
 import 'package:flutter/foundation.dart';
 
 import '../profiler/cpu_profile_controller.dart';
@@ -11,6 +13,8 @@ import '../profiler/cpu_profile_model.dart';
 import '../utils.dart';
 
 class PerformanceController with CpuProfilerControllerProviderMixin {
+  final _exportController = ExportController();
+  
   CpuProfileData get cpuProfileData => cpuProfilerController.dataNotifier.value;
 
   /// Notifies that a CPU profile is currently being recorded.
@@ -32,6 +36,16 @@ class PerformanceController with CpuProfilerControllerProviderMixin {
       // give us all cpu samples we have available
       extentMicros: maxJsInt,
     );
+  }
+
+  /// Exports the current performance data to a .json file.
+  ///
+  /// This method returns the name of the file that was downloaded.
+  String exportData() {
+    // TODO(kenz): investigate if we need to do any error handling here. Is the
+    // download always successful?
+    final encodedData = _exportController.encode(PerformanceScreen.id, cpuProfileData.json);
+    return _exportController.downloadFile(encodedData);
   }
 
   Future<void> clear() async {
