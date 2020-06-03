@@ -21,16 +21,13 @@ class NetworkController {
 
   /// Notifies that new HTTP requests have been processed.
   ValueListenable<HttpRequests> get requests => _requests;
+
   final _requests = ValueNotifier<HttpRequests>(HttpRequests());
-
-  void selectHttpRequest(HttpRequestData selection) {
-    _selectedHttpRequest.value = selection;
-  }
-
-  final _selectedHttpRequest = ValueNotifier<HttpRequestData>(null);
 
   ValueListenable<HttpRequestData> get selectedHttpRequest =>
       _selectedHttpRequest;
+
+  final _selectedHttpRequest = ValueNotifier<HttpRequestData>(null);
 
   /// Notifies that the timeline is currently being recorded.
   ValueListenable<bool> get recordingNotifier => _httpRecordingNotifier;
@@ -57,6 +54,10 @@ class NetworkController {
 
   @visibleForTesting
   bool get isPolling => _pollingTimer != null;
+
+  void selectHttpRequest(HttpRequestData selection) {
+    _selectedHttpRequest.value = selection;
+  }
 
   @visibleForTesting
   static HttpRequests processHttpTimelineEventsHelper(
