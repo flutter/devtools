@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('vm')
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/flutter/network_screen.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
