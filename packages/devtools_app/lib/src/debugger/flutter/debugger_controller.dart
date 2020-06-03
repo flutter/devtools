@@ -867,10 +867,10 @@ class ScriptsHistory extends ChangeNotifier
 
   ScriptsHistory();
 
-  final List<ScriptRef> _history = [];
+  final _history = <ScriptRef>[];
   int _historyIndex = -1;
 
-  final Set<ScriptRef> _openedScripts = {};
+  final _openedScripts = <ScriptRef>{};
 
   bool get hasPrevious {
     return _history.isNotEmpty && _historyIndex > 0;

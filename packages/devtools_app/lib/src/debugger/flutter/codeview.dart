@@ -332,8 +332,10 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
   List<PopupMenuEntry<ScriptRef>> _buildScriptMenuFromHistory(
     BuildContext context,
   ) {
+    const scriptHistorySize = 16;
+
     return widget.controller.scriptsHistory.openedScripts
-        .take(16)
+        .take(scriptHistorySize)
         .map((scriptRef) {
       return PopupMenuItem(
         value: scriptRef,
