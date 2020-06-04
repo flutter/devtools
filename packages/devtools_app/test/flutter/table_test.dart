@@ -546,18 +546,18 @@ void main() {
         state.focusNode.requestFocus();
         await tester.pumpAndSettle();
 
-        expect(state.selectedNode, equals(null));
+        expect(state.selectionNotifier.value.node, equals(null));
 
         // the root is selected by default when there is no selection. Pressing
         // arrowDown should take us to the first child, Bar
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
         await tester.pumpAndSettle();
-        expect(state.selectedNode, equals(data.children[0]));
+        expect(state.selectionNotifier.value.node, equals(data.children[0]));
 
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.pumpAndSettle();
 
-        expect(state.selectedNode, equals(data.root));
+        expect(state.selectionNotifier.value.node, equals(data.root));
       });
 
       testWidgets('selection changes with left/right arrow keys',
@@ -574,8 +574,8 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
         await tester.pumpAndSettle();
 
-        expect(state.selectedNode, equals(data.root));
-        expect(state.selectedNode.isExpanded, isFalse);
+        expect(state.selectionNotifier.value.node, equals(data.root));
+        expect(state.selectionNotifier.value.node.isExpanded, isFalse);
 
         // Expand root and navigate down twice
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -583,14 +583,17 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
         await tester.pumpAndSettle();
 
-        expect(state.selectedNode, equals(data.root.children[1]));
+        expect(
+          state.selectionNotifier.value.node,
+          equals(data.root.children[1]),
+        );
 
         // Back to parent
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
         await tester.pumpAndSettle();
 
-        expect(state.selectedNode, equals(data.root));
-        expect(state.selectedNode.isExpanded, isTrue);
+        expect(state.selectionNotifier.value.node, equals(data.root));
+        expect(state.selectionNotifier.value.node.isExpanded, isTrue);
       });
     });
 

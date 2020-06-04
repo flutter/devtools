@@ -4,6 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../config_specific/logger/logger.dart';
 import '../flutter/memory_controller.dart';
 
 // TODO(terry): Ask Ben, what is a class name of ::?
@@ -43,6 +44,11 @@ LibraryClass predefinedMap = LibraryClass(
   '_InternalLinkedHashMap',
 );
 
+LibraryClass predefinedHashMap = LibraryClass(
+  collection,
+  '_HashMap',
+);
+
 class Predefined {
   const Predefined(this.prettyName, this.isScalar);
 
@@ -62,7 +68,21 @@ Map<LibraryClass, Predefined> predefinedClasses = {
   predefinedString: const Predefined('String', true),
   predefinedList: const Predefined('List', false),
   predefinedMap: const Predefined('Map', false),
+  predefinedHashMap: const Predefined('HashMap', false),
 };
+
+// TODO(terry): Investigate if class implements the Map interface?
+bool isBuiltInMap(HeapGraphClassLive live) =>
+    live.fullQualifiedName == predefinedMap ||
+    live.fullQualifiedName == predefinedHashMap;
+
+/// Is it a built-in HashMap class (predefined).
+bool isBuiltInHashMap(HeapGraphClassLive live) =>
+    live.fullQualifiedName == predefinedHashMap;
+
+/// Is it a built-in List class (predefined).
+bool isBuiltInList(HeapGraphClassLive live) =>
+    live.fullQualifiedName == predefinedList;
 
 /// List of classes to monitor, helps to debug particular class structure.
 final Map<int, String> _monitorClasses = {};
@@ -91,10 +111,6 @@ HeapGraph convertHeapGraph(
   HeapSnapshotGraph graph, [
   List<String> classNamesToMonitor,
 ]) {
-  // Sentinals are objects that are marked to be GC'd.
-  final HeapGraphClassSentinel classSentinel = HeapGraphClassSentinel();
-  final HeapGraphElementSentinel elementSentinel = HeapGraphElementSentinel();
-
   final Map<LibraryClass, int> builtInClasses = {};
 
   if (classNamesToMonitor != null && classNamesToMonitor.isNotEmpty) {
@@ -146,7 +162,7 @@ HeapGraph convertHeapGraph(
     final HeapGraphElementLive converted = elements[i];
     if (o.classId == 0) {
       // classId of zero is a sentinel.
-      converted.theClass = classSentinel;
+      converted.theClass = HeapGraph.classSentinel;
     } else {
       // Allows finding and debugging a class in the snapshot.
       // classIds in the object are 1 based need to make zero based.
@@ -160,7 +176,7 @@ HeapGraph convertHeapGraph(
       for (int refId in o.references) {
         HeapGraphElement ref;
         if (refId == 0) {
-          ref = elementSentinel;
+          ref = HeapGraph.elementSentinel;
         } else {
           ref = elements[refId - 1];
         }
@@ -169,13 +185,24 @@ HeapGraph convertHeapGraph(
     };
   }
 
+  final snapshotExternals = graph.externalProperties;
+
+  // Pre-allocate the number of external objects in the snapshot.
+  final externals = List<HeapGraphExternalLive>(snapshotExternals.length);
+
+  // Construct all external objects and link to its live element.
+  for (int index = 0; index < snapshotExternals.length; index++) {
+    final snapshotObject = snapshotExternals[index];
+    final liveElement = elements[snapshotObject.object];
+    externals[index] = HeapGraphExternalLive(snapshotObject, liveElement);
+  }
+
   return HeapGraph(
     controller,
     builtInClasses,
-    classSentinel,
     classes,
-    elementSentinel,
     elements,
+    externals,
   );
 }
 
@@ -183,10 +210,9 @@ class HeapGraph {
   HeapGraph(
     this.controller,
     this.builtInClasses,
-    this.classSentinel,
     this.classes,
-    this.elementSentinel,
     this.elements,
+    this.externals,
   );
 
   final MemoryController controller;
@@ -199,28 +225,47 @@ class HeapGraph {
   final Map<LibraryClass, int> builtInClasses;
 
   /// Sentinel Class, all class sentinels point to this object.
-  final HeapGraphClassSentinel classSentinel;
+  static HeapGraphClassSentinel classSentinel = HeapGraphClassSentinel();
 
   /// Indexed by classId.
   final List<HeapGraphClassLive> classes;
 
   /// Sentinel Object, all object sentinels point to this object.
-  final HeapGraphElementSentinel elementSentinel;
+  static HeapGraphElementSentinel elementSentinel = HeapGraphElementSentinel();
 
   /// Index by objectId.
   final List<HeapGraphElementLive> elements;
 
-  /// Group all classes by all libraries.
-  final Map<String, List<HeapGraphClassLive>> rawGroupByLibrary = {};
+  /// Index by objectId of all external properties
+  List<HeapGraphExternalLive> externals;
 
-  /// Group all classes by libraries - with applied filters.
-  final Map<String, List<HeapGraphClassLive>> groupByLibrary = {};
+  /// Group all classes by libraries (key is library, value are classes).
+  /// This is the entire set of objects (no filter applied).
+  final Map<String, Set<HeapGraphClassLive>> rawGroupByLibrary = {};
 
-  /// Group all instances by all classes.
-  final Map<String, List<HeapGraphElementLive>> rawGroupByClass = {};
+  /// Group all classes by libraries (key is library, value is classes).
+  /// Filtering out objects that match a given filter. This is always a
+  /// subset of rawGroupByLibrary.
+  final Map<String, Set<HeapGraphClassLive>> groupByLibrary = {};
 
-  /// Group all instances by all classes - with applied filters.
-  final Map<String, List<HeapGraphElementLive>> groupByClass = {};
+  /// Group all instances by class (key is class name, value are class
+  /// instances).  This is the entire set of objects (no filter applied).
+  final Map<String, Set<HeapGraphElementLive>> rawGroupByClass = {};
+
+  /// Group all instances by class (key is class name, value are class
+  /// instances).  Filtering out objects that match a given filter. This
+  /// is always a subset of rawGroupByClass.
+  final Map<String, Set<HeapGraphElementLive>> groupByClass = {};
+
+  /// Group of instances by filtered out classes (key is class name, value
+  /// are instances). These are the instances not in groupByClass, together
+  /// filteredElements and groupByClass are equivalent to rawGroupByClass.
+  final Map<String, Set<HeapGraphElementLive>> filteredElements = {};
+
+  /// Group of libraries by filtered out classes (key is library name, value
+  /// are classes). These are the libraries not in groupByLibrary, together
+  /// filteredLibraries and groupByLibrary are equivalent to rawGroupByLibrary.
+  final Map<String, Set<HeapGraphClassLive>> filteredLibraries = {};
 
   /// Normalize the library name. Library is a Uri that contains
   /// the schema e.g., 'dart' or 'package' and pathSegments. The
@@ -254,7 +299,7 @@ class HeapGraph {
       // Collect classes for each library (group by library).
       sb.write(libraryKey);
       final librarySbToString = sb.toString();
-      rawGroupByLibrary[librarySbToString] ??= [];
+      rawGroupByLibrary[librarySbToString] ??= <HeapGraphClassLive>{};
       rawGroupByLibrary[librarySbToString].add(c);
       sb.clear();
 
@@ -263,48 +308,63 @@ class HeapGraph {
         sb.write(c.name);
         c.instancesTotalShallowSizes += instance.origin.shallowSize;
         final classSbToString = sb.toString();
-        rawGroupByClass[classSbToString] ??= [];
+        rawGroupByClass[classSbToString] ??= <HeapGraphElementLive>{};
         rawGroupByClass[classSbToString].add(instance);
         sb.clear();
       }
     }
   }
 
-  bool computeFilteredGroups() {
+  void computeFilteredGroups() {
     // Clone groupByClass from raw group.
     groupByClass.clear();
     rawGroupByClass.forEach((key, value) {
-      groupByClass[key] = value.toList();
+      groupByClass[key] = value.cast<HeapGraphElementLive>().toSet();
     });
 
     // Prune classes that are private or have zero instances.
-    groupByClass.removeWhere((className, instances) =>
-        (controller.filterZeroInstances.value && instances.isEmpty) ||
-        (controller.filterPrivateClasses.value && className.startsWith('_')) ||
-        className == internalClassName);
+    filteredElements.clear();
+    groupByClass.removeWhere((className, instances) {
+      final remove =
+          (controller.filterZeroInstances.value && instances.isEmpty) ||
+              (controller.filterPrivateClasses.value &&
+                  className.startsWith('_')) ||
+              className == internalClassName;
+      if (remove) {
+        filteredElements.putIfAbsent(className, () => instances);
+      }
+
+      return remove;
+    });
 
     // Clone groupByLibrary from raw group.
     groupByLibrary.clear();
     rawGroupByLibrary.forEach((key, value) {
-      groupByLibrary[key] = value.toList();
+      groupByLibrary[key] = value.cast<HeapGraphClassLive>().toSet();
     });
 
     // Prune libraries if all their classes are private or have zero instances.
+    filteredLibraries.clear();
+
     groupByLibrary.removeWhere((libraryName, classes) {
-      classes.removeWhere((actual) =>
-          (controller.filterZeroInstances.value &&
-              actual.getInstances(this).isEmpty) ||
-          (controller.filterPrivateClasses.value &&
-              actual.name.startsWith('_')) ||
-          actual.name == internalClassName);
+      classes.removeWhere((actual) {
+        final result = (controller.filterZeroInstances.value &&
+                actual.getInstances(this).isEmpty) ||
+            (controller.filterPrivateClasses.value &&
+                actual.name.startsWith('_')) ||
+            actual.name == internalClassName;
+        return result;
+      });
 
-      // Hide this library?
-      if (controller.libraryFilters.isLibraryFiltered(libraryName)) return true;
+      final result =
+          (controller.libraryFilters.isLibraryFiltered(libraryName)) ||
+              controller.filterLibraryNoInstances.value && classes.isEmpty;
+      if (result) {
+        filteredLibraries.putIfAbsent(libraryName, () => classes);
+      }
 
-      return controller.filterLibraryNoInstances.value && classes.isEmpty;
+      return result;
     });
-
-    return true;
   }
 
   // TODO(terry): Need dominator graph for flow.
@@ -333,10 +393,15 @@ abstract class HeapGraphElement {
     }
     return _references;
   }
+
+  bool get isSentinel;
 }
 
 /// Object marked for removal on next GC.
 class HeapGraphElementSentinel extends HeapGraphElement {
+  @override
+  bool get isSentinel => true;
+
   @override
   String toString() => 'HeapGraphElementSentinel';
 }
@@ -347,6 +412,9 @@ class HeapGraphElementLive extends HeapGraphElement {
 
   final HeapSnapshotObject origin;
   HeapGraphClass theClass;
+
+  @override
+  bool get isSentinel => false;
 
   HeapGraphElement getField(String name) {
     if (theClass is HeapGraphClassLive) {
@@ -365,11 +433,14 @@ class HeapGraphElementLive extends HeapGraphElement {
     if (theClass is HeapGraphClassLive) {
       final HeapGraphClassLive c = theClass;
       for (final field in c.origin.fields) {
-        // TODO(terry): Some index are out of range, this check should be removed.
+        // TODO(terry): Is index out of range, replace with assert?
         if (field.index < references.length) {
           result.add(MapEntry(field.name, references[field.index]));
         } else {
-          print('ERROR Field Range: name=${field.name},index=${field.index}');
+          log(
+            'ERROR Field Range: name=${field.name},index=${field.index}',
+            LogLevel.error,
+          );
         }
       }
     }
@@ -389,6 +460,29 @@ class HeapGraphElementLive extends HeapGraphElement {
   }
 }
 
+/// Live ExternalProperty.
+class HeapGraphExternalLive extends HeapGraphElement {
+  HeapGraphExternalLive(this.externalProperty, this.live);
+
+  final HeapSnapshotExternalProperty externalProperty;
+  final HeapGraphElementLive live;
+
+  @override
+  bool get isSentinel => false;
+
+  @override
+  String toString() {
+    if (live.origin.data is HeapSnapshotObjectNoData) {
+      return 'Instance of ${live.theClass}';
+    }
+    if (live.origin.data is HeapSnapshotObjectLengthData) {
+      final HeapSnapshotObjectLengthData data = live.origin.data;
+      return 'Instance of ${live.theClass} length = ${data.length}';
+    }
+    return 'Instance of ${live.theClass}; data: \'${live.origin.data}\'';
+  }
+}
+
 abstract class HeapGraphClass {
   final List<HeapGraphElementLive> _instances = [];
 
@@ -399,8 +493,6 @@ abstract class HeapGraphClass {
   }
 
   List<HeapGraphElementLive> getInstances(HeapGraph graph) {
-    // TODO(terry): Delay would be much faster but retained space needs
-    //              computation. Remove if block just return _instances?
     if (_instances == null) {
       for (var i = 0; i < graph.elements.length; i++) {
         final HeapGraphElementLive converted = graph.elements[i];
@@ -411,6 +503,10 @@ abstract class HeapGraphClass {
     }
     return _instances;
   }
+
+  /// Quick short-circuit to return real size of null implies '--' yet to be
+  /// computed or N/A.
+  int get instancesCount => _instances == null ? null : _instances.length;
 }
 
 class HeapGraphClassSentinel extends HeapGraphClass {

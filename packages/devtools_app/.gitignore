@@ -10,3 +10,4 @@ android/
 ios/
 lib/generated_plugin_registrant.dart
 macos/Runner/
+macos/Flutter/

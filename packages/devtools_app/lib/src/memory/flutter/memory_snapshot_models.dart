@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../trees.dart';
@@ -22,7 +23,9 @@ class Reference extends TreeNode<Reference> {
   Reference._empty()
       : controller = null,
         name = emptyName,
+        isAnalysis = false,
         isLibrary = false,
+        isExternals = false,
         isExternal = false,
         isFiltered = false,
         isClass = false,
@@ -32,7 +35,19 @@ class Reference extends TreeNode<Reference> {
   Reference._sentinel()
       : controller = null,
         name = sentinelName,
+        isAnalysis = false,
         isLibrary = false,
+        isExternals = false,
+        isExternal = false,
+        isFiltered = false,
+        isClass = false,
+        isObject = false,
+        actualClass = null;
+
+  Reference.analysis(this.controller, this.name, {this.onExpand, this.onLeaf})
+      : isAnalysis = true,
+        isLibrary = false,
+        isExternals = false,
         isExternal = false,
         isFiltered = false,
         isClass = false,
@@ -40,7 +55,9 @@ class Reference extends TreeNode<Reference> {
         actualClass = null;
 
   Reference.library(this.controller, this.name, {this.onExpand, this.onLeaf})
-      : isLibrary = true,
+      : isAnalysis = false,
+        isLibrary = true,
+        isExternals = false,
         isExternal = false,
         isFiltered = false,
         isClass = false,
@@ -52,8 +69,10 @@ class Reference extends TreeNode<Reference> {
     this.actualClass, {
     this.onExpand,
     this.onLeaf,
-  })  : name = actualClass.name,
+  })  : isAnalysis = false,
+        name = actualClass.name,
         isLibrary = false,
+        isExternals = false,
         isExternal = false,
         isFiltered = false,
         isClass = true,
@@ -65,28 +84,48 @@ class Reference extends TreeNode<Reference> {
     this.name, {
     this.onExpand,
     this.onLeaf,
-  })  : isLibrary = false,
+  })  : isAnalysis = false,
+        isLibrary = false,
+        isExternals = false,
         isExternal = false,
         isFiltered = false,
         isClass = false,
         isObject = true,
         actualClass = null;
 
-  // TODO(terry): Investigate expanding to view all external objects/field inspection?
   /// External heap
-  Reference.external(this.controller)
-      : isLibrary = false,
-        isExternal = true,
+  Reference.externals(
+    this.controller, {
+    this.onExpand,
+  })  : isAnalysis = false,
+        isLibrary = false,
+        isExternals = true,
+        isExternal = false,
         isFiltered = false,
         isClass = false,
         isObject = false,
         actualClass = null,
         name = externalLibraryName;
 
-  // TODO(terry): Investigate expanding to view filtered items.
+  /// External objects
+  Reference.external(
+    this.controller,
+    this.name, {
+    this.onExpand,
+  })  : isAnalysis = false,
+        isLibrary = false,
+        isExternals = false,
+        isExternal = true,
+        isFiltered = false,
+        isClass = false,
+        isObject = false,
+        actualClass = null;
+
   /// All filtered libraries and classes
   Reference.filtered(this.controller)
-      : isLibrary = false,
+      : isAnalysis = false,
+        isLibrary = false,
+        isExternals = false,
         isExternal = false,
         isFiltered = true,
         isClass = false,
@@ -108,15 +147,26 @@ class Reference extends TreeNode<Reference> {
 
   final String name;
 
+  final bool isAnalysis;
+
   final bool isLibrary;
 
+  /// The External heap (contains all external heap items).
+  final bool isExternals;
+
+  /// An External heap item.
   final bool isExternal;
 
+  /// Class or Library is filtered.
   final bool isFiltered;
 
   final bool isClass;
 
   final bool isObject;
+
+  int count;
+
+  bool get hasCount => count != null;
 
   Function onExpand;
 
@@ -133,14 +183,113 @@ class Reference extends TreeNode<Reference> {
 
   @override
   void leaf() {
-    assert(isObject);
+    if (isObject) {
+      final objectReference = this as ObjectReference;
+      if (controller.selectedAnalysisLeaf != null) {
+        controller.selectedAnalysisLeaf = null;
+      }
+      controller.selectedLeaf = objectReference.instance;
+    } else if (isAnalysis && this is AnalysisInstance) {
+      final AnalysisInstance analysisInstance = this as AnalysisInstance;
+      if (controller.selectedLeaf != null) {
+        controller.selectedLeaf = null;
+      }
+      controller.selectedAnalysisLeaf = analysisInstance;
+    }
 
-    final objectReference = this as ObjectReference;
-    controller.selectedLeaf = objectReference.instance;
     if (onLeaf != null) onLeaf(this);
 
     super.leaf();
   }
+}
+
+/// Container of all snapshot analyses processed.
+class AnalysesReference extends Reference {
+  AnalysesReference()
+      : super.analysis(
+          null,
+          'Analysis',
+/*
+          onExpand: (Reference reference) {
+            assert(reference.isAnalysis);
+            print("TBD");
+          },onLeaf: (ObjectReference reference) {
+            print("Clicking on analysis node");
+          }
+*/
+        );
+}
+
+/// Snapshot being analyzed.
+class AnalysisSnapshotReference extends Reference {
+  AnalysisSnapshotReference(
+    this.dateTime,
+  ) : super.analysis(
+          null,
+          'Snapshot ${_formatter.format(dateTime)}',
+/*
+          onExpand: (Reference reference) {
+            assert(reference.isAnalysis);
+            print("TBD");
+          },
+          onLeaf: (ObjectReference reference) {
+            print("Clicking on analysis node");
+          },
+*/
+        );
+
+  static final _formatter = DateFormat('MMM dd HH:mm:ss');
+
+  final DateTime dateTime;
+}
+
+/// Analysis data.
+class AnalysisReference extends Reference {
+  AnalysisReference(
+    String name, {
+    this.countNote,
+    this.sizeNote,
+  }) : super.analysis(
+          null,
+          name,
+        );
+
+  int countNote;
+  int sizeNote;
+}
+
+/// Analysis instance.
+class AnalysisInstance extends Reference {
+  AnalysisInstance(
+    MemoryController controller,
+    String name,
+    this.fieldsRoot,
+  ) : super.analysis(
+          controller,
+          name,
+        );
+
+  /// quick view of fields analysis.
+  final AnalysisField fieldsRoot;
+}
+
+/// Analysis instance.
+class AnalysisField extends TreeNode<AnalysisField> {
+  AnalysisField(
+    this.name,
+    this.value,
+  );
+
+  AnalysisField._empty()
+      : name = null,
+        value = null;
+
+  static AnalysisField empty = AnalysisField._empty();
+
+  bool get isEmptyReference => this == empty;
+
+  final String name;
+  final String value;
 }
 
 class LibraryReference extends Reference {
@@ -176,15 +325,66 @@ class LibraryReference extends Reference {
           },
         );
 
-  List<HeapGraphClassLive> actualClasses;
+  Set<HeapGraphClassLive> actualClasses;
+}
+
+class ExternalReferences extends Reference {
+  ExternalReferences(MemoryController controller, int externalsSize)
+      : super.externals(controller);
 }
 
 class ExternalReference extends Reference {
-  ExternalReference(MemoryController controller) : super.external(controller);
+  ExternalReference(MemoryController controller, String name, this.liveExternal)
+      : super.external(
+          controller,
+          name,
+          onExpand: (reference) {
+            assert(reference.isExternal);
+
+            // Need to construct the children.
+            if (reference.children.isNotEmpty &&
+                reference.children.first.isEmptyReference) {
+              reference.children.clear();
+
+              final externalReference = reference as ExternalReference;
+              final liveElement = externalReference.liveExternal.live;
+              externalReference.addChild(ObjectReference(
+                controller,
+                0,
+                liveElement,
+              ));
+            }
+          },
+        );
+
+  final HeapGraphExternalLive liveExternal;
+  int sumExternalSizes = 0;
 }
 
 class FilteredReference extends Reference {
   FilteredReference(MemoryController controller) : super.filtered(controller);
+}
+
+void computeInstanceForClassReference(
+  MemoryController controller,
+  Reference reference,
+) {
+  // Need to construct the children if the first child is Reference.empty.
+  if (reference.children.isNotEmpty &&
+      reference.children.first.isEmptyReference) {
+    reference.children.clear();
+
+    final classReference = reference as ClassReference;
+
+    final instances =
+        classReference.actualClass.getInstances(controller.heapGraph);
+
+    for (var index = 0; index < instances.length; index++) {
+      final instance = instances[index];
+      final objectRef = ObjectReference(controller, index, instance);
+      classReference.addChild(objectRef);
+    }
+  }
 }
 
 class ClassReference extends Reference {
@@ -195,22 +395,8 @@ class ClassReference extends Reference {
           controller,
           actualClass,
           onExpand: (reference) {
-            // Need to construct the children.
-            if (reference.children.isNotEmpty &&
-                reference.children.first.isEmptyReference) {
-              reference.children.clear();
-
-              final classReference = reference as ClassReference;
-
-              final instances =
-                  classReference.actualClass.getInstances(controller.heapGraph);
-
-              for (var index = 0; index < instances.length; index++) {
-                final instance = instances[index];
-                final objectRef = ObjectReference(controller, index, instance);
-                classReference.addChild(objectRef);
-              }
-            }
+            // Insure the children have been computed.
+            computeInstanceForClassReference(controller, reference);
           },
         );
 
@@ -226,6 +412,21 @@ class ObjectReference extends Reference {
   ) : super.object(controller, 'Instance $index');
 
   final HeapGraphElementLive instance;
+}
+
+class ExternalObjectReference extends ObjectReference {
+  ExternalObjectReference(
+    MemoryController controller,
+    int index,
+    HeapGraphElementLive instance,
+    this.externalSize,
+  ) : super(
+          controller,
+          index,
+          instance,
+        );
+
+  final int externalSize;
 }
 
 class Snapshot {
@@ -343,27 +544,53 @@ class ObjectFieldReference extends FieldReference {
           instance,
           type,
           name,
-          onExpand: (reference) {
-            // Need to construct the children.
-            if (reference.children.isNotEmpty &&
-                reference.children.first.isEmptyReference) {
-              reference.children.clear();
+        ) {
+    onExpand = _expandObjectFieldRef;
+  }
 
-              // Null value nothing to expand.
-              if (reference.isScaler) return;
+  void _expandObjectFieldRef(reference) {
+    // Need to construct the children.
+    if (reference.children.isNotEmpty &&
+        reference.children.first.isEmptyReference) {
+      // Remove empty entries compute the real values.
+      reference.children.clear();
 
-              assert(reference.isObject);
-              final objectFieldReference = reference as ObjectFieldReference;
+      // Null value nothing to expand.
+      if (reference.isScaler) return;
+    }
 
-              final objFields = instanceToFieldNodes(
-                controller,
-                objectFieldReference.instance,
-              );
+    assert(reference.isObject);
+    final ObjectFieldReference objectFieldReference = reference;
 
-              objectFieldReference.addAllChildren(objFields);
-            }
-          },
-        );
+    var objFields = instanceToFieldNodes(
+      controller,
+      objectFieldReference.instance,
+    );
+
+    if (objFields.isNotEmpty) {
+      final computedFields = <FieldReference>[];
+      for (final ref in objFields) {
+        if (ref is ObjectFieldReference) {
+          computedFields.add(ref);
+        } else if (ref is FieldReference) {
+          final FieldReference fieldRef = ref;
+          final HeapGraphElementLive live = fieldRef.instance;
+          final HeapGraphClassLive theClass = live.theClass;
+          final predefined = predefinedClasses[theClass.fullQualifiedName];
+          if (predefined != null && predefined.isScalar) {
+            computedFields.add(createScalar(
+              controller,
+              fieldRef.name,
+              fieldRef.instance,
+            ));
+          }
+        }
+      }
+      objFields = computedFields;
+    }
+
+    objectFieldReference.addAllChildren(objFields);
+  }
 
   final bool isNull;
 }
@@ -376,7 +603,7 @@ List<FieldReference> instanceToFieldNodes(
   final List<FieldReference> root = [];
   final List<MapEntry<String, HeapGraphElement>> fields = instance.getFields();
 
-  var sentinel = 0;
+  var sentinelCount = 0;
   var fieldIndex = 0;
   for (var fieldElement in fields) {
     // Ignore internal patching fields.
@@ -387,17 +614,16 @@ List<FieldReference> instanceToFieldNodes(
           controller,
           instance,
           fieldElement,
-          fieldIndex,
         ));
       } else {
-        sentinel++;
+        sentinelCount++;
         root.add(FieldReference.sentinel);
       }
     }
     fieldIndex++;
   }
 
-  if (root.length > 1 && sentinel > 0) {
+  if (root.isNotEmpty && sentinelCount > 0) {
     root.removeWhere((e) => e.isSentinelReference);
   }
 
@@ -409,15 +635,18 @@ FieldReference fieldToFieldReference(
   MemoryController controller,
   HeapGraphElementLive instance,
   MapEntry<String, HeapGraphElement> fieldElement,
-  int fieldIndex,
 ) {
   if (fieldElement.value is HeapGraphElementSentinel) {
     // TODO(terry): Debug for now, eliminate, user's don't need to know.
     return FieldReference.sentinel;
   }
 
-  final actual = fieldElement.value as HeapGraphElementLive;
   final theGraph = controller.heapGraph;
+
+  final actual = fieldElement.value as HeapGraphElementLive;
+  final HeapGraphClassLive theClass = actual.theClass;
+  // Debugging a particular field displayed use fieldElement.key (field name)
+  // to break.
 
   final int indexIntoClass = actual.origin.classId; // One based Index.
   if (!controller.heapGraph.builtInClasses.containsValue(indexIntoClass - 1)) {
@@ -430,18 +659,36 @@ FieldReference fieldToFieldReference(
   } else {
     final data = actual.origin.data;
     if (data.runtimeType == HeapSnapshotObjectLengthData) {
-      final HeapGraphElementLive actual = instance.references[fieldIndex];
-      final HeapGraphClassLive theClass = actual.theClass;
-      final fullClassName = theClass.fullQualifiedName;
-      if (fullClassName == predefinedMap) {
+      final isAMap = isBuiltInMap(theClass);
+      if (isAMap || isBuiltInList(theClass)) {
         return listToFieldEntries(
-            controller, actual, fieldElement.key, data.length);
-      } else if (fullClassName == predefinedList) {
-        return listToFieldEntries(
-            controller, actual, fieldElement.key, data.length);
+          controller,
+          actual,
+          fieldElement.key,
+          data.length,
+          isHashMap: isAMap, // TODO(terry): Just a test. &&&&&
+        );
+      }
+    } else if (isBuiltInHashMap(theClass)) {
+      for (var ref in fieldElement.value.references) {
+        if (ref is! HeapGraphElementSentinel) {
+          final HeapGraphElementLive actual = ref;
+          final HeapGraphClassLive theClass = actual.theClass;
+          if (isBuiltInList(theClass)) {
+            final hashMapData = actual.origin.data;
+            if (hashMapData.runtimeType == HeapSnapshotObjectLengthData) {
+              return listToFieldEntries(
+                controller,
+                ref,
+                fieldElement.key,
+                hashMapData.length ~/ 2,
+                isHashMap: true,
+              );
+            }
+          }
+        }
       }
     }
-
     return createScalar(controller, fieldElement.key, actual);
   }
 }
@@ -464,7 +711,8 @@ FieldReference createScalar(
       dataValue = 'null';
       break;
     case HeapSnapshotObjectLengthData:
-      assert(false, 'Unexpected object - expected scalar.');
+//      assert(false, 'Unexpected object - expected scalar.');
+      dataValue = data.length.toString();
       break;
     default:
       dataValue = data.toString();
@@ -488,24 +736,24 @@ FieldReference listToFieldEntries(
   MemoryController controller,
   HeapGraphElement reference,
   String fieldName,
-  int size,
-) {
-  bool isMap = false;
+  int size, {
+  isHashMap = false,
+}) {
+  bool isAMap = false;
   HeapGraphElementLive actualListElement;
   ObjectFieldReference listObjectReference;
   if (reference is HeapGraphElementLive) {
     final actualListClass = reference.theClass as HeapGraphClassLive;
-    final fullClassName = actualListClass.fullQualifiedName;
-    if (fullClassName == predefinedList) {
+    if (isBuiltInList(actualListClass)) {
       // Add the list entry.
       actualListElement = reference;
       listObjectReference = ObjectFieldReference(
         controller,
         actualListElement,
-        'List',
-        '[$size]',
+        isHashMap ? 'HashMap' : 'List',
+        isHashMap ? '$fieldName {$size}' : '[$size]',
       );
-    } else if (fullClassName == predefinedMap) {
+    } else if (isBuiltInMap(actualListClass)) {
       // Add the Map field name and the key/value pairs.
       actualListElement = reference;
       listObjectReference = ObjectFieldReference(
@@ -522,7 +770,7 @@ FieldReference listToFieldEntries(
           final fullClassName = theClass.fullQualifiedName;
           if (fullClassName == predefinedList) {
             actualListElement = reference;
-            isMap = true;
+            isAMap = true;
             break;
           }
         }
@@ -554,7 +802,7 @@ FieldReference listToFieldEntries(
 
   // TODO(terry): Need to verify.
   // Only value key if size != to number of real entries.
-  final hasKeyValues = isMap && realEntries.length == size;
+  final hasKeyValues = isAMap && realEntries.length == size;
 
   for (var realEntryIndex = 0;
       realEntryIndex < realEntries.length;
@@ -567,7 +815,7 @@ FieldReference listToFieldEntries(
         final predefined = predefinedClasses[entryClass.fullQualifiedName];
         FieldReference listEntry;
         if (predefined != null && predefined.isScalar) {
-          if (isMap) {
+          if (isAMap) {
             if (hasKeyValues) {
               final HeapGraphElementLive valueElement =
                   realEntries[realEntryIndex + 1];
@@ -607,17 +855,41 @@ FieldReference listToFieldEntries(
             listEntry = createScalar(controller, fieldName, entryElement);
           }
         } else {
-          // The List entries are computed on expansion.
-          listEntry = ObjectFieldReference(
+          listEntry ??= ObjectFieldReference(
             controller,
             entryElement,
             entryClass.name,
             '[$listIndex]',
           );
+          if (entryElement.references.isNotEmpty) {
+            // Key of the Map is an object.
+            if (isAMap) {
+              final keyFields = entryElement.getFields();
+              for (final keyField in keyFields) {
+                final key = keyField.key;
+                final value = keyField.value;
+
+                // Skip sentinels and null values.
+                if (!value.isSentinel && !dataIsNull(value)) {
+                  final HeapGraphElementLive live = value;
+                  final HeapGraphClassLive theClass = live.theClass;
+                  final keyObjectRef = ObjectFieldReference(
+                    controller,
+                    live,
+                    theClass.name,
+                    '$key',
+                  );
+
+                  keyObjectRef.addChild(FieldReference.empty);
+                  listEntry.addChild(keyObjectRef);
+                }
+              }
+            }
+          }
         }
 
         // Entry type to expand later.
-        if (!isMap) {
+        if (!isAMap) {
           listEntry.addChild(FieldReference.empty);
         }
 
@@ -633,6 +905,9 @@ FieldReference listToFieldEntries(
 
   return listObjectReference;
 }
+
+bool dataIsNull(HeapGraphElementLive live) =>
+    live.origin.data.runtimeType == HeapSnapshotObjectNullData;
 
 /// Return a ObjectFieldReference node (TableTree use) from the field that
 /// is an object (instance).  This object's field will be computed when
