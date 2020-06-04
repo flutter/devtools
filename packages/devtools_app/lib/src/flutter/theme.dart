@@ -93,6 +93,11 @@ const devtoolsWarning = Color(0xFFFDFAD5);
 
 const devtoolsLink = ThemedColor(Color(0xFF1976D2), Colors.lightBlueAccent);
 
+const linkTextStyle = TextStyle(
+  color: devtoolsLink,
+  decoration: TextDecoration.underline,
+);
+
 /// A short duration to use for animations.
 ///
 /// Use this when you want less emphasis on the animation and more on the

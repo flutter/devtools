@@ -919,9 +919,13 @@ class _TableRowState<T> extends State<TableRow<T>>
                   size: defaultIconSize,
                 ),
               const SizedBox(height: defaultRowHeight, width: 4.0),
-              Text(
-                column.title,
-                overflow: TextOverflow.ellipsis,
+              // TODO: This Flexible wrapper was added to get the
+              // network_profiler_test.dart tests to pass.
+              Flexible(
+                child: Text(
+                  column.title,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),

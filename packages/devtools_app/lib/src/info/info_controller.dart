@@ -18,6 +18,19 @@ class InfoController extends DisposableController
     _listenForFlutterVersionChanges();
   }
 
+  /// Return the FlutterVersion for the current connected app, or `null`
+  /// if the `flutterVersion` service extension does not exist.
+  static Future<FlutterVersion> getFlutterVersion() async {
+    final app = serviceManager.connectedApp;
+    if (!(await app.isFlutterApp)) {
+      return null;
+    }
+
+    return serviceManager.getFlutterVersion().then((response) {
+      return FlutterVersion.parse(response.json);
+    }).catchError((e) => null);
+  }
+
   final flutterVersionServiceAvailable = Completer();
 
   ValueListenable<FlutterVersion> get flutterVersion => _flutterVersion;
