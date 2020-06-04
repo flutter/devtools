@@ -301,7 +301,7 @@ class DurationColumn extends ColumnData<HttpRequestData> {
 
 class TimestampColumn extends ColumnData<HttpRequestData> {
   TimestampColumn()
-      : super('Timestamp', alignment: ColumnAlignment.right, fixedWidthPx: 165);
+      : super('Timestamp', alignment: ColumnAlignment.right, fixedWidthPx: 135);
 
   @override
   dynamic getValue(HttpRequestData dataObject) {
@@ -315,6 +315,6 @@ class TimestampColumn extends ColumnData<HttpRequestData> {
 
   @visibleForTesting
   static String formatRequestTime(DateTime requestTime) {
-    return DateFormat.Hms().add_yMd().format(requestTime);
+    return DateFormat('h:mm:ss.S a').format(requestTime);
   }
 }
