@@ -168,16 +168,6 @@ class MemoryTracker {
 
     _changeController.add(null);
   }
-
-  // TODO(devoncarew): fix HeapSpace.parse upstream
-  static Iterable<HeapSpace> getHeaps(Isolate isolate) {
-    if (isolate != null) {
-      final Map<String, dynamic> heaps = isolate.json['_heaps'];
-      return heaps.values.map((dynamic json) => HeapSpace.parse(json));
-    }
-
-    return const Iterable.empty();
-  }
 }
 
 // Heap Statistics

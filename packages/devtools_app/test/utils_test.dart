@@ -9,6 +9,17 @@ import 'package:test/test.dart';
 
 void main() {
   group('utils', () {
+    test('printKb', () {
+      const int kb = 1024;
+
+      expect(printKb(0), '0');
+      expect(printKb(1), '1');
+      expect(printKb(kb - 1), '1');
+      expect(printKb(kb), '1');
+      expect(printKb(kb + 1), '2');
+      expect(printKb(2000), '2');
+    });
+
     test('printMb', () {
       const int MB = 1024 * 1024;
 

@@ -57,8 +57,15 @@ final NumberFormat nf = NumberFormat.decimalPattern();
 
 String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
 
+final NumberFormat _kbPattern = NumberFormat.decimalPattern()
+  ..maximumFractionDigits = 0;
+
+String printKb(num bytes) {
+  return _kbPattern.format((bytes + 511) / 1024);
+}
+
 String printMb(num bytes, [int fractionDigits = 1]) {
-  return (bytes / (1024 * 1024)).toStringAsFixed(fractionDigits);
+  return (bytes / (1024 * 1024.0)).toStringAsFixed(fractionDigits);
 }
 
 String msText(
