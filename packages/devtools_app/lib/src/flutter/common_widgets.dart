@@ -140,7 +140,6 @@ StatelessWidget recordButton({
 
 /// Button to refresh data.
 ///
-/// * `recording`: Whether recording is in progress.
 /// * `includeTextWidth`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `labelOverride`: Optional alternative text to use for the button.
@@ -188,7 +187,7 @@ StatelessWidget stopRecordingButton({
 
 /// Button to stop recording data.
 ///
-/// * `recording`: Whether recording is in progress.
+/// * `paused`: Whether recording is in progress.
 /// * `includeTextWidth`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
@@ -463,6 +462,35 @@ class ToggleButton extends StatelessWidget {
           text,
           includeTextWidth: includeTextWidth,
         ),
+      ),
+    );
+  }
+}
+
+/// Button to export data.
+///
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
+/// * `onPressed`: The callback to be called upon pressing the button.
+class ExportButton extends StatelessWidget {
+  const ExportButton({
+    Key key,
+    @required this.includeTextWidth,
+    @required this.onPressed,
+  }) : super(key: key);
+
+  final double includeTextWidth;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlineButton(
+      key: key,
+      onPressed: onPressed,
+      child: MaterialIconLabel(
+        Icons.file_download,
+        'Export',
+        includeTextWidth: includeTextWidth,
       ),
     );
   }

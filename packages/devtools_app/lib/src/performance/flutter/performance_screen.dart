@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service.dart' hide Stack;
 
+import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
+import '../../flutter/notifications.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/theme.dart';
@@ -30,6 +34,8 @@ class PerformanceScreen extends Screen {
   @visibleForTesting
   static const stopRecordingButtonKey = Key('Stop Recording Button');
   @visibleForTesting
+  static const exportButtonKey = Key('Export Button');
+  @visibleForTesting
   static const recordingInstructionsKey = Key('Recording Instructions');
   @visibleForTesting
   static const recordingStatusKey = Key('Recording Status');
@@ -41,7 +47,7 @@ class PerformanceScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return !serviceManager.connectedApp.isDartWebAppNow
+    return offlineMode || !serviceManager.connectedApp.isDartWebAppNow
         ? const PerformanceScreenBody()
         : const DisabledForWebAppMessage();
   }
@@ -55,10 +61,18 @@ class PerformanceScreenBody extends StatefulWidget {
 }
 
 class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
-    with AutoDisposeMixin {
+    with
+        AutoDisposeMixin,
+        OfflineScreenMixin<PerformanceScreenBody, CpuProfileData> {
+  static const _primaryControlsMinIncludeTextWidth = 600.0;
+  static const _secondaryControlsMinIncludeTextWidth = 1100.0;
+
   PerformanceController controller;
+
   bool recording = false;
+
   bool processing = false;
+
   double processingProgress = 0.0;
 
   @override
@@ -71,17 +85,20 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
     controller = newController;
 
     cancel();
+
     addAutoDisposeListener(controller.recordingNotifier, () {
       setState(() {
         recording = controller.recordingNotifier.value;
       });
     });
+
     addAutoDisposeListener(controller.cpuProfilerController.processingNotifier,
         () {
       setState(() {
         processing = controller.cpuProfilerController.processingNotifier.value;
       });
     });
+
     addAutoDisposeListener(
         controller.cpuProfilerController.transformer.progressNotifier, () {
       setState(() {
@@ -89,10 +106,21 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
             controller.cpuProfilerController.transformer.progressNotifier.value;
       });
     });
+
+    // Load offline performance data if available.
+    if (shouldLoadOfflineData()) {
+      final performanceJson =
+          Map<String, dynamic>.from(offlineDataJson[PerformanceScreen.id]);
+      final offlinePerformanceData = CpuProfileData.parse(performanceJson);
+      if (!offlinePerformanceData.isEmpty) {
+        loadOfflineData(offlinePerformanceData);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (offlineMode) return _buildPerformanceBody(controller);
     return ValueListenableBuilder<Flag>(
       valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
       builder: (context, profilerFlag, _) {
@@ -104,15 +132,10 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   }
 
   Widget _buildPerformanceBody(PerformanceController controller) {
-    return Column(
+    final performanceScreen = Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildStateControls(controller),
-            const ProfileGranularityDropdown(PerformanceScreen.id),
-          ],
-        ),
+        if (!offlineMode) _buildPerformanceControls(),
+        const SizedBox(height: denseRowSpacing),
         Expanded(
           child: ValueListenableBuilder<CpuProfileData>(
             valueListenable: controller.cpuProfilerController.dataNotifier,
@@ -131,32 +154,75 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
         ),
       ],
     );
+
+    // We put these two items in a stack because the screen's UI needs to be
+    // built before offline data is processed in order to initialize listeners
+    // that respond to data processing events. The spinner hides the screen's
+    // empty UI while data is being processed.
+    return Stack(
+      children: [
+        performanceScreen,
+        if (loadingOfflineData)
+          Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+      ],
+    );
   }
 
-  Widget _buildStateControls(PerformanceController controller) {
-    const double includeTextWidth = 600;
+  Widget _buildPerformanceControls() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildPrimaryStateControls(),
+        _buildSecondaryControls(),
+      ],
+    );
+  }
 
+  Widget _buildPrimaryStateControls() {
     return Row(
       children: [
         recordButton(
           key: PerformanceScreen.recordButtonKey,
           recording: recording,
-          includeTextWidth: includeTextWidth,
+          includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.startRecording,
         ),
         const SizedBox(width: denseSpacing),
         stopRecordingButton(
           key: PerformanceScreen.stopRecordingButtonKey,
           recording: recording,
-          includeTextWidth: includeTextWidth,
+          includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.stopRecording,
         ),
         const SizedBox(width: defaultSpacing),
         clearButton(
           key: PerformanceScreen.clearButtonKey,
-          includeTextWidth: includeTextWidth,
           busy: recording,
+          includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.clear,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSecondaryControls() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        const ProfileGranularityDropdown(PerformanceScreen.id),
+        const SizedBox(width: defaultSpacing),
+        ExportButton(
+          key: PerformanceScreen.exportButtonKey,
+          onPressed: controller.cpuProfileData != null &&
+                  !controller.cpuProfileData.isEmpty
+              ? _exportPerformance
+              : null,
+          includeTextWidth: _secondaryControlsMinIncludeTextWidth,
         ),
       ],
     );
@@ -171,5 +237,27 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
       progressValue: processingProgress,
       recordedObject: 'CPU samples',
     );
+  }
+
+  void _exportPerformance() {
+    final exportedFile = controller.exportData();
+    // TODO(kenz): investigate if we need to do any error handling here. Is the
+    // download always successful?
+    // TODO(peterdjlee): find a way to push the notification logic into the
+    // export controller.
+    Notifications.of(context).push(successfulExportMessage(exportedFile));
+  }
+
+  @override
+  FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
+    await controller.cpuProfilerController.transformer.processData(offlineData);
+    controller.cpuProfilerController.loadOfflineData(offlineData);
+  }
+
+  @override
+  bool shouldLoadOfflineData() {
+    return offlineMode &&
+        offlineDataJson.isNotEmpty &&
+        offlineDataJson[PerformanceScreen.id] != null;
   }
 }

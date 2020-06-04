@@ -84,6 +84,7 @@ class CpuProfilerController {
   }
 
   void loadOfflineData(CpuProfileData data) {
+    assert(data.processed);
     _dataNotifier.value = data;
   }
 

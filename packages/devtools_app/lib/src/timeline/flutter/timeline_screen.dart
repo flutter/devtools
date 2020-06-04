@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
@@ -18,7 +19,6 @@ import '../../flutter/split.dart';
 import '../../flutter/theme.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
-import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
 import 'event_details.dart';
@@ -39,6 +39,8 @@ class TimelineScreen extends Screen {
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
   static const emptyTimelineKey = Key('Empty Timeline');
+  @visibleForTesting
+  static const exportButtonKey = Key('Export Button');
 
   static const id = 'timeline';
 
@@ -142,7 +144,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
     final timelineScreen = Column(
       children: [
-        if (!offlineMode) _timelineControls(),
+        if (!offlineMode) _buildTimelineControls(),
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
             (!offlineMode && serviceManager.connectedApp.isFlutterAppNow))
@@ -190,7 +192,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Widget _timelineControls() {
+  Widget _buildTimelineControls() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -241,16 +243,10 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         // TODO(kenz): hide or disable button if http timeline logging is not
         // available.
         const SizedBox(width: defaultSpacing),
-        Container(
-          height: Theme.of(context).buttonTheme.height,
-          child: OutlineButton(
-            onPressed: _exportTimeline,
-            child: const MaterialIconLabel(
-              Icons.file_download,
-              'Export',
-              includeTextWidth: _secondaryControlsMinIncludeTextWidth,
-            ),
-          ),
+        ExportButton(
+          key: TimelineScreen.exportButtonKey,
+          onPressed: _exportTimeline,
+          includeTextWidth: _secondaryControlsMinIncludeTextWidth,
         ),
         const SizedBox(width: defaultSpacing),
         ActionButton(
@@ -329,8 +325,9 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     final exportedFile = controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
-    Notifications.of(context)
-        .push('Successfully exported $exportedFile to ~/Downloads directory');
+    // TODO(peterdjlee): find a way to push the notification logic into the
+    // export controller.
+    Notifications.of(context).push(successfulExportMessage(exportedFile));
   }
 
   @override
