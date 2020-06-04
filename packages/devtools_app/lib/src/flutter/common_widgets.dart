@@ -469,19 +469,16 @@ class ToggleButton extends StatelessWidget {
 
 /// Button to export data.
 ///
-/// * `enabled`: Whether the button should be enabled.
 /// * `includeTextWidth`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
 class ExportButton extends StatelessWidget {
   const ExportButton({
     Key key,
-    this.enabled = true,
     @required this.includeTextWidth,
     @required this.onPressed,
   }) : super(key: key);
 
-  final bool enabled;
   final double includeTextWidth;
   final VoidCallback onPressed;
 
@@ -489,7 +486,7 @@ class ExportButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlineButton(
       key: key,
-      onPressed: enabled ? onPressed : null,
+      onPressed: onPressed,
       child: MaterialIconLabel(
         Icons.file_download,
         'Export',

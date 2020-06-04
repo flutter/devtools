@@ -218,9 +218,8 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
         const SizedBox(width: defaultSpacing),
         ExportButton(
           key: PerformanceScreen.exportButtonKey,
-          enabled: controller.cpuProfileData != null &&
-              !controller.cpuProfileData.isEmpty,
-          onPressed: _exportPerformance,
+          onPressed: controller.cpuProfileData != null &&
+              !controller.cpuProfileData.isEmpty ? _exportPerformance : null,
           includeTextWidth: _secondaryControlsMinIncludeTextWidth,
         ),
       ],
