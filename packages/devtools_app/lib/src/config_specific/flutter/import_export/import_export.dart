@@ -4,9 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/performance/flutter/performance_screen.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-
 import '../../../../devtools.dart';
 import '../../../flutter/notifications.dart';
 import '../../../globals.dart';
@@ -25,6 +22,10 @@ const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
 
 String attemptingToImportMessage(String devToolsScreen) {
   return 'Attempting to import file for screen with id "$devToolsScreen".';
+}
+
+String successfulExportMessage(String exportedFile) {
+  return 'Successfully exported $exportedFile to ~/Downloads directory';
 }
 
 // TODO(kenz): we should support a file picker import for desktop.

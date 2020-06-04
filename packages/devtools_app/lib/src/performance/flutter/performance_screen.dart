@@ -4,15 +4,15 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/flutter/notifications.dart';
-import 'package:devtools_app/src/ui/flutter/label.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
+import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
+import '../../flutter/notifications.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/theme.dart';
@@ -33,6 +33,8 @@ class PerformanceScreen extends Screen {
   static const recordButtonKey = Key('Record Button');
   @visibleForTesting
   static const stopRecordingButtonKey = Key('Stop Recording Button');
+  @visibleForTesting
+  static const exportButtonKey = Key('Export Button');
   @visibleForTesting
   static const recordingInstructionsKey = Key('Recording Instructions');
   @visibleForTesting
@@ -78,8 +80,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
     super.didChangeDependencies();
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
-    final newController =
-        Provider.of<PerformanceController>(context, listen: false);
+    final newController = Provider.of<PerformanceController>(context);
     if (newController == controller) return;
     controller = newController;
 
@@ -201,8 +202,8 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
         const SizedBox(width: defaultSpacing),
         clearButton(
           key: PerformanceScreen.clearButtonKey,
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
           busy: recording,
+          includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.clear,
         ),
       ],
@@ -215,19 +216,12 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
       children: [
         const ProfileGranularityDropdown(PerformanceScreen.id),
         const SizedBox(width: defaultSpacing),
-        Container(
-          height: Theme.of(context).buttonTheme.height,
-          child: OutlineButton(
-            onPressed: controller.cpuProfileData != null &&
-                    !controller.cpuProfileData.isEmpty
-                ? _exportPerformance
-                : null,
-            child: const MaterialIconLabel(
-              Icons.file_download,
-              'Export',
-              includeTextWidth: _secondaryControlsMinIncludeTextWidth,
-            ),
-          ),
+        ExportButton(
+          key: PerformanceScreen.exportButtonKey,
+          enabled: controller.cpuProfileData != null &&
+              !controller.cpuProfileData.isEmpty,
+          onPressed: _exportPerformance,
+          includeTextWidth: _secondaryControlsMinIncludeTextWidth,
         ),
       ],
     );
@@ -246,14 +240,15 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   void _exportPerformance() {
     final exportedFile = controller.exportData();
-
-    Notifications.of(context)
-        .push('Successfully exported $exportedFile to ~/Downloads directory');
+    // TODO(kenz): investigate if we need to do any error handling here. Is the
+    // download always successful?
+    // TODO(peterdjlee): find a way to push the notification logic into the
+    // export controller.
+    Notifications.of(context).push(successfulExportMessage(exportedFile));
   }
 
   @override
   FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
-    if (!offlineMode) await controller.clear();
     await controller.cpuProfilerController.transformer.processData(offlineData);
     controller.cpuProfilerController.loadOfflineData(offlineData);
   }
