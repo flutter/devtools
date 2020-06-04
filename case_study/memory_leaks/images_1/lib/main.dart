@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 
 void main() {
@@ -51,8 +52,9 @@ class MyHomePageState extends State<MyHomePage>
     if (imageChunkEvent == null) return null;
 
     final recordLoading = loadedImages.putIfAbsent(imageUrl, () {
-      print(
-        'Loading size: ${imageChunkEvent.expectedTotalBytes},'
+      developer.log(
+        'Start loading total: ${imageChunkEvent.expectedTotalBytes},'
+        ' chunk: ${imageChunkEvent.cumulativeBytesLoaded}'
         ' image: $imageUrl',
       );
       return imageChunkEvent;
@@ -63,9 +65,9 @@ class MyHomePageState extends State<MyHomePage>
 
     final loadingState = cumulativeBytes == expectedTotalBytes
         ? 'Loaded.'
-        : 'Loading, $cumulativeBytes of $expectedTotalBytes bytes.';
+        : 'Still Loading, $cumulativeBytes of $expectedTotalBytes bytes.';
 
-    print('$imageUrl $loadingState');
+    developer.log('$loadingState, $imageUrl');
 
     // Progress spinnger.
     return Center(
@@ -98,8 +100,9 @@ class MyHomePageState extends State<MyHomePage>
           )
         ],
         bottom: TabBar(
-            controller: _tabController,
-            tabs: tabs.map((e) => Tab(text: e)).toList()),
+          controller: _tabController,
+          tabs: tabs.map((e) => Tab(text: e)).toList(),
+        ),
       ),
       body: listView(),
     );
@@ -121,7 +124,7 @@ class MyHomePageState extends State<MyHomePage>
         ) {
           final imgUrl = allImages[idx];
 
-          print('Loading [$idx] $imgUrl');
+          developer.log('Start Network Load: [$idx] $imgUrl');
 
           final image = Image.network(
             imgUrl,
