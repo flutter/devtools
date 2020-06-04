@@ -5,7 +5,6 @@
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/logger.dart';
 import '../../trees.dart';
 import '../flutter/memory_controller.dart';
 import '../flutter/memory_graph_model.dart';

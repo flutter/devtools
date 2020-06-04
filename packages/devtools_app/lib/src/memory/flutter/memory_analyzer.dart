@@ -400,7 +400,7 @@ Map<String, List<String>> drillIn(
             matcher.findFieldMatch(fieldsStack, value);
             fieldsStack.pop();
 
-            debugMonitor('${field.key} = ${value}');
+            debugMonitor('${field.key} = $value');
             if (createTreeNodes) {
               final fieldNode = AnalysisField(field.key, value);
               fieldsRoot.addChild(fieldNode);
