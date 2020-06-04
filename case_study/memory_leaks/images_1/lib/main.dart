@@ -81,7 +81,7 @@ class MyHomePageState extends State<MyHomePage>
 
   @override
   Widget build(BuildContext context) {
-    // The build method rerun every time setState is called.
+    // The build method reruns every time setState is called.
     //
     // The Flutter framework has been optimized to efficiently run the build.
     // So that only what needs updating rather than having to individually
@@ -110,12 +110,6 @@ class MyHomePageState extends State<MyHomePage>
     return scaffold;
   }
 
-  /// *********************************************************************************
-  /// ***** ListView outside of TabBarView, ListView w/o width/height smaller.    *****
-  /// ***** Added scale: 0.25 and ResizeImage helps but still hangs.  Seems to    *****
-  /// ***** need loadingBuilder then works well.                                  *****
-  /// CacheHeight and cacheWidth is the solution.  ResizeImage doens't really help.
-  /// *********************************************************************************
   Widget listView() => ListView.builder(
         itemCount: allImages.length,
         itemBuilder: (
@@ -131,9 +125,6 @@ class MyHomePageState extends State<MyHomePage>
             width: 750.0,
             height: 500,
             scale: 1.0,
-            // Decode image to a specified height and width (ResizeImage).
-            cacheHeight: 1024,
-            cacheWidth: 1024,
             fit: BoxFit.fitWidth,
             loadingBuilder: (
               BuildContext context,
