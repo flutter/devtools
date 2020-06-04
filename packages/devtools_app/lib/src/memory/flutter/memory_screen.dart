@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../config_specific/logger/logger.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/banner_messages.dart';
 import '../../flutter/common_widgets.dart';
@@ -249,7 +250,6 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
       valueListenable: controller.paused,
       builder: (context, paused, _) {
         return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             OutlineButton(
               key: MemoryScreen.pauseButtonKey,
@@ -312,7 +312,6 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
 
   Widget _buildMemoryControls(TextTheme textTheme) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
@@ -330,7 +329,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         const SizedBox(width: denseSpacing),
         OutlineButton(
           key: MemoryScreen.gcButtonKey,
-          onPressed: _gc,
+          onPressed: controller.isGcing ? null : _gc,
           child: const MaterialIconLabel(
             Icons.delete_sweep,
             'GC',
@@ -362,7 +361,15 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
     // TODO(terry): TBD real implementation needed.
   }
 
-  void _gc() {
-    // TODO(terry): Implementation needed.
+  Future<void> _gc() async {
+    // TODO(terry): Record GC in analytics.
+    try {
+      log('GC Start', LogLevel.warning);
+      await controller.gc();
+      log('GC Complete', LogLevel.warning);
+    } catch (e) {
+      // TODO(terry): Show toast?
+      log('Unable to GC ${e.toString()}', LogLevel.error);
+    }
   }
 }

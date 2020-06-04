@@ -296,7 +296,7 @@ class InspectorController extends DisposableController
     if (!visibleToUser) {
       // We will refresh again once we are visible.
       // There is a risk a refresh got triggered before the view was visble.
-      return Future.value(null);
+      return Future.value();
     }
 
     // TODO(jacobr): refresh the tree as well as just the properties.
@@ -340,7 +340,7 @@ class InspectorController extends DisposableController
   Future<void> onForceRefresh() {
     assert(!_disposed);
     if (!visibleToUser || _disposed) {
-      return Future.value(null);
+      return Future.value();
     }
     recomputeTreeRoot(null, null, false);
 

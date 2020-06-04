@@ -348,7 +348,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
           max = _extentDelegate.layoutOffset(possibleFirstIndex);
         }
         geometry = SliverGeometry(
-          scrollExtent: max,
+          scrollExtent: _extentDelegate.layoutOffset(_extentDelegate.length),
           maxPaintExtent: max,
         );
         childManager.didFinishLayout();
@@ -453,7 +453,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
             .maxChildIndexForScrollOffset(targetEndScrollOffsetForPaint)
         : null;
     geometry = SliverGeometry(
-      scrollExtent: estimatedMaxScrollOffset,
+      scrollExtent: _extentDelegate.layoutOffset(_extentDelegate.length),
       paintExtent: paintExtent,
       cacheExtent: cacheExtent,
       maxPaintExtent: estimatedMaxScrollOffset,

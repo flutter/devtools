@@ -34,15 +34,6 @@ const mainRasterColorDark = Color(0xFF1A73E8); // Blue 600 Material Dark
 const mainUiColorSelectedDark = Colors.white;
 const mainRasterColorSelectedDark = Color(0xFFC9C9C9); // Grey.
 
-const Color selectedUiColor = ThemedColor(
-  mainUiColorSelectedLight,
-  mainUiColorSelectedDark,
-);
-const Color selectedRasterColor = ThemedColor(
-  mainRasterColorSelectedLight,
-  mainRasterColorSelectedDark,
-);
-
 // Light Blue 50: 200-400 (light mode) - see https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 // Blue Material Dark: 200-400 (dark mode) - see https://standards.google/guidelines/google-material/color/dark-theme.html#style.
 final uiColorPalette = [
@@ -84,17 +75,13 @@ const selectedFlameChartItemColor = ThemedColor(
   mainUiColorSelectedLight,
 );
 
-// Light is Red @ .2 opacity, Dark is Red 200 Material Dark @ .2 opacity.
-const Color jankGlowInside = ThemedColor(
-  Color(0x66FF0000),
-  Color(0x66F29C99),
-);
+final selectedFlutterFrameUiColor = Colors.yellow[500];
+final selectedFlutterFrameRasterColor = Colors.yellow[700];
 
-// Light is Red @ .5 opacity, Dark is Red 600 Material Dark @ .6 opacity.
-const Color jankGlowEdge = ThemedColor(
-  Color(0x80FF0000),
-  Color(0x99CE191C),
-);
+// [mainUiColor] with a red 0.4 opacity overlay.
+final uiJankColor = ThemedColor.fromSingleColor(const Color(0xFFCA82A1));
+// [mainRasterColor] with a red 0.4 opacity overlay.
+final rasterJankColor = ThemedColor.fromSingleColor(const Color(0xFF845697));
 
 // Red 50 - 400 is light at 1/2 opacity, Dark Red 500 Material Dark.
 const Color highwater16msColor = mainUiColorSelectedLight;

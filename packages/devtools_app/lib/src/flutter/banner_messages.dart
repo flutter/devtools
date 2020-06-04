@@ -125,12 +125,14 @@ class BannerMessage extends StatelessWidget {
     @required this.backgroundColor,
     @required this.foregroundColor,
     @required this.screenId,
+    @required this.headerText,
   }) : super(key: key);
 
   final List<TextSpan> textSpans;
   final Color backgroundColor;
   final Color foregroundColor;
   final String screenId;
+  final String headerText;
 
   @override
   Widget build(BuildContext context) {
@@ -139,25 +141,37 @@ class BannerMessage extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: denseRowSpacing),
       child: Padding(
         padding: const EdgeInsets.all(defaultSpacing),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: RichText(
-                text: TextSpan(
-                  children: textSpans,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  headerText,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline6
+                      .copyWith(color: foregroundColor),
                 ),
-              ),
-            ),
-            const SizedBox(width: denseSpacing),
-            CircularIconButton(
-              icon: Icons.close,
-              backgroundColor: backgroundColor,
-              foregroundColor: foregroundColor,
-              // TODO(kenz): animate the removal of this message.
-              onPressed: () =>
-                  Provider.of<BannerMessagesController>(context, listen: false)
+                CircularIconButton(
+                  icon: Icons.close,
+                  backgroundColor: backgroundColor,
+                  foregroundColor: foregroundColor,
+                  // TODO(kenz): animate the removal of this message.
+                  onPressed: () => Provider.of<BannerMessagesController>(
+                          context,
+                          listen: false)
                       .removeMessage(this, dismiss: true),
+                ),
+              ],
+            ),
+            const SizedBox(height: defaultSpacing),
+            RichText(
+              text: TextSpan(
+                children: textSpans,
+              ),
             ),
           ],
         ),
@@ -177,6 +191,7 @@ class _BannerError extends BannerMessage {
           backgroundColor: devtoolsError,
           foregroundColor: foreground,
           screenId: screenId,
+          headerText: 'ERROR',
         );
 
   static const foreground = Colors.white;
@@ -195,6 +210,7 @@ class _BannerWarning extends BannerMessage {
           backgroundColor: devtoolsWarning,
           foregroundColor: foreground,
           screenId: screenId,
+          headerText: 'WARNING',
         );
 
   static const foreground = Colors.black87;

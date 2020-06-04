@@ -7,6 +7,7 @@ import '../flutter/common_widgets.dart';
 import '../table_data.dart';
 import '../trees.dart';
 import '../utils.dart';
+import 'auto_dispose_mixin.dart';
 import 'collapsible_mixin.dart';
 import 'common_widgets.dart' show ColorExtension, ScrollControllerAutoScroll;
 import 'flutter_widgets/linked_scroll_controller.dart';
@@ -168,6 +169,22 @@ class FlatTableState<T> extends State<FlatTable<T>>
   }
 }
 
+class Selection<T> {
+  Selection({
+    this.node,
+    this.nodeIndex,
+    this.scrollIntoView = false,
+  });
+
+  final T node;
+  final int nodeIndex;
+  final bool scrollIntoView;
+}
+
+class SelectionNotifier<T> extends ValueNotifier<T> {
+  SelectionNotifier(T) : super(T);
+}
+
 // TODO(https://github.com/flutter/devtools/issues/1657)
 
 /// A table that shows [TreeNode]s.
@@ -194,6 +211,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     @required this.keyFactory,
     @required this.sortColumn,
     @required this.sortDirection,
+    this.selectionNotifier,
   })  : assert(columns.contains(treeColumn)),
         assert(columns.contains(sortColumn)),
         assert(columns != null),
@@ -217,23 +235,25 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
 
   final SortDirection sortDirection;
 
+  final ValueNotifier<Selection<T>> selectionNotifier;
+
   @override
   TreeTableState<T> createState() => TreeTableState<T>();
 }
 
 class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
-    with TickerProviderStateMixin, TreeMixin<T>
+    with TickerProviderStateMixin, TreeMixin<T>, AutoDisposeMixin
     implements SortableTable<T> {
   /// The number of items to show when animating out the tree table.
   static const itemsToShowWhenAnimating = 50;
   List<T> animatingChildren = [];
   Set<T> animatingChildrenSet = {};
   T animatingNode;
-  T selectedNode;
-  int selectedNodeIndex;
   List<double> columnWidths;
   List<bool> rootsExpanded;
   FocusNode _focusNode;
+
+  ValueNotifier<Selection<T>> selectionNotifier;
 
   FocusNode get focusNode => _focusNode;
 
@@ -247,9 +267,32 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     _focusNode = FocusNode();
   }
 
+  void expandParents(T parent) {
+    if (parent == null) return;
+
+    if (parent.parent?.index != -1) {
+      expandParents(parent.parent);
+    }
+
+    if (parent != null && !parent.isExpanded) {
+      _toggleNode(parent);
+    }
+  }
+
   @override
   void didUpdateWidget(TreeTable oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (widget == oldWidget) return;
+
+    cancel();
+
+    addAutoDisposeListener(selectionNotifier, () {
+      setState(() {
+        final node = selectionNotifier.value.node;
+        expandParents(node?.parent);
+      });
+    });
 
     if (widget.sortColumn != oldWidget.sortColumn ||
         widget.sortDirection != oldWidget.sortDirection ||
@@ -264,6 +307,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void _initData() {
     dataRoots = List.from(widget.dataRoots);
     sortData(widget.sortColumn, widget.sortDirection);
+
+    selectionNotifier =
+        widget.selectionNotifier ?? ValueNotifier<Selection<T>>(Selection<T>());
   }
 
   @override
@@ -291,8 +337,10 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   void _onItemPressed(T node, int nodeIndex) {
     // Rebuilds the table whenever the tree structure has been updated.
-    selectedNode = node;
-    selectedNodeIndex = nodeIndex;
+    selectionNotifier.value = Selection(
+      node: node,
+      nodeIndex: nodeIndex,
+    );
 
     _toggleNode(node);
   }
@@ -300,6 +348,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void _toggleNode(T node) {
     if (!node.isExpandable) {
       node.leaf();
+      _updateItems();
       return;
     }
 
@@ -376,6 +425,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       onSortChanged: _sortDataAndUpdate,
       focusNode: _focusNode,
       handleKeyEvent: _handleKeyEvent,
+      selectionNotifier: selectionNotifier,
     );
   }
 
@@ -386,7 +436,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     List<double> columnWidths,
   ) {
     Widget rowForNode(T node) {
-      final isNodeSelected = selectedNode == node;
+      final isNodeSelected = selectionNotifier.value.node == node;
+      node.index = index;
       return TableRow<T>(
         key: widget.keyFactory(node),
         linkedScrollControllerGroup: linkedScrollControllerGroup,
@@ -446,11 +497,15 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     ].contains(event.logicalKey)) return false;
 
     // If there is no selected node, choose the first one.
-    if (selectedNode == null) {
-      selectedNode = items[0];
-      selectedNodeIndex = 0;
+    if (selectionNotifier.value.node == null) {
+      selectionNotifier.value = Selection(
+        node: items[0],
+        nodeIndex: 0,
+      );
     }
-    assert(selectedNode == items[selectedNodeIndex]);
+
+    assert(selectionNotifier.value.node ==
+        items[selectionNotifier.value.nodeIndex]);
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
       _moveSelection(ScrollKind.down, scrollController, constraints.maxHeight);
@@ -459,8 +514,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
       // On left arrow collapse the row if it is expanded. If it is not, move
       // selection to its parent.
-      if (selectedNode.isExpanded) {
-        _toggleNode(selectedNode);
+      if (selectionNotifier.value.node.isExpanded) {
+        _toggleNode(selectionNotifier.value.node);
       } else {
         _moveSelection(
           ScrollKind.parent,
@@ -470,8 +525,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       }
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
       // On right arrow expand the row if possible, otherwise move selection down.
-      if (selectedNode.isExpandable && !selectedNode.isExpanded) {
-        _toggleNode(selectedNode);
+      if (selectionNotifier.value.node.isExpandable &&
+          !selectionNotifier.value.node.isExpanded) {
+        _toggleNode(selectionNotifier.value.node);
       } else {
         _moveSelection(
           ScrollKind.down,
@@ -499,6 +555,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
     int newSelectedNodeIndex;
 
+    final selectionValue = selectionNotifier.value;
+    final selectedNodeIndex = selectionValue.nodeIndex;
     switch (scrollKind) {
       case ScrollKind.down:
         newSelectedNodeIndex = min(selectedNodeIndex + 1, items.length - 1);
@@ -507,7 +565,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         newSelectedNodeIndex = max(selectedNodeIndex - 1, 0);
         break;
       case ScrollKind.parent:
-        newSelectedNodeIndex = max(items.indexOf(selectedNode.parent), 0);
+        newSelectedNodeIndex =
+            max(items.indexOf(selectionValue.node.parent), 0);
         break;
     }
 
@@ -533,8 +592,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
 
     setState(() {
-      selectedNode = newSelectedNode;
-      selectedNodeIndex = newSelectedNodeIndex;
+      selectionNotifier.value = Selection(
+        node: newSelectedNode,
+        nodeIndex: newSelectedNodeIndex,
+        scrollIntoView: true,
+      );
     });
   }
 
@@ -557,6 +619,7 @@ class _Table<T> extends StatefulWidget {
     this.focusNode,
     this.handleKeyEvent,
     this.autoScrollContent = false,
+    this.selectionNotifier,
   }) : super(key: key);
 
   final int itemCount;
@@ -570,6 +633,7 @@ class _Table<T> extends StatefulWidget {
   final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
   final FocusNode focusNode;
   final TableKeyEventHandler handleKeyEvent;
+  final ValueNotifier<Selection<T>> selectionNotifier;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
@@ -578,7 +642,7 @@ class _Table<T> extends StatefulWidget {
   _TableState<T> createState() => _TableState<T>();
 }
 
-class _TableState<T> extends State<_Table<T>> {
+class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
   ColumnData<T> sortColumn;
   SortDirection sortDirection;
@@ -592,6 +656,69 @@ class _TableState<T> extends State<_Table<T>> {
     sortColumn = widget.sortColumn;
     sortDirection = widget.sortDirection;
     scrollController = ScrollController();
+  }
+
+  @override
+  void didUpdateWidget(_Table oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    cancel();
+
+    // Detect selection changes but only care about scrollIntoView.
+    addAutoDisposeListener(oldWidget.selectionNotifier, () {
+      setState(() {
+        final selection = oldWidget.selectionNotifier.value;
+        if (selection.scrollIntoView) {
+          final int selectedDisplayRow = selection.node.index;
+          // TODO(terry): Optimize selecting row, if row's visible in
+          //              the viewport just select otherwise jumpTo row.
+          final newPos = selectedDisplayRow * defaultRowHeight;
+
+          // TODO(terry): Should animate factor out _moveSelection to reuse here.
+          scrollController.jumpTo(newPos);
+        }
+      });
+    });
+  }
+
+  /// Return the number of visible rows above the selected node.
+  // TODO(terry): Must refactory should be T not dynamic but that requires hanlding
+  //              for both Table and TreeTable.
+  int selectionRowNumber(dynamic selectedNode) {
+    var scanNode = selectedNode;
+    var parent = scanNode?.parent;
+
+    assert(parent != null);
+
+    var totalVisibleRowsAboveNode = 0;
+    while (!scanNode.isRoot) {
+      final rowsAbove = parent.children.indexWhere((node) {
+        return scanNode == node;
+      });
+
+      if (rowsAbove > 0) {
+        // Add parent row to the count.
+        totalVisibleRowsAboveNode += rowsAbove + (parent.index >= 0 ? 1 : 0);
+      }
+
+      // Check all scanNode's parent siblings above current scanNode.
+      for (final sibling in parent.children) {
+        if (sibling == scanNode) break;
+
+        // Any parent siblings above expanded? Count those rows too.
+        if (sibling.isExpanded) {
+          // Count of a parent node's children and parent, if expanded,
+          // above selected node.
+          totalVisibleRowsAboveNode += sibling.children.length + 1;
+        }
+      }
+
+      scanNode = parent;
+      parent = scanNode.parent;
+    }
+
+    // Return zero based row.
+    return totalVisibleRowsAboveNode - 1;
   }
 
   @override

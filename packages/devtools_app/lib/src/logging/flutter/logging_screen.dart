@@ -106,7 +106,6 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   Widget build(BuildContext context) {
     return Column(children: [
       Row(
-        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           clearButton(onPressed: _clearLogs),
           const Spacer(),
@@ -252,14 +251,16 @@ class _LogDetailsState extends State<LogDetails>
 
   Widget _buildSimpleLog(BuildContext context, LogData log) {
     final disabled = log?.details == null || log.details.isEmpty;
-    return Console(
-      lines: log?.prettyPrinted?.split('\n'),
-      controls: [
-        CopyToClipboardControl(
-          dataProvider: disabled ? null : () => log?.prettyPrinted,
-          buttonKey: LogDetails.copyToClipboardButtonKey,
-        ),
-      ],
+    return OutlineDecoration(
+      child: Console(
+        lines: log?.prettyPrinted?.split('\n'),
+        controls: [
+          CopyToClipboardControl(
+            dataProvider: disabled ? null : () => log?.prettyPrinted,
+            buttonKey: LogDetails.copyToClipboardButtonKey,
+          ),
+        ],
+      ),
     );
   }
 }

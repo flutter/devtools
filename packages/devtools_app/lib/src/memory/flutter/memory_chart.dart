@@ -208,10 +208,9 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
               ? const SizedBox()
               : Column(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(
-                      height: liveChartHeight,
+                      height: defaultChartHeight,
                       child: LineChart(dartChartController),
                     ),
                     _timelineSlider,
@@ -223,7 +222,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         if (controller.isAndroidChartVisible)
           Expanded(
             child: SizedBox(
-              height: liveChartHeight,
+              height: defaultChartHeight,
               child: LineChart(androidChartController),
             ),
           ),
@@ -279,15 +278,9 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..textSize = 2.0;
 */
       },
-      highLightPerTapEnabled: true,
-      backgroundColor: chartBackgroundColor,
+      backgroundColor: defaultBackgroundColor,
       doubleTapToZoomEnabled: false,
-      drawGridBackground: false,
-      dragXEnabled: true,
-      dragYEnabled: true,
       // TODO(terry): For now disable zoom with double-click.
-      scaleXEnabled: true,
-      scaleYEnabled: true,
       pinchZoomEnabled: false,
       description: desc,
       marker: _selectedDartChart,
@@ -349,11 +342,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..textSize = 2.0;
 */
       },
-      highLightPerTapEnabled: true,
-      backgroundColor: chartBackgroundColor,
-      drawGridBackground: false,
-      dragXEnabled: true,
-      dragYEnabled: true,
+      backgroundColor: defaultBackgroundColor,
       // TOD(terry): Disable zoom via double-click. Consider +/- button
       //             for a controlled zoom in/zoom out.
       scaleXEnabled: false,

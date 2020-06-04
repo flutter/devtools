@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../config_specific/host_platform/host_platform.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/flex_split_column.dart';
@@ -20,6 +21,7 @@ import '../../globals.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
+import 'common.dart';
 import 'console.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
@@ -137,7 +139,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       valueListenable: controller.librariesVisible,
       builder: (context, visible, _) {
         if (visible) {
-          // Focus the filter textfield when the ScriptPicker opens
+          // Focus the filter textfield when the ScriptPicker opens.
           _libraryFilterFocusNode.requestFocus();
 
           // TODO(devoncarew): Animate this opening and closing.
@@ -146,17 +148,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             initialFractions: const [0.70, 0.30],
             children: [
               codeView,
-              AnimatedBuilder(
-                animation: Listenable.merge([
-                  controller.sortedScripts,
-                  controller.sortedClasses,
-                ]),
-                builder: (context, _) {
+              ValueListenableBuilder(
+                valueListenable: controller.sortedScripts,
+                builder: (context, scripts, _) {
                   return ScriptPicker(
                     key: DebuggerScreenBody.scriptViewKey,
                     controller: controller,
-                    scripts: controller.sortedScripts.value,
-                    classes: controller.sortedClasses.value,
+                    scripts: scripts,
                     onSelected: _onLocationSelected,
                     libraryFilterFocusNode: _libraryFilterFocusNode,
                   );
@@ -172,12 +170,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyP):
-            FilterLibraryIntent(_libraryFilterFocusNode, controller),
+        focusLibraryFilterKeySet:
+            FocusLibraryFilterIntent(_libraryFilterFocusNode, controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
-          FilterLibraryIntent: FilterLibraryAction(),
+          FocusLibraryFilterIntent: FocusLibraryFilterAction(),
         },
         child: Split(
           axis: Axis.horizontal,
@@ -191,7 +189,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                 Expanded(
                   child: Split(
                     axis: Axis.vertical,
-                    initialFractions: const [0.74, 0.26],
+                    initialFractions: const [0.72, 0.28],
                     children: [
                       codeArea,
                       DebuggerConsole(controller: controller),
@@ -256,9 +254,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         return Row(children: [
           BreakpointsCountBadge(breakpoints: breakpoints),
           ActionButton(
-            child: FlatButton(
-              padding: EdgeInsets.zero,
-              child: const Icon(Icons.delete, size: actionsIconSize),
+            child: DebuggerToolbarAction(
+              Icons.delete,
               onPressed:
                   breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
             ),
@@ -270,8 +267,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 }
 
-class FilterLibraryIntent extends Intent {
-  const FilterLibraryIntent(
+final LogicalKeySet focusLibraryFilterKeySet = LogicalKeySet(
+  HostPlatform.instance.isMacOS
+      ? LogicalKeyboardKey.meta
+      : LogicalKeyboardKey.control,
+  LogicalKeyboardKey.keyP,
+);
+
+class FocusLibraryFilterIntent extends Intent {
+  const FocusLibraryFilterIntent(
     this.focusNode,
     this.debuggerController,
   )   : assert(debuggerController != null),
@@ -281,11 +285,10 @@ class FilterLibraryIntent extends Intent {
   final DebuggerController debuggerController;
 }
 
-class FilterLibraryAction extends Action<FilterLibraryIntent> {
+class FocusLibraryFilterAction extends Action<FocusLibraryFilterIntent> {
   @override
-  void invoke(FilterLibraryIntent intent) {
+  void invoke(FocusLibraryFilterIntent intent) {
     intent.debuggerController.openLibrariesView();
-    intent.focusNode.requestFocus();
   }
 }
 

@@ -10,7 +10,6 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
-import '../../config_specific/logger/logger.dart';
 import '../../core/message_bus.dart';
 import '../../globals.dart';
 import '../../utils.dart';
@@ -34,11 +33,19 @@ class DebuggerController extends DisposableController
     autoDispose(_service.onIsolateEvent.listen(_handleIsolateEvent));
     autoDispose(_service.onStdoutEvent.listen(_handleStdoutEvent));
     autoDispose(_service.onStderrEvent.listen(_handleStderrEvent));
+
+    _scriptHistoryListener = () {
+      _showScriptLocation(ScriptLocation(scriptsHistory.currentScript));
+    };
+    scriptsHistory.addListener(_scriptHistoryListener);
   }
 
   VmService get _service => serviceManager.service;
 
   final ScriptCache _scriptCache = ScriptCache();
+
+  final ScriptsHistory scriptsHistory = ScriptsHistory();
+  VoidCallback _scriptHistoryListener;
 
   final _isPaused = ValueNotifier<bool>(false);
 
@@ -68,6 +75,18 @@ class DebuggerController extends DisposableController
 
   /// Jump to the given ScriptRef and optional SourcePosition.
   void showScriptLocation(ScriptLocation scriptLocation) {
+    _showScriptLocation(scriptLocation);
+
+    // Update the scripts history (and make sure we don't react to the
+    // subsequent event).
+    scriptsHistory.removeListener(_scriptHistoryListener);
+    scriptsHistory.pushEntry(scriptLocation.scriptRef);
+    scriptsHistory.addListener(_scriptHistoryListener);
+  }
+
+  /// Show the given script location (without updating the script navigation
+  /// history).
+  void _showScriptLocation(ScriptLocation scriptLocation) {
     _currentScriptRef.value = scriptLocation?.scriptRef;
     _scriptLocation.value = scriptLocation;
   }
@@ -94,11 +113,6 @@ class DebuggerController extends DisposableController
 
   /// Return the sorted list of ScriptRefs active in the current isolate.
   ValueListenable<List<ScriptRef>> get sortedScripts => _sortedScripts;
-
-  final _sortedClasses = ValueNotifier<List<ClassRef>>([]);
-
-  /// Return the sorted list of ClassRefs active in the current isolate.
-  ValueListenable<List<ClassRef>> get sortedClasses => _sortedClasses;
 
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
@@ -432,8 +446,6 @@ class DebuggerController extends DisposableController
         _populateScriptAndShowLocation(newScriptRef);
       }
     }
-
-    // TODO(devoncarew): Invalidate the list of classes?
   }
 
   /// Jump to the given script.
@@ -561,21 +573,6 @@ class DebuggerController extends DisposableController
   Future<void> _populateScripts(Isolate isolate) async {
     final scriptRefs = await _retrieveAndSortScripts(isolateRef);
     _sortedScripts.value = scriptRefs;
-
-    try {
-      final classList = await _service.getClassList(isolateRef.id);
-      final classes = classList.classes
-          .where((c) => c?.name != null && c.name.isNotEmpty)
-          .toList();
-      classes.sort((ClassRef a, ClassRef b) {
-        // We sort uppercase so that items like Foo sort before items like _Foo.
-        return a.name.toUpperCase().compareTo(b.name.toUpperCase());
-      });
-      _sortedClasses.value = classes;
-    } catch (e, st) {
-      // Fail gracefully - not all clients support getClassList().
-      log('$e\n$st');
-    }
 
     for (var scriptRef in scriptRefs) {
       _uriToScriptMap[scriptRef.uri] = scriptRef;
@@ -858,4 +855,75 @@ class ScriptCache {
     _scripts = {};
     _inProgress.clear();
   }
+}
+
+/// Maintains the navigation history of the debugger's code area - which files
+/// were opened, whether it's possible to navigate forwards and backwards in the
+/// history, ...
+class ScriptsHistory extends ChangeNotifier
+    implements ValueListenable<ScriptsHistory> {
+  // TODO(devoncarew): This class should also record and restore scroll
+  // positions.
+
+  ScriptsHistory();
+
+  final _history = <ScriptRef>[];
+  int _historyIndex = -1;
+
+  final _openedScripts = <ScriptRef>{};
+
+  bool get hasPrevious {
+    return _history.isNotEmpty && _historyIndex > 0;
+  }
+
+  bool get hasNext {
+    return _history.isNotEmpty && _historyIndex < _history.length - 1;
+  }
+
+  bool get hasScripts => _openedScripts.isNotEmpty;
+
+  ScriptRef moveForward() {
+    if (!hasNext) throw StateError('no next history item');
+
+    _historyIndex++;
+
+    notifyListeners();
+
+    return currentScript;
+  }
+
+  ScriptRef moveBack() {
+    if (!hasPrevious) throw StateError('no previous history item');
+
+    _historyIndex--;
+
+    notifyListeners();
+
+    return currentScript;
+  }
+
+  ScriptRef get currentScript {
+    return _history.isEmpty ? null : _history[_historyIndex];
+  }
+
+  void pushEntry(ScriptRef ref) {
+    if (ref == currentScript) return;
+
+    while (hasNext) {
+      _history.removeLast();
+    }
+
+    _openedScripts.remove(ref);
+    _openedScripts.add(ref);
+
+    _history.add(ref);
+    _historyIndex++;
+
+    notifyListeners();
+  }
+
+  @override
+  ScriptsHistory get value => this;
+
+  Iterable<ScriptRef> get openedScripts => _openedScripts.toList().reversed;
 }

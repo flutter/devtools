@@ -5,9 +5,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/console.dart';
 import '../../utils.dart';
+import 'common.dart';
 import 'debugger_controller.dart';
+
+// TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
 /// Display the stdout and stderr output from the process under debug.
 class DebuggerConsole extends StatefulWidget {
@@ -29,17 +33,18 @@ class DebuggerConsole extends StatefulWidget {
 class _DebuggerConsoleState extends State<DebuggerConsole> {
   var _lines = <String>[];
 
+  @override
+  void initState() {
+    super.initState();
+
+    _lines = widget.controller.stdio.value;
+    widget.controller.stdio.addListener(_onStdioChanged);
+  }
+
   void _onStdioChanged() {
     setState(() {
       _lines = widget.controller.stdio.value;
     });
-  }
-
-  @override
-  void initState() {
-    _lines = widget.controller.stdio.value;
-    widget.controller.stdio.addListener(_onStdioChanged);
-    super.initState();
   }
 
   @override
@@ -52,20 +57,24 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
   Widget build(BuildContext context) {
     final numLines = _lines.length;
     final disabled = numLines == 0;
-    return Console(
-      lines: _lines,
-      controls: [
-        CopyToClipboardControl(
-          dataProvider: disabled ? null : () => _lines.join('\n'),
-          successMessage: 'Copied $numLines ${pluralize('line', numLines)}.',
-          buttonKey: DebuggerConsole.copyToClipboardButtonKey,
-        ),
-        DeleteControl(
-          onPressed: disabled ? null : widget.controller.clearStdio,
-          tooltip: 'Clear console output',
-          buttonKey: DebuggerConsole.clearStdioButtonKey,
-        ),
-      ],
+
+    return OutlineDecoration(
+      child: Console(
+        title: debuggerSectionTitle(Theme.of(context), text: 'Console'),
+        lines: _lines,
+        controls: [
+          CopyToClipboardControl(
+            dataProvider: disabled ? null : () => _lines.join('\n'),
+            successMessage: 'Copied $numLines ${pluralize('line', numLines)}.',
+            buttonKey: DebuggerConsole.copyToClipboardButtonKey,
+          ),
+          DeleteControl(
+            onPressed: disabled ? null : widget.controller.clearStdio,
+            tooltip: 'Clear console output',
+            buttonKey: DebuggerConsole.clearStdioButtonKey,
+          ),
+        ],
+      ),
     );
   }
 }

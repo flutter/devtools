@@ -4,7 +4,6 @@
 
 import '../trace_event.dart';
 import '../utils.dart';
-
 import 'http.dart';
 
 /// Contains all state relevant to completed and in-progress HTTP requests.
@@ -43,6 +42,7 @@ class HttpInstantEvent {
   HttpInstantEvent._(this._event);
 
   final TraceEvent _event;
+
   String get name => _event.name;
 
   /// The time the instant event was recorded.
@@ -95,14 +95,7 @@ class HttpRequestData {
       startEvent,
       endEvent,
     );
-    data._addInstantEvents(
-      [
-        for (final instant in instantEvents)
-          HttpInstantEvent._(
-            instant,
-          ),
-      ],
-    );
+    data._addInstantEvents(instantEvents.map((e) => HttpInstantEvent._(e)));
     return data;
   }
 
@@ -113,10 +106,6 @@ class HttpRequestData {
   // Do not add to this list directly! Call `_addInstantEvents` which is
   // responsible for calculating the time offsets of each event.
   final List<HttpInstantEvent> _instantEvents = [];
-
-  // State used to determine whether this request is currently selected in a
-  // table.
-  bool selected = false;
 
   /// The duration of the HTTP request, in milliseconds.
   Duration get duration {
@@ -260,12 +249,10 @@ class HttpRequestData {
   }
 
   static List<Cookie> _parseCookies(List cookies) {
-    return [
-      for (final cookie in cookies) Cookie.fromSetCookieValue(cookie),
-    ];
+    return cookies.map((cookie) => Cookie.fromSetCookieValue(cookie)).toList();
   }
 
-  void _addInstantEvents(List<HttpInstantEvent> events) {
+  void _addInstantEvents(Iterable<HttpInstantEvent> events) {
     _instantEvents.addAll(events);
 
     // This event is the second half of an outstanding request which will be
@@ -292,4 +279,7 @@ class HttpRequestData {
   int _getTimelineMicrosecondsSinceEpoch(TraceEvent event) {
     return _timelineMicrosBase + event.timestampMicros;
   }
+
+  @override
+  String toString() => '$method $name';
 }

@@ -78,8 +78,8 @@ void main() {
 
     test('process HTTP timeline events', () async {
       await controller.addClient();
-      final notifier = controller.requestsNotifier;
-      HttpRequests profile = notifier.value;
+      final requestsNotifier = controller.requests;
+      HttpRequests profile = requestsNotifier.value;
       // Check profile is initially empty.
       expect(profile.requests.isEmpty, true);
       expect(profile.outstandingRequests.isEmpty, true);
@@ -89,9 +89,9 @@ void main() {
 
       // Force a refresh of the HTTP requests. Ensure there's requests populated.
       await addListenerScope(
-        listenable: notifier,
+        listenable: requestsNotifier,
         listener: () {
-          profile = notifier.value;
+          profile = requestsNotifier.value;
           expect(profile.requests.length, numRequests);
           expect(profile.outstandingRequests.isEmpty, true);
 
@@ -127,9 +127,9 @@ void main() {
 
       // Finally, call `clear()` and ensure the requests have been cleared.
       await addListenerScope(
-        listenable: notifier,
+        listenable: requestsNotifier,
         listener: () {
-          profile = notifier.value;
+          profile = requestsNotifier.value;
           expect(profile.requests.isEmpty, true);
           expect(profile.outstandingRequests.isEmpty, true);
         },

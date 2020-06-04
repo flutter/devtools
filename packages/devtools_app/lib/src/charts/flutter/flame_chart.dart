@@ -33,6 +33,9 @@ const double sideInsetSmall = 40.0;
 // this offset. Use `localPosition` once this is fixed.
 const flameChartContainerOffset = 17.0;
 
+// TODO(kenz): add some indication that we are scrolled out of the relevant area
+// so that users don't get lost in the extra pixels at the end of the chart.
+
 // TODO(kenz): consider cleaning up by changing to a flame chart code to use a
 // composition pattern instead of a class extension pattern.
 abstract class FlameChart<T, V> extends StatefulWidget {
@@ -295,22 +298,24 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
       // if the key is held currently.
       if (keyLabel == 'w') {
-        zoomTo(math.min(FlameChart.maxZoomLevel,
-            zoomController.value + keyboardZoomInUnit));
+        zoomTo(math.min(
+          FlameChart.maxZoomLevel,
+          zoomController.value + keyboardZoomInUnit,
+        ));
       } else if (keyLabel == 's') {
-        zoomTo(math.max(FlameChart.minZoomLevel,
-            zoomController.value - keyboardZoomOutUnit));
+        zoomTo(math.max(
+          FlameChart.minZoomLevel,
+          zoomController.value - keyboardZoomOutUnit,
+        ));
       } else if (keyLabel == 'a') {
-        scrollToX(
-            linkedHorizontalScrollControllerGroup.offset - keyboardScrollUnit);
+        scrollToX(horizontalScrollOffset - keyboardScrollUnit);
       } else if (keyLabel == 'd') {
-        scrollToX(
-            linkedHorizontalScrollControllerGroup.offset + keyboardScrollUnit);
+        scrollToX(horizontalScrollOffset + keyboardScrollUnit);
       }
     }
   }
 
-  void _handlePointerSignal(PointerSignalEvent event) {
+  void _handlePointerSignal(PointerSignalEvent event) async {
     if (event is PointerScrollEvent) {
       final deltaX = event.scrollDelta.dx;
       double deltaY = event.scrollDelta.dy;
@@ -332,7 +337,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
             FlameChart.minZoomLevel,
             FlameChart.maxZoomLevel,
           );
-          zoomTo(newZoomLevel, jump: true);
+          await zoomTo(newZoomLevel, jump: true);
         }
       }
     }
@@ -344,7 +349,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       if (currentZoom == previousZoom) return;
 
       // Store current scroll values for re-calculating scroll location on zoom.
-      final lastScrollOffset = linkedHorizontalScrollControllerGroup.offset;
+      final lastScrollOffset = horizontalScrollOffset;
 
       final safeMouseHoverX = mouseHoverX ?? widget.totalStartingWidth / 2;
       // Position in the zoomable coordinate space that we want to keep fixed.
@@ -359,6 +364,11 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
           : lastScrollOffset;
 
       previousZoom = currentZoom;
+
+      // TODO(kenz): consult with Flutter team to see if there is a better place
+      // to call this that guarantees the scroll controller offsets will be
+      // updated for the new zoom level and layout size.
+      // https://github.com/flutter/devtools/issues/2012.
       linkedHorizontalScrollControllerGroup.jumpTo(
           newScrollOffset.clamp(FlameChart.minScrollOffset, maxScrollOffset));
     });
@@ -637,6 +647,12 @@ class FlameChartUtils {
     @required double chartStartInset,
     @required double chartWidth,
   }) {
+    // TODO(kenz): workaround for https://github.com/flutter/devtools/issues/2012.
+    // This is a ridiculous amount of padding but it ensures that we don't hit
+    // the issue described in the bug where the scroll extent is smaller than
+    // where we want to `jumpTo`. Smaller values were experimented with but the
+    // issue still persisted, so we are using a very large number.
+    if (index == nodes.length - 1) return 1000000.0;
     final node = nodes[index];
     final nextNode = index == nodes.length - 1 ? null : nodes[index + 1];
     final nodeZoom = zoomForNode(node, chartZoom);
@@ -971,6 +987,7 @@ class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
 
   @override
   double layoutOffset(int index) {
+    if (index <= 0) return 0.0;
     if (index >= length) return nodeIntervals.last.end;
     return nodeIntervals[index].begin;
   }

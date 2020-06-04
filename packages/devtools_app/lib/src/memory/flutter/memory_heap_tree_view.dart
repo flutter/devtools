@@ -3,23 +3,27 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../config_specific/logger/logger.dart' as logger;
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/table.dart';
 import '../../flutter/theme.dart';
 import '../../table_data.dart';
 import '../../ui/flutter/label.dart';
 import '../../utils.dart';
+import 'memory_analyzer.dart';
 import 'memory_controller.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_heatmap.dart';
 import 'memory_snapshot_models.dart';
+import 'memory_utils.dart';
 
 class HeapTree extends StatefulWidget {
   const HeapTree(
@@ -40,6 +44,75 @@ enum SnapshotStatus {
   done,
 }
 
+enum WildcardMatch {
+  exact,
+  startsWith,
+  endsWith,
+  contains,
+}
+
+/// If no wildcard then exact match.
+/// *NNN - ends with NNN
+/// NNN* - starts with NNN
+/// NNN*ZZZ - starts with NNN and ends with ZZZ
+const knowClassesToAnalyzeForImages = <WildcardMatch, List<String>>{
+  // Anything that contains the phrase:
+  WildcardMatch.contains: [
+    'Image',
+  ],
+
+  // Anything that starts with:
+  WildcardMatch.startsWith: [],
+
+  // Anything that exactly matches:
+  WildcardMatch.exact: [
+    '_Int32List',
+    'FrameInfos',
+  ],
+
+  // Anything that ends with:
+  WildcardMatch.endsWith: [],
+};
+
+/// RegEx expressions to handle the WildcardMatches:
+///     Ends with Image:      \[_A-Za-z0-9_]*Image\$
+///     Starts with Image:    ^Image
+///     Contains Image:       Image
+///     Extact Image:         ^Image$
+String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
+  final resultRegEx = StringBuffer();
+  matchingCriteria.forEach((key, value) {
+    if (value.isNotEmpty) {
+      final name = value;
+      String regEx;
+      // TODO(terry): Need to handle $ for identifier names e.g.,
+      //              $FOO is a valid identifier.
+      switch (key) {
+        case WildcardMatch.exact:
+          regEx = '^${name.join("\$|^")}\$';
+          break;
+        case WildcardMatch.startsWith:
+          regEx = '^${name.join("|^")}';
+          break;
+        case WildcardMatch.endsWith:
+          regEx = '^\[_A-Za-z0-9]*${name.join("\|[_A-Za-z0-9]*")}\$';
+          break;
+        case WildcardMatch.contains:
+          regEx = '${name.join("|")}';
+          break;
+        default:
+          assert(false, 'buildRegExs: Unhandled WildcardMatch');
+      }
+      resultRegEx.write(resultRegEx.isEmpty ? '($regEx' : '|$regEx');
+    }
+  });
+
+  resultRegEx.write(')');
+  return resultRegEx.toString();
+}
+
+final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
+
 class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   @visibleForTesting
   static const snapshotButtonKey = Key('Snapshot Button');
@@ -52,9 +125,11 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   @visibleForTesting
   static const expandAllButtonKey = Key('Expand All Button');
   @visibleForTesting
+  static const searchButtonKey = Key('Snapshot Search');
+  @visibleForTesting
   static const filterButtonKey = Key('Snapshot Filter');
   @visibleForTesting
-  static const searchButtonKey = Key('Snapshot Search');
+  static const analyzeButtonKey = Key('Snapshot Analyze');
   @visibleForTesting
   static const settingsButtonKey = Key('Snapshot Settings');
 
@@ -85,15 +160,25 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     });
 
     addAutoDisposeListener(controller.leafSelectedNotifier, () {
-      setState(() {});
+      setState(() {
+        controller.computeRoot();
+      });
+    });
+
+    addAutoDisposeListener(controller.leafAnalysisSelectedNotifier, () {
+      setState(() {
+        controller.computeAnalysisInstanceRoot();
+      });
     });
 
     addAutoDisposeListener(controller.searchNotifier, () {
-      if (controller.clearSearch) {
-        setState(() {
-          controller.clearSearch = false;
-        });
-      }
+      setState(() {
+        closeAutoCompleteOverlay();
+      });
+    });
+
+    addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
+      setState(autoCompleteOverlaySetState(controller, context));
     });
   }
 
@@ -177,9 +262,13 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
         children: [
           Expanded(child: snapshotDisplay),
           const SizedBox(width: defaultSpacing),
+          // TODO(terry): Need better focus handling between 2 tables & up/down
+          //              arrows in the right-side field instance view table.
           controller.isLeafSelected
               ? Expanded(child: SnapshotInstanceViewTable())
-              : const SizedBox(),
+              : controller.isAnalysisLeafSelected
+                  ? Expanded(child: AnalysisInstanceViewTable())
+                  : const SizedBox(),
         ],
       ),
     );
@@ -253,7 +342,9 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
               value: controller.showHeatMap,
               onChanged: (value) {
                 setState(() {
+                  closeAutoCompleteOverlay();
                   controller.showHeatMap = value;
+                  controller.search = '';
                   controller.selectedLeaf = null;
                 });
               },
@@ -313,43 +404,53 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   TextEditingController searchTextFieldController;
   FocusNode rawKeyboardFocusNode;
 
-  void clearSearchField() {
-    if (controller.search.isNotEmpty) {
-      controller.clearSearch = true;
+  void clearSearchField({force = false}) {
+    if (force || controller.search.isNotEmpty) {
       searchTextFieldController.clear();
       controller.search = '';
     }
   }
 
-  TextField createSearchField() {
+  Widget createSearchField() {
     // Creating new TextEditingController.
     searchFieldFocusNode = FocusNode();
-    searchTextFieldController = TextEditingController();
 
-    final searchField = TextField(
-      autofocus: true,
-      enabled: controller.showHeatMap && controller.snapshots.isNotEmpty,
-      focusNode: searchFieldFocusNode,
-      controller: searchTextFieldController,
-      onChanged: (value) {
-        if (controller.showHeatMap) {
+    searchFieldFocusNode.addListener(() {
+      if (!searchFieldFocusNode.hasFocus) {
+        closeAutoCompleteOverlay();
+      }
+    });
+
+    searchTextFieldController = TextEditingController(text: controller.search);
+    searchTextFieldController.selection = TextSelection.fromPosition(
+        TextPosition(offset: controller.search.length));
+
+    final searchField = CompositedTransformTarget(
+      link: autoCompletelayerLink,
+      child: TextField(
+        key: memorySearchFieldKey,
+        autofocus: true,
+        enabled: controller.snapshots.isNotEmpty,
+        focusNode: searchFieldFocusNode,
+        controller: searchTextFieldController,
+        onChanged: (value) {
           controller.search = value;
-        }
-      },
-      onEditingComplete: () {
-        searchFieldFocusNode.requestFocus();
-      },
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.all(8),
-        border: const OutlineInputBorder(),
-        labelText: 'Search',
-        hintText: 'Search',
-        suffix: IconButton(
-          padding: const EdgeInsets.all(0.0),
-          onPressed: () {
-            clearSearchField();
-          },
-          icon: const Icon(Icons.clear, size: 16),
+        },
+        onEditingComplete: () {
+          searchFieldFocusNode.requestFocus();
+        },
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.all(8),
+          border: const OutlineInputBorder(),
+          labelText: 'Search',
+          hintText: 'Search',
+          suffix: IconButton(
+            padding: const EdgeInsets.all(0.0),
+            onPressed: () {
+              clearSearchField();
+            },
+            icon: const Icon(Icons.clear, size: 16),
+          ),
         ),
       ),
     );
@@ -361,23 +462,56 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     return searchField;
   }
 
+  /// Match, found,  select it and process via ValueNotifiers.
+  void selectTheMatch(String foundName) {
+    setState(() {
+      if (snapshotDisplay is MemorySnapshotTable) {
+        controller.groupByTreeTable.dataRoots.every((element) {
+          element.collapseCascading();
+          return true;
+        });
+      }
+    });
+
+    searchTextFieldController.clear();
+    closeAutoCompleteOverlay();
+    controller.search = foundName;
+    controller.selectTheSearch = true;
+    clearSearchField(force: true);
+  }
+
   Widget _buildSearchFilterControls() {
     rawKeyboardFocusNode = FocusNode();
 
-    final searchAndRawKeyboard = controller.showHeatMap
-        ? RawKeyboardListener(
-            child: createSearchField(),
-            focusNode: rawKeyboardFocusNode,
-            onKey: (RawKeyEvent event) {
-              if (event is RawKeyDownEvent) {
-                if (event.logicalKey.keyId == LogicalKeyboardKey.escape.keyId) {
-                  // ESCAPE key pressed clear search TextField.
-                  clearSearchField();
-                }
+    final searchAndRawKeyboard = RawKeyboardListener(
+      child: createSearchField(),
+      focusNode: rawKeyboardFocusNode,
+      onKey: (RawKeyEvent event) {
+        if (event is RawKeyDownEvent) {
+          if (event.logicalKey.keyId == LogicalKeyboardKey.escape.keyId) {
+            // ESCAPE key pressed clear search TextField.
+            clearSearchField();
+          } else if (event.logicalKey.keyId == LogicalKeyboardKey.enter.keyId) {
+            // ENTER pressed.
+            var foundExact = false;
+            // Find exact match in autocomplete list - use that as our search value.
+            for (final autoEntry in controller.searchAutoComplete.value) {
+              if (controller.search.toLowerCase() == autoEntry.toLowerCase()) {
+                foundExact = true;
+                selectTheMatch(autoEntry);
               }
-            },
-          )
-        : const SizedBox();
+            }
+            // Nothing found, pick first line in dropdown.
+            if (!foundExact) {
+              final autoCompleteList = controller.searchAutoComplete.value;
+              if (autoCompleteList.isNotEmpty) {
+                selectTheMatch(autoCompleteList.first);
+              }
+            }
+          }
+        }
+      },
+    );
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -397,6 +531,18 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
             child: const MaterialIconLabel(
               Icons.filter_list,
               'Filter',
+              includeTextWidth: 200,
+            ),
+          ),
+        ),
+        const SizedBox(width: denseSpacing),
+        Flexible(
+          child: OutlineButton(
+            key: analyzeButtonKey,
+            onPressed: controller.enableAnalyzeButton() ? _analyze : null,
+            child: const MaterialIconLabel(
+              Icons.highlight,
+              'Analyze',
               includeTextWidth: 200,
             ),
           ),
@@ -451,13 +597,15 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     controller.selectedSnapshotTimestamp =
         DateFormat('dd-MMM-yyyy@H:m.s').format(snapshotTimestamp);
 
-    print('Total Snapshot completed in'
+    updateListOfSnapshotsUnderAnalysisNode();
+
+    logger.log('Total Snapshot completed in'
         ' ${snapshotDoneTime.difference(snapshotTimestamp).inMilliseconds / 1000} seconds');
-    print('  Snapshot collected in'
+    logger.log('  Snapshot collected in'
         ' ${snapshotCollectionTime.difference(snapshotTimestamp).inMilliseconds / 1000} seconds');
-    print('  Snapshot graph built in'
+    logger.log('  Snapshot graph built in'
         ' ${snapshotGraphTime.difference(snapshotCollectionTime).inMilliseconds / 1000} seconds');
-    print('  Snapshot grouping/libraries computed in'
+    logger.log('  Snapshot grouping/libraries computed in'
         ' ${snapshotDoneTime.difference(snapshotGraphTime).inMilliseconds / 1000} seconds');
 
     setState(() {
@@ -472,35 +620,94 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       ..computeFilteredGroups();
   }
 
-  void dumpClassGroupBySingleLine(
-      Map<String, List<HeapGraphElementLive>> classGroup) {
-    classGroup.forEach((key, instances) {
-      final shallowSizes = instances.first.theClass.instancesTotalShallowSizes;
-      final count = instances.length;
-      print('Class $key instances=[$count] totalShallowSize=$shallowSizes:');
-    });
-  }
-
-  void dumpLibraryGroupBySingleLine(
-      Map<String, List<HeapGraphClassLive>> libraryGroup) {
-    libraryGroup.forEach((libraryKey, libraryClasses) {
-      print('Library $libraryKey:');
-      for (var actualClass in libraryClasses) {
-        final instances = actualClass.getInstances(controller.heapGraph);
-        final shallowSizes = instances.isEmpty
-            ? 0
-            : instances.first.theClass.instancesTotalShallowSizes;
-        print(
-            '   class ${actualClass.name} instances count=${instances.length} shallow size=$shallowSizes');
-      }
-    });
-  }
-
   void _filter() {
     showDialog(
       context: context,
       builder: (BuildContext context) => SnapshotFilterDialog(controller),
     );
+  }
+
+  void updateListOfSnapshotsUnderAnalysisNode() {
+    final AnalysesReference analysesNode = findAnalysesNode(controller);
+    assert(analysesNode != null);
+
+    for (final snapshot in controller.snapshots) {
+      final currentSnapDT = snapshot.collectedTimestamp;
+
+      if (analysesNode.children.length == 1) {
+        final node = analysesNode.children.first;
+        if (node is AnalysisReference && node.name.isEmpty) {
+          setState(() {
+            analysesNode.collapse();
+            analysesNode.children.clear();
+          });
+        }
+      }
+
+      AnalysisSnapshotReference analyzeSnapshot;
+      final foundAnalysis = controller.completedAnalyses
+          .where((analysis) => analysis.dateTime == currentSnapDT);
+      if (foundAnalysis.isNotEmpty) {
+        // If there's an analysis of this snapshot then show it.
+        analyzeSnapshot = foundAnalysis.single;
+      } else {
+        analyzeSnapshot = AnalysisSnapshotReference(currentSnapDT);
+      }
+
+      analysesNode.addChild(analyzeSnapshot);
+    }
+  }
+
+  void _analyze() {
+    final AnalysesReference analysesNode = findAnalysesNode(controller);
+    assert(analysesNode != null);
+
+    final currentSnapDT = controller.snapshots.last.collectedTimestamp;
+
+    // If an analysis of the current snapshot exist then do nothing.
+    final foundSnapshot = analysesNode.children.where((analysis) {
+      if (analysis is AnalysisSnapshotReference) {
+        final AnalysisSnapshotReference node = analysis;
+        return node.dateTime == currentSnapDT;
+      }
+      return false;
+    });
+
+    if (foundSnapshot.isNotEmpty && foundSnapshot.first.children.isNotEmpty) {
+      // TODO(terry): Disable Analyze button if analysis exist for current snapshot.
+      logger.log('Analysis already computed.', logger.LogLevel.warning);
+      return;
+    }
+
+    // Analyze this snapshot.
+    final analyzeSnapshot = foundSnapshot.single;
+
+    final collectedData = collect(controller);
+
+    // Analyze the collected data.
+
+    // 1. Analysis of memory image usage.
+    imageAnalysis(controller, analyzeSnapshot, collectedData);
+
+    // Add to our list of completed analyses.
+    controller.completedAnalyses.add(analyzeSnapshot);
+
+    // Expand the 'Analysis' node.
+    if (!analysesNode.isExpanded) {
+      analysesNode.expand();
+    }
+
+    // Select the snapshot just analyzed.
+    controller.selectionNotifier.value = Selection(
+      node: analyzeSnapshot,
+      nodeIndex: analyzeSnapshot.index,
+      scrollIntoView: true,
+    );
+
+    // TODO(terry): Could be done if completedAnalyses was a ValueNotifier.
+    //              Although still an empty setState in didChangeDependencies.
+    // Rebuild Analyze button.
+    setState(() {});
   }
 
   void _settings() {
@@ -528,11 +735,6 @@ class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
     super.initState();
   }
 
-  List<FieldReference> computeRoot() {
-    final root = instanceToFieldNodes(controller, controller.selectedLeaf);
-    return root.isNotEmpty ? root : [FieldReference.empty];
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -549,10 +751,6 @@ class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
         controller.computeAllLibraries(true, true);
       });
     });
-
-    addAutoDisposeListener(controller.leafSelectedNotifier, () {
-      setState(() {});
-    });
   }
 
   void setupColumns() {
@@ -566,7 +764,7 @@ class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
   @override
   Widget build(BuildContext context) {
     controller.instanceFieldsTreeTable = TreeTable<FieldReference>(
-      dataRoots: computeRoot(),
+      dataRoots: controller.instanceRoot,
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name),
@@ -710,6 +908,212 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
         controller.computeAllLibraries(true, true);
       });
     });
+
+    addAutoDisposeListener(controller.searchAutoCompleteNotifier);
+
+    addAutoDisposeListener(controller.selectTheSearchNotifier, () {
+      if (_trySelectItem()) {
+        setState(() {
+          closeAutoCompleteOverlay();
+        });
+      }
+    });
+
+    addAutoDisposeListener(controller.searchNotifier, () {
+      if (_trySelectItem()) {
+        setState(() {
+          closeAutoCompleteOverlay();
+        });
+      }
+    });
+  }
+
+  bool _trySelectItem() {
+    final searchingValue = controller.search;
+    if (searchingValue.isNotEmpty) {
+      if (controller.selectTheSearch) {
+        // Found an exact match.
+        selectItemInTree(searchingValue);
+        controller.selectTheSearch = false;
+        controller.search = '';
+        return true;
+      }
+
+      // No exact match, return the list of possible matches.
+      controller.clearSearchAutoComplete();
+
+      final externalMatches = <String>[];
+      final filteredMatches = <String>[];
+      final matches = <String>[];
+
+      switch (controller.groupingBy.value) {
+        case MemoryController.groupByLibrary:
+          for (final reference in controller.groupByTreeTable.dataRoots) {
+            if (reference.isLibrary) {
+              matches.addAll(matchesInLibrary(reference, searchingValue));
+            } else if (reference.isExternals) {
+              final ExternalReferences refs = reference;
+              for (final ExternalReference ext in refs.children) {
+                final match = matchSearch(ext, searchingValue);
+                if (match != null) {
+                  externalMatches.add(match);
+                }
+              }
+            } else if (reference.isFiltered) {
+              // Matches in the filtered nodes.
+              final FilteredReference filteredReference = reference;
+              for (final library in filteredReference.children) {
+                filteredMatches.addAll(matchesInLibrary(
+                  library,
+                  searchingValue,
+                ));
+              }
+            }
+          }
+          break;
+        case MemoryController.groupByClass:
+          matches.addAll(matchClasses(
+              controller.groupByTreeTable.dataRoots, searchingValue));
+          break;
+        case MemoryController.groupByInstance:
+          // TODO(terry): TBD
+          break;
+      }
+
+      // Ordered in importance (matches, external, filtered).
+      matches.addAll(externalMatches);
+      matches.addAll(filteredMatches);
+
+      // Remove duplicates and sort the matches.
+      final normalizedMatches = matches.toSet().toList()..sort();
+      // Use the top 10 matches:
+      controller.searchAutoComplete.value = normalizedMatches.sublist(
+          0,
+          min(
+            topMatchesLimit,
+            normalizedMatches.length,
+          ));
+    }
+
+    return false;
+  }
+
+  List<String> _maybeAddMatch(Reference reference, String search) {
+    final matches = <String>[];
+
+    final match = matchSearch(reference, search);
+    if (match != null) {
+      matches.add(match);
+    }
+
+    return matches;
+  }
+
+  List<String> matchesInLibrary(
+    LibraryReference libraryReference,
+    String searchingValue,
+  ) {
+    final matches = _maybeAddMatch(libraryReference, searchingValue);
+
+    final List<Reference> classes = libraryReference.children;
+    matches.addAll(matchClasses(classes, searchingValue));
+
+    return matches;
+  }
+
+  List<String> matchClasses(
+    List<Reference> classReferences,
+    String searchingValue,
+  ) {
+    final matches = <String>[];
+
+    // Check the class names in the library
+    for (final ClassReference classReference in classReferences) {
+      matches.addAll(_maybeAddMatch(classReference, searchingValue));
+    }
+
+    // Remove duplicates
+    return matches;
+  }
+
+  /// Return null if no match, otherwise string.
+  String matchSearch(Reference ref, String matchString) {
+    final knownName = ref.name.toLowerCase();
+    if (knownName.contains(matchString.toLowerCase())) {
+      return ref.name;
+    }
+    return null;
+  }
+
+  /// This finds and selects an exact match in the tree.
+  /// Returns `true` if [searchingValue] is found in the tree.
+  bool selectItemInTree(String searchingValue) {
+    switch (controller.groupingBy.value) {
+      case MemoryController.groupByLibrary:
+        for (final reference in controller.groupByTreeTable.dataRoots) {
+          if (reference.isLibrary) {
+            final foundIt = _selectItemInTree(reference, searchingValue);
+            if (foundIt) return true;
+          } else if (reference.isFiltered) {
+            // Matches in the filtered nodes.
+            final FilteredReference filteredReference = reference;
+            for (final library in filteredReference.children) {
+              final foundIt = _selectItemInTree(library, searchingValue);
+              if (foundIt) return true;
+            }
+          } else if (reference.isExternals) {
+            final ExternalReferences refs = reference;
+            for (final ExternalReference external in refs.children) {
+              final foundIt = _selectItemInTree(external, searchingValue);
+              if (foundIt) return true;
+            }
+          }
+        }
+        break;
+      case MemoryController.groupByClass:
+        for (final reference in controller.groupByTreeTable.dataRoots) {
+          if (reference.isClass) {
+            return _selecteClassInTree(reference, searchingValue);
+          }
+        }
+        break;
+      case MemoryController.groupByInstance:
+        // TODO(terry): TBD
+        break;
+    }
+
+    return false;
+  }
+
+  bool _selectInTree(Reference reference, search) {
+    if (reference.name == search) {
+      controller.selectionNotifier.value = Selection(
+        node: reference,
+        nodeIndex: reference.index,
+        scrollIntoView: true,
+      );
+      controller.clearSearchAutoComplete();
+      return true;
+    }
+    return false;
+  }
+
+  bool _selectItemInTree(Reference reference, String searchingValue) {
+    // TODO(terry): Only finds first one.
+    if (_selectInTree(reference, searchingValue)) return true;
+
+    // Check the class names in the library
+    return _selecteClassInTree(reference, searchingValue);
+  }
+
+  bool _selecteClassInTree(Reference reference, String searchingValue) {
+    // Check the class names in the library
+    for (final Reference classReference in reference.children) {
+      // TODO(terry): Only finds first one.
+      if (_selectInTree(classReference, searchingValue)) return true;
+    }
+
+    return false;
   }
 
   void setupColumns() {
@@ -735,6 +1139,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
       keyFactory: (libRef) => PageStorageKey<String>(libRef.name),
       sortColumn: columns[0],
       sortDirection: SortDirection.ascending,
+      selectionNotifier: controller.selectionNotifier,
     );
 
     return controller.groupByTreeTable;
@@ -790,18 +1195,75 @@ class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
     if (dataObject.name == MemoryController.libraryRootNode ||
         dataObject.name == MemoryController.classRootNode) return '';
 
-    if (dataObject.isLibrary) {
-      // Return number of classes.
-      final libraryReference = dataObject as LibraryReference;
-      return libraryReference.actualClasses.length;
-    } else if (dataObject.isClass) {
-      // Return number of instances.
-      final classReference = dataObject as ClassReference;
-      return classReference.instances.length;
+    if (dataObject.isExternals) {
+      if (dataObject.hasCount) return dataObject.count;
+
+      var count = 0;
+      for (ExternalReference externalRef in dataObject.children) {
+        count += externalRef.children.length;
+      }
+      return count;
+    } else if (dataObject.isExternal) {
+      return dataObject.children.length;
+    } else if (dataObject.isFiltered) {
+      int sum = 0;
+      final FilteredReference filteredRef = dataObject;
+      for (final LibraryReference child in filteredRef.children) {
+        for (final HeapGraphClassLive liveClass in child.actualClasses) {
+          // Have the instances been realized (null implies no)
+          if (liveClass.instancesCount != null) {
+            sum += liveClass.instancesCount;
+          }
+        }
+      }
+
+      return sum;
+    } else if (dataObject.isAnalysis && dataObject is AnalysisReference) {
+      final AnalysisReference analysisReference = dataObject;
+      final count = analysisReference.countNote;
+      return count == null ? '' : count;
     }
 
-    return '';
+    final count = _computeCount(dataObject);
+
+    return count == null ? '--' : count;
   }
+
+  /// Return of null implies count can't be computed.
+  int _computeCount(Reference ref) {
+    // Only compute the children counts once then store in the Reference.
+    if (ref.hasCount) return ref.count;
+
+    int count;
+
+    if (ref.isClass) {
+      final ClassReference classRef = ref;
+      count = _computeClassInstances(classRef.actualClass);
+    } else if (ref.isLibrary) {
+      count = 0;
+      // Return number of classes.
+      final LibraryReference libraryReference = ref;
+      for (final heapClass in libraryReference.actualClasses) {
+        count += _computeClassInstances(heapClass);
+      }
+    } else if (ref.isFiltered) {
+      count = 0;
+      final FilteredReference filteredRef = ref;
+      for (final LibraryReference child in filteredRef.children) {
+        for (final heapClass in child.actualClasses) {
+          count += _computeClassInstances(heapClass);
+        }
+      }
+    }
+
+    // Only compute once.
+    ref.count = count;
+
+    return count;
+  }
+
+  int _computeClassInstances(HeapGraphClassLive liveClass) =>
+      liveClass.instancesCount != null ? liveClass.instancesCount : null;
 
   @override
   String getDisplayValue(Reference dataObject) => '${getValue(dataObject)}';
@@ -811,8 +1273,9 @@ class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
 
   @override
   int compare(Reference a, Reference b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    // Analysis is always before.
+    final Comparable valueA = a.isAnalysis ? 0 : getValue(a);
+    final Comparable valueB = b.isAnalysis ? 0 : getValue(b);
     return valueA.compareTo(valueB);
   }
 
@@ -861,14 +1324,29 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
     } else if (dataObject.isObject) {
       // Return number of instances.
       final objectReference = dataObject as ObjectReference;
-      return objectReference.instance.origin.shallowSize;
+
+      var size = objectReference.instance.origin.shallowSize;
+
+      // If it's an external object then return the externalSize too.
+      if (dataObject is ExternalObjectReference) {
+        final ExternalObjectReference externalRef = dataObject;
+        size += externalRef.externalSize;
+      }
+
+      return size;
     } else if (dataObject.isFiltered) {
       final sum =
           sizeAllVisibleLibraries(dataObject.controller.libraryRoot.children);
       final snapshotGraph = dataObject.controller.snapshots.last.snapshotGraph;
       return snapshotGraph.shallowSize - sum;
-    } else if (dataObject.isExternal) {
+    } else if (dataObject.isExternals) {
       return dataObject.controller.snapshots.last.snapshotGraph.externalSize;
+    } else if (dataObject.isExternal) {
+      return (dataObject as ExternalReference).sumExternalSizes;
+    } else if (dataObject.isAnalysis && dataObject is AnalysisReference) {
+      final AnalysisReference analysisReference = dataObject;
+      final size = analysisReference.sizeNote;
+      return size == null ? '' : size;
     }
 
     return '';
@@ -885,6 +1363,8 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
     final displayPercentage = percentage < .050 ? '<<1%' : '${NumberFormat.compact().format(percentage)}%';
     print('$displayPercentage [${NumberFormat.compact().format(percentage)}%]');
 */
+    if (dataObject.isAnalysis && value is! int) return '';
+
     return NumberFormat.compact().format(value);
   }
 
@@ -893,8 +1373,9 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
 
   @override
   int compare(Reference a, Reference b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    // Analysis is always before.
+    final Comparable valueA = a.isAnalysis ? 0 : getValue(a);
+    final Comparable valueB = b.isAnalysis ? 0 : getValue(b);
     return valueA.compareTo(valueB);
   }
 
@@ -927,6 +1408,13 @@ class _RetainedSizeColumn extends ColumnData<Reference> {
       // Return number of instances.
       final objectReference = dataObject as ObjectReference;
       return objectReference.instance.origin.shallowSize;
+    } else if (dataObject.isExternals) {
+      return dataObject.controller.snapshots.last.snapshotGraph.externalSize;
+    } else if (dataObject.isExternal) {
+      return (dataObject as ExternalReference)
+          .liveExternal
+          .externalProperty
+          .externalSize;
     }
 
     return '';
@@ -943,8 +1431,9 @@ class _RetainedSizeColumn extends ColumnData<Reference> {
 
   @override
   int compare(Reference a, Reference b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    // Analysis is always before.
+    final Comparable valueA = a.isAnalysis ? 0 : getValue(a);
+    final Comparable valueB = b.isAnalysis ? 0 : getValue(b);
     return valueA.compareTo(valueB);
   }
 
