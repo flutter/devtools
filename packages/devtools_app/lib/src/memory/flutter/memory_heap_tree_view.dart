@@ -620,31 +620,6 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       ..computeFilteredGroups();
   }
 
-  void _debugDumpClassGroupBySingleLine(
-      Map<String, List<HeapGraphElementLive>> classGroup) {
-    classGroup.forEach((key, instances) {
-      final shallowSizes = instances.first.theClass.instancesTotalShallowSizes;
-      final count = instances.length;
-      print('Class $key instances=[$count] totalShallowSize=$shallowSizes:');
-    });
-  }
-
-  void _debugDumpLibraryGroupBySingleLine(
-      Map<String, List<HeapGraphClassLive>> libraryGroup) {
-    libraryGroup.forEach((libraryKey, libraryClasses) {
-      print('Library $libraryKey:');
-      for (var actualClass in libraryClasses) {
-        final instances = actualClass.getInstances(controller.heapGraph);
-        final shallowSizes = instances.isEmpty
-            ? 0
-            : instances.first.theClass.instancesTotalShallowSizes;
-        print('   class ${actualClass.name} '
-            'instances count=${instances.length} '
-            'shallow size=$shallowSizes');
-      }
-    });
-  }
-
   void _filter() {
     showDialog(
       context: context,
