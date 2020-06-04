@@ -338,6 +338,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void _toggleNode(T node) {
     if (!node.isExpandable) {
       node.leaf();
+      _updateItems();
       return;
     }
 
@@ -425,6 +426,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   ) {
     Widget rowForNode(T node) {
       final isNodeSelected = selectionNotifier.value.node == node;
+      node.index = index;
       return TableRow<T>(
         key: widget.keyFactory(node),
         linkedScrollControllerGroup: linkedScrollControllerGroup,
@@ -582,6 +584,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       selectionNotifier.value = Selection(
         node: newSelectedNode,
         nodeIndex: newSelectedNodeIndex,
+        scrollIntoView: true,
       );
     });
   }
@@ -655,21 +658,12 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
       setState(() {
         final selection = oldWidget.selectionNotifier.value;
         if (selection.scrollIntoView) {
-          final selectedDisplayRow = selectionRowNumber(selection.node);
-
-          // Compute total rows above immediate parent.
-          var parentNode = selection.node.parent;
-          if (parentNode.index != -1) {
-            parentNode = parentNode.parent;
-          }
-          while (parentNode.index != -1) {
-            parentNode = parentNode.parent;
-          }
-
-          final newPos = selectedDisplayRow * defaultRowHeight;
+          final int selectedDisplayRow = selection.node.index;
           // TODO(terry): Optimize selecting row, if row's visible in
           //              the viewport just select otherwise jumpTo row.
-          // TODO(terry): Should animate too for a nicer interaction.
+          final newPos = selectedDisplayRow * defaultRowHeight;
+
+          // TODO(terry): Should animate factor out _moveSelection to reuse here.
           scrollController.jumpTo(newPos);
         }
       });

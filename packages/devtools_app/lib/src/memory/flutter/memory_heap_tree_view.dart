@@ -464,6 +464,15 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
 
   /// Match, found,  select it and process via ValueNotifiers.
   void selectTheMatch(String foundName) {
+    setState(() {
+      if (snapshotDisplay is MemorySnapshotTable) {
+        controller.groupByTreeTable.dataRoots.every((element) {
+          element.collapseCascading();
+          return true;
+        });
+      }
+    });
+
     searchTextFieldController.clear();
     closeAutoCompleteOverlay();
     controller.search = foundName;
@@ -611,7 +620,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       ..computeFilteredGroups();
   }
 
-  void dumpClassGroupBySingleLine(
+  void debugDumpClassGroupBySingleLine(
       Map<String, List<HeapGraphElementLive>> classGroup) {
     classGroup.forEach((key, instances) {
       final shallowSizes = instances.first.theClass.instancesTotalShallowSizes;
@@ -620,7 +629,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     });
   }
 
-  void dumpLibraryGroupBySingleLine(
+  void debugDumpLibraryGroupBySingleLine(
       Map<String, List<HeapGraphClassLive>> libraryGroup) {
     libraryGroup.forEach((libraryKey, libraryClasses) {
       print('Library $libraryKey:');
