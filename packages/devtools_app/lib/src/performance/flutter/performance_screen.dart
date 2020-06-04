@@ -219,7 +219,9 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
         ExportButton(
           key: PerformanceScreen.exportButtonKey,
           onPressed: controller.cpuProfileData != null &&
-              !controller.cpuProfileData.isEmpty ? _exportPerformance : null,
+                  !controller.cpuProfileData.isEmpty
+              ? _exportPerformance
+              : null,
           includeTextWidth: _secondaryControlsMinIncludeTextWidth,
         ),
       ],
