@@ -27,6 +27,7 @@ typedef IndexedScrollableWidgetBuilder = Widget Function(
   BuildContext,
   LinkedScrollControllerGroup linkedScrollControllerGroup,
   int index,
+  List<double> columnWidths,
 );
 
 typedef TableKeyEventHandler = bool Function(RawKeyEvent event,
@@ -77,15 +78,13 @@ class FlatTable<T> extends StatefulWidget {
 
 class FlatTableState<T> extends State<FlatTable<T>>
     implements SortableTable<T> {
-  List<double> columnWidths;
-
   List<T> data;
 
   @override
   void initState() {
     super.initState();
+
     _initData();
-    columnWidths = _computeColumnWidths();
   }
 
   @override
@@ -96,7 +95,6 @@ class FlatTableState<T> extends State<FlatTable<T>>
         !collectionEquals(widget.data, oldWidget.data)) {
       _initData();
     }
-    columnWidths = _computeColumnWidths();
   }
 
   void _initData() {
@@ -104,10 +102,18 @@ class FlatTableState<T> extends State<FlatTable<T>>
     sortData(widget.sortColumn, widget.sortDirection);
   }
 
-  List<double> _computeColumnWidths() {
+  List<double> _computeColumnWidths(double maxWidth) {
+    maxWidth -= 2 * defaultSpacing;
+
+    final unconstrainedCount =
+        widget.columns.where((col) => col.fixedWidthPx == null).length;
+    final allocatedWidth = widget.columns.fold(0,
+        (val, col) => col.fixedWidthPx == null ? val : col.fixedWidthPx + val);
+    final available = maxWidth - allocatedWidth;
+
     final widths = <double>[];
     for (ColumnData<T> column in widget.columns) {
-      final width = column.fixedWidthPx ?? _Table.defaultColumnWidth;
+      final width = column.fixedWidthPx ?? (available / unconstrainedCount);
       widths.add(width);
     }
     return widths;
@@ -115,15 +121,21 @@ class FlatTableState<T> extends State<FlatTable<T>>
 
   @override
   Widget build(BuildContext context) {
-    return _Table<T>(
-      itemCount: widget.data.length,
-      columns: widget.columns,
-      columnWidths: columnWidths,
-      autoScrollContent: widget.autoScrollContent,
-      rowBuilder: _buildRow,
-      sortColumn: widget.sortColumn,
-      sortDirection: widget.sortDirection,
-      onSortChanged: _sortDataAndUpdate,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columnWidths = _computeColumnWidths(constraints.maxWidth);
+
+        return _Table<T>(
+          itemCount: data.length,
+          columns: widget.columns,
+          columnWidths: columnWidths,
+          autoScrollContent: widget.autoScrollContent,
+          rowBuilder: _buildRow,
+          sortColumn: widget.sortColumn,
+          sortDirection: widget.sortDirection,
+          onSortChanged: _sortDataAndUpdate,
+        );
+      },
     );
   }
 
@@ -131,8 +143,9 @@ class FlatTableState<T> extends State<FlatTable<T>>
     BuildContext context,
     LinkedScrollControllerGroup linkedScrollControllerGroup,
     int index,
+    List<double> columnWidths,
   ) {
-    final node = widget.data[index];
+    final node = data[index];
     return TableRow<T>(
       key: widget.keyFactory(node),
       linkedScrollControllerGroup: linkedScrollControllerGroup,
@@ -323,7 +336,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   void _onItemPressed(T node, int nodeIndex) {
-    /// Rebuilds the table whenever the tree structure has been updated
+    // Rebuilds the table whenever the tree structure has been updated.
     selectionNotifier.value = Selection(
       node: node,
       nodeIndex: nodeIndex,
@@ -420,6 +433,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     BuildContext context,
     LinkedScrollControllerGroup linkedScrollControllerGroup,
     int index,
+    List<double> columnWidths,
   ) {
     Widget rowForNode(T node) {
       final isNodeSelected = selectionNotifier.value.node == node;
@@ -723,6 +737,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
       context,
       _linkedHorizontalScrollControllerGroup,
       index,
+      widget.columnWidths,
     );
   }
 
@@ -906,7 +921,7 @@ class TableRow<T> extends StatefulWidget {
     final theme = Theme.of(context);
     final color = theme.canvasColor;
 
-    if (index % 2 == 0) {
+    if (index % 2 == 1) {
       return color;
     } else {
       return theme.isDarkTheme ? color.brighten() : color.darken();
@@ -1031,7 +1046,8 @@ class _TableRowState<T> extends State<TableRow<T>>
       Widget content;
       final node = widget.node;
       if (node == null) {
-        final isSortColumn = column.title == widget.sortColumn.title;
+        final isSortColumn = column == widget.sortColumn;
+
         content = InkWell(
           canRequestFocus: false,
           onTap: () => _handleSortChange(column),
@@ -1045,7 +1061,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                       : Icons.expand_more,
                   size: defaultIconSize,
                 ),
-              const SizedBox(height: defaultRowHeight, width: 4.0),
+              if (isSortColumn) const SizedBox(width: densePadding),
               // TODO: This Flexible wrapper was added to get the
               // network_profiler_test.dart tests to pass.
               Flexible(
@@ -1064,7 +1080,7 @@ class _TableRowState<T> extends State<TableRow<T>>
           content = (column as ColumnRenderer).build(context, node);
         }
         content ??= Text(
-          '${column.getDisplayValue(node)}',
+          column.getDisplayValue(node),
           overflow: TextOverflow.ellipsis,
           style: fontStyle,
           maxLines: 1,
