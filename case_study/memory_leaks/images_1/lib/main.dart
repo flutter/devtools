@@ -124,7 +124,6 @@ class MyHomePageState extends State<MyHomePage>
             imgUrl,
             width: 750.0,
             height: 500,
-            scale: 1.0,
             fit: BoxFit.fitWidth,
             loadingBuilder: (
               BuildContext context,
