@@ -331,7 +331,7 @@ class MemoryController extends DisposableController
   final SettingsModel settings = SettingsModel();
 
   final selectionNotifier =
-      SelectionNotifier<Selection<Reference>>(Selection<Reference>.empty());
+      ValueNotifier<Selection<Reference>>(Selection<Reference>());
 
   /// Tree to view Libary/Class/Instance (grouped by)
   TreeTable<Reference> groupByTreeTable;

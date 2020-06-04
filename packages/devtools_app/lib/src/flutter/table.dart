@@ -163,11 +163,6 @@ class Selection<T> {
     this.scrollIntoView = false,
   });
 
-  Selection.empty()
-      : node = null,
-        nodeIndex = null,
-        scrollIntoView = false;
-
   final T node;
   final int nodeIndex;
   final bool scrollIntoView;
@@ -227,7 +222,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
 
   final SortDirection sortDirection;
 
-  final SelectionNotifier<Selection<T>> selectionNotifier;
+  final ValueNotifier<Selection<T>> selectionNotifier;
 
   @override
   TreeTableState<T> createState() => TreeTableState<T>();
@@ -245,7 +240,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   List<bool> rootsExpanded;
   FocusNode _focusNode;
 
-  SelectionNotifier<Selection<T>> selectionNotifier;
+  ValueNotifier<Selection<T>> selectionNotifier;
 
   FocusNode get focusNode => _focusNode;
 
@@ -275,6 +270,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void didUpdateWidget(TreeTable oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    if (widget == oldWidget) return;
+
     cancel();
 
     addAutoDisposeListener(selectionNotifier, () {
@@ -298,8 +295,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     dataRoots = List.from(widget.dataRoots);
     sortData(widget.sortColumn, widget.sortDirection);
 
-    selectionNotifier = widget.selectionNotifier ??
-        SelectionNotifier<Selection<T>>(Selection<T>.empty());
+    selectionNotifier =
+        widget.selectionNotifier ?? ValueNotifier<Selection<T>>(Selection<T>());
   }
 
   @override
@@ -622,7 +619,7 @@ class _Table<T> extends StatefulWidget {
   final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
   final FocusNode focusNode;
   final TableKeyEventHandler handleKeyEvent;
-  final SelectionNotifier<Selection<T>> selectionNotifier;
+  final ValueNotifier<Selection<T>> selectionNotifier;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;

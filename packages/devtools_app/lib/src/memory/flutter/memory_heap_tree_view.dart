@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../config_specific/logger/logger.dart';
+import '../../config_specific/logger/logger.dart' as logger;
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/table.dart';
 import '../../flutter/theme.dart';
@@ -599,13 +599,13 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
 
     updateListOfSnapshotsUnderAnalysisNode();
 
-    print('Total Snapshot completed in'
+    logger.log('Total Snapshot completed in'
         ' ${snapshotDoneTime.difference(snapshotTimestamp).inMilliseconds / 1000} seconds');
-    print('  Snapshot collected in'
+    logger.log('  Snapshot collected in'
         ' ${snapshotCollectionTime.difference(snapshotTimestamp).inMilliseconds / 1000} seconds');
-    print('  Snapshot graph built in'
+    logger.log('  Snapshot graph built in'
         ' ${snapshotGraphTime.difference(snapshotCollectionTime).inMilliseconds / 1000} seconds');
-    print('  Snapshot grouping/libraries computed in'
+    logger.log('  Snapshot grouping/libraries computed in'
         ' ${snapshotDoneTime.difference(snapshotGraphTime).inMilliseconds / 1000} seconds');
 
     setState(() {
@@ -620,7 +620,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       ..computeFilteredGroups();
   }
 
-  void debugDumpClassGroupBySingleLine(
+  void _debugDumpClassGroupBySingleLine(
       Map<String, List<HeapGraphElementLive>> classGroup) {
     classGroup.forEach((key, instances) {
       final shallowSizes = instances.first.theClass.instancesTotalShallowSizes;
@@ -629,7 +629,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     });
   }
 
-  void debugDumpLibraryGroupBySingleLine(
+  void _debugDumpLibraryGroupBySingleLine(
       Map<String, List<HeapGraphClassLive>> libraryGroup) {
     libraryGroup.forEach((libraryKey, libraryClasses) {
       print('Library $libraryKey:');
@@ -700,7 +700,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
 
     if (foundSnapshot.isNotEmpty && foundSnapshot.first.children.isNotEmpty) {
       // TODO(terry): Disable Analyze button if analysis exist for current snapshot.
-      log('Analysis for snapshot already computed - NoOp', LogLevel.warning);
+      logger.log('Analysis already computed.', logger.LogLevel.warning);
       return;
     }
 

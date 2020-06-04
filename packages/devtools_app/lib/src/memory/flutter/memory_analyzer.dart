@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../config_specific/logger/logger.dart' as logger;
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/table.dart';
 import '../../table_data.dart';
@@ -53,7 +54,7 @@ Map<String, List<Reference>> collect(MemoryController controller) {
         if (_classMatcher(liveClass)) {
           final instances = liveClass.getInstances(heapGraph);
           externalsToAnalyze.add(external);
-          print('regex external found ${liveClass.name} '
+          logger.log('Regex external found ${liveClass.name} '
               'instances=${instances.length} '
               'allocated bytes=$size');
         }
@@ -67,7 +68,7 @@ Map<String, List<Reference>> collect(MemoryController controller) {
           if (_classMatcher(liveClass)) {
             filtersToAnalyze.add(classRef);
             final instances = liveClass.getInstances(heapGraph);
-            print('regex filtered found ${classRef.name} '
+            logger.log('Regex filtered found ${classRef.name} '
                 'instances=${instances.length}');
           }
         }
@@ -80,7 +81,7 @@ Map<String, List<Reference>> collect(MemoryController controller) {
         if (_classMatcher(liveClass)) {
           librariesToAnalyze.add(classRef);
           final instances = liveClass.getInstances(heapGraph);
-          print('regex library found ${classRef.name} '
+          logger.log('Regex library found ${classRef.name} '
               'instances=${instances.length}');
         }
       }
@@ -309,16 +310,21 @@ AnalysisReference processMatches(
   return null;
 }
 
-// TODO(terry): Add a test to insure this output is never seen before checkin.
-// Name of class to monitor field/object drill in, e.g.,
-//
-//   debugMonitorDrillIn = 'ImageCache';
-String debugMonitorClass;
+// TODO(terry): Add a test, insure debugMonitor output never seen before checkin.
 
-void debugMonitor(String msg) {
-  // TODO(terry): Enable below to monitor.
-  // if (debugMonitorClass == null) return;
-  // print('--> $debugMonitorClass:$msg');
+/// Enable monitoring.
+bool _debugMonitorEnabled = false;
+
+// Name of classes to monitor then all field/object are followed with debug
+// information during drill in, e.g.,
+final _debugMonitorClasses = ['ImageCache'];
+
+/// Class being monitored if its name is in the debugMonitorClasses.
+String _debugMonitorClass;
+
+void _debugMonitor(String msg) {
+  if (!_debugMonitorEnabled || _debugMonitorClass == null) return;
+  print('--> $_debugMonitorClass:$msg');
 }
 
 ClassFields fieldsStack = ClassFields();
@@ -353,13 +359,16 @@ Map<String, List<String>> drillIn(
       librariesNode.addChild(objectNode);
     }
 
-    // TODO(terry): Enable debug code, validates an object's fields/values.
-    // debugMonitorClass = classRef.name == imageCache ? '${classRef.name}' : '';
+    if (_debugMonitorEnabled) {
+      _debugMonitorClass = _debugMonitorClasses.contains(classRef.name)
+          ? '${classRef.name}'
+          : '';
+    }
 
     fieldsStack.push(classRef.name);
 
     var instanceIndex = 0;
-    debugMonitor('Class ${classRef.name} Instance=$instanceIndex');
+    _debugMonitor('Class ${classRef.name} Instance=$instanceIndex');
     for (final ObjectReference objRef in classRef.children) {
       final fields = objRef.instance.getFields();
       // Root __FIELDS__ is a container for children, the children
@@ -376,7 +385,7 @@ Map<String, List<String>> drillIn(
         final HeapGraphElementLive live = field.value;
 
         if (live.references.isNotEmpty) {
-          debugMonitor('${field.key} OBJECT Start');
+          _debugMonitor('${field.key} OBJECT Start');
 
           final fieldObjectNode = AnalysisField(field.key, '');
 
@@ -392,7 +401,7 @@ Map<String, List<String>> drillIn(
           if (createTreeNodes) {
             fieldsRoot.addChild(fieldObjectNode);
           }
-          debugMonitor('${field.key} OBJECT End');
+          _debugMonitor('${field.key} OBJECT End');
         } else {
           final value = displayData(live);
           if (value != null) {
@@ -400,13 +409,13 @@ Map<String, List<String>> drillIn(
             matcher.findFieldMatch(fieldsStack, value);
             fieldsStack.pop();
 
-            debugMonitor('${field.key} = $value');
+            _debugMonitor('${field.key} = $value');
             if (createTreeNodes) {
               final fieldNode = AnalysisField(field.key, value);
               fieldsRoot.addChild(fieldNode);
             }
           } else {
-            debugMonitor('${field.key} Skipped null');
+            _debugMonitor('${field.key} Skipped null');
           }
         }
       }
@@ -452,7 +461,7 @@ bool displayObject(
       if (objectFields.isEmpty) continue;
 
       final newObject = AnalysisField(field.key, '');
-      debugMonitor('${field.key} OBJECT start [depth=$depth]');
+      _debugMonitor('${field.key} OBJECT start [depth=$depth]');
 
       depth++;
 
@@ -473,7 +482,7 @@ bool displayObject(
       if (createTreeNodes) {
         objectField.addChild(newObject);
       }
-      debugMonitor('${field.key} OBJECT end  [depth=$depth]');
+      _debugMonitor('${field.key} OBJECT end  [depth=$depth]');
     }
 
     final value = displayData(liveField);
@@ -482,7 +491,7 @@ bool displayObject(
       matcher.findFieldMatch(fieldsStack, value);
       fieldsStack.pop();
 
-      debugMonitor('${field.key}=$value');
+      _debugMonitor('${field.key}=$value');
       if (createTreeNodes) {
         final node = AnalysisField(field.key, value);
         objectField.addChild(node);
@@ -669,6 +678,11 @@ class ObjectMatcher {
   List<List<String>> _findClassMatch(String className) =>
       matcherDrillIn[className];
 
+  // TODO(terry): Change to be less strict.  Look for subclass or parentage
+  //              relationships.  If a new field or subclass is added we can
+  //              still find what we're looking for.  Maybe even consider the
+  //              the type we're looking for - best to be loosey goosey so
+  //              we're not brittle as the Framework or any code changes.
   /// First field name match.
   bool findFieldMatch(ClassFields classFields, dynamic value) {
     bool matched = false;
