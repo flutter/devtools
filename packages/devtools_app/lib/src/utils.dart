@@ -61,6 +61,8 @@ final NumberFormat _kbPattern = NumberFormat.decimalPattern()
   ..maximumFractionDigits = 0;
 
 String printKb(num bytes) {
+  // We add ((1024/2)-1) to the value before formatting so that a non-zero byte
+  // value doesn't round down to 0.
   return _kbPattern.format((bytes + 511) / 1024);
 }
 
