@@ -284,18 +284,20 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
           theme,
           child: Row(
             children: [
-              DebuggerToolbarAction(
-                Icons.chevron_left,
+              ToolbarAction(
+                icon: Icons.chevron_left,
                 onPressed:
                     scriptsHistory.hasPrevious ? scriptsHistory.moveBack : null,
+                tooltip: 'Back',
               ),
-              DebuggerToolbarAction(
-                Icons.chevron_right,
+              ToolbarAction(
+                icon: Icons.chevron_right,
                 onPressed:
                     scriptsHistory.hasNext ? scriptsHistory.moveForward : null,
+                tooltip: 'Forward',
               ),
               const SizedBox(width: denseSpacing),
-              const VerticalDivider(),
+              const VerticalDivider(thickness: 1.0),
               const SizedBox(width: defaultSpacing),
               Expanded(
                 child: Text(
@@ -304,7 +306,6 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                 ),
               ),
               const SizedBox(width: denseSpacing),
-              const VerticalDivider(),
               PopupMenuButton<ScriptRef>(
                 itemBuilder: _buildScriptMenuFromHistory,
                 enabled: scriptsHistory.hasScripts,

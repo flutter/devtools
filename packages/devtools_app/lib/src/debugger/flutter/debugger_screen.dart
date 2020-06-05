@@ -21,7 +21,6 @@ import '../../globals.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
-import 'common.dart';
 import 'console.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
@@ -36,8 +35,6 @@ const bool debugShowCallStackCount = false;
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
       : super('debugger', title: 'Debugger', icon: Octicons.bug);
-
-  static const debuggerPaneHeaderHeight = 36.0;
 
   @override
   String get docPageId => screenId;
@@ -212,18 +209,18 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           initialFractions: const [0.38, 0.38, 0.24],
           minSizes: const [0.0, 0.0, 0.0],
           headers: [
-            debuggerPaneHeader(
+            areaPaneHeader(
               context,
-              callStackTitle,
+              title: callStackTitle,
               needsTopBorder: false,
               rightChild:
                   // ignore: avoid_redundant_argument_values
                   debugShowCallStackCount ? _callStackRightChild() : null,
             ),
-            debuggerPaneHeader(context, variablesTitle),
-            debuggerPaneHeader(
+            areaPaneHeader(context, title: variablesTitle),
+            areaPaneHeader(
               context,
-              breakpointsTitle,
+              title: breakpointsTitle,
               rightChild: _breakpointsRightChild(),
               rightPadding: 0.0,
             ),
@@ -253,12 +250,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       builder: (context, breakpoints, _) {
         return Row(children: [
           BreakpointsCountBadge(breakpoints: breakpoints),
-          ActionButton(
-            child: DebuggerToolbarAction(
-              Icons.delete,
-              onPressed:
-                  breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
-            ),
+          ToolbarAction(
+            icon: Icons.delete,
+            onPressed:
+                breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
             tooltip: 'Remove all breakpoints',
           ),
         ]);
@@ -366,45 +361,4 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
 
     return 'paused$reason$fileName $pos';
   }
-}
-
-FlexSplitColumnHeader debuggerPaneHeader(
-  BuildContext context,
-  String title, {
-  bool needsTopBorder = true,
-  Widget rightChild,
-  double rightPadding = 4.0,
-}) {
-  final theme = Theme.of(context);
-
-  return FlexSplitColumnHeader(
-    height: DebuggerScreen.debuggerPaneHeaderHeight,
-    child: Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: needsTopBorder
-              ? BorderSide(color: theme.focusColor)
-              : BorderSide.none,
-          bottom: BorderSide(color: theme.focusColor),
-        ),
-        color: titleSolidBackgroundColor(theme),
-      ),
-      padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
-      alignment: Alignment.centerLeft,
-      height: DebuggerScreen.debuggerPaneHeaderHeight,
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.subtitle2,
-            ),
-          ),
-          if (rightChild != null) rightChild,
-        ],
-      ),
-    ),
-  );
 }

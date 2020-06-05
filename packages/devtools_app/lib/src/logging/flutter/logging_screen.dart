@@ -131,7 +131,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       Expanded(
         child: Split(
           axis: Axis.vertical,
-          initialFractions: const [0.78, 0.22],
+          initialFractions: const [0.72, 0.28],
           children: [
             OutlineDecoration(
               child: LogsTable(
@@ -252,12 +252,21 @@ class _LogDetailsState extends State<LogDetails>
   Widget _buildSimpleLog(BuildContext context, LogData log) {
     final disabled = log?.details == null || log.details.isEmpty;
     return OutlineDecoration(
-      child: Console(
-        lines: log?.prettyPrinted?.split('\n'),
-        controls: [
-          CopyToClipboardControl(
-            dataProvider: disabled ? null : () => log?.prettyPrinted,
-            buttonKey: LogDetails.copyToClipboardButtonKey,
+      child: Column(
+        children: [
+          areaPaneHeader(
+            context,
+            title: 'Details',
+            needsTopBorder: false,
+            rightChild: CopyToClipboardControl(
+              dataProvider: disabled ? null : () => log?.prettyPrinted,
+              buttonKey: LogDetails.copyToClipboardButtonKey,
+            ),
+          ),
+          Expanded(
+            child: Console(
+              lines: log?.prettyPrinted?.split('\n'),
+            ),
           ),
         ],
       ),

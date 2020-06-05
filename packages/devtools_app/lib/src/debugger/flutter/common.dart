@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/theme.dart';
-import 'debugger_screen.dart';
 
 /// Create a header area for a debugger component.
 ///
@@ -23,7 +23,7 @@ Container debuggerSectionTitle(ThemeData theme, {String text, Widget child}) {
     ),
     padding: const EdgeInsets.only(left: defaultSpacing),
     alignment: Alignment.centerLeft,
-    height: DebuggerScreen.debuggerPaneHeaderHeight,
+    height: areaPaneHeaderHeight,
     child: child != null ? child : Text(text, style: theme.textTheme.subtitle2),
   );
 }
@@ -44,25 +44,4 @@ Widget createAnimatedCircleWidget(double radius, Color color) {
     duration: defaultDuration,
     decoration: BoxDecoration(color: color, shape: BoxShape.circle),
   );
-}
-
-/// A wrapper around a FlatButton and an Icon, used for small toolbar actions.
-class DebuggerToolbarAction extends StatelessWidget {
-  const DebuggerToolbarAction(
-    this.icon, {
-    @required this.onPressed,
-  });
-
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return FlatButton(
-      padding: EdgeInsets.zero,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      onPressed: onPressed,
-      child: Icon(icon, size: actionsIconSize),
-    );
-  }
 }
