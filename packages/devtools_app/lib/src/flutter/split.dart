@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../utils.dart';
 
@@ -254,20 +255,23 @@ class _SplitState extends State<Split> {
           child: widget.children[i],
         ),
         if (i < widget.children.length - 1)
-          GestureDetector(
-            key: widget.dividerKey(i),
-            behavior: HitTestBehavior.translucent,
-            onHorizontalDragUpdate: (details) =>
-                isHorizontal ? updateSpacing(details, i) : null,
-            onVerticalDragUpdate: (details) =>
-                isHorizontal ? null : updateSpacing(details, i),
-            // DartStartBehavior.down is needed to keep the mouse pointer stuck to
-            // the drag bar. There still appears to be a few frame lag before the
-            // drag action triggers which is't ideal but isn't a launch blocker.
-            dragStartBehavior: DragStartBehavior.down,
-            child: widget.splitters != null
-                ? widget.splitters[i]
-                : _defaultSplitter(layoutHeight: height, layoutWidth: width),
+          MouseRegion(
+            cursor: SystemMouseCursors.grab,
+            child: GestureDetector(
+              key: widget.dividerKey(i),
+              behavior: HitTestBehavior.translucent,
+              onHorizontalDragUpdate: (details) =>
+                  isHorizontal ? updateSpacing(details, i) : null,
+              onVerticalDragUpdate: (details) =>
+                  isHorizontal ? null : updateSpacing(details, i),
+              // DartStartBehavior.down is needed to keep the mouse pointer stuck to
+              // the drag bar. There still appears to be a few frame lag before the
+              // drag action triggers which is't ideal but isn't a launch blocker.
+              dragStartBehavior: DragStartBehavior.down,
+              child: widget.splitters != null
+                  ? widget.splitters[i]
+                  : _defaultSplitter(layoutHeight: height, layoutWidth: width),
+            ),
           ),
       ]);
     }
