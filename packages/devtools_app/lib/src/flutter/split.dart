@@ -301,8 +301,7 @@ class _SplitState extends State<Split> {
     // The material icon for a drag handle is not currently available.
     // For now, draw an indicator that is 3 lines running in the direction
     // of the main axis, like a hamburger menu.
-    // TODO(https://github.com/flutter/devtools/issues/1265): update mouse
-    // to indicate that this is resizable.
+    // TODO: use Icons.drag_handle
     final defaultDragIndicator = Flex(
       direction: isHorizontal ? Axis.vertical : Axis.horizontal,
       mainAxisSize: MainAxisSize.min,
