@@ -5,7 +5,9 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/utils.dart';
-import 'package:test/test.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('utils', () {
@@ -474,6 +476,26 @@ void main() {
         expect(list.safeGet(1), equals(2));
         expect(list.safeGet(-1), isNull);
       });
+    });
+  });
+
+  group('LogicalKeySetExtension', () {
+    testWidgets('meta non-mac', (WidgetTester tester) async {
+      final keySet =
+          LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyP);
+      expect(keySet.describeKeys(), 'Meta-P');
+    });
+
+    testWidgets('meta mac', (WidgetTester tester) async {
+      final keySet =
+          LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyP);
+      expect(keySet.describeKeys(isMacOS: true), '⌘P');
+    });
+
+    testWidgets('ctrl', (WidgetTester tester) async {
+      final keySet =
+          LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyP);
+      expect(keySet.describeKeys(), 'Control-P');
     });
   });
 }

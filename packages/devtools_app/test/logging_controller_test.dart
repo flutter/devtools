@@ -11,7 +11,7 @@ import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:test/test.dart';
 
-import 'flutter/inspector_screen_test.dart';
+import 'inspector_screen_test.dart';
 import 'support/mocks.dart';
 
 void main() {

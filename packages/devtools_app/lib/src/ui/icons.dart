@@ -16,7 +16,7 @@ library icons;
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
-import '../flutter/theme.dart';
+import '../theme.dart';
 import 'theme.dart';
 
 class CustomIcon extends StatelessWidget {

@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import 'src/config_specific/flutter/framework_initialize/framework_initialize.dart';
-import 'src/flutter/app.dart';
+import 'src/app.dart';
+import 'src/config_specific/framework_initialize/framework_initialize.dart';
 
 void main() async {
   await initializeFramework();
