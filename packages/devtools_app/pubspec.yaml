@@ -25,7 +25,8 @@ dependencies:
   collection: ^1.14.11
   devtools_shared: 0.2.6-dev.1
   file: ^5.1.0
-  flutter_web_plugins: any
+  flutter_web_plugins:
+    sdk: flutter
   http: ^0.12.0+1
   intl: ^0.16.0
   js: ^0.6.1+1
