@@ -12,6 +12,8 @@ environment:
 dependencies:
   devtools_app: 0.2.6-dev.1
   devtools_shared: 0.2.6-dev.1
+  flutter:
+    sdk: flutter
   flutter_test:
     sdk: flutter
   matcher: ^0.12.3
