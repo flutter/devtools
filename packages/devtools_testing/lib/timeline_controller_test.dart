@@ -10,8 +10,8 @@ import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:test/test.dart';
 
-import 'support/timeline_test_data.dart';
 import 'support/flutter_test_environment.dart';
+import 'support/timeline_test_data.dart';
 
 Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
   TimelineController timelineController;
