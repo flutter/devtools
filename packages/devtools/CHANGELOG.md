@@ -1,3 +1,6 @@
+## 0.2.6-dev.2
+* Ship Flutter Web version of DevTools by default
+
 ## 0.2.5 2020-05-07
 * Persist connected app URI when switching to Flutter web version of DevTools [#1933](https://github.com/flutter/devtools/pull/1933)
 * Fix CPU profiler bug where we were unintentionally mutating data [#1923](https://github.com/flutter/devtools/pull/1923)
