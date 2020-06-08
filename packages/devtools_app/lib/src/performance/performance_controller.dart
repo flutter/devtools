@@ -6,11 +6,11 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../config_specific/flutter/import_export/import_export.dart';
+import '../config_specific/import_export/import_export.dart';
 import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../utils.dart';
-import 'flutter/performance_screen.dart';
+import 'performance_screen.dart';
 
 class PerformanceController with CpuProfilerControllerProviderMixin {
   final _exportController = ExportController();

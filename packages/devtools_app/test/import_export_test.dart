@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/flutter/import_export/import_export.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:test/test.dart';
 
-import 'flutter/wrappers.dart';
+import 'support/wrappers.dart';
 
 void main() async {
   group('ImportControllerTest', () {
