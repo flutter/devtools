@@ -6,20 +6,23 @@ A material design widget to view downloaded network images.
 
 **Using DevTools**
 
-```cd case_study/memory_leaks/images_1
+```
+cd case_study/memory_leaks/images_1
 flutter pub get
 flutter run
 ```
 
 Open DevTools and copy paste URL displayed on this line e.g.,
 
-```An Observatory debugger and profiler on AOSP on IA Emulator is available at: http://127.0.0.1:43473/5IvsZcde53E=/```
+```
+An Observatory debugger and profiler on AOSP on IA Emulator is available at: http://...
+```
 
 After DevTools has connected to this running Flutter application, click on the Memory tab.
 
 Click on the leaky Image Viewer app (the image) and drag down for a few images to load.  Memory profile should be display:
 
-<img src="memory_startup.png" height="600em" />
+<img src="memory_startup.png" />
 
 Press the Snapshot button to collect all the information of all objects in the Dart VM Heap.
 
@@ -43,20 +46,28 @@ After the snashot analysis a child row inside of > Analysis will be added titled
 
 <img src="analysis_1.png" />
 
-The analysis has checked on raw memory objects that contain the images, any classes concerning images in Flutter under the > Externals entry.
+The analysis has checked on raw memory objects that contain the images, any classes concerning images in Flutter under the
 
-In particular expand the
+```
+>Snapshot Jun 09 12:27:25
+  > Externals
+```
 
-```> Snapshot MMM DD HH:MM:SS
-     > Externals
-       > _Int32List
-         > Buckets```
+Expand Externals
+
+```
+> Snapshot MMM DD HH:MM:SS
+   > Externals
+     > _Int32List
+       > Buckets
+```
        
 You'll notice a number of chunks of _Int32List memory is displayed into their corresponding bucket sizes.  The images are in the 1M..10M and 50M+ buckets.  Eleven images total ~284M.
 
 The next interesting piece of information is to expand:
 
-```> Snapshot MMM DD HH:MM:SS
+```
+> Snapshot MMM DD HH:MM:SS
      > Library filters
        > ImageCache
 ```
@@ -73,7 +84,8 @@ As the graph grows press "Snapshot" and then "Analyze" the snapshot analysis sho
 
 Notice as you expand the _Int32List under Externals that the size has now grown to 771M.
 
-```193M for seven images in the 10M..50M range.
+```
+193M for seven images in the 10M..50M range.
 138M for 26 images in the 1M..10M range.
 438M for 5 images in the 50M+ range.
 ```
