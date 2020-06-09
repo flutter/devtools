@@ -9,15 +9,18 @@ A material design widget to view downloaded network images.
 ```
 cd case_study/memory_leaks/images_1
 flutter pub get
-flutter run```
+flutter run
+```
 
 Open DevTools and copy paste URL displayed on this line e.g.,
 
 ```
+
 Flutter run key commands.
 r Hot reload.
 ...
-An Observatory debugger and profiler on AOSP on IA Emulator is available at: http://127.0.0.1:43473/5IvsZcde53E=/```
+An Observatory debugger and profiler on AOSP on IA Emulator is available at: http://127.0.0.1:43473/5IvsZcde53E=/
+```
 
 After DevTools has connected to the running Flutter application, click on the Memory tab.
 
