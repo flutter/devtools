@@ -9,28 +9,24 @@ A material design widget to view downloaded network images.
 ```
 cd case_study/memory_leaks/images_1
 flutter pub get
-flutter run
-```
+flutter run```
 
 Open DevTools and copy paste URL displayed on this line e.g.,
 
 ```
-An Observatory debugger and profiler on AOSP on IA Emulator is available at: http://...
-```
+An Observatory debugger and profiler on AOSP on IA Emulator is available at: http://...```
 
-After DevTools has connected to this running Flutter application, click on the Memory tab.
+After DevTools has connected to the running Flutter application, click on the Memory tab.
 
-Click on the leaky Image Viewer app (the image) and drag down for a few images to load.  Memory profile should be display:
+Click on the leaky Image Viewer app (the image) and drag down for a few images to load.  The Memory profile chart should appear like the below chart.
 
 <img src="memory_startup.png" />
 
-Press the Snapshot button to collect all the information of all objects in the Dart VM Heap.
+Press the Snapshot button to collect information about all objects in the Dart VM Heap.
 
 <img src="snapshot.png" />
 
-When complete a Heat Map will appear.
-
-Turn off the Heat Map swtich:
+When complete a Heat Map will appear.  Turn off the Heat Map swtich:
 
 <img src="heatmap_off.png" />
 
@@ -46,7 +42,7 @@ After the snashot analysis a child row inside of > Analysis will be added titled
 
 <img src="analysis_1.png" />
 
-The analysis has checked on raw memory objects that contain the images, any classes concerning images in Flutter under the
+The analysis collects the raw memory objects that contain the images, any classes concerning images in Flutter under the
 
 ```
 >Snapshot Jun 09 12:27:25
@@ -74,7 +70,7 @@ The next interesting piece of information is to expand:
 
 This will display the number objects in the ImageCache for pending, cache and live images.
 
-Now start traversing through the images in the "Image Viewer" scroll down a lot noticing how the memory is growing rapidly 500M, 900M, 1b, and topping 2b in total memory usage.
+Now start traversing through the images in the "Image Viewer" scroll down a lot to cause a lot of images to be loaded over the network.  Notice how the memory is growing rapidly, over time, first 500M, then 900M, then 1b, and topping 2b in total memory usage.  Eventually, this app will run out of memory and crash.
 
 <img src="chart_before_crash.png" />
 
@@ -89,6 +85,8 @@ Notice as you expand the _Int32List under Externals that the size has now grown 
 138M for 26 images in the 1M..10M range.
 438M for 5 images in the 50M+ range.
 ```
+
+**Problem:** The images downloaded are very detailed and beautiful images some are over 50 megs in size.  The details of these images are lost on the small device being displayed on changing to only use a fraction of the size will save using a 50M image to display in a 3" x 3" area.
 
 **Solution:** Fix the ListView.builder add the parameters cacheHeight and cacheWidth to the Image.network constructor e.g.,
 
