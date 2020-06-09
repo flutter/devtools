@@ -26,27 +26,27 @@ After DevTools has connected to the running Flutter application, click on the Me
 
 Click on the leaky Image Viewer app (the image) and drag down for a few images to load.  The Memory profile chart should appear like the below chart.
 
-<img src="memory_startup.png" />
+<img src="readme_images/memory_startup.png" />
 
 Press the Snapshot button to collect information about all objects in the Dart VM Heap.
 
-<img src="snapshot.png" />
+<img src="readme_images/snapshot.png" />
 
 When complete a Heat Map will appear.  Turn off the Heat Map swtich:
 
-<img src="heatmap_off.png" />
+<img src="readme_images/heatmap_off.png" />
 
 When the Heat Map is switched off a table view is displayed of all objects in the Dart VM heap.
 
-<img src="table_first.png" />
+<img src="readme_images/table_first.png" />
 
 Press the Analyze button to analyze the current Snapshot
 
-<img src="analyze.png" />
+<img src="readme_images/analyze.png" />
 
 After the snashot analysis a child row inside of > Analysis will be added titled "Snapshot ..." with the timetime stamp of the snapshot e.g., "Snapshot Jun 09 12:23:44".
 
-<img src="analysis_1.png" />
+<img src="readme_images/analysis_1.png" />
 
 The analysis collects the raw memory objects that contain the images, any classes concerning images in Flutter under the
 
@@ -78,11 +78,11 @@ This will display the number objects in the ImageCache for pending, cache and li
 
 Now start scrolling through the images in the "Image Viewer" (click and drag) for a number of pictures - causing lots of images to be loaded over the network.  Notice the memory is growing rapidly, over time, first 500M, then 900M, then 1b, and finally topping 2b in total memory used.  Eventually, this app will run out of memory and crash.
 
-<img src="chart_before_crash.png" />
+<img src="readme_images/chart_before_crash.png" />
 
 As the graph grows press "Snapshot" and then "Analyze" the snapshot analysis should appear:
 
-<img src="analysis_before_crash.png" />
+<img src="readme_images/analysis_before_crash.png" />
 
 Notice as you expand the _Int32List under Externals that the size has now grown to 771M.
 
@@ -152,7 +152,7 @@ The parameters cacheWidth or cacheHeight indicates to the engine that the image 
 
 Read [[Image.network Documentation](https://api.flutter.dev/flutter/widgets/Image/Image.network.html)].
 
-<img src="leak_app.png" height="600em" />
+<img src="readme_images/leak_app.png" height="600em" />
 
 ## Getting Started
 
