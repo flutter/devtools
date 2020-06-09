@@ -15,8 +15,8 @@ Color memoryHeatMapDarkColor = const Color(0xFF0D47A1); // Material BLUE 900
 
 const mainUiColor = Color(0xFF88B1DE);
 const mainRasterColor = Color(0xFF2C5DAA);
-final mainUnknownColor = ThemedColor.fromSingleColor(const Color(0xFFCAB8E9));
-final mainAsyncColor = ThemedColor.fromSingleColor(const Color(0xFF80CBC4));
+const mainUnknownColor = Color(0xFFCAB8E9);
+const mainAsyncColor = Color(0xFF80CBC4);
 
 const mainUiColorSelectedLight = Color(0xFFD4D7DA); // Lighter grey.
 const mainRasterColorSelectedLight = Color(0xFFB5B5B5); // Darker grey.
@@ -38,16 +38,16 @@ const selectedFrameBackgroundColor =
     ThemedColor(Color(0xFFDBDDDD), Color(0xFF4E4F4F));
 const selectedFrameAccentColor = Color(0xFF36C6F4);
 
-// Teal 200-400 - see https://material.io/design/color/#tools-for-picking-colors.
-final asyncColorPalette = [
+// Teal 200, 400 - see https://material.io/design/color/#tools-for-picking-colors.
+const asyncColorPalette = [
   mainAsyncColor,
-  ThemedColor.fromSingleColor(const Color(0xFF26A69A)),
+  Color(0xFF26A69A),
 ];
 
-// Slight variation on Deep purple 100-300 - see https://material.io/design/color/#tools-for-picking-colors.
-final unknownColorPalette = [
+// Slight variation on Deep purple 100, 300 - see https://material.io/design/color/#tools-for-picking-colors.
+const unknownColorPalette = [
   mainUnknownColor,
-  ThemedColor.fromSingleColor(const Color(0xFF9D84CA)),
+  Color(0xFF9D84CA),
 ];
 
 const selectedFlameChartItemColor = ThemedColor(
