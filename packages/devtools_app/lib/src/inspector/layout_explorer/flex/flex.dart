@@ -23,9 +23,8 @@ import 'free_space.dart';
 import 'overflow_indicator_painter.dart';
 import 'utils.dart';
 
-const widthIndicatorColor = ThemedColor(Color(0xFF000099), mainUiColorDark);
-const heightIndicatorColor =
-    ThemedColor(mainRasterColorDark, Color(0xFF27AAE1));
+const widthIndicatorColor = ThemedColor(Color(0xFF000099), mainUiColor);
+const heightIndicatorColor = ThemedColor(mainRasterColor, Color(0xFF27AAE1));
 const margin = 8.0;
 
 const arrowHeadSize = 8.0;

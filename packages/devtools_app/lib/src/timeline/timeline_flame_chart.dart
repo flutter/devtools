@@ -171,13 +171,13 @@ class TimelineFlameChartState
 
       Color backgroundColor;
       if (event.isAsyncEvent) {
-        backgroundColor = nextAsyncColor(resetOffset: event.isRoot);
+        backgroundColor = nextAsyncColor(row);
       } else if (event.isUiEvent) {
-        backgroundColor = nextUiColor(resetOffset: event.isRoot);
+        backgroundColor = nextUiColor(row);
       } else if (event.isRasterEvent) {
-        backgroundColor = nextRasterColor(resetOffset: event.isRoot);
+        backgroundColor = nextRasterColor(row);
       } else {
-        backgroundColor = nextUnknownColor(resetOffset: event.isRoot);
+        backgroundColor = nextUnknownColor(row);
       }
 
       Color textColor;
@@ -196,9 +196,6 @@ class TimelineFlameChartState
         textColor: textColor,
         data: event,
         onSelected: (dynamic event) => widget.onSelected(event),
-        useAlternateBackground: (TimelineEvent event) =>
-            _selectedFrame != null && event.root.frameId == _selectedFrame.id,
-        alternateBackgroundColor: nextSelectedColor(resetOffset: event.isRoot),
         sectionIndex: section,
       );
       chartNodesByEvent[event] = node;

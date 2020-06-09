@@ -260,7 +260,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   // This method must be overridden by all subclasses.
   @mustCallSuper
   void initFlameChartElements() {
-    resetColorOffsets();
     rows.clear();
     sections.clear();
   }
@@ -753,15 +752,9 @@ class FlameChartNode<T> {
     @required this.textColor,
     @required this.data,
     @required this.onSelected,
-    this.useAlternateBackground,
-    this.alternateBackgroundColor,
     this.selectable = true,
     this.sectionIndex,
-  }) {
-    if (useAlternateBackground != null) {
-      assert(alternateBackgroundColor != null);
-    }
-  }
+  });
 
   FlameChartNode.sectionLabel({
     this.key,
@@ -774,12 +767,10 @@ class FlameChartNode<T> {
         tooltip = text,
         data = null,
         onSelected = ((_) {}),
-        selectable = false,
-        useAlternateBackground = null,
-        alternateBackgroundColor = null;
+        selectable = false;
 
   static const _selectedNodeColor = lightSelection;
-  static const _alternateTextColor = Colors.black;
+  static const _selectedTextColor = Colors.black;
   // We would like this value to be smaller, but zoom performance does not allow
   // for that. We should decrease this value if we can improve flame chart zoom
   // performance.
@@ -792,8 +783,6 @@ class FlameChartNode<T> {
   final Color backgroundColor;
   final Color textColor;
   final T data;
-  final bool Function(T) useAlternateBackground;
-  final Color alternateBackgroundColor;
   final void Function(T) onSelected;
   final bool selectable;
 
@@ -852,17 +841,11 @@ class FlameChartNode<T> {
 
   Color _backgroundColor(bool selected) {
     if (selected) return _selectedNodeColor;
-    if (useAlternateBackground != null && useAlternateBackground(data)) {
-      return alternateBackgroundColor;
-    }
     return backgroundColor;
   }
 
   Color _textColor(bool selected) {
-    if (selected ||
-        (useAlternateBackground != null && useAlternateBackground(data))) {
-      return _alternateTextColor;
-    }
+    if (selected) return _selectedTextColor;
     return textColor;
   }
 
@@ -883,66 +866,20 @@ class FlameChartNode<T> {
 }
 
 mixin FlameChartColorMixin {
-  int _uiColorOffset = 0;
-  Color nextUiColor({bool resetOffset = false}) {
-    if (resetOffset) {
-      _uiColorOffset = 0;
-    }
-    final color = uiColorPalette[_uiColorOffset % uiColorPalette.length];
-    _uiColorOffset++;
-    return color;
+  Color nextUiColor(int row) {
+    return uiColorPalette[row % uiColorPalette.length];
   }
 
-  int _rasterColorOffset = 0;
-  Color nextRasterColor({bool resetOffset = false}) {
-    if (resetOffset) {
-      _rasterColorOffset = 0;
-    }
-    final color =
-        rasterColorPalette[_rasterColorOffset % rasterColorPalette.length];
-    _rasterColorOffset++;
-    return color;
+  Color nextRasterColor(int row) {
+    return rasterColorPalette[row % rasterColorPalette.length];
   }
 
-  int _asyncColorOffset = 0;
-  Color nextAsyncColor({bool resetOffset = false}) {
-    if (resetOffset) {
-      _asyncColorOffset = 0;
-    }
-    final color =
-        asyncColorPalette[_asyncColorOffset % asyncColorPalette.length];
-    _asyncColorOffset++;
-    return color;
+  Color nextAsyncColor(int row) {
+    return asyncColorPalette[row % asyncColorPalette.length];
   }
 
-  int _unknownColorOffset = 0;
-  Color nextUnknownColor({bool resetOffset = false}) {
-    if (resetOffset) {
-      _unknownColorOffset = 0;
-    }
-    final color =
-        unknownColorPalette[_unknownColorOffset % unknownColorPalette.length];
-    _unknownColorOffset++;
-    return color;
-  }
-
-  int _selectedColorOffset = 0;
-  Color nextSelectedColor({bool resetOffset = false}) {
-    if (resetOffset) {
-      _selectedColorOffset = 0;
-    }
-    final color = selectedColorPalette[
-        _selectedColorOffset % selectedColorPalette.length];
-    _selectedColorOffset++;
-    return color;
-  }
-
-  void resetColorOffsets() {
-    _asyncColorOffset = 0;
-    _uiColorOffset = 0;
-    _rasterColorOffset = 0;
-    _unknownColorOffset = 0;
-    _selectedColorOffset = 0;
+  Color nextUnknownColor(int row) {
+    return unknownColorPalette[row % unknownColorPalette.length];
   }
 }
 

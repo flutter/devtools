@@ -245,7 +245,7 @@ class FlutterFramesChartItem extends StatelessWidget {
     );
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: densePadding),
-      color: selected ? chartAccentColor : null,
+      color: selected ? selectedFrameBackgroundColor : null,
       child: Column(
         children: [
           // Dummy child so that the InkWell does not take up the entire column.
