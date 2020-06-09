@@ -60,7 +60,7 @@ The parameters cacheWidth or cacheHeight indicates to the engine that the image 
 
 Read [[Image.network Documentation](https://api.flutter.dev/flutter/widgets/Image/Image.network.html)].
 
-<img src="demo_img.gif" height="600em" />
+<img src="leak_app.png" height="600em" />
 
 ## Getting Started
 
