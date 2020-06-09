@@ -52,7 +52,13 @@ class MemoryController extends DisposableController
 
   static const logFilenamePrefix = 'memory_log_';
 
-  bool showHeatMap = true;
+  final _showHeatMap = ValueNotifier<bool>(false);
+
+  ValueListenable<bool> get showHeatMap => _showHeatMap;
+
+  void toggleShowHeatMap(bool value) {
+    _showHeatMap.value = value;
+  }
 
   final snapshots = <Snapshot>[];
 
@@ -698,6 +704,7 @@ class MemoryController extends DisposableController
       );
 
   bool _gcing = false;
+
   bool get isGcing => _gcing;
 
   Future<void> gc() async {

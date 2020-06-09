@@ -98,6 +98,9 @@ const linkTextStyle = TextStyle(
   decoration: TextDecoration.underline,
 );
 
+const defaultSearchTextWidth = 200.0;
+const defaultSearchTextHeight = 36.0;
+
 /// A short duration to use for animations.
 ///
 /// Use this when you want less emphasis on the animation and more on the
