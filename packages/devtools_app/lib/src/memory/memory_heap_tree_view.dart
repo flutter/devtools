@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart' as logger;
 import '../table.dart';
 import '../table_data.dart';
@@ -215,6 +216,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       snapshotDisplay = Column(children: [
         const SizedBox(height: 50.0),
         snapshotDisplay = const CircularProgressIndicator(),
+        const SizedBox(height: denseSpacing),
         Text(_isSnapshotStreaming
             ? 'Processing...'
             : _isSnapshotGraphing
@@ -224,7 +226,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
                     : _isSnapshotComplete ? 'Done' : '...'),
       ]);
     } else if (controller.snapshotByLibraryData != null) {
-      if (controller.showHeatMap) {
+      if (controller.showHeatMap.value) {
         snapshotDisplay = HeatMapSizeAnalyzer(
           child: SizedBox.expand(
             child: FlameChart(controller),
@@ -246,31 +248,34 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
             _buildSearchFilterControls(),
           ],
         ),
+        const SizedBox(height: denseRowSpacing),
         Expanded(
-          child: buildSnapshotTables(snapshotDisplay),
+          child: OutlineDecoration(
+            child: buildSnapshotTables(snapshotDisplay),
+          ),
         ),
       ],
     );
   }
 
   Widget buildSnapshotTables(Widget snapshotDisplay) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Expanded(child: snapshotDisplay),
-          const SizedBox(width: defaultSpacing),
-          // TODO(terry): Need better focus handling between 2 tables & up/down
-          //              arrows in the right-side field instance view table.
-          controller.isLeafSelected
-              ? Expanded(child: SnapshotInstanceViewTable())
-              : controller.isAnalysisLeafSelected
-                  ? Expanded(child: AnalysisInstanceViewTable())
-                  : const SizedBox(),
-        ],
-      ),
+    final hasDetails =
+        controller.isLeafSelected || controller.isAnalysisLeafSelected;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Expanded(child: snapshotDisplay),
+        if (hasDetails) const SizedBox(width: defaultSpacing),
+        // TODO(terry): Need better focus handling between 2 tables & up/down
+        //              arrows in the right-side field instance view table.
+        controller.isLeafSelected
+            ? Expanded(child: SnapshotInstanceViewTable())
+            : controller.isAnalysisLeafSelected
+                ? Expanded(child: AnalysisInstanceViewTable())
+                : const SizedBox(),
+      ],
     );
   }
 
@@ -339,11 +344,11 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
           children: [
             const Text('Heat Map'),
             Switch(
-              value: controller.showHeatMap,
+              value: controller.showHeatMap.value,
               onChanged: (value) {
                 setState(() {
                   closeAutoCompleteOverlay();
-                  controller.showHeatMap = value;
+                  controller.toggleShowHeatMap(value);
                   controller.search = '';
                   controller.selectedLeaf = null;
                 });
@@ -352,11 +357,13 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
           ],
         ),
         const SizedBox(width: defaultSpacing),
-        controller.showHeatMap ? const SizedBox() : _groupByDropdown(textTheme),
+        controller.showHeatMap.value
+            ? const SizedBox()
+            : _groupByDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
         // TODO(terry): Mechanism to handle expand/collapse on both
         // tables objects/fields. Maybe notion in table?
-        controller.showHeatMap
+        controller.showHeatMap.value
             ? const SizedBox()
             : OutlineButton(
                 key: collapseAllButtonKey,
@@ -378,7 +385,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
                     : null,
                 child: const Text('Collapse All'),
               ),
-        controller.showHeatMap
+        controller.showHeatMap.value
             ? const SizedBox()
             : OutlineButton(
                 key: expandAllButtonKey,
@@ -455,7 +462,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       ),
     );
 
-    if (controller.showHeatMap && controller.snapshots.isNotEmpty) {
+    if (controller.showHeatMap.value && controller.snapshots.isNotEmpty) {
       searchFieldFocusNode.requestFocus();
     }
 
@@ -519,8 +526,8 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       children: [
         Container(
           // TODO(terry): Use a more adaptive layout than forcing to 300.0
-          width: 300.0,
-          height: 40.0,
+          width: defaultSearchTextWidth,
+          height: defaultSearchTextHeight,
           child: searchAndRawKeyboard,
         ),
         const SizedBox(width: denseSpacing),

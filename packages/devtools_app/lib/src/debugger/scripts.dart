@@ -87,7 +87,7 @@ class ScriptPickerState extends State<ScriptPicker> {
             child: Padding(
               padding: const EdgeInsets.all(denseSpacing),
               child: SizedBox(
-                height: 36.0,
+                height: defaultSearchTextHeight,
                 child: TextField(
                   decoration: InputDecoration(
                     labelText:

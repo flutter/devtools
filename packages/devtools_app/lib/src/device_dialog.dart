@@ -169,8 +169,8 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
               Text('VM Flags', style: textTheme.headline6),
               const Expanded(child: SizedBox(width: denseSpacing)),
               Container(
-                width: 200.0,
-                height: 36.0,
+                width: defaultSearchTextWidth,
+                height: defaultSearchTextHeight,
                 child: TextField(
                   controller: filterController,
                   decoration: const InputDecoration(
