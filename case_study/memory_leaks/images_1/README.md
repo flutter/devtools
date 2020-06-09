@@ -94,7 +94,7 @@ Notice as you expand the _Int32List under Externals that the size has now grown 
 
 In addition, many images are pending, in the cache and live to consume more data as the images are received over the network.
 
-**Problem:** The images downloaded are very detailed and beautiful images some are over 50 megs in size.  The details of these images are lost on the small device being displayed on changing to only use a fraction of the size will save using a 50M image to display in a 3" x 3" area.
+**Problem:** The images downloaded are very detailed and beautiful, some images are over 50 MB in size.  The details of these images are lost on the small device they are rendered on.  Using a fraction of the size will eliminate keeping 50M image(s) to render in a 3" x 3" area.
 
 **Solution:** Fix the ListView.builder add the parameters cacheHeight and cacheWidth to the Image.network constructor e.g.,
 
