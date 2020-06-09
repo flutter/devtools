@@ -14,7 +14,15 @@ flutter run```
 Open DevTools and copy paste URL displayed on this line e.g.,
 
 ```
-An Observatory debugger and profiler on AOSP on IA Emulator is available at: http://...```
+Flutter run key commands.
+r Hot reload. 🔥🔥🔥
+R Hot restart.
+h Repeat this help message.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+An Observatory debugger and profiler on AOSP on IA Emulator is available at: http://127.0.0.1:43473/5IvsZcde53E=/
+```
 
 After DevTools has connected to the running Flutter application, click on the Memory tab.
 
