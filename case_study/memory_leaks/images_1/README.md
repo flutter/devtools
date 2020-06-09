@@ -76,7 +76,7 @@ The next interesting piece of information is to expand:
 
 This will display the number objects in the ImageCache for pending, cache and live images.
 
-Now start traversing through the images in the "Image Viewer" scroll down a lot to cause a lot of images to be loaded over the network.  Notice how the memory is growing rapidly, over time, first 500M, then 900M, then 1b, and topping 2b in total memory usage.  Eventually, this app will run out of memory and crash.
+Now start scrolling through the images in the "Image Viewer" (click and drag) for a number of pictures - causing lots of images to be loaded over the network.  Notice the memory is growing rapidly, over time, first 500M, then 900M, then 1b, and finally topping 2b in total memory used.  Eventually, this app will run out of memory and crash.
 
 <img src="chart_before_crash.png" />
 
@@ -88,9 +88,11 @@ Notice as you expand the _Int32List under Externals that the size has now grown 
 
 ```
 193M for seven images in the 10M..50M range.
-138M for 26 images in the 1M..10M range.
-438M for 5 images in the 50M+ range.
+138M for twenty-six images in the 1M..10M range.
+438M for five images in the 50M+ range.
 ```
+
+In addition, many images are pending, in the cache and live to consume more data as the images are received over the network.
 
 **Problem:** The images downloaded are very detailed and beautiful images some are over 50 megs in size.  The details of these images are lost on the small device being displayed on changing to only use a fraction of the size will save using a 50M image to display in a 3" x 3" area.
 
