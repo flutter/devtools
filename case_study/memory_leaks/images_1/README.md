@@ -6,13 +6,14 @@ A material design widget to view downloaded network images.
 
 **Using DevTools**
 
-cd case_study/memory_leaks/images_1
+```cd case_study/memory_leaks/images_1
 flutter pub get
 flutter run
+```
 
 Open DevTools and copy paste URL displayed on this line e.g.,
 
-An Observatory debugger and profiler on AOSP on IA Emulator is available at: ```http://127.0.0.1:43473/5IvsZcde53E=/```
+```An Observatory debugger and profiler on AOSP on IA Emulator is available at: http://127.0.0.1:43473/5IvsZcde53E=/```
 
 After DevTools has connected to this running Flutter application, click on the Memory tab.
 
@@ -22,25 +23,25 @@ Click on the leaky Image Viewer app (the image) and drag down for a few images t
 
 Press the Snapshot button to collect all the information of all objects in the Dart VM Heap.
 
-<img src="snapshot.png" height="600em" />
+<img src="snapshot.png" />
 
 When complete a Heat Map will appear.
 
 Turn off the Heat Map swtich:
 
-<img src="heatmap_off.png" height="600em" />
+<img src="heatmap_off.png" />
 
 When the Heat Map is switched off a table view is displayed of all objects in the Dart VM heap.
 
-<img src="table_first.png" height="600em" />
+<img src="table_first.png" />
 
 Press the Analyze button to analyze the current Snapshot
 
-<img src="analyze.png" height="600em" />
+<img src="analyze.png" />
 
 After the snashot analysis a child row inside of > Analysis will be added titled "Snapshot ..." with the timetime stamp of the snapshot e.g., "Snapshot Jun 09 12:23:44".
 
-<img src="analysis_1.png" height="600em" />
+<img src="analysis_1.png" />
 
 The analysis has checked on raw memory objects that contain the images, any classes concerning images in Flutter under the > Externals entry.
 
@@ -57,24 +58,25 @@ The next interesting piece of information is to expand:
 
 ```> Snapshot MMM DD HH:MM:SS
      > Library filters
-       > ImageCache```
+       > ImageCache
+```
 
 This will display the number objects in the ImageCache for pending, cache and live images.
 
 Now start traversing through the images in the "Image Viewer" scroll down a lot noticing how the memory is growing rapidly 500M, 900M, 1b, and topping 2b in total memory usage.
 
-<img src="chart_before_crash.png" height="600em" />
+<img src="chart_before_crash.png" />
 
 As the graph grows press "Snapshot" and then "Analyze" the snapshot analysis should appear:
 
-<img src="analysis_before_crash.png" height="600em" />
+<img src="analysis_before_crash.png" />
 
 Notice as you expand the _Int32List under Externals that the size has now grown to 771M.
 
-193M for seven images in the 10M..50M range.
+```193M for seven images in the 10M..50M range.
 138M for 26 images in the 1M..10M range.
 438M for 5 images in the 50M+ range.
-
+```
 
 **Solution:** Fix the ListView.builder add the parameters cacheHeight and cacheWidth to the Image.network constructor e.g.,
 
