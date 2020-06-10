@@ -129,11 +129,3 @@ class FlexSplitColumn extends StatelessWidget {
     );
   }
 }
-
-// TODO(kenz): add support for arbitrarily sized widgets.
-class FlexSplitColumnHeader extends SizedBox {
-  const FlexSplitColumnHeader({
-    @required double height,
-    @required Widget child,
-  }) : super(height: height, child: child);
-}

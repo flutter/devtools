@@ -208,7 +208,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           totalHeight: constraints.maxHeight,
           initialFractions: const [0.38, 0.38, 0.24],
           minSizes: const [0.0, 0.0, 0.0],
-          headers: [
+          headers: <SizedBox>[
             areaPaneHeader(
               context,
               title: callStackTitle,

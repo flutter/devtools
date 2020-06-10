@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import 'flex_split_column.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'ui/label.dart';
@@ -459,7 +458,7 @@ class ToolbarAction extends StatelessWidget {
 ///
 /// This is typically used as a title for a logical area of the screen.
 // TODO(devoncarew): Refactor this into an 'AreaPaneHeader' widget.
-Widget areaPaneHeader(
+SizedBox areaPaneHeader(
   BuildContext context, {
   @required String title,
   bool needsTopBorder = true,
@@ -468,7 +467,7 @@ Widget areaPaneHeader(
 }) {
   final theme = Theme.of(context);
 
-  return FlexSplitColumnHeader(
+  return SizedBox(
     height: areaPaneHeaderHeight,
     child: Container(
       decoration: BoxDecoration(
@@ -482,7 +481,6 @@ Widget areaPaneHeader(
       ),
       padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
       alignment: Alignment.centerLeft,
-      height: areaPaneHeaderHeight,
       child: Row(
         children: [
           Expanded(
