@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'flex_split_column.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'ui/label.dart';
@@ -21,6 +22,8 @@ const debuggerDeviceWidth = 800.0;
 const mediumDeviceWidth = 1000.0;
 
 const defaultDialogRadius = 20.0;
+
+const areaPaneHeaderHeight = 36.0;
 
 List<Widget> headerInColumn(TextTheme textTheme, String title) {
   return [
@@ -416,6 +419,85 @@ class ActionButton extends StatelessWidget {
       child: child,
     );
   }
+}
+
+/// A wrapper around a FlatButton, an Icon, and an optional Tooltip; used for
+/// small toolbar actions.
+class ToolbarAction extends StatelessWidget {
+  const ToolbarAction({
+    @required this.icon,
+    @required this.onPressed,
+    this.tooltip,
+    Key key,
+  }) : super(key: key);
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final button = FlatButton(
+      padding: EdgeInsets.zero,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      onPressed: onPressed,
+      child: Icon(icon, size: actionsIconSize),
+    );
+
+    return tooltip == null
+        ? button
+        : Tooltip(
+            message: tooltip,
+            waitDuration: tooltipWait,
+            child: button,
+          );
+  }
+}
+
+/// Create a bordered, fixed-height header area with a title and optional child
+/// on the right-hand side.
+///
+/// This is typically used as a title for a logical area of the screen.
+// TODO(devoncarew): Refactor this into an 'AreaPaneHeader' widget.
+Widget areaPaneHeader(
+  BuildContext context, {
+  @required String title,
+  bool needsTopBorder = true,
+  List<Widget> actions = const [],
+  double rightPadding = densePadding,
+}) {
+  final theme = Theme.of(context);
+
+  return FlexSplitColumnHeader(
+    height: areaPaneHeaderHeight,
+    child: Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: needsTopBorder
+              ? BorderSide(color: theme.focusColor)
+              : BorderSide.none,
+          bottom: BorderSide(color: theme.focusColor),
+        ),
+        color: titleSolidBackgroundColor(theme),
+      ),
+      padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
+      alignment: Alignment.centerLeft,
+      height: areaPaneHeaderHeight,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.subtitle2,
+            ),
+          ),
+          ...actions,
+        ],
+      ),
+    ),
+  );
 }
 
 /// A FlatButton used to close a containing dialog.
