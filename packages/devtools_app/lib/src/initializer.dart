@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'app.dart';
 import 'auto_dispose_mixin.dart';
 import 'framework/framework_core.dart';
 import 'globals.dart';
@@ -24,8 +25,12 @@ import 'url_utils.dart';
 /// connected. As we require additional services to be available, add them
 /// here.
 class Initializer extends StatefulWidget {
-  const Initializer({Key key, @required this.url, @required this.builder})
-      : assert(builder != null),
+  const Initializer({
+    Key key,
+    @required this.url,
+    @required this.builder,
+    this.allowConnectionScreenOnDisconnect = true,
+  })  : assert(builder != null),
         super(key: key);
 
   /// The builder for the widget's children.
@@ -37,6 +42,9 @@ class Initializer extends StatefulWidget {
   ///
   /// If null, the app will navigate to the [ConnectScreen].
   final String url;
+
+  /// Whether to allow navigating to the connection screen upon disconnect.
+  final bool allowConnectionScreenOnDisconnect;
 
   @override
   _InitializerState createState() => _InitializerState();
@@ -68,9 +76,8 @@ class _InitializerState extends State<Initializer>
     // If we become disconnected, attempt to reconnect.
     autoDispose(
       serviceManager.onStateChange.where((connected) => !connected).listen((_) {
-        // TODO(https://github.com/flutter/devtools/issues/1285): On losing
-        // the connection, only provide an option to reconnect; don't
-        // immediately go to the connection page.
+        // Try to reconnect (otherwise, will fall back to showing the disconnected
+        // overlay).
         _attemptUrlConnection();
       }),
     );
@@ -86,7 +93,7 @@ class _InitializerState extends State<Initializer>
 
   Future<void> _attemptUrlConnection() async {
     if (widget.url == null) {
-      _navigateToConnectPage();
+      _handleNoConnection();
       return;
     }
 
@@ -99,17 +106,50 @@ class _InitializerState extends State<Initializer>
     );
 
     if (!connected) {
-      _navigateToConnectPage();
+      _handleNoConnection();
     }
   }
 
-  /// Goes to the connect page if the [service.serviceManager] is not currently connected.
-  void _navigateToConnectPage() {
+  /// Shows a "disconnected" overlay if the [service.serviceManager] is not currently connected.
+  void _handleNoConnection() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
-        Navigator.of(context).popAndPushNamed('/');
+        Overlay.of(context).insert(_createDisconnectedOverlay());
       }
     });
+  }
+
+  OverlayEntry _createDisconnectedOverlay() {
+    final theme = Theme.of(context);
+    OverlayEntry overlay;
+    overlay = OverlayEntry(
+      builder: (context) => Container(
+        // TODO(dantup): Change this to a theme colour and ensure it works in both dart/light themes
+        color: const Color.fromRGBO(128, 128, 128, 0.5),
+        child: Center(
+          child: Column(
+            children: [
+              const Spacer(),
+              Text('Disconnected', style: theme.textTheme.headline3),
+              if (widget.allowConnectionScreenOnDisconnect)
+                RaisedButton(
+                    onPressed: () {
+                      overlay.remove();
+                      Navigator.of(context).popAndPushNamed(homeRoute);
+                    },
+                    child: const Text('Connect to Another App'))
+              else
+                Text(
+                  'Run a new debug session to reconnect',
+                  style: theme.textTheme.bodyText2,
+                ),
+              const Spacer(),
+            ],
+          ),
+        ),
+      ),
+    );
+    return overlay;
   }
 
   @override

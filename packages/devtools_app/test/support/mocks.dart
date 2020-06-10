@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/initializer.dart' as initializer;
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart'
@@ -68,7 +68,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   Future<double> getDisplayRefreshRate() async => 60;
 
   @override
-  final bool hasConnection;
+  bool hasConnection;
 
   @override
   final IsolateManager isolateManager = FakeIsolateManager();
@@ -108,7 +108,14 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
-  Stream<bool> get onStateChange => const Stream.empty();
+  Stream<bool> get onStateChange => stateChangeStream.stream;
+
+  StreamController<bool> stateChangeStream = StreamController();
+
+  void changeState(bool value) {
+    hasConnection = value;
+    stateChangeStream.add(value);
+  }
 }
 
 class FakeVmService extends Fake implements VmServiceWrapper {

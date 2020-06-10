@@ -123,12 +123,19 @@ class DevToolsAppState extends State<DevToolsApp> {
     return _routes ??= {
       homeRoute: (_, params, __) {
         if (params['uri']?.isNotEmpty ?? false) {
+          final embed = params['embed'] == 'true';
+          final page = params['page'];
+          final tabs = embed && page != null
+              ? _visibleScreens().where((p) => p.screenId == page).toList()
+              : _visibleScreens();
           return Initializer(
             url: params['uri'],
+            allowConnectionScreenOnDisconnect: !embed,
             builder: (_) => _providedControllers(
               child: DevToolsScaffold(
-                initialPage: params['page'],
-                tabs: _visibleScreens(),
+                embed: embed,
+                initialPage: page,
+                tabs: tabs,
                 actions: [
                   if (serviceManager.connectedApp.isFlutterAppNow) ...[
                     HotReloadButton(),
@@ -151,7 +158,7 @@ class DevToolsAppState extends State<DevToolsApp> {
             child: SnapshotScreenBody(args, _screens),
           ),
         );
-      }
+      },
     };
   }
 
