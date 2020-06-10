@@ -10,7 +10,6 @@ import 'dart:isolate';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart' as shelf;
 import 'package:shelf_proxy/shelf_proxy.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:sse/server/sse_handler.dart';
