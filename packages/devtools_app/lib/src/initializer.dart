@@ -76,10 +76,7 @@ class _InitializerState extends State<Initializer>
     // If we become disconnected, attempt to reconnect.
     autoDispose(
       serviceManager.onStateChange.where((connected) => !connected).listen((_) {
-        // TODO(https://github.com/flutter/devtools/issues/1285): On losing
-        // the connection, only provide an option to reconnect; don't
-        // immediately go to the connection page.
-        _attemptUrlConnection();
+        _handleNoConnection();
       }),
     );
     // Trigger a rebuild when the connection becomes available. This is done
@@ -111,7 +108,7 @@ class _InitializerState extends State<Initializer>
     }
   }
 
-  /// Goes to the connect/disconnected page if the [service.serviceManager] is not currently connected.
+  /// Shows a "disconnected" overlay if the [service.serviceManager] is not currently connected.
   void _handleNoConnection() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
@@ -131,10 +128,7 @@ class _InitializerState extends State<Initializer>
           child: Column(
             children: [
               const Spacer(),
-              Text(
-                'Disconnected',
-                style: theme.textTheme.headline3,
-              ),
+              Text('Disconnected', style: theme.textTheme.headline3),
               if (widget.allowConnectionScreenOnDisconnect)
                 RaisedButton(
                     onPressed: () {
