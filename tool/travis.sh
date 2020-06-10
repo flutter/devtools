@@ -92,7 +92,7 @@ if [ "$BOT" = "main" ]; then
 
     # Provision our packages.
     flutter pub get
-    flutter pub global activate webdev
+    flutter pub global activate webdev 2.5.6
 
     # Verify that flutter format has been run.
     echo "Checking flutter format..."
