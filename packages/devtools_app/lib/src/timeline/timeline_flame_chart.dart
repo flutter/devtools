@@ -272,10 +272,11 @@ class TimelineFlameChartState
 
   @override
   List<CustomPaint> buildCustomPaints(BoxConstraints constraints) {
+    final zoom = zoomController.value;
     return [
       CustomPaint(
         painter: AsyncGuidelinePainter(
-          zoom: zoomController.value,
+          zoom: zoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
@@ -286,7 +287,7 @@ class TimelineFlameChartState
       ),
       CustomPaint(
         painter: TimelineGridPainter(
-          zoom: zoomController.value,
+          zoom: zoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
@@ -294,6 +295,23 @@ class TimelineFlameChartState
           chartEndInset: widget.endInset,
           flameChartWidth: widthWithZoom,
           duration: widget.time.duration,
+        ),
+      ),
+      CustomPaint(
+        painter: SelectedFrameForegroundPainter(
+          _selectedFrame,
+          zoom: zoom,
+          constraints: constraints,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
+          chartStartInset: widget.startInset,
+          startTimeOffsetMicros: startTimeOffset,
+          startingPxPerMicro: startingPxPerMicro,
+          // Subtract [rowHeight] because [_calculateVerticalGuidelineStartY]
+          // returns the Y value at the bottom of the flame chart node, and we
+          // want the Y value at the top of the node.
+          yForEvent: (event) =>
+              _calculateVerticalGuidelineStartY(event) - rowHeight,
         ),
       ),
     ];
@@ -432,51 +450,40 @@ class TimelineFlameChartState
   }
 }
 
-class AsyncGuidelinePainter extends CustomPainter {
+class AsyncGuidelinePainter extends FlameChartPainter {
   AsyncGuidelinePainter({
-    @required this.zoom,
-    @required this.constraints,
-    @required this.verticalScrollOffset,
-    @required this.horizontalScrollOffset,
+    @required double zoom,
+    @required BoxConstraints constraints,
+    @required double verticalScrollOffset,
+    @required double horizontalScrollOffset,
+    @required double chartStartInset,
     @required this.verticalGuidelines,
     @required this.horizontalGuidelines,
-    @required this.chartStartInset,
-  });
-
-  final double zoom;
-
-  final BoxConstraints constraints;
-
-  final double verticalScrollOffset;
-
-  final double horizontalScrollOffset;
+  }) : super(
+          zoom: zoom,
+          constraints: constraints,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
+          chartStartInset: chartStartInset,
+        );
 
   final List<VerticalLineSegment> verticalGuidelines;
 
   final List<HorizontalLineSegment> horizontalGuidelines;
 
-  final double chartStartInset;
-
   @override
   void paint(Canvas canvas, Size size) {
-    final visible = Rect.fromLTWH(
-      horizontalScrollOffset,
-      verticalScrollOffset,
-      constraints.maxWidth,
-      constraints.maxHeight,
-    );
-
     // The guideline objects are calculated with a base zoom level of 1.0. We
     // need to convert the zoomed left offset into the unzoomed left offset for
     // proper calculation of the first vertical guideline index.
     final unzoomedOffset = math.max(0.0, visible.left - chartStartInset) / zoom;
-    final leftBoundWithZoom = chartStartInset + unzoomedOffset;
+    final leftBoundWithoutZoom = chartStartInset + unzoomedOffset;
 
     final firstVerticalGuidelineIndex = lowerBound(
       verticalGuidelines,
       VerticalLineSegment(
-        Offset(leftBoundWithZoom, visible.top),
-        Offset(leftBoundWithZoom, visible.bottom),
+        Offset(leftBoundWithoutZoom, visible.top),
+        Offset(leftBoundWithoutZoom, visible.bottom),
       ),
     );
     final firstHorizontalGuidelineIndex = lowerBound(
@@ -567,17 +574,23 @@ class AsyncGuidelinePainter extends CustomPainter {
   bool shouldRepaint(AsyncGuidelinePainter oldDelegate) => true;
 }
 
-class TimelineGridPainter extends CustomPainter {
+class TimelineGridPainter extends FlameChartPainter {
   TimelineGridPainter({
-    @required this.zoom,
-    @required this.constraints,
-    @required this.verticalScrollOffset,
-    @required this.horizontalScrollOffset,
-    @required this.chartStartInset,
+    @required double zoom,
+    @required BoxConstraints constraints,
+    @required double verticalScrollOffset,
+    @required double horizontalScrollOffset,
+    @required double chartStartInset,
     @required this.chartEndInset,
     @required this.flameChartWidth,
     @required this.duration,
-  });
+  }) : super(
+          zoom: zoom,
+          constraints: constraints,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
+          chartStartInset: chartStartInset,
+        );
 
   static const baseGridIntervalPx = 150.0;
   static const timestampOffset = 6.0;
@@ -585,18 +598,6 @@ class TimelineGridPainter extends CustomPainter {
     Color(0xFF24292E),
     Color(0xFFFAFBFC),
   );
-
-  static const origin = 0.0;
-
-  final double zoom;
-
-  final BoxConstraints constraints;
-
-  final double verticalScrollOffset;
-
-  final double horizontalScrollOffset;
-
-  final double chartStartInset;
 
   final double chartEndInset;
 
@@ -606,20 +607,12 @@ class TimelineGridPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // The absolute coordinates of the flame chart's visible section.
-    final visible = Rect.fromLTWH(
-      horizontalScrollOffset,
-      verticalScrollOffset,
-      constraints.maxWidth,
-      constraints.maxHeight,
-    );
-
     // Paint background for the section that will contain the timestamps. This
     // section will appear sticky to the top of the viewport.
     canvas.drawRect(
       Rect.fromLTWH(
-        origin,
-        origin,
+        FlameChartPainter.origin,
+        FlameChartPainter.origin,
         constraints.maxWidth,
         math.min(constraints.maxHeight, rowHeight),
       ),
@@ -671,13 +664,14 @@ class TimelineGridPainter extends CustomPainter {
     // of text widgets for the timestamps instead of painting them.
     final xOffset = lineX - textPainter.width - timestampOffset;
     if (xOffset > 0) {
-      textPainter.paint(canvas, Offset(xOffset, origin + 5.0));
+      textPainter.paint(
+          canvas, Offset(xOffset, FlameChartPainter.origin + 5.0));
     }
   }
 
   void _paintGridLine(Canvas canvas, double lineX) {
     canvas.drawLine(
-      Offset(lineX, origin),
+      Offset(lineX, FlameChartPainter.origin),
       Offset(lineX, constraints.maxHeight),
       Paint()..color = chartAccentColor,
     );
@@ -731,6 +725,172 @@ class TimelineGridPainter extends CustomPainter {
         flameChartWidth,
         horizontalScrollOffset,
         duration,
+      );
+}
+
+class SelectedFrameForegroundPainter extends FlameChartPainter {
+  SelectedFrameForegroundPainter(
+    this.selectedFrame, {
+    @required double zoom,
+    @required BoxConstraints constraints,
+    @required double verticalScrollOffset,
+    @required double horizontalScrollOffset,
+    @required double chartStartInset,
+    @required this.startTimeOffsetMicros,
+    @required this.startingPxPerMicro,
+    @required this.yForEvent,
+  }) : super(
+          zoom: zoom,
+          constraints: constraints,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
+          chartStartInset: chartStartInset,
+        );
+
+  static const strokeWidth = 4.0;
+  static const bracketWidth = 24.0;
+  static const bracketCurveWidth = 8.0;
+  static const bracketVerticalPadding = 8.0;
+
+  final TimelineFrame selectedFrame;
+
+  final int startTimeOffsetMicros;
+
+  final double startingPxPerMicro;
+
+  final double Function(TimelineEvent) yForEvent;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (selectedFrame == null) return;
+
+    canvas.clipRect(Rect.fromLTWH(
+      FlameChartPainter.origin,
+      rowHeight, // We do not want to paint inside the timestamp section.
+      constraints.maxWidth,
+      constraints.maxHeight - rowHeight,
+    ));
+
+    final paint = Paint()
+      ..color = selectedFrameAccentColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    _paintBrackets(canvas, paint, event: selectedFrame.uiEventFlow);
+    _paintBrackets(canvas, paint, event: selectedFrame.rasterEventFlow);
+  }
+
+  void _paintBrackets(
+    Canvas canvas,
+    Paint paint, {
+    @required TimelineEvent event,
+  }) {
+    final startMicros = event.time.start.inMicroseconds - startTimeOffsetMicros;
+    final endMicros = event.time.end.inMicroseconds - startTimeOffsetMicros;
+    final startPx = startMicros * startingPxPerMicro * zoom + chartStartInset;
+    final endPx = endMicros * startingPxPerMicro * zoom + chartStartInset;
+
+    final startBracketX =
+        startPx - visible.left + (bracketWidth - bracketCurveWidth);
+    final endBracketX =
+        endPx - visible.left - (bracketWidth - bracketCurveWidth);
+    final bracketTopY = yForEvent(event) - visible.top - bracketVerticalPadding;
+    final bracketBottomY = bracketTopY +
+        event.depth * rowHeightWithPadding -
+        rowPadding +
+        bracketVerticalPadding * 2;
+
+    // Draw the start bracket.
+    canvas.drawPath(
+      Path()
+        ..moveTo(startBracketX, bracketTopY)
+        ..lineTo(startBracketX - bracketWidth + bracketCurveWidth, bracketTopY)
+        ..arcTo(
+          Rect.fromLTWH(
+            startBracketX - bracketWidth,
+            bracketTopY,
+            bracketCurveWidth * 2,
+            bracketCurveWidth * 2,
+          ),
+          degToRad(270),
+          degToRad(-90),
+          false,
+        )
+        ..lineTo(
+          startBracketX - bracketWidth,
+          bracketBottomY - bracketWidth,
+        )
+        ..arcTo(
+          Rect.fromLTWH(
+            startBracketX - bracketWidth,
+            bracketBottomY - bracketVerticalPadding * 2,
+            bracketCurveWidth * 2,
+            bracketCurveWidth * 2,
+          ),
+          degToRad(180),
+          degToRad(-90),
+          false,
+        )
+        ..lineTo(startBracketX, bracketBottomY),
+      paint,
+    );
+
+    // Draw the end bracket.
+    canvas.drawPath(
+      Path()
+        ..moveTo(endBracketX, bracketTopY)
+        ..lineTo(endBracketX + bracketWidth - bracketCurveWidth, bracketTopY)
+        ..arcTo(
+          Rect.fromLTWH(
+            endBracketX + bracketWidth - bracketCurveWidth * 2,
+            bracketTopY,
+            bracketCurveWidth * 2,
+            bracketCurveWidth * 2,
+          ),
+          degToRad(270),
+          degToRad(90),
+          false,
+        )
+        ..lineTo(
+          endBracketX + bracketWidth,
+          bracketBottomY - bracketWidth,
+        )
+        ..arcTo(
+          Rect.fromLTWH(
+            endBracketX + bracketWidth - bracketCurveWidth * 2,
+            bracketBottomY - bracketVerticalPadding * 2,
+            bracketCurveWidth * 2,
+            bracketCurveWidth * 2,
+          ),
+          degToRad(0),
+          degToRad(90),
+          false,
+        )
+        ..lineTo(endBracketX, bracketBottomY),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(SelectedFrameForegroundPainter oldDelegate) =>
+      this != oldDelegate;
+
+  @override
+  bool operator ==(other) {
+    return selectedFrame == other.selectedFrame &&
+        zoom == other.zoom &&
+        constraints == other.constraints &&
+        verticalScrollOffset == other.verticalScrollOffset &&
+        horizontalScrollOffset == other.horizontalScrollOffset;
+  }
+
+  @override
+  int get hashCode => hashValues(
+        selectedFrame,
+        zoom,
+        constraints,
+        verticalScrollOffset,
+        horizontalScrollOffset,
       );
 }
 

@@ -965,3 +965,33 @@ class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
     return index;
   }
 }
+
+abstract class FlameChartPainter extends CustomPainter {
+  FlameChartPainter({
+    @required this.zoom,
+    @required this.constraints,
+    @required this.verticalScrollOffset,
+    @required this.horizontalScrollOffset,
+    @required this.chartStartInset,
+  }) : visible = Rect.fromLTWH(
+          horizontalScrollOffset,
+          verticalScrollOffset,
+          constraints.maxWidth,
+          constraints.maxHeight,
+        );
+
+  static const origin = 0.0;
+
+  final double zoom;
+
+  final BoxConstraints constraints;
+
+  final double verticalScrollOffset;
+
+  final double horizontalScrollOffset;
+
+  final double chartStartInset;
+
+  /// The absolute coordinates of the flame chart's visible section.
+  final Rect visible;
+}
