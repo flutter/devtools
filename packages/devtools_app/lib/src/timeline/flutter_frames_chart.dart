@@ -213,6 +213,8 @@ class FlutterFramesChartItem extends StatelessWidget {
 
   static const defaultFrameWidth = 32.0;
 
+  static const selectedIndicatorHeight = 8.0;
+
   final TimelineFrame frame;
 
   final bool selected;
@@ -243,32 +245,41 @@ class FlutterFramesChartItem extends StatelessWidget {
           (frame.rasterDurationMs / msPerPx).clamp(0.0, availableChartHeight),
       color: janky ? rasterJankColor : mainRasterColor,
     );
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: densePadding),
-      color: selected ? selectedFrameBackgroundColor : null,
-      child: Column(
-        children: [
-          // Dummy child so that the InkWell does not take up the entire column.
-          const Expanded(child: SizedBox()),
-          InkWell(
-            // TODO(kenz): make tooltip to persist if the frame is selected.
-            // TODO(kenz): change color on hover.
-            onTap: onSelected,
-            child: Tooltip(
-              message: _tooltipText(frame),
-              padding: const EdgeInsets.all(denseSpacing),
-              preferBelow: false,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  ui,
-                  raster,
-                ],
+    return Stack(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: densePadding),
+          color: selected ? selectedFrameBackgroundColor : null,
+          child: Column(
+            children: [
+              // Dummy child so that the InkWell does not take up the entire column.
+              const Expanded(child: SizedBox()),
+              InkWell(
+                // TODO(kenz): make tooltip to persist if the frame is selected.
+                // TODO(kenz): change color on hover.
+                onTap: onSelected,
+                child: Tooltip(
+                  message: _tooltipText(frame),
+                  padding: const EdgeInsets.all(denseSpacing),
+                  preferBelow: false,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      ui,
+                      raster,
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+        if (selected)
+          Container(
+            color: selectedFrameAccentColor,
+            height: selectedIndicatorHeight,
+          ),
+      ],
     );
   }
 

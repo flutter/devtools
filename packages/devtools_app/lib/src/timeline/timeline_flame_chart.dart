@@ -103,7 +103,9 @@ class TimelineFlameChartState
       final verticalScrollOffset =
           eventGroupStartXValues[widget.data.eventGroups[TimelineData.uiKey]];
       await verticalScrollController.animateTo(
-        verticalScrollOffset,
+        // Subtract [rowHeightWithPadding] to ensure the selection brackets fit
+        // in view.
+        verticalScrollOffset - rowHeightWithPadding,
         duration: shortDuration,
         curve: defaultCurve,
       );
@@ -298,7 +300,7 @@ class TimelineFlameChartState
         ),
       ),
       CustomPaint(
-        painter: SelectedFrameForegroundPainter(
+        painter: SelectedFrameBracketPainter(
           _selectedFrame,
           zoom: zoom,
           constraints: constraints,
@@ -728,8 +730,8 @@ class TimelineGridPainter extends FlameChartPainter {
       );
 }
 
-class SelectedFrameForegroundPainter extends FlameChartPainter {
-  SelectedFrameForegroundPainter(
+class SelectedFrameBracketPainter extends FlameChartPainter {
+  SelectedFrameBracketPainter(
     this.selectedFrame, {
     @required double zoom,
     @required BoxConstraints constraints,
@@ -872,7 +874,7 @@ class SelectedFrameForegroundPainter extends FlameChartPainter {
   }
 
   @override
-  bool shouldRepaint(SelectedFrameForegroundPainter oldDelegate) =>
+  bool shouldRepaint(SelectedFrameBracketPainter oldDelegate) =>
       this != oldDelegate;
 
   @override
