@@ -774,7 +774,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
     ));
 
     final paint = Paint()
-      ..color = selectedFrameAccentColor
+      ..color = timelineSelectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 

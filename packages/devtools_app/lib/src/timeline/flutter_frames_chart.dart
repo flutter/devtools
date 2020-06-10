@@ -215,6 +215,9 @@ class FlutterFramesChartItem extends StatelessWidget {
 
   static const selectedIndicatorHeight = 8.0;
 
+  static const selectedFrameIndicatorKey =
+      Key('flutter frames chart - selected frame indicator');
+
   final TimelineFrame frame;
 
   final bool selected;
@@ -276,7 +279,8 @@ class FlutterFramesChartItem extends StatelessWidget {
         ),
         if (selected)
           Container(
-            color: selectedFrameAccentColor,
+            key: selectedFrameIndicatorKey,
+            color: timelineSelectionColor,
             height: selectedIndicatorHeight,
           ),
       ],

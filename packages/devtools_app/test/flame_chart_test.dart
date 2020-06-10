@@ -8,6 +8,7 @@ import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/theme.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
+import 'package:devtools_app/src/ui/colors.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:devtools_testing/support/timeline_test_data.dart';
@@ -315,7 +316,7 @@ void main() {
         await pumpFlameChartNode(tester, selected: true, hovered: false);
         expect(nodeFinder, findsOneWidget);
         final Container nodeWidget = tester.widget(nodeFinder);
-        expect(nodeWidget.color, equals(lightSelection));
+        expect(nodeWidget.color, equals(timelineSelectionColor));
 
         expect(textFinder, findsOneWidget);
         final Text textWidget = tester.widget(textFinder);

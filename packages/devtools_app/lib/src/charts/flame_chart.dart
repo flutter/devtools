@@ -769,7 +769,6 @@ class FlameChartNode<T> {
         onSelected = ((_) {}),
         selectable = false;
 
-  static const _selectedNodeColor = lightSelection;
   static const _selectedTextColor = Colors.black;
   // We would like this value to be smaller, but zoom performance does not allow
   // for that. We should decrease this value if we can improve flame chart zoom
@@ -840,7 +839,7 @@ class FlameChartNode<T> {
   }
 
   Color _backgroundColor(bool selected) {
-    if (selected) return _selectedNodeColor;
+    if (selected) return timelineSelectionColor;
     return backgroundColor;
   }
 
