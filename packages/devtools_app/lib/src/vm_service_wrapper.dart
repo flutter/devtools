@@ -729,6 +729,19 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
+  Future<ProtocolList> getSupportedProtocols() async {
+    if (await isProtocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 3, minor: 35))) {
+      return _trackFuture(
+        'getSupportedProtocols',
+        _vmService.getSupportedProtocols(),
+      );
+    } else {
+      return null;
+    }
+  }
+
+  @override
   Future<Success> requirePermissionToResume({
     bool onPauseStart,
     bool onPauseReload,

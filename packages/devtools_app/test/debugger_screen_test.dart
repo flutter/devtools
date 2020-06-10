@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:ansicolor/ansicolor.dart';
+import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/debugger/console.dart';
 import 'package:devtools_app/src/debugger/controls.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
@@ -193,7 +193,9 @@ void main() {
     });
 
     testWidgets('Libraries hidden', (WidgetTester tester) async {
-      final scripts = [ScriptRef(uri: 'package:/test/script.dart')];
+      final scripts = [
+        ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
+      ];
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
 
@@ -205,7 +207,9 @@ void main() {
     });
 
     testWidgets('Libraries visible', (WidgetTester tester) async {
-      final scripts = [ScriptRef(uri: 'package:/test/script.dart')];
+      final scripts = [
+        ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
+      ];
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
 
@@ -222,6 +226,7 @@ void main() {
       final breakpoints = [
         Breakpoint(
           breakpointNumber: 1,
+          id: 'bp1',
           resolved: false,
           location: UnresolvedSourceLocation(
             scriptUri: 'package:/test/script.dart',
@@ -265,9 +270,11 @@ void main() {
       final stackFrames = [
         Frame(
           index: 0,
-          code: CodeRef(name: 'testCodeRef', kind: CodeKind.kDart),
+          code: CodeRef(
+              name: 'testCodeRef', id: 'testCodeRef', kind: CodeKind.kDart),
           location: SourceLocation(
-            script: ScriptRef(uri: 'package:/test/script.dart'),
+            script:
+                ScriptRef(uri: 'package:/test/script.dart', id: 'script.dart'),
             tokenPos: 10,
           ),
           kind: FrameKind.kRegular,
@@ -275,7 +282,8 @@ void main() {
         Frame(
           index: 1,
           location: SourceLocation(
-            script: ScriptRef(uri: 'package:/test/script1.dart'),
+            script: ScriptRef(
+                uri: 'package:/test/script1.dart', id: 'script1.dart'),
             tokenPos: 10,
           ),
           kind: FrameKind.kRegular,
@@ -284,10 +292,12 @@ void main() {
           index: 2,
           code: CodeRef(
             name: '[Unoptimized] testCodeRef2',
+            id: 'testCodeRef2',
             kind: CodeKind.kDart,
           ),
           location: SourceLocation(
-            script: ScriptRef(uri: 'package:/test/script2.dart'),
+            script: ScriptRef(
+                uri: 'package:/test/script2.dart', id: 'script2.dart'),
             tokenPos: 10,
           ),
           kind: FrameKind.kRegular,
@@ -296,10 +306,12 @@ void main() {
           index: 3,
           code: CodeRef(
             name: 'testCodeRef3.<anonymous closure>',
+            id: 'testCodeRef3.closure',
             kind: CodeKind.kDart,
           ),
           location: SourceLocation(
-            script: ScriptRef(uri: 'package:/test/script3.dart'),
+            script: ScriptRef(
+                uri: 'package:/test/script3.dart', id: 'script3.dart'),
             tokenPos: 10,
           ),
           kind: FrameKind.kRegular,
@@ -307,7 +319,8 @@ void main() {
         Frame(
           index: 4,
           location: SourceLocation(
-            script: ScriptRef(uri: 'package:/test/script4.dart'),
+            script: ScriptRef(
+                uri: 'package:/test/script4.dart', id: 'script4.dart'),
             tokenPos: 10,
           ),
           kind: FrameKind.kAsyncSuspensionMarker,
@@ -507,8 +520,12 @@ final testVariables = [
   Variable.create(BoundVariable(
     name: 'Root 1',
     value: InstanceRef(
+      id: 'ref1',
       kind: InstanceKind.kList,
-      classRef: ClassRef(name: '_GrowableList'),
+      classRef: ClassRef(
+        name: '_GrowableList',
+        id: 'ref2',
+      ),
       length: 2,
     ),
     declarationTokenPos: null,
@@ -519,8 +536,9 @@ final testVariables = [
       Variable.create(BoundVariable(
         name: '0',
         value: InstanceRef(
+          id: 'ref3',
           kind: InstanceKind.kInt,
-          classRef: ClassRef(name: 'Integer'),
+          classRef: ClassRef(name: 'Integer', id: 'ref4'),
           valueAsString: '3',
           valueAsStringIsTruncated: false,
         ),
@@ -531,8 +549,9 @@ final testVariables = [
       Variable.create(BoundVariable(
         name: '1',
         value: InstanceRef(
+          id: 'ref5',
           kind: InstanceKind.kInt,
-          classRef: ClassRef(name: 'Integer'),
+          classRef: ClassRef(name: 'Integer', id: 'ref6'),
           valueAsString: '4',
           valueAsStringIsTruncated: false,
         ),
@@ -544,8 +563,9 @@ final testVariables = [
   Variable.create(BoundVariable(
     name: 'Root 2',
     value: InstanceRef(
+      id: 'ref7',
       kind: InstanceKind.kMap,
-      classRef: ClassRef(name: '_InternalLinkedHashmap'),
+      classRef: ClassRef(name: '_InternalLinkedHashmap', id: 'ref8'),
       length: 2,
     ),
     declarationTokenPos: null,
@@ -556,8 +576,9 @@ final testVariables = [
       Variable.create(BoundVariable(
         name: "['key1']",
         value: InstanceRef(
+          id: 'ref9',
           kind: InstanceKind.kDouble,
-          classRef: ClassRef(name: 'Double'),
+          classRef: ClassRef(name: 'Double', id: 'ref10'),
           valueAsString: '1.0',
           valueAsStringIsTruncated: false,
         ),
@@ -568,8 +589,9 @@ final testVariables = [
       Variable.create(BoundVariable(
         name: "['key2']",
         value: InstanceRef(
+          id: 'ref11',
           kind: InstanceKind.kDouble,
-          classRef: ClassRef(name: 'Double'),
+          classRef: ClassRef(name: 'Double', id: 'ref12'),
           valueAsString: '1.1',
           valueAsStringIsTruncated: false,
         ),
@@ -581,8 +603,9 @@ final testVariables = [
   Variable.create(BoundVariable(
     name: 'Root 3',
     value: InstanceRef(
+      id: 'ref13',
       kind: InstanceKind.kString,
-      classRef: ClassRef(name: 'String'),
+      classRef: ClassRef(name: 'String', id: 'ref14'),
       valueAsString: 'test str',
       valueAsStringIsTruncated: true,
     ),
@@ -593,8 +616,9 @@ final testVariables = [
   Variable.create(BoundVariable(
     name: 'Root 4',
     value: InstanceRef(
+      id: 'ref15',
       kind: InstanceKind.kBool,
-      classRef: ClassRef(name: 'Boolean'),
+      classRef: ClassRef(name: 'Boolean', id: 'ref16'),
       valueAsString: 'true',
       valueAsStringIsTruncated: false,
     ),
