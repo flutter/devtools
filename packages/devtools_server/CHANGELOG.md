@@ -1,3 +1,6 @@
+## 0.2.6-dev.2
+- Updated package:vm_service to >= 4.1.0
+
 ## 0.2.3
 - Updated package:vm_service to >= 3.0.0
 - Move shared code out of handlers.dart and rename to `external_handlers.dart`
