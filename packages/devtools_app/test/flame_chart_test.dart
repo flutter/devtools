@@ -6,8 +6,8 @@ import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/flutter_widgets/linked_scroll_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_flame_chart.dart';
+import 'package:devtools_app/src/theme.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
-import 'package:devtools_app/src/ui/colors.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:devtools_testing/support/timeline_test_data.dart';
@@ -244,8 +244,8 @@ void main() {
       expect(rowState.binarySearchForNode(10.0), equals(labelNode));
       expect(rowState.binarySearchForNode(49.0), isNull);
       expect(rowState.binarySearchForNode(70.0), equals(testNode));
-      expect(rowState.binarySearchForNode(114.0), equals(testNode));
-      expect(rowState.binarySearchForNode(114.1), isNull);
+      expect(rowState.binarySearchForNode(130.0), equals(testNode));
+      expect(rowState.binarySearchForNode(130.1), isNull);
       expect(rowState.binarySearchForNode(169.9), isNull);
       expect(rowState.binarySearchForNode(170.0), equals(testNode2));
       expect(rowState.binarySearchForNode(270.0), equals(testNode2));
@@ -306,6 +306,7 @@ void main() {
           ],
         ),
       ));
+      await tester.pumpAndSettle();
     }
 
     testWidgets(
@@ -314,16 +315,12 @@ void main() {
         await pumpFlameChartNode(tester, selected: true, hovered: false);
         expect(nodeFinder, findsOneWidget);
         final Container nodeWidget = tester.widget(nodeFinder);
-        expect(
-          (nodeWidget.decoration as BoxDecoration).color,
-          equals(mainUiColorSelectedLight),
-        );
+        expect(nodeWidget.color, equals(lightSelection));
 
         expect(textFinder, findsOneWidget);
         final Text textWidget = tester.widget(textFinder);
         expect(textWidget.style.color, equals(Colors.black));
       },
-      skip: true,
     );
 
     testWidgets(
@@ -333,16 +330,12 @@ void main() {
 
         expect(nodeFinder, findsOneWidget);
         final Container nodeWidget = tester.widget(nodeFinder);
-        expect(
-          (nodeWidget.decoration as BoxDecoration).color,
-          equals(Colors.blue),
-        );
+        expect(nodeWidget.color, equals(Colors.blue));
 
         expect(textFinder, findsOneWidget);
         final Text textWidget = tester.widget(textFinder);
         expect(textWidget.style.color, equals(Colors.white));
       },
-      skip: true,
     );
 
     testWidgets('builds tooltip for hovered state',
@@ -409,7 +402,7 @@ void main() {
       );
       expect(nodeFinder, findsOneWidget);
       Container nodeWidget = tester.widget(nodeFinder);
-      expect(nodeWidget.constraints.maxWidth, equals(44.0));
+      expect(nodeWidget.constraints.maxWidth, equals(60.0));
 
       await pumpFlameChartNode(
         tester,
@@ -419,7 +412,7 @@ void main() {
       );
       expect(nodeFinder, findsOneWidget);
       nodeWidget = tester.widget(nodeFinder);
-      expect(nodeWidget.constraints.maxWidth, equals(55.0));
+      expect(nodeWidget.constraints.maxWidth, equals(75.0));
     });
   });
 
@@ -537,7 +530,7 @@ void main() {
       expect(
           FlameChartUtils.rightPaddingForNode(1, testNodesWithLabel,
               chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
-          equals(28.0));
+          equals(20.0));
       expect(
           FlameChartUtils.rightPaddingForNode(2, testNodesWithLabel,
               chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
@@ -555,7 +548,7 @@ void main() {
       expect(
           FlameChartUtils.rightPaddingForNode(0, testNodesWithoutLabel,
               chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
-          equals(28.0));
+          equals(20.0));
       expect(
           FlameChartUtils.rightPaddingForNode(1, testNodesWithoutLabel,
               chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
@@ -601,7 +594,7 @@ void main() {
       expect(
           FlameChartUtils.rightPaddingForNode(1, testNodesWithLabel,
               chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
-          equals(56.0));
+          equals(40.0));
       expect(
           FlameChartUtils.rightPaddingForNode(2, testNodesWithLabel,
               chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
@@ -641,7 +634,7 @@ final labelNode = FlameChartNode<TimelineEvent>(
   key: labelNodeKey,
   text: 'label test node',
   tooltip: 'label test node',
-  // 22.0 is the minimum node width for text.
+  // 30.0 is the minimum node width for text.
   rect: const Rect.fromLTWH(2.0, 0.0, 20.0, rowHeight),
   backgroundColor: Colors.blue,
   textColor: Colors.white,
@@ -655,8 +648,8 @@ final testNode = FlameChartNode<TimelineEvent>(
   key: testNodeKey,
   text: 'Test node 1',
   tooltip: 'Test node 1 tooltip',
-  // 22.0 is the minimum node width for text.
-  rect: const Rect.fromLTWH(70.0, 0.0, 22.0, rowHeight),
+  // 30.0 is the minimum node width for text.
+  rect: const Rect.fromLTWH(70.0, 0.0, 30.0, rowHeight),
   backgroundColor: Colors.blue,
   textColor: Colors.white,
   data: goldenAsyncTimelineEvent,

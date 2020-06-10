@@ -18,12 +18,6 @@ const mainRasterColor = Color(0xFF2C5DAA);
 const mainUnknownColor = Color(0xFFCAB8E9);
 const mainAsyncColor = Color(0xFF80CBC4);
 
-const mainUiColorSelectedLight = Color(0xFFD4D7DA); // Lighter grey.
-const mainRasterColorSelectedLight = Color(0xFFB5B5B5); // Darker grey.
-
-const mainUiColorSelectedDark = Colors.white;
-const mainRasterColorSelectedDark = Color(0xFFC9C9C9); // Grey.
-
 final uiColorPalette = [
   mainUiColor,
   const Color(0xFF6793CD),
@@ -50,20 +44,8 @@ const unknownColorPalette = [
   Color(0xFF9D84CA),
 ];
 
-const selectedFlameChartItemColor = ThemedColor(
-  mainUiColorSelectedLight,
-  mainUiColorSelectedLight,
-);
-
 const uiJankColor = Color(0xFFF5846B);
 const rasterJankColor = Color(0xFFC3595A);
-
-// Red 50 - 400 is light at 1/2 opacity, Dark Red 500 Material Dark.
-const Color highwater16msColor = mainUiColorSelectedLight;
-
-const Color hoverTextHighContrastColor = Colors.white;
-
-const Color hoverTextColor = Colors.black;
 
 const treeGuidelineColor = ThemedColor(
   Colors.black54,
