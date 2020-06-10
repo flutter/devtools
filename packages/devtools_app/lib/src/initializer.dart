@@ -76,7 +76,9 @@ class _InitializerState extends State<Initializer>
     // If we become disconnected, attempt to reconnect.
     autoDispose(
       serviceManager.onStateChange.where((connected) => !connected).listen((_) {
-        _handleNoConnection();
+        // Try to reconnect (otherwise, will fall back to showing the disconnected
+        // overlay).
+        _attemptUrlConnection();
       }),
     );
     // Trigger a rebuild when the connection becomes available. This is done
