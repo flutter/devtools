@@ -10,9 +10,9 @@ void main() {
   group('ScriptsHistory', () {
     ScriptsHistory history;
 
-    final ScriptRef ref1 = ScriptRef(uri: 'package:foo/foo.dart')..id = 'id-1';
-    final ScriptRef ref2 = ScriptRef(uri: 'package:bar/bar.dart')..id = 'id-2';
-    final ScriptRef ref3 = ScriptRef(uri: 'package:baz/baz.dart')..id = 'id-3';
+    final ScriptRef ref1 = ScriptRef(uri: 'package:foo/foo.dart', id: 'id-1');
+    final ScriptRef ref2 = ScriptRef(uri: 'package:bar/bar.dart', id: 'id-2');
+    final ScriptRef ref3 = ScriptRef(uri: 'package:baz/baz.dart', id: 'id-3');
 
     setUp(() {
       history = ScriptsHistory();
