@@ -554,16 +554,17 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
             ),
           ),
         ),
-        const SizedBox(width: denseSpacing),
-        OutlineButton(
-          key: settingsButtonKey,
-          onPressed: _settings,
-          child: const MaterialIconLabel(
-            Icons.settings,
-            'Settings',
-            includeTextWidth: 200,
-          ),
-        ),
+        // TODO: Add these back in when _settings() is implemented.
+//        const SizedBox(width: denseSpacing),
+//        OutlineButton(
+//          key: settingsButtonKey,
+//          onPressed: _settings,
+//          child: const MaterialIconLabel(
+//            Icons.tune,
+//            'Settings',
+//            includeTextWidth: 200,
+//          ),
+//        ),
       ],
     );
   }
@@ -717,6 +718,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     setState(() {});
   }
 
+  // ignore: unused_element
   void _settings() {
     // TODO(terry): TBD
   }
