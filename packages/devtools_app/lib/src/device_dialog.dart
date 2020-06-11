@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
 import 'connected_app.dart';
+import 'dialogs.dart';
 import 'globals.dart';
 import 'info/info_controller.dart';
 import 'table.dart';
@@ -58,16 +59,12 @@ class DeviceDialog extends StatelessWidget {
           '${flutterVersion.engineRevision}';
     }
 
-    return AlertDialog(
-      actions: [
-        if (connectedApp.isRunningOnDartVM) _ViewVMFlagsButton(),
-        DialogCloseButton(),
-      ],
+    return DevToolsDialog(
+      title: dialogTitleText(theme, 'Device Info'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...headerInColumn(theme.textTheme, 'Device Info'),
           for (var name in items.keys)
             Padding(
               padding: const EdgeInsets.only(bottom: denseRowSpacing),
@@ -80,6 +77,10 @@ class DeviceDialog extends StatelessWidget {
             ),
         ],
       ),
+      actions: [
+        if (connectedApp.isRunningOnDartVM) _ViewVMFlagsButton(),
+        DialogCloseButton(),
+      ],
     );
   }
 }
@@ -154,36 +155,31 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
 
-    return AlertDialog(
-      actions: [
-        DialogCloseButton(),
-      ],
+    return DevToolsDialog(
+      title: Row(
+        children: [
+          dialogTitleText(theme, 'VM Flags'),
+          const Expanded(child: SizedBox(width: denseSpacing)),
+          Container(
+            width: defaultSearchTextWidth,
+            height: defaultSearchTextHeight,
+            child: TextField(
+              controller: filterController,
+              decoration: const InputDecoration(
+                isDense: true,
+                border: OutlineInputBorder(),
+                labelText: 'Filter',
+              ),
+            ),
+          ),
+        ],
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text('VM Flags', style: textTheme.headline6),
-              const Expanded(child: SizedBox(width: denseSpacing)),
-              Container(
-                width: defaultSearchTextWidth,
-                height: defaultSearchTextHeight,
-                child: TextField(
-                  controller: filterController,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    border: OutlineInputBorder(),
-                    labelText: 'Filter',
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const PaddedDivider(
-              padding: EdgeInsets.only(bottom: denseRowSpacing)),
           SizedBox(
             width: 875,
             height: 375,
@@ -191,6 +187,9 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
           ),
         ],
       ),
+      actions: [
+        DialogCloseButton(),
+      ],
     );
   }
 

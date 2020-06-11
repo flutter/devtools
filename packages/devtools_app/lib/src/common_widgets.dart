@@ -24,20 +24,6 @@ const defaultDialogRadius = 20.0;
 
 const areaPaneHeaderHeight = 36.0;
 
-List<Widget> headerInColumn(TextTheme textTheme, String title) {
-  return [
-    Text(title, style: textTheme.headline6),
-    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
-  ];
-}
-
-List<Widget> subHeaderInColumn(TextTheme textTheme, String title) {
-  return [
-    Text(title, style: textTheme.subtitle2),
-    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
-  ];
-}
-
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
@@ -496,19 +482,6 @@ SizedBox areaPaneHeader(
       ),
     ),
   );
-}
-
-/// A FlatButton used to close a containing dialog.
-class DialogCloseButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return FlatButton(
-      onPressed: () {
-        Navigator.of(context, rootNavigator: true).pop('dialog');
-      },
-      child: const Text('CLOSE'),
-    );
-  }
 }
 
 /// Toggle button for use as a child of a [ToggleButtons] widget.
