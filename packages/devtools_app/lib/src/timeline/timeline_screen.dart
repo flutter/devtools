@@ -253,7 +253,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         ActionButton(
           child: OutlineButton(
             child: const Icon(
-              Icons.more_vert,
+              Icons.tune,
               size: defaultIconSize,
             ),
             onPressed: _openSettingsDialog,

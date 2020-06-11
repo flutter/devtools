@@ -79,7 +79,7 @@ class ServiceExtensionDescription<T> {
 final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugAllowBanner',
   description: 'Debug Banner',
-  icon: createImageIcon('icons/debug_banner.png'),
+  icon: createImageIcon('icons/debug_banner@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Hide Debug Banner',
@@ -91,7 +91,7 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
 final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaint',
   description: 'Debug Paint',
-  icon: createImageIcon('icons/debug_paint.png'),
+  icon: createImageIcon('icons/debug_paint@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Hide Debug Paint',
@@ -103,7 +103,7 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
 final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaintBaselinesEnabled',
   description: 'Paint Baselines',
-  icon: createImageIcon('icons/inspector/textArea.png'),
+  icon: createImageIcon('icons/inspector/textArea@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Hide Paint Baselines',
@@ -115,7 +115,7 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
 final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.showPerformanceOverlay',
   description: 'Performance Overlay',
-  icon: createImageIcon('icons/general/performance_overlay.png'),
+  icon: createImageIcon('icons/general/performance_overlay@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Hide Performance Overlay',
@@ -127,7 +127,7 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
   description: 'Track Widget Builds',
-  icon: createImageIcon('icons/widget_tree.png'),
+  icon: createImageIcon('icons/widget_tree@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Disable tracking widget builds',
@@ -139,7 +139,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.repaintRainbow',
   description: 'Repaint Rainbow',
-  icon: createImageIcon('icons/repaint_rainbow.png'),
+  icon: createImageIcon('icons/repaint_rainbow@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Hide Repaint Rainbow',
@@ -151,7 +151,7 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
 final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   extension: 'ext.flutter.timeDilation',
   description: 'Slow Animations',
-  icon: createImageIcon('icons/history.png'),
+  icon: createImageIcon('icons/history@2x.png'),
   enabledValue: 5.0,
   disabledValue: 1.0,
   enabledTooltip: 'Disable Slow Animations',
@@ -163,7 +163,7 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>._(
 final togglePlatformMode = ServiceExtensionDescription<String>(
   extension: 'ext.flutter.platformOverride',
   description: 'Override target platform',
-  icon: createImageIcon('icons/phone.png'),
+  icon: createImageIcon('icons/phone@2x.png'),
   values: ['iOS', 'android', 'fuchsia', 'macOS', 'linux'],
   displayValues: [
     'Platform: iOS',
@@ -185,7 +185,7 @@ final toggleOnDeviceWidgetInspector =
   // versions of package:flutter it makes sense to describe this extension as
   // toggling widget select mode as it is the only way to toggle that mode.
   description: 'Select Widget Mode',
-  icon: createImageIcon('icons/general/locate.png'),
+  icon: createImageIcon('icons/general/locate@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Disable select widget mode',
@@ -199,7 +199,7 @@ final toggleOnDeviceWidgetInspector =
 final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.selectMode',
   description: 'Select widget mode',
-  icon: createImageIcon('icons/general/locate.png'),
+  icon: createImageIcon('icons/general/locate@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Exit select widget mode',
@@ -216,7 +216,7 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
 final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.enable',
   description: 'Enable on-device inspector',
-  icon: createImageIcon('icons/general/locate.png'),
+  icon: createImageIcon('icons/general/locate@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Exit on-device inspector',
@@ -228,7 +228,7 @@ final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
 final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.structuredErrors',
   description: 'Show structured errors',
-  icon: createImageIcon('icons/perf/RedExcl.png'),
+  icon: createImageIcon('icons/perf/RedExcl@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Disable structured errors for Flutter framework issues',
