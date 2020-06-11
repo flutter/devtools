@@ -54,7 +54,7 @@ class DeviceDialog extends StatelessWidget {
 
     if (flutterVersion != null) {
       items['Flutter Version'] =
-      '${flutterVersion.version} / ${flutterVersion.channel}';
+          '${flutterVersion.version} / ${flutterVersion.channel}';
       items['Framework / Engine'] = '${flutterVersion.frameworkRevision} / '
           '${flutterVersion.engineRevision}';
     }
@@ -255,8 +255,8 @@ class _ValueColumn extends ColumnData<_DialogFlag> {
 class _DialogFlag {
   _DialogFlag(this.flag)
       : filterText = '${flag.name.toLowerCase()}\n'
-      '${flag.comment.toLowerCase()}\n'
-      '${flag.valueAsString.toLowerCase()}';
+            '${flag.comment.toLowerCase()}\n'
+            '${flag.valueAsString.toLowerCase()}';
 
   final Flag flag;
   final String filterText;
