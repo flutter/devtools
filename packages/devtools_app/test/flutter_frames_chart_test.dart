@@ -29,7 +29,7 @@ void main() {
     expect(find.byType(FlutterFramesChart), findsOneWidget);
   }
 
-  group('TimelineScreen', () {
+  group('FlutterFramesChart', () {
     setUp(() async {
       setGlobal(
           ServiceConnectionManager, FakeServiceManager(useFakeService: true));
@@ -58,6 +58,38 @@ void main() {
           tester.widget(find.byKey(const Key('frame jankyFrame - raster')))
               as Container;
       expect(raster.color, equals(rasterJankColor));
+    });
+  });
+
+  group('FlutterFramesChartItem', () {
+    testWidgets('builds for selected frame', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        // FlutterFramesChartItem needs to be wrapped in Material,
+        // Directionality, and Overlay in order to pump the widget and test.
+        Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Overlay(
+              initialEntries: [
+                OverlayEntry(
+                  builder: (context) {
+                    return FlutterFramesChartItem(
+                      frame: testFrame0,
+                      selected: true,
+                      onSelected: () {},
+                      msPerPx: 1,
+                      availableChartHeight: 100.0,
+                      displayRefreshRate: defaultRefreshRate,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(find.byKey(FlutterFramesChartItem.selectedFrameIndicatorKey),
+          findsOneWidget);
     });
   });
 }

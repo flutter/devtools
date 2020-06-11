@@ -792,3 +792,6 @@ extension LogicalKeySetExtension on LogicalKeySet {
     }).join();
   }
 }
+
+// Method to convert degrees to radians
+num degToRad(num deg) => deg * (pi / 180.0);

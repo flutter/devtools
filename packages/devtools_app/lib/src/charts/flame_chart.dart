@@ -769,7 +769,6 @@ class FlameChartNode<T> {
         onSelected = ((_) {}),
         selectable = false;
 
-  static const _selectedNodeColor = lightSelection;
   static const _selectedTextColor = Colors.black;
   // We would like this value to be smaller, but zoom performance does not allow
   // for that. We should decrease this value if we can improve flame chart zoom
@@ -840,7 +839,7 @@ class FlameChartNode<T> {
   }
 
   Color _backgroundColor(bool selected) {
-    if (selected) return _selectedNodeColor;
+    if (selected) return timelineSelectionColor;
     return backgroundColor;
   }
 
@@ -964,4 +963,32 @@ class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
     assert(nodeIntervals[index].begin < endScrollOffset);
     return index;
   }
+}
+
+abstract class FlameChartPainter extends CustomPainter {
+  FlameChartPainter({
+    @required this.zoom,
+    @required this.constraints,
+    @required this.verticalScrollOffset,
+    @required this.horizontalScrollOffset,
+    @required this.chartStartInset,
+  }) : visible = Rect.fromLTWH(
+          horizontalScrollOffset,
+          verticalScrollOffset,
+          constraints.maxWidth,
+          constraints.maxHeight,
+        );
+
+  final double zoom;
+
+  final BoxConstraints constraints;
+
+  final double verticalScrollOffset;
+
+  final double horizontalScrollOffset;
+
+  final double chartStartInset;
+
+  /// The absolute coordinates of the flame chart's visible section.
+  final Rect visible;
 }

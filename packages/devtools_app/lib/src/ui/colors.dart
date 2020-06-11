@@ -30,7 +30,7 @@ final rasterColorPalette = [
 
 const selectedFrameBackgroundColor =
     ThemedColor(Color(0xFFDBDDDD), Color(0xFF4E4F4F));
-const selectedFrameAccentColor = Color(0xFF36C6F4);
+const timelineSelectionColor = Color(0xFF36C6F4);
 
 // Teal 200, 400 - see https://material.io/design/color/#tools-for-picking-colors.
 const asyncColorPalette = [
