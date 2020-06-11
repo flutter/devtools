@@ -321,7 +321,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
           key: MemoryScreen.resetButtonKey,
           onPressed: _reset,
           child: const MaterialIconLabel(
-            Icons.settings_backup_restore,
+            Icons.restore,
             'Reset',
             includeTextWidth: _primaryControlsMinVerboseWidth,
           ),
@@ -331,7 +331,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
           key: MemoryScreen.gcButtonKey,
           onPressed: controller.isGcing ? null : _gc,
           child: const MaterialIconLabel(
-            Icons.delete_sweep,
+            Icons.delete,
             'GC',
             includeTextWidth: _primaryControlsMinVerboseWidth,
           ),
