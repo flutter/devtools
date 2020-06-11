@@ -4,28 +4,28 @@ MaterialApp
  └─ScrollConfiguration
    │ behavior: _MaterialScrollBehavior
    │
-   └─WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]
-     │ state: _WidgetsAppState#00000
-     │
-     └─Shortcuts
-       │ shortcuts: <Default WidgetsApp Shortcuts>
-       │ state: _ShortcutsState#00000
+   └─HeroControllerScope
+     └─WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]
+       │ state: _WidgetsAppState#00000
        │
-       └─Focus
-         │ debugLabel: "Shortcuts"
-         │ state: _FocusState#00000
+       └─Shortcuts
+         │ shortcuts: <Default WidgetsApp Shortcuts>
+         │ state: _ShortcutsState#00000
          │
-         └─_FocusMarker
-           └─Semantics
-             │ container: false
-             │ properties: SemanticsProperties
-             │ label: null
-             │ value: null
-             │ hint: null
-             │ hintOverrides: null
-             │ renderObject: RenderSemanticsAnnotations#00000
-             │
-             └─_ShortcutsMarker
-               └─Actions
-                 │ dispatcher: null
+         └─Focus
+           │ debugLabel: "Shortcuts"
+           │ state: _FocusState#00000
+           │
+           └─_FocusMarker
+             └─Semantics
+               │ container: false
+               │ properties: SemanticsProperties
+               │ label: null
+               │ value: null
+               │ hint: null
+               │ hintOverrides: null
+               │ renderObject: RenderSemanticsAnnotations#00000
+               │
+               └─_ShortcutsMarker
+                 └─Actions
 ...
