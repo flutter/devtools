@@ -71,5 +71,21 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgetsWithWindowSize(
+        'builds flame chart with selected frame', windowSize,
+        (WidgetTester tester) async {
+      final controller = TimelineController();
+      await pumpTimelineBody(tester, controller);
+      expect(controller.data.frames.length, equals(1));
+      controller.selectFrame(controller.data.frames.first);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TimelineFlameChart), findsOneWidget);
+      expect(
+          find.byType(TimelineFlameChart),
+          matchesGoldenFile(
+              'goldens/timeline_flame_chart_with_selected_frame.png'));
+    });
   });
 }
