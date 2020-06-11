@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import 'theme.dart';
 import 'ui/icons.dart';
 
 class RegisteredServiceDescription {
@@ -15,7 +16,7 @@ class RegisteredServiceDescription {
 
   final String service;
   final String title;
-  final Image icon;
+  final Widget icon;
 }
 
 /// Hot reload service registered by Flutter Tools.
@@ -24,16 +25,19 @@ class RegisteredServiceDescription {
 final hotReload = RegisteredServiceDescription._(
   service: 'reloadSources',
   title: 'Hot Reload',
-  icon: createImageIcon('icons/hot-reload-white.png'),
+  icon: createImageIcon(
+    'icons/hot-reload-white@2x.png',
+    size: defaultIconThemeSize,
+  ),
 );
 
 /// Hot restart service registered by Flutter Tools.
 ///
 /// We call this service to perform a hot restart.
-final hotRestart = RegisteredServiceDescription._(
+const hotRestart = RegisteredServiceDescription._(
   service: 'hotRestart',
   title: 'Hot Restart',
-  icon: createImageIcon('icons/hot-restart-white.png'),
+  icon: Icon(Icons.settings_backup_restore),
 );
 
 /// Flutter version service registered by Flutter Tools.

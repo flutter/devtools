@@ -12,6 +12,7 @@ import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
 import '../config_specific/import_export/import_export.dart';
+import '../dialogs.dart';
 import '../globals.dart';
 import '../notifications.dart';
 import '../octicons.dart';
@@ -252,7 +253,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         ActionButton(
           child: OutlineButton(
             child: const Icon(
-              Icons.more_vert,
+              Icons.tune,
               size: defaultIconSize,
             ),
             onPressed: _openSettingsDialog,
@@ -354,22 +355,24 @@ class TimelineConfigurationsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Dialog(
-      child: Container(
+
+    return DevToolsDialog(
+      title: dialogTitleText(theme, 'Recorded Streams'),
+      content: Container(
         width: dialogWidth,
-        padding: const EdgeInsets.all(defaultSpacing),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...headerInColumn(theme.textTheme, 'Recorded Streams'),
             ..._defaultRecordedStreams(theme),
             const SizedBox(height: denseSpacing),
-            ...subHeaderInColumn(theme.textTheme, 'Advanced'),
+            ...dialogSubHeader(theme, 'Advanced'),
             ..._advancedStreams(theme),
           ],
         ),
       ),
+      actions: [
+        DialogCloseButton(),
+      ],
     );
   }
 

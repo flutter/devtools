@@ -12,6 +12,7 @@ import 'common_widgets.dart';
 import 'connect_screen.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/debugger_screen.dart';
+import 'dialogs.dart';
 import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'initializer.dart';
@@ -334,29 +335,29 @@ class OpenSettingsAction extends StatelessWidget {
 class DevToolsAboutDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
 
-    return AlertDialog(
-      actions: [
-        DialogCloseButton(),
-      ],
+    return DevToolsDialog(
+      title: dialogTitleText(theme, 'About DevTools'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...headerInColumn(textTheme, 'About DevTools'),
           _aboutDevTools(context),
           const SizedBox(height: defaultSpacing),
-          ...headerInColumn(textTheme, 'Feedback'),
+          ...dialogSubHeader(theme, 'Feedback'),
           Wrap(
             children: [
               const Text('Encountered an issue? Let us know at '),
-              _createFeedbackLink(context, textTheme),
+              _createFeedbackLink(context),
               const Text('.')
             ],
           ),
         ],
       ),
+      actions: [
+        DialogCloseButton(),
+      ],
     );
   }
 
@@ -364,7 +365,7 @@ class DevToolsAboutDialog extends StatelessWidget {
     return const SelectableText('DevTools version ${devtools.version}');
   }
 
-  Widget _createFeedbackLink(BuildContext context, TextTheme textTheme) {
+  Widget _createFeedbackLink(BuildContext context) {
     const urlPath = 'github.com/flutter/devtools/issues';
 
     return InkWell(
@@ -387,15 +388,12 @@ class SettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final preferences = DevToolsApp.of(context).preferences;
 
-    return AlertDialog(
-      actions: [
-        DialogCloseButton(),
-      ],
+    return DevToolsDialog(
+      title: dialogTitleText(Theme.of(context), 'Settings'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...headerInColumn(Theme.of(context).textTheme, 'Settings'),
           InkWell(
             onTap: () {
               preferences.toggleDarkModeTheme(!preferences.darkModeTheme.value);
@@ -419,6 +417,9 @@ class SettingsDialog extends StatelessWidget {
           ),
         ],
       ),
+      actions: [
+        DialogCloseButton(),
+      ],
     );
   }
 }

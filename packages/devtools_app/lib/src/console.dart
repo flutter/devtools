@@ -135,38 +135,6 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
 
 // CONTROLS
 
-/// A pre-configured IconButton that fits the ux of the Console widget.
-///
-/// The customizations are:
-///  * Icon size: [actionsIconSize]
-///  * Do not show [tooltip] if the button is disabled
-///  * [VisualDensity.compact]
-class ConsoleControl extends StatelessWidget {
-  const ConsoleControl({
-    this.icon,
-    this.tooltip,
-    this.onPressed,
-    this.buttonKey,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onPressed;
-  final Key buttonKey;
-
-  @override
-  Widget build(BuildContext context) {
-    final disabled = onPressed == null;
-    return IconButton(
-      icon: Icon(icon, size: actionsIconSize),
-      onPressed: onPressed,
-      tooltip: disabled ? null : tooltip,
-      visualDensity: VisualDensity.compact,
-      key: buttonKey,
-    );
-  }
-}
-
 /// A Console Control to "delete" the contents of the console.
 ///
 /// This just preconfigures a ConsoleControl with the `delete` icon,
@@ -184,11 +152,11 @@ class DeleteControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConsoleControl(
+    return ToolbarAction(
       icon: Icons.delete,
       tooltip: tooltip,
       onPressed: onPressed,
-      buttonKey: buttonKey,
+      key: buttonKey,
     );
   }
 }
@@ -215,13 +183,13 @@ class CopyToClipboardControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final disabled = dataProvider == null;
-    return ConsoleControl(
+    return ToolbarAction(
       icon: Icons.content_copy,
       tooltip: tooltip,
       onPressed: disabled
           ? null
           : () => copyToClipboard(dataProvider(), successMessage, context),
-      buttonKey: buttonKey,
+      key: buttonKey,
     );
   }
 }

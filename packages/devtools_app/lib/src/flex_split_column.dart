@@ -43,7 +43,7 @@ class FlexSplitColumn extends StatelessWidget {
   /// creators of [FlexSplitColumn] can be unaware of the under-the-hood
   /// calculations necessary to achieve the UI requirements specified by
   /// [initialFractions] and [minSizes].
-  final List<FlexSplitColumnHeader> headers;
+  final List<SizedBox> headers;
 
   /// The children that will be laid out below each corresponding header in
   /// [headers].
@@ -71,7 +71,7 @@ class FlexSplitColumn extends StatelessWidget {
   @visibleForTesting
   static List<Widget> buildChildrenWithFirstHeader(
     List<Widget> children,
-    List<FlexSplitColumnHeader> headers,
+    List<SizedBox> headers,
   ) {
     return [
       Column(
@@ -87,7 +87,7 @@ class FlexSplitColumn extends StatelessWidget {
   @visibleForTesting
   static List<double> modifyInitialFractionsToIncludeFirstHeader(
     List<double> initialFractions,
-    List<FlexSplitColumnHeader> headers,
+    List<SizedBox> headers,
     double totalHeight,
   ) {
     var totalHeaderHeight = 0.0;
@@ -110,7 +110,7 @@ class FlexSplitColumn extends StatelessWidget {
   @visibleForTesting
   static List<double> modifyMinSizesToIncludeFirstHeader(
     List<double> minSizes,
-    List<FlexSplitColumnHeader> headers,
+    List<SizedBox> headers,
   ) {
     return [
       minSizes[0] + headers[0].height,
@@ -128,12 +128,4 @@ class FlexSplitColumn extends StatelessWidget {
       splitters: headers.sublist(1),
     );
   }
-}
-
-// TODO(kenz): add support for arbitrarily sized widgets.
-class FlexSplitColumnHeader extends SizedBox {
-  const FlexSplitColumnHeader({
-    @required double height,
-    @required Widget child,
-  }) : super(height: height, child: child);
 }

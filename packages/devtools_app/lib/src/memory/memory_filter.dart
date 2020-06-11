@@ -6,9 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
+import '../dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
-import '../ui/dialog.dart';
 import '../ui/utils.dart';
 import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';
@@ -260,7 +259,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
 
   Widget okCancelButtons() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         DialogOkButton(
           () {
@@ -312,10 +311,9 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     //      - one list of libraries with at least 5 entries
     //      - one row of buttons Ok/Cancel
     // For very tall app keep the dialog at a reasonable height w/o too much vertical whitespace.
-    // The listbox area is the area that grows to accomodate the list of known libraries.
+    // The listbox area is the area that grows to accommodate the list of known libraries.
+    // TODO(devoncarew): Convert to a DevToolsDialog.
     return Dialog(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(defaultDialogRadius)),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           return Container(

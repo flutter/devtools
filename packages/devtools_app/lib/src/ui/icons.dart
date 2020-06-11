@@ -243,10 +243,10 @@ class FlutterMaterialIcons {
   }
 }
 
-Image createImageIcon(String url) {
+Image createImageIcon(String url, {double size = defaultIconSize}) {
   return Image(
     image: AssetImage(url),
-    height: defaultIconSize,
-    width: defaultIconSize,
+    height: size,
+    width: size,
   );
 }

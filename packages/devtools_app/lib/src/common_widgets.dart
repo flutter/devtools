@@ -22,19 +22,7 @@ const mediumDeviceWidth = 1000.0;
 
 const defaultDialogRadius = 20.0;
 
-List<Widget> headerInColumn(TextTheme textTheme, String title) {
-  return [
-    Text(title, style: textTheme.headline6),
-    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
-  ];
-}
-
-List<Widget> subHeaderInColumn(TextTheme textTheme, String title) {
-  return [
-    Text(title, style: textTheme.subtitle2),
-    const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
-  ];
-}
+const areaPaneHeaderHeight = 36.0;
 
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
@@ -418,17 +406,82 @@ class ActionButton extends StatelessWidget {
   }
 }
 
-/// A FlatButton used to close a containing dialog.
-class DialogCloseButton extends StatelessWidget {
+/// A wrapper around a FlatButton, an Icon, and an optional Tooltip; used for
+/// small toolbar actions.
+class ToolbarAction extends StatelessWidget {
+  const ToolbarAction({
+    @required this.icon,
+    @required this.onPressed,
+    this.tooltip,
+    Key key,
+  }) : super(key: key);
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      onPressed: () {
-        Navigator.of(context, rootNavigator: true).pop('dialog');
-      },
-      child: const Text('CLOSE'),
+    final button = FlatButton(
+      padding: EdgeInsets.zero,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      onPressed: onPressed,
+      child: Icon(icon, size: actionsIconSize),
     );
+
+    return tooltip == null
+        ? button
+        : Tooltip(
+            message: tooltip,
+            waitDuration: tooltipWait,
+            child: button,
+          );
   }
+}
+
+/// Create a bordered, fixed-height header area with a title and optional child
+/// on the right-hand side.
+///
+/// This is typically used as a title for a logical area of the screen.
+// TODO(devoncarew): Refactor this into an 'AreaPaneHeader' widget.
+SizedBox areaPaneHeader(
+  BuildContext context, {
+  @required String title,
+  bool needsTopBorder = true,
+  List<Widget> actions = const [],
+  double rightPadding = densePadding,
+}) {
+  final theme = Theme.of(context);
+
+  return SizedBox(
+    height: areaPaneHeaderHeight,
+    child: Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: needsTopBorder
+              ? BorderSide(color: theme.focusColor)
+              : BorderSide.none,
+          bottom: BorderSide(color: theme.focusColor),
+        ),
+        color: titleSolidBackgroundColor(theme),
+      ),
+      padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
+      alignment: Alignment.centerLeft,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.subtitle2,
+            ),
+          ),
+          ...actions,
+        ],
+      ),
+    ),
+  );
 }
 
 /// Toggle button for use as a child of a [ToggleButtons] widget.
