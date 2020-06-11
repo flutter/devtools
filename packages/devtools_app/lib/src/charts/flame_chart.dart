@@ -979,8 +979,6 @@ abstract class FlameChartPainter extends CustomPainter {
           constraints.maxHeight,
         );
 
-  static const origin = 0.0;
-
   final double zoom;
 
   final BoxConstraints constraints;

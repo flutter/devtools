@@ -613,8 +613,8 @@ class TimelineGridPainter extends FlameChartPainter {
     // section will appear sticky to the top of the viewport.
     canvas.drawRect(
       Rect.fromLTWH(
-        FlameChartPainter.origin,
-        FlameChartPainter.origin,
+        0.0,
+        0.0,
         constraints.maxWidth,
         math.min(constraints.maxHeight, rowHeight),
       ),
@@ -666,14 +666,13 @@ class TimelineGridPainter extends FlameChartPainter {
     // of text widgets for the timestamps instead of painting them.
     final xOffset = lineX - textPainter.width - timestampOffset;
     if (xOffset > 0) {
-      textPainter.paint(
-          canvas, Offset(xOffset, FlameChartPainter.origin + 5.0));
+      textPainter.paint(canvas, Offset(xOffset, 5.0));
     }
   }
 
   void _paintGridLine(Canvas canvas, double lineX) {
     canvas.drawLine(
-      Offset(lineX, FlameChartPainter.origin),
+      Offset(lineX, 0.0),
       Offset(lineX, constraints.maxHeight),
       Paint()..color = chartAccentColor,
     );
@@ -767,7 +766,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
     if (selectedFrame == null) return;
 
     canvas.clipRect(Rect.fromLTWH(
-      FlameChartPainter.origin,
+      0.0,
       rowHeight, // We do not want to paint inside the timestamp section.
       constraints.maxWidth,
       constraints.maxHeight - rowHeight,

@@ -6,7 +6,6 @@ import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/flutter_widgets/linked_scroll_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_flame_chart.dart';
-import 'package:devtools_app/src/theme.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/ui/colors.dart';
 import 'package:devtools_app/src/utils.dart';
