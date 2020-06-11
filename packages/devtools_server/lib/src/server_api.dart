@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:shelf/shelf.dart' as shelf;
-import 'package:shelf/shelf_io.dart' as shelf;
 
 import 'usage.dart';
 
