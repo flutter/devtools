@@ -837,6 +837,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
     );
 
     // Draw the end bracket.
+    // TODO(kenz): reuse the path of the start bracket and transform it to draw
+    // the end bracket.
     canvas.drawPath(
       Path()
         ..moveTo(endBracketX, bracketTopY)
