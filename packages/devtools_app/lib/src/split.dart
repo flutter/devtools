@@ -76,9 +76,6 @@ class Split extends StatefulWidget {
   @visibleForTesting
   Key dividerKey(int index) => Key('$this dividerKey $index');
 
-  /// The default size of the divider between children.
-  static const double defaultSplitterSize = 10.0;
-
   static Axis axisFor(BuildContext context, double horizontalAspectRatio) {
     final screenSize = MediaQuery.of(context).size;
     final aspectRatio = screenSize.width / screenSize.height;
@@ -270,7 +267,7 @@ class _SplitState extends State<Split> {
               dragStartBehavior: DragStartBehavior.down,
               child: widget.splitters != null
                   ? widget.splitters[i]
-                  : _defaultSplitter(layoutHeight: height, layoutWidth: width),
+                  : DefaultSplitter(isHorizontal: isHorizontal),
             ),
           ),
       ]);
@@ -281,7 +278,7 @@ class _SplitState extends State<Split> {
   double _totalSplitterSize() {
     final numSplitters = widget.children.length - 1;
     if (widget.splitters == null) {
-      return numSplitters * Split.defaultSplitterSize;
+      return numSplitters * DefaultSplitter.size;
     } else {
       var totalSize = 0.0;
       for (var splitter in widget.splitters) {
@@ -290,47 +287,24 @@ class _SplitState extends State<Split> {
       return totalSize;
     }
   }
+}
 
-  Widget _defaultSplitter({
-    @required double layoutWidth,
-    @required double layoutHeight,
-  }) {
-    final crossAxisSize = isHorizontal ? layoutHeight : layoutWidth;
+class DefaultSplitter extends StatelessWidget {
+  const DefaultSplitter({
+    @required this.isHorizontal,
+  });
 
-    // TODO(https://github.com/flutter/flutter/issues/43747): use an icon.
-    // The material icon for a drag handle is not currently available.
-    // For now, draw an indicator that is 3 lines running in the direction
-    // of the main axis, like a hamburger menu.
-    // TODO: use Icons.drag_handle
-    final defaultDragIndicator = Flex(
-      direction: isHorizontal ? Axis.vertical : Axis.horizontal,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var i = 0; i < math.min(crossAxisSize / 6.0, 3).floor(); i++)
-          Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: isHorizontal ? 2.0 : 0.0,
-              horizontal: isHorizontal ? 0.0 : 2.0,
-            ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Theme.of(context).dividerColor,
-                borderRadius: BorderRadius.circular(Split.defaultSplitterSize),
-              ),
-              child: SizedBox(
-                height: isHorizontal ? 2.0 : Split.defaultSplitterSize - 2.0,
-                width: isHorizontal ? Split.defaultSplitterSize - 2.0 : 2.0,
-              ),
-            ),
-          ),
-      ],
-    );
+  static const double size = 24.0;
 
-    return SizedBox(
-      width: isHorizontal ? Split.defaultSplitterSize : layoutWidth,
-      height: isHorizontal ? layoutHeight : Split.defaultSplitterSize,
-      child: Center(
-        child: defaultDragIndicator,
+  final bool isHorizontal;
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: isHorizontal ? degToRad(90.0) : degToRad(0.0),
+      child: const Icon(
+        Icons.drag_handle,
+        size: size,
       ),
     );
   }
