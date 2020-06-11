@@ -163,7 +163,7 @@ void main() {
             .byKey(LogDetails.copyToClipboardButtonKey)
             .evaluate()
             .first
-            .widget as IconButton;
+            .widget as ToolbarAction;
 
         expect(
           copyButton().onPressed,

@@ -15,10 +15,10 @@ void main() {
     const children = [SizedBox(), SizedBox(), SizedBox(), SizedBox()];
     const firstHeaderKey = Key('first header');
     const headers = [
-      FlexSplitColumnHeader(height: 50.0, child: SizedBox(key: firstHeaderKey)),
-      FlexSplitColumnHeader(height: 50.0, child: SizedBox()),
-      FlexSplitColumnHeader(height: 50.0, child: SizedBox()),
-      FlexSplitColumnHeader(height: 50.0, child: SizedBox()),
+      SizedBox(height: 50.0, key: firstHeaderKey),
+      SizedBox(height: 50.0),
+      SizedBox(height: 50.0),
+      SizedBox(height: 50.0),
     ];
     const initialFractions = [0.25, 0.25, 0.25, 0.25];
     const minSizes = [10.0, 10.0, 10.0, 10.0];

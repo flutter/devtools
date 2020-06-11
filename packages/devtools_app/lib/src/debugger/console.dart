@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import '../common_widgets.dart';
 import '../console.dart';
 import '../utils.dart';
-import 'common.dart';
 import 'debugger_controller.dart';
 
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
@@ -60,20 +59,25 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
 
     return OutlineDecoration(
       child: Console(
-        title: debuggerSectionTitle(Theme.of(context), text: 'Console'),
+        title: areaPaneHeader(
+          context,
+          title: 'Console',
+          needsTopBorder: false,
+          actions: [
+            CopyToClipboardControl(
+              dataProvider: disabled ? null : () => _lines.join('\n'),
+              successMessage:
+                  'Copied $numLines ${pluralize('line', numLines)}.',
+              buttonKey: DebuggerConsole.copyToClipboardButtonKey,
+            ),
+            DeleteControl(
+              buttonKey: DebuggerConsole.clearStdioButtonKey,
+              tooltip: 'Clear console output',
+              onPressed: disabled ? null : widget.controller.clearStdio,
+            ),
+          ],
+        ),
         lines: _lines,
-        controls: [
-          CopyToClipboardControl(
-            dataProvider: disabled ? null : () => _lines.join('\n'),
-            successMessage: 'Copied $numLines ${pluralize('line', numLines)}.',
-            buttonKey: DebuggerConsole.copyToClipboardButtonKey,
-          ),
-          DeleteControl(
-            onPressed: disabled ? null : widget.controller.clearStdio,
-            tooltip: 'Clear console output',
-            buttonKey: DebuggerConsole.clearStdioButtonKey,
-          ),
-        ],
       ),
     );
   }

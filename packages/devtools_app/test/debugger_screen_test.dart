@@ -128,7 +128,7 @@ void main() {
 
         final clearStdioElement =
             find.byKey(DebuggerConsole.clearStdioButtonKey).evaluate().first;
-        final clearStdioButton = clearStdioElement.widget as IconButton;
+        final clearStdioButton = clearStdioElement.widget as ToolbarAction;
         expect(clearStdioButton.onPressed, isNull);
       });
 

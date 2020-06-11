@@ -69,14 +69,16 @@ class ScriptPickerState extends State<ScriptPicker> {
     return OutlineDecoration(
       child: Column(
         children: [
-          debuggerPaneHeader(
+          areaPaneHeader(
             context,
-            'Libraries',
+            title: 'Libraries',
             needsTopBorder: false,
-            rightChild: CountBadge(
-              filteredItems: _filteredItems,
-              items: _items,
-            ),
+            actions: [
+              CountBadge(
+                filteredItems: _filteredItems,
+                items: _items,
+              ),
+            ],
           ),
           Container(
             decoration: BoxDecoration(
