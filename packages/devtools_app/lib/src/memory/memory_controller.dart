@@ -538,7 +538,7 @@ class MemoryController extends DisposableController
   }
 
   bool get isConnectedDeviceAndroid {
-    return serviceManager.vm.operatingSystem == 'android';
+    return serviceManager?.vm?.operatingSystem == 'android';
   }
 
   Future<List<InstanceSummary>> getInstances(

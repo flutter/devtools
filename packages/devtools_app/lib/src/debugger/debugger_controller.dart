@@ -292,17 +292,33 @@ class DebuggerController extends DisposableController
     _exceptionPauseMode.value = mode;
   }
 
+  /// Flutter starting with '--start-paused'. All subsequent isolates, after
+  /// the first isolate, are in a pauseStart state too.  If _resuming, then
+  /// resume any future isolate created with pause start.
+  Future<Success> _resumeIsolatePauseStart(Event event) {
+    assert(event.kind == EventKind.kPauseStart);
+    assert(_resuming.value);
+
+    final id = event.isolate.id;
+    _log.log('resume() $id');
+    return _service.resume(id);
+  }
+
   void _handleDebugEvent(Event event) {
     _log.log('event: ${event.kind}');
+
+    // We're resuming and another isolate has started in a paused state,
+    // resume any pauseState isolates.
+    if (_resuming.value &&
+        event.isolate.id != isolateRef?.id &&
+        event.kind == EventKind.kPauseStart) {
+      _resumeIsolatePauseStart(event);
+    }
 
     if (event.isolate.id != isolateRef?.id) return;
 
     _hasFrames.value = event.topFrame != null;
     _lastEvent = event;
-
-    // Any event we receive here indicates that any resume/step request has been
-    // processed.
-    _resuming.value = false;
 
     switch (event.kind) {
       case EventKind.kResume:
@@ -314,6 +330,9 @@ class DebuggerController extends DisposableController
       case EventKind.kPauseInterrupted:
       case EventKind.kPauseException:
       case EventKind.kPausePostRequest:
+        // Any event we receive here indicates that any resume/step request has been
+        // processed.
+        _resuming.value = false;
         _pause(true, pauseEvent: event);
         break;
       // TODO(djshuckerow): switch the _breakpoints notifier to a 'ListNotifier'

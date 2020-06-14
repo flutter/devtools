@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:vm_service/vm_service.dart';
+
 import 'globals.dart';
 import 'service_extensions.dart' as extensions;
 
@@ -27,8 +29,24 @@ class ConnectedApp {
 
   bool _isFlutterApp;
 
-  Future<bool> get isProfileBuild async =>
-      _isProfileBuild ??= await _connectedToProfileBuild();
+  Future<bool> get isProfileBuild async {
+    // If we have one isolate check if paused on start?
+    final isolates = serviceManager.isolateManager.isolates;
+    if (isolates.length == 1) {
+      final isolate = await serviceManager.service.getIsolate(isolates[0].id);
+      if (isolate.pauseEvent.kind == EventKind.kPauseStart) {
+        // Application started with --start-paused, assume profile build is
+        // false - debugging memory. Otherwise, _connectedToProfileBuild
+        // waits forever when paused start.
+        // TODO(terry): Revisit this assumption.
+        _isProfileBuild = false;
+        return _isProfileBuild;
+      }
+    }
+
+    _isProfileBuild ??= await _connectedToProfileBuild();
+    return _isProfileBuild;
+  }
 
   bool get isProfileBuildNow {
     assert(_isProfileBuild != null);

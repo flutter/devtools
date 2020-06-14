@@ -144,6 +144,11 @@ class _InitializerState extends State<Initializer>
                   style: theme.textTheme.bodyText2,
                 ),
               const Spacer(),
+              RaisedButton(
+                  onPressed: () {
+                    overlay.remove();
+                  },
+                  child: const Text('Review History')),
             ],
           ),
         ),

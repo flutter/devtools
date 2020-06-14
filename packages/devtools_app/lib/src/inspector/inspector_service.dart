@@ -380,8 +380,14 @@ class InspectorService extends DisposableController
 
   Future<Object> invokeServiceMethodDaemonNoGroup(
       String methodName, Map<String, Object> args) async {
+    final callMethodName = 'ext.flutter.inspector.$methodName';
+    if (!serviceManager.serviceExtensionManager
+        .isServiceExtensionAvailable(callMethodName)) {
+      return {'result': null};
+    }
+
     final r = await vmService.callServiceExtension(
-      'ext.flutter.inspector.$methodName',
+      callMethodName,
       isolateId: inspectorLibrary.isolateId,
       args: args,
     );
@@ -555,7 +561,13 @@ class ObjectGroup {
     String methodName,
     Map<String, Object> params,
   ) {
-    return _callServiceExtension('ext.flutter.inspector.$methodName', params);
+    final callMethodName = 'ext.flutter.inspector.$methodName';
+    if (serviceManager.serviceExtensionManager
+        .isServiceExtensionAvailable(callMethodName)) {
+      return null;
+    }
+
+    return _callServiceExtension(callMethodName, params);
   }
 
   Future<Object> invokeServiceMethodDaemonInspectorRef(
