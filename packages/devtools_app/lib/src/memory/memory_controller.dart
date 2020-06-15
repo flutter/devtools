@@ -510,8 +510,8 @@ class MemoryController extends DisposableController
   }
 
   Future<HeapSnapshotGraph> snapshotMemory() async {
-    return await serviceManager.service
-        .getHeapSnapshotGraph(serviceManager.isolateManager.selectedIsolate);
+    return await serviceManager?.service
+        ?.getHeapSnapshotGraph(serviceManager?.isolateManager?.selectedIsolate);
   }
 
   Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>

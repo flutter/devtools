@@ -145,10 +145,11 @@ class _InitializerState extends State<Initializer>
                 ),
               const Spacer(),
               RaisedButton(
-                  onPressed: () {
-                    overlay.remove();
-                  },
-                  child: const Text('Review History')),
+                onPressed: () {
+                  overlay.remove();
+                },
+                child: const Text('Review History'),
+              ),
             ],
           ),
         ),

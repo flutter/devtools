@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:vm_service/vm_service.dart';
 
+import 'eval_on_dart_library.dart';
 import 'globals.dart';
 import 'service_extensions.dart' as extensions;
 
@@ -30,20 +31,6 @@ class ConnectedApp {
   bool _isFlutterApp;
 
   Future<bool> get isProfileBuild async {
-    // If we have one isolate check if paused on start?
-    final isolates = serviceManager.isolateManager.isolates;
-    if (isolates.length == 1) {
-      final isolate = await serviceManager.service.getIsolate(isolates[0].id);
-      if (isolate.pauseEvent.kind == EventKind.kPauseStart) {
-        // Application started with --start-paused, assume profile build is
-        // false - debugging memory. Otherwise, _connectedToProfileBuild
-        // waits forever when paused start.
-        // TODO(terry): Revisit this assumption.
-        _isProfileBuild = false;
-        return _isProfileBuild;
-      }
-    }
-
     _isProfileBuild ??= await _connectedToProfileBuild();
     return _isProfileBuild;
   }
@@ -78,6 +65,16 @@ class ConnectedApp {
   bool get isDartCliAppNow => isRunningOnDartVM && !isFlutterAppNow;
 
   Future<bool> _connectedToProfileBuild() async {
+    // If eval works we're not a profile build.
+    final io = EvalOnDartLibrary(['dart:io'], serviceManager.service);
+    final value = await io.eval('Platform.isAndroid', isAlive: null);
+    return !(value?.kind == 'Bool');
+
+    // TODO(terry): Disabled below code, it will hang if flutter run --start-paused
+    //              see issue https://github.com/flutter/devtools/issues/2082.
+    //              Currently, if eval (see above) doesn't work then we're
+    //              running in Profile mode.
+    /*
     assert(serviceManager.isServiceAvailable);
     // Only flutter apps have profile and non-profile builds. If this changes in
     // the future (flutter web), we can modify this check.
@@ -89,6 +86,7 @@ class ConnectedApp {
     final hasDebugExtension = serviceManager.serviceExtensionManager
         .isServiceExtensionAvailable(extensions.debugAllowBanner.extension);
     return !hasDebugExtension;
+    */
   }
 
   Future<void> initializeValues() async {

@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart' as logger;
+import '../globals.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
@@ -570,6 +571,9 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   }
 
   void _snapshot() async {
+    // VmService not available (disconnected/crashed).
+    if (serviceManager.service == null) return;
+
     setState(() {
       snapshotState = SnapshotStatus.streaming;
     });
@@ -577,6 +581,10 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     final snapshotTimestamp = DateTime.now();
 
     final graph = await controller.snapshotMemory();
+
+    // No snapshot collected, disconnected/crash application.
+    if (graph == null) return;
+
     final snapshotCollectionTime = DateTime.now();
 
     setState(() {
