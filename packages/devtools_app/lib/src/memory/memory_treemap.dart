@@ -18,8 +18,8 @@ import 'memory_controller.dart';
 import 'memory_graph_model.dart';
 import 'memory_utils.dart';
 
-class TreeMapSizeAnalyzer extends SingleChildRenderObjectWidget {
-  const TreeMapSizeAnalyzer({
+class TreemapSizeAnalyzer extends SingleChildRenderObjectWidget {
+  const TreemapSizeAnalyzer({
     Key key,
     Widget child,
   }) : super(key: key, child: child);
@@ -39,19 +39,19 @@ class RenderFlameChart extends RenderProxyBox {
   }
 }
 
-class MemoryTreeMap extends StatefulWidget {
-  const MemoryTreeMap(
+class MemoryTreemap extends StatefulWidget {
+  const MemoryTreemap(
     this.controller,
   );
 
   final MemoryController controller;
 
   @override
-  MemoryTreeMapState createState() => MemoryTreeMapState(controller);
+  MemoryTreemapState createState() => MemoryTreemapState(controller);
 }
 
-class MemoryTreeMapState extends State<MemoryTreeMap> with AutoDisposeMixin {
-  MemoryTreeMapState(this.controller);
+class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
+  MemoryTreemapState(this.controller);
 
   InstructionsSize sizes;
 
@@ -169,7 +169,7 @@ class InstructionsSize {
 
     // TODO(terry): Should treemap be all memory or just the filtered group?
     //              Using rawGroup not graph.groupByLibrary.
-    
+
     controller.heapGraph.rawGroupByLibrary.forEach(
       (libraryGroup, value) {
         final classes = value;

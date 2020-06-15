@@ -109,7 +109,7 @@ class _TreemapState extends State<Treemap> {
   // |      |  L2  |            |
   // |      |      |            |
   // ----------------------------
-  List<Cell> buildTreeMap(
+  List<Cell> buildTreemap(
     List<TreemapNode> children,
     double width,
     double height,
@@ -229,7 +229,7 @@ class _TreemapState extends State<Treemap> {
     final double list1Height =
         isHorizontalRectangle ? height : height * list1SizeRatio;
     List<Cell> list1Cells;
-    list1Cells = buildTreeMap(
+    list1Cells = buildTreemap(
       list1,
       list1Width,
       list1Height,
@@ -246,7 +246,7 @@ class _TreemapState extends State<Treemap> {
     final double list2YCoord =
         isHorizontalRectangle ? y + pivotBestHeight : y + list1Height;
     List<Cell> list2Cells;
-    list2Cells = buildTreeMap(
+    list2Cells = buildTreemap(
       list2,
       list2Width,
       list2Height,
@@ -280,7 +280,7 @@ class _TreemapState extends State<Treemap> {
     final double list3YCoord =
         isHorizontalRectangle ? y : y + list1Height + pivotBestHeight;
     List<Cell> list3Cells;
-    list3Cells = buildTreeMap(
+    list3Cells = buildTreemap(
       list3,
       list3Width,
       list3Height,
@@ -361,7 +361,7 @@ class _TreemapState extends State<Treemap> {
             color: Colors.white38,
             child: Tooltip(
               message: rootNode.name,
-              child: buildNestedTreeMap(),
+              child: buildNestedTreemap(),
             ),
           ),
         );
@@ -374,11 +374,11 @@ class _TreemapState extends State<Treemap> {
         );
       }
     } else {
-      return buildNestedTreeMap();
+      return buildNestedTreemap();
     }
   }
 
-  LayoutBuilder buildNestedTreeMap() {
+  LayoutBuilder buildNestedTreemap() {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Container(
@@ -388,7 +388,7 @@ class _TreemapState extends State<Treemap> {
             border: Border.all(),
           ),
           child: Stack(
-            children: buildTreeMap(
+            children: buildTreemap(
               rootNode.children,
               constraints.maxWidth,
               constraints.maxHeight,
