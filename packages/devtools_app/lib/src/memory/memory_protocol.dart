@@ -55,6 +55,10 @@ class MemoryTracker {
   }
 
   void _updateLiveDataPolling([bool paused]) {
+    if (service == null) {
+      // A service of null implies we're disconnected - signal paused.
+      memoryController.pauseLiveFeed();
+    }
     paused ??= memoryController.paused.value;
 
     if (paused) {
@@ -62,7 +66,7 @@ class MemoryTracker {
       _gcStreamListener?.cancel();
     } else {
       _pollingTimer = Timer(Duration.zero, _pollMemory);
-      _gcStreamListener = service.onGCEvent.listen(_handleGCEvent);
+      _gcStreamListener = service?.onGCEvent?.listen(_handleGCEvent);
     }
   }
 

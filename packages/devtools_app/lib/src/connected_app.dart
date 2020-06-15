@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
+import 'eval_on_dart_library.dart';
 import 'globals.dart';
-import 'service_extensions.dart' as extensions;
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const dartHtmlLibraryUri = 'dart:html';
@@ -27,8 +27,10 @@ class ConnectedApp {
 
   bool _isFlutterApp;
 
-  Future<bool> get isProfileBuild async =>
-      _isProfileBuild ??= await _connectedToProfileBuild();
+  Future<bool> get isProfileBuild async {
+    _isProfileBuild ??= await _connectedToProfileBuild();
+    return _isProfileBuild;
+  }
 
   bool get isProfileBuildNow {
     assert(_isProfileBuild != null);
@@ -60,6 +62,16 @@ class ConnectedApp {
   bool get isDartCliAppNow => isRunningOnDartVM && !isFlutterAppNow;
 
   Future<bool> _connectedToProfileBuild() async {
+    // If eval works we're not a profile build.
+    final io = EvalOnDartLibrary(['dart:io'], serviceManager.service);
+    final value = await io.eval('Platform.isAndroid', isAlive: null);
+    return !(value?.kind == 'Bool');
+
+    // TODO(terry): Disabled below code, it will hang if flutter run --start-paused
+    //              see issue https://github.com/flutter/devtools/issues/2082.
+    //              Currently, if eval (see above) doesn't work then we're
+    //              running in Profile mode.
+    /*
     assert(serviceManager.isServiceAvailable);
     // Only flutter apps have profile and non-profile builds. If this changes in
     // the future (flutter web), we can modify this check.
@@ -71,6 +83,7 @@ class ConnectedApp {
     final hasDebugExtension = serviceManager.serviceExtensionManager
         .isServiceExtensionAvailable(extensions.debugAllowBanner.extension);
     return !hasDebugExtension;
+    */
   }
 
   Future<void> initializeValues() async {

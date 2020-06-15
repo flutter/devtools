@@ -510,8 +510,8 @@ class MemoryController extends DisposableController
   }
 
   Future<HeapSnapshotGraph> snapshotMemory() async {
-    return await serviceManager.service
-        .getHeapSnapshotGraph(serviceManager.isolateManager.selectedIsolate);
+    return await serviceManager?.service
+        ?.getHeapSnapshotGraph(serviceManager?.isolateManager?.selectedIsolate);
   }
 
   Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>
@@ -538,7 +538,7 @@ class MemoryController extends DisposableController
   }
 
   bool get isConnectedDeviceAndroid {
-    return serviceManager.vm.operatingSystem == 'android';
+    return serviceManager?.vm?.operatingSystem == 'android';
   }
 
   Future<List<InstanceSummary>> getInstances(

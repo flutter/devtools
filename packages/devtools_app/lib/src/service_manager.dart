@@ -643,7 +643,7 @@ class ServiceExtensionManager {
               _service,
             );
             final InstanceRef value = await flutterLibrary.eval(
-              'WidgetsBinding.instance.debugDidSendFirstFrameEvent',
+              'WidgetsBinding?.instance?.debugDidSendFirstFrameEvent ?? false',
               isAlive: null,
             );
 
