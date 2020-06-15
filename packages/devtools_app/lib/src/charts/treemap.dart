@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../memory/memory_treemap.dart';
+import '../trees.dart';
 
 class Treemap extends StatefulWidget {
   const Treemap({
-    this.rootNode,
-    this.levelsVisible,
-    this.width,
-    this.height,
-    this.onTap,
+    @required this.rootNode,
+    @required this.levelsVisible,
+    @required this.width,
+    @required this.height,
+    @required this.onTap,
   });
 
   final TreemapNode rootNode;
@@ -51,10 +51,10 @@ class _TreemapState extends State<Treemap> {
   }
 
   void cellOnTap(String name) {
-    final TreemapNode child = rootNode.getChildWithName(name);
+    final TreemapNode child = rootNode.childrenMap[name];
     if (child != null) {
       setState(() {
-        rootNode = rootNode.getChildWithName(name);
+        rootNode = child;
       });
     }
   }
@@ -343,11 +343,7 @@ class _TreemapState extends State<Treemap> {
         return Container(
           width: widget.width,
           child: Center(
-            child: Text(
-              rootNode.name + '\n' + nodeSizeText(),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: nameAndSizeText(),
           ),
         );
       } else {
@@ -369,13 +365,21 @@ class _TreemapState extends State<Treemap> {
         return Container(
           color: Colors.white38,
           child: Center(
-            child: shouldDisplayText ? Text(rootNode.name) : Container(),
+            child: shouldDisplayText ? nameAndSizeText() : Container(),
           ),
         );
       }
     } else {
       return buildNestedTreemap();
     }
+  }
+
+  Text nameAndSizeText() {
+    return Text(
+      rootNode.name + '\n' + nodeSizeText(),
+      textAlign: TextAlign.center,
+      overflow: TextOverflow.ellipsis,
+    );
   }
 
   LayoutBuilder buildNestedTreemap() {
@@ -455,5 +459,35 @@ class Cell extends StatelessWidget {
       'y': y,
       'node': node,
     }.toString();
+  }
+}
+
+class TreemapNode extends TreeNode<TreemapNode> {
+  TreemapNode({
+    @required this.name,
+    this.byteSize = 0,
+    this.childrenMap = const <String, TreemapNode>{},
+  })  : assert(name != null),
+        assert(byteSize != null),
+        assert(childrenMap != null);
+
+  final String name;
+  final Map<String, TreemapNode> childrenMap;
+  int byteSize;
+
+  void printTree() {
+    printTreeHelper(this, '');
+  }
+
+  void printTreeHelper(TreemapNode root, String tabs) {
+    print(tabs + '$root');
+    for (final child in root.children) {
+      printTreeHelper(child, tabs + '\t');
+    }
+  }
+
+  @override
+  String toString() {
+    return '{name: $name, size: $byteSize}\n';
   }
 }

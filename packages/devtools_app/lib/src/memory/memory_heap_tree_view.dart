@@ -226,12 +226,8 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
                     : _isSnapshotComplete ? 'Done' : '...'),
       ]);
     } else if (controller.snapshotByLibraryData != null) {
-      if (controller.showHeatMap.value) {
-        snapshotDisplay = TreemapSizeAnalyzer(
-          child: SizedBox.expand(
-            child: MemoryTreemap(controller),
-          ),
-        );
+      if (controller.showTreemap.value) {
+        snapshotDisplay = MemoryTreemap(controller);
       } else {
         snapshotDisplay = MemorySnapshotTable();
       }
@@ -267,8 +263,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Expanded(child: snapshotDisplay),
-        if (hasDetails)
-          const SizedBox(width: defaultSpacing),
+        hasDetails ? const SizedBox(width: defaultSpacing) : const SizedBox(),
         // TODO(terry): Need better focus handling between 2 tables & up/down
         //              arrows in the right-side field instance view table.
         controller.isLeafSelected
@@ -345,11 +340,11 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
           children: [
             const Text('Treemap'),
             Switch(
-              value: controller.showHeatMap.value,
+              value: controller.showTreemap.value,
               onChanged: (value) {
                 setState(() {
                   closeAutoCompleteOverlay();
-                  controller.toggleShowHeatMap(value);
+                  controller.toggleShowTreeMap(value);
                   controller.search = '';
                   controller.selectedLeaf = null;
                 });
@@ -358,13 +353,13 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
           ],
         ),
         const SizedBox(width: defaultSpacing),
-        controller.showHeatMap.value
+        controller.showTreemap.value
             ? const SizedBox()
             : _groupByDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
         // TODO(terry): Mechanism to handle expand/collapse on both
         // tables objects/fields. Maybe notion in table?
-        controller.showHeatMap.value
+        controller.showTreemap.value
             ? const SizedBox()
             : OutlineButton(
                 key: collapseAllButtonKey,
@@ -386,7 +381,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
                     : null,
                 child: const Text('Collapse All'),
               ),
-        controller.showHeatMap.value
+        controller.showTreemap.value
             ? const SizedBox()
             : OutlineButton(
                 key: expandAllButtonKey,
@@ -463,7 +458,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       ),
     );
 
-    if (controller.showHeatMap.value && controller.snapshots.isNotEmpty) {
+    if (controller.showTreemap.value && controller.snapshots.isNotEmpty) {
       searchFieldFocusNode.requestFocus();
     }
 

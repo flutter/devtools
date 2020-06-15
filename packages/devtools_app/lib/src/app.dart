@@ -459,10 +459,10 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
         const LoggingScreen(),
         createController: () => LoggingController(),
       ),
-      // Uncomment to see a sample implementation of a conditional screen.
-      // DevToolsScreen<ExampleController>(
-      //   const ExampleConditionalScreen(),
-      //   createController: () => ExampleController(),
-      //   supportsOffline: true,
-      // ),
+// Uncomment to see a sample implementation of a conditional screen.
+//      DevToolsScreen<ExampleController>(
+//        const ExampleConditionalScreen(),
+//        createController: () => ExampleController(),
+//        supportsOffline: true,
+//      ),
     ];
