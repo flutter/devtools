@@ -231,9 +231,9 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       if (controller.showHeatMap.value) {
         // TODO(peterdjlee): replace with tree map
         // snapshotDisplay = MemoryTreeMap(controller);
-        snapshotDisplay = TreeMapSizeAnalyzer(
+        snapshotDisplay = TreemapSizeAnalyzer(
           child: SizedBox.expand(
-            child: MemoryTreeMap(controller),
+            child: MemoryTreemap(controller),
           ),
         );
       } else {
