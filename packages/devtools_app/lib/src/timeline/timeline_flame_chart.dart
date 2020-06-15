@@ -20,6 +20,11 @@ import '../utils.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
 
+// TODO(kenz): for sections with more than one row deep, add empty row for
+// section label.
+
+// TODO(kenz): make flame chart sections collapsible.
+
 class TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
   TimelineFlameChart(
     TimelineData data, {
@@ -36,6 +41,7 @@ class TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
         );
 
   static double _calculateStartInset(TimelineData data) {
+    const spaceFor0msText = 55.0;
     const maxStartInset = 300.0;
     var maxMeasuredWidth = 0.0;
     for (String groupName in data.eventGroups.keys) {
@@ -46,7 +52,7 @@ class TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
       maxMeasuredWidth =
           math.max(maxMeasuredWidth, textPainter.width + 2 * densePadding);
     }
-    return math.min(maxStartInset, maxMeasuredWidth);
+    return math.min(maxStartInset, maxMeasuredWidth) + spaceFor0msText;
   }
 
   /// Offset for drawing async guidelines.
