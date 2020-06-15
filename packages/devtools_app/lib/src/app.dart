@@ -13,6 +13,7 @@ import 'connect_screen.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/debugger_screen.dart';
 import 'dialogs.dart';
+import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'initializer.dart';
@@ -459,10 +460,10 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
         const LoggingScreen(),
         createController: () => LoggingController(),
       ),
-// Uncomment to see a sample implementation of a conditional screen.
-//      DevToolsScreen<ExampleController>(
-//        const ExampleConditionalScreen(),
-//        createController: () => ExampleController(),
-//        supportsOffline: true,
-//      ),
+      // Uncomment to see a sample implementation of a conditional screen.
+      // DevToolsScreen<ExampleController>(
+      //   const ExampleConditionalScreen(),
+      //   createController: () => ExampleController(),
+      //   supportsOffline: true,
+      // ),
     ];

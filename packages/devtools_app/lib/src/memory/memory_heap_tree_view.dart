@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -227,9 +228,11 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       ]);
     } else if (controller.snapshotByLibraryData != null) {
       if (controller.showHeatMap.value) {
+        // TODO(peterdjlee): replace with tree map
+        // snapshotDisplay = MemoryTreeMap(controller);
         snapshotDisplay = HeatMapSizeAnalyzer(
           child: SizedBox.expand(
-            child: FlameChart(controller),
+            child: MemoryTreeMap(controller),
           ),
         );
       } else {

@@ -3,12 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:devtools_app/src/memory/memory_heatmap.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../globals.dart';
 import '../screen.dart';
+import 'canned_data.dart';
+import 'tree_map.dart';
 
 /// This is an example implementation of a conditional screen that supports
 /// offline mode and uses a provided controller [ExampleController].
@@ -44,6 +48,7 @@ class _ExampleConditionalScreenBodyState
     extends State<_ExampleConditionalScreenBody>
     with OfflineScreenMixin<_ExampleConditionalScreenBody, String> {
   ExampleController controller;
+  DataReference rootNode;
 
   @override
   void didChangeDependencies() {
@@ -58,6 +63,84 @@ class _ExampleConditionalScreenBodyState
         loadOfflineData(json['title']);
       }
     }
+    initializeTree();
+  }
+
+  DataReference addChild(
+    DataReference parent,
+    String name,
+    int size,
+  ) {
+    DataReference child = parent.getChildWithName(name);
+    if (child == null) {
+      parent.addChild(
+        DataReference(
+          name: name,
+          byteSize: size,
+        ),
+      );
+
+      child = parent.getChildWithName(name);
+    } else {
+      child.addSize(size);
+    }
+    return child;
+  }
+
+  void initializeTree() {
+    final List data = jsonDecode(galleryJson);
+
+    // Number of boxes at the library level we can see.
+    const int debugChildrenNumberLimit = 100;
+
+    final DataReference root = DataReference(
+      name: 'Root',
+      byteSize: 0,
+    );
+
+    // Can optimize look up / retrieve time with a hashmap
+
+    for (dynamic memoryUsage in data) {
+
+      String libraryName = memoryUsage['l'];
+      if (libraryName == null || libraryName == '') {
+        libraryName = 'Unnamed Library';
+      }
+      String className = memoryUsage['c'];
+      if (className == null || className == '') {
+        className = 'Unnamed Class';
+      }
+      String methodName = memoryUsage['n'];
+      if (methodName == null || methodName == '') {
+        methodName = 'Unnamed Method';
+      }
+      final int size = memoryUsage['s'];
+      if (size == null) {
+        throw 'Size was null for $memoryUsage';
+      }
+      root.addSize(size);
+
+      DataReference libraryLevelChild;
+      if (libraryName.startsWith('package:flutter/src/')) {
+        final String package =
+            libraryName.replaceAll('package:flutter/src/', '');
+        final List<String> packageSplit = package.split('/');
+        libraryLevelChild =
+            addChild(root, 'package:flutter', size);
+        for (String level in packageSplit) {
+          libraryLevelChild =
+              addChild(libraryLevelChild, level, size);
+        }
+      } else {
+        libraryName = libraryName.split('/')[0];
+        libraryLevelChild = addChild(root, libraryName, size);
+      }
+      final DataReference classLevelChild =
+          addChild(libraryLevelChild, className, size);
+      final DataReference methodLevelChild =
+          addChild(classLevelChild, methodName, size);
+    }
+    rootNode = root;
   }
 
   @override
@@ -65,7 +148,16 @@ class _ExampleConditionalScreenBodyState
     final exampleScreen = ValueListenableBuilder(
       valueListenable: controller.title,
       builder: (context, value, _) {
-        return Center(child: Text(value));
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return TreeMap(
+              rootNode: rootNode,
+              levelsVisible: 2,
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+            );
+          },
+        );
       },
     );
 
