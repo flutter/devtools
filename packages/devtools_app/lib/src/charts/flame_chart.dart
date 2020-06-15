@@ -501,9 +501,13 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTapUp: _handleTapUp,
-        child: SizedBox(
+        child: Container(
           height: rowHeightWithPadding,
           width: widget.width,
+          color: alternatingColorForIndexWithContext(
+            nodes.first.sectionIndex,
+            context,
+          ),
           // TODO(kenz): investigate if `addAutomaticKeepAlives: false` and
           // `addRepaintBoundaries: false` are needed here for perf improvement.
           child: ExtentDelegateListView(
@@ -755,19 +759,6 @@ class FlameChartNode<T> {
     this.selectable = true,
     this.sectionIndex,
   });
-
-  FlameChartNode.sectionLabel({
-    this.key,
-    @required this.text,
-    @required this.textColor,
-    @required this.backgroundColor,
-    @required double top,
-    @required double width,
-  })  : rect = Rect.fromLTRB(rowPadding, top, width, top + rowHeight),
-        tooltip = text,
-        data = null,
-        onSelected = ((_) {}),
-        selectable = false;
 
   static const _selectedTextColor = Colors.black;
   // We would like this value to be smaller, but zoom performance does not allow

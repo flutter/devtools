@@ -1,6 +1,7 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -10,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../charts/flame_chart.dart';
+import '../common_widgets.dart';
 import '../geometry.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
@@ -17,6 +19,11 @@ import '../ui/theme.dart';
 import '../utils.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
+
+// TODO(kenz): for sections with more than one row deep, add empty row for
+// section label.
+
+// TODO(kenz): make flame chart sections collapsible.
 
 class TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
   TimelineFlameChart(
@@ -34,15 +41,18 @@ class TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
         );
 
   static double _calculateStartInset(TimelineData data) {
-    // TODO(kenz): we need to calculate start inset based on the width of the
-    // section labels. We should also set a max, ellipsize, and rely on tooltip
-    // to give the full name in the event that the section name exceeds max.
-    //
-    // Alternatively, we could make the label section a column of it's own that
-    // is resizeable. It would need to link scroll controllers with the list
-    // view holding the flame chart nodes. This would make section labels sticky
-    // to the left as an inherent bonus.
-    return 140.0;
+    const spaceFor0msText = 55.0;
+    const maxStartInset = 300.0;
+    var maxMeasuredWidth = 0.0;
+    for (String groupName in data.eventGroups.keys) {
+      final textPainter = TextPainter(
+        text: TextSpan(text: groupName),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      maxMeasuredWidth =
+          math.max(maxMeasuredWidth, textPainter.width + 2 * densePadding);
+    }
+    return math.min(maxStartInset, maxMeasuredWidth) + spaceFor0msText;
   }
 
   /// Offset for drawing async guidelines.
@@ -232,32 +242,6 @@ class TimelineFlameChartState
       );
       sections.add(section);
 
-      // Add section label node.
-      Color sectionLabelBackgroundColor;
-      switch (groupName) {
-        case TimelineData.uiKey:
-          sectionLabelBackgroundColor = mainUiColor;
-          break;
-        case TimelineData.rasterKey:
-          sectionLabelBackgroundColor = mainRasterColor;
-          break;
-        case TimelineData.unknownKey:
-          sectionLabelBackgroundColor = mainUnknownColor;
-          break;
-        default:
-          sectionLabelBackgroundColor = mainAsyncColor;
-      }
-
-      final currentSectionLabel = FlameChartNode.sectionLabel(
-        text: groupName,
-        textColor: Colors.black,
-        backgroundColor: sectionLabelBackgroundColor,
-        top: flameChartNodeTop,
-        width: 120.0,
-      );
-
-      rows[currentRowIndex].addNode(currentSectionLabel, index: 0);
-
       // Increment for next section.
       currentRowIndex += group.displaySize;
       currentSectionIndex++;
@@ -314,6 +298,17 @@ class TimelineFlameChartState
           // want the Y value at the top of the node.
           yForEvent: (event) =>
               _calculateVerticalGuidelineStartY(event) - rowHeight,
+        ),
+      ),
+      CustomPaint(
+        painter: SectionLabelPainter(
+          _timelineController.data.eventGroups,
+          isDarkTheme: Theme.of(context).isDarkTheme,
+          zoom: zoom,
+          constraints: constraints,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
+          chartStartInset: widget.startInset,
         ),
       ),
     ];
@@ -449,6 +444,88 @@ class TimelineFlameChartState
         (chartNodesByEvent[event].row.index - spacerRowsBeforeEvent) *
             rowHeightWithPadding +
         rowHeight / 2;
+  }
+}
+
+class SectionLabelPainter extends FlameChartPainter {
+  SectionLabelPainter(
+    this.eventGroups, {
+    @required this.isDarkTheme,
+    @required double zoom,
+    @required BoxConstraints constraints,
+    @required double verticalScrollOffset,
+    @required double horizontalScrollOffset,
+    @required double chartStartInset,
+  }) : super(
+          zoom: zoom,
+          constraints: constraints,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
+          chartStartInset: chartStartInset,
+        );
+
+  final bool isDarkTheme;
+
+  final SplayTreeMap<String, TimelineEventGroup> eventGroups;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.clipRect(Rect.fromLTWH(
+      0.0,
+      rowHeight, // We do not want to paint inside the timestamp section.
+      constraints.maxWidth,
+      constraints.maxHeight - rowHeight,
+    ));
+
+    // Start at row height to account for timestamps at top of chart.
+    var startSectionPx = sectionSpacing * 2;
+    for (String groupName in eventGroups.keys) {
+      final group = eventGroups[groupName];
+      final labelTop = startSectionPx - verticalScrollOffset;
+
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: groupName,
+          style: const TextStyle(color: chartTextColor),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      final labelWidth = textPainter.width + 2 * densePadding;
+      final backgroundColor = alternatingColorForIndex(
+        eventGroups.values.toList().indexOf(group),
+        isDarkTheme: isDarkTheme,
+      );
+      final backgroundWithAlpha = Color.fromRGBO(
+        backgroundColor.red,
+        backgroundColor.green,
+        backgroundColor.blue,
+        0.75,
+      );
+
+      canvas.drawRect(
+        Rect.fromLTWH(
+          0.0,
+          labelTop,
+          labelWidth,
+          rowHeightWithPadding,
+        ),
+        Paint()..color = backgroundWithAlpha,
+      );
+
+      textPainter.paint(
+        canvas,
+        Offset(densePadding, labelTop + rowPadding),
+      );
+
+      startSectionPx += group.displaySizePx;
+    }
+  }
+
+  @override
+  bool shouldRepaint(SectionLabelPainter oldDelegate) {
+    return verticalScrollOffset != oldDelegate.verticalScrollOffset ||
+        eventGroups != oldDelegate.eventGroups;
   }
 }
 
@@ -596,10 +673,6 @@ class TimelineGridPainter extends FlameChartPainter {
 
   static const baseGridIntervalPx = 150.0;
   static const timestampOffset = 6.0;
-  static const timestampColor = ThemedColor(
-    Color(0xFF24292E),
-    Color(0xFFFAFBFC),
-  );
 
   final double chartEndInset;
 
@@ -655,7 +728,7 @@ class TimelineGridPainter extends FlameChartPainter {
     final textPainter = TextPainter(
       text: TextSpan(
         text: timestampText,
-        style: const TextStyle(color: timestampColor),
+        style: const TextStyle(color: chartTextColor),
       ),
       textAlign: TextAlign.right,
       textDirection: TextDirection.ltr,

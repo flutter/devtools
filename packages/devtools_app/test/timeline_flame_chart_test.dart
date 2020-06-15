@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/timeline/timeline_flame_chart.dart';
 import 'package:devtools_app/src/timeline/timeline_screen.dart';
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_testing/support/timeline_test_data.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -18,7 +21,7 @@ import 'support/wrappers.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;
-  group('TimelineFlameChart', () {
+  group('TimelineFlameChartContent', () {
     void _setupForTimeline(Map<String, dynamic> timelineJson) {
       fakeServiceManager = FakeServiceManager(
         useFakeService: true,
@@ -82,10 +85,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TimelineFlameChart), findsOneWidget);
-      expect(
+      await expectLater(
           find.byType(TimelineFlameChart),
           matchesGoldenFile(
               'goldens/timeline_flame_chart_with_selected_frame.png'));
-    });
+
+      // Await delay for golden comparison.
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+    }, skip: kIsWeb || !Platform.isMacOS);
   });
 }
