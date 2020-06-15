@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/timeline/timeline_flame_chart.dart';
@@ -89,6 +91,6 @@ void main() {
 
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
-    });
+    }, skip: !Platform.isMacOS);
   });
 }
