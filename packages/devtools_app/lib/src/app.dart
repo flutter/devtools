@@ -466,4 +466,3 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
 //        supportsOffline: true,
 //      ),
     ];
-    
