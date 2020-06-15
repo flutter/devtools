@@ -561,7 +561,13 @@ class ObjectGroup {
     String methodName,
     Map<String, Object> params,
   ) {
-    return _callServiceExtension('ext.flutter.inspector.$methodName', params);
+    final callMethodName = 'ext.flutter.inspector.$methodName';
+    if (!serviceManager.serviceExtensionManager
+        .isServiceExtensionAvailable(callMethodName)) {
+      return null;
+    }
+
+    return _callServiceExtension(callMethodName, params);
   }
 
   Future<Object> invokeServiceMethodDaemonInspectorRef(
