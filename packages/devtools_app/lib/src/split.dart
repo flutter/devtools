@@ -290,9 +290,7 @@ class _SplitState extends State<Split> {
 }
 
 class DefaultSplitter extends StatelessWidget {
-  const DefaultSplitter({
-    @required this.isHorizontal,
-  });
+  const DefaultSplitter({@required this.isHorizontal});
 
   static const double size = 24.0;
 

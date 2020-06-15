@@ -18,7 +18,7 @@ import 'support/wrappers.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;
-  group('TimelineFlameChart', () {
+  group('TimelineFlameChartContent', () {
     void _setupForTimeline(Map<String, dynamic> timelineJson) {
       fakeServiceManager = FakeServiceManager(
         useFakeService: true,
@@ -82,10 +82,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TimelineFlameChart), findsOneWidget);
-      expect(
+      await expectLater(
           find.byType(TimelineFlameChart),
           matchesGoldenFile(
               'goldens/timeline_flame_chart_with_selected_frame.png'));
+
+      // Await delay for golden comparison.
+      await tester.pumpAndSettle(const Duration(seconds: 2));
     });
   });
 }

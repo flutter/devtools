@@ -62,7 +62,7 @@ class _CpuProfileFlameChartState
         textColor: Colors.black,
         data: stackFrame,
         onSelected: (dynamic frame) => widget.onSelected(frame),
-      );
+      )..sectionIndex = 0;
 
       rows[row].addNode(node);
 

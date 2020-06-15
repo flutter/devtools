@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'auto_dispose_mixin.dart';
 import 'collapsible_mixin.dart';
 import 'common_widgets.dart';
-import 'common_widgets.dart' show ColorExtension, ScrollControllerAutoScroll;
+import 'common_widgets.dart' show ScrollControllerAutoScroll;
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'table_data.dart';
 import 'theme.dart';
@@ -153,7 +153,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
       onPressed: widget.onItemSelected,
       columns: widget.columns,
       columnWidths: columnWidths,
-      backgroundColor: TableRow.colorFor(context, index),
+      backgroundColor: alternatingColorForIndexWithContext(index, context),
     );
   }
 
@@ -445,7 +445,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         onPressed: (item) => _onItemPressed(item, index),
         backgroundColor: isNodeSelected
             ? Theme.of(context).selectedRowColor
-            : TableRow.colorFor(context, index),
+            : alternatingColorForIndexWithContext(index, context),
         columns: widget.columns,
         columnWidths: columnWidths,
         expandableColumn: widget.treeColumn,
@@ -915,18 +915,6 @@ class TableRow<T> extends StatefulWidget {
   final SortDirection sortDirection;
 
   final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
-
-  /// Gets a color to use for this row at a given index.
-  static Color colorFor(BuildContext context, int index) {
-    final theme = Theme.of(context);
-    final color = theme.canvasColor;
-
-    if (index % 2 == 1) {
-      return color;
-    } else {
-      return theme.isDarkTheme ? color.brighten() : color.darken();
-    }
-  }
 
   @override
   _TableRowState<T> createState() => _TableRowState<T>();

@@ -767,3 +767,27 @@ extension ThemeDataExtension on ThemeData {
 
   TextStyle get selectedTextStyle => TextStyle(color: textSelectionColor);
 }
+
+/// Gets an alternating color to use for indexed UI elements.
+Color alternatingColorForIndexWithContext(int index, BuildContext context) {
+  final theme = Theme.of(context);
+  final color = theme.canvasColor;
+  return _modifyColorForIndex(color, index, isDarkTheme: theme.isDarkTheme);
+}
+
+Color alternatingColorForIndex(int index, {@required bool isDarkTheme}) {
+  final color = defaultBackgroundColor;
+  return _modifyColorForIndex(color, index, isDarkTheme: isDarkTheme);
+}
+
+Color _modifyColorForIndex(
+  Color color,
+  int index, {
+  @required bool isDarkTheme,
+}) {
+  if (index % 2 == 1) {
+    return color;
+  } else {
+    return isDarkTheme ? color.brighten() : color.darken();
+  }
+}
