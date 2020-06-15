@@ -22,7 +22,6 @@ import 'memory_analyzer.dart';
 import 'memory_controller.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
-import 'memory_heatmap.dart';
 import 'memory_snapshot_models.dart';
 import 'memory_treemap.dart';
 import 'memory_utils.dart';
@@ -228,8 +227,6 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       ]);
     } else if (controller.snapshotByLibraryData != null) {
       if (controller.showHeatMap.value) {
-        // TODO(peterdjlee): replace with tree map
-        // snapshotDisplay = MemoryTreeMap(controller);
         snapshotDisplay = TreemapSizeAnalyzer(
           child: SizedBox.expand(
             child: MemoryTreemap(controller),
