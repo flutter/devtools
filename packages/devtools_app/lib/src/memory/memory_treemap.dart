@@ -109,6 +109,7 @@ class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
       setState(autoCompleteOverlaySetState(controller, context));
     });
   }
+
   @override
   void dispose() {
     super.dispose();
@@ -120,15 +121,15 @@ class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
 
     if (sizes != null) {
       return LayoutBuilder(
-          builder: (context, constraints) {
-            return Treemap(
-              rootNode: sizes.root,
-              levelsVisible: 2,
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-            );
-          },
-        );
+        builder: (context, constraints) {
+          return Treemap(
+            rootNode: sizes.root,
+            levelsVisible: 2,
+            width: constraints.maxWidth,
+            height: constraints.maxHeight,
+          );
+        },
+      );
     } else {
       return const SizedBox();
     }
@@ -209,10 +210,11 @@ class InstructionsSize {
             currentChildren.putIfAbsent(
               pathPart,
               () {
-                final TreemapNode node = TreemapNode(name: pathPart, childrenMap: <String, TreemapNode>{});
+                final TreemapNode node = TreemapNode(
+                    name: pathPart, childrenMap: <String, TreemapNode>{});
                 currentParent.addChild(node);
                 return node;
-              } ,
+              },
             );
             currentChildren[pathPart].byteSize += symbol.size;
             currentParent = currentChildren[pathPart];

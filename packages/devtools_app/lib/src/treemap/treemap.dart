@@ -130,7 +130,7 @@ class _TreemapState extends State<Treemap> {
     if (children.length == 1 || children.length == 2) {
       List<Cell> positionedChildren = [];
       double offset = isHorizontalRectangle ? x : y;
-      
+
       for (final child in children) {
         final double ratio = child.byteSize / totalSize;
         positionedChildren.add(
