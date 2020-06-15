@@ -119,4 +119,3 @@ const selectNodeKey = 'selectNode';
 
 /// selectNode callback signature.
 typedef SelectNodeFunction = void Function(TreemapNode);
-
