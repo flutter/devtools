@@ -10,6 +10,7 @@ import 'package:devtools_app/src/timeline/timeline_flame_chart.dart';
 import 'package:devtools_app/src/timeline/timeline_screen.dart';
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_testing/support/timeline_test_data.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -91,6 +92,6 @@ void main() {
 
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
-    }, skip: !Platform.isMacOS);
+    }, skip: kIsWeb || !Platform.isMacOS);
   });
 }
