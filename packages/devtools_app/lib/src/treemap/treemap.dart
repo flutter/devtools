@@ -128,7 +128,7 @@ class _TreemapState extends State<Treemap> {
     children.sort((a, b) => b.byteSize.compareTo(a.byteSize));
 
     if (children.length == 1 || children.length == 2) {
-      List<Cell> positionedChildren = [];
+      final List<Cell> positionedChildren = [];
       double offset = isHorizontalRectangle ? x : y;
 
       for (final child in children) {

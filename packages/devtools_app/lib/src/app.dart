@@ -13,7 +13,6 @@ import 'connect_screen.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/debugger_screen.dart';
 import 'dialogs.dart';
-import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'initializer.dart';
