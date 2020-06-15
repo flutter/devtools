@@ -25,6 +25,7 @@ import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_heatmap.dart';
 import 'memory_snapshot_models.dart';
+import 'memory_treemap.dart';
 import 'memory_utils.dart';
 
 class HeapTree extends StatefulWidget {
@@ -230,7 +231,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       if (controller.showHeatMap.value) {
         // TODO(peterdjlee): replace with tree map
         // snapshotDisplay = MemoryTreeMap(controller);
-        snapshotDisplay = HeatMapSizeAnalyzer(
+        snapshotDisplay = TreeMapSizeAnalyzer(
           child: SizedBox.expand(
             child: MemoryTreeMap(controller),
           ),
@@ -345,7 +346,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
         const SizedBox(width: defaultSpacing),
         Row(
           children: [
-            const Text('Heat Map'),
+            const Text('Treemap'),
             Switch(
               value: controller.showHeatMap.value,
               onChanged: (value) {

@@ -1,8 +1,9 @@
-import 'package:devtools_app/src/memory/memory_heatmap.dart';
 import 'package:flutter/material.dart';
 
-class TreeMap extends StatefulWidget {
-  const TreeMap({
+import '../memory/memory_treemap.dart';
+
+class Treemap extends StatefulWidget {
+  const Treemap({
     this.rootNode,
     this.levelsVisible,
     this.width,
@@ -10,7 +11,7 @@ class TreeMap extends StatefulWidget {
     this.onTap,
   });
 
-  final DataReference rootNode;
+  final TreemapNode rootNode;
 
   // The depth of children visible from this treemap widget.
   // For example, levelsVisible = 2
@@ -30,17 +31,17 @@ class TreeMap extends StatefulWidget {
   final VoidCallback onTap;
 
   @override
-  _TreeMapState createState() => _TreeMapState();
+  _TreemapState createState() => _TreemapState();
 }
 
 enum PivotType { pivotByMiddle, pivotBySize }
 
-class _TreeMapState extends State<TreeMap> {
+class _TreemapState extends State<Treemap> {
   PivotType pivotType = PivotType.pivotBySize;
   static const double minHeightToDisplayText = 20.0;
   bool shouldDisplayText;
 
-  DataReference rootNode;
+  TreemapNode rootNode;
 
   @override
   void initState() {
@@ -50,7 +51,7 @@ class _TreeMapState extends State<TreeMap> {
   }
 
   void cellOnTap(String name) {
-    final DataReference child = rootNode.getChildWithName(name);
+    final TreemapNode child = rootNode.getChildWithName(name);
     if (child != null) {
       setState(() {
         rootNode = rootNode.getChildWithName(name);
@@ -58,8 +59,8 @@ class _TreeMapState extends State<TreeMap> {
     }
   }
 
-  // Computes the total size of a given list of data references.
-  int computeSize(List<DataReference> children, int start, int end) {
+  // Computes the total size of a given list of treemap nodes.
+  int computeSize(List<TreemapNode> children, int start, int end) {
     int sum = 0;
     for (int i = start; i <= end; i++) {
       sum += children[i].byteSize;
@@ -67,7 +68,7 @@ class _TreeMapState extends State<TreeMap> {
     return sum;
   }
 
-  int computePivot2(List<DataReference> children) {
+  int computePivot2(List<TreemapNode> children) {
     switch (pivotType) {
       case PivotType.pivotByMiddle:
         {
@@ -89,14 +90,14 @@ class _TreeMapState extends State<TreeMap> {
     return -1;
   }
 
-  // Divided a given list of data references into four parts:
+  // Divides a given list of treemap nodes into four parts:
   // L1, P, L2, L3
 
-  // P (pivot) is the data references chosen to be the pivot based on the pivot type.
+  // P (pivot) is the treemap node chosen to be the pivot based on the pivot type.
 
-  // L1 inclues all data references before the pivot data reference.
+  // L1 inclues all treemap nodes before the pivot treemap nodes.
 
-  // L2 and L3 combined include all data references after the pivot data references.
+  // L2 and L3 combined include all treemap nodes after the pivot treemap node.
   // A combination of elements are put into L2 and L3 so that
   // the aspect ratio of PD is as low as it can be.
 
@@ -109,7 +110,7 @@ class _TreeMapState extends State<TreeMap> {
   // |      |      |            |
   // ----------------------------
   List<Cell> buildTreeMap(
-    List<DataReference> children,
+    List<TreemapNode> children,
     double width,
     double height,
     double x,
@@ -122,14 +123,15 @@ class _TreeMapState extends State<TreeMap> {
     if (children.isEmpty) {
       return [];
     }
-    // Make list of children descending in size.
-    // children.shuffle();
+
+    // Sort list of children, descending in size.
     children.sort((a, b) => b.byteSize.compareTo(a.byteSize));
+
     if (children.length == 1 || children.length == 2) {
       List<Cell> positionedChildren = [];
       double offset = isHorizontalRectangle ? x : y;
-
-      children.forEach((child) {
+      
+      for (final child in children) {
         final double ratio = child.byteSize / totalSize;
         positionedChildren.add(
           Cell(
@@ -145,24 +147,22 @@ class _TreeMapState extends State<TreeMap> {
         );
 
         offset += isHorizontalRectangle ? ratio * width : ratio * height;
-      });
+      }
+
       return positionedChildren;
     }
 
     final int pivotIndex = computePivot2(children);
-    if (pivotIndex == -1) {
-      throw 'Error occurred while computing the pivot index.';
-    }
 
-    final DataReference pivotDataReference = children[pivotIndex];
+    final TreemapNode pivotDataReference = children[pivotIndex];
     final int pSize = pivotDataReference.byteSize;
 
-    final List<DataReference> list1 = children.sublist(0, pivotIndex);
+    final List<TreemapNode> list1 = children.sublist(0, pivotIndex);
     final int list1Size = computeSize(list1, 0, list1.length - 1);
 
-    List<DataReference> list2 = [];
+    List<TreemapNode> list2 = [];
     int list2Size = 0;
-    List<DataReference> list3 = [];
+    List<TreemapNode> list3 = [];
     int list3Size = 0;
 
     // The amount of data we have from pivot + 1 (exclusive)
@@ -180,9 +180,8 @@ class _TreeMapState extends State<TreeMap> {
       // the combination where the aspect ratio of pivot is the lowest.
       for (int i = pivotIndex + 1; i < children.length; i++) {
         final int list2Size = computeSize(children, pivotIndex + 1, i);
-        final int list3Size = computeSize(children, i + 1, children.length - 1);
 
-        // Calculate the aspect ratio for the pivot data references.
+        // Calculate the aspect ratio for the pivot treemap node.
         final double pAndList2Ratio = (pSize + list2Size) / totalSize;
         final double pRatio = pSize / (pSize + list2Size);
 
@@ -204,7 +203,7 @@ class _TreeMapState extends State<TreeMap> {
         }
       }
       // Split the rest of the data into list2 and list3
-      // [L1, pivotIndex, [L2 bestIndex] L3]
+      // [L1, pivotIndex, [L2 bestIndex], L3]
       list2 = children.sublist(pivotIndex + 1, bestIndex + 1);
       list2Size = computeSize(list2, 0, list2.length - 1);
 
@@ -223,6 +222,7 @@ class _TreeMapState extends State<TreeMap> {
           isHorizontalRectangle ? pdRatio * height : pdAndList2Ratio * height;
     }
 
+    // Contruct list 1 sub-treemap.
     final double list1SizeRatio = list1Size / totalSize;
     final double list1Width =
         isHorizontalRectangle ? width * list1SizeRatio : width;
@@ -237,6 +237,7 @@ class _TreeMapState extends State<TreeMap> {
       y,
     );
 
+    // Construct list 2 sub-treemap.
     final double list2Width =
         isHorizontalRectangle ? pivotBestWidth : width - pivotBestWidth;
     final double list2Height =
@@ -253,6 +254,7 @@ class _TreeMapState extends State<TreeMap> {
       list2YCoord,
     );
 
+    // Construct pivot cell.
     final double pivotXCoord =
         isHorizontalRectangle ? x + list1Width : x + list2Width;
     final double pivotYCorrd = isHorizontalRectangle ? y : y + list1Height;
@@ -267,6 +269,7 @@ class _TreeMapState extends State<TreeMap> {
       levelsVisible: widget.levelsVisible - 1,
     );
 
+    // Construct list 3 sub-treemap.
     final double list3Ratio = list3Size / totalSize;
     final double list3Width =
         isHorizontalRectangle ? list3Ratio * width : width;
@@ -288,17 +291,27 @@ class _TreeMapState extends State<TreeMap> {
     return list1Cells + [pivotCell] + list2Cells + list3Cells;
   }
 
-  String buildNodeSizeText() {
+  String nodeSizeText() {
     final int size = rootNode.byteSize;
     final double sizeInKB = size / 1024;
     if (sizeInKB < 1024.0) {
       return '[' + sizeInKB.toStringAsFixed(2) + ' KB]';
     } else {
+      // TODO(peterdjlee): Investigate the max size of memory usages.
       final double sizeInMB = sizeInKB / 1024;
-      return '[' + sizeInMB.toStringAsFixed(2) + ' KB]';
+      return '[' + sizeInMB.toStringAsFixed(2) + ' MB]';
     }
   }
 
+  // Treemap layout:
+  // ----------------------------
+  // |        Title Text        |
+  // |--------------------------|
+  // |                          |
+  // |         Content          |
+  // |                          |
+  // |                          |
+  // ----------------------------
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -312,26 +325,26 @@ class _TreeMapState extends State<TreeMap> {
                 shouldDisplayText)
               Center(
                 child: Text(
-                  rootNode.name + ' ' + buildNodeSizeText(),
+                  rootNode.name + ' ' + nodeSizeText(),
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                 ),
               ),
-            Expanded(child: buildContainer()),
+            Expanded(child: buildContent()),
           ],
         ),
       ),
     );
   }
 
-  Widget buildContainer() {
+  Widget buildContent() {
     if (widget.levelsVisible == 0) {
       if (shouldDisplayText) {
         return Container(
           width: widget.width,
           child: Center(
             child: Text(
-              rootNode.name + '\n' + buildNodeSizeText(),
+              rootNode.name + '\n' + nodeSizeText(),
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
             ),
@@ -401,7 +414,6 @@ class Cell extends StatelessWidget {
     this.onTap,
   }) : super(key: key);
 
-  // Width and height of the box
   final double width;
   final double height;
 
@@ -412,7 +424,7 @@ class Cell extends StatelessWidget {
   final double y;
 
   final VoidCallback onTap;
-  final DataReference node;
+  final TreemapNode node;
 
   final int levelsVisible;
 
@@ -423,7 +435,7 @@ class Cell extends StatelessWidget {
       top: y,
       width: width,
       height: height,
-      child: TreeMap(
+      child: Treemap(
         rootNode: node,
         levelsVisible: levelsVisible,
         width: width,

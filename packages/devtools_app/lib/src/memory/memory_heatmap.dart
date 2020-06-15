@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:devtools_app/src/example/tree_map.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter/rendering.dart' hide TextStyle;
@@ -15,7 +14,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
-import '../trees.dart';
 import '../ui/colors.dart';
 
 import 'memory_controller.dart';
@@ -38,7 +36,6 @@ import 'memory_utils.dart';
 /// Mouse action over, upward, children will further expand its children in
 /// a upward fashion too. To collapse a rectangle move the mouse below a child
 /// rectangle (its parent) and click or mouse scroll.
-
 class HeatMapSizeAnalyzer extends SingleChildRenderObjectWidget {
   const HeatMapSizeAnalyzer({
     Key key,
@@ -60,21 +57,21 @@ class RenderFlameChart extends RenderProxyBox {
   }
 }
 
-class MemoryTreeMap extends StatefulWidget {
-  const MemoryTreeMap(
+class FlameChart extends StatefulWidget {
+  const FlameChart(
     this.controller,
   );
 
   final MemoryController controller;
 
   @override
-  MemoryTreeMapState createState() => MemoryTreeMapState(controller);
+  FlameChartState createState() => FlameChartState(controller);
 }
 
-class MemoryTreeMapState extends State<MemoryTreeMap> with AutoDisposeMixin {
-  MemoryTreeMapState(this.controller);
+class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
+  FlameChartState(this.controller);
 
-  InstructionsSize2 sizes;
+  InstructionsSize sizes;
 
   Map<String, Function> callbacks = {};
 
@@ -82,7 +79,7 @@ class MemoryTreeMapState extends State<MemoryTreeMap> with AutoDisposeMixin {
 
   Widget snapshotDisplay;
 
-  MemoryTreeMap _treemap;
+  _FlameChart _flameChart;
 
   @override
   void initState() {
@@ -102,7 +99,7 @@ class MemoryTreeMapState extends State<MemoryTreeMap> with AutoDisposeMixin {
       setState(() {
         controller.computeAllLibraries(true, true);
 
-        sizes = InstructionsSize2.fromSnapshop(controller);
+        sizes = InstructionsSize.fromSnapshop(controller);
       });
     });
 
@@ -168,44 +165,40 @@ class MemoryTreeMapState extends State<MemoryTreeMap> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    sizes = InstructionsSize2.fromSnapshop(controller);
+    sizes = InstructionsSize.fromSnapshop(controller);
 
-    // sizes = InstructionsSize.fromSnapshop(controller);
     if (sizes != null) {
-      return LayoutBuilder(
-          builder: (context, constraints) {
-            return TreeMap(
-              rootNode: sizes.root,
-              levelsVisible: 2,
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-            );
-          },
-        );
+      _flameChart = _FlameChart(
+        sizes,
+        // TODO(terry): Can the color range match flame chart? Review with UX.
+        memoryHeatMapLightColor,
+        memoryHeatMapDarkColor,
+        callbacks,
+      );
+      return _flameChart;
     } else {
       return const SizedBox();
     }
   }
 
   List<String> matchNames(String searchValue) {
-    // final MatchNamesFunction callback = _treemap.callbacks[matchNamesKey];
-    // return callback(searchValue);
+    final MatchNamesFunction callback = _flameChart.callbacks[matchNamesKey];
+    return callback(searchValue);
   }
 
   Node findNode(String searchValue) {
-    // final FindNodeFunction callback = _treemap.callbacks[findNodeKey];
-    // return callback(searchValue);
+    final FindNodeFunction callback = _flameChart.callbacks[findNodeKey];
+    return callback(searchValue);
   }
 
   void selectNode(Node nodeValue) {
-    // final SelectNodeFunction callback = _treemap.callbacks[selectNodeKey];
-    // callback(nodeValue);
+    final SelectNodeFunction callback = _flameChart.callbacks[selectNodeKey];
+    callback(nodeValue);
   }
 }
 
 /// Definitions of exposed callback methods stored in callback Map the key
 /// is the function name (String) and the value a callback function signature.
-
 /// matchNames callback name.
 const matchNamesKey = 'matchNames';
 
@@ -385,6 +378,7 @@ class FlameChartRenderObject extends RenderBox {
 
     final rootWidth = size.width;
     final top = _paintAncestors(context, _selectedNode.ancestors);
+
     _paintNode(
         context, _selectedNode, 0 + paintOffset.dx, rootWidth, top - offset.dy);
 
@@ -475,6 +469,7 @@ class FlameChartRenderObject extends RenderBox {
     double maxWidth,
   }) {
     double left = currentLeft;
+
     for (var child in children) {
       final double width = child.byteSize / parentSize * maxWidth;
       _paintNode(context, child, left, width, topFactor);
@@ -553,7 +548,6 @@ class InstructionsSize {
           Map<String, Node> currentChildren = rootChildren;
           final Node parentReset = currentParent;
           for (String pathPart in symbol.parts) {
-            
             currentChildren.putIfAbsent(
               pathPart,
               () => Node(pathPart,
@@ -602,153 +596,6 @@ class InstructionsSize {
 
   final Node root;
 }
-
-
-class InstructionsSize2 {
-  const InstructionsSize2(this.root);
-
-  factory InstructionsSize2.fromSnapshop(MemoryController controller) {
-    final Map<String, DataReference> rootChildren = <String, DataReference>{};
-    final DataReference root = DataReference(
-      name: 'root',
-      childrenMap: rootChildren,
-    );
-    DataReference currentParent = root;
-
-    // TODO(terry): Should heat map be all memory or just the filtered group?
-    //              Using rawGroup not graph.groupByLibrary.
-
-    controller.heapGraph.rawGroupByLibrary.forEach(
-      (libraryGroup, value) {
-        final classes = value;
-        for (final theClass in classes) {
-          final shallowSize = theClass.instancesTotalShallowSizes;
-          var className = theClass.name;
-          if (shallowSize == 0 ||
-              libraryGroup == null ||
-              className == null ||
-              className == '::') {
-            continue;
-          }
-
-          // Ensure the empty library name is our group name e.g., '' -> 'src'.
-          String libraryName = theClass.libraryUri.toString();
-          if (libraryName.isEmpty) {
-            libraryName = libraryGroup;
-          }
-
-          // Map class names to familar user names.
-          final predefined =
-              predefinedClasses[LibraryClass(libraryName, className)];
-          if (predefined != null) {
-            className = predefined.prettyName;
-          }
-
-          final symbol = Symbol(
-            name: 'new $className',
-            size: shallowSize,
-            libraryUri: libraryName,
-            className: className,
-          );
-
-          Map<String, DataReference> currentChildren = rootChildren;
-          final DataReference parentReset = currentParent;
-          for (String pathPart in symbol.parts) {
-            currentChildren.putIfAbsent(
-              pathPart,
-              () {
-                final DataReference node = DataReference(name: pathPart, childrenMap: <String, DataReference>{});
-                currentParent.addChild(node);
-                return node;
-              } ,
-            );
-            currentChildren[pathPart].byteSize += symbol.size;
-            currentParent = currentChildren[pathPart];
-            currentChildren = currentChildren[pathPart].childrenMap;
-          }
-          currentParent = parentReset;
-        }
-      },
-    );
-
-    root.byteSize = root.childrenMap.values
-        .fold(0, (int current, DataReference node) => current + node.byteSize);
-
-    final snapshotGraph = controller.snapshots.last.snapshotGraph;
-    // Add the external heap to the heat map.
-    root.childrenMap.putIfAbsent('External Heap', () {
-      final DataReference node = DataReference(
-        name: 'External Heap',
-        childrenMap: <String, DataReference>{},
-      );
-      root.addChild(node);
-      node.byteSize = snapshotGraph.externalSize;
-      return node;
-    });
-
-    // Add the filtered libraries/classes to the heat map.
-    root.childrenMap.putIfAbsent('All Filtered Libraries', () {
-      final node = DataReference(
-        name: 'All Filtered Libraries',
-        childrenMap: <String, DataReference>{},
-      );
-      root.addChild(node);
-      node.byteSize = snapshotGraph.shallowSize - root.byteSize;
-      return node;
-    });
-
-    root.byteSize = snapshotGraph.shallowSize + snapshotGraph.externalSize;
-
-    return InstructionsSize2(root);
-  }
-
-  final DataReference root;
-}
-
-
-// TODO(peterdjlee): Rename class to appropriate name.
-class DataReference extends TreeNode<DataReference> {
-  DataReference({
-    this.name,
-    this.byteSize = 0,
-    this.childrenMap = const <String, DataReference>{},
-  })  : assert(name != null),
-        assert(byteSize != null),
-        assert(childrenMap != null);
-
-  final String name;
-  int byteSize;
-  final Map<String, DataReference> childrenMap;
-
-  void addSize(int byteSize) {
-    this.byteSize += byteSize;
-  }
-
-  DataReference getChildWithName(String name) {
-    if (childrenMap.containsKey(name)) {
-      return childrenMap[name];
-    } else {
-      return null;
-    }
-  }
-
-  void printTree() {
-    printTreeHelper(this, '');
-  }
-
-  void printTreeHelper(DataReference root, String tabs) {
-    print(tabs + '$root');
-    for (final child in root.children) {
-      printTreeHelper(child, tabs + '\t');
-    }
-  }
-
-  @override
-  String toString() {
-    return '{name: $name, size: $byteSize}\n';
-  }
-}
-
 
 class Node {
   Node(
@@ -799,7 +646,7 @@ class Node {
   }
 
   @override
-  String toString() => 'Node($name, $byteSize, $rect)\n';
+  String toString() => 'Node($name, $byteSize, $rect)';
 }
 
 class Symbol {
