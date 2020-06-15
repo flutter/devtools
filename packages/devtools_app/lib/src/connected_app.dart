@@ -4,11 +4,8 @@
 
 import 'dart:async';
 
-import 'package:vm_service/vm_service.dart';
-
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
-import 'service_extensions.dart' as extensions;
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const dartHtmlLibraryUri = 'dart:html';
