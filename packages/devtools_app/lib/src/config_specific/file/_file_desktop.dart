@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/config_specific/logger/logger.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as _path;
@@ -57,24 +58,34 @@ class FileSystemDesktop implements FileIO {
   List<String> list({String prefix}) {
     final List<String> logs = [];
 
-    final previousCurrentDirectory = _fs.currentDirectory;
+    try {
+      final previousCurrentDirectory = _fs.currentDirectory;
 
-    // TODO(terry): Use path_provider when available?
-    _fs.currentDirectory = exportDirectory();
+      // TODO(terry): Use path_provider when available?
+      _fs.currentDirectory = exportDirectory();
 
-    final allFiles = _fs.currentDirectory.listSync();
-
-    for (FileSystemEntity entry in allFiles) {
-      final basename = _path.basename(entry.path);
-      if (_fs.isFileSync(entry.path) && basename.startsWith(prefix)) {
-        logs.add(basename);
+      if (!_fs.currentDirectory.existsSync()) {
+        return logs;
       }
+      final allFiles = _fs.currentDirectory.listSync(followLinks: false);
+      for (FileSystemEntity entry in allFiles) {
+        final basename = _path.basename(entry.path);
+        if (_fs.isFileSync(entry.path) && basename.startsWith(prefix)) {
+          logs.add(basename);
+        }
+      }
+      // Sort by newest file top-most (DateTime is in the filename).
+      logs.sort((a, b) => b.compareTo(a));
+
+      _fs.currentDirectory = previousCurrentDirectory;
+    } on FileSystemException catch (e) {
+      // TODO(jacobr): prompt the user to grant permission to access the
+      // directory if Flutter ever provides that option or consider using an
+      // alternate directory. This error should generally only occur on MacOS
+      // desktop Catalina and later  where access to the Downloads folder
+      // is not granted by default.
+      log(e.toString());
     }
-
-    // Sort by newest file top-most (DateTime is in the filename).
-    logs.sort((a, b) => b.compareTo(a));
-
-    _fs.currentDirectory = previousCurrentDirectory;
 
     return logs;
   }
