@@ -496,11 +496,11 @@ class SectionLabelPainter extends FlameChartPainter {
         eventGroups.values.toList().indexOf(group),
         isDarkTheme: isDarkTheme,
       );
-      final backgroundWithAlpha = Color.fromRGBO(
+      final backgroundWithOpacity = Color.fromRGBO(
         backgroundColor.red,
         backgroundColor.green,
         backgroundColor.blue,
-        0.75,
+        0.85,
       );
 
       canvas.drawRect(
@@ -510,7 +510,7 @@ class SectionLabelPainter extends FlameChartPainter {
           labelWidth,
           rowHeightWithPadding,
         ),
-        Paint()..color = backgroundWithAlpha,
+        Paint()..color = backgroundWithOpacity,
       );
 
       textPainter.paint(
