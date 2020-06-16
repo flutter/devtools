@@ -1042,7 +1042,9 @@ class _TableRowState<T> extends State<TableRow<T>>
   Widget tableRowFor(BuildContext context) {
     final fontStyle = fixedFontStyle(context);
 
-    Widget columnFor(ColumnData<T> column, double columnWidth) {
+    Widget columnFor(BuildContext context, int i) {
+      final column = widget.columns[i];
+      final columnWidth = widget.columnWidths[i];
       Widget content;
       final node = widget.node;
       if (node == null) {
@@ -1112,7 +1114,13 @@ class _TableRowState<T> extends State<TableRow<T>>
         );
       }
 
-      content = SizedBox(
+      content = Container(
+        // Add padding except for at the beginning of the first row and end of
+        // the last row.
+        padding: EdgeInsets.only(
+          left: i > 0 ? defaultSpacing / 2 : 0,
+          right: i + 1 < widget.columns.length ? defaultSpacing / 2 : 0,
+        ),
         width: columnWidth,
         child: Align(
           alignment: _alignmentFor(column),
@@ -1128,10 +1136,7 @@ class _TableRowState<T> extends State<TableRow<T>>
         scrollDirection: Axis.horizontal,
         controller: scrollController,
         itemCount: widget.columns.length,
-        itemBuilder: (context, int i) => columnFor(
-          widget.columns[i],
-          widget.columnWidths[i],
-        ),
+        itemBuilder: columnFor,
       ),
     );
   }
