@@ -256,7 +256,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   structuredErrors,
 ];
 
-final Map<String, ServiceExtensionDescription> serviceExtensionsWhitelist =
+final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
     Map.fromIterable(
   _extensionDescriptions,
   key: (extension) => extension.extension,

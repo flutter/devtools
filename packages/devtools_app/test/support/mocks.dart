@@ -404,7 +404,7 @@ class FakeServiceExtensionManager extends Fake
     final String name,
     String valueFromJson,
   ) async {
-    final extension = extensions.serviceExtensionsWhitelist[name];
+    final extension = extensions.serviceExtensionsAllowlist[name];
     if (extension != null) {
       final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
 
@@ -427,7 +427,7 @@ class FakeServiceExtensionManager extends Fake
 
   dynamic _getExtensionValueFromJson(String name, String valueFromJson) {
     final expectedValueType =
-        extensions.serviceExtensionsWhitelist[name].values.first.runtimeType;
+        extensions.serviceExtensionsAllowlist[name].values.first.runtimeType;
     switch (expectedValueType) {
       case bool:
         return valueFromJson == 'true' ? true : false;
@@ -473,10 +473,10 @@ class FakeServiceExtensionManager extends Fake
   }
 
   Future<void> _restoreExtensionFromDevice(String name) async {
-    if (!extensions.serviceExtensionsWhitelist.containsKey(name)) {
+    if (!extensions.serviceExtensionsAllowlist.containsKey(name)) {
       return;
     }
-    final extensionDescription = extensions.serviceExtensionsWhitelist[name];
+    final extensionDescription = extensions.serviceExtensionsAllowlist[name];
     final value = extensionValueOnDevice[name];
     if (extensionDescription
         is extensions.ToggleableServiceExtensionDescription) {

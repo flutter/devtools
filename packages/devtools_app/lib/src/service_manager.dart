@@ -562,7 +562,7 @@ class ServiceExtensionManager {
         final String valueFromJson =
             event.json['extensionData']['value'].toString();
 
-        final extension = extensions.serviceExtensionsWhitelist[name];
+        final extension = extensions.serviceExtensionsAllowlist[name];
         if (extension != null) {
           final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
 
@@ -586,7 +586,7 @@ class ServiceExtensionManager {
 
   dynamic _getExtensionValueFromJson(String name, String valueFromJson) {
     final expectedValueType =
-        extensions.serviceExtensionsWhitelist[name].values.first.runtimeType;
+        extensions.serviceExtensionsAllowlist[name].values.first.runtimeType;
     switch (expectedValueType) {
       case bool:
         return valueFromJson == 'true' ? true : false;
@@ -691,11 +691,11 @@ class ServiceExtensionManager {
   }
 
   Future<void> _restoreExtensionFromDevice(String name) async {
-    if (!extensions.serviceExtensionsWhitelist.containsKey(name)) {
+    if (!extensions.serviceExtensionsAllowlist.containsKey(name)) {
       return;
     }
     final expectedValueType =
-        extensions.serviceExtensionsWhitelist[name].values.first.runtimeType;
+        extensions.serviceExtensionsAllowlist[name].values.first.runtimeType;
 
     try {
       final response = await _service.callServiceExtension(
@@ -732,7 +732,7 @@ class ServiceExtensionManager {
   }
 
   Future<void> _maybeRestoreExtension(String name, dynamic value) async {
-    final extensionDescription = extensions.serviceExtensionsWhitelist[name];
+    final extensionDescription = extensions.serviceExtensionsAllowlist[name];
     if (extensionDescription
         is extensions.ToggleableServiceExtensionDescription) {
       if (value == extensionDescription.enabledValue) {
