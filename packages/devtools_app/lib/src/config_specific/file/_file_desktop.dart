@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/logger/logger.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as _path;
+
+import '../logger/logger.dart';
 
 import 'file.dart';
 
