@@ -1,3 +1,4 @@
+import 'package:devtools_app/src/ui/colors.dart';
 import 'package:flutter/material.dart';
 
 import '../trees.dart';
@@ -352,7 +353,7 @@ class _TreemapState extends State<Treemap> {
         return GestureDetector(
           onTap: widget.onTap,
           child: Container(
-            color: Colors.white38,
+            color: mainUiColor,
             child: Tooltip(
               message: rootNode.name,
               child: buildNestedTreemap(),
@@ -361,7 +362,7 @@ class _TreemapState extends State<Treemap> {
         );
       } else {
         return Container(
-          color: Colors.white38,
+          color: mainUiColor,
           child: shouldDisplayText
               ? Center(child: nameAndSizeText())
               : const SizedBox(),
@@ -375,6 +376,7 @@ class _TreemapState extends State<Treemap> {
   Text nameAndSizeText() {
     return Text(
       '${rootNode.name}\n${nodeSizeText()}',
+      style: const TextStyle(color: Colors.black),
       textAlign: TextAlign.center,
       overflow: TextOverflow.ellipsis,
     );

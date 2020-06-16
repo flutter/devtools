@@ -13,6 +13,7 @@ import 'theme.dart';
 Color memoryHeatMapLightColor = const Color(0xFFBBDEFB); // Material BLUE 100
 Color memoryHeatMapDarkColor = const Color(0xFF0D47A1); // Material BLUE 900
 
+// TODO(peterdjlee): Rename mainUiColor to something that more broadly matches where the color is used.
 const mainUiColor = Color(0xFF88B1DE);
 const mainRasterColor = Color(0xFF2C5DAA);
 const mainUnknownColor = Color(0xFFCAB8E9);
