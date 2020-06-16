@@ -8,7 +8,7 @@ set -x #echo on
 echo "Editing .gitignore to comment out build directory"
 
 pushd packages/devtools_app
-pub get
+flutter pub get
 popd
 
 tool/build_release.sh
