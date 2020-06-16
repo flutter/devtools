@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../trees.dart';
 import '../utils.dart';
 
+enum PivotType { pivotByMiddle, pivotBySize }
+
 class Treemap extends StatefulWidget {
   const Treemap({
     @required this.rootNode,
@@ -41,8 +43,6 @@ class Treemap extends StatefulWidget {
   _TreemapState createState() => _TreemapState();
 }
 
-enum PivotType { pivotByMiddle, pivotBySize }
-
 class _TreemapState extends State<Treemap> {
   static const double minHeightToDisplayText = 20.0;
   PivotType pivotType = PivotType.pivotBySize;
@@ -58,6 +58,7 @@ class _TreemapState extends State<Treemap> {
   bool get shouldDisplayText => widget.height > minHeightToDisplayText;
 
   void cellOnTap(TreemapNode child) {
+    // TODO(peterdjlee): Push rootNode state management into controller responsible for managing the data.
     if (child != null) {
       setState(() {
         rootNode = child;
@@ -66,11 +67,13 @@ class _TreemapState extends State<Treemap> {
   }
 
   /// Computes the total size of a given list of treemap nodes.
+  /// [endIndex] defaults to nodes.length - 1.
   int computeByteSizeForNodes({
     @required List<TreemapNode> nodes,
-    @required int startIndex,
-    @required int endIndex,
+    int startIndex = 0,
+    int endIndex,
   }) {
+    endIndex ??= nodes.length - 1;
     int sum = 0;
     for (int i = startIndex; i <= endIndex; i++) {
       sum += nodes[i].byteSize;
@@ -97,16 +100,20 @@ class _TreemapState extends State<Treemap> {
     }
   }
 
+  /// Implements the ordered treemap algorithm studied in [this research paper](https://www.cs.umd.edu/~ben/papers/Shneiderman2001Ordered.pdf).
+  ///
+  /// **Algorithm**
+  ///
   /// Divides a given list of treemap nodes into four parts:
   /// L1, P, L2, L3.
-
+  ///
   /// P (pivot) is the treemap node chosen to be the pivot based on the pivot type.
   /// L1 includes all treemap nodes before the pivot treemap node.
   /// L2 and L3 combined include all treemap nodes after the pivot treemap node.
   /// A combination of elements are put into L2 and L3 so that
   /// the aspect ratio of the pivot cell (P) is as close to 1 as it can be.
-
-  /// Example layout:
+  ///
+  /// **Layout**
   /// ```
   /// ----------------------
   /// |      |  P   |      |
@@ -125,17 +132,13 @@ class _TreemapState extends State<Treemap> {
   }) {
     final isHorizontalRectangle = width > height;
 
-    final totalSize = computeByteSizeForNodes(
-      nodes: children,
-      startIndex: 0,
-      endIndex: children.length - 1,
-    );
+    final totalSize = computeByteSizeForNodes(nodes: children);
 
     if (children.isEmpty) {
       return [];
     }
 
-    // Sort list of children, descending in size.
+    // Sort the list of treemap nodes, descending in size.
     children.sort((a, b) => b.byteSize.compareTo(a.byteSize));
 
     if (children.length <= 2) {
@@ -169,29 +172,23 @@ class _TreemapState extends State<Treemap> {
     final pSize = pivotDataReference.byteSize;
 
     final list1 = children.sublist(0, pivotIndex);
-    final list1Size = computeByteSizeForNodes(
-      nodes: list1,
-      startIndex: 0,
-      endIndex: list1.length - 1,
-    );
+    final list1Size = computeByteSizeForNodes(nodes: list1);
 
-    List<TreemapNode> list2 = [];
-    int list2Size = 0;
-    List<TreemapNode> list3 = [];
-    int list3Size = 0;
+    List list2 = <TreemapNode>[];
+    int list2ByteSize = 0;
+    List list3 = <TreemapNode>[];
+    int list3ByteSize = 0;
 
-    // The amount of data we have from pivot + 1 (exclusive)
-    // In another words, if we only put one data in l2, how many are left for l3?
-    // [L1, pivotIndex, data, |d|] d = 2
+    // The maximum amount of data we can put in [list3].
     final l3MaxLength = children.length - pivotIndex - 1;
     int bestIndex = 0;
     double pivotBestWidth = 0;
     double pivotBestHeight = 0;
 
-    // We need to be able to put at least 3 elements in l3 for this algorithm.
+    // We need to be able to put at least 3 elements in [list3] for this algorithm.
     if (l3MaxLength >= 3) {
       double pBestAspectRatio = double.infinity;
-      // Iterate through different combinations of list2 and list3 to find
+      // Iterate through different combinations of [list2] and [list3] to find
       // the combination where the aspect ratio of pivot is the lowest.
       for (int i = pivotIndex + 1; i < children.length; i++) {
         final list2Size = computeByteSizeForNodes(
@@ -221,32 +218,19 @@ class _TreemapState extends State<Treemap> {
           pivotBestHeight = pHeight;
         }
       }
-      // Split the rest of the data into list2 and list3
-      // [L1, pivotIndex, [L2 bestIndex], L3]
+      // Split the rest of the data into [list2] and [list3].
       list2 = children.sublist(pivotIndex + 1, bestIndex + 1);
-      list2Size = computeByteSizeForNodes(
-        nodes: list2,
-        startIndex: 0,
-        endIndex: list2.length - 1,
-      );
+      list2ByteSize = computeByteSizeForNodes(nodes: list2);
 
       list3 = children.sublist(bestIndex + 1);
-      list3Size = computeByteSizeForNodes(
-        nodes: list3,
-        startIndex: 0,
-        endIndex: list3.length - 1,
-      );
+      list3ByteSize = computeByteSizeForNodes(nodes: list3);
     } else {
-      // Put all data in l2 and none in l3.
+      // Put all data in [list2] and none in [list3].
       list2 = children.sublist(pivotIndex + 1);
-      list2Size = computeByteSizeForNodes(
-        nodes: list2,
-        startIndex: 0,
-        endIndex: list2.length - 1,
-      );
+      list2ByteSize = computeByteSizeForNodes(nodes: list2);
 
-      final pdAndList2Ratio = (pSize + list2Size) / totalSize;
-      final pdRatio = pSize / (pSize + list2Size);
+      final pdAndList2Ratio = (pSize + list2ByteSize) / totalSize;
+      final pdRatio = pSize / (pSize + list2ByteSize);
       pivotBestWidth =
           isHorizontalRectangle ? pdAndList2Ratio * width : pdRatio * width;
       pivotBestHeight =
@@ -297,7 +281,7 @@ class _TreemapState extends State<Treemap> {
     );
 
     // Construct list 3 sub-treemap.
-    final list3Ratio = list3Size / totalSize;
+    final list3Ratio = list3ByteSize / totalSize;
     final list3Width = isHorizontalRectangle ? list3Ratio * width : width;
     final list3Height = isHorizontalRectangle ? height : list3Ratio * height;
     final list3XCoord =
@@ -315,7 +299,7 @@ class _TreemapState extends State<Treemap> {
     return list1Cells + [pivotCell] + list2Cells + list3Cells;
   }
 
-  /// Treemap layout:
+  /// **Treemap widget layout**
   /// ```
   /// ----------------------------
   /// |        Title Text        |
@@ -446,9 +430,11 @@ class TreemapCell extends StatelessWidget {
   final double height;
 
   // Origin is defined by the left top corner.
-  // x is the horizontal distance from the origin.
-  // y is the vertical distance from the origin.
+
+  /// The horizontal distance from the origin .
   final double x;
+
+  /// The vertical distance from the origin.
   final double y;
 
   final VoidCallback onTap;
