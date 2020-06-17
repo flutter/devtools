@@ -33,6 +33,8 @@ class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
 
   Widget snapshotDisplay;
 
+  TreemapNode root;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -41,6 +43,8 @@ class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
     controller = Provider.of<MemoryController>(context);
 
     sizes = InstructionsSize.fromSnapshot(controller);
+
+    root = sizes.root;
 
     cancel();
 
@@ -79,18 +83,21 @@ class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
     });
   }
 
+  void _onRootChanged(TreemapNode newRoot) {
+    setState(() {
+      root = newRoot;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (sizes != null) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          return Treemap(
-            rootNode: sizes.root,
-            levelsVisible: 2,
-            width: constraints.maxWidth,
-            height: constraints.maxHeight,
-            onTap: () {},
-          );
+          return NewTreemap.fromRoot(
+              rootNode: root,
+              levelsVisible: 3,
+              onRootChangedCallback: _onRootChanged);
         },
       );
     } else {
