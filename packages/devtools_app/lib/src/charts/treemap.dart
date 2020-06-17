@@ -77,7 +77,9 @@ class Treemap extends StatelessWidget {
 
   static const treeMapHeaderHeight = 20.0;
 
-  static const minHeightToDisplayText = 20.0;
+  static const minHeightToDisplayTitleText = 20.0;
+
+  static const minHeightToDisplayCellText = 40.0;
 
   /// Computes the total size of a given list of treemap nodes.
   /// [endIndex] defaults to nodes.length - 1.
@@ -361,6 +363,15 @@ class Treemap extends StatelessWidget {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    if (rootNode == null && nodes.isNotEmpty) {
+      return buildSubTreemaps();
+    } else {
+      return buildTreemap();
+    }
+  }
+
   /// **Treemap widget layout**
   /// ```
   /// ----------------------------
@@ -372,23 +383,14 @@ class Treemap extends StatelessWidget {
   /// |                          |
   /// ----------------------------
   /// ```
-  @override
-  Widget build(BuildContext context) {
-    if (rootNode == null && nodes.isNotEmpty) {
-      return buildSubTreemaps();
-    } else {
-      return buildTreemapCell();
-    }
-  }
-
-  Widget buildTreemapCell() {
+  Widget buildTreemap() {
     if (levelsVisible > 0 && rootNode.children.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.all(1.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (height > minHeightToDisplayText) buildTitleText(),
+            if (height > minHeightToDisplayTitleText) buildTitleText(),
             Expanded(
               child: Treemap.fromNodes(
                 nodes: rootNode.children,
@@ -401,19 +403,29 @@ class Treemap extends StatelessWidget {
         ),
       );
     } else {
-      return buildSelectable(
-        child: Container(
-          decoration: BoxDecoration(
-            color: mainUiColor,
-            border: Border.all(color: Colors.black54),
-          ),
-          child: Center(
-            child: buildNameAndSizeText(
-              fontColor: Colors.black,
-              oneline: false,
+      return Column(
+        children: [
+          if (levelsVisible == 2 && height > minHeightToDisplayTitleText)
+            buildTitleText(),
+          Expanded(
+            child: buildSelectable(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: mainUiColor,
+                  border: Border.all(color: Colors.black54),
+                ),
+                child: Center(
+                  child: height > minHeightToDisplayCellText
+                      ? buildNameAndSizeText(
+                          fontColor: Colors.black,
+                          oneline: false,
+                        )
+                      : const SizedBox(),
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       );
     }
   }
@@ -536,6 +548,6 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
   @override
   String toString() {
-    return '{name: $name, size: $byteSize}\n';
+    return '{name: $name, size: $byteSize}';
   }
 }
