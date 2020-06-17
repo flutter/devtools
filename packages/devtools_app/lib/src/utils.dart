@@ -67,6 +67,15 @@ String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
 final NumberFormat _kbPattern = NumberFormat.decimalPattern()
   ..maximumFractionDigits = 0;
 
+String prettyPrintBytes(int size) {
+  final sizeInKB = size / 1024.0;
+  if (sizeInKB < 1024.0) {
+    return '[${printKb(size)} KB]';
+  } else {
+    return '[${printMb(size, 2)} MB]';
+  }
+}
+
 String printKb(num bytes) {
   // We add ((1024/2)-1) to the value before formatting so that a non-zero byte
   // value doesn't round down to 0.

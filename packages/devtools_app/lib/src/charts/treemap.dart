@@ -46,14 +46,14 @@ class Treemap extends StatelessWidget {
   final List<TreemapNode> nodes;
 
   /// The depth of children visible from this Treemap widget.
-  /// 
+  ///
   /// A decremented level should be passed in when constructing [Treemap.fromRoot],
   /// but not when constructing [Treemap.fromNodes]. This is because
   /// when constructing from a root, [Treemap] either builds a nested [Treemap] to
   /// show its node's children, or it shows its node. When constructing from a list
-  /// of nodes, however, [Treemap] is built to become part of a bigger treemap, 
+  /// of nodes, however, [Treemap] is built to become part of a bigger treemap,
   /// which means the level should not change.
-  /// 
+  ///
   /// For example, levelsVisible = 2:
   /// ```
   /// _______________
@@ -74,6 +74,10 @@ class Treemap extends StatelessWidget {
   final void Function(TreemapNode node) onRootChangedCallback;
 
   final PivotType pivotType = PivotType.pivotBySize;
+
+  static const treeMapHeaderHeight = 20.0;
+
+  static const minHeightToDisplayText = 20.0;
 
   /// Computes the total size of a given list of treemap nodes.
   /// [endIndex] defaults to nodes.length - 1.
@@ -175,8 +179,8 @@ class Treemap extends StatelessWidget {
 
     final pivotIndex = computePivot(children);
 
-    final pivotDataReference = children[pivotIndex];
-    final pivotByteSize = pivotDataReference.byteSize;
+    final pivotNode = children[pivotIndex];
+    final pivotByteSize = pivotNode.byteSize;
 
     final list1 = children.sublist(0, pivotIndex);
     final list1ByteSize = computeByteSizeForNodes(nodes: list1);
@@ -308,7 +312,7 @@ class Treemap extends StatelessWidget {
         width: pivotBestWidth,
         height: pivotBestHeight,
         child: Treemap.fromRoot(
-          rootNode: pivotDataReference,
+          rootNode: pivotNode,
           levelsVisible: levelsVisible - 1,
           onRootChangedCallback: onRootChangedCallback,
           height: height,
@@ -350,7 +354,7 @@ class Treemap extends StatelessWidget {
     @required bool oneline,
   }) {
     return Text(
-      rootNode.displayText(oneline: oneline),
+      rootNode.displayText(oneLine: oneline),
       style: TextStyle(color: fontColor),
       textAlign: TextAlign.center,
       overflow: TextOverflow.ellipsis,
@@ -382,18 +386,9 @@ class Treemap extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.all(1.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            if (height > 20.0)
-              buildSelectable(
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(border: Border.all()),
-                  child: buildNameAndSizeText(
-                    fontColor: Colors.white,
-                    oneline: true,
-                  ),
-                ),
-              ),
+            if (height > minHeightToDisplayText) buildTitleText(),
             Expanded(
               child: Treemap.fromNodes(
                 nodes: rootNode.children,
@@ -410,7 +405,7 @@ class Treemap extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: mainUiColor,
-            border: Border.all(),
+            border: Border.all(color: Colors.black54),
           ),
           child: Center(
             child: buildNameAndSizeText(
@@ -423,13 +418,61 @@ class Treemap extends StatelessWidget {
     }
   }
 
-  Tooltip buildSelectable({@required Widget child}) {
+  Widget buildTitleText() {
+    if (levelsVisible == 2) {
+      final pathFromRoot = rootNode.pathFromRoot();
+      return Container(
+        height: treeMapHeaderHeight,
+        child: ListView.separated(
+          shrinkWrap: true,
+          scrollDirection: Axis.horizontal,
+          separatorBuilder: (context, index) {
+            return const Text(' > ');
+          },
+          itemCount: pathFromRoot.length,
+          itemBuilder: (BuildContext context, int index) {
+            return buildSelectable(
+              child: Text(
+                index < pathFromRoot.length - 1
+                    ? pathFromRoot[index].name
+                    : pathFromRoot[index].displayText(),
+              ),
+              newRoot: pathFromRoot[index],
+            );
+          },
+        ),
+      );
+    } else {
+      return buildSelectable(
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black54),
+          ),
+          child: buildNameAndSizeText(
+            fontColor: Colors.white,
+            oneline: true,
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Builds a selectable container with [child] as its child.
+  ///
+  /// Selecting this widget will trigger a re-root of the tree
+  /// to the associated [TreemapNode].
+  ///
+  /// The default value for newRoot is [rootNode].
+  Tooltip buildSelectable({@required Widget child, TreemapNode newRoot}) {
+    newRoot ??= rootNode;
     return Tooltip(
       message: rootNode.displayText(),
       waitDuration: tooltipWait,
+      preferBelow: false,
       child: InkWell(
         onTap: () {
-          onRootChangedCallback(rootNode);
+          onRootChangedCallback(newRoot);
         },
         child: child,
       ),
@@ -464,19 +507,20 @@ class TreemapNode extends TreeNode<TreemapNode> {
   final Map<String, TreemapNode> childrenMap;
   int byteSize;
 
-  String displayText({bool oneline = true}) {
-    final separator = oneline ? ' ' : '\n';
-    return '$name$separator${_sizeDisplay()}';
+  String displayText({bool oneLine = true}) {
+    final separator = oneLine ? ' ' : '\n';
+    return '$name$separator${prettyPrintBytes(byteSize)}';
   }
 
-  String _sizeDisplay() {
-    final size = byteSize;
-    final sizeInKB = size / 1024;
-    if (sizeInKB < 1024.0) {
-      return '[${printKb(size)} KB]';
-    } else {
-      return '[${printMb(size, 2)} MB]';
+  /// Returns a list of [TreemapNode] in the path from root node to [this].
+  List<TreemapNode> pathFromRoot() {
+    TreemapNode node = this;
+    final path = <TreemapNode>[];
+    while (node != null) {
+      path.add(node);
+      node = node.parent;
     }
+    return path.reversed.toList();
   }
 
   void printTree() {
