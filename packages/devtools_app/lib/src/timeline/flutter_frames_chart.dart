@@ -52,9 +52,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   double horizontalScrollOffset = 0.0;
 
-  double get totalChartWidth =>
-      widget.frames.length * defaultFrameWidthWithPadding;
-
   double get availableChartHeight => defaultChartHeight - defaultSpacing;
 
   double get msPerPx =>
@@ -122,17 +119,18 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     return LayoutBuilder(
       builder: (context, constraints) {
         final themeData = Theme.of(context);
-        final chart = ListView.builder(
-          controller: scrollController,
-          scrollDirection: Axis.horizontal,
-          itemCount: widget.frames.length,
-          itemExtent: defaultFrameWidthWithPadding,
-          itemBuilder: (context, index) => _buildFrame(widget.frames[index]),
+        final chart = RoundedOutlinedBorder(
+          child: ListView.builder(
+            controller: scrollController,
+            scrollDirection: Axis.horizontal,
+            itemCount: widget.frames.length,
+            itemExtent: defaultFrameWidthWithPadding,
+            itemBuilder: (context, index) => _buildFrame(widget.frames[index]),
+          ),
         );
         final chartAxisPainter = CustomPaint(
           painter: ChartAxisPainter(
             constraints: constraints,
-            totalWidth: totalChartWidth,
             displayRefreshRate: widget.displayRefreshRate,
             msPerPx: msPerPx,
             themeData: themeData,
@@ -141,7 +139,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         final fpsLinePainter = CustomPaint(
           painter: FPSLinePainter(
             constraints: constraints,
-            totalWidth: totalChartWidth,
             displayRefreshRate: widget.displayRefreshRate,
             msPerPx: msPerPx,
             themeData: themeData,
@@ -302,7 +299,6 @@ class FlutterFramesChartItem extends StatelessWidget {
 class ChartAxisPainter extends CustomPainter {
   ChartAxisPainter({
     @required this.constraints,
-    @required this.totalWidth,
     @required this.displayRefreshRate,
     @required this.msPerPx,
     @required this.themeData,
@@ -311,8 +307,6 @@ class ChartAxisPainter extends CustomPainter {
   static const yAxisTickWidth = 8.0;
 
   final BoxConstraints constraints;
-
-  final double totalWidth;
 
   final double displayRefreshRate;
 
@@ -328,20 +322,6 @@ class ChartAxisPainter extends CustomPainter {
       0.0,
       constraints.maxWidth - _FlutterFramesChartState.yAxisUnitsSpace,
       constraints.maxHeight,
-    );
-
-    // Paint the Y axis.
-    canvas.drawLine(
-      chartArea.topLeft,
-      chartArea.bottomLeft,
-      Paint()..color = chartAccentColor,
-    );
-
-    // Paint the X axis
-    canvas.drawLine(
-      chartArea.bottomLeft,
-      chartArea.bottomRight,
-      Paint()..color = chartAccentColor,
     );
 
     _paintYAxisLabels(canvas, chartArea);
@@ -439,17 +419,14 @@ class ChartAxisPainter extends CustomPainter {
 class FPSLinePainter extends CustomPainter {
   FPSLinePainter({
     @required this.constraints,
-    @required this.totalWidth,
     @required this.displayRefreshRate,
     @required this.msPerPx,
     @required this.themeData,
   });
 
-  static const fpsTextSpace = 40.0;
+  static const fpsTextSpace = 45.0;
 
   final BoxConstraints constraints;
-
-  final double totalWidth;
 
   final double displayRefreshRate;
 
