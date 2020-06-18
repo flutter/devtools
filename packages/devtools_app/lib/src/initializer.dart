@@ -125,6 +125,7 @@ class _InitializerState extends State<Initializer>
         disconnectedOverlayReconnectSubscription = serviceManager.onStateChange
             .where((connected) => connected)
             .listen((_) => hideDisconnectedOverlay());
+        autoDispose(disconnectedOverlayReconnectSubscription);
       }
     });
   }
