@@ -60,6 +60,9 @@ class _InitializerState extends State<Initializer>
 
   bool _dependenciesLoaded = false;
 
+  OverlayEntry currentDisconnectedOverlay;
+  StreamSubscription<bool> disconnectedOverlayReconnectSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -113,16 +116,30 @@ class _InitializerState extends State<Initializer>
   /// Shows a "disconnected" overlay if the [service.serviceManager] is not currently connected.
   void _handleNoConnection() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
+      if (!_checkLoaded() &&
+          ModalRoute.of(context).isCurrent &&
+          currentDisconnectedOverlay == null) {
         Overlay.of(context).insert(_createDisconnectedOverlay());
+
+        // Set up a subscription to hide the overlay if we become reconnected.
+        disconnectedOverlayReconnectSubscription = serviceManager.onStateChange
+            .where((connected) => connected)
+            .listen((_) => hideDisconnectedOverlay());
+        autoDispose(disconnectedOverlayReconnectSubscription);
       }
     });
   }
 
+  void hideDisconnectedOverlay() {
+    currentDisconnectedOverlay?.remove();
+    currentDisconnectedOverlay = null;
+    disconnectedOverlayReconnectSubscription?.cancel();
+    disconnectedOverlayReconnectSubscription = null;
+  }
+
   OverlayEntry _createDisconnectedOverlay() {
     final theme = Theme.of(context);
-    OverlayEntry overlay;
-    overlay = OverlayEntry(
+    currentDisconnectedOverlay = OverlayEntry(
       builder: (context) => Container(
         // TODO(dantup): Change this to a theme colour and ensure it works in both dart/light themes
         color: const Color.fromRGBO(128, 128, 128, 0.5),
@@ -134,7 +151,7 @@ class _InitializerState extends State<Initializer>
               if (widget.allowConnectionScreenOnDisconnect)
                 RaisedButton(
                     onPressed: () {
-                      overlay.remove();
+                      hideDisconnectedOverlay();
                       Navigator.of(context).popAndPushNamed(homeRoute);
                     },
                     child: const Text('Connect to Another App'))
@@ -145,9 +162,7 @@ class _InitializerState extends State<Initializer>
                 ),
               const Spacer(),
               RaisedButton(
-                onPressed: () {
-                  overlay.remove();
-                },
+                onPressed: hideDisconnectedOverlay,
                 child: const Text('Review History'),
               ),
             ],
@@ -155,7 +170,7 @@ class _InitializerState extends State<Initializer>
         ),
       ),
     );
-    return overlay;
+    return currentDisconnectedOverlay;
   }
 
   @override

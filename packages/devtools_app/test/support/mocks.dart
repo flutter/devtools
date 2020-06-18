@@ -110,7 +110,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   @override
   Stream<bool> get onStateChange => stateChangeStream.stream;
 
-  StreamController<bool> stateChangeStream = StreamController();
+  StreamController<bool> stateChangeStream = StreamController.broadcast();
 
   void changeState(bool value) {
     hasConnection = value;
