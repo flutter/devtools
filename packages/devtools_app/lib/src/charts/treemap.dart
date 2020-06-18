@@ -8,43 +8,23 @@ import '../utils.dart';
 enum PivotType { pivotByMiddle, pivotBySize }
 
 class Treemap extends StatelessWidget {
-  Treemap._({
-    this.rootNode,
-    this.nodes = const [],
+  const Treemap.fromRoot({
+    @required this.rootNode,
+    this.nodes,
     @required this.levelsVisible,
     @required this.outermostLevel,
     @required this.height,
     @required this.onRootChangedCallback,
-  }) : assert(rootNode == null && nodes.isNotEmpty ||
-            rootNode != null && nodes.isEmpty);
+  });
 
-  Treemap.fromRoot({
-    @required TreemapNode rootNode,
-    @required levelsVisible,
-    @required outermostLevel,
-    @required height,
-    @required onRootChangedCallback,
-  }) : this._(
-          rootNode: rootNode,
-          levelsVisible: levelsVisible,
-          outermostLevel: outermostLevel,
-          height: height,
-          onRootChangedCallback: onRootChangedCallback,
-        );
-
-  Treemap.fromNodes({
-    @required List<TreemapNode> nodes,
-    @required levelsVisible,
-    @required outermostLevel,
-    @required height,
-    @required onRootChangedCallback,
-  }) : this._(
-          nodes: nodes,
-          levelsVisible: levelsVisible,
-          outermostLevel: outermostLevel,
-          height: height,
-          onRootChangedCallback: onRootChangedCallback,
-        );
+  const Treemap.fromNodes({
+    this.rootNode,
+    @required this.nodes,
+    @required this.levelsVisible,
+    @required this.outermostLevel,
+    @required this.height,
+    @required this.onRootChangedCallback,
+  });
 
   final TreemapNode rootNode;
 
@@ -81,7 +61,7 @@ class Treemap extends StatelessWidget {
 
   final void Function(TreemapNode node) onRootChangedCallback;
 
-  final PivotType pivotType = PivotType.pivotBySize;
+  static const PivotType pivotType = PivotType.pivotBySize;
 
   static const treeMapHeaderHeight = 20.0;
 
@@ -381,7 +361,7 @@ class Treemap extends StatelessWidget {
     if (rootNode == null && nodes.isNotEmpty) {
       return buildSubTreemaps();
     } else {
-      return buildTreemap();
+      return buildTreemap(context);
     }
   }
 
@@ -396,13 +376,13 @@ class Treemap extends StatelessWidget {
   /// |                          |
   /// ----------------------------
   /// ```
-  Widget buildTreemap() {
+  Widget buildTreemap(BuildContext context) {
     if (levelsVisible > 0 && rootNode.children.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.all(1.0),
         child: Column(
           children: [
-            if (height > minHeightToDisplayTitleText) buildTitleText(),
+            if (height > minHeightToDisplayTitleText) buildTitleText(context),
             Expanded(
               child: Treemap.fromNodes(
                 nodes: rootNode.children,
@@ -423,7 +403,7 @@ class Treemap extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   color: mainUiColor,
-                  border: Border.all(color: Colors.black54),
+                  border: Border.all(color: Colors.black87),
                 ),
                 child: Center(
                   child: height > minHeightToDisplayCellText
@@ -441,7 +421,7 @@ class Treemap extends StatelessWidget {
     }
   }
 
-  Widget buildTitleText() {
+  Widget buildTitleText(BuildContext context) {
     if (levelsVisible == outermostLevel) {
       final pathFromRoot = rootNode.pathFromRoot();
       // Build breadcrumbs navigator.
@@ -469,12 +449,13 @@ class Treemap extends StatelessWidget {
     } else {
       return buildSelectable(
         child: Container(
+          height: treeMapHeaderHeight,
           width: double.infinity,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.black54),
+            border: Border.all(color: Colors.black87),
           ),
           child: buildNameAndSizeText(
-            fontColor: Colors.white,
+            fontColor: Theme.of(context).textTheme.bodyText2.color,
             oneLine: true,
           ),
         ),
