@@ -97,6 +97,7 @@ class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
           return Treemap.fromRoot(
             rootNode: root,
             levelsVisible: 2,
+            outermostLevel: 2,
             height: constraints.maxHeight,
             onRootChangedCallback: _onRootChanged,
           );

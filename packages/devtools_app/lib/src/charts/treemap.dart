@@ -12,6 +12,7 @@ class Treemap extends StatelessWidget {
     this.rootNode,
     this.nodes = const [],
     @required this.levelsVisible,
+    @required this.outermostLevel,
     @required this.height,
     @required this.onRootChangedCallback,
   }) : assert(rootNode == null && nodes.isNotEmpty ||
@@ -20,11 +21,13 @@ class Treemap extends StatelessWidget {
   Treemap.fromRoot({
     @required TreemapNode rootNode,
     @required levelsVisible,
+    @required outermostLevel,
     @required height,
     @required onRootChangedCallback,
   }) : this._(
           rootNode: rootNode,
           levelsVisible: levelsVisible,
+          outermostLevel: outermostLevel,
           height: height,
           onRootChangedCallback: onRootChangedCallback,
         );
@@ -32,11 +35,13 @@ class Treemap extends StatelessWidget {
   Treemap.fromNodes({
     @required List<TreemapNode> nodes,
     @required levelsVisible,
+    @required outermostLevel,
     @required height,
     @required onRootChangedCallback,
   }) : this._(
           nodes: nodes,
           levelsVisible: levelsVisible,
+          outermostLevel: outermostLevel,
           height: height,
           onRootChangedCallback: onRootChangedCallback,
         );
@@ -68,6 +73,9 @@ class Treemap extends StatelessWidget {
   /// ---------------
   /// ```
   final int levelsVisible;
+
+  /// The maximum value of levels the widget can display.
+  final int outermostLevel;
 
   final double height;
 
@@ -168,6 +176,7 @@ class Treemap extends StatelessWidget {
             child: Treemap.fromRoot(
               rootNode: child,
               levelsVisible: levelsVisible - 1,
+              outermostLevel: outermostLevel,
               onRootChangedCallback: onRootChangedCallback,
               height: height,
             ),
@@ -271,7 +280,8 @@ class Treemap extends StatelessWidget {
           height: list1Height,
           child: Treemap.fromNodes(
             nodes: list1,
-            levelsVisible: levelsVisible, // Stay at current level since
+            levelsVisible: levelsVisible,
+            outermostLevel: outermostLevel,
             onRootChangedCallback: onRootChangedCallback,
             height: height,
           ),
@@ -296,6 +306,7 @@ class Treemap extends StatelessWidget {
           child: Treemap.fromNodes(
             nodes: list2,
             levelsVisible: levelsVisible,
+            outermostLevel: outermostLevel,
             onRootChangedCallback: onRootChangedCallback,
             height: height,
           ),
@@ -316,6 +327,7 @@ class Treemap extends StatelessWidget {
         child: Treemap.fromRoot(
           rootNode: pivotNode,
           levelsVisible: levelsVisible - 1,
+          outermostLevel: outermostLevel,
           onRootChangedCallback: onRootChangedCallback,
           height: height,
         ),
@@ -341,6 +353,7 @@ class Treemap extends StatelessWidget {
           child: Treemap.fromNodes(
             nodes: list3,
             levelsVisible: levelsVisible,
+            outermostLevel: outermostLevel,
             onRootChangedCallback: onRootChangedCallback,
             height: height,
           ),
@@ -353,10 +366,10 @@ class Treemap extends StatelessWidget {
 
   Text buildNameAndSizeText({
     @required Color fontColor,
-    @required bool oneline,
+    @required bool oneLine,
   }) {
     return Text(
-      rootNode.displayText(oneLine: oneline),
+      rootNode.displayText(oneLine: oneLine),
       style: TextStyle(color: fontColor),
       textAlign: TextAlign.center,
       overflow: TextOverflow.ellipsis,
@@ -388,13 +401,13 @@ class Treemap extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.all(1.0),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             if (height > minHeightToDisplayTitleText) buildTitleText(),
             Expanded(
               child: Treemap.fromNodes(
                 nodes: rootNode.children,
                 levelsVisible: levelsVisible,
+                outermostLevel: outermostLevel,
                 onRootChangedCallback: onRootChangedCallback,
                 height: height,
               ),
@@ -405,8 +418,6 @@ class Treemap extends StatelessWidget {
     } else {
       return Column(
         children: [
-          if (levelsVisible == 2 && height > minHeightToDisplayTitleText)
-            buildTitleText(),
           Expanded(
             child: buildSelectable(
               child: Container(
@@ -418,7 +429,7 @@ class Treemap extends StatelessWidget {
                   child: height > minHeightToDisplayCellText
                       ? buildNameAndSizeText(
                           fontColor: Colors.black,
-                          oneline: false,
+                          oneLine: false,
                         )
                       : const SizedBox(),
                 ),
@@ -431,8 +442,9 @@ class Treemap extends StatelessWidget {
   }
 
   Widget buildTitleText() {
-    if (levelsVisible == 2) {
+    if (levelsVisible == outermostLevel) {
       final pathFromRoot = rootNode.pathFromRoot();
+      // Build breadcrumbs navigator.
       return Container(
         height: treeMapHeaderHeight,
         child: ListView.separated(
@@ -463,7 +475,7 @@ class Treemap extends StatelessWidget {
           ),
           child: buildNameAndSizeText(
             fontColor: Colors.white,
-            oneline: true,
+            oneLine: true,
           ),
         ),
       );
@@ -484,7 +496,7 @@ class Treemap extends StatelessWidget {
       preferBelow: false,
       child: InkWell(
         onTap: () {
-          onRootChangedCallback(newRoot);
+          if (rootNode.children.isNotEmpty) onRootChangedCallback(newRoot);
         },
         child: child,
       ),
