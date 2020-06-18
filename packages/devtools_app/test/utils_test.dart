@@ -25,13 +25,13 @@ void main() {
     test('printMb', () {
       const int MB = 1024 * 1024;
 
-      expect(printMb(10 * MB, 0), '10');
+      expect(printMb(10 * MB, fractionDigits: 0), '10');
       expect(printMb(10 * MB), '10.0');
-      expect(printMb(10 * MB, 2), '10.00');
+      expect(printMb(10 * MB, fractionDigits: 2), '10.00');
 
-      expect(printMb(1000 * MB, 0), '1000');
+      expect(printMb(1000 * MB, fractionDigits: 0), '1000');
       expect(printMb(1000 * MB), '1000.0');
-      expect(printMb(1000 * MB, 2), '1000.00');
+      expect(printMb(1000 * MB, fractionDigits: 2), '1000.00');
     });
 
     test('msAsText', () {

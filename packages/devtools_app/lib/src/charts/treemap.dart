@@ -514,7 +514,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
   String displayText({bool oneLine = true}) {
     final separator = oneLine ? ' ' : '\n';
-    return '$name$separator${prettyPrintBytes(byteSize)}';
+    return '$name$separator[${prettyPrintBytes(byteSize, includeUnit: true)}]';
   }
 
   /// Returns a list of [TreemapNode] in the path from root node to [this].
