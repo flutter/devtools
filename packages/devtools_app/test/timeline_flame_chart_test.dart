@@ -80,11 +80,9 @@ void main() {
 
       expect(find.byType(TimelineFlameChart), findsOneWidget);
       expect(
-        find.byType(TimelineFlameChart),
-        matchesGoldenFile(
-          'goldens/timeline_flame_chart_with_selected_frame.png',
-        ),
-      );
+          find.byType(TimelineFlameChart),
+          matchesGoldenFile(
+              'goldens/timeline_flame_chart_with_selected_frame.png'));
     });
   });
 }
