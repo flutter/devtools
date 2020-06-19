@@ -23,7 +23,7 @@ void main() {
       expect(prettyPrintBytes(mb, includeUnit: true), '1.00 MB');
       expect(prettyPrintBytes(mb - kb, includeUnit: true), '1,023 KB');
     });
-    
+
     test('printKb', () {
       const int kb = 1024;
 
