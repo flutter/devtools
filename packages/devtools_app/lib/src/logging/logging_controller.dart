@@ -386,7 +386,7 @@ class LoggingController {
 
     final String summary = '${isolateRef['name']} • '
         '${e.json['reason']} collection in $time ms • '
-        '${printMb(usedBytes, includeUnit: true)} used of ${printMb(capacityBytes, includeUnit: true)}';
+        '${printMB(usedBytes, includeUnit: true)} used of ${printMB(capacityBytes, includeUnit: true)}';
 
     final Map<String, dynamic> event = <String, dynamic>{
       'reason': e.json['reason'],

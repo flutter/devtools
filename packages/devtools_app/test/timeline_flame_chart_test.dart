@@ -66,10 +66,7 @@ void main() {
       await pumpTimelineBody(tester, TimelineController());
       await tester.pumpAndSettle();
       expect(find.byType(TimelineFlameChart), findsNothing);
-      expect(
-        find.byKey(TimelineScreen.emptyTimelineKey),
-        findsOneWidget,
-      );
+      expect(find.byKey(TimelineScreen.emptyTimelineKey), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -83,9 +80,11 @@ void main() {
 
       expect(find.byType(TimelineFlameChart), findsOneWidget);
       expect(
-          find.byType(TimelineFlameChart),
-          matchesGoldenFile(
-              'goldens/timeline_flame_chart_with_selected_frame.png'));
+        find.byType(TimelineFlameChart),
+        matchesGoldenFile(
+          'goldens/timeline_flame_chart_with_selected_frame.png',
+        ),
+      );
     });
   });
 }

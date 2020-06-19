@@ -11,27 +11,40 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('utils', () {
+    test('prettyPrintBytes', () {
+      const int kb = 1024;
+      const int mb = 1024 * kb;
+
+      expect(prettyPrintBytes(kb), '1');
+      expect(prettyPrintBytes(kb, includeUnit: true), '1 KB');
+      expect(prettyPrintBytes(kb * 1000, includeUnit: true), '1,000 KB');
+
+      expect(prettyPrintBytes(mb), '1.00');
+      expect(prettyPrintBytes(mb, includeUnit: true), '1.00 MB');
+      expect(prettyPrintBytes(mb - kb, includeUnit: true), '1,023 KB');
+    });
+    
     test('printKb', () {
       const int kb = 1024;
 
-      expect(printKb(0), '0');
-      expect(printKb(1), '1');
-      expect(printKb(kb - 1), '1');
-      expect(printKb(kb), '1');
-      expect(printKb(kb + 1), '2');
-      expect(printKb(2000), '2');
+      expect(printKB(0), '0');
+      expect(printKB(1), '1');
+      expect(printKB(kb - 1), '1');
+      expect(printKB(kb), '1');
+      expect(printKB(kb + 1), '2');
+      expect(printKB(2000), '2');
     });
 
     test('printMb', () {
-      const int MB = 1024 * 1024;
+      const int mb = 1024 * 1024;
 
-      expect(printMb(10 * MB, fractionDigits: 0), '10');
-      expect(printMb(10 * MB), '10.0');
-      expect(printMb(10 * MB, fractionDigits: 2), '10.00');
+      expect(printMB(10 * mb, fractionDigits: 0), '10');
+      expect(printMB(10 * mb), '10.0');
+      expect(printMB(10 * mb, fractionDigits: 2), '10.00');
 
-      expect(printMb(1000 * MB, fractionDigits: 0), '1000');
-      expect(printMb(1000 * MB), '1000.0');
-      expect(printMb(1000 * MB, fractionDigits: 2), '1000.00');
+      expect(printMB(1000 * mb, fractionDigits: 0), '1000');
+      expect(printMB(1000 * mb), '1000.0');
+      expect(printMB(1000 * mb, fractionDigits: 2), '1000.00');
     });
 
     test('msAsText', () {
