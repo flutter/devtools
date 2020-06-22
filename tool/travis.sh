@@ -76,6 +76,9 @@ echo "which dart: " `which dart`
 pushd packages/devtools_app
 echo `pwd`
 
+# Disable Dart analytics.
+dart --disable-analytics
+
 # Print out the versions and ensure we can call Dart, Pub, and Flutter.
 dart --version
 flutter pub --version

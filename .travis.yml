@@ -53,9 +53,6 @@ matrix:
     - os: osx
 
 env:
-  # TODO(kenz): remove "BOT=true" until Flutter picks up
-  # https://dart-review.googlesource.com/c/sdk/+/152020.
-  - BOT=true
   - BOT=main
   - BOT=test_ddc PLATFORM=vm
   - BOT=test_ddc PLATFORM=chrome
