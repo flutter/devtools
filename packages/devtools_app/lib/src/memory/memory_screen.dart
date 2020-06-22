@@ -356,6 +356,11 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
 
   void _clearTimeline() {
     controller.memoryTimeline.reset();
+
+    // Clear all analysis and snapshots collected too.
+    controller.clearAllSnapshots();
+    controller.topNode = null;
+    controller.selectedSnapshotTimestamp = null;
   }
 
   void _reset() async {

@@ -24,6 +24,7 @@ class Reference extends TreeNode<Reference> {
       : controller = null,
         name = emptyName,
         isAnalysis = false,
+        isSnapshot = false,
         isLibrary = false,
         isExternals = false,
         isExternal = false,
@@ -36,6 +37,7 @@ class Reference extends TreeNode<Reference> {
       : controller = null,
         name = sentinelName,
         isAnalysis = false,
+        isSnapshot = false,
         isLibrary = false,
         isExternals = false,
         isExternal = false,
@@ -46,6 +48,18 @@ class Reference extends TreeNode<Reference> {
 
   Reference.analysis(this.controller, this.name, {this.onExpand, this.onLeaf})
       : isAnalysis = true,
+        isSnapshot = false,
+        isLibrary = false,
+        isExternals = false,
+        isExternal = false,
+        isFiltered = false,
+        isClass = false,
+        isObject = false,
+        actualClass = null;
+
+  Reference.snapshot(this.controller, this.name, {this.onExpand, this.onLeaf})
+      : isAnalysis = false,
+        isSnapshot = true,
         isLibrary = false,
         isExternals = false,
         isExternal = false,
@@ -56,6 +70,7 @@ class Reference extends TreeNode<Reference> {
 
   Reference.library(this.controller, this.name, {this.onExpand, this.onLeaf})
       : isAnalysis = false,
+        isSnapshot = false,
         isLibrary = true,
         isExternals = false,
         isExternal = false,
@@ -70,6 +85,7 @@ class Reference extends TreeNode<Reference> {
     this.onExpand,
     this.onLeaf,
   })  : isAnalysis = false,
+        isSnapshot = false,
         name = actualClass.name,
         isLibrary = false,
         isExternals = false,
@@ -85,6 +101,7 @@ class Reference extends TreeNode<Reference> {
     this.onExpand,
     this.onLeaf,
   })  : isAnalysis = false,
+        isSnapshot = false,
         isLibrary = false,
         isExternals = false,
         isExternal = false,
@@ -98,6 +115,7 @@ class Reference extends TreeNode<Reference> {
     this.controller, {
     this.onExpand,
   })  : isAnalysis = false,
+        isSnapshot = false,
         isLibrary = false,
         isExternals = true,
         isExternal = false,
@@ -113,6 +131,7 @@ class Reference extends TreeNode<Reference> {
     this.name, {
     this.onExpand,
   })  : isAnalysis = false,
+        isSnapshot = false,
         isLibrary = false,
         isExternals = false,
         isExternal = true,
@@ -124,6 +143,7 @@ class Reference extends TreeNode<Reference> {
   /// All filtered libraries and classes
   Reference.filtered(this.controller)
       : isAnalysis = false,
+        isSnapshot = false,
         isLibrary = false,
         isExternals = false,
         isExternal = false,
@@ -148,6 +168,8 @@ class Reference extends TreeNode<Reference> {
   final String name;
 
   final bool isAnalysis;
+
+  final bool isSnapshot;
 
   final bool isLibrary;
 
@@ -209,14 +231,6 @@ class AnalysesReference extends Reference {
       : super.analysis(
           null,
           'Analysis',
-/*
-          onExpand: (Reference reference) {
-            assert(reference.isAnalysis);
-            print("TBD");
-          },onLeaf: (ObjectReference reference) {
-            print("Clicking on analysis node");
-          }
-*/
         );
 }
 
@@ -226,19 +240,8 @@ class AnalysisSnapshotReference extends Reference {
     this.dateTime,
   ) : super.analysis(
           null,
-          'Snapshot ${_formatter.format(dateTime)}',
-/*
-          onExpand: (Reference reference) {
-            assert(reference.isAnalysis);
-            print("TBD");
-          },
-          onLeaf: (ObjectReference reference) {
-            print("Clicking on analysis node");
-          },
-*/
+          'Analyzed ${MemoryController.formattedTimestamp(dateTime)}',
         );
-
-  static final _formatter = DateFormat('MMM dd HH:mm:ss');
 
   final DateTime dateTime;
 }
@@ -290,6 +293,30 @@ class AnalysisField extends TreeNode<AnalysisField> {
 
   final String name;
   final String value;
+}
+
+/// Snapshot being analyzed.
+class SnapshotReference extends Reference {
+  SnapshotReference(this.snapshot)
+      : super.snapshot(
+          null,
+          snapshot != null
+              ? 'Snapshot ${_formatter.format(snapshot.collectedTimestamp)}'
+              : '',
+/*
+          onExpand: (Reference reference) {
+            assert(reference.isAnalysis);
+            print("TBD");
+          },
+          onLeaf: (ObjectReference reference) {
+            print("Clicking on analysis node");
+          },
+*/
+        );
+
+  static final _formatter = DateFormat('MMM dd HH:mm:ss');
+
+  final Snapshot snapshot;
 }
 
 class LibraryReference extends Reference {
@@ -434,11 +461,13 @@ class Snapshot {
     this.collectedTimestamp,
     this.controller,
     this.snapshotGraph,
+    this.libraryRoot,
   );
 
   final MemoryController controller;
   final DateTime collectedTimestamp;
   final HeapSnapshotGraph snapshotGraph;
+  LibraryReference libraryRoot;
 
   final Map<String, LibraryReference> libraries = {};
 

@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../config_specific/logger/logger.dart' as logger;
 import '../globals.dart';
 import '../service_manager.dart';
 import '../version.dart';
@@ -98,6 +99,16 @@ class MemoryTracker {
 
     final isolateMemory = <IsolateRef, MemoryUsage>{};
     for (IsolateRef isolateRef in serviceManager.isolateManager.isolates) {
+      try {
+        await service.getIsolate(isolateRef.id);
+      } catch (e) {
+        if (e is SentinelException) {
+          final SentinelException sentinelErr = e;
+          logger.log('Isolate sentinel ${isolateRef.id} '
+              '${sentinelErr.sentinel.kind}');
+          continue;
+        }
+      }
       isolateMemory[isolateRef] = await service.getMemoryUsage(isolateRef.id);
     }
 

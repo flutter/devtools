@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../ui/colors.dart';
+import '../utils.dart';
 
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';
@@ -98,7 +99,7 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
 
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
-        controller.computeAllLibraries(true, true);
+        controller.computeAllLibraries(rebuild: true);
 
         sizes = InstructionsSize.fromSnapshop(controller);
       });
@@ -106,7 +107,7 @@ class FlameChartState extends State<FlameChart> with AutoDisposeMixin {
 
     addAutoDisposeListener(controller.filterNotifier, () {
       setState(() {
-        controller.computeAllLibraries(true, true);
+        controller.computeAllLibraries(rebuild: true);
       });
     });
 
@@ -567,7 +568,7 @@ class InstructionsSize {
     root.byteSize = root.children.values
         .fold(0, (int current, Node node) => current + node.byteSize);
 
-    final snapshotGraph = controller.snapshots.last.snapshotGraph;
+    final snapshotGraph = controller.lastSnapshot.snapshotGraph;
 
     // Add the external heap to the heat map.
     root.children.putIfAbsent('External Heap', () {
