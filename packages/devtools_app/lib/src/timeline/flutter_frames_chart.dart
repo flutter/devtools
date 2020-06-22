@@ -44,6 +44,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   static const legendSquareSize = 16.0;
 
+  static const outlineBorderWidth = 1.0;
+
   TimelineController _controller;
 
   ScrollController scrollController;
@@ -164,7 +166,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       selected: frame == _selectedFrame,
       onSelected: () => _controller.selectFrame(frame),
       msPerPx: msPerPx,
-      availableChartHeight: availableChartHeight,
+      availableChartHeight: availableChartHeight - 2 * outlineBorderWidth,
       displayRefreshRate: widget.displayRefreshRate,
     );
   }
