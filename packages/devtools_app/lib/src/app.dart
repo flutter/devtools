@@ -8,6 +8,8 @@ import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart';
 
 import '../devtools.dart' as devtools;
+import 'code_size/code_size_controller.dart';
+import 'code_size/code_size_screen.dart';
 import 'common_widgets.dart';
 import 'connect_screen.dart';
 import 'debugger/debugger_controller.dart';
@@ -458,6 +460,10 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
       DevToolsScreen<LoggingController>(
         const LoggingScreen(),
         createController: () => LoggingController(),
+      ),
+      DevToolsScreen<CodeSizeController>(
+        const CodeSizeScreen(),
+        createController: () => CodeSizeController(),
       ),
 // Uncomment to see a sample implementation of a conditional screen.
 //      DevToolsScreen<ExampleController>(

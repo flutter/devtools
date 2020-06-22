@@ -82,7 +82,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TimelineFlameChart), findsOneWidget);
-<<<<<<< HEAD
       await expectLater(
           find.byType(TimelineFlameChart),
           matchesGoldenFile(
@@ -91,12 +90,5 @@ void main() {
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
     }, skip: kIsWeb || !Platform.isMacOS);
-=======
-      expect(
-          find.byType(TimelineFlameChart),
-          matchesGoldenFile(
-              'goldens/timeline_flame_chart_with_selected_frame.png'));
-    });
->>>>>>> 4191e172... Fix merge conflict
   });
 }

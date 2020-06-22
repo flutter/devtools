@@ -216,6 +216,7 @@ class InstructionsSize {
     });
 
     // Add the filtered libraries/classes to the treemap.
+    // TODO(peterdjlee): Remove this
     root.childrenMap.putIfAbsent('All Filtered Libraries', () {
       final node = TreemapNode(
         name: 'All Filtered Libraries',

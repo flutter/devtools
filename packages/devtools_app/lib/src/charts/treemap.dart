@@ -65,7 +65,7 @@ class Treemap extends StatelessWidget {
 
   static const treeMapHeaderHeight = 20.0;
 
-  static const minHeightToDisplayTitleText = 20.0;
+  static const minHeightToDisplayTitleText = 100.0;
 
   static const minHeightToDisplayCellText = 40.0;
 
