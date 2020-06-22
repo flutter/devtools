@@ -278,7 +278,7 @@ class _SplitState extends State<Split> {
   double _totalSplitterSize() {
     final numSplitters = widget.children.length - 1;
     if (widget.splitters == null) {
-      return numSplitters * DefaultSplitter.size;
+      return numSplitters * DefaultSplitter.splitterWidth;
     } else {
       var totalSize = 0.0;
       for (var splitter in widget.splitters) {
@@ -292,7 +292,8 @@ class _SplitState extends State<Split> {
 class DefaultSplitter extends StatelessWidget {
   const DefaultSplitter({@required this.isHorizontal});
 
-  static const double size = 24.0;
+  static const double iconSize = 24.0;
+  static const double splitterWidth = 12.0;
 
   final bool isHorizontal;
 
@@ -300,9 +301,14 @@ class DefaultSplitter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Transform.rotate(
       angle: isHorizontal ? degToRad(90.0) : degToRad(0.0),
-      child: const Icon(
-        Icons.drag_handle,
-        size: size,
+      child: Align(
+        widthFactor: 0.5,
+        heightFactor: 0.5,
+        child: Icon(
+          Icons.drag_handle,
+          size: iconSize,
+          color: Theme.of(context).focusColor,
+        ),
       ),
     );
   }
