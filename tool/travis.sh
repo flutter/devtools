@@ -76,7 +76,8 @@ echo "which dart: " `which dart`
 pushd packages/devtools_app
 echo `pwd`
 
-# Disable Dart analytics.
+# Disable analytics to ensure that the welcome message for the dart cli tooling
+# doesn't interrupt travis.
 dart --disable-analytics
 
 # Print out the versions and ensure we can call Dart, Pub, and Flutter.
