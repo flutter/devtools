@@ -226,20 +226,24 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     super.dispose();
   }
 
+  /// Enable to output debugging information for auto-snapshot.
+  /// WARNING: Do not checkin with this flag set to true.
+  final debugSnapshots = false;
+
   /// Detect spike in memory usage if so do an automatic snapshot.
-  void autoSnapshot({debugMode = false}) {
+  void autoSnapshot() {
     final heapSample = controller.memoryTimeline.sampleAddedNotifier.value;
     final heapSum = heapSample.external + heapSample.used;
-    heapMA.addToMA(heapSum);
+    heapMA.add(heapSum);
 
-    final DateFormat mFormat = DateFormat('hh:mm:ss.mmm');
-    final startDT = mFormat
+    final DateFormat dateTimeFormat = DateFormat('hh:mm:ss.mmm');
+    final startDateTime = dateTimeFormat
         .format(DateTime.fromMillisecondsSinceEpoch(heapSample.timestamp));
 
-    if (debugMode) {
-      logger.log('AutoSnapshot $startDT heapSum=$heapSum, '
+    if (debugSnapshots) {
+      logger.log('AutoSnapshot $startDateTime heapSum=$heapSum, '
           'first=${heapMA.dataSet.first}, '
-          'mean=${heapMA.mean()}');
+          'mean=${heapMA.mean}');
     }
 
     bool takeSnapshot = false;
@@ -257,27 +261,23 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
           rssSnapshotTaken++;
           rssSnapshotTime = heapSample.timestamp;
           takeSnapshot = true;
-          logger.log('AutoSnapshot - RSS exceeded.');
+          logger.log('AutoSnapshot - RSS exceeded @ $startDateTime.');
         }
       }
     }
 
     if (!takeSnapshot && heapMA.hasSpike()) {
       final snapshotTime = Duration(milliseconds: spikeSnapshotTime);
-      // Seconds between last spike snapshot - could be happening too fast.
-      if ((sampleTime - snapshotTime).inSeconds > maxSpikeDurationSecs) {
-        spikeSnapshotTime = heapSample.timestamp;
-        takeSnapshot = true;
-        logger.log('AutoSnapshot - memory spike in last '
-            '${(sampleTime - snapshotTime).inSeconds} seconds.');
-      }
-
-      // Reset moving average for next spike.
-      heapMA.clear();
+      spikeSnapshotTime = heapSample.timestamp;
+      takeSnapshot = true;
+      logger.log('AutoSnapshot - memory spike @ $startDateTime} '
+          'last snapshot ${(sampleTime - snapshotTime).inSeconds} seconds ago.');
     }
 
     if (takeSnapshot) {
-      _snapshot();
+      // Reset moving average for next spike.
+      heapMA.clear();
+      _snapshot(userGenerated: false);
     }
   }
 
@@ -403,7 +403,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
             () {
               controller.selectedLeaf = null;
               controller.groupingBy.value = newValue;
-              if (controller.snapshots.value.isNotEmpty) {
+              if (controller.snapshots.isNotEmpty) {
                 doGroupBy();
               }
             },
@@ -524,7 +524,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       child: TextField(
         key: memorySearchFieldKey,
         autofocus: true,
-        enabled: controller.snapshots.value.isNotEmpty,
+        enabled: controller.snapshots.isNotEmpty,
         focusNode: searchFieldFocusNode,
         controller: searchTextFieldController,
         onChanged: (value) {
@@ -549,7 +549,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       ),
     );
 
-    if (controller.showHeatMap.value && controller.snapshots.value.isNotEmpty) {
+    if (controller.showHeatMap.value && controller.snapshots.isNotEmpty) {
       searchFieldFocusNode.requestFocus();
     }
 
@@ -656,9 +656,17 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     );
   }
 
-  void _snapshot() async {
+  void _snapshot({userGenerated: true}) async {
     // VmService not available (disconnected/crashed).
     if (serviceManager.service == null) return;
+
+    // Another snapshot in progress, don't stall the world. An auto-snapshot
+    // is probably in progress.
+    if (snapshotState != SnapshotStatus.none &&
+        snapshotState != SnapshotStatus.done) {
+      logger.log('Snapshop in progress - ignoring this request.');
+      return;
+    }
 
     setState(() {
       snapshotState = SnapshotStatus.streaming;
@@ -693,7 +701,8 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     await doGroupBy();
 
     final root = controller.computeAllLibraries(graph: graph);
-    controller.storeSnapshot(snapshotTimestamp, graph, root);
+    controller.storeSnapshot(snapshotTimestamp, graph, root,
+        autoSnapshot: !userGenerated);
 
     final snapshotDoneTime = DateTime.now();
 
@@ -731,7 +740,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     final AnalysesReference analysesNode = controller.findAnalysesNode();
     assert(analysesNode != null);
 
-    final snapshot = controller.getSnapshotToAnalyze();
+    final snapshot = controller.computeSnapshotToAnalyze;
     final currentSnapDT = snapshot.collectedTimestamp;
     // Analysis already completed we're done.
     final foundMatch = controller.completedAnalyses
@@ -973,15 +982,6 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
 
     cancel();
 
-    addAutoDisposeListener(controller.realNodeFromFakeNodeNotifier, () {
-      setState(() {
-        // Fetch node to collapse and clear.
-        final nodeToUpdate = controller.realNodeFromFakeNodeNotifier.value;
-        nodeToUpdate.collapse();
-        nodeToUpdate.children.clear();
-      });
-    });
-
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
@@ -1033,7 +1033,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
 
       switch (controller.groupingBy.value) {
         case MemoryController.groupByLibrary:
-          final searchRoot = controller.activeSnapshot();
+          final searchRoot = controller.activeSnapshot;
           for (final reference in searchRoot.children) {
             if (reference.isLibrary) {
               matches.addAll(matchesInLibrary(reference, searchingValue));
@@ -1136,7 +1136,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
   bool selectItemInTree(String searchingValue) {
     switch (controller.groupingBy.value) {
       case MemoryController.groupByLibrary:
-        final searchRoot = controller.activeSnapshot();
+        final searchRoot = controller.activeSnapshot;
         if (controller.selectionNotifier.value.node == null) {
           // No selected node, then select the snapshot we're searching.
           controller.selectionNotifier.value = Selection(
@@ -1228,11 +1228,6 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
 
   @override
   Widget build(BuildContext context) {
-//    LibraryReference root = controller.computeAllLibraries();
-//    if (controller.groupingBy.value == MemoryController.groupByClass) {
-//      root = controller.classRoot;
-//    }
-
     final root = controller.buildTreeFromAllData();
 
     if (root != null) {
@@ -1292,6 +1287,9 @@ class _LibraryRefColumn extends TreeColumnData<Reference> {
   double get fixedWidthPx => 250.0;
 }
 
+/// Internal helper for all count values.
+String _displayCount(int count) => count == null ? '--' : '$count';
+
 class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
   _ClassOrInstanceCountColumn()
       : super('Count', alignment: ColumnAlignment.right);
@@ -1308,22 +1306,23 @@ class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
     } else if (dataObject.isAnalysis && dataObject is AnalysisReference) {
       final AnalysisReference analysisReference = dataObject;
       final count = analysisReference.countNote;
-      return count == null ? '' : count;
+      return _displayCount(count);
     } else if (dataObject.isSnapshot && dataObject is SnapshotReference) {
       final SnapshotReference snapshotRef = dataObject;
       int count = 0;
       for (final child in snapshotRef.children) {
         count += _computeCount(child);
       }
-      return count == null ? '--' : '$count';
+      return _displayCount(count);
     }
 
     final count = _computeCount(dataObject);
-    return count == null ? '--' : count;
+    return _displayCount(count);
   }
 
-  /// Return of null implies count can't be computed.
-  dynamic _computeCount(Reference ref) {
+  /// Return a count based on the Reference type e.g., library, filtered,
+  /// class, externals, etc.  Only compute once, store in the Reference.
+  int _computeCount(Reference ref) {
     // Only compute the children counts once then store in the Reference.
     if (ref.hasCount) return ref.count;
 

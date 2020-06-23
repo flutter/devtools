@@ -190,14 +190,14 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
         addLibrary(library, hideState: true);
       }
       // If not snapshots, return no libraries to process.
-      if (controller.snapshots.value.isEmpty) return;
+      if (controller.snapshots.isEmpty) return;
     }
 
     // No libraries to compute until a snapshot exist.
-    if (controller.snapshots.value.isEmpty) return;
+    if (controller.snapshots.isEmpty) return;
 
     final libraries = controller.libraryRoot == null
-        ? controller.activeSnapshot().children
+        ? controller.activeSnapshot.children
         : controller.libraryRoot.children;
 
     libraries..sort((a, b) => a.name.compareTo(b.name));

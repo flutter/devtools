@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:math';
 import 'dart:ui' as dart_ui;
 
-import 'package:devtools_app/src/ui/analytics_constants.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,8 +20,10 @@ import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../service_manager.dart';
 import '../table.dart';
+import '../ui/analytics_constants.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
+
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
@@ -64,11 +64,9 @@ class MemoryController extends DisposableController
     _showHeatMap.value = value;
   }
 
-  final snapshots = ValueNotifier<List<Snapshot>>([]);
+  final List<Snapshot> snapshots = [];
 
-  ValueNotifier<List<Snapshot>> get snapshotsNotifier => snapshots;
-
-  Snapshot get lastSnapshot => snapshots.value.safeLast;
+  Snapshot get lastSnapshot => snapshots.safeLast;
 
   /// Root nodes names that contains nodes of either libraries or classes depending on
   /// group by library or group by class.
@@ -154,10 +152,11 @@ class MemoryController extends DisposableController
   // List of completed Analysis of Snapshots.
   final List<AnalysisSnapshotReference> completedAnalyses = [];
 
-  /// Compute the snapshot to analyze.
-  Snapshot getSnapshotToAnalyze() {
+  /// Determine the snapshot to analyze - current active snapshot (selected or node
+  /// under snapshot selected), last snapshot or null (unknown).
+  Snapshot get computeSnapshotToAnalyze {
     // Any snapshots to analyze?
-    if (snapshots.value.isEmpty) return null;
+    if (snapshots.isEmpty) return null;
 
     // Is a selected table row under a snapshot.
     final nodeSelected = selectionNotifier.value.node;
@@ -170,7 +169,7 @@ class MemoryController extends DisposableController
       if (foundMatch.isEmpty) return snapshot;
     }
 
-    final snapshotsCount = snapshots.value.length;
+    final snapshotsCount = snapshots.length;
     final analysesCount = completedAnalyses.length;
     if (snapshotsCount > analysesCount &&
         snapshotsCount == (analysesCount + 1)) {
@@ -185,7 +184,7 @@ class MemoryController extends DisposableController
     return null;
   }
 
-  bool enableAnalyzeButton() => getSnapshotToAnalyze() != null;
+  bool enableAnalyzeButton() => computeSnapshotToAnalyze != null;
 
   MemoryTimeline memoryTimeline;
 
@@ -382,7 +381,7 @@ class MemoryController extends DisposableController
   LibraryReference get libraryRoot {
     if (selectionNotifier.value == null) {
       // No selectied snapshot use last snapshot.
-      return snapshots.value.last.libraryRoot;
+      return snapshots.safeLast.libraryRoot;
     }
 
     // Find the selected snapshot's libraryRoot.
@@ -397,8 +396,8 @@ class MemoryController extends DisposableController
     Snapshot snapshot;
 
     // Use last snapshot.
-    if (snapshots.value.isNotEmpty) {
-      snapshot = snapshots.value.last;
+    if (snapshots.isNotEmpty) {
+      snapshot = snapshots.safeLast;
     }
 
     // Find the selected snapshot's libraryRoot.
@@ -410,7 +409,7 @@ class MemoryController extends DisposableController
   }
 
   // Using the tree table find the active snapshot (selected or last snapshot).
-  SnapshotReference activeSnapshot() {
+  SnapshotReference get activeSnapshot {
     for (final topLevel in groupByTreeTable.dataRoots) {
       if (topLevel is SnapshotReference) {
         final nodeSelected = selectionNotifier.value.node;
@@ -663,7 +662,7 @@ class MemoryController extends DisposableController
     HeapSnapshotGraph graph,
   }) {
     final HeapSnapshotGraph snapshotGraph =
-        graph != null ? graph : snapshots.value?.safeLast?.snapshotGraph;
+        graph != null ? graph : snapshots.safeLast?.snapshotGraph;
 
     if (snapshotGraph == null) return null;
 
@@ -802,10 +801,8 @@ class MemoryController extends DisposableController
     return null;
   }
 
-  final realNodeFromFakeNodeNotifier = ValueNotifier<Reference>(null);
-
   void createSnapshotEntries(Reference parent) {
-    for (final snapshot in snapshots.value) {
+    for (final snapshot in snapshots) {
       final snapShotMatch = parent.children.where((element) {
         var result = false;
         if (element is SnapshotReference) {
@@ -820,7 +817,7 @@ class MemoryController extends DisposableController
         final snapshotNode = SnapshotReference(snapshot);
         parent.addChild(snapshotNode);
 
-        if (snapshots.value.safeLast == snapshot) {
+        if (snapshots.safeLast == snapshot) {
           snapshotNode.addAllChildren(computeAllLibraries().children);
         }
       } else {
@@ -831,7 +828,7 @@ class MemoryController extends DisposableController
 
   Reference buildTreeFromAllData() {
     // Nothing to build - no snapshots exists.
-    if (snapshots.value.isEmpty) return null;
+    if (snapshots.isEmpty) return null;
 
     if (topNode == null) {
       topNode = LibraryReference(this, libraryRootNode, null);
@@ -914,13 +911,20 @@ class MemoryController extends DisposableController
   void storeSnapshot(
     DateTime timestamp,
     HeapSnapshotGraph graph,
-    LibraryReference libraryRoot,
-  ) {
-    snapshots.value.add(Snapshot(timestamp, this, graph, libraryRoot));
+    LibraryReference libraryRoot, {
+    bool autoSnapshot = false,
+  }) {
+    snapshots.add(Snapshot(
+      timestamp,
+      this,
+      graph,
+      libraryRoot,
+      autoSnapshot,
+    ));
   }
 
   void clearAllSnapshots() {
-    snapshots.value.clear();
+    snapshots.clear();
   }
 
   @override
@@ -1375,47 +1379,6 @@ class MemoryTimeline {
     if (!controller.offline) {
       _sampleAddedNotifier.value = sample;
     }
-  }
-}
-
-/// Compute a simple moving average.
-class MovingAverage {
-  MovingAverage({this.averagePeriod = 20, this.magnitudeSpike = 3});
-
-  final dataSet = Queue<int>();
-
-  // Total collected items in the X axis (time) used to compute moving average.
-  final int averagePeriod; // Default 10-20 seconds.
-
-  final int magnitudeSpike; // Default magnitude of comparing first to mean.
-
-  // Sum of total heap used and external heap for unitPeriod.
-  int averageSum = 0;
-
-  // Reset moving average data.
-  void clear() {
-    dataSet.clear();
-    averageSum = 0;
-  }
-
-  // Update the sum to get a new mean.
-  void addToMA(int value) {
-    averageSum += value;
-    dataSet.add(value);
-
-    // Update dataSet of values to not exceede the period of the moving average
-    // to compute the normal mean.
-    if (dataSet.length > averagePeriod) {
-      averageSum -= dataSet.removeFirst();
-    }
-  }
-
-  int mean() => averageSum ~/ min(averagePeriod, dataSet.length);
-
-  // 1-order (default) of magnitude growth maybe a spike.
-  bool hasSpike() {
-    final first = dataSet.first;
-    return mean() > (first * magnitudeSpike);
   }
 }
 

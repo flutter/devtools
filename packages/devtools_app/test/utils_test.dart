@@ -498,6 +498,187 @@ void main() {
       expect(keySet.describeKeys(), 'Control-P');
     });
   });
+
+  group('MovingAverage', () {
+    const simpleDataSet = [
+      100,
+      200,
+      300,
+      500,
+      1000,
+      2000,
+      3000,
+      4000,
+      10000,
+      100000,
+    ];
+
+    const memorySizeDataSet = [
+      190432640,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      201045160,
+      198200392,
+      200144872,
+      210110632,
+      234077984,
+      229029504,
+      229029544,
+      231396416,
+      240465152,
+      303434344,
+      302925712,
+      356093472,
+      354292096,
+      400654120,
+      400538848,
+      402336872,
+      444325760,
+      444933104,
+      341888120,
+      406070376,
+      343798216,
+      392421072,
+      392441080,
+      481891656,
+      481447920,
+      433271776,
+      464727280,
+      494727280,
+      564727280,
+      524727280,
+      534727280,
+      564727280,
+      764727280,
+      964727280,
+      1064727280,
+      1464727280,
+      2264727280,
+      2500000000,
+    ];
+
+    void checkNewItemsAddedToDataSet(MovingAverage mA) {
+      mA.add(1000000);
+      mA.add(2000000);
+      mA.add(3000000);
+      expect(mA.dataSet.length, lessThan(mA.averagePeriod));
+      expect(mA.mean, equals(470853));
+    }
+
+    test('basic MA', () {
+      // Creation of MovingAverage statically.
+      final simpleMA = MovingAverage(newDataSet: simpleDataSet);
+      expect(simpleMA.dataSet.length, lessThan(simpleMA.averagePeriod));
+      expect(simpleMA.mean, equals(12110));
+      checkNewItemsAddedToDataSet(simpleMA);
+
+      simpleMA.clear();
+      expect(simpleMA.mean, equals(0));
+
+      // Dynamically add data to MovingAverage data set.
+      for (int i = 0; i < simpleDataSet.length; i++) {
+        simpleMA.add(simpleDataSet[i]);
+      }
+      // Should be identical to static one from above.
+      expect(simpleMA.mean, equals(12110));
+      checkNewItemsAddedToDataSet(simpleMA);
+    });
+
+    test('normal static MA', () {
+      // Creation of MovingAverage statically.
+      final mA = MovingAverage(newDataSet: memorySizeDataSet);
+      // Mean only calculated on last averagePeriod entries (50 default).
+      expect(mA.mean, equals(462271799));
+      expect(mA.dataSet.length, equals(mA.averagePeriod));
+      expect(mA.hasSpike(), isTrue);
+
+      mA.clear();
+      expect(mA.mean, equals(0));
+      expect(mA.dataSet.length, equals(0));
+    });
+
+    test('normal dynamic MA', () {
+      final mA = MovingAverage();
+
+      // Dynamically add data to MovingAverage data set.
+      for (int i = 0; i < 20; i++) {
+        mA.add(memorySizeDataSet[i]);
+        expect(mA.hasSpike(), isFalse);
+      }
+      expect(mA.mean, equals(192829540));
+
+      for (int i = 20; i < 50; i++) {
+        mA.add(memorySizeDataSet[i]);
+        switch (i) {
+          case 25:
+            expect(mA.hasSpike(), isTrue);
+            mA.clear();
+            expect(mA.dataSet.length, 0);
+            break;
+          case 48:
+          case 49:
+            expect(mA.hasSpike(), isTrue);
+            break;
+          default:
+            expect(mA.dataSet.length, i < 25 ? i + 1 : i - 25);
+            expect(mA.hasSpike(), isFalse);
+        }
+      }
+      expect(mA.mean, equals(469047851));
+
+      expect(mA.dataSet.length, 24);
+
+      for (int i = 50; i < memorySizeDataSet.length; i++) {
+        mA.add(memorySizeDataSet[i]);
+        switch (i) {
+          case 50:
+            expect(mA.mean, equals(492875028));
+            expect(mA.hasSpike(), isTrue);
+            expect(mA.dataSet.length, equals(25));
+            break;
+          case 51:
+            expect(mA.mean, equals(530253961));
+            expect(mA.hasSpike(), isTrue);
+            expect(mA.dataSet.length, equals(26));
+            break;
+          case 52:
+            expect(mA.mean, equals(594493714));
+            expect(mA.hasSpike(), isTrue);
+            expect(mA.dataSet.length, equals(27));
+            break;
+          case 53:
+            expect(mA.mean, equals(662547510));
+            expect(mA.hasSpike(), isTrue);
+            expect(mA.dataSet.length, equals(28));
+            break;
+          default:
+            expect(false, isTrue);
+        }
+      }
+
+      // dataSet was cleared on first spike @ item 25 so
+      // dataSet only has the remaining 28 entries.
+      expect(mA.dataSet.length, 28);
+      expect(mA.mean, equals(662547510));
+
+      mA.clear();
+      expect(mA.mean, equals(0));
+      expect(mA.dataSet.length, equals(0));
+    });
+  });
 }
 
 // This was generated from a canvas with font size 14.0.

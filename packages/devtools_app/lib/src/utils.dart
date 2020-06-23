@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
@@ -690,6 +691,71 @@ class DebugTimingLogger {
     _timer.start();
 
     print('[$name] $message');
+  }
+}
+
+/// Compute a simple moving average.
+class MovingAverage {
+  MovingAverage(
+      {this.averagePeriod = 50, this.ratioSpike = 2, List<int> newDataSet}) {
+    if (newDataSet != null) {
+      var initialDataSet = newDataSet;
+      final count = newDataSet.length;
+      if (count > averagePeriod) {
+        initialDataSet = newDataSet.sublist(count - averagePeriod);
+      }
+
+      dataSet.addAll(initialDataSet);
+      for (final value in dataSet) {
+        averageSum += value;
+      }
+    }
+  }
+
+  final dataSet = Queue<int>();
+
+  /// Total collected items in the X axis (time) used to compute moving average.
+  /// Default 100 periods for memory profiler 1-2 periods / seconds.
+  final int averagePeriod;
+
+  /// Ratio of first item in dataSet when comparing to last - mean
+  /// e.g., 2 is 50% (dataSet.first ~/ ratioSpike).
+  final int ratioSpike;
+
+  /// Sum of total heap used and external heap for unitPeriod.
+  int averageSum = 0;
+
+  /// Reset moving average data.
+  void clear() {
+    dataSet.clear();
+    averageSum = 0;
+  }
+
+  // Update the sum to get a new mean.
+  void add(int value) {
+    averageSum += value;
+    dataSet.add(value);
+
+    // Update dataSet of values to not exceede the period of the moving average
+    // to compute the normal mean.
+    if (dataSet.length > averagePeriod) {
+      averageSum -= dataSet.removeFirst();
+    }
+  }
+
+  int get mean {
+    final periodRange = min(averagePeriod, dataSet.length);
+    return periodRange > 0 ? averageSum ~/ periodRange : 0;
+  }
+
+  /// If the last - mean > than 50% of first value in period looks like a spike.
+  bool hasSpike() {
+    var first = dataSet.safeFirst;
+    first ??= 0;
+    var last = dataSet.safeLast;
+    last ??= 0;
+
+    return last - mean > (first ~/ ratioSpike);
   }
 }
 

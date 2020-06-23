@@ -19,6 +19,9 @@ const filteredLibrariesName = 'Filtered';
 const emptyName = '<empty>';
 const sentinelName = '<sentinel>';
 
+// TODO(terry): Add Reference._({...}) constructor w/ optional named parameters
+//              w/ default values. Call above constructor from each of the below
+//              constructors to eliinate the repeated false settings.
 class Reference extends TreeNode<Reference> {
   Reference._empty()
       : controller = null,
@@ -300,21 +303,18 @@ class SnapshotReference extends Reference {
   SnapshotReference(this.snapshot)
       : super.snapshot(
           null,
-          snapshot != null
-              ? 'Snapshot ${_formatter.format(snapshot.collectedTimestamp)}'
-              : '',
-/*
-          onExpand: (Reference reference) {
-            assert(reference.isAnalysis);
-            print("TBD");
-          },
-          onLeaf: (ObjectReference reference) {
-            print("Clicking on analysis node");
-          },
-*/
+          title(snapshot),
         );
 
-  static final _formatter = DateFormat('MMM dd HH:mm:ss');
+  static String title(Snapshot snapshot) {
+    if (snapshot == null) return '';
+
+    final timestamp = snapshot.collectedTimestamp;
+    final displayTimestamp = MemoryController.formattedTimestamp(timestamp);
+    return snapshot.autoSnapshot
+        ? 'Snapshot $displayTimestamp Auto'
+        : 'Snapshot $displayTimestamp';
+  }
 
   final Snapshot snapshot;
 }
@@ -462,8 +462,10 @@ class Snapshot {
     this.controller,
     this.snapshotGraph,
     this.libraryRoot,
+    this.autoSnapshot,
   );
 
+  final bool autoSnapshot;
   final MemoryController controller;
   final DateTime collectedTimestamp;
   final HeapSnapshotGraph snapshotGraph;
