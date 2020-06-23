@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vm_snapshot_analysis/program_info.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
@@ -45,7 +46,7 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
 
   CodeSizeController controller;
 
-  TreemapNode root;
+  ProgramInfoNode root;
 
   @override
   void didChangeDependencies() {

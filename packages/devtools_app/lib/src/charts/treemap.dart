@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:vm_snapshot_analysis/program_info.dart';
 
 import '../common_widgets.dart';
 import '../trees.dart';
@@ -30,9 +31,9 @@ class Treemap extends StatelessWidget {
     @required this.onRootChangedCallback,
   });
 
-  final TreemapNode rootNode;
+  final ProgramInfoNode rootNode;
 
-  final List<TreemapNode> nodes;
+  final List<ProgramInfoNode> nodes;
 
   /// The depth of children visible from this Treemap widget.
   ///
@@ -63,7 +64,7 @@ class Treemap extends StatelessWidget {
 
   final double height;
 
-  final void Function(TreemapNode node) onRootChangedCallback;
+  final void Function(ProgramInfoNode node) onRootChangedCallback;
 
   static const PivotType pivotType = PivotType.pivotBySize;
 
@@ -76,19 +77,23 @@ class Treemap extends StatelessWidget {
   /// Computes the total size of a given list of treemap nodes.
   /// [endIndex] defaults to nodes.length - 1.
   int computeByteSizeForNodes({
-    @required List<TreemapNode> nodes,
+    @required List<ProgramInfoNode> nodes,
     int startIndex = 0,
     int endIndex,
   }) {
     endIndex ??= nodes.length - 1;
     int sum = 0;
+    int size = 0;
     for (int i = startIndex; i <= endIndex; i++) {
-      sum += nodes[i].byteSize;
+      size = nodes[i].size;
+      if (size != null) {
+        sum += nodes[i].size;
+      }
     }
     return sum;
   }
 
-  int computePivot(List<TreemapNode> children) {
+  int computePivot(List<ProgramInfoNode> children) {
     switch (pivotType) {
       case PivotType.pivotByMiddle:
         return (children.length / 2).floor();
@@ -96,8 +101,8 @@ class Treemap extends StatelessWidget {
         int pivotIndex = -1;
         double maxSize = double.negativeInfinity;
         for (int i = 0; i < children.length; i++) {
-          if (children[i].byteSize > maxSize) {
-            maxSize = children[i].byteSize.toDouble();
+          if (children[i].size > maxSize) {
+            maxSize = children[i].size.toDouble();
             pivotIndex = i;
           }
         }
@@ -131,7 +136,7 @@ class Treemap extends StatelessWidget {
   /// ----------------------
   /// ```
   List<Positioned> buildTreemaps({
-    @required List<TreemapNode> children,
+    @required List<ProgramInfoNode> children,
     @required double width,
     @required double height,
   }) {
@@ -143,13 +148,13 @@ class Treemap extends StatelessWidget {
     }
 
     // Sort the list of treemap nodes, descending in size.
-    children.sort((a, b) => b.byteSize.compareTo(a.byteSize));
+    children.sort((a, b) => b.size.compareTo(a.size));
     if (children.length <= 2) {
       final positionedChildren = <Positioned>[];
       double offset = 0;
 
       for (final child in children) {
-        final ratio = child.byteSize / totalByteSize;
+        final ratio = child.size / totalByteSize;
 
         positionedChildren.add(
           Positioned(
@@ -175,14 +180,14 @@ class Treemap extends StatelessWidget {
     final pivotIndex = computePivot(children);
 
     final pivotNode = children[pivotIndex];
-    final pivotByteSize = pivotNode.byteSize;
+    final pivotByteSize = pivotNode.size;
 
     final list1 = children.sublist(0, pivotIndex);
     final list1ByteSize = computeByteSizeForNodes(nodes: list1);
 
-    var list2 = <TreemapNode>[];
+    var list2 = <ProgramInfoNode>[];
     int list2ByteSize = 0;
-    var list3 = <TreemapNode>[];
+    var list3 = <ProgramInfoNode>[];
     int list3ByteSize = 0;
 
     // The maximum amount of data we can put in [list3].
@@ -389,7 +394,7 @@ class Treemap extends StatelessWidget {
             if (height > minHeightToDisplayTitleText) buildTitleText(context),
             Expanded(
               child: Treemap.fromNodes(
-                nodes: rootNode.children,
+                nodes: rootNode.children.values.toList(),
                 levelsVisible: levelsVisible,
                 isOutermostLevel: isOutermostLevel,
                 onRootChangedCallback: onRootChangedCallback,
@@ -470,10 +475,10 @@ class Treemap extends StatelessWidget {
   /// Builds a selectable container with [child] as its child.
   ///
   /// Selecting this widget will trigger a re-root of the tree
-  /// to the associated [TreemapNode].
+  /// to the associated [ProgramInfoNode].
   ///
   /// The default value for newRoot is [rootNode].
-  Tooltip buildSelectable({@required Widget child, TreemapNode newRoot}) {
+  Tooltip buildSelectable({@required Widget child, ProgramInfoNode newRoot}) {
     newRoot ??= rootNode;
     return Tooltip(
       message: rootNode.displayText(),
@@ -501,6 +506,40 @@ class Treemap extends StatelessWidget {
       },
     );
   }
+}
+
+extension Node on ProgramInfoNode {
+  String displayText({bool oneLine = true}) {
+    final separator = oneLine ? ' ' : '\n';
+    return '$name$separator[${prettyPrintBytes(size, includeUnit: true)}]';
+  }
+
+  /// Returns a list of [TreemapNode] in the path from root node to [this].
+  List<ProgramInfoNode> pathFromRoot() {
+    ProgramInfoNode node = this;
+    final path = <ProgramInfoNode>[];
+    while (node != null) {
+      path.add(node);
+      node = node.parent;
+    }
+    return path.reversed.toList();
+  }
+
+  void printTree() {
+    printTreeHelper(this, '');
+  }
+
+  void printTreeHelper(ProgramInfoNode root, String tabs) {
+    print(tabs + '${root.details()}');
+    for (final child in root.children.values.toList()) {
+      printTreeHelper(child, tabs + '\t');
+    }
+  }
+
+  String details() {
+    return '{$name, $size}';
+  }
+
 }
 
 class TreemapNode extends TreeNode<TreemapNode> {

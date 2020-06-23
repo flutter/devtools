@@ -94,13 +94,14 @@ class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
     if (sizes != null) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          return Treemap.fromRoot(
-            rootNode: root,
-            levelsVisible: 2,
-            isOutermostLevel: true,
-            height: constraints.maxHeight,
-            onRootChangedCallback: _onRootChanged,
-          );
+          // return Treemap.fromRoot(
+          //   rootNode: root,
+          //   levelsVisible: 2,
+          //   isOutermostLevel: true,
+          //   height: constraints.maxHeight,
+          //   onRootChangedCallback: _onRootChanged,
+          // );
+          return const SizedBox();
         },
       );
     } else {
