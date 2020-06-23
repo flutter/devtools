@@ -15,7 +15,6 @@ import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../ui/colors.dart';
-import '../utils.dart';
 
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';

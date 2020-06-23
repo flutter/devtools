@@ -656,7 +656,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     );
   }
 
-  void _snapshot({userGenerated: true}) async {
+  void _snapshot({userGenerated = true}) async {
     // VmService not available (disconnected/crashed).
     if (serviceManager.service == null) return;
 
@@ -830,6 +830,9 @@ class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
 
     cancel();
 
+    // TODO(terry): setState should be called to set our state not change the
+    //              controller. Have other ValueListenables on controller to
+    //              listen to, so we don't need the setState calls.
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
