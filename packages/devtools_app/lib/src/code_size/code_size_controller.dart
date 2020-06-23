@@ -9,7 +9,7 @@ import 'code_size_processor.dart';
 
 class CodeSizeController {
   CodeSizeController() {
-    processor = CodeSizeProcessor(this);
+    processor = CodeSizeProcessor();
   }
 
   CodeSizeProcessor processor;
@@ -18,9 +18,9 @@ class CodeSizeController {
   final _root = ValueNotifier<TreemapNode>(null);
 
   void loadJson() {
-    processor.loadJson();
+    changeRoot(processor.buildTreeFromJson());
   }
-  
+
   void clear() {
     _root.value = null;
   }

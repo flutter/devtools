@@ -215,17 +215,6 @@ class InstructionsSize {
       return node;
     });
 
-    // Add the filtered libraries/classes to the treemap.
-    // TODO(peterdjlee): Remove this
-    root.childrenMap.putIfAbsent('All Filtered Libraries', () {
-      final node = TreemapNode(
-        name: 'All Filtered Libraries',
-        childrenMap: <String, TreemapNode>{},
-      )..byteSize = snapshotGraph.shallowSize - root.byteSize;
-      root.addChild(node);
-      return node;
-    });
-
     root.byteSize = snapshotGraph.shallowSize + snapshotGraph.externalSize;
 
     return InstructionsSize(root);

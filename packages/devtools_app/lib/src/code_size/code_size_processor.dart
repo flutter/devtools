@@ -6,18 +6,8 @@ import 'dart:convert';
 
 import '../charts/treemap.dart';
 import 'canned_data.dart';
-import 'code_size_controller.dart';
 
 class CodeSizeProcessor {
-  CodeSizeProcessor(this.codeSizeController);
-
-  final CodeSizeController codeSizeController;
-
-  void loadJson() {
-    final TreemapNode root = buildTreeFromJson();
-    codeSizeController.changeRoot(root);
-  }
-
   TreemapNode addChildNode(TreemapNode parent, String name, int byteSize) {
     TreemapNode child = parent.childrenMap[name];
     if (child == null) {
@@ -44,21 +34,14 @@ class CodeSizeProcessor {
       childrenMap: rootChildren,
     );
 
-    // Can optimize look up / retrieve time with a hashmap
-    for (dynamic memoryUsage in data) {
-      String libraryName = memoryUsage['l'];
-      if (libraryName == null || libraryName == '') {
-        libraryName = 'Unnamed Library';
-      }
-      String className = memoryUsage['c'];
-      if (className == null || className == '') {
-        className = 'Unnamed Class';
-      }
-      String methodName = memoryUsage['n'];
-      if (methodName == null || methodName == '') {
-        methodName = 'Unnamed Method';
-      }
-      final int byteSize = memoryUsage['s'];
+    for (Map<String, dynamic> memoryUsage in data) {
+      String libraryName = memoryUsage.lookUpWithDefault(
+        'l',
+        'Unnamed Library',
+      );
+      final className = memoryUsage.lookUpWithDefault('c', 'Unnamed Class');
+      final methodName = memoryUsage.lookUpWithDefault('n', 'Unnamed Method');
+      final byteSize = memoryUsage['s'];
       if (byteSize == null) {
         throw 'Size was null for $memoryUsage';
       }
@@ -92,4 +75,15 @@ class CodeSizeProcessor {
 
     return root;
   }
+}
+
+extension DefaultMapGetter<K, V> on Map<K, V> {
+  V lookUpWithDefault(K key, V defaultValue) {
+    final value = this[key];
+    if (_isStringObjectEmpty(value)) return defaultValue;
+    return value;
+  }
+
+  bool _isStringObjectEmpty(V value) =>
+      (value is String) ? value.isEmpty : true;
 }
