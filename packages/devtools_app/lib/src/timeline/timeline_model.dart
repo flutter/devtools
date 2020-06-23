@@ -138,9 +138,9 @@ class TimelineData {
       return -1 * a.compareTo(b);
     }
 
-    // Order non-UI and non-raster buckets before the UI / Raster buckets.
-    if (a == uiKey || a == rasterKey) return 1;
-    if (b == uiKey || b == rasterKey) return -1;
+    // Order non-UI and non-raster buckets after the UI / Raster buckets.
+    if (a == uiKey || a == rasterKey) return -1;
+    if (b == uiKey || b == rasterKey) return 1;
 
     // Alphabetize all other buckets.
     return a.compareTo(b);
