@@ -1380,14 +1380,14 @@ class MemoryTimeline {
 
 /// Compute a simple moving average.
 class MovingAverage {
-  MovingAverage({this.averagePeriod = 20, this.magnitudeSpike = 3 });
+  MovingAverage({this.averagePeriod = 20, this.magnitudeSpike = 3});
 
   final dataSet = Queue<int>();
 
   // Total collected items in the X axis (time) used to compute moving average.
-  final int averagePeriod;    // Default 10-20 seconds.
+  final int averagePeriod; // Default 10-20 seconds.
 
-  final int magnitudeSpike;   // Default magnitude of comparing first to mean.
+  final int magnitudeSpike; // Default magnitude of comparing first to mean.
 
   // Sum of total heap used and external heap for unitPeriod.
   int averageSum = 0;

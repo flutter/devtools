@@ -29,7 +29,8 @@ bool _classMatcher(HeapGraphClassLive liveClass) {
 ///   key: 'filters'      value: List<ClassReference>
 ///   key: 'libraries'    value: List<ClassReference>
 ///
-Map<String, List<Reference>> collect(MemoryController controller, Snapshot snapshot) {
+Map<String, List<Reference>> collect(
+    MemoryController controller, Snapshot snapshot) {
   final Map<String, List<Reference>> result = {};
 
   // Analyze the snapshot's heap memory information
