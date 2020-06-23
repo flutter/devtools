@@ -23,8 +23,6 @@ import 'free_space.dart';
 import 'overflow_indicator_painter.dart';
 import 'utils.dart';
 
-const widthIndicatorColor = ThemedColor(Color(0xFF000099), mainUiColor);
-const heightIndicatorColor = ThemedColor(mainRasterColor, Color(0xFF27AAE1));
 const margin = 8.0;
 
 const arrowHeadSize = 8.0;
@@ -73,16 +71,25 @@ const minHeightToAllowTruncating = 375.0;
 const minWidthToAllowTruncating = 375.0;
 
 // Story of Layout colors
-const mainAxisLightColor = Color(0xFFF597A8);
-const mainAxisDarkColor = Color(0xFFEA637C);
+const mainAxisLightColor = Color(0xff2c5daa);
+const mainAxisDarkColor = Color(0xff2c5daa);
+const rowColor = Color(0xff2c5daa);
+const columnColor = Color(0xff77974d);
+const regularWidgetColor = Color(0xff88b1de);
 const mainAxisColor = ThemedColor(mainAxisLightColor, mainAxisDarkColor);
 
-const crossAxisLightColor = Color(0xFFB3D25A);
-const crossAxisDarkColor = Color(0xFFB3D25A);
+const widgetNameColor = ThemedColor(Colors.white, Colors.black); // TODO(jacobr): verify.
+const selectedWidgetColor = Color(0xff36c6f4);
+
+const textColor = Color(0xff55767f);
+const emphasizedTextColor = Color(0xff009aca);
+
+const crossAxisLightColor = Color(0xff8ac652);
+const crossAxisDarkColor = Color(0xff8ac652);
 const crossAxisColor = ThemedColor(crossAxisLightColor, crossAxisDarkColor);
 
-const mainAxisTextColorLight = Color(0xFF913549);
-const mainAxisTextColorDark = Color(0xFFEA637C);
+const mainAxisTextColorLight = Color(0xFF1375bc);
+const mainAxisTextColorDark = Color(0xFF1375bc);
 const mainAxisTextColor =
     ThemedColor(mainAxisTextColorLight, mainAxisTextColorDark);
 
@@ -96,22 +103,36 @@ const overflowBackgroundColorLight = Color(0xFFB00020);
 const overflowBackgroundColor =
     ThemedColor(overflowBackgroundColorLight, overflowBackgroundColorDark);
 
-const overflowTextColorDark = Color(0xFFFFFFFF);
-const overflowTextColorLight = Color(0xFFFFFFFF);
+const overflowTextColorDark = Color(0xfff5846b);
+const overflowTextColorLight = Color(0xffdea089);
 const overflowTextColor =
     ThemedColor(overflowTextColorLight, overflowTextColorDark);
 
-extension LayoutThemeDataExtension on ThemeData {
-  Color get activeBackgroundColor => backgroundColor;
+const backgroundColorSelectedDark = Color(
+    0xff474747); // TODO(jacobr): we would like Color(0x4dedeeef) but that makes the background show through.
+const backgroundColorSelectedLight = Color(0xffedeeef);
+const backgroundColorSelected =
+    ThemedColor(backgroundColorSelectedLight, backgroundColorSelectedDark);
 
-  Color get inActiveBackgroundColor => cardColor;
-}
+const backgroundColorDark = Color(0xff30302f);
+const backgroundColorLight = Color(0xffffffff);
+const backgroundColor = ThemedColor(backgroundColorLight, backgroundColorDark);
+
+const unconstrainedDarkColor = Color(0xffdea089);
+const unconstrainedLightColor = Color(0xfff5846b);
+const unconstrainedColor = ThemedColor(unconstrainedLightColor, unconstrainedDarkColor);
+
+const widthIndicatorColor = textColor;
+const heightIndicatorColor = textColor;
+
+extension LayoutThemeDataExtension on ThemeData {}
 
 const freeSpaceAssetName = 'assets/img/layout_explorer/free_space.png';
 
 const dimensionIndicatorTextStyle = TextStyle(
   height: 1.0,
   letterSpacing: 1.1,
+  color: emphasizedTextColor,
 );
 
 final overflowingDimensionIndicatorTextStyle =
@@ -121,6 +142,20 @@ final overflowingDimensionIndicatorTextStyle =
     color: overflowTextColor,
   ),
 );
+
+Widget buildUnderline() {
+  return Container(
+    height: 1.0,
+    decoration: const BoxDecoration(
+      border: Border(
+        bottom: BorderSide(
+          color: textColor,
+          width: 0.0,
+        ),
+      ),
+    ),
+  );
+}
 
 const maxRequestsPerSecond = 3.0;
 
@@ -149,7 +184,8 @@ Widget dimensionDescription(TextSpan description, bool overflow) {
   return text;
 }
 
-Widget _visualizeWidthAndHeightWithConstraints({
+Widget _visualizeWidthAndHeightWithConstraints(
+  BuildContext context, {
   @required Widget widget,
   @required LayoutProperties properties,
   double arrowHeadSize = defaultIconSize,
@@ -158,6 +194,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
       properties is FlexLayoutProperties && properties.isOverflowWidth;
   const bottomHeight = widthAndConstraintIndicatorSize;
   const rightWidth = heightAndConstraintIndicatorSize;
+  final theme = Theme.of(context);
 
   final heightDescription = RotatedBox(
     quarterTurns: 1,
@@ -172,6 +209,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
             const TextSpan(text: '\n'),
           TextSpan(
             text: ' (${properties.describeHeightConstraints()})',
+            style : properties.constraints.hasBoundedHeight ? null : const TextStyle(color: unconstrainedColor),
           ),
           if (properties is FlexLayoutProperties && properties.isOverflowHeight)
             TextSpan(
@@ -224,6 +262,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
         if (!showChildrenWidthsSum) const TextSpan(text: '\n'),
         TextSpan(
           text: '(${properties.describeWidthConstraints()})',
+          style : properties.constraints.hasBoundedWidth ? null : const TextStyle(color: unconstrainedColor),
         ),
         if (showChildrenWidthsSum)
           TextSpan(
@@ -587,18 +626,18 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
           maxSizeAvailable: maxSizeAvailable,
         );
 
-        final childrenRenderWidgets = [
-          for (var i = 0; i < children.length; i++)
-            FlexChildVisualizer(
-              state: this,
-              backgroundColor: highlighted == children[i]
-                  ? theme.activeBackgroundColor
-                  : theme.inActiveBackgroundColor,
-              borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
-              textColor: i.isOdd ? null : const Color(0xFF303030),
-              renderProperties: renderProperties[i],
-            )
-        ];
+        final childrenRenderWidgets = <Widget>[];
+        for (var i = 0; i < children.length; i++) {
+          final child = children[i];
+          final isSelected = highlighted == child;
+
+          childrenRenderWidgets.add(FlexChildVisualizer(
+            state: this,
+            layoutProperties: child,
+            isSelected: isSelected,
+            renderProperties: renderProperties[i],
+          ));
+        }
 
         final freeSpacesWidgets = [
           for (var renderProperties in [...mainAxisSpaces, ...crossAxisSpaces])
@@ -640,6 +679,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
       }),
     );
     return _visualizeWidthAndHeightWithConstraints(
+      context,
       widget: widget,
       properties: properties,
     );
@@ -670,6 +710,9 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
         child: DropdownButton(
           value: selected,
           isExpanded: true,
+          // Avoid showing an underline for the main axis and cross-axis drop downs.
+          underline: const SizedBox(),
+          iconEnabledColor: axis == properties.direction ?  mainAxisColor : crossAxisColor,
           selectedItemBuilder: (context) {
             return [
               for (var alignment in alignmentEnumEntries)
@@ -771,9 +814,9 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
   }
 
   Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
-    final theme = Theme.of(context);
     final maxHeight = constraints.maxHeight;
     final maxWidth = constraints.maxWidth;
+    print("XXX $constraints");
     final flexDescription = Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -785,9 +828,8 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
           onTap: () => onTap(properties),
           child: WidgetVisualizer(
             title: flexType,
-            backgroundColor:
-                highlighted == properties ? theme.activeBackgroundColor : null,
-            borderColor: mainAxisColor,
+            layoutProperties: properties,
+            isSelected: highlighted == properties,
             overflowSide: properties.overflowSide,
             hint: Container(
               padding: const EdgeInsets.all(4.0),
@@ -795,6 +837,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
                 'Total Flex Factor: ${properties?.totalFlex?.toInt()}',
                 textScaleFactor: largeTextScaleFactor,
                 style: const TextStyle(
+                  color: emphasizedTextColor,
                   fontWeight: FontWeight.bold,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -922,17 +965,16 @@ class FlexChildVisualizer extends StatelessWidget {
   const FlexChildVisualizer({
     Key key,
     @required this.state,
+    @required this.layoutProperties,
     @required this.renderProperties,
-    @required this.backgroundColor,
-    @required this.borderColor,
-    @required this.textColor,
+    @required this.isSelected,
   }) : super(key: key);
 
   final _FlexLayoutExplorerWidgetState state;
 
-  final Color backgroundColor;
-  final Color borderColor;
-  final Color textColor;
+  final bool isSelected;
+
+  final LayoutProperties layoutProperties;
 
   final RenderProperties renderProperties;
 
@@ -965,8 +1007,11 @@ class FlexChildVisualizer extends StatelessWidget {
       return Text(
         'flex: $flexFactor',
         style: flexFactor == properties.flexFactor
-            ? const TextStyle(fontWeight: FontWeight.bold)
-            : null,
+            ? const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: emphasizedTextColor,
+              )
+            : const TextStyle(color: emphasizedTextColor),
       );
     }
 
@@ -980,6 +1025,8 @@ class FlexChildVisualizer extends StatelessWidget {
     return DropdownButton<int>(
       value: properties.flexFactor?.toInt()?.clamp(0, maximumFlexFactor),
       onChanged: onChangeFlexFactor,
+      iconEnabledColor: textColor,
+      underline: buildUnderline(),
       items: <DropdownMenuItem<int>>[
         buildMenuItem(null),
         for (var i = 0; i <= maximumFlexFactor; ++i) buildMenuItem(i),
@@ -988,8 +1035,10 @@ class FlexChildVisualizer extends StatelessWidget {
   }
 
   Widget _buildFlexFitChangerDropdown() {
-    Widget flexFitDescription(FlexFit flexFit) =>
-        Text('fit: ${describeEnum(flexFit)}');
+    Widget flexFitDescription(FlexFit flexFit) => Text(
+          'fit: ${describeEnum(flexFit)}',
+          style: const TextStyle(color: emphasizedTextColor),
+        );
 
     // Disable FlexFit changer if widget is Expanded.
     if (properties.description == 'Expanded') {
@@ -1006,6 +1055,8 @@ class FlexChildVisualizer extends StatelessWidget {
     return DropdownButton<FlexFit>(
       value: properties.flexFit,
       onChanged: onChangeFlexFit,
+      underline: buildUnderline(),
+      iconEnabledColor: emphasizedTextColor,
       items: <DropdownMenuItem<FlexFit>>[
         buildMenuItem(FlexFit.loose),
         if (properties.description != 'Expanded') buildMenuItem(FlexFit.tight)
@@ -1028,11 +1079,8 @@ class FlexChildVisualizer extends StatelessWidget {
           if (!properties.hasFlexFactor)
             Text(
               'unconstrained ${root.isMainAxisHorizontal ? 'horizontal' : 'vertical'}',
-              style: TextStyle(
-                color: ThemedColor(
-                  const Color(0xFFD08A29),
-                  Colors.orange.shade700,
-                ),
+              style: const TextStyle(
+                color: unconstrainedColor,
                 fontStyle: FontStyle.italic,
               ),
               maxLines: 2,
@@ -1092,12 +1140,12 @@ class FlexChildVisualizer extends StatelessWidget {
             animation: state.entranceController,
             builder: buildEntranceAnimation,
             child: WidgetVisualizer(
-              backgroundColor: backgroundColor,
+              isSelected: isSelected,
+              layoutProperties: layoutProperties,
               title: properties.description,
-              borderColor: borderColor,
-              textColor: textColor,
               overflowSide: properties.overflowSide,
               child: _visualizeWidthAndHeightWithConstraints(
+                context,
                 arrowHeadSize: arrowHeadSize,
                 widget: Align(
                   alignment: Alignment.topRight,
@@ -1128,22 +1176,19 @@ class WidgetVisualizer extends StatelessWidget {
     Key key,
     @required this.title,
     this.hint,
-    this.backgroundColor,
-    @required this.borderColor,
-    this.textColor,
+    @required this.isSelected,
+    @required this.layoutProperties,
     this.child,
     this.overflowSide,
   })  : assert(title != null),
-        assert(borderColor != null),
         super(key: key);
 
+  final LayoutProperties layoutProperties;
   final String title;
   final Widget child;
   final Widget hint;
+  final bool isSelected;
 
-  final Color borderColor;
-  final Color textColor;
-  final Color backgroundColor;
   final OverflowSide overflowSide;
 
   static const overflowIndicatorSize = 20.0;
@@ -1152,6 +1197,15 @@ class WidgetVisualizer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final properties = layoutProperties;
+    Color borderColor = regularWidgetColor;
+    if (properties is FlexLayoutProperties) {
+      borderColor =
+          properties.direction == Axis.horizontal ? rowColor : columnColor;
+    }
+    if (isSelected) {
+      borderColor = selectedWidgetColor;
+    }
     return Container(
       child: Stack(
         children: [
@@ -1190,9 +1244,7 @@ class WidgetVisualizer extends StatelessWidget {
                           child: Center(
                             child: Text(
                               title,
-                              style: textColor != null
-                                  ? TextStyle(color: textColor)
-                                  : null,
+                              style: const TextStyle(color: widgetNameColor),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -1214,7 +1266,7 @@ class WidgetVisualizer extends StatelessWidget {
         border: Border.all(
           color: borderColor,
         ),
-        color: backgroundColor,
+        color: isDarkTheme ? backgroundColorDark : backgroundColorLight,
       ),
     );
   }

@@ -178,13 +178,13 @@ class LayoutProperties {
   String describeWidthConstraints() {
     return constraints.hasBoundedWidth
         ? describeAxis(constraints.minWidth, constraints.maxWidth, 'w')
-        : 'w=unconstrained';
+        : 'width is unconstrained';
   }
 
   String describeHeightConstraints() {
     return constraints.hasBoundedHeight
         ? describeAxis(constraints.minHeight, constraints.maxHeight, 'h')
-        : 'h=unconstrained';
+        : 'height is unconstrained';
   }
 
   String describeWidth() => 'w=${toStringAsFixed(size.width)}';
