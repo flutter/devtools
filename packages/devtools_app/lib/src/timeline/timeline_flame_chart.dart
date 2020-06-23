@@ -29,14 +29,14 @@ class TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
   TimelineFlameChart(
     TimelineData data, {
     @required double width,
-    @required TimelineEvent selected,
+    @required ValueListenable<TimelineEvent> selectionNotifier,
     @required Function(TimelineEvent event) onSelection,
   }) : super(
           data,
           time: data.time,
           totalStartingWidth: width,
           startInset: _calculateStartInset(data),
-          selected: selected,
+          selectionNotifier: selectionNotifier,
           onSelected: onSelection,
         );
 

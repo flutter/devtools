@@ -25,7 +25,7 @@ void main() {
     final flameChart = CpuProfileFlameChart(
       CpuProfileData.parse(cpuProfileResponseJson),
       width: 1000.0,
-      selected: null,
+      selectionNotifier: ValueNotifier<CpuStackFrame>(null),
       onSelected: (_) {},
     );
 
@@ -154,7 +154,7 @@ void main() {
       nodes: testNodes,
       width: 680.0, // 680.0 fits all test nodes and sideInsets of 70.0.
       startInset: sideInset,
-      selected: null,
+      selectionNotifier: ValueNotifier<CpuStackFrame>(null),
       zoom: FlameChart.minZoomLevel,
     );
     final zoomedTestRow = ScrollingFlameChartRow(
@@ -163,7 +163,7 @@ void main() {
       // 1080.0 fits all test nodes at zoom level 2.0 and sideInsets of 70.0.
       width: 1080.0,
       startInset: sideInset,
-      selected: null,
+      selectionNotifier: ValueNotifier<CpuStackFrame>(null),
       zoom: 2.0,
     );
 
@@ -210,7 +210,7 @@ void main() {
         nodes: const [],
         width: 500.0, // 500.0 is arbitrary.
         startInset: sideInset,
-        selected: null,
+        selectionNotifier: ValueNotifier<CpuStackFrame>(null),
         zoom: FlameChart.minZoomLevel,
       );
 
