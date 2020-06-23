@@ -31,9 +31,9 @@ class Treemap extends StatelessWidget {
     @required this.onRootChangedCallback,
   });
 
-  final ProgramInfoNode rootNode;
+  final TreemapNode rootNode;
 
-  final List<ProgramInfoNode> nodes;
+  final List<TreemapNode> nodes;
 
   /// The depth of children visible from this Treemap widget.
   ///
@@ -64,7 +64,7 @@ class Treemap extends StatelessWidget {
 
   final double height;
 
-  final void Function(ProgramInfoNode node) onRootChangedCallback;
+  final void Function(TreemapNode node) onRootChangedCallback;
 
   static const PivotType pivotType = PivotType.pivotBySize;
 
@@ -77,7 +77,7 @@ class Treemap extends StatelessWidget {
   /// Computes the total size of a given list of treemap nodes.
   /// [endIndex] defaults to nodes.length - 1.
   int computeByteSizeForNodes({
-    @required List<ProgramInfoNode> nodes,
+    @required List<TreemapNode> nodes,
     int startIndex = 0,
     int endIndex,
   }) {
@@ -85,15 +85,15 @@ class Treemap extends StatelessWidget {
     int sum = 0;
     int size = 0;
     for (int i = startIndex; i <= endIndex; i++) {
-      size = nodes[i].size;
+      size = nodes[i].byteSize;
       if (size != null) {
-        sum += nodes[i].size;
+        sum += nodes[i].byteSize;
       }
     }
     return sum;
   }
 
-  int computePivot(List<ProgramInfoNode> children) {
+  int computePivot(List<TreemapNode> children) {
     switch (pivotType) {
       case PivotType.pivotByMiddle:
         return (children.length / 2).floor();
@@ -101,8 +101,8 @@ class Treemap extends StatelessWidget {
         int pivotIndex = -1;
         double maxSize = double.negativeInfinity;
         for (int i = 0; i < children.length; i++) {
-          if (children[i].size > maxSize) {
-            maxSize = children[i].size.toDouble();
+          if (children[i].byteSize > maxSize) {
+            maxSize = children[i].byteSize.toDouble();
             pivotIndex = i;
           }
         }
@@ -136,7 +136,7 @@ class Treemap extends StatelessWidget {
   /// ----------------------
   /// ```
   List<Positioned> buildTreemaps({
-    @required List<ProgramInfoNode> children,
+    @required List<TreemapNode> children,
     @required double width,
     @required double height,
   }) {
@@ -148,13 +148,13 @@ class Treemap extends StatelessWidget {
     }
 
     // Sort the list of treemap nodes, descending in size.
-    children.sort((a, b) => b.size.compareTo(a.size));
+    children.sort((a, b) => b.byteSize.compareTo(a.byteSize));
     if (children.length <= 2) {
       final positionedChildren = <Positioned>[];
       double offset = 0;
 
       for (final child in children) {
-        final ratio = child.size / totalByteSize;
+        final ratio = child.byteSize / totalByteSize;
 
         positionedChildren.add(
           Positioned(
@@ -180,14 +180,14 @@ class Treemap extends StatelessWidget {
     final pivotIndex = computePivot(children);
 
     final pivotNode = children[pivotIndex];
-    final pivotByteSize = pivotNode.size;
+    final pivotByteSize = pivotNode.byteSize;
 
     final list1 = children.sublist(0, pivotIndex);
     final list1ByteSize = computeByteSizeForNodes(nodes: list1);
 
-    var list2 = <ProgramInfoNode>[];
+    var list2 = <TreemapNode>[];
     int list2ByteSize = 0;
-    var list3 = <ProgramInfoNode>[];
+    var list3 = <TreemapNode>[];
     int list3ByteSize = 0;
 
     // The maximum amount of data we can put in [list3].
@@ -394,7 +394,7 @@ class Treemap extends StatelessWidget {
             if (height > minHeightToDisplayTitleText) buildTitleText(context),
             Expanded(
               child: Treemap.fromNodes(
-                nodes: rootNode.children.values.toList(),
+                nodes: rootNode.children,
                 levelsVisible: levelsVisible,
                 isOutermostLevel: isOutermostLevel,
                 onRootChangedCallback: onRootChangedCallback,
@@ -475,10 +475,10 @@ class Treemap extends StatelessWidget {
   /// Builds a selectable container with [child] as its child.
   ///
   /// Selecting this widget will trigger a re-root of the tree
-  /// to the associated [ProgramInfoNode].
+  /// to the associated [TreemapNode].
   ///
   /// The default value for newRoot is [rootNode].
-  Tooltip buildSelectable({@required Widget child, ProgramInfoNode newRoot}) {
+  Tooltip buildSelectable({@required Widget child, TreemapNode newRoot}) {
     newRoot ??= rootNode;
     return Tooltip(
       message: rootNode.displayText(),
@@ -508,40 +508,6 @@ class Treemap extends StatelessWidget {
   }
 }
 
-extension Node on ProgramInfoNode {
-  String displayText({bool oneLine = true}) {
-    final separator = oneLine ? ' ' : '\n';
-    return '$name$separator[${prettyPrintBytes(size, includeUnit: true)}]';
-  }
-
-  /// Returns a list of [TreemapNode] in the path from root node to [this].
-  List<ProgramInfoNode> pathFromRoot() {
-    ProgramInfoNode node = this;
-    final path = <ProgramInfoNode>[];
-    while (node != null) {
-      path.add(node);
-      node = node.parent;
-    }
-    return path.reversed.toList();
-  }
-
-  void printTree() {
-    printTreeHelper(this, '');
-  }
-
-  void printTreeHelper(ProgramInfoNode root, String tabs) {
-    print(tabs + '${root.details()}');
-    for (final child in root.children.values.toList()) {
-      printTreeHelper(child, tabs + '\t');
-    }
-  }
-
-  String details() {
-    return '{$name, $size}';
-  }
-
-}
-
 class TreemapNode extends TreeNode<TreemapNode> {
   TreemapNode({
     @required this.name,
@@ -551,13 +517,23 @@ class TreemapNode extends TreeNode<TreemapNode> {
         assert(byteSize != null),
         assert(childrenMap != null);
 
+  TreemapNode.fromProgramInfoNode(ProgramInfoNode programInfoNode)
+      : this(name: programInfoNode.name, byteSize: programInfoNode.size);
+
   final String name;
   final Map<String, TreemapNode> childrenMap;
+
   int byteSize;
 
   String displayText({bool oneLine = true}) {
+    var displayName = name;
+
+    if (parent != null && displayName.startsWith(parent.name)) {
+      displayName = displayName.replaceFirst(parent.name, '');
+    }
+
     final separator = oneLine ? ' ' : '\n';
-    return '$name$separator[${prettyPrintBytes(byteSize, includeUnit: true)}]';
+    return '$displayName$separator[${prettyPrintBytes(byteSize, includeUnit: true)}]';
   }
 
   /// Returns a list of [TreemapNode] in the path from root node to [this].

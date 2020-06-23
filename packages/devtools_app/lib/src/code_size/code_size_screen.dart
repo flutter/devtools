@@ -4,12 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vm_snapshot_analysis/program_info.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
-import '../common_widgets.dart';
-import '../globals.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import 'code_size_controller.dart';
@@ -24,10 +21,7 @@ class CodeSizeScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    final connected = serviceManager?.connectedApp;
-    return connected != null && !connected.isDartWebAppNow
-        ? const CodeSizeBody()
-        : const DisabledForWebAppMessage();
+    return const CodeSizeBody();
   }
 }
 
@@ -46,7 +40,7 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
 
   CodeSizeController controller;
 
-  ProgramInfoNode root;
+  TreemapNode root;
 
   @override
   void didChangeDependencies() {
@@ -63,7 +57,7 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
       });
     });
 
-    controller.loadJson();
+    controller.loadJsonAsProgramInfo('sizes.json');
   }
 
   @override

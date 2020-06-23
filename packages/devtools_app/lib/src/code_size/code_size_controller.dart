@@ -10,56 +10,49 @@ import 'package:vm_snapshot_analysis/program_info.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
 import '../charts/treemap.dart';
-import 'code_size_processor.dart';
 
 class CodeSizeController {
-  CodeSizeController() {
-    processor = CodeSizeProcessor();
-  }
+  ValueListenable<TreemapNode> get root => _root;
+  final _root = ValueNotifier<TreemapNode>(null);
 
-  CodeSizeProcessor processor;
-
-  ValueListenable<ProgramInfoNode> get root => _root;
-  final _root = ValueNotifier<ProgramInfoNode>(null);
-
-  // Work in progress
-  Future<void> loadJson() async {
+  Future<void> loadJsonAsProgramInfo(String filename) async {
     final directoryPath = current + '/lib/src/code_size/';
-    final sizesJson = File(directoryPath + 'sizes.json');
-    final v8Json = File(directoryPath + 'v8.json');
-    final sizesProgramInfo = await loadProgramInfo(sizesJson);
-    final v8ProgramInfo = await loadProgramInfo(v8Json);
-    // addSizesToParentNodes(sizesProgramInfo.root);
-    // sizesProgramInfo.root.children.values.toList().forEach((element) => print(element.details()));
-    // print('\n');
-    // v8ProgramInfo.root.children.values.toList().forEach((element) => print(element.details()));
-    // changeRoot(sizesProgramInfo.root);
+    final json = File(directoryPath + filename);
+    final programInfo = await loadProgramInfo(json);
+    final root = programInfo.root.toTreemapNodeTree();
+
+    changeRoot(root);
   }
-
-  // void addSizesToParentNodes(ProgramInfoNode root) {
-  //   if (root.children.isNotEmpty) {
-  //     root.children.values.toList().forEach((child) {
-  //       addSizesToParentNodes(child);
-  //     });
-  //   } else {
-  //     root.size ??= 0;
-  //     addSizeHelper(root);
-  //   }
-  // }
-
-  // void addSizeHelper(ProgramInfoNode child) {
-  //   if (child.parent == null) return;
-  //   child.parent.size ??= 0;
-  //   child.parent.size += child.size;
-  //   addSizeHelper(child.parent);
-  // }
-
 
   void clear() {
     _root.value = null;
   }
 
-  void changeRoot(ProgramInfoNode newRoot) {
+  void changeRoot(TreemapNode newRoot) {
     _root.value = newRoot;
+  }
+}
+
+extension on ProgramInfoNode {
+  /// Converts a tree built with [ProgramInfoNode] to a tree built with [TreemapNode].
+  TreemapNode toTreemapNodeTree() {
+    final treeemapNodeChildren = <TreemapNode>[];
+    var treemapNodeSize = 0;
+
+    children.values.toList().forEach((child) {
+      final childTreemapNodeTree = child.toTreemapNodeTree();
+      treeemapNodeChildren.add(childTreemapNodeTree);
+      treemapNodeSize += childTreemapNodeTree.byteSize;
+    });
+
+    // If not a leaf node, set size to the sum of children sizes.
+    if (children.isNotEmpty) size = treemapNodeSize;
+
+    // Special case checking for when a leaf node has a size of null.
+    size ??= 0;
+
+    final treemapNode = TreemapNode.fromProgramInfoNode(this);
+    treemapNode.addAllChildren(treeemapNodeChildren);
+    return treemapNode;
   }
 }

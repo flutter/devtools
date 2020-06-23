@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/code_size/code_size_controller.dart';
-import 'package:devtools_app/src/code_size/code_size_processor.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/notifications.dart';
