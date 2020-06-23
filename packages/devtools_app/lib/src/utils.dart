@@ -696,8 +696,11 @@ class DebugTimingLogger {
 
 /// Compute a simple moving average.
 class MovingAverage {
-  MovingAverage(
-      {this.averagePeriod = 50, this.ratioSpike = 2, List<int> newDataSet}) {
+  MovingAverage({
+    this.averagePeriod = 50,
+    this.ratioSpike = 2,
+    List<int> newDataSet,
+  }) {
     if (newDataSet != null) {
       var initialDataSet = newDataSet;
       final count = newDataSet.length;
@@ -720,7 +723,7 @@ class MovingAverage {
 
   /// Ratio of first item in dataSet when comparing to last - mean
   /// e.g., 2 is 50% (dataSet.first ~/ ratioSpike).
-  final int ratioSpike;
+  final double ratioSpike;
 
   /// Sum of total heap used and external heap for unitPeriod.
   int averageSum = 0;
@@ -743,19 +746,17 @@ class MovingAverage {
     }
   }
 
-  int get mean {
+  double get mean {
     final periodRange = min(averagePeriod, dataSet.length);
-    return periodRange > 0 ? averageSum ~/ periodRange : 0;
+    return periodRange > 0 ? averageSum / periodRange : 0;
   }
 
   /// If the last - mean > than 50% of first value in period looks like a spike.
   bool hasSpike() {
-    var first = dataSet.safeFirst;
-    first ??= 0;
-    var last = dataSet.safeLast;
-    last ??= 0;
+    final first = dataSet.safeFirst ?? 0;
+    final last = dataSet.safeLast ?? 0;
 
-    return last - mean > (first ~/ ratioSpike);
+    return last - mean > (first / ratioSpike);
   }
 }
 

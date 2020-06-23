@@ -575,14 +575,14 @@ void main() {
       mA.add(2000000);
       mA.add(3000000);
       expect(mA.dataSet.length, lessThan(mA.averagePeriod));
-      expect(mA.mean, equals(470853));
+      expect(mA.mean.toInt(), equals(470853));
     }
 
     test('basic MA', () {
       // Creation of MovingAverage statically.
       final simpleMA = MovingAverage(newDataSet: simpleDataSet);
       expect(simpleMA.dataSet.length, lessThan(simpleMA.averagePeriod));
-      expect(simpleMA.mean, equals(12110));
+      expect(simpleMA.mean.toInt(), equals(12110));
       checkNewItemsAddedToDataSet(simpleMA);
 
       simpleMA.clear();
@@ -593,7 +593,7 @@ void main() {
         simpleMA.add(simpleDataSet[i]);
       }
       // Should be identical to static one from above.
-      expect(simpleMA.mean, equals(12110));
+      expect(simpleMA.mean.toInt(), equals(12110));
       checkNewItemsAddedToDataSet(simpleMA);
     });
 
@@ -601,7 +601,7 @@ void main() {
       // Creation of MovingAverage statically.
       final mA = MovingAverage(newDataSet: memorySizeDataSet);
       // Mean only calculated on last averagePeriod entries (50 default).
-      expect(mA.mean, equals(462271799));
+      expect(mA.mean.toInt(), equals(462271799));
       expect(mA.dataSet.length, equals(mA.averagePeriod));
       expect(mA.hasSpike(), isTrue);
 
@@ -618,7 +618,7 @@ void main() {
         mA.add(memorySizeDataSet[i]);
         expect(mA.hasSpike(), isFalse);
       }
-      expect(mA.mean, equals(192829540));
+      expect(mA.mean.toInt(), equals(192829540));
 
       for (int i = 20; i < 50; i++) {
         mA.add(memorySizeDataSet[i]);
@@ -637,7 +637,7 @@ void main() {
             expect(mA.hasSpike(), isFalse);
         }
       }
-      expect(mA.mean, equals(469047851));
+      expect(mA.mean.toInt(), equals(469047851));
 
       expect(mA.dataSet.length, 24);
 
@@ -645,22 +645,22 @@ void main() {
         mA.add(memorySizeDataSet[i]);
         switch (i) {
           case 50:
-            expect(mA.mean, equals(492875028));
+            expect(mA.mean.toInt(), equals(492875028));
             expect(mA.hasSpike(), isTrue);
             expect(mA.dataSet.length, equals(25));
             break;
           case 51:
-            expect(mA.mean, equals(530253961));
+            expect(mA.mean.toInt(), equals(530253961));
             expect(mA.hasSpike(), isTrue);
             expect(mA.dataSet.length, equals(26));
             break;
           case 52:
-            expect(mA.mean, equals(594493714));
+            expect(mA.mean.toInt(), equals(594493714));
             expect(mA.hasSpike(), isTrue);
             expect(mA.dataSet.length, equals(27));
             break;
           case 53:
-            expect(mA.mean, equals(662547510));
+            expect(mA.mean.toInt(), equals(662547510));
             expect(mA.hasSpike(), isTrue);
             expect(mA.dataSet.length, equals(28));
             break;
@@ -672,7 +672,7 @@ void main() {
       // dataSet was cleared on first spike @ item 25 so
       // dataSet only has the remaining 28 entries.
       expect(mA.dataSet.length, 28);
-      expect(mA.mean, equals(662547510));
+      expect(mA.mean.toInt(), equals(662547510));
 
       mA.clear();
       expect(mA.mean, equals(0));

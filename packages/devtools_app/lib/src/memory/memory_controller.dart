@@ -23,7 +23,6 @@ import '../table.dart';
 import '../ui/analytics_constants.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
-
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
@@ -64,7 +63,7 @@ class MemoryController extends DisposableController
     _showHeatMap.value = value;
   }
 
-  final List<Snapshot> snapshots = [];
+  final snapshots = <Snapshot>[];
 
   Snapshot get lastSnapshot => snapshots.safeLast;
 
@@ -78,7 +77,7 @@ class MemoryController extends DisposableController
       _selectedSnapshotNotifier;
 
   static String formattedTimestamp(DateTime timestamp) =>
-      timestamp != null ? DateFormat('MMM dd HH:mm:ss').format(timestamp) : '';
+      timestamp != null ? DateFormat('MMM dd hh:mm:ss').format(timestamp) : '';
 
   /// Stored value is pretty timestamp when the snapshot was done.
   final _selectedSnapshotNotifier = ValueNotifier<DateTime>(null);
@@ -163,28 +162,36 @@ class MemoryController extends DisposableController
     final snapshot = getSnapshot(nodeSelected);
     if (snapshot != null) {
       // Has the snapshot (with a selected row) been analyzed?
-      final snapshotDT = snapshot.collectedTimestamp;
-      final foundMatch =
-          completedAnalyses.where((element) => element.dateTime == snapshotDT);
-      if (foundMatch.isEmpty) return snapshot;
+      return _findSnapshotAnalyzed(snapshot);
     }
 
     final snapshotsCount = snapshots.length;
     final analysesCount = completedAnalyses.length;
+
+    // Exactly one analysis is left? Ff the 'Analysis' button is pressed the
+    // snapshot that is left will be processed (usually the last one). More
+    // than one snapshots to analyze, the user must select the snapshot to
+    // analyze.
     if (snapshotsCount > analysesCount &&
         snapshotsCount == (analysesCount + 1)) {
-      // Check if last snapshot has been analyzed?
-      final snapshot = lastSnapshot;
-      final lastDT = snapshot.collectedTimestamp;
-      final foundMatch =
-          completedAnalyses.where((element) => element.dateTime == lastDT);
-      if (foundMatch.isEmpty) return snapshot;
+      // Has the last snapshot been analyzed?
+      return _findSnapshotAnalyzed(lastSnapshot);
     }
 
     return null;
   }
 
-  bool enableAnalyzeButton() => computeSnapshotToAnalyze != null;
+  /// Has the snapshot been analyzed, if not return the snapshot otherwise null.
+  Snapshot _findSnapshotAnalyzed(Snapshot snapshot) {
+    final snapshotDateTime = snapshot.collectedTimestamp;
+    final foundMatch = completedAnalyses
+        .where((analysis) => analysis.dateTime == snapshotDateTime);
+    if (foundMatch.isEmpty) return snapshot;
+
+    return null;
+  }
+
+  bool isAnalyzeButtonEnabled() => computeSnapshotToAnalyze != null;
 
   MemoryTimeline memoryTimeline;
 
@@ -402,13 +409,10 @@ class MemoryController extends DisposableController
 
     // Find the selected snapshot's libraryRoot.
     snapshot ??= getSnapshot(selectionNotifier.value.node);
-
-    if (snapshot != null) {
-      snapshot.libraryRoot = newRoot;
-    }
+    snapshot?.libraryRoot = newRoot;
   }
 
-  // Using the tree table find the active snapshot (selected or last snapshot).
+  /// Using the tree table find the active snapshot (selected or last snapshot).
   SnapshotReference get activeSnapshot {
     for (final topLevel in groupByTreeTable.dataRoots) {
       if (topLevel is SnapshotReference) {
@@ -793,6 +797,8 @@ class MemoryController extends DisposableController
   }
 
   AnalysesReference findAnalysesNode() {
+    if (topNode == null) return null;
+
     for (final child in topNode.children) {
       if (child is AnalysesReference) {
         return child;
@@ -803,16 +809,19 @@ class MemoryController extends DisposableController
 
   void createSnapshotEntries(Reference parent) {
     for (final snapshot in snapshots) {
-      final snapShotMatch = parent.children.where((element) {
-        var result = false;
-        if (element is SnapshotReference) {
-          final SnapshotReference node = element;
-          result = node.snapshot == snapshot;
-        }
+      final snaphotMatch = parent.children.firstWhere(
+        (element) {
+          var result = false;
+          if (element is SnapshotReference) {
+            final SnapshotReference node = element;
+            result = node.snapshot == snapshot;
+          }
 
-        return result;
-      });
-      if (snapShotMatch.isEmpty) {
+          return result;
+        },
+        orElse: () => null,
+      );
+      if (snaphotMatch == null) {
         // New snapshot add it.
         final snapshotNode = SnapshotReference(snapshot);
         parent.addChild(snapshotNode);
@@ -820,9 +829,10 @@ class MemoryController extends DisposableController
         if (snapshots.safeLast == snapshot) {
           snapshotNode.addAllChildren(computeAllLibraries().children);
         }
-      } else {
-        assert(snapShotMatch.isNotEmpty && snapShotMatch.length == 1);
+        return;
       }
+
+      assert(snaphotMatch != null, 'Unexpected Snapshot.');
     }
   }
 
