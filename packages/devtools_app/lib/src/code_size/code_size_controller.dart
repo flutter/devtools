@@ -9,14 +9,15 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 
 import '../charts/treemap.dart';
-import 'vm_treemap.dart';
+import 'temp/vm_treemap.dart';
 
 class CodeSizeController {
   ValueListenable<TreemapNode> get root => _root;
   final _root = ValueNotifier<TreemapNode>(null);
 
   Future<void> loadTree(String filename) async {
-    final codeSizePath = current + '/lib/src/code_size/';
+    // TODO(peterdjlee): Use user input data instead of hard coded data.
+    final codeSizePath = '$current/lib/src/code_size/stub_data/';
     final inputJson = File(codeSizePath + filename);
 
     await inputJson.readAsString().then((inputJsonString) {
@@ -29,15 +30,15 @@ class CodeSizeController {
       processedJsonMap['n'] = 'Root';
 
       // Build a tree with [TreemapNode] from [processedJsonMap].
-      final newRoot = generateTreemapNode(processedJsonMap);
+      final newRoot = generateTree(processedJsonMap);
 
       changeRoot(newRoot);
     });
   }
 
-  /// Builds a tree with TreemapNode from [treeJson] which represents
+  /// Builds a tree with [TreemapNode] from [treeJson] which represents
   /// the hierarchical structure of the tree.
-  TreemapNode generateTreemapNode(Map<String, dynamic> treeJson) {
+  TreemapNode generateTree(Map<String, dynamic> treeJson) {
     var treemapNodeName = treeJson['n'];
     if (treemapNodeName == '') treemapNodeName = 'Unnamed';
     final rawChildren = treeJson['children'];
@@ -48,7 +49,7 @@ class CodeSizeController {
       // If not a leaf node, build all children then take the sum of the
       // children's sizes as its own size.
       for (dynamic child in rawChildren) {
-        final childTreemapNode = generateTreemapNode(child);
+        final childTreemapNode = generateTree(child);
         treemapNodeChildren.add(childTreemapNode);
         treemapNodeSize += childTreemapNode.byteSize;
       }
@@ -59,9 +60,7 @@ class CodeSizeController {
       treemapNodeSize = treeJson['value'] ?? 0;
     }
 
-    final root = TreemapNode(name: treemapNodeName, byteSize: treemapNodeSize);
-    root.addAllChildren(treemapNodeChildren);
-    return root;
+    return TreemapNode(name: treemapNodeName, byteSize: treemapNodeSize)..addAllChildren(treemapNodeChildren);
   }
 
   void clear() {

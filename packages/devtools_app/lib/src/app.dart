@@ -461,10 +461,11 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
         const LoggingScreen(),
         createController: () => LoggingController(),
       ),
-      DevToolsScreen<CodeSizeController>(
-        const CodeSizeScreen(),
-        createController: () => CodeSizeController(),
-      ),
+      if (codeSizeScreenEnabled)
+        DevToolsScreen<CodeSizeController>(
+          const CodeSizeScreen(),
+          createController: () => CodeSizeController(),
+        ),
 // Uncomment to see a sample implementation of a conditional screen.
 //      DevToolsScreen<ExampleController>(
 //        const ExampleConditionalScreen(),

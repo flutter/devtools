@@ -83,12 +83,8 @@ class Treemap extends StatelessWidget {
   }) {
     endIndex ??= nodes.length - 1;
     int sum = 0;
-    int size = 0;
     for (int i = startIndex; i <= endIndex; i++) {
-      size = nodes[i].byteSize;
-      if (size != null) {
-        sum += nodes[i].byteSize;
-      }
+      sum += nodes[i].byteSize ?? 0;
     }
     return sum;
   }
@@ -517,9 +513,6 @@ class TreemapNode extends TreeNode<TreemapNode> {
         assert(byteSize != null),
         assert(childrenMap != null);
 
-  TreemapNode.fromProgramInfoNode(ProgramInfoNode programInfoNode)
-      : this(name: programInfoNode.name, byteSize: programInfoNode.size);
-
   final String name;
   final Map<String, TreemapNode> childrenMap;
 
@@ -528,7 +521,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
   String displayText({bool oneLine = true}) {
     var displayName = name;
 
-    if (parent != null && displayName.startsWith(parent.name)) {
+    if (parent != null && displayName.startsWith(parent.name + '/')) {
       displayName = displayName.replaceFirst(parent.name, '');
     }
 
