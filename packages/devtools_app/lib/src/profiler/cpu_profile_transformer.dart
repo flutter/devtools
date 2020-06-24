@@ -29,13 +29,19 @@ class CpuProfileTransformer {
 
   int _stackFramesProcessed = 0;
 
-  Future<void> processData(CpuProfileData cpuProfileData) async {
+  String _activeProcessId;
+
+  Future<void> processData(
+    CpuProfileData cpuProfileData, {
+    String processId,
+  }) async {
     // Do not process this data if it has already been processed.
     if (cpuProfileData.processed) return;
 
     // Reset the transformer before processing.
     reset();
 
+    _activeProcessId = processId;
     _stackFramesCount = cpuProfileData?.stackFramesJson?.length ?? 0;
     _stackFrameKeys = cpuProfileData?.stackFramesJson?.keys?.toList() ?? [];
     _stackFrameValues = cpuProfileData?.stackFramesJson?.values?.toList() ?? [];
@@ -57,6 +63,9 @@ class CpuProfileTransformer {
       // progress indicator. Use a longer delay than the default (0) so that the
       // progress indicator will look smoother.
       await delayForBatchProcessing(micros: 5000);
+      if (processId != _activeProcessId) {
+        throw ProcessCancelledException();
+      }
     }
 
     _setExclusiveSampleCounts(cpuProfileData);
@@ -132,6 +141,7 @@ class CpuProfileTransformer {
   }
 
   void reset() {
+    _activeProcessId = null;
     _stackFramesProcessed = 0;
     _stackFrameKeys = null;
     _stackFrameValues = null;
@@ -247,3 +257,7 @@ void mergeProfileRoots(List<CpuStackFrame> roots) {
     root.index = roots.indexOf(root);
   }
 }
+
+/// Exception thrown when a request to process data has been cancelled in
+/// favor of a new request.
+class ProcessCancelledException implements Exception {}
