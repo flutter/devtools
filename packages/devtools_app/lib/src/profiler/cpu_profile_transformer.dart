@@ -56,10 +56,6 @@ class CpuProfileTransformer {
 
     // Use batch processing to maintain a responsive UI.
     while (_stackFramesProcessed < _stackFramesCount) {
-      if (processId != _activeProcessId) {
-        throw ProcessCancelledException();
-      }
-
       _processBatch(batchSize, cpuProfileData);
       _progressNotifier.value = _stackFramesProcessed / _stackFramesCount;
 
@@ -67,6 +63,9 @@ class CpuProfileTransformer {
       // progress indicator. Use a longer delay than the default (0) so that the
       // progress indicator will look smoother.
       await delayForBatchProcessing(micros: 5000);
+      if (processId != _activeProcessId) {
+        throw ProcessCancelledException();
+      }
     }
 
     _setExclusiveSampleCounts(cpuProfileData);
