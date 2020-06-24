@@ -394,8 +394,8 @@ void main() {
           ''');
         final layoutProperties =
             LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
-        expect(layoutProperties.describeHeightConstraints(), 'h=unconstrained');
-        expect(layoutProperties.describeWidthConstraints(), 'w=unconstrained');
+        expect(layoutProperties.describeHeightConstraints(), 'height is unconstrained');
+        expect(layoutProperties.describeWidthConstraints(), 'width is unconstrained');
       });
     });
 
