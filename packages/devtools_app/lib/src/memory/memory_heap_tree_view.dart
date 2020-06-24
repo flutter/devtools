@@ -255,7 +255,13 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       // Otherwise, we could snapshot forever.
       final rssTime = Duration(milliseconds: rssSnapshotTime);
       // Number of seconds a snapshot happens because of RSS exceeded.
-      if ((sampleTime - rssTime).inSeconds > maxRSSExceededDurationSecs) {
+      final rssSnapshotPeriod = (sampleTime - rssTime).inSeconds;
+      if (rssSnapshotPeriod > maxRSSExceededDurationSecs) {
+        if (rssSnapshotPeriod > 60) {
+          // If its been a minute since last RSS auto snapshot then we're
+          // ready for more snapshots reset counter.
+          rssSnapshotTaken = 0;
+        }
         // Max number of snapshots because of RSS exceeded.
         if (rssSnapshotTaken < maxRSSExceededSnapshots) {
           rssSnapshotTaken++;
