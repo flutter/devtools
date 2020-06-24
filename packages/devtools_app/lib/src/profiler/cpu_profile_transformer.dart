@@ -29,13 +29,19 @@ class CpuProfileTransformer {
 
   int _stackFramesProcessed = 0;
 
-  Future<void> processData(CpuProfileData cpuProfileData) async {
+  String _activeProcessId;
+
+  Future<void> processData(
+    CpuProfileData cpuProfileData, {
+    String processId,
+  }) async {
     // Do not process this data if it has already been processed.
     if (cpuProfileData.processed) return;
 
     // Reset the transformer before processing.
     reset();
 
+    _activeProcessId = processId;
     _stackFramesCount = cpuProfileData?.stackFramesJson?.length ?? 0;
     _stackFrameKeys = cpuProfileData?.stackFramesJson?.keys?.toList() ?? [];
     _stackFrameValues = cpuProfileData?.stackFramesJson?.values?.toList() ?? [];
@@ -50,6 +56,10 @@ class CpuProfileTransformer {
 
     // Use batch processing to maintain a responsive UI.
     while (_stackFramesProcessed < _stackFramesCount) {
+      if (processId != _activeProcessId) {
+        throw ProcessCancelledException();
+      }
+
       _processBatch(batchSize, cpuProfileData);
       _progressNotifier.value = _stackFramesProcessed / _stackFramesCount;
 
@@ -132,6 +142,7 @@ class CpuProfileTransformer {
   }
 
   void reset() {
+    _activeProcessId = null;
     _stackFramesProcessed = 0;
     _stackFrameKeys = null;
     _stackFrameValues = null;
@@ -247,3 +258,7 @@ void mergeProfileRoots(List<CpuStackFrame> roots) {
     root.index = roots.indexOf(root);
   }
 }
+
+/// Exception thrown when a request to process data has been cancelled in
+/// favor of a new request.
+class ProcessCancelledException implements Exception {}

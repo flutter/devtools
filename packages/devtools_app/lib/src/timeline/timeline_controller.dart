@@ -172,6 +172,7 @@ class TimelineController
     await cpuProfilerController.pullAndProcessProfile(
       startMicros: selectedEvent.time.start.inMicroseconds,
       extentMicros: selectedEvent.time.duration.inMicroseconds,
+      processId: '${selectedEvent.traceEvents.first.id}',
     );
     data.cpuProfileData = cpuProfilerController.dataNotifier.value;
   }
