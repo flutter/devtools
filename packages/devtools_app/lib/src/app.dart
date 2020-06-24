@@ -42,9 +42,10 @@ const snapshotRoute = '/snapshot';
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
-  const DevToolsApp(this.screens);
+  const DevToolsApp(this.screens, this.preferences);
 
   final List<DevToolsScreen> screens;
+  final PreferencesController preferences;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -61,9 +62,9 @@ class DevToolsApp extends StatefulWidget {
 // TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
-  final preferences = PreferencesController();
-
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
+
+  PreferencesController get preferences => widget.preferences;
 
   @override
   void initState() {
@@ -202,7 +203,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: preferences.darkModeTheme,
+      valueListenable: widget.preferences.darkModeTheme,
       builder: (context, value, _) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
@@ -367,7 +368,7 @@ class DevToolsAboutDialog extends StatelessWidget {
 
   Widget _createFeedbackLink(BuildContext context) {
     const urlPath = 'github.com/flutter/devtools/issues';
-
+    final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () async {
         // TODO(devoncarew): Support analytics.
@@ -376,7 +377,7 @@ class DevToolsAboutDialog extends StatelessWidget {
         const reportIssuesUrl = 'https://$urlPath';
         await launchUrl(reportIssuesUrl, context);
       },
-      child: Text(urlPath, style: linkTextStyle),
+      child: Text(urlPath, style: linkTextStyle(colorScheme)),
     );
   }
 }

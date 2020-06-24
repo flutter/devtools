@@ -13,6 +13,7 @@ import '../auto_dispose_mixin.dart';
 import '../collapsible_mixin.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
+import '../ui/theme.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
 import 'inspector_tree.dart';
@@ -426,9 +427,9 @@ class _InspectorTreeState extends State<InspectorTree>
   bool get wantKeepAlive => true;
 }
 
-Paint get _defaultPaint => Paint()
+Paint _defaultPaint(ColorScheme colorScheme) => Paint()
 // TODO(kenz): try to use color from Theme.of(context) for treeGuidelineColor
-  ..color = treeGuidelineColor.toColor()
+  ..color = colorScheme.treeGuidelineColor
   ..strokeWidth = chartLineStrokeWidth;
 
 /// Custom painter that draws lines indicating how parent and child rows are
@@ -441,14 +442,16 @@ Paint get _defaultPaint => Paint()
 /// disadvantage that the x coordinates of each line connecting rows must be
 /// computed in advance.
 class _RowPainter extends CustomPainter {
-  _RowPainter(this.row, this._controller);
+  _RowPainter(this.row, this._controller, this.colorScheme);
 
   final InspectorTreeController _controller;
   final InspectorTreeRow row;
+  final ColorScheme colorScheme;
 
   @override
   void paint(Canvas canvas, Size size) {
     double currentX = 0;
+    final paint = _defaultPaint(colorScheme);
 
     if (row == null) {
       return;
@@ -462,13 +465,12 @@ class _RowPainter extends CustomPainter {
       canvas.drawLine(
         Offset(currentX, 0.0),
         Offset(currentX, rowHeight),
-        _defaultPaint,
+        paint,
       );
     }
     // If this row is itself connected to a parent then draw the L shaped line
     // to make that connection.
     if (row.lineToParent) {
-      final paint = _defaultPaint;
       currentX = _controller.getDepthIndent(row.depth - 1) - columnWidth * 0.5;
       final double width = showExpandCollapse ? columnWidth * 0.5 : columnWidth;
       canvas.drawLine(
@@ -486,8 +488,11 @@ class _RowPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
-    // TODO(jacobr): check whether the row has different ticks.
-    return false;
+    if (oldDelegate is _RowPainter) {
+      // TODO(jacobr): check whether the row has different ticks.
+      return oldDelegate.colorScheme.isLight != colorScheme.isLight;
+    }
+    return true;
   }
 }
 
@@ -516,6 +521,7 @@ class InspectorRowContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double currentX = controller.getDepthIndent(row.depth) - columnWidth;
+    final colorScheme = Theme.of(context).colorScheme;
 
     if (row == null) {
       return const SizedBox();
@@ -523,13 +529,13 @@ class InspectorRowContent extends StatelessWidget {
     Color backgroundColor;
     if (row.isSelected || row.node == controller.hover) {
       backgroundColor = row.isSelected
-          ? selectedRowBackgroundColor.toColor()
-          : hoverColor.toColor();
+          ? colorScheme.selectedRowBackgroundColor
+          : colorScheme.hoverColor;
     }
 
     final node = row.node;
     return CustomPaint(
-      painter: _RowPainter(row, controller),
+      painter: _RowPainter(row, controller, colorScheme),
       size: Size(currentX, rowHeight),
       child: Padding(
         padding: EdgeInsets.only(left: currentX),

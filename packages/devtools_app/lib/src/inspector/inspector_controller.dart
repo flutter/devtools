@@ -33,14 +33,14 @@ import 'inspector_service.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 
-TextStyle textStyleForLevel(DiagnosticLevel level) {
+TextStyle textStyleForLevel(DiagnosticLevel level, ColorScheme colorScheme) {
   switch (level) {
     case DiagnosticLevel.hidden:
-      return inspector_text_styles.unimportant;
+      return inspector_text_styles.unimportant(colorScheme);
     case DiagnosticLevel.warning:
-      return inspector_text_styles.warning;
+      return inspector_text_styles.warning(colorScheme);
     case DiagnosticLevel.error:
-      return inspector_text_styles.error;
+      return inspector_text_styles.error(colorScheme);
     case DiagnosticLevel.debug:
     case DiagnosticLevel.info:
     case DiagnosticLevel.fine:

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'ui/theme.dart' as devtools_theme;
+import 'ui/theme.dart';
 
 /// Returns [routeName] with [queryParameters] appended as [Uri] query
 /// parameters.
@@ -28,7 +28,7 @@ String routeNameWithQueryParams(BuildContext context, String routeName,
     previousQuery = ModalRoute.of(context).settings.name;
     // When this function is invoked from an unnamed context,
     // infer from the global theme configuration.
-    previousQuery ??= _inferThemeParameter;
+    previousQuery ??= _inferThemeParameter(Theme.of(context).colorScheme);
   }
 
   final previousQueryParams = Uri.parse(previousQuery).queryParameters;
@@ -55,6 +55,6 @@ String routeNameWithQueryParams(BuildContext context, String routeName,
 /// ```
 ///
 /// ModalRoute.of`(innerContext)` returns the unnamed page route.
-String get _inferThemeParameter =>
+String _inferThemeParameter(ColorScheme colorScheme) =>
     // ignore: deprecated_member_use_from_same_package
-    devtools_theme.isDarkTheme ? '/unnamedRoute?theme=dark' : '/unnamedRoute';
+    colorScheme.isDark ? '/unnamedRoute?theme=dark' : '/unnamedRoute';

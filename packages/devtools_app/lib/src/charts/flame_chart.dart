@@ -978,12 +978,14 @@ abstract class FlameChartPainter extends CustomPainter {
     @required this.verticalScrollOffset,
     @required this.horizontalScrollOffset,
     @required this.chartStartInset,
-  }) : visible = Rect.fromLTWH(
+    @required this.colorScheme,
+  })  : visible = Rect.fromLTWH(
           horizontalScrollOffset,
           verticalScrollOffset,
           constraints.maxWidth,
           constraints.maxHeight,
-        );
+        ),
+        assert(colorScheme != null);
 
   final double zoom;
 
@@ -997,4 +999,6 @@ abstract class FlameChartPainter extends CustomPainter {
 
   /// The absolute coordinates of the flame chart's visible section.
   final Rect visible;
+
+  final ColorScheme colorScheme;
 }

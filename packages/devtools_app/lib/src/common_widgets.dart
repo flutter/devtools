@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'ui/label.dart';
+import 'ui/theme.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 
@@ -772,18 +773,18 @@ extension ThemeDataExtension on ThemeData {
 Color alternatingColorForIndexWithContext(int index, BuildContext context) {
   final theme = Theme.of(context);
   final color = theme.canvasColor;
-  return _colorForIndex(color, index, isDarkTheme: theme.isDarkTheme);
+  return _colorForIndex(color, index, theme.colorScheme);
 }
 
-Color alternatingColorForIndex(int index, {@required bool isDarkTheme}) {
-  final color = defaultBackgroundColor.toColor();
-  return _colorForIndex(color, index, isDarkTheme: isDarkTheme);
+Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
+  final color = colorScheme.defaultBackgroundColor;
+  return _colorForIndex(color, index, colorScheme);
 }
 
-Color _colorForIndex(Color color, int index, {@required bool isDarkTheme}) {
+Color _colorForIndex(Color color, int index, ColorScheme colorScheme) {
   if (index % 2 == 1) {
     return color;
   } else {
-    return isDarkTheme ? color.brighten() : color.darken();
+    return colorScheme.isLight ? color.darken() : color.brighten();
   }
 }

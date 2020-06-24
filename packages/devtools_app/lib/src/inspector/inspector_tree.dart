@@ -30,14 +30,13 @@ final RegExp assertionThrownBuildingError = RegExp(
 
 typedef TreeEventCallback = void Function(InspectorTreeNode node);
 
-const selectedRowBackgroundColor = ThemedColor(
-  Color.fromARGB(255, 202, 191, 69),
-  Color.fromARGB(255, 99, 101, 103),
-);
-const hoverColor = ThemedColor(
-  Colors.yellowAccent,
-  Color.fromARGB(255, 70, 73, 76),
-);
+extension InspectorColorScheme on ColorScheme {
+  Color get selectedRowBackgroundColor => isLight
+      ? const Color.fromARGB(255, 202, 191, 69)
+      : const Color.fromARGB(255, 99, 101, 103);
+  Color get hoverColor =>
+      isLight ? Colors.yellowAccent : const Color.fromARGB(255, 70, 73, 76);
+}
 
 const double iconPadding = 5.0;
 const double chartLineStrokeWidth = 1.0;
