@@ -56,7 +56,11 @@ class TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
   }
 
   /// Offset for drawing async guidelines.
-  static int asyncGuidelineOffset = 1;
+  static const int asyncGuidelineOffset = 1;
+
+  // Rows of top padding needed to create room for the timestamp labels and the
+  // selected frame brackets.
+  static const int rowOffsetForTopPadding = 3;
 
   @override
   TimelineFlameChartState createState() => TimelineFlameChartState();
@@ -83,6 +87,9 @@ class TimelineFlameChartState
   TimelineController _timelineController;
 
   TimelineFrame _selectedFrame;
+
+  @override
+  int get rowOffsetForTopPadding => TimelineFlameChart.rowOffsetForTopPadding;
 
   @override
   void didChangeDependencies() {
@@ -484,7 +491,8 @@ class SectionLabelPainter extends FlameChartPainter {
     ));
 
     // Start at row height to account for timestamps at top of chart.
-    var startSectionPx = sectionSpacing * defaultRowOffsetForTopPadding;
+    var startSectionPx =
+        sectionSpacing * TimelineFlameChart.rowOffsetForTopPadding;
     for (String groupName in eventGroups.keys) {
       final group = eventGroups[groupName];
       final labelTop = startSectionPx - verticalScrollOffset;
