@@ -251,7 +251,7 @@ class FlutterFramesChartItem extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: densePadding),
-          color: selected ? selectedFrameBackgroundColor : null,
+          color: selected ? selectedFrameBackgroundColor.toColor() : null,
           child: Column(
             children: [
               // Dummy child so that the InkWell does not take up the entire column.
@@ -379,15 +379,15 @@ class ChartAxisPainter extends CustomPainter {
     canvas.drawLine(
       Offset(chartArea.left - yAxisTickWidth / 2, tickY),
       Offset(chartArea.left + yAxisTickWidth / 2, tickY),
-      Paint()..color = chartAccentColor,
+      Paint()..color = chartAccentColor.toColor(),
     );
 
     // Paint the axis label.
     final textPainter = TextPainter(
       text: TextSpan(
         text: labelText,
-        style: const TextStyle(
-          color: chartSubtleColor,
+        style: TextStyle(
+          color: chartSubtleColor.toColor(),
           fontSize: chartFontSizeSmall,
         ),
       ),
@@ -453,14 +453,14 @@ class FPSLinePainter extends CustomPainter {
     canvas.drawLine(
       Offset(chartArea.left, targetLineY),
       Offset(chartArea.right, targetLineY),
-      Paint()..color = chartAccentColor,
+      Paint()..color = chartAccentColor.toColor(),
     );
 
     final textPainter = TextPainter(
       text: TextSpan(
         text: '${displayRefreshRate.toStringAsFixed(0)} FPS',
-        style: const TextStyle(
-          color: chartSubtleColor,
+        style: TextStyle(
+          color: chartSubtleColor.toColor(),
           fontSize: chartFontSizeSmall,
         ),
       ),

@@ -246,7 +246,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..granularityEnabled = true
           // Set to baseline min and auto track max axis range.
           ..setStartAtZero(true)
-          ..textColor = defaultForeground;
+          ..textColor = defaultForeground.toColor();
       },
       axisRightSettingFunction: (axisRight, controller) {
         axisRight.enabled = false;
@@ -257,7 +257,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..textSize = 10
           ..drawAxisLine = false
           ..drawGridLines = true
-          ..textColor = defaultForeground
+          ..textColor = defaultForeground.toColor()
           ..centerAxisLabels = true
           ..setGranularity(1)
           ..setValueFormatter(XAxisFormatter());
@@ -278,7 +278,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..textSize = 2.0;
 */
       },
-      backgroundColor: defaultBackgroundColor,
+      backgroundColor: defaultBackgroundColor.toColor(),
       doubleTapToZoomEnabled: false,
       // TODO(terry): For now disable zoom with double-click.
       pinchZoomEnabled: false,
@@ -310,7 +310,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..granularityEnabled = true
           // Set to baseline min and auto track max axis range.
           ..setStartAtZero(true)
-          ..textColor = defaultForeground;
+          ..textColor = defaultForeground.toColor();
       },
       axisRightSettingFunction: (axisRight, controller) {
         axisRight.enabled = false;
@@ -321,7 +321,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..textSize = 10
           ..drawAxisLine = false
           ..drawGridLines = true
-          ..textColor = defaultForeground
+          ..textColor = defaultForeground.toColor()
           ..centerAxisLabels = true
           ..setGranularity(1)
           ..setValueFormatter(XAxisFormatter());
@@ -342,7 +342,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..textSize = 2.0;
 */
       },
-      backgroundColor: defaultBackgroundColor,
+      backgroundColor: defaultBackgroundColor.toColor(),
       // TOD(terry): Disable zoom via double-click. Consider +/- button
       //             for a controlled zoom in/zoom out.
       scaleXEnabled: false,

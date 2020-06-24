@@ -268,7 +268,8 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Expanded(child: snapshotDisplay),
-        if (hasDetails) const SizedBox(width: defaultSpacing),
+        if (hasDetails)
+          const SizedBox(width: defaultSpacing),
         // TODO(terry): Need better focus handling between 2 tables & up/down
         //              arrows in the right-side field instance view table.
         controller.isLeafSelected

@@ -178,7 +178,7 @@ class _ColorIconPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // draw a black and gray grid to use as the background to disambiguate
     // opaque colors from translucent colors.
-    final greyPaint = Paint()..color = grey;
+    final greyPaint = Paint()..color = grey.toColor();
     final iconRect = Rect.fromLTRB(
       iconMargin,
       iconMargin,
@@ -193,7 +193,7 @@ class _ColorIconPainter extends CustomPainter {
           size.width - iconMargin,
           size.height - iconMargin,
         ),
-        Paint()..color = defaultBackground,
+        Paint()..color = defaultBackground.toColor(),
       )
       ..drawRect(
         Rect.fromLTRB(
@@ -221,7 +221,7 @@ class _ColorIconPainter extends CustomPainter {
         iconRect,
         Paint()
           ..style = PaintingStyle.stroke
-          ..color = defaultForeground,
+          ..color = defaultForeground.toColor(),
       );
   }
 
@@ -238,8 +238,8 @@ class FlutterMaterialIcons {
 
   static Icon getIconForCodePoint(int charCode) {
     final String code = String.fromCharCode(charCode);
-    return _iconCache.putIfAbsent(
-        code, () => Icon(IconData(charCode), color: defaultForeground));
+    return _iconCache.putIfAbsent(code,
+        () => Icon(IconData(charCode), color: defaultForeground.toColor()));
   }
 }
 

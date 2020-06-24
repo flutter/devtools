@@ -426,9 +426,9 @@ class _InspectorTreeState extends State<InspectorTree>
   bool get wantKeepAlive => true;
 }
 
-final _defaultPaint = Paint()
+Paint get _defaultPaint => Paint()
 // TODO(kenz): try to use color from Theme.of(context) for treeGuidelineColor
-  ..color = treeGuidelineColor
+  ..color = treeGuidelineColor.toColor()
   ..strokeWidth = chartLineStrokeWidth;
 
 /// Custom painter that draws lines indicating how parent and child rows are
@@ -522,8 +522,9 @@ class InspectorRowContent extends StatelessWidget {
     }
     Color backgroundColor;
     if (row.isSelected || row.node == controller.hover) {
-      backgroundColor =
-          row.isSelected ? selectedRowBackgroundColor : hoverColor;
+      backgroundColor = row.isSelected
+          ? selectedRowBackgroundColor.toColor()
+          : hoverColor.toColor();
     }
 
     final node = row.node;

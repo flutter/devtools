@@ -30,11 +30,11 @@ final RegExp assertionThrownBuildingError = RegExp(
 
 typedef TreeEventCallback = void Function(InspectorTreeNode node);
 
-const Color selectedRowBackgroundColor = ThemedColor(
+const selectedRowBackgroundColor = ThemedColor(
   Color.fromARGB(255, 202, 191, 69),
   Color.fromARGB(255, 99, 101, 103),
 );
-const Color hoverColor = ThemedColor(
+const hoverColor = ThemedColor(
   Colors.yellowAccent,
   Color.fromARGB(255, 70, 73, 76),
 );

@@ -376,7 +376,7 @@ class DevToolsAboutDialog extends StatelessWidget {
         const reportIssuesUrl = 'https://$urlPath';
         await launchUrl(reportIssuesUrl, context);
       },
-      child: const Text(urlPath, style: linkTextStyle),
+      child: Text(urlPath, style: linkTextStyle),
     );
   }
 }

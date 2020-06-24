@@ -96,10 +96,10 @@ const devtoolsWarning = Color(0xFFFDFAD5);
 
 const devtoolsLink = ThemedColor(Color(0xFF1976D2), Colors.lightBlueAccent);
 
-const linkTextStyle = TextStyle(
-  color: devtoolsLink,
-  decoration: TextDecoration.underline,
-);
+TextStyle get linkTextStyle => TextStyle(
+      color: devtoolsLink.toColor(),
+      decoration: TextDecoration.underline,
+    );
 
 const defaultSearchTextWidth = 200.0;
 const defaultSearchTextHeight = 36.0;

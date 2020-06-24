@@ -58,7 +58,7 @@ const defaultPrimaryButtonIconColor = defaultBackground;
 /// This class is identical in spirit to the JBColor class in IntelliJ to make
 /// porting themed colors back and forth between IntelliJ plugin code and
 /// devtools code easy.
-class ThemedColor implements Color {
+class ThemedColor {
   const ThemedColor(this._light, this._dark);
 
   static ThemedColor fromSingleColor(Color color) => ThemedColor(color, color);
@@ -67,49 +67,5 @@ class ThemedColor implements Color {
   final Color _dark;
 
   // ignore: deprecated_member_use_from_same_package
-  Color get _current => isDarkTheme ? _dark : _light;
-
-  @override
-  int get alpha => _current.alpha;
-
-  @override
-  int get blue => _current.blue;
-
-  @override
-  double computeLuminance() => _current.computeLuminance();
-
-  @override
-  int get green => _current.green;
-
-  @override
-  double get opacity => _current.opacity;
-
-  @override
-  int get red => _current.red;
-
-  @override
-  int get value => _current.value;
-
-  @override
-  Color withAlpha(int a) => _current.withAlpha(a);
-
-  @override
-  Color withBlue(int b) => _current.withBlue(b);
-
-  @override
-  Color withGreen(int g) => _current.withGreen(g);
-
-  @override
-  Color withOpacity(double opacity) => _current.withOpacity(opacity);
-
-  @override
-  Color withRed(int r) => _current.withRed(r);
-
-  // TODO(jacobr): remove these methods when they are removed from flutter_web.
-  // @override only on Flutter Web
-  String toCssString() => (_current as dynamic).toCssString();
-
-  // TODO(jacobr): remove these methods when they are removed from flutter_web.
-  // @override only on Flutter Web
-  String toCssStringRgbOnly() => (_current as dynamic).toCssStringRgbOnly();
+  Color toColor() => isDarkTheme ? _dark : _light;
 }

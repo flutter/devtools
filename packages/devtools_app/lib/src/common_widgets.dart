@@ -776,7 +776,7 @@ Color alternatingColorForIndexWithContext(int index, BuildContext context) {
 }
 
 Color alternatingColorForIndex(int index, {@required bool isDarkTheme}) {
-  final color = defaultBackgroundColor;
+  final color = defaultBackgroundColor.toColor();
   return _colorForIndex(color, index, isDarkTheme: isDarkTheme);
 }
 

@@ -194,9 +194,10 @@ class TimelineFlameChartState
 
       Color textColor;
       if (event.isRasterEvent) {
-        textColor = ThemedColor.fromSingleColor(contrastForegroundWhite);
+        textColor =
+            ThemedColor.fromSingleColor(contrastForegroundWhite).toColor();
       } else {
-        textColor = ThemedColor.fromSingleColor(Colors.black);
+        textColor = ThemedColor.fromSingleColor(Colors.black).toColor();
       }
 
       final node = FlameChartNode<TimelineEvent>(
@@ -486,7 +487,7 @@ class SectionLabelPainter extends FlameChartPainter {
       final textPainter = TextPainter(
         text: TextSpan(
           text: groupName,
-          style: const TextStyle(color: chartTextColor),
+          style: TextStyle(color: chartTextColor.toColor()),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
@@ -641,7 +642,7 @@ class AsyncGuidelinePainter extends FlameChartPainter {
             (zoomedLine.end.dy - verticalScrollOffset)
                 .clamp(0.0, constraints.maxHeight),
           ),
-          Paint()..color = treeGuidelineColor,
+          Paint()..color = treeGuidelineColor.toColor(),
         );
       }
     }
@@ -691,7 +692,7 @@ class TimelineGridPainter extends FlameChartPainter {
         constraints.maxWidth,
         math.min(constraints.maxHeight, rowHeight),
       ),
-      Paint()..color = defaultBackgroundColor,
+      Paint()..color = defaultBackgroundColor.toColor(),
     );
 
     // Paint the timeline grid lines and corresponding timestamps in the flame
@@ -728,7 +729,7 @@ class TimelineGridPainter extends FlameChartPainter {
     final textPainter = TextPainter(
       text: TextSpan(
         text: timestampText,
-        style: const TextStyle(color: chartTextColor),
+        style: TextStyle(color: chartTextColor.toColor()),
       ),
       textAlign: TextAlign.right,
       textDirection: TextDirection.ltr,
@@ -747,7 +748,7 @@ class TimelineGridPainter extends FlameChartPainter {
     canvas.drawLine(
       Offset(lineX, 0.0),
       Offset(lineX, constraints.maxHeight),
-      Paint()..color = chartAccentColor,
+      Paint()..color = chartAccentColor.toColor(),
     );
   }
 

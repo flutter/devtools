@@ -6,29 +6,30 @@ import 'package:flutter/material.dart';
 
 import '../ui/theme.dart';
 
-final unimportant = TextStyle(
-  color: ThemedColor(Colors.grey.shade500, Colors.grey.shade600),
-);
+TextStyle get unimportant => TextStyle(
+      color: ThemedColor(Colors.grey.shade500, Colors.grey.shade600).toColor(),
+    );
 const regular = TextStyle();
-final warning = TextStyle(
-  color: ThemedColor(Colors.orange.shade900, Colors.orange.shade400),
-);
-final error = TextStyle(
-  color: ThemedColor(Colors.red.shade500, Colors.red.shade400),
-);
-final link = TextStyle(
-  color: ThemedColor(Colors.blue.shade700, Colors.blue.shade300),
-  decoration: TextDecoration.underline,
-);
+TextStyle get warning => TextStyle(
+      color:
+          ThemedColor(Colors.orange.shade900, Colors.orange.shade400).toColor(),
+    );
+TextStyle get error => TextStyle(
+      color: ThemedColor(Colors.red.shade500, Colors.red.shade400).toColor(),
+    );
+TextStyle get link => TextStyle(
+      color: ThemedColor(Colors.blue.shade700, Colors.blue.shade300).toColor(),
+      decoration: TextDecoration.underline,
+    );
 
-const regularBold = TextStyle(
-  color: defaultForeground,
-  fontWeight: FontWeight.w700,
-);
-const regularItalic = TextStyle(
-  color: defaultForeground,
-  fontStyle: FontStyle.italic,
-);
+TextStyle get regularBold => TextStyle(
+      color: defaultForeground.toColor(),
+      fontWeight: FontWeight.w700,
+    );
+TextStyle get regularItalic => TextStyle(
+      color: defaultForeground.toColor(),
+      fontStyle: FontStyle.italic,
+    );
 final unimportantItalic = unimportant.merge(const TextStyle(
   fontStyle: FontStyle.italic,
 ));
