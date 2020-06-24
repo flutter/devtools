@@ -1,4 +1,4 @@
-## 0.2.6-dev.2
+## 0.8.0-dev.1
 * Ship Flutter Web version of DevTools by default
 * Update package:vm_service dependency to ^4.1.0
 
