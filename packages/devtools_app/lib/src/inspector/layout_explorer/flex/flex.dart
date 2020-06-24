@@ -698,12 +698,16 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: Image.asset(
-                    colorScheme.isLight
-                        ? negativeSpaceLightAssetName
-                        : negativeSpaceDarkAssetName,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topLeft,
+                  child: Opacity(
+                    opacity: colorScheme.isLight ? 0.3 : 0.2,
+                    child: Image.asset(
+                      colorScheme.isLight
+                          ? negativeSpaceLightAssetName
+                          : negativeSpaceDarkAssetName,
+                      fit: BoxFit.none,
+                      repeat: ImageRepeat.repeat,
+                      alignment: Alignment.topLeft,
+                    ),
                   ),
                 ),
                 ...freeSpacesWidgets,
