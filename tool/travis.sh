@@ -128,9 +128,9 @@ elif [ "$BOT" = "test_ddc" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
-        flutter test test/*.dart test/{core,fixtures,support,ui}/
+        flutter test test/*.dart test/{core,fixtures,support}/
     elif [ "$PLATFORM" = "chrome" ]; then
-        flutter test --platform chrome test/*.dart test/{core,fixtures,support,ui}/
+        flutter test --platform chrome test/*.dart test/{core,fixtures,support}/
     else
         echo "unknown test platform"
         exit 1
@@ -146,9 +146,9 @@ elif [ "$BOT" = "test_dart2js" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=true flutter test test/*.dart test/{core,fixtures,support,ui}/
+        WEBDEV_RELEASE=true flutter test test/*.dart test/{core,fixtures,support}/
     elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=true flutter test --platform chrome test/*.dart test/{core,fixtures,support,ui}/
+        WEBDEV_RELEASE=true flutter test --platform chrome test/*.dart test/{core,fixtures,support}/
     else
         echo "unknown test platform"
         exit 1
