@@ -372,7 +372,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
       // TODO(kenz): consult with Flutter team to see if there is a better place
       // to call this that guarantees the scroll controller offsets will be
-      // updated for the new zoom level and layout size.
+      // updated for the new zoom level and layout size
       // https://github.com/flutter/devtools/issues/2012.
       linkedHorizontalScrollControllerGroup.jumpTo(
           newScrollOffset.clamp(FlameChart.minScrollOffset, maxScrollOffset));
