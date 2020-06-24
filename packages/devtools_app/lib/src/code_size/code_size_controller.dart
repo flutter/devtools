@@ -2,26 +2,66 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
-import 'package:vm_snapshot_analysis/program_info.dart';
-import 'package:vm_snapshot_analysis/utils.dart';
 
 import '../charts/treemap.dart';
+import 'vm_treemap.dart';
 
 class CodeSizeController {
   ValueListenable<TreemapNode> get root => _root;
   final _root = ValueNotifier<TreemapNode>(null);
 
-  Future<void> loadJsonAsProgramInfo(String filename) async {
-    final directoryPath = current + '/lib/src/code_size/';
-    final json = File(directoryPath + filename);
-    final programInfo = await loadProgramInfo(json);
-    final root = programInfo.root.toTreemapNodeTree();
+  Future<void> loadTree(String filename) async {
+    final codeSizePath = current + '/lib/src/code_size/';
+    final inputJson = File(codeSizePath + filename);
 
-    changeRoot(root);
+    await inputJson.readAsString().then((inputJsonString) {
+      final inputJsonMap = json.decode(inputJsonString);
+
+      // Build a [Map] object containing heirarchical information for [inputJsonMap].
+      final processedJsonMap = treemapFromJson(inputJsonMap);
+      
+      // Set name for root node.
+      processedJsonMap['n'] = 'Root';
+
+      // Build a tree with [TreemapNode] from [processedJsonMap].
+      final newRoot = generateTreemapNode(processedJsonMap);
+
+      changeRoot(newRoot);
+    });
+  }
+
+  /// Builds a tree with TreemapNode from [treeJson] which represents
+  /// the hierarchical structure of the tree.
+  TreemapNode generateTreemapNode(Map<String, dynamic> treeJson) {
+    var treemapNodeName = treeJson['n'];
+    if (treemapNodeName == '') treemapNodeName = 'Unnamed';
+    final rawChildren = treeJson['children'];
+    final treemapNodeChildren = <TreemapNode>[];
+
+    int treemapNodeSize = 0;
+    if (rawChildren != null) {
+      // If not a leaf node, build all children then take the sum of the
+      // children's sizes as its own size.
+      for (dynamic child in rawChildren) {
+        final childTreemapNode = generateTreemapNode(child);
+        treemapNodeChildren.add(childTreemapNode);
+        treemapNodeSize += childTreemapNode.byteSize;
+      }
+      treemapNodeSize = treemapNodeSize;
+    } else {
+      // If a leaf node, just take its own size.
+      // Defaults to 0 if a leaf node has a size of null.
+      treemapNodeSize = treeJson['value'] ?? 0;
+    }
+
+    final root = TreemapNode(name: treemapNodeName, byteSize: treemapNodeSize);
+    root.addAllChildren(treemapNodeChildren);
+    return root;
   }
 
   void clear() {
@@ -30,29 +70,5 @@ class CodeSizeController {
 
   void changeRoot(TreemapNode newRoot) {
     _root.value = newRoot;
-  }
-}
-
-extension on ProgramInfoNode {
-  /// Converts a tree built with [ProgramInfoNode] to a tree built with [TreemapNode].
-  TreemapNode toTreemapNodeTree() {
-    final treeemapNodeChildren = <TreemapNode>[];
-    var treemapNodeSize = 0;
-
-    children.values.toList().forEach((child) {
-      final childTreemapNodeTree = child.toTreemapNodeTree();
-      treeemapNodeChildren.add(childTreemapNodeTree);
-      treemapNodeSize += childTreemapNodeTree.byteSize;
-    });
-
-    // If not a leaf node, set size to the sum of children sizes.
-    if (children.isNotEmpty) size = treemapNodeSize;
-
-    // Special case checking for when a leaf node has a size of null.
-    size ??= 0;
-
-    final treemapNode = TreemapNode.fromProgramInfoNode(this);
-    treemapNode.addAllChildren(treeemapNodeChildren);
-    return treemapNode;
   }
 }

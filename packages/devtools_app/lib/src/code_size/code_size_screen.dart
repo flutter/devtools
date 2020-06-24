@@ -57,7 +57,7 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
       });
     });
 
-    controller.loadJsonAsProgramInfo('sizes.json');
+    controller.loadTree('sizes.json');
   }
 
   @override
