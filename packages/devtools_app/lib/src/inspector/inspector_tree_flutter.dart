@@ -428,7 +428,6 @@ class _InspectorTreeState extends State<InspectorTree>
 }
 
 Paint _defaultPaint(ColorScheme colorScheme) => Paint()
-// TODO(kenz): try to use color from Theme.of(context) for treeGuidelineColor
   ..color = colorScheme.treeGuidelineColor
   ..strokeWidth = chartLineStrokeWidth;
 

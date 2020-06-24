@@ -30,6 +30,7 @@ final RegExp assertionThrownBuildingError = RegExp(
 
 typedef TreeEventCallback = void Function(InspectorTreeNode node);
 
+// TODO(jacobr): merge this scheme with other color schemes in DevTools.
 extension InspectorColorScheme on ColorScheme {
   Color get selectedRowBackgroundColor => isLight
       ? const Color.fromARGB(255, 202, 191, 69)

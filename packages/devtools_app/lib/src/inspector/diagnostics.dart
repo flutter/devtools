@@ -125,8 +125,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               final int codePoint =
                   JsonUtils.getIntMember(properties, 'codePoint');
               if (codePoint > 0) {
-                final Icon icon = FlutterMaterialIcons.getIconForCodePoint(
-                    codePoint, colorScheme);
+                final icon = FlutterMaterialIcons.getIconForCodePoint(
+                  codePoint,
+                  colorScheme,
+                );
                 if (icon != null) {
                   children.add(_paddedIcon(icon));
                 }
@@ -159,8 +161,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       // Non property, regular node case.
       if (name?.isNotEmpty == true && diagnostic.showName && name != 'child') {
         if (name.startsWith('child ')) {
-          children.add(Text(name,
-              style: inspector_text_styles.unimportant(colorScheme)));
+          children.add(Text(
+            name,
+            style: inspector_text_styles.unimportant(colorScheme),
+          ));
         } else {
           children.add(Text(name, style: textStyle));
         }

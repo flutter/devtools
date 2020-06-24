@@ -104,20 +104,28 @@ extension LayoutExplorerColorScheme on ColorScheme {
   Color get mainAxisColor => isLight ? mainAxisLightColor : mainAxisDarkColor;
 
   Color get widgetNameColor => isLight ? Colors.white : Colors.black;
+
   Color get crossAxisColor =>
       isLight ? crossAxisLightColor : crossAxisDarkColor;
+
   Color get mainAxisTextColor =>
       isLight ? mainAxisTextColorLight : mainAxisTextColorDark;
+
   Color get crossAxisTextColor =>
       isLight ? crossAxisTextColorLight : crossAxisTextColorsDark;
+
   Color get overflowBackgroundColor =>
       isLight ? overflowBackgroundColorLight : overflowBackgroundColorDark;
+
   Color get overflowTextColor =>
       isLight ? overflowTextColorLight : overflowTextColorDark;
+
   Color get backgroundColorSelected =>
       isLight ? backgroundColorSelectedLight : backgroundColorSelectedDark;
+
   Color get backgroundColor =>
       isLight ? backgroundColorLight : backgroundColorDark;
+
   Color get unconstrainedColor =>
       isLight ? unconstrainedLightColor : unconstrainedDarkColor;
 }
@@ -170,7 +178,10 @@ const maxRequestsPerSecond = 3.0;
 
 /// Text widget for displaying width / height.
 Widget dimensionDescription(
-    TextSpan description, bool overflow, ColorScheme colorScheme) {
+  TextSpan description,
+  bool overflow,
+  ColorScheme colorScheme,
+) {
   final text = Text.rich(
     description,
     textAlign: TextAlign.center,
