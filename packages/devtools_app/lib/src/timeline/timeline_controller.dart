@@ -157,8 +157,7 @@ class TimelineController
 
     cpuProfilerController.reset();
 
-    // Fetch a profile if we are not in offline mode and if the profiler is
-    // enabled.
+    // Fetch a profile if not in offline mode and if the profiler is enabled.
     if ((!offlineMode || offlineTimelineData == null) &&
         cpuProfilerController.profilerEnabled) {
       await getCpuProfileForSelectedEvent();
