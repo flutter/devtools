@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../theme.dart';
-import '../../../ui/colors.dart';
 import '../../../ui/theme.dart';
 import '../../../utils.dart';
 import '../../diagnostics_node.dart';
@@ -23,8 +22,6 @@ import 'free_space.dart';
 import 'overflow_indicator_painter.dart';
 import 'utils.dart';
 
-const widthIndicatorColor = ThemedColor(Color(0xFF000099), mainUiColor);
-const heightIndicatorColor = ThemedColor(mainRasterColor, Color(0xFF27AAE1));
 const margin = 8.0;
 
 const arrowHeadSize = 8.0;
@@ -73,64 +70,123 @@ const minHeightToAllowTruncating = 375.0;
 const minWidthToAllowTruncating = 375.0;
 
 // Story of Layout colors
-const mainAxisLightColor = Color(0xFFF597A8);
-const mainAxisDarkColor = Color(0xFFEA637C);
-const mainAxisColor = ThemedColor(mainAxisLightColor, mainAxisDarkColor);
+const mainAxisLightColor = Color(0xff2c5daa);
+const mainAxisDarkColor = Color(0xff2c5daa);
+const rowColor = Color(0xff2c5daa);
+const columnColor = Color(0xff77974d);
+const regularWidgetColor = Color(0xff88b1de);
 
-const crossAxisLightColor = Color(0xFFB3D25A);
-const crossAxisDarkColor = Color(0xFFB3D25A);
-const crossAxisColor = ThemedColor(crossAxisLightColor, crossAxisDarkColor);
+const selectedWidgetColor = Color(0xff36c6f4);
 
-const mainAxisTextColorLight = Color(0xFF913549);
-const mainAxisTextColorDark = Color(0xFFEA637C);
-const mainAxisTextColor =
-    ThemedColor(mainAxisTextColorLight, mainAxisTextColorDark);
+const textColor = Color(0xff55767f);
+const emphasizedTextColor = Color(0xff009aca);
+
+const crossAxisLightColor = Color(0xff8ac652);
+const crossAxisDarkColor = Color(0xff8ac652);
+
+const mainAxisTextColorLight = Color(0xFF1375bc);
+const mainAxisTextColorDark = Color(0xFF1375bc);
 
 const crossAxisTextColorLight = Color(0xFF66672C);
 const crossAxisTextColorsDark = Color(0xFFB3D25A);
-const crossAxisTextColor =
-    ThemedColor(crossAxisTextColorLight, crossAxisTextColorsDark);
 
 const overflowBackgroundColorDark = Color(0xFFB00020);
 const overflowBackgroundColorLight = Color(0xFFB00020);
-const overflowBackgroundColor =
-    ThemedColor(overflowBackgroundColorLight, overflowBackgroundColorDark);
 
-const overflowTextColorDark = Color(0xFFFFFFFF);
-const overflowTextColorLight = Color(0xFFFFFFFF);
-const overflowTextColor =
-    ThemedColor(overflowTextColorLight, overflowTextColorDark);
+const overflowTextColorDark = Color(0xfff5846b);
+const overflowTextColorLight = Color(0xffdea089);
 
-extension LayoutThemeDataExtension on ThemeData {
-  Color get activeBackgroundColor => backgroundColor;
+const backgroundColorSelectedDark = Color(
+    0x4d474747); // TODO(jacobr): we would like Color(0x4dedeeef) but that makes the background show through.
+const backgroundColorSelectedLight = Color(0x4dedeeef);
 
-  Color get inActiveBackgroundColor => cardColor;
+extension LayoutExplorerColorScheme on ColorScheme {
+  Color get mainAxisColor => isLight ? mainAxisLightColor : mainAxisDarkColor;
+
+  Color get widgetNameColor => isLight ? Colors.white : Colors.black;
+
+  Color get crossAxisColor =>
+      isLight ? crossAxisLightColor : crossAxisDarkColor;
+
+  Color get mainAxisTextColor =>
+      isLight ? mainAxisTextColorLight : mainAxisTextColorDark;
+
+  Color get crossAxisTextColor =>
+      isLight ? crossAxisTextColorLight : crossAxisTextColorsDark;
+
+  Color get overflowBackgroundColor =>
+      isLight ? overflowBackgroundColorLight : overflowBackgroundColorDark;
+
+  Color get overflowTextColor =>
+      isLight ? overflowTextColorLight : overflowTextColorDark;
+
+  Color get backgroundColorSelected =>
+      isLight ? backgroundColorSelectedLight : backgroundColorSelectedDark;
+
+  Color get backgroundColor =>
+      isLight ? backgroundColorLight : backgroundColorDark;
+
+  Color get unconstrainedColor =>
+      isLight ? unconstrainedLightColor : unconstrainedDarkColor;
 }
 
-const freeSpaceAssetName = 'assets/img/layout_explorer/free_space.png';
+const backgroundColorDark = Color(0xff30302f);
+const backgroundColorLight = Color(0xffffffff);
+
+const unconstrainedDarkColor = Color(0xffdea089);
+const unconstrainedLightColor = Color(0xfff5846b);
+
+const widthIndicatorColor = textColor;
+const heightIndicatorColor = textColor;
+
+extension LayoutThemeDataExtension on ThemeData {}
+
+const negativeSpaceDarkAssetName =
+    'assets/img/layout_explorer/negative_space_dark.png';
+const negativeSpaceLightAssetName =
+    'assets/img/layout_explorer/negative_space_light.png';
 
 const dimensionIndicatorTextStyle = TextStyle(
   height: 1.0,
   letterSpacing: 1.1,
+  color: emphasizedTextColor,
 );
 
-final overflowingDimensionIndicatorTextStyle =
+TextStyle overflowingDimensionIndicatorTextStyle(ColorScheme colorScheme) =>
     dimensionIndicatorTextStyle.merge(
-  const TextStyle(
-    fontWeight: FontWeight.bold,
-    color: overflowTextColor,
-  ),
-);
+      TextStyle(
+        fontWeight: FontWeight.bold,
+        color: colorScheme.overflowTextColor,
+      ),
+    );
+
+Widget buildUnderline() {
+  return Container(
+    height: 1.0,
+    decoration: const BoxDecoration(
+      border: Border(
+        bottom: BorderSide(
+          color: textColor,
+          width: 0.0,
+        ),
+      ),
+    ),
+  );
+}
 
 const maxRequestsPerSecond = 3.0;
 
 /// Text widget for displaying width / height.
-Widget dimensionDescription(TextSpan description, bool overflow) {
+Widget dimensionDescription(
+  TextSpan description,
+  bool overflow,
+  ColorScheme colorScheme,
+) {
   final text = Text.rich(
     description,
     textAlign: TextAlign.center,
     style: overflow
-        ? overflowingDimensionIndicatorTextStyle
+        ? overflowingDimensionIndicatorTextStyle(colorScheme)
         : dimensionIndicatorTextStyle,
     overflow: TextOverflow.ellipsis,
   );
@@ -141,7 +197,7 @@ Widget dimensionDescription(TextSpan description, bool overflow) {
         horizontal: overflowTextHorizontalPadding,
       ),
       decoration: BoxDecoration(
-        color: overflowBackgroundColor,
+        color: colorScheme.overflowBackgroundColor,
         borderRadius: BorderRadius.circular(4.0),
       ),
       child: Center(child: text),
@@ -149,7 +205,8 @@ Widget dimensionDescription(TextSpan description, bool overflow) {
   return text;
 }
 
-Widget _visualizeWidthAndHeightWithConstraints({
+Widget _visualizeWidthAndHeightWithConstraints(
+  BuildContext context, {
   @required Widget widget,
   @required LayoutProperties properties,
   double arrowHeadSize = defaultIconSize,
@@ -158,30 +215,35 @@ Widget _visualizeWidthAndHeightWithConstraints({
       properties is FlexLayoutProperties && properties.isOverflowWidth;
   const bottomHeight = widthAndConstraintIndicatorSize;
   const rightWidth = heightAndConstraintIndicatorSize;
+  final colorScheme = Theme.of(context).colorScheme;
 
   final heightDescription = RotatedBox(
     quarterTurns: 1,
     child: dimensionDescription(
-      TextSpan(
-        children: [
-          TextSpan(
-            text: '${properties.describeHeight()}',
-          ),
-          if (properties is! FlexLayoutProperties ||
-              !properties.isOverflowHeight)
-            const TextSpan(text: '\n'),
-          TextSpan(
-            text: ' (${properties.describeHeightConstraints()})',
-          ),
-          if (properties is FlexLayoutProperties && properties.isOverflowHeight)
+        TextSpan(
+          children: [
             TextSpan(
-              text: '\nchildren take: '
-                  '${toStringAsFixed(sum(properties.childrenHeights))}',
+              text: '${properties.describeHeight()}',
             ),
-        ],
-      ),
-      properties.isOverflowHeight,
-    ),
+            if (properties is! FlexLayoutProperties ||
+                !properties.isOverflowHeight)
+              const TextSpan(text: '\n'),
+            TextSpan(
+              text: ' (${properties.describeHeightConstraints()})',
+              style: properties.constraints.hasBoundedHeight
+                  ? null
+                  : TextStyle(color: colorScheme.unconstrainedColor),
+            ),
+            if (properties is FlexLayoutProperties &&
+                properties.isOverflowHeight)
+              TextSpan(
+                text: '\nchildren take: '
+                    '${toStringAsFixed(sum(properties.childrenHeights))}',
+              ),
+          ],
+        ),
+        properties.isOverflowHeight,
+        colorScheme),
   );
   final right = Container(
     margin: const EdgeInsets.only(
@@ -224,6 +286,9 @@ Widget _visualizeWidthAndHeightWithConstraints({
         if (!showChildrenWidthsSum) const TextSpan(text: '\n'),
         TextSpan(
           text: '(${properties.describeWidthConstraints()})',
+          style: properties.constraints.hasBoundedWidth
+              ? null
+              : TextStyle(color: colorScheme.unconstrainedColor),
         ),
         if (showChildrenWidthsSum)
           TextSpan(
@@ -233,6 +298,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
       ],
     ),
     properties.isOverflowWidth,
+    colorScheme,
   );
   final bottom = Container(
     margin: const EdgeInsets.only(
@@ -330,17 +396,24 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
 
   Axis get direction => properties.direction;
 
-  Color get horizontalColor =>
-      properties.isMainAxisHorizontal ? mainAxisColor : crossAxisColor;
+  Color horizontalColor(ColorScheme colorScheme) =>
+      properties.isMainAxisHorizontal
+          ? colorScheme.mainAxisColor
+          : colorScheme.crossAxisColor;
 
-  Color get verticalColor =>
-      properties.isMainAxisVertical ? mainAxisColor : crossAxisColor;
+  Color verticalColor(ColorScheme colorScheme) => properties.isMainAxisVertical
+      ? colorScheme.mainAxisColor
+      : colorScheme.crossAxisColor;
 
-  Color get horizontalTextColor =>
-      properties.isMainAxisHorizontal ? mainAxisTextColor : crossAxisTextColor;
+  Color horizontalTextColor(ColorScheme colorScheme) =>
+      properties.isMainAxisHorizontal
+          ? colorScheme.mainAxisTextColor
+          : colorScheme.crossAxisTextColor;
 
-  Color get verticalTextColor =>
-      properties.isMainAxisVertical ? mainAxisTextColor : crossAxisTextColor;
+  Color verticalTextColor(ColorScheme colorScheme) =>
+      properties.isMainAxisVertical
+          ? colorScheme.mainAxisTextColor
+          : colorScheme.crossAxisTextColor;
 
   String get flexType => properties.type;
 
@@ -464,6 +537,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
         highlighted = newProperties;
       } else {
         final idx = selectedNode.parent.childrenNow.indexOf(selectedNode);
+        if (newProperties == null || newProperties.children == null) return;
         if (idx != -1) highlighted = newProperties.children[idx];
       }
     });
@@ -552,6 +626,8 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
       return const Center(child: Text('No Children'));
 
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final widget = Container(
       decoration: BoxDecoration(
         border: Border.all(
@@ -587,18 +663,18 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
           maxSizeAvailable: maxSizeAvailable,
         );
 
-        final childrenRenderWidgets = [
-          for (var i = 0; i < children.length; i++)
-            FlexChildVisualizer(
-              state: this,
-              backgroundColor: highlighted == children[i]
-                  ? theme.activeBackgroundColor
-                  : theme.inActiveBackgroundColor,
-              borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
-              textColor: i.isOdd ? null : const Color(0xFF303030),
-              renderProperties: renderProperties[i],
-            )
-        ];
+        final childrenRenderWidgets = <Widget>[];
+        for (var i = 0; i < children.length; i++) {
+          final child = children[i];
+          final isSelected = highlighted == child;
+
+          childrenRenderWidgets.add(FlexChildVisualizer(
+            state: this,
+            layoutProperties: child,
+            isSelected: isSelected,
+            renderProperties: renderProperties[i],
+          ));
+        }
 
         final freeSpacesWidgets = [
           for (var renderProperties in [...mainAxisSpaces, ...crossAxisSpaces])
@@ -623,11 +699,10 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
               children: [
                 Positioned.fill(
                   child: Image.asset(
-                    freeSpaceAssetName,
-                    width: maxWidth,
-                    height: maxHeight,
-                    repeat: ImageRepeat.repeat,
-                    fit: BoxFit.none,
+                    colorScheme.isLight
+                        ? negativeSpaceLightAssetName
+                        : negativeSpaceDarkAssetName,
+                    fit: BoxFit.cover,
                     alignment: Alignment.topLeft,
                   ),
                 ),
@@ -640,13 +715,16 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
       }),
     );
     return _visualizeWidthAndHeightWithConstraints(
+      context,
       widget: widget,
       properties: properties,
     );
   }
 
-  Widget _buildAxisAlignmentDropdown(Axis axis) {
-    final color = axis == direction ? mainAxisTextColor : crossAxisTextColor;
+  Widget _buildAxisAlignmentDropdown(Axis axis, ColorScheme colorScheme) {
+    final color = axis == direction
+        ? colorScheme.mainAxisTextColor
+        : colorScheme.crossAxisTextColor;
     List<Object> alignmentEnumEntries;
     Object selected;
     if (axis == direction) {
@@ -670,6 +748,11 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
         child: DropdownButton(
           value: selected,
           isExpanded: true,
+          // Avoid showing an underline for the main axis and cross-axis drop downs.
+          underline: const SizedBox(),
+          iconEnabledColor: axis == properties.direction
+              ? colorScheme.mainAxisColor
+              : colorScheme.crossAxisColor,
           selectedItemBuilder: (context) {
             return [
               for (var alignment in alignmentEnumEntries)
@@ -692,6 +775,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
                             : crossAxisAssetImageUrl(direction, alignment),
                         height: axisAlignmentAssetImageHeight,
                         fit: BoxFit.fitHeight,
+                        color: color,
                       ),
                     ),
                   ],
@@ -721,6 +805,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
                               ? mainAxisAssetImageUrl(direction, alignment)
                               : crossAxisAssetImageUrl(direction, alignment),
                           fit: BoxFit.fitHeight,
+                          color: color,
                         ),
                       ),
                     ],
@@ -771,7 +856,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
   }
 
   Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
-    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final maxHeight = constraints.maxHeight;
     final maxWidth = constraints.maxWidth;
     final flexDescription = Align(
@@ -785,9 +870,8 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
           onTap: () => onTap(properties),
           child: WidgetVisualizer(
             title: flexType,
-            backgroundColor:
-                highlighted == properties ? theme.activeBackgroundColor : null,
-            borderColor: mainAxisColor,
+            layoutProperties: properties,
+            isSelected: highlighted == properties,
             overflowSide: properties.overflowSide,
             hint: Container(
               padding: const EdgeInsets.all(4.0),
@@ -795,6 +879,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
                 'Total Flex Factor: ${properties?.totalFlex?.toInt()}',
                 textScaleFactor: largeTextScaleFactor,
                 style: const TextStyle(
+                  color: emphasizedTextColor,
                   fontWeight: FontWeight.bold,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -815,7 +900,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
           children: [
             Expanded(
               child: ArrowWrapper.unidirectional(
-                arrowColor: verticalColor,
+                arrowColor: verticalColor(colorScheme),
                 child: Truncateable(
                   truncate: maxHeight <= minHeightToAllowTruncating,
                   child: RotatedBox(
@@ -826,7 +911,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
                       textAlign: TextAlign.center,
                       textScaleFactor: largeTextScaleFactor,
                       style: TextStyle(
-                        color: verticalTextColor,
+                        color: verticalTextColor(colorScheme),
                       ),
                     ),
                   ),
@@ -836,7 +921,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
             ),
             Truncateable(
               truncate: maxHeight <= minHeightToAllowTruncating,
-              child: _buildAxisAlignmentDropdown(Axis.vertical),
+              child: _buildAxisAlignmentDropdown(Axis.vertical, colorScheme),
             ),
           ],
         ),
@@ -853,7 +938,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
           children: [
             Expanded(
               child: ArrowWrapper.unidirectional(
-                arrowColor: horizontalColor,
+                arrowColor: horizontalColor(colorScheme),
                 child: Truncateable(
                   truncate: maxWidth <= minWidthToAllowTruncating,
                   child: Text(
@@ -861,7 +946,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                     textScaleFactor: largeTextScaleFactor,
-                    style: TextStyle(color: horizontalTextColor),
+                    style: TextStyle(color: horizontalTextColor(colorScheme)),
                   ),
                 ),
                 type: ArrowType.right,
@@ -869,7 +954,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
             ),
             Truncateable(
               truncate: maxWidth <= minWidthToAllowTruncating,
-              child: _buildAxisAlignmentDropdown(Axis.horizontal),
+              child: _buildAxisAlignmentDropdown(Axis.horizontal, colorScheme),
             ),
           ],
         ),
@@ -922,17 +1007,16 @@ class FlexChildVisualizer extends StatelessWidget {
   const FlexChildVisualizer({
     Key key,
     @required this.state,
+    @required this.layoutProperties,
     @required this.renderProperties,
-    @required this.backgroundColor,
-    @required this.borderColor,
-    @required this.textColor,
+    @required this.isSelected,
   }) : super(key: key);
 
   final _FlexLayoutExplorerWidgetState state;
 
-  final Color backgroundColor;
-  final Color borderColor;
-  final Color textColor;
+  final bool isSelected;
+
+  final LayoutProperties layoutProperties;
 
   final RenderProperties renderProperties;
 
@@ -965,8 +1049,11 @@ class FlexChildVisualizer extends StatelessWidget {
       return Text(
         'flex: $flexFactor',
         style: flexFactor == properties.flexFactor
-            ? const TextStyle(fontWeight: FontWeight.bold)
-            : null,
+            ? const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: emphasizedTextColor,
+              )
+            : const TextStyle(color: emphasizedTextColor),
       );
     }
 
@@ -980,6 +1067,8 @@ class FlexChildVisualizer extends StatelessWidget {
     return DropdownButton<int>(
       value: properties.flexFactor?.toInt()?.clamp(0, maximumFlexFactor),
       onChanged: onChangeFlexFactor,
+      iconEnabledColor: textColor,
+      underline: buildUnderline(),
       items: <DropdownMenuItem<int>>[
         buildMenuItem(null),
         for (var i = 0; i <= maximumFlexFactor; ++i) buildMenuItem(i),
@@ -988,8 +1077,10 @@ class FlexChildVisualizer extends StatelessWidget {
   }
 
   Widget _buildFlexFitChangerDropdown() {
-    Widget flexFitDescription(FlexFit flexFit) =>
-        Text('fit: ${describeEnum(flexFit)}');
+    Widget flexFitDescription(FlexFit flexFit) => Text(
+          'fit: ${describeEnum(flexFit)}',
+          style: const TextStyle(color: emphasizedTextColor),
+        );
 
     // Disable FlexFit changer if widget is Expanded.
     if (properties.description == 'Expanded') {
@@ -1006,6 +1097,8 @@ class FlexChildVisualizer extends StatelessWidget {
     return DropdownButton<FlexFit>(
       value: properties.flexFit,
       onChanged: onChangeFlexFit,
+      underline: buildUnderline(),
+      iconEnabledColor: emphasizedTextColor,
       items: <DropdownMenuItem<FlexFit>>[
         buildMenuItem(FlexFit.loose),
         if (properties.description != 'Expanded') buildMenuItem(FlexFit.tight)
@@ -1013,7 +1106,7 @@ class FlexChildVisualizer extends StatelessWidget {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(ColorScheme colorScheme) {
     return Container(
       margin: const EdgeInsets.only(
         top: margin,
@@ -1029,10 +1122,7 @@ class FlexChildVisualizer extends StatelessWidget {
             Text(
               'unconstrained ${root.isMainAxisHorizontal ? 'horizontal' : 'vertical'}',
               style: TextStyle(
-                color: ThemedColor(
-                  const Color(0xFFD08A29),
-                  Colors.orange.shade700,
-                ),
+                color: colorScheme.unconstrainedColor,
                 fontStyle: FontStyle.italic,
               ),
               maxLines: 2,
@@ -1078,6 +1168,8 @@ class FlexChildVisualizer extends StatelessWidget {
       );
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Positioned(
       top: renderOffset.dy,
       left: renderOffset.dx,
@@ -1092,16 +1184,16 @@ class FlexChildVisualizer extends StatelessWidget {
             animation: state.entranceController,
             builder: buildEntranceAnimation,
             child: WidgetVisualizer(
-              backgroundColor: backgroundColor,
+              isSelected: isSelected,
+              layoutProperties: layoutProperties,
               title: properties.description,
-              borderColor: borderColor,
-              textColor: textColor,
               overflowSide: properties.overflowSide,
               child: _visualizeWidthAndHeightWithConstraints(
+                context,
                 arrowHeadSize: arrowHeadSize,
                 widget: Align(
                   alignment: Alignment.topRight,
-                  child: _buildContent(),
+                  child: _buildContent(colorScheme),
                 ),
                 properties: properties,
               ),
@@ -1128,22 +1220,19 @@ class WidgetVisualizer extends StatelessWidget {
     Key key,
     @required this.title,
     this.hint,
-    this.backgroundColor,
-    @required this.borderColor,
-    this.textColor,
+    @required this.isSelected,
+    @required this.layoutProperties,
     this.child,
     this.overflowSide,
   })  : assert(title != null),
-        assert(borderColor != null),
         super(key: key);
 
+  final LayoutProperties layoutProperties;
   final String title;
   final Widget child;
   final Widget hint;
+  final bool isSelected;
 
-  final Color borderColor;
-  final Color textColor;
-  final Color backgroundColor;
   final OverflowSide overflowSide;
 
   static const overflowIndicatorSize = 20.0;
@@ -1152,6 +1241,16 @@ class WidgetVisualizer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final properties = layoutProperties;
+    Color borderColor = regularWidgetColor;
+    if (properties is FlexLayoutProperties) {
+      borderColor =
+          properties.direction == Axis.horizontal ? rowColor : columnColor;
+    }
+    if (isSelected) {
+      borderColor = selectedWidgetColor;
+    }
     return Container(
       child: Stack(
         children: [
@@ -1173,6 +1272,7 @@ class WidgetVisualizer extends StatelessWidget {
                   ? overflowIndicatorSize
                   : 0.0,
             ),
+            color: isSelected ? colorScheme.backgroundColorSelected : null,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
@@ -1190,9 +1290,8 @@ class WidgetVisualizer extends StatelessWidget {
                           child: Center(
                             child: Text(
                               title,
-                              style: textColor != null
-                                  ? TextStyle(color: textColor)
-                                  : null,
+                              style:
+                                  TextStyle(color: colorScheme.widgetNameColor),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -1214,7 +1313,7 @@ class WidgetVisualizer extends StatelessWidget {
         border: Border.all(
           color: borderColor,
         ),
-        color: backgroundColor,
+        color: colorScheme.backgroundColor,
       ),
     );
   }

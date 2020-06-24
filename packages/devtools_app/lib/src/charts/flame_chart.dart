@@ -48,6 +48,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
     this.startInset = sideInset,
     this.endInset = sideInset,
   });
+
   static const minZoomLevel = 1.0;
   static const maxZoomLevel = 32000.0;
   static const zoomMultiplier = 0.01;
@@ -149,7 +150,12 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   /// overridden.
   ///
   /// The painters will be painted in the order that they are returned.
-  List<CustomPaint> buildCustomPaints(BoxConstraints constraints) => [];
+  List<CustomPaint> buildCustomPaints(
+    BoxConstraints constraints,
+    BuildContext buildContext,
+  ) {
+    return [];
+  }
 
   @override
   void initState() {
@@ -219,7 +225,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
         onKey: (event) => _handleKeyEvent(event),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final customPaints = buildCustomPaints(constraints);
+            final customPaints = buildCustomPaints(constraints, context);
             final flameChart = _buildFlameChart(constraints);
             return customPaints.isNotEmpty
                 ? Stack(
@@ -776,6 +782,7 @@ class FlameChartNode<T> {
   });
 
   static const _selectedTextColor = Colors.black;
+
   // We would like this value to be smaller, but zoom performance does not allow
   // for that. We should decrease this value if we can improve flame chart zoom
   // performance.
@@ -978,12 +985,14 @@ abstract class FlameChartPainter extends CustomPainter {
     @required this.verticalScrollOffset,
     @required this.horizontalScrollOffset,
     @required this.chartStartInset,
-  }) : visible = Rect.fromLTWH(
+    @required this.colorScheme,
+  })  : visible = Rect.fromLTWH(
           horizontalScrollOffset,
           verticalScrollOffset,
           constraints.maxWidth,
           constraints.maxHeight,
-        );
+        ),
+        assert(colorScheme != null);
 
   final double zoom;
 
@@ -997,4 +1006,14 @@ abstract class FlameChartPainter extends CustomPainter {
 
   /// The absolute coordinates of the flame chart's visible section.
   final Rect visible;
+
+  final ColorScheme colorScheme;
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    if (oldDelegate is FlameChartPainter) {
+      return oldDelegate.colorScheme != colorScheme;
+    }
+    return true;
+  }
 }

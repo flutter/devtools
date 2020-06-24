@@ -41,7 +41,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   void _addDescription(
     List<Widget> output,
     String description,
-    TextStyle textStyle, {
+    TextStyle textStyle,
+    ColorScheme colorScheme, {
     bool isProperty,
   }) {
     if (diagnostic.isDiagnosticableValue) {
@@ -51,7 +52,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         if (match.group(2).isNotEmpty) {
           output.add(Text(
             match.group(2),
-            style: inspector_text_styles.unimportant,
+            style: inspector_text_styles.unimportant(colorScheme),
           ));
         }
         return;
@@ -74,6 +75,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     if (diagnostic == null) {
       return const SizedBox();
     }
+    final colorScheme = Theme.of(context).colorScheme;
     final icon = diagnostic.icon;
     final children = <Widget>[];
 
@@ -81,7 +83,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       children.add(_paddedIcon(icon));
     }
     final String name = diagnostic.name;
-    TextStyle textStyle = textStyleForLevel(diagnostic.level);
+    TextStyle textStyle = textStyleForLevel(diagnostic.level, colorScheme);
     if (diagnostic.isProperty) {
       // Display of inline properties.
       final String propertyType = diagnostic.propertyType;
@@ -92,7 +94,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       if (diagnostic.isCreatedByLocalProject) {
-        textStyle = textStyle.merge(inspector_text_styles.regularBold);
+        textStyle =
+            textStyle.merge(inspector_text_styles.regularBold(colorScheme));
       }
 
       String description = diagnostic.description;
@@ -122,8 +125,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               final int codePoint =
                   JsonUtils.getIntMember(properties, 'codePoint');
               if (codePoint > 0) {
-                final Icon icon =
-                    FlutterMaterialIcons.getIconForCodePoint(codePoint);
+                final icon = FlutterMaterialIcons.getIconForCodePoint(
+                  codePoint,
+                  colorScheme,
+                );
                 if (icon != null) {
                   children.add(_paddedIcon(icon));
                 }
@@ -135,7 +140,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
       if (_showRenderObjectPropertiesAsLinks &&
           propertyType == 'RenderObject') {
-        textStyle = textStyle..merge(inspector_text_styles.link);
+        textStyle = textStyle..merge(inspector_text_styles.link(colorScheme));
       }
 
       // TODO(jacobr): custom display for units, iterables, and padding.
@@ -143,6 +148,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         children,
         description,
         textStyle,
+        colorScheme,
         isProperty: true,
       );
 
@@ -155,7 +161,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       // Non property, regular node case.
       if (name?.isNotEmpty == true && diagnostic.showName && name != 'child') {
         if (name.startsWith('child ')) {
-          children.add(Text(name, style: inspector_text_styles.unimportant));
+          children.add(Text(
+            name,
+            style: inspector_text_styles.unimportant(colorScheme),
+          ));
         } else {
           children.add(Text(name, style: textStyle));
         }
@@ -163,26 +172,28 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         if (diagnostic.showSeparator) {
           children.add(Text(
             diagnostic.separator,
-            style: inspector_text_styles.unimportant,
+            style: inspector_text_styles.unimportant(colorScheme),
           ));
           if (diagnostic.separator != ' ' &&
               diagnostic.description.isNotEmpty) {
             children.add(Text(
               ' ',
-              style: inspector_text_styles.unimportant,
+              style: inspector_text_styles.unimportant(colorScheme),
             ));
           }
         }
       }
 
       if (!diagnostic.isSummaryTree && diagnostic.isCreatedByLocalProject) {
-        textStyle = textStyle.merge(inspector_text_styles.regularBold);
+        textStyle =
+            textStyle.merge(inspector_text_styles.regularBold(colorScheme));
       }
 
       _addDescription(
         children,
         diagnostic.description,
         textStyle,
+        colorScheme,
         isProperty: false,
       );
     }

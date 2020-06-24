@@ -16,6 +16,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final heightDescription =
         'h=${toStringAsFixed(renderProperties.realHeight)}';
     final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
@@ -30,6 +31,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
               text: widthDescription,
             ),
             false,
+            colorScheme,
           ),
         ),
         Container(
@@ -51,6 +53,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
             child: dimensionDescription(
               TextSpan(text: heightDescription),
               false,
+              colorScheme,
             ),
           ),
           Container(

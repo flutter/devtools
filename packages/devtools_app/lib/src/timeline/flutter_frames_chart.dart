@@ -231,6 +231,8 @@ class FlutterFramesChartItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     final bool janky = _isFrameJanky(frame);
     // TODO(kenz): add some indicator when a frame is so janky that it exceeds the
     // available axis space.
@@ -251,7 +253,7 @@ class FlutterFramesChartItem extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: densePadding),
-          color: selected ? selectedFrameBackgroundColor : null,
+          color: selected ? colorScheme.selectedFrameBackgroundColor : null,
           child: Column(
             children: [
               // Dummy child so that the InkWell does not take up the entire column.
@@ -316,6 +318,8 @@ class ChartAxisPainter extends CustomPainter {
 
   final ThemeData themeData;
 
+  ColorScheme get colorScheme => themeData.colorScheme;
+
   @override
   void paint(Canvas canvas, Size size) {
     // The absolute coordinates of the chart's visible area.
@@ -379,15 +383,15 @@ class ChartAxisPainter extends CustomPainter {
     canvas.drawLine(
       Offset(chartArea.left - yAxisTickWidth / 2, tickY),
       Offset(chartArea.left + yAxisTickWidth / 2, tickY),
-      Paint()..color = chartAccentColor,
+      Paint()..color = colorScheme.chartAccentColor,
     );
 
     // Paint the axis label.
     final textPainter = TextPainter(
       text: TextSpan(
         text: labelText,
-        style: const TextStyle(
-          color: chartSubtleColor,
+        style: TextStyle(
+          color: colorScheme.chartSubtleColor,
           fontSize: chartFontSizeSmall,
         ),
       ),
@@ -436,6 +440,8 @@ class FPSLinePainter extends CustomPainter {
 
   final ThemeData themeData;
 
+  ColorScheme get colorScheme => themeData.colorScheme;
+
   @override
   void paint(Canvas canvas, Size size) {
     // The absolute coordinates of the chart's visible area.
@@ -453,14 +459,14 @@ class FPSLinePainter extends CustomPainter {
     canvas.drawLine(
       Offset(chartArea.left, targetLineY),
       Offset(chartArea.right, targetLineY),
-      Paint()..color = chartAccentColor,
+      Paint()..color = colorScheme.chartAccentColor,
     );
 
     final textPainter = TextPainter(
       text: TextSpan(
         text: '${displayRefreshRate.toStringAsFixed(0)} FPS',
-        style: const TextStyle(
-          color: chartSubtleColor,
+        style: TextStyle(
+          color: colorScheme.chartSubtleColor,
           fontSize: chartFontSizeSmall,
         ),
       ),

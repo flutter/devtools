@@ -94,6 +94,8 @@ class StatusLine extends StatelessWidget {
     Screen currentScreen,
     TextTheme textTheme,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     final String docPageId = currentScreen.docPageId;
     if (docPageId != null) {
       return InkWell(
@@ -103,7 +105,7 @@ class StatusLine extends StatelessWidget {
         },
         child: Text(
           'flutter.dev/devtools/$docPageId',
-          style: linkTextStyle,
+          style: linkTextStyle(colorScheme),
         ),
       );
     } else {

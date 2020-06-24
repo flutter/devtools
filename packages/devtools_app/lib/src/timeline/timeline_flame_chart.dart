@@ -194,9 +194,9 @@ class TimelineFlameChartState
 
       Color textColor;
       if (event.isRasterEvent) {
-        textColor = ThemedColor.fromSingleColor(contrastForegroundWhite);
+        textColor = contrastForegroundWhite;
       } else {
-        textColor = ThemedColor.fromSingleColor(Colors.black);
+        textColor = Colors.black;
       }
 
       final node = FlameChartNode<TimelineEvent>(
@@ -257,7 +257,11 @@ class TimelineFlameChartState
   }
 
   @override
-  List<CustomPaint> buildCustomPaints(BoxConstraints constraints) {
+  List<CustomPaint> buildCustomPaints(
+    BoxConstraints constraints,
+    BuildContext buildContext,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
     final zoom = zoomController.value;
     return [
       CustomPaint(
@@ -269,6 +273,7 @@ class TimelineFlameChartState
           verticalGuidelines: verticalGuidelines,
           horizontalGuidelines: horizontalGuidelines,
           chartStartInset: widget.startInset,
+          colorScheme: colorScheme,
         ),
       ),
       CustomPaint(
@@ -281,6 +286,7 @@ class TimelineFlameChartState
           chartEndInset: widget.endInset,
           flameChartWidth: widthWithZoom,
           duration: widget.time.duration,
+          colorScheme: colorScheme,
         ),
       ),
       CustomPaint(
@@ -298,17 +304,18 @@ class TimelineFlameChartState
           // want the Y value at the top of the node.
           yForEvent: (event) =>
               _calculateVerticalGuidelineStartY(event) - rowHeight,
+          colorScheme: colorScheme,
         ),
       ),
       CustomPaint(
         painter: SectionLabelPainter(
           _timelineController.data.eventGroups,
-          isDarkTheme: Theme.of(context).isDarkTheme,
           zoom: zoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
           chartStartInset: widget.startInset,
+          colorScheme: colorScheme,
         ),
       ),
     ];
@@ -450,21 +457,20 @@ class TimelineFlameChartState
 class SectionLabelPainter extends FlameChartPainter {
   SectionLabelPainter(
     this.eventGroups, {
-    @required this.isDarkTheme,
     @required double zoom,
     @required BoxConstraints constraints,
     @required double verticalScrollOffset,
     @required double horizontalScrollOffset,
     @required double chartStartInset,
+    @required ColorScheme colorScheme,
   }) : super(
           zoom: zoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
           chartStartInset: chartStartInset,
+          colorScheme: colorScheme,
         );
-
-  final bool isDarkTheme;
 
   final SplayTreeMap<String, TimelineEventGroup> eventGroups;
 
@@ -486,7 +492,7 @@ class SectionLabelPainter extends FlameChartPainter {
       final textPainter = TextPainter(
         text: TextSpan(
           text: groupName,
-          style: const TextStyle(color: chartTextColor),
+          style: TextStyle(color: colorScheme.chartTextColor),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
@@ -494,7 +500,7 @@ class SectionLabelPainter extends FlameChartPainter {
       final labelWidth = textPainter.width + 2 * densePadding;
       final backgroundColor = alternatingColorForIndex(
         eventGroups.values.toList().indexOf(group),
-        isDarkTheme: isDarkTheme,
+        colorScheme,
       );
       final backgroundWithOpacity = Color.fromRGBO(
         backgroundColor.red,
@@ -525,7 +531,8 @@ class SectionLabelPainter extends FlameChartPainter {
   @override
   bool shouldRepaint(SectionLabelPainter oldDelegate) {
     return verticalScrollOffset != oldDelegate.verticalScrollOffset ||
-        eventGroups != oldDelegate.eventGroups;
+        eventGroups != oldDelegate.eventGroups ||
+        super.shouldRepaint(oldDelegate);
   }
 }
 
@@ -538,12 +545,14 @@ class AsyncGuidelinePainter extends FlameChartPainter {
     @required double chartStartInset,
     @required this.verticalGuidelines,
     @required this.horizontalGuidelines,
+    @required ColorScheme colorScheme,
   }) : super(
           zoom: zoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
           chartStartInset: chartStartInset,
+          colorScheme: colorScheme,
         );
 
   final List<VerticalLineSegment> verticalGuidelines;
@@ -641,7 +650,7 @@ class AsyncGuidelinePainter extends FlameChartPainter {
             (zoomedLine.end.dy - verticalScrollOffset)
                 .clamp(0.0, constraints.maxHeight),
           ),
-          Paint()..color = treeGuidelineColor,
+          Paint()..color = colorScheme.treeGuidelineColor,
         );
       }
     }
@@ -663,12 +672,14 @@ class TimelineGridPainter extends FlameChartPainter {
     @required this.chartEndInset,
     @required this.flameChartWidth,
     @required this.duration,
+    @required ColorScheme colorScheme,
   }) : super(
           zoom: zoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
           chartStartInset: chartStartInset,
+          colorScheme: colorScheme,
         );
 
   static const baseGridIntervalPx = 150.0;
@@ -691,7 +702,7 @@ class TimelineGridPainter extends FlameChartPainter {
         constraints.maxWidth,
         math.min(constraints.maxHeight, rowHeight),
       ),
-      Paint()..color = defaultBackgroundColor,
+      Paint()..color = colorScheme.defaultBackgroundColor,
     );
 
     // Paint the timeline grid lines and corresponding timestamps in the flame
@@ -728,7 +739,7 @@ class TimelineGridPainter extends FlameChartPainter {
     final textPainter = TextPainter(
       text: TextSpan(
         text: timestampText,
-        style: const TextStyle(color: chartTextColor),
+        style: TextStyle(color: colorScheme.chartTextColor),
       ),
       textAlign: TextAlign.right,
       textDirection: TextDirection.ltr,
@@ -747,7 +758,7 @@ class TimelineGridPainter extends FlameChartPainter {
     canvas.drawLine(
       Offset(lineX, 0.0),
       Offset(lineX, constraints.maxHeight),
-      Paint()..color = chartAccentColor,
+      Paint()..color = colorScheme.chartAccentColor,
     );
   }
 
@@ -789,7 +800,8 @@ class TimelineGridPainter extends FlameChartPainter {
         constraints == other.constraints &&
         flameChartWidth == other.flameChartWidth &&
         horizontalScrollOffset == other.horizontalScrollOffset &&
-        duration == other.duration;
+        duration == other.duration &&
+        colorScheme == other.colorScheme;
   }
 
   @override
@@ -799,6 +811,7 @@ class TimelineGridPainter extends FlameChartPainter {
         flameChartWidth,
         horizontalScrollOffset,
         duration,
+        colorScheme,
       );
 }
 
@@ -813,12 +826,14 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
     @required this.startTimeOffsetMicros,
     @required this.startingPxPerMicro,
     @required this.yForEvent,
+    @required ColorScheme colorScheme,
   }) : super(
           zoom: zoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
           chartStartInset: chartStartInset,
+          colorScheme: colorScheme,
         );
 
   static const strokeWidth = 4.0;
@@ -957,7 +972,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
         zoom == other.zoom &&
         constraints == other.constraints &&
         verticalScrollOffset == other.verticalScrollOffset &&
-        horizontalScrollOffset == other.horizontalScrollOffset;
+        horizontalScrollOffset == other.horizontalScrollOffset &&
+        colorScheme == other.colorScheme;
   }
 
   @override
@@ -967,6 +983,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
         constraints,
         verticalScrollOffset,
         horizontalScrollOffset,
+        colorScheme,
       );
 }
 

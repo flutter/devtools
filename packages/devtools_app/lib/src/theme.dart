@@ -94,12 +94,24 @@ const devtoolsError = Color(0xFFAF4054);
 
 const devtoolsWarning = Color(0xFFFDFAD5);
 
-const devtoolsLink = ThemedColor(Color(0xFF1976D2), Colors.lightBlueAccent);
+extension DevToolsColorScheme on ColorScheme {
+  Color get devtoolsLink =>
+      isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
+  // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
+  // this in places where we do not have access to the context.
+  Color get defaultBackgroundColor =>
+      isLight ? Colors.grey[50] : Colors.grey[850];
+  Color get chartAccentColor =>
+      isLight ? const Color(0xFFCCCCCC) : const Color(0xFF585858);
+  Color get chartTextColor => isLight ? Colors.black : Colors.white;
+  Color get chartSubtleColor =>
+      isLight ? const Color(0xFF999999) : const Color(0xFF8A8A8A);
+}
 
-const linkTextStyle = TextStyle(
-  color: devtoolsLink,
-  decoration: TextDecoration.underline,
-);
+TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
+      color: colorScheme.devtoolsLink,
+      decoration: TextDecoration.underline,
+    );
 
 const defaultSearchTextWidth = 200.0;
 const defaultSearchTextHeight = 36.0;
@@ -167,12 +179,6 @@ Color titleSolidBackgroundColor(ThemeData theme) {
   return theme.isDarkTheme ? devtoolsGrey[900] : devtoolsGrey[50];
 }
 
-// This is the same as Theme.of(context).scaffoldBackgroundColor, but we use
-// this in places where we do not have access to the context.
-final defaultBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
-const chartAccentColor = ThemedColor(Color(0xFFCCCCCC), Color(0xFF585858));
-const chartTextColor = ThemedColor(Colors.black, Colors.white);
-const chartSubtleColor = ThemedColor(Color(0xFF999999), Color(0xFF8A8A8A));
 const chartFontSizeSmall = 12.0;
 
 final chartLightTypeFace = TypeFace(
