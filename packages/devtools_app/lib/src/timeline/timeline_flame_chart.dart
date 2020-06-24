@@ -257,7 +257,10 @@ class TimelineFlameChartState
   }
 
   @override
-  List<CustomPaint> buildCustomPaints(BoxConstraints constraints) {
+  List<CustomPaint> buildCustomPaints(
+    BoxConstraints constraints,
+    BuildContext buildContext,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final zoom = zoomController.value;
     return [
@@ -528,7 +531,8 @@ class SectionLabelPainter extends FlameChartPainter {
   @override
   bool shouldRepaint(SectionLabelPainter oldDelegate) {
     return verticalScrollOffset != oldDelegate.verticalScrollOffset ||
-        eventGroups != oldDelegate.eventGroups;
+        eventGroups != oldDelegate.eventGroups ||
+        super.shouldRepaint(oldDelegate);
   }
 }
 
@@ -796,7 +800,8 @@ class TimelineGridPainter extends FlameChartPainter {
         constraints == other.constraints &&
         flameChartWidth == other.flameChartWidth &&
         horizontalScrollOffset == other.horizontalScrollOffset &&
-        duration == other.duration;
+        duration == other.duration &&
+        colorScheme == other.colorScheme;
   }
 
   @override
@@ -806,6 +811,7 @@ class TimelineGridPainter extends FlameChartPainter {
         flameChartWidth,
         horizontalScrollOffset,
         duration,
+        colorScheme,
       );
 }
 
@@ -966,7 +972,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
         zoom == other.zoom &&
         constraints == other.constraints &&
         verticalScrollOffset == other.verticalScrollOffset &&
-        horizontalScrollOffset == other.horizontalScrollOffset;
+        horizontalScrollOffset == other.horizontalScrollOffset &&
+        colorScheme == other.colorScheme;
   }
 
   @override
@@ -976,6 +983,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
         constraints,
         verticalScrollOffset,
         horizontalScrollOffset,
+        colorScheme,
       );
 }
 
