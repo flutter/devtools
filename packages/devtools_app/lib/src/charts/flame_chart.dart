@@ -25,6 +25,7 @@ const double rowHeightWithPadding = rowHeight + rowPadding;
 const double sectionSpacing = 15.0;
 const double sideInset = 70.0;
 const double sideInsetSmall = 40.0;
+const int defaultRowOffsetForTopPadding = 3;
 
 // TODO(kenz): remove the hard coded hack once
 // https://github.com/flutter/flutter/issues/33675 is fixed.
@@ -85,7 +86,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 // like implementation).
 abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
-  int get rowOffsetForTopPadding => 2;
+  int get rowOffsetForTopPadding => defaultRowOffsetForTopPadding;
 
   // The "top" positional value for each flame chart node will be 0.0 because
   // each node is positioned inside its own list.

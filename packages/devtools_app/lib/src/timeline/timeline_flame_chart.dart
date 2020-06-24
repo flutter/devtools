@@ -484,7 +484,7 @@ class SectionLabelPainter extends FlameChartPainter {
     ));
 
     // Start at row height to account for timestamps at top of chart.
-    var startSectionPx = sectionSpacing * 2;
+    var startSectionPx = sectionSpacing * defaultRowOffsetForTopPadding;
     for (String groupName in eventGroups.keys) {
       final group = eventGroups[groupName];
       final labelTop = startSectionPx - verticalScrollOffset;
