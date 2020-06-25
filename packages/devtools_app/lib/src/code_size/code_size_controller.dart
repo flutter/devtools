@@ -7,9 +7,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
+import 'package:vm_snapshot_analysis/treemap.dart';
 
 import '../charts/treemap.dart';
-import 'temp/vm_treemap.dart';
 
 class CodeSizeController {
   ValueListenable<TreemapNode> get root => _root;
@@ -25,7 +25,7 @@ class CodeSizeController {
 
       // Build a [Map] object containing heirarchical information for [inputJsonMap].
       final processedJsonMap = treemapFromJson(inputJsonMap);
-      
+
       // Set name for root node.
       processedJsonMap['n'] = 'Root';
 
@@ -60,7 +60,8 @@ class CodeSizeController {
       treemapNodeSize = treeJson['value'] ?? 0;
     }
 
-    return TreemapNode(name: treemapNodeName, byteSize: treemapNodeSize)..addAllChildren(treemapNodeChildren);
+    return TreemapNode(name: treemapNodeName, byteSize: treemapNodeSize)
+      ..addAllChildren(treemapNodeChildren);
   }
 
   void clear() {

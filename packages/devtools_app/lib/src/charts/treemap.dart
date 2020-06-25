@@ -521,8 +521,11 @@ class TreemapNode extends TreeNode<TreemapNode> {
   String displayText({bool oneLine = true}) {
     var displayName = name;
 
-    if (parent != null && displayName.startsWith(parent.name + '/')) {
+    if (parent != null && displayName.startsWith(parent.name)) {
       displayName = displayName.replaceFirst(parent.name, '');
+      if (displayName.startsWith('/')) {
+        displayName = displayName.replaceFirst('/', '');
+      }
     }
 
     final separator = oneLine ? ' ' : '\n';
