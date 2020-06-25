@@ -76,8 +76,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
   double processingProgress = 0.0;
 
-  TimelineEvent selectedEvent;
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -104,13 +102,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     });
 
     addAutoDisposeListener(controller.selectedFrame);
-
-    selectedEvent = controller.selectedTimelineEvent.value;
-    addAutoDisposeListener(controller.selectedTimelineEvent, () {
-      setState(() {
-        selectedEvent = controller.selectedTimelineEvent.value;
-      });
-    });
 
     // Refresh data on page load if data is null. On subsequent tab changes,
     // this should not be called.
@@ -167,8 +158,13 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
             axis: Axis.vertical,
             initialFractions: const [0.6, 0.4],
             children: [
-              _buildFlameChartSection(selectedEvent),
-              EventDetails(selectedEvent),
+              _buildFlameChartSection(),
+              ValueListenableBuilder(
+                valueListenable: controller.selectedTimelineEvent,
+                builder: (context, selectedEvent, _) {
+                  return EventDetails(selectedEvent);
+                },
+              ),
             ],
           ),
         ),
@@ -271,7 +267,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Widget _buildFlameChartSection(TimelineEvent selectedEvent) {
+  Widget _buildFlameChartSection() {
     Widget content;
     final timelineEmpty = (controller.data?.isEmpty ?? true) ||
         controller.data.eventGroups.isEmpty;
@@ -293,7 +289,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           return TimelineFlameChart(
             controller.data,
             width: constraints.maxWidth,
-            selected: selectedEvent,
+            selectionNotifier: controller.selectedTimelineEvent,
             onSelection: (e) => controller.selectTimelineEvent(e),
           );
         },

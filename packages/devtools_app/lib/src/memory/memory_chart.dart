@@ -51,11 +51,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
   @override
   void initState() {
-    _setupDartChartController();
-
-    // Setup for Flutter Engine chart (Android ADB dumpsys meminfo).
-    _setupAndroidChartController();
-
     _preloadResources();
 
     super.initState();
@@ -66,6 +61,14 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     super.didChangeDependencies();
 
     controller = Provider.of<MemoryController>(context);
+
+    // TODO(jacobr): this is an ugly way to be using the theme. It would be
+    // better if the controllers weren't involved with the color scheme.
+    final colorScheme = Theme.of(context).colorScheme;
+    _setupDartChartController(colorScheme);
+
+    // Setup for Flutter Engine chart (Android ADB dumpsys meminfo).
+    _setupAndroidChartController(colorScheme);
 
     // Hookup access to the MemoryController when a data point is clicked
     // in a chart.
@@ -230,7 +233,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     );
   }
 
-  void _setupDartChartController() {
+  void _setupDartChartController(ColorScheme colorScheme) {
     final desc = Description()..enabled = false;
     _selectedDartChart = SelectedDataPoint(
       ChartType.DartHeaps,
@@ -246,7 +249,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..granularityEnabled = true
           // Set to baseline min and auto track max axis range.
           ..setStartAtZero(true)
-          ..textColor = defaultForeground;
+          ..textColor = colorScheme.defaultForeground;
       },
       axisRightSettingFunction: (axisRight, controller) {
         axisRight.enabled = false;
@@ -257,7 +260,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..textSize = 10
           ..drawAxisLine = false
           ..drawGridLines = true
-          ..textColor = defaultForeground
+          ..textColor = colorScheme.defaultForeground
           ..centerAxisLabels = true
           ..setGranularity(1)
           ..setValueFormatter(XAxisFormatter());
@@ -278,7 +281,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..textSize = 2.0;
 */
       },
-      backgroundColor: defaultBackgroundColor,
+      backgroundColor: colorScheme.defaultBackgroundColor,
       doubleTapToZoomEnabled: false,
       // TODO(terry): For now disable zoom with double-click.
       pinchZoomEnabled: false,
@@ -295,7 +298,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   /// Plots the Android ADB memory info (Flutter Engine).
   LineChartController androidChartController;
 
-  void _setupAndroidChartController() {
+  void _setupAndroidChartController(ColorScheme colorScheme) {
     final desc = Description()..enabled = false;
     _selectedAndroidChart = SelectedDataPoint(
       ChartType.AndroidHeaps,
@@ -310,7 +313,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..granularityEnabled = true
           // Set to baseline min and auto track max axis range.
           ..setStartAtZero(true)
-          ..textColor = defaultForeground;
+          ..textColor = colorScheme.defaultForeground;
       },
       axisRightSettingFunction: (axisRight, controller) {
         axisRight.enabled = false;
@@ -321,7 +324,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..textSize = 10
           ..drawAxisLine = false
           ..drawGridLines = true
-          ..textColor = defaultForeground
+          ..textColor = colorScheme.defaultForeground
           ..centerAxisLabels = true
           ..setGranularity(1)
           ..setValueFormatter(XAxisFormatter());
@@ -342,7 +345,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
           ..textSize = 2.0;
 */
       },
-      backgroundColor: defaultBackgroundColor,
+      backgroundColor: colorScheme.defaultBackgroundColor,
       // TOD(terry): Disable zoom via double-click. Consider +/- button
       //             for a controlled zoom in/zoom out.
       scaleXEnabled: false,

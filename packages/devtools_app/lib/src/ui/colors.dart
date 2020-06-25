@@ -29,8 +29,15 @@ final rasterColorPalette = [
   const Color(0xFF386EB6),
 ];
 
-const selectedFrameBackgroundColor =
-    ThemedColor(Color(0xFFDBDDDD), Color(0xFF4E4F4F));
+// TODO(jacobr): merge this with other color scheme extensions.
+extension FlameChartColorScheme on ColorScheme {
+  Color get selectedFrameBackgroundColor =>
+      isLight ? const Color(0xFFDBDDDD) : const Color(0xFF4E4F4F);
+
+  Color get treeGuidelineColor =>
+      isLight ? Colors.black54 : const Color.fromARGB(255, 200, 200, 200);
+}
+
 const timelineSelectionColor = Color(0xFF36C6F4);
 
 // Teal 200, 400 - see https://material.io/design/color/#tools-for-picking-colors.
@@ -47,8 +54,3 @@ const unknownColorPalette = [
 
 const uiJankColor = Color(0xFFF5846B);
 const rasterJankColor = Color(0xFFC3595A);
-
-const treeGuidelineColor = ThemedColor(
-  Colors.black54,
-  Color.fromARGB(255, 200, 200, 200),
-);

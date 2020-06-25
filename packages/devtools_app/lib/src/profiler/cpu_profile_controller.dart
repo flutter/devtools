@@ -53,6 +53,7 @@ class CpuProfilerController {
   Future<void> pullAndProcessProfile({
     @required int startMicros,
     @required int extentMicros,
+    String processId,
   }) async {
     if (!profilerEnabled) return;
     assert(_dataNotifier.value != null);
@@ -71,7 +72,7 @@ class CpuProfilerController {
     );
 
     try {
-      await transformer.processData(cpuProfileData);
+      await transformer.processData(cpuProfileData, processId: processId);
       _dataNotifier.value = cpuProfileData;
       _processingNotifier.value = false;
     } on AssertionError catch (_) {
@@ -80,6 +81,9 @@ class CpuProfilerController {
       // Rethrow after setting notifiers so that cpu profile data is included
       // in the timeline export.
       rethrow;
+    } on ProcessCancelledException catch (_) {
+      // Do nothing because the attempt to process data has been cancelled in
+      // favor of a new one.
     }
   }
 

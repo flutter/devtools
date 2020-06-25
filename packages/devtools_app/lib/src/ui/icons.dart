@@ -152,8 +152,9 @@ class ColorIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return CustomPaint(
-      painter: _ColorIconPainter(color),
+      painter: _ColorIconPainter(color, colorScheme),
       size: const Size(defaultIconSize, defaultIconSize),
     );
   }
@@ -168,17 +169,18 @@ class ColorIconMaker {
 }
 
 class _ColorIconPainter extends CustomPainter {
-  const _ColorIconPainter(this.color);
+  const _ColorIconPainter(this.color, this.colorScheme);
 
   final Color color;
 
+  final ColorScheme colorScheme;
   static const double iconMargin = 1;
 
   @override
   void paint(Canvas canvas, Size size) {
     // draw a black and gray grid to use as the background to disambiguate
     // opaque colors from translucent colors.
-    final greyPaint = Paint()..color = grey;
+    final greyPaint = Paint()..color = colorScheme.grey;
     final iconRect = Rect.fromLTRB(
       iconMargin,
       iconMargin,
@@ -193,7 +195,7 @@ class _ColorIconPainter extends CustomPainter {
           size.width - iconMargin,
           size.height - iconMargin,
         ),
-        Paint()..color = defaultBackground,
+        Paint()..color = colorScheme.defaultBackground,
       )
       ..drawRect(
         Rect.fromLTRB(
@@ -221,25 +223,24 @@ class _ColorIconPainter extends CustomPainter {
         iconRect,
         Paint()
           ..style = PaintingStyle.stroke
-          ..color = defaultForeground,
+          ..color = colorScheme.defaultForeground,
       );
   }
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
+    if (oldDelegate is _ColorIconPainter) {
+      return oldDelegate.colorScheme.isLight != colorScheme.isLight;
+    }
+    return true;
   }
 }
 
 class FlutterMaterialIcons {
   FlutterMaterialIcons._();
 
-  static final Map<String, Icon> _iconCache = {};
-
-  static Icon getIconForCodePoint(int charCode) {
-    final String code = String.fromCharCode(charCode);
-    return _iconCache.putIfAbsent(
-        code, () => Icon(IconData(charCode), color: defaultForeground));
+  static Icon getIconForCodePoint(int charCode, ColorScheme colorScheme) {
+    return Icon(IconData(charCode), color: colorScheme.defaultForeground);
   }
 }
 

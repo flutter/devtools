@@ -43,11 +43,12 @@ abstract class FlameChart<T, V> extends StatefulWidget {
     this.data, {
     @required this.time,
     @required this.totalStartingWidth,
-    @required this.selected,
+    @required this.selectionNotifier,
     @required this.onSelected,
     this.startInset = sideInset,
     this.endInset = sideInset,
   });
+
   static const minZoomLevel = 1.0;
   static const maxZoomLevel = 32000.0;
   static const zoomMultiplier = 0.01;
@@ -71,7 +72,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 
   final double endInset;
 
-  final V selected;
+  final ValueListenable<V> selectionNotifier;
 
   final void Function(V data) onSelected;
 
@@ -84,13 +85,13 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 // like implementation).
 abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
-  int get rowOffsetForTopPadding => 2;
+  int get rowOffsetForTopPadding => 1;
 
   // The "top" positional value for each flame chart node will be 0.0 because
   // each node is positioned inside its own list.
   final flameChartNodeTop = 0.0;
 
-  final List<FlameChartRow> rows = [];
+  final List<FlameChartRow<V>> rows = [];
 
   final List<FlameChartSection> sections = [];
 
@@ -149,7 +150,12 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   /// overridden.
   ///
   /// The painters will be painted in the order that they are returned.
-  List<CustomPaint> buildCustomPaints(BoxConstraints constraints) => [];
+  List<CustomPaint> buildCustomPaints(
+    BoxConstraints constraints,
+    BuildContext buildContext,
+  ) {
+    return [];
+  }
 
   @override
   void initState() {
@@ -219,7 +225,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
         onKey: (event) => _handleKeyEvent(event),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final customPaints = buildCustomPaints(constraints);
+            final customPaints = buildCustomPaints(constraints, context);
             final flameChart = _buildFlameChart(constraints);
             return customPaints.isNotEmpty
                 ? Stack(
@@ -247,7 +253,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
             nodes: rows[index].nodes,
             width: math.max(constraints.maxWidth, widthWithZoom),
             startInset: widget.startInset,
-            selected: widget.selected,
+            selectionNotifier: widget.selectionNotifier,
             zoom: zoomController.value,
           );
         },
@@ -267,7 +273,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   void expandRows(int newRowLength) {
     final currentLength = rows.length;
     for (int i = currentLength; i < newRowLength; i++) {
-      rows.add(FlameChartRow(i));
+      rows.add(FlameChartRow<V>(i));
     }
   }
 
@@ -366,7 +372,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
       // TODO(kenz): consult with Flutter team to see if there is a better place
       // to call this that guarantees the scroll controller offsets will be
-      // updated for the new zoom level and layout size.
+      // updated for the new zoom level and layout size
       // https://github.com/flutter/devtools/issues/2012.
       linkedHorizontalScrollControllerGroup.jumpTo(
           newScrollOffset.clamp(FlameChart.minScrollOffset, maxScrollOffset));
@@ -410,19 +416,19 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
     @required this.nodes,
     @required this.width,
     @required this.startInset,
-    @required this.selected,
+    @required this.selectionNotifier,
     @required this.zoom,
   });
 
   final LinkedScrollControllerGroup linkedScrollControllerGroup;
 
-  final List<FlameChartNode> nodes;
+  final List<FlameChartNode<V>> nodes;
 
   final double width;
 
   final double startInset;
 
-  final V selected;
+  final ValueListenable<V> selectionNotifier;
 
   final double zoom;
 
@@ -438,7 +444,11 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
   _ScrollingFlameChartRowExtentDelegate extentDelegate;
 
   /// Convenience getter for widget.nodes.
-  List<FlameChartNode> get nodes => widget.nodes;
+  List<FlameChartNode<V>> get nodes => widget.nodes;
+
+  List<V> get nodeData => nodes.map((node) => node.data).toList();
+
+  V selected;
 
   V hovered;
 
@@ -456,6 +466,17 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
       chartStartInset: widget.startInset,
       chartWidth: widget.width,
     );
+
+    selected = widget.selectionNotifier.value;
+    addAutoDisposeListener(widget.selectionNotifier, () {
+      final containsPreviousSelected = nodeData.contains(selected);
+      final containsNewSelected =
+          nodeData.contains(widget.selectionNotifier.value);
+      selected = widget.selectionNotifier.value;
+      // We only want to rebuild the row if it contains the previous or new
+      // selected node.
+      if (containsPreviousSelected || containsNewSelected) setState(() {});
+    });
   }
 
   @override
@@ -546,7 +567,7 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
         bottom: rowPadding,
       ),
       child: node.buildWidget(
-        selected: node.data == widget.selected,
+        selected: node.data == selected,
         hovered: node.data == hovered,
         zoom: FlameChartUtils.zoomForNode(node, widget.zoom),
       ),
@@ -723,10 +744,10 @@ class FlameChartSection {
   final int endRow;
 }
 
-class FlameChartRow {
+class FlameChartRow<T> {
   FlameChartRow(this.index);
 
-  final List<FlameChartNode> nodes = [];
+  final List<FlameChartNode<T>> nodes = [];
 
   final int index;
 
@@ -734,7 +755,7 @@ class FlameChartRow {
   ///
   /// If [index] is specified and in range of the list, [node] will be added at
   /// [index]. Otherwise, [node] will be added to the end of [nodes]
-  void addNode(FlameChartNode node, {int index}) {
+  void addNode(FlameChartNode<T> node, {int index}) {
     if (index != null && index >= 0 && index < nodes.length) {
       nodes.insert(index, node);
     } else {
@@ -761,6 +782,7 @@ class FlameChartNode<T> {
   });
 
   static const _selectedTextColor = Colors.black;
+
   // We would like this value to be smaller, but zoom performance does not allow
   // for that. We should decrease this value if we can improve flame chart zoom
   // performance.
@@ -963,12 +985,14 @@ abstract class FlameChartPainter extends CustomPainter {
     @required this.verticalScrollOffset,
     @required this.horizontalScrollOffset,
     @required this.chartStartInset,
-  }) : visible = Rect.fromLTWH(
+    @required this.colorScheme,
+  })  : visible = Rect.fromLTWH(
           horizontalScrollOffset,
           verticalScrollOffset,
           constraints.maxWidth,
           constraints.maxHeight,
-        );
+        ),
+        assert(colorScheme != null);
 
   final double zoom;
 
@@ -982,4 +1006,14 @@ abstract class FlameChartPainter extends CustomPainter {
 
   /// The absolute coordinates of the flame chart's visible section.
   final Rect visible;
+
+  final ColorScheme colorScheme;
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    if (oldDelegate is FlameChartPainter) {
+      return oldDelegate.colorScheme != colorScheme;
+    }
+    return true;
+  }
 }

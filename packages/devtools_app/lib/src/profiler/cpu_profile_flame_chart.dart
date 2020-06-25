@@ -1,6 +1,7 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../charts/flame_chart.dart';
@@ -12,7 +13,7 @@ class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame> {
   CpuProfileFlameChart(
     CpuProfileData data, {
     @required double width,
-    @required CpuStackFrame selected,
+    @required ValueListenable<CpuStackFrame> selectionNotifier,
     @required Function(CpuStackFrame stackFrame) onSelected,
   }) : super(
           data,
@@ -20,7 +21,7 @@ class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame> {
           totalStartingWidth: width,
           startInset: sideInsetSmall,
           endInset: sideInsetSmall,
-          selected: selected,
+          selectionNotifier: selectionNotifier,
           onSelected: onSelected,
         );
 
@@ -31,9 +32,6 @@ class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame> {
 class _CpuProfileFlameChartState
     extends FlameChartState<CpuProfileFlameChart, CpuStackFrame> {
   static const stackFramePadding = 1;
-
-  @override
-  int get rowOffsetForTopPadding => 1;
 
   int _colorOffset = 0;
 

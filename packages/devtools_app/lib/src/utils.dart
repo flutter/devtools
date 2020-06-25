@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
@@ -707,6 +708,80 @@ class DebugTimingLogger {
     _timer.start();
 
     print('[$name] $message');
+  }
+}
+
+/// Compute a simple moving average.
+/// [averagePeriod] default period is 50 units collected.
+/// [ratio] default percentage is 50% range is 0..1
+class MovingAverage {
+  MovingAverage({
+    this.averagePeriod = 50,
+    this.ratio = .5,
+    List<int> newDataSet,
+  }) : assert(ratio >= 0 && ratio <= 1, 'Value ratio $ratio is not 0 to 1.') {
+    if (newDataSet != null) {
+      var initialDataSet = newDataSet;
+      final count = newDataSet.length;
+      if (count > averagePeriod) {
+        initialDataSet = newDataSet.sublist(count - averagePeriod);
+      }
+
+      dataSet.addAll(initialDataSet);
+      for (final value in dataSet) {
+        averageSum += value;
+      }
+    }
+  }
+
+  final dataSet = Queue<int>();
+
+  /// Total collected items in the X axis (time) used to compute moving average.
+  /// Default 100 periods for memory profiler 1-2 periods / seconds.
+  final int averagePeriod;
+
+  /// Ratio of first item in dataSet when comparing to last - mean
+  /// e.g., 2 is 50% (dataSet.first ~/ ratioSpike).
+  final double ratio;
+
+  /// Sum of total heap used and external heap for unitPeriod.
+  int averageSum = 0;
+
+  /// Reset moving average data.
+  void clear() {
+    dataSet.clear();
+    averageSum = 0;
+  }
+
+  // Update the sum to get a new mean.
+  void add(int value) {
+    averageSum += value;
+    dataSet.add(value);
+
+    // Update dataSet of values to not exceede the period of the moving average
+    // to compute the normal mean.
+    if (dataSet.length > averagePeriod) {
+      averageSum -= dataSet.removeFirst();
+    }
+  }
+
+  double get mean {
+    final periodRange = min(averagePeriod, dataSet.length);
+    return periodRange > 0 ? averageSum / periodRange : 0;
+  }
+
+  /// If the last - mean > ratioSpike% of first value in period we're spiking.
+  bool hasSpike() {
+    final first = dataSet.safeFirst ?? 0;
+    final last = dataSet.safeLast ?? 0;
+
+    return last - mean > (first * ratio);
+  }
+
+  /// If the mean @ ratioSpike% > last value in period we're dipping.
+  bool isDipping() {
+    final last = dataSet.safeLast ?? 0;
+    return (mean * ratio) > last;
   }
 }
 

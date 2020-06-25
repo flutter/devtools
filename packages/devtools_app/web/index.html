@@ -52,6 +52,26 @@
       });
     }
   </script>
+
+  <!-- Script to fail gracefully when CanvasKit crashes. -->
+  <script>
+    var realWarn = window.console.warn.bind(console);
+    var tryingToClose = false;
+    window.console.warn = function(obj) {
+      if( typeof obj == "string" && obj.indexOf("CanvasKit") != -1 && obj.indexOf("font") != -1) {
+        if (!tryingToClose) {
+          tryingToClose = true;
+          window.alert(
+            "The Flutter web backend ('CanvasKit') has encountered a fatal error and needs to restart. \n" +
+            "Press OK to restart devtools. We are aware of this bug and working hard on a fix.\n" + obj
+          );
+        }
+        window.location.reload();
+        return;
+      }
+      realWarn(obj);
+    }
+  </script>
   <script src="main.dart.js" type="application/javascript"></script>
 </body>
 </html>

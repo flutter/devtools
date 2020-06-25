@@ -123,7 +123,7 @@ void main() {
       expect(TimelineData.eventGroupComparator('UI', 'Raster'), equals(-1));
       expect(TimelineData.eventGroupComparator('Raster', 'UI'), equals(1));
       expect(TimelineData.eventGroupComparator('UI', 'UI'), equals(0));
-      expect(TimelineData.eventGroupComparator('UI', 'Async'), equals(1));
+      expect(TimelineData.eventGroupComparator('UI', 'Async'), equals(-1));
       expect(TimelineData.eventGroupComparator('A', 'B'), equals(-1));
       expect(TimelineData.eventGroupComparator('Z', 'Unknown'), equals(-1));
     });

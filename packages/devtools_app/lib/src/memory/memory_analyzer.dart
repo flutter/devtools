@@ -29,13 +29,12 @@ bool _classMatcher(HeapGraphClassLive liveClass) {
 ///   key: 'filters'      value: List<ClassReference>
 ///   key: 'libraries'    value: List<ClassReference>
 ///
-Map<String, List<Reference>> collect(MemoryController controller) {
+Map<String, List<Reference>> collect(
+    MemoryController controller, Snapshot snapshot) {
   final Map<String, List<Reference>> result = {};
 
-  // Analyze the external heap for memory information
-  final root = controller.libraryRoot;
-  assert(root != null);
-
+  // Analyze the snapshot's heap memory information
+  final root = snapshot.libraryRoot;
   final heapGraph = controller.heapGraph;
 
   for (final library in root.children) {
@@ -91,15 +90,6 @@ Map<String, List<Reference>> collect(MemoryController controller) {
   }
 
   return result;
-}
-
-AnalysesReference findAnalysesNode(MemoryController controller) {
-  for (final child in controller.libraryRoot.children) {
-    if (child is AnalysesReference) {
-      return child;
-    }
-  }
-  return null;
 }
 
 const bucket10K = '1..10K';
@@ -550,7 +540,7 @@ class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
-        controller.computeAllLibraries(true, true);
+        controller.computeAllLibraries(rebuild: true);
       });
     });
   }
