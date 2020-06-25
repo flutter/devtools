@@ -513,6 +513,7 @@ void main() {
       100000,
     ];
 
+    /// Data only has spikes.
     const memorySizeDataSet = [
       190432640,
       190443808,
@@ -539,7 +540,7 @@ void main() {
       229029544,
       231396416,
       240465152,
-      303434344,
+      303434344, // Spike @ [25] (clear)
       302925712,
       356093472,
       354292096,
@@ -562,12 +563,73 @@ void main() {
       524727280,
       534727280,
       564727280,
-      764727280,
+      764727280, // Spike @ [48]
+      964727280, // Spike @ [49]
+      1064727280, // Spike @ [50]
+      1464727280, // Spike @ [51]
+      2264727280, // Spike @ [52]
+      2500000000, // Spike @ [53]
+    ];
+
+    /// Data has 5 spikes and 3 dips.
+    const dipsSpikesDataSet = [
+      190432640,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+      190443808,
+        5500000,    // Dips @ [12]
+        5600000,
+        7443808,
+        9043808,
+       11045160,
+       49800392,    // Spikes @ [17]
+       60144872,
+      210110632,    // Spikes @ [19]
+      234077984,
+      229029504,
+      229029544,
+      194000000,
+       80000000,    // Dips @ [24]
+      100000000,
+      150000000,
+      240465152,    // Spike @ [27]
+      303434344,
+      302925712,
+      356093472,
+      354292096,
+      400654120,
+      400538848,
+      402336872,
+      444325760,
+      444933104,
+      341888120,
+      406070376,
+      343798216,
+      392421072,
+      392441080,
+      481891656,
+        3000000,    // Dips @ [43]
+        3100000,
+        3200000,
+      330000000,    // Spike @ [46]
+      330000000,
+      330000000,
+      340000000,
+      340000000,
+      340000000,
       964727280,
-      1064727280,
-      1464727280,
-      2264727280,
-      2500000000,
+     1064727280,
+     1464727280,
+     2264727280,    // Spike @ [52]
+     2500000000,
     ];
 
     void checkNewItemsAddedToDataSet(MovingAverage mA) {
@@ -576,6 +638,8 @@ void main() {
       mA.add(3000000);
       expect(mA.dataSet.length, lessThan(mA.averagePeriod));
       expect(mA.mean.toInt(), equals(470853));
+      expect(mA.hasSpike(), isTrue);
+      expect(mA.isDipping(), isFalse);
     }
 
     test('basic MA', () {
@@ -604,19 +668,21 @@ void main() {
       expect(mA.mean.toInt(), equals(462271799));
       expect(mA.dataSet.length, equals(mA.averagePeriod));
       expect(mA.hasSpike(), isTrue);
+      expect(mA.isDipping(), isFalse);
 
       mA.clear();
       expect(mA.mean, equals(0));
       expect(mA.dataSet.length, equals(0));
     });
 
-    test('normal dynamic MA', () {
+    test('dynamic spikes MA', () {
       final mA = MovingAverage();
 
       // Dynamically add data to MovingAverage data set.
       for (int i = 0; i < 20; i++) {
         mA.add(memorySizeDataSet[i]);
         expect(mA.hasSpike(), isFalse);
+        expect(mA.isDipping(), isFalse);
       }
       expect(mA.mean.toInt(), equals(192829540));
 
@@ -625,16 +691,19 @@ void main() {
         switch (i) {
           case 25:
             expect(mA.hasSpike(), isTrue);
+            expect(mA.isDipping(), isFalse);
             mA.clear();
             expect(mA.dataSet.length, 0);
             break;
           case 48:
           case 49:
             expect(mA.hasSpike(), isTrue);
+            expect(mA.isDipping(), isFalse);
             break;
           default:
             expect(mA.dataSet.length, i < 25 ? i + 1 : i - 25);
             expect(mA.hasSpike(), isFalse);
+            expect(mA.isDipping(), isFalse);
         }
       }
       expect(mA.mean.toInt(), equals(469047851));
@@ -647,21 +716,25 @@ void main() {
           case 50:
             expect(mA.mean.toInt(), equals(492875028));
             expect(mA.hasSpike(), isTrue);
+            expect(mA.isDipping(), isFalse);
             expect(mA.dataSet.length, equals(25));
             break;
           case 51:
             expect(mA.mean.toInt(), equals(530253961));
             expect(mA.hasSpike(), isTrue);
+            expect(mA.isDipping(), isFalse);
             expect(mA.dataSet.length, equals(26));
             break;
           case 52:
             expect(mA.mean.toInt(), equals(594493714));
             expect(mA.hasSpike(), isTrue);
+            expect(mA.isDipping(), isFalse);
             expect(mA.dataSet.length, equals(27));
             break;
           case 53:
             expect(mA.mean.toInt(), equals(662547510));
             expect(mA.hasSpike(), isTrue);
+            expect(mA.isDipping(), isFalse);
             expect(mA.dataSet.length, equals(28));
             break;
           default:
@@ -677,6 +750,38 @@ void main() {
       mA.clear();
       expect(mA.mean, equals(0));
       expect(mA.dataSet.length, equals(0));
+    });
+
+    test('dips and spikes MA', () {
+      final mA = MovingAverage();
+
+      // Dynamically add data to MovingAverage data set.
+      for (int i = 0; i < memorySizeDataSet.length; i++) {
+        mA.add(dipsSpikesDataSet[i]);
+        switch (i) {
+          case 12:
+          case 24:
+          case 43:
+            expect(mA.hasSpike(), isFalse);
+            expect(mA.isDipping(), isTrue);
+            break;
+          case 17:
+          case 19:
+          case 27:
+          case 46:
+          case 52:
+            expect(mA.hasSpike(), isTrue);
+            expect(mA.isDipping(), isFalse);
+            break;
+          default:
+            expect(mA.hasSpike(), isFalse);
+            expect(mA.isDipping(), isFalse);
+        }
+        if (mA.hasSpike() || mA.isDipping()) {
+          mA.clear();
+          expect(mA.dataSet.length, 0);
+        }
+      }
     });
   });
 }

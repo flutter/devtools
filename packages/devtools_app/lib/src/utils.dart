@@ -695,12 +695,14 @@ class DebugTimingLogger {
 }
 
 /// Compute a simple moving average.
+/// [averagePeriod] default period is 50 units collected.
+/// [ratio] default percentage is 50% range is 0..1
 class MovingAverage {
   MovingAverage({
     this.averagePeriod = 50,
-    this.ratioSpike = 2,
+    this.ratio = .5,
     List<int> newDataSet,
-  }) {
+  }) : assert(ratio >= 0 && ratio <= 1, 'Value ratio $ratio is not 0 to 1.') {
     if (newDataSet != null) {
       var initialDataSet = newDataSet;
       final count = newDataSet.length;
@@ -723,7 +725,7 @@ class MovingAverage {
 
   /// Ratio of first item in dataSet when comparing to last - mean
   /// e.g., 2 is 50% (dataSet.first ~/ ratioSpike).
-  final double ratioSpike;
+  final double ratio;
 
   /// Sum of total heap used and external heap for unitPeriod.
   int averageSum = 0;
@@ -751,12 +753,18 @@ class MovingAverage {
     return periodRange > 0 ? averageSum / periodRange : 0;
   }
 
-  /// If the last - mean > than 50% of first value in period looks like a spike.
+  /// If the last - mean > ratioSpike% of first value in period we're spiking.
   bool hasSpike() {
     final first = dataSet.safeFirst ?? 0;
     final last = dataSet.safeLast ?? 0;
 
-    return last - mean > (first / ratioSpike);
+    return last - mean > (first * ratio);
+  }
+
+  /// If the mean @ ratioSpike% > last value in period we're dipping.
+  bool isDipping() {
+    final last = dataSet.safeLast ?? 0;
+    return (mean * ratio) > last;
   }
 }
 

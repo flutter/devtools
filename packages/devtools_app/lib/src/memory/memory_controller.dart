@@ -826,9 +826,9 @@ class MemoryController extends DisposableController
         final snapshotNode = SnapshotReference(snapshot);
         parent.addChild(snapshotNode);
 
-        if (snapshots.safeLast == snapshot) {
-          snapshotNode.addAllChildren(computeAllLibraries().children);
-        }
+        final allLibraries = computeAllLibraries(graph: snapshot.snapshotGraph);
+        snapshotNode.addAllChildren(allLibraries.children);
+
         return;
       }
 

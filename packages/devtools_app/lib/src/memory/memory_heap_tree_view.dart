@@ -140,16 +140,12 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   Widget snapshotDisplay;
 
   /// Used to detect a spike in memory usage.
-  MovingAverage heapMovingAverage = MovingAverage();
-
-  /// Max number of auto snapshots because RSS is exceeded.
-  static const maxRSSExceededSnapshots = 3;
+  MovingAverage heapMovingAverage = MovingAverage(averagePeriod: 100);
 
   /// Number of seconds between auto snapshots because RSS is exceeded.
-  static const maxRSSExceededDurationSecs = 5;
+  static const maxRSSExceededDurationSecs = 30;
 
-  /// Number of seconds between auto snapshots because memory spikes.
-  static const maxSpikeDurationSecs = 2;
+  static const minPercentIncrease = 30;
 
   /// Timestamp of HeapSample that caused auto snapshot.
   int spikeSnapshotTime;
@@ -157,8 +153,8 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   /// Timestamp when RSS exceeded auto snapshot.
   int rssSnapshotTime = 0;
 
-  /// Total number of snapshots because of RSS exceeded.
-  int rssSnapshotTaken = 0;
+  /// Total memory that caused last snapshot.
+  int lastSnapshotMemoryTotal = 0;
 
   @override
   void didChangeDependencies() {
@@ -251,23 +247,24 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
 
     final rssExceeded = heapSum > heapSample.rss;
     if (rssExceeded) {
-      // Only 3 snapshots at most every 5 seconds because RSS exceeded.
-      // Otherwise, we could snapshot forever.
+      final increase = heapSum - lastSnapshotMemoryTotal;
+      final rssPercentIncrease = lastSnapshotMemoryTotal > 0
+          ? increase / lastSnapshotMemoryTotal * 100
+          : 0;
       final rssTime = Duration(milliseconds: rssSnapshotTime);
-      // Number of seconds a snapshot happens because of RSS exceeded.
+      // Number of seconds since last snapshot happens because of RSS exceeded.
+      // Reduce rapid fire snapshots.
       final rssSnapshotPeriod = (sampleTime - rssTime).inSeconds;
       if (rssSnapshotPeriod > maxRSSExceededDurationSecs) {
-        if (rssSnapshotPeriod > 60) {
-          // If its been a minute since last RSS auto snapshot then we're
-          // ready for more snapshots reset counter.
-          rssSnapshotTaken = 0;
-        }
-        // Max number of snapshots because of RSS exceeded.
-        if (rssSnapshotTaken < maxRSSExceededSnapshots) {
-          rssSnapshotTaken++;
+        // minPercentIncrease larger than previous auto RSS snapshot then
+        // take another snapshot.
+        if (rssPercentIncrease > minPercentIncrease) {
           rssSnapshotTime = heapSample.timestamp;
+          lastSnapshotMemoryTotal = heapSum;
+
           takeSnapshot = true;
-          logger.log('AutoSnapshot - RSS exceeded @ $startDateTime.');
+          logger.log('AutoSnapshot - RSS exceeded '
+              '($rssPercentIncrease% increase) @ $startDateTime.');
         }
       }
     }
@@ -279,12 +276,23 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       takeSnapshot = true;
       logger.log('AutoSnapshot - memory spike @ $startDateTime} '
           'last snapshot ${(sampleTime - snapshotTime).inSeconds} seconds ago.');
+      logger.log('               '
+          'heap @ last snapshot = $lastSnapshotMemoryTotal, '
+          'heap total=$heapSum, RSS=${heapSample.rss}');
     }
 
     if (takeSnapshot) {
+      assert(!heapMovingAverage.isDipping());
       // Reset moving average for next spike.
       heapMovingAverage.clear();
+      // TODO(terry): Should get the real sum of the snapshot not the current memory.
+      //              Snapshot can take a bit and could be a lag.
+      lastSnapshotMemoryTotal = heapSum;
       _snapshot(userGenerated: false);
+    } else if (heapMovingAverage.isDipping()) {
+      // Reset the two things we're tracking spikes and RSS exceeded.
+      heapMovingAverage.clear();
+      lastSnapshotMemoryTotal = heapSum;
     }
   }
 
