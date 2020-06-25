@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:devtools_app/src/charts/treemap.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 
 import 'support/utils.dart';
 import 'support/wrappers.dart';
@@ -78,6 +81,6 @@ void main() {
       );
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
-    });
+    }, skip: kIsWeb || !Platform.isMacOS);
   });
 }
