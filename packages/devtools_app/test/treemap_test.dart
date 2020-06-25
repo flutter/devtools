@@ -61,14 +61,14 @@ void main() {
         (WidgetTester tester) async {
       const treemapKey = Key('Treemap');
       await pumpTreemapWidget(tester, treemapKey);
-      
+
       var text = 'package:flutter/src [1.82 MB]';
       expect(find.text(text), findsOneWidget);
       await tester.tap(find.text(text));
       await tester.pumpAndSettle();
-      
+
       await pumpTreemapWidget(tester, treemapKey);
-      
+
       text = 'dart:core [368 KB]';
       expect(find.text(text), findsNothing);
 
