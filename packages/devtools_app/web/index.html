@@ -58,7 +58,7 @@
     var realWarn = window.console.warn.bind(console);
     var tryingToClose = false;
     window.console.warn = function(obj) {
-      if( typeof(obj) == "string" && obj.indexOf("CanvasKit") != -1 && obj.indexOf("font") != -1) {
+      if( typeof obj == "string" && obj.indexOf("CanvasKit") != -1 && obj.indexOf("font") != -1) {
         if (!tryingToClose) {
           tryingToClose = true;
           window.alert(
