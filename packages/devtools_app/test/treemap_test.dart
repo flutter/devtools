@@ -57,7 +57,7 @@ void main() {
       );
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
-    });
+    }, skip: kIsWeb || !Platform.isMacOS);
 
     testWidgetsWithWindowSize(
         'builds treemap with expected data after zooming in', windowSize,
