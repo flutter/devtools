@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_snapshot_analysis/program_info.dart';
 
 import '../common_widgets.dart';
 import '../trees.dart';
