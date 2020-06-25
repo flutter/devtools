@@ -65,17 +65,34 @@ final NumberFormat nf = NumberFormat.decimalPattern();
 
 String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
 
+String prettyPrintBytes(int size, {bool includeUnit = false}) {
+  final sizeInKB = size / 1024.0;
+  if (sizeInKB < 1024.0) {
+    return '${printKB(size, includeUnit: includeUnit)}';
+  } else {
+    return '${printMB(size, fractionDigits: 2, includeUnit: includeUnit)}';
+  }
+}
+
 final NumberFormat _kbPattern = NumberFormat.decimalPattern()
   ..maximumFractionDigits = 0;
 
-String printKb(num bytes) {
+String printKB(num bytes, {bool includeUnit = false}) {
   // We add ((1024/2)-1) to the value before formatting so that a non-zero byte
   // value doesn't round down to 0.
-  return _kbPattern.format((bytes + 511) / 1024);
+  var output = _kbPattern.format((bytes + 511) / 1024);
+  if (includeUnit) {
+    output += ' KB';
+  }
+  return output;
 }
 
-String printMb(num bytes, [int fractionDigits = 1]) {
-  return (bytes / (1024 * 1024.0)).toStringAsFixed(fractionDigits);
+String printMB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
+  var output = (bytes / (1024 * 1024.0)).toStringAsFixed(fractionDigits);
+  if (includeUnit) {
+    output += ' MB';
+  }
+  return output;
 }
 
 String msText(
