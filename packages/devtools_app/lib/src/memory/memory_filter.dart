@@ -196,7 +196,10 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     // No libraries to compute until a snapshot exist.
     if (controller.snapshots.isEmpty) return;
 
-    final libraries = controller.computeAllLibraries().children;
+    final libraries = controller.libraryRoot == null
+        ? controller.activeSnapshot.children
+        : controller.libraryRoot.children;
+
     libraries..sort((a, b) => a.name.compareTo(b.name));
 
     for (final library in libraries) {
@@ -281,7 +284,9 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
             controller.libraryRoot = null;
             if (controller.lastSnapshot != null) {
               controller.heapGraph.computeFilteredGroups();
-              controller.computeAllLibraries();
+              controller.computeAllLibraries(
+                graph: controller.lastSnapshot.snapshotGraph,
+              );
             }
             cleanupFilteredLibrariesByGroupName();
             controller.updateFilter();
