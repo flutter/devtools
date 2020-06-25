@@ -5,10 +5,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_app/src/charts/treemap.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
+import 'package:vm_snapshot_analysis/treemap.dart';
 
 /// Scoping method which registers `listener` as a listener for `listenable`,
 /// invokes `callback`, and then removes the `listener`.
@@ -40,6 +42,46 @@ Future<Timeline> loadNetworkProfileTimeline() async {
     await File(testDataPath).readAsString(),
   );
   return Timeline.parse(httpTestData);
+}
+
+Future<TreemapNode> loadInstructionSizesJson() async {
+  const testDataPath = '../devtools_testing/lib/support/treemap_test_data.json';
+  final treemapTestData = jsonDecode(
+    await File(testDataPath).readAsString(),
+  );
+  final processedTestData = treemapFromJson(treemapTestData);
+  processedTestData['n'] = 'Root';
+
+  return generateTree(processedTestData);
+}
+
+// TODO(peterdjlee): Remove this method once code size PR (#2107) lands.
+/// Builds a tree with [TreemapNode] from [treeJson] which represents
+/// the hierarchical structure of the tree.
+TreemapNode generateTree(Map<String, dynamic> treeJson) {
+  var treemapNodeName = treeJson['n'];
+  if (treemapNodeName == '') treemapNodeName = 'Unnamed';
+  final rawChildren = treeJson['children'];
+  final treemapNodeChildren = <TreemapNode>[];
+
+  int treemapNodeSize = 0;
+  if (rawChildren != null) {
+    // If not a leaf node, build all children then take the sum of the
+    // children's sizes as its own size.
+    for (dynamic child in rawChildren) {
+      final childTreemapNode = generateTree(child);
+      treemapNodeChildren.add(childTreemapNode);
+      treemapNodeSize += childTreemapNode.byteSize;
+    }
+    treemapNodeSize = treemapNodeSize;
+  } else {
+    // If a leaf node, just take its own size.
+    // Defaults to 0 if a leaf node has a size of null.
+    treemapNodeSize = treeJson['value'] ?? 0;
+  }
+
+  return TreemapNode(name: treemapNodeName, byteSize: treemapNodeSize)
+    ..addAllChildren(treemapNodeChildren);
 }
 
 Future delay() {
