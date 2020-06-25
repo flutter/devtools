@@ -338,8 +338,7 @@ class TimelineController
 
     // TODO(kenz): once each trace event has a ui/raster distinction bit added to
     // the trace, we will not need to infer thread ids. This is not robust.
-    final uiThreadId =
-        _threadIdForEvents({uiEventName, uiEventNameOld}, traceEvents);
+    final uiThreadId = _threadIdForEvents({uiEventName}, traceEvents);
     final rasterThreadId = _threadIdForEvents({rasterEventName}, traceEvents);
 
     offlineTimelineData = offlineData.shallowClone();
