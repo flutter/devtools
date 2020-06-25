@@ -69,7 +69,7 @@ class Treemap extends StatelessWidget {
 
   static const treeMapHeaderHeight = 20.0;
 
-  static const minHeightToDisplayTitleText = 20.0;
+  static const minHeightToDisplayTitleText = 100.0;
 
   static const minHeightToDisplayCellText = 40.0;
 
@@ -83,7 +83,7 @@ class Treemap extends StatelessWidget {
     endIndex ??= nodes.length - 1;
     int sum = 0;
     for (int i = startIndex; i <= endIndex; i++) {
-      sum += nodes[i].byteSize;
+      sum += nodes[i].byteSize ?? 0;
     }
     return sum;
   }
@@ -517,8 +517,16 @@ class TreemapNode extends TreeNode<TreemapNode> {
   int byteSize;
 
   String displayText({bool oneLine = true}) {
+    var displayName = name;
+
+    if (parent != null && displayName.startsWith(parent.name)) {
+      displayName = displayName.replaceFirst(parent.name, '');
+      if (displayName.startsWith('/')) {
+        displayName = displayName.replaceFirst('/', '');
+      }
+    }
     final separator = oneLine ? ' ' : '\n';
-    return '$name$separator[${prettyPrintBytes(byteSize, includeUnit: true)}]';
+    return '$displayName$separator[${prettyPrintBytes(byteSize, includeUnit: true)}]';
   }
 
   /// Returns a list of [TreemapNode] in the path from root node to [this].
