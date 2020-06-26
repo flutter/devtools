@@ -55,12 +55,12 @@ class MemoryController extends DisposableController
 
   static const logFilenamePrefix = 'memory_log_';
 
-  final _showHeatMap = ValueNotifier<bool>(false);
+  final _showTreemap = ValueNotifier<bool>(false);
 
-  ValueListenable<bool> get showHeatMap => _showHeatMap;
+  ValueListenable<bool> get showTreemap => _showTreemap;
 
-  void toggleShowHeatMap(bool value) {
-    _showHeatMap.value = value;
+  void toggleShowTreemap(bool value) {
+    _showTreemap.value = value;
   }
 
   final snapshots = <Snapshot>[];
