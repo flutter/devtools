@@ -11,7 +11,6 @@ import '../charts/treemap.dart';
 
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';
-import 'memory_utils.dart';
 
 class MemoryTreemap extends StatefulWidget {
   const MemoryTreemap(this.controller);
