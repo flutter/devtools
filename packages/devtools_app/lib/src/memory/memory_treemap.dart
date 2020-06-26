@@ -61,7 +61,7 @@ class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
         controller.computeAllLibraries(rebuild: true);
       });
     });
-    // TODO(peterdjlee): Need to check if applicable to treemap.
+    // TODO(peterdjlee): Implement search and filter functionality for memory treemap.
     // addAutoDisposeListener(controller.selectTheSearchNotifier, () {
     //   setState(() {
     //     if (_trySelectItem()) {
