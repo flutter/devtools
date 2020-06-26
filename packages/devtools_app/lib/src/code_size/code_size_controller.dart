@@ -12,8 +12,12 @@ import 'package:vm_snapshot_analysis/treemap.dart';
 import '../charts/treemap.dart';
 
 class CodeSizeController {
-  ValueListenable<TreemapNode> get root => _root;
-  final _root = ValueNotifier<TreemapNode>(null);
+  /// The node set as the current root.
+  ValueListenable<TreemapNode> get currentRoot => _currentRoot;
+  final _currentRoot = ValueNotifier<TreemapNode>(null);
+
+  /// The root node of the entire tree.
+  TreemapNode topRoot;
 
   Future<void> loadTree(String filename) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
@@ -32,6 +36,7 @@ class CodeSizeController {
       // Build a tree with [TreemapNode] from [processedJsonMap].
       final newRoot = generateTree(processedJsonMap);
 
+      topRoot = newRoot;
       changeRoot(newRoot);
     });
   }
@@ -65,10 +70,10 @@ class CodeSizeController {
   }
 
   void clear() {
-    _root.value = null;
+    _currentRoot.value = null;
   }
 
   void changeRoot(TreemapNode newRoot) {
-    _root.value = newRoot;
+    _currentRoot.value = newRoot;
   }
 }
