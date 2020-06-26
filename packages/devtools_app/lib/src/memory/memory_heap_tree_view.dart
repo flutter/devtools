@@ -343,7 +343,8 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
           children: [
             _buildSnapshotControls(textTheme),
             const Expanded(child: SizedBox(width: defaultSpacing)),
-            _buildSearchFilterControls(),
+            // TODO(peterdjlee): Implement filter and search functionality for treemap.
+            if (!controller.showTreemap.value) _buildSearchFilterControls(),
           ],
         ),
         const SizedBox(height: denseRowSpacing),
