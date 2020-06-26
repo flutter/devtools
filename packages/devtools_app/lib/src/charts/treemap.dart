@@ -12,6 +12,7 @@ import '../utils.dart';
 enum PivotType { pivotByMiddle, pivotBySize }
 
 class Treemap extends StatelessWidget {
+  // TODO(peterdjlee): Consider auto-expanding rootNode named 'src'.
   const Treemap.fromRoot({
     @required this.rootNode,
     this.nodes,
