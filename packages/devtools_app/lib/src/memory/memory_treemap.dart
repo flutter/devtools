@@ -56,12 +56,12 @@ class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
       });
     });
 
-    addAutoDisposeListener(controller.filterNotifier, () {
-      setState(() {
-        controller.computeAllLibraries(rebuild: true);
-      });
-    });
     // TODO(peterdjlee): Implement search and filter functionality for memory treemap.
+    // addAutoDisposeListener(controller.filterNotifier, () {
+    //   setState(() {
+    //     controller.computeAllLibraries(rebuild: true);
+    //   });
+    // });
     // addAutoDisposeListener(controller.selectTheSearchNotifier, () {
     //   setState(() {
     //     if (_trySelectItem()) {
@@ -78,9 +78,9 @@ class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
     //   });
     // });
 
-    addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
-      setState(autoCompleteOverlaySetState(controller, context));
-    });
+    // addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
+    //   setState(autoCompleteOverlaySetState(controller, context));
+    // });
   }
 
   void _onRootChanged(TreemapNode newRoot) {
