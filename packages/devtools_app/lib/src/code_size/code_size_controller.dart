@@ -16,9 +16,6 @@ class CodeSizeController {
   ValueListenable<TreemapNode> get currentRoot => _currentRoot;
   final _currentRoot = ValueNotifier<TreemapNode>(null);
 
-  /// The root node of the entire tree.
-  TreemapNode topRoot;
-
   Future<void> loadTree(String filename) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
     final pathToFile = '$current/lib/src/code_size/stub_data/$filename';
@@ -36,7 +33,6 @@ class CodeSizeController {
       // Build a tree with [TreemapNode] from [processedJsonMap].
       final newRoot = generateTree(processedJsonMap);
 
-      topRoot = newRoot;
       changeRoot(newRoot);
     });
   }
