@@ -18,6 +18,7 @@ class CodeSizeTable extends StatelessWidget {
       sortColumn,
       _SizePercentageColumn(totalSize: rootNode.root.byteSize),
     ]);
+    
     return CodeSizeTable._(
       rootNode,
       treeColumn,
