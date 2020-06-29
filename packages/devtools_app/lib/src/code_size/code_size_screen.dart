@@ -84,14 +84,11 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
     }
   }
 
-  CodeSizeTable _buildTreeTable() {
-    return CodeSizeTable(
-      rootNode: root,
-      totalSize: controller.topRoot.byteSize,
-    );
+  Widget _buildTreeTable() {
+    return CodeSizeTable(rootNode: root);
   }
 
-  LayoutBuilder _buildTreemap() {
+  Widget _buildTreemap() {
     return LayoutBuilder(
       key: treemapKey,
       builder: (context, constraints) {

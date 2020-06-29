@@ -6,20 +6,16 @@ import '../table_data.dart';
 import '../utils.dart';
 
 class CodeSizeTable extends StatelessWidget {
-  factory CodeSizeTable({
-    @required rootNode,
-    @required totalSize,
-  }) {
-    final treeColumn = _LibraryRefColumn(currentRootLevel: rootNode.level);
+  factory CodeSizeTable({@required rootNode}) {
+    final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
     final sortColumn = _SizeColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
       sortColumn,
-      _SizePercentageColumn(totalSize: totalSize),
+      _SizePercentageColumn(totalSize: rootNode.root.byteSize),
     ]);
     return CodeSizeTable._(
       rootNode,
-      totalSize,
       treeColumn,
       sortColumn,
       columns,
@@ -28,14 +24,12 @@ class CodeSizeTable extends StatelessWidget {
 
   const CodeSizeTable._(
     this.rootNode,
-    this.totalSize,
     this.treeColumn,
     this.sortColumn,
     this.columns,
   );
 
   final TreemapNode rootNode;
-  final int totalSize;
 
   final TreeColumnData<TreemapNode> treeColumn;
   final ColumnData<TreemapNode> sortColumn;
@@ -54,9 +48,8 @@ class CodeSizeTable extends StatelessWidget {
   }
 }
 
-class _LibraryRefColumn extends TreeColumnData<TreemapNode> {
-  _LibraryRefColumn({@required this.currentRootLevel})
-      : super('Library or Class');
+class _NameColumn extends TreeColumnData<TreemapNode> {
+  _NameColumn({@required this.currentRootLevel}) : super('Library or Class');
 
   final int currentRootLevel;
 
@@ -68,7 +61,7 @@ class _LibraryRefColumn extends TreeColumnData<TreemapNode> {
 
   @override
   String getTooltip(TreemapNode dataObject) => dataObject.displayText();
-  
+
   @override
   double getNodeIndentPx(TreemapNode dataObject) {
     final relativeLevel = dataObject.level - currentRootLevel - 1;
