@@ -17,8 +17,8 @@ class CodeSizeController {
 
   Future<void> loadTree(String filename) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
-    final codeSizePath = '$current/lib/src/code_size/stub_data/';
-    final inputJson = File(codeSizePath + filename);
+    final pathToFile = '$current/lib/src/code_size/stub_data/$filename';
+    final inputJson = File(pathToFile);
 
     await inputJson.readAsString().then((inputJsonString) {
       final inputJsonMap = json.decode(inputJsonString);

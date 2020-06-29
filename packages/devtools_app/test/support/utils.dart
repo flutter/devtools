@@ -44,8 +44,21 @@ Future<Timeline> loadNetworkProfileTimeline() async {
   return Timeline.parse(httpTestData);
 }
 
-Future<TreemapNode> loadInstructionSizesJson() async {
-  const testDataPath = '../devtools_testing/lib/support/treemap_test_data.json';
+Future<TreemapNode> loadInstructionSizesJsonAsTree() async {
+  const testDataPath =
+      '../devtools_testing/lib/support/treemap_test_data_sizes.json';
+  final treemapTestData = jsonDecode(
+    await File(testDataPath).readAsString(),
+  );
+  final processedTestData = treemapFromJson(treemapTestData);
+  processedTestData['n'] = 'Root';
+
+  return generateTree(processedTestData);
+}
+
+Future<TreemapNode> loadV8JsonAsTree() async {
+  const testDataPath =
+      '../devtools_testing/lib/support/treemap_test_data_v8.json';
   final treemapTestData = jsonDecode(
     await File(testDataPath).readAsString(),
   );

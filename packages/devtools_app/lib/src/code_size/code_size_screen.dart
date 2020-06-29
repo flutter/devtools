@@ -59,7 +59,7 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
       });
     });
 
-    controller.loadTree('sizes.json');
+    controller.loadTree('v8.json');
   }
 
   @override

@@ -13,74 +13,167 @@ import 'support/utils.dart';
 import 'support/wrappers.dart';
 
 void main() {
-  group('Treemap', () {
-    TreemapNode root;
+  group(
+    'Treemap from instruction sizes',
+    () {
+      TreemapNode root;
 
-    setUp(() async {
-      root = await loadInstructionSizesJson();
-    });
+      setUp(() async {
+        root = await loadInstructionSizesJsonAsTree();
+      });
 
-    void changeRoot(TreemapNode newRoot) {
-      root = newRoot;
-    }
+      void changeRoot(TreemapNode newRoot) {
+        root = newRoot;
+      }
 
-    // Pump treemap widget with tree built with test data.
-    Future<void> pumpTreemapWidget(WidgetTester tester, Key treemapKey) async {
-      await tester.pumpWidget(wrap(LayoutBuilder(
-        key: treemapKey,
-        builder: (context, constraints) {
-          return Treemap.fromRoot(
-            rootNode: root,
-            levelsVisible: 2,
-            isOutermostLevel: true,
-            height: constraints.maxHeight,
-            onRootChangedCallback: changeRoot,
+      // Pump treemap widget with tree built with test data.
+      Future<void> pumpTreemapWidget(
+          WidgetTester tester, Key treemapKey) async {
+        await tester.pumpWidget(wrap(LayoutBuilder(
+          key: treemapKey,
+          builder: (context, constraints) {
+            return Treemap.fromRoot(
+              rootNode: root,
+              levelsVisible: 2,
+              isOutermostLevel: true,
+              height: constraints.maxHeight,
+              onRootChangedCallback: changeRoot,
+            );
+          },
+        )));
+
+        await tester.pumpAndSettle();
+      }
+
+      const windowSize = Size(2225.0, 1000.0);
+
+      testWidgetsWithWindowSize(
+        'builds treemap with expected data',
+        windowSize,
+        (WidgetTester tester) async {
+          const treemapKey = Key('Treemap');
+          await pumpTreemapWidget(tester, treemapKey);
+
+          expect(find.byKey(treemapKey), findsOneWidget);
+
+          await expectLater(
+            find.byKey(treemapKey),
+            matchesGoldenFile('goldens/treemap_sizes.png'),
           );
+          // Await delay for golden comparison.
+          await tester.pumpAndSettle(const Duration(seconds: 2));
         },
-      )));
-
-      await tester.pumpAndSettle();
-    }
-
-    const windowSize = Size(2225.0, 1000.0);
-
-    testWidgetsWithWindowSize('builds treemap with expected data', windowSize,
-        (WidgetTester tester) async {
-      const treemapKey = Key('Treemap');
-      await pumpTreemapWidget(tester, treemapKey);
-
-      expect(find.byKey(treemapKey), findsOneWidget);
-
-      await expectLater(
-        find.byKey(treemapKey),
-        matchesGoldenFile('goldens/treemap.png'),
+        skip: kIsWeb || !Platform.isMacOS,
       );
-      // Await delay for golden comparison.
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-    }, skip: kIsWeb || !Platform.isMacOS);
 
-    testWidgetsWithWindowSize(
-        'builds treemap with expected data after zooming in', windowSize,
+      testWidgetsWithWindowSize(
+        'builds treemap with expected data after zooming in',
+        windowSize,
         (WidgetTester tester) async {
-      const treemapKey = Key('Treemap');
-      await pumpTreemapWidget(tester, treemapKey);
+          const treemapKey = Key('Treemap');
+          await pumpTreemapWidget(tester, treemapKey);
 
-      var text = 'package:flutter/src [1.82 MB]';
-      expect(find.text(text), findsOneWidget);
-      await tester.tap(find.text(text));
-      await tester.pumpAndSettle();
+          var text = 'package:flutter/src [1.82 MB]';
+          expect(find.text(text), findsOneWidget);
+          await tester.tap(find.text(text));
+          await tester.pumpAndSettle();
 
-      await pumpTreemapWidget(tester, treemapKey);
+          await pumpTreemapWidget(tester, treemapKey);
 
-      text = 'dart:core [368 KB]';
-      expect(find.text(text), findsNothing);
+          text = 'dart:ui [145 KB]';
+          expect(find.text(text), findsNothing);
 
-      await expectLater(
-        find.byKey(treemapKey),
-        matchesGoldenFile('goldens/treemap_zoom.png'),
+          await expectLater(
+            find.byKey(treemapKey),
+            matchesGoldenFile('goldens/treemap_sizes_zoom.png'),
+          );
+          // Await delay for golden comparison.
+          await tester.pumpAndSettle(const Duration(seconds: 2));
+        },
+        skip: kIsWeb || !Platform.isMacOS,
       );
-      // Await delay for golden comparison.
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-    }, skip: kIsWeb || !Platform.isMacOS);
-  });
+    },
+  );
+
+  group(
+    'Treemap from v8 snapshots',
+    () {
+      TreemapNode root;
+
+      setUp(() async {
+        root = await loadV8JsonAsTree();
+      });
+
+      void changeRoot(TreemapNode newRoot) {
+        root = newRoot;
+      }
+
+      // Pump treemap widget with tree built with test data.
+      Future<void> pumpTreemapWidget(
+          WidgetTester tester, Key treemapKey) async {
+        await tester.pumpWidget(wrap(LayoutBuilder(
+          key: treemapKey,
+          builder: (context, constraints) {
+            return Treemap.fromRoot(
+              rootNode: root,
+              levelsVisible: 2,
+              isOutermostLevel: true,
+              height: constraints.maxHeight,
+              onRootChangedCallback: changeRoot,
+            );
+          },
+        )));
+
+        await tester.pumpAndSettle();
+      }
+
+      const windowSize = Size(2225.0, 1000.0);
+
+      testWidgetsWithWindowSize(
+        'builds treemap with expected data',
+        windowSize,
+        (WidgetTester tester) async {
+          const treemapKey = Key('Treemap');
+          await pumpTreemapWidget(tester, treemapKey);
+
+          expect(find.byKey(treemapKey), findsOneWidget);
+
+          await expectLater(
+            find.byKey(treemapKey),
+            matchesGoldenFile('goldens/treemap_v8.png'),
+          );
+          // Await delay for golden comparison.
+          await tester.pumpAndSettle(const Duration(seconds: 2));
+        },
+        skip: kIsWeb || !Platform.isMacOS,
+      );
+
+      testWidgetsWithWindowSize(
+        'builds treemap with expected data after zooming in',
+        windowSize,
+        (WidgetTester tester) async {
+          const treemapKey = Key('Treemap');
+          await pumpTreemapWidget(tester, treemapKey);
+
+          var text = 'package:flutter [2.99 MB]';
+          expect(find.text(text), findsOneWidget);
+          await tester.tap(find.text(text));
+          await tester.pumpAndSettle();
+
+          await pumpTreemapWidget(tester, treemapKey);
+
+          text = 'dart:ui [230 KB]';
+          expect(find.text(text), findsNothing);
+
+          await expectLater(
+            find.byKey(treemapKey),
+            matchesGoldenFile('goldens/treemap_v8_zoom.png'),
+          );
+          // Await delay for golden comparison.
+          await tester.pumpAndSettle(const Duration(seconds: 2));
+        },
+        skip: kIsWeb || !Platform.isMacOS,
+      );
+    },
+  );
 }
