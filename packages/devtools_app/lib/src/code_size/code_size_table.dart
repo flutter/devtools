@@ -1,73 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../utils.dart';
-import 'code_size_controller.dart';
 
-class TreemapTreeTable extends StatefulWidget {
-  const TreemapTreeTable();
-
-  @override
-  TreemapTreeTableState createState() => TreemapTreeTableState();
-}
-
-class TreemapTreeTableState extends State<TreemapTreeTable>
-    with AutoDisposeMixin {
-  TreeColumnData<TreemapNode> treeColumn =
-      _LibraryRefColumn(currentRootLevel: 0);
-  final List<ColumnData<TreemapNode>> columns = [];
-
-  CodeSizeController controller;
-
-  TreemapNode currentRoot;
-  @override
-  void initState() {
-    super.initState();
-    setupColumns();
-  }
-
-  void setupColumns() {
-    columns.addAll([
+class CodeSizeTable extends StatelessWidget {
+  factory CodeSizeTable({
+    @required rootNode,
+    @required totalSize,
+  }) {
+    final treeColumn = _LibraryRefColumn(currentRootLevel: rootNode.level);
+    final sortColumn = _SizeColumn();
+    final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
-      _ShallowSizeColumn(),
-      _SizePercentageColumn(totalSize: 0),
+      sortColumn,
+      _SizePercentageColumn(totalSize: totalSize),
     ]);
+    return CodeSizeTable._(
+      rootNode,
+      totalSize,
+      treeColumn,
+      sortColumn,
+      columns,
+    );
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final newController = Provider.of<CodeSizeController>(context);
-    if (newController == controller) return;
-    controller = newController;
+  const CodeSizeTable._(
+    this.rootNode,
+    this.totalSize,
+    this.treeColumn,
+    this.sortColumn,
+    this.columns,
+  );
 
-    onCurrentRootChanged();
+  final TreemapNode rootNode;
+  final int totalSize;
 
-    addAutoDisposeListener(controller.currentRoot, onCurrentRootChanged);
-  }
-
-  void onCurrentRootChanged() {
-    setState(() {
-      currentRoot = controller.currentRoot.value;
-      treeColumn = _LibraryRefColumn(currentRootLevel: currentRoot.level);
-      columns[0] = treeColumn;
-      columns[2] =
-          _SizePercentageColumn(totalSize: controller.topRoot.byteSize);
-    });
-  }
+  final TreeColumnData<TreemapNode> treeColumn;
+  final ColumnData<TreemapNode> sortColumn;
+  final List<ColumnData<TreemapNode>> columns;
 
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
-      dataRoots: currentRoot.children,
+      dataRoots: rootNode.children,
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
-      sortColumn: columns[1],
+      sortColumn: sortColumn,
       sortDirection: SortDirection.descending,
     );
   }
@@ -98,8 +79,8 @@ class _LibraryRefColumn extends TreeColumnData<TreemapNode> {
   }
 }
 
-class _ShallowSizeColumn extends ColumnData<TreemapNode> {
-  _ShallowSizeColumn() : super('Shallow', alignment: ColumnAlignment.right);
+class _SizeColumn extends ColumnData<TreemapNode> {
+  _SizeColumn() : super('Size', alignment: ColumnAlignment.right);
 
   @override
   dynamic getValue(TreemapNode dataObject) => dataObject.byteSize;
@@ -124,7 +105,7 @@ class _ShallowSizeColumn extends ColumnData<TreemapNode> {
 
 class _SizePercentageColumn extends ColumnData<TreemapNode> {
   _SizePercentageColumn({@required this.totalSize})
-      : super('% of Total', alignment: ColumnAlignment.right);
+      : super('% of Total Size', alignment: ColumnAlignment.right);
 
   final int totalSize;
 

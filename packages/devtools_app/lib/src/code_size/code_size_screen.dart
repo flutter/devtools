@@ -13,7 +13,7 @@ import '../split.dart';
 import 'code_size_controller.dart';
 import 'code_size_table.dart';
 
-bool codeSizeScreenEnabled = true;
+bool codeSizeScreenEnabled = false;
 
 class CodeSizeScreen extends Screen {
   const CodeSizeScreen() : super(id, title: 'Code Size', icon: Octicons.rss);
@@ -39,11 +39,9 @@ class CodeSizeBody extends StatefulWidget {
 class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
   @visibleForTesting
   static const treemapKey = Key('Treemap');
-  @visibleForTesting
-  static const emptyKey = Key('Empty');
 
-  static const initialFractionForTreemap = 0.5;
-  static const initialFractionForTreeTable = 0.5;
+  static const initialFractionForTreemap = 0.67;
+  static const initialFractionForTreeTable = 0.33;
 
   CodeSizeController controller;
 
@@ -73,19 +71,8 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
       return Split(
         axis: Axis.vertical,
         children: [
-          LayoutBuilder(
-            key: treemapKey,
-            builder: (context, constraints) {
-              return Treemap.fromRoot(
-                rootNode: root,
-                levelsVisible: 2,
-                isOutermostLevel: true,
-                height: constraints.maxHeight,
-                onRootChangedCallback: controller.changeRoot,
-              );
-            },
-          ),
-          const TreemapTreeTable(),
+          _buildTreemap(),
+          _buildTreeTable(),
         ],
         initialFractions: const [
           initialFractionForTreemap,
@@ -95,5 +82,27 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
     } else {
       return const SizedBox();
     }
+  }
+
+  CodeSizeTable _buildTreeTable() {
+    return CodeSizeTable(
+      rootNode: root,
+      totalSize: controller.topRoot.byteSize,
+    );
+  }
+
+  LayoutBuilder _buildTreemap() {
+    return LayoutBuilder(
+      key: treemapKey,
+      builder: (context, constraints) {
+        return Treemap.fromRoot(
+          rootNode: root,
+          levelsVisible: 2,
+          isOutermostLevel: true,
+          height: constraints.maxHeight,
+          onRootChangedCallback: controller.changeRoot,
+        );
+      },
+    );
   }
 }
