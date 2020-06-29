@@ -63,6 +63,7 @@ void main() {
           // Await delay for golden comparison.
           await tester.pumpAndSettle(const Duration(seconds: 2));
         },
+        skip: kIsWeb || !Platform.isMacOS,
       );
 
       testWidgetsWithWindowSize(
@@ -89,9 +90,9 @@ void main() {
           // Await delay for golden comparison.
           await tester.pumpAndSettle(const Duration(seconds: 2));
         },
+        skip: kIsWeb || !Platform.isMacOS,
       );
     },
-    skip: kIsWeb || !Platform.isMacOS,
   );
 
   group(
@@ -144,6 +145,7 @@ void main() {
           // Await delay for golden comparison.
           await tester.pumpAndSettle(const Duration(seconds: 2));
         },
+        skip: kIsWeb || !Platform.isMacOS,
       );
 
       testWidgetsWithWindowSize(
@@ -170,8 +172,8 @@ void main() {
           // Await delay for golden comparison.
           await tester.pumpAndSettle(const Duration(seconds: 2));
         },
+        skip: kIsWeb || !Platform.isMacOS,
       );
     },
-    skip: kIsWeb || !Platform.isMacOS,
   );
 }
