@@ -520,7 +520,12 @@ class TreemapNode extends TreeNode<TreemapNode> {
   String displayText({bool oneLine = true}) {
     var displayName = name;
 
-    if (parent != null && displayName.startsWith(parent.name)) {
+    // Trim beginning of the name of [this] if it starts with its parent's name.
+    // If the parent node and the child node's name are exactly the same,
+    // do not trim in order to avoid empty names.
+    if (parent != null &&
+        displayName.startsWith(parent.name) &&
+        displayName != parent.name) {
       displayName = displayName.replaceFirst(parent.name, '');
       if (displayName.startsWith('/')) {
         displayName = displayName.replaceFirst('/', '');

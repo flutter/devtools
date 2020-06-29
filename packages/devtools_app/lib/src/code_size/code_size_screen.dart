@@ -9,7 +9,9 @@ import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
 import '../octicons.dart';
 import '../screen.dart';
+import '../split.dart';
 import 'code_size_controller.dart';
+import 'code_size_table.dart';
 
 bool codeSizeScreenEnabled = false;
 
@@ -37,8 +39,9 @@ class CodeSizeBody extends StatefulWidget {
 class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
   @visibleForTesting
   static const treemapKey = Key('Treemap');
-  @visibleForTesting
-  static const emptyKey = Key('Empty');
+
+  static const initialFractionForTreemap = 0.67;
+  static const initialFractionForTreeTable = 0.33;
 
   CodeSizeController controller;
 
@@ -52,10 +55,10 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
     if (newController == controller) return;
     controller = newController;
 
-    root = controller.root.value;
-    addAutoDisposeListener(controller.root, () {
+    root = controller.currentRoot.value;
+    addAutoDisposeListener(controller.currentRoot, () {
       setState(() {
-        root = controller.root.value;
+        root = controller.currentRoot.value;
       });
     });
 
@@ -65,20 +68,38 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     if (root != null) {
-      return LayoutBuilder(
-        key: treemapKey,
-        builder: (context, constraints) {
-          return Treemap.fromRoot(
-            rootNode: root,
-            levelsVisible: 2,
-            isOutermostLevel: true,
-            height: constraints.maxHeight,
-            onRootChangedCallback: controller.changeRoot,
-          );
-        },
+      return Split(
+        axis: Axis.vertical,
+        children: [
+          _buildTreemap(),
+          _buildTreeTable(),
+        ],
+        initialFractions: const [
+          initialFractionForTreemap,
+          initialFractionForTreeTable,
+        ],
       );
     } else {
       return const SizedBox();
     }
+  }
+
+  Widget _buildTreeTable() {
+    return CodeSizeTable(rootNode: root);
+  }
+
+  Widget _buildTreemap() {
+    return LayoutBuilder(
+      key: treemapKey,
+      builder: (context, constraints) {
+        return Treemap.fromRoot(
+          rootNode: root,
+          levelsVisible: 2,
+          isOutermostLevel: true,
+          height: constraints.maxHeight,
+          onRootChangedCallback: controller.changeRoot,
+        );
+      },
+    );
   }
 }
