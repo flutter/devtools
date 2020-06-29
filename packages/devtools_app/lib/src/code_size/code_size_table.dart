@@ -68,10 +68,7 @@ class _LibraryRefColumn extends TreeColumnData<TreemapNode> {
 
   @override
   String getTooltip(TreemapNode dataObject) => dataObject.displayText();
-
-  @override
-  double get fixedWidthPx => 250.0;
-
+  
   @override
   double getNodeIndentPx(TreemapNode dataObject) {
     final relativeLevel = dataObject.level - currentRootLevel - 1;
