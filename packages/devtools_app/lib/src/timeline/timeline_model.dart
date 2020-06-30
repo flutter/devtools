@@ -11,6 +11,7 @@ import '../service_manager.dart';
 import '../trace_event.dart';
 import '../trees.dart';
 import '../utils.dart';
+import 'timeline_processor.dart';
 
 class TimelineData {
   TimelineData({
@@ -735,7 +736,7 @@ class SyncTimelineEvent extends TimelineEvent {
   SyncTimelineEvent(TraceEventWrapper firstTraceEvent) : super(firstTraceEvent);
 
   bool get isUiEventFlow => subtreeHasNodeWithCondition(
-      (TimelineEvent event) => event.name.contains('Engine::BeginFrame'));
+      (TimelineEvent event) => event.name.contains(uiEventName));
 
   bool get isRasterEventFlow => subtreeHasNodeWithCondition(
       (TimelineEvent event) => event.name.contains('PipelineConsume'));

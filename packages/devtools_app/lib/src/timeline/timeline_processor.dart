@@ -40,11 +40,7 @@ StringBuffer debugFrameTracking = StringBuffer();
 
 const String rasterEventName = 'GPURasterizer::Draw';
 
-// For older versions of Flutter, the starting event for the UI portion of a
-// Flutter frame was 'VSYNC'. We need to check for both so that we can still
-// support users on older versions of Flutter.
-const String uiEventNameOld = 'VSYNC';
-const String uiEventName = 'VsyncProcessCallback';
+const String uiEventName = 'Engine::BeginFrame';
 
 const String messageLoopFlushTasks = 'MessageLoop::FlushTasks';
 
