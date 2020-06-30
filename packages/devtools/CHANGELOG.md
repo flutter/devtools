@@ -1,3 +1,6 @@
+## 0.8.0+1
+* Build with fix for canvas kit crasher
+
 ## 0.8.0
 * Ship Flutter Web version of DevTools by default
 * Update package:vm_service dependency to ^4.1.0
