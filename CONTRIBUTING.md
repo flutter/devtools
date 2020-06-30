@@ -10,7 +10,7 @@ You can do this online, and it only takes a minute. If you've never submitted co
 you must add your (or your organization's) name and contact info to the [AUTHORS](AUTHORS)
 file.
 
-## Development
+## Development prep
 
 - `git clone https://github.com/flutter/devtools`
 - `cd devtools/packages/devtools_app`
@@ -22,22 +22,9 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
 
-### `dart:html` Web App
+## Development
 
-To run the `dart:html` build of DevTools currently shipping in production, follow these steps.
-
-From the packages/devtools_app directory:
-- `alias build_runner="flutter pub run build_runner"`
-- `build_runner serve web`
-
-Then, open a browser window to the local url specified by the tool. After the page has loaded, 
-copy and paste the url for the debug service into the DevTools app:
-
-- `Debug service listening on http://localhost:8080/asdfjASD5YJK=`
-
-## Development (Flutter)
-
-To run the experimental Flutter for Web build of DevTools, follow these steps.
+To run DevTools as a Flutter web app, follow these steps.
 
 First, perform one-time setup:
 
