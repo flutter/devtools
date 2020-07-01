@@ -1028,8 +1028,6 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context) {
-    final fontStyle = fixedFontStyle(context);
-
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget content;
       final node = widget.node;
@@ -1070,7 +1068,7 @@ class _TableRowState<T> extends State<TableRow<T>>
         content ??= Text(
           column.getDisplayValue(node),
           overflow: TextOverflow.ellipsis,
-          style: fontStyle,
+          style: contentTextStyle(column),
           maxLines: 1,
         );
 
@@ -1122,6 +1120,12 @@ class _TableRowState<T> extends State<TableRow<T>>
         ),
       ),
     );
+  }
+
+  TextStyle contentTextStyle(ColumnData<T> column) {
+    final textColor = column.getTextColor(widget.node);
+    final fontStyle = fixedFontStyle(context);
+    return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
   }
 
   @override

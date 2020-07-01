@@ -84,7 +84,7 @@ class Treemap extends StatelessWidget {
     endIndex ??= nodes.length - 1;
     int sum = 0;
     for (int i = startIndex; i <= endIndex; i++) {
-      sum += nodes[i].byteSize ?? 0;
+      sum += nodes[i].unsignedByteSize ?? 0;
     }
     return sum;
   }
@@ -97,8 +97,8 @@ class Treemap extends StatelessWidget {
         int pivotIndex = -1;
         double maxSize = double.negativeInfinity;
         for (int i = 0; i < children.length; i++) {
-          if (children[i].byteSize > maxSize) {
-            maxSize = children[i].byteSize.toDouble();
+          if (children[i].unsignedByteSize > maxSize) {
+            maxSize = children[i].unsignedByteSize.toDouble();
             pivotIndex = i;
           }
         }
@@ -144,13 +144,13 @@ class Treemap extends StatelessWidget {
     }
 
     // Sort the list of treemap nodes, descending in size.
-    children.sort((a, b) => b.byteSize.compareTo(a.byteSize));
+    children.sort((a, b) => b.unsignedByteSize.compareTo(a.unsignedByteSize));
     if (children.length <= 2) {
       final positionedChildren = <Positioned>[];
       double offset = 0;
 
       for (final child in children) {
-        final ratio = child.byteSize / totalByteSize;
+        final ratio = child.unsignedByteSize / totalByteSize;
 
         positionedChildren.add(
           Positioned(
@@ -176,7 +176,7 @@ class Treemap extends StatelessWidget {
     final pivotIndex = computePivot(children);
 
     final pivotNode = children[pivotIndex];
-    final pivotByteSize = pivotNode.byteSize;
+    final pivotByteSize = pivotNode.unsignedByteSize;
 
     final list1 = children.sublist(0, pivotIndex);
     final list1ByteSize = computeByteSizeForNodes(nodes: list1);
@@ -350,12 +350,12 @@ class Treemap extends StatelessWidget {
   }
 
   Text buildNameAndSizeText({
-    @required Color fontColor,
+    @required Color textColor,
     @required bool oneLine,
   }) {
     return Text(
       rootNode.displayText(oneLine: oneLine),
-      style: TextStyle(color: fontColor),
+      style: TextStyle(color: textColor),
       textAlign: TextAlign.center,
       overflow: TextOverflow.ellipsis,
     );
@@ -407,13 +407,14 @@ class Treemap extends StatelessWidget {
             child: buildSelectable(
               child: Container(
                 decoration: BoxDecoration(
-                  color: mainUiColor,
+                  color: rootNode.displayColor,
                   border: Border.all(color: Colors.black87),
                 ),
                 child: Center(
                   child: height > minHeightToDisplayCellText
                       ? buildNameAndSizeText(
-                          fontColor: Colors.black,
+                          textColor:
+                              rootNode.showDiff ? Colors.white : Colors.black,
                           oneLine: false,
                         )
                       : const SizedBox(),
@@ -460,7 +461,7 @@ class Treemap extends StatelessWidget {
             border: Border.all(color: Colors.black87),
           ),
           child: buildNameAndSizeText(
-            fontColor: Theme.of(context).textTheme.bodyText2.color,
+            textColor: Theme.of(context).textTheme.bodyText2.color,
             oneLine: true,
           ),
         ),
@@ -509,6 +510,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
     @required this.name,
     this.byteSize = 0,
     this.childrenMap = const <String, TreemapNode>{},
+    this.showDiff = false,
   })  : assert(name != null),
         assert(byteSize != null),
         assert(childrenMap != null);
@@ -516,6 +518,18 @@ class TreemapNode extends TreeNode<TreemapNode> {
   final String name;
   final Map<String, TreemapNode> childrenMap;
   int byteSize;
+
+  final bool showDiff;
+
+  int get unsignedByteSize => byteSize.abs();
+
+  Color get displayColor {
+    if (!showDiff) return mainUiColor;
+    if (byteSize < 0)
+      return treemapDecreaseColor;
+    else
+      return treemapIncreaseColor;
+  }
 
   String displayText({bool oneLine = true}) {
     var displayName = name;

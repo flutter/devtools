@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import 'trees.dart';
@@ -352,6 +353,7 @@ class TreeTableData<T extends TreeNode<T>> extends TableData<T> {
   }
 }
 
+// TODO(peterdjlee): Remove get from method names.
 abstract class ColumnData<T> {
   ColumnData(
     this.title, {
@@ -392,6 +394,9 @@ abstract class ColumnData<T> {
 
   /// Get the cell's tooltip value from the given [dataObject].
   String getTooltip(T dataObject) => getDisplayValue(dataObject);
+
+  /// Get the cell's text color from the given [dataObject].
+  Color getTextColor(T dataObject) => null;
 
   @override
   String toString() => title;
