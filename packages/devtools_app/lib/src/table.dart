@@ -1028,8 +1028,6 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context) {
-    final fontStyle = fixedFontStyle(context);
-
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget content;
       final node = widget.node;

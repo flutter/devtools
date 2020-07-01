@@ -201,31 +201,5 @@ class _DiffColumn extends ColumnData<TreemapNode> {
   }
 }
 
-// TODO(peterdjlee): Calculate percentage by (new - old) / new for every diff.
-class _DiffPercentageColumn extends ColumnData<TreemapNode> {
-  _DiffPercentageColumn({@required this.totalDiff})
-      : super('% of Total Diff', alignment: ColumnAlignment.right);
-
-  final int totalDiff;
-
-  @override
-  dynamic getValue(TreemapNode dataObject) =>
-      (dataObject.unsignedByteSize / totalDiff) * 100;
-
-  @override
-  String getDisplayValue(TreemapNode dataObject) =>
-      '${getValue(dataObject).toStringAsFixed(2)} %';
-
-  @override
-  bool get supportsSorting => true;
-
-  @override
-  int compare(TreemapNode a, TreemapNode b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
-    return valueA.compareTo(valueB);
-  }
-
-  @override
-  double get fixedWidthPx => 100.0;
-}
+// TODO(peterdjlee): Add diff percentage column where we calculate percentage by
+//                   (new - old) / new for every diff.
