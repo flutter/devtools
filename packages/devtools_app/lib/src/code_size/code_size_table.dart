@@ -168,13 +168,13 @@ class CodeSizeDiffTable extends StatelessWidget {
 
 // TODO(peterdjlee): Add an opaque overlay / background to differentiate from
 //                   other columns.
-// TODO(peterdjlee): Add up or down arrows indicating increase or decrease for display value.
 class _DiffColumn extends ColumnData<TreemapNode> {
   _DiffColumn() : super('Change', alignment: ColumnAlignment.right);
 
   @override
   dynamic getValue(TreemapNode dataObject) => dataObject.byteSize;
 
+// TODO(peterdjlee): Add up or down arrows indicating increase or decrease for display value.
   @override
   String getDisplayValue(TreemapNode dataObject) =>
       prettyPrintBytes(dataObject.byteSize, includeUnit: true);
