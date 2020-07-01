@@ -53,3 +53,6 @@ const unknownColorPalette = [
 
 const uiJankColor = Color(0xFFF5846B);
 const rasterJankColor = Color(0xFFC3595A);
+
+const codeSizeIncreaseColor = Color(0xFF3FB549);
+const codeSizeDecreaseColor = Color(0xFF77102F);

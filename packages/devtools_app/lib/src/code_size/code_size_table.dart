@@ -9,8 +9,8 @@ import '../table.dart';
 import '../table_data.dart';
 import '../utils.dart';
 
-class CodeSizeTable extends StatelessWidget {
-  factory CodeSizeTable({@required rootNode}) {
+class CodeSizeSnapshotTable extends StatelessWidget {
+  factory CodeSizeSnapshotTable({@required rootNode}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
     final sortColumn = _SizeColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
@@ -19,7 +19,7 @@ class CodeSizeTable extends StatelessWidget {
       _SizePercentageColumn(totalSize: rootNode.root.byteSize),
     ]);
 
-    return CodeSizeTable._(
+    return CodeSizeSnapshotTable._(
       rootNode,
       treeColumn,
       sortColumn,
@@ -27,7 +27,7 @@ class CodeSizeTable extends StatelessWidget {
     );
   }
 
-  const CodeSizeTable._(
+  const CodeSizeSnapshotTable._(
     this.rootNode,
     this.treeColumn,
     this.sortColumn,
@@ -124,4 +124,70 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
 
   @override
   double get fixedWidthPx => 100.0;
+}
+
+class CodeSizeDiffTable extends StatelessWidget {
+  factory CodeSizeDiffTable({@required rootNode}) {
+    final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
+    final columns = List<ColumnData<TreemapNode>>.unmodifiable([
+      treeColumn,
+      _DiffColumn(),
+    ]);
+
+    return CodeSizeDiffTable._(
+      rootNode,
+      treeColumn,
+      columns,
+    );
+  }
+
+  const CodeSizeDiffTable._(
+    this.rootNode,
+    this.treeColumn,
+    this.columns,
+  );
+
+  final TreemapNode rootNode;
+
+  final TreeColumnData<TreemapNode> treeColumn;
+  final List<ColumnData<TreemapNode>> columns;
+
+  @override
+  Widget build(BuildContext context) {
+    return TreeTable<TreemapNode>(
+      dataRoots: rootNode.children,
+      columns: columns,
+      treeColumn: treeColumn,
+      keyFactory: (node) => PageStorageKey<String>(node.name),
+      sortColumn: treeColumn,
+      sortDirection: SortDirection.ascending,
+    );
+  }
+}
+
+class _DiffColumn extends ColumnData<TreemapNode> {
+  _DiffColumn() : super('Deltas', alignment: ColumnAlignment.right);
+
+  @override
+  dynamic getValue(TreemapNode dataObject) => dataObject.byteSize;
+
+  @override
+  String getDisplayValue(TreemapNode dataObject) =>
+      prettyPrintBytes(dataObject.byteSize, includeUnit: true);
+
+  @override
+  bool get supportsSorting => true;
+
+  @override
+  int compare(TreemapNode a, TreemapNode b) {
+    final Comparable valueA = getValue(a);
+    final Comparable valueB = getValue(b);
+    return valueA.compareTo(valueB);
+  }
+
+  @override
+  double get fixedWidthPx => 100.0;
+
+  @override
+  Color getTextColor(TreemapNode dataObject) => dataObject.displayColor();
 }

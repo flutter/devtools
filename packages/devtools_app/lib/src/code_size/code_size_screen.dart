@@ -10,6 +10,7 @@ import '../charts/treemap.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
+import '../theme.dart';
 import 'code_size_controller.dart';
 import 'code_size_table.dart';
 
@@ -36,7 +37,8 @@ class CodeSizeBody extends StatefulWidget {
   CodeSizeBodyState createState() => CodeSizeBodyState();
 }
 
-class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
+class CodeSizeBodyState extends State<CodeSizeBody>
+    with AutoDisposeMixin, SingleTickerProviderStateMixin {
   @visibleForTesting
   static const treemapKey = Key('Treemap');
 
@@ -46,6 +48,27 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
   CodeSizeController controller;
 
   TreemapNode root;
+
+  TabController _tabController;
+  static const tabs = [
+    Tab(text: 'Snapshot'),
+    Tab(text: 'Diff'),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: tabs.length, vsync: this)
+      ..addListener(() {
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _tabController.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -62,21 +85,28 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
       });
     });
 
-    controller.loadTree('v8.json');
+    controller.loadTree('new_v8.json');
   }
 
   @override
   Widget build(BuildContext context) {
     if (root != null) {
-      return Split(
-        axis: Axis.vertical,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTreemap(),
-          _buildTreeTable(),
-        ],
-        initialFractions: const [
-          initialFractionForTreemap,
-          initialFractionForTreeTable,
+          TabBar(
+            isScrollable: true,
+            controller: _tabController,
+            tabs: tabs,
+            onTap: onTabSelected,
+          ),
+          Expanded(
+            child: TabBarView(
+              physics: defaultTabBarViewPhysics,
+              children: _buildTabViews(),
+              controller: _tabController,
+            ),
+          ),
         ],
       );
     } else {
@@ -84,8 +114,40 @@ class CodeSizeBodyState extends State<CodeSizeBody> with AutoDisposeMixin {
     }
   }
 
-  Widget _buildTreeTable() {
-    return CodeSizeTable(rootNode: root);
+  void onTabSelected(int index) {
+    final selected = tabs[index].text;
+    // TODO(peterdjlee): Import user file instead of using hard coded data.
+    switch (selected) {
+      case 'Snapshot':
+        controller.loadTree('new_v8.json');
+        return;
+      case 'Diff':
+        controller.loadFakeDiffData();
+        return;
+    }
+  }
+
+  List<Widget> _buildTabViews() {
+    return [
+      _buildTreemapAndTableSplitView(showDiff: false),
+      _buildTreemapAndTableSplitView(showDiff: true),
+    ];
+  }
+
+  Widget _buildTreemapAndTableSplitView({@required bool showDiff}) {
+    return Split(
+      axis: Axis.vertical,
+      children: [
+        _buildTreemap(),
+        showDiff
+            ? CodeSizeDiffTable(rootNode: root)
+            : CodeSizeSnapshotTable(rootNode: root),
+      ],
+      initialFractions: const [
+        initialFractionForTreemap,
+        initialFractionForTreeTable,
+      ],
+    );
   }
 
   Widget _buildTreemap() {

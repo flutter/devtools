@@ -5,8 +5,10 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
+import 'theme.dart';
 import 'trees.dart';
 import 'utils.dart';
 
@@ -392,6 +394,9 @@ abstract class ColumnData<T> {
 
   /// Get the cell's tooltip value from the given [dataObject].
   String getTooltip(T dataObject) => getDisplayValue(dataObject);
+
+  /// Get the cell's text color from the given [dataObject].
+  Color getTextColor(T dataObject) => null;
 
   @override
   String toString() => title;

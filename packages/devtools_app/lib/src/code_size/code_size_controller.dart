@@ -10,6 +10,7 @@ import 'package:path/path.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 
 import '../charts/treemap.dart';
+import 'stub_data/fake_data.dart';
 
 class CodeSizeController {
   /// The node set as the current root.
@@ -21,7 +22,7 @@ class CodeSizeController {
     final pathToFile = '$current/lib/src/code_size/stub_data/$filename';
     final inputJson = File(pathToFile);
 
-    await inputJson.readAsString().then((inputJsonString) {
+    await inputJson.readAsString().then((inputJsonString) async {
       final inputJsonMap = json.decode(inputJsonString);
 
       // Build a [Map] object containing heirarchical information for [inputJsonMap].
@@ -35,6 +36,10 @@ class CodeSizeController {
 
       changeRoot(newRoot);
     });
+  }
+
+  void loadFakeDiffData() {
+    changeRoot(fakeRoot);
   }
 
   /// Builds a tree with [TreemapNode] from [treeJson] which represents
@@ -54,15 +59,23 @@ class CodeSizeController {
         treemapNodeChildren.add(childTreemapNode);
         treemapNodeSize += childTreemapNode.byteSize;
       }
-      treemapNodeSize = treemapNodeSize;
     } else {
       // If a leaf node, just take its own size.
       // Defaults to 0 if a leaf node has a size of null.
       treemapNodeSize = treeJson['value'] ?? 0;
     }
 
-    return TreemapNode(name: treemapNodeName, byteSize: treemapNodeSize)
-      ..addAllChildren(treemapNodeChildren);
+    final childrenMap = <String, TreemapNode>{};
+
+    for (TreemapNode child in treemapNodeChildren) {
+      childrenMap[child.name] = child;
+    }
+
+    return TreemapNode(
+      name: treemapNodeName,
+      byteSize: treemapNodeSize,
+      childrenMap: childrenMap,
+    )..addAllChildren(treemapNodeChildren);
   }
 
   void clear() {
