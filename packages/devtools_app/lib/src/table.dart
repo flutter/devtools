@@ -1070,7 +1070,7 @@ class _TableRowState<T> extends State<TableRow<T>>
         content ??= Text(
           column.getDisplayValue(node),
           overflow: TextOverflow.ellipsis,
-          style: columnTextStyle(column),
+          style: contentTextStyle(column),
           maxLines: 1,
         );
 
@@ -1124,7 +1124,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     );
   }
 
-  TextStyle columnTextStyle(ColumnData<T> column) {
+  TextStyle contentTextStyle(ColumnData<T> column) {
     final textColor = column.getTextColor(widget.node);
     final fontStyle = fixedFontStyle(context);
     return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);

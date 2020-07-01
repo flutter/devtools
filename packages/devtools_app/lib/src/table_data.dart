@@ -354,6 +354,7 @@ class TreeTableData<T extends TreeNode<T>> extends TableData<T> {
   }
 }
 
+// TODO(peterdjlee): Remove get from method names.
 abstract class ColumnData<T> {
   ColumnData(
     this.title, {

@@ -84,7 +84,7 @@ class Treemap extends StatelessWidget {
     endIndex ??= nodes.length - 1;
     int sum = 0;
     for (int i = startIndex; i <= endIndex; i++) {
-      sum += nodes[i].absByteSize ?? 0;
+      sum += nodes[i].unsignedByteSize ?? 0;
     }
     return sum;
   }
@@ -97,8 +97,8 @@ class Treemap extends StatelessWidget {
         int pivotIndex = -1;
         double maxSize = double.negativeInfinity;
         for (int i = 0; i < children.length; i++) {
-          if (children[i].absByteSize > maxSize) {
-            maxSize = children[i].absByteSize.toDouble();
+          if (children[i].unsignedByteSize > maxSize) {
+            maxSize = children[i].unsignedByteSize.toDouble();
             pivotIndex = i;
           }
         }
@@ -144,13 +144,13 @@ class Treemap extends StatelessWidget {
     }
 
     // Sort the list of treemap nodes, descending in size.
-    children.sort((a, b) => b.absByteSize.compareTo(a.absByteSize));
+    children.sort((a, b) => b.unsignedByteSize.compareTo(a.unsignedByteSize));
     if (children.length <= 2) {
       final positionedChildren = <Positioned>[];
       double offset = 0;
 
       for (final child in children) {
-        final ratio = child.absByteSize / totalByteSize;
+        final ratio = child.unsignedByteSize / totalByteSize;
 
         positionedChildren.add(
           Positioned(
@@ -176,7 +176,7 @@ class Treemap extends StatelessWidget {
     final pivotIndex = computePivot(children);
 
     final pivotNode = children[pivotIndex];
-    final pivotByteSize = pivotNode.absByteSize;
+    final pivotByteSize = pivotNode.unsignedByteSize;
 
     final list1 = children.sublist(0, pivotIndex);
     final list1ByteSize = computeByteSizeForNodes(nodes: list1);
@@ -407,13 +407,14 @@ class Treemap extends StatelessWidget {
             child: buildSelectable(
               child: Container(
                 decoration: BoxDecoration(
-                  color: rootNode.displayColor(),
+                  color: rootNode.displayColor,
                   border: Border.all(color: Colors.black87),
                 ),
                 child: Center(
                   child: height > minHeightToDisplayCellText
                       ? buildNameAndSizeText(
-                          textColor: rootNode.showDiff ? Colors.white : Colors.black,
+                          textColor:
+                              rootNode.showDiff ? Colors.white : Colors.black,
                           oneLine: false,
                         )
                       : const SizedBox(),
@@ -520,10 +521,9 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
   final bool showDiff;
 
-  int get absByteSize => byteSize.abs();
-  
+  int get unsignedByteSize => byteSize.abs();
 
-  Color displayColor() {
+  Color get displayColor {
     if (!showDiff) return mainUiColor;
     if (byteSize < 0)
       return codeSizeDecreaseColor;

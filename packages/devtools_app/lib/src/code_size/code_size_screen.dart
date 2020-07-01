@@ -138,6 +138,8 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     return Split(
       axis: Axis.vertical,
       children: [
+        // TODO(peterdjlee): Try to reuse the same treemap widget and only swap
+        //                   tables in Diff mode.
         _buildTreemap(),
         showDiff
             ? CodeSizeDiffTable(rootNode: root)

@@ -165,6 +165,8 @@ class CodeSizeDiffTable extends StatelessWidget {
   }
 }
 
+// TODO(peterdjlee): Add an opaque overlay / background to differentiate from
+//                   other columns.
 class _DiffColumn extends ColumnData<TreemapNode> {
   _DiffColumn() : super('Deltas', alignment: ColumnAlignment.right);
 
@@ -189,5 +191,5 @@ class _DiffColumn extends ColumnData<TreemapNode> {
   double get fixedWidthPx => 100.0;
 
   @override
-  Color getTextColor(TreemapNode dataObject) => dataObject.displayColor();
+  Color getTextColor(TreemapNode dataObject) => dataObject.displayColor;
 }
