@@ -451,11 +451,13 @@ SizedBox areaPaneHeader(
   bool needsTopBorder = true,
   List<Widget> actions = const [],
   double rightPadding = densePadding,
+  bool tall = false,
 }) {
   final theme = Theme.of(context);
 
   return SizedBox(
-    height: areaPaneHeaderHeight,
+    height:
+        tall ? areaPaneHeaderHeight + 2 * densePadding : areaPaneHeaderHeight,
     child: Container(
       decoration: BoxDecoration(
         border: Border(
