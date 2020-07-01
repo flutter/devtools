@@ -85,7 +85,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(FlutterFramesChart), findsOneWidget);
       expect(find.byType(TimelineFlameChart), findsOneWidget);
-      expect(find.byKey(TimelineScreen.emptyTimelineKey), findsNothing);
+      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+          findsNothing);
       expect(find.byType(EventDetails), findsOneWidget);
       expect(find.byKey(TimelineScreen.refreshButtonKey), findsOneWidget);
       expect(find.byKey(TimelineScreen.clearButtonKey), findsOneWidget);
@@ -104,7 +105,8 @@ void main() {
       expect(controller.allTraceEvents, isNotEmpty);
       expect(find.byType(FlutterFramesChart), findsOneWidget);
       expect(find.byType(TimelineFlameChart), findsOneWidget);
-      expect(find.byKey(TimelineScreen.emptyTimelineKey), findsNothing);
+      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+          findsNothing);
       expect(find.byType(EventDetails), findsOneWidget);
 
       await tester.tap(find.byKey(TimelineScreen.clearButtonKey));
@@ -112,7 +114,8 @@ void main() {
       expect(controller.allTraceEvents, isEmpty);
       expect(find.byType(FlutterFramesChart), findsOneWidget);
       expect(find.byType(TimelineFlameChart), findsNothing);
-      expect(find.byKey(TimelineScreen.emptyTimelineKey), findsOneWidget);
+      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+          findsOneWidget);
       expect(find.byType(EventDetails), findsOneWidget);
     });
 
@@ -121,12 +124,14 @@ void main() {
       _setUpServiceManagerForTimeline({});
       await pumpTimelineScreen(tester);
       await tester.pumpAndSettle();
-      expect(find.byKey(TimelineScreen.emptyTimelineKey), findsOneWidget);
+      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+          findsOneWidget);
 
       // Refresh with empty timeline.
       await tester.tap(find.byKey(TimelineScreen.refreshButtonKey));
       await tester.pump();
-      expect(find.byKey(TimelineScreen.emptyTimelineKey), findsOneWidget);
+      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+          findsOneWidget);
     });
   });
 }
