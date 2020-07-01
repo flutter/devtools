@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../charts/treemap.dart';
 import '../table.dart';
 import '../table_data.dart';
+import '../ui/colors.dart';
 import '../utils.dart';
 
 class CodeSizeSnapshotTable extends StatelessWidget {
@@ -167,8 +168,9 @@ class CodeSizeDiffTable extends StatelessWidget {
 
 // TODO(peterdjlee): Add an opaque overlay / background to differentiate from
 //                   other columns.
+// TODO(peterdjlee): Add up or down arrows indicating increase or decrease for display value.
 class _DiffColumn extends ColumnData<TreemapNode> {
-  _DiffColumn() : super('Deltas', alignment: ColumnAlignment.right);
+  _DiffColumn() : super('Change', alignment: ColumnAlignment.right);
 
   @override
   dynamic getValue(TreemapNode dataObject) => dataObject.byteSize;
@@ -191,5 +193,39 @@ class _DiffColumn extends ColumnData<TreemapNode> {
   double get fixedWidthPx => 100.0;
 
   @override
-  Color getTextColor(TreemapNode dataObject) => dataObject.displayColor;
+  Color getTextColor(TreemapNode dataObject) {
+    if (dataObject.byteSize < 0)
+      return tableDecreaseColor;
+    else
+      return tableIncreaseColor;
+  }
+}
+
+// TODO(peterdjlee): Calculate percentage by (new - old) / new for every diff.
+class _DiffPercentageColumn extends ColumnData<TreemapNode> {
+  _DiffPercentageColumn({@required this.totalDiff})
+      : super('% of Total Diff', alignment: ColumnAlignment.right);
+
+  final int totalDiff;
+
+  @override
+  dynamic getValue(TreemapNode dataObject) =>
+      (dataObject.unsignedByteSize / totalDiff) * 100;
+
+  @override
+  String getDisplayValue(TreemapNode dataObject) =>
+      '${getValue(dataObject).toStringAsFixed(2)} %';
+
+  @override
+  bool get supportsSorting => true;
+
+  @override
+  int compare(TreemapNode a, TreemapNode b) {
+    final Comparable valueA = getValue(a);
+    final Comparable valueB = getValue(b);
+    return valueA.compareTo(valueB);
+  }
+
+  @override
+  double get fixedWidthPx => 100.0;
 }
