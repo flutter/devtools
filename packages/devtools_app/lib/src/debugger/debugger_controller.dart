@@ -711,24 +711,61 @@ class DebuggerController extends DisposableController
     variable.treeInitialized = true;
   }
 
+  // Whether a type has a simple value identity that is captured with the
+  // existing `InstanceRef.valueAsString` property.
+  static final _simpleKeys = {
+    InstanceKind.kBool,
+    InstanceKind.kDouble,
+    InstanceKind.kString,
+    InstanceKind.kInt,
+    InstanceKind.kNull,
+  };
+
   List<Variable> _createVariablesForAssociations(Instance instance) {
-    final boundsVariables = instance.associations.map((association) {
-      // For string keys, quote the key value.
-      String keyString = association.key.valueAsString;
-      // TODO(kenz): for maps where keys are not primitive types, support
-      // expanding the keys as well as the values.
-      if (association.key is InstanceRef &&
-          association.key.kind == InstanceKind.kString) {
-        keyString = "'$keyString'";
+    final boundsVariables = <BoundVariable>[];
+    for (final association in instance.associations) {
+      if (association.key is! InstanceRef) {
+        continue;
       }
-      return BoundVariable(
-        name: '[$keyString]',
-        value: association.value,
-        scopeStartTokenPos: null,
-        scopeEndTokenPos: null,
-        declarationTokenPos: null,
+      final instance = association.key as InstanceRef;
+      if (_simpleKeys.contains(instance.kind)) {
+        String keyString = association.key.valueAsString;
+        // For string keys, quote the key value.
+        if (instance.kind == InstanceKind.kString) {
+          keyString = "'${association.key.valueAsString}'";
+        }
+        boundsVariables.add(
+          BoundVariable(
+            name: '[$keyString]',
+            value: association.value,
+            scopeStartTokenPos: null,
+            scopeEndTokenPos: null,
+            declarationTokenPos: null,
+          ),
+        );
+        continue;
+      }
+      // For non-primitive keys, expand both the key and value into bound
+      // variables.
+      boundsVariables.add(
+        BoundVariable(
+          name: '[key]',
+          value: association.key,
+          scopeStartTokenPos: null,
+          scopeEndTokenPos: null,
+          declarationTokenPos: null,
+        ),
       );
-    });
+      boundsVariables.add(
+        BoundVariable(
+          name: '[value]',
+          value: association.value,
+          scopeStartTokenPos: null,
+          scopeEndTokenPos: null,
+          declarationTokenPos: null,
+        ),
+      );
+    }
     return boundsVariables.map((bv) => Variable.create(bv)).toList();
   }
 
