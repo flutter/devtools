@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -304,7 +305,7 @@ void main() {
       matchesVariable(name: '[2]', value: -4294967297),
       matchesVariable(name: '[3]', value: 4294967298),
     ]);
-  });
+  }, skip: kIsWeb); // Int64List cannot be instantiated on the web.
 
   test('Creates bound variables for Float32List instance', () async {
     final bytes =
@@ -387,7 +388,11 @@ void main() {
     await debuggerController.buildVariablesTree(variable);
 
     expect(variable.children.first.displayValue,
-        '[ffffffff, 00000000, ffffffff, 00000000]');
+        '[ffffffff, 00000000, ffffffff, 00000000]',
+        skip: kIsWeb);
+    // Formatting is different on the web.
+    expect(variable.children.first.displayValue, '[-1, 0, -1, 0]',
+        skip: !kIsWeb);
   });
 
   test('Creates bound variables for Float32x4List instance', () async {
