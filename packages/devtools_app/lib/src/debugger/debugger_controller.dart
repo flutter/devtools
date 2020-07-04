@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
@@ -698,14 +700,13 @@ class DebuggerController extends DisposableController
           variable.addAllChildren(_createVariablesForAssociations(result));
         } else if (result.elements != null) {
           variable.addAllChildren(_createVariablesForElements(result));
+        } else if (result.bytes != null) {
+          variable.addAllChildren(_createVariablesForBytes(result));
         } else if (result.fields != null) {
           variable.addAllChildren(_createVariablesForFields(result));
-        } else if (result.bytes != null) {
-          // TODO: Display children for Uint8List, Int16List, ...
-
         }
       }
-    } on SentinelException catch (_) {
+    } on SentinelException {
       // Fail gracefully if calling `getObject` throws a SentinelException.
     }
     variable.treeInitialized = true;
@@ -730,6 +731,70 @@ class DebuggerController extends DisposableController
       );
     });
     return boundsVariables.map((bv) => Variable.create(bv)).toList();
+  }
+
+  // Decodes the bytes into the correctly sized values based on the instance
+  // type, falling back to raw bytes. The switch is based on the allowed
+  // values of `instance.bytes`.
+  List<Variable> _createVariablesForBytes(Instance instance) {
+    final bytes = base64.decode(instance.bytes);
+    final boundVariables = <BoundVariable>[];
+    List<dynamic> result;
+    switch (instance.kind) {
+      case 'Uint8ClampedList':
+      case 'Uint8List':
+        result = bytes;
+        break;
+      case 'Uint16List':
+        result = Uint16List.view(bytes.buffer);
+        break;
+      case 'Uint32List':
+        result = Uint32List.view(bytes.buffer);
+        break;
+      case 'Uint64List':
+        result = Uint64List.view(bytes.buffer);
+        break;
+      case 'Int8List':
+        result = Int8List.view(bytes.buffer);
+        break;
+      case 'Int16List':
+        result = Int16List.view(bytes.buffer);
+        break;
+      case 'Int32List':
+        result = Int32List.view(bytes.buffer);
+        break;
+      case 'Int64List':
+        result = Int64List.view(bytes.buffer);
+        break;
+      case 'Float32List':
+        result = Float32List.view(bytes.buffer);
+        break;
+      case 'Float64List':
+        result = Float64List.view(bytes.buffer);
+        break;
+      case 'Int32x4List':
+        result = Int32x4List.view(bytes.buffer);
+        break;
+      case 'Float32x4List':
+        result = Float32x4List.view(bytes.buffer);
+        break;
+      case 'Float64x2List':
+        result = Float64x2List.view(bytes.buffer);
+        break;
+      default:
+        result = bytes;
+    }
+
+    for (int i = 0; i < result.length; i++) {
+      boundVariables.add(BoundVariable(
+        name: '[$i]',
+        value: result[i],
+        scopeStartTokenPos: null,
+        scopeEndTokenPos: null,
+        declarationTokenPos: null,
+      ));
+    }
+    return boundVariables.map((bv) => Variable.create(bv)).toList();
   }
 
   List<Variable> _createVariablesForElements(Instance instance) {
