@@ -189,7 +189,7 @@ void main() {
       matchesVariable(name: '[2]', value: 4294967297),
       matchesVariable(name: '[3]', value: 4294967298),
     ]);
-  });
+  }, skip: kIsWeb);
 
   test('Creates bound variables for Int8List instance', () async {
     final bytes = Int8List.fromList([0, 1, -2, 3]);
@@ -419,7 +419,11 @@ void main() {
     await debuggerController.buildVariablesTree(variable);
 
     expect(variable.children.first.displayValue,
-        '[0.000000, -232.199997, 2.330000, 9.000000]');
+        '[0.000000, -232.199997, 2.330000, 9.000000]',
+        skip: kIsWeb);
+    expect(variable.children.first.displayValue,
+        '[0, -232.1999969482422, 2.3299999237060547, 9]',
+        skip: !kIsWeb);
   });
 
   test('Creates bound variables for Float64x2List instance', () async {
@@ -444,7 +448,10 @@ void main() {
 
     await debuggerController.buildVariablesTree(variable);
 
-    expect(variable.children.first.displayValue, '[0.000000, -1232.222000]');
+    expect(variable.children.first.displayValue, '[0.000000, -1232.222000]',
+        skip: kIsWeb);
+    expect(variable.children.first.displayValue, '[0, -1232.222]',
+        skip: !kIsWeb);
   });
 }
 

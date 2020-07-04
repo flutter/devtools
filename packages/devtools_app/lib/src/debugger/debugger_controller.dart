@@ -752,6 +752,12 @@ class DebuggerController extends DisposableController
         result = Uint32List.view(bytes.buffer);
         break;
       case 'Uint64List':
+        // TODO: Uint64List cannot be instantiated on the web. Consider
+        // using existing libraries like fixnum to convert to string values
+        // for displaying.
+        if (kIsWeb) {
+          return <Variable>[];
+        }
         result = Uint64List.view(bytes.buffer);
         break;
       case 'Int8List':
@@ -764,7 +770,7 @@ class DebuggerController extends DisposableController
         result = Int32List.view(bytes.buffer);
         break;
       case 'Int64List':
-        // TODO: The Int64List cannot be instantiated on the web. Consider
+        // TODO: Int64List cannot be instantiated on the web. Consider
         // using existing libraries like fixnum to convert to string values
         // for displaying.
         if (kIsWeb) {
