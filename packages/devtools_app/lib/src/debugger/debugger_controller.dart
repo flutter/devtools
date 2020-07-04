@@ -741,17 +741,17 @@ class DebuggerController extends DisposableController
     final boundVariables = <BoundVariable>[];
     List<dynamic> result;
     switch (instance.kind) {
-      case 'Uint8ClampedList':
-      case 'Uint8List':
+      case InstanceKind.kUint8ClampedList:
+      case InstanceKind.kUint8List:
         result = bytes;
         break;
-      case 'Uint16List':
+      case InstanceKind.kUint16List:
         result = Uint16List.view(bytes.buffer);
         break;
-      case 'Uint32List':
+      case InstanceKind.kUint32List:
         result = Uint32List.view(bytes.buffer);
         break;
-      case 'Uint64List':
+      case InstanceKind.kUint64List:
         // TODO: Uint64List cannot be instantiated on the web. Consider
         // using existing libraries like fixnum to convert to string values
         // for displaying.
@@ -760,16 +760,16 @@ class DebuggerController extends DisposableController
         }
         result = Uint64List.view(bytes.buffer);
         break;
-      case 'Int8List':
+      case InstanceKind.kInt8List:
         result = Int8List.view(bytes.buffer);
         break;
-      case 'Int16List':
+      case InstanceKind.kInt16List:
         result = Int16List.view(bytes.buffer);
         break;
-      case 'Int32List':
+      case InstanceKind.kInt32List:
         result = Int32List.view(bytes.buffer);
         break;
-      case 'Int64List':
+      case InstanceKind.kInt64List:
         // TODO: Int64List cannot be instantiated on the web. Consider
         // using existing libraries like fixnum to convert to string values
         // for displaying.
@@ -778,19 +778,19 @@ class DebuggerController extends DisposableController
         }
         result = Int64List.view(bytes.buffer);
         break;
-      case 'Float32List':
+      case InstanceKind.kFloat32List:
         result = Float32List.view(bytes.buffer);
         break;
-      case 'Float64List':
+      case InstanceKind.kFloat64List:
         result = Float64List.view(bytes.buffer);
         break;
-      case 'Int32x4List':
+      case InstanceKind.kInt32x4List:
         result = Int32x4List.view(bytes.buffer);
         break;
-      case 'Float32x4List':
+      case InstanceKind.kFloat32x4List:
         result = Float32x4List.view(bytes.buffer);
         break;
-      case 'Float64x2List':
+      case InstanceKind.kFloat64x2List:
         result = Float64x2List.view(bytes.buffer);
         break;
       default:

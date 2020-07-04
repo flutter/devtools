@@ -49,7 +49,7 @@ void main() {
   test('Creates bound variables for Uint8ClampedList instance', () async {
     final bytes = Uint8ClampedList.fromList([0, 1, 2, 3]);
     final instance = Instance(
-      kind: 'Uint8ClampedList',
+      kind: InstanceKind.kUint8ClampedList,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -78,7 +78,7 @@ void main() {
   test('Creates bound variables for Uint8List instance', () async {
     final bytes = Uint8List.fromList([0, 1, 2, 3]);
     final instance = Instance(
-      kind: 'Uint8List',
+      kind: InstanceKind.kUint8List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -107,7 +107,7 @@ void main() {
   test('Creates bound variables for Uint16List instance', () async {
     final bytes = Uint16List.fromList([0, 513, 514, 515]);
     final instance = Instance(
-      kind: 'Uint16List',
+      kind: InstanceKind.kUint16List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -136,7 +136,7 @@ void main() {
   test('Creates bound variables for Uint32List instance', () async {
     final bytes = Uint32List.fromList([0, 131072, 131073, 131074]);
     final instance = Instance(
-      kind: 'Uint32List',
+      kind: InstanceKind.kUint32List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -165,7 +165,7 @@ void main() {
   test('Creates bound variables for Uint64List instance', () async {
     final bytes = Uint64List.fromList([0, 4294967296, 4294967297, 4294967298]);
     final instance = Instance(
-      kind: 'Uint64List',
+      kind: InstanceKind.kUint64List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -194,7 +194,7 @@ void main() {
   test('Creates bound variables for Int8List instance', () async {
     final bytes = Int8List.fromList([0, 1, -2, 3]);
     final instance = Instance(
-      kind: 'Int8List',
+      kind: InstanceKind.kInt8List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -223,7 +223,7 @@ void main() {
   test('Creates bound variables for Int16List instance', () async {
     final bytes = Int16List.fromList([0, 513, -514, 515]);
     final instance = Instance(
-      kind: 'Int16List',
+      kind: InstanceKind.kInt16List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -252,7 +252,7 @@ void main() {
   test('Creates bound variables for Int32List instance', () async {
     final bytes = Int32List.fromList([0, 131072, -131073, 131074]);
     final instance = Instance(
-      kind: 'Int32List',
+      kind: InstanceKind.kInt32List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -281,7 +281,7 @@ void main() {
   test('Creates bound variables for Int64List instance', () async {
     final bytes = Int64List.fromList([0, 4294967296, -4294967297, 4294967298]);
     final instance = Instance(
-      kind: 'Int64List',
+      kind: InstanceKind.kInt64List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -311,7 +311,7 @@ void main() {
     final bytes =
         Float32List.fromList([0, 2.2300031185150146, -4.610400199890137]);
     final instance = Instance(
-      kind: 'Float32List',
+      kind: InstanceKind.kFloat32List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -339,7 +339,7 @@ void main() {
   test('Creates bound variables for Float64List instance', () async {
     final bytes = Float64List.fromList([0, 5532.130793, -7532.130793]);
     final instance = Instance(
-      kind: 'Float64List',
+      kind: InstanceKind.kFloat64List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -369,7 +369,7 @@ void main() {
     final bytes =
         Int32x4List.fromList([Int32x4.bool(true, false, true, false)]);
     final instance = Instance(
-      kind: 'Int32x4List',
+      kind: InstanceKind.kInt32x4List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -399,7 +399,7 @@ void main() {
     final bytes = Float32x4List.fromList(
         [Float32x4(0.0, -232.1999969482422, 2.3299999237060547, 9.0)]);
     final instance = Instance(
-      kind: 'Float32x4List',
+      kind: InstanceKind.kFloat32x4List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
@@ -429,7 +429,7 @@ void main() {
   test('Creates bound variables for Float64x2List instance', () async {
     final bytes = Float64x2List.fromList([Float64x2(0, -1232.222)]);
     final instance = Instance(
-      kind: 'Float64x2List',
+      kind: InstanceKind.kFloat64x2List,
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
