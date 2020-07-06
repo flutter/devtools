@@ -11,7 +11,6 @@ import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
 import '../charts/treemap.dart';
-import 'stub_data/fake_diff_data.dart';
 
 class CodeSizeController {
   /// The node set as the current root.

@@ -522,7 +522,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
   final bool showDiff;
 
   int get unsignedByteSize => byteSize.abs();
-  
+
   Color get displayColor {
     if (!showDiff) return mainUiColor;
     if (byteSize < 0)
