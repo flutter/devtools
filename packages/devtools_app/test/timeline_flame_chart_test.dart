@@ -70,10 +70,8 @@ void main() {
       await pumpTimelineBody(tester, TimelineController());
       await tester.pumpAndSettle();
       expect(find.byType(TimelineFlameChart), findsNothing);
-      expect(
-        find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
-        findsOneWidget,
-      );
+      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+          findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
