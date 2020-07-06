@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
-import 'theme.dart';
 import 'trees.dart';
 import 'utils.dart';
 
