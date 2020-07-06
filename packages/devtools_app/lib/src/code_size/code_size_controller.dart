@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
+import 'package:vm_snapshot_analysis/utils.dart';
 
 import '../charts/treemap.dart';
 import 'stub_data/fake_diff_data.dart';
@@ -38,13 +39,25 @@ class CodeSizeController {
     });
   }
 
-  void loadFakeDiffData() {
-    changeRoot(fakeRoot);
+  Future<void> loadFakeDiffData(String oldFilename, String newFilename) async {
+    // TODO(peterdjlee): Use user input data instead of hard coded data.
+    final pathToOldFile = '$current/lib/src/code_size/stub_data/$oldFilename';
+    final oldInputJson = File(pathToOldFile);
+
+    final pathToNewFile = '$current/lib/src/code_size/stub_data/$newFilename';
+    final newInputJson = File(pathToNewFile);
+    final diffMap = await buildComparisonTreemap(oldInputJson, newInputJson);
+
+    diffMap['n'] = 'Root';
+    final newRoot = generateTree(diffMap, showDiff: true);
+
+    changeRoot(newRoot);
   }
 
   /// Builds a tree with [TreemapNode] from [treeJson] which represents
   /// the hierarchical structure of the tree.
-  TreemapNode generateTree(Map<String, dynamic> treeJson) {
+  TreemapNode generateTree(Map<String, dynamic> treeJson,
+      {bool showDiff = false}) {
     var treemapNodeName = treeJson['n'];
     if (treemapNodeName == '') treemapNodeName = 'Unnamed';
     final rawChildren = treeJson['children'];
@@ -55,7 +68,7 @@ class CodeSizeController {
       // If not a leaf node, build all children then take the sum of the
       // children's sizes as its own size.
       for (dynamic child in rawChildren) {
-        final childTreemapNode = generateTree(child);
+        final childTreemapNode = generateTree(child, showDiff: showDiff);
         treemapNodeChildren.add(childTreemapNode);
         treemapNodeSize += childTreemapNode.byteSize;
       }
@@ -75,6 +88,7 @@ class CodeSizeController {
       name: treemapNodeName,
       byteSize: treemapNodeSize,
       childrenMap: childrenMap,
+      showDiff: showDiff,
     )..addAllChildren(treemapNodeChildren);
   }
 
