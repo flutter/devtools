@@ -12,6 +12,12 @@ import 'package:vm_snapshot_analysis/utils.dart';
 
 import '../charts/treemap.dart';
 
+enum DiffTreeType {
+  increaseOnly,
+  decreaseOnly,
+  combined,
+}
+
 class CodeSizeController {
   /// The node set as the current root.
   ValueListenable<TreemapNode> get currentRoot => _currentRoot;
@@ -38,7 +44,8 @@ class CodeSizeController {
     });
   }
 
-  Future<void> loadFakeDiffData(String oldFilename, String newFilename) async {
+  Future<void> loadFakeDiffData(
+      String oldFilename, String newFilename, DiffTreeType diffTreeType) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
     final pathToOldFile = '$current/lib/src/code_size/stub_data/$oldFilename';
     final oldInputJson = File(pathToOldFile);
@@ -48,15 +55,22 @@ class CodeSizeController {
 
     final diffMap = await buildComparisonTreemap(oldInputJson, newInputJson);
     diffMap['n'] = 'Root';
-    final newRoot = generateTree(diffMap, showDiff: true);
+    final newRoot = generateTree(
+      diffMap,
+      diffTreeType: diffTreeType,
+      showDiff: true,
+    );
 
     changeRoot(newRoot);
   }
 
   /// Builds a tree with [TreemapNode] from [treeJson] which represents
   /// the hierarchical structure of the tree.
-  TreemapNode generateTree(Map<String, dynamic> treeJson,
-      {bool showDiff = false}) {
+  TreemapNode generateTree(
+    Map<String, dynamic> treeJson, {
+    DiffTreeType diffTreeType = DiffTreeType.combined,
+    bool showDiff = false,
+  }) {
     var treemapNodeName = treeJson['n'];
     if (treemapNodeName == '') treemapNodeName = 'Unnamed';
     final rawChildren = treeJson['children'];
@@ -67,14 +81,41 @@ class CodeSizeController {
       // If not a leaf node, build all children then take the sum of the
       // children's sizes as its own size.
       for (dynamic child in rawChildren) {
-        final childTreemapNode = generateTree(child, showDiff: showDiff);
+        final childTreemapNode = generateTree(
+          child,
+          diffTreeType: diffTreeType,
+          showDiff: showDiff,
+        );
+        if (childTreemapNode == null) {
+          continue;
+        }
         treemapNodeChildren.add(childTreemapNode);
         treemapNodeSize += childTreemapNode.byteSize;
       }
     } else {
       // If a leaf node, just take its own size.
-      // Defaults to 0 if a leaf node has a size of null.
-      treemapNodeSize = treeJson['value'] ?? 0;
+      treemapNodeSize = treeJson['value'];
+
+      // Only add nodes with a size.
+      if (treemapNodeSize == null || treemapNodeSize == 0) {
+        return null;
+      }
+
+      // Only add nodes that match the diff tree type.
+      switch (diffTreeType) {
+        case DiffTreeType.increaseOnly:
+          if (treemapNodeSize < 0) {
+            return null;
+          }
+          break;
+        case DiffTreeType.decreaseOnly:
+          if (treemapNodeSize > 0) {
+            return null;
+          }
+          break;
+        case DiffTreeType.combined:
+          break;
+      }
     }
 
     final childrenMap = <String, TreemapNode>{};

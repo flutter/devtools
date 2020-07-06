@@ -82,8 +82,12 @@ class _SizeColumn extends ColumnData<TreemapNode> {
   dynamic getValue(TreemapNode dataObject) => dataObject.byteSize;
 
   @override
-  String getDisplayValue(TreemapNode dataObject) =>
-      prettyPrintBytes(dataObject.byteSize, includeUnit: true);
+  String getDisplayValue(TreemapNode dataObject) {
+    return prettyPrintBytes(
+      dataObject.byteSize,
+      includeUnit: true,
+    );
+  }
 
   @override
   bool get supportsSorting => true;
