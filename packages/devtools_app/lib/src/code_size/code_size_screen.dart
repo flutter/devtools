@@ -14,7 +14,7 @@ import '../theme.dart';
 import 'code_size_controller.dart';
 import 'code_size_table.dart';
 
-bool codeSizeScreenEnabled = false;
+bool codeSizeScreenEnabled = true;
 
 class CodeSizeScreen extends Screen {
   const CodeSizeScreen() : super(id, title: 'Code Size', icon: Octicons.rss);
@@ -123,7 +123,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
         controller.loadTree('new_v8.json');
         return;
       case 'Diff':
-        controller.loadFakeDiffData();
+        controller.loadFakeDiffData('old_v8.json', 'new_v8.json');
         return;
     }
   }
