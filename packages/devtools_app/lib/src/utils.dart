@@ -65,7 +65,11 @@ final NumberFormat nf = NumberFormat.decimalPattern();
 
 String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
 
-String prettyPrintBytes(num bytes, {int fractionDigits = 0, bool includeUnit = false}) {
+String prettyPrintBytes(
+  num bytes, {
+  int fractionDigits = 0,
+  bool includeUnit = false,
+}) {
   final sizeInKB = bytes.abs() / 1024.0;
   if (sizeInKB < 1024.0) {
     return '${printKB(bytes, fractionDigits: fractionDigits, includeUnit: includeUnit)}';
