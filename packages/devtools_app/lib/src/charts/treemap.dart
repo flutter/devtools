@@ -552,7 +552,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
   String prettyByteSize() {
     // Negative sign isn't explicitly added since a regular print of a negative number includes it.
     final plusSign = showDiff && byteSize > 0 ? '+' : '';
-    return '$plusSign${prettyPrintBytes(byteSize, includeUnit: true)}';
+    return '$plusSign${prettyPrintBytes(byteSize, fractionDigits: 2, includeUnit: true)}';
   }
 
   /// Returns a list of [TreemapNode] in the path from root node to [this].
