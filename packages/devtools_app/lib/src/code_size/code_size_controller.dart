@@ -51,23 +51,12 @@ class CodeSizeController {
     final newRoot = generateTree(diffMap, showDiff: true);
 
     changeRoot(newRoot);
-
-    // await oldInputJson.readAsString().then((oldInputJsonString) async {
-    //   await newInputJson.readAsString().then((newInputJsonString) async {
-    //     final oldInputJsonMap = json.decode(oldInputJsonString);
-    //     final newInputJsonMap = json.decode(newInputJsonString);
-    //     final diffMap = await compareFromJson(oldInputJsonMap, newInputJsonMap);
-    //     diffMap['n'] = 'Root';
-    //     final newRoot = generateTree(diffMap);
-
-    //     changeRoot(newRoot);
-    //   });
-    // });
   }
 
   /// Builds a tree with [TreemapNode] from [treeJson] which represents
   /// the hierarchical structure of the tree.
-  TreemapNode generateTree(Map<String, dynamic> treeJson, {bool showDiff = false}) {
+  TreemapNode generateTree(Map<String, dynamic> treeJson,
+      {bool showDiff = false}) {
     var treemapNodeName = treeJson['n'];
     if (treemapNodeName == '') treemapNodeName = 'Unnamed';
     final rawChildren = treeJson['children'];
