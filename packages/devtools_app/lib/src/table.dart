@@ -1068,11 +1068,7 @@ class _TableRowState<T> extends State<TableRow<T>>
         content ??= Text(
           column.getDisplayValue(node),
           overflow: TextOverflow.ellipsis,
-<<<<<<< HEAD
           style: contentTextStyle(column),
-=======
-          style: columnTextStyle(column),
->>>>>>> c967e73a... Add diff tab to code size page
           maxLines: 1,
         );
 
@@ -1126,11 +1122,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     );
   }
 
-<<<<<<< HEAD
   TextStyle contentTextStyle(ColumnData<T> column) {
-=======
-  TextStyle columnTextStyle(ColumnData<T> column) {
->>>>>>> c967e73a... Add diff tab to code size page
     final textColor = column.getTextColor(widget.node);
     final fontStyle = fixedFontStyle(context);
     return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
