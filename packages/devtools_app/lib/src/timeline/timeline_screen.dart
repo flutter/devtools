@@ -39,8 +39,6 @@ class TimelineScreen extends Screen {
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
-  static const emptyTimelineKey = Key('Empty Timeline');
-  @visibleForTesting
   static const exportButtonKey = Key('Export Button');
 
   static const id = 'timeline';
@@ -158,7 +156,10 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
             axis: Axis.vertical,
             initialFractions: const [0.6, 0.4],
             children: [
-              _buildFlameChartSection(),
+              TimelineFlameChartContainer(
+                processing: processing,
+                processingProgress: processingProgress,
+              ),
               ValueListenableBuilder(
                 valueListenable: controller.selectedTimelineEvent,
                 builder: (context, selectedEvent, _) {
@@ -264,48 +265,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     showDialog(
       context: context,
       builder: (context) => TimelineConfigurationsDialog(controller),
-    );
-  }
-
-  Widget _buildFlameChartSection() {
-    Widget content;
-    final timelineEmpty = (controller.data?.isEmpty ?? true) ||
-        controller.data.eventGroups.isEmpty;
-    if (processing || timelineEmpty) {
-      content = ValueListenableBuilder<bool>(
-        valueListenable: controller.emptyTimeline,
-        builder: (context, emptyRecording, _) {
-          return emptyRecording
-              ? const Center(
-                  key: TimelineScreen.emptyTimelineKey,
-                  child: Text('No timeline events'),
-                )
-              : _buildProcessingInfo();
-        },
-      );
-    } else {
-      content = LayoutBuilder(
-        builder: (context, constraints) {
-          return TimelineFlameChart(
-            controller.data,
-            width: constraints.maxWidth,
-            selectionNotifier: controller.selectedTimelineEvent,
-            onSelection: (e) => controller.selectTimelineEvent(e),
-          );
-        },
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: OutlineDecoration(child: content),
-    );
-  }
-
-  Widget _buildProcessingInfo() {
-    return processingInfo(
-      progressValue: processingProgress,
-      processedObject: 'timeline trace',
     );
   }
 
