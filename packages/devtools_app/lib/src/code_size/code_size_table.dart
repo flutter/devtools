@@ -130,14 +130,16 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
 class CodeSizeDiffTable extends StatelessWidget {
   factory CodeSizeDiffTable({@required rootNode}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
+    final sortColumn = _DiffColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
-      _DiffColumn(),
+      sortColumn,
     ]);
 
     return CodeSizeDiffTable._(
       rootNode,
       treeColumn,
+      sortColumn,
       columns,
     );
   }
@@ -145,12 +147,14 @@ class CodeSizeDiffTable extends StatelessWidget {
   const CodeSizeDiffTable._(
     this.rootNode,
     this.treeColumn,
+    this.sortColumn,
     this.columns,
   );
 
   final TreemapNode rootNode;
 
   final TreeColumnData<TreemapNode> treeColumn;
+  final ColumnData<TreemapNode> sortColumn;
   final List<ColumnData<TreemapNode>> columns;
 
   @override
@@ -160,8 +164,8 @@ class CodeSizeDiffTable extends StatelessWidget {
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
-      sortColumn: treeColumn,
-      sortDirection: SortDirection.ascending,
+      sortColumn: sortColumn,
+      sortDirection: SortDirection.descending,
     );
   }
 }
@@ -176,8 +180,7 @@ class _DiffColumn extends ColumnData<TreemapNode> {
 
 // TODO(peterdjlee): Add up or down arrows indicating increase or decrease for display value.
   @override
-  String getDisplayValue(TreemapNode dataObject) =>
-      prettyPrintBytes(dataObject.byteSize, includeUnit: true);
+  String getDisplayValue(TreemapNode dataObject) => dataObject.prettyByteSize();
 
   @override
   bool get supportsSorting => true;

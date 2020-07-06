@@ -522,7 +522,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
   final bool showDiff;
 
   int get unsignedByteSize => byteSize.abs();
-
+  
   Color get displayColor {
     if (!showDiff) return mainUiColor;
     if (byteSize < 0)
@@ -546,7 +546,12 @@ class TreemapNode extends TreeNode<TreemapNode> {
       }
     }
     final separator = oneLine ? ' ' : '\n';
-    return '$displayName$separator[${prettyPrintBytes(byteSize, includeUnit: true)}]';
+    return '$displayName$separator[${prettyByteSize()}]';
+  }
+
+  String prettyByteSize() {
+    final plusSign = showDiff && byteSize > 0 ? '+' : '';
+    return '$plusSign${prettyPrintBytes(byteSize, includeUnit: true)}';
   }
 
   /// Returns a list of [TreemapNode] in the path from root node to [this].

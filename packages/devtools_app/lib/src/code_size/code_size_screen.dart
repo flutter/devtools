@@ -123,7 +123,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
         controller.loadTree('new_v8.json');
         return;
       case 'Diff':
-        controller.loadFakeDiffData();
+        controller.loadFakeDiffData('old_v8.json', 'new_v8.json');
         return;
     }
   }
