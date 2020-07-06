@@ -130,16 +130,16 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
 class CodeSizeDiffTable extends StatelessWidget {
   factory CodeSizeDiffTable({@required rootNode}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
-    final sortColumn = _DiffColumn();
+    final diffColumn = _DiffColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
-      sortColumn,
+      diffColumn,
     ]);
 
     return CodeSizeDiffTable._(
       rootNode,
       treeColumn,
-      sortColumn,
+      diffColumn,
       columns,
     );
   }

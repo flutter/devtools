@@ -14,7 +14,7 @@ import '../theme.dart';
 import 'code_size_controller.dart';
 import 'code_size_table.dart';
 
-bool codeSizeScreenEnabled = false;
+bool codeSizeScreenEnabled = true;
 
 class CodeSizeScreen extends Screen {
   const CodeSizeScreen() : super(id, title: 'Code Size', icon: Octicons.rss);
