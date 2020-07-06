@@ -55,6 +55,8 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     Tab(text: 'Diff'),
   ];
 
+  DiffTreeType _diffTreeType = DiffTreeType.combined;
+
   @override
   void initState() {
     super.initState();
@@ -94,12 +96,18 @@ class CodeSizeBodyState extends State<CodeSizeBody>
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TabBar(
-            labelColor: Theme.of(context).textTheme.bodyText1.color,
-            isScrollable: true,
-            controller: _tabController,
-            tabs: tabs,
-            onTap: onTabSelected,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TabBar(
+                labelColor: Theme.of(context).textTheme.bodyText1.color,
+                isScrollable: true,
+                controller: _tabController,
+                tabs: tabs,
+                onTap: onTabSelected,
+              ),
+              if (_tabController.index == 1) _buildDiffTreeTypeDropdown(),
+            ],
           ),
           Expanded(
             child: TabBarView(
@@ -115,6 +123,37 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     }
   }
 
+  DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<DiffTreeType>(
+        value: _diffTreeType,
+        items: [
+          _buildMenuItem(DiffTreeType.combined),
+          _buildMenuItem(DiffTreeType.increaseOnly),
+          _buildMenuItem(DiffTreeType.decreaseOnly),
+        ],
+        onChanged: (newDiffTreeType) {
+          setState(() {
+            _diffTreeType = newDiffTreeType;
+          });
+          controller.loadFakeDiffData(
+            'old_v8.json',
+            'new_v8.json',
+            _diffTreeType,
+          );
+        },
+      ),
+    );
+  }
+
+  DropdownMenuItem _buildMenuItem(DiffTreeType diffTreeType) {
+    // TODO(peterdjlee): Set item's text to the enum's value, not toString().
+    return DropdownMenuItem<DiffTreeType>(
+      value: diffTreeType,
+      child: Text(diffTreeType.toString()),
+    );
+  }
+
   void onTabSelected(int index) {
     final selected = tabs[index].text;
     // TODO(peterdjlee): Import user file instead of using hard coded data.
@@ -123,7 +162,11 @@ class CodeSizeBodyState extends State<CodeSizeBody>
         controller.loadTree('new_v8.json');
         return;
       case 'Diff':
-        controller.loadFakeDiffData('old_v8.json', 'new_v8.json');
+        controller.loadFakeDiffData(
+          'old_v8.json',
+          'new_v8.json',
+          _diffTreeType,
+        );
         return;
     }
   }
