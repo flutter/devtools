@@ -55,7 +55,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     Tab(text: 'Diff'),
   ];
 
-  DiffTreeType _diffTreeType = DiffTreeType.combined;
+  bool showDiffTreeTypeDropdown = false;
 
   @override
   void initState() {
@@ -87,6 +87,10 @@ class CodeSizeBodyState extends State<CodeSizeBody>
       });
     });
 
+    addAutoDisposeListener(controller.activeDiffTreeType);
+
+    addAutoDisposeListener(controller.showDiffTreeTypeDropdown);
+
     controller.loadTree('new_v8.json');
   }
 
@@ -106,7 +110,8 @@ class CodeSizeBodyState extends State<CodeSizeBody>
                 tabs: tabs,
                 onTap: onTabSelected,
               ),
-              if (_tabController.index == 1) _buildDiffTreeTypeDropdown(),
+              if (controller.showDiffTreeTypeDropdown.value)
+                _buildDiffTreeTypeDropdown(),
             ],
           ),
           Expanded(
@@ -126,21 +131,14 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
     return DropdownButtonHideUnderline(
       child: DropdownButton<DiffTreeType>(
-        value: _diffTreeType,
+        value: controller.activeDiffTreeType.value,
         items: [
           _buildMenuItem(DiffTreeType.combined),
           _buildMenuItem(DiffTreeType.increaseOnly),
           _buildMenuItem(DiffTreeType.decreaseOnly),
         ],
         onChanged: (newDiffTreeType) {
-          setState(() {
-            _diffTreeType = newDiffTreeType;
-          });
-          controller.loadFakeDiffData(
-            'old_v8.json',
-            'new_v8.json',
-            _diffTreeType,
-          );
+          controller.changeActiveDiffTreeType(newDiffTreeType);
         },
       ),
     );
@@ -159,13 +157,15 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     // TODO(peterdjlee): Import user file instead of using hard coded data.
     switch (selected) {
       case 'Snapshot':
+        controller.toggleShowDiffTreeTypeDropdown(false);
         controller.loadTree('new_v8.json');
         return;
       case 'Diff':
+        controller.toggleShowDiffTreeTypeDropdown(true);
         controller.loadFakeDiffData(
           'old_v8.json',
           'new_v8.json',
-          _diffTreeType,
+          controller.activeDiffTreeType.value,
         );
         return;
     }

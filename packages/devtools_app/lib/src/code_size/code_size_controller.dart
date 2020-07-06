@@ -23,6 +23,25 @@ class CodeSizeController {
   ValueListenable<TreemapNode> get currentRoot => _currentRoot;
   final _currentRoot = ValueNotifier<TreemapNode>(null);
 
+  /// The active diff tree type.
+  ValueListenable<DiffTreeType> get activeDiffTreeType {
+    return _activeDiffTreeTypeNotifier;
+  }
+
+  final _activeDiffTreeTypeNotifier =
+      ValueNotifier<DiffTreeType>(DiffTreeType.combined);
+
+  /// The node set as the current root.
+  ValueListenable<bool> get showDiffTreeTypeDropdown {
+    return _showDiffTreeTypeDropdown;
+  }
+
+  final _showDiffTreeTypeDropdown = ValueNotifier<bool>(false);
+
+  void toggleShowDiffTreeTypeDropdown(bool show) {
+    _showDiffTreeTypeDropdown.value = show;
+  }
+
   Future<void> loadTree(String filename) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
     final pathToFile = '$current/lib/src/code_size/stub_data/$filename';
@@ -45,7 +64,10 @@ class CodeSizeController {
   }
 
   Future<void> loadFakeDiffData(
-      String oldFilename, String newFilename, DiffTreeType diffTreeType) async {
+    String oldFilename,
+    String newFilename,
+    DiffTreeType diffTreeType,
+  ) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
     final pathToOldFile = '$current/lib/src/code_size/stub_data/$oldFilename';
     final oldInputJson = File(pathToOldFile);
@@ -55,21 +77,59 @@ class CodeSizeController {
 
     final diffMap = await buildComparisonTreemap(oldInputJson, newInputJson);
     diffMap['n'] = 'Root';
-    final newRoot = generateTree(
-      diffMap,
-      diffTreeType: diffTreeType,
-      showDiff: true,
-    );
+    final newRoot = generateDiffTree(diffMap, diffTreeType: diffTreeType);
 
     changeRoot(newRoot);
   }
 
   /// Builds a tree with [TreemapNode] from [treeJson] which represents
   /// the hierarchical structure of the tree.
-  TreemapNode generateTree(
+  TreemapNode generateTree(Map<String, dynamic> treeJson) {
+    var treemapNodeName = treeJson['n'];
+    if (treemapNodeName == '') treemapNodeName = 'Unnamed';
+    final rawChildren = treeJson['children'];
+    final treemapNodeChildren = <TreemapNode>[];
+
+    int treemapNodeSize = 0;
+    if (rawChildren != null) {
+      // If not a leaf node, build all children then take the sum of the
+      // children's sizes as its own size.
+      for (dynamic child in rawChildren) {
+        final childTreemapNode = generateTree(child);
+        if (childTreemapNode == null) {
+          continue;
+        }
+        treemapNodeChildren.add(childTreemapNode);
+        treemapNodeSize += childTreemapNode.byteSize;
+      }
+    } else {
+      // If a leaf node, just take its own size.
+      treemapNodeSize = treeJson['value'];
+
+      // Only add nodes with a size.
+      if (treemapNodeSize == null || treemapNodeSize == 0) {
+        return null;
+      }
+    }
+
+    final childrenMap = <String, TreemapNode>{};
+
+    for (TreemapNode child in treemapNodeChildren) {
+      childrenMap[child.name] = child;
+    }
+
+    return TreemapNode(
+      name: treemapNodeName,
+      byteSize: treemapNodeSize,
+      childrenMap: childrenMap,
+    )..addAllChildren(treemapNodeChildren);
+  }
+
+  /// Builds a tree with [TreemapNode] from [treeJson] which represents
+  /// the hierarchical structure of the tree.
+  TreemapNode generateDiffTree(
     Map<String, dynamic> treeJson, {
     DiffTreeType diffTreeType = DiffTreeType.combined,
-    bool showDiff = false,
   }) {
     var treemapNodeName = treeJson['n'];
     if (treemapNodeName == '') treemapNodeName = 'Unnamed';
@@ -81,10 +141,9 @@ class CodeSizeController {
       // If not a leaf node, build all children then take the sum of the
       // children's sizes as its own size.
       for (dynamic child in rawChildren) {
-        final childTreemapNode = generateTree(
+        final childTreemapNode = generateDiffTree(
           child,
           diffTreeType: diffTreeType,
-          showDiff: showDiff,
         );
         if (childTreemapNode == null) {
           continue;
@@ -128,7 +187,7 @@ class CodeSizeController {
       name: treemapNodeName,
       byteSize: treemapNodeSize,
       childrenMap: childrenMap,
-      showDiff: showDiff,
+      showDiff: true,
     )..addAllChildren(treemapNodeChildren);
   }
 
@@ -138,5 +197,14 @@ class CodeSizeController {
 
   void changeRoot(TreemapNode newRoot) {
     _currentRoot.value = newRoot;
+  }
+
+  void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
+    _activeDiffTreeTypeNotifier.value = newDiffTreeType;
+    loadFakeDiffData(
+      'old_v8.json',
+      'new_v8.json',
+      newDiffTreeType,
+    );
   }
 }
