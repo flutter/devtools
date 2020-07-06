@@ -45,8 +45,8 @@ class CodeSizeController {
 
     final pathToNewFile = '$current/lib/src/code_size/stub_data/$newFilename';
     final newInputJson = File(pathToNewFile);
-    final diffMap = await buildComparisonTreemap(oldInputJson, newInputJson);
 
+    final diffMap = await buildComparisonTreemap(oldInputJson, newInputJson);
     diffMap['n'] = 'Root';
     final newRoot = generateTree(diffMap, showDiff: true);
 
