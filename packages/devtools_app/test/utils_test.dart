@@ -16,15 +16,15 @@ void main() {
       const int mb = 1024 * kb;
 
       expect(prettyPrintBytes(kb), '1');
-      expect(prettyPrintBytes(kb + 100, fractionDigits: 1), '1.1');
-      expect(prettyPrintBytes(kb + 150, fractionDigits: 2), '1.15');
+      expect(prettyPrintBytes(kb + 100, kbFractionDigits: 1), '1.1');
+      expect(prettyPrintBytes(kb + 150, kbFractionDigits: 2), '1.15');
       expect(prettyPrintBytes(kb, includeUnit: true), '1 KB');
       expect(prettyPrintBytes(kb * 1000, includeUnit: true), '1,000 KB');
 
-      expect(prettyPrintBytes(mb), '1');
-      expect(prettyPrintBytes(mb + kb * 100, fractionDigits: 1), '1.1');
-      expect(prettyPrintBytes(mb + kb * 150, fractionDigits: 2), '1.15');
-      expect(prettyPrintBytes(mb, includeUnit: true), '1 MB');
+      expect(prettyPrintBytes(mb), '1.0');
+      expect(prettyPrintBytes(mb + kb * 100), '1.1');
+      expect(prettyPrintBytes(mb + kb * 150, mbFractionDigits: 2), '1.15');
+      expect(prettyPrintBytes(mb, includeUnit: true), '1.0 MB');
       expect(prettyPrintBytes(mb - kb, includeUnit: true), '1,023 KB');
     });
 
