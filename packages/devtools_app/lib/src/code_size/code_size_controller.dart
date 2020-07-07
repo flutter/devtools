@@ -74,20 +74,21 @@ class CodeSizeController {
   TreemapNode generateTree(Map<String, dynamic> treeJson) {
     final isLeafNode = treeJson['children'] == null;
     if (!isLeafNode) {
-      return buildNodeWithChildren(treeJson);
+      return _buildNodeWithChildren(treeJson);
     } else {
       // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
       final byteSize = treeJson['value'];
       if (byteSize == null) {
         return null;
       }
-      return buildNode(treeJson, byteSize);
+      return _buildNode(treeJson, byteSize);
     }
   }
 
   /// Recursively generates a diff tree from [treeJson] that contains the difference
-  /// between an old snapshot and a new snapshot. Each node in the resulting tree
-  /// represents a change in size for the given node.
+  /// between an old snapshot and a new snapshot. 
+  /// 
+  /// Each node in the resulting tree represents a change in size for the given node.
   ///
   /// The tree can be filtered with different [DiffTreeType] values:
   /// * [DiffTreeType.increaseOnly]: returns a tree with nodes with positive [byteSize].
@@ -99,7 +100,7 @@ class CodeSizeController {
   }) {
     final isLeafNode = treeJson['children'] == null;
     if (!isLeafNode) {
-      return buildNodeWithChildren(
+      return _buildNodeWithChildren(
         treeJson,
         showDiff: true,
         diffTreeType: diffTreeType,
@@ -127,13 +128,13 @@ class CodeSizeController {
           break;
       }
 
-      return buildNode(treeJson, byteSize, showDiff: true);
+      return _buildNode(treeJson, byteSize, showDiff: true);
     }
   }
 
   /// Builds a node by recursively building all of its children first
   /// in order to calculate the sum of its children's sizes.
-  TreemapNode buildNodeWithChildren(
+  TreemapNode _buildNodeWithChildren(
     Map<String, dynamic> treeJson, {
     bool showDiff = false,
     DiffTreeType diffTreeType = DiffTreeType.combined,
@@ -143,7 +144,7 @@ class CodeSizeController {
     int totalByteSize = 0;
 
     // Given a child, build its subtree.
-    for (dynamic child in rawChildren) {
+    for (Map<String, dynamic> child in rawChildren) {
       final childTreemapNode = showDiff
           ? generateDiffTree(child, diffTreeType: diffTreeType)
           : generateTree(child);
@@ -154,7 +155,7 @@ class CodeSizeController {
       totalByteSize += childTreemapNode.byteSize;
     }
 
-    return buildNode(
+    return _buildNode(
       treeJson,
       totalByteSize,
       children: treemapNodeChildren,
@@ -162,7 +163,7 @@ class CodeSizeController {
     );
   }
 
-  TreemapNode buildNode(
+  TreemapNode _buildNode(
     Map<String, dynamic> treeJson,
     int byteSize, {
     List<TreemapNode> children = const [],
