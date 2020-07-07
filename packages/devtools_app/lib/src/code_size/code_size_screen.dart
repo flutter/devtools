@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' hide context;
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
@@ -40,7 +41,13 @@ class CodeSizeBody extends StatefulWidget {
 class CodeSizeBodyState extends State<CodeSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
   @visibleForTesting
-  static const treemapKey = Key('Treemap');
+  static const treemapKey = Key('Code Size Treemap');
+  @visibleForTesting
+  static const diffTreeTypeDropdownKey = Key('Code Size Diff Tree Type Dropdown');
+  @visibleForTesting
+  static const snapshotTableKey = Key('Code Size Snapshot Table');
+  @visibleForTesting
+  static const diffTableKey = Key('Code Size Diff Table');
 
   static const initialFractionForTreemap = 0.67;
   static const initialFractionForTreeTable = 0.33;
@@ -50,15 +57,16 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   TreemapNode root;
 
   TabController _tabController;
-  static const Key snapshotTabKey = Key('code size snapshot tab');
-  static const Key diffTabKey = Key('code size diff tab');
+
+  @visibleForTesting
+  static const Key snapshotTabKey = Key('Code Size Snapshot Tab');
+  @visibleForTesting
+  static const Key diffTabKey = Key('Code Size Diff Tab');
 
   static const tabs = [
     Tab(text: 'Snapshot', key: snapshotTabKey),
     Tab(text: 'Diff', key: diffTabKey),
   ];
-
-  bool showDiffTreeTypeDropdown = false;
 
   @override
   void initState() {
@@ -86,13 +94,14 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     root = controller.currentRoot.value;
     addAutoDisposeListener(controller.currentRoot, () {
       setState(() {
+        print('changing root');
         root = controller.currentRoot.value;
       });
     });
 
     addAutoDisposeListener(controller.activeDiffTreeType);
 
-    controller.loadTree('new_v8.json');
+    controller.loadTree('$current/lib/src/code_size/stub_data/new_v8.json');
   }
 
   @override
@@ -131,6 +140,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
 
   DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
     return DropdownButtonHideUnderline(
+      key: diffTreeTypeDropdownKey,
       child: DropdownButton<DiffTreeType>(
         value: controller.activeDiffTreeType.value,
         items: [
@@ -161,8 +171,8 @@ class CodeSizeBodyState extends State<CodeSizeBody>
         return;
       case 'Diff':
         controller.loadFakeDiffData(
-          'old_v8.json',
-          'new_v8.json',
+          '$current/lib/src/code_size/stub_data/old_v8.json',
+          '$current/lib/src/code_size/stub_data/new_v8.json',
           controller.activeDiffTreeType.value,
         );
         return;
@@ -184,8 +194,8 @@ class CodeSizeBodyState extends State<CodeSizeBody>
         //                   tables in Diff mode.
         _buildTreemap(),
         showDiff
-            ? CodeSizeDiffTable(rootNode: root)
-            : CodeSizeSnapshotTable(rootNode: root),
+            ? CodeSizeDiffTable(rootNode: root, key: diffTableKey)
+            : CodeSizeSnapshotTable(rootNode: root, key: snapshotTableKey),
       ],
       initialFractions: const [
         initialFractionForTreemap,

@@ -31,9 +31,8 @@ class CodeSizeController {
   final _activeDiffTreeTypeNotifier =
       ValueNotifier<DiffTreeType>(DiffTreeType.combined);
 
-  Future<void> loadTree(String filename) async {
+  Future<void> loadTree(String pathToFile) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
-    final pathToFile = '$current/lib/src/code_size/stub_data/$filename';
     final inputJson = File(pathToFile);
 
     await inputJson.readAsString().then((inputJsonString) async {
@@ -53,15 +52,12 @@ class CodeSizeController {
   }
 
   Future<void> loadFakeDiffData(
-    String oldFilename,
-    String newFilename,
+    String pathToOldFile,
+    String pathToNewFile,
     DiffTreeType diffTreeType,
   ) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
-    final pathToOldFile = '$current/lib/src/code_size/stub_data/$oldFilename';
     final oldInputJson = File(pathToOldFile);
-
-    final pathToNewFile = '$current/lib/src/code_size/stub_data/$newFilename';
     final newInputJson = File(pathToNewFile);
 
     final diffMap = await buildComparisonTreemap(oldInputJson, newInputJson);
@@ -86,8 +82,8 @@ class CodeSizeController {
   }
 
   /// Recursively generates a diff tree from [treeJson] that contains the difference
-  /// between an old snapshot and a new snapshot. 
-  /// 
+  /// between an old snapshot and a new snapshot.
+  ///
   /// Each node in the resulting tree represents a change in size for the given node.
   ///
   /// The tree can be filtered with different [DiffTreeType] values:
@@ -200,8 +196,8 @@ class CodeSizeController {
   void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
     _activeDiffTreeTypeNotifier.value = newDiffTreeType;
     loadFakeDiffData(
-      'old_v8.json',
-      'new_v8.json',
+      '$current/lib/src/code_size/stub_data/old_v8.json',
+      '$current/lib/src/code_size/stub_data/new_v8.json',
       newDiffTreeType,
     );
   }

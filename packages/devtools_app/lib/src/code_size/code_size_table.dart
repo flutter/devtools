@@ -11,7 +11,7 @@ import '../ui/colors.dart';
 import '../utils.dart';
 
 class CodeSizeSnapshotTable extends StatelessWidget {
-  factory CodeSizeSnapshotTable({@required rootNode}) {
+  factory CodeSizeSnapshotTable({@required rootNode, Key key}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
     final sortColumn = _SizeColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
@@ -19,8 +19,10 @@ class CodeSizeSnapshotTable extends StatelessWidget {
       sortColumn,
       _SizePercentageColumn(totalSize: rootNode.root.byteSize),
     ]);
+    
 
     return CodeSizeSnapshotTable._(
+      key,
       rootNode,
       treeColumn,
       sortColumn,
@@ -29,11 +31,12 @@ class CodeSizeSnapshotTable extends StatelessWidget {
   }
 
   const CodeSizeSnapshotTable._(
+    Key key,
     this.rootNode,
     this.treeColumn,
     this.sortColumn,
     this.columns,
-  );
+  ) : super(key: key);
 
   final TreemapNode rootNode;
 
@@ -133,7 +136,7 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
 }
 
 class CodeSizeDiffTable extends StatelessWidget {
-  factory CodeSizeDiffTable({@required rootNode}) {
+  factory CodeSizeDiffTable({@required rootNode, Key key}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
     final diffColumn = _DiffColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
@@ -142,6 +145,7 @@ class CodeSizeDiffTable extends StatelessWidget {
     ]);
 
     return CodeSizeDiffTable._(
+      key,
       rootNode,
       treeColumn,
       diffColumn,
@@ -150,11 +154,12 @@ class CodeSizeDiffTable extends StatelessWidget {
   }
 
   const CodeSizeDiffTable._(
+    Key key,
     this.rootNode,
     this.treeColumn,
     this.sortColumn,
     this.columns,
-  );
+  ) : super(key: key);
 
   final TreemapNode rootNode;
 

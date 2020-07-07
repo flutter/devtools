@@ -58,7 +58,7 @@ Future<TreemapNode> loadInstructionSizesJsonAsTree() async {
 
 Future<TreemapNode> loadV8JsonAsTree() async {
   const testDataPath =
-      '../devtools_testing/lib/support/treemap_test_data_v8.json';
+      '../devtools_testing/lib/support/treemap_test_data_v8_new.json';
   final treemapTestData = jsonDecode(
     await File(testDataPath).readAsString(),
   );

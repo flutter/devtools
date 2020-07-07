@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/code_size/code_size_controller.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/notifications.dart';
@@ -41,6 +42,7 @@ Widget wrapWithControllers(
   DebuggerController debugger,
   NetworkController network,
   BannerMessagesController bannerMessages,
+  CodeSizeController codeSize,
 }) {
   final _providers = [
     Provider<BannerMessagesController>.value(
@@ -53,6 +55,7 @@ Widget wrapWithControllers(
       Provider<PerformanceController>.value(value: performance),
     if (network != null) Provider<NetworkController>.value(value: network),
     if (debugger != null) Provider<DebuggerController>.value(value: debugger),
+    if (codeSize != null) Provider<CodeSizeController>.value(value: codeSize),
   ];
   return wrap(
     MultiProvider(
