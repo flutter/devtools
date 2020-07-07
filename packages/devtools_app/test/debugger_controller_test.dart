@@ -109,4 +109,97 @@ void main() {
       expect(history.hasNext, isFalse);
     });
   });
+
+  group('EvalHistory', () {
+    EvalHistory evalHistory;
+
+    setUp(() {
+      evalHistory = EvalHistory();
+    });
+
+    test('starts empty', () {
+      expect(evalHistory.evalHistory, []);
+      expect(evalHistory.currentText, null);
+      expect(evalHistory.canNavigateDown, false);
+      expect(evalHistory.canNavigateUp, false);
+    });
+
+    test('pushEvalHistory', () {
+      evalHistory.pushEvalHistory('aaa');
+      evalHistory.pushEvalHistory('bbb');
+      evalHistory.pushEvalHistory('ccc');
+
+      expect(evalHistory.currentText, null);
+      evalHistory.navigateUp();
+      expect(evalHistory.currentText, 'ccc');
+      evalHistory.navigateUp();
+      expect(evalHistory.currentText, 'bbb');
+      evalHistory.navigateUp();
+      expect(evalHistory.currentText, 'aaa');
+    });
+
+    test('navigateUp', () {
+      expect(evalHistory.canNavigateUp, false);
+      expect(evalHistory.currentText, null);
+
+      evalHistory.pushEvalHistory('aaa');
+      evalHistory.pushEvalHistory('bbb');
+
+      expect(evalHistory.canNavigateUp, true);
+      expect(evalHistory.currentText, null);
+
+      evalHistory.navigateUp();
+      expect(evalHistory.canNavigateUp, true);
+      expect(evalHistory.currentText, 'bbb');
+
+      evalHistory.navigateUp();
+      expect(evalHistory.canNavigateUp, false);
+      expect(evalHistory.currentText, 'aaa');
+
+      evalHistory.navigateUp();
+      expect(evalHistory.currentText, 'aaa');
+    });
+
+    test('navigateDown', () {
+      expect(evalHistory.canNavigateDown, false);
+      expect(evalHistory.currentText, null);
+
+      evalHistory.pushEvalHistory('aaa');
+      evalHistory.pushEvalHistory('bbb');
+      expect(evalHistory.canNavigateDown, false);
+
+      evalHistory.navigateUp();
+      evalHistory.navigateUp();
+
+      expect(evalHistory.canNavigateDown, true);
+      expect(evalHistory.currentText, 'aaa');
+
+      evalHistory.navigateDown();
+      expect(evalHistory.canNavigateDown, true);
+      expect(evalHistory.currentText, 'bbb');
+
+      evalHistory.navigateDown();
+      expect(evalHistory.canNavigateDown, false);
+      expect(evalHistory.currentText, null);
+
+      evalHistory.navigateDown();
+      expect(evalHistory.canNavigateDown, false);
+      expect(evalHistory.currentText, null);
+    });
+
+    test('pushEvalHistory reset position', () {
+      evalHistory.pushEvalHistory('aaa');
+      evalHistory.pushEvalHistory('bbb');
+      expect(evalHistory.currentText, null);
+      expect(evalHistory.canNavigateDown, false);
+
+      evalHistory.navigateUp();
+      expect(evalHistory.currentText, 'bbb');
+      expect(evalHistory.canNavigateDown, true);
+
+      evalHistory.pushEvalHistory('ccc');
+      expect(evalHistory.currentText, null);
+      expect(evalHistory.canNavigateDown, false);
+    });
+  });
 }

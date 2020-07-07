@@ -791,7 +791,7 @@ class VmServiceWrapper implements VmService {
   /// Retrieves the full string value of a [stringRef].
   ///
   /// The string value stored with the [stringRef] is returned unless the value
-  /// is truncated in which an extra getObject call is issued to return the
+  /// is truncated, in which an extra getObject call is issued to return the
   /// value. If the [stringRef] has expired so the full string is unavailable,
   /// [onUnavailable] is called to return how the truncated value should be
   /// displayed. If [onUnavailable] is not specified, an exception is thrown

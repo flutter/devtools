@@ -199,6 +199,8 @@ class DebuggerController extends DisposableController
     _stdio.value = lines;
   }
 
+  final EvalHistory evalHistory = EvalHistory();
+
   void switchToIsolate(IsolateRef ref) async {
     isolateRef = ref;
 
@@ -272,6 +274,59 @@ class DebuggerController extends DisposableController
     _resuming.value = true;
 
     return _service.resume(isolateRef.id, step: StepOption.kOut);
+  }
+
+  /// Evaluate the given expression in the context of the currently selected
+  /// stack frame, or the top frame if there is no current selection.
+  ///
+  /// This will fail if the application is not currently paused.
+  Future<Response> evalAtCurrentFrame(String expression) async {
+    if (!isPaused.value) {
+      return Future.error(
+        RPCError.withDetails(
+            'evaluateInFrame', RPCError.kInvalidParams, 'Isolate not paused'),
+      );
+    }
+
+    if (stackFramesWithLocation.value.isEmpty) {
+      return Future.error(
+        RPCError.withDetails(
+            'evaluateInFrame', RPCError.kInvalidParams, 'No frames available'),
+      );
+    }
+
+    var frame = selectedStackFrame.value?.frame;
+    frame ??= stackFramesWithLocation.value.first.frame;
+
+    return _service.evaluateInFrame(
+      isolateRef.id,
+      frame.index,
+      expression,
+      disableBreakpoints: true,
+    );
+  }
+
+  /// Call `toString()` on the given instance and return the result.
+  Future<Response> invokeToString(InstanceRef instance) {
+    return _service.invoke(
+      isolateRef.id,
+      instance.id,
+      'toString',
+      <String>[],
+      disableBreakpoints: true,
+    );
+  }
+
+  /// Retrieves the full string value of a [stringRef].
+  Future<String> retrieveFullStringValue(
+    InstanceRef stringRef, {
+    String onUnavailable(String truncatedValue),
+  }) async {
+    return serviceManager.service.retrieveFullStringValue(
+      isolateRef.id,
+      stringRef,
+      onUnavailable: onUnavailable,
+    );
   }
 
   Future<void> clearBreakpoints() async {
@@ -945,4 +1000,52 @@ class ScriptsHistory extends ChangeNotifier
   ScriptsHistory get value => this;
 
   Iterable<ScriptRef> get openedScripts => _openedScripts.toList().reversed;
+}
+
+/// Store and manipulate the expression evaluation history.
+class EvalHistory {
+  final List<String> _evalHistory = [];
+  int _historyPosition = -1;
+
+  /// Get the expression evaluation history.
+  List<String> get evalHistory => _evalHistory.toList();
+
+  /// Push a new entry onto the expression evaluation history.
+  void pushEvalHistory(String expression) {
+    if (_evalHistory.isNotEmpty && _evalHistory.last == expression) {
+      return;
+    }
+
+    _evalHistory.add(expression);
+    _historyPosition = -1;
+  }
+
+  bool get canNavigateUp {
+    return evalHistory.isNotEmpty && _historyPosition != 0;
+  }
+
+  void navigateUp() {
+    if (_historyPosition == -1) {
+      _historyPosition = _evalHistory.length - 1;
+    } else if (_historyPosition > 0) {
+      _historyPosition--;
+    }
+  }
+
+  bool get canNavigateDown {
+    return evalHistory.isNotEmpty && _historyPosition != -1;
+  }
+
+  void navigateDown() {
+    if (_historyPosition != -1) {
+      _historyPosition++;
+    }
+    if (_historyPosition >= evalHistory.length) {
+      _historyPosition = -1;
+    }
+  }
+
+  String get currentText {
+    return _historyPosition == -1 ? null : _evalHistory[_historyPosition];
+  }
 }

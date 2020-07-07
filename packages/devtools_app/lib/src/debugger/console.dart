@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../common_widgets.dart';
 import '../console.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
+import 'evaluate.dart';
 
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
@@ -58,26 +58,33 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
     final disabled = numLines == 0;
 
     return OutlineDecoration(
-      child: Console(
-        title: areaPaneHeader(
-          context,
-          title: 'Console',
-          needsTopBorder: false,
-          actions: [
-            CopyToClipboardControl(
-              dataProvider: disabled ? null : () => _lines.join('\n'),
-              successMessage:
-                  'Copied $numLines ${pluralize('line', numLines)}.',
-              buttonKey: DebuggerConsole.copyToClipboardButtonKey,
+      child: Column(
+        children: [
+          Expanded(
+            child: Console(
+              title: areaPaneHeader(
+                context,
+                title: 'Console',
+                needsTopBorder: false,
+                actions: [
+                  CopyToClipboardControl(
+                    dataProvider: disabled ? null : () => _lines.join('\n'),
+                    successMessage:
+                        'Copied $numLines ${pluralize('line', numLines)}.',
+                    buttonKey: DebuggerConsole.copyToClipboardButtonKey,
+                  ),
+                  DeleteControl(
+                    buttonKey: DebuggerConsole.clearStdioButtonKey,
+                    tooltip: 'Clear console output',
+                    onPressed: disabled ? null : widget.controller.clearStdio,
+                  ),
+                ],
+              ),
+              lines: _lines,
             ),
-            DeleteControl(
-              buttonKey: DebuggerConsole.clearStdioButtonKey,
-              tooltip: 'Clear console output',
-              onPressed: disabled ? null : widget.controller.clearStdio,
-            ),
-          ],
-        ),
-        lines: _lines,
+          ),
+          ExpressionEvalField(controller: widget.controller),
+        ],
       ),
     );
   }
