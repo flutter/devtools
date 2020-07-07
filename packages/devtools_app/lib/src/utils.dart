@@ -65,22 +65,29 @@ final NumberFormat nf = NumberFormat.decimalPattern();
 
 String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
 
-String prettyPrintBytes(num bytes, {bool includeUnit = false}) {
+String prettyPrintBytes(
+  num bytes, {
+  int kbFractionDigits = 0,
+  int mbFractionDigits = 1,
+  bool includeUnit = false,
+}) {
   final sizeInKB = bytes.abs() / 1024.0;
   if (sizeInKB < 1024.0) {
-    return '${printKB(bytes, includeUnit: includeUnit)}';
+    return '${printKB(bytes, fractionDigits: kbFractionDigits, includeUnit: includeUnit)}';
   } else {
-    return '${printMB(bytes, fractionDigits: 2, includeUnit: includeUnit)}';
+    return '${printMB(bytes, fractionDigits: mbFractionDigits, includeUnit: includeUnit)}';
   }
 }
 
-final NumberFormat _kbPattern = NumberFormat.decimalPattern()
-  ..maximumFractionDigits = 0;
+String printKB(num bytes, {int fractionDigits = 0, bool includeUnit = false}) {
+  final NumberFormat _kbPattern = NumberFormat.decimalPattern()
+    ..maximumFractionDigits = fractionDigits;
 
-String printKB(num bytes, {bool includeUnit = false}) {
   // We add ((1024/2)-1) to the value before formatting so that a non-zero byte
-  // value doesn't round down to 0.
-  var output = _kbPattern.format((bytes + 511) / 1024);
+  // value doesn't round down to 0. If showing decimal points, let it round normally.
+  // TODO(peterdjlee): Round up to the respective digit when fractionDigits > 0.
+  final processedBytes = fractionDigits == 0 ? bytes + 511 : bytes;
+  var output = _kbPattern.format(processedBytes / 1024);
   if (includeUnit) {
     output += ' KB';
   }
