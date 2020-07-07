@@ -24,8 +24,10 @@ final _log = DebugTimingLogger('debugger', mute: true);
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
-  DebuggerController() {
-    switchToIsolate(serviceManager.isolateManager.selectedIsolate);
+  DebuggerController({bool initialSwitchToIsolate = true}) {
+    if (initialSwitchToIsolate) {
+      switchToIsolate(serviceManager.isolateManager.selectedIsolate);
+    }
 
     autoDispose(serviceManager.isolateManager.onSelectedIsolateChanged
         .listen(switchToIsolate));
@@ -688,7 +690,9 @@ class DebuggerController extends DisposableController
   /// We call this method as we expand variables in the variable tree, because
   /// building the tree for all variable data at once is very expensive.
   Future<void> buildVariablesTree(Variable variable) async {
-    if (!variable.isExpandable || variable.treeInitialized) return;
+    if (!variable.isExpandable ||
+        variable.treeInitialized ||
+        variable.boundVar.value is! InstanceRef) return;
 
     final InstanceRef instanceRef = variable.boundVar.value;
     try {
@@ -711,62 +715,41 @@ class DebuggerController extends DisposableController
     variable.treeInitialized = true;
   }
 
-  // Whether a type has a simple value identity that is captured with the
-  // existing `InstanceRef.valueAsString` property.
-  static final _simpleKeys = {
-    InstanceKind.kBool,
-    InstanceKind.kDouble,
-    InstanceKind.kString,
-    InstanceKind.kInt,
-    InstanceKind.kNull,
-  };
-
   List<Variable> _createVariablesForAssociations(Instance instance) {
-    final boundsVariables = <BoundVariable>[];
-    for (final association in instance.associations) {
+    final variables = <Variable>[];
+    for (var i = 0; i < instance.associations.length; i++) {
+      final association = instance.associations[i];
       if (association.key is! InstanceRef) {
         continue;
       }
-      final instance = association.key as InstanceRef;
-      if (_simpleKeys.contains(instance.kind)) {
-        String keyString = association.key.valueAsString;
-        // For string keys, quote the key value.
-        if (instance.kind == InstanceKind.kString) {
-          keyString = "'${association.key.valueAsString}'";
-        }
-        boundsVariables.add(
-          BoundVariable(
-            name: '[$keyString]',
-            value: association.value,
-            scopeStartTokenPos: null,
-            scopeEndTokenPos: null,
-            declarationTokenPos: null,
-          ),
-        );
-        continue;
-      }
-      // For non-primitive keys, expand both the key and value into bound
-      // variables.
-      boundsVariables.add(
+      final key = BoundVariable(
+        name: '[key]',
+        value: association.key,
+        scopeStartTokenPos: null,
+        scopeEndTokenPos: null,
+        declarationTokenPos: null,
+      );
+      final value = BoundVariable(
+        name: '[value]',
+        value: association.value,
+        scopeStartTokenPos: null,
+        scopeEndTokenPos: null,
+        declarationTokenPos: null,
+      );
+      final variable = Variable.create(
         BoundVariable(
-          name: '[key]',
-          value: association.key,
+          name: '[Entry $i]',
+          value: '',
           scopeStartTokenPos: null,
           scopeEndTokenPos: null,
           declarationTokenPos: null,
         ),
       );
-      boundsVariables.add(
-        BoundVariable(
-          name: '[value]',
-          value: association.value,
-          scopeStartTokenPos: null,
-          scopeEndTokenPos: null,
-          declarationTokenPos: null,
-        ),
-      );
+      variable.addChild(Variable.create(key));
+      variable.addChild(Variable.create(value));
+      variables.add(variable);
     }
-    return boundsVariables.map((bv) => Variable.create(bv)).toList();
+    return variables;
   }
 
   List<Variable> _createVariablesForElements(Instance instance) {

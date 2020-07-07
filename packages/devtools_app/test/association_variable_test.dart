@@ -11,15 +11,15 @@ import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/vm_service_wrapper.dart';
+
+import 'support/mocks.dart';
 
 void main() {
   ServiceConnectionManager manager;
   DebuggerController debuggerController;
 
   setUp(() {
-    manager = ServiceConnectionManager();
-    manager.service = MockVmServiceWrapper();
+    manager = FakeServiceManager();
     when(manager.service.onDebugEvent).thenAnswer((_) {
       return const Stream.empty();
     });
@@ -32,14 +32,9 @@ void main() {
     when(manager.service.onStderrEvent).thenAnswer((_) {
       return const Stream.empty();
     });
-    globals[ServiceConnectionManager] = manager;
-    debuggerController = DebuggerController();
-    debuggerController.isolateRef =
-        IsolateRef(id: '1', number: '2', name: 'main');
-  });
-
-  tearDown(() {
-    globals[ServiceConnectionManager] = null;
+    setGlobal(ServiceConnectionManager, manager);
+    debuggerController = DebuggerController(initialSwitchToIsolate: false)
+      ..isolateRef = IsolateRef(id: '1', number: '2', name: 'main');
   });
 
   test('Creates bound variables for Map with String key and Double value',
@@ -51,10 +46,11 @@ void main() {
       associations: [
         MapAssociation(
           key: InstanceRef(
-              classRef: null,
-              id: '4',
-              kind: InstanceKind.kString,
-              valueAsString: 'Hey'),
+            classRef: null,
+            id: '4',
+            kind: InstanceKind.kString,
+            valueAsString: 'Hey',
+          ),
           value: InstanceRef(
             classRef: null,
             id: '5',
@@ -78,7 +74,11 @@ void main() {
     await debuggerController.buildVariablesTree(variable);
 
     expect(variable.children, [
-      matchesVariable(name: '[\'Hey\']', value: '12.34'),
+      matchesVariable(name: '[Entry 0]', value: ''),
+    ]);
+    expect(variable.children.first.children, [
+      matchesVariable(name: '[key]', value: '\'Hey\''),
+      matchesVariable(name: '[value]', value: '12.34'),
     ]);
   });
 
@@ -91,10 +91,11 @@ void main() {
       associations: [
         MapAssociation(
           key: InstanceRef(
-              classRef: null,
-              id: '4',
-              kind: InstanceKind.kInt,
-              valueAsString: '1'),
+            classRef: null,
+            id: '4',
+            kind: InstanceKind.kInt,
+            valueAsString: '1',
+          ),
           value: InstanceRef(
             classRef: null,
             id: '5',
@@ -118,7 +119,11 @@ void main() {
     await debuggerController.buildVariablesTree(variable);
 
     expect(variable.children, [
-      matchesVariable(name: '[1]', value: '12.34'),
+      matchesVariable(name: '[Entry 0]', value: ''),
+    ]);
+    expect(variable.children.first.children, [
+      matchesVariable(name: '[key]', value: '1'),
+      matchesVariable(name: '[value]', value: '12.34'),
     ]);
   });
 
@@ -158,6 +163,9 @@ void main() {
     await debuggerController.buildVariablesTree(variable);
 
     expect(variable.children, [
+      matchesVariable(name: '[Entry 0]', value: ''),
+    ]);
+    expect(variable.children.first.children, [
       matchesVariable(name: '[key]', value: 'Foo'),
       matchesVariable(name: '[value]', value: '12.34'),
     ]);
@@ -180,5 +188,3 @@ Matcher matchesVariable({
           const TypeMatcher<BoundVariable>()
               .having((bv) => bv.name, 'name', equals(name)));
 }
-
-class MockVmServiceWrapper extends Mock implements VmServiceWrapper {}
