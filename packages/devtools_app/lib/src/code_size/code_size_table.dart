@@ -85,6 +85,10 @@ class _SizeColumn extends ColumnData<TreemapNode> {
   String getDisplayValue(TreemapNode dataObject) {
     return prettyPrintBytes(
       dataObject.byteSize,
+<<<<<<< HEAD
+=======
+      kbFractionDigits: 1,
+>>>>>>> master
       includeUnit: true,
     );
   }
