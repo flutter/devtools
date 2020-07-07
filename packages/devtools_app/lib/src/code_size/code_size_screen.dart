@@ -50,9 +50,12 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   TreemapNode root;
 
   TabController _tabController;
+  static const Key snapshotTabKey = Key('code size snapshot tab');
+  static const Key diffTabKey = Key('code size diff tab');
+
   static const tabs = [
-    Tab(text: 'Snapshot'),
-    Tab(text: 'Diff'),
+    Tab(text: 'Snapshot', key: snapshotTabKey),
+    Tab(text: 'Diff', key: diffTabKey),
   ];
 
   bool showDiffTreeTypeDropdown = false;
@@ -89,13 +92,12 @@ class CodeSizeBodyState extends State<CodeSizeBody>
 
     addAutoDisposeListener(controller.activeDiffTreeType);
 
-    addAutoDisposeListener(controller.showDiffTreeTypeDropdown);
-
     controller.loadTree('new_v8.json');
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentTab = tabs[_tabController.index];
     if (root != null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,8 +112,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
                 tabs: tabs,
                 onTap: onTabSelected,
               ),
-              if (controller.showDiffTreeTypeDropdown.value)
-                _buildDiffTreeTypeDropdown(),
+              if (currentTab.key == diffTabKey) _buildDiffTreeTypeDropdown(),
             ],
           ),
           Expanded(
@@ -145,10 +146,9 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   }
 
   DropdownMenuItem _buildMenuItem(DiffTreeType diffTreeType) {
-    // TODO(peterdjlee): Set item's text to the enum's value, not toString().
     return DropdownMenuItem<DiffTreeType>(
       value: diffTreeType,
-      child: Text(diffTreeType.toString()),
+      child: Text(diffTreeType.display),
     );
   }
 
@@ -157,11 +157,9 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     // TODO(peterdjlee): Import user file instead of using hard coded data.
     switch (selected) {
       case 'Snapshot':
-        controller.toggleShowDiffTreeTypeDropdown(false);
         controller.loadTree('new_v8.json');
         return;
       case 'Diff':
-        controller.toggleShowDiffTreeTypeDropdown(true);
         controller.loadFakeDiffData(
           'old_v8.json',
           'new_v8.json',
@@ -209,5 +207,19 @@ class CodeSizeBodyState extends State<CodeSizeBody>
         );
       },
     );
+  }
+}
+
+extension DiffTreeTypeExtension on DiffTreeType {
+  String get display {
+    switch (this) {
+      case DiffTreeType.increaseOnly:
+        return 'Increase Only';
+      case DiffTreeType.decreaseOnly:
+        return 'Decrease Only';
+      case DiffTreeType.combined:
+      default:
+        return 'Combined';
+    }
   }
 }
