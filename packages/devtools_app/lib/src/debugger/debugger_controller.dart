@@ -26,8 +26,10 @@ final _log = DebugTimingLogger('debugger', mute: true);
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
-  DebuggerController() {
-    switchToIsolate(serviceManager.isolateManager.selectedIsolate);
+  DebuggerController({bool initialSwitchToIsolate = true}) {
+    if (initialSwitchToIsolate) {
+      switchToIsolate(serviceManager.isolateManager.selectedIsolate);
+    }
 
     autoDispose(serviceManager.isolateManager.onSelectedIsolateChanged
         .listen(switchToIsolate));
@@ -702,6 +704,8 @@ class DebuggerController extends DisposableController
           variable.addAllChildren(_createVariablesForElements(result));
         } else if (result.bytes != null) {
           variable.addAllChildren(_createVariablesForBytes(result));
+          // Check fields last, as all instanceRefs may have a non-null fields
+          // with no entries.
         } else if (result.fields != null) {
           variable.addAllChildren(_createVariablesForFields(result));
         }
@@ -733,9 +737,9 @@ class DebuggerController extends DisposableController
     return boundsVariables.map((bv) => Variable.create(bv)).toList();
   }
 
-  // Decodes the bytes into the correctly sized values based on the instance
-  // type, falling back to raw bytes. The switch is based on the allowed
-  // values of `instance.bytes`.
+  /// Decodes the bytes into the correctly sized values based on the instance
+  /// type, falling back to raw bytes. The switch is based on the allowed
+  /// values of `instance.bytes`.
   List<Variable> _createVariablesForBytes(Instance instance) {
     final bytes = base64.decode(instance.bytes);
     final boundVariables = <BoundVariable>[];
@@ -752,9 +756,7 @@ class DebuggerController extends DisposableController
         result = Uint32List.view(bytes.buffer);
         break;
       case InstanceKind.kUint64List:
-        // TODO: Uint64List cannot be instantiated on the web. Consider
-        // using existing libraries like fixnum to convert to string values
-        // for displaying.
+        // TODO: https://github.com/flutter/devtools/issues/2159
         if (kIsWeb) {
           return <Variable>[];
         }
@@ -770,9 +772,7 @@ class DebuggerController extends DisposableController
         result = Int32List.view(bytes.buffer);
         break;
       case InstanceKind.kInt64List:
-        // TODO: Int64List cannot be instantiated on the web. Consider
-        // using existing libraries like fixnum to convert to string values
-        // for displaying.
+        // TODO: https://github.com/flutter/devtools/issues/2159
         if (kIsWeb) {
           return <Variable>[];
         }

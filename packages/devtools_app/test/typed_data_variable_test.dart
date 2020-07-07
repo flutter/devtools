@@ -17,13 +17,14 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 
+import 'support/mocks.dart';
+
 void main() {
   ServiceConnectionManager manager;
   DebuggerController debuggerController;
 
   setUp(() {
-    manager = ServiceConnectionManager();
-    manager.service = MockVmServiceWrapper();
+    manager = FakeServiceManager();
     when(manager.service.onDebugEvent).thenAnswer((_) {
       return const Stream.empty();
     });
@@ -36,14 +37,9 @@ void main() {
     when(manager.service.onStderrEvent).thenAnswer((_) {
       return const Stream.empty();
     });
-    globals[ServiceConnectionManager] = manager;
-    debuggerController = DebuggerController();
-    debuggerController.isolateRef =
-        IsolateRef(id: '1', number: '2', name: 'main');
-  });
-
-  tearDown(() {
-    globals[ServiceConnectionManager] = null;
+    setGlobal(ServiceConnectionManager, manager);
+    debuggerController = DebuggerController(initialSwitchToIsolate: false)
+      ..isolateRef = IsolateRef(id: '1', number: '2', name: 'main');
   });
 
   test('Creates bound variables for Uint8ClampedList instance', () async {
