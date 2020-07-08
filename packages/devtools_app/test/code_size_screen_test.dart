@@ -9,7 +9,6 @@ import 'package:devtools_app/src/code_size/code_size_table.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path/path.dart' hide equals;
 import 'support/wrappers.dart';
 
 void main() {
@@ -99,8 +98,8 @@ void main() {
         await tester.tap(find.byKey(CodeSizeBodyState.diffTabKey));
 
         await codeSizeController.loadFakeDiffData(
-          '$current/lib/src/code_size/stub_data/old_v8.json',
-          '$current/lib/src/code_size/stub_data/new_v8.json',
+        '../devtools_testing/lib/support/treemap_test_data_v8_old.json',
+        '../devtools_testing/lib/support/treemap_test_data_v8_new.json',
           DiffTreeType.combined,
         );
 
