@@ -16,6 +16,7 @@ import '../theme.dart';
 import '../ui/label.dart';
 import 'memory_chart.dart';
 import 'memory_controller.dart';
+import 'memory_events_pane.dart';
 import 'memory_heap_tree_view.dart';
 
 /// Width of application when memory buttons loose their text.
@@ -80,6 +81,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   static const androidChartButtonKey = Key('Android Chart');
 
   MemoryChart _memoryChart;
+  MemoryEventsPane _memoryEvents;
 
   MemoryController controller;
 
@@ -117,6 +119,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         ? MemoryScreen.memorySourceMenuItemPrefix
         : '';
 
+    _memoryEvents ??= MemoryEventsPane();
     _memoryChart = MemoryChart();
 
     return Column(
@@ -130,6 +133,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
           ],
         ),
         const SizedBox(height: denseSpacing),
+        _memoryEvents,
         _memoryChart,
         const PaddedDivider(padding: EdgeInsets.zero),
         Expanded(
@@ -371,9 +375,14 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   Future<void> _gc() async {
     // TODO(terry): Record GC in analytics.
     try {
-      log('GC Start', LogLevel.warning);
+      log('User Initiated GC Start');
+
+      // TODO(terry): Only record GCs not when user initiated.
+      controller.memoryTimeline.addGCEvent();
+
       await controller.gc();
-      log('GC Complete', LogLevel.warning);
+
+      log('User GC Complete');
     } catch (e) {
       // TODO(terry): Show toast?
       log('Unable to GC ${e.toString()}', LogLevel.error);

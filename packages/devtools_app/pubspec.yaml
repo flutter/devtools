@@ -23,7 +23,7 @@ dependencies:
     ^0.0.2
 #     path: ../../third_party/packages/ansi_up
   collection: ^1.14.11
-  devtools_shared: 0.8.1-dev.1
+  devtools_shared: 0.8.1-dev.2
   file: ^5.1.0
   flutter_web_plugins:
     sdk: flutter

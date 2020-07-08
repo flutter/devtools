@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui' as dart_ui;
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -29,6 +28,7 @@ import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_service.dart';
 import 'memory_snapshot_models.dart';
+import 'memory_timeline.dart';
 
 enum ChartType {
   DartHeaps,
@@ -301,6 +301,7 @@ class MemoryController extends DisposableController
 
     // The memory source has changed, clear all plotted values.
     memoryTimeline.dartChartData.reset();
+    memoryTimeline.eventsChartData.reset();
     memoryTimeline.androidChartData.reset();
   }
 
@@ -337,6 +338,18 @@ class MemoryController extends DisposableController
         minutesToDisplay: intervalDurationInMs,
       );
 
+      // Process the events
+      memoryTimeline.eventsChartData.addTraceEntries(
+        gcVmValue: arg[MemoryTimeline.gcVmEventKey],
+        gcUserValue: arg[MemoryTimeline.gcUserEventKey],
+        snapshotValue: arg[MemoryTimeline.snapshotEventKey],
+        snapshotAutoValue: arg[MemoryTimeline.snapshotAutoEventKey],
+        monitorStartValue: arg[MemoryTimeline.monitorStartEventKey],
+        monitorContinuesValue: arg[MemoryTimeline.monitorContinuesEventKey],
+        monitorResetValue: arg[MemoryTimeline.monitorResetEventKey],
+        minutesToDisplay: intervalDurationInMs,
+      );
+
       if (memoryTimeline.dartChartData.pruned) {
         memoryTimeline.startingIndex++;
       }
@@ -345,7 +358,8 @@ class MemoryController extends DisposableController
 
   void processData([bool reloadAllData = false]) {
     final args = offline
-        ? memoryTimeline.fetchMemoryLogFileData()
+        ? memoryTimeline
+            .fetchMemoryLogFileData() // TODO(terry): Need to fetch events data on disk too.
         : memoryTimeline.fetchLiveData(reloadAllData);
 
     processDataset(args);
@@ -946,13 +960,13 @@ class MPChartData {
   bool get pruned => _pruning;
 
   /// Datapoint entries for each used heap value.
-  final List used = <Entry>[];
+  final used = <Entry>[];
 
   /// Datapoint entries for each capacity heap value.
-  final List capacity = <Entry>[];
+  final capacity = <Entry>[];
 
   /// Datapoint entries for each external memory value.
-  final List externalHeap = <Entry>[];
+  final externalHeap = <Entry>[];
 
   /// Add each entry to its corresponding trace.
   void addTraceEntries({
@@ -992,33 +1006,118 @@ class MPChartData {
   }
 }
 
+/// Prepare data to plot in Event Chart.
+class MPEventsChartData {
+  bool _pruning = false;
+
+  /// Signal that every addTrace will cause a prune.
+  bool get pruned => _pruning;
+
+  /// Datapoint entries for ghost trace to stop auto-scaling of Y-axis.
+  final ghosts = <Entry>[];
+
+  /// Datapoint entries for each user initiated GC.
+  final gcUser = <Entry>[];
+
+  /// Datapoint entries for a VM's GC.
+  final gcVm = <Entry>[];
+
+  /// Datapoint entries for each user initiated snapshot event.
+  final snapshot = <Entry>[];
+
+  /// Datapoint entries for an automatically initiated snapshot event.
+  final snapshotAuto = <Entry>[];
+
+  /// Allocation Accumulator monitoring.
+  final monitorStart = <Entry>[];
+  final monitorContinues = <Entry>[];
+  final monitorReset = <Entry>[];
+
+  /// Add each entry to its corresponding trace.
+  void addTraceEntries({
+    Entry gcUserValue,
+    Entry gcVmValue,
+    Entry snapshotValue,
+    Entry snapshotAutoValue,
+    Entry monitorStartValue,
+    Entry monitorContinuesValue,
+    Entry monitorResetValue,
+    int minutesToDisplay,
+  }) {
+    if (!_pruning &&
+        gcUser.isNotEmpty &&
+        (gcUserValue.x - gcUser.first.x) > minutesToDisplay) {
+      _pruning = true;
+      assert(gcUserValue.x - gcUser.last.x <= minutesToDisplay);
+    }
+
+    // TODO(terry): Any way have a kind of trace order safe way to so we
+    // can keep a list of the entries (remoteAt and add).
+    if (_pruning) {
+      ghosts.removeAt(0);
+      gcUser.removeAt(0);
+      gcVm.removeAt(0);
+      snapshot.removeAt(0);
+      snapshotAuto.removeAt(0);
+      monitorStart.removeAt(0);
+      monitorContinues.removeAt(0);
+      monitorReset.removeAt(0);
+    }
+
+    ghosts.add(Entry(x: gcUserValue.x, y: MemoryTimeline.visibleEvent));
+    gcUser.add(gcUserValue);
+    gcVm.add(gcVmValue);
+    snapshot.add(snapshotValue);
+    snapshotAuto.add(snapshotAutoValue);
+    monitorStart.add(monitorStartValue);
+    monitorContinues.add(monitorContinuesValue);
+    monitorReset.add(monitorResetValue);
+  }
+
+  /// Remove all plotted entries in all traces.
+  void reset() {
+    // TODO(terry): Any way have a kind of trace order safe way to so we
+    // can keep an list of the entries (clear).
+    ghosts.clear();
+    gcUser.clear();
+    gcVm.clear();
+    snapshot.clear();
+    snapshotAuto.clear();
+    monitorStart.clear();
+    monitorContinues.clear();
+    monitorReset.clear();
+
+    _pruning = false;
+  }
+}
+
 /// Prepare Engine (ADB memory info) data to plot in MPChart.
 class MPEngineChartData {
   bool _pruning = false;
 
   /// Datapoint entries for each Java heap value.
-  final List javaHeap = <Entry>[];
+  final javaHeap = <Entry>[];
 
   /// Datapoint entries for each native heap value.
-  final List nativeHeap = <Entry>[];
+  final nativeHeap = <Entry>[];
 
   /// Datapoint entries for code size value.
-  final List code = <Entry>[];
+  final code = <Entry>[];
 
   /// Datapoint entries for stack size value.
-  final List stack = <Entry>[];
+  final stack = <Entry>[];
 
   /// Datapoint entries for graphics size value.
-  final List graphics = <Entry>[];
+  final graphics = <Entry>[];
 
   /// Datapoint entries for other size value.
-  final List other = <Entry>[];
+  final other = <Entry>[];
 
   /// Datapoint entries for system size value.
-  final List system = <Entry>[];
+  final system = <Entry>[];
 
   /// Datapoint entries for total size value.
-  final List total = <Entry>[];
+  final total = <Entry>[];
 
   /// Add each entry to its corresponding trace.
   void addTraceEntries({
@@ -1079,293 +1178,6 @@ class MPEngineChartData {
   }
 }
 
-/// All Raw data received from the VM and offline data loaded from a memory log file.
-class MemoryTimeline {
-  MemoryTimeline(this.controller);
-
-  /// Version of timeline data (HeapSample) JSON payload.
-  static const version = 1;
-
-  /// Keys used in a map to store all the MPChart Entries we construct to be plotted.
-  static const capcityValueKey = 'capacityValue';
-  static const usedValueKey = 'usedValue';
-  static const externalValueKey = 'externalValue';
-  static const rssValueKey = 'rssValue';
-
-  /// Keys used in a map to store all the MPEngineChart Entries we construct to be plotted,
-  /// ADB memory info.
-  static const javaHeapValueKey = 'javaHeapValue';
-  static const nativeHeapValueKey = 'nativeHeapValue';
-  static const codeValueKey = 'codeValue';
-  static const stackValueKey = 'stackValue';
-  static const graphicsValueKey = 'graphicsValue';
-  static const otherValueKey = 'otherValue';
-  static const systemValueKey = 'systemValue';
-  static const totalValueKey = 'totalValue';
-
-  final MemoryController controller;
-
-  /// Flutter Framework information (Dart heaps).
-  final dartChartData = MPChartData();
-
-  /// Flutter Engine (ADB memory information).
-  final androidChartData = MPEngineChartData();
-
-  /// Return the data payload that is active.
-  List<HeapSample> get data => controller.offline ? offlineData : liveData;
-
-  int get startingIndex =>
-      controller.offline ? offlineStartingIndex : liveStartingIndex;
-
-  set startingIndex(int value) {
-    controller.offline
-        ? offlineStartingIndex = value
-        : liveStartingIndex = value;
-  }
-
-  int get endingIndex => data.isNotEmpty ? data.length - 1 : -1;
-
-  /// Raw Heap sampling data from the VM.
-  final List<HeapSample> liveData = [];
-
-  /// Start index of liveData plotted for MPChartData/MPEngineChartData sets.
-  int liveStartingIndex = 0;
-
-  /// Data of the last selected offline memory source (JSON file in /tmp).
-  final List<HeapSample> offlineData = [];
-
-  /// Start index of offlineData plotted for MPChartData/MPEngineChartData sets.
-  int offlineStartingIndex = 0;
-
-  /// Notifies that a new Heap sample has been added to the timeline.
-  final _sampleAddedNotifier = ValueNotifier<HeapSample>(null);
-
-  ValueListenable<HeapSample> get sampleAddedNotifier => _sampleAddedNotifier;
-
-  /// Whether the timeline has been manually paused via the Pause button.
-  bool manuallyPaused = false;
-
-  /// Notifies that the timeline has been paused.
-  final _pausedNotifier = ValueNotifier<bool>(false);
-
-  ValueNotifier<bool> get pausedNotifier => _pausedNotifier;
-
-  void pause({bool manual = false}) {
-    manuallyPaused = manual;
-    _pausedNotifier.value = true;
-  }
-
-  void resume() {
-    manuallyPaused = false;
-    _pausedNotifier.value = false;
-  }
-
-  /// Notifies any visible marker for a particular chart should be hidden.
-  final _markerHiddenNotifier = ValueNotifier<bool>(false);
-
-  ValueListenable<bool> get markerHiddenNotifier => _markerHiddenNotifier;
-
-  void hideMarkers() {
-    _markerHiddenNotifier.value = !_markerHiddenNotifier.value;
-  }
-
-  /// dart_ui.Image Image asset displayed for each entry plotted in a chart.
-  // ignore: unused_field
-  dart_ui.Image _img;
-
-  // TODO(terry): Look at using _img for each data point (at least last N).
-  dart_ui.Image get dataPointImage => null;
-
-  set image(dart_ui.Image img) {
-    _img = img;
-  }
-
-  void reset() {
-    liveData.clear();
-    startingIndex = 0;
-    dartChartData.reset();
-    androidChartData.reset();
-  }
-
-  /// Common utility function to handle loading of the data into the
-  /// chart for either offline or live Feed.
-  List<Map> _processData(int index) {
-    final result = <Map<String, Entry>>[];
-
-    for (var lastIndex = index; lastIndex < data.length; lastIndex++) {
-      final sample = data[lastIndex];
-      final timestamp = sample.timestamp.toDouble();
-
-      // Flutter Framework memory (Dart VM Heaps)
-      final capacity = sample.capacity.toDouble();
-      final used = sample.used.toDouble();
-      final external = sample.external.toDouble();
-
-      // TOOD(terry): Need to plot.
-      final rss = (sample.rss ?? 0).toDouble();
-
-      final extEntry = Entry(x: timestamp, y: external, icon: dataPointImage);
-      final usedEntry =
-          Entry(x: timestamp, y: used + external, icon: dataPointImage);
-      final capacityEntry =
-          Entry(x: timestamp, y: capacity, icon: dataPointImage);
-      final rssEntry = Entry(x: timestamp, y: rss, icon: dataPointImage);
-
-      // Engine memory values (ADB Android):
-      final javaHeap = sample.adbMemoryInfo.javaHeap.toDouble();
-      final nativeHeap = sample.adbMemoryInfo.nativeHeap.toDouble();
-      final code = sample.adbMemoryInfo.code.toDouble();
-      final stack = sample.adbMemoryInfo.stack.toDouble();
-      final graphics = sample.adbMemoryInfo.graphics.toDouble();
-      final other = sample.adbMemoryInfo.other.toDouble();
-      final system = sample.adbMemoryInfo.system.toDouble();
-      final total = sample.adbMemoryInfo.total.toDouble();
-
-      final graphicsEntry = Entry(
-        x: timestamp,
-        y: graphics,
-        icon: dataPointImage,
-      );
-      final stackEntry = Entry(
-        x: timestamp,
-        y: stack + graphics,
-        icon: dataPointImage,
-      );
-      final javaHeapEntry = Entry(
-        x: timestamp,
-        y: javaHeap + graphics + stack,
-        icon: dataPointImage,
-      );
-      final nativeHeapEntry = Entry(
-        x: timestamp,
-        y: nativeHeap + javaHeap + graphics + stack,
-        icon: dataPointImage,
-      );
-      final codeEntry = Entry(
-        x: timestamp,
-        y: code + nativeHeap + javaHeap + graphics + stack,
-        icon: dataPointImage,
-      );
-      final otherEntry = Entry(
-        x: timestamp,
-        y: other + code + nativeHeap + javaHeap + graphics + stack,
-        icon: dataPointImage,
-      );
-      final systemEntry = Entry(
-        x: timestamp,
-        y: system + other + code + nativeHeap + javaHeap + graphics + stack,
-        icon: dataPointImage,
-      );
-      final totalEntry = Entry(
-        x: timestamp,
-        y: total,
-        icon: dataPointImage,
-      );
-
-      result.add({
-        capcityValueKey: capacityEntry,
-        usedValueKey: usedEntry,
-        externalValueKey: extEntry,
-        rssValueKey: rssEntry,
-        javaHeapValueKey: javaHeapEntry,
-        nativeHeapValueKey: nativeHeapEntry,
-        codeValueKey: codeEntry,
-        stackValueKey: stackEntry,
-        graphicsValueKey: graphicsEntry,
-        otherValueKey: otherEntry,
-        systemValueKey: systemEntry,
-        totalValueKey: totalEntry,
-      });
-    }
-
-    return result;
-  }
-
-  /// Fetch all the data in the loaded from a memory log (JSON file in /tmp).
-  List<Map> fetchMemoryLogFileData() {
-    assert(controller.offline);
-    assert(offlineData.isNotEmpty);
-    return _processData(startingIndex);
-  }
-
-  List<Map> fetchLiveData([bool reloadAllData = false]) {
-    assert(!controller.offline);
-    assert(liveData.isNotEmpty);
-
-    if (endingIndex - startingIndex != liveData.length || reloadAllData) {
-      // Process the data received (startingDataIndex is the last sample).
-      final args = _processData(endingIndex < 0 ? 0 : endingIndex);
-
-      // Debugging data - to enable remove logical not operator.
-      if (!true) {
-        final DateFormat mFormat = DateFormat('hh:mm:ss.mmm');
-        final startDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(
-            liveData[startingIndex].timestamp.toInt()));
-        final endDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(
-            liveData[endingIndex].timestamp.toInt()));
-        log('Time range Live data start: $startDT, end: $endDT');
-      }
-
-      return args;
-    }
-
-    return [];
-  }
-
-  List<Map> recomputeOfflineData(int displayInterval) {
-    assert(displayInterval > 0);
-
-    _computeStartingIndex(displayInterval);
-
-    // Start from the first sample to display in this time interval.
-    return _processData(startingIndex);
-  }
-
-  List<Map> recomputeLiveData(int displayInterval) {
-    assert(displayInterval > 0);
-
-    _computeStartingIndex(displayInterval);
-
-    // Start from the first sample to display in this time interval.
-    return _processData(startingIndex);
-  }
-
-  void _computeStartingIndex(int displayInterval) {
-    // Compute a new starting index from length - N minutes.
-    final timeLastSample = data.last.timestamp;
-    var dataIndex = data.length - 1;
-    for (; dataIndex > 0; dataIndex--) {
-      final sample = data[dataIndex];
-      final timestamp = sample.timestamp;
-
-      if ((timeLastSample - timestamp) > displayInterval) break;
-    }
-
-    startingIndex = dataIndex;
-
-    // Debugging data - to enable remove logical not operator.
-    if (!true) {
-      final DateFormat mFormat = DateFormat('hh:mm:ss.mmm');
-      final startDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(
-          data[startingIndex].timestamp.toInt()));
-      final endDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(
-          data[endingIndex].timestamp.toInt()));
-      log('Recompute Time range Offline data start: $startDT, end: $endDT');
-    }
-  }
-
-  void addSample(HeapSample sample) {
-    // Always record the heap sample in the raw set of data (liveFeed).
-    liveData.add(sample);
-
-    // Only notify that new sample has arrived if the
-    // memory source is 'Live Feed'.
-    if (!controller.offline) {
-      _sampleAddedNotifier.value = sample;
-    }
-  }
-}
-
 /// Supports saving and loading memory samples.
 class MemoryLog {
   MemoryLog(this.controller);
@@ -1386,13 +1198,14 @@ class MemoryLog {
       // Used to create empty memory log for test.
       pseudoData = true;
       liveData.add(HeapSample(
-        DateTime.now().microsecondsSinceEpoch,
+        DateTime.now().millisecondsSinceEpoch,
         0,
         0,
         0,
         0,
         false,
         AdbMemoryInfo.empty(),
+        EventSample.empty(),
       ));
     }
 

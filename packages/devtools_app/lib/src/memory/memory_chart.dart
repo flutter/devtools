@@ -33,6 +33,7 @@ import '../auto_dispose_mixin.dart';
 import '../theme.dart';
 import '../ui/theme.dart';
 import 'memory_controller.dart';
+import 'memory_timeline.dart';
 
 class MemoryChart extends StatefulWidget {
   @override
@@ -114,6 +115,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   void _refreshCharts() {
     // Reset all plotted data sets (Entries).
     controller.memoryTimeline.dartChartData.reset();
+    controller.memoryTimeline.eventsChartData.reset();
     controller.memoryTimeline.androidChartData.reset();
 
     if (controller.offline) {
@@ -213,7 +215,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
-                      height: defaultChartHeight,
+                      height: 150,
                       child: LineChart(dartChartController),
                     ),
                     _timelineSlider,
@@ -292,7 +294,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
     // Compute padding around chart.
     dartChartController.setViewPortOffsets(
-        defaultSpacing * 3, denseSpacing, defaultSpacing, defaultSpacing);
+        defaultSpacing * 3, 0, defaultSpacing, defaultSpacing);
   }
 
   /// Plots the Android ADB memory info (Flutter Engine).

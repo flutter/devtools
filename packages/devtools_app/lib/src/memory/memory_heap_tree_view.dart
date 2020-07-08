@@ -16,6 +16,7 @@ import '../globals.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
+import '../ui/icons.dart';
 import '../ui/label.dart';
 import '../ui/search.dart';
 import '../utils.dart';
@@ -128,6 +129,11 @@ class HeapTreeViewState extends State<HeapTree>
   static const collapseAllButtonKey = Key('Collapse All Button');
   @visibleForTesting
   static const expandAllButtonKey = Key('Expand All Button');
+  @visibleForTesting
+  static const allocationMonitorKey = Key('Allocation Monitor Start Button');
+  @visibleForTesting
+  static const allocationMonitorResetKey =
+      Key('Allocation Monitor Reset Button');
   @visibleForTesting
   static const searchButtonKey = Key('Snapshot Search');
   @visibleForTesting
@@ -507,8 +513,95 @@ class HeapTreeViewState extends State<HeapTree>
                     : null,
                 child: const Text('Expand All'),
               ),
+        const SizedBox(width: defaultSpacing),
+        OutlineButton(
+          key: allocationMonitorKey,
+          onPressed: _allocationStart,
+          child: createImageIcon(
+            'icons/memory/communities_white@2x.png',
+            size: defaultIconThemeSize,
+          ),
+        ),
+        OutlineButton(
+          key: allocationMonitorResetKey,
+          onPressed: _allocationReset,
+          child: createImageIcon(
+            'icons/memory/reset_icon_white@2x.png',
+            size: defaultIconThemeSize,
+          ),
+        ),
       ],
     );
+  }
+
+  void _allocationStart() {
+    controller.memoryTimeline.addMonitorStartEvent();
+  }
+
+  void _allocationReset() {
+    controller.memoryTimeline.addMonitorResetEvent();
+  }
+
+  FocusNode searchFieldFocusNode;
+  TextEditingController searchTextFieldController;
+  FocusNode rawKeyboardFocusNode;
+
+  void clearSearchField({force = false}) {
+    if (force || controller.search.isNotEmpty) {
+      searchTextFieldController.clear();
+      controller.search = '';
+    }
+  }
+
+  Widget createSearchField() {
+    // Creating new TextEditingController.
+    searchFieldFocusNode = FocusNode();
+
+    searchFieldFocusNode.addListener(() {
+      if (!searchFieldFocusNode.hasFocus) {
+        closeAutoCompleteOverlay();
+      }
+    });
+
+    searchTextFieldController = TextEditingController(text: controller.search);
+    searchTextFieldController.selection = TextSelection.fromPosition(
+        TextPosition(offset: controller.search.length));
+
+    final searchField = CompositedTransformTarget(
+      link: autoCompletelayerLink,
+      child: TextField(
+        key: memorySearchFieldKey,
+        autofocus: true,
+        enabled: controller.snapshots.isNotEmpty,
+        focusNode: searchFieldFocusNode,
+        controller: searchTextFieldController,
+        onChanged: (value) {
+          controller.search = value;
+        },
+        onEditingComplete: () {
+          searchFieldFocusNode.requestFocus();
+        },
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.all(8),
+          border: const OutlineInputBorder(),
+          labelText: 'Search',
+          hintText: 'Search',
+          suffix: IconButton(
+            padding: const EdgeInsets.all(0.0),
+            onPressed: () {
+              clearSearchField();
+            },
+            icon: const Icon(Icons.clear, size: 16),
+          ),
+        ),
+      ),
+    );
+
+    if (controller.showTreemap.value && controller.snapshots.isNotEmpty) {
+      searchFieldFocusNode.requestFocus();
+    }
+
+    return searchField;
   }
 
   /// Match, found,  select it and process via ValueNotifiers.
@@ -594,6 +687,8 @@ class HeapTreeViewState extends State<HeapTree>
       return;
     }
 
+    controller.memoryTimeline.addSnapshotEvent(auto: !userGenerated);
+
     setState(() {
       snapshotState = SnapshotStatus.streaming;
     });
@@ -627,6 +722,7 @@ class HeapTreeViewState extends State<HeapTree>
     await doGroupBy();
 
     final root = controller.computeAllLibraries(graph: graph);
+
     controller.storeSnapshot(
       snapshotTimestamp,
       graph,
