@@ -97,7 +97,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
 
     addAutoDisposeListener(controller.activeDiffTreeType);
 
-    controller.loadTree('$current/lib/src/code_size/stub_data/newe_v8.json');
+    controller.loadTree('$current/lib/src/code_size/stub_data/new_v8.json');
   }
 
   @override
