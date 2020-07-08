@@ -1,3 +1,6 @@
+## 0.8.1-dev.1
+* Add tooltips to list items in the Debugger Libraries pane [#2167](https://github.com/flutter/devtools/pull/2167)
+
 ## 0.8.0+1
 * Build with fix for canvas kit crasher
 
