@@ -71,6 +71,8 @@ String prettyPrintBytes(
   int mbFractionDigits = 1,
   bool includeUnit = false,
 }) {
+  // Ensure a small number of bytes does not print as 0 KB.
+  // If bytes >= 52 and kbFractionDigits == 1, it will start rounding to 0.01 KB.
   if (bytes.abs() < 52) {
     var output = bytes.toString();
     if (includeUnit) {

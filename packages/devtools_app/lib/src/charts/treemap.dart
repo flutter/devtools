@@ -493,6 +493,8 @@ class Treemap extends StatelessWidget {
   Widget buildSubTreemaps() {
     return LayoutBuilder(
       builder: (context, constraints) {
+        // TODO(peterdjlee): Investigate why exception is thrown without this check
+        //                   and if there are any other cases.
         if (constraints.maxHeight == 0 || constraints.maxWidth == 0) {
           return const SizedBox();
         }

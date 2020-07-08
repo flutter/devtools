@@ -15,6 +15,23 @@ void main() {
       const int kb = 1024;
       const int mb = 1024 * kb;
 
+      expect(
+        prettyPrintBytes(
+          51,
+          kbFractionDigits: 1,
+          includeUnit: true,
+        ),
+        '51 B',
+      );
+      expect(
+        prettyPrintBytes(
+          52,
+          kbFractionDigits: 1,
+          includeUnit: true,
+        ),
+        '0.1 KB',
+      );
+
       expect(prettyPrintBytes(kb), '1');
       expect(prettyPrintBytes(kb + 100, kbFractionDigits: 1), '1.1');
       expect(prettyPrintBytes(kb + 150, kbFractionDigits: 2), '1.15');

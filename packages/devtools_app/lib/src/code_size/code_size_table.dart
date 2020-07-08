@@ -162,7 +162,8 @@ class CodeSizeDiffTable extends StatelessWidget {
   final ColumnData<TreemapNode> sortColumn;
   final List<ColumnData<TreemapNode>> columns;
 
-  // TODO(petedjlee): Ensure the sort column is descending with the absolute value of the size.
+  // TODO(petedjlee): Ensure the sort column is descending with the absolute value of the size
+  //                  if the table is only showing negative values.
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
