@@ -739,9 +739,12 @@ class DebuggerController extends DisposableController
     return boundsVariables.map((bv) => Variable.create(bv)).toList();
   }
 
-  /// Decodes the bytes into the correctly sized values based on the instance
-  /// type, falling back to raw bytes. The switch is based on the allowed
-  /// values of `instance.bytes`.
+  /// Decodes the bytes into the correctly sized values based on
+  /// [Instance.kind], falling back to raw bytes if a type is not
+  /// matched.
+  ///
+  /// This method does not currently support [Uint64List] or
+  /// [Int64List].
   List<Variable> _createVariablesForBytes(Instance instance) {
     final bytes = base64.decode(instance.bytes);
     final boundVariables = <BoundVariable>[];
