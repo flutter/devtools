@@ -16,10 +16,14 @@ import '../common_widgets.dart';
 import '../geometry.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
+import '../ui/search.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
+import 'timeline_utils.dart';
+
+final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
 class TimelineFlameChartContainer extends StatefulWidget {
   const TimelineFlameChartContainer({
@@ -40,7 +44,8 @@ class TimelineFlameChartContainer extends StatefulWidget {
 }
 
 class _TimelineFlameChartContainerState
-    extends State<TimelineFlameChartContainer> with AutoDisposeMixin {
+    extends State<TimelineFlameChartContainer>
+    with AutoDisposeMixin, SearchFieldMixin {
   TimelineController controller;
 
   @override
@@ -75,13 +80,18 @@ class _TimelineFlameChartContainerState
           return TimelineFlameChart(
             controller.data,
             width: constraints.maxWidth,
+            height: constraints.maxHeight,
             selectionNotifier: controller.selectedTimelineEvent,
+            searchMatchesNotifier: controller.searchMatches,
+            activeSearchMatchNotifier: controller.activeSearchMatch,
             onSelection: (e) => controller.selectTimelineEvent(e),
           );
         },
       );
     }
 
+    final searchFieldEnabled =
+        !(controller.data?.isEmpty ?? true) && !widget.processing;
     return OutlineDecoration(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -91,6 +101,19 @@ class _TimelineFlameChartContainerState
             title: 'Timeline Events',
             tall: true,
             needsTopBorder: false,
+            actions: [
+              Container(
+                width: wideSearchTextWidth,
+                height: defaultSearchTextHeight,
+                child: buildSearchField(
+                  controller: controller,
+                  searchFieldKey: timelineSearchFieldKey,
+                  searchFieldEnabled: searchFieldEnabled,
+                  shouldRequestFocus: searchFieldEnabled,
+                  supportsNavigation: true,
+                ),
+              ),
+            ],
           ),
           Expanded(
             child: Padding(
@@ -120,14 +143,20 @@ class TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
   TimelineFlameChart(
     TimelineData data, {
     @required double width,
+    @required double height,
     @required ValueListenable<TimelineEvent> selectionNotifier,
+    @required ValueListenable<List<TimelineEvent>> searchMatchesNotifier,
+    @required ValueListenable<TimelineEvent> activeSearchMatchNotifier,
     @required Function(TimelineEvent event) onSelection,
   }) : super(
           data,
           time: data.time,
-          totalStartingWidth: width,
+          containerWidth: width,
+          containerHeight: height,
           startInset: _calculateStartInset(data),
           selectionNotifier: selectionNotifier,
+          searchMatchesNotifier: searchMatchesNotifier,
+          activeSearchMatchNotifier: activeSearchMatchNotifier,
           onSelected: onSelection,
         );
 
@@ -171,7 +200,7 @@ class TimelineFlameChartState
   /// Async guideline segments drawn in the direction of the y-axis.
   final verticalGuidelines = <VerticalLineSegment>[];
 
-  final eventGroupStartXValues = Expando<double>();
+  final eventGroupStartYValues = Expando<double>();
 
   int widestRow = -1;
 
@@ -193,6 +222,52 @@ class TimelineFlameChartState
       _timelineController.selectedFrame,
       _handleSelectedFrame,
     );
+
+    // TODO(kenz): make updateSearchMatches an abstract method on
+    // [SearchController] and then update the matches directly when the search
+    // query changes. This will need to be implemented by all extensions of
+    // [SearchController], so saving for a later CL.
+    addAutoDisposeListener(_timelineController.searchNotifier, () {
+      _timelineController.updateSearchMatches();
+    });
+
+    addAutoDisposeListener(_timelineController.activeSearchMatch, () async {
+      final activeSearch = _timelineController.activeSearchMatch.value;
+      if (activeSearch == null) return;
+
+      // Ensure the [activeSearch] is vertically in view.
+      if (!_isEventVerticallyInView(activeSearch)) {
+        await scrollVerticallyToEvent(activeSearch);
+      }
+
+      // TODO(kenz): zoom if the event is less than some min width.
+
+      // Ensure the [activeSearch] is horizontally in view.
+      if (!_isEventHorizontallyInView(activeSearch)) {
+        await scrollHorizontallyToTime(
+            timeMicros: activeSearch.time.start.inMicroseconds);
+      }
+    });
+  }
+
+  bool _isEventVerticallyInView(TimelineEvent event) {
+    final eventTopY = _topYForEvent(event);
+    return eventTopY > verticalScrollOffset &&
+        eventTopY + rowHeightWithPadding <
+            verticalScrollOffset + widget.containerHeight;
+  }
+
+  bool _isEventHorizontallyInView(TimelineEvent event) {
+    return visibleTimeRange.contains(event.time.start) &&
+        visibleTimeRange.contains(event.time.end);
+  }
+
+  double _topYForEvent(TimelineEvent event) {
+    final eventGroup = widget.data.eventGroups[computeEventGroupKey(event)];
+    assert(eventGroup != null);
+    final rowOffsetInGroup = eventGroup.rowIndexForEvent[event];
+    return eventGroupStartYValues[eventGroup] +
+        rowOffsetInGroup * rowHeightWithPadding;
   }
 
   void _handleSelectedFrame() async {
@@ -207,47 +282,61 @@ class TimelineFlameChartState
       // TODO(kenz): consider using jumpTo for some of these animations to
       // improve performance.
 
-      // Vertically scroll to the UI event group.
-      final verticalScrollOffset =
-          eventGroupStartXValues[widget.data.eventGroups[TimelineData.uiKey]];
-      await verticalScrollController.animateTo(
-        // Subtract [rowHeightWithPadding] to ensure the selection brackets fit
-        // in view.
-        verticalScrollOffset - rowHeightWithPadding,
-        duration: shortDuration,
-        curve: defaultCurve,
-      );
+      // Vertically scroll to the frame's UI event.
+      await scrollVerticallyToEvent(selectedFrame.uiEventFlow);
 
       // Bail early if the selection has changed again while the animation was
       // in progress.
       if (selectedFrame != _selectedFrame) return;
 
       // Zoom the frame into view.
-      final targetFrameWidth = widget.totalStartingWidth * 0.8;
-      final startingFrameWidth =
-          selectedFrame.time.duration.inMicroseconds * startingPxPerMicro;
-      final zoom = targetFrameWidth / startingFrameWidth;
-      final mouseXForZoom = (selectedFrame.time.start.inMicroseconds -
-                  startTimeOffset +
-                  selectedFrame.time.duration.inMicroseconds / 2) *
-              startingPxPerMicro +
-          widget.startInset;
-      await zoomTo(zoom, forceMouseX: mouseXForZoom);
+      await zoomToTimeRange(
+        startMicros: selectedFrame.time.start.inMicroseconds,
+        durationMicros: selectedFrame.time.duration.inMicroseconds,
+      );
 
       // Bail early if the selection has changed again while the animation was
       // in progress.
       if (selectedFrame != _selectedFrame) return;
 
       // Horizontally scroll to the frame.
-      final relativeStartTime =
-          selectedFrame.time.start.inMicroseconds - startTimeOffset;
-      final ratio =
-          relativeStartTime / widget.data.time.duration.inMicroseconds;
-      final offset = contentWidthWithZoom * ratio +
-          widget.startInset -
-          widget.totalStartingWidth * 0.1;
-      await scrollToX(offset);
+      await scrollHorizontallyToTime(
+        timeMicros: selectedFrame.time.start.inMicroseconds,
+      );
     }
+  }
+
+  Future<void> zoomToTimeRange({
+    @required int startMicros,
+    @required int durationMicros,
+    double targetWidth,
+  }) async {
+    targetWidth ??= widget.containerWidth * 0.8;
+    final startingWidth = durationMicros * startingPxPerMicro;
+    final zoom = targetWidth / startingWidth;
+    final mouseXForZoom = (startMicros - startTimeOffset + durationMicros / 2) *
+            startingPxPerMicro +
+        widget.startInset;
+    await zoomTo(zoom, forceMouseX: mouseXForZoom);
+  }
+
+  Future<void> scrollHorizontallyToTime({@required int timeMicros}) async {
+    // Horizontally scroll to the frame.
+    final relativeStartTime = timeMicros - startTimeOffset;
+    final ratio = relativeStartTime / widget.data.time.duration.inMicroseconds;
+    final offset = contentWidthWithZoom * ratio +
+        widget.startInset -
+        widget.containerWidth * 0.1;
+    await scrollToX(offset);
+  }
+
+  Future<void> scrollVerticallyToEvent(TimelineEvent event) async {
+    await verticalScrollController.animateTo(
+      // Subtract [2 * rowHeightWithPadding] to give the target scroll event top padding.
+      _topYForEvent(event) - 2 * rowHeightWithPadding,
+      duration: shortDuration,
+      curve: defaultCurve,
+    );
   }
 
   @override
@@ -316,13 +405,13 @@ class TimelineFlameChartState
     expandRows(rowOffsetForTopPadding);
     int currentRowIndex = rowOffsetForTopPadding;
     int currentSectionIndex = 0;
-    double xOffset = 0.0;
+    double yOffset = rowOffsetForTopPadding * sectionSpacing;
     for (String groupName in widget.data.eventGroups.keys) {
       final TimelineEventGroup group = widget.data.eventGroups[groupName];
       // Expand rows to fit nodes in [group].
       assert(rows.length == currentRowIndex);
       expandRows(rows.length + group.displaySize);
-      eventGroupStartXValues[group] = xOffset;
+      eventGroupStartYValues[group] = yOffset;
       for (int i = 0; i < group.rows.length; i++) {
         for (var event in group.rows[i].events) {
           createChartNode(
@@ -343,7 +432,7 @@ class TimelineFlameChartState
       // Increment for next section.
       currentRowIndex += group.displaySize;
       currentSectionIndex++;
-      xOffset += group.displaySizePx;
+      yOffset += group.displaySizePx;
     }
 
     // Ensure the nodes in each row are sorted in ascending positional order.

@@ -125,13 +125,13 @@ class _CpuProfilerState extends State<CpuProfiler>
     );
   }
 
-  // TODO(kenz): implement call tree and bottom up.
   List<Widget> _buildProfilerViews() {
     final cpuFlameChart = LayoutBuilder(
       builder: (context, constraints) {
         return CpuProfileFlameChart(
           widget.data,
           width: constraints.maxWidth,
+          height: constraints.maxHeight,
           selectionNotifier: widget.controller.selectedCpuStackFrameNotifier,
           onSelected: (sf) => widget.controller.selectCpuStackFrame(sf),
         );

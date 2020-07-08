@@ -19,6 +19,8 @@ import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
 import '../service_manager.dart';
 import '../trace_event.dart';
+import '../trees.dart';
+import '../ui/search.dart';
 import 'timeline_model.dart';
 import 'timeline_processor.dart';
 import 'timeline_screen.dart';
@@ -35,7 +37,9 @@ import 'timeline_streams.dart';
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
 class TimelineController
-    with CpuProfilerControllerProviderMixin
+    with
+        CpuProfilerControllerProviderMixin,
+        SearchControllerMixin<TimelineEvent>
     implements DisposableController {
   TimelineController() {
     processor = TimelineProcessor(this);
@@ -413,6 +417,23 @@ class TimelineController
   String exportData() {
     final encodedData = _exportController.encode(TimelineScreen.id, data.json);
     return _exportController.downloadFile(encodedData);
+  }
+
+  void updateSearchMatches() {
+    updateMatches(matchesForSearch(search));
+  }
+
+  List<TimelineEvent> matchesForSearch(String search) {
+    if (search == null || search.isEmpty) return [];
+    final matches = <TimelineEvent>[];
+    for (final event in data.timelineEvents) {
+      breadthFirstTraversal<TimelineEvent>(event, action: (TimelineEvent e) {
+        if (e.name.toLowerCase().contains(search.toLowerCase())) {
+          matches.add(e);
+        }
+      });
+    }
+    return matches;
   }
 
   Future<void> toggleHttpRequestLogging(bool state) async {
