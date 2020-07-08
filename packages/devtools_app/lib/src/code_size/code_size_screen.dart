@@ -43,11 +43,8 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   @visibleForTesting
   static const treemapKey = Key('Code Size Treemap');
   @visibleForTesting
-  static const diffTreeTypeDropdownKey = Key('Code Size Diff Tree Type Dropdown');
-  @visibleForTesting
-  static const snapshotTableKey = Key('Code Size Snapshot Table');
-  @visibleForTesting
-  static const diffTableKey = Key('Code Size Diff Table');
+  static const diffTreeTypeDropdownKey =
+      Key('Code Size Diff Tree Type Dropdown');
 
   static const initialFractionForTreemap = 0.67;
   static const initialFractionForTreeTable = 0.33;
@@ -94,14 +91,17 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     root = controller.currentRoot.value;
     addAutoDisposeListener(controller.currentRoot, () {
       setState(() {
-        print('changing root');
         root = controller.currentRoot.value;
       });
     });
 
     addAutoDisposeListener(controller.activeDiffTreeType);
 
-    controller.loadTree('$current/lib/src/code_size/stub_data/new_v8.json');
+    controller.loadFakeDiffData(
+      '$current/lib/src/code_size/stub_data/old_v8.json',
+      '$current/lib/src/code_size/stub_data/new_v8.json',
+      controller.activeDiffTreeType.value,
+    );
   }
 
   @override
@@ -194,8 +194,8 @@ class CodeSizeBodyState extends State<CodeSizeBody>
         //                   tables in Diff mode.
         _buildTreemap(),
         showDiff
-            ? CodeSizeDiffTable(rootNode: root, key: diffTableKey)
-            : CodeSizeSnapshotTable(rootNode: root, key: snapshotTableKey),
+            ? CodeSizeDiffTable(rootNode: root)
+            : CodeSizeSnapshotTable(rootNode: root),
       ],
       initialFractions: const [
         initialFractionForTreemap,

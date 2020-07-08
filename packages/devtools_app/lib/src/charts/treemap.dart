@@ -493,11 +493,17 @@ class Treemap extends StatelessWidget {
   Widget buildSubTreemaps() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Stack(
-          children: buildTreemaps(
-            children: nodes,
-            width: constraints.maxWidth,
-            height: constraints.maxHeight,
+        if (constraints.maxHeight == 0 || constraints.maxWidth == 0) {
+          return const SizedBox();
+        }
+        return Container(
+          width: constraints.maxWidth,
+          child: Stack(
+            children: buildTreemaps(
+              children: nodes,
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+            ),
           ),
         );
       },

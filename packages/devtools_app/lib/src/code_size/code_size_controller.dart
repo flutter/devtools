@@ -63,7 +63,7 @@ class CodeSizeController {
     final diffMap = await buildComparisonTreemap(oldInputJson, newInputJson);
     diffMap['n'] = 'Root';
     final newRoot = generateDiffTree(diffMap, diffTreeType: diffTreeType);
-
+    
     changeRoot(newRoot);
   }
 

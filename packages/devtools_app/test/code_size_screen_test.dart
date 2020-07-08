@@ -5,14 +5,16 @@
 @TestOn('vm')
 import 'package:devtools_app/src/code_size/code_size_screen.dart';
 import 'package:devtools_app/src/code_size/code_size_controller.dart';
+import 'package:devtools_app/src/code_size/code_size_table.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' hide equals;
 import 'support/wrappers.dart';
 
 void main() {
   CodeSizeScreen screen;
-  CodeSizeController snapshotTabController;
+  CodeSizeController codeSizeController;
 
   Future<void> pumpCodeSizeScreen(
     WidgetTester tester, {
@@ -31,8 +33,8 @@ void main() {
   group('CodeSizeScreen', () {
     setUp(() async {
       screen = const CodeSizeScreen();
-      snapshotTabController = CodeSizeController();
-      await snapshotTabController.loadTree(
+      codeSizeController = CodeSizeController();
+      await codeSizeController.loadTree(
         '../devtools_testing/lib/support/treemap_test_data_v8_new.json',
       );
     });
@@ -40,27 +42,25 @@ void main() {
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.buildTab),
-        codeSize: snapshotTabController,
+        codeSize: codeSizeController,
       ));
       expect(find.text('Code Size'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize('builds tabs', windowSize,
+    testWidgetsWithWindowSize('builds initial content', windowSize,
         (WidgetTester tester) async {
       await pumpCodeSizeScreen(
         tester,
-        codeSizeController: snapshotTabController,
+        codeSizeController: codeSizeController,
       );
 
-      expect(snapshotTabController.currentRoot.value, isNotNull);
+      expect(codeSizeController.currentRoot.value, isNotNull);
       expect(find.byType(CodeSizeBody), findsOneWidget);
       expect(find.byType(TabBar), findsOneWidget);
 
-      const snapshotTabKey = Key('Code Size Snapshot Tab');
-      expect(find.byKey(snapshotTabKey), findsOneWidget);
+      expect(find.byKey(CodeSizeBodyState.snapshotTabKey), findsOneWidget);
 
-      const diffTabKey = Key('Code Size Diff Tab');
-      expect(find.byKey(diffTabKey), findsOneWidget);
+      expect(find.byKey(CodeSizeBodyState.diffTabKey), findsOneWidget);
 
       // Verify the state of the splitter.
       final splitFinder = find.byType(Split);
@@ -74,23 +74,50 @@ void main() {
         (WidgetTester tester) async {
       await pumpCodeSizeScreen(
         tester,
-        codeSizeController: snapshotTabController,
+        codeSizeController: codeSizeController,
       );
 
-      const treemapKey = Key('Code Size Treemap');
-      expect(find.byKey(treemapKey), findsOneWidget);
+      expect(find.byKey(CodeSizeBodyState.treemapKey), findsOneWidget);
 
-      const diffTreeTypeDropdownKey = Key('Code Size Diff Tree Type Dropdown');
-      expect(find.byKey(diffTreeTypeDropdownKey), findsNothing);
+      expect(
+          find.byKey(CodeSizeBodyState.diffTreeTypeDropdownKey), findsNothing);
 
-      // Assumes the treemap is built with treemap_test_data_v8_old.json
-      const text = 'Root [6.0 MB]';
-      expect(find.text(text), findsOneWidget);
+      // Assumes the treemap is built with treemap_test_data_v8_new.json
+      expect(find.text('Root [6.0 MB]'), findsOneWidget);
 
-      const snapshotTableKey = Key('Code Size Snapshot Table');
-      expect(find.byKey(snapshotTableKey), findsOneWidget);
-      const diffTableKey = Key('Code Size Diff Table');
-      expect(find.byKey(diffTableKey), findsNothing);
+      expect(find.byType(CodeSizeSnapshotTable), findsOneWidget);
+      expect(find.byType(CodeSizeDiffTable), findsNothing);
+    });
+
+    testWidgetsWithWindowSize('builds diff tab', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await pumpCodeSizeScreen(
+          tester,
+          codeSizeController: codeSizeController,
+        );
+        await tester.tap(find.byKey(CodeSizeBodyState.diffTabKey));
+
+        await codeSizeController.loadFakeDiffData(
+          '$current/lib/src/code_size/stub_data/old_v8.json',
+          '$current/lib/src/code_size/stub_data/new_v8.json',
+          DiffTreeType.combined,
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(CodeSizeBodyState.treemapKey), findsOneWidget);
+
+        expect(
+          find.byKey(CodeSizeBodyState.diffTreeTypeDropdownKey),
+          findsOneWidget,
+        );
+
+        expect(find.text('Root [+1.5 MB]'), findsOneWidget);
+
+        expect(find.byType(CodeSizeSnapshotTable), findsNothing);
+        expect(find.byType(CodeSizeDiffTable), findsOneWidget);
+      });
     });
   });
 }
