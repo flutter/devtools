@@ -14,11 +14,10 @@ import '../service_manager.dart';
 import '../version.dart';
 import '../vm_service_wrapper.dart';
 import 'memory_controller.dart';
+import 'memory_timeline.dart';
 
 class MemoryTracker {
   MemoryTracker(this.serviceManager, this.memoryController);
-
-  static const Duration _updateDelay = Duration(milliseconds: 500);
 
   ServiceConnectionManager serviceManager;
 
@@ -49,6 +48,8 @@ class MemoryTracker {
   int get currentExternal => samples.last.external;
 
   StreamSubscription<Event> _gcStreamListener;
+
+  Timer _monitorContinues;
 
   void start() {
     _updateLiveDataPolling(memoryController.paused.value);
@@ -124,7 +125,7 @@ class MemoryTracker {
     // Polls for current RSS size.
     _update(await service.getVM(), isolateMemory);
 
-    _pollingTimer = Timer(_updateDelay, _pollMemory);
+    _pollingTimer = Timer(MemoryTimeline.updateDelay, _pollMemory);
   }
 
   void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
@@ -164,6 +165,27 @@ class MemoryTracker {
       time = math.max(time, samples.last.timestamp);
     }
 
+    final memoryTimeline = memoryController.memoryTimeline;
+
+    // Process any memory events?
+    final eventSample = processEventSample(memoryTimeline, time);
+
+    if (eventSample != null && eventSample.isEventAllocaitonAccumulator) {
+      if (eventSample.allocationAccumulator.isStart) {
+        // Stop Continuous events being auto posted - a new start is beginning.
+        memoryTimeline.monitorContinuesState = ContinuesState.stop;
+      }
+    } else if (memoryTimeline.monitorContinuesState == ContinuesState.next) {
+      if (_monitorContinues != null) {
+        _monitorContinues.cancel();
+        _monitorContinues = null;
+      }
+      _monitorContinues ??= Timer(
+        const Duration(milliseconds: 300),
+        _recalculate,
+      );
+    }
+
     final HeapSample sample = HeapSample(
       time,
       processRss,
@@ -172,10 +194,65 @@ class MemoryTracker {
       external,
       fromGC,
       adbMemoryInfo,
+      eventSample,
     );
 
     _addSample(sample);
-    memoryController.memoryTimeline.addSample(sample);
+    memoryTimeline.addSample(sample);
+
+    // Signal continues events are to be emitted.  These events are hidden
+    // until a reset event then the continuous events between last monitor
+    // start/reset and latest reset are made visible.
+    if (eventSample != null &&
+        eventSample.isEventAllocaitonAccumulator &&
+        eventSample.allocationAccumulator.isStart) {
+      memoryTimeline.monitorContinuesState = ContinuesState.next;
+    }
+  }
+
+  EventSample processEventSample(MemoryTimeline memoryTimeline, int time) {
+    EventSample eventSample;
+    if (memoryTimeline.anyEvents) {
+      final eventTime = memoryTimeline.peekEventTimestamp;
+      final timeDuration = Duration(milliseconds: time);
+      final eventDuration = Duration(milliseconds: eventTime);
+
+      // If the event is +/- _updateDelay (500 ms) of the current time then
+      // associate the EventSample with the current HeapSample.
+      final delay = MemoryTimeline.updateDelay;
+      final compared = timeDuration.compareTo(eventDuration);
+      if (compared < 0) {
+        if ((timeDuration + delay).compareTo(eventDuration) >= 0) {
+          // Currently, events are all UI events so duration < _updateDelay
+          final pulledEvent = memoryTimeline.pullEventSample();
+          eventSample = pulledEvent.clone(time);
+        } else {
+          // Throw away event, missed attempt to attach to a HeapSample.
+          final ignoreEvent = memoryTimeline.pullEventSample();
+          logger.log('Event duration is lagging ignore event'
+              'timestamp: ${MemoryTimeline.fineGrainTimestampFormat(time)} '
+              'event: ${MemoryTimeline.fineGrainTimestampFormat(eventTime)}'
+              '\n$ignoreEvent');
+        }
+      } else if (compared > 0) {
+        final msDiff = time - eventTime;
+        if (msDiff > MemoryTimeline.delayMs) {
+          // eventSample is in the future.
+          if ((timeDuration - delay).compareTo(eventDuration) >= 0) {
+            // Able to match event time to a heap sample. We will attach the
+            // EventSample to this HeapSample.
+            final pulledEvent = memoryTimeline.pullEventSample();
+            eventSample = pulledEvent.clone(time);
+          }
+        } else {
+          // The almost exact eventSample we have.
+          eventSample = memoryTimeline.pullEventSample();
+        }
+        // Keep the event, its time hasn't caught up to the HeapSample time yet.
+      }
+    }
+
+    return eventSample;
   }
 
   void _addSample(HeapSample sample) {

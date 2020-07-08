@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:devtools_app/src/ui/icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -126,6 +127,11 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
   static const collapseAllButtonKey = Key('Collapse All Button');
   @visibleForTesting
   static const expandAllButtonKey = Key('Expand All Button');
+  @visibleForTesting
+  static const allocationMonitorKey = Key('Allocation Monitor Start Button');
+  @visibleForTesting
+  static const allocationMonitorResetKey =
+      Key('Allocation Monitor Reset Button');
   @visibleForTesting
   static const searchButtonKey = Key('Snapshot Search');
   @visibleForTesting
@@ -505,8 +511,33 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
                     : null,
                 child: const Text('Expand All'),
               ),
+        const SizedBox(width: defaultSpacing),
+        OutlineButton(
+          key: allocationMonitorKey,
+          onPressed: _allocationStart,
+          child: createImageIcon(
+            'icons/memory/communities_white@2x.png',
+            size: defaultIconThemeSize,
+          ),
+        ),
+        OutlineButton(
+          key: allocationMonitorResetKey,
+          onPressed: _allocationReset,
+          child: createImageIcon(
+            'icons/memory/reset_icon_white@2x.png',
+            size: defaultIconThemeSize,
+          ),
+        ),
       ],
     );
+  }
+
+  void _allocationStart() {
+    controller.memoryTimeline.addMonitorStartEvent();
+  }
+
+  void _allocationReset() {
+    controller.memoryTimeline.addMonitorResetEvent();
   }
 
   FocusNode searchFieldFocusNode;
@@ -683,6 +714,8 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       return;
     }
 
+    controller.memoryTimeline.addSnapshotEvent(auto: !userGenerated);
+
     setState(() {
       snapshotState = SnapshotStatus.streaming;
     });
@@ -716,6 +749,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     await doGroupBy();
 
     final root = controller.computeAllLibraries(graph: graph);
+
     controller.storeSnapshot(
       snapshotTimestamp,
       graph,
