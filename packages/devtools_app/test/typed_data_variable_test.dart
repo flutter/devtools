@@ -462,5 +462,3 @@ Matcher matchesVariable({
           .having((bv) => bv.name, 'name', equals(name))
           .having((bv) => bv.value, 'value', equals(value)));
 }
-
-class MockVmServiceWrapper extends Mock implements VmServiceWrapper {}
