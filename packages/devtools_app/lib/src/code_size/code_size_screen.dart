@@ -43,8 +43,14 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   @visibleForTesting
   static const treemapKey = Key('Code Size Treemap');
   @visibleForTesting
-  static const diffTreeTypeDropdownKey =
-      Key('Code Size Diff Tree Type Dropdown');
+  static const Key snapshotTabKey = Key('Code Size Snapshot Tab');
+  @visibleForTesting
+  static const Key diffTabKey = Key('Code Size Diff Tab');
+
+  static const tabs = [
+    Tab(text: 'Snapshot', key: snapshotTabKey),
+    Tab(text: 'Diff', key: diffTabKey),
+  ];
 
   static const initialFractionForTreemap = 0.67;
   static const initialFractionForTreeTable = 0.33;
@@ -54,16 +60,6 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   TreemapNode root;
 
   TabController _tabController;
-
-  @visibleForTesting
-  static const Key snapshotTabKey = Key('Code Size Snapshot Tab');
-  @visibleForTesting
-  static const Key diffTabKey = Key('Code Size Diff Tab');
-
-  static const tabs = [
-    Tab(text: 'Snapshot', key: snapshotTabKey),
-    Tab(text: 'Diff', key: diffTabKey),
-  ];
 
   @override
   void initState() {
@@ -136,7 +132,6 @@ class CodeSizeBodyState extends State<CodeSizeBody>
 
   DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
     return DropdownButtonHideUnderline(
-      key: diffTreeTypeDropdownKey,
       child: DropdownButton<DiffTreeType>(
         value: controller.activeDiffTreeType.value,
         items: [
@@ -163,7 +158,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     // TODO(peterdjlee): Import user file instead of using hard coded data.
     switch (selected) {
       case 'Snapshot':
-        controller.loadTree('new_v8.json');
+        controller.loadTree('$current/lib/src/code_size/stub_data/new_v8.json');
         return;
       case 'Diff':
         controller.loadFakeDiffData(

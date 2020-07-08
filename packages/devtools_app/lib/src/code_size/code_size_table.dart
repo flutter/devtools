@@ -13,18 +13,17 @@ import '../utils.dart';
 class CodeSizeSnapshotTable extends StatelessWidget {
   factory CodeSizeSnapshotTable({@required rootNode}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
-    final sortColumn = _SizeColumn();
+    final sizeColumn = _SizeColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
-      sortColumn,
+      sizeColumn,
       _SizePercentageColumn(totalSize: rootNode.root.byteSize),
     ]);
-    
 
     return CodeSizeSnapshotTable._(
       rootNode,
       treeColumn,
-      sortColumn,
+      sizeColumn,
       columns,
     );
   }
@@ -163,6 +162,7 @@ class CodeSizeDiffTable extends StatelessWidget {
   final ColumnData<TreemapNode> sortColumn;
   final List<ColumnData<TreemapNode>> columns;
 
+  // TODO(petedjlee): Ensure the sort column is descending with the absolute value of the size.
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(

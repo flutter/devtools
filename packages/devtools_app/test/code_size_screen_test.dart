@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'support/wrappers.dart';
 
+// TODO(peterdjlee): Clean up the tests once  we don't need loadFakeData.
+
 void main() {
   CodeSizeScreen screen;
   CodeSizeController codeSizeController;
@@ -79,7 +81,9 @@ void main() {
       expect(find.byKey(CodeSizeBodyState.treemapKey), findsOneWidget);
 
       expect(
-          find.byKey(CodeSizeBodyState.diffTreeTypeDropdownKey), findsNothing);
+        find.byType(DropdownButtonHideUnderline),
+        findsNothing,
+      );
 
       // Assumes the treemap is built with treemap_test_data_v8_new.json
       expect(find.text('Root [6.0 MB]'), findsOneWidget);
@@ -98,8 +102,8 @@ void main() {
         await tester.tap(find.byKey(CodeSizeBodyState.diffTabKey));
 
         await codeSizeController.loadFakeDiffData(
-        '../devtools_testing/lib/support/treemap_test_data_v8_old.json',
-        '../devtools_testing/lib/support/treemap_test_data_v8_new.json',
+          '../devtools_testing/lib/support/treemap_test_data_v8_old.json',
+          '../devtools_testing/lib/support/treemap_test_data_v8_new.json',
           DiffTreeType.combined,
         );
 
@@ -108,10 +112,11 @@ void main() {
         expect(find.byKey(CodeSizeBodyState.treemapKey), findsOneWidget);
 
         expect(
-          find.byKey(CodeSizeBodyState.diffTreeTypeDropdownKey),
+          find.byType(DropdownButtonHideUnderline),
           findsOneWidget,
         );
 
+        // Assumes the treemap is built with treemap_test_data_v8_new.json and treemap_test_data_v8_old.json
         expect(find.text('Root [+1.5 MB]'), findsOneWidget);
 
         expect(find.byType(CodeSizeSnapshotTable), findsNothing);

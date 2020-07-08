@@ -71,6 +71,13 @@ String prettyPrintBytes(
   int mbFractionDigits = 1,
   bool includeUnit = false,
 }) {
+  if (bytes.abs() < 52) {
+    var output = bytes.toString();
+    if (includeUnit) {
+      output += ' B';
+    }
+    return output;
+  }
   final sizeInKB = bytes.abs() / 1024.0;
   if (sizeInKB < 1024.0) {
     return '${printKB(bytes, fractionDigits: kbFractionDigits, includeUnit: includeUnit)}';

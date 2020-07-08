@@ -63,7 +63,7 @@ class CodeSizeController {
     final diffMap = await buildComparisonTreemap(oldInputJson, newInputJson);
     diffMap['n'] = 'Root';
     final newRoot = generateDiffTree(diffMap, diffTreeType: diffTreeType);
-    
+
     changeRoot(newRoot);
   }
 
@@ -107,7 +107,6 @@ class CodeSizeController {
       if (byteSize == null) {
         return null;
       }
-
       // Only add nodes that match the diff tree type.
       switch (diffTreeType) {
         case DiffTreeType.increaseOnly:
@@ -123,7 +122,6 @@ class CodeSizeController {
         case DiffTreeType.combined:
           break;
       }
-
       return _buildNode(treeJson, byteSize, showDiff: true);
     }
   }
@@ -151,12 +149,17 @@ class CodeSizeController {
       totalByteSize += childTreemapNode.byteSize;
     }
 
-    return _buildNode(
-      treeJson,
-      totalByteSize,
-      children: treemapNodeChildren,
-      showDiff: showDiff,
-    );
+    // If none of the children matched the diff tree type
+    if (totalByteSize == 0) {
+      return null;
+    } else {
+      return _buildNode(
+        treeJson,
+        totalByteSize,
+        children: treemapNodeChildren,
+        showDiff: showDiff,
+      );
+    }
   }
 
   TreemapNode _buildNode(
