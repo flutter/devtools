@@ -26,7 +26,6 @@ final _log = DebugTimingLogger('debugger', mute: true);
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
-
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
   DebuggerController({bool initialSwitchToIsolate = true}) {
