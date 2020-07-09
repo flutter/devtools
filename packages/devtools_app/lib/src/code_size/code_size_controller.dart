@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
@@ -19,19 +18,67 @@ enum DiffTreeType {
 }
 
 class CodeSizeController {
-  /// The node set as the current root.
-  ValueListenable<TreemapNode> get currentRoot => _currentRoot;
-  final _currentRoot = ValueNotifier<TreemapNode>(null);
+  /// The node set as the snapshot root.
+  /// 
+  /// Used to build the treemap and the tree table for the snapshot tab.
+  ValueListenable<TreemapNode> get snapshotRoot => _snapshotRoot;
+  final _snapshotRoot = ValueNotifier<TreemapNode>(null);
 
-  /// The active diff tree type.
+  void changeSnapshotRoot(TreemapNode newRoot) {
+    _snapshotRoot.value = newRoot;
+  }
+
+  /// The node set as the diff root.
+  /// 
+  /// Used to build the treemap and the tree table for the diff tab.
+  ValueListenable<TreemapNode> get diffRoot => _diffRoot;
+  final _diffRoot = ValueNotifier<TreemapNode>(null);
+
+  void changeDiffRoot(TreemapNode newRoot) {
+    _diffRoot.value = newRoot;
+  }
+
+  /// The active diff tree type used to build the diff treemap.
   ValueListenable<DiffTreeType> get activeDiffTreeType {
     return _activeDiffTreeTypeNotifier;
+  }
+
+  // TODO(peterdjlee): Cache each diff tree so that it's less expensive
+  //                   to change bettween diff tree types.
+  void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
+    _activeDiffTreeTypeNotifier.value = newDiffTreeType;
+    loadFakeDiffTree(
+      _diffOldSnapshotFile.value,
+      _diffNewSnapshotFile.value,
+      diffTreeType: newDiffTreeType,
+    );
   }
 
   final _activeDiffTreeTypeNotifier =
       ValueNotifier<DiffTreeType>(DiffTreeType.combined);
 
-  Future<void> loadTree(String pathToFile) async {
+  ValueListenable<String> get snapshotFile => _snapshotFile;
+  final _snapshotFile = ValueNotifier<String>(null);
+
+  void loadSnapshotFile(String filename) {
+    _snapshotFile.value = filename;
+  }
+
+  ValueListenable<String> get diffOldSnapshotFile => _diffOldSnapshotFile;
+  final _diffOldSnapshotFile = ValueNotifier<String>(null);
+
+  void loadOldDiffSnapshotFile(String filename) {
+    _diffOldSnapshotFile.value = filename;
+  }
+
+  ValueListenable<String> get diffNewSnapshotFile => _diffNewSnapshotFile;
+  final _diffNewSnapshotFile = ValueNotifier<String>(null);
+
+  void loadNewDiffSnapshotFile(String filename) {
+    _diffNewSnapshotFile.value = filename;
+  }
+
+  Future<void> loadFakeTree(String pathToFile) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
     final inputJson = File(pathToFile);
 
@@ -47,15 +94,15 @@ class CodeSizeController {
       // Build a tree with [TreemapNode] from [processedJsonMap].
       final newRoot = generateTree(processedJsonMap);
 
-      changeRoot(newRoot);
+      changeSnapshotRoot(newRoot);
     });
   }
 
-  Future<void> loadFakeDiffData(
+  Future<void> loadFakeDiffTree(
     String pathToOldFile,
-    String pathToNewFile,
-    DiffTreeType diffTreeType,
-  ) async {
+    String pathToNewFile, {
+    DiffTreeType diffTreeType = DiffTreeType.combined,
+  }) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
     final oldInputJson = File(pathToOldFile);
     final newInputJson = File(pathToNewFile);
@@ -64,7 +111,7 @@ class CodeSizeController {
     diffMap['n'] = 'Root';
     final newRoot = generateDiffTree(diffMap, diffTreeType: diffTreeType);
 
-    changeRoot(newRoot);
+    changeDiffRoot(newRoot);
   }
 
   TreemapNode generateTree(Map<String, dynamic> treeJson) {
@@ -184,24 +231,5 @@ class CodeSizeController {
       childrenMap: childrenMap,
       showDiff: showDiff,
     )..addAllChildren(children);
-  }
-
-  void clear() {
-    _currentRoot.value = null;
-  }
-
-  void changeRoot(TreemapNode newRoot) {
-    _currentRoot.value = newRoot;
-  }
-
-  // TODO(peterdjlee): Cache each diff tree so that it's less expensive
-  //                   to change bettween diff tree types.
-  void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
-    _activeDiffTreeTypeNotifier.value = newDiffTreeType;
-    loadFakeDiffData(
-      '$current/lib/src/code_size/stub_data/old_v8.json',
-      '$current/lib/src/code_size/stub_data/new_v8.json',
-      newDiffTreeType,
-    );
   }
 }
