@@ -694,7 +694,9 @@ class DebuggerController extends DisposableController
   /// We call this method as we expand variables in the variable tree, because
   /// building the tree for all variable data at once is very expensive.
   Future<void> buildVariablesTree(Variable variable) async {
-    if (!variable.isExpandable || variable.treeInitialized) return;
+    if (!variable.isExpandable ||
+        variable.treeInitialized ||
+        variable.boundVar.value is! InstanceRef) return;
 
     final InstanceRef instanceRef = variable.boundVar.value;
     try {
@@ -719,24 +721,40 @@ class DebuggerController extends DisposableController
   }
 
   List<Variable> _createVariablesForAssociations(Instance instance) {
-    final boundsVariables = instance.associations.map((association) {
-      // For string keys, quote the key value.
-      String keyString = association.key.valueAsString;
-      // TODO(kenz): for maps where keys are not primitive types, support
-      // expanding the keys as well as the values.
-      if (association.key is InstanceRef &&
-          association.key.kind == InstanceKind.kString) {
-        keyString = "'$keyString'";
+    final variables = <Variable>[];
+    for (var i = 0; i < instance.associations.length; i++) {
+      final association = instance.associations[i];
+      if (association.key is! InstanceRef) {
+        continue;
       }
-      return BoundVariable(
-        name: '[$keyString]',
+      final key = BoundVariable(
+        name: '[key]',
+        value: association.key,
+        scopeStartTokenPos: null,
+        scopeEndTokenPos: null,
+        declarationTokenPos: null,
+      );
+      final value = BoundVariable(
+        name: '[value]',
         value: association.value,
         scopeStartTokenPos: null,
         scopeEndTokenPos: null,
         declarationTokenPos: null,
       );
-    });
-    return boundsVariables.map((bv) => Variable.create(bv)).toList();
+      final variable = Variable.create(
+        BoundVariable(
+          name: '[Entry $i]',
+          value: '',
+          scopeStartTokenPos: null,
+          scopeEndTokenPos: null,
+          declarationTokenPos: null,
+        ),
+      );
+      variable.addChild(Variable.create(key));
+      variable.addChild(Variable.create(value));
+      variables.add(variable);
+    }
+    return variables;
   }
 
   /// Decodes the bytes into the correctly sized values based on

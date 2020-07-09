@@ -195,8 +195,9 @@ class Variable extends TreeNode<Variable> {
 
   @override
   bool get isExpandable =>
-      boundVar.value is InstanceRef &&
-      (boundVar.value as InstanceRef).valueAsString == null;
+      children.isNotEmpty ||
+      (boundVar.value is InstanceRef &&
+          (boundVar.value as InstanceRef).valueAsString == null);
 
   Object get value => boundVar.value;
 
