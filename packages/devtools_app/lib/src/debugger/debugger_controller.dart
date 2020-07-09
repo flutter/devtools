@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
@@ -24,8 +26,12 @@ final _log = DebugTimingLogger('debugger', mute: true);
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
-  DebuggerController() {
-    switchToIsolate(serviceManager.isolateManager.selectedIsolate);
+  // `initialSwitchToIsolate` can be set to false for tests to skip the logic
+  // in `switchToIsolate`.
+  DebuggerController({bool initialSwitchToIsolate = true}) {
+    if (initialSwitchToIsolate) {
+      switchToIsolate(serviceManager.isolateManager.selectedIsolate);
+    }
 
     autoDispose(serviceManager.isolateManager.onSelectedIsolateChanged
         .listen(switchToIsolate));
@@ -698,14 +704,15 @@ class DebuggerController extends DisposableController
           variable.addAllChildren(_createVariablesForAssociations(result));
         } else if (result.elements != null) {
           variable.addAllChildren(_createVariablesForElements(result));
+        } else if (result.bytes != null) {
+          variable.addAllChildren(_createVariablesForBytes(result));
+          // Check fields last, as all instanceRefs may have a non-null fields
+          // with no entries.
         } else if (result.fields != null) {
           variable.addAllChildren(_createVariablesForFields(result));
-        } else if (result.bytes != null) {
-          // TODO: Display children for Uint8List, Int16List, ...
-
         }
       }
-    } on SentinelException catch (_) {
+    } on SentinelException {
       // Fail gracefully if calling `getObject` throws a SentinelException.
     }
     variable.treeInitialized = true;
@@ -730,6 +737,81 @@ class DebuggerController extends DisposableController
       );
     });
     return boundsVariables.map((bv) => Variable.create(bv)).toList();
+  }
+
+  /// Decodes the bytes into the correctly sized values based on
+  /// [Instance.kind], falling back to raw bytes if a type is not
+  /// matched.
+  ///
+  /// This method does not currently support [Uint64List] or
+  /// [Int64List].
+  List<Variable> _createVariablesForBytes(Instance instance) {
+    final bytes = base64.decode(instance.bytes);
+    final boundVariables = <BoundVariable>[];
+    List<dynamic> result;
+    switch (instance.kind) {
+      case InstanceKind.kUint8ClampedList:
+      case InstanceKind.kUint8List:
+        result = bytes;
+        break;
+      case InstanceKind.kUint16List:
+        result = Uint16List.view(bytes.buffer);
+        break;
+      case InstanceKind.kUint32List:
+        result = Uint32List.view(bytes.buffer);
+        break;
+      case InstanceKind.kUint64List:
+        // TODO: https://github.com/flutter/devtools/issues/2159
+        if (kIsWeb) {
+          return <Variable>[];
+        }
+        result = Uint64List.view(bytes.buffer);
+        break;
+      case InstanceKind.kInt8List:
+        result = Int8List.view(bytes.buffer);
+        break;
+      case InstanceKind.kInt16List:
+        result = Int16List.view(bytes.buffer);
+        break;
+      case InstanceKind.kInt32List:
+        result = Int32List.view(bytes.buffer);
+        break;
+      case InstanceKind.kInt64List:
+        // TODO: https://github.com/flutter/devtools/issues/2159
+        if (kIsWeb) {
+          return <Variable>[];
+        }
+        result = Int64List.view(bytes.buffer);
+        break;
+      case InstanceKind.kFloat32List:
+        result = Float32List.view(bytes.buffer);
+        break;
+      case InstanceKind.kFloat64List:
+        result = Float64List.view(bytes.buffer);
+        break;
+      case InstanceKind.kInt32x4List:
+        result = Int32x4List.view(bytes.buffer);
+        break;
+      case InstanceKind.kFloat32x4List:
+        result = Float32x4List.view(bytes.buffer);
+        break;
+      case InstanceKind.kFloat64x2List:
+        result = Float64x2List.view(bytes.buffer);
+        break;
+      default:
+        result = bytes;
+    }
+
+    for (int i = 0; i < result.length; i++) {
+      boundVariables.add(BoundVariable(
+        name: '[$i]',
+        value: result[i],
+        scopeStartTokenPos: null,
+        scopeEndTokenPos: null,
+        declarationTokenPos: null,
+      ));
+    }
+    return boundVariables.map((bv) => Variable.create(bv)).toList();
   }
 
   List<Variable> _createVariablesForElements(Instance instance) {
