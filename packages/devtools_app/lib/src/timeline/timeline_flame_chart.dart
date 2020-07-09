@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
 import '../common_widgets.dart';
 import '../geometry.dart';
@@ -19,6 +20,96 @@ import '../ui/theme.dart';
 import '../utils.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
+
+class TimelineFlameChartContainer extends StatefulWidget {
+  const TimelineFlameChartContainer({
+    @required this.processing,
+    @required this.processingProgress,
+  });
+
+  @visibleForTesting
+  static const emptyTimelineKey = Key('Empty Timeline');
+
+  final bool processing;
+
+  final double processingProgress;
+
+  @override
+  _TimelineFlameChartContainerState createState() =>
+      _TimelineFlameChartContainerState();
+}
+
+class _TimelineFlameChartContainerState
+    extends State<TimelineFlameChartContainer> with AutoDisposeMixin {
+  TimelineController controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final newController = Provider.of<TimelineController>(context);
+    if (newController == controller) return;
+    controller = newController;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget content;
+    final timelineEmpty = (controller.data?.isEmpty ?? true) ||
+        controller.data.eventGroups.isEmpty;
+    if (widget.processing || timelineEmpty) {
+      content = ValueListenableBuilder<bool>(
+        valueListenable: controller.emptyTimeline,
+        builder: (context, emptyRecording, _) {
+          return emptyRecording
+              ? const Center(
+                  key: TimelineFlameChartContainer.emptyTimelineKey,
+                  child: Text('No timeline events'),
+                )
+              : _buildProcessingInfo();
+        },
+      );
+    } else {
+      content = LayoutBuilder(
+        builder: (context, constraints) {
+          return TimelineFlameChart(
+            controller.data,
+            width: constraints.maxWidth,
+            selectionNotifier: controller.selectedTimelineEvent,
+            onSelection: (e) => controller.selectTimelineEvent(e),
+          );
+        },
+      );
+    }
+
+    return OutlineDecoration(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          areaPaneHeader(
+            context,
+            title: 'Timeline Events',
+            tall: true,
+            needsTopBorder: false,
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: content,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProcessingInfo() {
+    return processingInfo(
+      progressValue: widget.processingProgress,
+      processedObject: 'timeline trace',
+    );
+  }
+}
 
 // TODO(kenz): for sections with more than one row deep, add empty row for
 // section label.

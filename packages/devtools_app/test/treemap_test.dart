@@ -73,15 +73,14 @@ void main() {
           const treemapKey = Key('Treemap');
           await pumpTreemapWidget(tester, treemapKey);
 
-          var text = 'package:flutter/src [1.82 MB]';
+          const text = 'package:flutter/src [1.8 MB]';
           expect(find.text(text), findsOneWidget);
           await tester.tap(find.text(text));
           await tester.pumpAndSettle();
 
           await pumpTreemapWidget(tester, treemapKey);
 
-          text = 'dart:ui [145 KB]';
-          expect(find.text(text), findsNothing);
+          expect(find.text('widgets [563.4 KB]'), findsOneWidget);
 
           await expectLater(
             find.byKey(treemapKey),
@@ -155,15 +154,14 @@ void main() {
           const treemapKey = Key('Treemap');
           await pumpTreemapWidget(tester, treemapKey);
 
-          var text = 'package:flutter [2.99 MB]';
+          const text = 'package:flutter [3.0 MB]';
           expect(find.text(text), findsOneWidget);
           await tester.tap(find.text(text));
           await tester.pumpAndSettle();
 
           await pumpTreemapWidget(tester, treemapKey);
 
-          text = 'dart:ui [230 KB]';
-          expect(find.text(text), findsNothing);
+          expect(find.text('src [2.9 MB]'), findsOneWidget);
 
           await expectLater(
             find.byKey(treemapKey),

@@ -493,11 +493,19 @@ class Treemap extends StatelessWidget {
   Widget buildSubTreemaps() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Stack(
-          children: buildTreemaps(
-            children: nodes,
-            width: constraints.maxWidth,
-            height: constraints.maxHeight,
+        // TODO(peterdjlee): Investigate why exception is thrown without this check
+        //                   and if there are any other cases.
+        if (constraints.maxHeight == 0 || constraints.maxWidth == 0) {
+          return const SizedBox();
+        }
+        return Container(
+          width: constraints.maxWidth,
+          child: Stack(
+            children: buildTreemaps(
+              children: nodes,
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+            ),
           ),
         );
       },
@@ -546,7 +554,13 @@ class TreemapNode extends TreeNode<TreemapNode> {
       }
     }
     final separator = oneLine ? ' ' : '\n';
-    return '$displayName$separator[${prettyPrintBytes(byteSize, includeUnit: true)}]';
+    return '$displayName$separator[${prettyByteSize()}]';
+  }
+
+  String prettyByteSize() {
+    // Negative sign isn't explicitly added since a regular print of a negative number includes it.
+    final plusSign = showDiff && byteSize > 0 ? '+' : '';
+    return '$plusSign${prettyPrintBytes(byteSize, kbFractionDigits: 1, includeUnit: true)}';
   }
 
   /// Returns a list of [TreemapNode] in the path from root node to [this].

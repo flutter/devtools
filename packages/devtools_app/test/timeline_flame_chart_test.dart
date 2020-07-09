@@ -60,7 +60,8 @@ void main() {
       await pumpTimelineBody(tester, TimelineController());
       await tester.pumpAndSettle();
       expect(find.byType(TimelineFlameChart), findsOneWidget);
-      expect(find.byKey(TimelineScreen.emptyTimelineKey), findsNothing);
+      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+          findsNothing);
     });
 
     testWidgetsWithWindowSize('builds flame chart with no data', windowSize,
@@ -69,10 +70,8 @@ void main() {
       await pumpTimelineBody(tester, TimelineController());
       await tester.pumpAndSettle();
       expect(find.byType(TimelineFlameChart), findsNothing);
-      expect(
-        find.byKey(TimelineScreen.emptyTimelineKey),
-        findsOneWidget,
-      );
+      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+          findsOneWidget);
     });
 
     testWidgetsWithWindowSize(

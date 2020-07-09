@@ -35,25 +35,24 @@ class EventDetails extends StatelessWidget {
     // (see html_event_details.dart).
     final controller = Provider.of<TimelineController>(context);
     final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Text(
-            selectedEvent != null
+    return OutlineDecoration(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          areaPaneHeader(
+            context,
+            needsTopBorder: false,
+            title: selectedEvent != null
                 ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
                 : noEventSelected,
-            style: textTheme.subtitle1,
           ),
-        ),
-        const PaddedDivider.thin(),
-        Expanded(
-          child: selectedEvent != null
-              ? _buildDetails(controller)
-              : _buildInstructions(textTheme),
-        ),
-      ],
+          Expanded(
+            child: selectedEvent != null
+                ? _buildDetails(controller)
+                : _buildInstructions(textTheme),
+          ),
+        ],
+      ),
     );
   }
 

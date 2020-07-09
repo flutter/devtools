@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' hide context;
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
@@ -40,7 +41,16 @@ class CodeSizeBody extends StatefulWidget {
 class CodeSizeBodyState extends State<CodeSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
   @visibleForTesting
-  static const treemapKey = Key('Treemap');
+  static const treemapKey = Key('Code Size Treemap');
+  @visibleForTesting
+  static const Key snapshotTabKey = Key('Code Size Snapshot Tab');
+  @visibleForTesting
+  static const Key diffTabKey = Key('Code Size Diff Tab');
+
+  static const tabs = [
+    Tab(text: 'Snapshot', key: snapshotTabKey),
+    Tab(text: 'Diff', key: diffTabKey),
+  ];
 
   static const initialFractionForTreemap = 0.67;
   static const initialFractionForTreeTable = 0.33;
@@ -50,10 +60,6 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   TreemapNode root;
 
   TabController _tabController;
-  static const tabs = [
-    Tab(text: 'Snapshot'),
-    Tab(text: 'Diff'),
-  ];
 
   @override
   void initState() {
@@ -85,21 +91,30 @@ class CodeSizeBodyState extends State<CodeSizeBody>
       });
     });
 
-    controller.loadTree('new_v8.json');
+    addAutoDisposeListener(controller.activeDiffTreeType);
+
+    controller.loadTree('$current/lib/src/code_size/stub_data/new_v8.json');
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentTab = tabs[_tabController.index];
     if (root != null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TabBar(
-            labelColor: Theme.of(context).textTheme.bodyText1.color,
-            isScrollable: true,
-            controller: _tabController,
-            tabs: tabs,
-            onTap: onTabSelected,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TabBar(
+                labelColor: Theme.of(context).textTheme.bodyText1.color,
+                isScrollable: true,
+                controller: _tabController,
+                tabs: tabs,
+                onTap: onTabSelected,
+              ),
+              if (currentTab.key == diffTabKey) _buildDiffTreeTypeDropdown(),
+            ],
           ),
           Expanded(
             child: TabBarView(
@@ -115,15 +130,42 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     }
   }
 
+  DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<DiffTreeType>(
+        value: controller.activeDiffTreeType.value,
+        items: [
+          _buildMenuItem(DiffTreeType.combined),
+          _buildMenuItem(DiffTreeType.increaseOnly),
+          _buildMenuItem(DiffTreeType.decreaseOnly),
+        ],
+        onChanged: (newDiffTreeType) {
+          controller.changeActiveDiffTreeType(newDiffTreeType);
+        },
+      ),
+    );
+  }
+
+  DropdownMenuItem _buildMenuItem(DiffTreeType diffTreeType) {
+    return DropdownMenuItem<DiffTreeType>(
+      value: diffTreeType,
+      child: Text(diffTreeType.display),
+    );
+  }
+
   void onTabSelected(int index) {
     final selected = tabs[index].text;
     // TODO(peterdjlee): Import user file instead of using hard coded data.
     switch (selected) {
       case 'Snapshot':
-        controller.loadTree('new_v8.json');
+        controller.loadTree('$current/lib/src/code_size/stub_data/new_v8.json');
         return;
       case 'Diff':
-        controller.loadFakeDiffData();
+        controller.loadFakeDiffData(
+          '$current/lib/src/code_size/stub_data/old_v8.json',
+          '$current/lib/src/code_size/stub_data/new_v8.json',
+          controller.activeDiffTreeType.value,
+        );
         return;
     }
   }
@@ -166,5 +208,19 @@ class CodeSizeBodyState extends State<CodeSizeBody>
         );
       },
     );
+  }
+}
+
+extension DiffTreeTypeExtension on DiffTreeType {
+  String get display {
+    switch (this) {
+      case DiffTreeType.increaseOnly:
+        return 'Increase Only';
+      case DiffTreeType.decreaseOnly:
+        return 'Decrease Only';
+      case DiffTreeType.combined:
+      default:
+        return 'Combined';
+    }
   }
 }

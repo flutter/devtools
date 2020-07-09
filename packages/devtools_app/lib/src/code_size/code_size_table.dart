@@ -13,17 +13,17 @@ import '../utils.dart';
 class CodeSizeSnapshotTable extends StatelessWidget {
   factory CodeSizeSnapshotTable({@required rootNode}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
-    final sortColumn = _SizeColumn();
+    final sizeColumn = _SizeColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
-      sortColumn,
+      sizeColumn,
       _SizePercentageColumn(totalSize: rootNode.root.byteSize),
     ]);
 
     return CodeSizeSnapshotTable._(
       rootNode,
       treeColumn,
-      sortColumn,
+      sizeColumn,
       columns,
     );
   }
@@ -82,8 +82,13 @@ class _SizeColumn extends ColumnData<TreemapNode> {
   dynamic getValue(TreemapNode dataObject) => dataObject.byteSize;
 
   @override
-  String getDisplayValue(TreemapNode dataObject) =>
-      prettyPrintBytes(dataObject.byteSize, includeUnit: true);
+  String getDisplayValue(TreemapNode dataObject) {
+    return prettyPrintBytes(
+      dataObject.byteSize,
+      kbFractionDigits: 1,
+      includeUnit: true,
+    );
+  }
 
   @override
   bool get supportsSorting => true;
@@ -130,14 +135,16 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
 class CodeSizeDiffTable extends StatelessWidget {
   factory CodeSizeDiffTable({@required rootNode}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
+    final diffColumn = _DiffColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
-      _DiffColumn(),
+      diffColumn,
     ]);
 
     return CodeSizeDiffTable._(
       rootNode,
       treeColumn,
+      diffColumn,
       columns,
     );
   }
@@ -145,14 +152,18 @@ class CodeSizeDiffTable extends StatelessWidget {
   const CodeSizeDiffTable._(
     this.rootNode,
     this.treeColumn,
+    this.sortColumn,
     this.columns,
   );
 
   final TreemapNode rootNode;
 
   final TreeColumnData<TreemapNode> treeColumn;
+  final ColumnData<TreemapNode> sortColumn;
   final List<ColumnData<TreemapNode>> columns;
 
+  // TODO(petedjlee): Ensure the sort column is descending with the absolute value of the size
+  //                  if the table is only showing negative values.
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
@@ -160,8 +171,8 @@ class CodeSizeDiffTable extends StatelessWidget {
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
-      sortColumn: treeColumn,
-      sortDirection: SortDirection.ascending,
+      sortColumn: sortColumn,
+      sortDirection: SortDirection.descending,
     );
   }
 }
@@ -176,8 +187,7 @@ class _DiffColumn extends ColumnData<TreemapNode> {
 
 // TODO(peterdjlee): Add up or down arrows indicating increase or decrease for display value.
   @override
-  String getDisplayValue(TreemapNode dataObject) =>
-      prettyPrintBytes(dataObject.byteSize, includeUnit: true);
+  String getDisplayValue(TreemapNode dataObject) => dataObject.prettyByteSize();
 
   @override
   bool get supportsSorting => true;
