@@ -301,8 +301,8 @@ class DebuggerController extends DisposableController
       );
     }
 
-    var frame = selectedStackFrame.value?.frame;
-    frame ??= stackFramesWithLocation.value.first.frame;
+    final frame = selectedStackFrame.value?.frame ??
+        stackFramesWithLocation.value.first.frame;
 
     return _service.evaluateInFrame(
       isolateRef.id,
@@ -1104,11 +1104,12 @@ class ScriptsHistory extends ChangeNotifier
 
 /// Store and manipulate the expression evaluation history.
 class EvalHistory {
-  final List<String> _evalHistory = [];
-  int _historyPosition = -1;
+  var _historyPosition = -1;
 
   /// Get the expression evaluation history.
   List<String> get evalHistory => _evalHistory.toList();
+
+  final _evalHistory = <String>[];
 
   /// Push a new entry onto the expression evaluation history.
   void pushEvalHistory(String expression) {
@@ -1121,7 +1122,7 @@ class EvalHistory {
   }
 
   bool get canNavigateUp {
-    return evalHistory.isNotEmpty && _historyPosition != 0;
+    return _evalHistory.isNotEmpty && _historyPosition != 0;
   }
 
   void navigateUp() {
@@ -1133,14 +1134,14 @@ class EvalHistory {
   }
 
   bool get canNavigateDown {
-    return evalHistory.isNotEmpty && _historyPosition != -1;
+    return _evalHistory.isNotEmpty && _historyPosition != -1;
   }
 
   void navigateDown() {
     if (_historyPosition != -1) {
       _historyPosition++;
     }
-    if (_historyPosition >= evalHistory.length) {
+    if (_historyPosition >= _evalHistory.length) {
       _historyPosition = -1;
     }
   }
