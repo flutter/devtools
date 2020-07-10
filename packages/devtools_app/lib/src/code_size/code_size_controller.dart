@@ -19,7 +19,7 @@ enum DiffTreeType {
 
 class CodeSizeController {
   /// The node set as the snapshot root.
-  /// 
+  ///
   /// Used to build the treemap and the tree table for the snapshot tab.
   ValueListenable<TreemapNode> get snapshotRoot => _snapshotRoot;
   final _snapshotRoot = ValueNotifier<TreemapNode>(null);
@@ -28,8 +28,24 @@ class CodeSizeController {
     _snapshotRoot.value = newRoot;
   }
 
+  void clearSnapshot() {
+    _snapshotRoot.value = null;
+    clearSnapshotFile();
+  }
+
+  ValueListenable<String> get snapshotFile => _snapshotFile;
+  final _snapshotFile = ValueNotifier<String>(null);
+
+  void loadSnapshotFile(String filePath) {
+    _snapshotFile.value = filePath;
+  }
+
+  void clearSnapshotFile() {
+    _snapshotFile.value = null;
+  }
+
   /// The node set as the diff root.
-  /// 
+  ///
   /// Used to build the treemap and the tree table for the diff tab.
   ValueListenable<TreemapNode> get diffRoot => _diffRoot;
   final _diffRoot = ValueNotifier<TreemapNode>(null);
@@ -38,48 +54,56 @@ class CodeSizeController {
     _diffRoot.value = newRoot;
   }
 
+  void clearDiff() {
+    _diffRoot.value = null;
+    clearOldDiffSnapshotFile();
+    clearNewDiffSnapshotFile();
+  }
+
+  ValueListenable<String> get oldDiffSnapshotFile => _oldDiffSnapshotFile;
+  final _oldDiffSnapshotFile = ValueNotifier<String>(null);
+
+  void loadOldDiffSnapshotFile(String filePath) {
+    _oldDiffSnapshotFile.value = filePath;
+  }
+
+  void clearOldDiffSnapshotFile() {
+    _oldDiffSnapshotFile.value = null;
+  }
+
+  ValueListenable<String> get newDiffSnapshotFile => _newDiffSnapshotFile;
+  final _newDiffSnapshotFile = ValueNotifier<String>(null);
+
+  void loadNewDiffSnapshotFile(String filePath) {
+    _newDiffSnapshotFile.value = filePath;
+  }
+
+  void clearNewDiffSnapshotFile() {
+    _newDiffSnapshotFile.value = null;
+  }
+
   /// The active diff tree type used to build the diff treemap.
   ValueListenable<DiffTreeType> get activeDiffTreeType {
-    return _activeDiffTreeTypeNotifier;
+    return _activeDiffTreeType;
   }
+
+  final _activeDiffTreeType =
+      ValueNotifier<DiffTreeType>(DiffTreeType.combined);
 
   // TODO(peterdjlee): Cache each diff tree so that it's less expensive
   //                   to change bettween diff tree types.
   void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
-    _activeDiffTreeTypeNotifier.value = newDiffTreeType;
+    _activeDiffTreeType.value = newDiffTreeType;
     loadFakeDiffTree(
-      _diffOldSnapshotFile.value,
-      _diffNewSnapshotFile.value,
+      _oldDiffSnapshotFile.value,
+      _newDiffSnapshotFile.value,
       diffTreeType: newDiffTreeType,
     );
   }
 
-  final _activeDiffTreeTypeNotifier =
-      ValueNotifier<DiffTreeType>(DiffTreeType.combined);
-
-  ValueListenable<String> get snapshotFile => _snapshotFile;
-  final _snapshotFile = ValueNotifier<String>(null);
-
-  void loadSnapshotFile(String filename) {
-    _snapshotFile.value = filename;
-  }
-
-  ValueListenable<String> get diffOldSnapshotFile => _diffOldSnapshotFile;
-  final _diffOldSnapshotFile = ValueNotifier<String>(null);
-
-  void loadOldDiffSnapshotFile(String filename) {
-    _diffOldSnapshotFile.value = filename;
-  }
-
-  ValueListenable<String> get diffNewSnapshotFile => _diffNewSnapshotFile;
-  final _diffNewSnapshotFile = ValueNotifier<String>(null);
-
-  void loadNewDiffSnapshotFile(String filename) {
-    _diffNewSnapshotFile.value = filename;
-  }
-
   Future<void> loadFakeTree(String pathToFile) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
+    loadSnapshotFile(pathToFile);
     final inputJson = File(pathToFile);
 
     await inputJson.readAsString().then((inputJsonString) async {
@@ -103,6 +127,9 @@ class CodeSizeController {
     String pathToNewFile, {
     DiffTreeType diffTreeType = DiffTreeType.combined,
   }) async {
+    loadOldDiffSnapshotFile(pathToOldFile);
+    loadNewDiffSnapshotFile(pathToNewFile);
+
     // TODO(peterdjlee): Use user input data instead of hard coded data.
     final oldInputJson = File(pathToOldFile);
     final newInputJson = File(pathToNewFile);
