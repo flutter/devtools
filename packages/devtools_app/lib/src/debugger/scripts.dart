@@ -136,26 +136,31 @@ class ScriptPickerState extends State<ScriptPicker> {
       assert(false, 'unexpected object reference: ${ref.type}');
     }
 
-    return Material(
-      child: InkWell(
-        onTap: () => _handleSelected(ref),
-        child: Container(
-          padding: const EdgeInsets.all(densePadding),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: defaultIconSize,
-              ),
-              const SizedBox(width: densePadding),
-              Expanded(
-                child: Text(
-                  text,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+    return Tooltip(
+      waitDuration: tooltipWait,
+      preferBelow: false,
+      message: text,
+      child: Material(
+        child: InkWell(
+          onTap: () => _handleSelected(ref),
+          child: Container(
+            padding: const EdgeInsets.all(densePadding),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  size: defaultIconSize,
                 ),
-              ),
-            ],
+                const SizedBox(width: densePadding),
+                Expanded(
+                  child: Text(
+                    text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
