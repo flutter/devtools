@@ -50,7 +50,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15.0),
-              color: Colors.white10,
+              color: Theme.of(context).colorScheme.chartAccentColor,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -58,7 +58,8 @@ class _FileImportContainerState extends State<FileImportContainer> {
                 Column(
                   children: [
                     _buildImportButton(),
-                    if (importedFile != null) _buildImportedFileDisplay(),
+                    if (importedFile != null)
+                      _buildImportedFileDisplay(context),
                   ],
                 ),
                 if (widget.actionText != null && widget.onAction != null)
@@ -71,19 +72,18 @@ class _FileImportContainerState extends State<FileImportContainer> {
     );
   }
 
-  Column _buildImportedFileDisplay() {
+  Column _buildImportedFileDisplay(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const SizedBox(height: defaultSpacing),
-        const Text(
+        Text(
           'Imported File:',
-          style: TextStyle(color: Colors.white54),
           textAlign: TextAlign.center,
         ),
         Text(
           importedFile,
-          style: const TextStyle(color: Colors.white54),
+          style: TextStyle(color: Theme.of(context).textTheme.headline1.color),
           textAlign: TextAlign.center,
         ),
       ],

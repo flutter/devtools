@@ -225,10 +225,11 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 
   Column _buildHelpText() {
     return Column(
-      children: const [
+      children: [
         Text(
           'We currently only support instruction sizes and v8 snapshot profile outputs.',
-          style: TextStyle(color: Colors.white70),
+          style:
+              TextStyle(color: Theme.of(context).colorScheme.chartAccentColor),
         ),
       ],
     );
@@ -362,7 +363,8 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
       children: [
         Text(
           'We currently only support instruction sizes and v8 snapshot profile outputs.',
-          style: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+          style:
+              TextStyle(color: Theme.of(context).colorScheme.chartAccentColor),
         ),
       ],
     );
