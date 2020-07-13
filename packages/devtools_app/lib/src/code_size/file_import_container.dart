@@ -50,7 +50,8 @@ class _FileImportContainerState extends State<FileImportContainer> {
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).dividerColor, width: 2.0),
+              border:
+                  Border.all(color: Theme.of(context).dividerColor, width: 2.0),
               borderRadius: BorderRadius.circular(defaultDialogRadius),
             ),
             child: Column(
