@@ -94,10 +94,10 @@ class _FileImportContainerState extends State<FileImportContainer> {
             setState(() {
               if (widget.importNewFile) {
                 importedFile =
-                    '$current/lib/src/code_size/stub_data/old_v8.json';
+                    '$current/lib/src/code_size/stub_data/old_v8.dart';
               } else {
                 importedFile =
-                    '$current/lib/src/code_size/stub_data/new_v8.json';
+                    '$current/lib/src/code_size/stub_data/new_v8.dart';
               }
             });
 

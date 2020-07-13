@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
 import '../charts/treemap.dart';
+import 'stub_data/new_v8.dart';
+import 'stub_data/old_v8.dart';
 
 enum DiffTreeType {
   increaseOnly,
@@ -92,22 +91,17 @@ class CodeSizeController {
   Future<void> loadFakeTree(String pathToFile) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
     changeSnapshotFile(pathToFile);
-    final inputJson = File(pathToFile);
 
-    await inputJson.readAsString().then((inputJsonString) async {
-      final inputJsonMap = json.decode(inputJsonString);
+    // Build a [Map] object containing heirarchical information for [inputJsonMap].
+    final processedJsonMap = treemapFromJson(_jsonForFile(pathToFile));
 
-      // Build a [Map] object containing heirarchical information for [inputJsonMap].
-      final processedJsonMap = treemapFromJson(inputJsonMap);
+    // Set name for root node.
+    processedJsonMap['n'] = 'Root';
 
-      // Set name for root node.
-      processedJsonMap['n'] = 'Root';
+    // Build a tree with [TreemapNode] from [processedJsonMap].
+    final newRoot = generateTree(processedJsonMap);
 
-      // Build a tree with [TreemapNode] from [processedJsonMap].
-      final newRoot = generateTree(processedJsonMap);
-
-      changeSnapshotRoot(newRoot);
-    });
+    changeSnapshotRoot(newRoot);
   }
 
   Future<void> loadFakeDiffTree(
@@ -119,14 +113,21 @@ class CodeSizeController {
     changeNewDiffSnapshotFile(pathToNewFile);
 
     // TODO(peterdjlee): Use user input data instead of hard coded data.
-    final oldInputJson = File(pathToOldFile);
-    final newInputJson = File(pathToNewFile);
+    final oldInputJson = _jsonForFile(pathToOldFile);
+    final newInputJson = _jsonForFile(pathToNewFile);
 
     final diffMap = await buildComparisonTreemap(oldInputJson, newInputJson);
     diffMap['n'] = 'Root';
     final newRoot = generateDiffTree(diffMap, diffTreeType: diffTreeType);
 
     changeDiffRoot(newRoot);
+  }
+
+  // TODO(kenz): This is a hack - remove this once we have a file picker.
+  Map<String, dynamic> _jsonForFile(String pathToFile) {
+    if (pathToFile.contains('old_v8')) return jsonDecode(oldV8);
+    if (pathToFile.contains('new_v8')) return jsonDecode(newV8);
+    return null;
   }
 
   TreemapNode generateTree(Map<String, dynamic> treeJson) {

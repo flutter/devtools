@@ -16,7 +16,7 @@ import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
 
-bool codeSizeScreenEnabled = false;
+bool codeSizeScreenEnabled = true;
 
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
