@@ -3,19 +3,23 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' hide context;
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
+import '../common_widgets.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
 import 'code_size_controller.dart';
 import 'code_size_table.dart';
+import 'file_import_container.dart';
 
 bool codeSizeScreenEnabled = false;
+
+const initialFractionForTreemap = 0.67;
+const initialFractionForTreeTable = 0.33;
 
 class CodeSizeScreen extends Screen {
   const CodeSizeScreen() : super(id, title: 'Code Size', icon: Octicons.rss);
@@ -52,12 +56,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     Tab(text: 'Diff', key: diffTabKey),
   ];
 
-  static const initialFractionForTreemap = 0.67;
-  static const initialFractionForTreeTable = 0.33;
-
   CodeSizeController controller;
-
-  TreemapNode root;
 
   TabController _tabController;
 
@@ -83,110 +82,102 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     final newController = Provider.of<CodeSizeController>(context);
     if (newController == controller) return;
     controller = newController;
-
-    root = controller.currentRoot.value;
-    addAutoDisposeListener(controller.currentRoot, () {
-      setState(() {
-        root = controller.currentRoot.value;
-      });
-    });
-
-    addAutoDisposeListener(controller.activeDiffTreeType);
-
-    controller.loadTree('$current/lib/src/code_size/stub_data/new_v8.json');
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentTab = tabs[_tabController.index];
-    if (root != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TabBar(
-                labelColor: Theme.of(context).textTheme.bodyText1.color,
-                isScrollable: true,
-                controller: _tabController,
-                tabs: tabs,
-                onTap: onTabSelected,
-              ),
-              if (currentTab.key == diffTabKey) _buildDiffTreeTypeDropdown(),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
-              physics: defaultTabBarViewPhysics,
-              children: _buildTabViews(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            TabBar(
+              labelColor: Theme.of(context).textTheme.bodyText1.color,
+              isScrollable: true,
               controller: _tabController,
+              tabs: tabs,
             ),
+          ],
+        ),
+        Expanded(
+          child: TabBarView(
+            physics: defaultTabBarViewPhysics,
+            children: [
+              SnapshotView(),
+              DiffView(),
+            ],
+            controller: _tabController,
           ),
-        ],
-      );
-    } else {
-      return const SizedBox();
-    }
+        ),
+      ],
+    );
+  }
+}
+
+class SnapshotView extends StatefulWidget {
+  @override
+  _SnapshotViewState createState() => _SnapshotViewState();
+}
+
+class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
+  @visibleForTesting
+  static const treemapKey = Key('Code Size Treemap');
+
+  CodeSizeController controller;
+
+  TreemapNode snapshotRoot;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final newController = Provider.of<CodeSizeController>(context);
+    if (newController == controller) return;
+    controller = newController;
+
+    snapshotRoot = controller.snapshotRoot.value;
+    addAutoDisposeListener(controller.snapshotRoot, () {
+      setState(() {
+        snapshotRoot = controller.snapshotRoot.value;
+      });
+    });
   }
 
-  DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<DiffTreeType>(
-        value: controller.activeDiffTreeType.value,
-        items: [
-          _buildMenuItem(DiffTreeType.combined),
-          _buildMenuItem(DiffTreeType.increaseOnly),
-          _buildMenuItem(DiffTreeType.decreaseOnly),
-        ],
-        onChanged: (newDiffTreeType) {
-          controller.changeActiveDiffTreeType(newDiffTreeType);
-        },
-      ),
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // TODO(peterdjlee): Move the controls to be aligned with the
+        //                   tab bar to save vertical space.
+        buildSnapshotViewControls(),
+        Expanded(
+          child: snapshotRoot != null
+              ? _buildTreemapAndTableSplitView()
+              : _buildImportSnapshotView(),
+        ),
+      ],
     );
   }
 
-  DropdownMenuItem _buildMenuItem(DiffTreeType diffTreeType) {
-    return DropdownMenuItem<DiffTreeType>(
-      value: diffTreeType,
-      child: Text(diffTreeType.display),
+  Row buildSnapshotViewControls() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        clearButton(
+          busy: snapshotRoot == null,
+          onPressed: controller.clearSnapshot,
+        ),
+      ],
     );
   }
 
-  void onTabSelected(int index) {
-    final selected = tabs[index].text;
-    // TODO(peterdjlee): Import user file instead of using hard coded data.
-    switch (selected) {
-      case 'Snapshot':
-        controller.loadTree('$current/lib/src/code_size/stub_data/new_v8.json');
-        return;
-      case 'Diff':
-        controller.loadFakeDiffData(
-          '$current/lib/src/code_size/stub_data/old_v8.json',
-          '$current/lib/src/code_size/stub_data/new_v8.json',
-          controller.activeDiffTreeType.value,
-        );
-        return;
-    }
-  }
-
-  List<Widget> _buildTabViews() {
-    return [
-      _buildTreemapAndTableSplitView(showDiff: false),
-      _buildTreemapAndTableSplitView(showDiff: true),
-    ];
-  }
-
-  Widget _buildTreemapAndTableSplitView({@required bool showDiff}) {
+  Widget _buildTreemapAndTableSplitView() {
     return Split(
       axis: Axis.vertical,
       children: [
-        // TODO(peterdjlee): Try to reuse the same treemap widget and only swap
-        //                   tables in Diff mode.
         _buildTreemap(),
-        showDiff
-            ? CodeSizeDiffTable(rootNode: root)
-            : CodeSizeSnapshotTable(rootNode: root),
+        CodeSizeSnapshotTable(rootNode: snapshotRoot),
       ],
       initialFractions: const [
         initialFractionForTreemap,
@@ -200,11 +191,189 @@ class CodeSizeBodyState extends State<CodeSizeBody>
       key: treemapKey,
       builder: (context, constraints) {
         return Treemap.fromRoot(
-          rootNode: root,
+          rootNode: snapshotRoot,
           levelsVisible: 2,
           isOutermostLevel: true,
           height: constraints.maxHeight,
-          onRootChangedCallback: controller.changeRoot,
+          onRootChangedCallback: controller.changeSnapshotRoot,
+        );
+      },
+    );
+  }
+
+  Widget _buildImportSnapshotView() {
+    return Padding(
+      padding: const EdgeInsets.all(defaultSpacing),
+      child: Column(
+        children: [
+          Flexible(
+            child: FileImportContainer(
+              title: 'Snapshot',
+              actionText: 'Analyze Snapshot',
+              onAction: controller.loadFakeTree,
+            ),
+          ),
+          const SizedBox(height: defaultSpacing),
+          _buildHelpText(),
+        ],
+      ),
+    );
+  }
+
+  Column _buildHelpText() {
+    return Column(
+      children: [
+        Text(
+          'We currently only support instruction sizes and v8 snapshot profile outputs.',
+          style:
+              TextStyle(color: Theme.of(context).colorScheme.chartAccentColor),
+        ),
+      ],
+    );
+  }
+}
+
+class DiffView extends StatefulWidget {
+  @override
+  _DiffViewState createState() => _DiffViewState();
+}
+
+class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
+  @visibleForTesting
+  static const treemapKey = Key('Code Size Treemap');
+
+  CodeSizeController controller;
+
+  TreemapNode diffRoot;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final newController = Provider.of<CodeSizeController>(context);
+    if (newController == controller) return;
+    controller = newController;
+
+    diffRoot = controller.diffRoot.value;
+    addAutoDisposeListener(controller.diffRoot, () {
+      setState(() {
+        diffRoot = controller.diffRoot.value;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // TODO(peterdjlee): Move the controls to be aligned with the
+        //                   tab bar to save vertical space.
+        _buildDiffViewControls(),
+        Expanded(
+          child: diffRoot != null
+              ? _buildTreemapAndTableSplitView()
+              : _buildImportDiffView(),
+        ),
+      ],
+    );
+  }
+
+  Row _buildDiffViewControls() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        _buildDiffTreeTypeDropdown(),
+        const SizedBox(width: defaultSpacing),
+        clearButton(
+          busy: diffRoot == null,
+          onPressed: controller.clearDiff,
+        ),
+      ],
+    );
+  }
+
+  DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<DiffTreeType>(
+        value: controller.activeDiffTreeType.value,
+        items: [
+          _buildMenuItem(DiffTreeType.combined),
+          _buildMenuItem(DiffTreeType.increaseOnly),
+          _buildMenuItem(DiffTreeType.decreaseOnly),
+        ],
+        onChanged: controller.diffRoot.value == null
+            ? null
+            : (newDiffTreeType) {
+                controller.changeActiveDiffTreeType(newDiffTreeType);
+              },
+      ),
+    );
+  }
+
+  DropdownMenuItem _buildMenuItem(DiffTreeType diffTreeType) {
+    return DropdownMenuItem<DiffTreeType>(
+      value: diffTreeType,
+      child: Text(diffTreeType.display),
+    );
+  }
+
+  Widget _buildTreemapAndTableSplitView() {
+    return Split(
+      axis: Axis.vertical,
+      children: [
+        _buildTreemap(),
+        CodeSizeDiffTable(rootNode: diffRoot),
+      ],
+      initialFractions: const [
+        initialFractionForTreemap,
+        initialFractionForTreeTable,
+      ],
+    );
+  }
+
+  Widget _buildImportDiffView() {
+    return Padding(
+      padding: const EdgeInsets.all(defaultSpacing),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: DualFileImportContainer(
+              firstFileTitle: 'Old',
+              secondFileTitle: 'New',
+              actionText: 'Analyze Diff',
+              onAction: controller.loadFakeDiffTree,
+            ),
+          ),
+          const SizedBox(height: defaultSpacing),
+          _buildHelpText(),
+        ],
+      ),
+    );
+  }
+
+  Column _buildHelpText() {
+    return Column(
+      children: [
+        Text(
+          'We currently only support instruction sizes and v8 snapshot profile outputs.',
+          style:
+              TextStyle(color: Theme.of(context).colorScheme.chartAccentColor),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTreemap() {
+    return LayoutBuilder(
+      key: treemapKey,
+      builder: (context, constraints) {
+        return Treemap.fromRoot(
+          rootNode: diffRoot,
+          levelsVisible: 2,
+          isOutermostLevel: true,
+          height: constraints.maxHeight,
+          onRootChangedCallback: controller.changeSnapshotRoot,
         );
       },
     );
