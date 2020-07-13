@@ -30,7 +30,7 @@ class CodeSizeController {
 
   void clearSnapshot() {
     _snapshotRoot.value = null;
-    _snapshotRoot.value = null;
+    _snapshotFile.value = null;
   }
 
   ValueListenable<String> get snapshotFile => _snapshotFile;

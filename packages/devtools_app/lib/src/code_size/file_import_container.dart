@@ -48,12 +48,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
         ),
         const SizedBox(height: defaultSpacing),
         Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              border:
-                  Border.all(color: Theme.of(context).dividerColor, width: 2.0),
-              borderRadius: BorderRadius.circular(defaultDialogRadius),
-            ),
+          child: RoundedOutlinedBorder(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
