@@ -13,12 +13,14 @@ class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame> {
   CpuProfileFlameChart(
     CpuProfileData data, {
     @required double width,
+    @required double height,
     @required ValueListenable<CpuStackFrame> selectionNotifier,
     @required Function(CpuStackFrame stackFrame) onSelected,
   }) : super(
           data,
           time: data.profileMetaData.time,
-          totalStartingWidth: width,
+          containerWidth: width,
+          containerHeight: height,
           startInset: sideInsetSmall,
           endInset: sideInsetSmall,
           selectionNotifier: selectionNotifier,

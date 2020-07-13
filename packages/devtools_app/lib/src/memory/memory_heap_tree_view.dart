@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -18,6 +17,7 @@ import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
 import '../ui/label.dart';
+import '../ui/search.dart';
 import '../utils.dart';
 import 'memory_analyzer.dart';
 import 'memory_controller.dart';
@@ -25,7 +25,8 @@ import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_snapshot_models.dart';
 import 'memory_treemap.dart';
-import 'memory_utils.dart';
+
+final memorySearchFieldKey = GlobalKey(debugLabel: 'MemorySearchFieldKey');
 
 class HeapTree extends StatefulWidget {
   const HeapTree(
@@ -115,7 +116,8 @@ String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
 
 final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
 
-class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
+class HeapTreeViewState extends State<HeapTree>
+    with AutoDisposeMixin, SearchFieldMixin {
   @visibleForTesting
   static const snapshotButtonKey = Key('Snapshot Button');
   @visibleForTesting
@@ -198,12 +200,15 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
 
     addAutoDisposeListener(controller.searchNotifier, () {
       setState(() {
-        closeAutoCompleteOverlay();
+        controller.closeAutoCompleteOverlay();
       });
     });
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
-      setState(autoCompleteOverlaySetState(controller, context));
+      setState(controller.autoCompleteOverlaySetState(
+        searchFieldKey: memorySearchFieldKey,
+        context: context,
+      ));
     });
 
     addAutoDisposeListener(controller.memoryTimeline.sampleAddedNotifier, () {
@@ -446,7 +451,7 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
               value: controller.showTreemap.value,
               onChanged: (value) {
                 setState(() {
-                  closeAutoCompleteOverlay();
+                  controller.closeAutoCompleteOverlay();
                   controller.toggleShowTreemap(value);
                   controller.search = '';
                   controller.selectedLeaf = null;
@@ -506,68 +511,6 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
     );
   }
 
-  FocusNode searchFieldFocusNode;
-  TextEditingController searchTextFieldController;
-  FocusNode rawKeyboardFocusNode;
-
-  void clearSearchField({force = false}) {
-    if (force || controller.search.isNotEmpty) {
-      searchTextFieldController.clear();
-      controller.search = '';
-    }
-  }
-
-  Widget createSearchField() {
-    // Creating new TextEditingController.
-    searchFieldFocusNode = FocusNode();
-
-    searchFieldFocusNode.addListener(() {
-      if (!searchFieldFocusNode.hasFocus) {
-        closeAutoCompleteOverlay();
-      }
-    });
-
-    searchTextFieldController = TextEditingController(text: controller.search);
-    searchTextFieldController.selection = TextSelection.fromPosition(
-        TextPosition(offset: controller.search.length));
-
-    final searchField = CompositedTransformTarget(
-      link: autoCompletelayerLink,
-      child: TextField(
-        key: memorySearchFieldKey,
-        autofocus: true,
-        enabled: controller.snapshots.isNotEmpty,
-        focusNode: searchFieldFocusNode,
-        controller: searchTextFieldController,
-        onChanged: (value) {
-          controller.search = value;
-        },
-        onEditingComplete: () {
-          searchFieldFocusNode.requestFocus();
-        },
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.all(8),
-          border: const OutlineInputBorder(),
-          labelText: 'Search',
-          hintText: 'Search',
-          suffix: IconButton(
-            padding: const EdgeInsets.all(0.0),
-            onPressed: () {
-              clearSearchField();
-            },
-            icon: const Icon(Icons.clear, size: 16),
-          ),
-        ),
-      ),
-    );
-
-    if (controller.showTreemap.value && controller.snapshots.isNotEmpty) {
-      searchFieldFocusNode.requestFocus();
-    }
-
-    return searchField;
-  }
-
   /// Match, found,  select it and process via ValueNotifiers.
   void selectTheMatch(String foundName) {
     setState(() {
@@ -579,46 +522,10 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
       }
     });
 
-    searchTextFieldController.clear();
-    closeAutoCompleteOverlay();
-    controller.search = foundName;
-    controller.selectTheSearch = true;
-    clearSearchField(force: true);
+    selectFromSearchField(controller, foundName);
   }
 
   Widget _buildSearchFilterControls() {
-    rawKeyboardFocusNode = FocusNode();
-
-    final searchAndRawKeyboard = RawKeyboardListener(
-      child: createSearchField(),
-      focusNode: rawKeyboardFocusNode,
-      onKey: (RawKeyEvent event) {
-        if (event is RawKeyDownEvent) {
-          if (event.logicalKey.keyId == LogicalKeyboardKey.escape.keyId) {
-            // ESCAPE key pressed clear search TextField.
-            clearSearchField();
-          } else if (event.logicalKey.keyId == LogicalKeyboardKey.enter.keyId) {
-            // ENTER pressed.
-            var foundExact = false;
-            // Find exact match in autocomplete list - use that as our search value.
-            for (final autoEntry in controller.searchAutoComplete.value) {
-              if (controller.search.toLowerCase() == autoEntry.toLowerCase()) {
-                foundExact = true;
-                selectTheMatch(autoEntry);
-              }
-            }
-            // Nothing found, pick first line in dropdown.
-            if (!foundExact) {
-              final autoCompleteList = controller.searchAutoComplete.value;
-              if (autoCompleteList.isNotEmpty) {
-                selectTheMatch(autoCompleteList.first);
-              }
-            }
-          }
-        }
-      },
-    );
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.end,
@@ -627,7 +534,14 @@ class HeapTreeViewState extends State<HeapTree> with AutoDisposeMixin {
           // TODO(terry): Use a more adaptive layout than forcing to 300.0
           width: defaultSearchTextWidth,
           height: defaultSearchTextHeight,
-          child: searchAndRawKeyboard,
+          child: buildAutoCompleteSearchField(
+            controller: controller,
+            searchFieldKey: memorySearchFieldKey,
+            searchFieldEnabled: controller.snapshots.isNotEmpty,
+            shouldRequestFocus:
+                controller.showTreemap.value && controller.snapshots.isNotEmpty,
+            onSelection: selectTheMatch,
+          ),
         ),
         const SizedBox(width: denseSpacing),
         Flexible(
@@ -1029,7 +943,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
     addAutoDisposeListener(controller.selectTheSearchNotifier, () {
       if (_trySelectItem()) {
         setState(() {
-          closeAutoCompleteOverlay();
+          controller.closeAutoCompleteOverlay();
         });
       }
     });
@@ -1037,7 +951,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
     addAutoDisposeListener(controller.searchNotifier, () {
       if (_trySelectItem()) {
         setState(() {
-          closeAutoCompleteOverlay();
+          controller.closeAutoCompleteOverlay();
         });
       }
     });
