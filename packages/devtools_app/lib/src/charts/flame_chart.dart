@@ -17,6 +17,7 @@ import '../extent_delegate_list.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
+import '../ui/search.dart';
 import '../utils.dart';
 
 const double rowPadding = 2.0;
@@ -473,7 +474,7 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
 }
 
 class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
-    with AutoDisposeMixin {
+    with AutoDisposeMixin, SearchableMixin<V> {
   ScrollController scrollController;
 
   _ScrollingFlameChartRowExtentDelegate extentDelegate;
@@ -486,10 +487,6 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
   V selected;
 
   V hovered;
-
-  List<V> searchMatches = [];
-
-  V activeSearchMatch;
 
   @override
   void initState() {
@@ -514,7 +511,9 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
       selected = widget.selectionNotifier.value;
       // We only want to rebuild the row if it contains the previous or new
       // selected node.
-      if (containsPreviousSelected || containsNewSelected) setState(() {});
+      if (containsPreviousSelected || containsNewSelected) {
+        setState(() {});
+      }
     });
 
     if (widget.searchMatchesNotifier != null) {
@@ -532,7 +531,9 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
         // TODO(kenz): should we check for unordered equality here? Are there
         // performance repercussions for doing so?
         if (!collectionEquals(
-            previousSearchMatchesInRow, newSearchMatchesInRow)) setState(() {});
+            previousSearchMatchesInRow, newSearchMatchesInRow)) {
+          setState(() {});
+        }
       });
     }
 
@@ -546,8 +547,9 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
         activeSearchMatch = widget.activeSearchMatchNotifier.value;
         // We only want to rebuild the row if it contains the previous or new
         // active search match.
-        if (containsPreviousActiveSearchMatch || containsNewActiveSearchMatch)
+        if (containsPreviousActiveSearchMatch || containsNewActiveSearchMatch) {
           setState(() {});
+        }
       });
     }
   }

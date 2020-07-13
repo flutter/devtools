@@ -426,9 +426,10 @@ class TimelineController
   List<TimelineEvent> matchesForSearch(String search) {
     if (search == null || search.isEmpty) return [];
     final matches = <TimelineEvent>[];
+    final caseInsensitiveSearch = search.toLowerCase();
     for (final event in data.timelineEvents) {
       breadthFirstTraversal<TimelineEvent>(event, action: (TimelineEvent e) {
-        if (e.name.toLowerCase().contains(search.toLowerCase())) {
+        if (e.name.toLowerCase().contains(caseInsensitiveSearch)) {
           matches.add(e);
         }
       });

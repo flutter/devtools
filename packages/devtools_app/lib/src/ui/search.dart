@@ -172,6 +172,12 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   }
 }
 
+mixin SearchableMixin<T> {
+  List<T> searchMatches = [];
+
+  T activeSearchMatch;
+}
+
 mixin SearchFieldMixin {
   FocusNode searchFieldFocusNode;
   TextEditingController searchTextFieldController;
@@ -190,8 +196,10 @@ mixin SearchFieldMixin {
       onKey: (RawKeyEvent event) {
         if (event is RawKeyDownEvent) {
           if (event.logicalKey.keyId == LogicalKeyboardKey.escape.keyId) {
+            // TODO(kenz): Enable this once we find a way around the navigation
+            // this causes. This triggers a "back" navigation.
             // ESCAPE key pressed clear search TextField.
-            clearSearchField(controller);
+            // clearSearchField(controller);
           } else if (event.logicalKey.keyId == LogicalKeyboardKey.enter.keyId) {
             // ENTER pressed.
             var foundExact = false;
