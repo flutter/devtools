@@ -18,6 +18,9 @@ import 'file_import_container.dart';
 
 bool codeSizeScreenEnabled = false;
 
+const initialFractionForTreemap = 0.67;
+const initialFractionForTreeTable = 0.33;
+
 class CodeSizeScreen extends Screen {
   const CodeSizeScreen() : super(id, title: 'Code Size', icon: Octicons.rss);
 
@@ -100,16 +103,15 @@ class CodeSizeBodyState extends State<CodeSizeBody>
         Expanded(
           child: TabBarView(
             physics: defaultTabBarViewPhysics,
-            children: _buildTabViews(),
+            children: [
+              SnapshotView(),
+              DiffView(),
+            ],
             controller: _tabController,
           ),
         ),
       ],
     );
-  }
-
-  List<Widget> _buildTabViews() {
-    return [SnapshotView(), DiffView()];
   }
 }
 
@@ -121,9 +123,6 @@ class SnapshotView extends StatefulWidget {
 class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   @visibleForTesting
   static const treemapKey = Key('Code Size Treemap');
-
-  static const initialFractionForTreemap = 0.67;
-  static const initialFractionForTreeTable = 0.33;
 
   CodeSizeController controller;
 
@@ -149,8 +148,14 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // TODO(peterdjlee): Move the controls to be aligned with the
+        //                   tab bar to save vertical space.
         buildSnapshotViewControls(),
-        Expanded(child: buildBody()),
+        Expanded(
+          child: snapshotRoot != null
+              ? _buildTreemapAndTableSplitView()
+              : _buildImportSnapshotView(),
+        ),
       ],
     );
   }
@@ -165,14 +170,6 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
         ),
       ],
     );
-  }
-
-  Widget buildBody() {
-    if (snapshotRoot != null) {
-      return _buildTreemapAndTableSplitView();
-    } else {
-      return _buildImportSnapshotView();
-    }
   }
 
   Widget _buildTreemapAndTableSplitView() {
@@ -245,9 +242,6 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   @visibleForTesting
   static const treemapKey = Key('Code Size Treemap');
 
-  static const initialFractionForTreemap = 0.67;
-  static const initialFractionForTreeTable = 0.33;
-
   CodeSizeController controller;
 
   TreemapNode diffRoot;
@@ -272,8 +266,14 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // TODO(peterdjlee): Move the controls to be aligned with the
+        //                   tab bar to save vertical space.
         _buildDiffViewControls(),
-        Expanded(child: _buildBody()),
+        Expanded(
+          child: diffRoot != null
+              ? _buildTreemapAndTableSplitView()
+              : _buildImportDiffView(),
+        ),
       ],
     );
   }
@@ -317,14 +317,6 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
     );
   }
 
-  Widget _buildBody() {
-    if (diffRoot != null) {
-      return _buildTreemapAndTableSplitView();
-    } else {
-      return _buildImportDiffView();
-    }
-  }
-
   Widget _buildTreemapAndTableSplitView() {
     return Split(
       axis: Axis.vertical,
@@ -347,6 +339,8 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
         children: [
           Expanded(
             child: DualFileImportContainer(
+              firstFileTitle: 'Old',
+              secondFileTitle: 'New',
               actionText: 'Analyze Diff',
               onAction: controller.loadFakeDiffTree,
             ),

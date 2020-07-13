@@ -30,18 +30,14 @@ class CodeSizeController {
 
   void clearSnapshot() {
     _snapshotRoot.value = null;
-    clearSnapshotFile();
+    _snapshotRoot.value = null;
   }
 
   ValueListenable<String> get snapshotFile => _snapshotFile;
   final _snapshotFile = ValueNotifier<String>(null);
 
-  void loadSnapshotFile(String filePath) {
+  void changeSnapshotFile(String filePath) {
     _snapshotFile.value = filePath;
-  }
-
-  void clearSnapshotFile() {
-    _snapshotFile.value = null;
   }
 
   /// The node set as the diff root.
@@ -56,30 +52,22 @@ class CodeSizeController {
 
   void clearDiff() {
     _diffRoot.value = null;
-    clearOldDiffSnapshotFile();
-    clearNewDiffSnapshotFile();
+    _oldDiffSnapshotFile.value = null;
+    _newDiffSnapshotFile.value = null;
   }
 
   ValueListenable<String> get oldDiffSnapshotFile => _oldDiffSnapshotFile;
   final _oldDiffSnapshotFile = ValueNotifier<String>(null);
 
-  void loadOldDiffSnapshotFile(String filePath) {
+  void changeOldDiffSnapshotFile(String filePath) {
     _oldDiffSnapshotFile.value = filePath;
-  }
-
-  void clearOldDiffSnapshotFile() {
-    _oldDiffSnapshotFile.value = null;
   }
 
   ValueListenable<String> get newDiffSnapshotFile => _newDiffSnapshotFile;
   final _newDiffSnapshotFile = ValueNotifier<String>(null);
 
-  void loadNewDiffSnapshotFile(String filePath) {
+  void changeNewDiffSnapshotFile(String filePath) {
     _newDiffSnapshotFile.value = filePath;
-  }
-
-  void clearNewDiffSnapshotFile() {
-    _newDiffSnapshotFile.value = null;
   }
 
   /// The active diff tree type used to build the diff treemap.
@@ -103,7 +91,7 @@ class CodeSizeController {
 
   Future<void> loadFakeTree(String pathToFile) async {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
-    loadSnapshotFile(pathToFile);
+    changeSnapshotFile(pathToFile);
     final inputJson = File(pathToFile);
 
     await inputJson.readAsString().then((inputJsonString) async {
@@ -127,8 +115,8 @@ class CodeSizeController {
     String pathToNewFile, {
     DiffTreeType diffTreeType = DiffTreeType.combined,
   }) async {
-    loadOldDiffSnapshotFile(pathToOldFile);
-    loadNewDiffSnapshotFile(pathToNewFile);
+    changeOldDiffSnapshotFile(pathToOldFile);
+    changeNewDiffSnapshotFile(pathToNewFile);
 
     // TODO(peterdjlee): Use user input data instead of hard coded data.
     final oldInputJson = File(pathToOldFile);

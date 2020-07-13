@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 
+import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 
@@ -48,8 +49,9 @@ class _FileImportContainerState extends State<FileImportContainer> {
         const SizedBox(height: defaultSpacing),
         Expanded(
           child: Container(
+            // TODO(peterdjlee): Consider using a rounded rectangle outline instead.
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15.0),
+              borderRadius: BorderRadius.circular(defaultDialogRadius),
               color: Theme.of(context).colorScheme.chartAccentColor,
             ),
             child: Column(
@@ -58,12 +60,11 @@ class _FileImportContainerState extends State<FileImportContainer> {
                 Column(
                   children: [
                     _buildImportButton(),
-                    if (importedFile != null)
-                      _buildImportedFileDisplay(context),
+                    _buildImportedFileDisplay(context),
                   ],
                 ),
                 if (widget.actionText != null && widget.onAction != null)
-                  _buildAnalyzeButton(widget.actionText),
+                  _buildActionButton(),
               ],
             ),
           ),
@@ -78,12 +79,10 @@ class _FileImportContainerState extends State<FileImportContainer> {
       children: [
         const SizedBox(height: defaultSpacing),
         Text(
-          'Imported File:',
-          textAlign: TextAlign.center,
-        ),
-        Text(
-          importedFile,
-          style: TextStyle(color: Theme.of(context).textTheme.headline1.color),
+          importedFile != null ? importedFile : 'No File Selected',
+          style: TextStyle(
+            color: Theme.of(context).textTheme.headline1.color,
+          ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -116,7 +115,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
     );
   }
 
-  Column _buildAnalyzeButton(String title) {
+  Column _buildActionButton() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -130,7 +129,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
                   : null,
               child: MaterialIconLabel(
                 Icons.highlight,
-                title,
+                widget.actionText,
               ),
             ),
           ],
@@ -142,15 +141,21 @@ class _FileImportContainerState extends State<FileImportContainer> {
 
 class DualFileImportContainer extends StatefulWidget {
   const DualFileImportContainer({
+    @required this.firstFileTitle,
+    @required this.secondFileTitle,
     @required this.actionText,
     @required this.onAction,
     Key key,
   }) : super(key: key);
 
+  final String firstFileTitle;
+
+  final String secondFileTitle;
+
   /// The title of the action button.
   final String actionText;
 
-  final Function(String oldFilePath, String newFilePath) onAction;
+  final Function(String firstFilePath, String secondFilePath) onAction;
 
   @override
   _DualFileImportContainerState createState() =>
@@ -158,8 +163,8 @@ class DualFileImportContainer extends StatefulWidget {
 }
 
 class _DualFileImportContainerState extends State<DualFileImportContainer> {
-  String pathToOldFile;
-  String pathToNewFile;
+  String firstFilePath;
+  String secondFilePath;
 
   @override
   Widget build(BuildContext context) {
@@ -167,37 +172,37 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
       children: [
         Expanded(
           child: FileImportContainer(
-            title: 'Old',
-            onFileSelected: onOldFileImport,
+            title: widget.firstFileTitle,
+            onFileSelected: onFirstFileSelected,
             importNewFile: false,
           ),
         ),
         const SizedBox(width: defaultSpacing),
-        Center(child: _buildAnalyzeButton('Analyze Diff')),
+        Center(child: _buildActionButton()),
         const SizedBox(width: defaultSpacing),
         Expanded(
           child: FileImportContainer(
-            title: 'New',
-            onFileSelected: onNewFileImport,
+            title: widget.secondFileTitle,
+            onFileSelected: onSecondFileSelected,
           ),
         ),
       ],
     );
   }
 
-  void onOldFileImport(String importedPathToOldFile) {
+  void onFirstFileSelected(String selectedFirstFilePath) {
     setState(() {
-      pathToOldFile = importedPathToOldFile;
+      firstFilePath = selectedFirstFilePath;
     });
   }
 
-  void onNewFileImport(String importedPathToNewFile) {
+  void onSecondFileSelected(String selectedSecondFilePath) {
     setState(() {
-      pathToNewFile = importedPathToNewFile;
+      secondFilePath = selectedSecondFilePath;
     });
   }
 
-  Column _buildAnalyzeButton(String title) {
+  Column _buildActionButton() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -206,12 +211,12 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             RaisedButton(
-              onPressed: pathToOldFile != null && pathToNewFile != null
-                  ? () => widget.onAction(pathToOldFile, pathToNewFile)
+              onPressed: firstFilePath != null && secondFilePath != null
+                  ? () => widget.onAction(firstFilePath, secondFilePath)
                   : null,
               child: MaterialIconLabel(
                 Icons.highlight,
-                title,
+                widget.actionText,
               ),
             ),
           ],
