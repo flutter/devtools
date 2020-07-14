@@ -159,10 +159,15 @@ void main() {
             switch (call.method) {
               case 'Clipboard.setData':
                 _clipboardContents = call.arguments['text'];
+                return Future.value(true);
+                break;
+              case 'Clipboard.getData':
+                return Future.value(<String, dynamic>{});
                 break;
               default:
                 break;
             }
+
             return Future.value(true);
           });
         });
