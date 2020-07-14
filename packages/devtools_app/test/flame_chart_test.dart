@@ -435,7 +435,7 @@ void main() {
       expect(paddedZoomedIntervals[0], equals(const Range(0.0, 120.0)));
       expect(paddedZoomedIntervals[1], equals(const Range(120.0, 180.0)));
       expect(paddedZoomedIntervals[2], equals(const Range(180.0, 240.0)));
-      expect(paddedZoomedIntervals[3], equals(const Range(240.0, 1000540.0)));
+      expect(paddedZoomedIntervals[3], equals(const Range(240.0, 10000540.0)));
     });
 
     test('toPaddedZoomedIntervals calculation is accurate for zoomed row', () {
@@ -447,7 +447,7 @@ void main() {
       expect(paddedZoomedIntervals[0], equals(const Range(0.0, 170.0)));
       expect(paddedZoomedIntervals[1], equals(const Range(170.0, 290.0)));
       expect(paddedZoomedIntervals[2], equals(const Range(290.0, 410.0)));
-      expect(paddedZoomedIntervals[3], equals(const Range(410.0, 1001010.0)));
+      expect(paddedZoomedIntervals[3], equals(const Range(410.0, 10001010.0)));
     });
   });
 
@@ -487,7 +487,7 @@ void main() {
       expect(
           FlameChartUtils.rightPaddingForNode(3, testNodes,
               chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
-          equals(1000000.0));
+          equals(10000000.0));
     });
 
     test('leftPaddingForNode returns correct value for zoomed row', () {
@@ -525,7 +525,7 @@ void main() {
       expect(
           FlameChartUtils.rightPaddingForNode(3, testNodes,
               chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
-          equals(1000000.0));
+          equals(10000000.0));
     });
 
     test('zoomForNode returns correct values', () {
