@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';
@@ -29,6 +30,7 @@ import 'memory_protocol.dart';
 import 'memory_service.dart';
 import 'memory_snapshot_models.dart';
 import 'memory_timeline.dart';
+import 'memory_utils.dart';
 
 enum ChartType {
   DartHeaps,
@@ -600,24 +602,48 @@ class MemoryController extends DisposableController
   Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>
       getAllocationProfile(reset: true);
 
-  // 'reset': true to reset the object allocation accumulators
+  /// 'reset': true to reset the object allocation accumulators
   Future<List<ClassHeapDetailStats>> getAllocationProfile({
     bool reset = false,
   }) async {
     AllocationProfile allocationProfile;
-    try {
+    if (await isIsolateLive(_isolateId)) {
       allocationProfile = await serviceManager.service.getAllocationProfile(
         _isolateId,
         reset: reset,
       );
-    } on SentinelException catch (_) {
-      return [];
+
+      final lastReset = allocationProfile.dateLastAccumulatorReset;
+      if (lastReset != null) {
+        final resetTimestamp = DateTime.fromMillisecondsSinceEpoch(lastReset);
+        debugLogger('Last Allocation Reset @ '
+            '${MemoryController.formattedTimestamp(resetTimestamp)}');
+      }
+      
+      return allocationProfile.members
+          .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
+          .where((ClassHeapDetailStats stats) {
+        return stats.instancesCurrent > 0 || stats.instancesAccumulated > 0;
+      }).toList();
     }
-    return allocationProfile.members
-        .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
-        .where((ClassHeapDetailStats stats) {
-      return stats.instancesCurrent > 0 || stats.instancesAccumulated > 0;
-    }).toList();
+    return [];
+  }
+
+  Future computeLibraries() async {
+    // TODO(terry): Review why unawaited is necessary.
+    unawaited(serviceManager.service.getVM().then((vm) {
+      Future.wait(vm.isolates.map((IsolateRef ref) {
+        return serviceManager.service.getIsolate(ref.id);
+      })).then((isolates) {
+        for (LibraryRef libraryRef in isolates.first.libraries) {
+          serviceManager.service
+              .getObject(_isolateId, libraryRef.id)
+              .then((theLibrary) {
+            print('Library $theLibrary');
+          });
+        }
+      });
+    }));
   }
 
   bool get isConnectedDeviceAndroid {
@@ -906,23 +932,43 @@ class MemoryController extends DisposableController
     snapshotByLibraryData ??= lastSnapshot?.librariesToList();
   }
 
-  void storeSnapshot(
+  Snapshot storeSnapshot(
     DateTime timestamp,
     HeapSnapshotGraph graph,
     LibraryReference libraryRoot, {
     bool autoSnapshot = false,
   }) {
-    snapshots.add(Snapshot(
+    final snapshot = Snapshot(
       timestamp,
       this,
       graph,
       libraryRoot,
       autoSnapshot,
-    ));
+    );
+    snapshots.add(snapshot);
+
+    return snapshot;
   }
 
   void clearAllSnapshots() {
     snapshots.clear();
+  }
+
+  /// Detect stale isolates (sentinaled), may happen after a hot restart.
+  Future<bool> isIsolateLive(String isolateId) async {
+    try {
+      final service = serviceManager?.service;
+      await service.getIsolate(isolateId);
+    } catch (e) {
+      if (e is SentinelException) {
+        final SentinelException sentinelErr = e;
+        final message = 'isIsolateLive: Isolate sentinel $isolateId '
+            '${sentinelErr.sentinel.kind}';
+        debugLogger(message);
+        return false;
+      }
+    }
+    return true;
   }
 
   @override

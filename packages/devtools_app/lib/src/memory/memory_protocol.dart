@@ -66,9 +66,11 @@ class MemoryTracker {
     if (paused) {
       _pollingTimer?.cancel();
       _gcStreamListener?.cancel();
+      _gcStreamListener = null;
+      _pollingTimer = null;
     } else {
-      _pollingTimer = Timer(Duration.zero, _pollMemory);
-      _gcStreamListener = service?.onGCEvent?.listen(_handleGCEvent);
+      _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
+      _gcStreamListener ??= service?.onGCEvent?.listen(_handleGCEvent);
     }
   }
 
@@ -89,28 +91,21 @@ class MemoryTracker {
     );
 
     _updateGCEvent(event.isolate.id, memoryUsage);
-    // TODO(terry): expose when GC occured as markers in memory timeline.
   }
 
-  // TODO(terry): Discuss need a record/stop record for memory?  Unless expensive probably not.
-  Future<void> _pollMemory() async {
+  void _pollMemory() async {
+    _pollingTimer = null;
+
     if (!hasConnection || memoryController.memoryTracker == null) {
+      logger.log('VM service connection and/or MemoryTracker lost.');
       return;
     }
 
     final isolateMemory = <IsolateRef, MemoryUsage>{};
     for (IsolateRef isolateRef in serviceManager.isolateManager.isolates) {
-      try {
-        await service.getIsolate(isolateRef.id);
-      } catch (e) {
-        if (e is SentinelException) {
-          final SentinelException sentinelErr = e;
-          logger.log('Isolate sentinel ${isolateRef.id} '
-              '${sentinelErr.sentinel.kind}');
-          continue;
-        }
+      if (await memoryController.isIsolateLive(isolateRef.id)) {
+        isolateMemory[isolateRef] = await service.getMemoryUsage(isolateRef.id);
       }
-      isolateMemory[isolateRef] = await service.getMemoryUsage(isolateRef.id);
     }
 
     // Polls for current Android meminfo using:
@@ -125,7 +120,7 @@ class MemoryTracker {
     // Polls for current RSS size.
     _update(await service.getVM(), isolateMemory);
 
-    _pollingTimer = Timer(MemoryTimeline.updateDelay, _pollMemory);
+    _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
   }
 
   void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
@@ -145,20 +140,47 @@ class MemoryTracker {
     _recalculate(true);
   }
 
-  // Poll ADB meminfo
+  /// Poll ADB meminfo
   Future<AdbMemoryInfo> _fetchAdbInfo() async =>
       AdbMemoryInfo.fromJson((await serviceManager.getAdbMemoryInfo()).json);
+
+  /// Returns the MemoryUsage of a particular isolate.
+  /// @param id isolateId.
+  /// @param usage associated with the passed in isolate's id.
+  /// @returns the MemoryUsage of the isolate or null if isolate is a sentinal.
+  Future<MemoryUsage> _isolateMemoryUsage(String id, MemoryUsage usage) async =>
+      await memoryController.isIsolateLive(id) ? usage : null;
 
   void _recalculate([bool fromGC = false]) async {
     int used = 0;
     int capacity = 0;
     int external = 0;
 
-    for (MemoryUsage memoryUsage in isolateHeaps.values) {
-      used += memoryUsage.heapUsage;
-      capacity += memoryUsage.heapCapacity;
-      external += memoryUsage.externalUsage;
+    final keysToRemove = <String>[];
+
+    final isolateCount = isolateHeaps.length;
+    final keys = isolateHeaps.keys.toList();
+    for (var index = 0; index < isolateCount; index++) {
+      final isolateId = keys[index];
+      var usage = isolateHeaps[isolateId];
+      if (isolateCount > 1) {
+        // Is the isolate live (not sentinaled).
+        usage = await _isolateMemoryUsage(isolateId, usage);
+        if (usage == null && !keysToRemove.contains(isolateId)) {
+          keysToRemove.add(isolateId);
+        }
+      }
+
+      if (usage != null) {
+        // Isolate is live (a null usage implies sentinal).
+        used += usage.heapUsage;
+        capacity += usage.heapCapacity;
+        external += usage.externalUsage;
+      }
     }
+
+    // Removes any isolate that is a sentinal.
+    isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
 
     int time = DateTime.now().millisecondsSinceEpoch;
     if (samples.isNotEmpty) {
@@ -293,7 +315,7 @@ class ClassHeapDetailStats {
       instancesCurrent = json['instancesCurrent'];
       instancesAccumulated = json['instancesAccumulated'];
       bytesCurrent = json['bytesCurrent'];
-      bytesAccumulated = json['bytesAccumulated'];
+      bytesAccumulated = json['accumulatedSize'];
     } else {
       _update(json['new']);
       _update(json['old']);

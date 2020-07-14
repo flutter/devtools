@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
-import '../config_specific/logger/logger.dart' as logger;
 import '../table.dart';
 import '../table_data.dart';
 import '../utils.dart';
@@ -17,6 +16,7 @@ import 'memory_controller.dart';
 import 'memory_graph_model.dart';
 import 'memory_heap_tree_view.dart';
 import 'memory_snapshot_models.dart';
+import 'memory_utils.dart';
 
 bool _classMatcher(HeapGraphClassLive liveClass) {
   final regExp = RegExp(knownClassesRegExs);
@@ -52,7 +52,7 @@ Map<String, List<Reference>> collect(
         if (_classMatcher(liveClass)) {
           final instances = liveClass.getInstances(heapGraph);
           externalsToAnalyze.add(external);
-          logger.log('Regex external found ${liveClass.name} '
+          debugLogger('Regex external found ${liveClass.name} '
               'instances=${instances.length} '
               'allocated bytes=$size');
         }
@@ -66,7 +66,7 @@ Map<String, List<Reference>> collect(
           if (_classMatcher(liveClass)) {
             filtersToAnalyze.add(classRef);
             final instances = liveClass.getInstances(heapGraph);
-            logger.log('Regex filtered found ${classRef.name} '
+            debugLogger('Regex filtered found ${classRef.name} '
                 'instances=${instances.length}');
           }
         }
@@ -79,7 +79,7 @@ Map<String, List<Reference>> collect(
         if (_classMatcher(liveClass)) {
           librariesToAnalyze.add(classRef);
           final instances = liveClass.getInstances(heapGraph);
-          logger.log('Regex library found ${classRef.name} '
+          debugLogger('Regex library found ${classRef.name} '
               'instances=${instances.length}');
         }
       }

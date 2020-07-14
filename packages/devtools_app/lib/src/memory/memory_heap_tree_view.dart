@@ -534,12 +534,45 @@ class HeapTreeViewState extends State<HeapTree>
     );
   }
 
-  void _allocationStart() {
+  void _allocationStart() async {
+//    await controller.computeLibraries();
+
     controller.memoryTimeline.addMonitorStartEvent();
+
+    final allocations = await controller.getAllocationProfile();
+    for (var index = 0; index < allocations.length; index++) {
+      final allocation = allocations[index];
+      final instancesCurrent = allocation.instancesCurrent;
+      final instancesAccumulated = allocation.instancesAccumulated;
+      final bytesCurrent = allocation.bytesCurrent;
+      final bytesAccumulated = allocation.bytesAccumulated;
+      if (instancesCurrent != instancesAccumulated || bytesAccumulated > 0) {
+        print('[$index] class ${allocation.classRef.name}\n'
+            '    instancesCurrent=$instancesCurrent\n'
+            '    instancesAccumulated=$instancesAccumulated\n'
+            '    bytesCurrent=$bytesCurrent\n'
+            '    bytesAccumulated=$bytesAccumulated\n');
+      }
+    }
   }
 
-  void _allocationReset() {
+  void _allocationReset() async {
     controller.memoryTimeline.addMonitorResetEvent();
+    final allocations = await controller.resetAllocationProfile();
+    for (var index = 0; index < allocations.length; index++) {
+      final allocation = allocations[index];
+      final instancesCurrent = allocation.instancesCurrent;
+      final instancesAccumulated = allocation.instancesAccumulated;
+      final bytesCurrent = allocation.bytesCurrent;
+      final bytesAccumulated = allocation.bytesAccumulated;
+      if (instancesCurrent != instancesAccumulated || bytesAccumulated > 0) {
+        print('Reset [$index] class ${allocation.classRef.name}\n'
+            '    instancesCurrent=$instancesCurrent\n'
+            '    instancesAccumulated=$instancesAccumulated\n'
+            '    bytesCurrent=$bytesCurrent\n'
+            '    bytesAccumulated=$bytesAccumulated\n');
+      }
+    }
   }
 
   FocusNode searchFieldFocusNode;
@@ -683,7 +716,7 @@ class HeapTreeViewState extends State<HeapTree>
     // is probably in progress.
     if (snapshotState != SnapshotStatus.none &&
         snapshotState != SnapshotStatus.done) {
-      logger.log('Snapshop in progress - ignoring this request.');
+      debugLogger('Snapshop in progress - ignoring this request.');
       return;
     }
 
@@ -723,7 +756,7 @@ class HeapTreeViewState extends State<HeapTree>
 
     final root = controller.computeAllLibraries(graph: graph);
 
-    controller.storeSnapshot(
+    final snapshot = controller.storeSnapshot(
       snapshotTimestamp,
       graph,
       root,
@@ -734,18 +767,21 @@ class HeapTreeViewState extends State<HeapTree>
 
     controller.selectedSnapshotTimestamp = snapshotTimestamp;
 
-    logger.log('Total Snapshot completed in'
+    debugLogger('Total Snapshot completed in'
         ' ${snapshotDoneTime.difference(snapshotTimestamp).inMilliseconds / 1000} seconds');
-    logger.log('  Snapshot collected in'
+    debugLogger('  Snapshot collected in'
         ' ${snapshotCollectionTime.difference(snapshotTimestamp).inMilliseconds / 1000} seconds');
-    logger.log('  Snapshot graph built in'
+    debugLogger('  Snapshot graph built in'
         ' ${snapshotGraphTime.difference(snapshotCollectionTime).inMilliseconds / 1000} seconds');
-    logger.log('  Snapshot grouping/libraries computed in'
+    debugLogger('  Snapshot grouping/libraries computed in'
         ' ${snapshotDoneTime.difference(snapshotGraphTime).inMilliseconds / 1000} seconds');
 
     setState(() {
       snapshotState = SnapshotStatus.done;
     });
+
+    controller.buildTreeFromAllData();
+    _analyze(snapshot: snapshot);
   }
 
   Future<void> doGroupBy() async {
@@ -779,14 +815,14 @@ class HeapTreeViewState extends State<HeapTree>
         );
       }
       return true;
-    }.call());
+    }());
   }
 
-  void _analyze() {
+  void _analyze({Snapshot snapshot}) {
     final AnalysesReference analysesNode = controller.findAnalysesNode();
     assert(analysesNode != null);
 
-    final snapshot = controller.computeSnapshotToAnalyze;
+    snapshot ??= controller.computeSnapshotToAnalyze;
     final currentSnapDateTime = snapshot?.collectedTimestamp;
 
     _debugCheckAnalyses(currentSnapDateTime);

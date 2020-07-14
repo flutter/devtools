@@ -109,14 +109,16 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   }
 
   Future<void> _connect() async {
+/*
     if (controller.text?.isEmpty ?? true) {
       Notifications.of(context).push(
         'Please enter a VM Service URL.',
       );
       return;
     }
-
-    final uri = normalizeVmServiceUri(controller.text);
+*/
+//    final uri = normalizeVmServiceUri(controller.text);
+    final uri = normalizeVmServiceUri('http://127.0.0.1:38119/phY5dzzf3VE=/');
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
