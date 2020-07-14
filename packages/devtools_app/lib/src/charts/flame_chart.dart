@@ -27,13 +27,6 @@ const double sectionSpacing = 15.0;
 const double sideInset = 70.0;
 const double sideInsetSmall = 40.0;
 
-// TODO(kenz): remove the hard coded hack once
-// https://github.com/flutter/flutter/issues/33675 is fixed.
-// [PointerHoverEvent.localPosition] is actually the absolute position right
-// now, so for mouse position detection in the flame chart container, we use
-// this offset. Use `localPosition` once this is fixed.
-const flameChartContainerOffset = 17.0;
-
 // TODO(kenz): add some indication that we are scrolled out of the relevant area
 // so that users don't get lost in the extra pixels at the end of the chart.
 
@@ -316,7 +309,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   }
 
   void _handleMouseHover(PointerHoverEvent event) {
-    mouseHoverX = event.position.dx - flameChartContainerOffset;
+    mouseHoverX = event.localPosition.dx;
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
@@ -652,10 +645,9 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
   }
 
   void _handleMouseHover(PointerHoverEvent event) {
-    final hoverNodeData = binarySearchForNode(event.position.dx -
-            flameChartContainerOffset +
-            scrollController.offset)
-        ?.data;
+    final hoverNodeData =
+        binarySearchForNode(event.localPosition.dx - scrollController.offset)
+            ?.data;
 
     if (hoverNodeData != hovered) {
       setState(() {
