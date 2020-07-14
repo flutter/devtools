@@ -219,6 +219,20 @@ final uiTraceEventsWithDuplicates = [
   endVsyncTrace,
 ];
 
+final httpEvent = testSyncTimelineEvent(httpTrace);
+
+final httpTrace = testTraceEventWrapper({
+  'name': 'HTTP CLIENT GET',
+  'cat': 'Embedder',
+  'tid': testUiThreadId,
+  'pid': 28035,
+  'ts': 118039650802,
+  'ph': 'b',
+  'args': {
+    'filterKey': 'HTTP/client',
+  }
+});
+
 final vsyncTrace = testTraceEventWrapper({
   'name': 'VSYNC',
   'cat': 'Embedder',

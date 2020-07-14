@@ -121,6 +121,30 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       );
       await env.tearDownEnvironment();
     });
+
+    test('matchesForSearch', () async {
+      await env.setupEnvironment();
+
+      // Verify an empty list is returned for bad input.
+      expect(timelineController.matchesForSearch(null), isEmpty);
+      expect(timelineController.matchesForSearch(''), isEmpty);
+
+      await timelineController.clearData(clearVmTimeline: false);
+      expect(timelineController.data.timelineEvents, isEmpty);
+      expect(timelineController.matchesForSearch('test'), isEmpty);
+
+      timelineController.addTimelineEvent(goldenUiTimelineEvent);
+      expect(timelineController.matchesForSearch('test'), isEmpty);
+
+      final matches = timelineController.matchesForSearch('frame');
+      expect(matches.length, equals(4));
+      expect(matches[0].name, equals('Animator::BeginFrame'));
+      expect(matches[1].name, equals('Framework Workload'));
+      expect(matches[2].name, equals('Engine::BeginFrame'));
+      expect(matches[3].name, equals('Frame'));
+
+      await env.tearDownEnvironment();
+    });
   });
 }
 

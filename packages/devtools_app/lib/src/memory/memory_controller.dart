@@ -21,6 +21,7 @@ import '../globals.dart';
 import '../service_manager.dart';
 import '../table.dart';
 import '../ui/analytics_constants.dart';
+import '../ui/search.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
 import 'memory_filter.dart';
@@ -47,7 +48,10 @@ final String _memoryLogFilename =
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Flutter Web.
 class MemoryController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with
+        AutoDisposeControllerMixin,
+        SearchControllerMixin,
+        AutoCompleteSearchControllerMixin {
   MemoryController() {
     memoryTimeline = MemoryTimeline(this);
     memoryLog = MemoryLog(this);
@@ -498,36 +502,6 @@ class MemoryController extends DisposableController
   final groupingBy = ValueNotifier<String>(groupByLibrary);
 
   ValueListenable<String> get groupingByNotifier => groupingBy;
-
-  final selectTheSearchNotifier = ValueNotifier<bool>(false);
-
-  bool get selectTheSearch => selectTheSearchNotifier.value;
-
-  /// Search is very dynamic, with auto-complete or programmatic searching,
-  /// setting the value to true will fire off searching through a snapshot.
-  set selectTheSearch(bool v) {
-    selectTheSearchNotifier.value = v;
-  }
-
-  final _searchNotifier = ValueNotifier<String>('');
-
-  /// Notify that the search has changed.
-  ValueListenable get searchNotifier => _searchNotifier;
-
-  set search(String value) {
-    _searchNotifier.value = value;
-  }
-
-  String get search => _searchNotifier.value;
-
-  final searchAutoComplete = ValueNotifier<List<String>>([]);
-
-  ValueListenable<List<String>> get searchAutoCompleteNotifier =>
-      searchAutoComplete;
-
-  void clearSearchAutoComplete() {
-    searchAutoComplete.value = [];
-  }
 
   String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
