@@ -373,7 +373,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
           levelsVisible: 2,
           isOutermostLevel: true,
           height: constraints.maxHeight,
-          onRootChangedCallback: controller.changeSnapshotRoot,
+          onRootChangedCallback: controller.changeDiffRoot,
         );
       },
     );
