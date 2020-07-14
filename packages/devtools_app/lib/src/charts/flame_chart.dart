@@ -17,6 +17,7 @@ import '../extent_delegate_list.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
+import '../ui/search.dart';
 import '../utils.dart';
 
 const double rowPadding = 2.0;
@@ -25,13 +26,6 @@ const double rowHeightWithPadding = rowHeight + rowPadding;
 const double sectionSpacing = 15.0;
 const double sideInset = 70.0;
 const double sideInsetSmall = 40.0;
-
-// TODO(kenz): remove the hard coded hack once
-// https://github.com/flutter/flutter/issues/33675 is fixed.
-// [PointerHoverEvent.localPosition] is actually the absolute position right
-// now, so for mouse position detection in the flame chart container, we use
-// this offset. Use `localPosition` once this is fixed.
-const flameChartContainerOffset = 17.0;
 
 // TODO(kenz): add some indication that we are scrolled out of the relevant area
 // so that users don't get lost in the extra pixels at the end of the chart.
@@ -42,9 +36,12 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   const FlameChart(
     this.data, {
     @required this.time,
-    @required this.totalStartingWidth,
+    @required this.containerWidth,
+    @required this.containerHeight,
     @required this.selectionNotifier,
     @required this.onSelected,
+    this.searchMatchesNotifier,
+    this.activeSearchMatchNotifier,
     this.startInset = sideInset,
     this.endInset = sideInset,
   });
@@ -66,7 +63,9 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 
   final TimeRange time;
 
-  final double totalStartingWidth;
+  final double containerWidth;
+
+  final double containerHeight;
 
   final double startInset;
 
@@ -74,9 +73,13 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 
   final ValueListenable<V> selectionNotifier;
 
+  final ValueListenable<List<V>> searchMatchesNotifier;
+
+  final ValueListenable<V> activeSearchMatchNotifier;
+
   final void Function(V data) onSelected;
 
-  double get startingContentWidth => totalStartingWidth - startInset - endInset;
+  double get startingContentWidth => containerWidth - startInset - endInset;
 }
 
 // TODO(kenz): cap number of nodes we can show per row at once - need this for
@@ -108,7 +111,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   LinkedScrollControllerGroup linkedHorizontalScrollControllerGroup;
 
   double get maxScrollOffset =>
-      widget.totalStartingWidth * (zoomController.value - 1);
+      widget.containerWidth * (zoomController.value - 1);
 
   /// Animation controller for animating flame chart zoom changes.
   AnimationController zoomController;
@@ -120,7 +123,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   double horizontalScrollOffset = 0.0;
 
   // Scrolling via WASD controls will pan the left/right 25% of the view.
-  double get keyboardScrollUnit => widget.totalStartingWidth * 0.25;
+  double get keyboardScrollUnit => widget.containerWidth * 0.25;
 
   // Zooming in via WASD controls will zoom the view in by 50% on each zoom. For
   // example, if the zoom level is 2.0, zooming by one unit would increase the
@@ -138,6 +141,24 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   double get widthWithZoom =>
       contentWidthWithZoom + widget.startInset + widget.endInset;
+
+  TimeRange get visibleTimeRange {
+    final startMicros = horizontalScrollOffset < widget.startInset
+        ? startTimeOffset
+        : startTimeOffset +
+            (horizontalScrollOffset - widget.startInset) /
+                zoomController.value /
+                startingPxPerMicro;
+
+    final endMicros = startTimeOffset +
+        (horizontalScrollOffset - widget.startInset + widget.containerWidth) /
+            zoomController.value /
+            startingPxPerMicro;
+
+    return TimeRange()
+      ..start = Duration(microseconds: startMicros.round())
+      ..end = Duration(microseconds: endMicros.round());
+  }
 
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
@@ -254,6 +275,8 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
             width: math.max(constraints.maxWidth, widthWithZoom),
             startInset: widget.startInset,
             selectionNotifier: widget.selectionNotifier,
+            searchMatchesNotifier: widget.searchMatchesNotifier,
+            activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
             zoom: zoomController.value,
           );
         },
@@ -286,7 +309,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   }
 
   void _handleMouseHover(PointerHoverEvent event) {
-    mouseHoverX = event.position.dx - flameChartContainerOffset;
+    mouseHoverX = event.localPosition.dx;
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
@@ -356,7 +379,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       // Store current scroll values for re-calculating scroll location on zoom.
       final lastScrollOffset = horizontalScrollOffset;
 
-      final safeMouseHoverX = mouseHoverX ?? widget.totalStartingWidth / 2;
+      final safeMouseHoverX = mouseHoverX ?? widget.containerWidth / 2;
       // Position in the zoomable coordinate space that we want to keep fixed.
       final fixedX = safeMouseHoverX + lastScrollOffset - widget.startInset;
 
@@ -417,6 +440,8 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
     @required this.width,
     @required this.startInset,
     @required this.selectionNotifier,
+    @required this.searchMatchesNotifier,
+    @required this.activeSearchMatchNotifier,
     @required this.zoom,
   });
 
@@ -430,6 +455,10 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
 
   final ValueListenable<V> selectionNotifier;
 
+  final ValueListenable<List<V>> searchMatchesNotifier;
+
+  final ValueListenable<V> activeSearchMatchNotifier;
+
   final double zoom;
 
   @override
@@ -438,7 +467,7 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
 }
 
 class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
-    with AutoDisposeMixin {
+    with AutoDisposeMixin, SearchableMixin<V> {
   ScrollController scrollController;
 
   _ScrollingFlameChartRowExtentDelegate extentDelegate;
@@ -475,8 +504,47 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
       selected = widget.selectionNotifier.value;
       // We only want to rebuild the row if it contains the previous or new
       // selected node.
-      if (containsPreviousSelected || containsNewSelected) setState(() {});
+      if (containsPreviousSelected || containsNewSelected) {
+        setState(() {});
+      }
     });
+
+    if (widget.searchMatchesNotifier != null) {
+      searchMatches = widget.searchMatchesNotifier.value;
+      addAutoDisposeListener(widget.searchMatchesNotifier, () {
+        final previousSearchMatchesInRow =
+            searchMatches.where((match) => nodeData.contains(match)).toList();
+        final newSearchMatchesInRow = widget.searchMatchesNotifier.value
+            .where((match) => nodeData.contains(match))
+            .toList();
+        searchMatches = widget.searchMatchesNotifier.value;
+
+        // We only want to rebuild the row if it contains the search matches in
+        // the row have changed.
+        // TODO(kenz): should we check for unordered equality here? Are there
+        // performance repercussions for doing so?
+        if (!collectionEquals(
+            previousSearchMatchesInRow, newSearchMatchesInRow)) {
+          setState(() {});
+        }
+      });
+    }
+
+    if (widget.activeSearchMatchNotifier != null) {
+      activeSearchMatch = widget.activeSearchMatchNotifier.value;
+      addAutoDisposeListener(widget.activeSearchMatchNotifier, () {
+        final containsPreviousActiveSearchMatch =
+            nodeData.contains(activeSearchMatch);
+        final containsNewActiveSearchMatch =
+            nodeData.contains(widget.activeSearchMatchNotifier.value);
+        activeSearchMatch = widget.activeSearchMatchNotifier.value;
+        // We only want to rebuild the row if it contains the previous or new
+        // active search match.
+        if (containsPreviousActiveSearchMatch || containsNewActiveSearchMatch) {
+          setState(() {});
+        }
+      });
+    }
   }
 
   @override
@@ -569,16 +637,17 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
       child: node.buildWidget(
         selected: node.data == selected,
         hovered: node.data == hovered,
+        searchMatch: searchMatches?.contains(node.data) ?? false,
+        activeSearchMatch: activeSearchMatch == node.data,
         zoom: FlameChartUtils.zoomForNode(node, widget.zoom),
       ),
     );
   }
 
   void _handleMouseHover(PointerHoverEvent event) {
-    final hoverNodeData = binarySearchForNode(event.position.dx -
-            flameChartContainerOffset +
-            scrollController.offset)
-        ?.data;
+    final hoverNodeData =
+        binarySearchForNode(event.localPosition.dx - scrollController.offset)
+            ?.data;
 
     if (hoverNodeData != hovered) {
       setState(() {
@@ -781,7 +850,7 @@ class FlameChartNode<T> {
     this.sectionIndex,
   });
 
-  static const _selectedTextColor = Colors.black;
+  static const _darkTextColor = Colors.black;
 
   // We would like this value to be smaller, but zoom performance does not allow
   // for that. We should decrease this value if we can improve flame chart zoom
@@ -805,6 +874,8 @@ class FlameChartNode<T> {
   Widget buildWidget({
     @required bool selected,
     @required bool hovered,
+    @required bool searchMatch,
+    @required bool activeSearchMatch,
     @required double zoom,
   }) {
     // This math.max call prevents using a rect with negative width for
@@ -828,13 +899,22 @@ class FlameChartNode<T> {
       height: rect.height,
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       alignment: Alignment.centerLeft,
-      color: _backgroundColor(selected),
+      color: _backgroundColor(
+        selected: selected,
+        searchMatch: searchMatch,
+        activeSearchMatch: activeSearchMatch,
+      ),
       child: zoomedWidth >= _minWidthForText
           ? Text(
               text,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: _textColor(selected)),
+              style: TextStyle(
+                  color: _textColor(
+                selected: selected,
+                searchMatch: searchMatch,
+                activeSearchMatch: activeSearchMatch,
+              )),
             )
           : const SizedBox(),
     );
@@ -851,13 +931,23 @@ class FlameChartNode<T> {
     }
   }
 
-  Color _backgroundColor(bool selected) {
+  Color _backgroundColor({
+    @required bool selected,
+    @required bool searchMatch,
+    @required bool activeSearchMatch,
+  }) {
     if (selected) return timelineSelectionColor;
+    if (activeSearchMatch) return activeSearchMatchColor;
+    if (searchMatch) return searchMatchColor;
     return backgroundColor;
   }
 
-  Color _textColor(bool selected) {
-    if (selected) return _selectedTextColor;
+  Color _textColor({
+    @required bool selected,
+    @required bool searchMatch,
+    @required bool activeSearchMatch,
+  }) {
+    if (selected || searchMatch || activeSearchMatch) return _darkTextColor;
     return textColor;
   }
 

@@ -68,7 +68,6 @@ Future<TreemapNode> loadV8JsonAsTree() async {
   return generateTree(processedTestData);
 }
 
-// TODO(peterdjlee): Remove this method once code size PR (#2107) lands.
 /// Builds a tree with [TreemapNode] from [treeJson] which represents
 /// the hierarchical structure of the tree.
 TreemapNode generateTree(Map<String, dynamic> treeJson) {

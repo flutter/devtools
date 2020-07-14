@@ -113,6 +113,7 @@ TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
       decoration: TextDecoration.underline,
     );
 
+const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
 const defaultSearchTextHeight = 36.0;
 

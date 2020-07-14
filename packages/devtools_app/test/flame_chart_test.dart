@@ -25,6 +25,7 @@ void main() {
     final flameChart = CpuProfileFlameChart(
       CpuProfileData.parse(cpuProfileResponseJson),
       width: 1000.0,
+      height: 1000.0,
       selectionNotifier: ValueNotifier<CpuStackFrame>(null),
       onSelected: (_) {},
     );
@@ -155,6 +156,8 @@ void main() {
       width: 680.0, // 680.0 fits all test nodes and sideInsets of 70.0.
       startInset: sideInset,
       selectionNotifier: ValueNotifier<CpuStackFrame>(null),
+      searchMatchesNotifier: null,
+      activeSearchMatchNotifier: null,
       zoom: FlameChart.minZoomLevel,
     );
     final zoomedTestRow = ScrollingFlameChartRow(
@@ -164,6 +167,8 @@ void main() {
       width: 1080.0,
       startInset: sideInset,
       selectionNotifier: ValueNotifier<CpuStackFrame>(null),
+      searchMatchesNotifier: null,
+      activeSearchMatchNotifier: null,
       zoom: 2.0,
     );
 
@@ -211,6 +216,8 @@ void main() {
         width: 500.0, // 500.0 is arbitrary.
         startInset: sideInset,
         selectionNotifier: ValueNotifier<CpuStackFrame>(null),
+        searchMatchesNotifier: null,
+        activeSearchMatchNotifier: null,
         zoom: FlameChart.minZoomLevel,
       );
 
@@ -274,6 +281,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: node.buildWidget(
           selected: selected,
+          searchMatch: false,
+          activeSearchMatch: false,
           hovered: hovered,
           zoom: zoom,
         ),
@@ -295,6 +304,8 @@ void main() {
               builder: (BuildContext context) {
                 return testNode.buildWidget(
                   selected: _selected,
+                  searchMatch: false,
+                  activeSearchMatch: false,
                   hovered: _hovered,
                   zoom: defaultZoom,
                 );
