@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 @TestOn('vm')
 import 'package:devtools_app/src/code_size/code_size_screen.dart';
 import 'package:devtools_app/src/code_size/code_size_controller.dart';
@@ -9,6 +11,7 @@ import 'package:devtools_app/src/code_size/code_size_table.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' hide equals;
 import 'support/wrappers.dart';
 
 // TODO(peterdjlee): Clean up the tests once  we don't need loadFakeData.
@@ -78,6 +81,7 @@ void main() {
         codeSizeController: codeSizeController,
       );
 
+      expect(find.byType(SnapshotView), findsOneWidget);
       expect(find.byKey(CodeSizeBodyState.treemapKey), findsOneWidget);
 
       expect(
@@ -108,15 +112,22 @@ void main() {
 
         await tester.pumpAndSettle();
 
+        expect(find.byType(DiffView), findsOneWidget);
         expect(find.byKey(CodeSizeBodyState.treemapKey), findsOneWidget);
 
         expect(
           find.byType(DropdownButtonHideUnderline),
           findsOneWidget,
         );
-
+        
         // Assumes the treemap is built with treemap_test_data_v8_new.json and treemap_test_data_v8_old.json
-        expect(find.text('Root [+1.5 MB]'), findsOneWidget);
+        const text = 'package:pointycastle [+465.8 KB]';
+        expect(find.text(text), findsOneWidget);
+        await tester.tap(find.text(text));
+        await tester.pumpAndSettle();
+
+        expect(find.text('ecc\n[+129.1 KB]'), findsOneWidget);
+        expect(find.text('dart:core'), findsNothing);
 
         expect(find.byType(CodeSizeSnapshotTable), findsNothing);
         expect(find.byType(CodeSizeDiffTable), findsOneWidget);
