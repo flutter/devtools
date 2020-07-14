@@ -745,7 +745,7 @@ class FlameChartUtils {
     // the issue described in the bug where the scroll extent is smaller than
     // where we want to `jumpTo`. Smaller values were experimented with but the
     // issue still persisted, so we are using a very large number.
-    if (index == nodes.length - 1) return 1000000.0;
+    if (index == nodes.length - 1) return 10000000.0;
     final node = nodes[index];
     final nextNode = index == nodes.length - 1 ? null : nodes[index + 1];
     final nodeZoom = zoomForNode(node, chartZoom);
