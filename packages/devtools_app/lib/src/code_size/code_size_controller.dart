@@ -90,7 +90,7 @@ class CodeSizeController {
     );
   }
 
-  Future<void> loadFakeTree(String pathToFile) async {
+  void loadFakeTree(String pathToFile) {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
     changeSnapshotFile(pathToFile);
 
@@ -106,11 +106,11 @@ class CodeSizeController {
     changeSnapshotRoot(newRoot);
   }
 
-  Future<void> loadFakeDiffTree(
+  void loadFakeDiffTree(
     String pathToOldFile,
     String pathToNewFile, {
     DiffTreeType diffTreeType = DiffTreeType.combined,
-  }) async {
+  }) {
     changeOldDiffSnapshotFile(pathToOldFile);
     changeNewDiffSnapshotFile(pathToNewFile);
 
@@ -118,7 +118,7 @@ class CodeSizeController {
     final oldInputJson = _jsonForFile(pathToOldFile);
     final newInputJson = _jsonForFile(pathToNewFile);
 
-    final diffMap = await buildComparisonTreemap(oldInputJson, newInputJson);
+    final diffMap = buildComparisonTreemap(oldInputJson, newInputJson);
     diffMap['n'] = 'Root';
     final newRoot = generateDiffTree(diffMap, diffTreeType: diffTreeType);
 

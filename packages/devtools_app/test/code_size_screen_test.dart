@@ -35,7 +35,7 @@ void main() {
     setUp(() async {
       screen = const CodeSizeScreen();
       codeSizeController = CodeSizeController();
-      await codeSizeController.loadFakeTree(
+      codeSizeController.loadFakeTree(
         '../devtools_testing/lib/support/treemap_test_data_v8_new.json',
       );
     });
@@ -102,7 +102,7 @@ void main() {
         );
         await tester.tap(find.byKey(CodeSizeBodyState.diffTabKey));
 
-        await codeSizeController.loadFakeDiffTree(
+        codeSizeController.loadFakeDiffTree(
           '../devtools_testing/lib/support/treemap_test_data_v8_old.json',
           '../devtools_testing/lib/support/treemap_test_data_v8_new.json',
         );
