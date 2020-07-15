@@ -136,7 +136,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       valueListenable: controller.librariesVisible,
       builder: (context, visible, _) {
         if (visible) {
-          // Focus the filter textfield when the ScriptPicker opens.
+          // Focus the filter text field when the ScriptPicker opens.
           _libraryFilterFocusNode.requestFocus();
 
           // TODO(devoncarew): Animate this opening and closing.
@@ -285,7 +285,7 @@ class FocusLibraryFilterIntent extends Intent {
 class FocusLibraryFilterAction extends Action<FocusLibraryFilterIntent> {
   @override
   void invoke(FocusLibraryFilterIntent intent) {
-    intent.debuggerController.openLibrariesView();
+    intent.debuggerController.toggleLibrariesVisible();
   }
 }
 
