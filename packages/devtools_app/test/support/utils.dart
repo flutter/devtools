@@ -45,8 +45,7 @@ Future<Timeline> loadNetworkProfileTimeline() async {
 }
 
 Future<TreemapNode> loadInstructionSizesJsonAsTree() async {
-  const testDataPath =
-      '../devtools_testing/lib/support/treemap_test_data_sizes.json';
+  const testDataPath = 'sizes';
   final treemapTestData = jsonDecode(
     await File(testDataPath).readAsString(),
   );
@@ -57,8 +56,7 @@ Future<TreemapNode> loadInstructionSizesJsonAsTree() async {
 }
 
 Future<TreemapNode> loadV8JsonAsTree() async {
-  const testDataPath =
-      '../devtools_testing/lib/support/treemap_test_data_v8_new.json';
+  const testDataPath = 'new_v8';
   final treemapTestData = jsonDecode(
     await File(testDataPath).readAsString(),
   );
