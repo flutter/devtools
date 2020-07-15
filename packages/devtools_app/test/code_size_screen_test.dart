@@ -35,9 +35,7 @@ void main() {
     setUp(() async {
       screen = const CodeSizeScreen();
       codeSizeController = CodeSizeController();
-      codeSizeController.loadFakeTree(
-        '../devtools_testing/lib/support/treemap_test_data_v8_new.json',
-      );
+      codeSizeController.loadFakeTree('new_v8');
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -102,10 +100,7 @@ void main() {
         );
         await tester.tap(find.byKey(CodeSizeBodyState.diffTabKey));
 
-        codeSizeController.loadFakeDiffTree(
-          '../devtools_testing/lib/support/treemap_test_data_v8_old.json',
-          '../devtools_testing/lib/support/treemap_test_data_v8_new.json',
-        );
+        codeSizeController.loadFakeDiffTree('old_v8', 'new_v8');
 
         await tester.pumpAndSettle();
 

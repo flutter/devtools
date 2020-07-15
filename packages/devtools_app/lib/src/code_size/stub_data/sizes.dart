@@ -1,3 +1,4 @@
+const instructionSizes = '''
 [
     {
       "l": "dart:_internal",
@@ -67808,3 +67809,4 @@
       "s": 148
     }
   ]
+''';
