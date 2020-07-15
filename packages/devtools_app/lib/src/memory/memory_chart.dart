@@ -206,31 +206,21 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
     _timelineSlider = _createTimelineSlider();
 
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: memoryTimeline.liveData.isEmpty
-              ? const SizedBox()
-              : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      height: 150,
-                      child: LineChart(dartChartController),
-                    ),
-                    _timelineSlider,
-                  ],
-                ),
-        ),
-        if (controller.isAndroidChartVisible)
-          const SizedBox(width: denseSpacing),
-        if (controller.isAndroidChartVisible)
-          Expanded(
-            child: SizedBox(
-              height: defaultChartHeight,
-              child: LineChart(androidChartController),
-            ),
-          ),
+        memoryTimeline.liveData.isEmpty
+            ? const SizedBox(height: 0)
+            : SizedBox(
+                height: defaultChartHeight,
+                child: LineChart(dartChartController),
+              ),
+        controller.isAndroidChartVisible
+            ? SizedBox(
+                height: defaultChartHeight,
+                child: LineChart(androidChartController),
+              )
+            : const SizedBox(height: 0),
+        SizedBox(child: _timelineSlider),
       ],
     );
   }

@@ -70,7 +70,8 @@ const knowClassesToAnalyzeForImages = <WildcardMatch, List<String>>{
 
   // Anything that exactly matches:
   WildcardMatch.exact: [
-    '_Int32List',
+    '_Int32List', // Emulator stores raw images as Int32List.
+    '_Int64List', // New devices e.g., Pixel 3 XL stores images as Int64List.
     'FrameInfos',
   ],
 
@@ -132,14 +133,11 @@ class HeapTreeViewState extends State<HeapTree>
   @visibleForTesting
   static const allocationMonitorKey = Key('Allocation Monitor Start Button');
   @visibleForTesting
-  static const allocationMonitorResetKey =
-      Key('Allocation Monitor Reset Button');
+  static const allocationMonitorResetKey = Key('Accumulators Reset Button');
   @visibleForTesting
   static const searchButtonKey = Key('Snapshot Search');
   @visibleForTesting
   static const filterButtonKey = Key('Snapshot Filter');
-  @visibleForTesting
-  static const analyzeButtonKey = Key('Snapshot Analyze');
   @visibleForTesting
   static const settingsButtonKey = Key('Snapshot Settings');
 
@@ -440,13 +438,15 @@ class HeapTreeViewState extends State<HeapTree>
   Widget _buildSnapshotControls(TextTheme textTheme) {
     return Row(
       children: [
-        OutlineButton(
-          key: snapshotButtonKey,
-          onPressed: _isSnapshotRunning ? null : _snapshot,
-          child: const MaterialIconLabel(
-            Icons.camera,
-            'Snapshot',
-            includeTextWidth: 200,
+        Tooltip(
+          message: 'Snapshot',
+          child: OutlineButton(
+            key: snapshotButtonKey,
+            onPressed: _isSnapshotRunning ? null : _snapshot,
+            child: const MaterialIconLabel(
+              Icons.camera,
+              '',
+            ),
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -475,59 +475,76 @@ class HeapTreeViewState extends State<HeapTree>
         // tables objects/fields. Maybe notion in table?
         controller.showTreemap.value
             ? const SizedBox()
-            : OutlineButton(
-                key: collapseAllButtonKey,
-                onPressed: snapshotDisplay is MemorySnapshotTable
-                    ? () {
-                        if (snapshotDisplay is MemorySnapshotTable) {
-                          controller.groupByTreeTable.dataRoots
-                              .every((element) {
-                            element.collapseCascading();
-                            return true;
-                          });
-                          if (controller.instanceFieldsTreeTable != null) {
-                            // We're collapsing close the fields table.
-                            controller.selectedLeaf = null;
+            : Tooltip(
+                message: 'Collapse All',
+                child: OutlineButton(
+                  key: collapseAllButtonKey,
+                  onPressed: snapshotDisplay is MemorySnapshotTable
+                      ? () {
+                          if (snapshotDisplay is MemorySnapshotTable) {
+                            controller.groupByTreeTable.dataRoots
+                                .every((element) {
+                              element.collapseCascading();
+                              return true;
+                            });
+                            if (controller.instanceFieldsTreeTable != null) {
+                              // We're collapsing close the fields table.
+                              controller.selectedLeaf = null;
+                            }
+                            setState(() {});
                           }
-                          setState(() {});
                         }
-                      }
-                    : null,
-                child: const Text('Collapse All'),
-              ),
+                      : null,
+                  child: const MaterialIconLabel(
+                    Icons.vertical_align_top,
+                    '',
+                  ),
+                )),
         controller.showTreemap.value
             ? const SizedBox()
-            : OutlineButton(
-                key: expandAllButtonKey,
-                onPressed: snapshotDisplay is MemorySnapshotTable
-                    ? () {
-                        if (snapshotDisplay is MemorySnapshotTable) {
-                          controller.groupByTreeTable.dataRoots
-                              .every((element) {
-                            element.expandCascading();
-                            return true;
-                          });
-                          setState(() {});
+            : Tooltip(
+                message: 'Expand All',
+                child: OutlineButton(
+                  key: expandAllButtonKey,
+                  onPressed: snapshotDisplay is MemorySnapshotTable
+                      ? () {
+                          if (snapshotDisplay is MemorySnapshotTable) {
+                            controller.groupByTreeTable.dataRoots
+                                .every((element) {
+                              element.expandCascading();
+                              return true;
+                            });
+                            setState(() {});
+                          }
                         }
-                      }
-                    : null,
-                child: const Text('Expand All'),
+                      : null,
+                  child: const MaterialIconLabel(
+                    Icons.vertical_align_bottom,
+                    '',
+                  ),
+                ),
               ),
         const SizedBox(width: defaultSpacing),
-        OutlineButton(
-          key: allocationMonitorKey,
-          onPressed: _allocationStart,
-          child: createImageIcon(
-            'icons/memory/communities_white@2x.png',
-            size: defaultIconThemeSize,
+        Tooltip(
+          message: 'Monitor Allocations',
+          child: OutlineButton(
+            key: allocationMonitorKey,
+            onPressed: _allocationStart,
+            child: createImageIcon(
+              'icons/memory/communities_white@2x.png',
+              size: defaultIconThemeSize,
+            ),
           ),
         ),
-        OutlineButton(
-          key: allocationMonitorResetKey,
-          onPressed: _allocationReset,
-          child: createImageIcon(
-            'icons/memory/reset_icon_white@2x.png',
-            size: defaultIconThemeSize,
+        Tooltip(
+          message: 'Reset Accumulators',
+          child: OutlineButton(
+            key: allocationMonitorResetKey,
+            onPressed: _allocationReset,
+            child: createImageIcon(
+              'icons/memory/reset_icon_white@2x.png',
+              size: defaultIconThemeSize,
+            ),
           ),
         ),
       ],
@@ -670,26 +687,14 @@ class HeapTreeViewState extends State<HeapTree>
           ),
         ),
         const SizedBox(width: denseSpacing),
-        Flexible(
+        Tooltip(
+          message: 'Filter',
           child: OutlineButton(
             key: filterButtonKey,
             onPressed: _filter,
             child: const MaterialIconLabel(
               Icons.filter_list,
-              'Filter',
-              includeTextWidth: 200,
-            ),
-          ),
-        ),
-        const SizedBox(width: denseSpacing),
-        Flexible(
-          child: OutlineButton(
-            key: analyzeButtonKey,
-            onPressed: controller.isAnalyzeButtonEnabled() ? _analyze : null,
-            child: const MaterialIconLabel(
-              Icons.highlight,
-              'Analyze',
-              includeTextWidth: 200,
+              '',
             ),
           ),
         ),

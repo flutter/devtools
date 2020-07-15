@@ -54,8 +54,6 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const exportButtonKey = Key('Export Button');
   @visibleForTesting
-  static const resetButtonKey = Key('Reset Button');
-  @visibleForTesting
   static const gcButtonKey = Key('GC Button');
 
   static const memorySourceMenuItemPrefix = 'Source: ';
@@ -132,9 +130,13 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
             _buildMemoryControls(textTheme),
           ],
         ),
-        const SizedBox(height: denseSpacing),
-        _memoryEvents,
-        _memoryChart,
+        SizedBox(
+          height: 50,
+          child: _memoryEvents,
+        ),
+        SizedBox(
+          child: _memoryChart,
+        ),
         const PaddedDivider(padding: EdgeInsets.zero),
         Expanded(
           child: HeapTree(controller),
@@ -324,16 +326,6 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         createToggleAdbMemoryButton(),
         const SizedBox(width: denseSpacing),
         OutlineButton(
-          key: MemoryScreen.resetButtonKey,
-          onPressed: _reset,
-          child: const MaterialIconLabel(
-            Icons.restore,
-            'Reset',
-            includeTextWidth: _primaryControlsMinVerboseWidth,
-          ),
-        ),
-        const SizedBox(width: denseSpacing),
-        OutlineButton(
           key: MemoryScreen.gcButtonKey,
           onPressed: controller.isGcing ? null : _gc,
           child: const MaterialIconLabel(
@@ -364,12 +356,9 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
 
     // Clear all analysis and snapshots collected too.
     controller.clearAllSnapshots();
+    controller.classRoot = null;
     controller.topNode = null;
     controller.selectedSnapshotTimestamp = null;
-  }
-
-  void _reset() async {
-    // TODO(terry): TBD real implementation needed.
   }
 
   Future<void> _gc() async {
