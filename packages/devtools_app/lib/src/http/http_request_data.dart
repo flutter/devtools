@@ -2,40 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../network/network_model.dart';
 import '../trace_event.dart';
 import '../utils.dart';
 import 'http.dart';
-
-/// Contains all state relevant to completed and in-progress HTTP requests.
-class HttpRequests {
-  HttpRequests({
-    this.requests = const [],
-    this.invalidRequests = const [],
-    this.outstandingRequests = const {},
-  })  : assert(requests != null),
-        assert(invalidRequests != null),
-        assert(outstandingRequests != null);
-
-  /// A list of HTTP requests.
-  ///
-  /// Individual requests in this list can be either completed or in-progress.
-  List<HttpRequestData> requests;
-
-  /// A list of invalid HTTP requests received.
-  ///
-  /// These are requests that have completed but do not contain all the required
-  /// information to display normally in the UI.
-  List<HttpRequestData> invalidRequests;
-
-  /// A mapping of timeline IDs to instances of HttpRequestData which are
-  /// currently in-progress.
-  Map<String, HttpRequestData> outstandingRequests;
-
-  void clear() {
-    requests.clear();
-    outstandingRequests.clear();
-  }
-}
 
 /// Used to represent an instant event emitted during an HTTP request.
 class HttpInstantEvent {
@@ -56,12 +26,12 @@ class HttpInstantEvent {
 }
 
 /// An abstraction of an HTTP request made through dart:io.
-class HttpRequestData {
+class HttpRequestData extends NetworkRequest {
   HttpRequestData._(
-    this._timelineMicrosBase,
+    int timelineMicrosBase,
     this._startEvent,
     this._endEvent,
-  );
+  ) : super(timelineMicrosBase);
 
   /// Build an instance from timeline events.
   ///
@@ -99,7 +69,6 @@ class HttpRequestData {
     return data;
   }
 
-  final int _timelineMicrosBase;
   final TraceEvent _startEvent;
   TraceEvent _endEvent;
 
@@ -107,7 +76,7 @@ class HttpRequestData {
   // responsible for calculating the time offsets of each event.
   final List<HttpInstantEvent> _instantEvents = [];
 
-  /// The duration of the HTTP request, in milliseconds.
+  @override
   Duration get duration {
     if (_endEvent == null || _startEvent == null) {
       return null;
@@ -117,6 +86,21 @@ class HttpRequestData {
       ..start = Duration(microseconds: _startEvent.timestampMicros)
       ..end = Duration(microseconds: _endEvent.timestampMicros);
     return range.duration;
+  }
+
+  @override
+  String get contentType {
+    if (responseHeaders == null || responseHeaders['content-type'] == null) {
+      return null;
+    }
+    return responseHeaders['content-type'].toString();
+  }
+
+  @override
+  String get type {
+    // TODO(kenz): pull in a package or implement functionality to pretty print
+    // the MIME type from the 'content-type' field in a response header.
+    return 'http';
   }
 
   /// Whether the request is safe to display in the UI.
@@ -145,6 +129,12 @@ class HttpRequestData {
     return copy;
   }
 
+  @override
+  int get port {
+    final Map<String, dynamic> connectionInfo = general['connectionInfo'];
+    return connectionInfo != null ? connectionInfo['localPort'] : null;
+  }
+
   /// True if the HTTP request hasn't completed yet, determined by the lack of
   /// an end event.
   bool get inProgress => _endEvent == null;
@@ -152,14 +142,11 @@ class HttpRequestData {
   /// All instant events logged to the timeline for this HTTP request.
   List<HttpInstantEvent> get instantEvents => _instantEvents;
 
-  /// The HTTP method associated with this request.
+  @override
   String get method {
     assert(_startEvent.args.containsKey('method'));
     return _startEvent.args['method'];
   }
-
-  /// The name of the request (currently the URI).
-  String get name => uri.toString();
 
   /// A list of all cookies contained within the request headers.
   List<Cookie> get requestCookies {
@@ -183,11 +170,19 @@ class HttpRequestData {
   }
 
   /// The time the HTTP request was issued.
-  DateTime get requestTime {
+  @override
+  DateTime get startTimestamp {
     assert(_startEvent != null);
     return DateTime.fromMicrosecondsSinceEpoch(
-      _getTimelineMicrosecondsSinceEpoch(_startEvent),
+      timelineMicrosecondsSinceEpoch(_startEvent.timestampMicros),
     );
+  }
+
+  @override
+  DateTime get endTimestamp {
+    if (_endEvent == null) return null;
+    return DateTime.fromMicrosecondsSinceEpoch(
+        timelineMicrosecondsSinceEpoch(_endEvent.timestampMicros));
   }
 
   /// A list of all cookies contained within the response headers.
@@ -217,6 +212,7 @@ class HttpRequestData {
   ///
   /// If the request completed, this will be an HTTP status code. If an error
   /// was encountered, this will return 'Error'.
+  @override
   String get status {
     String statusCode;
     if (_endEvent != null) {
@@ -232,10 +228,10 @@ class HttpRequestData {
     return statusCode;
   }
 
-  /// The address the HTTP request was issued to.
-  Uri get uri {
+  @override
+  String get address {
     assert(_startEvent.args.containsKey('uri'));
-    return Uri.parse(_startEvent.args['uri']);
+    return _startEvent.args['uri'];
   }
 
   /// Merges the information from another [HttpRequestData] into this instance.
@@ -276,10 +272,6 @@ class HttpRequestData {
     }
   }
 
-  int _getTimelineMicrosecondsSinceEpoch(TraceEvent event) {
-    return _timelineMicrosBase + event.timestampMicros;
-  }
-
   @override
-  String toString() => '$method $name';
+  String toString() => '$method $address';
 }

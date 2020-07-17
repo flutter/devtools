@@ -462,26 +462,26 @@ class VmServiceWrapper implements VmService {
 
   Future<Success> startSocketProfiling(String isolateId) async {
     assert(await isSocketProfilingAvailable(isolateId));
-    return _trackFuture('startSocketProfiling',
-        _vmService.startSocketProfiling(isolateId));
+    return _trackFuture(
+        'startSocketProfiling', _vmService.startSocketProfiling(isolateId));
   }
 
   Future<Success> pauseSocketProfiling(String isolateId) async {
     assert(await isSocketProfilingAvailable(isolateId));
-    return _trackFuture('pauseSocketProfiling',
-        _vmService.pauseSocketProfiling(isolateId));
+    return _trackFuture(
+        'pauseSocketProfiling', _vmService.pauseSocketProfiling(isolateId));
   }
 
   Future<Success> clearSocketProfile(String isolateId) async {
     assert(await isSocketProfilingAvailable(isolateId));
-    return _trackFuture('clearSocketProfile',
-        _vmService.clearSocketProfile(isolateId));
+    return _trackFuture(
+        'clearSocketProfile', _vmService.clearSocketProfile(isolateId));
   }
 
   Future<SocketProfile> getSocketProfile(String isolateId) async {
     assert(await isSocketProfilingAvailable(isolateId));
-    return _trackFuture('getSocketProfile',
-        _vmService.getSocketProfile(isolateId));
+    return _trackFuture(
+        'getSocketProfile', _vmService.getSocketProfile(isolateId));
   }
 
   @override

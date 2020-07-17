@@ -174,29 +174,6 @@ StatelessWidget stopRecordingButton({
   );
 }
 
-/// Button to stop recording data.
-///
-/// * `paused`: Whether recording is in progress.
-/// * `includeTextWidth`: The minimum width the button can be before the text is
-///    omitted.
-/// * `onPressed`: The callback to be called upon pressing the button.
-StatelessWidget stopButton({
-  Key key,
-  @required bool paused,
-  double includeTextWidth,
-  @required VoidCallback onPressed,
-}) {
-  return OutlineButton(
-    key: key,
-    onPressed: paused ? null : onPressed,
-    child: MaterialIconLabel(
-      Icons.stop,
-      'Stop',
-      includeTextWidth: includeTextWidth,
-    ),
-  );
-}
-
 // TODO(kenz): make recording info its own stateful widget that handles
 // listening to value notifiers and building info.
 Widget recordingInfo({

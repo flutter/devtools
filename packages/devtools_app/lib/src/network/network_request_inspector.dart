@@ -7,26 +7,27 @@ import 'package:flutter/material.dart';
 import '../common_widgets.dart';
 import '../http/http_request_data.dart';
 import '../theme.dart';
-import 'http_request_inspector_views.dart';
+import 'network_model.dart';
+import 'network_request_inspector_views.dart';
 
-/// A [Widget] which displays information about an HTTP request.
-class HttpRequestInspector extends StatelessWidget {
-  const HttpRequestInspector(this.data);
+/// A [Widget] which displays information about a network request.
+class NetworkRequestInspector extends StatelessWidget {
+  const NetworkRequestInspector(this.data);
 
+  static const _overviewTabTitle = 'Overview';
   static const _headersTabTitle = 'Headers';
-  static const _timingTabTitle = 'Timing';
   static const _cookiesTabTitle = 'Cookies';
 
   @visibleForTesting
-  static const headersTabKey = Key(_headersTabTitle);
+  static const overviewTabKey = Key(_overviewTabTitle);
   @visibleForTesting
-  static const timingTabKey = Key(_timingTabTitle);
+  static const headersTabKey = Key(_headersTabTitle);
   @visibleForTesting
   static const cookiesTabKey = Key(_cookiesTabTitle);
   @visibleForTesting
   static const noRequestSelectedKey = Key('No Request Selected');
 
-  final HttpRequestData data;
+  final NetworkRequest data;
 
   Widget _buildTab(String tabName) {
     return Tab(
@@ -40,11 +41,12 @@ class HttpRequestInspector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasCookies = data?.hasCookies ?? false;
     final tabs = <Tab>[
-      _buildTab(_headersTabTitle),
-      _buildTab(_timingTabTitle),
-      if (hasCookies) _buildTab(_cookiesTabTitle),
+      _buildTab(_overviewTabTitle),
+      if (data is HttpRequestData) ...[
+        _buildTab(_headersTabTitle),
+        if ((data as HttpRequestData).hasCookies) _buildTab(_cookiesTabTitle),
+      ],
     ];
     final tabbedContent = DefaultTabController(
       length: tabs.length,
@@ -64,9 +66,12 @@ class HttpRequestInspector extends StatelessWidget {
             child: TabBarView(
               physics: defaultTabBarViewPhysics,
               children: [
-                HttpRequestHeadersView(data),
-                HttpRequestTimingView(data),
-                if (hasCookies) HttpRequestCookiesView(data),
+                NetworkRequestOverviewView(data),
+                if (data is HttpRequestData) ...[
+                  HttpRequestHeadersView(data),
+                  if ((data as HttpRequestData).hasCookies)
+                    HttpRequestCookiesView(data),
+                ],
               ],
             ),
           ),

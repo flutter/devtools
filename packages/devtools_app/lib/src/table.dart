@@ -778,7 +778,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
               child: Scrollbar(
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,
-                  onTapDown: (a) => widget.focusNode.requestFocus(),
+                  onTapDown: (a) => widget.focusNode?.requestFocus(),
                   child: Focus(
                     autofocus: true,
                     onKey: (_, event) => widget.handleKeyEvent != null

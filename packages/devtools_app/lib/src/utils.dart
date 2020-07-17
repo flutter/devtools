@@ -511,6 +511,10 @@ class TimeRange {
   int get hashCode => hashValues(start, end);
 }
 
+String formatDateTime(DateTime time) {
+  return DateFormat('h:mm:ss.S a').format(time);
+}
+
 bool isDebugBuild() {
   bool debugBuild = false;
   assert((() {
