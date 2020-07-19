@@ -455,6 +455,9 @@ class AnimatedFlexLayoutProperties
       textBaseline: textBaseline ?? this.textBaseline,
     );
   }
+
+  @override
+  bool get flipMainAxis => end.flipMainAxis;
 }
 
 /// LayoutProperties extension to be reused on LayoutProperties and AnimatedLayoutProperties

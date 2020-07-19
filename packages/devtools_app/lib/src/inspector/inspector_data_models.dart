@@ -370,6 +370,9 @@ class FlexLayoutProperties extends LayoutProperties {
   final VerticalDirection verticalDirection;
   final TextBaseline textBaseline;
 
+  @override
+  List<LayoutProperties> get children => flipMainAxis ? super.children.reversed.toList() : super.children;
+
   int _totalFlex;
 
   bool get isMainAxisHorizontal => direction == Axis.horizontal;
@@ -415,6 +418,36 @@ class FlexLayoutProperties extends LayoutProperties {
     if (direction == Axis.vertical)
       return height + overflowEpsilon < sum(childrenHeights);
     return height + overflowEpsilon < max(childrenHeights);
+  }
+
+  /// Method and logic is taken from [RenderFlex] on `rendering/flex.dart`
+  bool _flipMainAxis;
+  bool get flipMainAxis {
+    if (_flipMainAxis != null) return _flipMainAxis;
+    assert(direction != null);
+    final startIsTopLeft = () {
+      switch (direction) {
+        case Axis.horizontal:
+          switch (textDirection) {
+            case TextDirection.ltr:
+              return true;
+            case TextDirection.rtl:
+              return false;
+          }
+          break;
+        case Axis.vertical:
+          switch (verticalDirection) {
+            case VerticalDirection.down:
+              return true;
+            case VerticalDirection.up:
+              return false;
+          }
+          break;
+        default:
+          return true;
+      }
+    }();
+    return _flipMainAxis = !startIsTopLeft;
   }
 
   /// render properties for laying out rendered Flex & Flex children widgets
@@ -511,7 +544,6 @@ class FlexLayoutProperties extends LayoutProperties {
         return sizes.map((_) => size).toList();
       }
     }
-
     final widths = renderSizes(Axis.horizontal);
     final heights = renderSizes(Axis.vertical);
 
