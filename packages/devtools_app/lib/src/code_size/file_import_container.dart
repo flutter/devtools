@@ -12,10 +12,10 @@ import '../ui/label.dart';
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
     @required this.title,
+    @required this.fileToBeImported,
     this.actionText,
     this.onAction,
     this.onFileSelected,
-    this.importNewFile = true,
     Key key,
   }) : super(key: key);
 
@@ -29,7 +29,7 @@ class FileImportContainer extends StatefulWidget {
   final Function(String filePath) onFileSelected;
 
   // TODO(peterdjlee): Remove once the file picker is implemented.
-  final bool importNewFile;
+  final String fileToBeImported;
 
   @override
   _FileImportContainerState createState() => _FileImportContainerState();
@@ -92,17 +92,12 @@ class _FileImportContainerState extends State<FileImportContainer> {
           onPressed: () {
             // TODO(peterdjlee): Prompt file picker to choose a file.
             setState(() {
-              if (widget.importNewFile) {
-                importedFile =
-                    '$current/lib/src/code_size/stub_data/old_v8.dart';
-              } else {
-                importedFile =
-                    '$current/lib/src/code_size/stub_data/new_v8.dart';
-              }
+              importedFile = widget.fileToBeImported;
             });
 
-            if (widget.onFileSelected != null)
+            if (widget.onFileSelected != null) {
               widget.onFileSelected(importedFile);
+            }
           },
           child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
         ),
@@ -169,7 +164,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
           child: FileImportContainer(
             title: widget.firstFileTitle,
             onFileSelected: onFirstFileSelected,
-            importNewFile: false,
+            fileToBeImported: '$current/lib/src/code_size/stub_data/old_v8.dart',
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -179,6 +174,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
           child: FileImportContainer(
             title: widget.secondFileTitle,
             onFileSelected: onSecondFileSelected,
+            fileToBeImported: '$current/lib/src/code_size/stub_data/new_v8.dart',
           ),
         ),
       ],

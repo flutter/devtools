@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' hide context;
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
@@ -16,7 +17,7 @@ import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
 
-bool codeSizeScreenEnabled = false;
+bool codeSizeScreenEnabled = true;
 
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
@@ -211,6 +212,8 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
               title: 'Snapshot',
               actionText: 'Analyze Snapshot',
               onAction: controller.loadFakeTree,
+              fileToBeImported:
+                  '$current/lib/src/code_size/stub_data/app_size.dart',
             ),
           ),
           const SizedBox(height: defaultSpacing),

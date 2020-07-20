@@ -9,6 +9,7 @@ import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
 import '../charts/treemap.dart';
+import 'stub_data/app_size.dart';
 import 'stub_data/new_v8.dart';
 import 'stub_data/old_v8.dart';
 import 'stub_data/sizes.dart';
@@ -96,7 +97,13 @@ class CodeSizeController {
     changeSnapshotFile(pathToFile);
 
     // Build a [Map] object containing heirarchical information for [inputJsonMap].
-    final processedJsonMap = treemapFromJson(_jsonForFile(pathToFile));
+    Map<String, dynamic> processedJsonMap;
+    if (pathToFile.contains('app_size')) {
+      // App size file should be processed already.
+      processedJsonMap = _jsonForFile(pathToFile);
+    } else {
+      processedJsonMap = treemapFromJson(_jsonForFile(pathToFile));
+    }
 
     // Set name for root node.
     processedJsonMap['n'] = 'Root';
@@ -131,6 +138,7 @@ class CodeSizeController {
     if (pathToFile.contains('old_v8')) return jsonDecode(oldV8);
     if (pathToFile.contains('new_v8')) return jsonDecode(newV8);
     if (pathToFile.contains('sizes')) return jsonDecode(instructionSizes);
+    if (pathToFile.contains('app_size')) return jsonDecode(appSize);
     return null;
   }
 
