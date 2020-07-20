@@ -164,7 +164,8 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
           child: FileImportContainer(
             title: widget.firstFileTitle,
             onFileSelected: onFirstFileSelected,
-            fileToBeImported: '$current/lib/src/code_size/stub_data/old_v8.dart',
+            fileToBeImported:
+                '$current/lib/src/code_size/stub_data/old_v8.dart',
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -174,7 +175,8 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
           child: FileImportContainer(
             title: widget.secondFileTitle,
             onFileSelected: onSecondFileSelected,
-            fileToBeImported: '$current/lib/src/code_size/stub_data/new_v8.dart',
+            fileToBeImported:
+                '$current/lib/src/code_size/stub_data/new_v8.dart',
           ),
         ),
       ],
