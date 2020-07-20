@@ -2,18 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
 
 import 'common_widgets.dart';
+import 'config_specific/theme_overrides/theme_overrides.dart';
 import 'ui/theme.dart';
 
-/// Constructs the light or dark theme for the app.
-ThemeData themeFor({@required bool isDarkTheme}) {
-  return isDarkTheme ? _darkTheme() : _lightTheme();
+/// Constructs the light or dark theme for the app taking into account
+/// environment-specific overrides.
+ThemeData themeFor({
+  @required bool isDarkTheme,
+  @required ThemeOverrides themeOverrides,
+}) {
+  // If the theme specifies a background color, use it to infer a theme.
+  if (isValidDarkColor(themeOverrides?.backgroundColor)) {
+    return _darkTheme(themeOverrides);
+  } else if (isValidLightColor(themeOverrides?.backgroundColor)) {
+    return _lightTheme(themeOverrides);
+  }
+
+  return isDarkTheme ? _darkTheme(themeOverrides) : _lightTheme(themeOverrides);
 }
 
-ThemeData _darkTheme() {
+ThemeData _darkTheme(ThemeOverrides themeOverrides) {
   final theme = ThemeData.dark();
   return theme.copyWith(
     primaryColor: devtoolsGrey[900],
@@ -25,10 +39,13 @@ ThemeData _darkTheme() {
     toggleableActiveColor: devtoolsBlue[400],
     selectedRowColor: devtoolsGrey[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
+    scaffoldBackgroundColor: isValidDarkColor(themeOverrides?.backgroundColor)
+        ? themeOverrides?.backgroundColor
+        : null,
   );
 }
 
-ThemeData _lightTheme() {
+ThemeData _lightTheme(ThemeOverrides themeOverrides) {
   final theme = ThemeData.light();
   return theme.copyWith(
     primaryColor: devtoolsBlue[600],
@@ -40,7 +57,28 @@ ThemeData _lightTheme() {
     toggleableActiveColor: devtoolsBlue[400],
     selectedRowColor: devtoolsBlue[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
+    scaffoldBackgroundColor: isValidLightColor(themeOverrides?.backgroundColor)
+        ? themeOverrides?.backgroundColor
+        : null,
   );
+}
+
+bool isValidDarkColor(Color color) {
+  if (color == null) {
+    return false;
+  }
+  // TODO(dantup): Pick good threshold
+  final components = [color.red, color.green, color.blue];
+  return components.reduce(max) < 50;
+}
+
+bool isValidLightColor(Color color) {
+  if (color == null) {
+    return false;
+  }
+  // TODO(dantup): Pick good threshold
+  final components = [color.red, color.green, color.blue];
+  return components.reduce(min) > 205;
 }
 
 const buttonMinWidth = 36.0;

@@ -14,6 +14,7 @@ import 'banner_messages.dart';
 import 'common_widgets.dart';
 import 'config_specific/drag_and_drop/drag_and_drop.dart';
 import 'config_specific/import_export/import_export.dart';
+import 'config_specific/theme_overrides/theme_overrides.dart';
 import 'framework_controller.dart';
 import 'globals.dart';
 import 'navigation.dart';
@@ -36,11 +37,19 @@ class DevToolsScaffold extends StatefulWidget {
     this.initialPage,
     this.actions,
     this.embed = false,
+    @required this.themeOverrides,
   })  : assert(tabs != null),
         super(key: key);
 
-  DevToolsScaffold.withChild({Key key, Widget child})
-      : this(key: key, tabs: [SimpleScreen(child)]);
+  DevToolsScaffold.withChild({
+    Key key,
+    Widget child,
+    @required ThemeOverrides themeOverrides,
+  }) : this(
+          key: key,
+          tabs: [SimpleScreen(child)],
+          themeOverrides: themeOverrides,
+        );
 
   /// A [Key] that indicates the scaffold is showing in narrow-width mode.
   static const Key narrowWidthKey = Key('Narrow Scaffold');
@@ -71,6 +80,9 @@ class DevToolsScaffold extends StatefulWidget {
 
   /// Whether to render the embedded view (without the header).
   final bool embed;
+
+  /// Environment-specific theme overrides.
+  final ThemeOverrides themeOverrides;
 
   /// Actions that it's possible to perform in this Scaffold.
   ///

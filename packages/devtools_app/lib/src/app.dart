@@ -11,6 +11,7 @@ import '../devtools.dart' as devtools;
 import 'code_size/code_size_controller.dart';
 import 'code_size/code_size_screen.dart';
 import 'common_widgets.dart';
+import 'config_specific/theme_overrides/theme_overrides.dart';
 import 'connect_screen.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/debugger_screen.dart';
@@ -44,10 +45,11 @@ const snapshotRoute = '/snapshot';
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
-  const DevToolsApp(this.screens, this.preferences);
+  const DevToolsApp(this.screens, this.preferences, this.themeOverrides);
 
   final List<DevToolsScreen> screens;
   final PreferencesController preferences;
+  final ThemeOverrides themeOverrides;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -67,6 +69,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
   PreferencesController get preferences => widget.preferences;
+  ThemeOverrides get themeOverrides => widget.themeOverrides;
 
   @override
   void initState() {
@@ -117,6 +120,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       builder: (BuildContext context) {
         return DevToolsScaffold.withChild(
           child: CenteredMessage("'$uri' not found."),
+          themeOverrides: themeOverrides,
         );
       },
     );
@@ -138,6 +142,7 @@ class DevToolsAppState extends State<DevToolsApp> {
             builder: (_) => _providedControllers(
               child: DevToolsScaffold(
                 embed: embed,
+                themeOverrides: themeOverrides,
                 initialPage: page,
                 tabs: tabs,
                 actions: [
@@ -152,7 +157,10 @@ class DevToolsAppState extends State<DevToolsApp> {
             ),
           );
         } else {
-          return DevToolsScaffold.withChild(child: ConnectScreenBody());
+          return DevToolsScaffold.withChild(
+            child: ConnectScreenBody(),
+            themeOverrides: themeOverrides,
+          );
         }
       },
       snapshotRoute: (_, __, args) {
@@ -161,6 +169,7 @@ class DevToolsAppState extends State<DevToolsApp> {
             offline: true,
             child: SnapshotScreenBody(args, _screens),
           ),
+          themeOverrides: themeOverrides,
         );
       },
     };
@@ -209,7 +218,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       builder: (context, value, _) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: themeFor(isDarkTheme: value),
+          theme: themeFor(isDarkTheme: value, themeOverrides: themeOverrides),
           builder: (context, child) => Notifications(child: child),
           onGenerateRoute: _generateRoute,
         );

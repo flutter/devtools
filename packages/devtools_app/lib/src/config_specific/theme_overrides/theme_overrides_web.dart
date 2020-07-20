@@ -1,0 +1,81 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be found
+// in the LICENSE file.
+
+import 'dart:html';
+
+import 'package:flutter/widgets.dart';
+
+/// Environment-specific theme overrides, for example IDE-provided
+/// theming for embedded mode.
+class ThemeOverrides {
+  ThemeOverrides({this.backgroundColor, this.foregroundColor, this.fontSize});
+
+  factory ThemeOverrides.load() {
+    final queryParams = _loadQueryParams();
+
+    final overrides = ThemeOverrides(
+      backgroundColor: _tryParseColor(queryParams['backgroundColor']),
+      foregroundColor: _tryParseColor(queryParams['foregroundColor']),
+      fontSize: _tryParseDouble(queryParams['fontSize']),
+    );
+
+    // If the environment has provided a background color, set it immediately
+    // to avoid a white page until the first Flutter frame is rendered.
+    if (overrides.backgroundColor != null) {
+      document.body.style.backgroundColor =
+          overrides.backgroundColor.value.toRadixString(16).padLeft(8, '0');
+    }
+
+    return overrides;
+  }
+
+  Color backgroundColor;
+  Color foregroundColor;
+  double fontSize;
+
+  static Map<String, String> _loadQueryParams() {
+    // The querystring could be in one of two places:
+    // http://localhost:123/?backgroundColor=00000
+    // http://localhost:123/#/?backgroundColor=00000
+    final queryString = window.location.hash.startsWith('#/?')
+        ? window.location.hash.substring(2)
+        : window.location.search;
+
+    final queryParams = queryString.startsWith('?')
+        ? Uri().replace(query: queryString.substring(1)).queryParameters
+        : <String, String>{};
+
+    return queryParams;
+  }
+
+  static Color _tryParseColor(String input) {
+    try {
+      if (input != null) {
+        final fullHex = input
+            .replaceAll('#', '') // Remove any leading #
+            .replaceAll('%23', '') // Ignore over-escaped # too
+            .padLeft(8, 'f');
+        return Color(int.parse(fullHex, radix: 16));
+      }
+    } catch (e) {
+      // The user can manipulate the query string so if the value is invalid
+      // print the value but otherwise continue.
+      print(e);
+    }
+    return null;
+  }
+
+  static double _tryParseDouble(String input) {
+    try {
+      if (input != null) {
+        return double.parse(input);
+      }
+    } catch (e) {
+      // The user can manipulate the query string so if the value is invalid
+      // print the value but otherwise continue.
+      print(e);
+    }
+    return null;
+  }
+}
