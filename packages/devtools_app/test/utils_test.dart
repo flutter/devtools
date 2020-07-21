@@ -817,6 +817,25 @@ void main() {
         }
       }
     });
+
+    group('parseCssHexColor', () {
+      test('parses 6 digit hex colors', () {
+        expect(parseCssHexColor('#000000'), equals(Colors.black));
+        expect(parseCssHexColor('000000'), equals(Colors.black));
+        expect(parseCssHexColor('#ffffff'), equals(Colors.white));
+        expect(parseCssHexColor('ffffff'), equals(Colors.white));
+        expect(parseCssHexColor('#ff0000'), equals(const Color(0xFFFF0000)));
+        expect(parseCssHexColor('ff0000'), equals(const Color(0xFFFF0000)));
+      });
+      test('parses 3 digit hex colors', () {
+        expect(parseCssHexColor('#000'), equals(Colors.black));
+        expect(parseCssHexColor('000'), equals(Colors.black));
+        expect(parseCssHexColor('#fff'), equals(Colors.white));
+        expect(parseCssHexColor('fff'), equals(Colors.white));
+        expect(parseCssHexColor('#f30'), equals(const Color(0xFFFF3300)));
+        expect(parseCssHexColor('f30'), equals(const Color(0xFFFF3300)));
+      });
+    });
   });
 }
 

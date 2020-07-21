@@ -14,9 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:vm_service/vm_service.dart';
-
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
+import 'package:vm_service/vm_service.dart';
 
 import 'notifications.dart';
 
@@ -280,6 +279,22 @@ Stream combineStreams(Stream a, Stream b, Stream c) {
   );
 
   return controller.stream;
+}
+
+/// Parses a 3 or 6 digit CSS Hex Color into a dart:ui Color.
+Color parseCssHexColor(String input) {
+  // Remove any leading # (and the escaped version to be leniant)
+  input = input.replaceAll('#', '').replaceAll('%23', '');
+
+  // Handle 3-digit hex codes (eg. #123 == #112233)
+  if (input.length == 3) {
+    input = input.split('').map((c) => '$c$c').join();
+  }
+
+  // Pad alpha with FF.
+  final fullHex = input.padLeft(8, 'f');
+
+  return Color(int.parse(fullHex, radix: 16));
 }
 
 class Property<T> {

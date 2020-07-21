@@ -4,9 +4,10 @@
 
 import 'dart:html';
 
-import 'package:devtools_app/src/config_specific/logger/logger.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../utils.dart';
+import '../logger/logger.dart';
 import 'ide_theme.dart';
 
 /// Load any IDE-supplied theming.
@@ -51,11 +52,7 @@ Map<String, String> _loadQueryParams() {
 Color _tryParseColor(String input) {
   try {
     if (input != null) {
-      final fullHex = input
-          .replaceAll('#', '') // Remove any leading #
-          .replaceAll('%23', '') // Ignore over-escaped # too
-          .padLeft(8, 'f');
-      return Color(int.parse(fullHex, radix: 16));
+      return parseCssHexColor(input);
     }
   } catch (e) {
     // The user can manipulate the query string so if the value is invalid
