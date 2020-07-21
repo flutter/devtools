@@ -212,6 +212,7 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
               title: 'Snapshot',
               actionText: 'Analyze Snapshot',
               onAction: controller.loadFakeTree,
+              // TODO(peterdjlee): Remove once the file picker is implemented.
               fileToBeImported:
                   '$current/lib/src/code_size/stub_data/app_size.dart',
             ),

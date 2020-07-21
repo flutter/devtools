@@ -96,20 +96,20 @@ class CodeSizeController {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
     changeSnapshotFile(pathToFile);
 
-    // Build a [Map] object containing heirarchical information for [inputJsonMap].
-    Map<String, dynamic> processedJsonMap;
+    final json = _jsonForFile(pathToFile);
+    Map<String, dynamic> processedJson;
     if (pathToFile.contains('app_size')) {
       // App size file should be processed already.
-      processedJsonMap = _jsonForFile(pathToFile);
+      processedJson = json;
     } else {
-      processedJsonMap = treemapFromJson(_jsonForFile(pathToFile));
+      processedJson = treemapFromJson(json);
     }
 
     // Set name for root node.
-    processedJsonMap['n'] = 'Root';
+    processedJson['n'] = 'Root';
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
-    final newRoot = generateTree(processedJsonMap);
+    final newRoot = generateTree(processedJson);
 
     changeSnapshotRoot(newRoot);
   }
