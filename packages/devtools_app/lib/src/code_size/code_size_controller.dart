@@ -9,6 +9,7 @@ import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
 import '../charts/treemap.dart';
+import 'stub_data/app_size.dart';
 import 'stub_data/new_v8.dart';
 import 'stub_data/old_v8.dart';
 import 'stub_data/sizes.dart';
@@ -95,14 +96,20 @@ class CodeSizeController {
     // TODO(peterdjlee): Use user input data instead of hard coded data.
     changeSnapshotFile(pathToFile);
 
-    // Build a [Map] object containing heirarchical information for [inputJsonMap].
-    final processedJsonMap = treemapFromJson(_jsonForFile(pathToFile));
+    final json = _jsonForFile(pathToFile);
+    Map<String, dynamic> processedJson;
+    if (json['type'] == 'apk') {
+      // App size file should be processed already.
+      processedJson = json;
+    } else {
+      processedJson = treemapFromJson(json);
+    }
 
     // Set name for root node.
-    processedJsonMap['n'] = 'Root';
+    processedJson['n'] = 'Root';
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
-    final newRoot = generateTree(processedJsonMap);
+    final newRoot = generateTree(processedJson);
 
     changeSnapshotRoot(newRoot);
   }
@@ -131,6 +138,7 @@ class CodeSizeController {
     if (pathToFile.contains('old_v8')) return jsonDecode(oldV8);
     if (pathToFile.contains('new_v8')) return jsonDecode(newV8);
     if (pathToFile.contains('sizes')) return jsonDecode(instructionSizes);
+    if (pathToFile.contains('app_size')) return jsonDecode(appSize);
     return null;
   }
 

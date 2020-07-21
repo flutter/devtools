@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' hide context;
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
@@ -211,6 +212,9 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
               title: 'Snapshot',
               actionText: 'Analyze Snapshot',
               onAction: controller.loadFakeTree,
+              // TODO(peterdjlee): Remove once the file picker is implemented.
+              fileToBeImported:
+                  '$current/lib/src/code_size/stub_data/app_size.dart',
             ),
           ),
           const SizedBox(height: defaultSpacing),
