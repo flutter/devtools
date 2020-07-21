@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'src/app.dart';
 import 'src/config_specific/framework_initialize/framework_initialize.dart';
+import 'src/config_specific/ide_theme/ide_theme.dart';
 import 'src/config_specific/load_fallback_app/load_fallback_app.dart';
 import 'src/config_specific/theme_overrides/theme_overrides.dart';
 import 'src/preferences.dart';
@@ -50,7 +51,7 @@ void main() async {
     };
   }
 
-  final themeOverrides = ThemeOverrides.load();
+  final ideTheme = IdeTheme.load();
 
   final preferences = PreferencesController();
   // Wait for preferences to load before rendering the app to avoid a flash of
@@ -61,6 +62,6 @@ void main() async {
 
   // Now run the app.
   runApp(
-    DevToolsApp(defaultScreens, preferences, themeOverrides),
+    DevToolsApp(defaultScreens, preferences, ideTheme),
   );
 }

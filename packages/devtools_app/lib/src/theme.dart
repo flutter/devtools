@@ -8,26 +8,26 @@ import 'package:flutter/material.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
 
 import 'common_widgets.dart';
-import 'config_specific/theme_overrides/theme_overrides.dart';
+import 'config_specific/ide_theme/ide_theme.dart';
 import 'ui/theme.dart';
 
 /// Constructs the light or dark theme for the app taking into account
-/// environment-specific overrides.
+/// IDE-supplied theming.
 ThemeData themeFor({
   @required bool isDarkTheme,
-  @required ThemeOverrides themeOverrides,
+  @required IdeTheme ideTheme,
 }) {
   // If the theme specifies a background color, use it to infer a theme.
-  if (isValidDarkColor(themeOverrides?.backgroundColor)) {
-    return _darkTheme(themeOverrides);
-  } else if (isValidLightColor(themeOverrides?.backgroundColor)) {
-    return _lightTheme(themeOverrides);
+  if (isValidDarkColor(ideTheme?.backgroundColor)) {
+    return _darkTheme(ideTheme);
+  } else if (isValidLightColor(ideTheme?.backgroundColor)) {
+    return _lightTheme(ideTheme);
   }
 
-  return isDarkTheme ? _darkTheme(themeOverrides) : _lightTheme(themeOverrides);
+  return isDarkTheme ? _darkTheme(ideTheme) : _lightTheme(ideTheme);
 }
 
-ThemeData _darkTheme(ThemeOverrides themeOverrides) {
+ThemeData _darkTheme(IdeTheme ideTheme) {
   final theme = ThemeData.dark();
   return theme.copyWith(
     primaryColor: devtoolsGrey[900],
@@ -39,13 +39,13 @@ ThemeData _darkTheme(ThemeOverrides themeOverrides) {
     toggleableActiveColor: devtoolsBlue[400],
     selectedRowColor: devtoolsGrey[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
-    scaffoldBackgroundColor: isValidDarkColor(themeOverrides?.backgroundColor)
-        ? themeOverrides?.backgroundColor
+    scaffoldBackgroundColor: isValidDarkColor(ideTheme?.backgroundColor)
+        ? ideTheme?.backgroundColor
         : null,
   );
 }
 
-ThemeData _lightTheme(ThemeOverrides themeOverrides) {
+ThemeData _lightTheme(IdeTheme ideTheme) {
   final theme = ThemeData.light();
   return theme.copyWith(
     primaryColor: devtoolsBlue[600],
@@ -57,8 +57,8 @@ ThemeData _lightTheme(ThemeOverrides themeOverrides) {
     toggleableActiveColor: devtoolsBlue[400],
     selectedRowColor: devtoolsBlue[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
-    scaffoldBackgroundColor: isValidLightColor(themeOverrides?.backgroundColor)
-        ? themeOverrides?.backgroundColor
+    scaffoldBackgroundColor: isValidLightColor(ideTheme?.backgroundColor)
+        ? ideTheme?.backgroundColor
         : null,
   );
 }

@@ -2,6 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-export 'theme_overrides_stub.dart'
-    if (dart.library.html) 'theme_overrides_web.dart'
-    if (dart.library.io) 'theme_overrides_desktop.dart';
+export 'ide_theme_stub.dart'
+    if (dart.library.html) 'ide_theme_web.dart'
+    if (dart.library.io) 'ide_theme_desktop.dart';

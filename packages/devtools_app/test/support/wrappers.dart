@@ -28,7 +28,7 @@ import '../support/mocks.dart';
 /// draw ink effects.
 Widget wrap(Widget widget) {
   return MaterialApp(
-    theme: themeFor(isDarkTheme: false, themeOverrides: null),
+    theme: themeFor(isDarkTheme: false, ideTheme: null),
     home: Material(child: widget),
   );
 }

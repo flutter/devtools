@@ -6,15 +6,14 @@ import 'dart:html';
 
 import 'package:flutter/widgets.dart';
 
-/// Environment-specific theme overrides, for example IDE-provided
-/// theming for embedded mode.
-class ThemeOverrides {
-  ThemeOverrides({this.backgroundColor, this.foregroundColor, this.fontSize});
+/// IDE-supplied theming.
+class IdeTheme {
+  IdeTheme({this.backgroundColor, this.foregroundColor, this.fontSize});
 
-  factory ThemeOverrides.load() {
+  factory IdeTheme.load() {
     final queryParams = _loadQueryParams();
 
-    final overrides = ThemeOverrides(
+    final overrides = IdeTheme(
       backgroundColor: _tryParseColor(queryParams['backgroundColor']),
       foregroundColor: _tryParseColor(queryParams['foregroundColor']),
       fontSize: _tryParseDouble(queryParams['fontSize']),
