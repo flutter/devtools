@@ -9,6 +9,7 @@ import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
 import '../charts/treemap.dart';
+import 'code_size_screen.dart';
 import 'stub_data/new_v8.dart';
 import 'stub_data/old_v8.dart';
 import 'stub_data/sizes.dart';
@@ -30,7 +31,7 @@ class CodeSizeController {
     _snapshotRoot.value = newRoot;
   }
 
-  void clearSnapshot() {
+  void _clearSnapshot() {
     _snapshotRoot.value = null;
     _snapshotFile.value = null;
   }
@@ -52,7 +53,7 @@ class CodeSizeController {
     _diffRoot.value = newRoot;
   }
 
-  void clearDiff() {
+  void _clearDiff() {
     _diffRoot.value = null;
     _oldDiffSnapshotFile.value = null;
     _newDiffSnapshotFile.value = null;
@@ -87,8 +88,26 @@ class CodeSizeController {
     loadFakeDiffTree(
       _oldDiffSnapshotFile.value,
       _newDiffSnapshotFile.value,
-      diffTreeType: newDiffTreeType,
     );
+  }
+
+  /// The active tree type used to build the diff treemap.
+  ValueListenable<Key> get activeViewKey {
+    return _activeViewKey;
+  }
+
+  final _activeViewKey = ValueNotifier<Key>(CodeSizeBodyState.snapshotTabKey);
+
+  void changeActiveView(Key activeViewKey) {
+    _activeViewKey.value = activeViewKey;
+  }
+
+  void clear() {
+    if (_activeViewKey.value == CodeSizeBodyState.snapshotTabKey) {
+      _clearSnapshot();
+    } else if (_activeViewKey.value == CodeSizeBodyState.diffTabKey) {
+      _clearDiff();
+    }
   }
 
   void loadFakeTree(String pathToFile) {
@@ -107,11 +126,10 @@ class CodeSizeController {
     changeSnapshotRoot(newRoot);
   }
 
-  void loadFakeDiffTree(
-    String pathToOldFile,
-    String pathToNewFile, {
-    DiffTreeType diffTreeType = DiffTreeType.combined,
-  }) {
+  void loadFakeDiffTree(String pathToOldFile, String pathToNewFile) {
+    if (pathToOldFile == null || pathToNewFile == null) {
+      return;
+    }
     changeOldDiffSnapshotFile(pathToOldFile);
     changeNewDiffSnapshotFile(pathToNewFile);
 
@@ -121,7 +139,7 @@ class CodeSizeController {
 
     final diffMap = buildComparisonTreemap(oldInputJson, newInputJson);
     diffMap['n'] = 'Root';
-    final newRoot = generateDiffTree(diffMap, diffTreeType: diffTreeType);
+    final newRoot = generateDiffTree(diffMap);
 
     changeDiffRoot(newRoot);
   }
@@ -157,17 +175,10 @@ class CodeSizeController {
   /// * [DiffTreeType.increaseOnly]: returns a tree with nodes with positive [byteSize].
   /// * [DiffTreeType.decreaseOnly]: returns a tree with nodes with negative [byteSize].
   /// * [DiffTreeType.combined]: returns a tree with all nodes.
-  TreemapNode generateDiffTree(
-    Map<String, dynamic> treeJson, {
-    DiffTreeType diffTreeType = DiffTreeType.combined,
-  }) {
+  TreemapNode generateDiffTree(Map<String, dynamic> treeJson) {
     final isLeafNode = treeJson['children'] == null;
     if (!isLeafNode) {
-      return _buildNodeWithChildren(
-        treeJson,
-        showDiff: true,
-        diffTreeType: diffTreeType,
-      );
+      return _buildNodeWithChildren(treeJson, showDiff: true);
     } else {
       // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
       final byteSize = treeJson['value'];
@@ -175,7 +186,7 @@ class CodeSizeController {
         return null;
       }
       // Only add nodes that match the diff tree type.
-      switch (diffTreeType) {
+      switch (activeDiffTreeType.value) {
         case DiffTreeType.increaseOnly:
           if (byteSize < 0) {
             return null;
@@ -206,9 +217,8 @@ class CodeSizeController {
 
     // Given a child, build its subtree.
     for (Map<String, dynamic> child in rawChildren) {
-      final childTreemapNode = showDiff
-          ? generateDiffTree(child, diffTreeType: diffTreeType)
-          : generateTree(child);
+      final childTreemapNode =
+          showDiff ? generateDiffTree(child) : generateTree(child);
       if (childTreemapNode == null) {
         continue;
       }

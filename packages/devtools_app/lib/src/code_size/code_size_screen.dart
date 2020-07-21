@@ -44,12 +44,8 @@ class CodeSizeBody extends StatefulWidget {
 
 class CodeSizeBodyState extends State<CodeSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  @visibleForTesting
-  static const treemapKey = Key('Code Size Treemap');
-  @visibleForTesting
-  static const Key snapshotTabKey = Key('Code Size Snapshot Tab');
-  @visibleForTesting
-  static const Key diffTabKey = Key('Code Size Diff Tab');
+  static const snapshotTabKey = Key('Code Size Snapshot Tab');
+  static const diffTabKey = Key('Code Size Diff Tab');
 
   static const tabs = [
     Tab(text: 'Snapshot', key: snapshotTabKey),
@@ -59,9 +55,6 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   CodeSizeController controller;
 
   TabController _tabController;
-
-  TreemapNode snapshotRoot;
-  TreemapNode diffRoot;
 
   @override
   void initState() {
@@ -84,25 +77,14 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     if (newController == controller) return;
     controller = newController;
 
-    snapshotRoot = controller.snapshotRoot.value;
-    addAutoDisposeListener(controller.snapshotRoot, () {
-      setState(() {
-        snapshotRoot = controller.snapshotRoot.value;
-      });
-    });
+    addAutoDisposeListener(controller.activeDiffTreeType);
 
-    diffRoot = controller.diffRoot.value;
-    addAutoDisposeListener(controller.diffRoot, () {
-      setState(() {
-        diffRoot = controller.diffRoot.value;
-      });
-    });
+    addAutoDisposeListener(controller.activeViewKey);
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentTab = tabs[_tabController.index];
-    final isSnapView = currentTab.key == snapshotTabKey;
+    final isDiffView = controller.activeViewKey.value == diffTabKey;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -114,12 +96,15 @@ class CodeSizeBodyState extends State<CodeSizeBody>
               isScrollable: true,
               controller: _tabController,
               tabs: tabs,
+              onTap: (index) {
+                controller.changeActiveView(tabs[index].key);
+              },
             ),
             Row(
               children: [
-                if (!isSnapView) _buildDiffTreeTypeDropdown(),
+                if (isDiffView) _buildDiffTreeTypeDropdown(),
                 const SizedBox(width: defaultSpacing),
-                buildClearButton(isSnapView),
+                buildClearButton(isDiffView),
               ],
             ),
           ],
@@ -128,8 +113,8 @@ class CodeSizeBodyState extends State<CodeSizeBody>
           child: TabBarView(
             physics: defaultTabBarViewPhysics,
             children: [
-              SnapshotView(rootNode: snapshotRoot),
-              DiffView(rootNode: diffRoot),
+              SnapshotView(),
+              DiffView(),
             ],
             controller: _tabController,
           ),
@@ -147,11 +132,9 @@ class CodeSizeBodyState extends State<CodeSizeBody>
           _buildMenuItem(DiffTreeType.increaseOnly),
           _buildMenuItem(DiffTreeType.decreaseOnly),
         ],
-        onChanged: diffRoot != null
-            ? (newDiffTreeType) {
-                controller.changeActiveDiffTreeType(newDiffTreeType);
-              }
-            : null,
+        onChanged: (newDiffTreeType) {
+          controller.changeActiveDiffTreeType(newDiffTreeType);
+        },
       ),
     );
   }
@@ -163,28 +146,24 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     );
   }
 
-  Widget buildClearButton(bool isSnapView) {
+  Widget buildClearButton(bool isDiffView) {
     return clearButton(
-      busy: isSnapView ? snapshotRoot == null : diffRoot == null,
-      onPressed: isSnapView ? controller.clearSnapshot : controller.clearDiff,
+      onPressed: controller.clear,
     );
   }
 }
 
 class SnapshotView extends StatefulWidget {
-  const SnapshotView({@required this.rootNode});
-
-  final TreemapNode rootNode;
-
   @override
   _SnapshotViewState createState() => _SnapshotViewState();
 }
 
 class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
-  @visibleForTesting
   static const treemapKey = Key('Code Size Treemap');
 
   CodeSizeController controller;
+
+  TreemapNode snapshotRoot;
 
   @override
   void didChangeDependencies() {
@@ -193,6 +172,13 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
     final newController = Provider.of<CodeSizeController>(context);
     if (newController == controller) return;
     controller = newController;
+
+    snapshotRoot = controller.snapshotRoot.value;
+    addAutoDisposeListener(controller.snapshotRoot, () {
+      setState(() {
+        snapshotRoot = controller.snapshotRoot.value;
+      });
+    });
   }
 
   @override
@@ -202,7 +188,7 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
         // TODO(peterdjlee): Move the controls to be aligned with the
         //                   tab bar to save vertical space.
         Expanded(
-          child: widget.rootNode != null
+          child: snapshotRoot != null
               ? _buildTreemapAndTableSplitView()
               : _buildImportSnapshotView(),
         ),
@@ -215,7 +201,7 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
       axis: Axis.vertical,
       children: [
         _buildTreemap(),
-        CodeSizeSnapshotTable(rootNode: widget.rootNode),
+        CodeSizeSnapshotTable(rootNode: snapshotRoot),
       ],
       initialFractions: const [
         initialFractionForTreemap,
@@ -229,7 +215,7 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
       key: treemapKey,
       builder: (context, constraints) {
         return Treemap.fromRoot(
-          rootNode: widget.rootNode,
+          rootNode: snapshotRoot,
           levelsVisible: 2,
           isOutermostLevel: true,
           height: constraints.maxHeight,
@@ -272,19 +258,16 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 }
 
 class DiffView extends StatefulWidget {
-  const DiffView({@required this.rootNode});
-
-  final TreemapNode rootNode;
-
   @override
   _DiffViewState createState() => _DiffViewState();
 }
 
 class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
-  @visibleForTesting
   static const treemapKey = Key('Code Size Treemap');
 
   CodeSizeController controller;
+
+  TreemapNode diffRoot;
 
   @override
   void didChangeDependencies() {
@@ -293,6 +276,13 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
     final newController = Provider.of<CodeSizeController>(context);
     if (newController == controller) return;
     controller = newController;
+
+    diffRoot = controller.diffRoot.value;
+    addAutoDisposeListener(controller.diffRoot, () {
+      setState(() {
+        diffRoot = controller.diffRoot.value;
+      });
+    });
 
     addAutoDisposeListener(controller.activeDiffTreeType);
   }
@@ -304,7 +294,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
         // TODO(peterdjlee): Move the controls to be aligned with the
         //                   tab bar to save vertical space.
         Expanded(
-          child: widget.rootNode != null
+          child: diffRoot != null
               ? _buildTreemapAndTableSplitView()
               : _buildImportDiffView(),
         ),
@@ -317,7 +307,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
       axis: Axis.vertical,
       children: [
         _buildTreemap(),
-        CodeSizeDiffTable(rootNode: widget.rootNode),
+        CodeSizeDiffTable(rootNode: diffRoot),
       ],
       initialFractions: const [
         initialFractionForTreemap,
@@ -365,7 +355,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
       key: treemapKey,
       builder: (context, constraints) {
         return Treemap.fromRoot(
-          rootNode: widget.rootNode,
+          rootNode: diffRoot,
           levelsVisible: 2,
           isOutermostLevel: true,
           height: constraints.maxHeight,
