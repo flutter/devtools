@@ -102,6 +102,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   @override
   Widget build(BuildContext context) {
     final currentTab = tabs[_tabController.index];
+    final isSnapView = currentTab.key == snapshotTabKey;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -116,9 +117,9 @@ class CodeSizeBodyState extends State<CodeSizeBody>
             ),
             Row(
               children: [
-                _buildDiffTreeTypeDropdown(currentTab),
+                if (!isSnapView) _buildDiffTreeTypeDropdown(),
                 const SizedBox(width: defaultSpacing),
-                buildClearButton(currentTab),
+                buildClearButton(isSnapView),
               ],
             ),
           ],
@@ -137,9 +138,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     );
   }
 
-  DropdownButtonHideUnderline _buildDiffTreeTypeDropdown(Tab currentTab) {
-    final isSnapView = currentTab.key == snapshotTabKey;
-    final enableDropdown = !isSnapView && diffRoot != null;
+  DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
     return DropdownButtonHideUnderline(
       child: DropdownButton<DiffTreeType>(
         value: controller.activeDiffTreeType.value,
@@ -148,7 +147,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
           _buildMenuItem(DiffTreeType.increaseOnly),
           _buildMenuItem(DiffTreeType.decreaseOnly),
         ],
-        onChanged: enableDropdown
+        onChanged: diffRoot != null
             ? (newDiffTreeType) {
                 controller.changeActiveDiffTreeType(newDiffTreeType);
               }
@@ -164,8 +163,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     );
   }
 
-  Widget buildClearButton(Tab currentTab) {
-    final isSnapView = currentTab.key == snapshotTabKey;
+  Widget buildClearButton(bool isSnapView) {
     return clearButton(
       busy: isSnapView ? snapshotRoot == null : diffRoot == null,
       onPressed: isSnapView ? controller.clearSnapshot : controller.clearDiff,
