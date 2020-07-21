@@ -2,6 +2,7 @@ const appSize = r'''
 {
   "n": "Root",
   "value": 0,
+  "type": "apk",
   "children": [
     {
       "n": "AndroidManifest.xml",

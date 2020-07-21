@@ -98,7 +98,7 @@ class CodeSizeController {
 
     final json = _jsonForFile(pathToFile);
     Map<String, dynamic> processedJson;
-    if (pathToFile.contains('app_size')) {
+    if (json['type'] == 'apk') {
       // App size file should be processed already.
       processedJson = json;
     } else {
