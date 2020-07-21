@@ -79,11 +79,6 @@ void main() {
       expect(find.byType(SnapshotView), findsOneWidget);
       expect(find.byKey(CodeSizeBodyState.treemapKey), findsOneWidget);
 
-      expect(
-        find.byType(DropdownButtonHideUnderline),
-        findsNothing,
-      );
-
       // Assumes the treemap is built with treemap_test_data_v8_new.json
       expect(find.text('Root [6.0 MB]'), findsOneWidget);
 
@@ -106,11 +101,6 @@ void main() {
 
         expect(find.byType(DiffView), findsOneWidget);
         expect(find.byKey(CodeSizeBodyState.treemapKey), findsOneWidget);
-
-        expect(
-          find.byType(DropdownButtonHideUnderline),
-          findsOneWidget,
-        );
 
         // Assumes the treemap is built with treemap_test_data_v8_new.json and treemap_test_data_v8_old.json
         const text = 'package:pointycastle [+465.8 KB]';
