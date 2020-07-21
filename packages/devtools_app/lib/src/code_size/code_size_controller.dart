@@ -9,6 +9,7 @@ import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
 import '../charts/treemap.dart';
+import 'code_size_screen.dart';
 import 'stub_data/new_v8.dart';
 import 'stub_data/old_v8.dart';
 import 'stub_data/sizes.dart';
@@ -58,10 +59,10 @@ class CodeSizeController {
     _newDiffSnapshotFile.value = null;
   }
 
-  void clear(bool isDiffView) {
-    if (isDiffView) {
+  void clear(Key activeTabKey) {
+    if (activeTabKey == CodeSizeBodyState.diffTabKey) {
       _clearDiff();
-    } else {
+    } else if (activeTabKey == CodeSizeBodyState.snapshotTabKey) {
       _clearSnapshot();
     }
   }

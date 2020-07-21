@@ -83,7 +83,6 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   @override
   Widget build(BuildContext context) {
     final currentTab = tabs[_tabController.index];
-    final isDiffView = currentTab.key == diffTabKey;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -98,9 +97,9 @@ class CodeSizeBodyState extends State<CodeSizeBody>
             ),
             Row(
               children: [
-                if (isDiffView) _buildDiffTreeTypeDropdown(),
+                if (currentTab.key == diffTabKey) _buildDiffTreeTypeDropdown(),
                 const SizedBox(width: defaultSpacing),
-                buildClearButton(isDiffView),
+                buildClearButton(currentTab.key),
               ],
             ),
           ],
@@ -142,9 +141,9 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     );
   }
 
-  Widget buildClearButton(bool isDiffView) {
+  Widget buildClearButton(Key activeTabKey) {
     return clearButton(
-      onPressed: () => controller.clear(isDiffView),
+      onPressed: () => controller.clear(activeTabKey),
     );
   }
 }
