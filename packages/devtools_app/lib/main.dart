@@ -51,7 +51,7 @@ void main() async {
     };
   }
 
-  final ideTheme = IdeTheme.load();
+  final ideTheme = getIdeTheme();
 
   final preferences = PreferencesController();
   // Wait for preferences to load before rendering the app to avoid a flash of
