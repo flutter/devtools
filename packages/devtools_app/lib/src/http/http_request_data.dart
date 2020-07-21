@@ -69,6 +69,19 @@ class HttpRequestData extends NetworkRequest {
     return data;
   }
 
+  static const _connectionInfoKey = 'connectionInfo';
+  static const _contentTypeKey = 'content-type';
+  static const _cookieKey = 'cookie';
+  static const _errorKey = 'error';
+  static const _filterKey = 'filterKey';
+  static const _localPortKey = 'localPort';
+  static const _methodKey = 'method';
+  static const _requestHeadersKey = 'requestHeaders';
+  static const _responseHeadersKey = 'responseHeaders';
+  static const _statusCodeKey = 'statusCode';
+  static const _setCookieKey = 'set-cookie';
+  static const _uriKey = 'uri';
+
   final TraceEvent _startEvent;
   TraceEvent _endEvent;
 
@@ -90,10 +103,10 @@ class HttpRequestData extends NetworkRequest {
 
   @override
   String get contentType {
-    if (responseHeaders == null || responseHeaders['content-type'] == null) {
+    if (responseHeaders == null || responseHeaders[_contentTypeKey] == null) {
       return null;
     }
-    return responseHeaders['content-type'].toString();
+    return responseHeaders[_contentTypeKey].toString();
   }
 
   @override
@@ -123,16 +136,16 @@ class HttpRequestData extends NetworkRequest {
     if (_endEvent != null) {
       copy.addAll(_endEvent.args);
     }
-    copy.remove('requestHeaders');
-    copy.remove('responseHeaders');
-    copy.remove('filterKey');
+    copy.remove(_requestHeadersKey);
+    copy.remove(_responseHeadersKey);
+    copy.remove(_filterKey);
     return copy;
   }
 
   @override
   int get port {
-    final Map<String, dynamic> connectionInfo = general['connectionInfo'];
-    return connectionInfo != null ? connectionInfo['localPort'] : null;
+    final Map<String, dynamic> connectionInfo = general[_connectionInfoKey];
+    return connectionInfo != null ? connectionInfo[_localPortKey] : null;
   }
 
   /// True if the HTTP request hasn't completed yet, determined by the lack of
@@ -144,8 +157,8 @@ class HttpRequestData extends NetworkRequest {
 
   @override
   String get method {
-    assert(_startEvent.args.containsKey('method'));
-    return _startEvent.args['method'];
+    assert(_startEvent.args.containsKey(_methodKey));
+    return _startEvent.args[_methodKey];
   }
 
   /// A list of all cookies contained within the request headers.
@@ -156,7 +169,7 @@ class HttpRequestData extends NetworkRequest {
     if (headers == null) {
       return [];
     }
-    return _parseCookies(headers['cookie'] ?? []);
+    return _parseCookies(headers[_cookieKey] ?? []);
   }
 
   /// The request headers for the HTTP request.
@@ -166,7 +179,7 @@ class HttpRequestData extends NetworkRequest {
     if (_endEvent == null) {
       return null;
     }
-    return _endEvent.args['requestHeaders'];
+    return _endEvent.args[_requestHeadersKey];
   }
 
   /// The time the HTTP request was issued.
@@ -194,7 +207,7 @@ class HttpRequestData extends NetworkRequest {
       return [];
     }
     return _parseCookies(
-      headers['set-cookie'] ?? [],
+      headers[_setCookieKey] ?? [],
     );
   }
 
@@ -205,7 +218,7 @@ class HttpRequestData extends NetworkRequest {
     if (_endEvent == null) {
       return null;
     }
-    return _endEvent.args['responseHeaders'];
+    return _endEvent.args[_responseHeadersKey];
   }
 
   /// A string representing the status of the request.
@@ -217,12 +230,12 @@ class HttpRequestData extends NetworkRequest {
     String statusCode;
     if (_endEvent != null) {
       final endArgs = _endEvent.args;
-      if (endArgs.containsKey('error')) {
+      if (endArgs.containsKey(_errorKey)) {
         // This case occurs when an exception has been thrown, so there's no
         // status code to associate with the request.
         statusCode = 'Error';
       } else {
-        statusCode = endArgs['statusCode'].toString();
+        statusCode = endArgs[_statusCodeKey].toString();
       }
     }
     return statusCode;
@@ -230,8 +243,8 @@ class HttpRequestData extends NetworkRequest {
 
   @override
   String get address {
-    assert(_startEvent.args.containsKey('uri'));
-    return _startEvent.args['uri'];
+    assert(_startEvent.args.containsKey(_uriKey));
+    return _startEvent.args[_uriKey];
   }
 
   /// Merges the information from another [HttpRequestData] into this instance.
