@@ -9,7 +9,6 @@ import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
 import '../charts/treemap.dart';
-import 'code_size_screen.dart';
 import 'stub_data/new_v8.dart';
 import 'stub_data/old_v8.dart';
 import 'stub_data/sizes.dart';
@@ -59,6 +58,14 @@ class CodeSizeController {
     _newDiffSnapshotFile.value = null;
   }
 
+  void clear(bool isDiffView) {
+    if (isDiffView) {
+      _clearDiff();
+    } else {
+      _clearSnapshot();
+    }
+  }
+
   ValueListenable<String> get oldDiffSnapshotFile => _oldDiffSnapshotFile;
   final _oldDiffSnapshotFile = ValueNotifier<String>(null);
 
@@ -89,25 +96,6 @@ class CodeSizeController {
       _oldDiffSnapshotFile.value,
       _newDiffSnapshotFile.value,
     );
-  }
-
-  /// The active tree type used to build the diff treemap.
-  ValueListenable<Key> get activeViewKey {
-    return _activeViewKey;
-  }
-
-  final _activeViewKey = ValueNotifier<Key>(CodeSizeBodyState.snapshotTabKey);
-
-  void changeActiveView(Key activeViewKey) {
-    _activeViewKey.value = activeViewKey;
-  }
-
-  void clear() {
-    if (_activeViewKey.value == CodeSizeBodyState.snapshotTabKey) {
-      _clearSnapshot();
-    } else if (_activeViewKey.value == CodeSizeBodyState.diffTabKey) {
-      _clearDiff();
-    }
   }
 
   void loadFakeTree(String pathToFile) {

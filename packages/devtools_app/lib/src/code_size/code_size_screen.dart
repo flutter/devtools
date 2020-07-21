@@ -78,13 +78,12 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     controller = newController;
 
     addAutoDisposeListener(controller.activeDiffTreeType);
-
-    addAutoDisposeListener(controller.activeViewKey);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDiffView = controller.activeViewKey.value == diffTabKey;
+    final currentTab = tabs[_tabController.index];
+    final isDiffView = currentTab.key == diffTabKey;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -96,9 +95,6 @@ class CodeSizeBodyState extends State<CodeSizeBody>
               isScrollable: true,
               controller: _tabController,
               tabs: tabs,
-              onTap: (index) {
-                controller.changeActiveView(tabs[index].key);
-              },
             ),
             Row(
               children: [
@@ -148,7 +144,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
 
   Widget buildClearButton(bool isDiffView) {
     return clearButton(
-      onPressed: controller.clear,
+      onPressed: () => controller.clear(isDiffView),
     );
   }
 }
