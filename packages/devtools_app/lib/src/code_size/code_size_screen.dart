@@ -59,8 +59,8 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: tabs.length, vsync: this)
-      ..addListener(() => setState(() {}));
+    _tabController = TabController(length: tabs.length, vsync: this);
+    addAutoDisposeListener(_tabController);
   }
 
   @override
