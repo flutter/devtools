@@ -114,9 +114,9 @@ class CodeSizeBodyState extends State<CodeSizeBody>
         Expanded(
           child: TabBarView(
             physics: defaultTabBarViewPhysics,
-            children: [
-              const SnapshotView(),
-              const DiffView(),
+            children: const [
+              SnapshotView(),
+              DiffView(),
             ],
             controller: _tabController,
           ),
@@ -165,7 +165,6 @@ class SnapshotView extends StatefulWidget {
 }
 
 class SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
-  @visibleForTesting
   static const treemapKey = Key('Snapshot View Treemap');
 
   CodeSizeController controller;
@@ -275,7 +274,6 @@ class DiffView extends StatefulWidget {
 }
 
 class DiffViewState extends State<DiffView> with AutoDisposeMixin {
-  @visibleForTesting
   static const treemapKey = Key('Diff View Treemap');
 
   CodeSizeController controller;
