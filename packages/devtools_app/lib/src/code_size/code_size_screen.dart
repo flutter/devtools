@@ -52,10 +52,10 @@ class CodeSizeBody extends StatefulWidget {
   const CodeSizeBody();
 
   @override
-  CodeSizeBodyState createState() => CodeSizeBodyState();
+  _CodeSizeBodyState createState() => _CodeSizeBodyState();
 }
 
-class CodeSizeBodyState extends State<CodeSizeBody>
+class _CodeSizeBodyState extends State<CodeSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
   static const tabs = [
     Tab(text: 'Snapshot', key: CodeSizeScreen.snapshotTabKey),
@@ -165,10 +165,10 @@ class SnapshotView extends StatefulWidget {
   const SnapshotView();
 
   @override
-  SnapshotViewState createState() => SnapshotViewState();
+  _SnapshotViewState createState() => _SnapshotViewState();
 }
 
-class SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
+class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   CodeSizeController controller;
 
   TreemapNode snapshotRoot;
@@ -272,10 +272,10 @@ class DiffView extends StatefulWidget {
   const DiffView();
 
   @override
-  DiffViewState createState() => DiffViewState();
+  _DiffViewState createState() => _DiffViewState();
 }
 
-class DiffViewState extends State<DiffView> with AutoDisposeMixin {
+class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   CodeSizeController controller;
 
   TreemapNode diffRoot;
