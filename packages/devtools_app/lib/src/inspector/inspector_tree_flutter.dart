@@ -541,7 +541,6 @@ class InspectorRowContent extends StatelessWidget {
         child: ClipRect(
           child: Row(
             mainAxisSize: MainAxisSize.min,
-            textBaseline: TextBaseline.alphabetic,
             children: [
               node.showExpandCollapse
                   ? InkWell(
