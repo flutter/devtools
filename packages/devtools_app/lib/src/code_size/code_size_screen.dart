@@ -44,8 +44,14 @@ class CodeSizeBody extends StatefulWidget {
 
 class CodeSizeBodyState extends State<CodeSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  static const snapshotTabKey = Key('Code Size Snapshot Tab');
-  static const diffTabKey = Key('Code Size Diff Tab');
+  @visibleForTesting
+  static const snapshotTabKey = Key('Snapshot Tab');
+  @visibleForTesting
+  static const diffTabKey = Key('Diff Tab');
+  @visibleForTesting
+  static const clearButtonKey = Key('Clear Button');
+  @visibleForTesting
+  static const dropdownKey = Key('Diff Tree Type Dropdown');
 
   static const tabs = [
     Tab(text: 'Snapshot', key: snapshotTabKey),
@@ -108,8 +114,8 @@ class CodeSizeBodyState extends State<CodeSizeBody>
           child: TabBarView(
             physics: defaultTabBarViewPhysics,
             children: [
-              SnapshotView(),
-              DiffView(),
+              const SnapshotView(),
+              const DiffView(),
             ],
             controller: _tabController,
           ),
@@ -120,6 +126,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
 
   DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
     return DropdownButtonHideUnderline(
+      key: dropdownKey,
       child: DropdownButton<DiffTreeType>(
         value: controller.activeDiffTreeType.value,
         items: [
@@ -143,18 +150,22 @@ class CodeSizeBodyState extends State<CodeSizeBody>
 
   Widget buildClearButton(Key activeTabKey) {
     return clearButton(
+      key: clearButtonKey,
       onPressed: () => controller.clear(activeTabKey),
     );
   }
 }
 
 class SnapshotView extends StatefulWidget {
+  const SnapshotView();
+
   @override
-  _SnapshotViewState createState() => _SnapshotViewState();
+  SnapshotViewState createState() => SnapshotViewState();
 }
 
-class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
-  static const treemapKey = Key('Code Size Treemap');
+class SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
+  @visibleForTesting
+  static const treemapKey = Key('Snapshot View Treemap');
 
   CodeSizeController controller;
 
@@ -253,12 +264,15 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 }
 
 class DiffView extends StatefulWidget {
+  const DiffView();
+
   @override
-  _DiffViewState createState() => _DiffViewState();
+  DiffViewState createState() => DiffViewState();
 }
 
-class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
-  static const treemapKey = Key('Code Size Treemap');
+class DiffViewState extends State<DiffView> with AutoDisposeMixin {
+  @visibleForTesting
+  static const treemapKey = Key('Diff View Treemap');
 
   CodeSizeController controller;
 

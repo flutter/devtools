@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('vm')
 import 'package:devtools_app/src/code_size/code_size_screen.dart';
 import 'package:devtools_app/src/code_size/code_size_controller.dart';
 import 'package:devtools_app/src/code_size/code_size_table.dart';
@@ -58,7 +57,6 @@ void main() {
       expect(find.byType(TabBar), findsOneWidget);
 
       expect(find.byKey(CodeSizeBodyState.snapshotTabKey), findsOneWidget);
-
       expect(find.byKey(CodeSizeBodyState.diffTabKey), findsOneWidget);
 
       // Verify the state of the splitter.
@@ -76,8 +74,11 @@ void main() {
         codeSizeController: codeSizeController,
       );
 
+      expect(find.byKey(CodeSizeBodyState.dropdownKey), findsNothing);
+      expect(find.byKey(CodeSizeBodyState.clearButtonKey), findsOneWidget);
+
       expect(find.byType(SnapshotView), findsOneWidget);
-      expect(find.byKey(CodeSizeBodyState.treemapKey), findsOneWidget);
+      expect(find.byKey(SnapshotViewState.treemapKey), findsOneWidget);
 
       // Assumes the treemap is built with treemap_test_data_v8_new.json
       expect(find.text('Root [6.0 MB]'), findsOneWidget);
@@ -99,8 +100,11 @@ void main() {
 
         await tester.pumpAndSettle();
 
+        expect(find.byKey(CodeSizeBodyState.dropdownKey), findsOneWidget);
+        expect(find.byKey(CodeSizeBodyState.clearButtonKey), findsOneWidget);
+
         expect(find.byType(DiffView), findsOneWidget);
-        expect(find.byKey(CodeSizeBodyState.treemapKey), findsOneWidget);
+        expect(find.byKey(DiffViewState.treemapKey), findsOneWidget);
 
         // Assumes the treemap is built with treemap_test_data_v8_new.json and treemap_test_data_v8_old.json
         const text = 'package:pointycastle [+465.8 KB]';
