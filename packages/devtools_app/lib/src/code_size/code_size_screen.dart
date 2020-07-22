@@ -45,10 +45,9 @@ class CodeSizeBody extends StatefulWidget {
 
 class CodeSizeBodyState extends State<CodeSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  @visibleForTesting
   static const snapshotTabKey = Key('Snapshot Tab');
-  @visibleForTesting
   static const diffTabKey = Key('Diff Tab');
+  
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
@@ -165,6 +164,7 @@ class SnapshotView extends StatefulWidget {
 }
 
 class SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
+  @visibleForTesting
   static const treemapKey = Key('Snapshot View Treemap');
 
   CodeSizeController controller;
@@ -274,6 +274,7 @@ class DiffView extends StatefulWidget {
 }
 
 class DiffViewState extends State<DiffView> with AutoDisposeMixin {
+  @visibleForTesting
   static const treemapKey = Key('Diff View Treemap');
 
   CodeSizeController controller;
