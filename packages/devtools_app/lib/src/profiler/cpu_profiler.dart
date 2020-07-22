@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'package:flutter/material.dart';
 
+import '../auto_dispose_mixin.dart';
 import '../theme.dart';
 import 'cpu_profile_bottom_up.dart';
 import 'cpu_profile_call_tree.dart';
@@ -52,16 +53,16 @@ class CpuProfiler extends StatefulWidget {
 // TODO(kenz): preserve tab controller index when updating CpuProfiler with new
 // data. The state is being destroyed with every new cpu profile - investigate.
 class _CpuProfilerState extends State<CpuProfiler>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutoDisposeMixin {
   TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: CpuProfiler.tabs.length, vsync: this)
-      ..addListener(() {
-        setState(() {});
-      });
+
+    _tabController =
+        TabController(length: CpuProfiler.tabs.length, vsync: this);
+    addAutoDisposeListener(_tabController);
   }
 
   @override
