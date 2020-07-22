@@ -27,6 +27,18 @@ class CodeSizeScreen extends Screen {
 
   static const id = 'codeSize';
 
+  static const snapshotTabKey = Key('Snapshot Tab');
+  static const diffTabKey = Key('Diff Tab');
+
+  @visibleForTesting
+  static const clearButtonKey = Key('Clear Button');
+  @visibleForTesting
+  static const dropdownKey = Key('Diff Tree Type Dropdown');
+  @visibleForTesting
+  static const snapshotViewTreemapKey = Key('Snapshot View Treemap');
+  @visibleForTesting
+  static const diffViewTreemapKey = Key('Diff View Treemap');
+
   @override
   String get docPageId => id;
 
@@ -45,17 +57,9 @@ class CodeSizeBody extends StatefulWidget {
 
 class CodeSizeBodyState extends State<CodeSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  static const snapshotTabKey = Key('Snapshot Tab');
-  static const diffTabKey = Key('Diff Tab');
-  
-  @visibleForTesting
-  static const clearButtonKey = Key('Clear Button');
-  @visibleForTesting
-  static const dropdownKey = Key('Diff Tree Type Dropdown');
-
   static const tabs = [
-    Tab(text: 'Snapshot', key: snapshotTabKey),
-    Tab(text: 'Diff', key: diffTabKey),
+    Tab(text: 'Snapshot', key: CodeSizeScreen.snapshotTabKey),
+    Tab(text: 'Diff', key: CodeSizeScreen.diffTabKey),
   ];
 
   CodeSizeController controller;
@@ -103,9 +107,10 @@ class CodeSizeBodyState extends State<CodeSizeBody>
             ),
             Row(
               children: [
-                if (currentTab.key == diffTabKey) _buildDiffTreeTypeDropdown(),
+                if (currentTab.key == CodeSizeScreen.diffTabKey)
+                  _buildDiffTreeTypeDropdown(),
                 const SizedBox(width: defaultSpacing),
-                buildClearButton(currentTab.key),
+                _buildClearButton(currentTab.key),
               ],
             ),
           ],
@@ -126,7 +131,7 @@ class CodeSizeBodyState extends State<CodeSizeBody>
 
   DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
     return DropdownButtonHideUnderline(
-      key: dropdownKey,
+      key: CodeSizeScreen.dropdownKey,
       child: DropdownButton<DiffTreeType>(
         value: controller.activeDiffTreeType.value,
         items: [
@@ -148,9 +153,9 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     );
   }
 
-  Widget buildClearButton(Key activeTabKey) {
+  Widget _buildClearButton(Key activeTabKey) {
     return clearButton(
-      key: clearButtonKey,
+      key: CodeSizeScreen.clearButtonKey,
       onPressed: () => controller.clear(activeTabKey),
     );
   }
@@ -164,9 +169,6 @@ class SnapshotView extends StatefulWidget {
 }
 
 class SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
-  @visibleForTesting
-  static const treemapKey = Key('Snapshot View Treemap');
-
   CodeSizeController controller;
 
   TreemapNode snapshotRoot;
@@ -218,7 +220,7 @@ class SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 
   Widget _buildTreemap() {
     return LayoutBuilder(
-      key: treemapKey,
+      key: CodeSizeScreen.snapshotViewTreemapKey,
       builder: (context, constraints) {
         return Treemap.fromRoot(
           rootNode: snapshotRoot,
@@ -274,9 +276,6 @@ class DiffView extends StatefulWidget {
 }
 
 class DiffViewState extends State<DiffView> with AutoDisposeMixin {
-  @visibleForTesting
-  static const treemapKey = Key('Diff View Treemap');
-
   CodeSizeController controller;
 
   TreemapNode diffRoot;
@@ -364,7 +363,7 @@ class DiffViewState extends State<DiffView> with AutoDisposeMixin {
 
   Widget _buildTreemap() {
     return LayoutBuilder(
-      key: treemapKey,
+      key: CodeSizeScreen.snapshotViewTreemapKey,
       builder: (context, constraints) {
         return Treemap.fromRoot(
           rootNode: diffRoot,

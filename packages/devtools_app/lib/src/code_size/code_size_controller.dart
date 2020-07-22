@@ -61,9 +61,9 @@ class CodeSizeController {
   }
 
   void clear(Key activeTabKey) {
-    if (activeTabKey == CodeSizeBodyState.diffTabKey) {
+    if (activeTabKey == CodeSizeScreen.diffTabKey) {
       _clearDiff();
-    } else if (activeTabKey == CodeSizeBodyState.snapshotTabKey) {
+    } else if (activeTabKey == CodeSizeScreen.snapshotTabKey) {
       _clearSnapshot();
     }
   }

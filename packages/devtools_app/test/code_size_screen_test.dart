@@ -56,8 +56,8 @@ void main() {
       expect(find.byType(CodeSizeBody), findsOneWidget);
       expect(find.byType(TabBar), findsOneWidget);
 
-      expect(find.byKey(CodeSizeBodyState.snapshotTabKey), findsOneWidget);
-      expect(find.byKey(CodeSizeBodyState.diffTabKey), findsOneWidget);
+      expect(find.byKey(CodeSizeScreen.snapshotTabKey), findsOneWidget);
+      expect(find.byKey(CodeSizeScreen.diffTabKey), findsOneWidget);
 
       // Verify the state of the splitter.
       final splitFinder = find.byType(Split);
@@ -74,11 +74,11 @@ void main() {
         codeSizeController: codeSizeController,
       );
 
-      expect(find.byKey(CodeSizeBodyState.dropdownKey), findsNothing);
-      expect(find.byKey(CodeSizeBodyState.clearButtonKey), findsOneWidget);
+      expect(find.byKey(CodeSizeScreen.dropdownKey), findsNothing);
+      expect(find.byKey(CodeSizeScreen.clearButtonKey), findsOneWidget);
 
       expect(find.byType(SnapshotView), findsOneWidget);
-      expect(find.byKey(SnapshotViewState.treemapKey), findsOneWidget);
+      expect(find.byKey(CodeSizeScreen.snapshotViewTreemapKey), findsOneWidget);
 
       // Assumes the treemap is built with treemap_test_data_v8_new.json
       expect(find.text('Root [6.0 MB]'), findsOneWidget);
@@ -94,17 +94,18 @@ void main() {
           tester,
           codeSizeController: codeSizeController,
         );
-        await tester.tap(find.byKey(CodeSizeBodyState.diffTabKey));
+        await tester.tap(find.byKey(CodeSizeScreen.diffTabKey));
 
         codeSizeController.loadFakeDiffTree('old_v8', 'new_v8');
 
         await tester.pumpAndSettle();
 
-        expect(find.byKey(CodeSizeBodyState.dropdownKey), findsOneWidget);
-        expect(find.byKey(CodeSizeBodyState.clearButtonKey), findsOneWidget);
+        expect(find.byKey(CodeSizeScreen.dropdownKey), findsOneWidget);
+        expect(find.byKey(CodeSizeScreen.clearButtonKey), findsOneWidget);
 
         expect(find.byType(DiffView), findsOneWidget);
-        expect(find.byKey(DiffViewState.treemapKey), findsOneWidget);
+        expect(
+            find.byKey(CodeSizeScreen.snapshotViewTreemapKey), findsOneWidget);
 
         // Assumes the treemap is built with treemap_test_data_v8_new.json and treemap_test_data_v8_old.json
         const text = 'package:pointycastle [+465.8 KB]';
