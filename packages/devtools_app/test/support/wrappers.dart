@@ -23,13 +23,18 @@ import '../support/mocks.dart';
 
 /// Wraps [widget] with the build context it needs to load in a test.
 ///
-/// This includes a [MaterialApp] to provide context like [Theme.of].
-/// It also provides a [Material] to support elements like [TextField] that
-/// draw ink effects.
+/// This includes a [MaterialApp] to provide context like [Theme.of], a
+/// [Material] to support elements like [TextField] that draw ink effects, and a
+/// [Directionality] to support [RenderFlex] widgets like [Row] and [Column].
 Widget wrap(Widget widget) {
   return MaterialApp(
     theme: themeFor(isDarkTheme: false),
-    home: Material(child: widget),
+    home: Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: widget,
+      ),
+    ),
   );
 }
 

@@ -44,6 +44,8 @@ class HttpRequestHeadersView extends StatelessWidget {
   const HttpRequestHeadersView(this.data);
 
   @visibleForTesting
+  static const generalKey = Key('General');
+  @visibleForTesting
   static const requestHeadersKey = Key('Request Headers');
   @visibleForTesting
   static const responseHeadersKey = Key('Response Headers');
@@ -97,7 +99,7 @@ class HttpRequestHeadersView extends StatelessWidget {
                     constraints,
                   ),
               ],
-              // key: generalKey,
+              key: generalKey,
             ),
             _buildTile(
               'Response Headers',
@@ -289,11 +291,12 @@ class HttpRequestCookiesView extends StatelessWidget {
 class NetworkRequestOverviewView extends StatelessWidget {
   const NetworkRequestOverviewView(this.data);
 
-  @visibleForTesting
-  static const generalKey = Key('General');
-
   static const _keyWidth = 110.0;
   static const _timingGraphHeight = 18.0;
+  @visibleForTesting
+  static const httpTimingGraphKey = Key('Http Timing Graph Key');
+  @visibleForTesting
+  static const socketTimingGraphKey = Key('Socket Timing Graph Key');
 
   final NetworkRequest data;
 
@@ -320,7 +323,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Request uri',
-        child: _valueText(data.address),
+        child: _valueText(data.uri),
       ),
       const SizedBox(height: defaultSpacing),
       _buildRow(
@@ -394,6 +397,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     final data = this.data as HttpRequestData;
     if (data.duration == null || data.instantEvents.isEmpty) {
       return Container(
+        key: httpTimingGraphKey,
         height: 18.0,
         color: mainRasterColor,
       );
@@ -434,6 +438,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       );
     }
     return Row(
+      key: httpTimingGraphKey,
       children: timingWidgets,
     );
   }
@@ -476,13 +481,13 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Read bytes',
-        child: _valueText(prettyPrintBytes(socket.readBytes)),
+        child: _valueText('${socket.readBytes}'),
       ),
       const SizedBox(height: defaultSpacing),
       _buildRow(
         context: context,
         title: 'Write bytes',
-        child: _valueText(prettyPrintBytes(socket.writeBytes)),
+        child: _valueText('${socket.writeBytes}'),
       ),
       const SizedBox(height: defaultSpacing),
     ];
@@ -490,6 +495,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   Widget _buildSocketTimeGraph(BuildContext context) {
     return Container(
+      key: socketTimingGraphKey,
       height: _timingGraphHeight,
       color: mainUiColor,
     );

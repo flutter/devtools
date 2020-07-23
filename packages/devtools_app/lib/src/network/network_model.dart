@@ -10,10 +10,7 @@ abstract class NetworkRequest {
 
   String get method;
 
-  /// The URI for the request.
-  ///
-  /// This may be a
-  String get address;
+  String get uri;
 
   String get contentType;
 
@@ -81,7 +78,7 @@ class WebSocket extends NetworkRequest {
   String get socketType => _socket.socketType;
 
   @override
-  String get address => _socket.address;
+  String get uri => _socket.address;
 
   @override
   int get port => _socket.port;

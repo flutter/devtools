@@ -87,7 +87,6 @@ class NetworkService {
     await serviceManager.service.forEachIsolate((isolate) async {
       final socketProfile =
           await serviceManager.service.getSocketProfile(isolate.id);
-      print('${socketProfile.sockets.length}');
       sockets.addAll(socketProfile.sockets);
     });
     return sockets;

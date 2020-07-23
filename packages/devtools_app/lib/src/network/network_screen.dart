@@ -209,7 +209,7 @@ class NetworkRequestsTable extends StatelessWidget {
   }) : super(key: key);
 
   static MethodColumn methodColumn = MethodColumn();
-  static AddressColumn addressColumn = AddressColumn();
+  static UriColumn addressColumn = UriColumn();
   static StatusColumn statusColumn = StatusColumn();
   static TypeColumn typeColumn = TypeColumn();
   static DurationColumn durationColumn = DurationColumn();
@@ -243,13 +243,13 @@ class NetworkRequestsTable extends StatelessWidget {
   }
 }
 
-class AddressColumn extends ColumnData<NetworkRequest>
+class UriColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
-  AddressColumn() : super.wide('Address');
+  UriColumn() : super.wide('Uri');
 
   @override
   dynamic getValue(NetworkRequest dataObject) {
-    return dataObject.address;
+    return dataObject.uri;
   }
 
   @override

@@ -12,6 +12,8 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 
+import 'network_test_data.dart';
+
 /// Scoping method which registers `listener` as a listener for `listenable`,
 /// invokes `callback`, and then removes the `listener`.
 ///
@@ -42,6 +44,13 @@ Future<Timeline> loadNetworkProfileTimeline() async {
     await File(testDataPath).readAsString(),
   );
   return Timeline.parse(httpTestData);
+}
+
+SocketProfile loadSocketProfile() {
+  return SocketProfile(sockets: [
+    SocketStatistic.parse(testSocket1Json),
+    SocketStatistic.parse(testSocket2Json),
+  ]);
 }
 
 Future<TreemapNode> loadInstructionSizesJsonAsTree() async {

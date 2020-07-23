@@ -91,7 +91,7 @@ class HttpRequestData extends NetworkRequest {
 
   @override
   Duration get duration {
-    if (_endEvent == null || _startEvent == null) {
+    if (inProgress || !isValid) {
       return null;
     }
     // Timestamps are in microseconds
@@ -132,8 +132,9 @@ class HttpRequestData extends NetworkRequest {
 
   /// A map of general information associated with an HTTP request.
   Map<String, dynamic> get general {
+    if (!isValid) return null;
     final copy = Map<String, dynamic>.from(_startEvent.args);
-    if (_endEvent != null) {
+    if (!inProgress) {
       copy.addAll(_endEvent.args);
     }
     copy.remove(_requestHeadersKey);
@@ -144,6 +145,7 @@ class HttpRequestData extends NetworkRequest {
 
   @override
   int get port {
+    if (general == null) return null;
     final Map<String, dynamic> connectionInfo = general[_connectionInfoKey];
     return connectionInfo != null ? connectionInfo[_localPortKey] : null;
   }
@@ -157,6 +159,7 @@ class HttpRequestData extends NetworkRequest {
 
   @override
   String get method {
+    if (!isValid) return null;
     assert(_startEvent.args.containsKey(_methodKey));
     return _startEvent.args[_methodKey];
   }
@@ -175,17 +178,16 @@ class HttpRequestData extends NetworkRequest {
   /// The request headers for the HTTP request.
   Map<String, dynamic> get requestHeaders {
     // The request may still be in progress, in which case we don't display any
-    // headers.
-    if (_endEvent == null) {
-      return null;
-    }
+    // headers, or the request may be invalid, in which case we also don't
+    // display any headers.
+    if (inProgress || !isValid) return null;
     return _endEvent.args[_requestHeadersKey];
   }
 
   /// The time the HTTP request was issued.
   @override
   DateTime get startTimestamp {
-    assert(_startEvent != null);
+    if (!isValid) return null;
     return DateTime.fromMicrosecondsSinceEpoch(
       timelineMicrosecondsSinceEpoch(_startEvent.timestampMicros),
     );
@@ -193,7 +195,7 @@ class HttpRequestData extends NetworkRequest {
 
   @override
   DateTime get endTimestamp {
-    if (_endEvent == null) return null;
+    if (inProgress || !isValid) return null;
     return DateTime.fromMicrosecondsSinceEpoch(
         timelineMicrosecondsSinceEpoch(_endEvent.timestampMicros));
   }
@@ -214,10 +216,9 @@ class HttpRequestData extends NetworkRequest {
   /// The response headers for the HTTP request.
   Map<String, dynamic> get responseHeaders {
     // The request may still be in progress, in which case we don't display any
-    // headers.
-    if (_endEvent == null) {
-      return null;
-    }
+    // headers, or the request may be invalid, in which case we also don't
+    // display any headers.
+    if (inProgress || !isValid) return null;
     return _endEvent.args[_responseHeadersKey];
   }
 
@@ -227,22 +228,22 @@ class HttpRequestData extends NetworkRequest {
   /// was encountered, this will return 'Error'.
   @override
   String get status {
+    if (inProgress || !isValid) return null;
     String statusCode;
-    if (_endEvent != null) {
-      final endArgs = _endEvent.args;
-      if (endArgs.containsKey(_errorKey)) {
-        // This case occurs when an exception has been thrown, so there's no
-        // status code to associate with the request.
-        statusCode = 'Error';
-      } else {
-        statusCode = endArgs[_statusCodeKey].toString();
-      }
+    final endArgs = _endEvent.args;
+    if (endArgs.containsKey(_errorKey)) {
+      // This case occurs when an exception has been thrown, so there's no
+      // status code to associate with the request.
+      statusCode = 'Error';
+    } else {
+      statusCode = endArgs[_statusCodeKey].toString();
     }
     return statusCode;
   }
 
   @override
-  String get address {
+  String get uri {
+    if (!isValid) return null;
     assert(_startEvent.args.containsKey(_uriKey));
     return _startEvent.args[_uriKey];
   }
@@ -286,5 +287,5 @@ class HttpRequestData extends NetworkRequest {
   }
 
   @override
-  String toString() => '$method $address';
+  String toString() => '$method $uri';
 }
