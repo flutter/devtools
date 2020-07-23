@@ -3,25 +3,9 @@
 // found in the LICENSE file.
 
 import '../table_data.dart';
-import '../trees.dart';
 import 'memory_protocol.dart';
 
-/*
-class AllocationData extends TreeNode<AllocationData> {
-  AllocationData(this.className, this.instanceCount, this.instanceAccumulator,
-      this.bytes, this.bytesAccumulator);
-
-  final String className;
-  final int instanceCount;
-  final int instanceAccumulator;
-  final int bytes;
-  final int bytesAccumulator;
-
-  @override
-  String toString() =>
-      '$className - $instanceCount,$instanceAccumulator [$bytes, $bytesAccumulator]';
-}
-*/
+const fieldWidthNumbers = 100.0;
 
 class FieldClassName extends ColumnData<ClassHeapDetailStats> {
   FieldClassName() : super('Class');
@@ -76,7 +60,7 @@ class FieldInstanceCountColumn extends ColumnData<ClassHeapDetailStats> {
   }
 
   @override
-  double get fixedWidthPx => 150.0;
+  double get fixedWidthPx => fieldWidthNumbers;
 }
 
 class FieldInstanceAccumulatorColumn extends ColumnData<ClassHeapDetailStats> {
@@ -108,7 +92,7 @@ class FieldInstanceAccumulatorColumn extends ColumnData<ClassHeapDetailStats> {
   }
 
   @override
-  double get fixedWidthPx => 150.0;
+  double get fixedWidthPx => fieldWidthNumbers;
 }
 
 class FieldSizeColumn extends ColumnData<ClassHeapDetailStats> {
@@ -139,7 +123,7 @@ class FieldSizeColumn extends ColumnData<ClassHeapDetailStats> {
   }
 
   @override
-  double get fixedWidthPx => 150.0;
+  double get fixedWidthPx => fieldWidthNumbers;
 }
 
 class FieldSizeAccumulatorColumn extends ColumnData<ClassHeapDetailStats> {
@@ -171,5 +155,5 @@ class FieldSizeAccumulatorColumn extends ColumnData<ClassHeapDetailStats> {
   }
 
   @override
-  double get fixedWidthPx => 150.0;
+  double get fixedWidthPx => fieldWidthNumbers;
 }

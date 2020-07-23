@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/memory/memory_protocol.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,6 +11,7 @@ import '../table_data.dart';
 import '../utils.dart';
 import 'memory_allocation_table_data.dart';
 import 'memory_controller.dart';
+import 'memory_protocol.dart';
 
 class AllocationTableView extends StatefulWidget {
   @override
@@ -63,13 +63,16 @@ class AllocationTableViewState extends State<AllocationTableView>
     ]);
   }
 
+  ColumnData<ClassHeapDetailStats> sortedColumn;
+  SortDirection sortedDirection;
+
   @override
   Widget build(BuildContext context) {
     ColumnData<ClassHeapDetailStats> toSortColumn;
     SortDirection toSortDirection;
     if (controller.allocationsFieldsTable != null) {
-      toSortColumn = controller.allocationsFieldsTable.sortedColumn; 
-      toSortDirection = controller.allocationsFieldsTable.sortedDirection;
+      toSortColumn = sortedColumn;
+      toSortDirection = sortedDirection;
     } else {
       toSortColumn = columns[0];
       toSortDirection = SortDirection.ascending;
@@ -79,11 +82,14 @@ class AllocationTableViewState extends State<AllocationTableView>
       columns: columns,
       data: controller.monitorAllocations,
       keyFactory: (d) => Key(d.classRef.name),
-      onItemSelected: (ref) {
-        print(">> Table Row clicked $ref");
-      },
+      onItemSelected: (ref) {},
       sortColumn: toSortColumn,
       sortDirection: toSortDirection,
+      onSortChanged: (column, direction) {
+        sortedColumn = column;
+        sortedDirection = direction;
+
+      },
     );
 
     return controller.allocationsFieldsTable;

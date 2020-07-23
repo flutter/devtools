@@ -241,7 +241,7 @@ class MemoryTracker {
 
       // If the event is +/- _updateDelay (500 ms) of the current time then
       // associate the EventSample with the current HeapSample.
-      final delay = MemoryTimeline.updateDelay;
+      const delay = MemoryTimeline.updateDelay;
       final compared = timeDuration.compareTo(eventDuration);
       if (compared < 0) {
         if ((timeDuration + delay).compareTo(eventDuration) >= 0) {
