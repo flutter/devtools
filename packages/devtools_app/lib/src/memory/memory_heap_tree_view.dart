@@ -20,10 +20,13 @@ import '../ui/icons.dart';
 import '../ui/label.dart';
 import '../ui/search.dart';
 import '../utils.dart';
+import 'memory_allocation_table_view.dart';
 import 'memory_analyzer.dart';
 import 'memory_controller.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
+import 'memory_instance_tree_view.dart';
+import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
 import 'memory_treemap.dart';
 
@@ -215,6 +218,12 @@ class HeapTreeViewState extends State<HeapTree>
       ));
     });
 
+    addAutoDisposeListener(controller.monitorAllocationsChanged, () {
+      setState(() {
+        controller.computeAllLibraries(rebuild: true);
+      });
+    });
+
     addAutoDisposeListener(controller.memoryTimeline.sampleAddedNotifier, () {
       autoSnapshot();
     });
@@ -336,7 +345,8 @@ class HeapTreeViewState extends State<HeapTree>
                     ? 'Grouping...'
                     : _isSnapshotComplete ? 'Done' : '...'),
       ]);
-    } else if (controller.snapshotByLibraryData != null) {
+    } else if (controller.snapshotByLibraryData != null ||
+        controller.monitorAllocations.isNotEmpty) {
       if (controller.showTreemap.value) {
         snapshotDisplay = MemoryTreemap(controller);
       } else {
@@ -370,6 +380,14 @@ class HeapTreeViewState extends State<HeapTree>
     final hasDetails =
         controller.isLeafSelected || controller.isAnalysisLeafSelected;
 
+    final rightSideTable = controller.isLeafSelected
+        ? Expanded(child: InstanceTreeView())
+        : controller.isAnalysisLeafSelected
+            ? Expanded(child: AnalysisInstanceViewTable())
+            : controller.isAllocationMonitorLeafSelected
+                ? Expanded(child: AllocationTableView())
+                : const SizedBox();
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.end,
@@ -378,11 +396,7 @@ class HeapTreeViewState extends State<HeapTree>
         if (hasDetails) const SizedBox(width: defaultSpacing),
         // TODO(terry): Need better focus handling between 2 tables & up/down
         //              arrows in the right-side field instance view table.
-        controller.isLeafSelected
-            ? Expanded(child: SnapshotInstanceViewTable())
-            : controller.isAnalysisLeafSelected
-                ? Expanded(child: AnalysisInstanceViewTable())
-                : const SizedBox(),
+        rightSideTable,
       ],
     );
   }
@@ -525,11 +539,14 @@ class HeapTreeViewState extends State<HeapTree>
                 ),
               ),
         const SizedBox(width: defaultSpacing),
+
         Tooltip(
           message: 'Monitor Allocations',
           child: OutlineButton(
             key: allocationMonitorKey,
-            onPressed: _allocationStart,
+            onPressed: () async {
+              await _allocationStart();
+            },
             child: createImageIcon(
               'icons/memory/communities_white@2x.png',
               size: defaultIconThemeSize,
@@ -540,7 +557,9 @@ class HeapTreeViewState extends State<HeapTree>
           message: 'Reset Accumulators',
           child: OutlineButton(
             key: allocationMonitorResetKey,
-            onPressed: _allocationReset,
+            onPressed: () async {
+              await _allocationReset();
+            },
             child: createImageIcon(
               'icons/memory/reset_icon_white@2x.png',
               size: defaultIconThemeSize,
@@ -551,45 +570,85 @@ class HeapTreeViewState extends State<HeapTree>
     );
   }
 
-  void _allocationStart() async {
-//    await controller.computeLibraries();
+  Future<void> _allocationStart() async {
+    await controller.computeLibraries();
 
     controller.memoryTimeline.addMonitorStartEvent();
+    final currentAllocations = await controller.getAllocationProfile();
 
-    final allocations = await controller.getAllocationProfile();
-    for (var index = 0; index < allocations.length; index++) {
-      final allocation = allocations[index];
-      final instancesCurrent = allocation.instancesCurrent;
-      final instancesAccumulated = allocation.instancesAccumulated;
-      final bytesCurrent = allocation.bytesCurrent;
-      final bytesAccumulated = allocation.bytesAccumulated;
-      if (instancesCurrent != instancesAccumulated || bytesAccumulated > 0) {
-        print('[$index] class ${allocation.classRef.name}\n'
-            '    instancesCurrent=$instancesCurrent\n'
-            '    instancesAccumulated=$instancesAccumulated\n'
-            '    bytesCurrent=$bytesCurrent\n'
-            '    bytesAccumulated=$bytesAccumulated\n');
+    if (controller.monitorAllocations.isNotEmpty) {
+      final previousLength = controller.monitorAllocations.length;
+      int previousIndex = 0;
+      final currentLength = currentAllocations.length;
+      int currentIndex = 0;
+      while (currentIndex < currentLength && previousIndex < previousLength) {
+        final previousAllocation = controller.monitorAllocations[previousIndex];
+        final currentAllocation = currentAllocations[currentIndex];
+
+        if (previousAllocation.classRef.id == currentAllocation.classRef.id) {
+          final instancesCurrent = currentAllocation.instancesCurrent;
+          final bytesCurrent = currentAllocation.bytesCurrent;
+
+          currentAllocation.instancesAccumulated =
+              previousAllocation.instancesAccumulated +
+                  (instancesCurrent - previousAllocation.instancesCurrent);
+          currentAllocation.bytesAccumulated =
+              previousAllocation.bytesAccumulated +
+                  (bytesCurrent - previousAllocation.bytesCurrent);
+
+          final instancesAccumulated = currentAllocation.instancesAccumulated;
+          final bytesAccumulated = currentAllocation.bytesAccumulated;
+
+          if (instancesAccumulated != 0 || bytesAccumulated != 0) {
+            debugLogger('previous,index=[$previousIndex][$currentIndex] '
+                'class ${currentAllocation.classRef.name}\n'
+                '    instancesCurrent=$instancesCurrent, '
+                '    instancesAccumulated=${currentAllocation.instancesAccumulated}\n'
+                '    bytesCurrent=$bytesCurrent, '
+                '    bytesAccumulated=${currentAllocation.bytesAccumulated}}\n');
+          }
+
+          previousIndex++;
+          currentIndex++;
+        } else {
+          // Either a new class in currentAllocations or old that's no longer
+          // active in previousAllocations.
+          final currentClassId = currentAllocation.classRef.id;
+          final ClassHeapDetailStats first =
+              controller.monitorAllocations.firstWhere(
+            (element) => element.classRef.id == currentClassId,
+            orElse: () => null,
+          );
+          if (first != null) {
+            //It's a class that's gone?
+            previousIndex++;
+          } else {
+            // New Class encountered in new AllocationProfile, don't increment
+            // previousIndex.
+            currentIndex++;
+          }
+        }
       }
+
+      // Insure all entries from previous and current were looked at.
+      assert(previousLength == previousIndex);
+      assert(currentLength == currentIndex);
     }
+
+    controller.monitorAllocations = currentAllocations;
   }
 
-  void _allocationReset() async {
+  Future<void> _allocationReset() async {
     controller.memoryTimeline.addMonitorResetEvent();
-    final allocations = await controller.resetAllocationProfile();
-    for (var index = 0; index < allocations.length; index++) {
-      final allocation = allocations[index];
-      final instancesCurrent = allocation.instancesCurrent;
-      final instancesAccumulated = allocation.instancesAccumulated;
-      final bytesCurrent = allocation.bytesCurrent;
-      final bytesAccumulated = allocation.bytesAccumulated;
-      if (instancesCurrent != instancesAccumulated || bytesAccumulated > 0) {
-        print('Reset [$index] class ${allocation.classRef.name}\n'
-            '    instancesCurrent=$instancesCurrent\n'
-            '    instancesAccumulated=$instancesAccumulated\n'
-            '    bytesCurrent=$bytesCurrent\n'
-            '    bytesAccumulated=$bytesAccumulated\n');
-      }
-    }
+    final currentAllocations = await controller.resetAllocationProfile();
+
+    // Reset all accumulators to zero.
+    currentAllocations.every((element) {
+      element.bytesAccumulated = 0;
+      element.instancesAccumulated = 0;
+      return true;
+    });
+    controller.monitorAllocations = currentAllocations;
   }
 
   FocusNode searchFieldFocusNode;
@@ -878,161 +937,7 @@ class HeapTreeViewState extends State<HeapTree>
   }
 }
 
-class SnapshotInstanceViewTable extends StatefulWidget {
-  @override
-  SnapshotInstanceViewState createState() => SnapshotInstanceViewState();
-}
-
-/// Table of the fields of an instance (type, name and value).
-class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
-    with AutoDisposeMixin {
-  MemoryController controller;
-
-  final TreeColumnData<FieldReference> treeColumn = _FieldTypeColumn();
-  final List<ColumnData<FieldReference>> columns = [];
-
-  @override
-  void initState() {
-    setupColumns();
-
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    final newController = Provider.of<MemoryController>(context);
-    if (newController == controller) return;
-    controller = newController;
-
-    cancel();
-
-    // TODO(terry): setState should be called to set our state not change the
-    //              controller. Have other ValueListenables on controller to
-    //              listen to, so we don't need the setState calls.
-    // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
-      setState(() {
-        controller.computeAllLibraries(rebuild: true);
-      });
-    });
-  }
-
-  void setupColumns() {
-    columns.addAll([
-      treeColumn,
-      _FieldNameColumn(),
-      _FieldValueColumn(),
-    ]);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    controller.instanceFieldsTreeTable = TreeTable<FieldReference>(
-      dataRoots: controller.instanceRoot,
-      columns: columns,
-      treeColumn: treeColumn,
-      keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name),
-      sortColumn: columns[0],
-      sortDirection: SortDirection.ascending,
-    );
-
-    return controller.instanceFieldsTreeTable;
-  }
-}
-
-class _FieldTypeColumn extends TreeColumnData<FieldReference> {
-  _FieldTypeColumn() : super('Type');
-
-  @override
-  dynamic getValue(FieldReference dataObject) =>
-      dataObject.isEmptyReference || dataObject.isSentinelReference
-          ? ''
-          : dataObject.type;
-
-  @override
-  String getDisplayValue(FieldReference dataObject) =>
-      '${getValue(dataObject)}';
-
-  @override
-  bool get supportsSorting => true;
-
-  @override
-  int compare(FieldReference a, FieldReference b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
-    return valueA.compareTo(valueB);
-  }
-
-  @override
-  double get fixedWidthPx => 250.0;
-}
-
-class _FieldNameColumn extends ColumnData<FieldReference> {
-  _FieldNameColumn() : super('Name');
-
-  @override
-  dynamic getValue(FieldReference dataObject) =>
-      dataObject.isEmptyReference ? '' : dataObject.name;
-
-  @override
-  String getDisplayValue(FieldReference dataObject) =>
-      '${getValue(dataObject)}';
-
-  @override
-  bool get supportsSorting => true;
-
-  @override
-  int compare(FieldReference a, FieldReference b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
-    return valueA.compareTo(valueB);
-  }
-
-  @override
-  double get fixedWidthPx => 150.0;
-}
-
-class _FieldValueColumn extends ColumnData<FieldReference> {
-  _FieldValueColumn() : super('Value');
-
-  @override
-  dynamic getValue(FieldReference dataObject) =>
-      dataObject.isEmptyReference || dataObject.isSentinelReference
-          ? ''
-          : dataObject.value;
-
-  @override
-  String getDisplayValue(FieldReference dataObject) {
-    if (dataObject is ObjectFieldReference && !dataObject.isNull) {
-      // Real object that isn't Null value is empty string.
-      return '';
-    }
-
-    var value = getValue(dataObject);
-    if (value is String && value.length > 30) {
-      value = '${value.substring(0, 13)}…${value.substring(value.length - 17)}';
-    }
-    return '$value';
-  }
-
-  @override
-  bool get supportsSorting => true;
-
-  @override
-  int compare(FieldReference a, FieldReference b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
-    return valueA.compareTo(valueB);
-  }
-
-  @override
-  double get fixedWidthPx => 250.0;
-}
-
 /// Snapshot TreeTable
-
 class MemorySnapshotTable extends StatefulWidget {
   @override
   MemorySnapshotTableState createState() => MemorySnapshotTableState();
@@ -1069,6 +974,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
         controller.computeAllLibraries(rebuild: true);
       });
     });
+
     addAutoDisposeListener(controller.filterNotifier, () {
       setState(() {
         controller.computeAllLibraries(rebuild: true);
@@ -1561,7 +1467,10 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
     final displayPercentage = percentage < .050 ? '<<1%' : '${NumberFormat.compact().format(percentage)}%';
     print('$displayPercentage [${NumberFormat.compact().format(percentage)}%]');
 */
-    if (dataObject.isAnalysis && value is! int) return '';
+    if ((dataObject.isAnalysis ||
+            dataObject.isAllocations ||
+            dataObject.isAllocation) &&
+        value is! int) return '';
 
     return NumberFormat.compact().format(value);
   }

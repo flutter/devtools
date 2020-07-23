@@ -124,6 +124,25 @@ class MemoryController extends DisposableController
 
   List<FieldReference> get instanceRoot => _instanceRoot;
 
+  /// Leaf node of allocation monitor selected?  If selected then the Allocation Profile of all
+  /// classes is displayed (class name, instance count, accumulator, byte size, accumulator).
+  final _leafAllocationMonitorSelectedNotifier =
+      ValueNotifier<AllocationMonitorReference>(null);
+
+  ValueListenable<AllocationMonitorReference>
+      get leafAllocationMonitorSelectedNotifier =>
+          _leafAllocationMonitorSelectedNotifier;
+
+  AllocationMonitorReference get selectedAllocationMonitorLeaf =>
+      _leafAllocationMonitorSelectedNotifier.value;
+
+  set selectedAllocationMonitorLeaf(AllocationMonitorReference selected) {
+    _leafAllocationMonitorSelectedNotifier.value = selected;
+  }
+
+  bool get isAllocationMonitorLeafSelected =>
+      selectedAllocationMonitorLeaf != null;
+
   /// Leaf node of analysis selected?  If selected then the field
   /// view is displayed to view an abbreviated fields of an instance.
   final _leafAnalysisSelectedNotifier = ValueNotifier<AnalysisInstance>(null);
@@ -400,6 +419,9 @@ class MemoryController extends DisposableController
   /// Tree to view fields of an analysis.
   TreeTable<AnalysisField> analysisFieldsTreeTable;
 
+  /// Table to view fields of an Allocation Profile.
+  FlatTable<ClassHeapDetailStats> allocationsFieldsTable;
+
   /// State of filters used by filter dialog (create/modify) and used
   /// by filtering in grouping.
   final FilteredLibraries libraryFilters = FilteredLibraries();
@@ -599,37 +621,55 @@ class MemoryController extends DisposableController
         ?.getHeapSnapshotGraph(serviceManager?.isolateManager?.selectedIsolate);
   }
 
+  final _monitorAllocationsUpdated = ValueNotifier<int>(0);
+
+  ValueListenable<int> get monitorAllocationsChanged =>
+      _monitorAllocationsUpdated;
+
+  var _monitorAllocations = <ClassHeapDetailStats>[];
+
+  List<ClassHeapDetailStats> get monitorAllocations => _monitorAllocations;
+
+  set monitorAllocations(List<ClassHeapDetailStats> allocations) {
+    _monitorAllocations = allocations;
+    // Clearing allocations reset ValueNotifier to zero.
+    allocations.isNotEmpty
+        ? _monitorAllocationsUpdated.value++
+        : _monitorAllocationsUpdated.value = 0;
+  }
+
   Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>
       getAllocationProfile(reset: true);
 
   /// 'reset': true to reset the object allocation accumulators
   Future<List<ClassHeapDetailStats>> getAllocationProfile({
-    bool reset = false,
+    reset = false,
   }) async {
-    AllocationProfile allocationProfile;
-    if (await isIsolateLive(_isolateId)) {
-      allocationProfile = await serviceManager.service.getAllocationProfile(
-        _isolateId,
-        reset: reset,
-      );
+    if (!await isIsolateLive(_isolateId)) return [];
 
-      final lastReset = allocationProfile.dateLastAccumulatorReset;
-      if (lastReset != null) {
-        final resetTimestamp = DateTime.fromMillisecondsSinceEpoch(lastReset);
-        debugLogger('Last Allocation Reset @ '
-            '${MemoryController.formattedTimestamp(resetTimestamp)}');
-      }
-      
-      return allocationProfile.members
-          .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
-          .where((ClassHeapDetailStats stats) {
-        return stats.instancesCurrent > 0 || stats.instancesAccumulated > 0;
-      }).toList();
+    AllocationProfile allocationProfile;
+    allocationProfile = await serviceManager.service.getAllocationProfile(
+      _isolateId,
+      reset: reset,
+    );
+
+    final lastReset = allocationProfile.dateLastAccumulatorReset;
+    if (lastReset != null) {
+      final resetTimestamp = DateTime.fromMillisecondsSinceEpoch(lastReset);
+      debugLogger('Last Allocation Reset @ '
+          '${MemoryController.formattedTimestamp(resetTimestamp)}');
     }
-    return [];
+
+    final allocations = allocationProfile.members
+        .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
+        .where((ClassHeapDetailStats stats) {
+      return stats.instancesCurrent > 0 || stats.instancesAccumulated > 0;
+    }).toList();
+
+    return allocations;
   }
 
-  Future computeLibraries() async {
+  Future<void> computeLibraries() async {
     // TODO(terry): Review why unawaited is necessary.
     unawaited(serviceManager.service.getVM().then((vm) {
       Future.wait(vm.isolates.map((IsolateRef ref) {
@@ -639,7 +679,7 @@ class MemoryController extends DisposableController
           serviceManager.service
               .getObject(_isolateId, libraryRef.id)
               .then((theLibrary) {
-            print('Library $theLibrary');
+            debugLogger('Library ${libraryRef.name}');
           });
         }
       });
@@ -851,16 +891,27 @@ class MemoryController extends DisposableController
   }
 
   Reference buildTreeFromAllData() {
-    // Nothing to build - no snapshots exists.
-    if (snapshots.isEmpty) return null;
+    topNode ??= LibraryReference(this, libraryRootNode, null);
 
-    if (topNode == null) {
-      topNode = LibraryReference(this, libraryRootNode, null);
+    var anyMonitor = false;
+    var anyAnalyses = false;
+    for (final reference in topNode.children) {
+      anyMonitor |= reference is AllocationsMonitorReference;
+      anyAnalyses |= reference is AnalysesReference;
+    }
 
+    if (snapshots.isNotEmpty && !anyAnalyses) {
       // Create Analysis entry.
       final analysesRoot = AnalysesReference();
       analysesRoot.addChild(AnalysisReference(''));
       topNode.addChild(analysesRoot);
+    }
+
+    if (monitorAllocations.isNotEmpty && !anyMonitor) {
+      // Create Monitor Allocations entry.
+      final monitorRoot = AllocationsMonitorReference();
+      monitorRoot.addChild(AllocationMonitorReference(this, DateTime.now()));
+      topNode.addChild(monitorRoot);
     }
 
     createSnapshotEntries(topNode);
@@ -952,6 +1003,7 @@ class MemoryController extends DisposableController
 
   void clearAllSnapshots() {
     snapshots.clear();
+    snapshotByLibraryData = null;
   }
 
   /// Detect stale isolates (sentinaled), may happen after a hot restart.

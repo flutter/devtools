@@ -41,7 +41,7 @@ enum ScrollKind { up, down, parent }
 /// The [ColumnData] gives this table information about how to size its columns,
 /// and how to present each row of `data`.
 class FlatTable<T> extends StatefulWidget {
-  const FlatTable({
+  FlatTable({
     Key key,
     @required this.columns,
     @required this.data,
@@ -54,7 +54,10 @@ class FlatTable<T> extends StatefulWidget {
         assert(keyFactory != null),
         assert(data != null),
         assert(onItemSelected != null),
-        super(key: key);
+        super(key: key) {
+    sortedColumn = sortColumn;
+    sortedDirection = sortDirection;
+  }
 
   final List<ColumnData<T>> columns;
 
@@ -71,6 +74,10 @@ class FlatTable<T> extends StatefulWidget {
   final ColumnData<T> sortColumn;
 
   final SortDirection sortDirection;
+
+  ColumnData<T> sortedColumn;
+
+  SortDirection sortedDirection;
 
   @override
   FlatTableState<T> createState() => FlatTableState<T>();
@@ -160,6 +167,8 @@ class FlatTableState<T> extends State<FlatTable<T>>
   void _sortDataAndUpdate(ColumnData column, SortDirection direction) {
     setState(() {
       sortData(column, direction);
+      widget.sortedColumn = column;
+      widget.sortedDirection = direction;
     });
   }
 

@@ -354,6 +354,9 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   void _clearTimeline() {
     controller.memoryTimeline.reset();
 
+    // Clear any current Allocation Profile collected.
+    controller.monitorAllocations = [];
+
     // Clear all analysis and snapshots collected too.
     controller.clearAllSnapshots();
     controller.classRoot = null;
