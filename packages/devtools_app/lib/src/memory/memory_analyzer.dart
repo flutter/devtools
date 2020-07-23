@@ -16,7 +16,6 @@ import 'memory_controller.dart';
 import 'memory_graph_model.dart';
 import 'memory_heap_tree_view.dart';
 import 'memory_snapshot_models.dart';
-import 'memory_utils.dart';
 
 bool _classMatcher(HeapGraphClassLive liveClass) {
   final regExp = RegExp(knownClassesRegExs);

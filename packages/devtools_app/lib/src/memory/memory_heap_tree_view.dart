@@ -571,8 +571,7 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   Future<void> _allocationStart() async {
-    await controller.computeLibraries();
-
+    // TODO(terry): Look at grouping by library or classes also filtering e.g., await controller.computeLibraries();
     controller.memoryTimeline.addMonitorStartEvent();
     final currentAllocations = await controller.getAllocationProfile();
 
@@ -649,68 +648,6 @@ class HeapTreeViewState extends State<HeapTree>
       return true;
     });
     controller.monitorAllocations = currentAllocations;
-  }
-
-  FocusNode searchFieldFocusNode;
-  TextEditingController searchTextFieldController;
-  FocusNode rawKeyboardFocusNode;
-
-  void clearSearchField({force = false}) {
-    if (force || controller.search.isNotEmpty) {
-      searchTextFieldController.clear();
-      controller.search = '';
-    }
-  }
-
-  Widget createSearchField() {
-    // Creating new TextEditingController.
-    searchFieldFocusNode = FocusNode();
-
-    searchFieldFocusNode.addListener(() {
-      if (!searchFieldFocusNode.hasFocus) {
-        closeAutoCompleteOverlay();
-      }
-    });
-
-    searchTextFieldController = TextEditingController(text: controller.search);
-    searchTextFieldController.selection = TextSelection.fromPosition(
-        TextPosition(offset: controller.search.length));
-
-    final searchField = CompositedTransformTarget(
-      link: autoCompletelayerLink,
-      child: TextField(
-        key: memorySearchFieldKey,
-        autofocus: true,
-        enabled: controller.snapshots.isNotEmpty,
-        focusNode: searchFieldFocusNode,
-        controller: searchTextFieldController,
-        onChanged: (value) {
-          controller.search = value;
-        },
-        onEditingComplete: () {
-          searchFieldFocusNode.requestFocus();
-        },
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.all(8),
-          border: const OutlineInputBorder(),
-          labelText: 'Search',
-          hintText: 'Search',
-          suffix: IconButton(
-            padding: const EdgeInsets.all(0.0),
-            onPressed: () {
-              clearSearchField();
-            },
-            icon: const Icon(Icons.clear, size: 16),
-          ),
-        ),
-      ),
-    );
-
-    if (controller.showTreemap.value && controller.snapshots.isNotEmpty) {
-      searchFieldFocusNode.requestFocus();
-    }
-
-    return searchField;
   }
 
   /// Match, found,  select it and process via ValueNotifiers.

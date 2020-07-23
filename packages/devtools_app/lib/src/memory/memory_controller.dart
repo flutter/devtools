@@ -30,7 +30,6 @@ import 'memory_protocol.dart';
 import 'memory_service.dart';
 import 'memory_snapshot_models.dart';
 import 'memory_timeline.dart';
-import 'memory_utils.dart';
 
 enum ChartType {
   DartHeaps,
