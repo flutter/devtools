@@ -79,6 +79,8 @@ class HttpRequestData extends NetworkRequest {
   static const _requestHeadersKey = 'requestHeaders';
   static const _responseHeadersKey = 'responseHeaders';
   static const _statusCodeKey = 'statusCode';
+  // TODO(kenz): modify this to `setCookie` once
+  // https://github.com/dart-lang/sdk/issues/42822 is resolved
   static const _setCookieKey = 'set-cookie';
   static const _uriKey = 'uri';
 
@@ -91,9 +93,7 @@ class HttpRequestData extends NetworkRequest {
 
   @override
   Duration get duration {
-    if (inProgress || !isValid) {
-      return null;
-    }
+    if (inProgress || !isValid) return null;
     // Timestamps are in microseconds
     final range = TimeRange()
       ..start = Duration(microseconds: _startEvent.timestampMicros)
@@ -132,6 +132,7 @@ class HttpRequestData extends NetworkRequest {
 
   /// A map of general information associated with an HTTP request.
   Map<String, dynamic> get general {
+    if (_general != null) return _general;
     if (!isValid) return null;
     final copy = Map<String, dynamic>.from(_startEvent.args);
     if (!inProgress) {
@@ -140,8 +141,10 @@ class HttpRequestData extends NetworkRequest {
     copy.remove(_requestHeadersKey);
     copy.remove(_responseHeadersKey);
     copy.remove(_filterKey);
-    return copy;
+    return _general = copy;
   }
+
+  Map<String, dynamic> _general;
 
   @override
   int get port {

@@ -246,8 +246,7 @@ class NetworkController {
   /// profile from the vm, and resets the last refresh timestamp to the current
   /// time.
   Future<void> clear() async {
-    await _networkService.updateLastRefreshTime();
-    await networkService.clearSocketProfile();
+    await _networkService.clearData();
     _requests.value = NetworkRequests();
     _selectedRequest.value = null;
   }

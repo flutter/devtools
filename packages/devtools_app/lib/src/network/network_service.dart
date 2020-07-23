@@ -92,7 +92,7 @@ class NetworkService {
     return sockets;
   }
 
-  Future<void> clearSocketProfile() async {
+  Future<void> _clearSocketProfile() async {
     await serviceManager.service.forEachIsolate((isolate) async {
       final socketProfilingAvailable =
           await serviceManager.service.isSocketProfilingAvailable(isolate.id);
@@ -128,5 +128,10 @@ class NetworkService {
         await timeout(future, 500);
       }
     });
+  }
+
+  Future<void> clearData() async {
+    await updateLastRefreshTime();
+    await _clearSocketProfile();
   }
 }
