@@ -133,28 +133,30 @@ class DevToolsAppState extends State<DevToolsApp> {
         if (params['uri']?.isNotEmpty ?? false) {
           final embed = params['embed'] == 'true';
           final page = params['page'];
-          final tabs = embed && page != null
-              ? _visibleScreens().where((p) => p.screenId == page).toList()
-              : _visibleScreens();
           return Initializer(
             url: params['uri'],
             allowConnectionScreenOnDisconnect: !embed,
-            builder: (_) => _providedControllers(
-              child: DevToolsScaffold(
-                embed: embed,
-                ideTheme: ideTheme,
-                initialPage: page,
-                tabs: tabs,
-                actions: [
-                  if (serviceManager.connectedApp.isFlutterAppNow) ...[
-                    HotReloadButton(),
-                    HotRestartButton(),
+            builder: (_) {
+              final tabs = embed && page != null
+                  ? _visibleScreens().where((p) => p.screenId == page).toList()
+                  : _visibleScreens();
+              return _providedControllers(
+                child: DevToolsScaffold(
+                  embed: embed,
+                  ideTheme: ideTheme,
+                  initialPage: page,
+                  tabs: tabs,
+                  actions: [
+                    if (serviceManager.connectedApp.isFlutterAppNow) ...[
+                      HotReloadButton(),
+                      HotRestartButton(),
+                    ],
+                    OpenSettingsAction(),
+                    OpenAboutAction(),
                   ],
-                  OpenSettingsAction(),
-                  OpenAboutAction(),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         } else {
           return DevToolsScaffold.withChild(
