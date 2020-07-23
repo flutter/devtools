@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 import '../auto_dispose_mixin.dart';
 import '../blocking_action_mixin.dart';
 import '../common_widgets.dart';
+import '../connected_app.dart';
 import '../globals.dart';
 import '../initializer.dart';
 import '../octicons.dart';
@@ -24,8 +25,9 @@ import 'inspector_tree_flutter.dart';
 
 class InspectorScreen extends Screen {
   const InspectorScreen()
-      : super(
-          'inspector',
+      : super.conditional(
+          id: 'inspector',
+          conditionalLibrary: flutterLibraryUri,
           title: 'Flutter Inspector',
           icon: Octicons.deviceMobile,
         );
