@@ -97,7 +97,7 @@ final httpGetEventTrace = [
   },
 ];
 
-const _putStartTime = 231935155427;
+const _putStartTime = 231935155000;
 final httpPutEvent = HttpRequestData.fromTimeline(
   _putStartTime - 10, // - 10 is arbitrary.
   httpPutEventTrace,
@@ -123,7 +123,7 @@ final httpPutEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935155497,
+    'ts': 231935155100,
     'ph': 'n',
     'id': '17',
     'args': {'isolateId': 'isolates/3907117677703047'}
@@ -133,7 +133,7 @@ final httpPutEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935155527,
+    'ts': 231935155200,
     'ph': 'n',
     'id': '17',
     'args': {'isolateId': 'isolates/3907117677703047'}
@@ -143,7 +143,7 @@ final httpPutEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935597179,
+    'ts': 231935597000,
     'ph': 'n',
     'id': '17',
     'args': {'isolateId': 'isolates/3907117677703047'}
@@ -153,7 +153,7 @@ final httpPutEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935597670,
+    'ts': 231935598000,
     'ph': 'e',
     'id': '17',
     'args': {

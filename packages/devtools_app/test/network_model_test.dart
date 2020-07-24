@@ -59,7 +59,7 @@ void main() {
 
     test('duration returns correct value', () {
       expect(httpGetEvent.duration.inMicroseconds, equals(424865));
-      expect(httpPutEvent.duration.inMicroseconds, equals(442243));
+      expect(httpPutEvent.duration.inMicroseconds, equals(443000));
       expect(httpGetEventWithError.duration.inMicroseconds, equals(10000));
       expect(httpInvalidEvent.duration, isNull);
       expect(httpInProgressEvent.duration, isNull);
@@ -76,7 +76,7 @@ void main() {
       );
       expect(
         formatDateTime(httpPutEvent.startTimestamp.toUtc()),
-        equals('8:51:10.311 AM'),
+        equals('8:51:10.309 AM'),
       );
       expect(
         formatDateTime(httpGetEventWithError.startTimestamp.toUtc()),
@@ -106,7 +106,7 @@ void main() {
       );
       expect(
         formatDateTime(httpPutEvent.endTimestamp.toUtc()),
-        equals('8:51:10.753 AM'),
+        equals('8:51:10.752 AM'),
       );
       expect(
         formatDateTime(httpGetEventWithError.endTimestamp.toUtc()),
@@ -144,7 +144,7 @@ void main() {
 
     test('durationDisplay returns correct value', () {
       expect(httpGetEvent.durationDisplay, equals('Duration: 424.9 ms'));
-      expect(httpPutEvent.durationDisplay, equals('Duration: 442.2 ms'));
+      expect(httpPutEvent.durationDisplay, equals('Duration: 443.0 ms'));
       expect(httpGetEventWithError.durationDisplay, 'Duration: 10.0 ms');
       expect(httpInvalidEvent.durationDisplay, equals('Duration: Pending'));
       expect(httpInProgressEvent.durationDisplay, equals('Duration: Pending'));
