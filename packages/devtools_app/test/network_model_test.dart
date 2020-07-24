@@ -76,7 +76,7 @@ void main() {
       );
       expect(
         formatDateTime(httpPutEvent.startTimestamp.toUtc()),
-        equals('8:51:10.310 AM'),
+        equals('8:51:10.311 AM'),
       );
       expect(
         formatDateTime(httpGetEventWithError.startTimestamp.toUtc()),
