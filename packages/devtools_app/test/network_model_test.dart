@@ -70,52 +70,52 @@ void main() {
 
     test('startTimestamp returns correct value', () {
       expect(
-        httpGetEvent.startTimestamp.toString(),
-        equals('1970-01-06 00:51:10.643248'),
+        formatDateTime(httpGetEvent.startTimestamp),
+        equals('12:51:10.643 AM'),
       );
       expect(
-        httpPutEvent.startTimestamp.toString(),
-        equals('1970-01-06 00:51:10.310844'),
+        formatDateTime(httpPutEvent.startTimestamp),
+        equals('12:51:10.310 AM'),
       );
       expect(
-        httpGetEventWithError.startTimestamp.toString(),
-        equals('1970-01-06 00:51:11.215330'),
+        formatDateTime(httpGetEventWithError.startTimestamp),
+        equals('12:51:11.215 AM'),
       );
       expect(httpInvalidEvent.startTimestamp, isNull);
       expect(
-        httpInProgressEvent.startTimestamp.toString(),
-        equals('1970-01-06 00:51:10.643248'),
+        formatDateTime(httpInProgressEvent.startTimestamp),
+        equals('12:51:10.643 AM'),
       );
 
       expect(
-        testSocket1.startTimestamp.toString(),
-        equals('1969-12-31 16:00:01.000'),
+        formatDateTime(testSocket1.startTimestamp),
+        equals('4:00:01.000 PM'),
       );
       expect(
-        testSocket2.startTimestamp.toString(),
-        equals('1969-12-31 16:00:03.000'),
+        formatDateTime(testSocket2.startTimestamp),
+        equals('4:00:03.000 PM'),
       );
     });
 
     test('endTimestamp returns correct value', () {
       expect(
-        httpGetEvent.endTimestamp.toString(),
-        equals('1970-01-06 00:51:11.068113'),
+        formatDateTime(httpGetEvent.endTimestamp),
+        equals('12:51:11.068 AM'),
       );
       expect(
-        httpPutEvent.endTimestamp.toString(),
-        equals('1970-01-06 00:51:10.753087'),
+        formatDateTime(httpPutEvent.endTimestamp),
+        equals('12:51:10.753 AM'),
       );
       expect(
-        httpGetEventWithError.endTimestamp.toString(),
-        equals('1970-01-06 00:51:11.225330'),
+        formatDateTime(httpGetEventWithError.endTimestamp),
+        equals('12:51:11.225 AM'),
       );
       expect(httpInvalidEvent.endTimestamp, isNull);
       expect(httpInProgressEvent.endTimestamp, isNull);
 
       expect(
-        testSocket1.endTimestamp.toString(),
-        equals('1969-12-31 16:00:02.000'),
+        formatDateTime(testSocket1.endTimestamp),
+        equals('4:00:02.000 PM'),
       );
       expect(testSocket2.endTimestamp, isNull);
     });
@@ -320,23 +320,23 @@ void main() {
 
     test('lastReadTimestamp returns correct value', () {
       expect(
-        testSocket1.lastReadTimestamp.toString(),
-        equals('1969-12-31 16:00:01.800'),
+        formatDateTime(testSocket1.lastReadTimestamp),
+        equals('4:00:01.800 PM'),
       );
       expect(
-        testSocket2.lastReadTimestamp.toString(),
-        equals('1969-12-31 16:00:03.500'),
+        formatDateTime(testSocket2.lastReadTimestamp),
+        equals('4:00:03.500 PM'),
       );
     });
 
     test('lastWriteTimestamp returns correct value', () {
       expect(
-        testSocket1.lastWriteTimestamp.toString(),
-        equals('1969-12-31 16:00:01.850'),
+        formatDateTime(testSocket1.lastWriteTimestamp),
+        equals('4:00:01.850 PM'),
       );
       expect(
-        testSocket2.lastWriteTimestamp.toString(),
-        equals('1969-12-31 16:00:03.600'),
+        formatDateTime(testSocket2.lastWriteTimestamp),
+        equals('4:00:03.600 PM'),
       );
     });
 
