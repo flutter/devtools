@@ -117,6 +117,8 @@ class MemoryProfile {
 
   AdbMemoryInfo adbMemoryInfo;
 
+  EventSample eventSample;
+
   int heapMax;
 
   Stream<void> get onConnectionClosed => _connectionClosedController.stream;
@@ -180,6 +182,10 @@ class MemoryProfile {
       adbMemoryInfo = AdbMemoryInfo.empty();
     }
 
+    // TODO(terry): There are no user interactions.  However, might be nice to
+    //              record VM GC's on the timeline.
+    eventSample = EventSample.empty();
+
     // Polls for current RSS size.
     _update(vm, isolates);
 
@@ -237,6 +243,7 @@ class MemoryProfile {
       external,
       fromGC,
       adbMemoryInfo,
+      eventSample,
     );
 
     if (_verboseMode) {

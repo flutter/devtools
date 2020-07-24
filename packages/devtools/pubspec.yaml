@@ -16,8 +16,8 @@ environment:
   sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
-  devtools_server: 0.8.1-dev.1
-  devtools_shared: 0.8.1-dev.1
+  devtools_server: 0.8.1-dev.2
+  devtools_shared: 0.8.1-dev.2
   http: ^0.12.0+1
   intl: ^0.16.0
 
