@@ -132,6 +132,11 @@ class NetworkController {
       }
     }
 
+    // [currentValues] contains all the current requests we have in the
+    // profiler, which will contain web socket requests if they exist. The new
+    // [sockets] may contain web sockets with the same ids as ones we already
+    // have, so we remove the current web sockets and replace them with updated
+    // data.
     currentValues.removeWhere((value) => value is WebSocket);
     for (final socket in sockets) {
       final webSocket = WebSocket(socket, timelineMicrosOffset);
