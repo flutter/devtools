@@ -68,61 +68,59 @@ void main() {
       expect(testSocket2.duration, isNull);
     });
 
-    // TODO(kenz): figure out a workaround for the difference in
-    // `microsecondsSinceEpoch` locally and on the bots - then unskip.
     test('startTimestamp returns correct value', () {
+      // Test these values in UTC to avoid timezone differences with the bots.
       expect(
-        formatDateTime(httpGetEvent.startTimestamp),
-        equals('12:51:10.643 AM'),
+        formatDateTime(httpGetEvent.startTimestamp.toUtc()),
+        equals('8:51:10.643 AM'),
       );
       expect(
-        formatDateTime(httpPutEvent.startTimestamp),
-        equals('12:51:10.310 AM'),
+        formatDateTime(httpPutEvent.startTimestamp.toUtc()),
+        equals('8:51:10.310 AM'),
       );
       expect(
-        formatDateTime(httpGetEventWithError.startTimestamp),
-        equals('12:51:11.215 AM'),
+        formatDateTime(httpGetEventWithError.startTimestamp.toUtc()),
+        equals('8:51:11.215 AM'),
       );
       expect(httpInvalidEvent.startTimestamp, isNull);
       expect(
-        formatDateTime(httpInProgressEvent.startTimestamp),
-        equals('12:51:10.643 AM'),
+        formatDateTime(httpInProgressEvent.startTimestamp.toUtc()),
+        equals('8:51:10.643 AM'),
       );
 
       expect(
-        formatDateTime(testSocket1.startTimestamp),
-        equals('4:00:01.000 PM'),
+        formatDateTime(testSocket1.startTimestamp.toUtc()),
+        equals('12:00:01.000 AM'),
       );
       expect(
-        formatDateTime(testSocket2.startTimestamp),
-        equals('4:00:03.000 PM'),
+        formatDateTime(testSocket2.startTimestamp.toUtc()),
+        equals('12:00:03.000 AM'),
       );
-    }, skip: true);
+    });
 
-    // TODO(kenz): figure out a workaround for the difference in
-    // `microsecondsSinceEpoch` locally and on the bots - then unskip.
     test('endTimestamp returns correct value', () {
+      // Test these values in UTC to avoid timezone differences with the bots.
       expect(
-        formatDateTime(httpGetEvent.endTimestamp),
-        equals('12:51:11.068 AM'),
+        formatDateTime(httpGetEvent.endTimestamp.toUtc()),
+        equals('8:51:11.068 AM'),
       );
       expect(
-        formatDateTime(httpPutEvent.endTimestamp),
-        equals('12:51:10.753 AM'),
+        formatDateTime(httpPutEvent.endTimestamp.toUtc()),
+        equals('8:51:10.753 AM'),
       );
       expect(
-        formatDateTime(httpGetEventWithError.endTimestamp),
-        equals('12:51:11.225 AM'),
+        formatDateTime(httpGetEventWithError.endTimestamp.toUtc()),
+        equals('8:51:11.225 AM'),
       );
       expect(httpInvalidEvent.endTimestamp, isNull);
       expect(httpInProgressEvent.endTimestamp, isNull);
 
       expect(
-        formatDateTime(testSocket1.endTimestamp),
-        equals('4:00:02.000 PM'),
+        formatDateTime(testSocket1.endTimestamp.toUtc()),
+        equals('12:00:02.000 AM'),
       );
       expect(testSocket2.endTimestamp, isNull);
-    }, skip: true);
+    });
 
     test('status returns correct value', () {
       expect(httpGetEvent.status, equals('200'));
@@ -322,31 +320,29 @@ void main() {
       expect(testSocket2.id, equals(1));
     });
 
-    // TODO(kenz): figure out a workaround for the difference in
-    // `microsecondsSinceEpoch` locally and on the bots - then unskip.
     test('lastReadTimestamp returns correct value', () {
+      // Test these values in UTC to avoid timezone differences with the bots.
       expect(
-        formatDateTime(testSocket1.lastReadTimestamp),
-        equals('4:00:01.800 PM'),
+        formatDateTime(testSocket1.lastReadTimestamp.toUtc()),
+        equals('12:00:01.800 AM'),
       );
       expect(
-        formatDateTime(testSocket2.lastReadTimestamp),
-        equals('4:00:03.500 PM'),
+        formatDateTime(testSocket2.lastReadTimestamp.toUtc()),
+        equals('12:00:03.500 AM'),
       );
-    }, skip: true);
+    });
 
-    // TODO(kenz): figure out a workaround for the difference in
-    // `microsecondsSinceEpoch` locally and on the bots - then unskip.
     test('lastWriteTimestamp returns correct value', () {
+      // Test these values in UTC to avoid timezone differences with the bots.
       expect(
-        formatDateTime(testSocket1.lastWriteTimestamp),
-        equals('4:00:01.850 PM'),
+        formatDateTime(testSocket1.lastWriteTimestamp.toUtc()),
+        equals('12:00:01.850 AM'),
       );
       expect(
-        formatDateTime(testSocket2.lastWriteTimestamp),
-        equals('4:00:03.600 PM'),
+        formatDateTime(testSocket2.lastWriteTimestamp.toUtc()),
+        equals('12:00:03.600 AM'),
       );
-    }, skip: true);
+    });
 
     test('socketType returns correct value', () {
       expect(testSocket1.socketType, equals('tcp'));
