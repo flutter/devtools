@@ -6,9 +6,9 @@ import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_model.dart';
 import 'package:vm_service/vm_service.dart';
 
-const _getStartTime = 231935321629;
+const _getStartTime = 231935000000;
 final httpGetEvent = HttpRequestData.fromTimeline(
-  _getStartTime - 10, // - 10 is arbitrary.
+  _getStartTime - 1000000, // - 1000000 is arbitrary.
   httpGetEventTrace,
 );
 final httpGetEventTrace = [
@@ -32,7 +32,7 @@ final httpGetEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935321740,
+    'ts': 231935100000,
     'ph': 'n',
     'id': '1d',
     'args': {'isolateId': 'isolates/3907117677703047'}
@@ -42,7 +42,7 @@ final httpGetEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935321786,
+    'ts': 231935200000,
     'ph': 'n',
     'id': '1d',
     'args': {'isolateId': 'isolates/3907117677703047'}
@@ -52,7 +52,7 @@ final httpGetEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935746112,
+    'ts': 231935400000,
     'ph': 'n',
     'id': '1d',
     'args': {'isolateId': 'isolates/3907117677703047'}
@@ -62,7 +62,7 @@ final httpGetEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935746494,
+    'ts': 231935900000,
     'ph': 'e',
     'id': '1d',
     'args': {
@@ -97,9 +97,9 @@ final httpGetEventTrace = [
   },
 ];
 
-const _putStartTime = 231935155000;
+const _putStartTime = 231936000000;
 final httpPutEvent = HttpRequestData.fromTimeline(
-  _putStartTime - 10, // - 10 is arbitrary.
+  _putStartTime - 1000000, // - 1000000 is arbitrary.
   httpPutEventTrace,
 );
 final httpPutEventTrace = [
@@ -123,7 +123,7 @@ final httpPutEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935155100,
+    'ts': 231936300000,
     'ph': 'n',
     'id': '17',
     'args': {'isolateId': 'isolates/3907117677703047'}
@@ -133,7 +133,7 @@ final httpPutEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935155200,
+    'ts': 231936600000,
     'ph': 'n',
     'id': '17',
     'args': {'isolateId': 'isolates/3907117677703047'}
@@ -143,7 +143,7 @@ final httpPutEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935597000,
+    'ts': 231936800000,
     'ph': 'n',
     'id': '17',
     'args': {'isolateId': 'isolates/3907117677703047'}
@@ -153,7 +153,7 @@ final httpPutEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935598000,
+    'ts': 231936900000,
     'ph': 'e',
     'id': '17',
     'args': {
@@ -189,9 +189,9 @@ final httpPutEventTrace = [
   },
 ];
 
-const _getWithErrorStartTime = 231935607670;
+const _getWithErrorStartTime = 231937000000;
 final httpGetEventWithError = HttpRequestData.fromTimeline(
-  _getWithErrorStartTime - 10, // - 10 is arbitrary.
+  _getWithErrorStartTime - 1000000, // - 1000000 is arbitrary.
   httpGetEventWithErrorTrace,
 );
 final httpGetEventWithErrorTrace = [
@@ -217,7 +217,7 @@ final httpGetEventWithErrorTrace = [
     'cat': 'Dart',
     'tid': 21767,
     'pid': 81479,
-    'ts': 231935617670,
+    'ts': 231937100000,
     'ph': 'e',
     'id': 238,
     'args': {
@@ -231,9 +231,9 @@ final httpGetEventWithErrorTrace = [
   },
 ];
 
-const _invalidStartTime = 231935607670;
+const _invalidStartTime = 231938000000;
 final httpInvalidEvent = HttpRequestData.fromTimeline(
-  _invalidStartTime - 10, // - 10 is arbitrary.
+  _invalidStartTime - 1000000, // - 1000000 is arbitrary.
   httpInvalidEventTrace,
 );
 final httpInvalidEventTrace = [
@@ -242,7 +242,7 @@ final httpInvalidEventTrace = [
     'cat': 'Dart',
     'tid': 52414,
     'pid': 52406,
-    'ts': 231935597670,
+    'ts': 231938100000,
     'ph': 'e',
     'id': '17',
     'args': {
@@ -278,9 +278,9 @@ final httpInvalidEventTrace = [
   },
 ];
 
-const _inProgressStartTime = 231935321629;
+const _inProgressStartTime = 231939000000;
 final httpInProgressEvent = HttpRequestData.fromTimeline(
-  _inProgressStartTime - 10, // - 10 is arbitrary.
+  _inProgressStartTime - 1000000, // - 1000000 is arbitrary.
   httpInProgressEventTrace,
 );
 final httpInProgressEventTrace = [
