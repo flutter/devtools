@@ -13,6 +13,7 @@ import 'package:devtools_app/src/network/network_request_inspector_views.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -326,9 +327,9 @@ void main() {
       // Verify timing information.
       expect(find.text('Timing: '), findsOneWidget);
       expect(find.text('Start time: '), findsOneWidget);
-      expect(find.text('12:51:10.643 AM'), findsOneWidget);
+      expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
-      expect(find.text('12:51:11.068 AM'), findsOneWidget);
+      expect(find.text(formatDateTime(data.endTimestamp)), findsOneWidget);
       expect(find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
           findsOneWidget);
       expect(find.text('Connection established: '), findsOneWidget);
@@ -356,9 +357,9 @@ void main() {
       // Verify timing information.
       expect(find.text('Timing: '), findsOneWidget);
       expect(find.text('Start time: '), findsOneWidget);
-      expect(find.text('12:51:11.215 AM'), findsOneWidget);
+      expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
-      expect(find.text('12:51:11.225 AM'), findsOneWidget);
+      expect(find.text(formatDateTime(data.endTimestamp)), findsOneWidget);
       expect(find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
           findsOneWidget);
       expect(find.text('Connection established: '), findsNothing);
@@ -395,15 +396,16 @@ void main() {
       // Verify timing information.
       expect(find.text('Timing: '), findsOneWidget);
       expect(find.text('Start time: '), findsOneWidget);
-      expect(find.text('4:00:01.000 PM'), findsOneWidget);
+      expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
-      expect(find.text('4:00:02.000 PM'), findsOneWidget);
+      expect(find.text(formatDateTime(data.endTimestamp)), findsOneWidget);
       expect(find.byKey(NetworkRequestOverviewView.socketTimingGraphKey),
           findsOneWidget);
       expect(find.text('Last read time: '), findsOneWidget);
-      expect(find.text('4:00:01.800 PM'), findsOneWidget);
+      expect(find.text(formatDateTime(data.lastReadTimestamp)), findsOneWidget);
       expect(find.text('Last write time: '), findsOneWidget);
-      expect(find.text('4:00:01.850 PM'), findsOneWidget);
+      expect(
+          find.text(formatDateTime(data.lastWriteTimestamp)), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -435,15 +437,16 @@ void main() {
       // Verify timing information.
       expect(find.text('Timing: '), findsOneWidget);
       expect(find.text('Start time: '), findsOneWidget);
-      expect(find.text('4:00:03.000 PM'), findsOneWidget);
+      expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
       expect(find.text('Pending'), findsOneWidget);
       expect(find.byKey(NetworkRequestOverviewView.socketTimingGraphKey),
           findsOneWidget);
       expect(find.text('Last read time: '), findsOneWidget);
-      expect(find.text('4:00:03.500 PM'), findsOneWidget);
+      expect(find.text(formatDateTime(data.lastReadTimestamp)), findsOneWidget);
       expect(find.text('Last write time: '), findsOneWidget);
-      expect(find.text('4:00:03.600 PM'), findsOneWidget);
+      expect(
+          find.text(formatDateTime(data.lastWriteTimestamp)), findsOneWidget);
     });
   });
 }
