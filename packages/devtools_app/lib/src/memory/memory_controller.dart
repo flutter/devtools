@@ -20,6 +20,7 @@ import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../service_manager.dart';
 import '../table.dart';
+import '../table_data.dart';
 import '../ui/analytics_constants.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
@@ -622,8 +623,15 @@ class MemoryController extends DisposableController
 
   final _monitorAllocationsUpdated = ValueNotifier<int>(0);
 
+  /// Last column sorted and sort direction in allocation monitoring. As table
+  /// is reconstructed e.g., reset, etc. remembers user's sorting preference.
+  ColumnData<ClassHeapDetailStats> sortedMonitorColumn;
+  SortDirection sortedMonitorDirection;
+
   ValueListenable<int> get monitorAllocationsChanged =>
       _monitorAllocationsUpdated;
+
+  DateTime monitorTimestamp;
 
   var _monitorAllocations = <ClassHeapDetailStats>[];
 
@@ -892,10 +900,12 @@ class MemoryController extends DisposableController
   Reference buildTreeFromAllData() {
     topNode ??= LibraryReference(this, libraryRootNode, null);
 
-    var anyMonitor = false;
+    AllocationsMonitorReference monitorRoot;
     var anyAnalyses = false;
     for (final reference in topNode.children) {
-      anyMonitor |= reference is AllocationsMonitorReference;
+      if (reference is AllocationsMonitorReference) {
+        monitorRoot = reference;
+      }
       anyAnalyses |= reference is AnalysesReference;
     }
 
@@ -906,11 +916,33 @@ class MemoryController extends DisposableController
       topNode.addChild(analysesRoot);
     }
 
-    if (monitorAllocations.isNotEmpty && !anyMonitor) {
-      // Create Monitor Allocations entry.
-      final monitorRoot = AllocationsMonitorReference();
-      monitorRoot.addChild(AllocationMonitorReference(this, DateTime.now()));
-      topNode.addChild(monitorRoot);
+    if (monitorAllocations.isNotEmpty) {
+      var createRoot = false;
+      var createChild = false;
+
+      if (monitorRoot != null) {
+        final AllocationMonitorReference monitor = monitorRoot.children.first;
+        if (monitor.dateTime != monitorTimestamp) {
+          monitorRoot.removeLastChild();
+          // Reconstruct child new allocation profile.
+          createChild = true;
+        }
+      } else {
+        // Create Monitor Allocations entry - first time.
+        monitorRoot = AllocationsMonitorReference();
+        createRoot = true;
+        createChild = true;
+      }
+
+      if (createChild) {
+        monitorRoot.addChild(AllocationMonitorReference(
+          this,
+          monitorTimestamp,
+        ));
+      }
+      if (createRoot) {
+        topNode.addChild(monitorRoot);
+      }
     }
 
     createSnapshotEntries(topNode);

@@ -41,7 +41,7 @@ enum ScrollKind { up, down, parent }
 /// The [ColumnData] gives this table information about how to size its columns,
 /// and how to present each row of `data`.
 class FlatTable<T> extends StatefulWidget {
-  FlatTable({
+  const FlatTable({
     Key key,
     @required this.columns,
     @required this.data,
@@ -55,7 +55,7 @@ class FlatTable<T> extends StatefulWidget {
         assert(keyFactory != null),
         assert(data != null),
         assert(onItemSelected != null),
-        super(key: key) {}
+        super(key: key);
 
   final List<ColumnData<T>> columns;
 

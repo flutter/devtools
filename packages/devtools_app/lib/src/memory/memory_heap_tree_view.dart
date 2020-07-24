@@ -573,6 +573,8 @@ class HeapTreeViewState extends State<HeapTree>
   Future<void> _allocationStart() async {
     // TODO(terry): Look at grouping by library or classes also filtering e.g., await controller.computeLibraries();
     controller.memoryTimeline.addMonitorStartEvent();
+
+    final allocationtimestamp = DateTime.now();
     final currentAllocations = await controller.getAllocationProfile();
 
     if (controller.monitorAllocations.isNotEmpty) {
@@ -634,6 +636,7 @@ class HeapTreeViewState extends State<HeapTree>
       assert(currentLength == currentIndex);
     }
 
+    controller.monitorTimestamp = allocationtimestamp;
     controller.monitorAllocations = currentAllocations;
   }
 

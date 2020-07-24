@@ -63,19 +63,11 @@ class AllocationTableViewState extends State<AllocationTableView>
     ]);
   }
 
-  ColumnData<ClassHeapDetailStats> sortedColumn;
-  SortDirection sortedDirection;
-
   @override
   Widget build(BuildContext context) {
-    ColumnData<ClassHeapDetailStats> toSortColumn;
-    SortDirection toSortDirection;
-    if (controller.allocationsFieldsTable != null) {
-      toSortColumn = sortedColumn;
-      toSortDirection = sortedDirection;
-    } else {
-      toSortColumn = columns[0];
-      toSortDirection = SortDirection.ascending;
+    if (controller.allocationsFieldsTable == null) {
+      controller.sortedMonitorColumn = columns[0];
+      controller.sortedMonitorDirection = SortDirection.ascending;
     }
 
     controller.allocationsFieldsTable = FlatTable<ClassHeapDetailStats>(
@@ -83,11 +75,11 @@ class AllocationTableViewState extends State<AllocationTableView>
       data: controller.monitorAllocations,
       keyFactory: (d) => Key(d.classRef.name),
       onItemSelected: (ref) {},
-      sortColumn: toSortColumn,
-      sortDirection: toSortDirection,
+      sortColumn: controller.sortedMonitorColumn,
+      sortDirection: controller.sortedMonitorDirection,
       onSortChanged: (column, direction) {
-        sortedColumn = column;
-        sortedDirection = direction;
+        controller.sortedMonitorColumn = column;
+        controller.sortedMonitorDirection = direction;
 
       },
     );

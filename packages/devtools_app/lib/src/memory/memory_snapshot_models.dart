@@ -297,7 +297,7 @@ class AllocationMonitorReference extends Reference {
           'Monitor ${MemoryController.formattedTimestamp(dateTime)}',
         );
 
-  final DateTime dateTime;
+  DateTime dateTime;
 }
 
 /// Container of all snapshot analyses processed.
