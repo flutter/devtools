@@ -38,6 +38,10 @@ class AllocationAccumulator {
         'reset': _reset,
       };
 
+  static AllocationAccumulator empty() => AllocationAccumulator(false, false, false);
+
+  bool get isEmpty => !isStart && !isContinuesVisible && !isReset;
+
   final bool _start;
 
   final bool _continues;
@@ -123,7 +127,13 @@ class EventSample {
       );
 
   /// Create an empty event (all values are nothing)
-  static EventSample empty() => EventSample(-1, false, false, false, null);
+  static EventSample empty() => EventSample(
+        -1,
+        false,
+        false,
+        false,
+        AllocationAccumulator.empty(),
+      );
 
   bool get isEmpty => timestamp == -1;
 
