@@ -106,7 +106,7 @@ void main() {
         expect(find.byType(DiffView), findsOneWidget);
         expect(
             find.byKey(CodeSizeScreen.snapshotViewTreemapKey), findsOneWidget);
-
+        debugDumpApp();
         // Assumes the treemap is built with treemap_test_data_v8_new.json and treemap_test_data_v8_old.json
         const text = 'package:pointycastle [+465.8 KB]';
         expect(find.text(text), findsOneWidget);
