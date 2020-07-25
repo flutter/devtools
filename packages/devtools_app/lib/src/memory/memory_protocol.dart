@@ -192,7 +192,7 @@ class MemoryTracker {
     // Process any memory events?
     final eventSample = processEventSample(memoryTimeline, time);
 
-    if (eventSample != null && eventSample.isEventAllocaitonAccumulator) {
+    if (eventSample != null && eventSample.isEventAllocationAccumulator) {
       if (eventSample.allocationAccumulator.isStart) {
         // Stop Continuous events being auto posted - a new start is beginning.
         memoryTimeline.monitorContinuesState = ContinuesState.stop;
@@ -226,7 +226,7 @@ class MemoryTracker {
     // until a reset event then the continuous events between last monitor
     // start/reset and latest reset are made visible.
     if (eventSample != null &&
-        eventSample.isEventAllocaitonAccumulator &&
+        eventSample.isEventAllocationAccumulator &&
         eventSample.allocationAccumulator.isStart) {
       memoryTimeline.monitorContinuesState = ContinuesState.next;
     }

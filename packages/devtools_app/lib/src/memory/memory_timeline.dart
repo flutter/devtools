@@ -155,7 +155,7 @@ class MemoryTimeline {
     for (var index = liveData.length - 1; index >= 0; index--) {
       final sample = liveData[index];
       if (sample.memoryEventInfo != null &&
-          sample.memoryEventInfo.isEventAllocaitonAccumulator) {
+          sample.memoryEventInfo.isEventAllocationAccumulator) {
         final allocationAccumulator =
             sample.memoryEventInfo.allocationAccumulator;
         if (allocationAccumulator.isReset || allocationAccumulator.isStart) {
@@ -436,16 +436,7 @@ class MemoryTimeline {
     return [];
   }
 
-  List<Map> recomputeOfflineData(int displayInterval) {
-    assert(displayInterval > 0);
-
-    _computeStartingIndex(displayInterval);
-
-    // Start from the first sample to display in this time interval.
-    return _processData(startingIndex);
-  }
-
-  List<Map> recomputeLiveData(int displayInterval) {
+  List<Map> recomputeData(int displayInterval) {
     assert(displayInterval > 0);
 
     _computeStartingIndex(displayInterval);

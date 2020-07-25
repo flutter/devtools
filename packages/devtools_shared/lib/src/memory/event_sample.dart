@@ -38,7 +38,8 @@ class AllocationAccumulator {
         'reset': _reset,
       };
 
-  static AllocationAccumulator empty() => AllocationAccumulator(false, false, false);
+  static AllocationAccumulator empty() =>
+      AllocationAccumulator(false, false, false);
 
   bool get isEmpty => !isStart && !isContinuesVisible && !isReset;
 
@@ -107,7 +108,9 @@ class EventSample {
         json['gcEvent'] as bool,
         json['snapshotEvent'] as bool,
         json['snapshotAutoEvent'] as bool,
-        AllocationAccumulator.fromJson(json['allocationAccumulatorEvent']),
+        json['allocationAccumulatorEvent'] != null
+            ? AllocationAccumulator.fromJson(json['allocationAccumulatorEvent'])
+            : null,
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -115,7 +118,9 @@ class EventSample {
         'gcEvent': isEventGC,
         'snapshotEvent': isEventSnapshot,
         'snapshotAutoEvent': isEventSnapshotAuto,
-        'allocationAccumulatorEvent': allocationAccumulator.toJson(),
+        'allocationAccumulatorEvent': allocationAccumulator != null
+            ? allocationAccumulator.toJson()
+            : null,
       };
 
   EventSample clone(int timestamp) => EventSample(
@@ -148,7 +153,7 @@ class EventSample {
 
   final bool isEventSnapshotAuto;
 
-  bool get isEventAllocaitonAccumulator => allocationAccumulator != null;
+  bool get isEventAllocationAccumulator => allocationAccumulator != null;
 
   AllocationAccumulator allocationAccumulator;
 

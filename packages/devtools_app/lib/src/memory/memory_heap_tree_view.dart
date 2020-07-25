@@ -255,7 +255,7 @@ class HeapTreeViewState extends State<HeapTree>
         .format(DateTime.fromMillisecondsSinceEpoch(heapSample.timestamp));
 
     if (debugSnapshots) {
-      logger.log('AutoSnapshot $startDateTime heapSum=$heapSum, '
+      debugLogger('AutoSnapshot $startDateTime heapSum=$heapSum, '
           'first=${heapMovingAverage.dataSet.first}, '
           'mean=${heapMovingAverage.mean}');
     }
@@ -281,7 +281,7 @@ class HeapTreeViewState extends State<HeapTree>
           lastSnapshotMemoryTotal = heapSum;
 
           takeSnapshot = true;
-          logger.log('AutoSnapshot - RSS exceeded '
+          debugLogger('AutoSnapshot - RSS exceeded '
               '($rssPercentIncrease% increase) @ $startDateTime.');
         }
       }
@@ -294,7 +294,7 @@ class HeapTreeViewState extends State<HeapTree>
       takeSnapshot = true;
       logger.log('AutoSnapshot - memory spike @ $startDateTime} '
           'last snapshot ${(sampleTime - snapshotTime).inSeconds} seconds ago.');
-      logger.log('               '
+      debugLogger('               '
           'heap @ last snapshot = $lastSnapshotMemoryTotal, '
           'heap total=$heapSum, RSS=${heapSample.rss}');
     }
@@ -735,7 +735,13 @@ class HeapTreeViewState extends State<HeapTree>
     final graph = await controller.snapshotMemory();
 
     // No snapshot collected, disconnected/crash application.
-    if (graph == null) return;
+    if (graph == null) {
+      setState(() {
+        snapshotState = SnapshotStatus.done;
+      });
+      controller.selectedSnapshotTimestamp = DateTime.now();
+      return;
+    }
 
     final snapshotCollectionTime = DateTime.now();
 

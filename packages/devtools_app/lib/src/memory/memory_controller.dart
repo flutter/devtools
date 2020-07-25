@@ -299,10 +299,15 @@ class MemoryController extends DisposableController
   /// 1 minute in milliseconds.
   static const int minuteInMs = 60 * 1000;
 
+  static int displayIntervalToIntervalDurationInMs(String interval) {
+    return interval == displayAllMinutes
+        ? maxJsInt
+        : int.parse(interval) * minuteInMs;
+  }
+
   /// Return the pruning interval in milliseconds.
-  int get intervalDurationInMs => (displayInterval == displayAllMinutes)
-      ? maxJsInt
-      : int.parse(displayInterval) * minuteInMs;
+  int get intervalDurationInMs =>
+      displayIntervalToIntervalDurationInMs(displayInterval);
 
   /// MemorySource has changed update the view.
   void updatedMemorySource() {
@@ -327,12 +332,12 @@ class MemoryController extends DisposableController
   }
 
   void recomputeOfflineData() {
-    final args = memoryTimeline.recomputeOfflineData(intervalDurationInMs);
+    final args = memoryTimeline.recomputeData(intervalDurationInMs);
     processDataset(args);
   }
 
   void recomputeData() {
-    final args = memoryTimeline.recomputeLiveData(intervalDurationInMs);
+    final args = memoryTimeline.recomputeData(intervalDurationInMs);
     processDataset(args);
     // TODO(terry): need to recomputeOffline data?
   }
@@ -1343,7 +1348,7 @@ class MemoryLog {
       // TODO(terry): Remove this check add a unit test instead.
       // Reload the file just created and validate that the saved data matches
       // the live data.
-      final memoryJson = MemoryJson.decode(jsonPayload);
+      final memoryJson = MemoryJson.decode(argJsonString: jsonPayload);
       assert(memoryJson.isMatchedVersion);
       assert(memoryJson.isMemoryPayload);
       assert(memoryJson.data.length == liveData.length);
@@ -1369,16 +1374,15 @@ class MemoryLog {
 
   /// Load the memory profile data from a saved memory log file.
   void loadOffline(String filename) async {
-    controller.offline = true;
-
     final jsonPayload = _fs.readStringFromFile(filename);
-    final memoryJson = MemoryJson.decode(jsonPayload);
+    final memoryJson = MemoryJson.decode(argJsonString: jsonPayload);
 
     // TODO(terry): Display notification JSON file isn't version isn't
     // supported or if the payload isn't an exported memory file.
     assert(memoryJson.isMatchedVersion);
     assert(memoryJson.isMemoryPayload);
 
+    controller.offline = true;
     controller.memoryTimeline.offlineData.clear();
     controller.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
