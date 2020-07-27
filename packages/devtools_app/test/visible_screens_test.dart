@@ -35,7 +35,7 @@ void main() {
     void setupMockValues({
       bool web = false,
       bool flutter = false,
-      bool profileMode = false,
+      bool debugMode = true,
     }) {
       mockIsDartVmApp(fakeServiceManager.connectedApp, !web);
       if (web) {
@@ -47,9 +47,9 @@ void main() {
             .add('package:flutter/src/widgets/binding.dart');
       }
       mockIsDebugFlutterApp(
-          fakeServiceManager.connectedApp, flutter && !profileMode);
+          fakeServiceManager.connectedApp, flutter && debugMode);
       mockIsProfileFlutterApp(
-          fakeServiceManager.connectedApp, flutter && profileMode);
+          fakeServiceManager.connectedApp, flutter && !debugMode);
     }
 
     testWidgets('are correct for Dart CLI app', (WidgetTester tester) async {
@@ -106,7 +106,7 @@ void main() {
 
     testWidgets('are correct for Flutter (non-web) profile app',
         (WidgetTester tester) async {
-      setupMockValues(flutter: true, profileMode: true);
+      setupMockValues(flutter: true, debug: false);
 
       expect(
           visibleScreenTypes,
@@ -142,7 +142,7 @@ void main() {
 
     testWidgets('are correct for Flutter web profile app',
         (WidgetTester tester) async {
-      setupMockValues(flutter: true, web: true, profileMode: true);
+      setupMockValues(flutter: true, web: true, debug: false);
 
       expect(
           visibleScreenTypes,
