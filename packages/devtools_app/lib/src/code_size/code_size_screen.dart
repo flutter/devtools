@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
 import '../common_widgets.dart';
+import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -17,7 +18,7 @@ import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
 
-bool codeSizeScreenEnabled = false;
+bool codeSizeScreenEnabled = true;
 
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
@@ -164,6 +165,9 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
 class SnapshotView extends StatefulWidget {
   const SnapshotView();
 
+  static const snapshotDragAndDropKey =
+      Key('Code size snapshot - dragAndDropKey');
+
   @override
   _SnapshotViewState createState() => _SnapshotViewState();
 }
@@ -172,6 +176,12 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   CodeSizeController controller;
 
   TreemapNode snapshotRoot;
+
+  @override
+  void initState() {
+    super.initState();
+    addDragAndDropPriorityKeys([SnapshotView.snapshotDragAndDropKey]);
+  }
 
   @override
   void didChangeDependencies() {
@@ -242,6 +252,10 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
             child: FileImportContainer(
               title: 'Snapshot',
               actionText: 'Analyze Snapshot',
+              dragAndDropKey: SnapshotView.snapshotDragAndDropKey,
+              // TODO(kenz): handle drag and drop
+              onDragAndDrop: (data) =>
+                  print('TODO: handle snapshot drag and drop'),
               onAction: controller.loadFakeTree,
               // TODO(peterdjlee): Remove once the file picker is implemented.
               fileToBeImported:
@@ -271,6 +285,12 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 class DiffView extends StatefulWidget {
   const DiffView();
 
+  static const diffOldDragAndDropKey =
+      Key('Code size diff old - dragAndDropKey');
+
+  static const diffNewDragAndDropKey =
+      Key('Code size diff new - dragAndDropKey');
+
   @override
   _DiffViewState createState() => _DiffViewState();
 }
@@ -279,6 +299,15 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   CodeSizeController controller;
 
   TreemapNode diffRoot;
+
+  @override
+  void initState() {
+    super.initState();
+    addDragAndDropPriorityKeys([
+      DiffView.diffOldDragAndDropKey,
+      DiffView.diffNewDragAndDropKey,
+    ]);
+  }
 
   @override
   void didChangeDependencies() {
@@ -337,6 +366,8 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
             child: DualFileImportContainer(
               firstFileTitle: 'Old',
               secondFileTitle: 'New',
+              firstDragAndDropKey: DiffView.diffOldDragAndDropKey,
+              secondDragAndDropKey: DiffView.diffNewDragAndDropKey,
               actionText: 'Analyze Diff',
               onAction: controller.loadFakeDiffTree,
             ),

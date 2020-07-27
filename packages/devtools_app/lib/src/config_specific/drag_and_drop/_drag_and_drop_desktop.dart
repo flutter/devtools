@@ -10,17 +10,19 @@ import 'drag_and_drop.dart';
 // https://github.com/flutter/flutter/issues/30719.
 
 DragAndDropDesktop createDragAndDrop({
+  @required Key key,
   @required void Function(Map<String, dynamic> data) handleDrop,
   @required Widget child,
 }) {
-  return DragAndDropDesktop(handleDrop: handleDrop, child: child);
+  return DragAndDropDesktop(key: key, handleDrop: handleDrop, child: child);
 }
 
 class DragAndDropDesktop extends DragAndDrop {
   const DragAndDropDesktop({
+    @required Key key,
     @required void Function(Map<String, dynamic> data) handleDrop,
     @required Widget child,
-  }) : super.impl(handleDrop: handleDrop, child: child);
+  }) : super.impl(key: key, handleDrop: handleDrop, child: child);
 
   @override
   _DragAndDropDesktopState createState() => _DragAndDropDesktopState();

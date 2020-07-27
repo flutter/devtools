@@ -34,6 +34,7 @@ void main() {
         const DevToolsScaffold(
           tabs: [screen1, screen2, screen3, screen4, screen5],
           ideTheme: null,
+          dragAndDropKey: null,
         ),
       ));
       expect(find.byKey(k1), findsOneWidget);
@@ -48,6 +49,7 @@ void main() {
         const DevToolsScaffold(
           tabs: [screen1, screen2, screen3, screen4, screen5],
           ideTheme: null,
+          dragAndDropKey: null,
         ),
       ));
       expect(find.byKey(k1), findsOneWidget);
@@ -58,7 +60,11 @@ void main() {
     testWidgets('displays no tabs when only one is given',
         (WidgetTester tester) async {
       await tester.pumpWidget(wrap(
-        const DevToolsScaffold(tabs: [screen1], ideTheme: null),
+        const DevToolsScaffold(
+          tabs: [screen1],
+          ideTheme: null,
+          dragAndDropKey: null,
+        ),
       ));
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(t1), findsNothing);
@@ -69,6 +75,7 @@ void main() {
         const DevToolsScaffold(
           tabs: [screen1, screen2],
           ideTheme: null,
+          dragAndDropKey: null,
         ),
       ));
       expect(find.byKey(k1), findsOneWidget);
@@ -95,6 +102,7 @@ void main() {
           tabs: const [screen1, screen2],
           initialPage: screen2.screenId,
           ideTheme: null,
+          dragAndDropKey: null,
         ),
       ));
 

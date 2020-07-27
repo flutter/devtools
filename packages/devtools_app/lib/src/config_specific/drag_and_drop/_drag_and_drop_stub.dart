@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'drag_and_drop.dart';
 
 DragAndDrop createDragAndDrop({
+  @required Key key,
   @required void Function(Map<String, dynamic> data) handleDrop,
   @required Widget child,
 }) {

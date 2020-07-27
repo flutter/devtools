@@ -33,6 +33,7 @@ import 'theme.dart';
 class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
     Key key,
+    @required this.dragAndDropKey,
     @required this.tabs,
     this.initialPage,
     this.actions,
@@ -43,12 +44,14 @@ class DevToolsScaffold extends StatefulWidget {
 
   DevToolsScaffold.withChild({
     Key key,
-    Widget child,
+    @required Widget child,
     @required IdeTheme ideTheme,
+    @required Key dragAndDropKey,
   }) : this(
           key: key,
           tabs: [SimpleScreen(child)],
           ideTheme: ideTheme,
+          dragAndDropKey: dragAndDropKey,
         );
 
   /// A [Key] that indicates the scaffold is showing in narrow-width mode.
@@ -57,6 +60,7 @@ class DevToolsScaffold extends StatefulWidget {
   /// A [Key] that indicates the scaffold is showing in full-width mode.
   static const Key fullWidthKey = Key('Full-width Scaffold');
 
+  // TODO(kenz): update this when we enable the code size screen
   // TODO(jacobr): compute this based on the width of the list of tabs rather
   // than hardcoding. Computing this width dynamically is even more important
   // in the presence of conditional screens.
@@ -71,6 +75,8 @@ class DevToolsScaffold extends StatefulWidget {
   /// The border around the content in the DevTools UI.
   static const EdgeInsets appPadding =
       EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
+
+  final Key dragAndDropKey;
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
@@ -122,6 +128,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         frameworkController.onConnectVmEvent.listen(_connectVm);
     _showPageSubscription =
         frameworkController.onShowPageId.listen(_showPageById);
+
+    addDragAndDropPriorityKeys([widget.dragAndDropKey]);
   }
 
   @override
@@ -283,6 +291,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       child: Provider<BannerMessagesController>(
         create: (_) => BannerMessagesController(),
         child: DragAndDrop(
+          key: widget.dragAndDropKey,
           // TODO(kenz): we are handling drops from multiple scaffolds. We need
           // to make sure we are only handling drops from the active scaffold.
           handleDrop: _importController.importData,

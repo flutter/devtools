@@ -11,17 +11,19 @@ import 'package:flutter/material.dart';
 import 'drag_and_drop.dart';
 
 DragAndDropWeb createDragAndDrop({
+  @required Key key,
   @required void Function(Map<String, dynamic> data) handleDrop,
   @required Widget child,
 }) {
-  return DragAndDropWeb(handleDrop: handleDrop, child: child);
+  return DragAndDropWeb(key: key, handleDrop: handleDrop, child: child);
 }
 
 class DragAndDropWeb extends DragAndDrop {
   const DragAndDropWeb({
+    @required Key key,
     @required void Function(Map<String, dynamic> data) handleDrop,
     @required Widget child,
-  }) : super.impl(handleDrop: handleDrop, child: child);
+  }) : super.impl(key: key, handleDrop: handleDrop, child: child);
 
   @override
   _DragAndDropWebState createState() => _DragAndDropWebState();
@@ -49,17 +51,27 @@ class _DragAndDropWebState extends DragAndDropState {
   }
 
   void _onDragOver(MouseEvent event) {
-    super.dragOver();
+    if (!isPriority) return;
+
+    super.dragOver(event.offset.x, event.offset.y);
+
+    // This needs to be called after `super.dragOver()` so that the value of
+    // `_dragging` gets updated correctly.
+    if (!coordinatesInBound(event.offset.x, event.offset.y)) return;
+
     // This is necessary to allow us to drop.
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }
 
   void _onDragLeave(MouseEvent event) {
+    if (!isPriority) return;
     super.dragLeave();
   }
 
   void _onDrop(MouseEvent event) async {
+    if (!isPriority || !coordinatesInBound(event.offset.x, event.offset.y))
+      return;
     super.drop();
 
     // Stop the browser from redirecting.

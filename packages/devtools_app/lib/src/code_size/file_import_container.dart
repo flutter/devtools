@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 
 import '../common_widgets.dart';
+import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 
@@ -13,6 +14,8 @@ class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
     @required this.title,
     @required this.fileToBeImported,
+    @required this.dragAndDropKey,
+    @required this.onDragAndDrop,
     this.actionText,
     this.onAction,
     this.onFileSelected,
@@ -27,6 +30,10 @@ class FileImportContainer extends StatefulWidget {
   final Function(String filePath) onAction;
 
   final Function(String filePath) onFileSelected;
+
+  final Key dragAndDropKey;
+
+  final Function(Map<String, dynamic> data) onDragAndDrop;
 
   // TODO(peterdjlee): Remove once the file picker is implemented.
   final String fileToBeImported;
@@ -48,19 +55,27 @@ class _FileImportContainerState extends State<FileImportContainer> {
         ),
         const SizedBox(height: defaultSpacing),
         Expanded(
-          child: RoundedOutlinedBorder(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
+          // TODO(kenz): improve drag over highlight.
+          child: DragAndDrop(
+            key: widget.dragAndDropKey,
+            handleDrop: widget.onDragAndDrop,
+            child: RoundedOutlinedBorder(
+              child: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildImportButton(),
-                    _buildImportedFileDisplay(context),
+                    Column(
+                      children: [
+                        _buildImportButton(),
+                        _buildImportedFileDisplay(context),
+                      ],
+                    ),
+                    if (widget.actionText != null && widget.onAction != null)
+                      _buildActionButton(),
                   ],
                 ),
-                if (widget.actionText != null && widget.onAction != null)
-                  _buildActionButton(),
-              ],
+              ),
             ),
           ),
         ),
@@ -133,6 +148,10 @@ class DualFileImportContainer extends StatefulWidget {
   const DualFileImportContainer({
     @required this.firstFileTitle,
     @required this.secondFileTitle,
+    @required this.firstDragAndDropKey,
+    @required this.secondDragAndDropKey,
+    @required this.firstOnDragAndDrop,
+    @required this.secondOnDragAndDrop,
     @required this.actionText,
     @required this.onAction,
     Key key,
@@ -141,6 +160,14 @@ class DualFileImportContainer extends StatefulWidget {
   final String firstFileTitle;
 
   final String secondFileTitle;
+
+  final Key firstDragAndDropKey;
+
+  final Key secondDragAndDropKey;
+
+  final Function(Map<String, dynamic> data) firstOnDragAndDrop;
+
+  final Function(Map<String, dynamic> data) secondOnDragAndDrop;
 
   /// The title of the action button.
   final String actionText;
@@ -163,6 +190,8 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Expanded(
           child: FileImportContainer(
             title: widget.firstFileTitle,
+            dragAndDropKey: widget.firstDragAndDropKey,
+            onDragAndDrop: widget.firstOnDragAndDrop,
             onFileSelected: onFirstFileSelected,
             // TODO(peterdjlee): Remove once the file picker is implemented.
             fileToBeImported:
@@ -175,6 +204,8 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Expanded(
           child: FileImportContainer(
             title: widget.secondFileTitle,
+            dragAndDropKey: widget.secondDragAndDropKey,
+            onDragAndDrop: widget.secondOnDragAndDrop,
             onFileSelected: onSecondFileSelected,
             // TODO(peterdjlee): Remove once the file picker is implemented.
             fileToBeImported:
