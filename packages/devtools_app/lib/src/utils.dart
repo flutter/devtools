@@ -286,15 +286,33 @@ Color parseCssHexColor(String input) {
   // Remove any leading # (and the escaped version to be leniant)
   input = input.replaceAll('#', '').replaceAll('%23', '');
 
-  // Handle 3-digit hex codes (eg. #123 == #112233)
-  if (input.length == 3) {
+  // Handle 3/4-digit hex codes (eg. #123 == #112233)
+  if (input.length == 3 || input.length == 4) {
     input = input.split('').map((c) => '$c$c').join();
   }
 
   // Pad alpha with FF.
-  final fullHex = input.padLeft(8, 'f');
+  if (input.length == 6) {
+    input = '${input}ff';
+  }
 
-  return Color(int.parse(fullHex, radix: 16));
+  // In CSS, alpha is in the lowest bits, but for Flutter's value, it's in the
+  // highest bits, so move the alpha from the end to the start before parsing.
+  if (input.length == 8) {
+    input = '${input.substring(6)}${input.substring(0, 6)}';
+  }
+  final value = int.parse(input, radix: 16);
+
+  return Color(value);
+}
+
+/// Converts a dart:ui Color into #RRGGBBAA format for use in CSS.
+String toCssHexColor(Color color) {
+  // In CSS Hex, Alpha comes last, but in Flutter's `value` field, alpha is
+  // in the high bytes, so just using `value.toRadixString(16)` will put alpha
+  // in the wrong position.
+  String hex(int val) => val.toRadixString(16).padLeft(2, '0');
+  return '#${hex(color.red)}${hex(color.green)}${hex(color.blue)}${hex(color.alpha)}';
 }
 
 class Property<T> {

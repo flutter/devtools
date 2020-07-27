@@ -24,7 +24,7 @@ IdeTheme getIdeTheme() {
   // to avoid a white page until the first Flutter frame is rendered.
   if (overrides.backgroundColor != null) {
     document.body.style.backgroundColor =
-        overrides.backgroundColor.value.toRadixString(16).padLeft(8, '0');
+        toCssHexColor(overrides.backgroundColor);
   }
 
   return overrides;
