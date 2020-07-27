@@ -106,7 +106,7 @@ void main() {
 
     testWidgets('are correct for Flutter (non-web) profile app',
         (WidgetTester tester) async {
-      setupMockValues(flutter: true, debug: false);
+      setupMockValues(flutter: true, debugMode: false);
 
       expect(
           visibleScreenTypes,
@@ -142,7 +142,7 @@ void main() {
 
     testWidgets('are correct for Flutter web profile app',
         (WidgetTester tester) async {
-      setupMockValues(flutter: true, web: true, debug: false);
+      setupMockValues(flutter: true, web: true, debugMode: false);
 
       expect(
           visibleScreenTypes,
