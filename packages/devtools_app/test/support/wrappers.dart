@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/code_size/code_size_controller.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/banner_messages.dart';
-import 'package:devtools_app/src/notifications.dart';
-import 'package:devtools_app/src/theme.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
+import 'package:devtools_app/src/notifications.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/theme.dart';
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -28,7 +28,7 @@ import '../support/mocks.dart';
 /// draw ink effects.
 Widget wrap(Widget widget) {
   return MaterialApp(
-    theme: themeFor(isDarkTheme: false),
+    theme: themeFor(isDarkTheme: false, ideTheme: null),
     home: Material(child: widget),
   );
 }

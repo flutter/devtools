@@ -55,7 +55,7 @@ Future<void> main() async {
       await preferences.init();
       final app = DefaultAssetBundle(
         bundle: _DiskAssetBundle(),
-        child: DevToolsApp(const [], preferences),
+        child: DevToolsApp(const [], preferences, null),
       );
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();

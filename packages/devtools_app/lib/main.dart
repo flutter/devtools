@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'src/app.dart';
 import 'src/config_specific/framework_initialize/framework_initialize.dart';
+import 'src/config_specific/ide_theme/ide_theme.dart';
 import 'src/config_specific/load_fallback_app/load_fallback_app.dart';
 import 'src/preferences.dart';
 
@@ -49,6 +50,8 @@ void main() async {
     };
   }
 
+  final ideTheme = getIdeTheme();
+
   final preferences = PreferencesController();
   // Wait for preferences to load before rendering the app to avoid a flash of
   // content with the incorrect theme.
@@ -58,6 +61,6 @@ void main() async {
 
   // Now run the app.
   runApp(
-    DevToolsApp(defaultScreens, preferences),
+    DevToolsApp(defaultScreens, preferences, ideTheme),
   );
 }

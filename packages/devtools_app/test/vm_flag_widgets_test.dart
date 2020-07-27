@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/banner_messages.dart';
-import 'package:devtools_app/src/theme.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/theme.dart';
 import 'package:devtools_app/src/ui/vm_flag_widgets.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:flutter/material.dart';
@@ -33,7 +33,7 @@ void main() {
     Future<void> pumpDropdown(WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: themeFor(isDarkTheme: false),
+          theme: themeFor(isDarkTheme: false, ideTheme: null),
           home: Material(
             child: wrapWithControllers(
               Builder(
