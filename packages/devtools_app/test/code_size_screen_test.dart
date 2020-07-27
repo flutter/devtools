@@ -6,7 +6,6 @@ import 'package:devtools_app/src/code_size/code_size_screen.dart';
 import 'package:devtools_app/src/code_size/code_size_controller.dart';
 import 'package:devtools_app/src/code_size/code_size_table.dart';
 import 'package:devtools_app/src/split.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'support/wrappers.dart';
@@ -86,7 +85,7 @@ void main() {
 
       expect(find.byType(CodeSizeSnapshotTable), findsOneWidget);
       expect(find.byType(CodeSizeDiffTable), findsNothing);
-    },);
+    });
 
     testWidgetsWithWindowSize('builds diff tab', windowSize,
         (WidgetTester tester) async {
