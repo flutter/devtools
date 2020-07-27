@@ -139,8 +139,8 @@ mixin OfflineScreenMixin<T extends StatefulWidget, U> on State<T> {
 
 /// Check whether a screen should be shown in the UI.
 bool shouldShowScreen(Screen screen) {
-  if (offlineMode && screen.worksOffline) {
-    return true;
+  if (offlineMode) {
+    return screen.worksOffline;
   }
   if (screen.requiresLibrary != null) {
     if (!serviceManager.isServiceAvailable ||

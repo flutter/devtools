@@ -48,6 +48,8 @@ void main() {
       }
       mockIsDebugFlutterApp(
           fakeServiceManager.connectedApp, flutter && !profileMode);
+      mockIsProfileFlutterApp(
+          fakeServiceManager.connectedApp, flutter && profileMode);
     }
 
     testWidgets('are correct for Dart CLI app', (WidgetTester tester) async {
@@ -78,9 +80,9 @@ void main() {
             // MemoryScreen,
             // PerformanceScreen,
             DebuggerScreen,
-            NetworkScreen,
+            // NetworkScreen,
             LoggingScreen,
-            if (codeSizeScreenEnabled) CodeSizeScreen,
+            // if (codeSizeScreenEnabled) CodeSizeScreen,
           ]));
     });
 
@@ -109,11 +111,11 @@ void main() {
       expect(
           visibleScreenTypes,
           equals([
-            InspectorScreen,
+            // InspectorScreen,
             TimelineScreen,
             MemoryScreen,
             PerformanceScreen,
-            DebuggerScreen,
+            // DebuggerScreen,
             NetworkScreen,
             LoggingScreen,
             if (codeSizeScreenEnabled) CodeSizeScreen,
@@ -132,9 +134,9 @@ void main() {
             // MemoryScreen,
             // PerformanceScreen,
             DebuggerScreen,
-            NetworkScreen,
+            // NetworkScreen,
             LoggingScreen,
-            if (codeSizeScreenEnabled) CodeSizeScreen,
+            // if (codeSizeScreenEnabled) CodeSizeScreen,
           ]));
     });
 
@@ -145,14 +147,16 @@ void main() {
       expect(
           visibleScreenTypes,
           equals([
-            InspectorScreen,
+            // InspectorScreen,
             // TimelineScreen,
             // MemoryScreen,
             // PerformanceScreen,
-            DebuggerScreen,
-            NetworkScreen,
+            // DebuggerScreen,
+            // NetworkScreen,
+            // TODO(dantup): Find out if this should be disabled (and if so
+            // how best to represent it).
             LoggingScreen,
-            if (codeSizeScreenEnabled) CodeSizeScreen,
+            // if (codeSizeScreenEnabled) CodeSizeScreen,
           ]));
     });
 
@@ -167,10 +171,10 @@ void main() {
             TimelineScreen, // Works offline, so appears regardless of web flag
             // MemoryScreen,
             PerformanceScreen, // Works offline, so appears regardless of web flag
-            DebuggerScreen,
-            NetworkScreen,
-            LoggingScreen,
-            if (codeSizeScreenEnabled) CodeSizeScreen,
+            // DebuggerScreen,
+            // NetworkScreen,
+            // LoggingScreen,
+            // if (codeSizeScreenEnabled) CodeSizeScreen,
           ]));
     });
   });

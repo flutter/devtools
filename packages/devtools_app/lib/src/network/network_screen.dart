@@ -20,7 +20,12 @@ import 'network_request_inspector.dart';
 
 class NetworkScreen extends Screen {
   const NetworkScreen()
-      : super('network', title: 'Network', icon: Icons.network_check);
+      : super.conditional(
+          id: 'network',
+          requiresDartVm: true,
+          title: 'Network',
+          icon: Icons.network_check,
+        );
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');

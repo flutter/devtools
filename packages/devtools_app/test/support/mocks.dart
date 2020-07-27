@@ -672,12 +672,18 @@ void mockIsFlutterApp(MockConnectedApp connectedApp, [isFlutterApp = true]) {
   when(connectedApp.isFlutterAppNow).thenReturn(isFlutterApp);
   when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(isFlutterApp));
   when(connectedApp.isDebugFlutterAppNow).thenReturn(true);
-  when(connectedApp.isProfileBuildNow).thenReturn(false);
 }
 
 void mockIsDebugFlutterApp(MockConnectedApp connectedApp,
     [isDebugFlutterApp = true]) {
   when(connectedApp.isDebugFlutterAppNow).thenReturn(isDebugFlutterApp);
+  when(connectedApp.isProfileBuildNow).thenReturn(!isDebugFlutterApp);
+}
+
+void mockIsProfileFlutterApp(MockConnectedApp connectedApp,
+    [isProfileFlutterApp = true]) {
+  when(connectedApp.isDebugFlutterAppNow).thenReturn(!isProfileFlutterApp);
+  when(connectedApp.isProfileBuildNow).thenReturn(isProfileFlutterApp);
 }
 
 void mockIsDartVmApp(MockConnectedApp connectedApp, [isDartVmApp = true]) {
