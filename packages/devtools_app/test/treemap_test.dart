@@ -28,7 +28,9 @@ void main() {
 
       // Pump treemap widget with tree built with test data.
       Future<void> pumpTreemapWidget(
-          WidgetTester tester, Key treemapKey) async {
+        WidgetTester tester,
+        Key treemapKey,
+      ) async {
         await tester.pumpWidget(wrap(LayoutBuilder(
           key: treemapKey,
           builder: (context, constraints) {

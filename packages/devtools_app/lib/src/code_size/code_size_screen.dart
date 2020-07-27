@@ -27,6 +27,18 @@ class CodeSizeScreen extends Screen {
 
   static const id = 'codeSize';
 
+  static const snapshotTabKey = Key('Snapshot Tab');
+  static const diffTabKey = Key('Diff Tab');
+
+  @visibleForTesting
+  static const clearButtonKey = Key('Clear Button');
+  @visibleForTesting
+  static const dropdownKey = Key('Diff Tree Type Dropdown');
+  @visibleForTesting
+  static const snapshotViewTreemapKey = Key('Snapshot View Treemap');
+  @visibleForTesting
+  static const diffViewTreemapKey = Key('Diff View Treemap');
+
   @override
   String get docPageId => id;
 
@@ -40,21 +52,14 @@ class CodeSizeBody extends StatefulWidget {
   const CodeSizeBody();
 
   @override
-  CodeSizeBodyState createState() => CodeSizeBodyState();
+  _CodeSizeBodyState createState() => _CodeSizeBodyState();
 }
 
-class CodeSizeBodyState extends State<CodeSizeBody>
+class _CodeSizeBodyState extends State<CodeSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  @visibleForTesting
-  static const treemapKey = Key('Code Size Treemap');
-  @visibleForTesting
-  static const Key snapshotTabKey = Key('Code Size Snapshot Tab');
-  @visibleForTesting
-  static const Key diffTabKey = Key('Code Size Diff Tab');
-
   static const tabs = [
-    Tab(text: 'Snapshot', key: snapshotTabKey),
-    Tab(text: 'Diff', key: diffTabKey),
+    Tab(text: 'Snapshot', key: CodeSizeScreen.snapshotTabKey),
+    Tab(text: 'Diff', key: CodeSizeScreen.diffTabKey),
   ];
 
   CodeSizeController controller;
@@ -64,10 +69,8 @@ class CodeSizeBodyState extends State<CodeSizeBody>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: tabs.length, vsync: this)
-      ..addListener(() {
-        setState(() {});
-      });
+    _tabController = TabController(length: tabs.length, vsync: this);
+    addAutoDisposeListener(_tabController);
   }
 
   @override
@@ -83,10 +86,13 @@ class CodeSizeBodyState extends State<CodeSizeBody>
     final newController = Provider.of<CodeSizeController>(context);
     if (newController == controller) return;
     controller = newController;
+
+    addAutoDisposeListener(controller.activeDiffTreeType);
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentTab = tabs[_tabController.index];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -99,12 +105,20 @@ class CodeSizeBodyState extends State<CodeSizeBody>
               controller: _tabController,
               tabs: tabs,
             ),
+            Row(
+              children: [
+                if (currentTab.key == CodeSizeScreen.diffTabKey)
+                  _buildDiffTreeTypeDropdown(),
+                const SizedBox(width: defaultSpacing),
+                _buildClearButton(currentTab.key),
+              ],
+            ),
           ],
         ),
         Expanded(
           child: TabBarView(
             physics: defaultTabBarViewPhysics,
-            children: [
+            children: const [
               SnapshotView(),
               DiffView(),
             ],
@@ -114,17 +128,47 @@ class CodeSizeBodyState extends State<CodeSizeBody>
       ],
     );
   }
+
+  DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
+    return DropdownButtonHideUnderline(
+      key: CodeSizeScreen.dropdownKey,
+      child: DropdownButton<DiffTreeType>(
+        value: controller.activeDiffTreeType.value,
+        items: [
+          _buildMenuItem(DiffTreeType.combined),
+          _buildMenuItem(DiffTreeType.increaseOnly),
+          _buildMenuItem(DiffTreeType.decreaseOnly),
+        ],
+        onChanged: (newDiffTreeType) {
+          controller.changeActiveDiffTreeType(newDiffTreeType);
+        },
+      ),
+    );
+  }
+
+  DropdownMenuItem _buildMenuItem(DiffTreeType diffTreeType) {
+    return DropdownMenuItem<DiffTreeType>(
+      value: diffTreeType,
+      child: Text(diffTreeType.display),
+    );
+  }
+
+  Widget _buildClearButton(Key activeTabKey) {
+    return clearButton(
+      key: CodeSizeScreen.clearButtonKey,
+      onPressed: () => controller.clear(activeTabKey),
+    );
+  }
 }
 
 class SnapshotView extends StatefulWidget {
+  const SnapshotView();
+
   @override
   _SnapshotViewState createState() => _SnapshotViewState();
 }
 
 class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
-  @visibleForTesting
-  static const treemapKey = Key('Code Size Treemap');
-
   CodeSizeController controller;
 
   TreemapNode snapshotRoot;
@@ -151,23 +195,10 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
       children: [
         // TODO(peterdjlee): Move the controls to be aligned with the
         //                   tab bar to save vertical space.
-        buildSnapshotViewControls(),
         Expanded(
           child: snapshotRoot != null
               ? _buildTreemapAndTableSplitView()
               : _buildImportSnapshotView(),
-        ),
-      ],
-    );
-  }
-
-  Row buildSnapshotViewControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        clearButton(
-          busy: snapshotRoot == null,
-          onPressed: controller.clearSnapshot,
         ),
       ],
     );
@@ -189,7 +220,7 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 
   Widget _buildTreemap() {
     return LayoutBuilder(
-      key: treemapKey,
+      key: CodeSizeScreen.snapshotViewTreemapKey,
       builder: (context, constraints) {
         return Treemap.fromRoot(
           rootNode: snapshotRoot,
@@ -238,14 +269,13 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 }
 
 class DiffView extends StatefulWidget {
+  const DiffView();
+
   @override
   _DiffViewState createState() => _DiffViewState();
 }
 
 class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
-  @visibleForTesting
-  static const treemapKey = Key('Code Size Treemap');
-
   CodeSizeController controller;
 
   TreemapNode diffRoot;
@@ -264,6 +294,8 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
         diffRoot = controller.diffRoot.value;
       });
     });
+
+    addAutoDisposeListener(controller.activeDiffTreeType);
   }
 
   @override
@@ -272,52 +304,12 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
       children: [
         // TODO(peterdjlee): Move the controls to be aligned with the
         //                   tab bar to save vertical space.
-        _buildDiffViewControls(),
         Expanded(
           child: diffRoot != null
               ? _buildTreemapAndTableSplitView()
               : _buildImportDiffView(),
         ),
       ],
-    );
-  }
-
-  Row _buildDiffViewControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        _buildDiffTreeTypeDropdown(),
-        const SizedBox(width: defaultSpacing),
-        clearButton(
-          busy: diffRoot == null,
-          onPressed: controller.clearDiff,
-        ),
-      ],
-    );
-  }
-
-  DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<DiffTreeType>(
-        value: controller.activeDiffTreeType.value,
-        items: [
-          _buildMenuItem(DiffTreeType.combined),
-          _buildMenuItem(DiffTreeType.increaseOnly),
-          _buildMenuItem(DiffTreeType.decreaseOnly),
-        ],
-        onChanged: controller.diffRoot.value == null
-            ? null
-            : (newDiffTreeType) {
-                controller.changeActiveDiffTreeType(newDiffTreeType);
-              },
-      ),
-    );
-  }
-
-  DropdownMenuItem _buildMenuItem(DiffTreeType diffTreeType) {
-    return DropdownMenuItem<DiffTreeType>(
-      value: diffTreeType,
-      child: Text(diffTreeType.display),
     );
   }
 
@@ -361,8 +353,9 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
       children: [
         Text(
           'We currently only support instruction sizes and v8 snapshot profile outputs.',
-          style:
-              TextStyle(color: Theme.of(context).colorScheme.chartAccentColor),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.chartAccentColor,
+          ),
         ),
       ],
     );
@@ -370,7 +363,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
 
   Widget _buildTreemap() {
     return LayoutBuilder(
-      key: treemapKey,
+      key: CodeSizeScreen.snapshotViewTreemapKey,
       builder: (context, constraints) {
         return Treemap.fromRoot(
           rootNode: diffRoot,
