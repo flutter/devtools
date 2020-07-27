@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/vm_flag_widgets.dart';
@@ -63,14 +62,6 @@ void main() {
         performance: PerformanceController(),
       ));
       expect(find.text('Performance'), findsOneWidget);
-    });
-
-    testWidgets('builds disabled message when disabled for web app',
-        (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(true);
-      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
-      expect(find.byType(PerformanceScreenBody), findsNothing);
-      expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
     });
 
     const windowSize = Size(1000.0, 1000.0);

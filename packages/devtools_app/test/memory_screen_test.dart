@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('vm')
-import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/memory/memory_chart.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
@@ -52,14 +50,6 @@ void main() {
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
       expect(find.text('Memory'), findsOneWidget);
-    });
-
-    testWidgets('builds disabled message when disabled for web app',
-        (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(true);
-      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
-      expect(find.byType(MemoryBody), findsNothing);
-      expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds proper content for state', windowSize,

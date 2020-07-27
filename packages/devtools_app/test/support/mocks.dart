@@ -33,6 +33,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     bool useFakeService = false,
     this.hasConnection = true,
     this.availableServices = const [],
+    this.availableLibraries = const [],
     Timeline timelineData,
     SocketProfile socketProfile,
   }) : service = useFakeService
@@ -44,6 +45,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   static final _flagManager = VmFlagManager();
 
   final List<String> availableServices;
+
+  final List<String> availableLibraries;
 
   final MockVM _mockVM = MockVM();
 
@@ -93,6 +96,11 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
+  bool libraryUriAvailableNow(String uri) {
+    return availableLibraries.any((u) => u.startsWith(uri));
+  }
+
+  @override
   Future<Response> getFlutterVersion() {
     return Future.value(Response.parse({
       'type': 'Success',
@@ -117,6 +125,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     hasConnection = value;
     stateChangeStream.add(value);
   }
+
+  @override
+  ValueListenable<bool> get deviceBusy => ValueNotifier(false);
 }
 
 class FakeVmService extends Fake implements VmServiceWrapper {
@@ -338,6 +349,10 @@ class FakeIsolateManager extends Fake implements IsolateManager {
 
   @override
   Stream<IsolateRef> get onSelectedIsolateChanged => const Stream.empty();
+
+  @override
+  Completer<bool> get selectedIsolateAvailable =>
+      Completer<bool>()..complete(true);
 }
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {}
@@ -653,7 +668,18 @@ Future<void> ensureInspectorDependencies() async {
   await initializer.ensureInspectorDependencies();
 }
 
-void mockIsFlutterApp(MockConnectedApp connectedApp) {
-  when(connectedApp.isFlutterAppNow).thenReturn(true);
-  when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(true));
+void mockIsFlutterApp(MockConnectedApp connectedApp, [isFlutterApp = true]) {
+  when(connectedApp.isFlutterAppNow).thenReturn(isFlutterApp);
+  when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(isFlutterApp));
+  when(connectedApp.isDebugFlutterAppNow).thenReturn(true);
+  when(connectedApp.isProfileBuildNow).thenReturn(false);
+}
+
+void mockIsDebugFlutterApp(MockConnectedApp connectedApp,
+    [isDebugFlutterApp = true]) {
+  when(connectedApp.isDebugFlutterAppNow).thenReturn(isDebugFlutterApp);
+}
+
+void mockIsDartVmApp(MockConnectedApp connectedApp, [isDartVmApp = true]) {
+  when(connectedApp.isRunningOnDartVM).thenReturn(isDartVmApp);
 }

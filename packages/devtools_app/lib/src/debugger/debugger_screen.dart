@@ -13,7 +13,6 @@ import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/host_platform/host_platform.dart';
 import '../flex_split_column.dart';
-import '../globals.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -34,7 +33,12 @@ const bool debugShowCallStackCount = false;
 
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
-      : super('debugger', title: 'Debugger', icon: Octicons.bug);
+      : super.conditional(
+          id: 'debugger',
+          requiresDebugBuild: true,
+          title: 'Debugger',
+          icon: Octicons.bug,
+        );
 
   @override
   String get docPageId => screenId;
@@ -43,11 +47,7 @@ class DebuggerScreen extends Screen {
   bool get showIsolateSelector => true;
 
   @override
-  Widget build(BuildContext context) {
-    return !serviceManager.connectedApp.isProfileBuildNow
-        ? const DebuggerScreenBody()
-        : const DisabledForProfileBuildMessage();
-  }
+  Widget build(BuildContext context) => const DebuggerScreenBody();
 
   @override
   Widget buildStatus(BuildContext context, TextTheme textTheme) {

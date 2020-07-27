@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('vm')
-import 'package:devtools_app/src/common_widgets.dart';
-import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/timeline/event_details.dart';
 import 'package:devtools_app/src/timeline/flutter_frames_chart.dart';
+import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_flame_chart.dart';
 import 'package:devtools_app/src/timeline/timeline_screen.dart';
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_testing/support/timeline_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -69,14 +67,6 @@ void main() {
         timeline: TimelineController(),
       ));
       expect(find.text('Timeline'), findsOneWidget);
-    });
-
-    testWidgets('builds disabled message when disabled for web app',
-        (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(true);
-      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
-      expect(find.byType(TimelineScreenBody), findsNothing);
-      expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds initial content', windowSize,

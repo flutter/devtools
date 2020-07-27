@@ -19,7 +19,7 @@ class ExampleConditionalScreen extends Screen {
   const ExampleConditionalScreen()
       : super.conditional(
           id: id,
-          conditionalLibrary: 'package:flutter/',
+          requiresLibrary: 'package:flutter/',
           title: 'Example',
           icon: Icons.palette,
         );

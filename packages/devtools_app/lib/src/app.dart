@@ -137,6 +137,7 @@ class DevToolsAppState extends State<DevToolsApp> {
             url: params['uri'],
             allowConnectionScreenOnDisconnect: !embed,
             builder: (_) {
+              // TODO(dantup): Handle when `page` is not in the list of visible screens.
               final tabs = embed && page != null
                   ? _visibleScreens().where((p) => p.screenId == page).toList()
                   : _visibleScreens();
@@ -183,22 +184,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     _routes = null;
   }
 
-  List<Screen> _visibleScreens() {
-    final visibleScreens = <Screen>[];
-    for (var screen in _screens) {
-      if (screen.conditionalLibrary != null) {
-        if (serviceManager.isServiceAvailable &&
-            serviceManager
-                .isolateManager.selectedIsolateAvailable.isCompleted &&
-            serviceManager.libraryUriAvailableNow(screen.conditionalLibrary)) {
-          visibleScreens.add(screen);
-        }
-      } else {
-        visibleScreens.add(screen);
-      }
-    }
-    return visibleScreens;
-  }
+  List<Screen> _visibleScreens() => _screens.where(shouldShowScreen).toList();
 
   Widget _providedControllers({@required Widget child, bool offline = false}) {
     final _providers = widget.screens
