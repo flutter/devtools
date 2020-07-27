@@ -18,7 +18,7 @@ import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
 
-bool codeSizeScreenEnabled = true;
+bool codeSizeScreenEnabled = false;
 
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
@@ -368,6 +368,11 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
               secondFileTitle: 'New',
               firstDragAndDropKey: DiffView.diffOldDragAndDropKey,
               secondDragAndDropKey: DiffView.diffNewDragAndDropKey,
+              // TODO(kenz): handle drag and drop
+              firstOnDragAndDrop: (data) =>
+                  print('TODO: handle old diff drag and drop'),
+              secondOnDragAndDrop: (data) =>
+                  print('TODO: handle new diff drag and drop'),
               actionText: 'Analyze Diff',
               onAction: controller.loadFakeDiffTree,
             ),
