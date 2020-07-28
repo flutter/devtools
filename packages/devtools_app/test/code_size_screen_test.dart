@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:devtools_app/src/code_size/code_size_screen.dart';
 import 'package:devtools_app/src/code_size/code_size_controller.dart';
 import 'package:devtools_app/src/code_size/code_size_table.dart';
+import 'package:devtools_app/src/code_size/stub_data/new_v8.dart';
+import 'package:devtools_app/src/code_size/stub_data/old_v8.dart';
 import 'package:devtools_app/src/split.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'support/wrappers.dart';
@@ -34,7 +39,13 @@ void main() {
     setUp(() async {
       screen = const CodeSizeScreen();
       codeSizeController = CodeSizeController();
-      codeSizeController.loadFakeTree('new_v8');
+      codeSizeController.loadFakeTree(
+        DevToolsJsonFile(
+          path: 'lib/src/code_size/stub_data/apk_analysis.dart',
+          lastModifiedTime: DateTime.now(),
+          data: json.decode(newV8),
+        ),
+      );
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -78,6 +89,7 @@ void main() {
       expect(find.byKey(CodeSizeScreen.clearButtonKey), findsOneWidget);
 
       expect(find.byType(SnapshotView), findsOneWidget);
+      expect(find.byType(SingleJsonFileHeader), findsOneWidget);
       expect(find.byKey(CodeSizeScreen.snapshotViewTreemapKey), findsOneWidget);
 
       // Assumes the treemap is built with treemap_test_data_v8_new.json
@@ -96,7 +108,18 @@ void main() {
         );
         await tester.tap(find.byKey(CodeSizeScreen.diffTabKey));
 
-        codeSizeController.loadFakeDiffTree('old_v8', 'new_v8');
+        codeSizeController.loadFakeDiffTree(
+          DevToolsJsonFile(
+            path: 'lib/src/code_size/stub_data/old_v8.dart',
+            lastModifiedTime: DateTime.now(),
+            data: json.decode(oldV8),
+          ),
+          DevToolsJsonFile(
+            path: 'lib/src/code_size/stub_data/new_v8.dart',
+            lastModifiedTime: DateTime.now(),
+            data: json.decode(newV8),
+          ),
+        );
 
         await tester.pumpAndSettle();
 
@@ -104,6 +127,7 @@ void main() {
         expect(find.byKey(CodeSizeScreen.clearButtonKey), findsOneWidget);
 
         expect(find.byType(DiffView), findsOneWidget);
+        expect(find.byType(DualJsonFileHeader), findsOneWidget);
         expect(
           find.byKey(CodeSizeScreen.snapshotViewTreemapKey),
           findsOneWidget,

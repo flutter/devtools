@@ -792,3 +792,20 @@ Color _colorForIndex(Color color, int index, ColorScheme colorScheme) {
     return colorScheme.isLight ? color.darken() : color.brighten();
   }
 }
+
+abstract class DevToolsFileHeader extends StatelessWidget {
+  const DevToolsFileHeader({this.centerTitle});
+
+  final bool centerTitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return areaPaneHeader(
+      context,
+      title: buildHeaderText(),
+      centerTitle: centerTitle,
+    );
+  }
+
+  String buildHeaderText();
+}

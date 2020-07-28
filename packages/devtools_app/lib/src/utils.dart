@@ -965,20 +965,3 @@ class DevToolsFile<T> {
 
   final T data;
 }
-
-abstract class DevToolsFileHeader extends StatelessWidget {
-  const DevToolsFileHeader({this.centerTitle});
-
-  final bool centerTitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return areaPaneHeader(
-      context,
-      title: buildHeaderText(),
-      centerTitle: centerTitle,
-    );
-  }
-
-  String buildHeaderText();
-}
