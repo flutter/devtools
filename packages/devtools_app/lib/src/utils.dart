@@ -17,7 +17,6 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'package:vm_service/vm_service.dart';
 
-import 'common_widgets.dart';
 import 'notifications.dart';
 
 bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
