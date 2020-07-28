@@ -20,7 +20,7 @@ import 'code_size_table.dart';
 import 'file_import_container.dart';
 import 'stub_data/apk_analysis.dart';
 
-bool codeSizeScreenEnabled = false;
+bool codeSizeScreenEnabled = true;
 
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
@@ -198,10 +198,6 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // TODO(peterdjlee): Move the controls to be aligned with the
-        //                   tab bar to save vertical space.
-        if (controller.snapshotJsonFile.value != null)
-          SingleJsonFileHeader(jsonFile: controller.snapshotJsonFile.value),
         Expanded(
           child: snapshotRoot != null
               ? _buildTreemapAndTableSplitView()
@@ -212,17 +208,38 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   }
 
   Widget _buildTreemapAndTableSplitView() {
-    return Split(
-      axis: Axis.vertical,
-      children: [
-        _buildTreemap(),
-        CodeSizeSnapshotTable(rootNode: snapshotRoot),
-      ],
-      initialFractions: const [
-        initialFractionForTreemap,
-        initialFractionForTreeTable,
-      ],
+    return OutlineDecoration(
+      child: Column(
+        children: [
+          areaPaneHeader(
+            context,
+            title: _generateSingleFileHeaderText(),
+            needsTopBorder: false,
+          ),
+          Expanded(
+            child: Split(
+              axis: Axis.vertical,
+              children: [
+                _buildTreemap(),
+                CodeSizeSnapshotTable(rootNode: snapshotRoot),
+              ],
+              initialFractions: const [
+                initialFractionForTreemap,
+                initialFractionForTreeTable,
+              ],
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  String _generateSingleFileHeaderText() {
+    String output = '';
+    output +=
+        controller.snapshotJsonFile.value.isApkFile ? 'APK: ' : 'Snapshot: ';
+    output += controller.snapshotJsonFile.value.displayText;
+    return output;
   }
 
   Widget _buildTreemap() {
@@ -312,12 +329,6 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        if (controller.oldDiffSnapshotJsonFile.value != null &&
-            controller.newDiffSnapshotJsonFile.value != null)
-          DualJsonFileHeader(
-            firstJsonFile: controller.oldDiffSnapshotJsonFile.value,
-            secondJsonFile: controller.newDiffSnapshotJsonFile.value,
-          ),
         Expanded(
           child: diffRoot != null
               ? _buildTreemapAndTableSplitView()
@@ -328,17 +339,41 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   }
 
   Widget _buildTreemapAndTableSplitView() {
-    return Split(
-      axis: Axis.vertical,
-      children: [
-        _buildTreemap(),
-        CodeSizeDiffTable(rootNode: diffRoot),
-      ],
-      initialFractions: const [
-        initialFractionForTreemap,
-        initialFractionForTreeTable,
-      ],
+    return OutlineDecoration(
+      child: Column(
+        children: [
+          areaPaneHeader(
+            context,
+            title: _generateDualFileHeaderText(),
+            needsTopBorder: false,
+          ),
+          Expanded(
+            child: Split(
+              axis: Axis.vertical,
+              children: [
+                _buildTreemap(),
+                CodeSizeDiffTable(rootNode: diffRoot),
+              ],
+              initialFractions: const [
+                initialFractionForTreemap,
+                initialFractionForTreeTable,
+              ],
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  String _generateDualFileHeaderText() {
+    String output = 'Diffing ';
+    output += controller.oldDiffSnapshotJsonFile.value.isApkFile
+        ? 'APKs: '
+        : 'Snapshots: ';
+    output += controller.oldDiffSnapshotJsonFile.value.displayText;
+    output += ' (OLD) vs (NEW) ';
+    output += controller.newDiffSnapshotJsonFile.value.displayText;
+    return output;
   }
 
   Widget _buildImportDiffView() {
@@ -399,40 +434,5 @@ extension DiffTreeTypeExtension on DiffTreeType {
       default:
         return 'Combined';
     }
-  }
-}
-
-class SingleJsonFileHeader extends DevToolsFileHeader {
-  const SingleJsonFileHeader({@required this.jsonFile})
-      : super(centerTitle: true);
-
-  final DevToolsJsonFile jsonFile;
-
-  @override
-  String buildHeaderText() {
-    String output = '';
-    output += jsonFile.isApkFile ? 'APK: ' : 'Snapshot: ';
-    output += jsonFile.displayText;
-    return output;
-  }
-}
-
-class DualJsonFileHeader extends DevToolsFileHeader {
-  const DualJsonFileHeader({
-    @required this.firstJsonFile,
-    @required this.secondJsonFile,
-  }) : super(centerTitle: true);
-
-  final DevToolsJsonFile firstJsonFile;
-  final DevToolsJsonFile secondJsonFile;
-
-  @override
-  String buildHeaderText() {
-    String output = 'Diffing ';
-    output += firstJsonFile.isApkFile ? 'APKs: ' : 'Snapshots: ';
-    output += firstJsonFile.displayText;
-    output += ' (OLD) vs (NEW) ';
-    output += secondJsonFile.displayText;
-    return output;
   }
 }

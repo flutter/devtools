@@ -18,6 +18,8 @@ import 'support/wrappers.dart';
 // TODO(peterdjlee): Clean up the tests once  we don't need loadFakeData.
 
 void main() {
+  final lastModifiedTime = DateTime.parse('2020-07-28 13:29:00');
+
   CodeSizeScreen screen;
   CodeSizeController codeSizeController;
 
@@ -41,8 +43,8 @@ void main() {
       codeSizeController = CodeSizeController();
       codeSizeController.loadFakeTree(
         DevToolsJsonFile(
-          path: 'lib/src/code_size/stub_data/apk_analysis.dart',
-          lastModifiedTime: DateTime.now(),
+          path: 'lib/src/code_size/stub_data/new_v8.dart',
+          lastModifiedTime: lastModifiedTime,
           data: json.decode(newV8),
         ),
       );
@@ -89,7 +91,12 @@ void main() {
       expect(find.byKey(CodeSizeScreen.clearButtonKey), findsOneWidget);
 
       expect(find.byType(SnapshotView), findsOneWidget);
-      expect(find.byType(SingleJsonFileHeader), findsOneWidget);
+      expect(
+        find.text(
+          'Snapshot: lib/src/code_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
+        ),
+        findsOneWidget,
+      );
       expect(find.byKey(CodeSizeScreen.snapshotViewTreemapKey), findsOneWidget);
 
       // Assumes the treemap is built with treemap_test_data_v8_new.json
@@ -111,12 +118,12 @@ void main() {
         codeSizeController.loadFakeDiffTree(
           DevToolsJsonFile(
             path: 'lib/src/code_size/stub_data/old_v8.dart',
-            lastModifiedTime: DateTime.now(),
+            lastModifiedTime: lastModifiedTime,
             data: json.decode(oldV8),
           ),
           DevToolsJsonFile(
             path: 'lib/src/code_size/stub_data/new_v8.dart',
-            lastModifiedTime: DateTime.now(),
+            lastModifiedTime: lastModifiedTime,
             data: json.decode(newV8),
           ),
         );
@@ -127,7 +134,12 @@ void main() {
         expect(find.byKey(CodeSizeScreen.clearButtonKey), findsOneWidget);
 
         expect(find.byType(DiffView), findsOneWidget);
-        expect(find.byType(DualJsonFileHeader), findsOneWidget);
+        expect(
+          find.text(
+            'Diffing Snapshots: lib/src/code_size/stub_data/old_v8.dart - 7/28/2020 1:29 PM (OLD) vs (NEW) lib/src/code_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
+          ),
+          findsOneWidget,
+        );
         expect(
           find.byKey(CodeSizeScreen.snapshotViewTreemapKey),
           findsOneWidget,

@@ -938,7 +938,7 @@ extension LogicalKeySetExtension on LogicalKeySet {
 // Method to convert degrees to radians
 num degToRad(num deg) => deg * (pi / 180.0);
 
-typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile droppedFile);
+typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile file);
 
 class DevToolsJsonFile extends DevToolsFile<Map<String, dynamic>> {
   const DevToolsJsonFile({

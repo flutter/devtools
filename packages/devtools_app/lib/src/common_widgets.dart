@@ -445,6 +445,7 @@ class ToolbarAction extends StatelessWidget {
 ///
 /// This is typically used as a title for a logical area of the screen.
 // TODO(devoncarew): Refactor this into an 'AreaPaneHeader' widget.
+// TODO(peterdjlee): Consider passing in a list of widgets for content instead of String title.
 SizedBox areaPaneHeader(
   BuildContext context, {
   @required String title,
@@ -452,7 +453,6 @@ SizedBox areaPaneHeader(
   List<Widget> actions = const [],
   double rightPadding = densePadding,
   bool tall = false,
-  bool centerTitle = false,
 }) {
   final theme = Theme.of(context);
 
@@ -479,7 +479,6 @@ SizedBox areaPaneHeader(
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.subtitle2,
-              textAlign: centerTitle ? TextAlign.center : TextAlign.start,
             ),
           ),
           ...actions,
@@ -791,21 +790,4 @@ Color _colorForIndex(Color color, int index, ColorScheme colorScheme) {
   } else {
     return colorScheme.isLight ? color.darken() : color.brighten();
   }
-}
-
-abstract class DevToolsFileHeader extends StatelessWidget {
-  const DevToolsFileHeader({this.centerTitle});
-
-  final bool centerTitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return areaPaneHeader(
-      context,
-      title: buildHeaderText(),
-      centerTitle: centerTitle,
-    );
-  }
-
-  String buildHeaderText();
 }
