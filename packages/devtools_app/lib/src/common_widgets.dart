@@ -445,6 +445,7 @@ class ToolbarAction extends StatelessWidget {
 ///
 /// This is typically used as a title for a logical area of the screen.
 // TODO(devoncarew): Refactor this into an 'AreaPaneHeader' widget.
+// TODO(peterdjlee): Consider passing in a list of widgets for content instead of String title.
 SizedBox areaPaneHeader(
   BuildContext context, {
   @required String title,
