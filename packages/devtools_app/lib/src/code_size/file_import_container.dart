@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 
 import '../common_widgets.dart';
@@ -13,13 +10,10 @@ import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import '../utils.dart';
-import 'stub_data/new_v8.dart';
-import 'stub_data/old_v8.dart';
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
     @required this.title,
-    @required this.fileToBeImported,
     @required this.dragAndDropId,
     this.actionText,
     this.onAction,
@@ -37,9 +31,6 @@ class FileImportContainer extends StatefulWidget {
   final DevToolsJsonFileHandler onFileSelected;
 
   final String dragAndDropId;
-
-  // TODO(peterdjlee): Remove once the file picker is implemented.
-  final DevToolsJsonFile fileToBeImported;
 
   @override
   _FileImportContainerState createState() => _FileImportContainerState();
@@ -62,8 +53,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
           child: DragAndDrop(
             id: widget.dragAndDropId,
             manager: Provider.of<DragAndDropManager>(context),
-            handleDrop: (_) =>
-                print('TODO: handle drag and drop for ${widget.actionText}'),
+            handleDrop: _handleImportedFile,
             child: RoundedOutlinedBorder(
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
@@ -94,7 +84,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
       children: [
         const SizedBox(height: defaultSpacing),
         Text(
-          importedFile != null ? importedFile.path : 'No File Selected',
+          importedFile?.path ?? 'No File Selected',
           style: TextStyle(
             color: Theme.of(context).textTheme.headline1.color,
           ),
@@ -109,16 +99,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         OutlineButton(
-          onPressed: () {
-            // TODO(peterdjlee): Prompt file picker to choose a file.
-            setState(() {
-              importedFile = widget.fileToBeImported;
-            });
-
-            if (widget.onFileSelected != null) {
-              widget.onFileSelected(importedFile);
-            }
-          },
+          onPressed: () {},
           child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
         ),
       ],
@@ -147,6 +128,15 @@ class _FileImportContainerState extends State<FileImportContainer> {
       ],
     );
   }
+
+  void _handleImportedFile(DevToolsJsonFile file) {
+    setState(() {
+      importedFile = file;
+    });
+    if (widget.onFileSelected != null) {
+      widget.onFileSelected(file);
+    }
+  }
 }
 
 class DualFileImportContainer extends StatefulWidget {
@@ -158,7 +148,7 @@ class DualFileImportContainer extends StatefulWidget {
     @required this.actionText,
     @required this.onAction,
     Key key,
-  }) : super(key: key);
+  });
 
   final String firstFileTitle;
 
@@ -194,12 +184,6 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
             title: widget.firstFileTitle,
             dragAndDropId: widget.firstDragAndDropId,
             onFileSelected: onFirstFileSelected,
-            // TODO(peterdjlee): Remove once the file picker is implemented.
-            fileToBeImported: DevToolsJsonFile(
-              path: 'lib/src/code_size/stub_data/old_v8.dart',
-              lastModifiedTime: DateTime.now(),
-              data: json.decode(oldV8),
-            ),
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -210,12 +194,6 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
             title: widget.secondFileTitle,
             dragAndDropId: widget.secondDragAndDropId,
             onFileSelected: onSecondFileSelected,
-            // TODO(peterdjlee): Remove once the file picker is implemented.
-            fileToBeImported: DevToolsJsonFile(
-              path: 'lib/src/code_size/stub_data/new_v8.dart',
-              lastModifiedTime: DateTime.now(),
-              data: json.decode(newV8),
-            ),
           ),
         ),
       ],

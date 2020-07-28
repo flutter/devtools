@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/drag_and_drop/drag_and_drop.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
@@ -12,6 +11,7 @@ import '../devtools.dart' as devtools;
 import 'code_size/code_size_controller.dart';
 import 'code_size/code_size_screen.dart';
 import 'common_widgets.dart';
+import 'config_specific/drag_and_drop/drag_and_drop.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'connect_screen.dart';
 import 'debugger/debugger_controller.dart';

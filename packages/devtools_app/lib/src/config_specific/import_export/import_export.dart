@@ -9,6 +9,7 @@ import '../../globals.dart';
 import '../../notifications.dart';
 import '../../timeline/timeline_model.dart';
 import '../../timeline/timeline_screen.dart';
+import '../../utils.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
@@ -44,7 +45,9 @@ class ImportController {
   DateTime previousImportTime;
 
   // TODO(kenz): improve error handling here or in snapshot_screen.dart.
-  void importData(Map<String, dynamic> json) {
+  void importData(DevToolsJsonFile jsonFile) {
+    final json = jsonFile.data;
+
     // Do not allow two different imports within 500 ms of each other. This is a
     // workaround for the fact that we get two drop events for the same file.
     final now = DateTime.now();

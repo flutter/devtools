@@ -9,6 +9,7 @@ import 'dart:html';
 import 'package:meta/meta.dart';
 
 import '../../notifications.dart';
+import '../../utils.dart';
 import 'drag_and_drop.dart';
 
 DragAndDropManagerWeb createDragAndDropManager({
@@ -81,7 +82,12 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     reader.onLoad.listen((_) {
       try {
         final Map<String, dynamic> json = jsonDecode(reader.result);
-        activeState.widget.handleDrop(json);
+        final devToolsJsonFile = DevToolsJsonFile(
+          name: droppedFile.name,
+          lastModifiedTime: droppedFile.lastModifiedDate,
+          data: json,
+        );
+        activeState.widget.handleDrop(devToolsJsonFile);
       } on FormatException catch (e) {
         notifications.push(
           'JSON syntax error in imported file: "$e". Please make sure the '
