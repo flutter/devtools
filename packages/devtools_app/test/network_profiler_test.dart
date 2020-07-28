@@ -333,11 +333,13 @@ void main() {
       expect(find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
           findsOneWidget);
       expect(find.text('Connection established: '), findsOneWidget);
-      expect(find.text('[0.0 ms - 0.1 ms] → 0.1 ms total'), findsOneWidget);
+      expect(find.text('[0.0 ms - 100.0 ms] → 100.0 ms total'), findsOneWidget);
       expect(find.text('Request initiated: '), findsOneWidget);
-      expect(find.text('[0.1 ms - 0.2 ms] → 0.0 ms total'), findsOneWidget);
+      expect(
+          find.text('[100.0 ms - 200.0 ms] → 100.0 ms total'), findsOneWidget);
       expect(find.text('Response received: '), findsOneWidget);
-      expect(find.text('[0.2 ms - 424.5 ms] → 424.3 ms total'), findsOneWidget);
+      expect(
+          find.text('[200.0 ms - 400.0 ms] → 200.0 ms total'), findsOneWidget);
     });
 
     testWidgets('displays for http request with error', (tester) async {
