@@ -452,6 +452,7 @@ SizedBox areaPaneHeader(
   List<Widget> actions = const [],
   double rightPadding = densePadding,
   bool tall = false,
+  bool centerTitle = false,
 }) {
   final theme = Theme.of(context);
 
@@ -478,6 +479,7 @@ SizedBox areaPaneHeader(
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.subtitle2,
+              textAlign: centerTitle ? TextAlign.center : TextAlign.start,
             ),
           ),
           ...actions,

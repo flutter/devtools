@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' hide context;
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
@@ -13,9 +14,11 @@ import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
+import '../utils.dart';
 import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
+import 'stub_data/apk_analysis.dart';
 
 bool codeSizeScreenEnabled = false;
 
@@ -187,6 +190,8 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
         snapshotRoot = controller.snapshotRoot.value;
       });
     });
+
+    addAutoDisposeListener(controller.snapshotJsonFile);
   }
 
   @override
@@ -195,6 +200,8 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
       children: [
         // TODO(peterdjlee): Move the controls to be aligned with the
         //                   tab bar to save vertical space.
+        if (controller.snapshotJsonFile.value != null)
+          SingleJsonFileHeader(jsonFile: controller.snapshotJsonFile.value),
         Expanded(
           child: snapshotRoot != null
               ? _buildTreemapAndTableSplitView()
@@ -234,24 +241,24 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   }
 
   Widget _buildImportSnapshotView() {
-    return Padding(
-      padding: const EdgeInsets.all(defaultSpacing),
-      child: Column(
-        children: [
-          Flexible(
-            child: FileImportContainer(
-              title: 'Snapshot',
-              actionText: 'Analyze Snapshot',
-              onAction: controller.loadFakeTree,
-              // TODO(peterdjlee): Remove once the file picker is implemented.
-              fileToBeImported:
-                  '$current/lib/src/code_size/stub_data/app_size.dart',
+    return Column(
+      children: [
+        Flexible(
+          child: FileImportContainer(
+            title: 'Snapshot',
+            actionText: 'Analyze Snapshot',
+            onAction: controller.loadFakeTree,
+            // TODO(peterdjlee): Remove once the file picker is implemented.
+            fileToBeImported: DevToolsJsonFile(
+              path: 'lib/src/code_size/stub_data/apk_analysis.dart',
+              lastModifiedTime: DateTime.now(),
+              data: json.decode(apkAnalysis),
             ),
           ),
-          const SizedBox(height: defaultSpacing),
-          _buildHelpText(),
-        ],
-      ),
+        ),
+        const SizedBox(height: defaultSpacing),
+        _buildHelpText(),
+      ],
     );
   }
 
@@ -296,14 +303,21 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
     });
 
     addAutoDisposeListener(controller.activeDiffTreeType);
+
+    addAutoDisposeListener(controller.oldDiffSnapshotJsonFile);
+    addAutoDisposeListener(controller.newDiffSnapshotJsonFile);
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // TODO(peterdjlee): Move the controls to be aligned with the
-        //                   tab bar to save vertical space.
+        if (controller.oldDiffSnapshotJsonFile.value != null &&
+            controller.newDiffSnapshotJsonFile.value != null)
+          DualJsonFileHeader(
+            firstJsonFile: controller.oldDiffSnapshotJsonFile.value,
+            secondJsonFile: controller.newDiffSnapshotJsonFile.value,
+          ),
         Expanded(
           child: diffRoot != null
               ? _buildTreemapAndTableSplitView()
@@ -328,23 +342,20 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   }
 
   Widget _buildImportDiffView() {
-    return Padding(
-      padding: const EdgeInsets.all(defaultSpacing),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: DualFileImportContainer(
-              firstFileTitle: 'Old',
-              secondFileTitle: 'New',
-              actionText: 'Analyze Diff',
-              onAction: controller.loadFakeDiffTree,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: DualFileImportContainer(
+            firstFileTitle: 'Old',
+            secondFileTitle: 'New',
+            actionText: 'Analyze Diff',
+            onAction: controller.loadFakeDiffTree,
           ),
-          const SizedBox(height: defaultSpacing),
-          _buildHelpText(),
-        ],
-      ),
+        ),
+        const SizedBox(height: defaultSpacing),
+        _buildHelpText(),
+      ],
     );
   }
 
@@ -388,5 +399,40 @@ extension DiffTreeTypeExtension on DiffTreeType {
       default:
         return 'Combined';
     }
+  }
+}
+
+class SingleJsonFileHeader extends DevToolsFileHeader {
+  const SingleJsonFileHeader({@required this.jsonFile})
+      : super(centerTitle: true);
+
+  final DevToolsJsonFile jsonFile;
+
+  @override
+  String buildHeaderText() {
+    String output = '';
+    output += jsonFile.isApkFile ? 'APK: ' : 'Snapshot: ';
+    output += jsonFile.displayText;
+    return output;
+  }
+}
+
+class DualJsonFileHeader extends DevToolsFileHeader {
+  const DualJsonFileHeader({
+    @required this.firstJsonFile,
+    @required this.secondJsonFile,
+  }) : super(centerTitle: true);
+
+  final DevToolsJsonFile firstJsonFile;
+  final DevToolsJsonFile secondJsonFile;
+
+  @override
+  String buildHeaderText() {
+    String output = 'Diffing ';
+    output += firstJsonFile.isApkFile ? 'APKs: ' : 'Snapshots: ';
+    output += firstJsonFile.displayText;
+    output += ' (OLD) vs (NEW) ';
+    output += secondJsonFile.displayText;
+    return output;
   }
 }
