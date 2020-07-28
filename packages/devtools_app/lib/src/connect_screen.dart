@@ -109,7 +109,6 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   }
 
   Future<void> _connect() async {
-    controller.text = 'http://127.0.0.1:56311/udsUe1mvrQY=/';
     if (controller.text?.isEmpty ?? true) {
       Notifications.of(context).push(
         'Please enter a VM Service URL.',
