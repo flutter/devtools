@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: implementation_imports
-import 'dart:convert';
-
-import 'package:devtools_app/src/utils.dart';
-
-import 'test_utils.dart';
-
 /// Little over a 1 minute run starting at 6:08:09 till 6:09:15
 /// Contains 2 manual snapshots, 3 auto snapshots, 2 manual GCs,
 /// Also contains, 3 allocation profile 2 groups of:
@@ -21,7 +14,7 @@ import 'test_utils.dart';
 /// How to create a new test data set. Run DevTools collecting stats then press
 /// the Export button. Then copy the contents of the exported file and assign to
 /// testHeapSampleData.
-final testHeapSampleData = r'''
+const testHeapSampleData = r'''
 {"samples": {"version": 1, "dartDevToolsScreen": "memory", "data": [
 {"timestamp":1595682492441,"rss":329695232,"capacity":202441480,"used":39785240,"external":153432840,"gc":false,"adb_memoryInfo":{"Realtime":181868455,"Java Heap":7564,"Native Heap":114220,"Code":14728,"Stack":52,"Graphics":0,"Private Other":152680,"System":3756,"Total":293000},"memory_eventInfo":{"timestamp":-1,"gcEvent":false,"snapshotEvent":false,"snapshotAutoEvent":false,"allocationAccumulatorEvent":{"start":false,"continues":false,"reset":false}}},
 {"timestamp":1595682493087,"rss":329682944,"capacity":202441480,"used":39785240,"external":153432840,"gc":false,"adb_memoryInfo":{"Realtime":181869122,"Java Heap":7512,"Native Heap":114292,"Code":14728,"Stack":52,"Graphics":0,"Private Other":152680,"System":3756,"Total":293020},"memory_eventInfo":{"timestamp":-1,"gcEvent":false,"snapshotEvent":false,"snapshotAutoEvent":false,"allocationAccumulatorEvent":{"start":false,"continues":false,"reset":false}}},
