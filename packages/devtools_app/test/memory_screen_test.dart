@@ -25,7 +25,7 @@ void main() {
 
   void _setUpServiceManagerForMemory() {
     // Load canned data testHeapSampleData.
-    final memoryJson = MemoryJson.decode(argDecodedMap: testHeapSampleData);
+    final memoryJson = MemoryJson.decode(argJsonString: testHeapSampleData);
     fakeServiceManager = FakeServiceManager(
       useFakeService: true,
       memoryData: memoryJson,
