@@ -150,11 +150,6 @@ class DebuggerController extends DisposableController
     _librariesVisible.value = !_librariesVisible.value;
   }
 
-  /// Make the 'Libraries' view on the right-hand side of the screen visible.
-  void openLibrariesView() {
-    _librariesVisible.value = true;
-  }
-
   final _stdio = ValueNotifier<List<String>>([]);
   bool _stdioTrailingNewline = false;
 

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<!--
+  Copyright 2018 The Chromium Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+-->
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dart DevTools</title>
+    <link href="favicon.png" rel="icon" sizes="64x64">
+
+    <script type="text/javascript">
+        function supportsES6Classes() {
+            "use strict";
+            try { eval("class Foo {}"); }
+            catch (e) { return false; }
+            return true;
+        }
+
+        if (!supportsES6Classes()) {
+            window.location.href = '/unsupported-browser.html';
+        }
+
+        // Handle URLs that pass all variables directly on a querystring without
+        // the fragment (for ex. VS Code while it has some encoding bugs preventing
+        // building the correct URLs using fragments
+        // https://github.com/microsoft/vscode/issues/85930).
+        if (window.location.search && window.location.search.length > 1) {
+          // Ensure each component is encoded, because if the URI contains / slashes
+          // Flutter will split on them and try to push multiple routes.
+          const params = new URLSearchParams(unescape(window.location.search));
+          params.forEach(function(v, k) { params.set(k, encodeURIComponent(v)) });
+          window.location.replace(window.location.origin + '/#/?' + params.toString());
+        }
+    </script>
+</head>
+
+<body>
+  <!-- This script installs service_worker.js to provide PWA functionality to
+       application. For more information, see:
+       https://developers.google.com/web/fundamentals/primers/service-workers -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('flutter_service_worker.js');
+      });
+    }
+  </script>
+  <script src="main_fallback.dart.js" type="application/javascript"></script>
+</body>
+</html>

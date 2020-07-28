@@ -14,9 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:vm_service/vm_service.dart';
-
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
+import 'package:vm_service/vm_service.dart';
 
 import 'notifications.dart';
 
@@ -280,6 +279,40 @@ Stream combineStreams(Stream a, Stream b, Stream c) {
   );
 
   return controller.stream;
+}
+
+/// Parses a 3 or 6 digit CSS Hex Color into a dart:ui Color.
+Color parseCssHexColor(String input) {
+  // Remove any leading # (and the escaped version to be leniant)
+  input = input.replaceAll('#', '').replaceAll('%23', '');
+
+  // Handle 3/4-digit hex codes (eg. #123 == #112233)
+  if (input.length == 3 || input.length == 4) {
+    input = input.split('').map((c) => '$c$c').join();
+  }
+
+  // Pad alpha with FF.
+  if (input.length == 6) {
+    input = '${input}ff';
+  }
+
+  // In CSS, alpha is in the lowest bits, but for Flutter's value, it's in the
+  // highest bits, so move the alpha from the end to the start before parsing.
+  if (input.length == 8) {
+    input = '${input.substring(6)}${input.substring(0, 6)}';
+  }
+  final value = int.parse(input, radix: 16);
+
+  return Color(value);
+}
+
+/// Converts a dart:ui Color into #RRGGBBAA format for use in CSS.
+String toCssHexColor(Color color) {
+  // In CSS Hex, Alpha comes last, but in Flutter's `value` field, alpha is
+  // in the high bytes, so just using `value.toRadixString(16)` will put alpha
+  // in the wrong position.
+  String hex(int val) => val.toRadixString(16).padLeft(2, '0');
+  return '#${hex(color.red)}${hex(color.green)}${hex(color.blue)}${hex(color.alpha)}';
 }
 
 class Property<T> {
@@ -908,3 +941,30 @@ extension LogicalKeySetExtension on LogicalKeySet {
 
 // Method to convert degrees to radians
 num degToRad(num deg) => deg * (pi / 180.0);
+
+typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile file);
+
+class DevToolsJsonFile extends DevToolsFile<Map<String, dynamic>> {
+  const DevToolsJsonFile({
+    @required String path,
+    @required DateTime lastModifiedTime,
+    @required Map<String, dynamic> data,
+  }) : super(
+          path: path,
+          lastModifiedTime: lastModifiedTime,
+          data: data,
+        );
+}
+
+class DevToolsFile<T> {
+  const DevToolsFile({
+    @required this.path,
+    @required this.lastModifiedTime,
+    @required this.data,
+  });
+  final String path;
+
+  final DateTime lastModifiedTime;
+
+  final T data;
+}
