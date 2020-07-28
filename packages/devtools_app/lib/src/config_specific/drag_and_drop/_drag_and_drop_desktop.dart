@@ -2,30 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 
+import '../../notifications.dart';
 import 'drag_and_drop.dart';
 
 // TODO(kenz): implement once Desktop support is available. See
 // https://github.com/flutter/flutter/issues/30719.
 
-DragAndDropDesktop createDragAndDrop({
-  @required Key key,
-  @required void Function(Map<String, dynamic> data) handleDrop,
-  @required Widget child,
+DragAndDropManagerDesktop createDragAndDropManager({
+  @required NotificationsState notifications,
 }) {
-  return DragAndDropDesktop(key: key, handleDrop: handleDrop, child: child);
+  return DragAndDropManagerDesktop(notifications: notifications);
 }
 
-class DragAndDropDesktop extends DragAndDrop {
-  const DragAndDropDesktop({
-    @required Key key,
-    @required void Function(Map<String, dynamic> data) handleDrop,
-    @required Widget child,
-  }) : super.impl(key: key, handleDrop: handleDrop, child: child);
+class DragAndDropManagerDesktop extends DragAndDropManager {
+  DragAndDropManagerDesktop({@required NotificationsState notifications})
+      : super.impl(notifications: notifications);
 
   @override
-  _DragAndDropDesktopState createState() => _DragAndDropDesktopState();
+  void init() {}
 }
-
-class _DragAndDropDesktopState extends DragAndDropState {}

@@ -33,7 +33,7 @@ import 'theme.dart';
 class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
     Key key,
-    @required this.dragAndDropKey,
+    @required this.dragAndDropId,
     @required this.tabs,
     this.initialPage,
     this.actions,
@@ -46,12 +46,12 @@ class DevToolsScaffold extends StatefulWidget {
     Key key,
     @required Widget child,
     @required IdeTheme ideTheme,
-    @required Key dragAndDropKey,
+    @required String dragAndDropId,
   }) : this(
           key: key,
           tabs: [SimpleScreen(child)],
           ideTheme: ideTheme,
-          dragAndDropKey: dragAndDropKey,
+          dragAndDropId: dragAndDropId,
         );
 
   /// A [Key] that indicates the scaffold is showing in narrow-width mode.
@@ -76,7 +76,7 @@ class DevToolsScaffold extends StatefulWidget {
   static const EdgeInsets appPadding =
       EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
 
-  final Key dragAndDropKey;
+  final String dragAndDropId;
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
@@ -128,8 +128,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         frameworkController.onConnectVmEvent.listen(_connectVm);
     _showPageSubscription =
         frameworkController.onShowPageId.listen(_showPageById);
-
-    addDragAndDropPriorityKeys([widget.dragAndDropKey]);
   }
 
   @override
@@ -276,6 +274,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final tabBodies = [
       for (var screen in widget.tabs)
         Container(
+          // TODO(kenz): this padding creates a flash when dragging and dropping
+          // into the code size screen because it creates space that is outside
+          // of the [DragAndDropEventAbsorber] widget. Fix this.
           padding: DevToolsScaffold.appPadding,
           alignment: Alignment.topLeft,
           child: FocusScope(
@@ -291,7 +292,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       child: Provider<BannerMessagesController>(
         create: (_) => BannerMessagesController(),
         child: DragAndDrop(
-          key: widget.dragAndDropKey,
+          id: widget.dragAndDropId,
+          manager: Provider.of<DragAndDropManager>(context),
           // TODO(kenz): we are handling drops from multiple scaffolds. We need
           // to make sure we are only handling drops from the active scaffold.
           handleDrop: _importController.importData,

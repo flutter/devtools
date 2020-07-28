@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 
+import '../../notifications.dart';
 import 'drag_and_drop.dart';
 
-DragAndDrop createDragAndDrop({
-  @required Key key,
-  @required void Function(Map<String, dynamic> data) handleDrop,
-  @required Widget child,
+DragAndDropManager createDragAndDropManager({
+  @required NotificationsState notifications,
 }) {
   throw Exception(
       'Attempting to create DragAndDrop for unrecognized platform.');

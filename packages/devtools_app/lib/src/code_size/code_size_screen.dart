@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' hide context;
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
@@ -14,9 +15,11 @@ import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
+import '../utils.dart';
 import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
+import 'stub_data/apk_analysis.dart';
 
 bool codeSizeScreenEnabled = false;
 
@@ -45,7 +48,7 @@ class CodeSizeScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return const CodeSizeBody();
+    return const DragAndDropEventAbsorber(child: CodeSizeBody());
   }
 }
 
@@ -165,8 +168,7 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
 class SnapshotView extends StatefulWidget {
   const SnapshotView();
 
-  static const snapshotDragAndDropKey =
-      Key('Code size snapshot - dragAndDropKey');
+  static const snapshotDragAndDropId = 'Code size snapshot - dragAndDropKey';
 
   @override
   _SnapshotViewState createState() => _SnapshotViewState();
@@ -180,7 +182,6 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
-    addDragAndDropPriorityKeys([SnapshotView.snapshotDragAndDropKey]);
   }
 
   @override
@@ -197,14 +198,14 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
         snapshotRoot = controller.snapshotRoot.value;
       });
     });
+
+    addAutoDisposeListener(controller.snapshotJsonFile);
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // TODO(peterdjlee): Move the controls to be aligned with the
-        //                   tab bar to save vertical space.
         Expanded(
           child: snapshotRoot != null
               ? _buildTreemapAndTableSplitView()
@@ -215,17 +216,37 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   }
 
   Widget _buildTreemapAndTableSplitView() {
-    return Split(
-      axis: Axis.vertical,
-      children: [
-        _buildTreemap(),
-        CodeSizeSnapshotTable(rootNode: snapshotRoot),
-      ],
-      initialFractions: const [
-        initialFractionForTreemap,
-        initialFractionForTreeTable,
-      ],
+    return OutlineDecoration(
+      child: Column(
+        children: [
+          areaPaneHeader(
+            context,
+            title: _generateSingleFileHeaderText(),
+            needsTopBorder: false,
+          ),
+          Expanded(
+            child: Split(
+              axis: Axis.vertical,
+              children: [
+                _buildTreemap(),
+                CodeSizeSnapshotTable(rootNode: snapshotRoot),
+              ],
+              initialFractions: const [
+                initialFractionForTreemap,
+                initialFractionForTreeTable,
+              ],
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  String _generateSingleFileHeaderText() {
+    String output =
+        controller.snapshotJsonFile.value.isApkFile ? 'APK: ' : 'Snapshot: ';
+    output += controller.snapshotJsonFile.value.displayText;
+    return output;
   }
 
   Widget _buildTreemap() {
@@ -244,28 +265,25 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   }
 
   Widget _buildImportSnapshotView() {
-    return Padding(
-      padding: const EdgeInsets.all(defaultSpacing),
-      child: Column(
-        children: [
-          Flexible(
-            child: FileImportContainer(
-              title: 'Snapshot',
-              actionText: 'Analyze Snapshot',
-              dragAndDropKey: SnapshotView.snapshotDragAndDropKey,
-              // TODO(kenz): handle drag and drop
-              onDragAndDrop: (data) =>
-                  print('TODO: handle snapshot drag and drop'),
-              onAction: controller.loadFakeTree,
-              // TODO(peterdjlee): Remove once the file picker is implemented.
-              fileToBeImported:
-                  '$current/lib/src/code_size/stub_data/app_size.dart',
+    return Column(
+      children: [
+        Flexible(
+          child: FileImportContainer(
+            title: 'Snapshot',
+            actionText: 'Analyze Snapshot',
+            dragAndDropId: SnapshotView.snapshotDragAndDropId,
+            onAction: controller.loadFakeTree,
+            // TODO(peterdjlee): Remove once the file picker is implemented.
+            fileToBeImported: DevToolsJsonFile(
+              path: 'lib/src/code_size/stub_data/apk_analysis.dart',
+              lastModifiedTime: DateTime.now(),
+              data: json.decode(apkAnalysis),
             ),
           ),
-          const SizedBox(height: defaultSpacing),
-          _buildHelpText(),
-        ],
-      ),
+        ),
+        const SizedBox(height: defaultSpacing),
+        _buildHelpText(),
+      ],
     );
   }
 
@@ -285,11 +303,9 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 class DiffView extends StatefulWidget {
   const DiffView();
 
-  static const diffOldDragAndDropKey =
-      Key('Code size diff old - dragAndDropKey');
+  static const diffOldDragAndDropId = 'Code size diff old - dragAndDropKey';
 
-  static const diffNewDragAndDropKey =
-      Key('Code size diff new - dragAndDropKey');
+  static const diffNewDragAndDropId = 'Code size diff new - dragAndDropKey';
 
   @override
   _DiffViewState createState() => _DiffViewState();
@@ -299,15 +315,6 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   CodeSizeController controller;
 
   TreemapNode diffRoot;
-
-  @override
-  void initState() {
-    super.initState();
-    addDragAndDropPriorityKeys([
-      DiffView.diffOldDragAndDropKey,
-      DiffView.diffNewDragAndDropKey,
-    ]);
-  }
 
   @override
   void didChangeDependencies() {
@@ -325,14 +332,15 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
     });
 
     addAutoDisposeListener(controller.activeDiffTreeType);
+
+    addAutoDisposeListener(controller.oldDiffSnapshotJsonFile);
+    addAutoDisposeListener(controller.newDiffSnapshotJsonFile);
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // TODO(peterdjlee): Move the controls to be aligned with the
-        //                   tab bar to save vertical space.
         Expanded(
           child: diffRoot != null
               ? _buildTreemapAndTableSplitView()
@@ -343,44 +351,60 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   }
 
   Widget _buildTreemapAndTableSplitView() {
-    return Split(
-      axis: Axis.vertical,
-      children: [
-        _buildTreemap(),
-        CodeSizeDiffTable(rootNode: diffRoot),
-      ],
-      initialFractions: const [
-        initialFractionForTreemap,
-        initialFractionForTreeTable,
-      ],
+    return OutlineDecoration(
+      child: Column(
+        children: [
+          areaPaneHeader(
+            context,
+            title: _generateDualFileHeaderText(),
+            needsTopBorder: false,
+          ),
+          Expanded(
+            child: Split(
+              axis: Axis.vertical,
+              children: [
+                _buildTreemap(),
+                CodeSizeDiffTable(rootNode: diffRoot),
+              ],
+              initialFractions: const [
+                initialFractionForTreemap,
+                initialFractionForTreeTable,
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
+  String _generateDualFileHeaderText() {
+    String output = 'Diffing ';
+    output += controller.oldDiffSnapshotJsonFile.value.isApkFile
+        ? 'APKs: '
+        : 'Snapshots: ';
+    output += controller.oldDiffSnapshotJsonFile.value.displayText;
+    output += ' (OLD)      vs      (NEW) ';
+    output += controller.newDiffSnapshotJsonFile.value.displayText;
+    return output;
+  }
+
   Widget _buildImportDiffView() {
-    return Padding(
-      padding: const EdgeInsets.all(defaultSpacing),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: DualFileImportContainer(
-              firstFileTitle: 'Old',
-              secondFileTitle: 'New',
-              firstDragAndDropKey: DiffView.diffOldDragAndDropKey,
-              secondDragAndDropKey: DiffView.diffNewDragAndDropKey,
-              // TODO(kenz): handle drag and drop
-              firstOnDragAndDrop: (data) =>
-                  print('TODO: handle old diff drag and drop'),
-              secondOnDragAndDrop: (data) =>
-                  print('TODO: handle new diff drag and drop'),
-              actionText: 'Analyze Diff',
-              onAction: controller.loadFakeDiffTree,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: DualFileImportContainer(
+            firstFileTitle: 'Old',
+            secondFileTitle: 'New',
+            firstDragAndDropId: DiffView.diffOldDragAndDropId,
+            secondDragAndDropId: DiffView.diffNewDragAndDropId,
+            actionText: 'Analyze Diff',
+            onAction: controller.loadFakeDiffTree,
           ),
-          const SizedBox(height: defaultSpacing),
-          _buildHelpText(),
-        ],
-      ),
+        ),
+        const SizedBox(height: defaultSpacing),
+        _buildHelpText(),
+      ],
     );
   }
 

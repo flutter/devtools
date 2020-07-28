@@ -1,4 +1,4 @@
-const appSize = r'''
+const apkAnalysis = r'''
 {
   "n": "Root",
   "value": 0,

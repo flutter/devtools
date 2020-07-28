@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/config_specific/drag_and_drop/drag_and_drop.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
@@ -119,8 +120,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       settings: settings,
       builder: (BuildContext context) {
         return DevToolsScaffold.withChild(
-          dragAndDropKey:
-              const Key('Scaffold - URI not found - dragAndDropKey'),
+          dragAndDropId: 'Scaffold - URI not found - dragAndDropKey',
           child: CenteredMessage("'$uri' not found."),
           ideTheme: ideTheme,
         );
@@ -147,7 +147,7 @@ class DevToolsAppState extends State<DevToolsApp> {
                 ideTheme: ideTheme,
                 initialPage: page,
                 tabs: tabs,
-                dragAndDropKey: const Key('Scaffold - main - dragAndDropKey'),
+                dragAndDropId: 'Scaffold - main - dragAndDropKey',
                 actions: [
                   if (serviceManager.connectedApp.isFlutterAppNow) ...[
                     HotReloadButton(),
@@ -163,15 +163,13 @@ class DevToolsAppState extends State<DevToolsApp> {
           return DevToolsScaffold.withChild(
             child: ConnectScreenBody(),
             ideTheme: ideTheme,
-            dragAndDropKey:
-                const Key('Scaffold - connect screen - dragAndDropKey'),
+            dragAndDropId: 'Scaffold - connect screen - dragAndDropKey',
           );
         }
       },
       snapshotRoute: (_, __, args) {
         return DevToolsScaffold.withChild(
-          dragAndDropKey:
-              const Key('Scaffold - snapshot screen - dragAndDropKey'),
+          dragAndDropId: 'Scaffold - snapshot screen - dragAndDropKey',
           child: _providedControllers(
             offline: true,
             child: SnapshotScreenBody(args, _screens),
@@ -226,7 +224,9 @@ class DevToolsAppState extends State<DevToolsApp> {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: themeFor(isDarkTheme: value, ideTheme: ideTheme),
-          builder: (context, child) => Notifications(child: child),
+          builder: (context, child) => Notifications(
+            child: DragAndDropManagerProvider(child: child),
+          ),
           onGenerateRoute: _generateRoute,
         );
       },

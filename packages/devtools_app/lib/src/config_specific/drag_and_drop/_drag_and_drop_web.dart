@@ -6,40 +6,33 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 
-import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 
+import '../../notifications.dart';
 import 'drag_and_drop.dart';
 
-DragAndDropWeb createDragAndDrop({
-  @required Key key,
-  @required void Function(Map<String, dynamic> data) handleDrop,
-  @required Widget child,
+DragAndDropManagerWeb createDragAndDropManager({
+  @required NotificationsState notifications,
 }) {
-  return DragAndDropWeb(key: key, handleDrop: handleDrop, child: child);
+  return DragAndDropManagerWeb(notifications: notifications);
 }
 
-class DragAndDropWeb extends DragAndDrop {
-  const DragAndDropWeb({
-    @required Key key,
-    @required void Function(Map<String, dynamic> data) handleDrop,
-    @required Widget child,
-  }) : super.impl(key: key, handleDrop: handleDrop, child: child);
+class DragAndDropManagerWeb extends DragAndDropManager {
+  DragAndDropManagerWeb({
+    @required NotificationsState notifications,
+  }) : super.impl(notifications: notifications);
 
-  @override
-  _DragAndDropWebState createState() => _DragAndDropWebState();
-}
-
-class _DragAndDropWebState extends DragAndDropState {
   StreamSubscription<MouseEvent> onDragOverSubscription;
+
   StreamSubscription<MouseEvent> onDropSubscription;
+
   StreamSubscription<MouseEvent> onDragLeaveSubscription;
 
   @override
-  void initState() {
+  void init() {
     onDragOverSubscription = document.body.onDragOver.listen(_onDragOver);
     onDragLeaveSubscription = document.body.onDragLeave.listen(_onDragLeave);
     onDropSubscription = document.body.onDrop.listen(_onDrop);
-    super.initState();
   }
 
   @override
@@ -51,13 +44,7 @@ class _DragAndDropWebState extends DragAndDropState {
   }
 
   void _onDragOver(MouseEvent event) {
-    if (!isPriority) return;
-
     super.dragOver(event.offset.x, event.offset.y);
-
-    // This needs to be called after `super.dragOver()` so that the value of
-    // `_dragging` gets updated correctly.
-    if (!coordinatesInBound(event.offset.x, event.offset.y)) return;
 
     // This is necessary to allow us to drop.
     event.preventDefault();
@@ -65,17 +52,16 @@ class _DragAndDropWebState extends DragAndDropState {
   }
 
   void _onDragLeave(MouseEvent event) {
-    if (!isPriority) return;
     super.dragLeave();
   }
 
   void _onDrop(MouseEvent event) async {
-    if (!isPriority || !coordinatesInBound(event.offset.x, event.offset.y))
-      return;
     super.drop();
 
     // Stop the browser from redirecting.
     event.preventDefault();
+
+    if (activeState == null) return;
 
     final List<File> files = event.dataTransfer.files;
     if (files.length > 1) {
@@ -95,7 +81,7 @@ class _DragAndDropWebState extends DragAndDropState {
     reader.onLoad.listen((_) {
       try {
         final Map<String, dynamic> json = jsonDecode(reader.result);
-        widget.handleDrop(json);
+        activeState.widget.handleDrop(json);
       } on FormatException catch (e) {
         notifications.push(
           'JSON syntax error in imported file: "$e". Please make sure the '

@@ -2,20 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
+import 'package:provider/provider.dart';
 
 import '../common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../theme.dart';
 import '../ui/label.dart';
+import '../utils.dart';
+import 'stub_data/new_v8.dart';
+import 'stub_data/old_v8.dart';
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
     @required this.title,
     @required this.fileToBeImported,
-    @required this.dragAndDropKey,
-    @required this.onDragAndDrop,
+    @required this.dragAndDropId,
     this.actionText,
     this.onAction,
     this.onFileSelected,
@@ -27,23 +32,21 @@ class FileImportContainer extends StatefulWidget {
   /// The title of the action button.
   final String actionText;
 
-  final Function(String filePath) onAction;
+  final DevToolsJsonFileHandler onAction;
 
-  final Function(String filePath) onFileSelected;
+  final DevToolsJsonFileHandler onFileSelected;
 
-  final Key dragAndDropKey;
-
-  final Function(Map<String, dynamic> data) onDragAndDrop;
+  final String dragAndDropId;
 
   // TODO(peterdjlee): Remove once the file picker is implemented.
-  final String fileToBeImported;
+  final DevToolsJsonFile fileToBeImported;
 
   @override
   _FileImportContainerState createState() => _FileImportContainerState();
 }
 
 class _FileImportContainerState extends State<FileImportContainer> {
-  String importedFile;
+  DevToolsJsonFile importedFile;
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +60,10 @@ class _FileImportContainerState extends State<FileImportContainer> {
         Expanded(
           // TODO(kenz): improve drag over highlight.
           child: DragAndDrop(
-            key: widget.dragAndDropKey,
-            handleDrop: widget.onDragAndDrop,
+            id: widget.dragAndDropId,
+            manager: Provider.of<DragAndDropManager>(context),
+            handleDrop: (_) =>
+                print('TODO: handle drag and drop for ${widget.actionText}'),
             child: RoundedOutlinedBorder(
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
@@ -89,7 +94,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
       children: [
         const SizedBox(height: defaultSpacing),
         Text(
-          importedFile != null ? importedFile : 'No File Selected',
+          importedFile != null ? importedFile.path : 'No File Selected',
           style: TextStyle(
             color: Theme.of(context).textTheme.headline1.color,
           ),
@@ -148,10 +153,8 @@ class DualFileImportContainer extends StatefulWidget {
   const DualFileImportContainer({
     @required this.firstFileTitle,
     @required this.secondFileTitle,
-    @required this.firstDragAndDropKey,
-    @required this.secondDragAndDropKey,
-    @required this.firstOnDragAndDrop,
-    @required this.secondOnDragAndDrop,
+    @required this.firstDragAndDropId,
+    @required this.secondDragAndDropId,
     @required this.actionText,
     @required this.onAction,
     Key key,
@@ -161,18 +164,17 @@ class DualFileImportContainer extends StatefulWidget {
 
   final String secondFileTitle;
 
-  final Key firstDragAndDropKey;
+  final String firstDragAndDropId;
 
-  final Key secondDragAndDropKey;
-
-  final Function(Map<String, dynamic> data) firstOnDragAndDrop;
-
-  final Function(Map<String, dynamic> data) secondOnDragAndDrop;
+  final String secondDragAndDropId;
 
   /// The title of the action button.
   final String actionText;
 
-  final Function(String firstFilePath, String secondFilePath) onAction;
+  final Function(
+    DevToolsJsonFile firstImportedFile,
+    DevToolsJsonFile secondImportedFile,
+  ) onAction;
 
   @override
   _DualFileImportContainerState createState() =>
@@ -180,8 +182,8 @@ class DualFileImportContainer extends StatefulWidget {
 }
 
 class _DualFileImportContainerState extends State<DualFileImportContainer> {
-  String firstFilePath;
-  String secondFilePath;
+  DevToolsJsonFile firstImportedFile;
+  DevToolsJsonFile secondImportedFile;
 
   @override
   Widget build(BuildContext context) {
@@ -190,12 +192,14 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Expanded(
           child: FileImportContainer(
             title: widget.firstFileTitle,
-            dragAndDropKey: widget.firstDragAndDropKey,
-            onDragAndDrop: widget.firstOnDragAndDrop,
+            dragAndDropId: widget.firstDragAndDropId,
             onFileSelected: onFirstFileSelected,
             // TODO(peterdjlee): Remove once the file picker is implemented.
-            fileToBeImported:
-                '$current/lib/src/code_size/stub_data/old_v8.dart',
+            fileToBeImported: DevToolsJsonFile(
+              path: 'lib/src/code_size/stub_data/old_v8.dart',
+              lastModifiedTime: DateTime.now(),
+              data: json.decode(oldV8),
+            ),
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -204,27 +208,29 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Expanded(
           child: FileImportContainer(
             title: widget.secondFileTitle,
-            dragAndDropKey: widget.secondDragAndDropKey,
-            onDragAndDrop: widget.secondOnDragAndDrop,
+            dragAndDropId: widget.secondDragAndDropId,
             onFileSelected: onSecondFileSelected,
             // TODO(peterdjlee): Remove once the file picker is implemented.
-            fileToBeImported:
-                '$current/lib/src/code_size/stub_data/new_v8.dart',
+            fileToBeImported: DevToolsJsonFile(
+              path: 'lib/src/code_size/stub_data/new_v8.dart',
+              lastModifiedTime: DateTime.now(),
+              data: json.decode(newV8),
+            ),
           ),
         ),
       ],
     );
   }
 
-  void onFirstFileSelected(String selectedFirstFilePath) {
+  void onFirstFileSelected(DevToolsJsonFile selectedFile) {
     setState(() {
-      firstFilePath = selectedFirstFilePath;
+      firstImportedFile = selectedFile;
     });
   }
 
-  void onSecondFileSelected(String selectedSecondFilePath) {
+  void onSecondFileSelected(DevToolsJsonFile selectedFile) {
     setState(() {
-      secondFilePath = selectedSecondFilePath;
+      secondImportedFile = selectedFile;
     });
   }
 
@@ -237,8 +243,8 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             RaisedButton(
-              onPressed: firstFilePath != null && secondFilePath != null
-                  ? () => widget.onAction(firstFilePath, secondFilePath)
+              onPressed: firstImportedFile != null && secondImportedFile != null
+                  ? () => widget.onAction(firstImportedFile, secondImportedFile)
                   : null,
               child: MaterialIconLabel(
                 Icons.highlight,
