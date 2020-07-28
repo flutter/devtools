@@ -20,7 +20,7 @@ import 'code_size_table.dart';
 import 'file_import_container.dart';
 import 'stub_data/apk_analysis.dart';
 
-bool codeSizeScreenEnabled = true;
+bool codeSizeScreenEnabled = false;
 
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
@@ -235,8 +235,7 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   }
 
   String _generateSingleFileHeaderText() {
-    String output = '';
-    output +=
+    String output =
         controller.snapshotJsonFile.value.isApkFile ? 'APK: ' : 'Snapshot: ';
     output += controller.snapshotJsonFile.value.displayText;
     return output;
@@ -371,7 +370,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
         ? 'APKs: '
         : 'Snapshots: ';
     output += controller.oldDiffSnapshotJsonFile.value.displayText;
-    output += ' (OLD) vs (NEW) ';
+    output += ' (OLD)      vs      (NEW) ';
     output += controller.newDiffSnapshotJsonFile.value.displayText;
     return output;
   }
