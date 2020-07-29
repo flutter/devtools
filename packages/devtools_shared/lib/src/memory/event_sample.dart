@@ -109,7 +109,9 @@ class EventSample {
         json['gcEvent'] as bool,
         json['snapshotEvent'] as bool,
         json['snapshotAutoEvent'] as bool,
-        AllocationAccumulator?.fromJson(json['allocationAccumulatorEvent']),
+        json['allocationAccumulatorEvent'] != null
+            ? AllocationAccumulator.fromJson(json['allocationAccumulatorEvent'])
+            : null,
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
