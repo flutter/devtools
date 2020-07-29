@@ -26,14 +26,14 @@ void main() {
 
     test('can be inferred from override background color', () {
       theme = themeFor(
-        isDarkTheme: false, // Will be overriden by black BG
+        isDarkTheme: false, // Will be overridden by black BG
         ideTheme: IdeTheme(backgroundColor: Colors.black),
       );
       expect(theme.brightness, equals(Brightness.dark));
       expect(theme.scaffoldBackgroundColor, equals(Colors.black));
 
       theme = themeFor(
-        isDarkTheme: true, // Will be overriden by white BG
+        isDarkTheme: true, // Will be overridden by white BG
         ideTheme: IdeTheme(backgroundColor: Colors.white),
       );
       expect(theme.brightness, equals(Brightness.light));
@@ -42,7 +42,7 @@ void main() {
 
     test('will not be inferred for colors that are not dark/light enough', () {
       theme = themeFor(
-        isDarkTheme: false, // Will not be overriden - not dark enough
+        isDarkTheme: false, // Will not be overridden - not dark enough
         ideTheme: IdeTheme(backgroundColor: Colors.orange),
       );
       expect(theme.brightness, equals(Brightness.light));
@@ -50,7 +50,7 @@ void main() {
           equals(ThemeData.light().scaffoldBackgroundColor));
 
       theme = themeFor(
-        isDarkTheme: true, // Will not be overriden - not light enough
+        isDarkTheme: true, // Will not be overridden - not light enough
         ideTheme: IdeTheme(backgroundColor: Colors.orange),
       );
       expect(theme.brightness, equals(Brightness.dark));

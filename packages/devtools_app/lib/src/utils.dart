@@ -283,7 +283,7 @@ Stream combineStreams(Stream a, Stream b, Stream c) {
 
 /// Parses a 3 or 6 digit CSS Hex Color into a dart:ui Color.
 Color parseCssHexColor(String input) {
-  // Remove any leading # (and the escaped version to be leniant)
+  // Remove any leading # (and the escaped version to be lenient)
   input = input.replaceAll('#', '').replaceAll('%23', '');
 
   // Handle 3/4-digit hex codes (eg. #123 == #112233)
