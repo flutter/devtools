@@ -43,7 +43,7 @@ class DevToolsScaffold extends StatefulWidget {
 
   DevToolsScaffold.withChild({
     Key key,
-    Widget child,
+    @required Widget child,
     @required IdeTheme ideTheme,
   }) : this(
           key: key,
@@ -57,6 +57,7 @@ class DevToolsScaffold extends StatefulWidget {
   /// A [Key] that indicates the scaffold is showing in full-width mode.
   static const Key fullWidthKey = Key('Full-width Scaffold');
 
+  // TODO(kenz): update this when we enable the code size screen
   // TODO(jacobr): compute this based on the width of the list of tabs rather
   // than hardcoding. Computing this width dynamically is even more important
   // in the presence of conditional screens.
@@ -268,6 +269,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final tabBodies = [
       for (var screen in widget.tabs)
         Container(
+          // TODO(kenz): this padding creates a flash when dragging and dropping
+          // into the code size screen because it creates space that is outside
+          // of the [DragAndDropEventAbsorber] widget. Fix this.
           padding: DevToolsScaffold.appPadding,
           alignment: Alignment.topLeft,
           child: FocusScope(
@@ -283,8 +287,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       child: Provider<BannerMessagesController>(
         create: (_) => BannerMessagesController(),
         child: DragAndDrop(
-          // TODO(kenz): we are handling drops from multiple scaffolds. We need
-          // to make sure we are only handling drops from the active scaffold.
           handleDrop: _importController.importData,
           child: Scaffold(
             appBar: widget.embed ? null : _buildAppBar(),

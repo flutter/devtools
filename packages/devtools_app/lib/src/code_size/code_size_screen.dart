@@ -2,23 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
 import '../common_widgets.dart';
+import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
-import '../utils.dart';
 import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
-import 'stub_data/apk_analysis.dart';
 
 bool codeSizeScreenEnabled = false;
 
@@ -47,7 +44,11 @@ class CodeSizeScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return const CodeSizeBody();
+    // Since `handleDrop` is not specified for this [DragAndDrop] widget, drag
+    // and drop events will be absorbed by it, meaning drag and drop actions
+    // will be a no-op if they occur over this area. [DragAndDrop] widgets
+    // lower in the tree will have priority over this one.
+    return const DragAndDrop(child: CodeSizeBody());
   }
 }
 
@@ -263,28 +264,8 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
           child: FileImportContainer(
             title: 'Snapshot',
             actionText: 'Analyze Snapshot',
-            onAction: controller.loadFakeTree,
-            // TODO(peterdjlee): Remove once the file picker is implemented.
-            fileToBeImported: DevToolsJsonFile(
-              path: 'lib/src/code_size/stub_data/apk_analysis.dart',
-              lastModifiedTime: DateTime.now(),
-              data: json.decode(apkAnalysis),
-            ),
+            onAction: controller.loadTreeFromJsonFile,
           ),
-        ),
-        const SizedBox(height: defaultSpacing),
-        _buildHelpText(),
-      ],
-    );
-  }
-
-  Column _buildHelpText() {
-    return Column(
-      children: [
-        Text(
-          'We currently only support instruction sizes and v8 snapshot profile outputs.',
-          style:
-              TextStyle(color: Theme.of(context).colorScheme.chartAccentColor),
         ),
       ],
     );
@@ -370,7 +351,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
         ? 'APKs: '
         : 'Snapshots: ';
     output += controller.oldDiffSnapshotJsonFile.value.displayText;
-    output += ' (OLD)      vs      (NEW) ';
+    output += ' (OLD)    vs    (NEW) ';
     output += controller.newDiffSnapshotJsonFile.value.displayText;
     return output;
   }
@@ -384,22 +365,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
             firstFileTitle: 'Old',
             secondFileTitle: 'New',
             actionText: 'Analyze Diff',
-            onAction: controller.loadFakeDiffTree,
-          ),
-        ),
-        const SizedBox(height: defaultSpacing),
-        _buildHelpText(),
-      ],
-    );
-  }
-
-  Column _buildHelpText() {
-    return Column(
-      children: [
-        Text(
-          'We currently only support instruction sizes and v8 snapshot profile outputs.',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.chartAccentColor,
+            onAction: controller.loadDiffTreeFromJsonFiles,
           ),
         ),
       ],

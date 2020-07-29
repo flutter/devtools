@@ -94,14 +94,13 @@ class CodeSizeController {
   //                   to change bettween diff tree types.
   void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
     _activeDiffTreeType.value = newDiffTreeType;
-    loadFakeDiffTree(
+    loadDiffTreeFromJsonFiles(
       _oldDiffSnapshotJsonFile.value,
       _newDiffSnapshotJsonFile.value,
     );
   }
 
-  // TODO(peterdjlee): Use user input data instead of hard coded data.
-  void loadFakeTree(DevToolsJsonFile jsonFile) {
+  void loadTreeFromJsonFile(DevToolsJsonFile jsonFile) {
     changeSnapshotJsonFile(jsonFile);
 
     Map<String, dynamic> processedJson;
@@ -121,15 +120,16 @@ class CodeSizeController {
     changeSnapshotRoot(newRoot);
   }
 
-  // TODO(peterdjlee): Use user input data instead of hard coded data.
-  void loadFakeDiffTree(
-    DevToolsJsonFile oldJsonFile,
-    DevToolsJsonFile newJsonFile,
+  void loadDiffTreeFromJsonFiles(
+    DevToolsJsonFile oldFile,
+    DevToolsJsonFile newFile,
   ) {
-    changeOldDiffSnapshotFile(oldJsonFile);
-    changeNewDiffSnapshotFile(newJsonFile);
+    if (oldFile == null || newFile == null) return;
 
-    final diffMap = buildComparisonTreemap(oldJsonFile.data, newJsonFile.data);
+    changeOldDiffSnapshotFile(oldFile);
+    changeNewDiffSnapshotFile(newFile);
+
+    final diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
     diffMap['n'] = 'Root';
     final newRoot = generateDiffTree(diffMap);
 

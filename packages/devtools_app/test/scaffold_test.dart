@@ -66,10 +66,7 @@ void main() {
 
     testWidgets('displays only the selected tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(
-        const DevToolsScaffold(
-          tabs: [screen1, screen2],
-          ideTheme: null,
-        ),
+        const DevToolsScaffold(tabs: [screen1, screen2], ideTheme: null),
       ));
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(k2), findsNothing);

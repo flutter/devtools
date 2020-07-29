@@ -7,12 +7,13 @@ import 'dart:convert';
 import 'package:devtools_app/src/code_size/code_size_screen.dart';
 import 'package:devtools_app/src/code_size/code_size_controller.dart';
 import 'package:devtools_app/src/code_size/code_size_table.dart';
-import 'package:devtools_app/src/code_size/stub_data/new_v8.dart';
-import 'package:devtools_app/src/code_size/stub_data/old_v8.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/code_size_test_data/new_v8.dart';
+import 'support/code_size_test_data/old_v8.dart';
 import 'support/wrappers.dart';
 
 // TODO(peterdjlee): Clean up the tests once  we don't need loadFakeData.
@@ -41,9 +42,9 @@ void main() {
     setUp(() async {
       screen = const CodeSizeScreen();
       codeSizeController = CodeSizeController();
-      codeSizeController.loadFakeTree(
+      codeSizeController.loadTreeFromJsonFile(
         DevToolsJsonFile(
-          path: 'lib/src/code_size/stub_data/new_v8.dart',
+          name: 'lib/src/code_size/stub_data/new_v8.dart',
           lastModifiedTime: lastModifiedTime,
           data: json.decode(newV8),
         ),
@@ -115,14 +116,14 @@ void main() {
         );
         await tester.tap(find.byKey(CodeSizeScreen.diffTabKey));
 
-        codeSizeController.loadFakeDiffTree(
+        codeSizeController.loadDiffTreeFromJsonFiles(
           DevToolsJsonFile(
-            path: 'lib/src/code_size/stub_data/old_v8.dart',
+            name: 'lib/src/code_size/stub_data/old_v8.dart',
             lastModifiedTime: lastModifiedTime,
             data: json.decode(oldV8),
           ),
           DevToolsJsonFile(
-            path: 'lib/src/code_size/stub_data/new_v8.dart',
+            name: 'lib/src/code_size/stub_data/new_v8.dart',
             lastModifiedTime: lastModifiedTime,
             data: json.decode(newV8),
           ),
@@ -136,7 +137,7 @@ void main() {
         expect(find.byType(DiffView), findsOneWidget);
         expect(
           find.text(
-            'Diffing Snapshots: lib/src/code_size/stub_data/old_v8.dart - 7/28/2020 1:29 PM (OLD)      vs      (NEW) lib/src/code_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
+            'Diffing Snapshots: lib/src/code_size/stub_data/old_v8.dart - 7/28/2020 1:29 PM (OLD)    vs    (NEW) lib/src/code_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
           ),
           findsOneWidget,
         );

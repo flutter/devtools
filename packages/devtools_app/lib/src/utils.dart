@@ -946,11 +946,11 @@ typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile file);
 
 class DevToolsJsonFile extends DevToolsFile<Map<String, dynamic>> {
   const DevToolsJsonFile({
-    @required String path,
+    @required String name,
     @required DateTime lastModifiedTime,
     @required Map<String, dynamic> data,
   }) : super(
-          path: path,
+          path: name,
           lastModifiedTime: lastModifiedTime,
           data: data,
         );

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:test/test.dart';
 
 import 'support/wrappers.dart';
@@ -34,9 +35,17 @@ void main() async {
   });
 }
 
-final nonDevToolsFileJson = <String, dynamic>{};
-final devToolsFileJson = <String, dynamic>{
-  'devToolsSnapshot': true,
-  'activeScreenId': 'example',
-  'example': {'title': 'example custom tools'}
-};
+final nonDevToolsFileJson = DevToolsJsonFile(
+  name: 'nonDevToolsFileJson',
+  lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(1000),
+  data: <String, dynamic>{},
+);
+final devToolsFileJson = DevToolsJsonFile(
+  name: 'devToolsFileJson',
+  lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(2000),
+  data: <String, dynamic>{
+    'devToolsSnapshot': true,
+    'activeScreenId': 'example',
+    'example': {'title': 'example custom tools'}
+  },
+);
