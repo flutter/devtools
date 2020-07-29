@@ -626,15 +626,15 @@ class MemoryController extends DisposableController
         ?.getHeapSnapshotGraph(serviceManager?.isolateManager?.selectedIsolate);
   }
 
-  final _monitorAllocationsUpdated = ValueNotifier<int>(0);
+  final _monitorAllocationsNotifier = ValueNotifier<int>(0);
 
   /// Last column sorted and sort direction in allocation monitoring. As table
   /// is reconstructed e.g., reset, etc. remembers user's sorting preference.
   ColumnData<ClassHeapDetailStats> sortedMonitorColumn;
   SortDirection sortedMonitorDirection;
 
-  ValueListenable<int> get monitorAllocationsChanged =>
-      _monitorAllocationsUpdated;
+  ValueListenable<int> get monitorAllocationsNotifier =>
+      _monitorAllocationsNotifier;
 
   DateTime monitorTimestamp;
 
@@ -646,9 +646,9 @@ class MemoryController extends DisposableController
     _monitorAllocations = allocations;
     // Clearing allocations reset ValueNotifier to zero.
     if (allocations.isEmpty) {
-      _monitorAllocationsUpdated.value = 0;
+      _monitorAllocationsNotifier.value = 0;
     } else {
-      _monitorAllocationsUpdated.value++;
+      _monitorAllocationsNotifier.value++;
     }
   }
 
@@ -681,23 +681,6 @@ class MemoryController extends DisposableController
     }).toList();
 
     return allocations;
-  }
-
-  Future<void> computeLibraries() async {
-    // TODO(terry): Review why unawaited is necessary.
-    unawaited(serviceManager.service.getVM().then((vm) {
-      Future.wait(vm.isolates.map((IsolateRef ref) {
-        return serviceManager.service.getIsolate(ref.id);
-      })).then((isolates) {
-        for (LibraryRef libraryRef in isolates.first.libraries) {
-          serviceManager.service
-              .getObject(_isolateId, libraryRef.id)
-              .then((theLibrary) {
-            debugLogger('Library ${libraryRef.name}');
-          });
-        }
-      });
-    }));
   }
 
   bool get isConnectedDeviceAndroid {

@@ -218,7 +218,7 @@ class HeapTreeViewState extends State<HeapTree>
       ));
     });
 
-    addAutoDisposeListener(controller.monitorAllocationsChanged, () {
+    addAutoDisposeListener(controller.monitorAllocationsNotifier, () {
       setState(() {
         controller.computeAllLibraries(rebuild: true);
       });
@@ -502,7 +502,9 @@ class HeapTreeViewState extends State<HeapTree>
                               // We're collapsing close the fields table.
                               controller.selectedLeaf = null;
                             }
-                            setState(() {});
+                            setState(() {
+                              controller.buildTreeFromAllData();
+                            });
                           }
                         }
                       : null,
@@ -524,8 +526,10 @@ class HeapTreeViewState extends State<HeapTree>
                               element.expandCascading();
                               return true;
                             });
-                            setState(() {});
                           }
+                          setState(() {
+                            controller.buildTreeFromAllData();
+                          });
                         }
                       : null,
                   child: const MaterialIconLabel.noText(
@@ -866,11 +870,6 @@ class HeapTreeViewState extends State<HeapTree>
       nodeIndex: analyzeSnapshot.index,
       scrollIntoView: true,
     );
-
-    // TODO(terry): Could be done if completedAnalyses was a ValueNotifier.
-    //              Although still an empty setState in didChangeDependencies.
-    // Rebuild Analyze button.
-    setState(() {});
   }
 
   // ignore: unused_element

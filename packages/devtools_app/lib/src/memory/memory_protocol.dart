@@ -163,12 +163,13 @@ class MemoryTracker {
     for (var index = 0; index < isolateCount; index++) {
       final isolateId = keys[index];
       var usage = isolateHeaps[isolateId];
-      if (isolateCount > 1) {
-        // Is the isolate live (not sentinaled).
-        usage = await _isolateMemoryUsage(isolateId, usage);
-        if (usage == null && !keysToRemove.contains(isolateId)) {
-          keysToRemove.add(isolateId);
-        }
+      // Check if the isolate is dead (sentinal), null implies sentinal.
+      final checkIsolateUsage = await _isolateMemoryUsage(isolateId, usage);
+      if (checkIsolateUsage == null && !keysToRemove.contains(isolateId)) {
+        // Sentinal Isolate don't include in the heap computation.
+        keysToRemove.add(isolateId);
+        // Don't use this sential isolate for any heap computation.
+        usage = null;
       }
 
       if (usage != null) {

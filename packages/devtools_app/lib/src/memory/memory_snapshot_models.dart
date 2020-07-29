@@ -208,9 +208,12 @@ class Reference extends TreeNode<Reference> {
 
   final String name;
 
-  final bool isAllocation;
-
+  /// Allocations are being monitored, user requested monitoring of any
+  /// allocated memory.  Parent node containing all monitored classes.
   final bool isAllocations;
+
+  /// A monitored class.
+  final bool isAllocation;
 
   final bool isAnalysis;
 
