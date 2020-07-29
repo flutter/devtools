@@ -133,28 +133,31 @@ class DevToolsAppState extends State<DevToolsApp> {
         if (params['uri']?.isNotEmpty ?? false) {
           final embed = params['embed'] == 'true';
           final page = params['page'];
-          final tabs = embed && page != null
-              ? _visibleScreens().where((p) => p.screenId == page).toList()
-              : _visibleScreens();
           return Initializer(
             url: params['uri'],
             allowConnectionScreenOnDisconnect: !embed,
-            builder: (_) => _providedControllers(
-              child: DevToolsScaffold(
-                embed: embed,
-                ideTheme: ideTheme,
-                initialPage: page,
-                tabs: tabs,
-                actions: [
-                  if (serviceManager.connectedApp.isFlutterAppNow) ...[
-                    HotReloadButton(),
-                    HotRestartButton(),
+            builder: (_) {
+              // TODO(dantup): Handle when `page` is not in the list of visible screens.
+              final tabs = embed && page != null
+                  ? _visibleScreens().where((p) => p.screenId == page).toList()
+                  : _visibleScreens();
+              return _providedControllers(
+                child: DevToolsScaffold(
+                  embed: embed,
+                  ideTheme: ideTheme,
+                  initialPage: page,
+                  tabs: tabs,
+                  actions: [
+                    if (serviceManager.connectedApp.isFlutterAppNow) ...[
+                      HotReloadButton(),
+                      HotRestartButton(),
+                    ],
+                    OpenSettingsAction(),
+                    OpenAboutAction(),
                   ],
-                  OpenSettingsAction(),
-                  OpenAboutAction(),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         } else {
           return DevToolsScaffold.withChild(
@@ -181,22 +184,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     _routes = null;
   }
 
-  List<Screen> _visibleScreens() {
-    final visibleScreens = <Screen>[];
-    for (var screen in _screens) {
-      if (screen.conditionalLibrary != null) {
-        if (serviceManager.isServiceAvailable &&
-            serviceManager
-                .isolateManager.selectedIsolateAvailable.isCompleted &&
-            serviceManager.libraryUriAvailableNow(screen.conditionalLibrary)) {
-          visibleScreens.add(screen);
-        }
-      } else {
-        visibleScreens.add(screen);
-      }
-    }
-    return visibleScreens;
-  }
+  List<Screen> _visibleScreens() => _screens.where(shouldShowScreen).toList();
 
   Widget _providedControllers({@required Widget child, bool offline = false}) {
     final _providers = widget.screens

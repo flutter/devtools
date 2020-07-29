@@ -22,7 +22,13 @@ import 'memory_heap_tree_view.dart';
 const _primaryControlsMinVerboseWidth = 1100.0;
 
 class MemoryScreen extends Screen {
-  const MemoryScreen() : super(id, title: 'Memory', icon: Octicons.package);
+  const MemoryScreen()
+      : super.conditional(
+          id: id,
+          requiresDartVm: true,
+          title: 'Memory',
+          icon: Octicons.package,
+        );
 
   @visibleForTesting
   static const pauseButtonKey = Key('Pause Button');
@@ -59,12 +65,7 @@ class MemoryScreen extends Screen {
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) {
-    final connected = serviceManager?.connectedApp;
-    return connected != null && !connected.isDartWebAppNow
-        ? const MemoryBody()
-        : const DisabledForWebAppMessage();
-  }
+  Widget build(BuildContext context) => const MemoryBody();
 }
 
 class MemoryBody extends StatefulWidget {

@@ -71,14 +71,6 @@ void main() {
       expect(find.text('Debugger'), findsOneWidget);
     });
 
-    testWidgets('builds disabled message when disabled for profile mode',
-        (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(true);
-      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
-      expect(find.byType(DebuggerScreenBody), findsNothing);
-      expect(find.byType(DisabledForProfileBuildMessage), findsOneWidget);
-    });
-
     testWidgets('has Console / stdio area', (WidgetTester tester) async {
       when(debuggerController.stdio).thenReturn(ValueNotifier(['test stdio']));
 

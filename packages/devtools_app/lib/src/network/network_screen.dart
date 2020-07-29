@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
-import '../globals.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../table.dart';
@@ -21,7 +20,12 @@ import 'network_request_inspector.dart';
 
 class NetworkScreen extends Screen {
   const NetworkScreen()
-      : super('network', title: 'Network', icon: Icons.network_check);
+      : super.conditional(
+          id: 'network',
+          requiresDartVm: true,
+          title: 'Network',
+          icon: Icons.network_check,
+        );
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -33,11 +37,7 @@ class NetworkScreen extends Screen {
   static const recordingInstructionsKey = Key('Recording Instructions');
 
   @override
-  Widget build(BuildContext context) {
-    return !serviceManager.connectedApp.isDartWebAppNow
-        ? const NetworkScreenBody()
-        : const DisabledForWebAppMessage();
-  }
+  Widget build(BuildContext context) => const NetworkScreenBody();
 
   @override
   Widget buildStatus(BuildContext context, TextTheme textTheme) {

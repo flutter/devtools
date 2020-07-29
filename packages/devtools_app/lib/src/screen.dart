@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'globals.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
@@ -17,18 +18,27 @@ abstract class Screen {
     this.title,
     this.icon,
     this.tabKey,
-    this.conditionalLibrary,
+    this.requiresLibrary,
+    this.requiresDartVm = false,
+    this.requiresDebugBuild = false,
+    this.worksOffline = false,
   });
 
   const Screen.conditional({
     @required String id,
-    @required String conditionalLibrary,
+    String requiresLibrary,
+    bool requiresDartVm = false,
+    bool requiresDebugBuild = false,
+    bool worksOffline = false,
     String title,
     IconData icon,
     Key tabKey,
   }) : this(
           id,
-          conditionalLibrary: conditionalLibrary,
+          requiresLibrary: requiresLibrary,
+          requiresDartVm: requiresDartVm,
+          requiresDebugBuild: requiresDebugBuild,
+          worksOffline: worksOffline,
           title: title,
           icon: icon,
           tabKey: tabKey,
@@ -48,12 +58,21 @@ abstract class Screen {
   /// Library uri that determines whether to include this screen in DevTools.
   ///
   /// This can either be a full library uri or it can be a prefix. If null, this
-  /// screen will be shown unconditionally.
+  /// screen will be shown if it meets all other criteria.
   ///
   /// Examples:
   ///  * 'package:provider/provider.dart'
   ///  * 'package:provider/'
-  final String conditionalLibrary;
+  final String requiresLibrary;
+
+  /// Whether this screen should only be included when the app is running on the Dart VM.
+  final bool requiresDartVm;
+
+  /// Whether this screen should only be included when the app is debuggable.
+  final bool requiresDebugBuild;
+
+  /// Whether this screen works offline and should show in offline mode even if conditions are not met.
+  final bool worksOffline;
 
   /// Whether this screen should display the isolate selector in the status
   /// line.
@@ -116,4 +135,31 @@ mixin OfflineScreenMixin<T extends StatefulWidget, U> on State<T> {
       _loadingOfflineData = false;
     });
   }
+}
+
+/// Check whether a screen should be shown in the UI.
+bool shouldShowScreen(Screen screen) {
+  if (offlineMode) {
+    return screen.worksOffline;
+  }
+  if (screen.requiresLibrary != null) {
+    if (!serviceManager.isServiceAvailable ||
+        !serviceManager.isolateManager.selectedIsolateAvailable.isCompleted ||
+        !serviceManager.libraryUriAvailableNow(screen.requiresLibrary)) {
+      return false;
+    }
+  }
+  if (screen.requiresDartVm) {
+    if (!serviceManager.isServiceAvailable ||
+        !serviceManager.connectedApp.isRunningOnDartVM) {
+      return false;
+    }
+  }
+  if (screen.requiresDebugBuild) {
+    if (!serviceManager.isServiceAvailable ||
+        serviceManager.connectedApp.isProfileBuildNow) {
+      return false;
+    }
+  }
+  return true;
 }

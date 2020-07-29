@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../console.dart';
-import '../globals.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -30,12 +29,7 @@ class LoggingScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  Widget build(BuildContext context) {
-    return !(serviceManager.connectedApp.isFlutterWebAppNow &&
-            serviceManager.connectedApp.isProfileBuildNow)
-        ? const LoggingScreenBody()
-        : const DisabledForFlutterWebProfileBuildMessage();
-  }
+  Widget build(BuildContext context) => const LoggingScreenBody();
 
   @override
   Widget buildStatus(BuildContext context, TextTheme textTheme) {

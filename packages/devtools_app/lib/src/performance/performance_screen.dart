@@ -25,7 +25,13 @@ import 'performance_controller.dart';
 
 class PerformanceScreen extends Screen {
   const PerformanceScreen()
-      : super(id, title: 'Performance', icon: Octicons.dashboard);
+      : super.conditional(
+          id: id,
+          requiresDartVm: true,
+          worksOffline: true,
+          title: 'Performance',
+          icon: Octicons.dashboard,
+        );
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -46,11 +52,7 @@ class PerformanceScreen extends Screen {
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) {
-    return offlineMode || !serviceManager.connectedApp.isDartWebAppNow
-        ? const PerformanceScreenBody()
-        : const DisabledForWebAppMessage();
-  }
+  Widget build(BuildContext context) => const PerformanceScreenBody();
 }
 
 class PerformanceScreenBody extends StatefulWidget {
