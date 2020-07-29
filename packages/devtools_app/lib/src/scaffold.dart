@@ -33,7 +33,6 @@ import 'theme.dart';
 class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
     Key key,
-    @required this.dragAndDropId,
     @required this.tabs,
     this.initialPage,
     this.actions,
@@ -46,12 +45,10 @@ class DevToolsScaffold extends StatefulWidget {
     Key key,
     @required Widget child,
     @required IdeTheme ideTheme,
-    @required String dragAndDropId,
   }) : this(
           key: key,
           tabs: [SimpleScreen(child)],
           ideTheme: ideTheme,
-          dragAndDropId: dragAndDropId,
         );
 
   /// A [Key] that indicates the scaffold is showing in narrow-width mode.
@@ -75,8 +72,6 @@ class DevToolsScaffold extends StatefulWidget {
   /// The border around the content in the DevTools UI.
   static const EdgeInsets appPadding =
       EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
-
-  final String dragAndDropId;
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;

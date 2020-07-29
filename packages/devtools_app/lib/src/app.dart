@@ -119,7 +119,6 @@ class DevToolsAppState extends State<DevToolsApp> {
       settings: settings,
       builder: (BuildContext context) {
         return DevToolsScaffold.withChild(
-          dragAndDropId: 'Scaffold - URI not found - dragAndDropKey',
           child: CenteredMessage("'$uri' not found."),
           ideTheme: ideTheme,
         );
@@ -146,7 +145,6 @@ class DevToolsAppState extends State<DevToolsApp> {
                 ideTheme: ideTheme,
                 initialPage: page,
                 tabs: tabs,
-                dragAndDropId: 'Scaffold - main - dragAndDropKey',
                 actions: [
                   if (serviceManager.connectedApp.isFlutterAppNow) ...[
                     HotReloadButton(),
@@ -162,13 +160,11 @@ class DevToolsAppState extends State<DevToolsApp> {
           return DevToolsScaffold.withChild(
             child: ConnectScreenBody(),
             ideTheme: ideTheme,
-            dragAndDropId: 'Scaffold - connect screen - dragAndDropKey',
           );
         }
       },
       snapshotRoute: (_, __, args) {
         return DevToolsScaffold.withChild(
-          dragAndDropId: 'Scaffold - snapshot screen - dragAndDropKey',
           child: _providedControllers(
             offline: true,
             child: SnapshotScreenBody(args, _screens),
