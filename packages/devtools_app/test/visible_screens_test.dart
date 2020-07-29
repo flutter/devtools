@@ -140,26 +140,6 @@ void main() {
           ]));
     });
 
-    testWidgets('are correct for Flutter web profile app',
-        (WidgetTester tester) async {
-      setupMockValues(flutter: true, web: true, debugMode: false);
-
-      expect(
-          visibleScreenTypes,
-          equals([
-            // InspectorScreen,
-            // TimelineScreen,
-            // MemoryScreen,
-            // PerformanceScreen,
-            // DebuggerScreen,
-            // NetworkScreen,
-            // TODO(dantup): Find out if this should be disabled (and if so
-            // how best to represent it).
-            LoggingScreen,
-            // if (codeSizeScreenEnabled) CodeSizeScreen,
-          ]));
-    });
-
     testWidgets('are correct when offline', (WidgetTester tester) async {
       offlineMode = true;
       setupMockValues(web: true); // Web apps would normally hide
