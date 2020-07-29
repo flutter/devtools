@@ -453,6 +453,37 @@ class VmServiceWrapper implements VmService {
         _vmService.setHttpEnableTimelineLogging(isolateId, enable));
   }
 
+  // TODO(kenz): move this method to
+  // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
+  Future<bool> isSocketProfilingAvailable(String isolateId) async {
+    final Isolate isolate = await getIsolate(isolateId);
+    return isolate.extensionRPCs.contains('ext.dart.io.getSocketProfile');
+  }
+
+  Future<Success> startSocketProfiling(String isolateId) async {
+    assert(await isSocketProfilingAvailable(isolateId));
+    return _trackFuture(
+        'startSocketProfiling', _vmService.startSocketProfiling(isolateId));
+  }
+
+  Future<Success> pauseSocketProfiling(String isolateId) async {
+    assert(await isSocketProfilingAvailable(isolateId));
+    return _trackFuture(
+        'pauseSocketProfiling', _vmService.pauseSocketProfiling(isolateId));
+  }
+
+  Future<Success> clearSocketProfile(String isolateId) async {
+    assert(await isSocketProfilingAvailable(isolateId));
+    return _trackFuture(
+        'clearSocketProfile', _vmService.clearSocketProfile(isolateId));
+  }
+
+  Future<SocketProfile> getSocketProfile(String isolateId) async {
+    assert(await isSocketProfilingAvailable(isolateId));
+    return _trackFuture(
+        'getSocketProfile', _vmService.getSocketProfile(isolateId));
+  }
+
   @override
   Future<TimelineFlags> getVMTimelineFlags() {
     return _trackFuture('getVMTimelineFlags', _vmService.getVMTimelineFlags());

@@ -4,11 +4,14 @@
 
 import 'package:flutter/material.dart';
 
+import '../common_widgets.dart';
 import '../http/http.dart';
 import '../http/http_request_data.dart';
 import '../table.dart';
 import '../theme.dart';
+import '../ui/colors.dart';
 import '../utils.dart';
+import 'network_model.dart';
 
 // Approximately double the indent of the expandable tile's title.
 const double _rowIndentPadding = 30;
@@ -285,68 +288,265 @@ class HttpRequestCookiesView extends StatelessWidget {
   }
 }
 
-/// A [Widget] which displays timing information for an HTTP request.
-class HttpRequestTimingView extends StatelessWidget {
-  const HttpRequestTimingView(this.data);
+class NetworkRequestOverviewView extends StatelessWidget {
+  const NetworkRequestOverviewView(this.data);
 
-  final HttpRequestData data;
+  static const _keyWidth = 110.0;
+  static const _timingGraphHeight = 18.0;
+  @visibleForTesting
+  static const httpTimingGraphKey = Key('Http Timing Graph Key');
+  @visibleForTesting
+  static const socketTimingGraphKey = Key('Socket Timing Graph Key');
 
-  Widget _buildRow(
-    BuildContext context,
-    String key,
-    dynamic value,
-  ) {
-    return Container(
-      padding: _rowPadding,
+  final NetworkRequest data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(defaultSpacing),
       child: Column(
         children: [
-          Row(
-            children: [
-              Text(
-                '$key: ',
-                style: Theme.of(context).textTheme.subtitle2,
-              ),
-              Text(value),
-            ],
+          ..._buildGeneralRows(context),
+          if (data is WebSocket) ..._buildSocketOverviewRows(context),
+          const PaddedDivider(
+            padding: EdgeInsets.only(bottom: denseRowSpacing),
           ),
+          ..._buildTimingOverview(context),
         ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final events = <Widget>[];
+  List<Widget> _buildGeneralRows(BuildContext context) {
+    return [
+      // TODO(kenz): show preview for requests (png, response body, proto)
+      _buildRow(
+        context: context,
+        title: 'Request uri',
+        child: _valueText(data.uri),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Method',
+        child: _valueText(data.method),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Status',
+        child: _valueText(data.status ?? '--'),
+      ),
+      const SizedBox(height: defaultSpacing),
+      if (data.port != null) ...[
+        _buildRow(
+          context: context,
+          title: 'Port',
+          child: _valueText('${data.port}'),
+        ),
+        const SizedBox(height: defaultSpacing),
+      ],
+      if (data.contentType != null) ...[
+        _buildRow(
+          context: context,
+          title: 'Content type',
+          child: _valueText(data.contentType ?? 'null'),
+        ),
+        const SizedBox(height: defaultSpacing),
+      ],
+    ];
+  }
+
+  List<Widget> _buildTimingOverview(BuildContext context) {
+    return [
+      _buildRow(
+        context: context,
+        title: 'Timing',
+        child: data is WebSocket
+            ? _buildSocketTimeGraph(context)
+            : _buildHttpTimeGraph(context),
+      ),
+      const SizedBox(height: denseSpacing),
+      _buildRow(
+        context: context,
+        title: null,
+        child: _valueText(data.durationDisplay),
+      ),
+      const SizedBox(height: defaultSpacing),
+      ...data is WebSocket
+          ? _buildSocketTimingRows(context)
+          : _buildHttpTimingRows(context),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Start time',
+        child: _valueText(formatDateTime(data.startTimestamp)),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'End time',
+        child: _valueText(data.endTimestamp != null
+            ? formatDateTime(data.endTimestamp)
+            : 'Pending'),
+      ),
+    ];
+  }
+
+  Widget _buildHttpTimeGraph(BuildContext context) {
+    final data = this.data as HttpRequestData;
+    if (data.duration == null || data.instantEvents.isEmpty) {
+      return Container(
+        key: httpTimingGraphKey,
+        height: 18.0,
+        color: mainRasterColor,
+      );
+    }
+
+    final _colors = [
+      searchMatchColor,
+      mainUiColor,
+      mainRasterColor,
+    ];
+    var _colorIndex = 0;
+    Color _nextColor() {
+      final color = _colors[_colorIndex % _colors.length];
+      _colorIndex++;
+      return color;
+    }
+
+    // TODO(kenz): consider calculating these sizes by hand instead of using
+    // flex so that we can set a minimum width for small timing chunks.
+    final timingWidgets = <Widget>[];
     for (final instant in data.instantEvents) {
       final duration = instant.timeRange.duration;
-      events.add(
-        _buildTile(
-          instant.name,
-          [
-            _buildRow(
-              context,
-              'Duration',
-              '${msText(duration)}',
+      final flex =
+          (duration.inMicroseconds / data.duration.inMicroseconds * 100)
+              .round();
+      timingWidgets.add(
+        Flexible(
+          flex: flex,
+          child: Tooltip(
+            waitDuration: tooltipWait,
+            message: '${instant.name} - ${msText(duration)}',
+            child: Container(
+              height: _timingGraphHeight,
+              color: _nextColor(),
             ),
-          ],
+          ),
         ),
       );
     }
-    events.add(
-      _buildTile(
-        'Total',
-        [
-          _buildRow(
-            context,
-            'Duration',
-            '${msText(data.duration)}',
-          ),
-        ],
-      ),
+    return Row(
+      key: httpTimingGraphKey,
+      children: timingWidgets,
     );
+  }
 
-    return ListView(
-      children: events,
+  // TODO(kenz): add a "waterfall" like visualization with the same colors that
+  // are used in the timing graph.
+  List<Widget> _buildHttpTimingRows(BuildContext context) {
+    final data = this.data as HttpRequestData;
+    return [
+      for (final instant in data.instantEvents) ...[
+        _buildRow(
+          context: context,
+          title: instant.name,
+          child: _valueText(
+              '[${msText(instant.timeRange.start - data.instantEvents.first.timeRange.start)} - '
+              '${msText(instant.timeRange.end - data.instantEvents.first.timeRange.start)}]'
+              ' → ${msText(instant.timeRange.duration)} total'),
+        ),
+        if (instant != data.instantEvents.last)
+          const SizedBox(height: defaultSpacing),
+      ]
+    ];
+  }
+
+  List<Widget> _buildSocketOverviewRows(BuildContext context) {
+    final socket = data as WebSocket;
+    return [
+      _buildRow(
+        context: context,
+        title: 'Socket id',
+        child: _valueText('${socket.id}'),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Socket type',
+        child: _valueText(socket.socketType),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Read bytes',
+        child: _valueText('${socket.readBytes}'),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Write bytes',
+        child: _valueText('${socket.writeBytes}'),
+      ),
+      const SizedBox(height: defaultSpacing),
+    ];
+  }
+
+  Widget _buildSocketTimeGraph(BuildContext context) {
+    return Container(
+      key: socketTimingGraphKey,
+      height: _timingGraphHeight,
+      color: mainUiColor,
+    );
+  }
+
+  List<Widget> _buildSocketTimingRows(BuildContext context) {
+    final data = this.data as WebSocket;
+    return [
+      _buildRow(
+        context: context,
+        title: 'Last read time',
+        child: data.lastReadTimestamp != null
+            ? _valueText(formatDateTime(data.lastReadTimestamp))
+            : '--',
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Last write time',
+        child: _valueText(formatDateTime(data.lastWriteTimestamp)),
+      ),
+    ];
+  }
+
+  Widget _buildRow({
+    @required BuildContext context,
+    @required String title,
+    @required Widget child,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: _keyWidth,
+          child: Text(
+            title != null ? '$title: ' : '',
+            style: Theme.of(context).textTheme.subtitle2,
+          ),
+        ),
+        Expanded(
+          child: child,
+        ),
+      ],
+    );
+  }
+
+  Widget _valueText(String value) {
+    return Text(
+      value,
+      overflow: TextOverflow.ellipsis,
+      maxLines: 5,
     );
   }
 }

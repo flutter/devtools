@@ -2,40 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../network/network_model.dart';
 import '../trace_event.dart';
 import '../utils.dart';
 import 'http.dart';
-
-/// Contains all state relevant to completed and in-progress HTTP requests.
-class HttpRequests {
-  HttpRequests({
-    this.requests = const [],
-    this.invalidRequests = const [],
-    this.outstandingRequests = const {},
-  })  : assert(requests != null),
-        assert(invalidRequests != null),
-        assert(outstandingRequests != null);
-
-  /// A list of HTTP requests.
-  ///
-  /// Individual requests in this list can be either completed or in-progress.
-  List<HttpRequestData> requests;
-
-  /// A list of invalid HTTP requests received.
-  ///
-  /// These are requests that have completed but do not contain all the required
-  /// information to display normally in the UI.
-  List<HttpRequestData> invalidRequests;
-
-  /// A mapping of timeline IDs to instances of HttpRequestData which are
-  /// currently in-progress.
-  Map<String, HttpRequestData> outstandingRequests;
-
-  void clear() {
-    requests.clear();
-    outstandingRequests.clear();
-  }
-}
 
 /// Used to represent an instant event emitted during an HTTP request.
 class HttpInstantEvent {
@@ -56,12 +26,12 @@ class HttpInstantEvent {
 }
 
 /// An abstraction of an HTTP request made through dart:io.
-class HttpRequestData {
+class HttpRequestData extends NetworkRequest {
   HttpRequestData._(
-    this._timelineMicrosBase,
+    int timelineMicrosBase,
     this._startEvent,
     this._endEvent,
-  );
+  ) : super(timelineMicrosBase);
 
   /// Build an instance from timeline events.
   ///
@@ -99,7 +69,21 @@ class HttpRequestData {
     return data;
   }
 
-  final int _timelineMicrosBase;
+  static const _connectionInfoKey = 'connectionInfo';
+  static const _contentTypeKey = 'content-type';
+  static const _cookieKey = 'cookie';
+  static const _errorKey = 'error';
+  static const _filterKey = 'filterKey';
+  static const _localPortKey = 'localPort';
+  static const _methodKey = 'method';
+  static const _requestHeadersKey = 'requestHeaders';
+  static const _responseHeadersKey = 'responseHeaders';
+  static const _statusCodeKey = 'statusCode';
+  // TODO(kenz): modify this to `setCookie` once
+  // https://github.com/dart-lang/sdk/issues/42822 is resolved
+  static const _setCookieKey = 'set-cookie';
+  static const _uriKey = 'uri';
+
   final TraceEvent _startEvent;
   TraceEvent _endEvent;
 
@@ -107,16 +91,29 @@ class HttpRequestData {
   // responsible for calculating the time offsets of each event.
   final List<HttpInstantEvent> _instantEvents = [];
 
-  /// The duration of the HTTP request, in milliseconds.
+  @override
   Duration get duration {
-    if (_endEvent == null || _startEvent == null) {
-      return null;
-    }
+    if (inProgress || !isValid) return null;
     // Timestamps are in microseconds
     final range = TimeRange()
       ..start = Duration(microseconds: _startEvent.timestampMicros)
       ..end = Duration(microseconds: _endEvent.timestampMicros);
     return range.duration;
+  }
+
+  @override
+  String get contentType {
+    if (responseHeaders == null || responseHeaders[_contentTypeKey] == null) {
+      return null;
+    }
+    return responseHeaders[_contentTypeKey].toString();
+  }
+
+  @override
+  String get type {
+    // TODO(kenz): pull in a package or implement functionality to pretty print
+    // the MIME type from the 'content-type' field in a response header.
+    return 'http';
   }
 
   /// Whether the request is safe to display in the UI.
@@ -135,14 +132,25 @@ class HttpRequestData {
 
   /// A map of general information associated with an HTTP request.
   Map<String, dynamic> get general {
+    if (_general != null) return _general;
+    if (!isValid) return null;
     final copy = Map<String, dynamic>.from(_startEvent.args);
-    if (_endEvent != null) {
+    if (!inProgress) {
       copy.addAll(_endEvent.args);
     }
-    copy.remove('requestHeaders');
-    copy.remove('responseHeaders');
-    copy.remove('filterKey');
-    return copy;
+    copy.remove(_requestHeadersKey);
+    copy.remove(_responseHeadersKey);
+    copy.remove(_filterKey);
+    return _general = copy;
+  }
+
+  Map<String, dynamic> _general;
+
+  @override
+  int get port {
+    if (general == null) return null;
+    final Map<String, dynamic> connectionInfo = general[_connectionInfoKey];
+    return connectionInfo != null ? connectionInfo[_localPortKey] : null;
   }
 
   /// True if the HTTP request hasn't completed yet, determined by the lack of
@@ -152,14 +160,12 @@ class HttpRequestData {
   /// All instant events logged to the timeline for this HTTP request.
   List<HttpInstantEvent> get instantEvents => _instantEvents;
 
-  /// The HTTP method associated with this request.
+  @override
   String get method {
-    assert(_startEvent.args.containsKey('method'));
-    return _startEvent.args['method'];
+    if (!isValid) return null;
+    assert(_startEvent.args.containsKey(_methodKey));
+    return _startEvent.args[_methodKey];
   }
-
-  /// The name of the request (currently the URI).
-  String get name => uri.toString();
 
   /// A list of all cookies contained within the request headers.
   List<Cookie> get requestCookies {
@@ -169,25 +175,32 @@ class HttpRequestData {
     if (headers == null) {
       return [];
     }
-    return _parseCookies(headers['cookie'] ?? []);
+    return _parseCookies(headers[_cookieKey] ?? []);
   }
 
   /// The request headers for the HTTP request.
   Map<String, dynamic> get requestHeaders {
     // The request may still be in progress, in which case we don't display any
-    // headers.
-    if (_endEvent == null) {
-      return null;
-    }
-    return _endEvent.args['requestHeaders'];
+    // headers, or the request may be invalid, in which case we also don't
+    // display any headers.
+    if (inProgress || !isValid) return null;
+    return _endEvent.args[_requestHeadersKey];
   }
 
   /// The time the HTTP request was issued.
-  DateTime get requestTime {
-    assert(_startEvent != null);
+  @override
+  DateTime get startTimestamp {
+    if (!isValid) return null;
     return DateTime.fromMicrosecondsSinceEpoch(
-      _getTimelineMicrosecondsSinceEpoch(_startEvent),
+      timelineMicrosecondsSinceEpoch(_startEvent.timestampMicros),
     );
+  }
+
+  @override
+  DateTime get endTimestamp {
+    if (inProgress || !isValid) return null;
+    return DateTime.fromMicrosecondsSinceEpoch(
+        timelineMicrosecondsSinceEpoch(_endEvent.timestampMicros));
   }
 
   /// A list of all cookies contained within the response headers.
@@ -199,43 +212,43 @@ class HttpRequestData {
       return [];
     }
     return _parseCookies(
-      headers['set-cookie'] ?? [],
+      headers[_setCookieKey] ?? [],
     );
   }
 
   /// The response headers for the HTTP request.
   Map<String, dynamic> get responseHeaders {
     // The request may still be in progress, in which case we don't display any
-    // headers.
-    if (_endEvent == null) {
-      return null;
-    }
-    return _endEvent.args['responseHeaders'];
+    // headers, or the request may be invalid, in which case we also don't
+    // display any headers.
+    if (inProgress || !isValid) return null;
+    return _endEvent.args[_responseHeadersKey];
   }
 
   /// A string representing the status of the request.
   ///
   /// If the request completed, this will be an HTTP status code. If an error
   /// was encountered, this will return 'Error'.
+  @override
   String get status {
+    if (inProgress || !isValid) return null;
     String statusCode;
-    if (_endEvent != null) {
-      final endArgs = _endEvent.args;
-      if (endArgs.containsKey('error')) {
-        // This case occurs when an exception has been thrown, so there's no
-        // status code to associate with the request.
-        statusCode = 'Error';
-      } else {
-        statusCode = endArgs['statusCode'].toString();
-      }
+    final endArgs = _endEvent.args;
+    if (endArgs.containsKey(_errorKey)) {
+      // This case occurs when an exception has been thrown, so there's no
+      // status code to associate with the request.
+      statusCode = 'Error';
+    } else {
+      statusCode = endArgs[_statusCodeKey].toString();
     }
     return statusCode;
   }
 
-  /// The address the HTTP request was issued to.
-  Uri get uri {
-    assert(_startEvent.args.containsKey('uri'));
-    return Uri.parse(_startEvent.args['uri']);
+  @override
+  String get uri {
+    if (!isValid) return null;
+    assert(_startEvent.args.containsKey(_uriKey));
+    return _startEvent.args[_uriKey];
   }
 
   /// Merges the information from another [HttpRequestData] into this instance.
@@ -276,10 +289,6 @@ class HttpRequestData {
     }
   }
 
-  int _getTimelineMicrosecondsSinceEpoch(TraceEvent event) {
-    return _timelineMicrosBase + event.timestampMicros;
-  }
-
   @override
-  String toString() => '$method $name';
+  String toString() => '$method $uri';
 }

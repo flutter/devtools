@@ -6,6 +6,7 @@
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
+import 'package:devtools_app/src/network/network_model.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -18,15 +19,18 @@ void main() {
     NetworkController controller;
     FakeServiceManager fakeServiceManager;
     Timeline timeline;
+    SocketProfile socketProfile;
 
     setUpAll(() async {
       timeline = await loadNetworkProfileTimeline();
+      socketProfile = loadSocketProfile();
     });
 
     setUp(() {
       fakeServiceManager = FakeServiceManager(
         useFakeService: true,
         timelineData: timeline,
+        socketProfile: socketProfile,
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       controller = NetworkController();
@@ -76,65 +80,58 @@ void main() {
       controller.removeClient();
     });
 
-    test('process HTTP timeline events', () async {
+    test('process network data', () async {
       await controller.addClient();
       final requestsNotifier = controller.requests;
-      HttpRequests profile = requestsNotifier.value;
+      NetworkRequests profile = requestsNotifier.value;
       // Check profile is initially empty.
       expect(profile.requests.isEmpty, true);
-      expect(profile.outstandingRequests.isEmpty, true);
+      expect(profile.outstandingHttpRequests.isEmpty, true);
 
       // The number of valid requests recorded in the test data.
-      const numRequests = 69;
+      const numRequests = 71;
 
-      // Force a refresh of the HTTP requests. Ensure there's requests populated.
-      await addListenerScope(
-        listenable: requestsNotifier,
-        listener: () {
-          profile = requestsNotifier.value;
-          expect(profile.requests.length, numRequests);
-          expect(profile.outstandingRequests.isEmpty, true);
+      // Refresh network data and ensure requests are populated.
+      await controller.networkService.refreshNetworkData();
+      profile = requestsNotifier.value;
+      expect(profile.requests.length, numRequests);
 
-          const httpMethods = <String>{
-            'CONNECT',
-            'DELETE',
-            'GET',
-            'HEAD',
-            'PATCH',
-            'POST',
-            'PUT',
-          };
+      expect(profile.outstandingHttpRequests.isEmpty, true);
 
-          for (final request in profile.requests) {
-            expect(request.duration, isNotNull);
-            expect(request.general, isNotNull);
-            expect(request.general.length, greaterThan(0));
-            expect(request.hasCookies, isNotNull);
-            expect(request.inProgress, false);
-            expect(request.instantEvents, isNotNull);
-            expect(httpMethods.contains(request.method), true);
-            expect(request.name, isNotNull);
-            expect(request.requestCookies, isNotNull);
-            expect(request.responseCookies, isNotNull);
-            expect(request.requestTime, isNotNull);
-            expect(request.status, isNotNull);
-            expect(request.uri, isNotNull);
-          }
-        },
-        callback: () async =>
-            await controller.networkService.refreshHttpRequests(),
-      );
+      const httpMethods = <String>{
+        'CONNECT',
+        'DELETE',
+        'GET',
+        'HEAD',
+        'PATCH',
+        'POST',
+        'PUT',
+      };
+
+      final List<HttpRequestData> httpRequests = profile.requests
+          .where((r) => r is HttpRequestData)
+          .cast<HttpRequestData>()
+          .toList();
+      for (final request in httpRequests) {
+        expect(request.duration, isNotNull);
+        expect(request.general, isNotNull);
+        expect(request.general.length, greaterThan(0));
+        expect(request.hasCookies, isNotNull);
+        expect(request.inProgress, false);
+        expect(request.instantEvents, isNotNull);
+        expect(httpMethods.contains(request.method), true);
+        expect(request.requestCookies, isNotNull);
+        expect(request.responseCookies, isNotNull);
+        expect(request.startTimestamp, isNotNull);
+        expect(request.status, isNotNull);
+        expect(request.uri, isNotNull);
+      }
 
       // Finally, call `clear()` and ensure the requests have been cleared.
-      await addListenerScope(
-        listenable: requestsNotifier,
-        listener: () {
-          profile = requestsNotifier.value;
-          expect(profile.requests.isEmpty, true);
-          expect(profile.outstandingRequests.isEmpty, true);
-        },
-        callback: () async => await controller.clear(),
-      );
+      await controller.clear();
+      profile = requestsNotifier.value;
+      expect(profile.requests.isEmpty, true);
+      expect(profile.outstandingHttpRequests.isEmpty, true);
       controller.removeClient();
     });
   });

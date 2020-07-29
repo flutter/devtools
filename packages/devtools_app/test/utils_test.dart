@@ -203,6 +203,10 @@ void main() {
       expect(t.overlaps(noOverlap), isFalse);
     });
 
+    test('formatDateTime', () {
+      expect(formatDateTime(DateTime(2020, 1, 16, 13)), '1:00:00.000 PM');
+    });
+
     test('longestFittingSubstring', () {
       const asciiStr = 'ComponentElement.performRebuild';
       const nonAsciiStr = 'ԪElement.updateChildԪ';

@@ -34,8 +34,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.hasConnection = true,
     this.availableServices = const [],
     Timeline timelineData,
+    SocketProfile socketProfile,
   }) : service = useFakeService
-            ? FakeVmService(_flagManager, timelineData)
+            ? FakeVmService(_flagManager, timelineData, socketProfile)
             : MockVmService() {
     _flagManager.service = service;
   }
@@ -122,13 +123,16 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   FakeVmService(
     this._vmFlagManager,
     this._timelineData,
-  );
+    this._socketProfile,
+  ) : _startingSockets = _socketProfile?.sockets ?? [];
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
 
   final VmFlagManager _vmFlagManager;
   final Timeline _timelineData;
+  SocketProfile _socketProfile;
+  final List<SocketStatistic> _startingSockets;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -244,6 +248,36 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> clearVMTimeline() => Future.value(Success());
+
+  @override
+  Future<bool> isSocketProfilingAvailable(String isolateId) {
+    return Future.value(true);
+  }
+
+  @override
+  Future<Success> startSocketProfiling(String isolateId) {
+    return Future.value(Success());
+  }
+
+  @override
+  Future<Success> pauseSocketProfiling(String isolateId) {
+    return Future.value(Success());
+  }
+
+  @override
+  Future<Success> clearSocketProfile(String isolateId) async {
+    _socketProfile.sockets.clear();
+    return Future.value(Success());
+  }
+
+  @override
+  Future<SocketProfile> getSocketProfile(String isolateId) {
+    return Future.value(_socketProfile ?? SocketProfile(sockets: []));
+  }
+
+  void restoreFakeSockets() {
+    _socketProfile = SocketProfile(sockets: _startingSockets);
+  }
 
   @override
   Future<CpuProfileData> getCpuProfileTimeline(
