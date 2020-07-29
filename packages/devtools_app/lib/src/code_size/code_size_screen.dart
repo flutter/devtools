@@ -17,7 +17,7 @@ import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
 
-bool codeSizeScreenEnabled = false;
+bool codeSizeScreenEnabled = true;
 
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
@@ -44,7 +44,11 @@ class CodeSizeScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return const DragAndDropEventAbsorber(child: CodeSizeBody());
+    // Since `handleDrop` is not specified for this [DragAndDrop] widget, drag
+    // and drop events will be absorbed by it, meaning drag and drop actions
+    // will be a no-op if they occur over this area. [DragAndDrop] widgets
+    // lower in the tree will have priority over this one.
+    return const DragAndDrop(child: CodeSizeBody());
   }
 }
 
@@ -164,8 +168,6 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
 class SnapshotView extends StatefulWidget {
   const SnapshotView();
 
-  static const snapshotDragAndDropId = 'Code size snapshot - dragAndDropKey';
-
   @override
   _SnapshotViewState createState() => _SnapshotViewState();
 }
@@ -262,7 +264,6 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
           child: FileImportContainer(
             title: 'Snapshot',
             actionText: 'Analyze Snapshot',
-            dragAndDropId: SnapshotView.snapshotDragAndDropId,
             onAction: controller.loadTreeFromJsonFile,
           ),
         ),
@@ -273,10 +274,6 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 
 class DiffView extends StatefulWidget {
   const DiffView();
-
-  static const diffOldDragAndDropId = 'Code size diff old - dragAndDropKey';
-
-  static const diffNewDragAndDropId = 'Code size diff new - dragAndDropKey';
 
   @override
   _DiffViewState createState() => _DiffViewState();
@@ -367,8 +364,6 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
           child: DualFileImportContainer(
             firstFileTitle: 'Old',
             secondFileTitle: 'New',
-            firstDragAndDropId: DiffView.diffOldDragAndDropId,
-            secondDragAndDropId: DiffView.diffNewDragAndDropId,
             actionText: 'Analyze Diff',
             onAction: controller.loadDiffTreeFromJsonFiles,
           ),

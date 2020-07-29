@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
@@ -14,7 +13,6 @@ import '../utils.dart';
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
     @required this.title,
-    @required this.dragAndDropId,
     this.actionText,
     this.onAction,
     this.onFileSelected,
@@ -29,8 +27,6 @@ class FileImportContainer extends StatefulWidget {
   final DevToolsJsonFileHandler onAction;
 
   final DevToolsJsonFileHandler onFileSelected;
-
-  final String dragAndDropId;
 
   @override
   _FileImportContainerState createState() => _FileImportContainerState();
@@ -51,8 +47,6 @@ class _FileImportContainerState extends State<FileImportContainer> {
         Expanded(
           // TODO(kenz): improve drag over highlight.
           child: DragAndDrop(
-            id: widget.dragAndDropId,
-            manager: Provider.of<DragAndDropManager>(context),
             handleDrop: _handleImportedFile,
             child: RoundedOutlinedBorder(
               child: Container(
@@ -129,6 +123,8 @@ class _FileImportContainerState extends State<FileImportContainer> {
     );
   }
 
+  // TODO(kenz): add error handling to ensure we only allow importing supported
+  // files.
   void _handleImportedFile(DevToolsJsonFile file) {
     setState(() {
       importedFile = file;
@@ -143,8 +139,6 @@ class DualFileImportContainer extends StatefulWidget {
   const DualFileImportContainer({
     @required this.firstFileTitle,
     @required this.secondFileTitle,
-    @required this.firstDragAndDropId,
-    @required this.secondDragAndDropId,
     @required this.actionText,
     @required this.onAction,
     Key key,
@@ -153,10 +147,6 @@ class DualFileImportContainer extends StatefulWidget {
   final String firstFileTitle;
 
   final String secondFileTitle;
-
-  final String firstDragAndDropId;
-
-  final String secondDragAndDropId;
 
   /// The title of the action button.
   final String actionText;
@@ -182,7 +172,6 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Expanded(
           child: FileImportContainer(
             title: widget.firstFileTitle,
-            dragAndDropId: widget.firstDragAndDropId,
             onFileSelected: onFirstFileSelected,
           ),
         ),
@@ -192,7 +181,6 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Expanded(
           child: FileImportContainer(
             title: widget.secondFileTitle,
-            dragAndDropId: widget.secondDragAndDropId,
             onFileSelected: onSecondFileSelected,
           ),
         ),

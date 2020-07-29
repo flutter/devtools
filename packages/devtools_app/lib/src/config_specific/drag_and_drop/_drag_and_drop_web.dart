@@ -6,22 +6,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 
-import 'package:meta/meta.dart';
-
-import '../../notifications.dart';
 import '../../utils.dart';
 import 'drag_and_drop.dart';
 
-DragAndDropManagerWeb createDragAndDropManager({
-  @required NotificationsState notifications,
-}) {
-  return DragAndDropManagerWeb(notifications: notifications);
+DragAndDropManagerWeb createDragAndDropManager() {
+  return DragAndDropManagerWeb();
 }
 
 class DragAndDropManagerWeb extends DragAndDropManager {
-  DragAndDropManagerWeb({
-    @required NotificationsState notifications,
-  }) : super.impl(notifications: notifications);
+  DragAndDropManagerWeb() : super.impl();
 
   StreamSubscription<MouseEvent> onDragOverSubscription;
 
@@ -31,6 +24,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
 
   @override
   void init() {
+    super.init();
     onDragOverSubscription = document.body.onDragOver.listen(_onDragOver);
     onDragLeaveSubscription = document.body.onDragLeave.listen(_onDragLeave);
     onDropSubscription = document.body.onDrop.listen(_onDrop);
@@ -62,17 +56,19 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     // Stop the browser from redirecting.
     event.preventDefault();
 
-    if (activeState == null) return;
+    // If there is no active state or the active state does not have a drop
+    // handler, return early.
+    if (activeState?.widget?.handleDrop == null) return;
 
     final List<File> files = event.dataTransfer.files;
     if (files.length > 1) {
-      notifications.push('You cannot import more than one file.');
+      activeState.notifications.push('You cannot import more than one file.');
       return;
     }
 
     final droppedFile = files.first;
     if (droppedFile.type != 'application/json') {
-      notifications.push(
+      activeState.notifications.push(
           '${droppedFile.type} is not a supported file type. Please import '
           'a .json file that was exported from Dart DevTools.');
       return;
@@ -89,7 +85,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
         );
         activeState.widget.handleDrop(devToolsJsonFile);
       } on FormatException catch (e) {
-        notifications.push(
+        activeState.notifications.push(
           'JSON syntax error in imported file: "$e". Please make sure the '
           'imported file is a Dart DevTools file, and check that it has not '
           'been modified.',
@@ -101,7 +97,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     try {
       reader.readAsText(droppedFile);
     } catch (e) {
-      notifications.push('Could not import file: $e');
+      activeState.notifications.push('Could not import file: $e');
     }
   }
 }

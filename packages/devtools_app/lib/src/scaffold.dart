@@ -292,10 +292,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       child: Provider<BannerMessagesController>(
         create: (_) => BannerMessagesController(),
         child: DragAndDrop(
-          id: widget.dragAndDropId,
-          manager: Provider.of<DragAndDropManager>(context),
-          // TODO(kenz): we are handling drops from multiple scaffolds. We need
-          // to make sure we are only handling drops from the active scaffold.
           handleDrop: _importController.importData,
           child: Scaffold(
             appBar: widget.embed ? null : _buildAppBar(),

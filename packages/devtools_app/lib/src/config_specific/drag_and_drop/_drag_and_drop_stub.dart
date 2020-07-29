@@ -2,14 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
-import '../../notifications.dart';
 import 'drag_and_drop.dart';
 
-DragAndDropManager createDragAndDropManager({
-  @required NotificationsState notifications,
-}) {
+DragAndDropManager createDragAndDropManager() {
   throw Exception(
       'Attempting to create DragAndDrop for unrecognized platform.');
 }

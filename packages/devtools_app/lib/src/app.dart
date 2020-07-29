@@ -11,7 +11,6 @@ import '../devtools.dart' as devtools;
 import 'code_size/code_size_controller.dart';
 import 'code_size/code_size_screen.dart';
 import 'common_widgets.dart';
-import 'config_specific/drag_and_drop/drag_and_drop.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'connect_screen.dart';
 import 'debugger/debugger_controller.dart';
@@ -225,7 +224,7 @@ class DevToolsAppState extends State<DevToolsApp> {
           debugShowCheckedModeBanner: false,
           theme: themeFor(isDarkTheme: value, ideTheme: ideTheme),
           builder: (context, child) => Notifications(
-            child: DragAndDropManagerProvider(child: child),
+            child: child,
           ),
           onGenerateRoute: _generateRoute,
         );

@@ -2,24 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
-import '../../notifications.dart';
 import 'drag_and_drop.dart';
 
 // TODO(kenz): implement once Desktop support is available. See
 // https://github.com/flutter/flutter/issues/30719.
 
-DragAndDropManagerDesktop createDragAndDropManager({
-  @required NotificationsState notifications,
-}) {
-  return DragAndDropManagerDesktop(notifications: notifications);
+DragAndDropManagerDesktop createDragAndDropManager() {
+  return DragAndDropManagerDesktop();
 }
 
 class DragAndDropManagerDesktop extends DragAndDropManager {
-  DragAndDropManagerDesktop({@required NotificationsState notifications})
-      : super.impl(notifications: notifications);
-
-  @override
-  void init() {}
+  DragAndDropManagerDesktop() : super.impl();
 }
