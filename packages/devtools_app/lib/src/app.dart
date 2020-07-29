@@ -219,9 +219,7 @@ class DevToolsAppState extends State<DevToolsApp> {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: themeFor(isDarkTheme: value, ideTheme: ideTheme),
-          builder: (context, child) => Notifications(
-            child: child,
-          ),
+          builder: (context, child) => Notifications(child: child),
           onGenerateRoute: _generateRoute,
         );
       },
