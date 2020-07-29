@@ -115,7 +115,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
       );
       return;
     }
-    
+
     final uri = normalizeVmServiceUri(controller.text);
     final connected = await FrameworkCore.initVmService(
       '',
