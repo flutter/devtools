@@ -645,17 +645,19 @@ class MemoryController extends DisposableController
   set monitorAllocations(List<ClassHeapDetailStats> allocations) {
     _monitorAllocations = allocations;
     // Clearing allocations reset ValueNotifier to zero.
-    allocations.isNotEmpty
-        ? _monitorAllocationsUpdated.value++
-        : _monitorAllocationsUpdated.value = 0;
+    if (allocations.isEmpty) {
+      _monitorAllocationsUpdated.value = 0;
+    } else {
+      _monitorAllocationsUpdated.value++;
+    }
   }
 
   Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>
       getAllocationProfile(reset: true);
 
-  /// 'reset': true to reset the object allocation accumulators
+  /// 'reset': true to reset the monitor allocation accumulators
   Future<List<ClassHeapDetailStats>> getAllocationProfile({
-    reset = false,
+    bool reset = false,
   }) async {
     if (!await isIsolateLive(_isolateId)) return [];
 
@@ -675,7 +677,7 @@ class MemoryController extends DisposableController
     final allocations = allocationProfile.members
         .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
         .where((ClassHeapDetailStats stats) {
-      return stats.instancesCurrent > 0 || stats.instancesAccumulated > 0;
+      return stats.instancesCurrent > 0 || stats.instancesDelta > 0;
     }).toList();
 
     return allocations;
@@ -926,6 +928,9 @@ class MemoryController extends DisposableController
       var createChild = false;
 
       if (monitorRoot != null) {
+        // Only show the latest active allocation monitor.  If a new monitor
+        // exist (newer timestamp).  Remove the old node and signal a new node,
+        // with the latest timestamp, needs to be created.
         final AllocationMonitorReference monitor = monitorRoot.children.first;
         if (monitor.dateTime != monitorTimestamp) {
           monitorRoot.removeLastChild();
@@ -1086,6 +1091,18 @@ class SettingsModel {
   bool experiment = false;
 }
 
+/// Index in datasets to each dataset's list of Entry's.
+enum ChartDataSets {
+  // Datapoint entries for each used heap value.
+  usedSet,
+  // Datapoint entries for each capacity heap value.
+  capacitySet,
+  // Datapoint entries for each external memory value.
+  externalHeapSet,
+  // TODO(terry): Datapoint entries for each RSS value.
+  // rssSet,
+}
+
 /// Prepare data to plot in MPChart.
 class MPChartData {
   bool _pruning = false;
@@ -1093,14 +1110,17 @@ class MPChartData {
   /// Signal that every addTrace will cause a prune.
   bool get pruned => _pruning;
 
-  /// Datapoint entries for each used heap value.
-  final used = <Entry>[];
+  final datasets = List<List<Entry>>.generate(
+    ChartDataSets.values.length,
+    (int) => <Entry>[],
+  );
 
-  /// Datapoint entries for each capacity heap value.
-  final capacity = <Entry>[];
-
-  /// Datapoint entries for each external memory value.
-  final externalHeap = <Entry>[];
+  /// Compute each dataset Entry's.
+  List<Entry> get used => datasets[ChartDataSets.usedSet.index];
+  List<Entry> get capacity => datasets[ChartDataSets.capacitySet.index];
+  List<Entry> get externalHeap => datasets[ChartDataSets.externalHeapSet.index];
+  // TODO(terry): Implement RSS plotting.
+  // List<Entry> get rssSet => datasets[ChartDataSets.rssSet.index];
 
   /// Add each entry to its corresponding trace.
   void addTraceEntries({
@@ -1116,12 +1136,10 @@ class MPChartData {
       assert(externalValue.x - externalHeap.last.x <= minutesToDisplay);
     }
 
-    // TODO(terry): Any way have a kind of trace order safe way to so we
-    // can keep an list of the entries (remoteAt and add).
     if (_pruning) {
-      externalHeap.removeAt(0);
-      used.removeAt(0);
-      capacity.removeAt(0);
+      for (final dataset in datasets) {
+        dataset.removeAt(0);
+      }
     }
 
     externalHeap.add(externalValue);
@@ -1131,13 +1149,32 @@ class MPChartData {
 
   /// Remove all plotted entries in all traces.
   void reset() {
-    // TODO(terry): Any way have a kind of trace order safe way to so we
-    // can keep an list of the entries (clear).
-    used.clear();
-    capacity.clear();
-    externalHeap.clear();
+    // Clear all Entries in each dataset.
+    for (final dataset in datasets) {
+      dataset.clear();
+    }
     _pruning = false;
   }
+}
+
+/// Index in datasets to each dataset's list of Entry's.
+enum EventDataSets {
+  // Datapoint entries for ghost trace to stop auto-scaling of Y-axis.
+  ghostsSet,
+  // Datapoint entries for each user initiated GC.
+  gcUserSet,
+  // Datapoint entries for a VM's GC.
+  gcVmSet,
+  // Datapoint entries for each user initiated snapshot event.
+  snapshotSet,
+  // Datapoint entries for an automatically initiated snapshot event.
+  snapshotAutoSet,
+  // Allocation Accumulator monitoring.
+  monitorStartSet,
+  // TODO(terry): Allocation Accumulator continues UX connector.
+  monitorContinuesSet,
+  // Reset all Allocation Accumulators.
+  monitorResetSet,
 }
 
 /// Prepare data to plot in Event Chart.
@@ -1147,25 +1184,21 @@ class MPEventsChartData {
   /// Signal that every addTrace will cause a prune.
   bool get pruned => _pruning;
 
-  /// Datapoint entries for ghost trace to stop auto-scaling of Y-axis.
-  final ghosts = <Entry>[];
+  final datasets = List<List<Entry>>.generate(
+    EventDataSets.values.length,
+    (int) => <Entry>[],
+  );
 
-  /// Datapoint entries for each user initiated GC.
-  final gcUser = <Entry>[];
-
-  /// Datapoint entries for a VM's GC.
-  final gcVm = <Entry>[];
-
-  /// Datapoint entries for each user initiated snapshot event.
-  final snapshot = <Entry>[];
-
-  /// Datapoint entries for an automatically initiated snapshot event.
-  final snapshotAuto = <Entry>[];
-
-  /// Allocation Accumulator monitoring.
-  final monitorStart = <Entry>[];
-  final monitorContinues = <Entry>[];
-  final monitorReset = <Entry>[];
+  /// Compute each dataset Entry's.
+  List<Entry> get ghosts => datasets[EventDataSets.ghostsSet.index];
+  List<Entry> get gcUser => datasets[EventDataSets.gcUserSet.index];
+  List<Entry> get gcVm => datasets[EventDataSets.gcVmSet.index];
+  List<Entry> get snapshot => datasets[EventDataSets.snapshotSet.index];
+  List<Entry> get snapshotAuto => datasets[EventDataSets.snapshotAutoSet.index];
+  List<Entry> get monitorStart => datasets[EventDataSets.monitorStartSet.index];
+  List<Entry> get monitorContinues =>
+      datasets[EventDataSets.monitorContinuesSet.index];
+  List<Entry> get monitorReset => datasets[EventDataSets.monitorResetSet.index];
 
   /// Add each entry to its corresponding trace.
   void addTraceEntries({
@@ -1185,17 +1218,10 @@ class MPEventsChartData {
       assert(gcUserValue.x - gcUser.last.x <= minutesToDisplay);
     }
 
-    // TODO(terry): Any way have a kind of trace order safe way to so we
-    // can keep a list of the entries (remoteAt and add).
     if (_pruning) {
-      ghosts.removeAt(0);
-      gcUser.removeAt(0);
-      gcVm.removeAt(0);
-      snapshot.removeAt(0);
-      snapshotAuto.removeAt(0);
-      monitorStart.removeAt(0);
-      monitorContinues.removeAt(0);
-      monitorReset.removeAt(0);
+      for (final dataset in datasets) {
+        dataset.removeAt(0);
+      }
     }
 
     ghosts.add(Entry(x: gcUserValue.x, y: MemoryTimeline.visibleEvent));
@@ -1210,48 +1236,61 @@ class MPEventsChartData {
 
   /// Remove all plotted entries in all traces.
   void reset() {
-    // TODO(terry): Any way have a kind of trace order safe way to so we
-    // can keep an list of the entries (clear).
-    ghosts.clear();
-    gcUser.clear();
-    gcVm.clear();
-    snapshot.clear();
-    snapshotAuto.clear();
-    monitorStart.clear();
-    monitorContinues.clear();
-    monitorReset.clear();
-
+    // Clear all Entries in each dataset.
+    for (final dataset in datasets) {
+      dataset.clear();
+    }
     _pruning = false;
   }
+}
+
+/// Index in datasets to each dataset's list of Entry's.
+enum ADBDataSets {
+  // Datapoint entries for each Java heap value.
+  javaHeapSet,
+  // Datapoint entries for each native heap value.
+  nativeHeapSet,
+  // Datapoint entries for code size value.
+  codeSet,
+  // Datapoint entries for stack size value.
+  stackSet,
+  // Datapoint entries for graphics size value.
+  graphicsSet,
+  // Datapoint entries for other size value.
+  otherSet,
+  // Datapoint entries for system size value.
+  systemSet,
+  // Datapoint entries for total size value.
+  totalSet,
 }
 
 /// Prepare Engine (ADB memory info) data to plot in MPChart.
 class MPEngineChartData {
   bool _pruning = false;
 
-  /// Datapoint entries for each Java heap value.
-  final javaHeap = <Entry>[];
+  final datasets = List<List<Entry>>.generate(
+    ADBDataSets.values.length,
+    (int) => <Entry>[],
+  );
 
-  /// Datapoint entries for each native heap value.
-  final nativeHeap = <Entry>[];
+  // Compute each dataset Entry's.
 
-  /// Datapoint entries for code size value.
-  final code = <Entry>[];
-
-  /// Datapoint entries for stack size value.
-  final stack = <Entry>[];
-
-  /// Datapoint entries for graphics size value.
-  final graphics = <Entry>[];
-
-  /// Datapoint entries for other size value.
-  final other = <Entry>[];
-
-  /// Datapoint entries for system size value.
-  final system = <Entry>[];
-
-  /// Datapoint entries for total size value.
-  final total = <Entry>[];
+  // Datapoint entries for each Java heap value.
+  List<Entry> get javaHeap => datasets[ADBDataSets.javaHeapSet.index];
+  // Datapoint entries for each native heap value.
+  List<Entry> get nativeHeap => datasets[ADBDataSets.nativeHeapSet.index];
+  // Datapoint entries for code size value.
+  List<Entry> get code => datasets[ADBDataSets.codeSet.index];
+  // Datapoint entries for stack size value.
+  List<Entry> get stack => datasets[ADBDataSets.stackSet.index];
+  // Datapoint entries for graphics size value.
+  List<Entry> get graphics => datasets[ADBDataSets.graphicsSet.index];
+  // Datapoint entries for other size value.
+  List<Entry> get other => datasets[ADBDataSets.otherSet.index];
+  // Datapoint entries for system size value.
+  List<Entry> get system => datasets[ADBDataSets.systemSet.index];
+  // Datapoint entries for total size value.
+  List<Entry> get total => datasets[ADBDataSets.totalSet.index];
 
   /// Add each entry to its corresponding trace.
   void addTraceEntries({
@@ -1273,17 +1312,10 @@ class MPEngineChartData {
       assert(javaValue.x - javaHeap.last.x <= minutesToDisplay);
     }
 
-    // TODO(terry): Any way have a kind of trace order safe way to so we
-    // can keep an list of the entries (remoteAt and add).
     if (_pruning) {
-      javaHeap.removeAt(0);
-      nativeHeap.removeAt(0);
-      code.removeAt(0);
-      stack.removeAt(0);
-      graphics.removeAt(0);
-      other.removeAt(0);
-      system.removeAt(0);
-      total.removeAt(0);
+      for (final dataset in datasets) {
+        dataset.removeAt(0);
+      }
     }
 
     javaHeap.add(javaValue);
@@ -1298,16 +1330,10 @@ class MPEngineChartData {
 
   /// Remove all plotted entries in all traces.
   void reset() {
-    // TODO(terry): Any way have a kind of trace order safe way to so we
-    // can keep an list of the entries (clear).
-    javaHeap.clear();
-    nativeHeap.clear();
-    code.clear();
-    stack.clear();
-    graphics.clear();
-    other.clear();
-    system.clear();
-    total.clear();
+    // Clear all Entries in each dataset.
+    for (final dataset in datasets) {
+      dataset.clear();
+    }
     _pruning = false;
   }
 }
@@ -1327,8 +1353,6 @@ class MemoryLog {
 
     bool pseudoData = false;
     if (liveData.isEmpty) {
-      // TODO(terry): Can eliminate once I add loading a canned data source
-      //              see the todo in memory_screen_test.
       // Used to create empty memory log for test.
       pseudoData = true;
       liveData.add(HeapSample(

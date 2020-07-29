@@ -27,9 +27,14 @@ class InstanceTreeViewState extends State<InstanceTreeView>
 
   @override
   void initState() {
-    setupColumns();
-
     super.initState();
+
+    // Setup table column names for instance viewer.
+    columns.addAll([
+      treeColumn,
+      _FieldNameColumn(),
+      _FieldValueColumn(),
+    ]);
   }
 
   @override
@@ -51,14 +56,6 @@ class InstanceTreeViewState extends State<InstanceTreeView>
         controller.computeAllLibraries(rebuild: true);
       });
     });
-  }
-
-  void setupColumns() {
-    columns.addAll([
-      treeColumn,
-      _FieldNameColumn(),
-      _FieldValueColumn(),
-    ]);
   }
 
   @override
@@ -144,6 +141,13 @@ class _FieldValueColumn extends ColumnData<FieldReference> {
       return '';
     }
 
+    // TODO(terry): Can we use standard Flutter string truncation?
+    //              Long variable names the beginning and end of the name is
+    //              most significant the middle part of name less so.  However,
+    //              we need a nice hover/tooltip to show the entire name.
+    //              If middle, '...' then we need a more robust computation w/
+    //              text measurement so we accurately truncate the correct # of
+    //              characters instead guessing that we only show 30 chars.
     var value = getValue(dataObject);
     if (value is String && value.length > 30) {
       value = '${value.substring(0, 13)}…${value.substring(value.length - 17)}';

@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import '../table_data.dart';
 import 'memory_protocol.dart';
 
-const fieldWidthNumbers = 100.0;
+const defaultNumberFieldWidth = 100.0;
 
 class FieldClassName extends ColumnData<ClassHeapDetailStats> {
   FieldClassName() : super('Class');
@@ -60,23 +62,25 @@ class FieldInstanceCountColumn extends ColumnData<ClassHeapDetailStats> {
   }
 
   @override
-  double get fixedWidthPx => fieldWidthNumbers;
+  double get fixedWidthPx => defaultNumberFieldWidth;
 }
 
-class FieldInstanceAccumulatorColumn extends ColumnData<ClassHeapDetailStats> {
-  FieldInstanceAccumulatorColumn()
+class FieldInstanceDeltaColumn extends ColumnData<ClassHeapDetailStats> {
+  FieldInstanceDeltaColumn()
       : super(
-          'Accum',
+          'Delta',
           alignment: ColumnAlignment.right,
         );
 
   @override
-  dynamic getValue(ClassHeapDetailStats dataObject) =>
-      dataObject.instancesAccumulated;
+  int getValue(ClassHeapDetailStats dataObject) =>
+      dataObject.instancesDelta;
 
+  // TODO(terry): Only show grows (negative value returns 0). Consider setting
+  //              to display growth and decline.
   @override
   String getDisplayValue(ClassHeapDetailStats dataObject) =>
-      '${getValue(dataObject)}';
+      '${max(0, getValue(dataObject))}';
 
   @override
   bool get numeric => true;
@@ -92,7 +96,7 @@ class FieldInstanceAccumulatorColumn extends ColumnData<ClassHeapDetailStats> {
   }
 
   @override
-  double get fixedWidthPx => fieldWidthNumbers;
+  double get fixedWidthPx => defaultNumberFieldWidth;
 }
 
 class FieldSizeColumn extends ColumnData<ClassHeapDetailStats> {
@@ -123,23 +127,25 @@ class FieldSizeColumn extends ColumnData<ClassHeapDetailStats> {
   }
 
   @override
-  double get fixedWidthPx => fieldWidthNumbers;
+  double get fixedWidthPx => defaultNumberFieldWidth;
 }
 
-class FieldSizeAccumulatorColumn extends ColumnData<ClassHeapDetailStats> {
-  FieldSizeAccumulatorColumn()
+class FieldSizeDeltaColumn extends ColumnData<ClassHeapDetailStats> {
+  FieldSizeDeltaColumn()
       : super(
-          'Accum',
+          'Delta',
           alignment: ColumnAlignment.right,
         );
 
   @override
-  dynamic getValue(ClassHeapDetailStats dataObject) =>
-      dataObject.bytesAccumulated;
+  int getValue(ClassHeapDetailStats dataObject) =>
+      dataObject.bytesDelta;
 
+  // TODO(terry): Only show grows (negative value returns 0). Consider setting
+  //              to display growth and decline.
   @override
   String getDisplayValue(ClassHeapDetailStats dataObject) =>
-      '${getValue(dataObject)}';
+      '${max(0, getValue(dataObject))}';
 
   @override
   bool get numeric => true;
@@ -155,5 +161,5 @@ class FieldSizeAccumulatorColumn extends ColumnData<ClassHeapDetailStats> {
   }
 
   @override
-  double get fixedWidthPx => fieldWidthNumbers;
+  double get fixedWidthPx => defaultNumberFieldWidth;
 }

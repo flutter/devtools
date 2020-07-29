@@ -52,9 +52,9 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
   @override
   void initState() {
-    _preloadResources();
-
     super.initState();
+
+    _preloadResources();
   }
 
   @override
@@ -209,7 +209,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     return Column(
       children: [
         memoryTimeline.liveData.isEmpty
-            ? const SizedBox(height: 0)
+            ? const SizedBox()
             : SizedBox(
                 height: defaultChartHeight,
                 child: LineChart(dartChartController),
@@ -219,7 +219,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
                 height: defaultChartHeight,
                 child: LineChart(androidChartController),
               )
-            : const SizedBox(height: 0),
+            : const SizedBox(),
         SizedBox(child: _timelineSlider),
       ],
     );
@@ -435,29 +435,58 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setValueTextSize(9);
   }
 
+  final adbDatasets = List<LineDataSet>.generate(
+    ADBDataSets.values.length,
+    (int) => null,
+  );
+
   /// Trace #1 Java Heap.
-  LineDataSet javaHeapSet;
+  LineDataSet get javaHeapSet => adbDatasets[ADBDataSets.javaHeapSet.index];
+  set javaHeapSet(LineDataSet dataset) {
+    adbDatasets[ADBDataSets.javaHeapSet.index] = dataset;
+  }
 
   /// Trace #2 Native Heap.
-  LineDataSet nativeHeapSet;
+  LineDataSet get nativeHeapSet => adbDatasets[ADBDataSets.nativeHeapSet.index];
+  set nativeHeapSet(LineDataSet dataset) {
+    adbDatasets[ADBDataSets.nativeHeapSet.index] = dataset;
+  }
 
   /// Trace #3 Code Size.
-  LineDataSet codeSizeSet;
+  LineDataSet get codeSizeSet => adbDatasets[ADBDataSets.codeSet.index];
+  set codeSizeSet(LineDataSet dataset) {
+    adbDatasets[ADBDataSets.codeSet.index] = dataset;
+  }
 
   /// Trace #4 Stack Size.
-  LineDataSet stackSizeSet;
+  LineDataSet get stackSizeSet => adbDatasets[ADBDataSets.stackSet.index];
+  set stackSizeSet(LineDataSet dataset) {
+    adbDatasets[ADBDataSets.stackSet.index] = dataset;
+  }
 
   /// Trace #5 Graphics Size.
-  LineDataSet graphicsSizeSet;
+  LineDataSet get graphicsSizeSet => adbDatasets[ADBDataSets.graphicsSet.index];
+  set graphicsSizeSet(LineDataSet dataset) {
+    adbDatasets[ADBDataSets.graphicsSet.index] = dataset;
+  }
 
   /// Trace #6 Other Size.
-  LineDataSet otherSizeSet;
+  LineDataSet get otherSizeSet => adbDatasets[ADBDataSets.otherSet.index];
+  set otherSizeSet(LineDataSet dataset) {
+    adbDatasets[ADBDataSets.otherSet.index] = dataset;
+  }
 
   /// Trace #7 System Size.
-  LineDataSet systemSizeSet;
+  LineDataSet get systemSizeSet => adbDatasets[ADBDataSets.systemSet.index];
+  set systemSizeSet(LineDataSet dataset) {
+    adbDatasets[ADBDataSets.systemSet.index] = dataset;
+  }
 
   /// Trace #8 Total Size.
-  LineDataSet totalSizeSet;
+  LineDataSet get totalSizeSet => adbDatasets[ADBDataSets.totalSet.index];
+  set totalSizeSet(LineDataSet dataset) {
+    adbDatasets[ADBDataSets.totalSet.index] = dataset;
+  }
 
   /// Get the HeapSample that is selected for the Dart chart.
   HeapSample getDartSelectedSample(int timestamp) =>
@@ -503,14 +532,30 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     super.dispose();
   }
 
+  final chartDatasets = List<LineDataSet>.generate(
+    ChartDataSets.values.length,
+    (int) => null,
+  );
+
   // Trace #1 Heap Used.
-  LineDataSet usedHeapSet;
+  LineDataSet get usedHeapSet => chartDatasets[ChartDataSets.usedSet.index];
+  set usedHeapSet(LineDataSet dataset) {
+    chartDatasets[ChartDataSets.usedSet.index] = dataset;
+  }
 
   // Trace #2 Heap Capacity.
-  LineDataSet capacityHeapSet;
+  LineDataSet get capacityHeapSet =>
+      chartDatasets[ChartDataSets.capacitySet.index];
+  set capacityHeapSet(LineDataSet dataset) {
+    chartDatasets[ChartDataSets.capacitySet.index] = dataset;
+  }
 
   // Trace #3 External Memory used.
-  LineDataSet externalMemorySet;
+  LineDataSet get externalMemorySet =>
+      chartDatasets[ChartDataSets.externalHeapSet.index];
+  set externalMemorySet(LineDataSet dataset) {
+    chartDatasets[ChartDataSets.externalHeapSet.index] = dataset;
+  }
 
   /// Loads all heap samples (live data or offline).
   void _processAndUpdate([bool reloadAllData = false]) {
@@ -547,38 +592,20 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   void _updateAllCharts() {
     setState(() {
       // Update Dart VM chart datasets.
-      dartChartController.data = LineData.fromList([
-        usedHeapSet,
-        externalMemorySet,
-        capacityHeapSet,
-      ]);
+      dartChartController.data = LineData.fromList(chartDatasets);
 
       // Received new samples ready to plot, signal data has changed.
-      usedHeapSet.notifyDataSetChanged();
-      capacityHeapSet.notifyDataSetChanged();
-      externalMemorySet.notifyDataSetChanged();
+      for (final dataSet in chartDatasets) {
+        dataSet.notifyDataSetChanged();
+      }
 
       // Update Android Memory chart datasets.
-      androidChartController.data = LineData.fromList([
-        javaHeapSet,
-        nativeHeapSet,
-        codeSizeSet,
-        stackSizeSet,
-        graphicsSizeSet,
-        otherSizeSet,
-        systemSizeSet,
-        totalSizeSet,
-      ]);
+      androidChartController.data = LineData.fromList(adbDatasets);
 
       // Received ADB memory info from samples ready to plot, signal data has changed.
-      javaHeapSet.notifyDataSetChanged();
-      nativeHeapSet.notifyDataSetChanged();
-      codeSizeSet.notifyDataSetChanged();
-      stackSizeSet.notifyDataSetChanged();
-      graphicsSizeSet.notifyDataSetChanged();
-      otherSizeSet.notifyDataSetChanged();
-      systemSizeSet.notifyDataSetChanged();
-      totalSizeSet.notifyDataSetChanged();
+      for (final dataSet in adbDatasets) {
+        dataSet.notifyDataSetChanged();
+      }
     });
   }
 

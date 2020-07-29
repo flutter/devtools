@@ -114,43 +114,65 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
         defaultSpacing * 3, denseSpacing, defaultSpacing, 0);
   }
 
-  /// Override onNothingSelected and onValueSelected for selectionListener.
-  @override
-  void onNothingSelected() {
-    // TODO: implement onNothingSelected
-    print('>>>> onNothingSelected');
-  }
-
-  @override
-  void onValueSelected(Entry e, Highlight h) {
-    // TODO: implement onValueSelected
-    print('>>>> onValueSelected');
-  }
+  final datasets = List<ScatterDataSet>.generate(
+    EventDataSets.values.length,
+    (int) => null,
+  );
 
   /// Point to keep Y axis from scaling, entries invisible foreground color of
   /// points are background color of the event pane.
-  ScatterDataSet _ghostTopLineSet;
+  ScatterDataSet get _ghostTopLineSet =>
+      datasets[EventDataSets.ghostsSet.index];
+  set _ghostTopLineSet(ScatterDataSet dataset) {
+    datasets[EventDataSets.ghostsSet.index] = dataset;
+  }
 
   /// VM is GCing.
-  ScatterDataSet _gcVmDataSet;
+  ScatterDataSet get _gcVmDataSet => datasets[EventDataSets.gcVmSet.index];
+  set _gcVmDataSet(ScatterDataSet dataset) {
+    datasets[EventDataSets.gcVmSet.index] = dataset;
+  }
 
   /// Used to signal start allocation monitoring
-  ScatterDataSet _allocationStartSet;
+  ScatterDataSet get _allocationStartSet =>
+      datasets[EventDataSets.monitorStartSet.index];
+  set _allocationStartSet(ScatterDataSet dataset) {
+    datasets[EventDataSets.monitorStartSet.index] = dataset;
+  }
 
   /// Montoring continuing...
-  ScatterDataSet _allocationContinueSet;
+  ScatterDataSet get _allocationContinueSet =>
+      datasets[EventDataSets.monitorContinuesSet.index];
+  set _allocationContinueSet(ScatterDataSet dataset) {
+    datasets[EventDataSets.monitorContinuesSet.index] = dataset;
+  }
 
   /// Reset allocation accumulators
-  ScatterDataSet _allocationResetSet;
+  ScatterDataSet get _allocationResetSet =>
+      datasets[EventDataSets.monitorResetSet.index];
+  set _allocationResetSet(ScatterDataSet dataset) {
+    datasets[EventDataSets.monitorResetSet.index] = dataset;
+  }
 
   /// GC initiated by user pressing GC button.
-  ScatterDataSet _gcUserDataSet;
+  ScatterDataSet get _gcUserDataSet => datasets[EventDataSets.gcUserSet.index];
+  set _gcUserDataSet(ScatterDataSet dataset) {
+    datasets[EventDataSets.gcUserSet.index] = dataset;
+  }
 
   /// User initiated snapshot.
-  ScatterDataSet _snapshotDataSet;
+  ScatterDataSet get _snapshotDataSet =>
+      datasets[EventDataSets.snapshotSet.index];
+  set _snapshotDataSet(ScatterDataSet dataset) {
+    datasets[EventDataSets.snapshotSet.index] = dataset;
+  }
 
   /// Automatically initiated snapshot.
-  ScatterDataSet _snapshotAutoDataSet;
+  ScatterDataSet get _snapshotAutoDataSet =>
+      datasets[EventDataSets.snapshotAutoSet.index];
+  set _snapshotAutoDataSet(ScatterDataSet dataset) {
+    datasets[EventDataSets.snapshotAutoSet.index] = dataset;
+  }
 
   /// Pulls the visible EventSamples added as trace data to actual data list to be
   /// plotted.
@@ -166,32 +188,39 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     _gcVmDataSet = ScatterDataSet(eventsData.gcVm, 'VM GC');
     _gcVmDataSet.setScatterShape(ScatterShape.CIRCLE);
     _gcVmDataSet.setScatterShapeSize(6);
-    _gcVmDataSet.setScatterShapeHoleColor(ColorUtils.HOLO_BLUE_DARK);
+    _gcVmDataSet.setColor1(ColorUtils.HOLO_BLUE_DARK);
 
     // Dataset for user generated GC.
     _gcUserDataSet = ScatterDataSet(eventsData.gcUser, 'User GC');
     _gcUserDataSet.setScatterShape(ScatterShape.CIRCLE);
-    _gcUserDataSet.setScatterShapeHoleRadius(.6);
-    _gcUserDataSet.setScatterShapeHoleColor(ColorUtils.HOLO_BLUE_LIGHT);
+    _gcUserDataSet.setColor1(ColorUtils.HOLO_BLUE_DARK);
+    _gcUserDataSet.setScatterShapeHoleRadius(.9);
+    _gcUserDataSet.setScatterShapeHoleColor(colorScheme.defaultBackgroundColor);
 
     // Dataset for user generated Snapshot.
     _snapshotDataSet = ScatterDataSet(eventsData.snapshot, 'Snapshot');
-    _snapshotDataSet.setScatterShape(ScatterShape.TRIANGLE);
-    _snapshotDataSet.setScatterShapeHoleRadius(.6);
-    _snapshotDataSet.setScatterShapeHoleColor(ColorUtils.HOLO_GREEN_DARK);
+    _snapshotDataSet.setScatterShape(ScatterShape.CIRCLE);
     _snapshotDataSet.setColor1(ColorUtils.HOLO_GREEN_DARK);
+    _snapshotDataSet.setScatterShapeHoleRadius(.9);
+    _snapshotDataSet
+        .setScatterShapeHoleColor(colorScheme.defaultBackgroundColor);
 
-    _allocationStartSet = ScatterDataSet(eventsData.monitorStart, 'Monitor Start');
-    _allocationStartSet.setScatterShape(ScatterShape.SQUARE);
-    _allocationStartSet.setScatterShapeSize(10);
+    _allocationStartSet =
+        ScatterDataSet(eventsData.monitorStart, 'Monitor Start');
+    _allocationStartSet.setScatterShape(ScatterShape.CIRCLE);
     _allocationStartSet.setColor1(ColorUtils.YELLOW);
+    _allocationStartSet.setScatterShapeHoleRadius(.9);
+    _allocationStartSet
+        .setScatterShapeHoleColor(colorScheme.defaultBackgroundColor);
 
-    _allocationContinueSet = ScatterDataSet(eventsData.monitorContinues, 'Monitor Continue');
+    _allocationContinueSet =
+        ScatterDataSet(eventsData.monitorContinues, 'Monitor Continue');
     _allocationContinueSet.setScatterShape(ScatterShape.SQUARE);
     _allocationContinueSet.setScatterShapeSize(8);
     _allocationContinueSet.setColor2(ColorUtils.YELLOW, 30);
 
-    _allocationResetSet = ScatterDataSet(eventsData.monitorReset, 'Monitor Reset');
+    _allocationResetSet =
+        ScatterDataSet(eventsData.monitorReset, 'Monitor Reset');
     _allocationResetSet.setScatterShape(ScatterShape.CIRCLE);
     _allocationResetSet.setScatterShapeHoleRadius(.8);
     _allocationResetSet.setScatterShapeHoleColor(ColorUtils.YELLOW);
@@ -202,22 +231,14 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
       eventsData.snapshotAuto,
       'Snapshot-Auto',
     );
-    _snapshotAutoDataSet.setScatterShape(ScatterShape.TRIANGLE);
-    _snapshotAutoDataSet.setScatterShapeHoleRadius(.6);
-    _snapshotAutoDataSet.setScatterShapeHoleColor(ColorUtils.HOLO_RED_LIGHT);
+    _snapshotAutoDataSet.setScatterShape(ScatterShape.CIRCLE);
     _snapshotAutoDataSet.setColor1(ColorUtils.HOLO_RED_LIGHT);
+    _snapshotAutoDataSet.setScatterShapeHoleRadius(.9);
+    _snapshotAutoDataSet
+        .setScatterShapeHoleColor(colorScheme.defaultBackgroundColor);
 
     // create a data object with the data sets
-    _controller.data = ScatterData.fromList([
-      _ghostTopLineSet,
-      _gcVmDataSet,
-      _allocationStartSet,
-      _allocationContinueSet,
-      _allocationResetSet,
-      _gcUserDataSet,
-      _snapshotDataSet,
-      _snapshotAutoDataSet,
-    ]);
+    _controller.data = ScatterData.fromList(datasets);
     _controller.data.setDrawValues(false);
   }
 
@@ -232,24 +253,22 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   /// Display any newly received events in the chart.
   void _updateEventPane() {
     setState(() {
-      _controller.data = ScatterData.fromList([
-        _gcVmDataSet,
-        _allocationStartSet,
-        _allocationContinueSet,
-        _allocationResetSet,
-        _gcUserDataSet,
-        _snapshotDataSet,
-        _snapshotAutoDataSet,
-      ]);
+      _controller.data = ScatterData.fromList(datasets);
 
       // Received new samples ready to plot, signal data has changed.
-      _gcVmDataSet.notifyDataSetChanged();
-      _allocationStartSet.notifyDataSetChanged();
-      _allocationContinueSet.notifyDataSetChanged();
-      _allocationResetSet.notifyDataSetChanged();
-      _gcUserDataSet.notifyDataSetChanged();
-      _snapshotDataSet.notifyDataSetChanged();
-      _snapshotAutoDataSet.notifyDataSetChanged();
+      for (final dataset in datasets) {
+        dataset.notifyDataSetChanged();
+      }
     });
+  }
+
+  @override
+  void onNothingSelected() {
+    // TODO: implement onNothingSelected
+  }
+
+  @override
+  void onValueSelected(Entry e, Highlight h) {
+    // TODO: implement onValueSelected
   }
 }

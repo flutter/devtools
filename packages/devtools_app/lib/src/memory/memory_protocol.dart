@@ -313,9 +313,9 @@ class ClassHeapDetailStats {
     if (serviceManager.service.protocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 18))) {
       instancesCurrent = json['instancesCurrent'];
-      instancesAccumulated = json['instancesAccumulated'];
+      instancesDelta = json['instancesAccumulated'];
       bytesCurrent = json['bytesCurrent'];
-      bytesAccumulated = json['accumulatedSize'];
+      bytesDelta = json['accumulatedSize'];
     } else {
       _update(json['new']);
       _update(json['old']);
@@ -334,17 +334,17 @@ class ClassHeapDetailStats {
   final Map<String, dynamic> json;
 
   int instancesCurrent = 0;
-  int instancesAccumulated = 0;
+  int instancesDelta = 0;
   int bytesCurrent = 0;
-  int bytesAccumulated = 0;
+  int bytesDelta = 0;
 
   ClassRef classRef;
 
   String get type => json['type'];
 
   void _update(List<dynamic> stats) {
-    instancesAccumulated += stats[ACCUMULATED];
-    bytesAccumulated += stats[ACCUMULATED_SIZE];
+    instancesDelta += stats[ACCUMULATED];
+    bytesDelta += stats[ACCUMULATED_SIZE];
     instancesCurrent += stats[LIVE_AFTER_GC] + stats[ALLOCATED_SINCE_GC];
     bytesCurrent += stats[LIVE_AFTER_GC_SIZE] + stats[ALLOCATED_SINCE_GC_SIZE];
   }

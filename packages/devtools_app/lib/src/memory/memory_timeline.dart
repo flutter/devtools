@@ -285,41 +285,58 @@ class MemoryTimeline {
       final system = sample.adbMemoryInfo.system.toDouble();
       final total = sample.adbMemoryInfo.total.toDouble();
 
+      // Y position for each trace, each trace is stacked on top of each other.
+      double yPosition = 0;
+
+      yPosition += graphics;
       final graphicsEntry = Entry(
         x: timestamp,
-        y: graphics,
+        y: yPosition,
         icon: dataPointImage,
       );
+
+      yPosition += stack;
       final stackEntry = Entry(
         x: timestamp,
-        y: stack + graphics,
+        y: yPosition,
         icon: dataPointImage,
       );
+
+      yPosition += javaHeap;
       final javaHeapEntry = Entry(
         x: timestamp,
-        y: javaHeap + graphics + stack,
+        y: yPosition,
         icon: dataPointImage,
       );
+
+      yPosition += nativeHeap;
       final nativeHeapEntry = Entry(
         x: timestamp,
-        y: nativeHeap + javaHeap + graphics + stack,
+        y: yPosition,
         icon: dataPointImage,
       );
+
+      yPosition += code;
       final codeEntry = Entry(
         x: timestamp,
-        y: code + nativeHeap + javaHeap + graphics + stack,
+        y: yPosition,
         icon: dataPointImage,
       );
+
+      yPosition += other;
       final otherEntry = Entry(
         x: timestamp,
-        y: other + code + nativeHeap + javaHeap + graphics + stack,
+        y: yPosition,
         icon: dataPointImage,
       );
+
+      yPosition += system;
       final systemEntry = Entry(
         x: timestamp,
-        y: system + other + code + nativeHeap + javaHeap + graphics + stack,
+        y: yPosition,
         icon: dataPointImage,
       );
+
       final totalEntry = Entry(
         x: timestamp,
         y: total,

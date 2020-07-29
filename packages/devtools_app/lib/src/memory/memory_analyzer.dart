@@ -521,9 +521,13 @@ class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
 
   @override
   void initState() {
-    setupColumns();
-
     super.initState();
+
+    // Setup the table columns.
+    columns.addAll([
+      treeColumn,
+      _AnalysisFieldValueColumn(),
+    ]);
   }
 
   @override
@@ -542,13 +546,6 @@ class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
         controller.computeAllLibraries(rebuild: true);
       });
     });
-  }
-
-  void setupColumns() {
-    columns.addAll([
-      treeColumn,
-      _AnalysisFieldValueColumn(),
-    ]);
   }
 
   @override

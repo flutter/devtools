@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Displays heap object allocation monitoring (in the VM).  The mllocation
-/// monitor will cause 'start' event to display in the event pane. Immediately
-/// afterwards a 'continues' event is displayed on each subsequent timestamp
-/// tick, until another monitor start event.  A 'reset' event will stop the
-/// 'continues' event for one timestamp tick with a 'reset' event. Immediately
-/// after the reset event the 'continues' event will again appear in the event
-/// pane until new monitor is started. One monitor exists in a VM connection.
+/// Monitor heap object allocations (in the VM).  The allocation monitor will
+/// cause 'start' event exist in the HeapSample. Immediately afterwards a
+/// 'continues' event is added on each subsequent timestamp tick (HeapSample)
+/// until another monitor start event.  A 'reset' event stops the 'continues'
+/// event for one timestamp tick with a 'reset' event. Immediately after the
+/// reset event a 'continues' event will again appear in the HeapSample's
+/// MemoryEventInfo - until a new monitor is started. One monitor exists per
+/// VM connection.
 class AllocationAccumulator {
   AllocationAccumulator(this._start, this._continues, this._reset);
 
@@ -108,9 +109,7 @@ class EventSample {
         json['gcEvent'] as bool,
         json['snapshotEvent'] as bool,
         json['snapshotAutoEvent'] as bool,
-        json['allocationAccumulatorEvent'] != null
-            ? AllocationAccumulator.fromJson(json['allocationAccumulatorEvent'])
-            : null,
+        AllocationAccumulator?.fromJson(json['allocationAccumulatorEvent']),
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -118,9 +117,7 @@ class EventSample {
         'gcEvent': isEventGC,
         'snapshotEvent': isEventSnapshot,
         'snapshotAutoEvent': isEventSnapshotAuto,
-        'allocationAccumulatorEvent': allocationAccumulator != null
-            ? allocationAccumulator.toJson()
-            : null,
+        'allocationAccumulatorEvent': allocationAccumulator?.toJson(),
       };
 
   EventSample clone(int timestamp) => EventSample(

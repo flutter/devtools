@@ -73,8 +73,8 @@ const knowClassesToAnalyzeForImages = <WildcardMatch, List<String>>{
 
   // Anything that exactly matches:
   WildcardMatch.exact: [
-    '_Int32List', // Emulator stores raw images as Int32List.
-    '_Int64List', // New devices e.g., Pixel 3 XL stores images as Int64List.
+    '_Int32List', // 32-bit devices e.g., emulators, Pixel 2, raw images as Int32List.
+    '_Int64List', // 64-bit devices e.g., Pixel 3 XL, raw images as Int64List.
     'FrameInfos',
   ],
 
@@ -457,10 +457,7 @@ class HeapTreeViewState extends State<HeapTree>
           child: OutlineButton(
             key: snapshotButtonKey,
             onPressed: _isSnapshotRunning ? null : _snapshot,
-            child: const MaterialIconLabel(
-              Icons.camera,
-              '',
-            ),
+            child: const MaterialIconLabel.noText(Icons.camera),
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -509,9 +506,8 @@ class HeapTreeViewState extends State<HeapTree>
                           }
                         }
                       : null,
-                  child: const MaterialIconLabel(
+                  child: const MaterialIconLabel.noText(
                     Icons.vertical_align_top,
-                    '',
                   ),
                 )),
         controller.showTreemap.value
@@ -532,9 +528,8 @@ class HeapTreeViewState extends State<HeapTree>
                           }
                         }
                       : null,
-                  child: const MaterialIconLabel(
+                  child: const MaterialIconLabel.noText(
                     Icons.vertical_align_bottom,
-                    '',
                   ),
                 ),
               ),
@@ -548,6 +543,7 @@ class HeapTreeViewState extends State<HeapTree>
               await _allocationStart();
             },
             child: createImageIcon(
+              // TODO(terry): Could we use a canned material icon check w/ Youyang?
               'icons/memory/communities_white@2x.png',
               size: defaultIconThemeSize,
             ),
@@ -561,6 +557,7 @@ class HeapTreeViewState extends State<HeapTree>
               await _allocationReset();
             },
             child: createImageIcon(
+              // TODO(terry): Could we use a canned material icon check w/ Youyang?
               'icons/memory/reset_icon_white@2x.png',
               size: defaultIconThemeSize,
             ),
@@ -569,6 +566,9 @@ class HeapTreeViewState extends State<HeapTree>
       ],
     );
   }
+
+  // WARNING: Do not checkin the debug flag set to true.
+  final _debugAllocationMonitoring = false;
 
   Future<void> _allocationStart() async {
     // TODO(terry): Look at grouping by library or classes also filtering e.g., await controller.computeLibraries();
@@ -590,23 +590,22 @@ class HeapTreeViewState extends State<HeapTree>
           final instancesCurrent = currentAllocation.instancesCurrent;
           final bytesCurrent = currentAllocation.bytesCurrent;
 
-          currentAllocation.instancesAccumulated =
-              previousAllocation.instancesAccumulated +
-                  (instancesCurrent - previousAllocation.instancesCurrent);
-          currentAllocation.bytesAccumulated =
-              previousAllocation.bytesAccumulated +
-                  (bytesCurrent - previousAllocation.bytesCurrent);
+          currentAllocation.instancesDelta = previousAllocation.instancesDelta +
+              (instancesCurrent - previousAllocation.instancesCurrent);
+          currentAllocation.bytesDelta = previousAllocation.bytesDelta +
+              (bytesCurrent - previousAllocation.bytesCurrent);
 
-          final instancesAccumulated = currentAllocation.instancesAccumulated;
-          final bytesAccumulated = currentAllocation.bytesAccumulated;
+          final instancesAccumulated = currentAllocation.instancesDelta;
+          final bytesAccumulated = currentAllocation.bytesDelta;
 
-          if (instancesAccumulated != 0 || bytesAccumulated != 0) {
+          if (_debugAllocationMonitoring &&
+              (instancesAccumulated != 0 || bytesAccumulated != 0)) {
             debugLogger('previous,index=[$previousIndex][$currentIndex] '
                 'class ${currentAllocation.classRef.name}\n'
                 '    instancesCurrent=$instancesCurrent, '
-                '    instancesAccumulated=${currentAllocation.instancesAccumulated}\n'
+                '    instancesAccumulated=${currentAllocation.instancesDelta}\n'
                 '    bytesCurrent=$bytesCurrent, '
-                '    bytesAccumulated=${currentAllocation.bytesAccumulated}}\n');
+                '    bytesAccumulated=${currentAllocation.bytesDelta}}\n');
           }
 
           previousIndex++;
@@ -621,7 +620,7 @@ class HeapTreeViewState extends State<HeapTree>
             orElse: () => null,
           );
           if (first != null) {
-            //It's a class that's gone?
+            // A class that no longer exist (live or sentinel).
             previousIndex++;
           } else {
             // New Class encountered in new AllocationProfile, don't increment
@@ -645,11 +644,11 @@ class HeapTreeViewState extends State<HeapTree>
     final currentAllocations = await controller.resetAllocationProfile();
 
     // Reset all accumulators to zero.
-    currentAllocations.every((element) {
-      element.bytesAccumulated = 0;
-      element.instancesAccumulated = 0;
-      return true;
-    });
+    for (final classAllocation in currentAllocations) {
+      classAllocation.bytesDelta = 0;
+      classAllocation.instancesDelta = 0;
+    }
+
     controller.monitorAllocations = currentAllocations;
   }
 
@@ -691,10 +690,7 @@ class HeapTreeViewState extends State<HeapTree>
           child: OutlineButton(
             key: filterButtonKey,
             onPressed: _filter,
-            child: const MaterialIconLabel(
-              Icons.filter_list,
-              '',
-            ),
+            child: const MaterialIconLabel.noText(Icons.filter_list),
           ),
         ),
         // TODO: Add these back in when _settings() is implemented.
@@ -899,9 +895,15 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
 
   @override
   void initState() {
-    setupColumns();
-
     super.initState();
+
+    // Setup the table columns.
+    columns.addAll([
+      treeColumn,
+      _ClassOrInstanceCountColumn(),
+      _ShallowSizeColumn(),
+      _RetainedSizeColumn(),
+    ]);
   }
 
   @override
@@ -1148,15 +1150,6 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
     }
 
     return false;
-  }
-
-  void setupColumns() {
-    columns.addAll([
-      treeColumn,
-      _ClassOrInstanceCountColumn(),
-      _ShallowSizeColumn(),
-      _RetainedSizeColumn(),
-    ]);
   }
 
   @override

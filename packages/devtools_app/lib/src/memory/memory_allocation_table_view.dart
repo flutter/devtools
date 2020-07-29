@@ -27,9 +27,16 @@ class AllocationTableViewState extends State<AllocationTableView>
 
   @override
   void initState() {
-    setupColumns();
-
     super.initState();
+
+    // Setup the columns.
+    columns.addAll([
+      FieldClassName(),
+      FieldInstanceCountColumn(),
+      FieldInstanceDeltaColumn(),
+      FieldSizeColumn(),
+      FieldSizeDeltaColumn(),
+    ]);
   }
 
   @override
@@ -53,16 +60,6 @@ class AllocationTableViewState extends State<AllocationTableView>
     });
   }
 
-  void setupColumns() {
-    columns.addAll([
-      FieldClassName(),
-      FieldInstanceCountColumn(),
-      FieldInstanceAccumulatorColumn(),
-      FieldSizeColumn(),
-      FieldSizeAccumulatorColumn(),
-    ]);
-  }
-
   @override
   Widget build(BuildContext context) {
     if (controller.allocationsFieldsTable == null) {
@@ -80,7 +77,6 @@ class AllocationTableViewState extends State<AllocationTableView>
       onSortChanged: (column, direction) {
         controller.sortedMonitorColumn = column;
         controller.sortedMonitorDirection = direction;
-
       },
     );
 
