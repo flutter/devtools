@@ -39,7 +39,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
   }
 
   void _onDragOver(MouseEvent event) {
-    super.dragOver(event.offset.x, event.offset.y);
+    dragOver(event.offset.x, event.offset.y);
 
     // This is necessary to allow us to drop.
     event.preventDefault();
@@ -47,11 +47,11 @@ class DragAndDropManagerWeb extends DragAndDropManager {
   }
 
   void _onDragLeave(MouseEvent event) {
-    super.dragLeave();
+    dragLeave();
   }
 
   void _onDrop(MouseEvent event) async {
-    super.drop();
+    drop();
 
     // Stop the browser from redirecting.
     event.preventDefault();
