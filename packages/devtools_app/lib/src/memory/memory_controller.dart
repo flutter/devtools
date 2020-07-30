@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';
@@ -887,8 +886,25 @@ class MemoryController extends DisposableController
     }
   }
 
+  final _treeChangedNotifier = ValueNotifier<bool>(false);
+
+  ValueListenable<bool> get treeChangedNotifier => _treeChangedNotifier;
+
+  bool get isTreeChanged => _treeChangedNotifier.value;
+
+  void treeChanged({bool state = true}) {
+    if (_treeChangedNotifier.value) {
+      _treeChangedNotifier.value = false;
+    }
+    _treeChangedNotifier.value = state;
+  }
+
   Reference buildTreeFromAllData() {
+    final oldChildren = topNode?.children;
+    if (isTreeChanged) topNode = null;
     topNode ??= LibraryReference(this, libraryRootNode, null);
+
+    if (isTreeChanged && oldChildren != null) topNode.addAllChildren(oldChildren);
 
     AllocationsMonitorReference monitorRoot;
     var anyAnalyses = false;

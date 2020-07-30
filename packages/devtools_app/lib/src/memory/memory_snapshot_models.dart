@@ -76,10 +76,12 @@ class Reference extends TreeNode<Reference> {
 
   factory Reference._sentinel() => Reference._internal(name: sentinelName);
 
-  Reference.allocationsMonitor(MemoryController controller, String name,
-      {Function onExpand, Function onLeaf})
-      : this._internal(
-          controller: controller,
+  Reference.allocationsMonitor(
+    String name, {
+    Function onExpand,
+    Function onLeaf,
+  }) : this._internal(
+          controller: null,
           name: name,
           isAllocations: true,
           onExpand: onExpand,
@@ -287,10 +289,7 @@ class Reference extends TreeNode<Reference> {
 
 class AllocationsMonitorReference extends Reference {
   AllocationsMonitorReference()
-      : super.allocationsMonitor(
-          null,
-          'Allocation Monitors',
-        );
+      : super.allocationsMonitor('Allocation Monitors');
 }
 
 class AllocationMonitorReference extends Reference {

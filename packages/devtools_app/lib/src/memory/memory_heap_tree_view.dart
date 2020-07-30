@@ -457,7 +457,7 @@ class HeapTreeViewState extends State<HeapTree>
           child: OutlineButton(
             key: snapshotButtonKey,
             onPressed: _isSnapshotRunning ? null : _snapshot,
-            child: const MaterialIconLabel.noText(Icons.camera),
+            child: createIcon(Icons.camera),
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -502,15 +502,12 @@ class HeapTreeViewState extends State<HeapTree>
                               // We're collapsing close the fields table.
                               controller.selectedLeaf = null;
                             }
-                            setState(() {
-                              controller.buildTreeFromAllData();
-                            });
+                            // All nodes collapsed - signal tree state changed.
+                            controller.treeChanged();
                           }
                         }
                       : null,
-                  child: const MaterialIconLabel.noText(
-                    Icons.vertical_align_top,
-                  ),
+                  child: createIcon(Icons.vertical_align_top),
                 )),
         controller.showTreemap.value
             ? const SizedBox()
@@ -527,14 +524,11 @@ class HeapTreeViewState extends State<HeapTree>
                               return true;
                             });
                           }
-                          setState(() {
-                            controller.buildTreeFromAllData();
-                          });
+                          // All nodes expanded - signal tree state  changed.
+                          controller.treeChanged();
                         }
                       : null,
-                  child: const MaterialIconLabel.noText(
-                    Icons.vertical_align_bottom,
-                  ),
+                  child: createIcon(Icons.vertical_align_bottom),
                 ),
               ),
         const SizedBox(width: defaultSpacing),
@@ -641,6 +635,8 @@ class HeapTreeViewState extends State<HeapTree>
 
     controller.monitorTimestamp = allocationtimestamp;
     controller.monitorAllocations = currentAllocations;
+
+    controller.treeChanged();
   }
 
   Future<void> _allocationReset() async {
@@ -694,7 +690,7 @@ class HeapTreeViewState extends State<HeapTree>
           child: OutlineButton(
             key: filterButtonKey,
             onPressed: _filter,
-            child: const MaterialIconLabel.noText(Icons.filter_list),
+            child: createIcon(Icons.filter_list),
           ),
         ),
         // TODO: Add these back in when _settings() is implemented.
@@ -915,7 +911,14 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
 
     cancel();
 
-    // Update the chart when the memorySource changes.
+    // Update the tree when the tree state changes e.g., expand, collapse, etc.
+    addAutoDisposeListener(controller.treeChangedNotifier, () {
+      if (controller.isTreeChanged) {
+        setState(() {});
+      }
+    });
+
+    // Update the tree when the memorySource changes.
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
         controller.computeAllLibraries(rebuild: true);
