@@ -249,7 +249,13 @@ class CodeSizeController {
 }
 
 extension CodeSizeJsonFileExtension on DevToolsJsonFile {
-  bool get isApkFile => data['type'] == 'apk';
+  bool get isApkFile {
+    if (data is Map<String, dynamic>) {
+      final dataMap = data as Map<String, dynamic>;
+      return dataMap['type'] == 'apk';
+    }
+    return false;
+  }
 
   String get displayText {
     return '$path - $formattedTime';

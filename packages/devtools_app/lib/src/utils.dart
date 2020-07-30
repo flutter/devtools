@@ -945,11 +945,11 @@ num degToRad(num deg) => deg * (pi / 180.0);
 
 typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile file);
 
-class DevToolsJsonFile extends DevToolsFile<Map<String, dynamic>> {
+class DevToolsJsonFile extends DevToolsFile<Object> {
   const DevToolsJsonFile({
     @required String name,
     @required DateTime lastModifiedTime,
-    @required Map<String, dynamic> data,
+    @required Object data,
   }) : super(
           path: name,
           lastModifiedTime: lastModifiedTime,
