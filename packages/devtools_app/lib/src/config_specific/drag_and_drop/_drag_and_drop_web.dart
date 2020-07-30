@@ -77,7 +77,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     final FileReader reader = FileReader();
     reader.onLoad.listen((_) {
       try {
-        final Map<String, dynamic> json = jsonDecode(reader.result);
+        final Object json = jsonDecode(reader.result);
         final devToolsJsonFile = DevToolsJsonFile(
           name: droppedFile.name,
           lastModifiedTime: droppedFile.lastModifiedDate,
