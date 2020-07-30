@@ -137,10 +137,16 @@ class DevToolsAppState extends State<DevToolsApp> {
             url: params['uri'],
             allowConnectionScreenOnDisconnect: !embed,
             builder: (_) {
-              // TODO(dantup): Handle when `page` is not in the list of visible screens.
               final tabs = embed && page != null
                   ? _visibleScreens().where((p) => p.screenId == page).toList()
                   : _visibleScreens();
+              if (tabs.isEmpty) {
+                return DevToolsScaffold.withChild(
+                  child: const CenteredMessage(
+                      'The requested screen is not available for this application.'),
+                  ideTheme: ideTheme,
+                );
+              }
               return _providedControllers(
                 child: DevToolsScaffold(
                   embed: embed,
