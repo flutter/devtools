@@ -632,11 +632,22 @@ class ServiceExtensionManager {
         if (!_firstFrameEventReceived) {
           bool didSendFirstFrameEvent = false;
           if (isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
-            final value = await _service.callServiceExtension(
+            // We listen for the result here in a Future, instead of awaiting
+            // the call, so that we don't block the connection initialization.
+            // If the app is paused, this call won't return until the app is
+            // resumed.
+            unawaited(_service
+                .callServiceExtension(
               extensions.didSendFirstFrameEvent,
               isolateId: _isolateManager.selectedIsolate.id,
-            );
-            didSendFirstFrameEvent = value?.json['enabled'] == 'true';
+            )
+                .then((value) async {
+              didSendFirstFrameEvent = value?.json['enabled'] == 'true';
+
+              if (didSendFirstFrameEvent) {
+                await _onFrameEventReceived();
+              }
+            }));
           } else {
             final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
               ['package:flutter/src/widgets/binding.dart'],
@@ -648,10 +659,9 @@ class ServiceExtensionManager {
             );
 
             didSendFirstFrameEvent = value?.valueAsString == 'true';
-          }
-
-          if (didSendFirstFrameEvent) {
-            await _onFrameEventReceived();
+            if (didSendFirstFrameEvent) {
+              await _onFrameEventReceived();
+            }
           }
         }
       } else {
