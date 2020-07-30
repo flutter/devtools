@@ -25,8 +25,14 @@ void main() async {
 
       await Future.delayed(const Duration(
           milliseconds: ImportController.repeatImportTimeBufferMs));
-      importController.importData(devToolsFileJson);
+      importController.importData(nonDevToolsFileJsonWithListData);
       expect(notifications.messages.length, equals(2));
+      expect(notifications.messages, contains(nonDevToolsFileMessage));
+
+      await Future.delayed(const Duration(
+          milliseconds: ImportController.repeatImportTimeBufferMs));
+      importController.importData(devToolsFileJson);
+      expect(notifications.messages.length, equals(3));
       expect(
         notifications.messages,
         contains(attemptingToImportMessage('example')),
@@ -39,6 +45,11 @@ final nonDevToolsFileJson = DevToolsJsonFile(
   name: 'nonDevToolsFileJson',
   lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(1000),
   data: <String, dynamic>{},
+);
+final nonDevToolsFileJsonWithListData = DevToolsJsonFile(
+  name: 'nonDevToolsFileJsonWithListData',
+  lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(1000),
+  data: <Map<String, dynamic>>[],
 );
 final devToolsFileJson = DevToolsJsonFile(
   name: 'devToolsFileJson',
