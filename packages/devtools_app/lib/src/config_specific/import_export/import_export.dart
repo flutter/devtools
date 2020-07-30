@@ -60,8 +60,8 @@ class ImportController {
     previousImportTime = now;
 
     final isDevToolsSnapshot =
-        json is Map<String, dynamic> && json[devToolsSnapshotKey];
-    if (isDevToolsSnapshot == null || !isDevToolsSnapshot) {
+        json is Map<String, dynamic> && json[devToolsSnapshotKey] == true;
+    if (!isDevToolsSnapshot) {
       _notifications.push(nonDevToolsFileMessage);
       return;
     }
