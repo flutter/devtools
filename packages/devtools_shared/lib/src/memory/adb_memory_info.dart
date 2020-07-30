@@ -84,10 +84,16 @@ class AdbMemoryInfo {
   Duration get bootDuration => Duration(milliseconds: realtime);
 
   @override
-  String toString() => '[AdbMemoryInfo $realTimeKey: $realtime'
-      ', realtimeDT: $realtimeDT, durationBoot: $bootDuration'
-      ', $javaHeapKey: $javaHeap, $nativeHeapKey: $nativeHeap'
-      ', $codeKey: $code, $stackKey: $stack, $graphicsKey: $graphics'
-      ', $otherKey: $other, $systemKey: $system'
-      ', $totalKey: $total]';
+  String toString() => '[AdbMemoryInfo '
+      '$realTimeKey: $realtime, '
+      'realtimeDT: $realtimeDT, '
+      'durationBoot: $bootDuration, '
+      '$javaHeapKey: $javaHeap, '
+      '$nativeHeapKey: $nativeHeap, '
+      '$codeKey: $code, '
+      '$stackKey: $stack, '
+      '$graphicsKey: $graphics, '
+      '$otherKey: $other, '
+      '$systemKey: $system, '
+      '$totalKey: $total]';
 }

@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
-import '../config_specific/logger/logger.dart' as logger;
 import '../table.dart';
 import '../table_data.dart';
 import '../utils.dart';
@@ -52,7 +51,7 @@ Map<String, List<Reference>> collect(
         if (_classMatcher(liveClass)) {
           final instances = liveClass.getInstances(heapGraph);
           externalsToAnalyze.add(external);
-          logger.log('Regex external found ${liveClass.name} '
+          debugLogger('Regex external found ${liveClass.name} '
               'instances=${instances.length} '
               'allocated bytes=$size');
         }
@@ -66,7 +65,7 @@ Map<String, List<Reference>> collect(
           if (_classMatcher(liveClass)) {
             filtersToAnalyze.add(classRef);
             final instances = liveClass.getInstances(heapGraph);
-            logger.log('Regex filtered found ${classRef.name} '
+            debugLogger('Regex filtered found ${classRef.name} '
                 'instances=${instances.length}');
           }
         }
@@ -79,7 +78,7 @@ Map<String, List<Reference>> collect(
         if (_classMatcher(liveClass)) {
           librariesToAnalyze.add(classRef);
           final instances = liveClass.getInstances(heapGraph);
-          logger.log('Regex library found ${classRef.name} '
+          debugLogger('Regex library found ${classRef.name} '
               'instances=${instances.length}');
         }
       }
@@ -522,9 +521,13 @@ class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
 
   @override
   void initState() {
-    setupColumns();
-
     super.initState();
+
+    // Setup the table columns.
+    columns.addAll([
+      treeColumn,
+      _AnalysisFieldValueColumn(),
+    ]);
   }
 
   @override
@@ -543,13 +546,6 @@ class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
         controller.computeAllLibraries(rebuild: true);
       });
     });
-  }
-
-  void setupColumns() {
-    columns.addAll([
-      treeColumn,
-      _AnalysisFieldValueColumn(),
-    ]);
   }
 
   @override

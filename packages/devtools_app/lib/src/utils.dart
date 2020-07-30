@@ -17,6 +17,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'package:vm_service/vm_service.dart';
 
+import 'config_specific/logger/logger.dart' as logger;
 import 'notifications.dart';
 
 bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
@@ -967,4 +968,13 @@ class DevToolsFile<T> {
   final DateTime lastModifiedTime;
 
   final T data;
+}
+
+/// Logging to debug console only in debug runs.
+void debugLogger(String message) {
+  // Debug only check.
+  assert(() {
+    logger.log('$message');
+    return true;
+  }());
 }

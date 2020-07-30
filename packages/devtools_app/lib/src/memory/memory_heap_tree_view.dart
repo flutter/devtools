@@ -16,13 +16,17 @@ import '../globals.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
+import '../ui/icons.dart';
 import '../ui/label.dart';
 import '../ui/search.dart';
 import '../utils.dart';
+import 'memory_allocation_table_view.dart';
 import 'memory_analyzer.dart';
 import 'memory_controller.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
+import 'memory_instance_tree_view.dart';
+import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
 import 'memory_treemap.dart';
 
@@ -69,7 +73,8 @@ const knowClassesToAnalyzeForImages = <WildcardMatch, List<String>>{
 
   // Anything that exactly matches:
   WildcardMatch.exact: [
-    '_Int32List',
+    '_Int32List', // 32-bit devices e.g., emulators, Pixel 2, raw images as Int32List.
+    '_Int64List', // 64-bit devices e.g., Pixel 3 XL, raw images as Int64List.
     'FrameInfos',
   ],
 
@@ -129,11 +134,13 @@ class HeapTreeViewState extends State<HeapTree>
   @visibleForTesting
   static const expandAllButtonKey = Key('Expand All Button');
   @visibleForTesting
+  static const allocationMonitorKey = Key('Allocation Monitor Start Button');
+  @visibleForTesting
+  static const allocationMonitorResetKey = Key('Accumulators Reset Button');
+  @visibleForTesting
   static const searchButtonKey = Key('Snapshot Search');
   @visibleForTesting
   static const filterButtonKey = Key('Snapshot Filter');
-  @visibleForTesting
-  static const analyzeButtonKey = Key('Snapshot Analyze');
   @visibleForTesting
   static const settingsButtonKey = Key('Snapshot Settings');
 
@@ -211,6 +218,12 @@ class HeapTreeViewState extends State<HeapTree>
       ));
     });
 
+    addAutoDisposeListener(controller.monitorAllocationsNotifier, () {
+      setState(() {
+        controller.computeAllLibraries(rebuild: true);
+      });
+    });
+
     addAutoDisposeListener(controller.memoryTimeline.sampleAddedNotifier, () {
       autoSnapshot();
     });
@@ -242,7 +255,7 @@ class HeapTreeViewState extends State<HeapTree>
         .format(DateTime.fromMillisecondsSinceEpoch(heapSample.timestamp));
 
     if (debugSnapshots) {
-      logger.log('AutoSnapshot $startDateTime heapSum=$heapSum, '
+      debugLogger('AutoSnapshot $startDateTime heapSum=$heapSum, '
           'first=${heapMovingAverage.dataSet.first}, '
           'mean=${heapMovingAverage.mean}');
     }
@@ -268,7 +281,7 @@ class HeapTreeViewState extends State<HeapTree>
           lastSnapshotMemoryTotal = heapSum;
 
           takeSnapshot = true;
-          logger.log('AutoSnapshot - RSS exceeded '
+          debugLogger('AutoSnapshot - RSS exceeded '
               '($rssPercentIncrease% increase) @ $startDateTime.');
         }
       }
@@ -281,7 +294,7 @@ class HeapTreeViewState extends State<HeapTree>
       takeSnapshot = true;
       logger.log('AutoSnapshot - memory spike @ $startDateTime} '
           'last snapshot ${(sampleTime - snapshotTime).inSeconds} seconds ago.');
-      logger.log('               '
+      debugLogger('               '
           'heap @ last snapshot = $lastSnapshotMemoryTotal, '
           'heap total=$heapSum, RSS=${heapSample.rss}');
     }
@@ -332,7 +345,8 @@ class HeapTreeViewState extends State<HeapTree>
                     ? 'Grouping...'
                     : _isSnapshotComplete ? 'Done' : '...'),
       ]);
-    } else if (controller.snapshotByLibraryData != null) {
+    } else if (controller.snapshotByLibraryData != null ||
+        controller.monitorAllocations.isNotEmpty) {
       if (controller.showTreemap.value) {
         snapshotDisplay = MemoryTreemap(controller);
       } else {
@@ -366,6 +380,14 @@ class HeapTreeViewState extends State<HeapTree>
     final hasDetails =
         controller.isLeafSelected || controller.isAnalysisLeafSelected;
 
+    final rightSideTable = controller.isLeafSelected
+        ? Expanded(child: InstanceTreeView())
+        : controller.isAnalysisLeafSelected
+            ? Expanded(child: AnalysisInstanceViewTable())
+            : controller.isAllocationMonitorLeafSelected
+                ? Expanded(child: AllocationTableView())
+                : const SizedBox();
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.end,
@@ -374,11 +396,7 @@ class HeapTreeViewState extends State<HeapTree>
         if (hasDetails) const SizedBox(width: defaultSpacing),
         // TODO(terry): Need better focus handling between 2 tables & up/down
         //              arrows in the right-side field instance view table.
-        controller.isLeafSelected
-            ? Expanded(child: SnapshotInstanceViewTable())
-            : controller.isAnalysisLeafSelected
-                ? Expanded(child: AnalysisInstanceViewTable())
-                : const SizedBox(),
+        rightSideTable,
       ],
     );
   }
@@ -434,13 +452,12 @@ class HeapTreeViewState extends State<HeapTree>
   Widget _buildSnapshotControls(TextTheme textTheme) {
     return Row(
       children: [
-        OutlineButton(
-          key: snapshotButtonKey,
-          onPressed: _isSnapshotRunning ? null : _snapshot,
-          child: const MaterialIconLabel(
-            Icons.camera,
-            'Snapshot',
-            includeTextWidth: 200,
+        Tooltip(
+          message: 'Snapshot',
+          child: OutlineButton(
+            key: snapshotButtonKey,
+            onPressed: _isSnapshotRunning ? null : _snapshot,
+            child: createIcon(Icons.camera),
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -469,46 +486,170 @@ class HeapTreeViewState extends State<HeapTree>
         // tables objects/fields. Maybe notion in table?
         controller.showTreemap.value
             ? const SizedBox()
-            : OutlineButton(
-                key: collapseAllButtonKey,
-                onPressed: snapshotDisplay is MemorySnapshotTable
-                    ? () {
-                        if (snapshotDisplay is MemorySnapshotTable) {
-                          controller.groupByTreeTable.dataRoots
-                              .every((element) {
-                            element.collapseCascading();
-                            return true;
-                          });
-                          if (controller.instanceFieldsTreeTable != null) {
-                            // We're collapsing close the fields table.
-                            controller.selectedLeaf = null;
+            : Tooltip(
+                message: 'Collapse All',
+                child: OutlineButton(
+                  key: collapseAllButtonKey,
+                  onPressed: snapshotDisplay is MemorySnapshotTable
+                      ? () {
+                          if (snapshotDisplay is MemorySnapshotTable) {
+                            controller.groupByTreeTable.dataRoots
+                                .every((element) {
+                              element.collapseCascading();
+                              return true;
+                            });
+                            if (controller.instanceFieldsTreeTable != null) {
+                              // We're collapsing close the fields table.
+                              controller.selectedLeaf = null;
+                            }
+                            // All nodes collapsed - signal tree state changed.
+                            controller.treeChanged();
                           }
-                          setState(() {});
                         }
-                      }
-                    : null,
-                child: const Text('Collapse All'),
-              ),
+                      : null,
+                  child: createIcon(Icons.vertical_align_top),
+                )),
         controller.showTreemap.value
             ? const SizedBox()
-            : OutlineButton(
-                key: expandAllButtonKey,
-                onPressed: snapshotDisplay is MemorySnapshotTable
-                    ? () {
-                        if (snapshotDisplay is MemorySnapshotTable) {
-                          controller.groupByTreeTable.dataRoots
-                              .every((element) {
-                            element.expandCascading();
-                            return true;
-                          });
-                          setState(() {});
+            : Tooltip(
+                message: 'Expand All',
+                child: OutlineButton(
+                  key: expandAllButtonKey,
+                  onPressed: snapshotDisplay is MemorySnapshotTable
+                      ? () {
+                          if (snapshotDisplay is MemorySnapshotTable) {
+                            controller.groupByTreeTable.dataRoots
+                                .every((element) {
+                              element.expandCascading();
+                              return true;
+                            });
+                          }
+                          // All nodes expanded - signal tree state  changed.
+                          controller.treeChanged();
                         }
-                      }
-                    : null,
-                child: const Text('Expand All'),
+                      : null,
+                  child: createIcon(Icons.vertical_align_bottom),
+                ),
               ),
+        const SizedBox(width: defaultSpacing),
+
+        Tooltip(
+          message: 'Monitor Allocations',
+          child: OutlineButton(
+            key: allocationMonitorKey,
+            onPressed: () async {
+              await _allocationStart();
+            },
+            child: createImageIcon(
+              // TODO(terry): Could we use a canned material icon check w/ Youyang?
+              'icons/memory/communities_white@2x.png',
+              size: defaultIconThemeSize,
+            ),
+          ),
+        ),
+        Tooltip(
+          message: 'Reset Accumulators',
+          child: OutlineButton(
+            key: allocationMonitorResetKey,
+            onPressed: () async {
+              await _allocationReset();
+            },
+            child: createImageIcon(
+              // TODO(terry): Could we use a canned material icon check w/ Youyang?
+              'icons/memory/reset_icon_white@2x.png',
+              size: defaultIconThemeSize,
+            ),
+          ),
+        ),
       ],
     );
+  }
+
+  // WARNING: Do not checkin the debug flag set to true.
+  final _debugAllocationMonitoring = false;
+
+  Future<void> _allocationStart() async {
+    // TODO(terry): Look at grouping by library or classes also filtering e.g., await controller.computeLibraries();
+    controller.memoryTimeline.addMonitorStartEvent();
+
+    final allocationtimestamp = DateTime.now();
+    final currentAllocations = await controller.getAllocationProfile();
+
+    if (controller.monitorAllocations.isNotEmpty) {
+      final previousLength = controller.monitorAllocations.length;
+      int previousIndex = 0;
+      final currentLength = currentAllocations.length;
+      int currentIndex = 0;
+      while (currentIndex < currentLength && previousIndex < previousLength) {
+        final previousAllocation = controller.monitorAllocations[previousIndex];
+        final currentAllocation = currentAllocations[currentIndex];
+
+        if (previousAllocation.classRef.id == currentAllocation.classRef.id) {
+          final instancesCurrent = currentAllocation.instancesCurrent;
+          final bytesCurrent = currentAllocation.bytesCurrent;
+
+          currentAllocation.instancesDelta = previousAllocation.instancesDelta +
+              (instancesCurrent - previousAllocation.instancesCurrent);
+          currentAllocation.bytesDelta = previousAllocation.bytesDelta +
+              (bytesCurrent - previousAllocation.bytesCurrent);
+
+          final instancesAccumulated = currentAllocation.instancesDelta;
+          final bytesAccumulated = currentAllocation.bytesDelta;
+
+          if (_debugAllocationMonitoring &&
+              (instancesAccumulated != 0 || bytesAccumulated != 0)) {
+            debugLogger('previous,index=[$previousIndex][$currentIndex] '
+                'class ${currentAllocation.classRef.name}\n'
+                '    instancesCurrent=$instancesCurrent, '
+                '    instancesAccumulated=${currentAllocation.instancesDelta}\n'
+                '    bytesCurrent=$bytesCurrent, '
+                '    bytesAccumulated=${currentAllocation.bytesDelta}}\n');
+          }
+
+          previousIndex++;
+          currentIndex++;
+        } else {
+          // Either a new class in currentAllocations or old that's no longer
+          // active in previousAllocations.
+          final currentClassId = currentAllocation.classRef.id;
+          final ClassHeapDetailStats first =
+              controller.monitorAllocations.firstWhere(
+            (element) => element.classRef.id == currentClassId,
+            orElse: () => null,
+          );
+          if (first != null) {
+            // A class that no longer exist (live or sentinel).
+            previousIndex++;
+          } else {
+            // New Class encountered in new AllocationProfile, don't increment
+            // previousIndex.
+            currentIndex++;
+          }
+        }
+      }
+
+      // Insure all entries from previous and current were looked at.
+      assert(previousLength == previousIndex);
+      assert(currentLength == currentIndex);
+    }
+
+    controller.monitorTimestamp = allocationtimestamp;
+    controller.monitorAllocations = currentAllocations;
+
+    controller.treeChanged();
+  }
+
+  Future<void> _allocationReset() async {
+    controller.memoryTimeline.addMonitorResetEvent();
+    final currentAllocations = await controller.resetAllocationProfile();
+
+    // Reset all accumulators to zero.
+    for (final classAllocation in currentAllocations) {
+      classAllocation.bytesDelta = 0;
+      classAllocation.instancesDelta = 0;
+    }
+
+    controller.monitorAllocations = currentAllocations;
   }
 
   /// Match, found,  select it and process via ValueNotifiers.
@@ -544,27 +685,12 @@ class HeapTreeViewState extends State<HeapTree>
           ),
         ),
         const SizedBox(width: denseSpacing),
-        Flexible(
+        Tooltip(
+          message: 'Filter',
           child: OutlineButton(
             key: filterButtonKey,
             onPressed: _filter,
-            child: const MaterialIconLabel(
-              Icons.filter_list,
-              'Filter',
-              includeTextWidth: 200,
-            ),
-          ),
-        ),
-        const SizedBox(width: denseSpacing),
-        Flexible(
-          child: OutlineButton(
-            key: analyzeButtonKey,
-            onPressed: controller.isAnalyzeButtonEnabled() ? _analyze : null,
-            child: const MaterialIconLabel(
-              Icons.highlight,
-              'Analyze',
-              includeTextWidth: 200,
-            ),
+            child: createIcon(Icons.filter_list),
           ),
         ),
         // TODO: Add these back in when _settings() is implemented.
@@ -590,9 +716,11 @@ class HeapTreeViewState extends State<HeapTree>
     // is probably in progress.
     if (snapshotState != SnapshotStatus.none &&
         snapshotState != SnapshotStatus.done) {
-      logger.log('Snapshop in progress - ignoring this request.');
+      debugLogger('Snapshop in progress - ignoring this request.');
       return;
     }
+
+    controller.memoryTimeline.addSnapshotEvent(auto: !userGenerated);
 
     setState(() {
       snapshotState = SnapshotStatus.streaming;
@@ -603,7 +731,13 @@ class HeapTreeViewState extends State<HeapTree>
     final graph = await controller.snapshotMemory();
 
     // No snapshot collected, disconnected/crash application.
-    if (graph == null) return;
+    if (graph == null) {
+      setState(() {
+        snapshotState = SnapshotStatus.done;
+      });
+      controller.selectedSnapshotTimestamp = DateTime.now();
+      return;
+    }
 
     final snapshotCollectionTime = DateTime.now();
 
@@ -627,7 +761,8 @@ class HeapTreeViewState extends State<HeapTree>
     await doGroupBy();
 
     final root = controller.computeAllLibraries(graph: graph);
-    controller.storeSnapshot(
+
+    final snapshot = controller.storeSnapshot(
       snapshotTimestamp,
       graph,
       root,
@@ -638,18 +773,21 @@ class HeapTreeViewState extends State<HeapTree>
 
     controller.selectedSnapshotTimestamp = snapshotTimestamp;
 
-    logger.log('Total Snapshot completed in'
+    debugLogger('Total Snapshot completed in'
         ' ${snapshotDoneTime.difference(snapshotTimestamp).inMilliseconds / 1000} seconds');
-    logger.log('  Snapshot collected in'
+    debugLogger('  Snapshot collected in'
         ' ${snapshotCollectionTime.difference(snapshotTimestamp).inMilliseconds / 1000} seconds');
-    logger.log('  Snapshot graph built in'
+    debugLogger('  Snapshot graph built in'
         ' ${snapshotGraphTime.difference(snapshotCollectionTime).inMilliseconds / 1000} seconds');
-    logger.log('  Snapshot grouping/libraries computed in'
+    debugLogger('  Snapshot grouping/libraries computed in'
         ' ${snapshotDoneTime.difference(snapshotGraphTime).inMilliseconds / 1000} seconds');
 
     setState(() {
       snapshotState = SnapshotStatus.done;
     });
+
+    controller.buildTreeFromAllData();
+    _analyze(snapshot: snapshot);
   }
 
   Future<void> doGroupBy() async {
@@ -683,14 +821,14 @@ class HeapTreeViewState extends State<HeapTree>
         );
       }
       return true;
-    }.call());
+    }());
   }
 
-  void _analyze() {
+  void _analyze({Snapshot snapshot}) {
     final AnalysesReference analysesNode = controller.findAnalysesNode();
     assert(analysesNode != null);
 
-    final snapshot = controller.computeSnapshotToAnalyze;
+    snapshot ??= controller.computeSnapshotToAnalyze;
     final currentSnapDateTime = snapshot?.collectedTimestamp;
 
     _debugCheckAnalyses(currentSnapDateTime);
@@ -728,11 +866,6 @@ class HeapTreeViewState extends State<HeapTree>
       nodeIndex: analyzeSnapshot.index,
       scrollIntoView: true,
     );
-
-    // TODO(terry): Could be done if completedAnalyses was a ValueNotifier.
-    //              Although still an empty setState in didChangeDependencies.
-    // Rebuild Analyze button.
-    setState(() {});
   }
 
   // ignore: unused_element
@@ -741,161 +874,7 @@ class HeapTreeViewState extends State<HeapTree>
   }
 }
 
-class SnapshotInstanceViewTable extends StatefulWidget {
-  @override
-  SnapshotInstanceViewState createState() => SnapshotInstanceViewState();
-}
-
-/// Table of the fields of an instance (type, name and value).
-class SnapshotInstanceViewState extends State<SnapshotInstanceViewTable>
-    with AutoDisposeMixin {
-  MemoryController controller;
-
-  final TreeColumnData<FieldReference> treeColumn = _FieldTypeColumn();
-  final List<ColumnData<FieldReference>> columns = [];
-
-  @override
-  void initState() {
-    setupColumns();
-
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    final newController = Provider.of<MemoryController>(context);
-    if (newController == controller) return;
-    controller = newController;
-
-    cancel();
-
-    // TODO(terry): setState should be called to set our state not change the
-    //              controller. Have other ValueListenables on controller to
-    //              listen to, so we don't need the setState calls.
-    // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
-      setState(() {
-        controller.computeAllLibraries(rebuild: true);
-      });
-    });
-  }
-
-  void setupColumns() {
-    columns.addAll([
-      treeColumn,
-      _FieldNameColumn(),
-      _FieldValueColumn(),
-    ]);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    controller.instanceFieldsTreeTable = TreeTable<FieldReference>(
-      dataRoots: controller.instanceRoot,
-      columns: columns,
-      treeColumn: treeColumn,
-      keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name),
-      sortColumn: columns[0],
-      sortDirection: SortDirection.ascending,
-    );
-
-    return controller.instanceFieldsTreeTable;
-  }
-}
-
-class _FieldTypeColumn extends TreeColumnData<FieldReference> {
-  _FieldTypeColumn() : super('Type');
-
-  @override
-  dynamic getValue(FieldReference dataObject) =>
-      dataObject.isEmptyReference || dataObject.isSentinelReference
-          ? ''
-          : dataObject.type;
-
-  @override
-  String getDisplayValue(FieldReference dataObject) =>
-      '${getValue(dataObject)}';
-
-  @override
-  bool get supportsSorting => true;
-
-  @override
-  int compare(FieldReference a, FieldReference b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
-    return valueA.compareTo(valueB);
-  }
-
-  @override
-  double get fixedWidthPx => 250.0;
-}
-
-class _FieldNameColumn extends ColumnData<FieldReference> {
-  _FieldNameColumn() : super('Name');
-
-  @override
-  dynamic getValue(FieldReference dataObject) =>
-      dataObject.isEmptyReference ? '' : dataObject.name;
-
-  @override
-  String getDisplayValue(FieldReference dataObject) =>
-      '${getValue(dataObject)}';
-
-  @override
-  bool get supportsSorting => true;
-
-  @override
-  int compare(FieldReference a, FieldReference b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
-    return valueA.compareTo(valueB);
-  }
-
-  @override
-  double get fixedWidthPx => 150.0;
-}
-
-class _FieldValueColumn extends ColumnData<FieldReference> {
-  _FieldValueColumn() : super('Value');
-
-  @override
-  dynamic getValue(FieldReference dataObject) =>
-      dataObject.isEmptyReference || dataObject.isSentinelReference
-          ? ''
-          : dataObject.value;
-
-  @override
-  String getDisplayValue(FieldReference dataObject) {
-    if (dataObject is ObjectFieldReference && !dataObject.isNull) {
-      // Real object that isn't Null value is empty string.
-      return '';
-    }
-
-    var value = getValue(dataObject);
-    if (value is String && value.length > 30) {
-      value = '${value.substring(0, 13)}…${value.substring(value.length - 17)}';
-    }
-    return '$value';
-  }
-
-  @override
-  bool get supportsSorting => true;
-
-  @override
-  int compare(FieldReference a, FieldReference b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
-    return valueA.compareTo(valueB);
-  }
-
-  @override
-  double get fixedWidthPx => 250.0;
-}
-
 /// Snapshot TreeTable
-
 class MemorySnapshotTable extends StatefulWidget {
   @override
   MemorySnapshotTableState createState() => MemorySnapshotTableState();
@@ -911,9 +890,15 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
 
   @override
   void initState() {
-    setupColumns();
-
     super.initState();
+
+    // Setup the table columns.
+    columns.addAll([
+      treeColumn,
+      _ClassOrInstanceCountColumn(),
+      _ShallowSizeColumn(),
+      _RetainedSizeColumn(),
+    ]);
   }
 
   @override
@@ -926,12 +911,20 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
 
     cancel();
 
-    // Update the chart when the memorySource changes.
+    // Update the tree when the tree state changes e.g., expand, collapse, etc.
+    addAutoDisposeListener(controller.treeChangedNotifier, () {
+      if (controller.isTreeChanged) {
+        setState(() {});
+      }
+    });
+
+    // Update the tree when the memorySource changes.
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
         controller.computeAllLibraries(rebuild: true);
       });
     });
+
     addAutoDisposeListener(controller.filterNotifier, () {
       setState(() {
         controller.computeAllLibraries(rebuild: true);
@@ -1159,15 +1152,6 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
     }
 
     return false;
-  }
-
-  void setupColumns() {
-    columns.addAll([
-      treeColumn,
-      _ClassOrInstanceCountColumn(),
-      _ShallowSizeColumn(),
-      _RetainedSizeColumn(),
-    ]);
   }
 
   @override
@@ -1424,7 +1408,10 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
     final displayPercentage = percentage < .050 ? '<<1%' : '${NumberFormat.compact().format(percentage)}%';
     print('$displayPercentage [${NumberFormat.compact().format(percentage)}%]');
 */
-    if (dataObject.isAnalysis && value is! int) return '';
+    if ((dataObject.isAnalysis ||
+            dataObject.isAllocations ||
+            dataObject.isAllocation) &&
+        value is! int) return '';
 
     return NumberFormat.compact().format(value);
   }

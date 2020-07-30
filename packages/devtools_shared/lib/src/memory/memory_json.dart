@@ -8,8 +8,12 @@ import 'heap_sample.dart';
 class MemoryJson {
   /// Given a JSON string representing an array of HeapSample, decode to a
   /// List of HeapSample.
-  MemoryJson.decode(String jsonString) {
-    final Map<String, dynamic> decodedMap = jsonDecode(jsonString);
+  MemoryJson.decode({
+    String argJsonString,
+    Map<String, dynamic> argDecodedMap,
+  }) {
+    final Map<String, dynamic> decodedMap =
+        argDecodedMap == null ? jsonDecode(argJsonString) : argDecodedMap;
     final Map<String, dynamic> samplesPayload =
         decodedMap['$_jsonPayloadField'];
 

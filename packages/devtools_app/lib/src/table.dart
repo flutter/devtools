@@ -50,6 +50,7 @@ class FlatTable<T> extends StatefulWidget {
     @required this.onItemSelected,
     @required this.sortColumn,
     @required this.sortDirection,
+    this.onSortChanged,
   })  : assert(columns != null),
         assert(keyFactory != null),
         assert(data != null),
@@ -71,6 +72,8 @@ class FlatTable<T> extends StatefulWidget {
   final ColumnData<T> sortColumn;
 
   final SortDirection sortDirection;
+
+  final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
 
   @override
   FlatTableState<T> createState() => FlatTableState<T>();
@@ -160,6 +163,9 @@ class FlatTableState<T> extends State<FlatTable<T>>
   void _sortDataAndUpdate(ColumnData column, SortDirection direction) {
     setState(() {
       sortData(column, direction);
+      if (widget.onSortChanged != null) {
+        widget.onSortChanged(column, direction);
+      }
     });
   }
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'adb_memory_info.dart';
+import 'event_sample.dart';
 
 /// DevTools Plotted and JSON persisted memory information.
 class HeapSample {
@@ -12,9 +13,10 @@ class HeapSample {
     this.capacity,
     this.used,
     this.external,
-    this.isGC, [
+    this.isGC,
     this._adbMemoryInfo,
-  ]);
+    this._memoryEventInfo,
+  );
 
   factory HeapSample.fromJson(Map<String, dynamic> json) => HeapSample(
         json['timestamp'] as int,
@@ -24,10 +26,8 @@ class HeapSample {
         json['external'] as int,
         json['gc'] as bool,
         AdbMemoryInfo.fromJson(json['adb_memoryInfo']),
+        EventSample.fromJson(json['memory_eventInfo']),
       );
-
-  /// Version of HeapSample JSON payload.
-  static const version = 1;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'timestamp': timestamp,
@@ -37,7 +37,11 @@ class HeapSample {
         'external': external,
         'gc': isGC,
         'adb_memoryInfo': adbMemoryInfo.toJson(),
+        'memory_eventInfo': memoryEventInfo.toJson(),
       };
+
+  /// Version of HeapSample JSON payload.
+  static const version = 1;
 
   final int timestamp;
 
@@ -51,6 +55,8 @@ class HeapSample {
 
   final bool isGC;
 
+  EventSample _memoryEventInfo;
+
   AdbMemoryInfo _adbMemoryInfo;
 
   AdbMemoryInfo get adbMemoryInfo {
@@ -58,8 +64,18 @@ class HeapSample {
     return _adbMemoryInfo;
   }
 
+  EventSample get memoryEventInfo {
+    _memoryEventInfo ??= EventSample.empty();
+    return _memoryEventInfo;
+  }
+
   @override
-  String toString() => '[HeapSample timestamp: $timestamp, rss: $rss, '
-      'capacity: $capacity, used: $used, external: $external, '
-      'isGC: $isGC, AdbMemoryInfo: $adbMemoryInfo]';
+  String toString() => '[HeapSample timestamp: $timestamp, '
+      'rss: $rss, '
+      'capacity: $capacity, '
+      'used: $used, '
+      'external: $external, '
+      'isGC: $isGC, '
+      'AdbMemoryInfo: $adbMemoryInfo, '
+      'MemoryEventInfo: $memoryEventInfo]';
 }

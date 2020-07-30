@@ -22,6 +22,7 @@ import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/vm_service_wrapper.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
@@ -36,8 +37,14 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableLibraries = const [],
     Timeline timelineData,
     SocketProfile socketProfile,
+    MemoryJson memoryData,
   }) : service = useFakeService
-            ? FakeVmService(_flagManager, timelineData, socketProfile)
+            ? FakeVmService(
+                _flagManager,
+                timelineData,
+                socketProfile,
+                memoryData,
+              )
             : MockVmService() {
     _flagManager.service = service;
   }
@@ -135,6 +142,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._vmFlagManager,
     this._timelineData,
     this._socketProfile,
+    this._memoryData,
   ) : _startingSockets = _socketProfile?.sockets ?? [];
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
@@ -144,6 +152,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   final Timeline _timelineData;
   SocketProfile _socketProfile;
   final List<SocketStatistic> _startingSockets;
+  final MemoryJson _memoryData;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -187,8 +196,29 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       );
 
   @override
+  Future<HeapSnapshotGraph> getHeapSnapshotGraph(IsolateRef isolateRef) async {
+    // Simulate a snapshot that takes .5 seconds.
+    await Future.delayed(const Duration(milliseconds: 500));
+    return null;
+  }
+
+  @override
   Future<Isolate> getIsolate(String isolateId) {
     return Future.value(MockIsolate());
+  }
+
+  @override
+  Future<MemoryUsage> getMemoryUsage(String isolateId) async {
+    if (_memoryData == null) {
+      throw StateError('_memoryData was not provided to FakeServiceManager');
+    }
+
+    final heapSample = _memoryData.data.first;
+    return MemoryUsage(
+      externalUsage: heapSample.external,
+      heapCapacity: heapSample.capacity,
+      heapUsage: heapSample.used,
+    );
   }
 
   @override
