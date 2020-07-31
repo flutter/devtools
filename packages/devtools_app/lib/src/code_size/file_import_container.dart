@@ -13,6 +13,7 @@ import '../utils.dart';
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
     @required this.title,
+    @required this.instructions,
     this.actionText,
     this.onAction,
     this.onFileSelected,
@@ -20,6 +21,8 @@ class FileImportContainer extends StatefulWidget {
   }) : super(key: key);
 
   final String title;
+
+  final String instructions;
 
   /// The title of the action button.
   final String actionText;
@@ -52,14 +55,10 @@ class _FileImportContainerState extends State<FileImportContainer> {
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Column(
-                      children: [
-                        _buildImportButton(),
-                        _buildImportedFileDisplay(context),
-                      ],
-                    ),
+                    _buildImportInstructions(),
+                    _buildImportFileRow(),
                     if (widget.actionText != null && widget.onAction != null)
                       _buildActionButton(),
                   ],
@@ -72,23 +71,65 @@ class _FileImportContainerState extends State<FileImportContainer> {
     );
   }
 
-  Column _buildImportedFileDisplay(BuildContext context) {
-    return Column(
+  Widget _buildImportInstructions() {
+    return Padding(
+      padding: const EdgeInsets.all(defaultSpacing),
+      child: Text(
+        widget.instructions,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Theme.of(context).textTheme.headline1.color,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImportFileRow() {
+    const rowHeight = 37.0;
+    final theme = Theme.of(context);
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const SizedBox(height: defaultSpacing),
-        Text(
-          importedFile?.path ?? 'No File Selected',
-          style: TextStyle(
-            color: Theme.of(context).textTheme.headline1.color,
+        // Horizontal spacer with flex value of 1.
+        const Flexible(
+          child: SizedBox(height: rowHeight),
+        ),
+        Flexible(
+          flex: 4,
+          fit: FlexFit.tight,
+          child: Container(
+            height: 37.0,
+            padding: const EdgeInsets.all(denseSpacing),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(color: theme.focusColor),
+                bottom: BorderSide(color: theme.focusColor),
+                left: BorderSide(color: theme.focusColor),
+              ),
+            ),
+            child: _buildImportedFileDisplay(),
           ),
-          textAlign: TextAlign.center,
+        ),
+        _buildImportButton(),
+        // Horizontal spacer with flex value of 1.
+        const Flexible(
+          child: SizedBox(height: rowHeight),
         ),
       ],
     );
   }
 
-  Row _buildImportButton() {
+  Widget _buildImportedFileDisplay() {
+    return Text(
+      importedFile?.path ?? 'No File Selected',
+      style: TextStyle(
+        color: Theme.of(context).textTheme.headline1.color,
+      ),
+      textAlign: TextAlign.left,
+    );
+  }
+
+  Widget _buildImportButton() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -100,7 +141,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
     );
   }
 
-  Column _buildActionButton() {
+  Widget _buildActionButton() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -139,6 +180,8 @@ class DualFileImportContainer extends StatefulWidget {
   const DualFileImportContainer({
     @required this.firstFileTitle,
     @required this.secondFileTitle,
+    @required this.firstInstructions,
+    @required this.secondInstructions,
     @required this.actionText,
     @required this.onAction,
     Key key,
@@ -147,6 +190,10 @@ class DualFileImportContainer extends StatefulWidget {
   final String firstFileTitle;
 
   final String secondFileTitle;
+
+  final String firstInstructions;
+
+  final String secondInstructions;
 
   /// The title of the action button.
   final String actionText;
@@ -172,6 +219,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Expanded(
           child: FileImportContainer(
             title: widget.firstFileTitle,
+            instructions: widget.firstInstructions,
             onFileSelected: onFirstFileSelected,
           ),
         ),
@@ -181,6 +229,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Expanded(
           child: FileImportContainer(
             title: widget.secondFileTitle,
+            instructions: widget.secondInstructions,
             onFileSelected: onSecondFileSelected,
           ),
         ),
@@ -200,7 +249,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
     });
   }
 
-  Column _buildActionButton() {
+  Widget _buildActionButton() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

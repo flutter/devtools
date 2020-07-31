@@ -17,7 +17,7 @@ import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
 
-bool codeSizeScreenEnabled = false;
+bool codeSizeScreenEnabled = true;
 
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
@@ -262,8 +262,10 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
       children: [
         Flexible(
           child: FileImportContainer(
-            title: 'Snapshot',
-            actionText: 'Analyze Snapshot',
+            title: 'Snapshot / APK analysis',
+            instructions:
+                'Select an AOT snapshot or "apk-analysis.json" file for code size debugging.\nDrag and drop or click "Import File".',
+            actionText: 'Analyze Snapshot / APK',
             onAction: controller.loadTreeFromJsonFile,
           ),
         ),
@@ -364,6 +366,11 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
           child: DualFileImportContainer(
             firstFileTitle: 'Old',
             secondFileTitle: 'New',
+            // TODO(kenz): perhaps bold "original" and "modified".
+            firstInstructions:
+                'Select an original AOT snapshot or "apk-analysis.json" file for code size diffing.\nDrag and drop or click "Import File".',
+            secondInstructions:
+                'Select a modified AOT snapshot or "apk-analysis.json" file for code size diffing.\nDrag and drop or click "Import File".',
             actionText: 'Analyze Diff',
             onAction: controller.loadDiffTreeFromJsonFiles,
           ),
