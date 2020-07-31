@@ -142,8 +142,8 @@ class DevToolsAppState extends State<DevToolsApp> {
                   : _visibleScreens();
               if (tabs.isEmpty) {
                 return DevToolsScaffold.withChild(
-                  child: const CenteredMessage(
-                      'The requested screen is not available for this application.'),
+                  child: CenteredMessage(
+                      'The "$page" screen is not available for this application.'),
                   ideTheme: ideTheme,
                 );
               }
