@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:steel_crypt/steel_crypt.dart';
+import 'package:steel_crypt/steel_crypt.dart' as encrypt;
 
 void main() {
   runApp(MyApp());
@@ -31,10 +31,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final textEdittingController = TextEditingController(
-    text: 'Lorem ipsum dolor sit amet',
-  );
-  String encryptedText = '';
+  TextEditingController textEditingController;
+  String encryptedText;
+
+  @override
+  void initState() {
+    super.initState();
+    encryptedText = '';
+    textEditingController = TextEditingController(
+      text: 'Lorem ipsum dolor sit amet',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             TextField(
-              controller: textEdittingController,
+              controller: textEditingController,
             ),
             Column(
               children: [
@@ -56,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text('Encrypt'),
                   onPressed: () {
                     setState(() {
-                      encryptedText = encryptText(textEdittingController.text);
+                      encryptedText = encryptText(textEditingController.text);
                     });
                   },
                 ),
@@ -66,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: TextStyle(color: Colors.black54),
                   ),
                   onPressed: () {
-                    textEdittingController.clear();
+                    textEditingController.clear();
                     setState(() {
                       encryptedText = '';
                     });
@@ -94,7 +101,8 @@ class _MyHomePageState extends State<MyHomePage> {
       utf8.encode('my 32 length key................'),
     ));
     final iv = base64.encode(Uint8List(16));
-    final aesEncrypter = AesCrypt(key: key, padding: PaddingAES.pkcs7);
+    final aesEncrypter =
+        encrypt.AesCrypt(key: key, padding: encrypt.PaddingAES.pkcs7);
     final encryptedText = aesEncrypter.ctr.encrypt(
       inp: stringToEncrypt,
       iv: iv,
