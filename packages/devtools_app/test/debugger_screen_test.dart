@@ -200,7 +200,7 @@ void main() {
       when(debuggerController.librariesVisible)
           .thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Libraries and Classes'), findsNothing);
+      expect(find.text('Libraries'), findsNothing);
     });
 
     testWidgets('Libraries visible', (WidgetTester tester) async {
