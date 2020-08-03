@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
 
@@ -63,22 +61,26 @@ ThemeData _lightTheme(IdeTheme ideTheme) {
   );
 }
 
+/// Threshold used to determine whether a colour is light/dark enough for us to
+/// override the default DevTools themes with.
+///
+/// A value of 0.5 would result in all colours being considered light/dark, and
+/// a value of 0.1 allowing around only the 10% darkest/lightest colours by
+/// Flutter's luminance calculation.
+const _lightDarkLuminanceThreshold = 0.1;
+
 bool isValidDarkColor(Color color) {
   if (color == null) {
     return false;
   }
-  // TODO(dantup): Pick good threshold
-  final components = [color.red, color.green, color.blue];
-  return components.reduce(max) < 50;
+  return color.computeLuminance() <= _lightDarkLuminanceThreshold;
 }
 
 bool isValidLightColor(Color color) {
   if (color == null) {
     return false;
   }
-  // TODO(dantup): Pick good threshold
-  final components = [color.red, color.green, color.blue];
-  return components.reduce(min) > 205;
+  return color.computeLuminance() >= 1 - _lightDarkLuminanceThreshold;
 }
 
 const buttonMinWidth = 36.0;
