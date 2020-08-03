@@ -1,5 +1,11 @@
-## 0.8.1-dev.1
+## 0.9.0
 * Add search functionality to Timeline flame chart [#2164](https://github.com/flutter/devtools/pull/2164)
+* Add socket profiling to Network page [#2191](https://github.com/flutter/devtools/pull/2191)
+* Support multiple meory snapshots and support automatic snapshots [#2105](https://github.com/flutter/devtools/pull/2105)
+* Add memory events pane and support for tracking # allocations of each class without a full snapshot [#2166](https://github.com/flutter/devtools/pull/2166)
+* Replace heatmap with treemap on the memory page [#2131](https://github.com/flutter/devtools/pull/2131)
+* Have the cmd-p keybinding toggle the libraries debugger pane [#2187](https://github.com/flutter/devtools/pull/2187_
+* Add support for non-primitive map keys [#2154](https://github.com/flutter/devtools/pull/2154)
 * Add tooltips to list items in the Debugger Libraries pane [#2167](https://github.com/flutter/devtools/pull/2167)
 
 ## 0.8.0+1
