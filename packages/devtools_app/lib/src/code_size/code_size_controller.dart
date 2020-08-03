@@ -164,7 +164,7 @@ class CodeSizeController {
     if (!isLeafNode) {
       return _buildNodeWithChildren(treeJson, showDiff: true);
     } else {
-      // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
+      // TODO(peterdjlee): Investigate why there are leaf nodes with size of null
       final byteSize = treeJson['value'];
       if (byteSize == null) {
         return null;
