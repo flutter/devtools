@@ -98,7 +98,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
           flex: 4,
           fit: FlexFit.tight,
           child: Container(
-            height: 37.0,
+            height: rowHeight,
             padding: const EdgeInsets.all(denseSpacing),
             decoration: BoxDecoration(
               border: Border(
