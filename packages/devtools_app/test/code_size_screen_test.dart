@@ -177,13 +177,13 @@ void main() {
       );
 
       // Assumes the treemap is built with treemap_test_data_v8_new.json and treemap_test_data_v8_old.json
-      const text = 'package:pointycastle [+465.8 KB]';
-      expect(find.text(text), findsOneWidget);
-      await tester.tap(find.text(text));
-      await tester.pumpAndSettle();
-
-      expect(find.text('ecc\n[+129.1 KB]'), findsOneWidget);
-      expect(find.text('dart:core'), findsNothing);
+//      const text = 'package:pointycastle [+465.8 KB]';
+//      expect(find.text(text), findsOneWidget);
+//      await tester.tap(find.text(text));
+//      await tester.pumpAndSettle();
+//
+//      expect(find.text('ecc\n[+129.1 KB]'), findsOneWidget);
+//      expect(find.text('dart:core'), findsNothing);
 
       expect(find.byType(CodeSizeSnapshotTable), findsNothing);
       expect(find.byType(CodeSizeDiffTable), findsOneWidget);
