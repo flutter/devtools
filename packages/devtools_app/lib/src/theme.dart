@@ -27,6 +27,10 @@ ThemeData themeFor({
 
 ThemeData _darkTheme(IdeTheme ideTheme) {
   final theme = ThemeData.dark();
+  final background = isValidDarkColor(ideTheme?.backgroundColor)
+      ? ideTheme?.backgroundColor
+      : null;
+
   return theme.copyWith(
     primaryColor: devtoolsGrey[900],
     primaryColorDark: devtoolsBlue[700],
@@ -34,17 +38,19 @@ ThemeData _darkTheme(IdeTheme ideTheme) {
     indicatorColor: devtoolsBlue[400],
     accentColor: devtoolsBlue[400],
     backgroundColor: devtoolsGrey[600],
+    canvasColor: background,
     toggleableActiveColor: devtoolsBlue[400],
     selectedRowColor: devtoolsGrey[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
-    scaffoldBackgroundColor: isValidDarkColor(ideTheme?.backgroundColor)
-        ? ideTheme?.backgroundColor
-        : null,
+    scaffoldBackgroundColor: background,
   );
 }
 
 ThemeData _lightTheme(IdeTheme ideTheme) {
   final theme = ThemeData.light();
+  final background = isValidLightColor(ideTheme?.backgroundColor)
+      ? ideTheme?.backgroundColor
+      : null;
   return theme.copyWith(
     primaryColor: devtoolsBlue[600],
     primaryColorDark: devtoolsBlue[700],
@@ -52,12 +58,11 @@ ThemeData _lightTheme(IdeTheme ideTheme) {
     indicatorColor: Colors.yellowAccent[400],
     accentColor: devtoolsBlue[400],
     backgroundColor: devtoolsGrey[600],
+    canvasColor: background,
     toggleableActiveColor: devtoolsBlue[400],
     selectedRowColor: devtoolsBlue[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
-    scaffoldBackgroundColor: isValidLightColor(ideTheme?.backgroundColor)
-        ? ideTheme?.backgroundColor
-        : null,
+    scaffoldBackgroundColor: background,
   );
 }
 
@@ -217,7 +222,7 @@ CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
 
 Color titleSolidBackgroundColor(ThemeData theme) {
-  return theme.isDarkTheme ? devtoolsGrey[900] : devtoolsGrey[50];
+  return theme.canvasColor.darken(0.2);
 }
 
 const chartFontSizeSmall = 12.0;
