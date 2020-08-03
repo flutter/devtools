@@ -168,6 +168,10 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
 class SnapshotView extends StatefulWidget {
   const SnapshotView();
 
+  static const importInstructions = 'Select an AOT snapshot or'
+      ' "apk-analysis.json" file for code size debugging.\nDrag and drop or '
+      'click "Import File".';
+
   @override
   _SnapshotViewState createState() => _SnapshotViewState();
 }
@@ -262,8 +266,9 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
       children: [
         Flexible(
           child: FileImportContainer(
-            title: 'Snapshot',
-            actionText: 'Analyze Snapshot',
+            title: 'Snapshot / APK analysis',
+            instructions: SnapshotView.importInstructions,
+            actionText: 'Analyze Snapshot / APK',
             onAction: controller.loadTreeFromJsonFile,
           ),
         ),
@@ -274,6 +279,14 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 
 class DiffView extends StatefulWidget {
   const DiffView();
+
+  static const importOldInstructions = 'Select an original AOT snapshot or '
+      '"apk-analysis.json" file for code size diffing.\nDrag and drop or click '
+      '"Import File".';
+
+  static const importNewInstructions = 'Select a modified AOT snapshot or'
+      ' "apk-analysis.json" file for code size diffing.\nDrag and drop or click'
+      ' "Import File".';
 
   @override
   _DiffViewState createState() => _DiffViewState();
@@ -364,6 +377,9 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
           child: DualFileImportContainer(
             firstFileTitle: 'Old',
             secondFileTitle: 'New',
+            // TODO(kenz): perhaps bold "original" and "modified".
+            firstInstructions: DiffView.importOldInstructions,
+            secondInstructions: DiffView.importNewInstructions,
             actionText: 'Analyze Diff',
             onAction: controller.loadDiffTreeFromJsonFiles,
           ),
