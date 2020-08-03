@@ -904,7 +904,9 @@ class MemoryController extends DisposableController
     if (isTreeChanged) topNode = null;
     topNode ??= LibraryReference(this, libraryRootNode, null);
 
-    if (isTreeChanged && oldChildren != null) topNode.addAllChildren(oldChildren);
+    if (isTreeChanged && oldChildren != null) {
+      topNode.addAllChildren(oldChildren);
+    }
 
     AllocationsMonitorReference monitorRoot;
     var anyAnalyses = false;

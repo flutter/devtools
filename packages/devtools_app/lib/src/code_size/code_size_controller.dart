@@ -193,7 +193,6 @@ class CodeSizeController {
   TreemapNode _buildNodeWithChildren(
     Map<String, dynamic> treeJson, {
     bool showDiff = false,
-    DiffTreeType diffTreeType = DiffTreeType.combined,
   }) {
     final rawChildren = treeJson['children'];
     final treemapNodeChildren = <TreemapNode>[];
