@@ -76,7 +76,8 @@ Future<VmServiceWrapper> _connectWithWebSocket(
         ],
       );
       final wsTargetResponse = await http.get(getWebSocketTargetUrl);
-      final target = WebSocketTarget.parse(json.decode(wsTargetResponse.body)['result']);
+      final target =
+          WebSocketTarget.parse(json.decode(wsTargetResponse.body)['result']);
       uri = Uri.parse(target.uri);
     }
   } else {
