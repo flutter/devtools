@@ -379,6 +379,11 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
+  Future<ProcessMemoryUsage> getProcessMemoryUsage() {
+    return _trackFuture('getProcessMemoryUsage', _vmService.getProcessMemoryUsage());
+  }
+
+  @override
   Future<SourceReport> getSourceReport(
     String isolateId,
     List<String> reports, {
@@ -426,6 +431,11 @@ class VmServiceWrapper implements VmService {
           await _trackFuture('getVMTimeline', callMethod('_getVMTimeline'));
       return Timeline.parse(response.json);
     }
+  }
+
+  @override
+  Future<WebSocketTarget> getWebSocketTarget() {
+    return _trackFuture('getWebSocketTarget', _vmService.getWebSocketTarget());
   }
 
   // TODO(kenz): move this method to

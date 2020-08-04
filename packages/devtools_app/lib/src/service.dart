@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/utils.dart';
+import 'package:vm_service/vm_service.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config_specific/sse/sse_shim.dart';
@@ -46,9 +50,41 @@ Future<VmServiceWrapper> _connectWithWebSocket(
   void onError(error),
   Completer<void> finishedCompleter,
 ) async {
-  // Map the URI (which may be Observatory web app) to a WebSocket URI for
-  // the VM service.
-  uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
+  // Avoid possible web socket connection redirects on web.
+  if (kIsWeb) {
+    final getVersionUrl = uri.replace(
+      scheme: 'http',
+      pathSegments: [
+        ...uri.pathSegments.where((e) => e.isNotEmpty),
+        'getVersion'
+      ],
+    );
+    final versionResponse = await http.get(getVersionUrl);
+    final version = Version.parse(json.decode(versionResponse.body)['result']);
+    if (version.major >= 3 && version.minor >= 37) {
+      // After this version, the VM service will attempt to redirect web socket
+      // connections to DDS, if connected. This works fine with some web socket
+      // implementations (e.g., dart:io's WebSocket) but is unsupported in
+      // others (e.g., dart:html's WebSocket). On the web we need to query the
+      // VM service via HTTP first to determine which web socket URI we should
+      // use.
+      final getWebSocketTargetUrl = uri.replace(
+        scheme: 'http',
+        pathSegments: [
+          ...uri.pathSegments.where((e) => e.isNotEmpty),
+          'getWebSocketTarget'
+        ],
+      );
+      final wsTargetResponse = await http.get(getWebSocketTargetUrl);
+      final target = WebSocketTarget.parse(json.decode(wsTargetResponse.body)['result']);
+      uri = Uri.parse(target.uri);
+    }
+  } else {
+    // Map the URI (which may be Observatory web app) to a WebSocket URI for
+    // the VM service.
+    uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
+  }
+
   final ws = WebSocketChannel.connect(uri);
   final stream = ws.stream.handleError(onError);
   final service = VmServiceWrapper.fromNewVmService(
