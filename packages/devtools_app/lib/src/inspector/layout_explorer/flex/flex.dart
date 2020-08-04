@@ -1319,7 +1319,7 @@ class WidgetVisualizer extends StatelessWidget {
         border: Border.all(
           color: borderColor,
         ),
-        color: theme.canvasColor.darken(0.2),
+        color: theme.canvasColor.darken(),
       ),
     );
   }
