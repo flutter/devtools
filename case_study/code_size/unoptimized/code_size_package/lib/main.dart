@@ -1,8 +1,5 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart';
-import 'package:steel_crypt/steel_crypt.dart' as encrypt;
 
 void main() {
   runApp(MyApp());
@@ -97,16 +94,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String encryptText(String stringToEncrypt) {
-    final key = base64.encode(Uint8List.fromList(
-      utf8.encode('my 32 length key................'),
-    ));
-    final iv = base64.encode(Uint8List(16));
-    final aesEncrypter =
-        encrypt.AesCrypt(key: key, padding: encrypt.PaddingAES.pkcs7);
-    final encryptedText = aesEncrypter.ctr.encrypt(
-      inp: stringToEncrypt,
-      iv: iv,
+    final key = encrypt.Key.fromUtf8('my 32 length key................');
+    final iv = encrypt.IV.fromLength(16);
+    final encrypter = encrypt.Encrypter(
+      encrypt.AES(key, mode: encrypt.AESMode.ctr),
     );
+    final encryptedText = encrypter.encrypt(stringToEncrypt, iv: iv).base64;
     return encryptedText;
   }
 }
