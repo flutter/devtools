@@ -73,8 +73,7 @@ class FieldInstanceDeltaColumn extends ColumnData<ClassHeapDetailStats> {
         );
 
   @override
-  int getValue(ClassHeapDetailStats dataObject) =>
-      dataObject.instancesDelta;
+  int getValue(ClassHeapDetailStats dataObject) => dataObject.instancesDelta;
 
   // TODO(terry): Only show grows (negative value returns 0). Consider setting
   //              to display growth and decline.
@@ -138,8 +137,7 @@ class FieldSizeDeltaColumn extends ColumnData<ClassHeapDetailStats> {
         );
 
   @override
-  int getValue(ClassHeapDetailStats dataObject) =>
-      dataObject.bytesDelta;
+  int getValue(ClassHeapDetailStats dataObject) => dataObject.bytesDelta;
 
   // TODO(terry): Only show grows (negative value returns 0). Consider setting
   //              to display growth and decline.
