@@ -82,7 +82,6 @@ class CodeSizeController {
     }
   }
 
-
   /// The active diff tree type used to build the diff treemap.
   ValueListenable<DiffTreeType> get activeDiffTreeType {
     return _activeDiffTreeType;
@@ -94,7 +93,7 @@ class CodeSizeController {
   TreemapNode _increasedDiffTreeRoot;
   TreemapNode _decreasedDiffTreeRoot;
   TreemapNode _combinedDiffTreeRoot;
-  
+
   void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
     _activeDiffTreeType.value = newDiffTreeType;
     switch (_activeDiffTreeType.value) {
@@ -143,8 +142,10 @@ class CodeSizeController {
     diffMap['n'] = 'Root';
 
     _combinedDiffTreeRoot = generateDiffTree(diffMap, DiffTreeType.combined);
-    _increasedDiffTreeRoot = generateDiffTree(diffMap, DiffTreeType.increaseOnly);
-    _decreasedDiffTreeRoot = generateDiffTree(diffMap, DiffTreeType.decreaseOnly);
+    _increasedDiffTreeRoot =
+        generateDiffTree(diffMap, DiffTreeType.increaseOnly);
+    _decreasedDiffTreeRoot =
+        generateDiffTree(diffMap, DiffTreeType.decreaseOnly);
 
     changeDiffRoot(_combinedDiffTreeRoot);
   }
@@ -173,11 +174,16 @@ class CodeSizeController {
   /// * [DiffTreeType.decreaseOnly]: returns a tree with nodes with negative [byteSize].
   /// * [DiffTreeType.combined]: returns a tree with all nodes.
   TreemapNode generateDiffTree(
-      Map<String, dynamic> treeJson, DiffTreeType diffTreeType) {
+    Map<String, dynamic> treeJson,
+    DiffTreeType diffTreeType,
+  ) {
     final isLeafNode = treeJson['children'] == null;
     if (!isLeafNode) {
-      return _buildNodeWithChildren(treeJson,
-          showDiff: true, diffTreeType: diffTreeType);
+      return _buildNodeWithChildren(
+        treeJson,
+        showDiff: true,
+        diffTreeType: diffTreeType,
+      );
     } else {
       // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
       final byteSize = treeJson['value'];
