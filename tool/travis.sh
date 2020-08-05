@@ -98,12 +98,12 @@ if [ "$BOT" = "main" ]; then
     flutter pub get
     flutter pub global activate webdev
 
-    # Verify that flutter format has been run.
-    echo "Checking flutter format..."
+    # Verify that dart format has been run.
+    echo "Checking dart format..."
 
-    if [[ $(flutter format -n --set-exit-if-changed lib/ test/ web/) ]]; then
-        echo "Failed flutter format check: run flutter format lib/ test/ web/"
-        flutter format -n --set-exit-if-changed lib/ test/ web/
+    if [[ $(dart format -n --set-exit-if-changed lib/ test/ web/) ]]; then
+        echo "Failed dart format check: run dart format lib/ test/ web/"
+        dart format -n --set-exit-if-changed lib/ test/ web/
         exit 1
     fi
 
