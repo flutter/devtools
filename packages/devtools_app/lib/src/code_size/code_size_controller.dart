@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:vm_snapshot_analysis/program_info.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
@@ -129,11 +130,54 @@ class CodeSizeController {
     changeOldDiffSnapshotFile(oldFile);
     changeNewDiffSnapshotFile(newFile);
 
-    final diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
+    Map<String, dynamic> diffMap;
+    if (oldFile.isApkFile && newFile.isApkFile) {
+      final oldApkProgramInfo = ProgramInfo();
+      _apkJsonToProgramInfo(
+        oldApkProgramInfo,
+        oldApkProgramInfo.root,
+        oldFile.data,
+      );
+
+      final newApkProgramInfo = ProgramInfo();
+      _apkJsonToProgramInfo(
+        newApkProgramInfo,
+        newApkProgramInfo.root,
+        newFile.data,
+      );
+
+      diffMap = compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
+    } else {
+      diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
+    }
+
     diffMap['n'] = 'Root';
     final newRoot = generateDiffTree(diffMap);
 
     changeDiffRoot(newRoot);
+  }
+
+  ProgramInfoNode _apkJsonToProgramInfo(
+    ProgramInfo program,
+    ProgramInfoNode parent,
+    Map<String, dynamic> json,
+  ) {
+    final bool isLeafNode = json['children'] == null;
+    final node = program.makeNode(
+      name: json['n'],
+      parent: parent,
+      type: NodeType.other,
+    );
+    
+    if (!isLeafNode) {
+      final List<dynamic> rawChildren = json['children'] as List<dynamic>;
+      for (Map<String, dynamic> child in rawChildren) {
+        _apkJsonToProgramInfo(program, node, child);
+      }
+    } else {
+      node.size = json['value'] ?? 0;
+    }
+    return node;
   }
 
   TreemapNode generateTree(Map<String, dynamic> treeJson) {
@@ -190,11 +234,8 @@ class CodeSizeController {
 
   /// Builds a node by recursively building all of its children first
   /// in order to calculate the sum of its children's sizes.
-  TreemapNode _buildNodeWithChildren(
-    Map<String, dynamic> treeJson, {
-    bool showDiff = false,
-    DiffTreeType diffTreeType = DiffTreeType.combined,
-  }) {
+  TreemapNode _buildNodeWithChildren(Map<String, dynamic> treeJson,
+      {bool showDiff = false}) {
     final rawChildren = treeJson['children'];
     final treemapNodeChildren = <TreemapNode>[];
     int totalByteSize = 0;
