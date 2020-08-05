@@ -168,7 +168,7 @@ class CodeSizeController {
       parent: parent,
       type: NodeType.other,
     );
-    
+
     if (!isLeafNode) {
       final List<dynamic> rawChildren = json['children'] as List<dynamic>;
       for (Map<String, dynamic> child in rawChildren) {
@@ -234,8 +234,11 @@ class CodeSizeController {
 
   /// Builds a node by recursively building all of its children first
   /// in order to calculate the sum of its children's sizes.
-  TreemapNode _buildNodeWithChildren(Map<String, dynamic> treeJson,
-      {bool showDiff = false}) {
+  TreemapNode _buildNodeWithChildren(
+    Map<String, dynamic> treeJson, {
+    bool showDiff = false,
+    DiffTreeType diffTreeType = DiffTreeType.combined,
+  }) {
     final rawChildren = treeJson['children'];
     final treemapNodeChildren = <TreemapNode>[];
     int totalByteSize = 0;
