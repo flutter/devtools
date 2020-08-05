@@ -101,9 +101,9 @@ if [ "$BOT" = "main" ]; then
     # Verify that flutter format has been run.
     echo "Checking flutter format..."
 
-    if [[ $(flutter format -n --set-exit-if-changed lib/ test/ web/) ]]; then
-        echo "Failed flutter format check: run flutter format lib/ test/ web/"
-        flutter format -n --set-exit-if-changed lib/ test/ web/
+    if [[ $(dart format --output=none --set-exit-if-changed lib/ test/ web/) ]]; then
+        echo "Failed format check: run dart format lib/ test/ web/"
+        dart format --output=none --set-exit-if-changed lib/ test/ web/
         exit 1
     fi
 
