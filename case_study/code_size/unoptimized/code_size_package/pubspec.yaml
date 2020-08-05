@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  encrypt: ^4.0.2
+  steel_crypt: ^2.2.1
 
   cupertino_icons: ^0.1.3
 
