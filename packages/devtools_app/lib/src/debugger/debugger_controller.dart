@@ -409,8 +409,7 @@ class DebuggerController extends DisposableController
         break;
       case EventKind.kBreakpointResolved:
         _breakpoints.value = [
-          for (var b in _breakpoints.value)
-            if (b != event.breakpoint) b,
+          for (var b in _breakpoints.value) if (b != event.breakpoint) b,
           event.breakpoint
         ];
 
@@ -435,8 +434,7 @@ class DebuggerController extends DisposableController
         }
 
         _breakpoints.value = [
-          for (var b in _breakpoints.value)
-            if (b != breakpoint) b
+          for (var b in _breakpoints.value) if (b != breakpoint) b
         ];
 
         _breakpointsWithLocation.value = [

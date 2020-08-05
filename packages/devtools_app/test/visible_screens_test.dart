@@ -65,7 +65,8 @@ void main() {
             DebuggerScreen,
             NetworkScreen,
             LoggingScreen,
-            if (codeSizeScreenEnabled) CodeSizeScreen,
+            if (codeSizeScreenEnabled)
+              CodeSizeScreen,
           ]));
     });
 
@@ -118,7 +119,8 @@ void main() {
             // DebuggerScreen,
             NetworkScreen,
             LoggingScreen,
-            if (codeSizeScreenEnabled) CodeSizeScreen,
+            if (codeSizeScreenEnabled)
+              CodeSizeScreen,
           ]));
     });
 

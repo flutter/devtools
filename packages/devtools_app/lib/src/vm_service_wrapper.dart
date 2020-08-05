@@ -760,6 +760,17 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
+  Future<ProcessMemoryUsage> getProcessMemoryUsage() {
+    return _trackFuture(
+        'getProcessMemoryUsage', _vmService.getProcessMemoryUsage());
+  }
+
+  @override
+  Future<WebSocketTarget> getWebSocketTarget() {
+    return _trackFuture('getWebSocketTarget', _vmService.getWebSocketTarget());
+  }
+
+  @override
   Future<ProtocolList> getSupportedProtocols() async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 35))) {
