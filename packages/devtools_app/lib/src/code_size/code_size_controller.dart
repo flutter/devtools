@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:vm_snapshot_analysis/program_info.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
@@ -50,6 +51,25 @@ class CodeSizeController {
     _diffRoot.value = newRoot;
   }
 
+  TreemapNode get _activeDiffRoot {
+    switch (_activeDiffTreeType.value) {
+      case DiffTreeType.increaseOnly:
+        assert(_increasedDiffTreeRoot != null);
+        return _increasedDiffTreeRoot;
+      case DiffTreeType.decreaseOnly:
+        assert(_decreasedDiffTreeRoot != null);
+        return _decreasedDiffTreeRoot;
+      case DiffTreeType.combined:
+      default:
+        assert(_combinedDiffTreeRoot != null);
+        return _combinedDiffTreeRoot;
+    }
+  }
+
+  TreemapNode _increasedDiffTreeRoot;
+  TreemapNode _decreasedDiffTreeRoot;
+  TreemapNode _combinedDiffTreeRoot;
+
   ValueListenable<DevToolsJsonFile> get oldDiffSnapshotJsonFile {
     return _oldDiffSnapshotJsonFile;
   }
@@ -72,6 +92,9 @@ class CodeSizeController {
     _diffRoot.value = null;
     _oldDiffSnapshotJsonFile.value = null;
     _newDiffSnapshotJsonFile.value = null;
+    _increasedDiffTreeRoot = null;
+    _decreasedDiffTreeRoot = null;
+    _combinedDiffTreeRoot = null;
   }
 
   void clear(Key activeTabKey) {
@@ -90,14 +113,9 @@ class CodeSizeController {
   final _activeDiffTreeType =
       ValueNotifier<DiffTreeType>(DiffTreeType.combined);
 
-  // TODO(peterdjlee): Cache each diff tree so that it's less expensive
-  //                   to change bettween diff tree types.
   void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
     _activeDiffTreeType.value = newDiffTreeType;
-    loadDiffTreeFromJsonFiles(
-      _oldDiffSnapshotJsonFile.value,
-      _newDiffSnapshotJsonFile.value,
-    );
+    changeDiffRoot(_activeDiffRoot);
   }
 
   void loadTreeFromJsonFile(DevToolsJsonFile jsonFile) {
@@ -105,7 +123,7 @@ class CodeSizeController {
 
     Map<String, dynamic> processedJson;
     if (jsonFile.isApkFile) {
-      // APK analysis json should be processed already.a
+      // APK analysis json should be processed already.
       processedJson = jsonFile.data;
     } else {
       processedJson = treemapFromJson(jsonFile.data);
@@ -129,11 +147,67 @@ class CodeSizeController {
     changeOldDiffSnapshotFile(oldFile);
     changeNewDiffSnapshotFile(newFile);
 
-    final diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
-    diffMap['n'] = 'Root';
-    final newRoot = generateDiffTree(diffMap);
+    Map<String, dynamic> diffMap;
+    if (oldFile.isApkFile && newFile.isApkFile) {
+      final oldApkProgramInfo = ProgramInfo();
+      _apkJsonToProgramInfo(
+        program: oldApkProgramInfo,
+        parent: oldApkProgramInfo.root,
+        json: oldFile.data,
+      );
 
-    changeDiffRoot(newRoot);
+      final newApkProgramInfo = ProgramInfo();
+      _apkJsonToProgramInfo(
+        program: newApkProgramInfo,
+        parent: newApkProgramInfo.root,
+        json: newFile.data,
+      );
+
+      diffMap = compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
+    } else {
+      diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
+    }
+
+    diffMap['n'] = 'Root';
+
+    // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
+    _combinedDiffTreeRoot = generateDiffTree(
+      diffMap,
+      DiffTreeType.combined,
+    );
+    _increasedDiffTreeRoot = generateDiffTree(
+      diffMap,
+      DiffTreeType.increaseOnly,
+    );
+    _decreasedDiffTreeRoot = generateDiffTree(
+      diffMap,
+      DiffTreeType.decreaseOnly,
+    );
+
+    changeDiffRoot(_activeDiffRoot);
+  }
+
+  ProgramInfoNode _apkJsonToProgramInfo({
+    @required ProgramInfo program,
+    @required ProgramInfoNode parent,
+    @required Map<String, dynamic> json,
+  }) {
+    final bool isLeafNode = json['children'] == null;
+    final node = program.makeNode(
+      name: json['n'],
+      parent: parent,
+      type: NodeType.other,
+    );
+
+    if (!isLeafNode) {
+      final List<dynamic> rawChildren = json['children'] as List<dynamic>;
+      for (Map<String, dynamic> childJson in rawChildren) {
+        _apkJsonToProgramInfo(program: program, parent: node, json: childJson);
+      }
+    } else {
+      node.size = json['value'] ?? 0;
+    }
+    return node;
   }
 
   TreemapNode generateTree(Map<String, dynamic> treeJson) {
@@ -159,10 +233,17 @@ class CodeSizeController {
   /// * [DiffTreeType.increaseOnly]: returns a tree with nodes with positive [byteSize].
   /// * [DiffTreeType.decreaseOnly]: returns a tree with nodes with negative [byteSize].
   /// * [DiffTreeType.combined]: returns a tree with all nodes.
-  TreemapNode generateDiffTree(Map<String, dynamic> treeJson) {
+  TreemapNode generateDiffTree(
+    Map<String, dynamic> treeJson,
+    DiffTreeType diffTreeType,
+  ) {
     final isLeafNode = treeJson['children'] == null;
     if (!isLeafNode) {
-      return _buildNodeWithChildren(treeJson, showDiff: true);
+      return _buildNodeWithChildren(
+        treeJson,
+        showDiff: true,
+        diffTreeType: diffTreeType,
+      );
     } else {
       // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
       final byteSize = treeJson['value'];
@@ -170,7 +251,7 @@ class CodeSizeController {
         return null;
       }
       // Only add nodes that match the diff tree type.
-      switch (activeDiffTreeType.value) {
+      switch (diffTreeType) {
         case DiffTreeType.increaseOnly:
           if (byteSize < 0) {
             return null;
@@ -193,6 +274,7 @@ class CodeSizeController {
   TreemapNode _buildNodeWithChildren(
     Map<String, dynamic> treeJson, {
     bool showDiff = false,
+    DiffTreeType diffTreeType,
   }) {
     final rawChildren = treeJson['children'];
     final treemapNodeChildren = <TreemapNode>[];
@@ -200,8 +282,9 @@ class CodeSizeController {
 
     // Given a child, build its subtree.
     for (Map<String, dynamic> child in rawChildren) {
-      final childTreemapNode =
-          showDiff ? generateDiffTree(child) : generateTree(child);
+      final childTreemapNode = showDiff
+          ? generateDiffTree(child, diffTreeType)
+          : generateTree(child);
       if (childTreemapNode == null) {
         continue;
       }
