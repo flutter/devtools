@@ -171,8 +171,8 @@ class CodeSizeController {
 
     if (!isLeafNode) {
       final List<dynamic> rawChildren = json['children'] as List<dynamic>;
-      for (Map<String, dynamic> child in rawChildren) {
-        _apkJsonToProgramInfo(program, node, child);
+      for (Map<String, dynamic> childJson in rawChildren) {
+        _apkJsonToProgramInfo(program, node, childJson);
       }
     } else {
       node.size = json['value'] ?? 0;
