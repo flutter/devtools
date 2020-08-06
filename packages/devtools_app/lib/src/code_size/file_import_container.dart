@@ -105,12 +105,15 @@ class _FileImportContainerState extends State<FileImportContainer> {
                 top: BorderSide(color: theme.focusColor),
                 bottom: BorderSide(color: theme.focusColor),
                 left: BorderSide(color: theme.focusColor),
+                // TODO(kenz): remove right border when we add the import button
+                right: BorderSide(color: theme.focusColor),
               ),
             ),
             child: _buildImportedFileDisplay(),
           ),
         ),
-        _buildImportButton(),
+        // TODO(kenz): uncomment once file picker support is added
+        // _buildImportButton(),
         // Horizontal spacer with flex value of 1.
         const Flexible(
           child: SizedBox(height: rowHeight),
@@ -129,17 +132,18 @@ class _FileImportContainerState extends State<FileImportContainer> {
     );
   }
 
-  Widget _buildImportButton() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        OutlineButton(
-          onPressed: () {},
-          child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
-        ),
-      ],
-    );
-  }
+// TODO(kenz): uncomment once file picker support is added
+//  Widget _buildImportButton() {
+//    return Row(
+//      mainAxisAlignment: MainAxisAlignment.center,
+//      children: [
+//        OutlineButton(
+//          onPressed: () {},
+//          child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
+//        ),
+//      ],
+//    );
+//  }
 
   Widget _buildActionButton() {
     return Column(
