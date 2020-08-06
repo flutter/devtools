@@ -53,11 +53,14 @@ class CodeSizeController {
   TreemapNode get _activeDiffRoot {
     switch (_activeDiffTreeType.value) {
       case DiffTreeType.increaseOnly:
+        assert(_increasedDiffTreeRoot != null);
         return _increasedDiffTreeRoot;
       case DiffTreeType.decreaseOnly:
+        assert(_decreasedDiffTreeRoot != null);
         return _decreasedDiffTreeRoot;
       case DiffTreeType.combined:
       default:
+        assert(_combinedDiffTreeRoot != null);
         return _combinedDiffTreeRoot;
     }
   }
@@ -145,7 +148,7 @@ class CodeSizeController {
 
     final diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
     diffMap['n'] = 'Root';
-    
+
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
     _combinedDiffTreeRoot = generateDiffTree(
       diffMap,
