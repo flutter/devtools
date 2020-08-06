@@ -64,12 +64,11 @@ else
 fi
 
 export PATH=`pwd`/flutter/bin:$PATH
-export PATH=`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
+export PATH=`pwd`/flutter/bin/dart:$PATH
 export PATH=`pwd`/bin:$PATH
 
 # We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
 echo "which dart: " `which dart`
-ls -la /home/travis/build/flutter/devtools/flutter/bin/dart
 
 flutter config --no-analytics
 flutter doctor
