@@ -22,7 +22,7 @@ dependencies:
   ansi_up:
     ^0.0.2
 #     path: ../../third_party/packages/ansi_up
-  collection: ^1.14.11
+  collection: ^1.15.0-nnbd
   devtools_shared: 0.9.0
   file: ^5.1.0
   flutter_web_plugins:
