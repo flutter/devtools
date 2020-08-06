@@ -50,6 +50,22 @@ class CodeSizeController {
     _diffRoot.value = newRoot;
   }
 
+  TreemapNode get _activeDiffRoot {
+    switch (_activeDiffTreeType.value) {
+      case DiffTreeType.increaseOnly:
+        return _increasedDiffTreeRoot;
+      case DiffTreeType.decreaseOnly:
+        return _decreasedDiffTreeRoot;
+      case DiffTreeType.combined:
+      default:
+        return _combinedDiffTreeRoot;
+    }
+  }
+
+  TreemapNode _increasedDiffTreeRoot;
+  TreemapNode _decreasedDiffTreeRoot;
+  TreemapNode _combinedDiffTreeRoot;
+
   ValueListenable<DevToolsJsonFile> get oldDiffSnapshotJsonFile {
     return _oldDiffSnapshotJsonFile;
   }
@@ -72,6 +88,9 @@ class CodeSizeController {
     _diffRoot.value = null;
     _oldDiffSnapshotJsonFile.value = null;
     _newDiffSnapshotJsonFile.value = null;
+    _increasedDiffTreeRoot = null;
+    _decreasedDiffTreeRoot = null;
+    _combinedDiffTreeRoot = null;
   }
 
   void clear(Key activeTabKey) {
@@ -90,23 +109,9 @@ class CodeSizeController {
   final _activeDiffTreeType =
       ValueNotifier<DiffTreeType>(DiffTreeType.combined);
 
-  TreemapNode _increasedDiffTreeRoot;
-  TreemapNode _decreasedDiffTreeRoot;
-  TreemapNode _combinedDiffTreeRoot;
-
   void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
     _activeDiffTreeType.value = newDiffTreeType;
-    switch (_activeDiffTreeType.value) {
-      case DiffTreeType.increaseOnly:
-        changeDiffRoot(_increasedDiffTreeRoot);
-        break;
-      case DiffTreeType.decreaseOnly:
-        changeDiffRoot(_decreasedDiffTreeRoot);
-        break;
-      case DiffTreeType.combined:
-      default:
-        changeDiffRoot(_combinedDiffTreeRoot);
-    }
+    changeDiffRoot(_activeDiffRoot);
   }
 
   void loadTreeFromJsonFile(DevToolsJsonFile jsonFile) {
@@ -114,7 +119,7 @@ class CodeSizeController {
 
     Map<String, dynamic> processedJson;
     if (jsonFile.isApkFile) {
-      // APK analysis json should be processed already.a
+      // APK analysis json should be processed already.
       processedJson = jsonFile.data;
     } else {
       processedJson = treemapFromJson(jsonFile.data);
@@ -140,14 +145,22 @@ class CodeSizeController {
 
     final diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
     diffMap['n'] = 'Root';
+    
+    // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
+    _combinedDiffTreeRoot = generateDiffTree(
+      diffMap,
+      DiffTreeType.combined,
+    );
+    _increasedDiffTreeRoot = generateDiffTree(
+      diffMap,
+      DiffTreeType.increaseOnly,
+    );
+    _decreasedDiffTreeRoot = generateDiffTree(
+      diffMap,
+      DiffTreeType.decreaseOnly,
+    );
 
-    _combinedDiffTreeRoot = generateDiffTree(diffMap, DiffTreeType.combined);
-    _increasedDiffTreeRoot =
-        generateDiffTree(diffMap, DiffTreeType.increaseOnly);
-    _decreasedDiffTreeRoot =
-        generateDiffTree(diffMap, DiffTreeType.decreaseOnly);
-
-    changeDiffRoot(_combinedDiffTreeRoot);
+    changeDiffRoot(_activeDiffRoot);
   }
 
   TreemapNode generateTree(Map<String, dynamic> treeJson) {
