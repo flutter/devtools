@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:vm_snapshot_analysis/program_info.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
@@ -146,7 +147,27 @@ class CodeSizeController {
     changeOldDiffSnapshotFile(oldFile);
     changeNewDiffSnapshotFile(newFile);
 
-    final diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
+    Map<String, dynamic> diffMap;
+    if (oldFile.isApkFile && newFile.isApkFile) {
+      final oldApkProgramInfo = ProgramInfo();
+      _apkJsonToProgramInfo(
+        program: oldApkProgramInfo,
+        parent: oldApkProgramInfo.root,
+        json: oldFile.data,
+      );
+
+      final newApkProgramInfo = ProgramInfo();
+      _apkJsonToProgramInfo(
+        program: newApkProgramInfo,
+        parent: newApkProgramInfo.root,
+        json: newFile.data,
+      );
+
+      diffMap = compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
+    } else {
+      diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
+    }
+
     diffMap['n'] = 'Root';
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
@@ -164,6 +185,29 @@ class CodeSizeController {
     );
 
     changeDiffRoot(_activeDiffRoot);
+  }
+
+  ProgramInfoNode _apkJsonToProgramInfo({
+    @required ProgramInfo program,
+    @required ProgramInfoNode parent,
+    @required Map<String, dynamic> json,
+  }) {
+    final bool isLeafNode = json['children'] == null;
+    final node = program.makeNode(
+      name: json['n'],
+      parent: parent,
+      type: NodeType.other,
+    );
+
+    if (!isLeafNode) {
+      final List<dynamic> rawChildren = json['children'] as List<dynamic>;
+      for (Map<String, dynamic> childJson in rawChildren) {
+        _apkJsonToProgramInfo(program: program, parent: node, json: childJson);
+      }
+    } else {
+      node.size = json['value'] ?? 0;
+    }
+    return node;
   }
 
   TreemapNode generateTree(Map<String, dynamic> treeJson) {
