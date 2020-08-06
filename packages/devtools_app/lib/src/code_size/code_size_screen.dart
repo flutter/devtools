@@ -23,9 +23,13 @@ const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
 
 class CodeSizeScreen extends Screen {
-  const CodeSizeScreen() : super(id, title: 'Code Size', icon: Octicons.rss);
-
-  static const id = 'codeSize';
+  const CodeSizeScreen()
+      : super.conditional(
+          id: 'code-size',
+          requiresDartVm: true,
+          title: 'Code Size',
+          icon: Octicons.fileZip,
+        );
 
   static const snapshotTabKey = Key('Snapshot Tab');
   static const diffTabKey = Key('Diff Tab');
@@ -40,7 +44,7 @@ class CodeSizeScreen extends Screen {
   static const diffViewTreemapKey = Key('Diff View Treemap');
 
   @override
-  String get docPageId => id;
+  String get docPageId => screenId;
 
   @override
   Widget build(BuildContext context) {
