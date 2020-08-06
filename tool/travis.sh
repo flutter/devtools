@@ -58,7 +58,7 @@ if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
     export DEVTOOLS_GOLDENS_SUFFIX="_stable"
 else
     echo "Cloning dev Flutter branch"
-    git clone https://github.com/flutter/flutter.git --branch dev ./flutter
+    git clone https://github.com/flutter/flutter.git --branch beta ./flutter
     # Set the suffix so we use the master goldens
     export DEVTOOLS_GOLDENS_SUFFIX=""
 fi

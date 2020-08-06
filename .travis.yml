@@ -6,7 +6,7 @@ os:
 
 language: dart
 dart:
-  - dev
+  - beta
 # Exclude stable for now as we depend on Flutter features not availabe on
 # stable.
 #  - stable
@@ -44,7 +44,7 @@ matrix:
         - BOT=integration_dart2js
     
   include:
-    - dart: dev
+    - dart: beta
       env: BOT=packages
   # Allow windows bots to fail until we can make the windows tests less flaky.
   # https://github.com/flutter/devtools/issues/963
