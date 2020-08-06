@@ -17,13 +17,19 @@ import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
 
-bool codeSizeScreenEnabled = false;
+bool codeSizeScreenEnabled = true;
 
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
 
 class CodeSizeScreen extends Screen {
-  const CodeSizeScreen() : super(id, title: 'Code Size', icon: Octicons.rss);
+  const CodeSizeScreen()
+      : super.conditional(
+          id: id,
+          requiresDartVm: true,
+          title: 'Code Size',
+          icon: Octicons.fileZip,
+        );
 
   static const id = 'codeSize';
 
