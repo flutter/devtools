@@ -8,13 +8,14 @@ import 'package:vm_service/vm_service.dart';
 import '../common_widgets.dart';
 import '../config_specific/host_platform/host_platform.dart';
 import '../theme.dart';
+import '../tree.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'debugger_screen.dart';
 
+const containerIcon = Icons.folder;
 const libraryIcon = Icons.insert_chart;
-const classIcon = Icons.album;
 
 /// Picker that takes a list of scripts and allows filtering and selection of
 /// items.
@@ -42,6 +43,7 @@ class ScriptPickerState extends State<ScriptPicker> {
 
   List<ObjRef> _items = [];
   List<ObjRef> _filteredItems = [];
+  List<FileNode> _rootScriptNodes;
 
   @override
   void initState() {
@@ -65,6 +67,9 @@ class ScriptPickerState extends State<ScriptPicker> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isMacOS = HostPlatform.instance.isMacOS;
+
+    // Re-calculate the tree of scripts if necessary.
+    _rootScriptNodes ??= FileNode.createRootsFrom(_filteredItems);
 
     return OutlineDecoration(
       child: Column(
@@ -110,11 +115,9 @@ class ScriptPickerState extends State<ScriptPicker> {
             ),
           if (!_isLoading)
             Expanded(
-              child: ListView.builder(
-                itemCount: _filteredItems.length,
-                itemExtent: defaultListItemHeight,
-                itemBuilder: (context, index) =>
-                    _buildItemWidget(_filteredItems[index]),
+              child: TreeView<FileNode>(
+                dataRoots: _rootScriptNodes,
+                dataDisplayProvider: (item) => _displayProvider(context, item),
               ),
             ),
         ],
@@ -122,45 +125,34 @@ class ScriptPickerState extends State<ScriptPicker> {
     );
   }
 
-  Widget _buildItemWidget(ObjRef ref) {
-    String text;
-    IconData icon;
-
-    if (ref is ScriptRef) {
-      text = ref.uri;
-      icon = libraryIcon;
-    } else if (ref is ClassRef) {
-      text = ref.name;
-      icon = classIcon;
-    } else {
-      assert(false, 'unexpected object reference: ${ref.type}');
-    }
-
+  Widget _displayProvider(BuildContext context, FileNode node) {
     return Tooltip(
       waitDuration: tooltipWait,
       preferBelow: false,
-      message: text,
+      message: node.name,
+      key: ValueKey(node.name),
       child: Material(
         child: InkWell(
-          onTap: () => _handleSelected(ref),
-          child: Container(
-            padding: const EdgeInsets.all(densePadding),
-            child: Row(
-              children: [
-                Icon(
-                  icon,
-                  size: defaultIconSize,
+          onTap: () {
+            if (node.hasScript) {
+              _handleSelected(node.scriptRef);
+            }
+          },
+          child: Row(
+            children: [
+              Icon(
+                node.hasScript ? libraryIcon : containerIcon,
+                size: defaultIconSize,
+              ),
+              const SizedBox(width: densePadding),
+              Expanded(
+                child: Text(
+                  node.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(width: densePadding),
-                Expanded(
-                  child: Text(
-                    text,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -176,6 +168,10 @@ class ScriptPickerState extends State<ScriptPicker> {
     _filteredItems = widget.scripts
         .where((ref) => ref.uri.toLowerCase().contains(filterText))
         .toList();
+
+    // Remove the cached value here; it'll be re-computed the next time we need
+    // it.
+    _rootScriptNodes = null;
   }
 
   void _handleSelected(ObjRef ref) async {

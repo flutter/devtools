@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide Stack;
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../trees.dart';
@@ -26,7 +25,12 @@ class ScriptLocation {
   }
 
   @override
-  int get hashCode => hashValues(scriptRef, location);
+  int get hashCode {
+    int hash = 17;
+    hash = 0x1fffffff & (hash * 31 + scriptRef.hashCode);
+    hash = 0x1fffffff & (hash * 31 + location.hashCode);
+    return hash;
+  }
 
   @override
   String toString() => '${scriptRef.uri} $location';
@@ -250,5 +254,64 @@ class Variable extends TreeNode<Variable> {
         ? (boundVar.value as InstanceRef).valueAsString
         : boundVar.value;
     return '${boundVar.name} - $value';
+  }
+}
+
+/// A node in a tree of scripts.
+///
+/// A node can either be a directory (a name with potentially some child nodes),
+/// a script reference (where [scriptRef] is non-null), or a combination of both
+/// (where the node has a non-null [scriptRef] but also contains child nodes).
+class FileNode extends TreeNode<FileNode> {
+  FileNode(this.name);
+
+  final String name;
+
+  // This can be null.
+  ScriptRef scriptRef;
+
+  /// This exists to allow for O(1) lookup of children when building the tree.
+  Map<String, FileNode> _childrenAsMap = {};
+
+  bool get hasScript => scriptRef != null;
+
+  /// Given a flat list of service protocol scripts, return a tree of scripts
+  /// representing the best hierarchical grouping.
+  static List<FileNode> createRootsFrom(List<ScriptRef> scripts) {
+    // The name of this node is not exposed to users.
+    final root = FileNode('<root>');
+
+    for (var script in scripts) {
+      final parts = script.uri.split('/');
+
+      FileNode node = root;
+      for (var name in parts) {
+        node = node._getCreateChild(name);
+      }
+      node.scriptRef = script;
+    }
+
+    // Null out the _childrenAsSet field.
+    root._trimChildrenAsMapEntries();
+
+    return root.children;
+  }
+
+  FileNode _getCreateChild(String name) {
+    return _childrenAsMap.putIfAbsent(name, () {
+      final child = FileNode(name);
+      child.parent = this;
+      children.add(child);
+      return child;
+    });
+  }
+
+  /// Null out the _childrenAsMap field recursively to save memory.
+  void _trimChildrenAsMapEntries() {
+    _childrenAsMap = null;
+
+    for (var child in children) {
+      child._trimChildrenAsMapEntries();
+    }
   }
 }
