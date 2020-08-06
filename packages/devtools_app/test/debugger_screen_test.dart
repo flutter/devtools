@@ -215,8 +215,8 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Libraries'), findsOneWidget);
 
-      // test for items in the libraries list
-      expect(find.text(scripts.first.uri), findsOneWidget);
+      // test for items in the libraries tree
+      expect(find.text(scripts.first.uri.split('/').first), findsOneWidget);
     });
 
     testWidgets('Breakpoints show items', (WidgetTester tester) async {
