@@ -134,16 +134,16 @@ class CodeSizeController {
     if (oldFile.isApkFile && newFile.isApkFile) {
       final oldApkProgramInfo = ProgramInfo();
       _apkJsonToProgramInfo(
-        oldApkProgramInfo,
-        oldApkProgramInfo.root,
-        oldFile.data,
+        program: oldApkProgramInfo,
+        parent: oldApkProgramInfo.root,
+        json: oldFile.data,
       );
 
       final newApkProgramInfo = ProgramInfo();
       _apkJsonToProgramInfo(
-        newApkProgramInfo,
-        newApkProgramInfo.root,
-        newFile.data,
+        program: newApkProgramInfo,
+        parent: newApkProgramInfo.root,
+        json: newFile.data,
       );
 
       diffMap = compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
@@ -157,11 +157,11 @@ class CodeSizeController {
     changeDiffRoot(newRoot);
   }
 
-  ProgramInfoNode _apkJsonToProgramInfo(
-    ProgramInfo program,
-    ProgramInfoNode parent,
-    Map<String, dynamic> json,
-  ) {
+  ProgramInfoNode _apkJsonToProgramInfo({
+    @required ProgramInfo program,
+    @required ProgramInfoNode parent,
+    @required Map<String, dynamic> json,
+  }) {
     final bool isLeafNode = json['children'] == null;
     final node = program.makeNode(
       name: json['n'],
@@ -172,7 +172,7 @@ class CodeSizeController {
     if (!isLeafNode) {
       final List<dynamic> rawChildren = json['children'] as List<dynamic>;
       for (Map<String, dynamic> childJson in rawChildren) {
-        _apkJsonToProgramInfo(program, node, childJson);
+        _apkJsonToProgramInfo(program: program, parent: node, json: childJson);
       }
     } else {
       node.size = json['value'] ?? 0;
