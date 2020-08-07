@@ -174,9 +174,10 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
 class SnapshotView extends StatefulWidget {
   const SnapshotView();
 
-  static const importInstructions = 'Select an AOT snapshot or'
-      ' "apk-analysis.json" file for code size debugging.\nDrag and drop or '
-      'click "Import File".';
+  // TODO(kenz): add links to documentation on how to generate these files, and
+  // mention the import file button once it is hooked up to a file picker.
+  static const importInstructions = 'Drag and drop an AOT snapshot or'
+      ' "apk-analysis.json" file for code size debugging';
 
   @override
   _SnapshotViewState createState() => _SnapshotViewState();
@@ -286,13 +287,12 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 class DiffView extends StatefulWidget {
   const DiffView();
 
-  static const importOldInstructions = 'Select an original AOT snapshot or '
-      '"apk-analysis.json" file for code size diffing.\nDrag and drop or click '
-      '"Import File".';
-
-  static const importNewInstructions = 'Select a modified AOT snapshot or'
-      ' "apk-analysis.json" file for code size diffing.\nDrag and drop or click'
-      ' "Import File".';
+  // TODO(kenz): add links to documentation on how to generate these files, and
+  // mention the import file button once it is hooked up to a file picker.
+  static const importOldInstructions = 'Drag and drop an original (old) AOT '
+      'snapshot or "apk-analysis.json" file for code size debugging';
+  static const importNewInstructions = 'Drag and drop a modified (new) AOT '
+      'snapshot or "apk-analysis.json" file for code size debugging';
 
   @override
   _DiffViewState createState() => _DiffViewState();
