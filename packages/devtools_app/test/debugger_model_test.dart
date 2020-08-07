@@ -52,6 +52,30 @@ void main() {
         expect(roots[1].children[1].name, 'baz.dart');
         expect(roots[1].children[1].scriptRef, isNotNull);
       });
+
+      test('handles dotted paths', () {
+        final roots = FileNode.createRootsFrom([
+          ScriptRef(uri: 'package:foo.bar.baz/qux.dart', id: 'id-5'),
+        ]);
+        expect(roots, isNotEmpty);
+        expect(roots, hasLength(1));
+
+        var child = roots[0];
+        expect(child.name, 'package:foo');
+        expect(child.scriptRef, isNull);
+
+        child = child.children[0];
+        expect(child.name, 'bar');
+        expect(child.scriptRef, isNull);
+
+        child = child.children[0];
+        expect(child.name, 'baz');
+        expect(child.scriptRef, isNull);
+
+        child = child.children[0];
+        expect(child.name, 'qux.dart');
+        expect(child.scriptRef, isNotNull);
+      });
     });
   });
 }

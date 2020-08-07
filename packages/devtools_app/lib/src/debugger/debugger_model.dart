@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -25,12 +26,7 @@ class ScriptLocation {
   }
 
   @override
-  int get hashCode {
-    int hash = 17;
-    hash = 0x1fffffff & (hash * 31 + scriptRef.hashCode);
-    hash = 0x1fffffff & (hash * 31 + location.hashCode);
-    return hash;
-  }
+  int get hashCode => hashValues(scriptRef, location);
 
   @override
   String toString() => '${scriptRef.uri} $location';
@@ -271,7 +267,7 @@ class FileNode extends TreeNode<FileNode> {
   ScriptRef scriptRef;
 
   /// This exists to allow for O(1) lookup of children when building the tree.
-  Map<String, FileNode> _childrenAsMap = {};
+  final Map<String, FileNode> _childrenAsMap = {};
 
   bool get hasScript => scriptRef != null;
 
@@ -282,7 +278,15 @@ class FileNode extends TreeNode<FileNode> {
     final root = FileNode('<root>');
 
     for (var script in scripts) {
-      final parts = script.uri.split('/');
+      var parts = script.uri.split('/');
+
+      // Look for and handle dotted package names.
+      if (parts.isNotEmpty && parts.first.contains('.')) {
+        parts = [
+          ...parts.first.split('.'),
+          ...parts.sublist(1),
+        ];
+      }
 
       FileNode node = root;
       for (var name in parts) {
@@ -291,7 +295,7 @@ class FileNode extends TreeNode<FileNode> {
       node.scriptRef = script;
     }
 
-    // Null out the _childrenAsSet field.
+    // Clear out the _childrenAsMap map.
     root._trimChildrenAsMapEntries();
 
     return root.children;
@@ -306,9 +310,9 @@ class FileNode extends TreeNode<FileNode> {
     });
   }
 
-  /// Null out the _childrenAsMap field recursively to save memory.
+  /// Clear the _childrenAsMap map recursively to save memory.
   void _trimChildrenAsMapEntries() {
-    _childrenAsMap = null;
+    _childrenAsMap.clear();
 
     for (var child in children) {
       child._trimChildrenAsMapEntries();
