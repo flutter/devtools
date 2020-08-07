@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
-import 'package:devtools_app/src/code_size/stub_data/new_v8.dart';
-import 'package:devtools_app/src/code_size/stub_data/sizes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
