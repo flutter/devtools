@@ -254,6 +254,7 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
           rootNode: snapshotRoot,
           levelsVisible: 2,
           isOutermostLevel: true,
+          width: constraints.maxWidth,
           height: constraints.maxHeight,
           onRootChangedCallback: controller.changeSnapshotRoot,
         );
@@ -396,6 +397,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
           rootNode: diffRoot,
           levelsVisible: 2,
           isOutermostLevel: true,
+          width: constraints.maxWidth,
           height: constraints.maxHeight,
           onRootChangedCallback: controller.changeDiffRoot,
         );
