@@ -12,7 +12,6 @@ import 'code_size/code_size_controller.dart';
 import 'code_size/code_size_screen.dart';
 import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
-import 'connect_screen.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/debugger_screen.dart';
 import 'dialogs.dart';
@@ -20,6 +19,7 @@ import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'initializer.dart';
 import 'inspector/inspector_screen.dart';
+import 'landing_screen.dart';
 import 'logging/logging_controller.dart';
 import 'logging/logging_screen.dart';
 import 'memory/memory_controller.dart';
@@ -41,6 +41,7 @@ import 'utils.dart';
 
 const homeRoute = '/';
 const snapshotRoute = '/snapshot';
+const codeSizeRoute = '/codeSize';
 
 /// Top-level configuration for the app.
 @immutable
@@ -158,6 +159,8 @@ class DevToolsAppState extends State<DevToolsApp> {
                       HotReloadButton(),
                       HotRestartButton(),
                     ],
+                    // TODO(kenz): we probably want these actions on every
+                    // scaffold. Refactor so these are always visible.
                     OpenSettingsAction(),
                     OpenAboutAction(),
                   ],
@@ -167,7 +170,7 @@ class DevToolsAppState extends State<DevToolsApp> {
           );
         } else {
           return DevToolsScaffold.withChild(
-            child: ConnectScreenBody(),
+            child: LandingScreenBody(),
             ideTheme: ideTheme,
             actions: [
               OpenSettingsAction(),
@@ -183,6 +186,18 @@ class DevToolsAppState extends State<DevToolsApp> {
             child: SnapshotScreenBody(args, _screens),
           ),
           ideTheme: ideTheme,
+        );
+      },
+      codeSizeRoute: (_, __, ___) {
+        return DevToolsScaffold.withChild(
+          child: _providedControllers(
+            child: const CodeSizeBody(),
+          ),
+          ideTheme: ideTheme,
+          actions: [
+            OpenSettingsAction(),
+            OpenAboutAction(),
+          ],
         );
       },
     };
