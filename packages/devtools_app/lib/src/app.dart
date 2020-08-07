@@ -169,6 +169,10 @@ class DevToolsAppState extends State<DevToolsApp> {
           return DevToolsScaffold.withChild(
             child: ConnectScreenBody(),
             ideTheme: ideTheme,
+            actions: [
+              OpenSettingsAction(),
+              OpenAboutAction(),
+            ],
           );
         }
       },
