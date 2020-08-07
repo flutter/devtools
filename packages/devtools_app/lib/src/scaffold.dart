@@ -316,7 +316,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     // Add a leading [BulletSpacer] to the actions if the screen is not narrow.
     final actions = List<Widget>.from(widget.actions ?? []);
-    if (!isNarrow && actions.isNotEmpty) {
+    if (!isNarrow && actions.isNotEmpty && widget.tabs.length > 1) {
       actions.insert(0, const BulletSpacer(useAccentColor: true));
     }
 
