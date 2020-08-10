@@ -243,7 +243,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   }
 
   /// Loads all heap samples (live data or offline).
-  void _processAndUpdate([bool reloadAllData = false]) {
+  void _processAndUpdate() {
     setState(() {
       // Display new events in the pane.
       _updateEventPane();

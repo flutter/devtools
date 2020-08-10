@@ -17,13 +17,19 @@ import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
 
-bool codeSizeScreenEnabled = false;
+bool codeSizeScreenEnabled = true;
 
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
 
 class CodeSizeScreen extends Screen {
-  const CodeSizeScreen() : super(id, title: 'Code Size', icon: Octicons.rss);
+  const CodeSizeScreen()
+      : super.conditional(
+          id: id,
+          requiresDartVm: true,
+          title: 'Code Size',
+          icon: Octicons.fileZip,
+        );
 
   static const id = 'codeSize';
 
@@ -168,6 +174,11 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
 class SnapshotView extends StatefulWidget {
   const SnapshotView();
 
+  // TODO(kenz): add links to documentation on how to generate these files, and
+  // mention the import file button once it is hooked up to a file picker.
+  static const importInstructions = 'Drag and drop an AOT snapshot or'
+      ' "apk-analysis.json" file for code size debugging';
+
   @override
   _SnapshotViewState createState() => _SnapshotViewState();
 }
@@ -262,8 +273,9 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
       children: [
         Flexible(
           child: FileImportContainer(
-            title: 'Snapshot',
-            actionText: 'Analyze Snapshot',
+            title: 'Snapshot / APK analysis',
+            instructions: SnapshotView.importInstructions,
+            actionText: 'Analyze Snapshot / APK',
             onAction: controller.loadTreeFromJsonFile,
           ),
         ),
@@ -274,6 +286,13 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 
 class DiffView extends StatefulWidget {
   const DiffView();
+
+  // TODO(kenz): add links to documentation on how to generate these files, and
+  // mention the import file button once it is hooked up to a file picker.
+  static const importOldInstructions = 'Drag and drop an original (old) AOT '
+      'snapshot or "apk-analysis.json" file for code size debugging';
+  static const importNewInstructions = 'Drag and drop a modified (new) AOT '
+      'snapshot or "apk-analysis.json" file for code size debugging';
 
   @override
   _DiffViewState createState() => _DiffViewState();
@@ -364,6 +383,9 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
           child: DualFileImportContainer(
             firstFileTitle: 'Old',
             secondFileTitle: 'New',
+            // TODO(kenz): perhaps bold "original" and "modified".
+            firstInstructions: DiffView.importOldInstructions,
+            secondInstructions: DiffView.importNewInstructions,
             actionText: 'Analyze Diff',
             onAction: controller.loadDiffTreeFromJsonFiles,
           ),

@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:devtools_app/src/code_size/code_size_screen.dart';
 import 'package:devtools_app/src/code_size/code_size_controller.dart';
 import 'package:devtools_app/src/code_size/code_size_table.dart';
+import 'package:devtools_app/src/code_size/file_import_container.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
@@ -42,14 +43,22 @@ void main() {
     setUp(() async {
       screen = const CodeSizeScreen();
       codeSizeController = CodeSizeController();
-      codeSizeController.loadTreeFromJsonFile(
-        DevToolsJsonFile(
-          name: 'lib/src/code_size/stub_data/new_v8.dart',
-          lastModifiedTime: lastModifiedTime,
-          data: json.decode(newV8),
-        ),
-      );
     });
+
+    final defaultData = DevToolsJsonFile(
+      name: 'lib/src/code_size/stub_data/new_v8.dart',
+      lastModifiedTime: lastModifiedTime,
+      data: json.decode(newV8),
+    );
+
+    Future<void> loadDataAndPump(
+      WidgetTester tester, {
+      DevToolsJsonFile data,
+    }) async {
+      data ??= defaultData;
+      codeSizeController.loadTreeFromJsonFile(data);
+      await tester.pumpAndSettle();
+    }
 
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
@@ -66,12 +75,13 @@ void main() {
         codeSizeController: codeSizeController,
       );
 
-      expect(codeSizeController.snapshotRoot.value, isNotNull);
       expect(find.byType(CodeSizeBody), findsOneWidget);
       expect(find.byType(TabBar), findsOneWidget);
 
       expect(find.byKey(CodeSizeScreen.snapshotTabKey), findsOneWidget);
       expect(find.byKey(CodeSizeScreen.diffTabKey), findsOneWidget);
+
+      await loadDataAndPump(tester);
 
       // Verify the state of the splitter.
       final splitFinder = find.byType(Split);
@@ -91,6 +101,15 @@ void main() {
       expect(find.byKey(CodeSizeScreen.dropdownKey), findsNothing);
       expect(find.byKey(CodeSizeScreen.clearButtonKey), findsOneWidget);
 
+      expect(find.byType(FileImportContainer), findsOneWidget);
+      expect(find.text(SnapshotView.importInstructions), findsOneWidget);
+      expect(find.text('No File Selected'), findsOneWidget);
+
+      await loadDataAndPump(tester);
+
+      expect(find.byType(FileImportContainer), findsNothing);
+      expect(find.text(SnapshotView.importInstructions), findsNothing);
+      expect(find.text('No File Selected'), findsNothing);
       expect(find.byType(SnapshotView), findsOneWidget);
       expect(
         find.text(
@@ -109,54 +128,65 @@ void main() {
 
     testWidgetsWithWindowSize('builds diff tab', windowSize,
         (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        await pumpCodeSizeScreen(
-          tester,
-          codeSizeController: codeSizeController,
-        );
-        await tester.tap(find.byKey(CodeSizeScreen.diffTabKey));
+      await pumpCodeSizeScreen(
+        tester,
+        codeSizeController: codeSizeController,
+      );
+      await tester.tap(find.byKey(CodeSizeScreen.diffTabKey));
+      await tester.pumpAndSettle();
 
-        codeSizeController.loadDiffTreeFromJsonFiles(
-          DevToolsJsonFile(
-            name: 'lib/src/code_size/stub_data/old_v8.dart',
-            lastModifiedTime: lastModifiedTime,
-            data: json.decode(oldV8),
-          ),
-          DevToolsJsonFile(
-            name: 'lib/src/code_size/stub_data/new_v8.dart',
-            lastModifiedTime: lastModifiedTime,
-            data: json.decode(newV8),
-          ),
-        );
+      expect(find.byType(DualFileImportContainer), findsOneWidget);
+      expect(find.byType(FileImportContainer), findsNWidgets(2));
+      expect(find.text(DiffView.importOldInstructions), findsOneWidget);
+      expect(find.text(DiffView.importNewInstructions), findsOneWidget);
+      expect(find.text('No File Selected'), findsNWidgets(2));
 
-        await tester.pumpAndSettle();
+      codeSizeController.loadDiffTreeFromJsonFiles(
+        DevToolsJsonFile(
+          name: 'lib/src/code_size/stub_data/old_v8.dart',
+          lastModifiedTime: lastModifiedTime,
+          data: json.decode(oldV8),
+        ),
+        DevToolsJsonFile(
+          name: 'lib/src/code_size/stub_data/new_v8.dart',
+          lastModifiedTime: lastModifiedTime,
+          data: json.decode(newV8),
+        ),
+      );
 
-        expect(find.byKey(CodeSizeScreen.dropdownKey), findsOneWidget);
-        expect(find.byKey(CodeSizeScreen.clearButtonKey), findsOneWidget);
+      await tester.pumpAndSettle();
 
-        expect(find.byType(DiffView), findsOneWidget);
-        expect(
-          find.text(
-            'Diffing Snapshots: lib/src/code_size/stub_data/old_v8.dart - 7/28/2020 1:29 PM (OLD)    vs    (NEW) lib/src/code_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.byKey(CodeSizeScreen.snapshotViewTreemapKey),
-          findsOneWidget,
-        );
-        // Assumes the treemap is built with treemap_test_data_v8_new.json and treemap_test_data_v8_old.json
-        // const text = 'package:pointycastle [+465.8 KB]';
-        // expect(find.text(text), findsOneWidget);
-        // await tester.tap(find.text(text));
-        // await tester.pumpAndSettle();
+      expect(find.byKey(CodeSizeScreen.dropdownKey), findsOneWidget);
+      expect(find.byKey(CodeSizeScreen.clearButtonKey), findsOneWidget);
 
-        // expect(find.text('ecc\n[+129.1 KB]'), findsOneWidget);
-        // expect(find.text('dart:core'), findsNothing);
+      expect(find.byType(DualFileImportContainer), findsNothing);
+      expect(find.byType(FileImportContainer), findsNothing);
+      expect(find.text(DiffView.importOldInstructions), findsNothing);
+      expect(find.text(DiffView.importNewInstructions), findsNothing);
+      expect(find.text('No File Selected'), findsNothing);
+      expect(find.byType(DiffView), findsOneWidget);
+      expect(
+        find.text(
+          'Diffing Snapshots: lib/src/code_size/stub_data/old_v8.dart - 7/28/2020 1:29 PM (OLD)    vs    (NEW) lib/src/code_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(CodeSizeScreen.snapshotViewTreemapKey),
+        findsOneWidget,
+      );
 
-        expect(find.byType(CodeSizeSnapshotTable), findsNothing);
-        expect(find.byType(CodeSizeDiffTable), findsOneWidget);
-      });
+      // Assumes the treemap is built with treemap_test_data_v8_new.json and treemap_test_data_v8_old.json
+//      const text = 'package:pointycastle [+465.8 KB]';
+//      expect(find.text(text), findsOneWidget);
+//      await tester.tap(find.text(text));
+//      await tester.pumpAndSettle();
+//
+//      expect(find.text('ecc\n[+129.1 KB]'), findsOneWidget);
+//      expect(find.text('dart:core'), findsNothing);
+
+      expect(find.byType(CodeSizeSnapshotTable), findsNothing);
+      expect(find.byType(CodeSizeDiffTable), findsOneWidget);
     });
   });
 }

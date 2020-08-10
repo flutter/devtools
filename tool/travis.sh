@@ -57,8 +57,8 @@ if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
     # Set the suffix so we use stable goldens.
     export DEVTOOLS_GOLDENS_SUFFIX="_stable"
 else
-    echo "Cloning dev Flutter branch"
-    git clone https://github.com/flutter/flutter.git --branch dev ./flutter
+    echo "Cloning master Flutter branch"
+    git clone https://github.com/flutter/flutter.git --branch master ./flutter
     # Set the suffix so we use the master goldens
     export DEVTOOLS_GOLDENS_SUFFIX=""
 fi
@@ -98,12 +98,12 @@ if [ "$BOT" = "main" ]; then
     flutter pub get
     flutter pub global activate webdev
 
-    # Verify that flutter format has been run.
-    echo "Checking flutter format..."
+    # Verify that dart format has been run.
+    echo "Checking dart format..."
 
-    if [[ $(flutter format -n --set-exit-if-changed lib/ test/ web/) ]]; then
-        echo "Failed flutter format check: run flutter format lib/ test/ web/"
-        flutter format -n --set-exit-if-changed lib/ test/ web/
+    if [[ $(dart format -n --set-exit-if-changed lib/ test/ web/) ]]; then
+        echo "Failed dart format check: run dart format lib/ test/ web/"
+        dart format -n --set-exit-if-changed lib/ test/ web/
         exit 1
     fi
 

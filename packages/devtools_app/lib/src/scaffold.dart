@@ -46,10 +46,12 @@ class DevToolsScaffold extends StatefulWidget {
     Key key,
     @required Widget child,
     @required IdeTheme ideTheme,
+    List<Widget> actions,
   }) : this(
           key: key,
           tabs: [SimpleScreen(child)],
           ideTheme: ideTheme,
+          actions: actions,
         );
 
   /// A [Key] that indicates the scaffold is showing in narrow-width mode.
@@ -58,12 +60,11 @@ class DevToolsScaffold extends StatefulWidget {
   /// A [Key] that indicates the scaffold is showing in full-width mode.
   static const Key fullWidthKey = Key('Full-width Scaffold');
 
-  // TODO(kenz): update this when we enable the code size screen
   // TODO(jacobr): compute this based on the width of the list of tabs rather
   // than hardcoding. Computing this width dynamically is even more important
   // in the presence of conditional screens.
   /// The width at or below which we treat the scaffold as narrow-width.
-  static const double narrowWidthThreshold = 1300.0;
+  static const double narrowWidthThreshold = 1350.0;
 
   /// The size that all actions on this widget are expected to have.
   static const double actionWidgetSize = 48.0;
@@ -318,7 +319,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     // Add a leading [BulletSpacer] to the actions if the screen is not narrow.
     final actions = List<Widget>.from(widget.actions ?? []);
-    if (!isNarrow && actions.isNotEmpty) {
+    if (!isNarrow && actions.isNotEmpty && widget.tabs.length > 1) {
       actions.insert(0, const BulletSpacer(useAccentColor: true));
     }
 
