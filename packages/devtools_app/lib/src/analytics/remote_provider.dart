@@ -19,10 +19,10 @@ class _RemoteAnalyticsProvider implements AnalyticsProvider {
   @override
   Future<bool> get isEnabled async => _isEnabled ??= await analytics.isEnabled;
 
-  bool _isFirstRun;
   @override
   Future<bool> get isFirstRun async =>
       _isFirstRun ??= await analytics.isFirstRun;
+  bool _isFirstRun;
 
   @override
   bool get isGtagsEnabled => analytics.isGtagsEnabled();
@@ -40,5 +40,5 @@ class _RemoteAnalyticsProvider implements AnalyticsProvider {
   }
 }
 
-AnalyticsProvider _provider = _RemoteAnalyticsProvider();
 AnalyticsProvider get provider => _provider;
+AnalyticsProvider _provider = _RemoteAnalyticsProvider();

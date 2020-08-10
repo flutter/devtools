@@ -27,5 +27,5 @@ class _StubProvider implements AnalyticsProvider {
   void setUpAnalytics() {}
 }
 
-AnalyticsProvider _provider = _StubProvider();
 AnalyticsProvider get provider => _provider;
+AnalyticsProvider _provider = _StubProvider();

@@ -69,23 +69,26 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
               Card(
                 margin: const EdgeInsets.only(bottom: denseRowSpacing),
                 child: Padding(
-                    padding: const EdgeInsets.all(defaultSpacing),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Send usage statistics for DevTools?',
-                          style: textTheme.headline5,
-                        ),
-                        const Padding(padding: EdgeInsets.only(top: 20.0)),
-                        _analyticsDescription(textTheme),
-                        const SizedBox(height: denseRowSpacing),
-                        _actionButtons(),
-                      ],
-                    )),
+                  padding: const EdgeInsets.all(defaultSpacing),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Send usage statistics for DevTools?',
+                        style: textTheme.headline5,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(top: defaultSpacing),
+                      ),
+                      _analyticsDescription(textTheme),
+                      const SizedBox(height: denseRowSpacing),
+                      _actionButtons(),
+                    ],
+                  ),
+                ),
               ),
-            Expanded(child: _child)
+            Expanded(child: _child),
           ],
         )),
       ],
@@ -94,29 +97,32 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
 
   Widget _analyticsDescription(TextTheme textTheme) {
     return RichText(
-        text: TextSpan(
-      children: [
-        TextSpan(
-          text: 'DevTools reports feature usage statistics and basic '
-              'crash reports to Google in order to help Google improve '
-              'the tool over time. See Google\'s ',
-          style: textTheme.bodyText1,
-        ),
-        TextSpan(
-          text: 'privacy policy',
-          style: const TextStyle(color: Color(0xFF54C1EF)),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () {
-              launchUrl(
-                  'https://www.google.com/intl/en/policies/privacy', context);
-            },
-        ),
-        TextSpan(
-          text: '.',
-          style: textTheme.bodyText1,
-        ),
-      ],
-    ));
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: 'DevTools reports feature usage statistics and basic '
+                'crash reports to Google in order to help Google improve '
+                'the tool over time. See Google\'s ',
+            style: textTheme.bodyText1,
+          ),
+          TextSpan(
+            text: 'privacy policy',
+            style: const TextStyle(color: Color(0xFF54C1EF)),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                launchUrl(
+                  'https://www.google.com/intl/en/policies/privacy',
+                  context,
+                );
+              },
+          ),
+          TextSpan(
+            text: '.',
+            style: textTheme.bodyText1,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _actionButtons() {
@@ -134,7 +140,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
           color: Colors.grey,
         ),
         const Padding(
-          padding: EdgeInsets.only(left: 20.0),
+          padding: EdgeInsets.only(left: defaultSpacing),
         ),
         RaisedButton(
           child: const Text('Sounds good!'),
