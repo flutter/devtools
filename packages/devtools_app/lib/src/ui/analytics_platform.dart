@@ -17,9 +17,6 @@ import '../ui/analytics.dart' as ga;
 @JS('getDevToolsPropertyID')
 external String devToolsProperty();
 
-@JS('initializeGA')
-external void initializeGA();
-
 @JS('hookupListenerForGA')
 external void jsHookupListenerForGA();
 

@@ -1,0 +1,196 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+
+import 'theme.dart';
+import 'ui/analytics.dart' as analytics;
+import 'ui/analytics_platform.dart' as platform;
+import 'utils.dart';
+
+abstract class AnalyticsProvider {
+  Future<void> initialize();
+  bool get isGtagsEnabled;
+  Future<bool> get isFirstRun;
+  Future<bool> get isEnabled;
+  void setUpAnalytics();
+  void setAllowAnalytics();
+  void setDontAllowAnalytics();
+}
+
+class RemoteAnalyticsProvider implements AnalyticsProvider {
+  @override
+  Future<void> initialize() async {
+    analytics.exposeGaDevToolsEnabledToJs();
+    if (analytics.isGtagsReset()) {
+      await analytics.resetDevToolsFile();
+    }
+  }
+
+  bool _isEnabled;
+  @override
+  Future<bool> get isEnabled async => _isEnabled ??= await analytics.isEnabled;
+
+  bool _isFirstRun;
+  @override
+  Future<bool> get isFirstRun async =>
+      _isFirstRun ??= await analytics.isFirstRun;
+
+  @override
+  bool get isGtagsEnabled => analytics.isGtagsEnabled();
+
+  @override
+  void setAllowAnalytics() => platform.setAllowAnalytics();
+
+  @override
+  void setDontAllowAnalytics() => platform.setDontAllowAnalytics();
+
+  @override
+  void setUpAnalytics() {
+    analytics.initializeGA();
+    platform.jsHookupListenerForGA();
+  }
+}
+
+/// Conditionally displays a notification to request permission for collection
+/// of usage analytics.
+class AnalyticsNotification extends StatefulWidget {
+  const AnalyticsNotification({
+    @required this.provider,
+    @required this.child,
+  });
+
+  final Widget child;
+  final AnalyticsProvider provider;
+
+  @override
+  State<AnalyticsNotification> createState() =>
+      _AnalyticsNotificationState(provider, child);
+}
+
+class _AnalyticsNotificationState extends State<AnalyticsNotification> {
+  _AnalyticsNotificationState(this._provider, this._child);
+
+  final Widget _child;
+  final AnalyticsProvider _provider;
+
+  bool _isVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    () async {
+      try {
+        await _provider.initialize();
+
+        if (_provider.isGtagsEnabled) {
+          if (await _provider.isFirstRun) {
+            setState(() {
+              _isVisible = true;
+            });
+          } else if (await _provider.isEnabled) {
+            _provider.setUpAnalytics();
+          }
+        }
+      } catch (e) {
+        print('Error collecting analytics:\n$e');
+      }
+    }();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+            child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_isVisible)
+              Card(
+                margin: const EdgeInsets.only(bottom: denseRowSpacing),
+                child: Padding(
+                    padding: const EdgeInsets.all(defaultSpacing),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Send usage statistics for DevTools?',
+                          style: textTheme.headline5,
+                        ),
+                        const Padding(padding: EdgeInsets.only(top: 20.0)),
+                        _analyticsDescription(textTheme),
+                        const SizedBox(height: denseRowSpacing),
+                        _actionButtons(),
+                      ],
+                    )),
+              ),
+            Expanded(child: _child)
+          ],
+        )),
+      ],
+    );
+  }
+
+  Widget _analyticsDescription(TextTheme textTheme) {
+    return RichText(
+        text: TextSpan(
+      children: [
+        TextSpan(
+          text: 'DevTools reports feature usage statistics and basic '
+              'crash reports to Google in order to help Google improve '
+              'the tool over time. See Google\'s ',
+          style: textTheme.bodyText1,
+        ),
+        TextSpan(
+          text: 'privacy policy',
+          style: const TextStyle(color: Color(0xFF54C1EF)),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              launchUrl(
+                  'https://www.google.com/intl/en/policies/privacy', context);
+            },
+        ),
+        TextSpan(
+          text: '.',
+          style: textTheme.bodyText1,
+        ),
+      ],
+    ));
+  }
+
+  Widget _actionButtons() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        RaisedButton(
+          child: const Text('No thanks.'),
+          onPressed: () {
+            _provider.setDontAllowAnalytics();
+            setState(() {
+              _isVisible = false;
+            });
+          },
+          color: Colors.grey,
+        ),
+        const Padding(
+          padding: EdgeInsets.only(left: 20.0),
+        ),
+        RaisedButton(
+          child: const Text('Sounds good!'),
+          onPressed: () {
+            _provider.setAllowAnalytics();
+            setState(() {
+              _isVisible = false;
+            });
+          },
+        ),
+      ],
+    );
+  }
+}
