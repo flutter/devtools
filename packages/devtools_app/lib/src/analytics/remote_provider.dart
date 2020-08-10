@@ -15,9 +15,9 @@ class _RemoteAnalyticsProvider implements AnalyticsProvider {
     }
   }
 
-  bool _isEnabled;
   @override
   Future<bool> get isEnabled async => _isEnabled ??= await analytics.isEnabled;
+  bool _isEnabled;
 
   @override
   Future<bool> get isFirstRun async =>

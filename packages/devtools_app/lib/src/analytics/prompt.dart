@@ -59,38 +59,32 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-            child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (_isVisible)
-              Card(
-                margin: const EdgeInsets.only(bottom: denseRowSpacing),
-                child: Padding(
-                  padding: const EdgeInsets.all(defaultSpacing),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Send usage statistics for DevTools?',
-                        style: textTheme.headline5,
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.only(top: defaultSpacing),
-                      ),
-                      _analyticsDescription(textTheme),
-                      const SizedBox(height: denseRowSpacing),
-                      _actionButtons(),
-                    ],
+        if (_isVisible)
+          Card(
+            margin: const EdgeInsets.only(bottom: denseRowSpacing),
+            child: Padding(
+              padding: const EdgeInsets.all(defaultSpacing),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Send usage statistics for DevTools?',
+                    style: textTheme.headline5,
                   ),
-                ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: defaultSpacing),
+                  ),
+                  _analyticsDescription(textTheme),
+                  const SizedBox(height: denseRowSpacing),
+                  _actionButtons(),
+                ],
               ),
-            Expanded(child: _child),
-          ],
-        )),
+            ),
+          ),
+        Expanded(child: _child),
       ],
     );
   }
