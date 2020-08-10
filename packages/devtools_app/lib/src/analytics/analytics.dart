@@ -17,12 +17,12 @@ import 'package:js/js_util.dart';
 import '../../devtools.dart' as devtools show version;
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
-import '../ui/analytics_constants.dart';
 import '../ui/gtags.dart';
 import '../utils.dart';
 import '../version.dart';
+import 'constants.dart';
 
-export '../ui/analytics_constants.dart';
+export 'constants.dart';
 
 // Dimensions1 AppType values:
 const String appTypeFlutter = 'flutter';

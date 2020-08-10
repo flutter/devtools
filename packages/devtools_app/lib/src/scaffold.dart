@@ -9,6 +9,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'analytics/prompt.dart';
+import 'analytics/stub_provider.dart'
+    if (dart.library.html) 'analytics/remote_provider.dart';
 import 'app.dart';
 import 'banner_messages.dart';
 import 'common_widgets.dart';
@@ -276,8 +279,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           padding: DevToolsScaffold.appPadding,
           alignment: Alignment.topLeft,
           child: FocusScope(
-            child: BannerMessages(
-              screen: screen,
+            child: AnalyticsPrompt(
+              provider: provider,
+              child: BannerMessages(
+                screen: screen,
+              ),
             ),
           ),
         ),
