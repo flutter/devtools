@@ -118,8 +118,23 @@ class CodeSizeController {
     changeDiffRoot(_activeDiffRoot);
   }
 
-  void loadTreeFromJsonFile(DevToolsJsonFile jsonFile) {
+  /// Notifies that the json files are currently being processed.
+  ValueListenable get processingNotifier => _processingNotifier;
+  final _processingNotifier = ValueNotifier<bool>(false);
+
+  // TODO(peterdjlee): Spawn an isolate to run parts of this function to
+  //                   prevent the UI from freezing and display a circular
+  //                   progress indicator on code size screen. Needs flutter
+  //                   web to support working with isolates. (See #33577)
+  void loadTreeFromJsonFile(DevToolsJsonFile jsonFile) async {
     changeSnapshotJsonFile(jsonFile);
+
+    _processingNotifier.value = true;
+
+    // Free up the thread for the code size page to display the loading message.
+    // Without passing in a high value, the value listenable builder in the code
+    // size screen does not get updated.
+    await delayForBatchProcessing(micros: 10000);
 
     Map<String, dynamic> processedJson;
     if (jsonFile.isApkFile) {
@@ -136,16 +151,29 @@ class CodeSizeController {
     final newRoot = generateTree(processedJson);
 
     changeSnapshotRoot(newRoot);
+
+    _processingNotifier.value = false;
   }
 
+  // TODO(peterdjlee): Spawn an isolate to run parts of this function to
+  //                   prevent the UI from freezing and display a circular
+  //                   progress indicator on code size screen. Needs flutter
+  //                   web to support working with isolates. (See #33577)
   void loadDiffTreeFromJsonFiles(
     DevToolsJsonFile oldFile,
     DevToolsJsonFile newFile,
-  ) {
+  ) async {
     if (oldFile == null || newFile == null) return;
 
     changeOldDiffSnapshotFile(oldFile);
     changeNewDiffSnapshotFile(newFile);
+
+    _processingNotifier.value = true;
+
+    // Free up the thread for the code size page to display the loading message.
+    // Without passing in a high value, the value listenable builder in the code
+    // size screen does not get updated.
+    await delayForBatchProcessing(micros: 10000);
 
     Map<String, dynamic> diffMap;
     if (oldFile.isApkFile && newFile.isApkFile) {
@@ -185,6 +213,8 @@ class CodeSizeController {
     );
 
     changeDiffRoot(_activeDiffRoot);
+
+    _processingNotifier.value = false;
   }
 
   ProgramInfoNode _apkJsonToProgramInfo({
