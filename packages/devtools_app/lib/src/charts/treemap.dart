@@ -357,11 +357,12 @@ class Treemap extends StatelessWidget {
   /// ```
   Widget buildTreemap(BuildContext context) {
     if (rootNode.children.isNotEmpty) {
+      final treemapFromNodes = buildTreemapFromNodes(context);
       return Padding(
         padding: const EdgeInsets.all(1.0),
         child: isOutermostLevel
-            ? buildTreemapFromNodes(context)
-            : buildSelectable(child: buildTreemapFromNodes(context)),
+            ? treemapFromNodes
+            : buildSelectable(child: treemapFromNodes),
       );
     } else {
       return Column(
@@ -499,7 +500,8 @@ class Treemap extends StatelessWidget {
           height: constraints.maxHeight,
         );
         if (levelsVisible <= 1) {
-          // If this is the second to the last level, paint all widgets in the last level.
+          // If this is the second to the last level, paint all cells in the last level
+          // instead of creating widgets to improve performance.
           return CustomPaint(
             painter: MultiCellPainter(nodes: positionedChildren),
             size: Size(constraints.maxWidth, constraints.maxHeight),
