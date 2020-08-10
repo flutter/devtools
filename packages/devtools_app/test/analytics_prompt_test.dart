@@ -21,13 +21,10 @@ class FakeProvider implements AnalyticsProvider {
   final bool firstRun;
 
   @override
-  Future<void> initialize() async {}
+  bool get isEnabled => enabled;
 
   @override
-  Future<bool> get isEnabled async => enabled;
-
-  @override
-  Future<bool> get isFirstRun async => firstRun;
+  bool get isFirstRun => firstRun;
 
   @override
   bool get isGtagsEnabled => gtagsEnabled;
