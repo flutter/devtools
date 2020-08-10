@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
 import 'package:flutter/material.dart';
 
 import '../common_widgets.dart';
@@ -360,23 +359,9 @@ class Treemap extends StatelessWidget {
     if (rootNode.children.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.all(1.0),
-        child: buildSelectable(
-          selectable: !isOutermostLevel,
-          child: Column(
-            children: [
-              if (height > minHeightToDisplayTitleText) buildTitleText(context),
-              Expanded(
-                child: Treemap.fromNodes(
-                  nodes: rootNode.children,
-                  levelsVisible: levelsVisible,
-                  onRootChangedCallback: onRootChangedCallback,
-                  width: width,
-                  height: height,
-                ),
-              ),
-            ],
-          ),
-        ),
+        child: isOutermostLevel
+            ? buildTreemapFromNodes(context)
+            : buildSelectable(child: buildTreemapFromNodes(context)),
       );
     } else {
       return Column(
@@ -403,6 +388,23 @@ class Treemap extends StatelessWidget {
         ],
       );
     }
+  }
+
+  Widget buildTreemapFromNodes(BuildContext context) {
+    return Column(
+      children: [
+        if (height > minHeightToDisplayTitleText) buildTitleText(context),
+        Expanded(
+          child: Treemap.fromNodes(
+            nodes: rootNode.children,
+            levelsVisible: levelsVisible,
+            onRootChangedCallback: onRootChangedCallback,
+            width: width,
+            height: height,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget buildTitleText(BuildContext context) {
@@ -466,14 +468,7 @@ class Treemap extends StatelessWidget {
   /// to the associated [TreemapNode].
   ///
   /// The default value for newRoot is [rootNode].
-  Widget buildSelectable({
-    @required Widget child,
-    TreemapNode newRoot,
-    bool selectable = true,
-  }) {
-    if (!selectable) {
-      return child;
-    }
+  Widget buildSelectable({@required Widget child, TreemapNode newRoot}) {
     newRoot ??= rootNode;
     return Tooltip(
       message: rootNode.displayText(),
@@ -504,11 +499,13 @@ class Treemap extends StatelessWidget {
           height: constraints.maxHeight,
         );
         if (levelsVisible <= 1) {
+          // If this is the second to the last level, paint all widgets in the last level.
           return CustomPaint(
             painter: MultiCellPainter(nodes: positionedChildren),
             size: Size(constraints.maxWidth, constraints.maxHeight),
           );
         } else {
+          // Else all widgets should still be positioned Treemap widgets.
           return Stack(children: positionedChildren);
         }
       },
@@ -633,7 +630,8 @@ class MultiCellPainter extends CustomPainter {
       size.height,
     );
 
-    final rectPaint = Paint()..color = node.displayColor;
+    final rectPaint = Paint();
+    rectPaint.color = node.displayColor;
     canvas.drawRect(bounds, rectPaint);
 
     final borderPaint = Paint()
