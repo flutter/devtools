@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/analytics_notification.dart';
+import 'package:devtools_app/src/analytics/prompt.dart';
+import 'package:devtools_app/src/analytics/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -42,59 +43,58 @@ class FakeProvider implements AnalyticsProvider {
 }
 
 void main() {
-  group('AnalyticsNotification', () {
+  group('AnalyticsPrompt', () {
     group('with gtags enabled', () {
-      testWidgets('displays notification on first run',
-          (WidgetTester tester) async {
-        final notification = AnalyticsNotification(
+      testWidgets('displays prompt on first run', (WidgetTester tester) async {
+        final prompt = AnalyticsPrompt(
           provider: FakeProvider(gtagsEnabled: true, firstRun: true),
           child: const Text('Child Text'),
         );
-        await tester.pumpWidget(wrap(notification));
+        await tester.pumpWidget(wrap(prompt));
         await tester.pump();
         expect(
             find.text('Send usage statistics for DevTools?'), findsOneWidget);
       });
 
-      testWidgets('does not display notification without first run',
+      testWidgets('does not display prompt without first run',
           (WidgetTester tester) async {
-        final notification = AnalyticsNotification(
+        final prompt = AnalyticsPrompt(
           provider: FakeProvider(gtagsEnabled: true),
           child: const Text('Child Text'),
         );
-        await tester.pumpWidget(wrap(notification));
+        await tester.pumpWidget(wrap(prompt));
         await tester.pump();
         expect(find.text('Send usage statistics for DevTools?'), findsNothing);
       });
 
       testWidgets('displays the child', (WidgetTester tester) async {
-        final notification = AnalyticsNotification(
+        final prompt = AnalyticsPrompt(
           provider: FakeProvider(),
           child: const Text('Child Text'),
         );
-        await tester.pumpWidget(wrap(notification));
+        await tester.pumpWidget(wrap(prompt));
         await tester.pump();
         expect(find.text('Child Text'), findsOneWidget);
       });
     });
 
     group('without gtags enabled', () {
-      testWidgets('does not display notification', (WidgetTester tester) async {
-        final notification = AnalyticsNotification(
+      testWidgets('does not display prompt', (WidgetTester tester) async {
+        final prompt = AnalyticsPrompt(
           provider: FakeProvider(),
           child: const Text('Child Text'),
         );
-        await tester.pumpWidget(wrap(notification));
+        await tester.pumpWidget(wrap(prompt));
         await tester.pump();
         expect(find.text('Send usage statistics for DevTools?'), findsNothing);
       });
 
       testWidgets('displays the child', (WidgetTester tester) async {
-        final notification = AnalyticsNotification(
+        final prompt = AnalyticsPrompt(
           provider: FakeProvider(),
           child: const Text('Child Text'),
         );
-        await tester.pumpWidget(wrap(notification));
+        await tester.pumpWidget(wrap(prompt));
         await tester.pump();
         expect(find.text('Child Text'), findsOneWidget);
       });

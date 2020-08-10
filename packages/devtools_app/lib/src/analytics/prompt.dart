@@ -5,59 +5,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'theme.dart';
-import 'ui/analytics.dart' as analytics;
-import 'ui/analytics_platform.dart' as platform;
-import 'utils.dart';
+import '../theme.dart';
+import '../utils.dart';
+import 'provider.dart';
 
-abstract class AnalyticsProvider {
-  Future<void> initialize();
-  bool get isGtagsEnabled;
-  Future<bool> get isFirstRun;
-  Future<bool> get isEnabled;
-  void setUpAnalytics();
-  void setAllowAnalytics();
-  void setDontAllowAnalytics();
-}
-
-class RemoteAnalyticsProvider implements AnalyticsProvider {
-  @override
-  Future<void> initialize() async {
-    analytics.exposeGaDevToolsEnabledToJs();
-    if (analytics.isGtagsReset()) {
-      await analytics.resetDevToolsFile();
-    }
-  }
-
-  bool _isEnabled;
-  @override
-  Future<bool> get isEnabled async => _isEnabled ??= await analytics.isEnabled;
-
-  bool _isFirstRun;
-  @override
-  Future<bool> get isFirstRun async =>
-      _isFirstRun ??= await analytics.isFirstRun;
-
-  @override
-  bool get isGtagsEnabled => analytics.isGtagsEnabled();
-
-  @override
-  void setAllowAnalytics() => platform.setAllowAnalytics();
-
-  @override
-  void setDontAllowAnalytics() => platform.setDontAllowAnalytics();
-
-  @override
-  void setUpAnalytics() {
-    analytics.initializeGA();
-    platform.jsHookupListenerForGA();
-  }
-}
-
-/// Conditionally displays a notification to request permission for collection
-/// of usage analytics.
-class AnalyticsNotification extends StatefulWidget {
-  const AnalyticsNotification({
+/// Conditionally displays a prompt to request permission for collection of
+/// usage analytics.
+class AnalyticsPrompt extends StatefulWidget {
+  const AnalyticsPrompt({
     @required this.provider,
     @required this.child,
   });
@@ -66,12 +21,12 @@ class AnalyticsNotification extends StatefulWidget {
   final AnalyticsProvider provider;
 
   @override
-  State<AnalyticsNotification> createState() =>
-      _AnalyticsNotificationState(provider, child);
+  State<AnalyticsPrompt> createState() =>
+      _AnalyticsPromptState(provider, child);
 }
 
-class _AnalyticsNotificationState extends State<AnalyticsNotification> {
-  _AnalyticsNotificationState(this._provider, this._child);
+class _AnalyticsPromptState extends State<AnalyticsPrompt> {
+  _AnalyticsPromptState(this._provider, this._child);
 
   final Widget _child;
   final AnalyticsProvider _provider;
