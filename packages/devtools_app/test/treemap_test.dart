@@ -38,6 +38,7 @@ void main() {
               rootNode: root,
               levelsVisible: 2,
               isOutermostLevel: true,
+              width: constraints.maxWidth,
               height: constraints.maxHeight,
               onRootChangedCallback: changeRoot,
             );
@@ -119,6 +120,7 @@ void main() {
               rootNode: root,
               levelsVisible: 2,
               isOutermostLevel: true,
+              width: constraints.maxWidth,
               height: constraints.maxHeight,
               onRootChangedCallback: changeRoot,
             );
