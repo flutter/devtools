@@ -59,10 +59,9 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _headerText('Connect to a Running App'),
+          _subtitleText('Connect to a Running App'),
           const SizedBox(height: denseRowSpacing),
-          _subHeaderText(
-              'Enter a URL to a running Dart or Flutter application'),
+          _captionText('Enter a URL to a running Dart or Flutter application'),
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           _buildConnectInput(),
         ],
@@ -76,9 +75,9 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _headerText('Analyze and view diffs for your app\'s code size'),
+          _subtitleText('Analyze and view diffs for your app\'s code size'),
           const SizedBox(height: denseRowSpacing),
-          _subHeaderText('Load Dart AOT v8 snapshots, instruction sizes, or '
+          _captionText('Load Dart AOT v8 snapshots, instruction sizes, or '
               '"apk-analysis.json" files to track down code size issues'),
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           RaisedButton(
@@ -106,14 +105,14 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
     );
   }
 
-  Widget _headerText(String text) {
+  Widget _subtitleText(String text) {
     return Text(
       text,
-      style: Theme.of(context).textTheme.bodyText1,
+      style: Theme.of(context).textTheme.subtitle1,
     );
   }
 
-  Widget _subHeaderText(String text) {
+  Widget _captionText(String text) {
     return Text(
       text,
       style: Theme.of(context).textTheme.caption,
