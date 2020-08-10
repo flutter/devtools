@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
 import 'package:flutter/material.dart';
 
 import '../common_widgets.dart';
@@ -17,7 +18,7 @@ class Treemap extends StatelessWidget {
     @required this.rootNode,
     this.nodes,
     @required this.levelsVisible,
-    @required this.isOutermostLevel,
+    this.isOutermostLevel = false,
     @required this.width,
     @required this.height,
     @required this.onRootChangedCallback,
@@ -27,7 +28,7 @@ class Treemap extends StatelessWidget {
     this.rootNode,
     @required this.nodes,
     @required this.levelsVisible,
-    @required this.isOutermostLevel,
+    this.isOutermostLevel = false,
     @required this.width,
     @required this.height,
     @required this.onRootChangedCallback,
@@ -158,21 +159,21 @@ class Treemap extends StatelessWidget {
 
       for (final child in children) {
         final ratio = child.unsignedByteSize / totalByteSize;
-
+        final newWidth = isHorizontalRectangle ? ratio * width : width;
+        final newHeight = isHorizontalRectangle ? height : ratio * height;
         positionedChildren.add(
           PositionedCell(
             left: isHorizontalRectangle ? x + offset : x,
             top: isHorizontalRectangle ? y : y + offset,
-            width: isHorizontalRectangle ? ratio * width : width,
-            height: isHorizontalRectangle ? height : ratio * height,
-            rootNode: child,
+            width: newWidth,
+            height: newHeight,
+            node: child,
             child: Treemap.fromRoot(
               rootNode: child,
               levelsVisible: levelsVisible - 1,
-              isOutermostLevel: false,
               onRootChangedCallback: onRootChangedCallback,
-              width: width,
-              height: height,
+              width: newWidth,
+              height: newHeight,
             ),
           ),
         );
@@ -302,11 +303,10 @@ class Treemap extends StatelessWidget {
         top: y + pivotYCoord,
         width: pivotBestWidth,
         height: pivotBestHeight,
-        rootNode: pivotNode,
+        node: pivotNode,
         child: Treemap.fromRoot(
           rootNode: pivotNode,
           levelsVisible: levelsVisible - 1,
-          isOutermostLevel: false,
           onRootChangedCallback: onRootChangedCallback,
           width: width,
           height: height,
@@ -369,7 +369,6 @@ class Treemap extends StatelessWidget {
                 child: Treemap.fromNodes(
                   nodes: rootNode.children,
                   levelsVisible: levelsVisible,
-                  isOutermostLevel: isOutermostLevel,
                   onRootChangedCallback: onRootChangedCallback,
                   width: width,
                   height: height,
@@ -383,13 +382,22 @@ class Treemap extends StatelessWidget {
       return Column(
         children: [
           Expanded(
-            child: CustomPaint(
-              painter: CellPainter(
-                rootNode: rootNode,
-                showText: height > minHeightToDisplayCellText &&
-                    width > minWidthToDisplayCellText,
+            child: buildSelectable(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: rootNode.displayColor,
+                  border: Border.all(color: Colors.black87),
+                ),
+                child: Center(
+                  child: height > minHeightToDisplayCellText
+                      ? buildNameAndSizeText(
+                          textColor:
+                              rootNode.showDiff ? Colors.white : Colors.black,
+                          oneLine: false,
+                        )
+                      : const SizedBox(),
+                ),
               ),
-              size: Size(width, height),
             ),
           ),
         ],
@@ -407,14 +415,24 @@ class Treemap extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(color: Colors.black87),
         ),
-        child: Text(
-          rootNode.displayText(),
-          style: TextStyle(color: Theme.of(context).textTheme.bodyText2.color),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
+        child: buildNameAndSizeText(
+          textColor: Theme.of(context).textTheme.bodyText2.color,
+          oneLine: true,
         ),
       );
     }
+  }
+
+  Text buildNameAndSizeText({
+    @required Color textColor,
+    @required bool oneLine,
+  }) {
+    return Text(
+      rootNode.displayText(oneLine: oneLine),
+      style: TextStyle(color: textColor),
+      textAlign: TextAlign.center,
+      overflow: TextOverflow.ellipsis,
+    );
   }
 
   Container buildBreadcrumbsNavigator() {
@@ -487,7 +505,7 @@ class Treemap extends StatelessWidget {
         );
         if (levelsVisible <= 1) {
           return CustomPaint(
-            painter: CellListPainter(nodes: positionedChildren),
+            painter: MultiCellPainter(nodes: positionedChildren),
             size: Size(constraints.maxWidth, constraints.maxHeight),
           );
         } else {
@@ -582,69 +600,18 @@ class PositionedCell extends Positioned {
     @required top,
     @required width,
     @required height,
-    @required this.rootNode,
+    @required this.node,
     child,
   }) : super(left: left, top: top, width: width, height: height, child: child);
 
-  final TreemapNode rootNode;
+  final TreemapNode node;
 }
 
-class CellPainter extends CustomPainter {
-  const CellPainter({@required this.rootNode, @required this.showText});
-
-  final TreemapNode rootNode;
-
-  final bool showText;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final bounds = Rect.fromLTWH(
-      0,
-      0,
-      size.width,
-      size.height,
-    );
-
-    final rectPaint = Paint()..color = rootNode.displayColor;
-    canvas.drawRect(bounds, rectPaint);
-
-    final borderPaint = Paint()
-      ..color = Colors.black87
-      ..style = PaintingStyle.stroke;
-    canvas.drawRect(bounds, borderPaint);
-
-    if (showText) {
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: rootNode.displayText(oneLine: false),
-          style: TextStyle(
-            color: rootNode.showDiff ? Colors.white : Colors.black,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-        textAlign: TextAlign.center,
-        ellipsis: '...',
-      )..layout(maxWidth: size.width);
-
-      final centerX = bounds.width / 2 - textPainter.width / 2;
-      final centerY = bounds.height / 2 - textPainter.height / 2;
-      textPainter.paint(
-        canvas,
-        Offset(centerX, centerY),
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(CellPainter oldDelegate) {
-    return false;
-  }
-}
-
-class CellListPainter extends CustomPainter {
-  const CellListPainter({@required this.nodes});
+class MultiCellPainter extends CustomPainter {
+  const MultiCellPainter({@required this.nodes});
 
   final List<PositionedCell> nodes;
+
   @override
   void paint(Canvas canvas, Size size) {
     for (final positionedCell in nodes) {
@@ -657,7 +624,7 @@ class CellListPainter extends CustomPainter {
   }
 
   void paintCell(Canvas canvas, Size size, PositionedCell positionedCell) {
-    final rootNode = positionedCell.rootNode;
+    final node = positionedCell.node;
 
     final bounds = Rect.fromLTWH(
       positionedCell.left,
@@ -666,7 +633,7 @@ class CellListPainter extends CustomPainter {
       size.height,
     );
 
-    final rectPaint = Paint()..color = rootNode.displayColor;
+    final rectPaint = Paint()..color = node.displayColor;
     canvas.drawRect(bounds, rectPaint);
 
     final borderPaint = Paint()
@@ -678,9 +645,9 @@ class CellListPainter extends CustomPainter {
         positionedCell.height > Treemap.minHeightToDisplayCellText) {
       final textPainter = TextPainter(
         text: TextSpan(
-          text: rootNode.displayText(oneLine: false),
+          text: node.displayText(oneLine: false),
           style: TextStyle(
-            color: rootNode.showDiff ? Colors.white : Colors.black,
+            color: node.showDiff ? Colors.white : Colors.black,
           ),
         ),
         textDirection: TextDirection.ltr,
@@ -700,7 +667,7 @@ class CellListPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CellListPainter oldDelegate) {
+  bool shouldRepaint(MultiCellPainter oldDelegate) {
     return false;
   }
 }
