@@ -13,6 +13,7 @@ import 'package:meta/meta.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../analytics/constants.dart';
 import '../auto_dispose.dart';
 import '../config_specific/file/file.dart';
 import '../config_specific/logger/logger.dart';
@@ -20,7 +21,6 @@ import '../globals.dart';
 import '../service_manager.dart';
 import '../table.dart';
 import '../table_data.dart';
-import '../ui/analytics_constants.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
 import '../utils.dart';

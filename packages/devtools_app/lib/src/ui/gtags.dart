@@ -9,7 +9,7 @@ library gtags;
 
 import 'package:js/js.dart';
 
-import 'analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 
 /// For gtags API see https://developers.google.com/gtagjs/reference/api
 /// For debugging install the Chrome Plugin "Google Analytics Debugger".

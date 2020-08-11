@@ -7,7 +7,7 @@ library service_extensions;
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
-import 'ui/analytics_constants.dart' as ga;
+import 'analytics/constants.dart' as ga;
 import 'ui/icons.dart';
 
 // Each service extension needs to be added to [_extensionDescriptions].

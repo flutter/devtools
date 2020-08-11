@@ -12,13 +12,10 @@ import 'package:js/js.dart';
 
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
-import '../ui/analytics.dart' as ga;
+import 'analytics.dart' as ga;
 
 @JS('getDevToolsPropertyID')
 external String devToolsProperty();
-
-@JS('initializeGA')
-external void initializeGA();
 
 @JS('hookupListenerForGA')
 external void jsHookupListenerForGA();
