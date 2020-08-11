@@ -2,27 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'analytics.dart' as analytics;
 import 'platform.dart' as platform;
 import 'provider.dart';
 
 class _RemoteAnalyticsProvider implements AnalyticsProvider {
-  @override
-  Future<void> initialize() async {
-    analytics.exposeGaDevToolsEnabledToJs();
-    if (analytics.isGtagsReset()) {
-      await analytics.resetDevToolsFile();
-    }
-  }
+  _RemoteAnalyticsProvider(this._isEnabled, this._isFirstRun);
 
   @override
-  Future<bool> get isEnabled async => _isEnabled ??= await analytics.isEnabled;
-  bool _isEnabled;
+  bool get isEnabled => _isEnabled;
+  final bool _isEnabled;
 
   @override
-  Future<bool> get isFirstRun async =>
-      _isFirstRun ??= await analytics.isFirstRun;
-  bool _isFirstRun;
+  bool get isFirstRun => _isFirstRun;
+  final bool _isFirstRun;
 
   @override
   bool get isGtagsEnabled => analytics.isGtagsEnabled();
@@ -40,5 +35,27 @@ class _RemoteAnalyticsProvider implements AnalyticsProvider {
   }
 }
 
-AnalyticsProvider get provider => _provider;
-AnalyticsProvider _provider = _RemoteAnalyticsProvider();
+Future<AnalyticsProvider> get analyticsProvider async {
+  if (_providerCompleter != null) return _providerCompleter.future;
+  _providerCompleter = Completer<AnalyticsProvider>();
+  var isEnabled = false;
+  var isFirstRun = false;
+  try {
+    analytics.exposeGaDevToolsEnabledToJs();
+    if (analytics.isGtagsReset()) {
+      await analytics.resetDevToolsFile();
+    }
+    if (await analytics.isEnabled) {
+      isEnabled = true;
+      if (await analytics.isFirstRun) {
+        isFirstRun = true;
+      }
+    }
+  } catch (_) {
+    // Ignore issues if analytics could not be initialized.
+  }
+  _providerCompleter.complete(_RemoteAnalyticsProvider(isEnabled, isFirstRun));
+  return _providerCompleter.future;
+}
+
+Completer<AnalyticsProvider> _providerCompleter;

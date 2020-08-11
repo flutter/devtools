@@ -6,13 +6,10 @@ import 'provider.dart';
 
 class _StubProvider implements AnalyticsProvider {
   @override
-  Future<void> initialize() async {}
+  bool get isEnabled => false;
 
   @override
-  Future<bool> get isEnabled async => false;
-
-  @override
-  Future<bool> get isFirstRun async => false;
+  bool get isFirstRun => false;
 
   @override
   bool get isGtagsEnabled => false;
@@ -27,5 +24,5 @@ class _StubProvider implements AnalyticsProvider {
   void setUpAnalytics() {}
 }
 
-AnalyticsProvider get provider => _provider;
+Future<AnalyticsProvider> get analyticsProvider async => _provider;
 AnalyticsProvider _provider = _StubProvider();

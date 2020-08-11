@@ -8,6 +8,7 @@ import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart';
 
 import '../devtools.dart' as devtools;
+import 'analytics/provider.dart';
 import 'code_size/code_size_controller.dart';
 import 'code_size/code_size_screen.dart';
 import 'common_widgets.dart';
@@ -46,11 +47,17 @@ const codeSizeRoute = '/codeSize';
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
-  const DevToolsApp(this.screens, this.preferences, this.ideTheme);
+  const DevToolsApp(
+    this.screens,
+    this.preferences,
+    this.ideTheme,
+    this.analyticsProvider,
+  );
 
   final List<DevToolsScreen> screens;
   final PreferencesController preferences;
   final IdeTheme ideTheme;
+  final AnalyticsProvider analyticsProvider;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -122,6 +129,7 @@ class DevToolsAppState extends State<DevToolsApp> {
         return DevToolsScaffold.withChild(
           child: CenteredMessage("'$uri' not found."),
           ideTheme: ideTheme,
+          analyticsProvider: widget.analyticsProvider,
         );
       },
     );
@@ -146,6 +154,7 @@ class DevToolsAppState extends State<DevToolsApp> {
                   child: CenteredMessage(
                       'The "$page" screen is not available for this application.'),
                   ideTheme: ideTheme,
+                  analyticsProvider: widget.analyticsProvider,
                 );
               }
               return _providedControllers(
@@ -154,6 +163,7 @@ class DevToolsAppState extends State<DevToolsApp> {
                   ideTheme: ideTheme,
                   initialPage: page,
                   tabs: tabs,
+                  analyticsProvider: widget.analyticsProvider,
                   actions: [
                     if (serviceManager.connectedApp.isFlutterAppNow) ...[
                       HotReloadButton(),
@@ -172,6 +182,7 @@ class DevToolsAppState extends State<DevToolsApp> {
           return DevToolsScaffold.withChild(
             child: LandingScreenBody(),
             ideTheme: ideTheme,
+            analyticsProvider: widget.analyticsProvider,
             actions: [
               OpenSettingsAction(),
               OpenAboutAction(),
@@ -181,6 +192,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       },
       snapshotRoute: (_, __, args) {
         return DevToolsScaffold.withChild(
+          analyticsProvider: widget.analyticsProvider,
           child: _providedControllers(
             offline: true,
             child: SnapshotScreenBody(args, _screens),
@@ -190,6 +202,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       },
       codeSizeRoute: (_, __, ___) {
         return DevToolsScaffold.withChild(
+          analyticsProvider: widget.analyticsProvider,
           child: _providedControllers(
             child: const CodeSizeBody(),
           ),

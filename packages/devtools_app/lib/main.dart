@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import 'src/analytics/stub_provider.dart'
+    if (dart.library.html) 'src/analytics/remote_provider.dart';
 import 'src/app.dart';
 import 'src/config_specific/framework_initialize/framework_initialize.dart';
 import 'src/config_specific/ide_theme/ide_theme.dart';
@@ -61,6 +63,6 @@ void main() async {
 
   // Now run the app.
   runApp(
-    DevToolsApp(defaultScreens, preferences, ideTheme),
+    DevToolsApp(defaultScreens, preferences, ideTheme, await analyticsProvider),
   );
 }
