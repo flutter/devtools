@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../common_widgets.dart';
 import '../trees.dart';
@@ -162,10 +163,12 @@ class Treemap extends StatelessWidget {
         final newHeight = isHorizontalRectangle ? height : ratio * height;
         positionedChildren.add(
           PositionedCell(
-            left: isHorizontalRectangle ? x + offset : x,
-            top: isHorizontalRectangle ? y : y + offset,
-            width: newWidth,
-            height: newHeight,
+            rect: Rect.fromLTWH(
+              isHorizontalRectangle ? x + offset : x,
+              isHorizontalRectangle ? y : y + offset,
+              newWidth,
+              newHeight,
+            ),
             node: child,
             child: Treemap.fromRoot(
               rootNode: child,
@@ -298,10 +301,12 @@ class Treemap extends StatelessWidget {
 
     positionedTreemaps.add(
       PositionedCell(
-        left: x + pivotXCoord,
-        top: y + pivotYCoord,
-        width: pivotBestWidth,
-        height: pivotBestHeight,
+        rect: Rect.fromLTWH(
+          x + pivotXCoord,
+          y + pivotYCoord,
+          pivotBestWidth,
+          pivotBestHeight,
+        ),
         node: pivotNode,
         child: Treemap.fromRoot(
           rootNode: pivotNode,
@@ -344,6 +349,42 @@ class Treemap extends StatelessWidget {
     }
   }
 
+  Widget buildSubTreemaps() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // TODO(peterdjlee): Investigate why exception is thrown without this check
+        //                   and if there are any other cases.
+        if (constraints.maxHeight == 0 || constraints.maxWidth == 0) {
+          return const SizedBox();
+        }
+        final positionedChildren = buildTreemaps(
+          children: nodes,
+          x: 0,
+          y: 0,
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+        );
+        if (levelsVisible <= 1) {
+          // If this is the second to the last level, paint all cells in the last level
+          // instead of creating widgets to improve performance.
+          return MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTapDown: (details) => _onTapDown(details, positionedChildren),
+              child: CustomPaint(
+                painter: MultiCellPainter(nodes: positionedChildren),
+                size: Size(constraints.maxWidth, constraints.maxHeight),
+              ),
+            ),
+          );
+        } else {
+          // Else all widgets should still be positioned Treemap widgets.
+          return Stack(children: positionedChildren);
+        }
+      },
+    );
+  }
+
   /// **Treemap widget layout**
   /// ```
   /// ----------------------------
@@ -357,37 +398,13 @@ class Treemap extends StatelessWidget {
   /// ```
   Widget buildTreemap(BuildContext context) {
     if (rootNode.children.isNotEmpty) {
-      final treemapFromNodes = buildTreemapFromNodes(context);
       return Padding(
         padding: const EdgeInsets.all(1.0),
-        child: isOutermostLevel
-            ? treemapFromNodes
-            : buildSelectable(child: treemapFromNodes),
+        child: buildTreemapFromNodes(context),
       );
     } else {
-      return Column(
-        children: [
-          Expanded(
-            child: buildSelectable(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: rootNode.displayColor,
-                  border: Border.all(color: Colors.black87),
-                ),
-                child: Center(
-                  child: height > minHeightToDisplayCellText
-                      ? buildNameAndSizeText(
-                          textColor:
-                              rootNode.showDiff ? Colors.white : Colors.black,
-                          oneLine: false,
-                        )
-                      : const SizedBox(),
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
+      // If given a root node but its children are empty, draw itself.
+      return buildTreemapFromRoot(context);
     }
   }
 
@@ -408,19 +425,51 @@ class Treemap extends StatelessWidget {
     );
   }
 
+  Column buildTreemapFromRoot(BuildContext context) {
+    return Column(
+      children: [
+        if (isOutermostLevel) buildTitleText(context),
+        Expanded(
+          child: isOutermostLevel
+              ? buildCell()
+              : buildSelectable(child: buildCell()),
+        ),
+      ],
+    );
+  }
+
+  Container buildCell() {
+    return Container(
+      decoration: BoxDecoration(
+        color: rootNode.displayColor,
+        border: Border.all(color: Colors.black87),
+      ),
+      child: Center(
+        child: height > minHeightToDisplayCellText
+            ? buildNameAndSizeText(
+                textColor: rootNode.showDiff ? Colors.white : Colors.black,
+                oneLine: false,
+              )
+            : const SizedBox(),
+      ),
+    );
+  }
+
   Widget buildTitleText(BuildContext context) {
     if (isOutermostLevel) {
       return buildBreadcrumbsNavigator();
     } else {
-      return Container(
-        height: treeMapHeaderHeight,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.black87),
-        ),
-        child: buildNameAndSizeText(
-          textColor: Theme.of(context).textTheme.bodyText2.color,
-          oneLine: true,
+      return buildSelectable(
+        child: Container(
+          height: treeMapHeaderHeight,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black87),
+          ),
+          child: buildNameAndSizeText(
+            textColor: Theme.of(context).textTheme.bodyText2.color,
+            oneLine: true,
+          ),
         ),
       );
     }
@@ -477,41 +526,33 @@ class Treemap extends StatelessWidget {
       preferBelow: false,
       child: InkWell(
         onTap: () {
-          if (rootNode.children.isNotEmpty) onRootChangedCallback(newRoot);
+          onRootChangedCallback(newRoot);
         },
         child: child,
       ),
     );
   }
 
-  Widget buildSubTreemaps() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // TODO(peterdjlee): Investigate why exception is thrown without this check
-        //                   and if there are any other cases.
-        if (constraints.maxHeight == 0 || constraints.maxWidth == 0) {
-          return const SizedBox();
-        }
-        final positionedChildren = buildTreemaps(
-          children: nodes,
-          x: 0,
-          y: 0,
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-        );
-        if (levelsVisible <= 1) {
-          // If this is the second to the last level, paint all cells in the last level
-          // instead of creating widgets to improve performance.
-          return CustomPaint(
-            painter: MultiCellPainter(nodes: positionedChildren),
-            size: Size(constraints.maxWidth, constraints.maxHeight),
-          );
-        } else {
-          // Else all widgets should still be positioned Treemap widgets.
-          return Stack(children: positionedChildren);
-        }
-      },
-    );
+  /// Checks if the touch point of the given [details] is overlapping with
+  /// a cell in [positionedCells].
+  ///
+  /// If so, reroot to the matching cell if the cell has children to show.
+  void _onTapDown(
+    TapDownDetails details,
+    List<PositionedCell> positionedCells,
+  ) {
+    final x = details.localPosition.dx;
+    final y = details.localPosition.dy;
+    final touchPoint = Offset(x, y);
+    // TODO(peterdjlee): Optimize with more efficient algorithm to find the overlapping cell.
+    //                   Currently O(positionedCells.length) but an optimized algorithm with
+    //                   O(log(positionedCells.length)) is possible.
+
+    for (final cell in positionedCells) {
+      if (cell.rect.contains(touchPoint)) {
+        onRootChangedCallback(cell.node);
+      }
+    }
   }
 }
 
@@ -594,14 +635,19 @@ class TreemapNode extends TreeNode<TreemapNode> {
 }
 
 class PositionedCell extends Positioned {
-  const PositionedCell({
-    @required left,
-    @required top,
-    @required width,
-    @required height,
+  PositionedCell({
+    @required this.rect,
     @required this.node,
-    child,
-  }) : super(left: left, top: top, width: width, height: height, child: child);
+    @required child,
+  }) : super(
+          left: rect.left,
+          top: rect.top,
+          width: rect.width,
+          height: rect.height,
+          child: child,
+        );
+
+  final Rect rect;
 
   final TreemapNode node;
 }
