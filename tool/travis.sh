@@ -7,6 +7,14 @@
 # Fast fail the script on failures.
 set -ex
 
+if [[ $TRAVIS_OS_NAME == "windows" ]]; then
+    echo Installing Google Chrome Stable...
+    # Install Chrome via Chocolatey while `addons: chrome` doesn't seem to work on Windows yet
+    # https://travis-ci.community/t/installing-google-chrome-stable-but-i-cant-find-it-anywhere/2118
+    choco install googlechrome --acceptlicense --yes --no-progress --ignore-checksums
+fi
+
+
 # In GitBash on Windows, we have to call flutter.bat so we alias them in this
 # script to call the correct one based on the OS.
 function flutter {
@@ -16,20 +24,6 @@ function flutter {
         command flutter "$@"
     fi
 }
-
-# Some integration tests assume the devtools package is up to date and located
-# adjacent to the devtools_app package.
-pushd packages/devtools
-    # We want to make sure that devtools is retrievable with regular pub.
-    flutter pub get
-popd
-
-if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-    echo Installing Google Chrome Stable...
-    # Install Chrome via Chocolatey while `addons: chrome` doesn't seem to work on Windows yet
-    # https://travis-ci.community/t/installing-google-chrome-stable-but-i-cant-find-it-anywhere/2118
-    choco install googlechrome --acceptlicense --yes --no-progress --ignore-checksums
-fi
 
 # Get Flutter.
 if [ "$CHANNEL" = "stable" ]; then
@@ -75,6 +69,15 @@ flutter pub --version
 export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
 echo "Flutter version is '$FLUTTER_VERSION'"
 
+
+# Some integration tests assume the devtools package is up to date and located
+# adjacent to the devtools_app package.
+pushd packages/devtools
+    # We want to make sure that devtools is retrievable with regular pub.
+    flutter pub get
+popd
+
+
 if [ "$BOT" = "main" ]; then
 
     # Provision our packages.
@@ -83,9 +86,9 @@ if [ "$BOT" = "main" ]; then
     # Verify that dart format has been run.
     echo "Checking dart format..."
 
-    if [[ $(dart format -n --set-exit-if-changed lib/ test/ web/) ]]; then
+    if [[ $(dart format --output=none --set-exit-if-changed lib/ test/ web/) ]]; then
         echo "Failed dart format check: run dart format lib/ test/ web/"
-        dart format -n --set-exit-if-changed lib/ test/ web/
+        dart format --output=none --set-exit-if-changed lib/ test/ web/
         exit 1
     fi
 
