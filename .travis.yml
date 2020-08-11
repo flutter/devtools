@@ -31,9 +31,9 @@ env:
     - BOT=integration_dart2js
     - BOT=main                CHANNEL=master
 
-allow_failures:
-  env:
-    - BOT=main                CHANNEL=master
+jobs:
+  allow_failures:
+    - env: BOT=main                CHANNEL=master
 
 script: ./tool/travis.sh
 
