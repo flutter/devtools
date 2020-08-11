@@ -49,9 +49,6 @@ echo "which flutter: " `which flutter`
 # We should be using dart from ../flutter/bin/dart.
 echo "which dart: " `which dart`
 
-pushd packages/devtools_app
-echo `pwd`
-
 # Disable analytics to ensure that the welcome message for the dart cli tooling
 # doesn't interrupt travis.
 dart --disable-analytics
@@ -69,7 +66,6 @@ flutter pub --version
 export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
 echo "Flutter version is '$FLUTTER_VERSION'"
 
-
 # Some integration tests assume the devtools package is up to date and located
 # adjacent to the devtools_app package.
 pushd packages/devtools
@@ -77,6 +73,9 @@ pushd packages/devtools
     flutter pub get
 popd
 
+# Change the CI to the packages/devtools_app directory.
+pushd packages/devtools_app
+echo `pwd`
 
 if [ "$BOT" = "main" ]; then
 
