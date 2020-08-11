@@ -112,13 +112,19 @@ class HttpRequestData extends NetworkRequest {
 
   @override
   String get type {
-    // Extract the MIME from [contentType].
-    // Example: "[text/html; charset-UTF-8]" --> "text/html"
     var mime = contentType;
+    if (mime == null) return 'http';
+
+    // Extract the MIME from `contentType`.
+    // Example: "[text/html; charset-UTF-8]" --> "text/html"
     mime = mime.split(';').first;
     if (mime.startsWith('[')) {
       mime = mime.substring(1);
     }
+    // TODO(kenz): consider special casing some extensions. For example,
+    // "text/html" is the MIME for both .html and .htm, but since .htm comes
+    // first alphabetically, `extensionFromMime` returns "htm". Other cases are
+    // more unintuitive such as "text/plain" returning "conf".
     return extensionFromMime(mime);
   }
 

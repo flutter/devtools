@@ -56,7 +56,7 @@ packages:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.1-dev.1"
+    version: "0.9.1-dev.2"
   http:
     dependency: transitive
     description:

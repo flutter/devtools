@@ -173,7 +173,7 @@ final httpPutEventTrace = [
       'cookies': ['Cookie-Monster=Me-want-cookie!; HttpOnly'],
       'responseHeaders': {
         'x-frame-options': ['SAMEORIGIN'],
-        'content-type': ['text/plain; charset=utf-8'],
+        'content-type': ['application/json; charset=utf-8'],
         'x-xss-protection': ['1; mode=block'],
         'set-cookie': ['Cookie-Monster=Me-want-cookie!; HttpOnly'],
         'x-content-type-options': ['nosniff'],
