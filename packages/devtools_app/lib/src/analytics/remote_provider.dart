@@ -38,17 +38,21 @@ class _RemoteAnalyticsProvider implements AnalyticsProvider {
 Future<AnalyticsProvider> get analyticsProvider async {
   if (_providerCompleter != null) return _providerCompleter.future;
   _providerCompleter = Completer<AnalyticsProvider>();
-  analytics.exposeGaDevToolsEnabledToJs();
-  if (analytics.isGtagsReset()) {
-    await analytics.resetDevToolsFile();
-  }
   var isEnabled = false;
   var isFirstRun = false;
-  if (await analytics.isEnabled) {
-    isEnabled = true;
-    if (await analytics.isFirstRun) {
-      isFirstRun = true;
+  try {
+    analytics.exposeGaDevToolsEnabledToJs();
+    if (analytics.isGtagsReset()) {
+      await analytics.resetDevToolsFile();
     }
+    if (await analytics.isEnabled) {
+      isEnabled = true;
+      if (await analytics.isFirstRun) {
+        isFirstRun = true;
+      }
+    }
+  } catch (_) {
+    // Ignore issues if analytics could not be initialized.
   }
   _providerCompleter.complete(_RemoteAnalyticsProvider(isEnabled, isFirstRun));
   return _providerCompleter.future;
