@@ -31,6 +31,7 @@ dependencies:
   intl: ^0.16.0
   js: ^0.6.1+1
   meta: ^1.1.0
+  mime: ^0.9.7
   mp_chart: ^0.1.7
   path: ^1.6.0
   pedantic: ^1.7.0

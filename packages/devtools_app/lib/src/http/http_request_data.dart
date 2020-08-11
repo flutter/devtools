@@ -1,6 +1,7 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'package:mime/mime.dart';
 
 import '../network/network_model.dart';
 import '../trace_event.dart';
@@ -111,9 +112,20 @@ class HttpRequestData extends NetworkRequest {
 
   @override
   String get type {
-    // TODO(kenz): pull in a package or implement functionality to pretty print
-    // the MIME type from the 'content-type' field in a response header.
-    return 'http';
+    var mime = contentType;
+    if (mime == null) return 'http';
+
+    // Extract the MIME from `contentType`.
+    // Example: "[text/html; charset-UTF-8]" --> "text/html"
+    mime = mime.split(';').first;
+    if (mime.startsWith('[')) {
+      mime = mime.substring(1);
+    }
+    // TODO(kenz): consider special casing some extensions. For example,
+    // "text/html" is the MIME for both .html and .htm, but since .htm comes
+    // first alphabetically, `extensionFromMime` returns "htm". Other cases are
+    // more unintuitive such as "text/plain" returning "conf".
+    return extensionFromMime(mime);
   }
 
   /// Whether the request is safe to display in the UI.
