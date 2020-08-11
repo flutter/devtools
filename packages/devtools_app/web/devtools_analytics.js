@@ -13,12 +13,12 @@
 window.dataLayer = window.dataLayer || [];
 function gtag() {
   if (gtagsEnabled()) {
-      dataLayer.push(arguments);
+    dataLayer.push(arguments);
   }
 }
 
 // Parse the URI parameters.
-let _gtagsValue = new URLSearchParams(window.location.search).get('gtags');
+let _gtagsValue = new URLSearchParams(window.location.hash.split('?').pop()).get('gtags');
 let _gtagsReset = _gtagsValue == 'reset';
 // By default GA is enabled, if &gtags= is not specified. GA is ONLY collected if opt-in dialog was accepted.
 let _gtagsEnabled = _gtagsValue == null || _gtagsValue == 'enabled';
@@ -42,22 +42,22 @@ function initializeGA() {
   if (gtagsEnabled() && window.gaDevToolsEnabled() && !_initializedGA) {
     gtag('js', new Date());
     gtag('config', GA_DEVTOOLS_PROPERTY, {
-           'custom_map': {
-             // Custom dimensions:
-             dimension1: 'user_app',
-             dimension2: 'user_build',
-             dimension3: 'user_platform',
-             dimension4: 'devtools_platform',
-             dimension5: 'devtools_chrome',
-             dimension6: 'devtools_version',
-             dimension7: 'ide_launched',
-             dimension8: 'flutter_client_id',
+      'custom_map': {
+        // Custom dimensions:
+        dimension1: 'user_app',
+        dimension2: 'user_build',
+        dimension3: 'user_platform',
+        dimension4: 'devtools_platform',
+        dimension5: 'devtools_chrome',
+        dimension6: 'devtools_version',
+        dimension7: 'ide_launched',
+        dimension8: 'flutter_client_id',
 
-             // Custom metrics:
-             metric1: 'gpu_duration',
-             metric2: 'ui_duration',
-           }
-         });
+        // Custom metrics:
+        metric1: 'gpu_duration',
+        metric2: 'ui_duration',
+      }
+    });
 
     _initializedGA = true;
   }

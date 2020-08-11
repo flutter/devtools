@@ -174,29 +174,6 @@ StatelessWidget stopRecordingButton({
   );
 }
 
-/// Button to stop recording data.
-///
-/// * `paused`: Whether recording is in progress.
-/// * `includeTextWidth`: The minimum width the button can be before the text is
-///    omitted.
-/// * `onPressed`: The callback to be called upon pressing the button.
-StatelessWidget stopButton({
-  Key key,
-  @required bool paused,
-  double includeTextWidth,
-  @required VoidCallback onPressed,
-}) {
-  return OutlineButton(
-    key: key,
-    onPressed: paused ? null : onPressed,
-    child: MaterialIconLabel(
-      Icons.stop,
-      'Stop',
-      includeTextWidth: includeTextWidth,
-    ),
-  );
-}
-
 // TODO(kenz): make recording info its own stateful widget that handles
 // listening to value notifiers and building info.
 Widget recordingInfo({
@@ -445,6 +422,7 @@ class ToolbarAction extends StatelessWidget {
 ///
 /// This is typically used as a title for a logical area of the screen.
 // TODO(devoncarew): Refactor this into an 'AreaPaneHeader' widget.
+// TODO(peterdjlee): Consider passing in a list of widgets for content instead of String title.
 SizedBox areaPaneHeader(
   BuildContext context, {
   @required String title,
@@ -589,57 +567,6 @@ class RoundedOutlinedBorder extends StatelessWidget {
 ///
 /// Makes for nice-looking rectangles.
 final goldenRatio = 1 + sqrt(5) / 2;
-
-class DisabledForProfileBuildMessage extends StatelessWidget {
-  const DisabledForProfileBuildMessage();
-
-  static const message =
-      'This screen is disabled because you are running a profile build of your '
-      'application.';
-
-  @override
-  Widget build(BuildContext context) {
-    return const CenteredMessage(message);
-  }
-}
-
-class DisabledForWebAppMessage extends StatelessWidget {
-  const DisabledForWebAppMessage();
-
-  static const message =
-      'This screen is disabled because you are connected to a web application.';
-
-  @override
-  Widget build(BuildContext context) {
-    return const CenteredMessage(message);
-  }
-}
-
-class DisabledForFlutterWebProfileBuildMessage extends StatelessWidget {
-  const DisabledForFlutterWebProfileBuildMessage();
-
-  static const message =
-      'This screen is disabled because you are connected to a profile build of '
-      'your Flutter Web application.';
-
-  @override
-  Widget build(BuildContext context) {
-    return const CenteredMessage(message);
-  }
-}
-
-class DisabledForNonFlutterAppMessage extends StatelessWidget {
-  const DisabledForNonFlutterAppMessage();
-
-  static const message =
-      'This screen is disabled because you are not running a Flutter '
-      'application.';
-
-  @override
-  Widget build(BuildContext context) {
-    return const CenteredMessage(message);
-  }
-}
 
 class CenteredMessage extends StatelessWidget {
   const CenteredMessage(this.message);

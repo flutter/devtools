@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/scaffold.dart';
-import 'package:devtools_app/src/screen.dart';
 import 'package:devtools_app/src/framework_controller.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/scaffold.dart';
+import 'package:devtools_app/src/screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,6 +33,7 @@ void main() {
       await tester.pumpWidget(wrap(
         const DevToolsScaffold(
           tabs: [screen1, screen2, screen3, screen4, screen5],
+          ideTheme: null,
         ),
       ));
       expect(find.byKey(k1), findsOneWidget);
@@ -46,6 +47,7 @@ void main() {
       await tester.pumpWidget(wrap(
         const DevToolsScaffold(
           tabs: [screen1, screen2, screen3, screen4, screen5],
+          ideTheme: null,
         ),
       ));
       expect(find.byKey(k1), findsOneWidget);
@@ -56,7 +58,7 @@ void main() {
     testWidgets('displays no tabs when only one is given',
         (WidgetTester tester) async {
       await tester.pumpWidget(wrap(
-        const DevToolsScaffold(tabs: [screen1]),
+        const DevToolsScaffold(tabs: [screen1], ideTheme: null),
       ));
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(t1), findsNothing);
@@ -64,9 +66,7 @@ void main() {
 
     testWidgets('displays only the selected tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(
-        const DevToolsScaffold(
-          tabs: [screen1, screen2],
-        ),
+        const DevToolsScaffold(tabs: [screen1, screen2], ideTheme: null),
       ));
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(k2), findsNothing);
@@ -91,6 +91,7 @@ void main() {
         DevToolsScaffold(
           tabs: const [screen1, screen2],
           initialPage: screen2.screenId,
+          ideTheme: null,
         ),
       ));
 

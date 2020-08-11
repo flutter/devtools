@@ -15,6 +15,19 @@
     <title>Dart DevTools</title>
     <link href="favicon.png" rel="icon" sizes="64x64">
 
+    <!-- Global site tag (gtag.js) - Google Analytics -->	
+    <script>	
+      const GA_DEVTOOLS_PROPERTY = 'UA-26406144-34'; // Dart DevTools GA Property UA.	
+
+      function getDevToolsPropertyID() {	
+          return GA_DEVTOOLS_PROPERTY;	
+      }	
+    </script>	
+    <!-- The below URI ?id= must match the GA_DEVTOOLS_PROPERTY above. -->	
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26406144-34"></script>	
+    <script type="text/javascript" src="devtools_analytics.js"></script>	
+    <!-- End of DevTools Google Analytics -->
+
     <script type="text/javascript">
         function supportsES6Classes() {
             "use strict";

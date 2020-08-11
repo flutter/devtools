@@ -4,7 +4,6 @@
 .dart_tool/
 .packages
 .pub/
-pubspec.lock
 
 .idea/
 .data_dir/

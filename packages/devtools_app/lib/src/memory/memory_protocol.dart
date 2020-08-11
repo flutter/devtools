@@ -14,11 +14,10 @@ import '../service_manager.dart';
 import '../version.dart';
 import '../vm_service_wrapper.dart';
 import 'memory_controller.dart';
+import 'memory_timeline.dart';
 
 class MemoryTracker {
   MemoryTracker(this.serviceManager, this.memoryController);
-
-  static const Duration _updateDelay = Duration(milliseconds: 500);
 
   ServiceConnectionManager serviceManager;
 
@@ -50,6 +49,8 @@ class MemoryTracker {
 
   StreamSubscription<Event> _gcStreamListener;
 
+  Timer _monitorContinues;
+
   void start() {
     _updateLiveDataPolling(memoryController.paused.value);
     memoryController.paused.addListener(_updateLiveDataPolling);
@@ -65,9 +66,11 @@ class MemoryTracker {
     if (paused) {
       _pollingTimer?.cancel();
       _gcStreamListener?.cancel();
+      _gcStreamListener = null;
+      _pollingTimer = null;
     } else {
-      _pollingTimer = Timer(Duration.zero, _pollMemory);
-      _gcStreamListener = service?.onGCEvent?.listen(_handleGCEvent);
+      _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
+      _gcStreamListener ??= service?.onGCEvent?.listen(_handleGCEvent);
     }
   }
 
@@ -88,28 +91,21 @@ class MemoryTracker {
     );
 
     _updateGCEvent(event.isolate.id, memoryUsage);
-    // TODO(terry): expose when GC occured as markers in memory timeline.
   }
 
-  // TODO(terry): Discuss need a record/stop record for memory?  Unless expensive probably not.
-  Future<void> _pollMemory() async {
+  void _pollMemory() async {
+    _pollingTimer = null;
+
     if (!hasConnection || memoryController.memoryTracker == null) {
+      logger.log('VM service connection and/or MemoryTracker lost.');
       return;
     }
 
     final isolateMemory = <IsolateRef, MemoryUsage>{};
     for (IsolateRef isolateRef in serviceManager.isolateManager.isolates) {
-      try {
-        await service.getIsolate(isolateRef.id);
-      } catch (e) {
-        if (e is SentinelException) {
-          final SentinelException sentinelErr = e;
-          logger.log('Isolate sentinel ${isolateRef.id} '
-              '${sentinelErr.sentinel.kind}');
-          continue;
-        }
+      if (await memoryController.isIsolateLive(isolateRef.id)) {
+        isolateMemory[isolateRef] = await service.getMemoryUsage(isolateRef.id);
       }
-      isolateMemory[isolateRef] = await service.getMemoryUsage(isolateRef.id);
     }
 
     // Polls for current Android meminfo using:
@@ -124,7 +120,7 @@ class MemoryTracker {
     // Polls for current RSS size.
     _update(await service.getVM(), isolateMemory);
 
-    _pollingTimer = Timer(_updateDelay, _pollMemory);
+    _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
   }
 
   void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
@@ -144,24 +140,73 @@ class MemoryTracker {
     _recalculate(true);
   }
 
-  // Poll ADB meminfo
+  /// Poll ADB meminfo
   Future<AdbMemoryInfo> _fetchAdbInfo() async =>
       AdbMemoryInfo.fromJson((await serviceManager.getAdbMemoryInfo()).json);
+
+  /// Returns the MemoryUsage of a particular isolate.
+  /// @param id isolateId.
+  /// @param usage associated with the passed in isolate's id.
+  /// @returns the MemoryUsage of the isolate or null if isolate is a sentinal.
+  Future<MemoryUsage> _isolateMemoryUsage(String id, MemoryUsage usage) async =>
+      await memoryController.isIsolateLive(id) ? usage : null;
 
   void _recalculate([bool fromGC = false]) async {
     int used = 0;
     int capacity = 0;
     int external = 0;
 
-    for (MemoryUsage memoryUsage in isolateHeaps.values) {
-      used += memoryUsage.heapUsage;
-      capacity += memoryUsage.heapCapacity;
-      external += memoryUsage.externalUsage;
+    final keysToRemove = <String>[];
+
+    final isolateCount = isolateHeaps.length;
+    final keys = isolateHeaps.keys.toList();
+    for (var index = 0; index < isolateCount; index++) {
+      final isolateId = keys[index];
+      var usage = isolateHeaps[isolateId];
+      // Check if the isolate is dead (sentinal), null implies sentinal.
+      final checkIsolateUsage = await _isolateMemoryUsage(isolateId, usage);
+      if (checkIsolateUsage == null && !keysToRemove.contains(isolateId)) {
+        // Sentinal Isolate don't include in the heap computation.
+        keysToRemove.add(isolateId);
+        // Don't use this sential isolate for any heap computation.
+        usage = null;
+      }
+
+      if (usage != null) {
+        // Isolate is live (a null usage implies sentinal).
+        used += usage.heapUsage;
+        capacity += usage.heapCapacity;
+        external += usage.externalUsage;
+      }
     }
+
+    // Removes any isolate that is a sentinal.
+    isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
 
     int time = DateTime.now().millisecondsSinceEpoch;
     if (samples.isNotEmpty) {
       time = math.max(time, samples.last.timestamp);
+    }
+
+    final memoryTimeline = memoryController.memoryTimeline;
+
+    // Process any memory events?
+    final eventSample = processEventSample(memoryTimeline, time);
+
+    if (eventSample != null && eventSample.isEventAllocationAccumulator) {
+      if (eventSample.allocationAccumulator.isStart) {
+        // Stop Continuous events being auto posted - a new start is beginning.
+        memoryTimeline.monitorContinuesState = ContinuesState.stop;
+      }
+    } else if (memoryTimeline.monitorContinuesState == ContinuesState.next) {
+      if (_monitorContinues != null) {
+        _monitorContinues.cancel();
+        _monitorContinues = null;
+      }
+      _monitorContinues ??= Timer(
+        const Duration(milliseconds: 300),
+        _recalculate,
+      );
     }
 
     final HeapSample sample = HeapSample(
@@ -172,10 +217,65 @@ class MemoryTracker {
       external,
       fromGC,
       adbMemoryInfo,
+      eventSample,
     );
 
     _addSample(sample);
-    memoryController.memoryTimeline.addSample(sample);
+    memoryTimeline.addSample(sample);
+
+    // Signal continues events are to be emitted.  These events are hidden
+    // until a reset event then the continuous events between last monitor
+    // start/reset and latest reset are made visible.
+    if (eventSample != null &&
+        eventSample.isEventAllocationAccumulator &&
+        eventSample.allocationAccumulator.isStart) {
+      memoryTimeline.monitorContinuesState = ContinuesState.next;
+    }
+  }
+
+  EventSample processEventSample(MemoryTimeline memoryTimeline, int time) {
+    EventSample eventSample;
+    if (memoryTimeline.anyEvents) {
+      final eventTime = memoryTimeline.peekEventTimestamp;
+      final timeDuration = Duration(milliseconds: time);
+      final eventDuration = Duration(milliseconds: eventTime);
+
+      // If the event is +/- _updateDelay (500 ms) of the current time then
+      // associate the EventSample with the current HeapSample.
+      const delay = MemoryTimeline.updateDelay;
+      final compared = timeDuration.compareTo(eventDuration);
+      if (compared < 0) {
+        if ((timeDuration + delay).compareTo(eventDuration) >= 0) {
+          // Currently, events are all UI events so duration < _updateDelay
+          final pulledEvent = memoryTimeline.pullEventSample();
+          eventSample = pulledEvent.clone(time);
+        } else {
+          // Throw away event, missed attempt to attach to a HeapSample.
+          final ignoreEvent = memoryTimeline.pullEventSample();
+          logger.log('Event duration is lagging ignore event'
+              'timestamp: ${MemoryTimeline.fineGrainTimestampFormat(time)} '
+              'event: ${MemoryTimeline.fineGrainTimestampFormat(eventTime)}'
+              '\n$ignoreEvent');
+        }
+      } else if (compared > 0) {
+        final msDiff = time - eventTime;
+        if (msDiff > MemoryTimeline.delayMs) {
+          // eventSample is in the future.
+          if ((timeDuration - delay).compareTo(eventDuration) >= 0) {
+            // Able to match event time to a heap sample. We will attach the
+            // EventSample to this HeapSample.
+            final pulledEvent = memoryTimeline.pullEventSample();
+            eventSample = pulledEvent.clone(time);
+          }
+        } else {
+          // The almost exact eventSample we have.
+          eventSample = memoryTimeline.pullEventSample();
+        }
+        // Keep the event, its time hasn't caught up to the HeapSample time yet.
+      }
+    }
+
+    return eventSample;
   }
 
   void _addSample(HeapSample sample) {
@@ -214,9 +314,9 @@ class ClassHeapDetailStats {
     if (serviceManager.service.protocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 18))) {
       instancesCurrent = json['instancesCurrent'];
-      instancesAccumulated = json['instancesAccumulated'];
+      instancesDelta = json['instancesAccumulated'];
       bytesCurrent = json['bytesCurrent'];
-      bytesAccumulated = json['bytesAccumulated'];
+      bytesDelta = json['accumulatedSize'];
     } else {
       _update(json['new']);
       _update(json['old']);
@@ -235,17 +335,17 @@ class ClassHeapDetailStats {
   final Map<String, dynamic> json;
 
   int instancesCurrent = 0;
-  int instancesAccumulated = 0;
+  int instancesDelta = 0;
   int bytesCurrent = 0;
-  int bytesAccumulated = 0;
+  int bytesDelta = 0;
 
   ClassRef classRef;
 
   String get type => json['type'];
 
   void _update(List<dynamic> stats) {
-    instancesAccumulated += stats[ACCUMULATED];
-    bytesAccumulated += stats[ACCUMULATED_SIZE];
+    instancesDelta += stats[ACCUMULATED];
+    bytesDelta += stats[ACCUMULATED_SIZE];
     instancesCurrent += stats[LIVE_AFTER_GC] + stats[ALLOCATED_SINCE_GC];
     bytesCurrent += stats[LIVE_AFTER_GC_SIZE] + stats[ALLOCATED_SINCE_GC_SIZE];
   }

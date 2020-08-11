@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
+import 'package:vm_snapshot_analysis/program_info.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 
 import '../charts/treemap.dart';
-import 'stub_data/new_v8.dart';
-import 'stub_data/old_v8.dart';
-import 'stub_data/sizes.dart';
+import '../utils.dart';
+import 'code_size_screen.dart';
 
 enum DiffTreeType {
   increaseOnly,
@@ -30,16 +29,16 @@ class CodeSizeController {
     _snapshotRoot.value = newRoot;
   }
 
-  void clearSnapshot() {
-    _snapshotRoot.value = null;
-    _snapshotFile.value = null;
+  ValueListenable<DevToolsJsonFile> get snapshotJsonFile => _snapshotJsonFile;
+  final _snapshotJsonFile = ValueNotifier<DevToolsJsonFile>(null);
+
+  void changeSnapshotJsonFile(DevToolsJsonFile newJson) {
+    _snapshotJsonFile.value = newJson;
   }
 
-  ValueListenable<String> get snapshotFile => _snapshotFile;
-  final _snapshotFile = ValueNotifier<String>(null);
-
-  void changeSnapshotFile(String filePath) {
-    _snapshotFile.value = filePath;
+  void _clearSnapshot() {
+    _snapshotRoot.value = null;
+    _snapshotJsonFile.value = null;
   }
 
   /// The node set as the diff root.
@@ -52,24 +51,58 @@ class CodeSizeController {
     _diffRoot.value = newRoot;
   }
 
-  void clearDiff() {
+  TreemapNode get _activeDiffRoot {
+    switch (_activeDiffTreeType.value) {
+      case DiffTreeType.increaseOnly:
+        assert(_increasedDiffTreeRoot != null);
+        return _increasedDiffTreeRoot;
+      case DiffTreeType.decreaseOnly:
+        assert(_decreasedDiffTreeRoot != null);
+        return _decreasedDiffTreeRoot;
+      case DiffTreeType.combined:
+      default:
+        assert(_combinedDiffTreeRoot != null);
+        return _combinedDiffTreeRoot;
+    }
+  }
+
+  TreemapNode _increasedDiffTreeRoot;
+  TreemapNode _decreasedDiffTreeRoot;
+  TreemapNode _combinedDiffTreeRoot;
+
+  ValueListenable<DevToolsJsonFile> get oldDiffSnapshotJsonFile {
+    return _oldDiffSnapshotJsonFile;
+  }
+
+  final _oldDiffSnapshotJsonFile = ValueNotifier<DevToolsJsonFile>(null);
+  void changeOldDiffSnapshotFile(DevToolsJsonFile newJsonFile) {
+    _oldDiffSnapshotJsonFile.value = newJsonFile;
+  }
+
+  ValueListenable<DevToolsJsonFile> get newDiffSnapshotJsonFile {
+    return _newDiffSnapshotJsonFile;
+  }
+
+  final _newDiffSnapshotJsonFile = ValueNotifier<DevToolsJsonFile>(null);
+  void changeNewDiffSnapshotFile(DevToolsJsonFile newJsonFile) {
+    _newDiffSnapshotJsonFile.value = newJsonFile;
+  }
+
+  void _clearDiff() {
     _diffRoot.value = null;
-    _oldDiffSnapshotFile.value = null;
-    _newDiffSnapshotFile.value = null;
+    _oldDiffSnapshotJsonFile.value = null;
+    _newDiffSnapshotJsonFile.value = null;
+    _increasedDiffTreeRoot = null;
+    _decreasedDiffTreeRoot = null;
+    _combinedDiffTreeRoot = null;
   }
 
-  ValueListenable<String> get oldDiffSnapshotFile => _oldDiffSnapshotFile;
-  final _oldDiffSnapshotFile = ValueNotifier<String>(null);
-
-  void changeOldDiffSnapshotFile(String filePath) {
-    _oldDiffSnapshotFile.value = filePath;
-  }
-
-  ValueListenable<String> get newDiffSnapshotFile => _newDiffSnapshotFile;
-  final _newDiffSnapshotFile = ValueNotifier<String>(null);
-
-  void changeNewDiffSnapshotFile(String filePath) {
-    _newDiffSnapshotFile.value = filePath;
+  void clear(Key activeTabKey) {
+    if (activeTabKey == CodeSizeScreen.diffTabKey) {
+      _clearDiff();
+    } else if (activeTabKey == CodeSizeScreen.snapshotTabKey) {
+      _clearSnapshot();
+    }
   }
 
   /// The active diff tree type used to build the diff treemap.
@@ -80,58 +113,101 @@ class CodeSizeController {
   final _activeDiffTreeType =
       ValueNotifier<DiffTreeType>(DiffTreeType.combined);
 
-  // TODO(peterdjlee): Cache each diff tree so that it's less expensive
-  //                   to change bettween diff tree types.
   void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
     _activeDiffTreeType.value = newDiffTreeType;
-    loadFakeDiffTree(
-      _oldDiffSnapshotFile.value,
-      _newDiffSnapshotFile.value,
-      diffTreeType: newDiffTreeType,
-    );
+    changeDiffRoot(_activeDiffRoot);
   }
 
-  void loadFakeTree(String pathToFile) {
-    // TODO(peterdjlee): Use user input data instead of hard coded data.
-    changeSnapshotFile(pathToFile);
+  void loadTreeFromJsonFile(DevToolsJsonFile jsonFile) {
+    changeSnapshotJsonFile(jsonFile);
 
-    // Build a [Map] object containing heirarchical information for [inputJsonMap].
-    final processedJsonMap = treemapFromJson(_jsonForFile(pathToFile));
+    Map<String, dynamic> processedJson;
+    if (jsonFile.isApkFile) {
+      // APK analysis json should be processed already.
+      processedJson = jsonFile.data;
+    } else {
+      processedJson = treemapFromJson(jsonFile.data);
+    }
 
     // Set name for root node.
-    processedJsonMap['n'] = 'Root';
+    processedJson['n'] = 'Root';
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
-    final newRoot = generateTree(processedJsonMap);
+    final newRoot = generateTree(processedJson);
 
     changeSnapshotRoot(newRoot);
   }
 
-  void loadFakeDiffTree(
-    String pathToOldFile,
-    String pathToNewFile, {
-    DiffTreeType diffTreeType = DiffTreeType.combined,
-  }) {
-    changeOldDiffSnapshotFile(pathToOldFile);
-    changeNewDiffSnapshotFile(pathToNewFile);
+  void loadDiffTreeFromJsonFiles(
+    DevToolsJsonFile oldFile,
+    DevToolsJsonFile newFile,
+  ) {
+    if (oldFile == null || newFile == null) return;
 
-    // TODO(peterdjlee): Use user input data instead of hard coded data.
-    final oldInputJson = _jsonForFile(pathToOldFile);
-    final newInputJson = _jsonForFile(pathToNewFile);
+    changeOldDiffSnapshotFile(oldFile);
+    changeNewDiffSnapshotFile(newFile);
 
-    final diffMap = buildComparisonTreemap(oldInputJson, newInputJson);
+    Map<String, dynamic> diffMap;
+    if (oldFile.isApkFile && newFile.isApkFile) {
+      final oldApkProgramInfo = ProgramInfo();
+      _apkJsonToProgramInfo(
+        program: oldApkProgramInfo,
+        parent: oldApkProgramInfo.root,
+        json: oldFile.data,
+      );
+
+      final newApkProgramInfo = ProgramInfo();
+      _apkJsonToProgramInfo(
+        program: newApkProgramInfo,
+        parent: newApkProgramInfo.root,
+        json: newFile.data,
+      );
+
+      diffMap = compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
+    } else {
+      diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
+    }
+
     diffMap['n'] = 'Root';
-    final newRoot = generateDiffTree(diffMap, diffTreeType: diffTreeType);
 
-    changeDiffRoot(newRoot);
+    // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
+    _combinedDiffTreeRoot = generateDiffTree(
+      diffMap,
+      DiffTreeType.combined,
+    );
+    _increasedDiffTreeRoot = generateDiffTree(
+      diffMap,
+      DiffTreeType.increaseOnly,
+    );
+    _decreasedDiffTreeRoot = generateDiffTree(
+      diffMap,
+      DiffTreeType.decreaseOnly,
+    );
+
+    changeDiffRoot(_activeDiffRoot);
   }
 
-  // TODO(kenz): This is a hack - remove this once we have a file picker.
-  Map<String, dynamic> _jsonForFile(String pathToFile) {
-    if (pathToFile.contains('old_v8')) return jsonDecode(oldV8);
-    if (pathToFile.contains('new_v8')) return jsonDecode(newV8);
-    if (pathToFile.contains('sizes')) return jsonDecode(instructionSizes);
-    return null;
+  ProgramInfoNode _apkJsonToProgramInfo({
+    @required ProgramInfo program,
+    @required ProgramInfoNode parent,
+    @required Map<String, dynamic> json,
+  }) {
+    final bool isLeafNode = json['children'] == null;
+    final node = program.makeNode(
+      name: json['n'],
+      parent: parent,
+      type: NodeType.other,
+    );
+
+    if (!isLeafNode) {
+      final List<dynamic> rawChildren = json['children'] as List<dynamic>;
+      for (Map<String, dynamic> childJson in rawChildren) {
+        _apkJsonToProgramInfo(program: program, parent: node, json: childJson);
+      }
+    } else {
+      node.size = json['value'] ?? 0;
+    }
+    return node;
   }
 
   TreemapNode generateTree(Map<String, dynamic> treeJson) {
@@ -158,9 +234,9 @@ class CodeSizeController {
   /// * [DiffTreeType.decreaseOnly]: returns a tree with nodes with negative [byteSize].
   /// * [DiffTreeType.combined]: returns a tree with all nodes.
   TreemapNode generateDiffTree(
-    Map<String, dynamic> treeJson, {
-    DiffTreeType diffTreeType = DiffTreeType.combined,
-  }) {
+    Map<String, dynamic> treeJson,
+    DiffTreeType diffTreeType,
+  ) {
     final isLeafNode = treeJson['children'] == null;
     if (!isLeafNode) {
       return _buildNodeWithChildren(
@@ -198,7 +274,7 @@ class CodeSizeController {
   TreemapNode _buildNodeWithChildren(
     Map<String, dynamic> treeJson, {
     bool showDiff = false,
-    DiffTreeType diffTreeType = DiffTreeType.combined,
+    DiffTreeType diffTreeType,
   }) {
     final rawChildren = treeJson['children'];
     final treemapNodeChildren = <TreemapNode>[];
@@ -207,7 +283,7 @@ class CodeSizeController {
     // Given a child, build its subtree.
     for (Map<String, dynamic> child in rawChildren) {
       final childTreemapNode = showDiff
-          ? generateDiffTree(child, diffTreeType: diffTreeType)
+          ? generateDiffTree(child, diffTreeType)
           : generateTree(child);
       if (childTreemapNode == null) {
         continue;
@@ -251,5 +327,23 @@ class CodeSizeController {
       childrenMap: childrenMap,
       showDiff: showDiff,
     )..addAllChildren(children);
+  }
+}
+
+extension CodeSizeJsonFileExtension on DevToolsJsonFile {
+  bool get isApkFile {
+    if (data is Map<String, dynamic>) {
+      final dataMap = data as Map<String, dynamic>;
+      return dataMap['type'] == 'apk';
+    }
+    return false;
+  }
+
+  String get displayText {
+    return '$path - $formattedTime';
+  }
+
+  String get formattedTime {
+    return DateFormat.yMd().add_jm().format(lastModifiedTime);
   }
 }

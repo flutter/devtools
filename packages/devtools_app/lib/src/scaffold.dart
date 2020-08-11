@@ -9,10 +9,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'analytics/prompt.dart';
+import 'analytics/stub_provider.dart'
+    if (dart.library.html) 'analytics/remote_provider.dart';
 import 'app.dart';
 import 'banner_messages.dart';
 import 'common_widgets.dart';
 import 'config_specific/drag_and_drop/drag_and_drop.dart';
+import 'config_specific/ide_theme/ide_theme.dart';
 import 'config_specific/import_export/import_export.dart';
 import 'framework_controller.dart';
 import 'globals.dart';
@@ -36,11 +40,21 @@ class DevToolsScaffold extends StatefulWidget {
     this.initialPage,
     this.actions,
     this.embed = false,
+    @required this.ideTheme,
   })  : assert(tabs != null),
         super(key: key);
 
-  DevToolsScaffold.withChild({Key key, Widget child})
-      : this(key: key, tabs: [SimpleScreen(child)]);
+  DevToolsScaffold.withChild({
+    Key key,
+    @required Widget child,
+    @required IdeTheme ideTheme,
+    List<Widget> actions,
+  }) : this(
+          key: key,
+          tabs: [SimpleScreen(child)],
+          ideTheme: ideTheme,
+          actions: actions,
+        );
 
   /// A [Key] that indicates the scaffold is showing in narrow-width mode.
   static const Key narrowWidthKey = Key('Narrow Scaffold');
@@ -52,7 +66,7 @@ class DevToolsScaffold extends StatefulWidget {
   // than hardcoding. Computing this width dynamically is even more important
   // in the presence of conditional screens.
   /// The width at or below which we treat the scaffold as narrow-width.
-  static const double narrowWidthThreshold = 1300.0;
+  static const double narrowWidthThreshold = 1350.0;
 
   /// The size that all actions on this widget are expected to have.
   static const double actionWidgetSize = 48.0;
@@ -71,6 +85,9 @@ class DevToolsScaffold extends StatefulWidget {
 
   /// Whether to render the embedded view (without the header).
   final bool embed;
+
+  /// IDE-supplied theming.
+  final IdeTheme ideTheme;
 
   /// Actions that it's possible to perform in this Scaffold.
   ///
@@ -256,11 +273,17 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final tabBodies = [
       for (var screen in widget.tabs)
         Container(
+          // TODO(kenz): this padding creates a flash when dragging and dropping
+          // into the code size screen because it creates space that is outside
+          // of the [DragAndDropEventAbsorber] widget. Fix this.
           padding: DevToolsScaffold.appPadding,
           alignment: Alignment.topLeft,
           child: FocusScope(
-            child: BannerMessages(
-              screen: screen,
+            child: AnalyticsPrompt(
+              provider: provider,
+              child: BannerMessages(
+                screen: screen,
+              ),
             ),
           ),
         ),
@@ -271,8 +294,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       child: Provider<BannerMessagesController>(
         create: (_) => BannerMessagesController(),
         child: DragAndDrop(
-          // TODO(kenz): we are handling drops from multiple scaffolds. We need
-          // to make sure we are only handling drops from the active scaffold.
           handleDrop: _importController.importData,
           child: Scaffold(
             appBar: widget.embed ? null : _buildAppBar(),
@@ -300,7 +321,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     // Add a leading [BulletSpacer] to the actions if the screen is not narrow.
     final actions = List<Widget>.from(widget.actions ?? []);
-    if (!isNarrow && actions.isNotEmpty) {
+    if (!isNarrow && actions.isNotEmpty && widget.tabs.length > 1) {
       actions.insert(0, const BulletSpacer(useAccentColor: true));
     }
 

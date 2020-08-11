@@ -67,6 +67,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
 
     test('toggle boolean service extension', () async {
       await env.setupEnvironment();
+      await serviceManager.service.allFuturesCompleted;
 
       final extensionName = extensions.debugPaint.extension;
       const evalExpression = 'debugPaintSizeEnabled';
@@ -96,6 +97,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
 
     test('toggle String service extension', () async {
       await env.setupEnvironment();
+      await serviceManager.service.allFuturesCompleted;
 
       final extensionName = extensions.togglePlatformMode.extension;
       const evalExpression = 'defaultTargetPlatform.toString()';
@@ -137,6 +139,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
 
     test('toggle numeric service extension', () async {
       await env.setupEnvironment();
+      await serviceManager.service.allFuturesCompleted;
 
       final extensionName = extensions.slowAnimations.extension;
       const evalExpression = 'timeDilation';

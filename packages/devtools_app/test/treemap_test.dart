@@ -28,7 +28,9 @@ void main() {
 
       // Pump treemap widget with tree built with test data.
       Future<void> pumpTreemapWidget(
-          WidgetTester tester, Key treemapKey) async {
+        WidgetTester tester,
+        Key treemapKey,
+      ) async {
         await tester.pumpWidget(wrap(LayoutBuilder(
           key: treemapKey,
           builder: (context, constraints) {
@@ -36,6 +38,7 @@ void main() {
               rootNode: root,
               levelsVisible: 2,
               isOutermostLevel: true,
+              width: constraints.maxWidth,
               height: constraints.maxHeight,
               onRootChangedCallback: changeRoot,
             );
@@ -117,6 +120,7 @@ void main() {
               rootNode: root,
               levelsVisible: 2,
               isOutermostLevel: true,
+              width: constraints.maxWidth,
               height: constraints.maxHeight,
               onRootChangedCallback: changeRoot,
             );

@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/memory/memory_chart.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
+import 'package:devtools_app/src/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_shared/devtools_shared.dart';
+import 'package:devtools_testing/support/memory_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -21,6 +23,27 @@ void main() {
   MemoryController controller;
   FakeServiceManager fakeServiceManager;
 
+  void _setUpServiceManagerForMemory() {
+    // Load canned data testHeapSampleData.
+    final memoryJson = MemoryJson.decode(argJsonString: testHeapSampleData);
+    fakeServiceManager = FakeServiceManager(
+      useFakeService: true,
+      memoryData: memoryJson,
+    );
+    when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+    when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
+        .thenReturn(false);
+    when(fakeServiceManager.connectedApp.isDartWebApp)
+        .thenAnswer((_) => Future.value(false));
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+
+    controller.offline = true;
+    controller.memoryTimeline.offlineData.clear();
+    controller.memoryTimeline.offlineData.addAll(memoryJson.data);
+  }
+
   Future<void> pumpMemoryScreen(
     WidgetTester tester, {
     MemoryController memoryController,
@@ -30,6 +53,9 @@ void main() {
       const MemoryBody(),
       memory: controller = memoryController ?? MemoryController(),
     ));
+
+    // Delay to ensure the memory profiler has collected data.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(MemoryBody), findsOneWidget);
   }
 
@@ -54,14 +80,6 @@ void main() {
       expect(find.text('Memory'), findsOneWidget);
     });
 
-    testWidgets('builds disabled message when disabled for web app',
-        (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(true);
-      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
-      expect(find.byType(MemoryBody), findsNothing);
-      expect(find.byType(DisabledForWebAppMessage), findsOneWidget);
-    });
-
     testWidgetsWithWindowSize('builds proper content for state', windowSize,
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);
@@ -75,8 +93,6 @@ void main() {
 
       expect(controller.memorySource, MemoryController.liveFeed);
 
-//      expect(find.byKey(MemoryScreen.snapshotButtonKey), findsOneWidget);
-      expect(find.byKey(MemoryScreen.resetButtonKey), findsOneWidget);
       expect(find.byKey(MemoryScreen.gcButtonKey), findsOneWidget);
 
       expect(find.byType(MemoryChart), findsOneWidget);
@@ -144,7 +160,6 @@ void main() {
         startsWith(MemoryController.logFilenamePrefix),
       );
 
-      // TODO(terry): Load canned test data.
       final filenames = controller.memoryLog.offlineFiles();
       final filename = filenames.first;
 
@@ -158,5 +173,87 @@ void main() {
       // our temp directory when this test runs locally.
       expect(controller.memoryLog.removeOfflineFile(filename), isTrue);
     });
+  });
+
+  testWidgetsWithWindowSize('heap tree view', windowSize,
+      (WidgetTester tester) async {
+    await pumpMemoryScreen(tester);
+
+    expect(find.byKey(HeapTreeViewState.snapshotButtonKey), findsOneWidget);
+    expect(
+      find.byKey(HeapTreeViewState.allocationMonitorResetKey),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(HeapTreeViewState.allocationMonitorResetKey),
+      findsOneWidget,
+    );
+
+    // Load canned data.
+    _setUpServiceManagerForMemory();
+
+    final data = controller.memoryTimeline.data;
+
+    // Total number of collected HeapSamples.
+    expect(data.length, 292);
+
+    // Number of VM GCs
+    final totalGCEvents = data.where((element) => element.isGC);
+    expect(totalGCEvents.length, 70);
+
+    // User initiated GCs
+    final totalUserGCEvents =
+        data.where((element) => element.memoryEventInfo.isEventGC);
+    expect(totalUserGCEvents.length, 2);
+
+    // User initiated Snapshots
+    final totalSnapshotEvents =
+        data.where((element) => element.memoryEventInfo.isEventSnapshot);
+    expect(totalSnapshotEvents.length, 2);
+
+    // Number of auto-Snapshots
+    final totalSnapshotAutoEvents =
+        data.where((element) => element.memoryEventInfo.isEventSnapshotAuto);
+    expect(totalSnapshotAutoEvents.length, 3);
+
+    // Total Allocation Monitor events (many are empty).
+    final totalAllocationMonitorEvents = data.where(
+        (element) => element.memoryEventInfo.isEventAllocationAccumulator);
+    expect(totalAllocationMonitorEvents.length, 285);
+
+    // Number of user initiated allocation monitors
+    final startMonitors = totalAllocationMonitorEvents.where(
+        (element) => element.memoryEventInfo.allocationAccumulator.isStart);
+    expect(startMonitors.length, 3);
+
+    // Number of accumulator resets
+    final resetMonitors = totalAllocationMonitorEvents.where(
+        (element) => element.memoryEventInfo.allocationAccumulator.isReset);
+    expect(resetMonitors.length, 2);
+
+    final interval1Min = MemoryController.displayIntervalToIntervalDurationInMs(
+        MemoryController.displayOneMinute);
+    expect(interval1Min, 60000);
+    final interval5Min = MemoryController.displayIntervalToIntervalDurationInMs(
+        MemoryController.displayFiveMinutes);
+    expect(interval5Min, 300000);
+
+    // TODO(terry): Check intervals and autosnapshot does it snapshot same points?
+    // TODO(terry): Simulate sample run of liveData filling up?
+
+    // Take a snapshot
+    await tester.tap(find.byKey(HeapTreeViewState.snapshotButtonKey));
+    await tester.pump();
+
+    final snapshotButton = tester
+        .widget<OutlineButton>(find.byKey(HeapTreeViewState.snapshotButtonKey));
+
+    expect(snapshotButton.enabled, isFalse);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+
+    expect(
+      controller.selectedSnapshotTimestamp.millisecondsSinceEpoch,
+      lessThan(DateTime.now().millisecondsSinceEpoch),
+    );
   });
 }

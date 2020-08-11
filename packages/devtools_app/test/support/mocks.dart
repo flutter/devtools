@@ -22,6 +22,7 @@ import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/vm_service_wrapper.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
@@ -33,9 +34,17 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     bool useFakeService = false,
     this.hasConnection = true,
     this.availableServices = const [],
+    this.availableLibraries = const [],
     Timeline timelineData,
+    SocketProfile socketProfile,
+    MemoryJson memoryData,
   }) : service = useFakeService
-            ? FakeVmService(_flagManager, timelineData)
+            ? FakeVmService(
+                _flagManager,
+                timelineData,
+                socketProfile,
+                memoryData,
+              )
             : MockVmService() {
     _flagManager.service = service;
   }
@@ -43,6 +52,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   static final _flagManager = VmFlagManager();
 
   final List<String> availableServices;
+
+  final List<String> availableLibraries;
 
   final MockVM _mockVM = MockVM();
 
@@ -92,6 +103,11 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
+  bool libraryUriAvailableNow(String uri) {
+    return availableLibraries.any((u) => u.startsWith(uri));
+  }
+
+  @override
   Future<Response> getFlutterVersion() {
     return Future.value(Response.parse({
       'type': 'Success',
@@ -116,19 +132,27 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     hasConnection = value;
     stateChangeStream.add(value);
   }
+
+  @override
+  ValueListenable<bool> get deviceBusy => ValueNotifier(false);
 }
 
 class FakeVmService extends Fake implements VmServiceWrapper {
   FakeVmService(
     this._vmFlagManager,
     this._timelineData,
-  );
+    this._socketProfile,
+    this._memoryData,
+  ) : _startingSockets = _socketProfile?.sockets ?? [];
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
 
   final VmFlagManager _vmFlagManager;
   final Timeline _timelineData;
+  SocketProfile _socketProfile;
+  final List<SocketStatistic> _startingSockets;
+  final MemoryJson _memoryData;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -172,8 +196,29 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       );
 
   @override
+  Future<HeapSnapshotGraph> getHeapSnapshotGraph(IsolateRef isolateRef) async {
+    // Simulate a snapshot that takes .5 seconds.
+    await Future.delayed(const Duration(milliseconds: 500));
+    return null;
+  }
+
+  @override
   Future<Isolate> getIsolate(String isolateId) {
     return Future.value(MockIsolate());
+  }
+
+  @override
+  Future<MemoryUsage> getMemoryUsage(String isolateId) async {
+    if (_memoryData == null) {
+      throw StateError('_memoryData was not provided to FakeServiceManager');
+    }
+
+    final heapSample = _memoryData.data.first;
+    return MemoryUsage(
+      externalUsage: heapSample.external,
+      heapCapacity: heapSample.capacity,
+      heapUsage: heapSample.used,
+    );
   }
 
   @override
@@ -246,6 +291,36 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Future<Success> clearVMTimeline() => Future.value(Success());
 
   @override
+  Future<bool> isSocketProfilingAvailable(String isolateId) {
+    return Future.value(true);
+  }
+
+  @override
+  Future<Success> startSocketProfiling(String isolateId) {
+    return Future.value(Success());
+  }
+
+  @override
+  Future<Success> pauseSocketProfiling(String isolateId) {
+    return Future.value(Success());
+  }
+
+  @override
+  Future<Success> clearSocketProfile(String isolateId) async {
+    _socketProfile.sockets.clear();
+    return Future.value(Success());
+  }
+
+  @override
+  Future<SocketProfile> getSocketProfile(String isolateId) {
+    return Future.value(_socketProfile ?? SocketProfile(sockets: []));
+  }
+
+  void restoreFakeSockets() {
+    _socketProfile = SocketProfile(sockets: _startingSockets);
+  }
+
+  @override
   Future<CpuProfileData> getCpuProfileTimeline(
     String isolateId,
     int origin,
@@ -304,6 +379,10 @@ class FakeIsolateManager extends Fake implements IsolateManager {
 
   @override
   Stream<IsolateRef> get onSelectedIsolateChanged => const Stream.empty();
+
+  @override
+  Completer<bool> get selectedIsolateAvailable =>
+      Completer<bool>()..complete(true);
 }
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {}
@@ -619,7 +698,24 @@ Future<void> ensureInspectorDependencies() async {
   await initializer.ensureInspectorDependencies();
 }
 
-void mockIsFlutterApp(MockConnectedApp connectedApp) {
-  when(connectedApp.isFlutterAppNow).thenReturn(true);
-  when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(true));
+void mockIsFlutterApp(MockConnectedApp connectedApp, [isFlutterApp = true]) {
+  when(connectedApp.isFlutterAppNow).thenReturn(isFlutterApp);
+  when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(isFlutterApp));
+  when(connectedApp.isDebugFlutterAppNow).thenReturn(true);
+}
+
+void mockIsDebugFlutterApp(MockConnectedApp connectedApp,
+    [isDebugFlutterApp = true]) {
+  when(connectedApp.isDebugFlutterAppNow).thenReturn(isDebugFlutterApp);
+  when(connectedApp.isProfileBuildNow).thenReturn(!isDebugFlutterApp);
+}
+
+void mockIsProfileFlutterApp(MockConnectedApp connectedApp,
+    [isProfileFlutterApp = true]) {
+  when(connectedApp.isDebugFlutterAppNow).thenReturn(!isProfileFlutterApp);
+  when(connectedApp.isProfileBuildNow).thenReturn(isProfileFlutterApp);
+}
+
+void mockIsDartVmApp(MockConnectedApp connectedApp, [isDartVmApp = true]) {
+  when(connectedApp.isRunningOnDartVM).thenReturn(isDartVmApp);
 }

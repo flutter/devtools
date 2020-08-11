@@ -12,6 +12,7 @@ import '../config_specific/logger/allowed_error.dart';
 import '../globals.dart';
 import '../http/http_request_data.dart';
 import '../http/http_service.dart';
+import 'network_model.dart';
 import 'network_service.dart';
 
 class NetworkController {
@@ -19,51 +20,55 @@ class NetworkController {
     _networkService = NetworkService(this);
   }
 
-  /// Notifies that new HTTP requests have been processed.
-  ValueListenable<HttpRequests> get requests => _requests;
+  /// Notifies that new Network requests have been processed.
+  ValueListenable<NetworkRequests> get requests => _requests;
 
-  final _requests = ValueNotifier<HttpRequests>(HttpRequests());
+  final _requests = ValueNotifier<NetworkRequests>(NetworkRequests());
 
-  ValueListenable<HttpRequestData> get selectedHttpRequest =>
-      _selectedHttpRequest;
+  ValueListenable<NetworkRequest> get selectedRequest => _selectedRequest;
 
-  final _selectedHttpRequest = ValueNotifier<HttpRequestData>(null);
+  final _selectedRequest = ValueNotifier<NetworkRequest>(null);
 
   /// Notifies that the timeline is currently being recorded.
-  ValueListenable<bool> get recordingNotifier => _httpRecordingNotifier;
-  final _httpRecordingNotifier = ValueNotifier<bool>(false);
+  ValueListenable<bool> get recordingNotifier => _recordingNotifier;
+  final _recordingNotifier = ValueNotifier<bool>(false);
 
   @visibleForTesting
   NetworkService get networkService => _networkService;
   NetworkService _networkService;
 
-  // The timeline timestamps are relative to when the VM started. This value is
-  // equal to `DateTime.now().microsecondsSinceEpoch - _profileStartMicros` when
-  // recording is started is used to calculate the correct wall-time for
-  // timeline events.
+  /// The timeline timestamps are relative to when the VM started.
+  ///
+  /// This value is equal to
+  /// `DateTime.now().microsecondsSinceEpoch - _profileStartMicros` when
+  /// recording is started is used to calculate the correct wall-time for
+  /// timeline events.
   int _timelineMicrosOffset;
-  int lastProfileRefreshMicros = 0;
+
+  /// The last timestamp at which HTTP and Socket information was refreshed.
+  int lastRefreshMicros = 0;
+
+  // TODO(jacobr): clear this flag on hot restart.
+  bool _recordingStateInitializedForIsolates = false;
 
   // The number of active clients helps us track whether we should be polling
   // or not.
   int _countActiveClients = 0;
   Timer _pollingTimer;
 
-  // TODO(jacobr): clear this flag on hot restart.
-  bool _recordingStateInitializedForIsolates = false;
-
   @visibleForTesting
   bool get isPolling => _pollingTimer != null;
 
-  void selectHttpRequest(HttpRequestData selection) {
-    _selectedHttpRequest.value = selection;
+  void selectRequest(NetworkRequest selection) {
+    _selectedRequest.value = selection;
   }
 
   @visibleForTesting
-  static HttpRequests processHttpTimelineEventsHelper(
+  NetworkRequests processNetworkTrafficHelper(
     Timeline timeline,
+    List<SocketStatistic> sockets,
     int timelineMicrosOffset, {
-    @required List<HttpRequestData> currentValues,
+    @required List<NetworkRequest> currentValues,
     @required List<HttpRequestData> invalidRequests,
     @required Map<String, HttpRequestData> outstandingRequestsMap,
   }) {
@@ -126,23 +131,42 @@ class NetworkController {
         invalidRequests.add(requestData);
       }
     }
-    return HttpRequests(
+
+    // [currentValues] contains all the current requests we have in the
+    // profiler, which will contain web socket requests if they exist. The new
+    // [sockets] may contain web sockets with the same ids as ones we already
+    // have, so we remove the current web sockets and replace them with updated
+    // data.
+    currentValues.removeWhere((value) => value is WebSocket);
+    for (final socket in sockets) {
+      final webSocket = WebSocket(socket, timelineMicrosOffset);
+      // If we have updated data for the selected web socket, update the value.
+      if (_selectedRequest.value is WebSocket &&
+          (_selectedRequest.value as WebSocket).id == webSocket.id) {
+        _selectedRequest.value = webSocket;
+      }
+      currentValues.add(webSocket);
+    }
+
+    return NetworkRequests(
       requests: currentValues,
-      invalidRequests: invalidRequests,
-      outstandingRequests: outstandingRequestsMap,
+      invalidHttpRequests: invalidRequests,
+      outstandingHttpRequests: outstandingRequestsMap,
     );
   }
 
-  void processHttpTimelineEvents(Timeline timeline) {
-    // TODO(jacobr): we are creating a copy of the large list of existing
-    // requests each time which is inefficient.
+  void processNetworkTraffic({
+    @required Timeline timeline,
+    @required List<SocketStatistic> sockets,
+  }) {
     // Trigger refresh.
-    _requests.value = processHttpTimelineEventsHelper(
+    _requests.value = processNetworkTrafficHelper(
       timeline,
+      sockets,
       _timelineMicrosOffset,
       currentValues: List.from(requests.value.requests),
       invalidRequests: [],
-      outstandingRequestsMap: Map.from(requests.value.outstandingRequests),
+      outstandingRequestsMap: Map.from(requests.value.outstandingHttpRequests),
     );
   }
 
@@ -150,14 +174,21 @@ class NetworkController {
     await HttpService.toggleHttpRequestLogging(state);
     // Start polling once we've enabled logging.
     updatePollingState(state);
-    _httpRecordingNotifier.value = state;
+    _recordingNotifier.value = state;
   }
 
-  void updatePollingState(bool httpRecordingNotifierValue) {
-    if (httpRecordingNotifierValue && _countActiveClients > 0) {
+  Future<void> _toggleSocketProfiling(bool state) async {
+    await networkService.toggleSocketProfiling(state);
+    // Start polling once we've enabled socket profiling.
+    updatePollingState(state);
+    _recordingNotifier.value = state;
+  }
+
+  void updatePollingState(bool recording) {
+    if (recording && _countActiveClients > 0) {
       _pollingTimer ??= Timer.periodic(
         const Duration(milliseconds: 500),
-        (_) => _networkService.refreshHttpRequests(),
+        (_) => _networkService.refreshNetworkData(),
       );
     } else {
       _pollingTimer?.cancel();
@@ -165,7 +196,8 @@ class NetworkController {
     }
   }
 
-  /// Enables HTTP request recording on all isolates and starts polling.
+  /// Enables network traffic recording on all isolates and starts polling for
+  /// HTTP and Socket information.
   ///
   /// If `alreadyRecording` is true, the last refresh time will be assumed to
   /// be the beginning of the process (time 0).
@@ -187,13 +219,17 @@ class NetworkController {
         serviceManager.service.setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
 
     await _toggleHttpTimelineRecording(true);
+    await _toggleSocketProfiling(true);
   }
 
-  /// Pauses the output of HTTP request information to the timeline.
+  /// Pauses the output of HTTP traffic to the timeline, as well as pauses any
+  /// socket profiling.
   ///
   /// May result in some incomplete timeline events.
-  Future<void> stopRecording() async =>
-      await _toggleHttpTimelineRecording(false);
+  Future<void> stopRecording() async {
+    await _toggleHttpTimelineRecording(false);
+    await _toggleSocketProfiling(false);
+  }
 
   /// Checks to see if HTTP requests are currently being output. If so, recording
   /// is automatically started upon initialization.
@@ -203,19 +239,20 @@ class NetworkController {
       _recordingStateInitializedForIsolates = true;
       await _networkService.initializeRecordingState();
     }
-    updatePollingState(_httpRecordingNotifier.value);
+    updatePollingState(_recordingNotifier.value);
   }
 
   void removeClient() {
     _countActiveClients--;
-    updatePollingState(_httpRecordingNotifier.value);
+    updatePollingState(_recordingNotifier.value);
   }
 
-  /// Clears the previously collected HTTP timeline events and resets the last
-  /// refresh timestamp to the current time.
+  /// Clears the previously collected HTTP timeline events, clears the socket
+  /// profile from the vm, and resets the last refresh timestamp to the current
+  /// time.
   Future<void> clear() async {
-    await _networkService.updateLastRefreshTime();
-    _requests.value = HttpRequests();
-    _selectedHttpRequest.value = null;
+    await _networkService.clearData();
+    _requests.value = NetworkRequests();
+    _selectedRequest.value = null;
   }
 }

@@ -7,7 +7,7 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../auto_dispose_mixin.dart';
 import '../blocking_action_mixin.dart';
-import '../common_widgets.dart';
+import '../connected_app.dart';
 import '../globals.dart';
 import '../initializer.dart';
 import '../octicons.dart';
@@ -24,8 +24,10 @@ import 'inspector_tree_flutter.dart';
 
 class InspectorScreen extends Screen {
   const InspectorScreen()
-      : super(
-          'inspector',
+      : super.conditional(
+          id: 'inspector',
+          requiresLibrary: flutterLibraryUri,
+          requiresDebugBuild: true,
           title: 'Flutter Inspector',
           icon: Octicons.deviceMobile,
         );
@@ -34,16 +36,7 @@ class InspectorScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  Widget build(BuildContext context) {
-    final isFlutterApp = serviceManager.connectedApp.isFlutterAppNow;
-    final isProfileBuild = serviceManager.connectedApp.isProfileBuildNow;
-    if (!isFlutterApp || isProfileBuild) {
-      return !isFlutterApp
-          ? const DisabledForNonFlutterAppMessage()
-          : const DisabledForProfileBuildMessage();
-    }
-    return const InspectorScreenBody();
-  }
+  Widget build(BuildContext context) => const InspectorScreenBody();
 }
 
 class InspectorScreenBody extends StatefulWidget {

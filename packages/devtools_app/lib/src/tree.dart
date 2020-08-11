@@ -105,20 +105,20 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
       child: Padding(
         padding: EdgeInsets.only(left: nodeIndent(widget.data)),
         child: Row(
-            mainAxisSize: MainAxisSize.min,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              widget.data.isExpandable
-                  ? RotationTransition(
-                      turns: expandArrowAnimation,
-                      child: const Icon(
-                        Icons.arrow_drop_down,
-                        size: defaultIconSize,
-                      ),
-                    )
-                  : const SizedBox(width: defaultIconSize),
-              Expanded(child: widget.display),
-            ]),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            widget.data.isExpandable
+                ? RotationTransition(
+                    turns: expandArrowAnimation,
+                    child: const Icon(
+                      Icons.arrow_drop_down,
+                      size: defaultIconSize,
+                    ),
+                  )
+                : const SizedBox(width: defaultIconSize),
+            Expanded(child: widget.display),
+          ],
+        ),
       ),
     );
   }

@@ -85,27 +85,28 @@ dart bin/devtools.dart
   generally work, and there are no exceptions in the chrome devtools log
 
 #### Publish the packages
-Paste this multiline block into your console, and follow the confirmation prompts to upload the packages.
+Paste each of these multiline blocks into your console, and follow the confirmation prompts to upload the packages.
 
 ```shell
 pushd packages/devtools_shared
 pub publish
-popd
 
+popd
 pushd packages/devtools_server
 pub publish
-popd
 
+popd
 pushd packages/devtools_testing
 pub publish
-popd
 
+popd
 pushd packages/devtools_app
 pub publish
-popd
 
+popd
 pushd packages/devtools
 pub publish
+
 popd
 
 ```

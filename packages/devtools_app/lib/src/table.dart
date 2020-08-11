@@ -50,6 +50,7 @@ class FlatTable<T> extends StatefulWidget {
     @required this.onItemSelected,
     @required this.sortColumn,
     @required this.sortDirection,
+    this.onSortChanged,
   })  : assert(columns != null),
         assert(keyFactory != null),
         assert(data != null),
@@ -71,6 +72,8 @@ class FlatTable<T> extends StatefulWidget {
   final ColumnData<T> sortColumn;
 
   final SortDirection sortDirection;
+
+  final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
 
   @override
   FlatTableState<T> createState() => FlatTableState<T>();
@@ -160,6 +163,9 @@ class FlatTableState<T> extends State<FlatTable<T>>
   void _sortDataAndUpdate(ColumnData column, SortDirection direction) {
     setState(() {
       sortData(column, direction);
+      if (widget.onSortChanged != null) {
+        widget.onSortChanged(column, direction);
+      }
     });
   }
 
@@ -778,7 +784,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
               child: Scrollbar(
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,
-                  onTapDown: (a) => widget.focusNode.requestFocus(),
+                  onTapDown: (a) => widget.focusNode?.requestFocus(),
                   child: Focus(
                     autofocus: true,
                     onKey: (_, event) => widget.handleKeyEvent != null
@@ -1047,7 +1053,8 @@ class _TableRowState<T> extends State<TableRow<T>>
                       : Icons.expand_more,
                   size: defaultIconSize,
                 ),
-              if (isSortColumn) const SizedBox(width: densePadding),
+              if (isSortColumn)
+                const SizedBox(width: densePadding),
               // TODO: This Flexible wrapper was added to get the
               // network_profiler_test.dart tests to pass.
               Flexible(

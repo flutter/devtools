@@ -16,13 +16,20 @@ import '../theme.dart';
 import '../ui/label.dart';
 import 'memory_chart.dart';
 import 'memory_controller.dart';
+import 'memory_events_pane.dart';
 import 'memory_heap_tree_view.dart';
 
 /// Width of application when memory buttons loose their text.
 const _primaryControlsMinVerboseWidth = 1100.0;
 
 class MemoryScreen extends Screen {
-  const MemoryScreen() : super(id, title: 'Memory', icon: Octicons.package);
+  const MemoryScreen()
+      : super.conditional(
+          id: id,
+          requiresDartVm: true,
+          title: 'Memory',
+          icon: Octicons.package,
+        );
 
   @visibleForTesting
   static const pauseButtonKey = Key('Pause Button');
@@ -47,8 +54,6 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const exportButtonKey = Key('Export Button');
   @visibleForTesting
-  static const resetButtonKey = Key('Reset Button');
-  @visibleForTesting
   static const gcButtonKey = Key('GC Button');
 
   static const memorySourceMenuItemPrefix = 'Source: ';
@@ -59,12 +64,7 @@ class MemoryScreen extends Screen {
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) {
-    final connected = serviceManager?.connectedApp;
-    return connected != null && !connected.isDartWebAppNow
-        ? const MemoryBody()
-        : const DisabledForWebAppMessage();
-  }
+  Widget build(BuildContext context) => const MemoryBody();
 }
 
 class MemoryBody extends StatefulWidget {
@@ -79,6 +79,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   static const androidChartButtonKey = Key('Android Chart');
 
   MemoryChart _memoryChart;
+  MemoryEventsPane _memoryEvents;
 
   MemoryController controller;
 
@@ -116,6 +117,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         ? MemoryScreen.memorySourceMenuItemPrefix
         : '';
 
+    _memoryEvents ??= MemoryEventsPane();
     _memoryChart = MemoryChart();
 
     return Column(
@@ -128,8 +130,13 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
             _buildMemoryControls(textTheme),
           ],
         ),
-        const SizedBox(height: denseSpacing),
-        _memoryChart,
+        SizedBox(
+          height: 50,
+          child: _memoryEvents,
+        ),
+        SizedBox(
+          child: _memoryChart,
+        ),
         const PaddedDivider(padding: EdgeInsets.zero),
         Expanded(
           child: HeapTree(controller),
@@ -319,16 +326,6 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         createToggleAdbMemoryButton(),
         const SizedBox(width: denseSpacing),
         OutlineButton(
-          key: MemoryScreen.resetButtonKey,
-          onPressed: _reset,
-          child: const MaterialIconLabel(
-            Icons.restore,
-            'Reset',
-            includeTextWidth: _primaryControlsMinVerboseWidth,
-          ),
-        ),
-        const SizedBox(width: denseSpacing),
-        OutlineButton(
           key: MemoryScreen.gcButtonKey,
           onPressed: controller.isGcing ? null : _gc,
           child: const MaterialIconLabel(
@@ -357,22 +354,27 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   void _clearTimeline() {
     controller.memoryTimeline.reset();
 
+    // Clear any current Allocation Profile collected.
+    controller.monitorAllocations = [];
+
     // Clear all analysis and snapshots collected too.
     controller.clearAllSnapshots();
+    controller.classRoot = null;
     controller.topNode = null;
     controller.selectedSnapshotTimestamp = null;
-  }
-
-  void _reset() async {
-    // TODO(terry): TBD real implementation needed.
   }
 
   Future<void> _gc() async {
     // TODO(terry): Record GC in analytics.
     try {
-      log('GC Start', LogLevel.warning);
+      log('User Initiated GC Start');
+
+      // TODO(terry): Only record GCs not when user initiated.
+      controller.memoryTimeline.addGCEvent();
+
       await controller.gc();
-      log('GC Complete', LogLevel.warning);
+
+      log('User GC Complete');
     } catch (e) {
       // TODO(terry): Show toast?
       log('Unable to GC ${e.toString()}', LogLevel.error);

@@ -9,6 +9,7 @@ import '../../globals.dart';
 import '../../notifications.dart';
 import '../../timeline/timeline_model.dart';
 import '../../timeline/timeline_screen.dart';
+import '../../utils.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
@@ -44,7 +45,9 @@ class ImportController {
   DateTime previousImportTime;
 
   // TODO(kenz): improve error handling here or in snapshot_screen.dart.
-  void importData(Map<String, dynamic> json) {
+  void importData(DevToolsJsonFile jsonFile) {
+    final json = jsonFile.data;
+
     // Do not allow two different imports within 500 ms of each other. This is a
     // workaround for the fact that we get two drop events for the same file.
     final now = DateTime.now();
@@ -56,15 +59,17 @@ class ImportController {
     }
     previousImportTime = now;
 
-    final isDevToolsSnapshot = json[devToolsSnapshotKey];
-    if (isDevToolsSnapshot == null || !isDevToolsSnapshot) {
+    final isDevToolsSnapshot =
+        json is Map<String, dynamic> && json[devToolsSnapshotKey] == true;
+    if (!isDevToolsSnapshot) {
       _notifications.push(nonDevToolsFileMessage);
       return;
     }
 
+    final devToolsSnapshot = json as Map<String, dynamic>;
     // TODO(kenz): support imports for more than one screen at a time.
-    final activeScreenId = json[activeScreenIdKey];
-    offlineDataJson = json;
+    final activeScreenId = devToolsSnapshot[activeScreenIdKey];
+    offlineDataJson = devToolsSnapshot;
     _notifications.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);
   }

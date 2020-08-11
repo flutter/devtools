@@ -2,18 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
 
 import 'common_widgets.dart';
+import 'config_specific/ide_theme/ide_theme.dart';
 import 'ui/theme.dart';
 
-/// Constructs the light or dark theme for the app.
-ThemeData themeFor({@required bool isDarkTheme}) {
-  return isDarkTheme ? _darkTheme() : _lightTheme();
+/// Constructs the light or dark theme for the app taking into account
+/// IDE-supplied theming.
+ThemeData themeFor({
+  @required bool isDarkTheme,
+  @required IdeTheme ideTheme,
+}) {
+  // If the theme specifies a background color, use it to infer a theme.
+  if (isValidDarkColor(ideTheme?.backgroundColor)) {
+    return _darkTheme(ideTheme);
+  } else if (isValidLightColor(ideTheme?.backgroundColor)) {
+    return _lightTheme(ideTheme);
+  }
+
+  return isDarkTheme ? _darkTheme(ideTheme) : _lightTheme(ideTheme);
 }
 
-ThemeData _darkTheme() {
+ThemeData _darkTheme(IdeTheme ideTheme) {
   final theme = ThemeData.dark();
   return theme.copyWith(
     primaryColor: devtoolsGrey[900],
@@ -25,10 +39,13 @@ ThemeData _darkTheme() {
     toggleableActiveColor: devtoolsBlue[400],
     selectedRowColor: devtoolsGrey[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
+    scaffoldBackgroundColor: isValidDarkColor(ideTheme?.backgroundColor)
+        ? ideTheme?.backgroundColor
+        : null,
   );
 }
 
-ThemeData _lightTheme() {
+ThemeData _lightTheme(IdeTheme ideTheme) {
   final theme = ThemeData.light();
   return theme.copyWith(
     primaryColor: devtoolsBlue[600],
@@ -40,7 +57,28 @@ ThemeData _lightTheme() {
     toggleableActiveColor: devtoolsBlue[400],
     selectedRowColor: devtoolsBlue[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
+    scaffoldBackgroundColor: isValidLightColor(ideTheme?.backgroundColor)
+        ? ideTheme?.backgroundColor
+        : null,
   );
+}
+
+bool isValidDarkColor(Color color) {
+  if (color == null) {
+    return false;
+  }
+  // TODO(dantup): Pick good threshold
+  final components = [color.red, color.green, color.blue];
+  return components.reduce(max) < 50;
+}
+
+bool isValidLightColor(Color color) {
+  if (color == null) {
+    return false;
+  }
+  // TODO(dantup): Pick good threshold
+  final components = [color.red, color.green, color.blue];
+  return components.reduce(min) > 205;
 }
 
 const buttonMinWidth = 36.0;
@@ -60,7 +98,7 @@ const smallProgressSize = 12.0;
 
 const defaultListItemHeight = 28.0;
 
-const defaultChartHeight = 160.0;
+const defaultChartHeight = 140.0;
 
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 

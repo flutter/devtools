@@ -32,7 +32,14 @@ import 'timeline_model.dart';
 // where applicable.
 
 class TimelineScreen extends Screen {
-  const TimelineScreen() : super(id, title: 'Timeline', icon: Octicons.pulse);
+  const TimelineScreen()
+      : super.conditional(
+          id: id,
+          requiresDartVm: true,
+          worksOffline: true,
+          title: 'Timeline',
+          icon: Octicons.pulse,
+        );
 
   @visibleForTesting
   static const refreshButtonKey = Key('Refresh Button');
@@ -47,11 +54,7 @@ class TimelineScreen extends Screen {
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) {
-    return offlineMode || !serviceManager.connectedApp.isDartWebAppNow
-        ? const TimelineScreenBody()
-        : const DisabledForWebAppMessage();
-  }
+  Widget build(BuildContext context) => const TimelineScreenBody();
 }
 
 class TimelineScreenBody extends StatefulWidget {

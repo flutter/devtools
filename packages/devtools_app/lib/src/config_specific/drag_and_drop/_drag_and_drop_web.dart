@@ -6,38 +6,28 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 
-import 'package:flutter/material.dart';
-
+import '../../utils.dart';
 import 'drag_and_drop.dart';
 
-DragAndDropWeb createDragAndDrop({
-  @required void Function(Map<String, dynamic> data) handleDrop,
-  @required Widget child,
-}) {
-  return DragAndDropWeb(handleDrop: handleDrop, child: child);
+DragAndDropManagerWeb createDragAndDropManager() {
+  return DragAndDropManagerWeb();
 }
 
-class DragAndDropWeb extends DragAndDrop {
-  const DragAndDropWeb({
-    @required void Function(Map<String, dynamic> data) handleDrop,
-    @required Widget child,
-  }) : super.impl(handleDrop: handleDrop, child: child);
+class DragAndDropManagerWeb extends DragAndDropManager {
+  DragAndDropManagerWeb() : super.impl();
 
-  @override
-  _DragAndDropWebState createState() => _DragAndDropWebState();
-}
-
-class _DragAndDropWebState extends DragAndDropState {
   StreamSubscription<MouseEvent> onDragOverSubscription;
+
   StreamSubscription<MouseEvent> onDropSubscription;
+
   StreamSubscription<MouseEvent> onDragLeaveSubscription;
 
   @override
-  void initState() {
+  void init() {
+    super.init();
     onDragOverSubscription = document.body.onDragOver.listen(_onDragOver);
     onDragLeaveSubscription = document.body.onDragLeave.listen(_onDragLeave);
     onDropSubscription = document.body.onDrop.listen(_onDrop);
-    super.initState();
   }
 
   @override
@@ -49,31 +39,36 @@ class _DragAndDropWebState extends DragAndDropState {
   }
 
   void _onDragOver(MouseEvent event) {
-    super.dragOver();
+    dragOver(event.offset.x, event.offset.y);
+
     // This is necessary to allow us to drop.
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }
 
   void _onDragLeave(MouseEvent event) {
-    super.dragLeave();
+    dragLeave();
   }
 
   void _onDrop(MouseEvent event) async {
-    super.drop();
+    drop();
 
     // Stop the browser from redirecting.
     event.preventDefault();
 
+    // If there is no active state or the active state does not have a drop
+    // handler, return early.
+    if (activeState?.widget?.handleDrop == null) return;
+
     final List<File> files = event.dataTransfer.files;
     if (files.length > 1) {
-      notifications.push('You cannot import more than one file.');
+      activeState.notifications.push('You cannot import more than one file.');
       return;
     }
 
     final droppedFile = files.first;
     if (droppedFile.type != 'application/json') {
-      notifications.push(
+      activeState.notifications.push(
           '${droppedFile.type} is not a supported file type. Please import '
           'a .json file that was exported from Dart DevTools.');
       return;
@@ -82,10 +77,15 @@ class _DragAndDropWebState extends DragAndDropState {
     final FileReader reader = FileReader();
     reader.onLoad.listen((_) {
       try {
-        final Map<String, dynamic> json = jsonDecode(reader.result);
-        widget.handleDrop(json);
+        final Object json = jsonDecode(reader.result);
+        final devToolsJsonFile = DevToolsJsonFile(
+          name: droppedFile.name,
+          lastModifiedTime: droppedFile.lastModifiedDate,
+          data: json,
+        );
+        activeState.widget.handleDrop(devToolsJsonFile);
       } on FormatException catch (e) {
-        notifications.push(
+        activeState.notifications.push(
           'JSON syntax error in imported file: "$e". Please make sure the '
           'imported file is a Dart DevTools file, and check that it has not '
           'been modified.',
@@ -97,7 +97,7 @@ class _DragAndDropWebState extends DragAndDropState {
     try {
       reader.readAsText(droppedFile);
     } catch (e) {
-      notifications.push('Could not import file: $e');
+      activeState.notifications.push('Could not import file: $e');
     }
   }
 }

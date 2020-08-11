@@ -71,14 +71,6 @@ void main() {
       expect(find.text('Debugger'), findsOneWidget);
     });
 
-    testWidgets('builds disabled message when disabled for profile mode',
-        (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(true);
-      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
-      expect(find.byType(DebuggerScreenBody), findsNothing);
-      expect(find.byType(DisabledForProfileBuildMessage), findsOneWidget);
-    });
-
     testWidgets('has Console / stdio area', (WidgetTester tester) async {
       when(debuggerController.stdio).thenReturn(ValueNotifier(['test stdio']));
 
@@ -208,7 +200,7 @@ void main() {
       when(debuggerController.librariesVisible)
           .thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Libraries and Classes'), findsNothing);
+      expect(find.text('Libraries'), findsNothing);
     });
 
     testWidgets('Libraries visible', (WidgetTester tester) async {
@@ -223,8 +215,8 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Libraries'), findsOneWidget);
 
-      // test for items in the libraries list
-      expect(find.text(scripts.first.uri), findsOneWidget);
+      // test for items in the libraries tree
+      expect(find.text(scripts.first.uri.split('/').first), findsOneWidget);
     });
 
     testWidgets('Breakpoints show items', (WidgetTester tester) async {

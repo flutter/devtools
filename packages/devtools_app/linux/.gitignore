@@ -1,7 +1,1 @@
-app_configuration.mk
-Makefile
-flutter
 flutter/ephemeral
-window_configuration.cc
-window_configuration.h
-

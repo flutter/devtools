@@ -55,7 +55,7 @@ Future<void> main() async {
       await preferences.init();
       final app = DefaultAssetBundle(
         bundle: _DiskAssetBundle(),
-        child: DevToolsApp(const [], preferences),
+        child: DevToolsApp(const [], preferences, null),
       );
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
@@ -144,7 +144,7 @@ void validateJSONFile(List<Verbose> values) {
   final file = File('${Directory.current.path}/${ParseStdout.jsonFilename}');
   final contents = file.readAsStringSync();
 
-  final memoryJson = MemoryJson.decode(contents);
+  final memoryJson = MemoryJson.decode(argJsonString: contents);
   expect(memoryJson.isMatchedVersion, isTrue);
   expect(memoryJson.isMemoryPayload, isTrue);
 

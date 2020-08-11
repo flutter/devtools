@@ -3,40 +3,40 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 
 import '../common_widgets.dart';
+import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../theme.dart';
 import '../ui/label.dart';
+import '../utils.dart';
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
     @required this.title,
+    @required this.instructions,
     this.actionText,
     this.onAction,
     this.onFileSelected,
-    this.importNewFile = true,
     Key key,
   }) : super(key: key);
 
   final String title;
 
+  final String instructions;
+
   /// The title of the action button.
   final String actionText;
 
-  final Function(String filePath) onAction;
+  final DevToolsJsonFileHandler onAction;
 
-  final Function(String filePath) onFileSelected;
-
-  // TODO(peterdjlee): Remove once the file picker is implemented.
-  final bool importNewFile;
+  final DevToolsJsonFileHandler onFileSelected;
 
   @override
   _FileImportContainerState createState() => _FileImportContainerState();
 }
 
 class _FileImportContainerState extends State<FileImportContainer> {
-  String importedFile;
+  DevToolsJsonFile importedFile;
 
   @override
   Widget build(BuildContext context) {
@@ -48,19 +48,22 @@ class _FileImportContainerState extends State<FileImportContainer> {
         ),
         const SizedBox(height: defaultSpacing),
         Expanded(
-          child: RoundedOutlinedBorder(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
+          // TODO(kenz): improve drag over highlight.
+          child: DragAndDrop(
+            handleDrop: _handleImportedFile,
+            child: RoundedOutlinedBorder(
+              child: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildImportButton(),
-                    _buildImportedFileDisplay(context),
+                    _buildImportInstructions(),
+                    _buildImportFileRow(),
+                    if (widget.actionText != null && widget.onAction != null)
+                      _buildActionButton(),
                   ],
                 ),
-                if (widget.actionText != null && widget.onAction != null)
-                  _buildActionButton(),
-              ],
+              ),
             ),
           ),
         ),
@@ -68,49 +71,81 @@ class _FileImportContainerState extends State<FileImportContainer> {
     );
   }
 
-  Column _buildImportedFileDisplay(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(height: defaultSpacing),
-        Text(
-          importedFile != null ? importedFile : 'No File Selected',
-          style: TextStyle(
-            color: Theme.of(context).textTheme.headline1.color,
-          ),
-          textAlign: TextAlign.center,
+  Widget _buildImportInstructions() {
+    return Padding(
+      padding: const EdgeInsets.all(defaultSpacing),
+      child: Text(
+        widget.instructions,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Theme.of(context).textTheme.headline1.color,
         ),
-      ],
+      ),
     );
   }
 
-  Row _buildImportButton() {
+  Widget _buildImportFileRow() {
+    const rowHeight = 37.0;
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        OutlineButton(
-          onPressed: () {
-            // TODO(peterdjlee): Prompt file picker to choose a file.
-            setState(() {
-              if (widget.importNewFile) {
-                importedFile =
-                    '$current/lib/src/code_size/stub_data/old_v8.dart';
-              } else {
-                importedFile =
-                    '$current/lib/src/code_size/stub_data/new_v8.dart';
-              }
-            });
-
-            if (widget.onFileSelected != null)
-              widget.onFileSelected(importedFile);
-          },
-          child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
+        // Horizontal spacer with flex value of 1.
+        const Flexible(
+          child: SizedBox(height: rowHeight),
+        ),
+        Flexible(
+          flex: 4,
+          fit: FlexFit.tight,
+          child: Container(
+            height: rowHeight,
+            padding: const EdgeInsets.all(denseSpacing),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(color: theme.focusColor),
+                bottom: BorderSide(color: theme.focusColor),
+                left: BorderSide(color: theme.focusColor),
+                // TODO(kenz): remove right border when we add the import button
+                right: BorderSide(color: theme.focusColor),
+              ),
+            ),
+            child: _buildImportedFileDisplay(),
+          ),
+        ),
+        // TODO(kenz): uncomment once file picker support is added
+        // _buildImportButton(),
+        // Horizontal spacer with flex value of 1.
+        const Flexible(
+          child: SizedBox(height: rowHeight),
         ),
       ],
     );
   }
 
-  Column _buildActionButton() {
+  Widget _buildImportedFileDisplay() {
+    return Text(
+      importedFile?.path ?? 'No File Selected',
+      style: TextStyle(
+        color: Theme.of(context).textTheme.headline1.color,
+      ),
+      textAlign: TextAlign.left,
+    );
+  }
+
+// TODO(kenz): uncomment once file picker support is added
+//  Widget _buildImportButton() {
+//    return Row(
+//      mainAxisAlignment: MainAxisAlignment.center,
+//      children: [
+//        OutlineButton(
+//          onPressed: () {},
+//          child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
+//        ),
+//      ],
+//    );
+//  }
+
+  Widget _buildActionButton() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -132,25 +167,45 @@ class _FileImportContainerState extends State<FileImportContainer> {
       ],
     );
   }
+
+  // TODO(kenz): add error handling to ensure we only allow importing supported
+  // files.
+  void _handleImportedFile(DevToolsJsonFile file) {
+    setState(() {
+      importedFile = file;
+    });
+    if (widget.onFileSelected != null) {
+      widget.onFileSelected(file);
+    }
+  }
 }
 
 class DualFileImportContainer extends StatefulWidget {
   const DualFileImportContainer({
     @required this.firstFileTitle,
     @required this.secondFileTitle,
+    @required this.firstInstructions,
+    @required this.secondInstructions,
     @required this.actionText,
     @required this.onAction,
     Key key,
-  }) : super(key: key);
+  });
 
   final String firstFileTitle;
 
   final String secondFileTitle;
 
+  final String firstInstructions;
+
+  final String secondInstructions;
+
   /// The title of the action button.
   final String actionText;
 
-  final Function(String firstFilePath, String secondFilePath) onAction;
+  final Function(
+    DevToolsJsonFile firstImportedFile,
+    DevToolsJsonFile secondImportedFile,
+  ) onAction;
 
   @override
   _DualFileImportContainerState createState() =>
@@ -158,8 +213,8 @@ class DualFileImportContainer extends StatefulWidget {
 }
 
 class _DualFileImportContainerState extends State<DualFileImportContainer> {
-  String firstFilePath;
-  String secondFilePath;
+  DevToolsJsonFile firstImportedFile;
+  DevToolsJsonFile secondImportedFile;
 
   @override
   Widget build(BuildContext context) {
@@ -168,8 +223,8 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Expanded(
           child: FileImportContainer(
             title: widget.firstFileTitle,
+            instructions: widget.firstInstructions,
             onFileSelected: onFirstFileSelected,
-            importNewFile: false,
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -178,6 +233,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Expanded(
           child: FileImportContainer(
             title: widget.secondFileTitle,
+            instructions: widget.secondInstructions,
             onFileSelected: onSecondFileSelected,
           ),
         ),
@@ -185,19 +241,19 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
     );
   }
 
-  void onFirstFileSelected(String selectedFirstFilePath) {
+  void onFirstFileSelected(DevToolsJsonFile selectedFile) {
     setState(() {
-      firstFilePath = selectedFirstFilePath;
+      firstImportedFile = selectedFile;
     });
   }
 
-  void onSecondFileSelected(String selectedSecondFilePath) {
+  void onSecondFileSelected(DevToolsJsonFile selectedFile) {
     setState(() {
-      secondFilePath = selectedSecondFilePath;
+      secondImportedFile = selectedFile;
     });
   }
 
-  Column _buildActionButton() {
+  Widget _buildActionButton() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -206,8 +262,8 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             RaisedButton(
-              onPressed: firstFilePath != null && secondFilePath != null
-                  ? () => widget.onAction(firstFilePath, secondFilePath)
+              onPressed: firstImportedFile != null && secondImportedFile != null
+                  ? () => widget.onAction(firstImportedFile, secondImportedFile)
                   : null,
               child: MaterialIconLabel(
                 Icons.highlight,

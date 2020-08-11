@@ -9,8 +9,8 @@ import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/console.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/logging/logging_screen.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
+import 'package:devtools_app/src/logging/logging_screen.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/service_extension_widgets.dart';
@@ -56,16 +56,6 @@ void main() {
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
       expect(find.text('Logging'), findsOneWidget);
-    });
-
-    testWidgets('builds disabled message when disabled for flutter web app',
-        (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isFlutterWebAppNow).thenReturn(true);
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(true);
-      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
-      expect(find.byType(LoggingScreenBody), findsNothing);
-      expect(find.byType(DisabledForFlutterWebProfileBuildMessage),
-          findsOneWidget);
     });
 
     testWidgets('builds with no data', (WidgetTester tester) async {
