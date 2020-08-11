@@ -9,6 +9,9 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
 import 'package:flutter/widgets.dart';
 
 /// A [ScrollView] that uses a single child layout model and allows for custom
@@ -89,6 +92,7 @@ class CustomPointerScrollable extends StatefulWidget {
     this.excludeFromSemantics = false,
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.restorationId,
     this.customPointerSignalHandler,
   })  : assert(axisDirection != null),
         assert(dragStartBehavior != null),
@@ -226,6 +230,22 @@ class CustomPointerScrollable extends StatefulWidget {
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@template flutter.widgets.scrollable.restorationId}
+  /// Restoration ID to save and restore the scroll offset of the scrollable.
+  ///
+  /// If a restoration id is provided, the scrollable will persist its current
+  /// scroll offset and restore it during state restoration.
+  ///
+  /// The scroll offset is persisted in a [RestorationBucket] claimed from
+  /// the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  /// {@endtemplate}
+  final String restorationId;
+
   /// The axis along which the scroll view scrolls.
   ///
   /// Determined by the [axisDirection].
@@ -242,6 +262,7 @@ class CustomPointerScrollable extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
     properties.add(DiagnosticsProperty<ScrollPhysics>('physics', physics));
+    properties.add(StringProperty('restorationId', restorationId));
   }
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -322,7 +343,7 @@ class CustomPointerScrollable extends StatefulWidget {
 /// [ScrollableState._receivedPointerSignal] with
 /// [CustomPointerScrollable.customPointerSignalHandler] when non-null.
 class _CustomPointerScrollableState extends State<CustomPointerScrollable>
-    with TickerProviderStateMixin
+    with TickerProviderStateMixin, RestorationMixin
     implements ScrollContext {
   /// The manager for this [Scrollable] widget's viewport position.
   ///
@@ -331,6 +352,9 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
   /// [ScrollPosition] in its [ScrollController.createScrollPosition] method.
   ScrollPosition get position => _position;
   ScrollPosition _position;
+
+  final _RestorableScrollOffset _persistedScrollOffset =
+      _RestorableScrollOffset();
 
   @override
   AxisDirection get axisDirection => widget.axisDirection;
@@ -358,6 +382,25 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
             physics: _physics, context: this, oldPosition: oldPosition);
     assert(position != null);
     controller?.attach(position);
+  }
+
+  @override
+  void restoreState(RestorationBucket oldBucket) {
+    registerForRestoration(_persistedScrollOffset, 'offset');
+    assert(position != null);
+    if (_persistedScrollOffset.value != null) {
+      position.restoreOffset(_persistedScrollOffset.value,
+          initialRestore: oldBucket == null);
+    }
+  }
+
+  @override
+  void saveOffset(double offset) {
+    assert(debugIsSerializableForRestoration(offset));
+    _persistedScrollOffset.value = offset;
+    // [saveOffset] is called after a scrolling ends and it is usually not
+    // followed by a frame. Therefore, manually flush restoration data.
+    ServicesBinding.instance.restorationManager.flushData();
   }
 
   @override
@@ -394,6 +437,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
   void dispose() {
     widget.controller?.detach(position);
     position.dispose();
+    _persistedScrollOffset.dispose();
     super.dispose();
   }
 
@@ -654,6 +698,9 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ScrollPosition>('position', position));
   }
+
+  @override
+  String get restorationId => widget.restorationId;
 }
 
 // The following classes were copied from the Flutter framework with minor
@@ -827,4 +874,29 @@ class _RenderScrollSemantics extends RenderProxyBox {
     super.clearSemantics();
     _innerNode = null;
   }
+}
+
+// Not using a RestorableDouble because we want to allow null values and override
+// [enabled].
+class _RestorableScrollOffset extends RestorableValue<double> {
+  @override
+  double createDefaultValue() => null;
+
+  @override
+  void didUpdateValue(double oldValue) {
+    notifyListeners();
+  }
+
+  @override
+  double fromPrimitives(Object data) {
+    return data as double;
+  }
+
+  @override
+  Object toPrimitives() {
+    return value;
+  }
+
+  @override
+  bool get enabled => value != null;
 }
