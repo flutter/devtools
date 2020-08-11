@@ -7,15 +7,8 @@
 # Fast fail the script on failures.
 set -ex
 
-# In GitBash on Windows, we have to call pub.bat and flutter.bat so we alias
-# them in this script to call the correct one based on the OS.
-function pub {
-	if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-        command pub.bat "$@"
-    else
-        command pub "$@"
-    fi
-}
+# In GitBash on Windows, we have to call flutter.bat so we alias them in this
+# script to call the correct one based on the OS.
 function flutter {
 	if [[ $TRAVIS_OS_NAME == "windows" ]]; then
         command flutter.bat "$@"
@@ -28,19 +21,8 @@ function flutter {
 # adjacent to the devtools_app package.
 pushd packages/devtools
     # We want to make sure that devtools is retrievable with regular pub.
-    pub get
-    # Only package:devtools and package:devtools_server should be built with
-    # the pub tool. All other devtools packages and their tests now run on
-    # the flutter tool, so all other invocations of pub in this script should
-    # call 'flutter pub' instead of just 'pub'.
+    flutter pub get
 popd
-
-# Add globally activated packages to the path.
-if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-    export PATH=$PATH:$APPDATA/Roaming/Pub/Cache/bin
-else
-    export PATH=$PATH:~/.pub-cache/bin
-fi
 
 if [[ $TRAVIS_OS_NAME == "windows" ]]; then
     echo Installing Google Chrome Stable...
@@ -50,27 +32,27 @@ if [[ $TRAVIS_OS_NAME == "windows" ]]; then
 fi
 
 # Get Flutter.
-if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
+if [ "$CHANNEL" = "stable" ]; then
     echo "Cloning stable Flutter branch"
     git clone https://github.com/flutter/flutter.git --branch stable ./flutter
 
     # Set the suffix so we use stable goldens.
     export DEVTOOLS_GOLDENS_SUFFIX="_stable"
 else
-    echo "Cloning master Flutter branch"
-    git clone https://github.com/flutter/flutter.git --branch master ./flutter
-    # Set the suffix so we use the master goldens
+    echo "Cloning Flutter $CHANNEL"
+    git clone https://github.com/flutter/flutter.git --branch $CHANNEL ./flutter
+    # Set the suffix so we use the non-stable goldens
     export DEVTOOLS_GOLDENS_SUFFIX=""
 fi
 
 export PATH=`pwd`/flutter/bin:$PATH
-export PATH=`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
 export PATH=`pwd`/bin:$PATH
 
 flutter config --no-analytics
 flutter doctor
 
-# We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
+echo "which flutter: " `which flutter`
+# We should be using dart from ../flutter/bin/dart.
 echo "which dart: " `which dart`
 
 pushd packages/devtools_app
@@ -83,6 +65,7 @@ dart --disable-analytics
 # Print out the versions and ensure we can call Dart, Pub, and Flutter.
 dart --version
 flutter pub --version
+
 # Put the Flutter version into a variable.
 # First awk extracts "Flutter x.y.z-pre.a":
 #   -F '•'         uses the bullet as field separator
@@ -96,7 +79,6 @@ if [ "$BOT" = "main" ]; then
 
     # Provision our packages.
     flutter pub get
-    flutter pub global activate webdev
 
     # Verify that dart format has been run.
     echo "Checking dart format..."
@@ -111,7 +93,7 @@ if [ "$BOT" = "main" ]; then
     repo_tool repo-check
 
     # Analyze the source.
-    flutter pub global activate tuneup && flutter pub global run tuneup check
+    dart analyze
 
     # Ensure we can build the app.
     flutter pub run build_runner build -o web:build --release
