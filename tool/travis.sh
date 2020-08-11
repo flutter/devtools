@@ -84,12 +84,7 @@ if [ "$BOT" = "main" ]; then
 
     # Verify that dart format has been run.
     echo "Checking dart format..."
-
-    if [[ $(dart format --output=none --set-exit-if-changed lib/ test/ web/) ]]; then
-        echo "Failed dart format check: run dart format lib/ test/ web/"
-        dart format --output=none --set-exit-if-changed lib/ test/ web/
-        exit 1
-    fi
+    dart format --output=none --set-exit-if-changed lib/ test/ web/
 
     # Make sure the app versions are in sync.
     repo_tool repo-check

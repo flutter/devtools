@@ -21,7 +21,8 @@ env:
   global:
     - CHANNEL=dev
   jobs:
-    - BOT=main
+    - BOT=main                CHANNEL=dev
+    - BOT=main                CHANNEL=master
     - BOT=packages
     - BOT=test_ddc            PLATFORM=vm
     - BOT=test_ddc            PLATFORM=chrome
