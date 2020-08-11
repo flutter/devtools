@@ -36,18 +36,12 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
   @override
   void initState() {
     super.initState();
-    try {
-      if (_provider.isGtagsEnabled) {
-        if (_provider.isFirstRun) {
-          setState(() {
-            _isVisible = true;
-          });
-        } else if (_provider.isEnabled) {
-          _provider.setUpAnalytics();
-        }
+    if (_provider.isGtagsEnabled) {
+      if (_provider.isFirstRun) {
+        _isVisible = true;
+      } else if (_provider.isEnabled) {
+        _provider.setUpAnalytics();
       }
-    } catch (e) {
-      print('Error collecting analytics:\n$e');
     }
   }
 
