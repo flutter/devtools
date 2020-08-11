@@ -3,6 +3,8 @@ addons:
   chrome: stable
 os:
   - linux
+  # TODO(devoncarew): The macos bots are generally failing; we should determine
+  # what we need to do to get them back on-line.
   #- osx
   # TODO(dantup): Skip on windows until we understand/fix Flutter crashing
   # with "failed to delete build/assets: file is locked by another process".
