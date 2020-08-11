@@ -45,6 +45,9 @@ class CodeSizeScreen extends Screen {
   @visibleForTesting
   static const diffViewTreemapKey = Key('Diff View Treemap');
 
+  static const loadingMessage =
+      'Loading data...\nPlease do not refresh or leave this page.';
+
   @override
   String get docPageId => id;
 
@@ -270,17 +273,34 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   }
 
   Widget _buildImportSnapshotView() {
-    return Column(
-      children: [
-        Flexible(
-          child: FileImportContainer(
-            title: 'Snapshot / APK analysis',
-            instructions: SnapshotView.importInstructions,
-            actionText: 'Analyze Snapshot / APK',
-            onAction: controller.loadTreeFromJsonFile,
-          ),
-        ),
-      ],
+    return ValueListenableBuilder(
+      valueListenable: controller.processingNotifier,
+      builder: (context, processing, _) {
+        if (processing) {
+          return Center(
+            child: Text(
+              CodeSizeScreen.loadingMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline1.color,
+              ),
+            ),
+          );
+        } else {
+          return Column(
+            children: [
+              Flexible(
+                child: FileImportContainer(
+                  title: 'Snapshot / APK analysis',
+                  instructions: SnapshotView.importInstructions,
+                  actionText: 'Analyze Snapshot / APK',
+                  onAction: controller.loadTreeFromJsonFile,
+                ),
+              ),
+            ],
+          );
+        }
+      },
     );
   }
 }
@@ -377,21 +397,38 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   }
 
   Widget _buildImportDiffView() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: DualFileImportContainer(
-            firstFileTitle: 'Old',
-            secondFileTitle: 'New',
-            // TODO(kenz): perhaps bold "original" and "modified".
-            firstInstructions: DiffView.importOldInstructions,
-            secondInstructions: DiffView.importNewInstructions,
-            actionText: 'Analyze Diff',
-            onAction: controller.loadDiffTreeFromJsonFiles,
-          ),
-        ),
-      ],
+    return ValueListenableBuilder(
+      valueListenable: controller.processingNotifier,
+      builder: (context, processing, _) {
+        if (processing) {
+          return Center(
+            child: Text(
+              CodeSizeScreen.loadingMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline1.color,
+              ),
+            ),
+          );
+        } else {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: DualFileImportContainer(
+                  firstFileTitle: 'Old',
+                  secondFileTitle: 'New',
+                  // TODO(kenz): perhaps bold "original" and "modified".
+                  firstInstructions: DiffView.importOldInstructions,
+                  secondInstructions: DiffView.importNewInstructions,
+                  actionText: 'Analyze Diff',
+                  onAction: controller.loadDiffTreeFromJsonFiles,
+                ),
+              ),
+            ],
+          );
+        }
+      },
     );
   }
 
