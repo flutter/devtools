@@ -57,6 +57,9 @@ class NetworkService {
   /// If at least one isolate is already logging, this method will enable logging
   /// on all isolates and enable recording for [NetworkScreen].
   Future<bool> initializeRecordingState() async {
+    assert(serviceManager.service != null);
+    if (serviceManager.service == null) return false;
+
     // TODO(jacobr): this method does not properly handle isolates that are
     // restarted.
     // TODO(kenz): should we be checking if socket profiling has started? There is
@@ -83,6 +86,9 @@ class NetworkService {
   }
 
   Future<List<SocketStatistic>> _refreshSockets() async {
+    assert(serviceManager.service != null);
+    if (serviceManager.service == null) return [];
+
     final sockets = <SocketStatistic>[];
     await serviceManager.service.forEachIsolate((isolate) async {
       final socketProfile =
@@ -93,6 +99,9 @@ class NetworkService {
   }
 
   Future<void> _clearSocketProfile() async {
+    assert(serviceManager.service != null);
+    if (serviceManager.service == null) return;
+
     await serviceManager.service.forEachIsolate((isolate) async {
       final socketProfilingAvailable =
           await serviceManager.service.isSocketProfilingAvailable(isolate.id);
@@ -110,6 +119,9 @@ class NetworkService {
 
   /// Enables or disables Socket profiling for all isolates.
   Future<void> toggleSocketProfiling(bool state) async {
+    assert(serviceManager.service != null);
+    if (serviceManager.service == null) return;
+
     await serviceManager.service.forEachIsolate((isolate) async {
       final socketProfilingAvailable =
           await serviceManager.service.isSocketProfilingAvailable(isolate.id);
