@@ -125,7 +125,7 @@ class CodeSizeController {
   // TODO(peterdjlee): Spawn an isolate to run parts of this function to
   //                   prevent the UI from freezing and display a circular
   //                   progress indicator on code size screen. Needs flutter
-  //                   web to support working with isolates. (See #33577)
+  //                   web to support working with isolates. See #33577.
   void loadTreeFromJsonFile(DevToolsJsonFile jsonFile) async {
     changeSnapshotJsonFile(jsonFile);
 
@@ -158,7 +158,7 @@ class CodeSizeController {
   // TODO(peterdjlee): Spawn an isolate to run parts of this function to
   //                   prevent the UI from freezing and display a circular
   //                   progress indicator on code size screen. Needs flutter
-  //                   web to support working with isolates. (See #33577)
+  //                   web to support working with isolates. See #33577.
   void loadDiffTreeFromJsonFiles(
     DevToolsJsonFile oldFile,
     DevToolsJsonFile newFile,
