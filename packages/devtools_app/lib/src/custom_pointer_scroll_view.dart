@@ -403,8 +403,8 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
 
   @override
   void didChangeDependencies() {
-    super.didChangeDependencies();
     _updatePosition();
+    super.didChangeDependencies();
   }
 
   bool _shouldUpdatePosition(CustomPointerScrollable oldWidget) {
