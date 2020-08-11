@@ -8,6 +8,7 @@ import 'package:devtools_app/src/code_size/code_size_screen.dart';
 import 'package:devtools_app/src/code_size/code_size_controller.dart';
 import 'package:devtools_app/src/code_size/code_size_table.dart';
 import 'package:devtools_app/src/code_size/file_import_container.dart';
+import 'package:devtools_app/src/notifications.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ import 'support/code_size_test_data/new_v8.dart';
 import 'support/code_size_test_data/old_v8.dart';
 import 'support/wrappers.dart';
 
-// TODO(peterdjlee): Clean up the tests once  we don't need loadFakeData.
+// TODO(peterdjlee): Clean up the tests once we don't need loadFakeData.
 
 void main() {
   final lastModifiedTime = DateTime.parse('2020-07-28 13:29:00');
@@ -56,7 +57,7 @@ void main() {
       DevToolsJsonFile data,
     }) async {
       data ??= defaultData;
-      codeSizeController.loadTreeFromJsonFile(data);
+      codeSizeController.loadTreeFromJsonFile(data, (error) => {});
       await tester.pumpAndSettle();
     }
 
@@ -152,6 +153,7 @@ void main() {
           lastModifiedTime: lastModifiedTime,
           data: json.decode(newV8),
         ),
+        (error) => {},
       );
 
       await tester.pumpAndSettle();

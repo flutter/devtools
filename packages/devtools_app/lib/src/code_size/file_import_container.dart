@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
+import '../notifications.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import '../utils.dart';
@@ -17,6 +18,7 @@ class FileImportContainer extends StatefulWidget {
     this.actionText,
     this.onAction,
     this.onFileSelected,
+    this.onError,
     Key key,
   }) : super(key: key);
 
@@ -30,6 +32,8 @@ class FileImportContainer extends StatefulWidget {
   final DevToolsJsonFileHandler onAction;
 
   final DevToolsJsonFileHandler onFileSelected;
+
+  final void Function(String error) onError;
 
   @override
   _FileImportContainerState createState() => _FileImportContainerState();
@@ -205,6 +209,7 @@ class DualFileImportContainer extends StatefulWidget {
   final Function(
     DevToolsJsonFile firstImportedFile,
     DevToolsJsonFile secondImportedFile,
+    void Function(String error) onError,
   ) onAction;
 
   @override
@@ -263,7 +268,11 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
           children: [
             RaisedButton(
               onPressed: firstImportedFile != null && secondImportedFile != null
-                  ? () => widget.onAction(firstImportedFile, secondImportedFile)
+                  ? () => widget.onAction(
+                        firstImportedFile,
+                        secondImportedFile,
+                        (error) => Notifications.of(context).push(error),
+                      )
                   : null,
               child: MaterialIconLabel(
                 Icons.highlight,

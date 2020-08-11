@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
+import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../charts/treemap.dart';
 import '../utils.dart';
@@ -122,13 +124,10 @@ class CodeSizeController {
   ValueListenable get processingNotifier => _processingNotifier;
   final _processingNotifier = ValueNotifier<bool>(false);
 
-  // TODO(peterdjlee): Spawn an isolate to run parts of this function to
-  //                   prevent the UI from freezing and display a circular
-  //                   progress indicator on code size screen. Needs flutter
-  //                   web to support working with isolates. See #33577.
-  void loadTreeFromJsonFile(DevToolsJsonFile jsonFile) async {
-    changeSnapshotJsonFile(jsonFile);
-
+  void loadTreeFromJsonFile(
+    DevToolsJsonFile jsonFile,
+    void Function(String error) onError,
+  ) async {
     _processingNotifier.value = true;
 
     // Free up the thread for the code size page to display the loading message.
@@ -141,8 +140,19 @@ class CodeSizeController {
       // APK analysis json should be processed already.
       processedJson = jsonFile.data;
     } else {
-      processedJson = treemapFromJson(jsonFile.data);
+      try {
+        processedJson = treemapFromJson(jsonFile.data);
+      } catch (error) {
+        // TODO(peterdjlee): Include link to docs when hyperlink support is added to the
+        //                    Notifications class. See #2268.
+        onError('Failed to load snapshot: file type not supported.\n\n'
+            'The code size tool supports Dart AOT v8 snapshots, instruction sizes, '
+            'and apk-analysis files. See documentation for how to generate these files.');
+        return;
+      }
     }
+
+    changeSnapshotJsonFile(jsonFile);
 
     // Set name for root node.
     processedJson['n'] = 'Root';
@@ -162,11 +172,19 @@ class CodeSizeController {
   void loadDiffTreeFromJsonFiles(
     DevToolsJsonFile oldFile,
     DevToolsJsonFile newFile,
+    void Function(String error) onError,
   ) async {
-    if (oldFile == null || newFile == null) return;
+    if (oldFile == null || newFile == null) {
+      return;
+    }
 
-    changeOldDiffSnapshotFile(oldFile);
-    changeNewDiffSnapshotFile(newFile);
+    if (oldFile.isApkFile != newFile.isApkFile ||
+        oldFile.isV8Snapshot != newFile.isV8Snapshot) {
+      onError(
+        'Failed to load diff: OLD and NEW files are different types.',
+      );
+      return;
+    }
 
     _processingNotifier.value = true;
 
@@ -193,8 +211,25 @@ class CodeSizeController {
 
       diffMap = compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
     } else {
-      diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
+      try {
+        diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
+      } catch (error) {
+        // TODO(peterdjlee): Include link to docs when hyperlink support is added to the
+        //                    Notifications class. See #2268.
+        onError('Failed to load diff: file type not supported.\n\n'
+            'The code size tool supports Dart AOT v8 snapshots, instruction sizes, '
+            'and apk-analysis files. See documentation for how to generate these files.');
+        return;
+      }
     }
+
+    if ((diffMap['children'] as List).isEmpty) {
+      onError('Failed to load diff: OLD and NEW files are identical.');
+      return;
+    }
+
+    changeOldDiffSnapshotFile(oldFile);
+    changeNewDiffSnapshotFile(newFile);
 
     diffMap['n'] = 'Root';
 
@@ -368,6 +403,8 @@ extension CodeSizeJsonFileExtension on DevToolsJsonFile {
     }
     return false;
   }
+
+  bool get isV8Snapshot => Snapshot.isV8HeapSnapshot(data);
 
   String get displayText {
     return '$path - $formattedTime';
