@@ -3,7 +3,7 @@ addons:
   chrome: stable
 os:
   - linux
-  - osx
+  #- osx
   # TODO(dantup): Skip on windows until we understand/fix Flutter crashing
   # with "failed to delete build/assets: file is locked by another process".
   #- windows
@@ -22,7 +22,6 @@ env:
     - CHANNEL=dev
   jobs:
     - BOT=main                CHANNEL=dev
-    - BOT=main                CHANNEL=master
     - BOT=packages
     - BOT=test_ddc            PLATFORM=vm
     - BOT=test_ddc            PLATFORM=chrome
@@ -30,6 +29,11 @@ env:
     - BOT=test_dart2js        PLATFORM=chrome
     - BOT=integration_ddc
     - BOT=integration_dart2js
+    - BOT=main                CHANNEL=master
+
+allow_failures:
+  env:
+    - BOT=main                CHANNEL=master
 
 script: ./tool/travis.sh
 
