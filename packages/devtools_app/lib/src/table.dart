@@ -1053,8 +1053,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                       : Icons.expand_more,
                   size: defaultIconSize,
                 ),
-              if (isSortColumn)
-                const SizedBox(width: densePadding),
+              if (isSortColumn) const SizedBox(width: densePadding),
               // TODO: This Flexible wrapper was added to get the
               // network_profiler_test.dart tests to pass.
               Flexible(
