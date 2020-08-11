@@ -12,8 +12,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'package:flutter/widgets.dart';
-
 /// A [ScrollView] that uses a single child layout model and allows for custom
 /// handling of [PointerSignalEvent]s.
 ///
