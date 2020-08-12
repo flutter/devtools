@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/ui/icons.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,6 +15,7 @@ import '../octicons.dart';
 import '../screen.dart';
 import '../theme.dart';
 import '../ui/label.dart';
+import '../utils.dart';
 import 'memory_chart.dart';
 import 'memory_controller.dart';
 import 'memory_events_pane.dart';
@@ -30,6 +32,8 @@ class MemoryScreen extends Screen {
           title: 'Memory',
           icon: Octicons.package,
         );
+
+  static const legendKeyName = 'Legend Button';
 
   @visibleForTesting
   static const pauseButtonKey = Key('Pause Button');
@@ -55,6 +59,8 @@ class MemoryScreen extends Screen {
   static const exportButtonKey = Key('Export Button');
   @visibleForTesting
   static const gcButtonKey = Key('GC Button');
+  @visibleForTesting
+  static const legendButtonkey = Key(legendKeyName);
 
   static const memorySourceMenuItemPrefix = 'Source: ';
 
@@ -83,6 +89,8 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
 
   MemoryController controller;
 
+  OverlayEntry legendOverlayEntry;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -99,6 +107,21 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         //              by Class or by Objects.
         // Create the snapshot data by Library.
         controller.createSnapshotByLibrary();
+      });
+    });
+
+    addAutoDisposeListener(controller.legendVisibleNotifier, () {
+      setState(() {
+        controller.isLegendVisible ? showLegend(context) : hideLegend();
+      });
+    });
+
+    addAutoDisposeListener(controller.androidChartVisibleNotifier, () {
+      setState(() {
+        if (controller.isLegendVisible) {
+          hideLegend();
+          showLegend(context);
+        }
       });
     });
 
@@ -345,8 +368,186 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
             includeTextWidth: _primaryControlsMinVerboseWidth,
           ),
         ),
+        const SizedBox(width: defaultSpacing),
+        OutlineButton(
+          key: legendKey,
+          onPressed: controller.toggleLegendVisibility,
+          child: MaterialIconLabel(
+            legendOverlayEntry == null ? Icons.storage : Icons.close,
+            'Legend',
+            includeTextWidth: _primaryControlsMinVerboseWidth,
+          ),
+        ),
       ],
     );
+  }
+
+  final legendKey = GlobalKey(debugLabel: MemoryScreen.legendKeyName);
+  static const legendXOffset = 20;
+  static const legendYOffset = 7.0;
+  static const legendWidth = 200.0;
+  static const legendTextWidth = 55.0;
+  static const legendHeight1Chart = 185.0;
+  static const legendHeight2Charts = 340.0;
+
+  // TODO(terry): Consider custom painter?
+  static const base = 'assets/img/legend/';
+  static const snapshotManualLegend = '${base}snapshot_manual_glyph.png';
+  static const snapshotAutoLegend = '${base}snapshot_auto_glyph.png';
+  static const monitorLegend = '${base}monitor_glyph.png';
+  static const resetLegend = '${base}reset_glyph.png';
+  static const gcManualLegend = '${base}gc_manual_glyph.png';
+  static const gcVMLegend = '${base}gc_vm_glyph.png';
+  static const capcityLegend = '${base}capacity_glyph.png';
+  static const usedLegend = '${base}used_glyph.png';
+  static const externalLegend = '${base}external_glyph.png';
+  static const rssLegend = '${base}rss_glyph.png';
+  static const androidTotalLegend = '${base}android_total_glyph.png';
+  static const androidOtherLegend = '${base}android_other_glyph.png';
+  static const androidCodeLegend = '${base}android_code_glyph.png';
+  static const androidNativeLegend = '${base}android_native_glyph.png';
+  static const androidJavaLegend = '${base}android_java_glyph.png';
+  static const androidStackLegend = '${base}android_stack_glyph.png';
+  static const androidGraphicsLegend = '${base}android_graphics_glyph.png';
+
+  Widget legendRow({String name1, String image1, String name2, String image2}) {
+    final legendEntry = Theme.of(context).textTheme.caption;
+
+    List<Widget> legendPart(
+      String name,
+      String image, [
+      double leftEdge = 5.0,
+    ]) {
+      final rightSide = <Widget>[];
+      if (name != null && image != null) {
+        rightSide.addAll([
+          Container(
+            padding: EdgeInsets.fromLTRB(leftEdge, 0, 0, 2),
+            width: legendTextWidth + leftEdge,
+            child: Text(name, style: legendEntry),
+          ),
+          const PaddedDivider(
+            padding: EdgeInsets.only(left: denseRowSpacing),
+          ),
+          Image(image: AssetImage(image)),
+        ]);
+      }
+
+      return rightSide;
+    }
+
+    final rowChildren = <Widget>[];
+    rowChildren.addAll(legendPart(name1, image1));
+    if (name2 != null && image2 != null) {
+      rowChildren.addAll(legendPart(name2, image2, 20.0));
+    }
+
+    return Container(
+        padding: const EdgeInsets.fromLTRB(10, 0, 0, 2),
+        child: Row(
+          children: rowChildren,
+        ));
+  }
+
+  void showLegend(BuildContext context) {
+    final RenderBox box = legendKey.currentContext.findRenderObject();
+
+    // Global position.
+    final position = box.localToGlobal(Offset.zero);
+
+    final legendHeading = Theme.of(context).textTheme.subtitle2;
+    final OverlayState overlayState = Overlay.of(context);
+    legendOverlayEntry ??= OverlayEntry(
+      builder: (context) => Positioned(
+        top: position.dy + box.size.height + legendYOffset,
+        left: position.dx - legendWidth + box.size.width - legendXOffset,
+        height: controller.isAndroidChartVisible
+            ? legendHeight2Charts
+            : legendHeight1Chart,
+        child: Opacity(
+          opacity: 0.6,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(
+              0,
+              5,
+              0,
+              8,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              border: Border.all(
+                color: Colors.yellow,
+              ),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            width: legendWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+                  child: Text('Events Legend', style: legendHeading),
+                ),
+                legendRow(
+                  name1: 'Snapshot',
+                  image1: snapshotManualLegend,
+                  name2: 'Auto',
+                  image2: snapshotAutoLegend,
+                ),
+                legendRow(
+                  name1: 'Monitor',
+                  image1: monitorLegend,
+                  name2: 'Reset',
+                  image2: resetLegend,
+                ),
+                legendRow(
+                  name1: 'GC VM',
+                  image1: gcVMLegend,
+                  name2: 'Manual',
+                  image2: gcManualLegend,
+                ),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+                  child: Text('Memory Legend', style: legendHeading),
+                ),
+                legendRow(name1: 'Capcity', image1: capcityLegend),
+                legendRow(name1: 'Used', image1: usedLegend),
+                legendRow(name1: 'External', image1: externalLegend),
+                legendRow(name1: 'RSS', image1: rssLegend),
+                if (controller.isAndroidChartVisible)
+                  const Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 9)),
+                if (controller.isAndroidChartVisible)
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+                    child: Text('Android Legend', style: legendHeading),
+                  ),
+                if (controller.isAndroidChartVisible)
+                  legendRow(name1: 'Total', image1: androidTotalLegend),
+                if (controller.isAndroidChartVisible)
+                  legendRow(name1: 'Other', image1: androidOtherLegend),
+                if (controller.isAndroidChartVisible)
+                  legendRow(name1: 'Code', image1: androidCodeLegend),
+                if (controller.isAndroidChartVisible)
+                  legendRow(name1: 'Native', image1: androidNativeLegend),
+                if (controller.isAndroidChartVisible)
+                  legendRow(name1: 'Java', image1: androidJavaLegend),
+                if (controller.isAndroidChartVisible)
+                  legendRow(name1: 'Stack', image1: androidStackLegend),
+                if (controller.isAndroidChartVisible)
+                  legendRow(name1: 'Graphics', image1: androidGraphicsLegend),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlayState.insert(legendOverlayEntry);
+  }
+
+  void hideLegend() {
+    legendOverlayEntry?.remove();
+    legendOverlayEntry = null;
   }
 
   /// Callbacks for button actions:
@@ -367,14 +568,14 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   Future<void> _gc() async {
     // TODO(terry): Record GC in analytics.
     try {
-      log('User Initiated GC Start');
+      debugLogger('User Initiated GC Start');
 
       // TODO(terry): Only record GCs not when user initiated.
       controller.memoryTimeline.addGCEvent();
 
       await controller.gc();
 
-      log('User GC Complete');
+      debugLogger('User GC Complete');
     } catch (e) {
       // TODO(terry): Show toast?
       log('Unable to GC ${e.toString()}', LogLevel.error);

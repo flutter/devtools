@@ -220,7 +220,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
                 child: LineChart(androidChartController),
               )
             : const SizedBox(),
-        SizedBox(child: _timelineSlider),
+            // TODO(terry): Re-enable support with dragging mouse in chart left/right.
+            // SizedBox(child: _timelineSlider),
       ],
     );
   }
