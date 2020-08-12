@@ -123,23 +123,36 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
     final CallbackDwell connectDebounce = CallbackDwell(_connect);
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
           width: 350.0,
-          child: TextField(
-            onSubmitted: (str) => connectDebounce.invoke(),
-            autofocus: true,
-            decoration: const InputDecoration(
-              isDense: true,
-              border: OutlineInputBorder(),
-              enabledBorder: OutlineInputBorder(
-                // TODO(jacobr): we need to use themed colors everywhere instead
-                // of hard coding material colors.
-                borderSide: BorderSide(width: 0.5, color: Colors.grey),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                onSubmitted: (str) => connectDebounce.invoke(),
+                autofocus: true,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    // TODO(jacobr): we need to use themed colors everywhere instead
+                    // of hard coding material colors.
+                    borderSide: BorderSide(width: 0.5, color: Colors.grey),
+                  ),
+                ),
+                controller: connectDialogController,
               ),
-              hintText: 'http://127.0.0.1:12345/auth_code=',
-            ),
-            controller: connectDialogController,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  '(http://127.0.0.1:12345/auth_code=)',
+                  textAlign: TextAlign.end,
+                  style: Theme.of(context).textTheme.caption,
+                ),
+              ),
+            ],
           ),
         ),
         const Padding(
