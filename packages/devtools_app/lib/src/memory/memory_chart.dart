@@ -169,6 +169,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     return '$unitsAgo Minute${unitsAgo != 1 ? 's' : ''} Ago';
   }
 
+  // TODO(terry): Investigate changing from slider to a dragging inside the chart.
+  /*
   Slider _createTimelineSlider() {
     return Slider.adaptive(
       label: timelineSliderLabel(controller.sliderValue),
@@ -191,6 +193,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       divisions: controller.numberOfStops,
     );
   }
+  */
 
   @override
   Widget build(BuildContext context) {
