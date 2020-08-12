@@ -292,6 +292,9 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
 
   @override
   FlexFit get flexFit => end.flexFit;
+
+  @override
+  List<LayoutProperties> get displayChildren => end.displayChildren;
 }
 
 class AnimatedFlexLayoutProperties
@@ -457,7 +460,7 @@ class AnimatedFlexLayoutProperties
   }
 
   @override
-  bool get flipMainAxis => end.flipMainAxis;
+  bool get startIsTopLeft => end.startIsTopLeft;
 }
 
 /// LayoutProperties extension to be reused on LayoutProperties and AnimatedLayoutProperties

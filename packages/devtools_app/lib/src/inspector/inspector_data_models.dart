@@ -155,6 +155,9 @@ class LayoutProperties {
   final bool isFlex;
   final Size size;
 
+  /// Represents the order of [children] to be displayed.
+  List<LayoutProperties> get displayChildren => children;
+
   bool get hasFlexFactor => flexFactor != null && flexFactor > 0;
 
   int get totalChildren => children?.length ?? 0;
@@ -168,7 +171,7 @@ class LayoutProperties {
   double dimension(Axis axis) => axis == Axis.horizontal ? width : height;
 
   List<double> childrenDimensions(Axis axis) {
-    return children?.map((child) => child.dimension(axis))?.toList();
+    return displayChildren?.map((child) => child.dimension(axis))?.toList();
   }
 
   List<double> get childrenWidths => childrenDimensions(Axis.horizontal);
@@ -205,7 +208,6 @@ class LayoutProperties {
   }
 
   static BoxConstraints deserializeConstraints(Map<String, Object> json) {
-    // TODO(albertusangga): Support SliverConstraint
     if (json == null) return null;
     return BoxConstraints(
       minWidth: double.parse(json['minWidth'] ?? '0.0'),
@@ -370,8 +372,14 @@ class FlexLayoutProperties extends LayoutProperties {
   final VerticalDirection verticalDirection;
   final TextBaseline textBaseline;
 
+  List<LayoutProperties> _displayChildren;
+
   @override
-  List<LayoutProperties> get children => flipMainAxis ? super.children.reversed.toList() : super.children;
+  List<LayoutProperties> get displayChildren {
+    if (_displayChildren != null) return _displayChildren;
+    return _displayChildren =
+        startIsTopLeft ? children : children.reversed.toList();
+  }
 
   int _totalFlex;
 
@@ -420,34 +428,26 @@ class FlexLayoutProperties extends LayoutProperties {
     return height + overflowEpsilon < max(childrenHeights);
   }
 
-  /// Method and logic is taken from [RenderFlex] on `rendering/flex.dart`
-  bool _flipMainAxis;
-  bool get flipMainAxis {
-    if (_flipMainAxis != null) return _flipMainAxis;
+  bool get startIsTopLeft {
     assert(direction != null);
-    final startIsTopLeft = () {
-      switch (direction) {
-        case Axis.horizontal:
-          switch (textDirection) {
-            case TextDirection.ltr:
-              return true;
-            case TextDirection.rtl:
-              return false;
-          }
-          break;
-        case Axis.vertical:
-          switch (verticalDirection) {
-            case VerticalDirection.down:
-              return true;
-            case VerticalDirection.up:
-              return false;
-          }
-          break;
-        default:
-          return true;
-      }
-    }();
-    return _flipMainAxis = !startIsTopLeft;
+    switch (direction) {
+      case Axis.horizontal:
+        switch (textDirection) {
+          case TextDirection.ltr:
+            return true;
+          case TextDirection.rtl:
+            return false;
+        }
+        break;
+      case Axis.vertical:
+        switch (verticalDirection) {
+          case VerticalDirection.down:
+            return true;
+          case VerticalDirection.up:
+            return false;
+        }
+    }
+    return true;
   }
 
   /// render properties for laying out rendered Flex & Flex children widgets
@@ -544,6 +544,7 @@ class FlexLayoutProperties extends LayoutProperties {
         return sizes.map((_) => size).toList();
       }
     }
+
     final widths = renderSizes(Axis.horizontal);
     final heights = renderSizes(Axis.vertical);
 
@@ -597,11 +598,11 @@ class FlexLayoutProperties extends LayoutProperties {
           axis: direction,
           size: Size(widths[i], heights[i]),
           offset: Offset.zero,
-          realSize: children[i].size,
+          realSize: displayChildren[i].size,
         )
           ..mainAxisOffset = calculateMainAxisOffset(i)
           ..crossAxisOffset = calculateCrossAxisOffset(i)
-          ..layoutProperties = children[i],
+          ..layoutProperties = displayChildren[i],
       );
     }
 
@@ -649,7 +650,7 @@ class FlexLayoutProperties extends LayoutProperties {
     final spaces = <RenderProperties>[];
     for (var i = 0; i < children.length; ++i) {
       if (dimension(crossAxisDirection) ==
-              children[i].dimension(crossAxisDirection) ||
+              displayChildren[i].dimension(crossAxisDirection) ||
           childrenRenderProperties[i].crossAxisDimension ==
               maxSizeAvailable(crossAxisDirection)) continue;
 
