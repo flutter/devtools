@@ -139,7 +139,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     _img ??= await ImageLoader.loadImage('assets/img/star.png');
   }
 
-  Slider _timelineSlider;
+  // TOOD(terry): Disable until use either slider or dragging of chart.
+  // Slider _timelineSlider;
 
   SelectedDataPoint _selectedDartChart;
   SelectedDataPoint _selectedAndroidChart;
@@ -204,7 +205,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     }
     controller.numberOfStops = stops;
 
-    _timelineSlider = _createTimelineSlider();
+    // TODO(terry): Temporarily disable investigate using drag to navigate through the chart.
+    // _timelineSlider = _createTimelineSlider();
 
     return Column(
       children: [
@@ -220,8 +222,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
                 child: LineChart(androidChartController),
               )
             : const SizedBox(),
-            // TODO(terry): Re-enable support with dragging mouse in chart left/right.
-            // SizedBox(child: _timelineSlider),
+        // TODO(terry): Re-enable support with dragging mouse in chart left/right.
+        // SizedBox(child: _timelineSlider),
       ],
     );
   }
