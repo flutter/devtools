@@ -147,8 +147,8 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  '(http://127.0.0.1:12345/auth_code=)',
-                  textAlign: TextAlign.end,
+                  '(e.g., http://127.0.0.1:12345/auth_code=...)',
+                  textAlign: TextAlign.start,
                   style: Theme.of(context).textTheme.caption,
                 ),
               ),
