@@ -38,7 +38,6 @@ class _NotifierCheckboxState extends State<NotifierCheckbox>
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _trackValue();
   }

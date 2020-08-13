@@ -279,19 +279,9 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     );
   }
 
-  NotifierCheckbox privateClasses;
-  NotifierCheckbox zeroInstances;
-  NotifierCheckbox libraryNoInstances;
-
   @override
   Widget build(BuildContext context) {
     buildFilters();
-
-    privateClasses =
-        NotifierCheckbox(notifier: controller.filterPrivateClasses);
-    zeroInstances = NotifierCheckbox(notifier: controller.filterZeroInstances);
-    libraryNoInstances =
-        NotifierCheckbox(notifier: controller.filterLibraryNoInstances);
 
     // Dialog has three main vertical sections:
     //      - three checkboxes
@@ -323,19 +313,22 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                       ),
                       Row(
                         children: [
-                          privateClasses,
+                          NotifierCheckbox(
+                              notifier: controller.filterPrivateClasses),
                           const Text('Hide Private Class e.g.,_className'),
                         ],
                       ),
                       Row(
                         children: [
-                          zeroInstances,
+                          NotifierCheckbox(
+                              notifier: controller.filterZeroInstances),
                           const Text('Hide Classes with No Instances'),
                         ],
                       ),
                       Row(
                         children: [
-                          libraryNoInstances,
+                          NotifierCheckbox(
+                              notifier: controller.filterLibraryNoInstances),
                           const Text('Hide Library with No Instances'),
                         ],
                       ),
