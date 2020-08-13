@@ -145,7 +145,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
                 controller: connectDialogController,
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
                   '(e.g., http://127.0.0.1:12345/auth_code=...)',
                   textAlign: TextAlign.start,
