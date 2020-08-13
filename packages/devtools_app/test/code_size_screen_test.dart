@@ -196,7 +196,7 @@ void main() {
 
   group('CodeSizeController', () {
     BuildContext buildContext;
-    
+
     setUp(() async {
       screen = const CodeSizeScreen();
       codeSizeController = CodeSizeController();
