@@ -217,6 +217,15 @@ class MemoryController extends DisposableController
 
   bool isAnalyzeButtonEnabled() => computeSnapshotToAnalyze != null;
 
+  ValueListenable get legendVisibleNotifier => _legendVisibleNotifier;
+
+  final _legendVisibleNotifier = ValueNotifier<bool>(false);
+
+  bool get isLegendVisible => _legendVisibleNotifier.value;
+
+  bool toggleLegendVisibility() =>
+      _legendVisibleNotifier.value = !_legendVisibleNotifier.value;
+
   MemoryTimeline memoryTimeline;
 
   MemoryLog memoryLog;
@@ -402,12 +411,14 @@ class MemoryController extends DisposableController
     _paused.value = false;
   }
 
-  bool _androidChartVisible = false;
+  final _androidChartVisibleNotifier = ValueNotifier<bool>(false);
+  
+  ValueListenable get androidChartVisibleNotifier => _androidChartVisibleNotifier;
 
-  bool get isAndroidChartVisible => _androidChartVisible;
+  bool get isAndroidChartVisible => _androidChartVisibleNotifier.value;
 
   bool toggleAndroidChartVisibility() =>
-      _androidChartVisible = !_androidChartVisible;
+      _androidChartVisibleNotifier.value = !_androidChartVisibleNotifier.value;
 
   final SettingsModel settings = SettingsModel();
 
