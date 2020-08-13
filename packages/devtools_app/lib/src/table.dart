@@ -972,7 +972,8 @@ class _TableRowState<T> extends State<TableRow<T>>
     final box = SizedBox(
       height: defaultRowHeight,
       child: Material(
-        color: widget.backgroundColor ?? Theme.of(context).canvasColor,
+        color: widget.backgroundColor ??
+            titleSolidBackgroundColor(Theme.of(context)),
         child: widget.onPressed != null
             ? InkWell(
                 canRequestFocus: false,
