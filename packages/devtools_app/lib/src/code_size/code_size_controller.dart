@@ -21,6 +21,17 @@ enum DiffTreeType {
 }
 
 class CodeSizeController {
+  static const unsupportedFileTypeError =
+      'Failed to load snapshot: file type not supported.\n\n'
+      'The code size tool supports Dart AOT v8 snapshots, instruction sizes, '
+      'and apk-analysis files. See documentation for how to generate these files.';
+
+  static const differentTypesError =
+      'Failed to load diff: OLD and NEW files are different types.';
+
+  static const identicalFilesError =
+      'Failed to load diff: OLD and NEW files are identical.';
+
   /// The node set as the snapshot root.
   ///
   /// Used to build the treemap and the tree table for the snapshot tab.
@@ -144,10 +155,9 @@ class CodeSizeController {
         processedJson = treemapFromJson(jsonFile.data);
       } catch (error) {
         // TODO(peterdjlee): Include link to docs when hyperlink support is added to the
-        //                    Notifications class. See #2268.
-        onError('Failed to load snapshot: file type not supported.\n\n'
-            'The code size tool supports Dart AOT v8 snapshots, instruction sizes, '
-            'and apk-analysis files. See documentation for how to generate these files.');
+        //                   Notifications class. See #2268.\
+        onError(unsupportedFileTypeError);
+        _processingNotifier.value = false;
         return;
       }
     }
@@ -180,9 +190,7 @@ class CodeSizeController {
 
     if (oldFile.isApkFile != newFile.isApkFile ||
         oldFile.isV8Snapshot != newFile.isV8Snapshot) {
-      onError(
-        'Failed to load diff: OLD and NEW files are different types.',
-      );
+      onError(differentTypesError);
       return;
     }
 
@@ -214,17 +222,19 @@ class CodeSizeController {
       try {
         diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
       } catch (error) {
+        print('catching error');
         // TODO(peterdjlee): Include link to docs when hyperlink support is added to the
         //                    Notifications class. See #2268.
-        onError('Failed to load diff: file type not supported.\n\n'
-            'The code size tool supports Dart AOT v8 snapshots, instruction sizes, '
-            'and apk-analysis files. See documentation for how to generate these files.');
+        // onError('unsupportedFileTypeError');
+        _processingNotifier.value = false;
         return;
       }
     }
+    print('after try and catch');
 
-    if ((diffMap['children'] as List).isEmpty) {
-      onError('Failed to load diff: OLD and NEW files are identical.');
+    if (diffMap == null || (diffMap['children'] as List).isEmpty) {
+      onError(identicalFilesError);
+      _processingNotifier.value = false;
       return;
     }
 

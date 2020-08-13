@@ -223,6 +223,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
 
   @override
   Widget build(BuildContext context) {
+    print('dual file import container building');
     return Row(
       children: [
         Expanded(
@@ -259,6 +260,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
   }
 
   Widget _buildActionButton() {
+    print('action button building');
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

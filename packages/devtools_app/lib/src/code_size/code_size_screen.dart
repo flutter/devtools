@@ -352,6 +352,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
+    print('diff view building');
     return Column(
       children: [
         Expanded(
