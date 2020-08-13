@@ -349,6 +349,13 @@ void main() {
             widget.text.toPlainText().contains('testCodeRef() script.dart 0')),
         findsOneWidget,
       );
+
+      // verify that the frame has a tooltip
+      expect(
+        find.byTooltip('testCodeRef() script.dart 0'),
+        findsOneWidget,
+      );
+
       // Stack frame 1
       expect(
         find.byWidgetPredicate((Widget widget) =>
@@ -395,6 +402,12 @@ void main() {
           widget is RichText && widget.text.toPlainText().contains('0: 3'));
       final listChild2Finder = find.byWidgetPredicate((Widget widget) =>
           widget is RichText && widget.text.toPlainText().contains('1: 4'));
+
+      // expect a tooltip for the list value
+      expect(
+        find.byTooltip('_GrowableList (2 items)'),
+        findsOneWidget,
+      );
 
       final mapFinder = find.byWidgetPredicate((Widget widget) =>
           widget is RichText &&

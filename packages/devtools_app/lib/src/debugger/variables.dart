@@ -31,20 +31,30 @@ class Variables extends StatelessWidget {
     );
   }
 
-  Widget displayProvider(BuildContext context, Variable v) {
+  Widget displayProvider(BuildContext context, Variable variable) {
     final theme = Theme.of(context);
-    return RichText(
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      text: TextSpan(
-        text: '${v.boundVar.name}: ',
-        style: theme.regularTextStyle,
-        children: [
-          TextSpan(
-            text: v.displayValue,
-            style: theme.subtleTextStyle,
-          ),
-        ],
+
+    // TODO(devoncarew): Here, we want to wait until the tooltip wants to show,
+    // then call toString() on variable and render the result in a tooltip. We
+    // should also include the type of the value in the tooltip if the variable
+    // is not null.
+
+    return Tooltip(
+      message: variable.displayValue,
+      waitDuration: tooltipWaitLong,
+      child: RichText(
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        text: TextSpan(
+          text: '${variable.boundVar.name}: ',
+          style: theme.regularTextStyle,
+          children: [
+            TextSpan(
+              text: variable.displayValue,
+              style: theme.subtleTextStyle,
+            ),
+          ],
+        ),
       ),
     );
   }
