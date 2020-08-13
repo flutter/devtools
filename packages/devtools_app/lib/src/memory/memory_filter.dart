@@ -139,24 +139,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     controller = widget.controller;
 
     cancel();
-
-    // Detect and handle checkboxes state changing.
-    addAutoDisposeListener(controller.filterPrivateClassesListenable, () {
-      setState(() {
-        privateClasses.notifier.value = controller.filterPrivateClasses.value;
-      });
-    });
-    addAutoDisposeListener(controller.filterLibraryNoInstancesListenable, () {
-      setState(() {
-        libraryNoInstances.notifier.value =
-            controller.filterLibraryNoInstances.value;
-      });
-    });
-    addAutoDisposeListener(controller.filterZeroInstancesListenable, () {
-      setState(() {
-        zeroInstances.notifier.value = controller.filterZeroInstances.value;
-      });
-    });
   }
 
   void addLibrary(String libraryName, {bool hideState = false}) {
