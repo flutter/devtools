@@ -175,9 +175,12 @@ class _FileImportContainerState extends State<FileImportContainer> {
   // TODO(kenz): add error handling to ensure we only allow importing supported
   // files.
   void _handleImportedFile(DevToolsJsonFile file) {
-    setState(() {
-      importedFile = file;
-    });
+    // TODO(peterdjlee): Investigate why setState is called after the state is disposed.
+    if (mounted) {
+      setState(() {
+        importedFile = file;
+      });
+    }
     if (widget.onFileSelected != null) {
       widget.onFileSelected(file);
     }
@@ -223,7 +226,6 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
 
   @override
   Widget build(BuildContext context) {
-    print('dual file import container building');
     return Row(
       children: [
         Expanded(
@@ -248,19 +250,26 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
   }
 
   void onFirstFileSelected(DevToolsJsonFile selectedFile) {
-    setState(() {
-      firstImportedFile = selectedFile;
-    });
+    // TODO(peterdjlee): Investigate why setState is called after the state is disposed.
+    if (mounted) {
+      setState(() {
+        firstImportedFile = selectedFile;
+      });
+    }
   }
 
   void onSecondFileSelected(DevToolsJsonFile selectedFile) {
-    setState(() {
-      secondImportedFile = selectedFile;
-    });
+    // TODO(peterdjlee): Investigate why setState is called after the state is disposed.
+    if (mounted) {
+      setState(() {
+        secondImportedFile = selectedFile;
+      });
+    }
   }
 
   Widget _buildActionButton() {
-    print('action button building');
+    final notifications = Notifications.of(context);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -273,7 +282,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
                   ? () => widget.onAction(
                         firstImportedFile,
                         secondImportedFile,
-                        (error) => Notifications.of(context).push(error),
+                        (error) => notifications.push(error),
                       )
                   : null,
               child: MaterialIconLabel(

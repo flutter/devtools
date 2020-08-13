@@ -8,6 +8,7 @@ import 'package:devtools_app/src/code_size/code_size_screen.dart';
 import 'package:devtools_app/src/code_size/code_size_controller.dart';
 import 'package:devtools_app/src/code_size/code_size_table.dart';
 import 'package:devtools_app/src/code_size/file_import_container.dart';
+import 'package:devtools_app/src/notifications.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
@@ -27,18 +28,6 @@ void main() {
   CodeSizeScreen screen;
   CodeSizeController codeSizeController;
 
-  Future<void> pumpCodeSizeScreen(
-    WidgetTester tester, {
-    CodeSizeController codeSizeController,
-  }) async {
-    await tester.pumpWidget(wrapWithControllers(
-      const CodeSizeBody(),
-      codeSize: codeSizeController,
-    ));
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.byType(CodeSizeBody), findsOneWidget);
-  }
-
   const windowSize = Size(2050.0, 1000.0);
 
   group('CodeSizeScreen', () {
@@ -46,6 +35,18 @@ void main() {
       screen = const CodeSizeScreen();
       codeSizeController = CodeSizeController();
     });
+
+    Future<void> pumpCodeSizeScreen(
+      WidgetTester tester, {
+      CodeSizeController codeSizeController,
+    }) async {
+      await tester.pumpWidget(wrapWithControllers(
+        const CodeSizeBody(),
+        codeSize: codeSizeController,
+      ));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      expect(find.byType(CodeSizeBody), findsOneWidget);
+    }
 
     final defaultData = DevToolsJsonFile(
       name: 'lib/src/code_size/stub_data/new_v8.dart',
@@ -194,113 +195,97 @@ void main() {
   });
 
   group('CodeSizeController', () {
+    BuildContext buildContext;
+    
     setUp(() async {
       screen = const CodeSizeScreen();
       codeSizeController = CodeSizeController();
     });
 
-    final defaultData = DevToolsJsonFile(
-      name: 'lib/src/code_size/stub_data/new_v8.dart',
-      lastModifiedTime: lastModifiedTime,
-      data: json.decode(newV8),
-    );
-
-    Future<void> loadDataAndPump(
+    Future<void> pumpCodeSizeScreenWithContext(
       WidgetTester tester, {
-      DevToolsJsonFile data,
+      CodeSizeController codeSizeController,
     }) async {
-      data ??= defaultData;
-      codeSizeController.loadTreeFromJsonFile(data, (error) => {});
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(wrapWithControllers(
+        MaterialApp(
+          builder: (context, child) => Notifications(child: child),
+          home: Builder(
+            builder: (context) {
+              buildContext = context;
+              return const CodeSizeBody();
+            },
+          ),
+        ),
+        codeSize: codeSizeController,
+      ));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      expect(find.byType(CodeSizeBody), findsOneWidget);
+    }
+
+    void loadDiffTreeFromJsonFiles(String firstFile, String secondFile) {
+      codeSizeController.loadDiffTreeFromJsonFiles(
+        DevToolsJsonFile(
+          name: '',
+          lastModifiedTime: lastModifiedTime,
+          data: json.decode(firstFile),
+        ),
+        DevToolsJsonFile(
+          name: '',
+          lastModifiedTime: lastModifiedTime,
+          data: json.decode(secondFile),
+        ),
+        (error) => Notifications.of(buildContext).push(error),
+      );
     }
 
     testWidgetsWithWindowSize(
         'outputs error notifications for invalid input on the snapshot tab',
         windowSize, (WidgetTester tester) async {
-      await pumpCodeSizeScreen(
+      await pumpCodeSizeScreenWithContext(
         tester,
         codeSizeController: codeSizeController,
       );
 
-      await loadDataAndPump(
-        tester,
-        data: DevToolsJsonFile(
+      codeSizeController.loadTreeFromJsonFile(
+        DevToolsJsonFile(
           name: 'unsupported_file.json',
           lastModifiedTime: lastModifiedTime,
           data: unsupportedFile,
         ),
+        (error) => Notifications.of(buildContext).push(error),
       );
-
+      await tester.pumpAndSettle();
       expect(
         find.text(CodeSizeController.unsupportedFileTypeError),
         findsOneWidget,
       );
     });
+
     testWidgetsWithWindowSize(
         'outputs error notifications for invalid input on the diff tab',
         windowSize, (WidgetTester tester) async {
-      await pumpCodeSizeScreen(
+      await pumpCodeSizeScreenWithContext(
         tester,
         codeSizeController: codeSizeController,
       );
       await tester.tap(find.byKey(CodeSizeScreen.diffTabKey));
       await tester.pumpAndSettle();
 
-      codeSizeController.loadDiffTreeFromJsonFiles(
-        DevToolsJsonFile(
-          name: 'lib/src/code_size/stub_data/new_v8.dart',
-          lastModifiedTime: lastModifiedTime,
-          data: json.decode(newV8),
-        ),
-        DevToolsJsonFile(
-          name: 'lib/src/code_size/stub_data/new_v8.dart',
-          lastModifiedTime: lastModifiedTime,
-          data: json.decode(newV8),
-        ),
-        (error) => {},
-      );
-
+      loadDiffTreeFromJsonFiles(newV8, newV8);
       await tester.pumpAndSettle();
-
       expect(
         find.text(CodeSizeController.identicalFilesError),
         findsOneWidget,
       );
 
-      codeSizeController.loadDiffTreeFromJsonFiles(
-        DevToolsJsonFile(
-          name: 'lib/src/code_size/stub_data/sizes.dart',
-          lastModifiedTime: lastModifiedTime,
-          data: json.decode(instructionSizes),
-        ),
-        DevToolsJsonFile(
-          name: 'lib/src/code_size/stub_data/new_v8.dart',
-          lastModifiedTime: lastModifiedTime,
-          data: json.decode(newV8),
-        ),
-        (error) => {},
-      );
-
+      loadDiffTreeFromJsonFiles(instructionSizes, newV8);
       await tester.pumpAndSettle();
       expect(
         find.text(CodeSizeController.differentTypesError),
         findsOneWidget,
       );
 
-      codeSizeController.loadDiffTreeFromJsonFiles(
-        DevToolsJsonFile(
-          name: 'lib/src/code_size/stub_data/new_v8.dart',
-          lastModifiedTime: lastModifiedTime,
-          data: json.decode(newV8),
-        ),
-        DevToolsJsonFile(
-          name: 'lib/src/code_size/stub_data/new_v8.dart',
-          lastModifiedTime: lastModifiedTime,
-          data: json.decode(newV8),
-        ),
-        (error) => {},
-      );
-
+      loadDiffTreeFromJsonFiles(unsupportedFile, unsupportedFile);
       await tester.pumpAndSettle();
       expect(
         find.text(CodeSizeController.unsupportedFileTypeError),

@@ -222,15 +222,13 @@ class CodeSizeController {
       try {
         diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
       } catch (error) {
-        print('catching error');
         // TODO(peterdjlee): Include link to docs when hyperlink support is added to the
         //                    Notifications class. See #2268.
-        // onError('unsupportedFileTypeError');
+        onError(unsupportedFileTypeError);
         _processingNotifier.value = false;
         return;
       }
     }
-    print('after try and catch');
 
     if (diffMap == null || (diffMap['children'] as List).isEmpty) {
       onError(identicalFilesError);
