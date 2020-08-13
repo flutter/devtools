@@ -22,7 +22,6 @@ import '../service_manager.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../ui/search.dart';
-import '../ui/utils.dart';
 import '../utils.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
@@ -530,19 +529,19 @@ class MemoryController extends DisposableController
   }
 
   /// Hide any class that hasn't been constructed (zero instances).
-  final filterZeroInstances = CheckboxValueNotifier(true);
+  final filterZeroInstances = ValueNotifier(true);
 
   ValueListenable<bool> get filterZeroInstancesListenable =>
       filterZeroInstances;
 
   /// Hide any private class, prefixed with an underscore.
-  final filterPrivateClasses = CheckboxValueNotifier(true);
+  final filterPrivateClasses = ValueNotifier(true);
 
   ValueListenable<bool> get filterPrivateClassesListenable =>
       filterPrivateClasses;
 
   /// Hide any library with no constructed class instances.
-  final filterLibraryNoInstances = CheckboxValueNotifier(true);
+  final filterLibraryNoInstances = ValueNotifier(true);
 
   ValueListenable<bool> get filterLibraryNoInstancesListenable =>
       filterLibraryNoInstances;
