@@ -274,6 +274,8 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   }
 
   Widget _buildImportSnapshotView() {
+    final notifications = Notifications.of(context);
+
     return ValueListenableBuilder(
         valueListenable: controller.processingNotifier,
         builder: (context, processing, _) {
@@ -298,7 +300,7 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
                     onAction: (jsonFile) {
                       controller.loadTreeFromJsonFile(
                         jsonFile,
-                        (error) => Notifications.of(context).push(error),
+                        (error) => notifications.push(error),
                       );
                     },
                   ),
