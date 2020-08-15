@@ -256,6 +256,19 @@ class LayoutProperties {
 
 final Expando<FlexLayoutProperties> _flexLayoutExpando = Expando();
 
+extension on MainAxisAlignment {
+  MainAxisAlignment get reversed {
+    switch (this) {
+      case MainAxisAlignment.start:
+        return MainAxisAlignment.end;
+      case MainAxisAlignment.end:
+        return MainAxisAlignment.start;
+      default:
+        return this;
+    }
+  }
+}
+
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class FlexLayoutProperties extends LayoutProperties {
   FlexLayoutProperties({
@@ -461,10 +474,11 @@ class FlexLayoutProperties extends LayoutProperties {
   }) {
     /// calculate the render empty spaces
     final freeSpace = dimension(direction) - sum(childrenDimensions(direction));
-
+    final displayMainAxisAlignment = startIsTopLeft ? mainAxisAlignment : mainAxisAlignment.reversed;
+    
     double leadingSpace(double freeSpace) {
       if (children.isEmpty) return 0.0;
-      switch (mainAxisAlignment) {
+      switch (displayMainAxisAlignment) {
         case MainAxisAlignment.start:
         case MainAxisAlignment.end:
           return freeSpace;
@@ -484,7 +498,7 @@ class FlexLayoutProperties extends LayoutProperties {
 
     double betweenSpace(double freeSpace) {
       if (children.isEmpty) return 0.0;
-      switch (mainAxisAlignment) {
+      switch (displayMainAxisAlignment) {
         case MainAxisAlignment.start:
         case MainAxisAlignment.end:
         case MainAxisAlignment.center:
@@ -569,7 +583,7 @@ class FlexLayoutProperties extends LayoutProperties {
 
     double space(int index) {
       if (index == 0) {
-        if (mainAxisAlignment == MainAxisAlignment.start) return 0.0;
+        if (displayMainAxisAlignment == MainAxisAlignment.start) return 0.0;
         return renderLeadingSpace;
       }
       return renderBetweenSpace;
@@ -617,7 +631,7 @@ class FlexLayoutProperties extends LayoutProperties {
           ..isFreeSpace = true
           ..layoutProperties = this;
     if (actualLeadingSpace > 0.0 &&
-        mainAxisAlignment != MainAxisAlignment.start) {
+        displayMainAxisAlignment != MainAxisAlignment.start) {
       spaces.add(renderPropsWithFullCrossAxisDimension.clone()
         ..mainAxisOffset = 0.0
         ..mainAxisDimension = renderLeadingSpace
@@ -632,7 +646,7 @@ class FlexLayoutProperties extends LayoutProperties {
           ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension);
       }
     if (actualLeadingSpace > 0.0 &&
-        mainAxisAlignment != MainAxisAlignment.end) {
+        displayMainAxisAlignment != MainAxisAlignment.end) {
       spaces.add(renderPropsWithFullCrossAxisDimension.clone()
         ..mainAxisOffset = childrenRenderProps.last.mainAxisDimension +
             childrenRenderProps.last.mainAxisOffset

@@ -392,7 +392,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
 
   Size get size => properties.size;
 
-  List<LayoutProperties> get children => properties.children;
+  List<LayoutProperties> get children => properties.displayChildren;
 
   Axis get direction => properties.direction;
 
