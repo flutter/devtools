@@ -43,6 +43,8 @@ class CodeSizeSnapshotTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ensure root node is already expanded on load.
+    rootNode.expand();
     return TreeTable<TreemapNode>(
       dataRoots: [rootNode],
       columns: columns,
@@ -166,6 +168,8 @@ class CodeSizeDiffTable extends StatelessWidget {
   //                  if the table is only showing negative values.
   @override
   Widget build(BuildContext context) {
+    // Ensure root node is already expanded on load.
+    rootNode.expand();
     return TreeTable<TreemapNode>(
       dataRoots: rootNode.children,
       columns: columns,
