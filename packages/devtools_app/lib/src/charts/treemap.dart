@@ -71,7 +71,7 @@ class Treemap extends StatelessWidget {
 
   final void Function(TreemapNode node) onRootChangedCallback;
 
-  static const PivotType pivotType = PivotType.pivotBySize;
+  static const PivotType pivotType = PivotType.pivotByMiddle;
 
   static const treeMapHeaderHeight = 20.0;
 
@@ -343,8 +343,10 @@ class Treemap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (rootNode == null && nodes.isNotEmpty) {
+      // If constructed with Treemap.fromNodes
       return buildSubTreemaps();
     } else {
+      // If constructed with Treemap.fromRoot
       return buildTreemap(context);
     }
   }
@@ -683,7 +685,7 @@ class MultiCellPainter extends CustomPainter {
     canvas.drawRect(bounds, rectPaint);
 
     final borderPaint = Paint()
-      ..color = Colors.black87
+      ..color = Colors.black45
       ..style = PaintingStyle.stroke;
     canvas.drawRect(bounds, borderPaint);
 
