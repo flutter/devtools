@@ -171,7 +171,7 @@ class CodeSizeDiffTable extends StatelessWidget {
     // Ensure root node is already expanded on load.
     rootNode.expand();
     return TreeTable<TreemapNode>(
-      dataRoots: rootNode.children,
+      dataRoots: [rootNode],
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
