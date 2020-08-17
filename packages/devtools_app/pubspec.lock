@@ -203,28 +203,28 @@ packages:
       path: "../devtools"
       relative: true
     source: path
-    version: "0.9.1-dev.2"
+    version: "0.9.1-dev.3"
   devtools_server:
     dependency: "direct overridden"
     description:
       path: "../devtools_server"
       relative: true
     source: path
-    version: "0.9.1-dev.2"
+    version: "0.9.1-dev.3"
   devtools_shared:
     dependency: "direct main"
     description:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.1-dev.2"
+    version: "0.9.1-dev.3"
   devtools_testing:
     dependency: "direct dev"
     description:
       path: "../devtools_testing"
       relative: true
     source: path
-    version: "0.9.1-dev.2"
+    version: "0.9.1-dev.3"
   fake_async:
     dependency: transitive
     description:
@@ -561,7 +561,7 @@ packages:
       name: shelf
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.7"
+    version: "0.7.9"
   shelf_packages_handler:
     dependency: transitive
     description:
@@ -727,7 +727,7 @@ packages:
       name: url_launcher_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.2"
+    version: "0.1.2+1"
   usage:
     dependency: transitive
     description:
@@ -762,7 +762,7 @@ packages:
       name: vm_snapshot_analysis
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.3"
+    version: "0.5.4"
   watcher:
     dependency: transitive
     description:
