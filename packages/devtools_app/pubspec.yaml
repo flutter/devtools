@@ -64,6 +64,7 @@ flutter:
     - assets/img/layout_explorer/
     - assets/img/layout_explorer/cross_axis_alignment/
     - assets/img/layout_explorer/main_axis_alignment/
+    - assets/img/legend/
     - assets/scripts/inspector_polyfill_script.dart
     - icons/
     - icons/actions/

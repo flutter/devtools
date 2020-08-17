@@ -9,6 +9,7 @@ import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
 import '../common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
+import '../notifications.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -273,35 +274,41 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   }
 
   Widget _buildImportSnapshotView() {
+    final notifications = Notifications.of(context);
+
     return ValueListenableBuilder(
-      valueListenable: controller.processingNotifier,
-      builder: (context, processing, _) {
-        if (processing) {
-          return Center(
-            child: Text(
-              CodeSizeScreen.loadingMessage,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.headline1.color,
-              ),
-            ),
-          );
-        } else {
-          return Column(
-            children: [
-              Flexible(
-                child: FileImportContainer(
-                  title: 'Snapshot / APK analysis',
-                  instructions: SnapshotView.importInstructions,
-                  actionText: 'Analyze Snapshot / APK',
-                  onAction: controller.loadTreeFromJsonFile,
+        valueListenable: controller.processingNotifier,
+        builder: (context, processing, _) {
+          if (processing) {
+            return Center(
+              child: Text(
+                CodeSizeScreen.loadingMessage,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.headline1.color,
                 ),
               ),
-            ],
-          );
-        }
-      },
-    );
+            );
+          } else {
+            return Column(
+              children: [
+                Flexible(
+                  child: FileImportContainer(
+                    title: 'Snapshot / APK analysis',
+                    instructions: SnapshotView.importInstructions,
+                    actionText: 'Analyze Snapshot / APK',
+                    onAction: (jsonFile) {
+                      controller.loadTreeFromJsonFile(
+                        jsonFile,
+                        (error) => notifications.push(error),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+        });
   }
 }
 

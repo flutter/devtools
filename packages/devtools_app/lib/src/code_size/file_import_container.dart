@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
+import '../notifications.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import '../utils.dart';
@@ -17,6 +18,7 @@ class FileImportContainer extends StatefulWidget {
     this.actionText,
     this.onAction,
     this.onFileSelected,
+    this.onError,
     Key key,
   }) : super(key: key);
 
@@ -30,6 +32,8 @@ class FileImportContainer extends StatefulWidget {
   final DevToolsJsonFileHandler onAction;
 
   final DevToolsJsonFileHandler onFileSelected;
+
+  final void Function(String error) onError;
 
   @override
   _FileImportContainerState createState() => _FileImportContainerState();
@@ -171,9 +175,12 @@ class _FileImportContainerState extends State<FileImportContainer> {
   // TODO(kenz): add error handling to ensure we only allow importing supported
   // files.
   void _handleImportedFile(DevToolsJsonFile file) {
-    setState(() {
-      importedFile = file;
-    });
+    // TODO(peterdjlee): Investigate why setState is called after the state is disposed.
+    if (mounted) {
+      setState(() {
+        importedFile = file;
+      });
+    }
     if (widget.onFileSelected != null) {
       widget.onFileSelected(file);
     }
@@ -205,6 +212,7 @@ class DualFileImportContainer extends StatefulWidget {
   final Function(
     DevToolsJsonFile firstImportedFile,
     DevToolsJsonFile secondImportedFile,
+    void Function(String error) onError,
   ) onAction;
 
   @override
@@ -242,18 +250,26 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
   }
 
   void onFirstFileSelected(DevToolsJsonFile selectedFile) {
-    setState(() {
-      firstImportedFile = selectedFile;
-    });
+    // TODO(peterdjlee): Investigate why setState is called after the state is disposed.
+    if (mounted) {
+      setState(() {
+        firstImportedFile = selectedFile;
+      });
+    }
   }
 
   void onSecondFileSelected(DevToolsJsonFile selectedFile) {
-    setState(() {
-      secondImportedFile = selectedFile;
-    });
+    // TODO(peterdjlee): Investigate why setState is called after the state is disposed.
+    if (mounted) {
+      setState(() {
+        secondImportedFile = selectedFile;
+      });
+    }
   }
 
   Widget _buildActionButton() {
+    final notifications = Notifications.of(context);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -263,7 +279,11 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
           children: [
             RaisedButton(
               onPressed: firstImportedFile != null && secondImportedFile != null
-                  ? () => widget.onAction(firstImportedFile, secondImportedFile)
+                  ? () => widget.onAction(
+                        firstImportedFile,
+                        secondImportedFile,
+                        (error) => notifications.push(error),
+                      )
                   : null,
               child: MaterialIconLabel(
                 Icons.highlight,

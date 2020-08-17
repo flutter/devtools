@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
 
@@ -29,6 +27,10 @@ ThemeData themeFor({
 
 ThemeData _darkTheme(IdeTheme ideTheme) {
   final theme = ThemeData.dark();
+  final background = isValidDarkColor(ideTheme?.backgroundColor)
+      ? ideTheme?.backgroundColor
+      : null;
+
   return theme.copyWith(
     primaryColor: devtoolsGrey[900],
     primaryColorDark: devtoolsBlue[700],
@@ -36,17 +38,19 @@ ThemeData _darkTheme(IdeTheme ideTheme) {
     indicatorColor: devtoolsBlue[400],
     accentColor: devtoolsBlue[400],
     backgroundColor: devtoolsGrey[600],
+    canvasColor: background,
     toggleableActiveColor: devtoolsBlue[400],
     selectedRowColor: devtoolsGrey[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
-    scaffoldBackgroundColor: isValidDarkColor(ideTheme?.backgroundColor)
-        ? ideTheme?.backgroundColor
-        : null,
+    scaffoldBackgroundColor: background,
   );
 }
 
 ThemeData _lightTheme(IdeTheme ideTheme) {
   final theme = ThemeData.light();
+  final background = isValidLightColor(ideTheme?.backgroundColor)
+      ? ideTheme?.backgroundColor
+      : null;
   return theme.copyWith(
     primaryColor: devtoolsBlue[600],
     primaryColorDark: devtoolsBlue[700],
@@ -54,31 +58,34 @@ ThemeData _lightTheme(IdeTheme ideTheme) {
     indicatorColor: Colors.yellowAccent[400],
     accentColor: devtoolsBlue[400],
     backgroundColor: devtoolsGrey[600],
+    canvasColor: background,
     toggleableActiveColor: devtoolsBlue[400],
     selectedRowColor: devtoolsBlue[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
-    scaffoldBackgroundColor: isValidLightColor(ideTheme?.backgroundColor)
-        ? ideTheme?.backgroundColor
-        : null,
+    scaffoldBackgroundColor: background,
   );
 }
+
+/// Threshold used to determine whether a colour is light/dark enough for us to
+/// override the default DevTools themes with.
+///
+/// A value of 0.5 would result in all colours being considered light/dark, and
+/// a value of 0.1 allowing around only the 10% darkest/lightest colours by
+/// Flutter's luminance calculation.
+const _lightDarkLuminanceThreshold = 0.1;
 
 bool isValidDarkColor(Color color) {
   if (color == null) {
     return false;
   }
-  // TODO(dantup): Pick good threshold
-  final components = [color.red, color.green, color.blue];
-  return components.reduce(max) < 50;
+  return color.computeLuminance() <= _lightDarkLuminanceThreshold;
 }
 
 bool isValidLightColor(Color color) {
   if (color == null) {
     return false;
   }
-  // TODO(dantup): Pick good threshold
-  final components = [color.red, color.green, color.blue];
-  return components.reduce(min) > 205;
+  return color.computeLuminance() >= 1 - _lightDarkLuminanceThreshold;
 }
 
 const buttonMinWidth = 36.0;
@@ -215,7 +222,7 @@ CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
 
 Color titleSolidBackgroundColor(ThemeData theme) {
-  return theme.isDarkTheme ? devtoolsGrey[900] : devtoolsGrey[50];
+  return theme.canvasColor.darken(0.2);
 }
 
 const chartFontSizeSmall = 12.0;

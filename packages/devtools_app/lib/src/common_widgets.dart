@@ -15,6 +15,7 @@ import 'ui/label.dart';
 import 'ui/theme.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
+const tooltipWaitLong = Duration(milliseconds: 1000);
 
 /// The width of the package:flutter_test debugger device.
 const debuggerDeviceWidth = 800.0;

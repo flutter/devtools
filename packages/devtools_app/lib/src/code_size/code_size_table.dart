@@ -44,7 +44,7 @@ class CodeSizeSnapshotTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
-      dataRoots: rootNode.children,
+      dataRoots: [rootNode],
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
@@ -70,7 +70,7 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
 
   @override
   double getNodeIndentPx(TreemapNode dataObject) {
-    final relativeLevel = dataObject.level - currentRootLevel - 1;
+    final relativeLevel = dataObject.level - currentRootLevel;
     return relativeLevel * TreeColumnData.treeToggleWidth;
   }
 }

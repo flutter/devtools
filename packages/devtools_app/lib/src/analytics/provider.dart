@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 abstract class AnalyticsProvider {
-  Future<void> initialize();
   bool get isGtagsEnabled;
-  Future<bool> get isFirstRun;
-  Future<bool> get isEnabled;
+  bool get isFirstRun;
+  bool get isEnabled;
   void setUpAnalytics();
   void setAllowAnalytics();
   void setDontAllowAnalytics();

@@ -10,8 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'analytics/prompt.dart';
-import 'analytics/stub_provider.dart'
-    if (dart.library.html) 'analytics/remote_provider.dart';
+import 'analytics/provider.dart';
 import 'app.dart';
 import 'banner_messages.dart';
 import 'common_widgets.dart';
@@ -37,6 +36,7 @@ class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
     Key key,
     @required this.tabs,
+    @required this.analyticsProvider,
     this.initialPage,
     this.actions,
     this.embed = false,
@@ -48,10 +48,12 @@ class DevToolsScaffold extends StatefulWidget {
     Key key,
     @required Widget child,
     @required IdeTheme ideTheme,
+    @required AnalyticsProvider analyticsProvider,
     List<Widget> actions,
   }) : this(
           key: key,
           tabs: [SimpleScreen(child)],
+          analyticsProvider: analyticsProvider,
           ideTheme: ideTheme,
           actions: actions,
         );
@@ -93,6 +95,8 @@ class DevToolsScaffold extends StatefulWidget {
   ///
   /// These will generally be [RegisteredServiceExtensionButton]s.
   final List<Widget> actions;
+
+  final AnalyticsProvider analyticsProvider;
 
   @override
   State<StatefulWidget> createState() => DevToolsScaffoldState();
@@ -280,7 +284,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           alignment: Alignment.topLeft,
           child: FocusScope(
             child: AnalyticsPrompt(
-              provider: provider,
+              provider: widget.analyticsProvider,
               child: BannerMessages(
                 screen: screen,
               ),
