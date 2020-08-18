@@ -256,7 +256,7 @@ class LayoutProperties {
 
 final Expando<FlexLayoutProperties> _flexLayoutExpando = Expando();
 
-extension on MainAxisAlignment {
+extension MainAxisAlignmentExtension on MainAxisAlignment {
   MainAxisAlignment get reversed {
     switch (this) {
       case MainAxisAlignment.start:
@@ -474,8 +474,9 @@ class FlexLayoutProperties extends LayoutProperties {
   }) {
     /// calculate the render empty spaces
     final freeSpace = dimension(direction) - sum(childrenDimensions(direction));
-    final displayMainAxisAlignment = startIsTopLeft ? mainAxisAlignment : mainAxisAlignment.reversed;
-    
+    final displayMainAxisAlignment =
+        startIsTopLeft ? mainAxisAlignment : mainAxisAlignment.reversed;
+
     double leadingSpace(double freeSpace) {
       if (children.isEmpty) return 0.0;
       switch (displayMainAxisAlignment) {
@@ -806,5 +807,44 @@ class RenderProperties {
       layoutProperties: layoutProperties,
       isFreeSpace: isFreeSpace,
     );
+  }
+
+  @override
+  int get hashCode =>
+      axis.hashCode ^
+      size.hashCode ^
+      offset.hashCode ^
+      realSize.hashCode ^
+      isFreeSpace.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    return other is RenderProperties &&
+        axis == other.axis &&
+        size.closeTo(other.size) &&
+        offset.closeTo(other.offset) &&
+        realSize.closeTo(other.realSize) &&
+        isFreeSpace == other.isFreeSpace;
+  }
+
+  @override
+  String toString() {
+    return '{ axis: $axis, size: $size, offset: $offset, realSize: $realSize, isFreeSpace: $isFreeSpace }';
+  }
+}
+
+bool _closeTo(double a, double b, {int precision = 1}) {
+  return a.toStringAsPrecision(precision) == b.toStringAsPrecision(precision);
+}
+
+extension on Size {
+  bool closeTo(Size other) {
+    return _closeTo(width, other.width) && _closeTo(height, other.height);
+  }
+}
+
+extension on Offset {
+  bool closeTo(Offset other) {
+    return _closeTo(dx, other.dx) && _closeTo(dy, other.dy);
   }
 }

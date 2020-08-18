@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
-import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/inspector_data_models.dart';
+import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/flex/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -15,18 +13,36 @@ import 'layout_explorer_test_utils.dart';
 
 void main() {
   group('FlexLayoutProperties tests', () {
+    Future<FlexLayoutProperties> toFlexLayoutProperties(
+      Flex flex, {
+      @required WidgetTester tester,
+      int subtreeDepth = 2,
+      double width,
+      double height,
+    }) async {
+      final wrappedWidget = SizedBox(
+        width: width,
+        height: height,
+        child: flex,
+      );
+      final rootNodeDiagnostics =
+          await widgetToLayoutExplorerRemoteDiagnosticsNode(
+        widget: wrappedWidget,
+        tester: tester,
+        subtreeDepth: subtreeDepth,
+      );
+      final flexDiagnostics = rootNodeDiagnostics.childrenNow.first;
+      return FlexLayoutProperties.fromDiagnostics(flexDiagnostics);
+    }
+
     testWidgets('FlexLayoutProperties.fromJson creates correct value from enum',
         (tester) async {
       final widget = Row(
         children: const [SizedBox()],
         textDirection: TextDirection.ltr,
       );
-      final diagnostics = await widgetToLayoutExplorerRemoteDiagnosticsNode(
-        widget: widget,
-        tester: tester,
-      );
-      final FlexLayoutProperties flexProperties =
-          FlexLayoutProperties.fromDiagnostics(diagnostics);
+      final flexProperties =
+          await toFlexLayoutProperties(widget, tester: tester);
       expect(flexProperties.direction, Axis.horizontal);
       expect(flexProperties.mainAxisAlignment, MainAxisAlignment.start);
       expect(flexProperties.mainAxisSize, MainAxisSize.max);
@@ -41,18 +57,16 @@ void main() {
         children: const [SizedBox()],
         verticalDirection: VerticalDirection.up,
       );
-      final columnNode = await widgetToLayoutExplorerRemoteDiagnosticsNode(
-          widget: columnWidget, tester: tester);
-      final columnProperties = FlexLayoutProperties.fromDiagnostics(columnNode);
+      final columnProperties =
+          await toFlexLayoutProperties(columnWidget, tester: tester);
       expect(columnProperties.startIsTopLeft, false);
 
       final rowWidget = Row(
         children: const [SizedBox()],
         textDirection: TextDirection.rtl,
       );
-      final rowNode = await widgetToLayoutExplorerRemoteDiagnosticsNode(
-          widget: rowWidget, tester: tester);
-      final rowProperties = FlexLayoutProperties.fromDiagnostics(rowNode);
+      final rowProperties =
+          await toFlexLayoutProperties(rowWidget, tester: tester);
       expect(rowProperties.startIsTopLeft, false);
     });
 
@@ -63,9 +77,7 @@ void main() {
         const SizedBox(),
         Container(),
       ]);
-      final node = await widgetToLayoutExplorerRemoteDiagnosticsNode(
-          widget: widget, tester: tester);
-      final properties = FlexLayoutProperties.fromDiagnostics(node);
+      final properties = await toFlexLayoutProperties(widget, tester: tester);
       expect(properties.startIsTopLeft, true);
       expect(properties.displayChildren[0].description, 'SizedBox');
       expect(properties.displayChildren[1].description, 'Container');
@@ -81,12 +93,160 @@ void main() {
         ],
         verticalDirection: VerticalDirection.up,
       );
-      final node = await widgetToLayoutExplorerRemoteDiagnosticsNode(
-          widget: widget, tester: tester);
-      final properties = FlexLayoutProperties.fromDiagnostics(node);
+      final properties = await toFlexLayoutProperties(widget, tester: tester);
       expect(properties.startIsTopLeft, false);
       expect(properties.displayChildren[0].description, 'Container');
       expect(properties.displayChildren[1].description, 'SizedBox');
+    });
+
+    group('childrenRenderProperties tests', () {
+      const maxMainAxisDimension = 500.0;
+      double maxSizeAvailable(Axis axis) => maxMainAxisDimension;
+
+      List<RenderProperties> childrenRenderProperties(
+              FlexLayoutProperties properties) =>
+          properties.childrenRenderProperties(
+            smallestRenderWidth: minRenderWidth,
+            largestRenderWidth: defaultMaxRenderWidth,
+            smallestRenderHeight: minRenderHeight,
+            largestRenderHeight: defaultMaxRenderHeight,
+            maxSizeAvailable: maxSizeAvailable,
+          );
+
+      final childrenWidgets = <Widget>[
+        const SizedBox(
+          width: 50.0,
+        ),
+        Container(
+          width: 75.0,
+          height: 25.0,
+        ),
+      ];
+
+      testWidgets(
+          'returns correct RenderProperties with main axis not flipped when start is top left',
+          (tester) async {
+        final widget = Row(children: childrenWidgets);
+        final properties = await toFlexLayoutProperties(
+          widget,
+          width: maxMainAxisDimension,
+          tester: tester,
+          subtreeDepth: 3,
+        );
+        final renderProps = properties.childrenRenderProperties(
+          smallestRenderWidth: minRenderWidth,
+          largestRenderWidth: defaultMaxRenderWidth,
+          smallestRenderHeight: minRenderHeight,
+          largestRenderHeight: defaultMaxRenderHeight,
+          maxSizeAvailable: maxSizeAvailable,
+        );
+        expect(renderProps.length, 3);
+        expect(renderProps, [
+          RenderProperties(
+            axis: Axis.horizontal,
+            size: const Size(250, 250),
+            realSize: const Size(50.0, 0.0),
+            offset: const Offset(0.0, 125.0),
+          ),
+          RenderProperties(
+            axis: Axis.horizontal,
+            size: const Size(261.50, 500),
+            realSize: const Size(75.0, 25.0),
+            offset: const Offset(250.0, 0.0),
+          ),
+          RenderProperties(
+            axis: Axis.horizontal,
+            size: const Size(400, 500),
+            realSize: const Size(375.0, 25.0),
+            offset: const Offset(511.5, 0.0),
+            isFreeSpace: true,
+          ),
+        ]);
+      });
+
+      testWidgets(
+        'returns correct RenderProperties with main axis flipped when start is not top left',
+        (tester) async {
+          final widget = Row(
+            textDirection: TextDirection.rtl,
+            children: childrenWidgets,
+          );
+          final properties = await toFlexLayoutProperties(
+            widget,
+            tester: tester,
+            width: maxMainAxisDimension,
+            subtreeDepth: 3,
+          );
+          final renderProps = properties.childrenRenderProperties(
+            smallestRenderWidth: minRenderWidth,
+            largestRenderWidth: defaultMaxRenderWidth,
+            smallestRenderHeight: minRenderHeight,
+            largestRenderHeight: defaultMaxRenderHeight,
+            maxSizeAvailable: maxSizeAvailable,
+          );
+          expect(renderProps.length, 3);
+          expect(renderProps, [
+            RenderProperties(
+              axis: Axis.horizontal,
+              size: const Size(261.5, 500.0),
+              realSize: const Size(75.0, 25.0),
+              offset: const Offset(400.0, 0.0),
+            ),
+            RenderProperties(
+              axis: Axis.horizontal,
+              size: const Size(250.0, 250.0),
+              realSize: const Size(50.0, 0.0),
+              offset: const Offset(661.5, 125.0),
+            ),
+            RenderProperties(
+              axis: Axis.horizontal,
+              size: const Size(400, 500),
+              realSize: const Size(375.0, 25.0),
+              offset: const Offset(0.0, 0.0),
+              isFreeSpace: true,
+            ),
+          ]);
+        },
+      );
+
+      testWidgets(
+          'when the start is not top left, render properties should be equals to its mirrored version',
+          (tester) async {
+        Row buildWidget({
+          bool flipMainAxis,
+          MainAxisAlignment mainAxisAlignment,
+        }) =>
+            Row(
+              textDirection:
+                  flipMainAxis ? TextDirection.rtl : TextDirection.ltr,
+              mainAxisAlignment:
+                  flipMainAxis ? mainAxisAlignment.reversed : mainAxisAlignment,
+              children: flipMainAxis
+                  ? childrenWidgets.reversed.toList()
+                  : childrenWidgets,
+            );
+        for (final mainAxisAlignment in MainAxisAlignment.values) {
+          final originalWidgetRenderProperties = childrenRenderProperties(
+            await toFlexLayoutProperties(
+              buildWidget(
+                flipMainAxis: false,
+                mainAxisAlignment: mainAxisAlignment,
+              ),
+              tester: tester,
+            ),
+          );
+          final mirroredWidgetRenderProperties = childrenRenderProperties(
+            await toFlexLayoutProperties(
+              buildWidget(
+                flipMainAxis: true,
+                mainAxisAlignment: mainAxisAlignment,
+              ),
+              tester: tester,
+            ),
+          );
+          expect(originalWidgetRenderProperties, mirroredWidgetRenderProperties);
+        }
+      });
     });
   });
 

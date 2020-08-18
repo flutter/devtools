@@ -32,6 +32,7 @@ class LayoutExplorerSerializationDelegate
                 includeProperties: true,
               ),
             );
+        // ignore: invalid_use_of_protected_member
         final Constraints constraints = renderObject.constraints;
         if (constraints != null) {
           final Map<String, Object> constraintsProperty =
