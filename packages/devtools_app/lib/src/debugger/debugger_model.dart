@@ -278,12 +278,28 @@ class FileNode extends TreeNode<FileNode> {
     final root = FileNode('<root>');
 
     for (var script in scripts) {
-      var parts = script.uri.split('/');
+      final uri = Uri.parse(script.uri);
+      final scheme = uri.scheme;
+      var parts = uri.path.split('/');
 
-      // Look for and handle dotted package names.
-      if (parts.isNotEmpty && parts.first.contains('.')) {
+      // handle google3:///foo/bar
+      if (parts.first.isEmpty) {
+        parts = parts.where((part) => part.isNotEmpty).toList();
         parts = [
-          ...parts.first.split('.'),
+          '$scheme:${parts.first}',
+          ...parts.sublist(1),
+        ];
+      } else if (parts.first.contains('.')) {
+        // Look for and handle dotted package names (package:foo.bar).
+        final dottedParts = parts.first.split('.');
+        parts = [
+          '$scheme:${dottedParts.first}',
+          ...dottedParts.sublist(1),
+          ...parts.sublist(1),
+        ];
+      } else {
+        parts = [
+          '$scheme:${parts.first}',
           ...parts.sublist(1),
         ];
       }
