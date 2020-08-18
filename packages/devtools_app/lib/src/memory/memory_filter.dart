@@ -139,24 +139,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     controller = widget.controller;
 
     cancel();
-
-    // Detect and handle checkboxes state changing.
-    addAutoDisposeListener(controller.filterPrivateClassesListenable, () {
-      setState(() {
-        privateClasses.notifier.value = controller.filterPrivateClasses.value;
-      });
-    });
-    addAutoDisposeListener(controller.filterLibraryNoInstancesListenable, () {
-      setState(() {
-        libraryNoInstances.notifier.value =
-            controller.filterLibraryNoInstances.value;
-      });
-    });
-    addAutoDisposeListener(controller.filterZeroInstancesListenable, () {
-      setState(() {
-        zeroInstances.notifier.value = controller.filterZeroInstances.value;
-      });
-    });
   }
 
   void addLibrary(String libraryName, {bool hideState = false}) {
@@ -297,19 +279,9 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     );
   }
 
-  NotifierCheckbox privateClasses;
-  NotifierCheckbox zeroInstances;
-  NotifierCheckbox libraryNoInstances;
-
   @override
   Widget build(BuildContext context) {
     buildFilters();
-
-    privateClasses =
-        NotifierCheckbox(notifier: controller.filterPrivateClasses);
-    zeroInstances = NotifierCheckbox(notifier: controller.filterZeroInstances);
-    libraryNoInstances =
-        NotifierCheckbox(notifier: controller.filterLibraryNoInstances);
 
     // Dialog has three main vertical sections:
     //      - three checkboxes
@@ -341,19 +313,22 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                       ),
                       Row(
                         children: [
-                          privateClasses,
+                          NotifierCheckbox(
+                              notifier: controller.filterPrivateClasses),
                           const Text('Hide Private Class e.g.,_className'),
                         ],
                       ),
                       Row(
                         children: [
-                          zeroInstances,
+                          NotifierCheckbox(
+                              notifier: controller.filterZeroInstances),
                           const Text('Hide Classes with No Instances'),
                         ],
                       ),
                       Row(
                         children: [
-                          libraryNoInstances,
+                          NotifierCheckbox(
+                              notifier: controller.filterLibraryNoInstances),
                           const Text('Hide Library with No Instances'),
                         ],
                       ),

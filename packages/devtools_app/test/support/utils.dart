@@ -53,22 +53,8 @@ SocketProfile loadSocketProfile() {
   ]);
 }
 
-Future<TreemapNode> loadInstructionSizesJsonAsTree() async {
-  const testDataPath = 'sizes';
-  final treemapTestData = jsonDecode(
-    await File(testDataPath).readAsString(),
-  );
-  final processedTestData = treemapFromJson(treemapTestData);
-  processedTestData['n'] = 'Root';
-
-  return generateTree(processedTestData);
-}
-
-Future<TreemapNode> loadV8JsonAsTree() async {
-  const testDataPath = 'new_v8';
-  final treemapTestData = jsonDecode(
-    await File(testDataPath).readAsString(),
-  );
+Future<TreemapNode> loadSnapshotJsonAsTree(String snapshotJson) async {
+  final treemapTestData = jsonDecode(snapshotJson);
   final processedTestData = treemapFromJson(treemapTestData);
   processedTestData['n'] = 'Root';
 

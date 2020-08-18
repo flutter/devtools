@@ -11,7 +11,7 @@ import '../ui/colors.dart';
 import '../utils.dart';
 
 class CodeSizeSnapshotTable extends StatelessWidget {
-  factory CodeSizeSnapshotTable({@required rootNode}) {
+  factory CodeSizeSnapshotTable({@required rootNode, autoExpandRoot = true}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
     final sizeColumn = _SizeColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
@@ -22,6 +22,7 @@ class CodeSizeSnapshotTable extends StatelessWidget {
 
     return CodeSizeSnapshotTable._(
       rootNode,
+      autoExpandRoot,
       treeColumn,
       sizeColumn,
       columns,
@@ -30,6 +31,7 @@ class CodeSizeSnapshotTable extends StatelessWidget {
 
   const CodeSizeSnapshotTable._(
     this.rootNode,
+    this.autoExpandRoot,
     this.treeColumn,
     this.sortColumn,
     this.columns,
@@ -37,14 +39,19 @@ class CodeSizeSnapshotTable extends StatelessWidget {
 
   final TreemapNode rootNode;
 
+  final bool autoExpandRoot;
+
   final TreeColumnData<TreemapNode> treeColumn;
   final ColumnData<TreemapNode> sortColumn;
   final List<ColumnData<TreemapNode>> columns;
 
   @override
   Widget build(BuildContext context) {
+    if (autoExpandRoot) {
+      rootNode.expand();
+    }
     return TreeTable<TreemapNode>(
-      dataRoots: rootNode.children,
+      dataRoots: [rootNode],
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
@@ -70,7 +77,7 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
 
   @override
   double getNodeIndentPx(TreemapNode dataObject) {
-    final relativeLevel = dataObject.level - currentRootLevel - 1;
+    final relativeLevel = dataObject.level - currentRootLevel;
     return relativeLevel * TreeColumnData.treeToggleWidth;
   }
 }
@@ -133,7 +140,7 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
 }
 
 class CodeSizeDiffTable extends StatelessWidget {
-  factory CodeSizeDiffTable({@required rootNode}) {
+  factory CodeSizeDiffTable({@required rootNode, autoExpandRoot = true}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
     final diffColumn = _DiffColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
@@ -143,6 +150,7 @@ class CodeSizeDiffTable extends StatelessWidget {
 
     return CodeSizeDiffTable._(
       rootNode,
+      autoExpandRoot,
       treeColumn,
       diffColumn,
       columns,
@@ -151,12 +159,15 @@ class CodeSizeDiffTable extends StatelessWidget {
 
   const CodeSizeDiffTable._(
     this.rootNode,
+    this.autoExpandRoot,
     this.treeColumn,
     this.sortColumn,
     this.columns,
   );
 
   final TreemapNode rootNode;
+
+  final bool autoExpandRoot;
 
   final TreeColumnData<TreemapNode> treeColumn;
   final ColumnData<TreemapNode> sortColumn;
@@ -166,8 +177,11 @@ class CodeSizeDiffTable extends StatelessWidget {
   //                  if the table is only showing negative values.
   @override
   Widget build(BuildContext context) {
+    if (autoExpandRoot) {
+      rootNode.expand();
+    }
     return TreeTable<TreemapNode>(
-      dataRoots: rootNode.children,
+      dataRoots: [rootNode],
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
@@ -182,8 +196,9 @@ class CodeSizeDiffTable extends StatelessWidget {
 class _DiffColumn extends ColumnData<TreemapNode> {
   _DiffColumn() : super('Change', alignment: ColumnAlignment.right);
 
+  // Ensure sort by absolute size.
   @override
-  dynamic getValue(TreemapNode dataObject) => dataObject.byteSize;
+  dynamic getValue(TreemapNode dataObject) => dataObject.unsignedByteSize;
 
 // TODO(peterdjlee): Add up or down arrows indicating increase or decrease for display value.
   @override

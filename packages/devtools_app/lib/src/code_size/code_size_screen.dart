@@ -9,6 +9,7 @@ import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
 import '../common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
+import '../notifications.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -44,6 +45,9 @@ class CodeSizeScreen extends Screen {
   static const snapshotViewTreemapKey = Key('Snapshot View Treemap');
   @visibleForTesting
   static const diffViewTreemapKey = Key('Diff View Treemap');
+
+  static const loadingMessage =
+      'Loading data...\nPlease do not refresh or leave this page.';
 
   @override
   String get docPageId => id;
@@ -270,18 +274,41 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   }
 
   Widget _buildImportSnapshotView() {
-    return Column(
-      children: [
-        Flexible(
-          child: FileImportContainer(
-            title: 'Snapshot / APK analysis',
-            instructions: SnapshotView.importInstructions,
-            actionText: 'Analyze Snapshot / APK',
-            onAction: controller.loadTreeFromJsonFile,
-          ),
-        ),
-      ],
-    );
+    final notifications = Notifications.of(context);
+
+    return ValueListenableBuilder(
+        valueListenable: controller.processingNotifier,
+        builder: (context, processing, _) {
+          if (processing) {
+            return Center(
+              child: Text(
+                CodeSizeScreen.loadingMessage,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.headline1.color,
+                ),
+              ),
+            );
+          } else {
+            return Column(
+              children: [
+                Flexible(
+                  child: FileImportContainer(
+                    title: 'Snapshot / APK analysis',
+                    instructions: SnapshotView.importInstructions,
+                    actionText: 'Analyze Snapshot / APK',
+                    onAction: (jsonFile) {
+                      controller.loadTreeFromJsonFile(
+                        jsonFile,
+                        (error) => notifications.push(error),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+        });
   }
 }
 
@@ -377,21 +404,38 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   }
 
   Widget _buildImportDiffView() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: DualFileImportContainer(
-            firstFileTitle: 'Old',
-            secondFileTitle: 'New',
-            // TODO(kenz): perhaps bold "original" and "modified".
-            firstInstructions: DiffView.importOldInstructions,
-            secondInstructions: DiffView.importNewInstructions,
-            actionText: 'Analyze Diff',
-            onAction: controller.loadDiffTreeFromJsonFiles,
-          ),
-        ),
-      ],
+    return ValueListenableBuilder(
+      valueListenable: controller.processingNotifier,
+      builder: (context, processing, _) {
+        if (processing) {
+          return Center(
+            child: Text(
+              CodeSizeScreen.loadingMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline1.color,
+              ),
+            ),
+          );
+        } else {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: DualFileImportContainer(
+                  firstFileTitle: 'Old',
+                  secondFileTitle: 'New',
+                  // TODO(kenz): perhaps bold "original" and "modified".
+                  firstInstructions: DiffView.importOldInstructions,
+                  secondInstructions: DiffView.importNewInstructions,
+                  actionText: 'Analyze Diff',
+                  onAction: controller.loadDiffTreeFromJsonFiles,
+                ),
+              ),
+            ],
+          );
+        }
+      },
     );
   }
 

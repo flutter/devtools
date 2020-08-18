@@ -46,3 +46,6 @@ popd
 NEW_VERSION="$(sed -n -e 's/^.*version: //p' packages/devtools_app/pubspec.yaml)"
 echo "Updated version to: $NEW_VERSION"
 
+echo "Running pub upgrade on all packages"
+tool/pub_upgrade.sh
+

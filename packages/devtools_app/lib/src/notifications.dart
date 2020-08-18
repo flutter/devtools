@@ -103,6 +103,7 @@ class NotificationsState extends State<_NotificationsProvider>
     super.dispose();
   }
 
+  // TODO(peterdjlee): Support clickable links in notifications. See #2268.
   /// Pushes a notification [message].
   @override
   void push(String message) {

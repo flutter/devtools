@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../common_widgets.dart';
 import '../../../theme.dart';
 import '../../../ui/theme.dart';
 import '../../../utils.dart';
@@ -1245,7 +1246,8 @@ class WidgetVisualizer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final properties = layoutProperties;
     Color borderColor = regularWidgetColor;
     if (properties is FlexLayoutProperties) {
@@ -1317,7 +1319,7 @@ class WidgetVisualizer extends StatelessWidget {
         border: Border.all(
           color: borderColor,
         ),
-        color: colorScheme.backgroundColor,
+        color: theme.canvasColor.darken(),
       ),
     );
   }

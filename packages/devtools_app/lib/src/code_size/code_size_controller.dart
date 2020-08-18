@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
+import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../charts/treemap.dart';
 import '../utils.dart';
@@ -19,6 +21,17 @@ enum DiffTreeType {
 }
 
 class CodeSizeController {
+  static const unsupportedFileTypeError =
+      'Failed to load snapshot: file type not supported.\n\n'
+      'The code size tool supports Dart AOT v8 snapshots, instruction sizes, '
+      'and apk-analysis files. See documentation for how to generate these files.';
+
+  static const differentTypesError =
+      'Failed to load diff: OLD and NEW files are different types.';
+
+  static const identicalFilesError =
+      'Failed to load diff: OLD and NEW files are identical.';
+
   /// The node set as the snapshot root.
   ///
   /// Used to build the treemap and the tree table for the snapshot tab.
@@ -118,16 +131,38 @@ class CodeSizeController {
     changeDiffRoot(_activeDiffRoot);
   }
 
-  void loadTreeFromJsonFile(DevToolsJsonFile jsonFile) {
-    changeSnapshotJsonFile(jsonFile);
+  /// Notifies that the json files are currently being processed.
+  ValueListenable get processingNotifier => _processingNotifier;
+  final _processingNotifier = ValueNotifier<bool>(false);
+
+  void loadTreeFromJsonFile(
+    DevToolsJsonFile jsonFile,
+    void Function(String error) onError,
+  ) async {
+    _processingNotifier.value = true;
+
+    // Free up the thread for the code size page to display the loading message.
+    // Without passing in a high value, the value listenable builder in the code
+    // size screen does not get updated.
+    await delayForBatchProcessing(micros: 10000);
 
     Map<String, dynamic> processedJson;
     if (jsonFile.isApkFile) {
       // APK analysis json should be processed already.
       processedJson = jsonFile.data;
     } else {
-      processedJson = treemapFromJson(jsonFile.data);
+      try {
+        processedJson = treemapFromJson(jsonFile.data);
+      } catch (error) {
+        // TODO(peterdjlee): Include link to docs when hyperlink support is added to the
+        //                   Notifications class. See #2268.\
+        onError(unsupportedFileTypeError);
+        _processingNotifier.value = false;
+        return;
+      }
     }
+
+    changeSnapshotJsonFile(jsonFile);
 
     // Set name for root node.
     processedJson['n'] = 'Root';
@@ -136,16 +171,35 @@ class CodeSizeController {
     final newRoot = generateTree(processedJson);
 
     changeSnapshotRoot(newRoot);
+
+    _processingNotifier.value = false;
   }
 
+  // TODO(peterdjlee): Spawn an isolate to run parts of this function to
+  //                   prevent the UI from freezing and display a circular
+  //                   progress indicator on code size screen. Needs flutter
+  //                   web to support working with isolates. See #33577.
   void loadDiffTreeFromJsonFiles(
     DevToolsJsonFile oldFile,
     DevToolsJsonFile newFile,
-  ) {
-    if (oldFile == null || newFile == null) return;
+    void Function(String error) onError,
+  ) async {
+    if (oldFile == null || newFile == null) {
+      return;
+    }
 
-    changeOldDiffSnapshotFile(oldFile);
-    changeNewDiffSnapshotFile(newFile);
+    if (oldFile.isApkFile != newFile.isApkFile ||
+        oldFile.isV8Snapshot != newFile.isV8Snapshot) {
+      onError(differentTypesError);
+      return;
+    }
+
+    _processingNotifier.value = true;
+
+    // Free up the thread for the code size page to display the loading message.
+    // Without passing in a high value, the value listenable builder in the code
+    // size screen does not get updated.
+    await delayForBatchProcessing(micros: 10000);
 
     Map<String, dynamic> diffMap;
     if (oldFile.isApkFile && newFile.isApkFile) {
@@ -165,8 +219,25 @@ class CodeSizeController {
 
       diffMap = compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
     } else {
-      diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
+      try {
+        diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
+      } catch (error) {
+        // TODO(peterdjlee): Include link to docs when hyperlink support is added to the
+        //                    Notifications class. See #2268.
+        onError(unsupportedFileTypeError);
+        _processingNotifier.value = false;
+        return;
+      }
     }
+
+    if (diffMap == null || (diffMap['children'] as List).isEmpty) {
+      onError(identicalFilesError);
+      _processingNotifier.value = false;
+      return;
+    }
+
+    changeOldDiffSnapshotFile(oldFile);
+    changeNewDiffSnapshotFile(newFile);
 
     diffMap['n'] = 'Root';
 
@@ -185,6 +256,8 @@ class CodeSizeController {
     );
 
     changeDiffRoot(_activeDiffRoot);
+
+    _processingNotifier.value = false;
   }
 
   ProgramInfoNode _apkJsonToProgramInfo({
@@ -338,6 +411,8 @@ extension CodeSizeJsonFileExtension on DevToolsJsonFile {
     }
     return false;
   }
+
+  bool get isV8Snapshot => Snapshot.isV8HeapSnapshot(data);
 
   String get displayText {
     return '$path - $formattedTime';

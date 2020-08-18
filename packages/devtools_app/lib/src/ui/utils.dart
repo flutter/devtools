@@ -7,44 +7,70 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// Used to create a Checkbox widget who's boolean value is attached
-/// to a ValueNotifier<bool>.  This allows for the pattern:
+import '../auto_dispose_mixin.dart';
+
+/// Stateful Checkbox Widget class using a [ValueNotifier].
 ///
-/// Create the NotifierCheckbox widget in build e.g.,
+/// Used to create a Checkbox widget who's boolean value is attached
+/// to a [ValueNotifier<bool>].  This allows for the pattern:
+///
+/// Create the [NotifierCheckbox] widget in build e.g.,
 ///
 ///   myCheckboxWidget = NotifierCheckbox(notifier: controller.myCheckbox);
 ///
-/// Add a listener in didChangeDependencies to rebuild when checkbox value
-/// changes e.g.,
-///
-/// addAutoDisposeListener(controller.myCheckboxListenable, () {
-///   setState(() {
-///     myCheckbox.notifier.value = controller.myCheckbox.value;
-///   });
-/// });
-
-/// Checkbox Widget class using a ValueNotifier.
-class NotifierCheckbox extends Checkbox {
-  NotifierCheckbox({
+/// The checkbox and the value notifier are now linked with clicks updating the
+/// [ValueNotifier] and changes to the [ValueNotifier] updating the checkbox.
+class NotifierCheckbox extends StatefulWidget {
+  const NotifierCheckbox({
     Key key,
     @required this.notifier,
-  }) : super(
-          key: key,
-          value: notifier.value,
-          onChanged: notifier.onChanged,
-        );
+  }) : super(key: key);
 
-  final CheckboxValueNotifier notifier;
+  final ValueNotifier<bool> notifier;
 
-  /// Notifies that the value of the checkbox has changed.
-  ValueListenable<bool> get valueListenable => notifier;
+  @override
+  _NotifierCheckboxState createState() => _NotifierCheckboxState();
 }
 
-/// ValueNotifier associated with a Checkbox widget.
-class CheckboxValueNotifier extends ValueNotifier<bool> {
-  CheckboxValueNotifier(bool value) : super(value);
+class _NotifierCheckboxState extends State<NotifierCheckbox>
+    with AutoDisposeMixin {
+  bool currentValue;
 
-  void onChanged(bool newValue) {
-    value = newValue;
+  @override
+  void initState() {
+    super.initState();
+    _trackValue();
+  }
+
+  @override
+  void didUpdateWidget(NotifierCheckbox oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.notifier == widget.notifier) return;
+
+    cancel();
+    _trackValue();
+  }
+
+  void _trackValue() {
+    _updateValue();
+    addAutoDisposeListener(widget.notifier, _updateValue);
+  }
+
+  void _updateValue() {
+    if (currentValue == widget.notifier.value) return;
+    setState(() {
+      currentValue = widget.notifier.value;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Checkbox(
+      value: currentValue,
+      onChanged: (value) {
+        widget.notifier.value = value;
+      },
+    );
   }
 }
