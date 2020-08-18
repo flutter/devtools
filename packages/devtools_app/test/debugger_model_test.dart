@@ -76,6 +76,26 @@ void main() {
         expect(child.name, 'qux.dart');
         expect(child.scriptRef, isNotNull);
       });
+
+      test('handles urls paths', () {
+        final roots = FileNode.createRootsFrom([
+          ScriptRef(uri: 'google3:///foo/bar/baz.dart', id: 'id-6'),
+        ]);
+        expect(roots, isNotEmpty);
+        expect(roots, hasLength(1));
+
+        var child = roots[0];
+        expect(child.name, 'google3:foo');
+        expect(child.scriptRef, isNull);
+
+        child = child.children[0];
+        expect(child.name, 'bar');
+        expect(child.scriptRef, isNull);
+
+        child = child.children[0];
+        expect(child.name, 'baz.dart');
+        expect(child.scriptRef, isNotNull);
+      });
     });
   });
 }
