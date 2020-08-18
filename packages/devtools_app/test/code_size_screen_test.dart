@@ -264,9 +264,9 @@ void main() {
       await tester.tap(find.text('Decrease Only').hitTestable());
       await tester.pumpAndSettle();
 
-      expect(find.text('Root [-82.6 KB]'), findsOneWidget);
-      expect(find.text('package:memory [-19.2 KB]'), findsOneWidget);
-      expect(find.text('package:flutter [-42.3 KB]'), findsOneWidget);
+      expect(find.text('Root'), findsOneWidget);
+      expect(find.text('package:memory'), findsOneWidget);
+      expect(find.text('package:flutter'), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('clears data', windowSize,
