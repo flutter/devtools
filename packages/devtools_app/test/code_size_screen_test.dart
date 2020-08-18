@@ -139,8 +139,8 @@ void main() {
       expect(find.byKey(CodeSizeScreen.snapshotViewTreemapKey), findsOneWidget);
 
       expect(find.text('Root [6.0 MB]'), findsOneWidget);
-      expect(find.text('package:flutter [3.0 MB]'), findsOneWidget);
-      expect(find.text('dart:core [542.7 KB]'), findsOneWidget);
+      expect(find.text('package:flutter'), findsOneWidget);
+      expect(find.text('dart:core'), findsOneWidget);
 
       expect(find.byType(CodeSizeSnapshotTable), findsOneWidget);
       expect(find.byType(CodeSizeDiffTable), findsNothing);
@@ -229,8 +229,8 @@ void main() {
       );
 
       expect(find.text('Root [+1.5 MB]'), findsOneWidget);
-      expect(find.text('package:pointycastle [+465.8 KB]'), findsOneWidget);
-      expect(find.text('package:flutter [+369 KB]'), findsOneWidget);
+      expect(find.text('package:pointycastle'), findsOneWidget);
+      expect(find.text('package:flutter'), findsOneWidget);
 
       expect(find.byType(CodeSizeSnapshotTable), findsNothing);
       expect(find.byType(CodeSizeDiffTable), findsOneWidget);
@@ -255,8 +255,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Root [+1.6 MB]'), findsOneWidget);
-      expect(find.text('package:pointycastle [+465.8 KB]'), findsOneWidget);
-      expect(find.text('package:flutter [+411.3 KB]'), findsOneWidget);
+      expect(find.text('package:pointycastle'), findsOneWidget);
+      expect(find.text('package:flutter'), findsOneWidget);
 
       await tester.tap(find.byKey(CodeSizeScreen.dropdownKey));
       await tester.pumpAndSettle();
