@@ -5,11 +5,14 @@
 import 'dart:async';
 
 import 'analytics.dart' as analytics;
-import 'platform.dart' as platform;
 import 'provider.dart';
 
 class _RemoteAnalyticsProvider implements AnalyticsProvider {
-  _RemoteAnalyticsProvider(this._isEnabled, this._isFirstRun);
+  _RemoteAnalyticsProvider(
+    this._isEnabled,
+    this._isFirstRun,
+    this._isGtagsEnabled,
+  );
 
   @override
   bool get isEnabled => _isEnabled;
@@ -20,18 +23,19 @@ class _RemoteAnalyticsProvider implements AnalyticsProvider {
   final bool _isFirstRun;
 
   @override
-  bool get isGtagsEnabled => analytics.isGtagsEnabled();
+  bool get isGtagsEnabled => _isGtagsEnabled;
+  final bool _isGtagsEnabled;
 
   @override
-  void setAllowAnalytics() => platform.setAllowAnalytics();
+  void setAllowAnalytics() => analytics.setAllowAnalytics();
 
   @override
-  void setDontAllowAnalytics() => platform.setDontAllowAnalytics();
+  void setDontAllowAnalytics() => analytics.setDontAllowAnalytics();
 
   @override
   void setUpAnalytics() {
     analytics.initializeGA();
-    platform.jsHookupListenerForGA();
+    analytics.jsHookupListenerForGA();
   }
 }
 
@@ -40,6 +44,7 @@ Future<AnalyticsProvider> get analyticsProvider async {
   _providerCompleter = Completer<AnalyticsProvider>();
   var isEnabled = false;
   var isFirstRun = false;
+  var isGtagsEnabled = false;
   try {
     analytics.exposeGaDevToolsEnabledToJs();
     if (analytics.isGtagsReset()) {
@@ -51,10 +56,12 @@ Future<AnalyticsProvider> get analyticsProvider async {
         isFirstRun = true;
       }
     }
+    isGtagsEnabled = analytics.isGtagsEnabled();
   } catch (_) {
     // Ignore issues if analytics could not be initialized.
   }
-  _providerCompleter.complete(_RemoteAnalyticsProvider(isEnabled, isFirstRun));
+  _providerCompleter.complete(
+      _RemoteAnalyticsProvider(isEnabled, isFirstRun, isGtagsEnabled));
   return _providerCompleter.future;
 }
 

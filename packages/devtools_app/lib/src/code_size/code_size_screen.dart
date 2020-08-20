@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
 import '../common_widgets.dart';
@@ -32,10 +34,9 @@ class CodeSizeScreen extends Screen {
           icon: Octicons.fileZip,
         );
 
-  static const id = 'codeSize';
-
   static const snapshotTabKey = Key('Snapshot Tab');
   static const diffTabKey = Key('Diff Tab');
+  static const id = 'codeSize';
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -83,6 +84,7 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
   @override
   void initState() {
     super.initState();
+    ga.screen(CodeSizeScreen.id);
     _tabController = TabController(length: tabs.length, vsync: this);
     addAutoDisposeListener(_tabController);
   }

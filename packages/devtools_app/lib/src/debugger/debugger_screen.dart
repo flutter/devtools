@@ -9,6 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/host_platform/host_platform.dart';
@@ -34,11 +36,13 @@ const bool debugShowCallStackCount = false;
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
       : super.conditional(
-          id: 'debugger',
+          id: id,
           requiresDebugBuild: true,
           title: 'Debugger',
           icon: Octicons.bug,
         );
+
+  static const id = 'debugger';
 
   @override
   String get docPageId => screenId;
@@ -79,6 +83,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void initState() {
     super.initState();
     _libraryFilterFocusNode = FocusNode();
+    ga.screen(DebuggerScreen.id);
   }
 
   @override
