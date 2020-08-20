@@ -7,6 +7,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart';
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../console.dart';
@@ -22,8 +24,9 @@ import 'logging_controller.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
-  const LoggingScreen()
-      : super('logging', title: 'Logging', icon: Octicons.clippy);
+  const LoggingScreen() : super(id, title: 'Logging', icon: Octicons.clippy);
+
+  static const id = 'logging';
 
   @override
   String get docPageId => screenId;
@@ -64,6 +67,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   @override
   void initState() {
     super.initState();
+    screen(LoggingScreen.id);
 
     filterController = TextEditingController();
   }

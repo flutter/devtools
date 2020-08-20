@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart';
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../screen.dart';
@@ -21,11 +23,13 @@ import 'network_request_inspector.dart';
 class NetworkScreen extends Screen {
   const NetworkScreen()
       : super.conditional(
-          id: 'network',
+          id: id,
           requiresDartVm: true,
           title: 'Network',
           icon: Icons.network_check,
         );
+
+  static const id = 'network';
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -90,6 +94,12 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   bool recording;
 
   NetworkRequests requests;
+
+  @override
+  void initState() {
+    super.initState();
+    screen(NetworkScreen.id);
+  }
 
   @override
   void didChangeDependencies() {

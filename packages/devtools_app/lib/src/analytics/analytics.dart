@@ -7,6 +7,7 @@ library gtags;
 
 // ignore_for_file: non_constant_identifier_names
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 
@@ -21,8 +22,6 @@ import '../ui/gtags.dart';
 import '../utils.dart';
 import '../version.dart';
 import 'constants.dart';
-
-export 'constants.dart';
 
 // Dimensions1 AppType values:
 const String appTypeFlutter = 'flutter';
@@ -616,4 +615,108 @@ Future<void> computeUserApplicationCustomGTagData() async {
 
 void exposeGaDevToolsEnabledToJs() {
   setProperty(window, 'gaDevToolsEnabled', allowInterop(gaEnabled));
+}
+
+@JS('getDevToolsPropertyID')
+external String devToolsProperty();
+
+@JS('hookupListenerForGA')
+external void jsHookupListenerForGA();
+
+Future<bool> get isAnalyticsAllowed async => await isEnabled;
+
+void setAllowAnalytics() {
+  setEnabled();
+}
+
+void setDontAllowAnalytics() {
+  setEnabled(false);
+}
+
+/// Computes the DevTools application. Fills in the devtoolsPlatformType and
+/// devtoolsChrome.
+void computeDevToolsCustomGTagsData() {
+  // Platform
+  final String platform = window.navigator.platform;
+  platform.replaceAll(' ', '_');
+  devtoolsPlatformType = platform;
+
+  final String appVersion = window.navigator.appVersion;
+  final List<String> splits = appVersion.split(' ');
+  final len = splits.length;
+  for (int index = 0; index < len; index++) {
+    final String value = splits[index];
+    // Chrome or Chrome iOS
+    if (value.startsWith(devToolsChromeName) ||
+        value.startsWith(devToolsChromeIos)) {
+      devtoolsChrome = value;
+    } else if (value.startsWith('Android')) {
+      // appVersion for Android is 'Android n.n.n'
+      devtoolsPlatformType = '$devToolsPlatformTypeAndroid${splits[index + 1]}';
+    } else if (value == devToolsChromeOS) {
+      // Chrome OS will return a platform e.g., CrOS_Linux_x86_64
+      devtoolsPlatformType = '${devToolsChromeOS}_$platform';
+    }
+  }
+}
+
+// Look at the query parameters '&ide=' and record in GA.
+void computeDevToolsQueryParams() {
+  ideLaunched = ideLaunchedCLI; // Default is Command Line launch.
+
+  final Uri uri = Uri.parse(window.location.toString());
+  final ideValue = uri.queryParameters[ideLaunchedQuery];
+  if (ideValue != null) {
+    ideLaunched = ideValue;
+  }
+}
+
+void computeFlutterClientId() async {
+  flutterClientId = await flutterGAClientID();
+}
+
+bool _computing = false;
+
+int _stillWaiting = 0;
+void waitForDimensionsComputed(String screenName) {
+  Timer(const Duration(milliseconds: 100), () async {
+    if (isDimensionsComputed) {
+      screen(screenName);
+    } else {
+      if (_stillWaiting++ < 50) {
+        waitForDimensionsComputed(screenName);
+      } else {
+        log('Cancel waiting for dimensions.', LogLevel.warning);
+      }
+    }
+  });
+}
+
+// Loading screen from a hash code, can't collect GA (if enabled) until we have
+// all the dimension data.
+void setupAndGaScreen(String screenName) async {
+  if (isGtagsEnabled()) {
+    if (!isDimensionsComputed) {
+      _stillWaiting++;
+      waitForDimensionsComputed(screenName);
+    } else {
+      screen(screenName);
+    }
+  }
+}
+
+Future<void> setupDimensions() async {
+  if (serviceManager.connectedApp != null &&
+      isGtagsEnabled() &&
+      !isDimensionsComputed &&
+      !_computing) {
+    _computing = true;
+    // While spinning up DevTools first time wait until dimensions data is
+    // available before first GA event sent.
+    await computeUserApplicationCustomGTagData();
+    computeDevToolsCustomGTagsData();
+    computeDevToolsQueryParams();
+    computeFlutterClientId();
+    dimensionsComputed();
+  }
 }

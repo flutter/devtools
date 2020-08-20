@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart';
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
@@ -76,6 +78,12 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   bool processing = false;
 
   double processingProgress = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    screen(PerformanceScreen.id);
+  }
 
   @override
   void didChangeDependencies() {

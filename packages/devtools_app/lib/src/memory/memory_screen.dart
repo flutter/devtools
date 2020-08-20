@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart';
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
@@ -89,6 +91,12 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   MemoryController controller;
 
   OverlayEntry legendOverlayEntry;
+
+  @override
+  void initState() {
+    super.initState();
+    screen(MemoryScreen.id);
+  }
 
   @override
   void didChangeDependencies() {

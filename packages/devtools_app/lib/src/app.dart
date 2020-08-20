@@ -8,6 +8,9 @@ import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart';
 
 import '../devtools.dart' as devtools;
+import 'analytics/analytics_stub.dart'
+    if (dart.library.html) 'analytics/analytics.dart';
+import 'analytics/constants.dart';
 import 'analytics/provider.dart';
 import 'code_size/code_size_controller.dart';
 import 'code_size/code_size_screen.dart';
@@ -408,8 +411,7 @@ class DevToolsAboutDialog extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () async {
-        // TODO(devoncarew): Support analytics.
-        // ga.select(ga.devToolsMain, ga.feedback);
+        select(devToolsMain, feedback);
 
         const reportIssuesUrl = 'https://$urlPath';
         await launchUrl(reportIssuesUrl, context);
