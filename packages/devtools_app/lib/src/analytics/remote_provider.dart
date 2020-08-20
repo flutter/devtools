@@ -27,10 +27,10 @@ class _RemoteAnalyticsProvider implements AnalyticsProvider {
   final bool _isGtagsEnabled;
 
   @override
-  void setAllowAnalytics() => setAllowAnalytics();
+  void setAllowAnalytics() => analytics.setAllowAnalytics();
 
   @override
-  void setDontAllowAnalytics() => setDontAllowAnalytics();
+  void setDontAllowAnalytics() => analytics.setDontAllowAnalytics();
 
   @override
   void setUpAnalytics() {
