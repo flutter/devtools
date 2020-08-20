@@ -54,7 +54,9 @@ const String ideLaunchedQuery = 'ide'; // '&ide=' query parameter
 const String ideLaunchedCLI = 'CLI'; // Command Line Interface
 
 @JS('gtagsEnabled')
-external bool isGtagsEnabled();
+external bool Function() get _isGtagsEnabled;
+
+bool isGtagsEnabled() => _isGtagsEnabled?.call() ?? false;
 
 /// Is the query parameter &gtags= set to reset?
 @JS('gtagsReset')

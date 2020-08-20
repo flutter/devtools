@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart';
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
@@ -82,7 +82,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   @override
   void initState() {
     super.initState();
-    screen(TimelineScreen.id);
+    ga.screen(TimelineScreen.id);
   }
 
   @override

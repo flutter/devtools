@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart';
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
 import '../common_widgets.dart';
@@ -25,12 +25,10 @@ bool codeSizeScreenEnabled = true;
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
 
-const _id = 'codeSize';
-
 class CodeSizeScreen extends Screen {
   const CodeSizeScreen()
       : super.conditional(
-          id: _id,
+          id: id,
           requiresDartVm: true,
           title: 'Code Size',
           icon: Octicons.fileZip,
@@ -38,6 +36,7 @@ class CodeSizeScreen extends Screen {
 
   static const snapshotTabKey = Key('Snapshot Tab');
   static const diffTabKey = Key('Diff Tab');
+  static const id = 'codeSize';
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -52,7 +51,7 @@ class CodeSizeScreen extends Screen {
       'Loading data...\nPlease do not refresh or leave this page.';
 
   @override
-  String get docPageId => _id;
+  String get docPageId => id;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +84,7 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
   @override
   void initState() {
     super.initState();
-    screen(_id);
+    ga.screen(CodeSizeScreen.id);
     _tabController = TabController(length: tabs.length, vsync: this);
     addAutoDisposeListener(_tabController);
   }

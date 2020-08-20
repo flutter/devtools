@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart';
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../console.dart';
@@ -67,7 +67,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   @override
   void initState() {
     super.initState();
-    screen(LoggingScreen.id);
+    ga.screen(LoggingScreen.id);
 
     filterController = TextEditingController();
   }

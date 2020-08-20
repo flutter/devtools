@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart';
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../screen.dart';
@@ -98,7 +98,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   @override
   void initState() {
     super.initState();
-    screen(NetworkScreen.id);
+    ga.screen(NetworkScreen.id);
   }
 
   @override

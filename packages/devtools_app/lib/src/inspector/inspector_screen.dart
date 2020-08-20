@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart';
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart';
 import '../auto_dispose_mixin.dart';
 import '../blocking_action_mixin.dart';
@@ -69,8 +69,8 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
   @override
   void initState() {
     super.initState();
-    setupDimensions();
-    screen(InspectorScreen.id);
+    ga.setupDimensions();
+    ga.screen(InspectorScreen.id);
     autoDispose(
         serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
     if (serviceManager.hasConnection) {
@@ -294,7 +294,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   void _refreshInspector() {
-    select(inspector, refresh);
+    ga.select(inspector, refresh);
     blockWhileInProgress(() async {
       await inspectorController?.onForceRefresh();
     });

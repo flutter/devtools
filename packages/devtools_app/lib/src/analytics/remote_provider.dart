@@ -9,7 +9,10 @@ import 'provider.dart';
 
 class _RemoteAnalyticsProvider implements AnalyticsProvider {
   _RemoteAnalyticsProvider(
-      this._isEnabled, this._isFirstRun, this._isGtagsEnabled);
+    this._isEnabled,
+    this._isFirstRun,
+    this._isGtagsEnabled,
+  );
 
   @override
   bool get isEnabled => _isEnabled;
