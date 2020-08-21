@@ -405,6 +405,9 @@ class CodeSizeController {
 
 extension CodeSizeJsonFileExtension on DevToolsJsonFile {
   static const _supportedAnalyzeSizePlatforms = [
+    // TODO(kenz): remove 'apk' once
+    // https://github.com/flutter/flutter/pull/63610 is in stable.
+    'apk',
     'android',
     'ios',
     'macos',
