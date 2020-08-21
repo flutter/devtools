@@ -120,8 +120,11 @@ void main() {
       expect(find.text(SnapshotView.importInstructions), findsOneWidget);
       expect(find.text('No File Selected'), findsOneWidget);
 
-      codeSizeController.loadTreeFromJsonFile(newV8JsonFile, (error) => {},
-          delayed: true);
+      codeSizeController.loadTreeFromJsonFile(
+        newV8JsonFile,
+        (error) => {},
+        delayed: true,
+      );
       await tester.pump(const Duration(milliseconds: 500));
       expect(find.text(CodeSizeScreen.loadingMessage), findsOneWidget);
       await tester.pumpAndSettle();
@@ -179,6 +182,19 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    Future<void> loadDiffDataAndPump(
+      WidgetTester tester,
+      DevToolsJsonFile oldJsonFile,
+      DevToolsJsonFile newJsonFile,
+    ) async {
+      codeSizeController.loadDiffTreeFromJsonFiles(
+        oldJsonFile,
+        newJsonFile,
+        (error) => {},
+      );
+      await tester.pumpAndSettle();
+    }
+
     testWidgetsWithWindowSize('builds initial content', windowSize,
         (WidgetTester tester) async {
       await loadDiffTabAndSettle(tester);
@@ -204,13 +220,13 @@ void main() {
         delayed: true,
       );
       await tester.pump(const Duration(milliseconds: 500));
-
       expect(find.text(CodeSizeScreen.loadingMessage), findsOneWidget);
+      await tester.pumpAndSettle();
+
       expect(find.byType(FileImportContainer), findsNothing);
       expect(find.text(DiffView.importOldInstructions), findsNothing);
       expect(find.text(DiffView.importNewInstructions), findsNothing);
       expect(find.text('No File Selected'), findsNothing);
-      await tester.pumpAndSettle();
 
       expect(find.byType(DiffView), findsOneWidget);
       expect(
@@ -241,12 +257,7 @@ void main() {
         (WidgetTester tester) async {
       await loadDiffTabAndSettle(tester);
 
-      codeSizeController.loadDiffTreeFromJsonFiles(
-        oldV8JsonFile,
-        newV8JsonFile,
-        (error) => {},
-      );
-      await tester.pumpAndSettle();
+      await loadDiffDataAndPump(tester, oldV8JsonFile, newV8JsonFile);
 
       await tester.tap(find.byKey(CodeSizeScreen.dropdownKey));
       await tester.pumpAndSettle();
@@ -273,12 +284,7 @@ void main() {
         (WidgetTester tester) async {
       await loadDiffTabAndSettle(tester);
 
-      codeSizeController.loadDiffTreeFromJsonFiles(
-        oldV8JsonFile,
-        newV8JsonFile,
-        (error) => {},
-      );
-      await tester.pumpAndSettle();
+      await loadDiffDataAndPump(tester, oldV8JsonFile, newV8JsonFile);
 
       await tester.tap(find.byKey(CodeSizeScreen.clearButtonKey));
       await tester.pumpAndSettle();
@@ -291,7 +297,7 @@ void main() {
     });
   });
 
-  group('CodeSizeTestController', () {
+  group('CodeSizeController', () {
     BuildContext buildContext;
 
     setUp(() async {
@@ -319,7 +325,11 @@ void main() {
       expect(find.byType(CodeSizeBody), findsOneWidget);
     }
 
-    void loadDiffTreeFromJsonFiles(String firstFile, String secondFile) {
+    Future<void> loadDiffTreeAndPump(
+      WidgetTester tester,
+      String firstFile,
+      String secondFile,
+    ) async {
       codeSizeController.loadDiffTreeFromJsonFiles(
         DevToolsJsonFile(
           name: '',
@@ -333,6 +343,7 @@ void main() {
         ),
         (error) => Notifications.of(buildContext).push(error),
       );
+      await tester.pumpAndSettle();
     }
 
     testWidgetsWithWindowSize(
@@ -368,22 +379,19 @@ void main() {
       await tester.tap(find.byKey(CodeSizeScreen.diffTabKey));
       await tester.pumpAndSettle();
 
-      loadDiffTreeFromJsonFiles(newV8, newV8);
-      await tester.pumpAndSettle();
+      await loadDiffTreeAndPump(tester, newV8, newV8);
       expect(
         find.text(CodeSizeController.identicalFilesError),
         findsOneWidget,
       );
 
-      loadDiffTreeFromJsonFiles(instructionSizes, newV8);
-      await tester.pumpAndSettle();
+      await loadDiffTreeAndPump(tester, instructionSizes, newV8);
       expect(
         find.text(CodeSizeController.differentTypesError),
         findsOneWidget,
       );
 
-      loadDiffTreeFromJsonFiles(unsupportedFile, unsupportedFile);
-      await tester.pumpAndSettle();
+      await loadDiffTreeAndPump(tester, unsupportedFile, unsupportedFile);
       expect(
         find.text(CodeSizeController.unsupportedFileTypeError),
         findsOneWidget,
