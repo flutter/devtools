@@ -116,7 +116,7 @@ void main() {
       expect(find.byType(SnapshotView), findsOneWidget);
       expect(
         find.text(
-          'Snapshot: lib/src/code_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
+          'Dart AOT Snapshot: lib/src/code_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
         ),
         findsOneWidget,
       );
