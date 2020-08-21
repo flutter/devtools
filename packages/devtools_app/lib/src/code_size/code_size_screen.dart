@@ -254,8 +254,8 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
 
   String _generateSingleFileHeaderText() {
     String output = controller.snapshotJsonFile.value.isAnalyzeSizeFile
-        ? 'Total Size Analysis: '
-        : 'Dart AOT Snapshot: ';
+        ? 'Total size analysis: '
+        : 'Dart AOT snapshot: ';
     output += controller.snapshotJsonFile.value.displayText;
     return output;
   }
@@ -398,8 +398,8 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   String _generateDualFileHeaderText() {
     String output = 'Diffing ';
     output += controller.oldDiffSnapshotJsonFile.value.isAnalyzeSizeFile
-        ? 'APKs: '
-        : 'Snapshots: ';
+        ? 'total size analyses: '
+        : 'Dart AOT snapshots: ';
     output += controller.oldDiffSnapshotJsonFile.value.displayText;
     output += ' (OLD)    vs    (NEW) ';
     output += controller.newDiffSnapshotJsonFile.value.displayText;
