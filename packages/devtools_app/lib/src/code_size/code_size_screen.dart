@@ -42,6 +42,7 @@ class CodeSizeScreen extends Screen {
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
   static const dropdownKey = Key('Diff Tree Type Dropdown');
+
   @visibleForTesting
   static const snapshotViewTreemapKey = Key('Snapshot View Treemap');
   @visibleForTesting
@@ -443,7 +444,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
 
   Widget _buildTreemap() {
     return LayoutBuilder(
-      key: CodeSizeScreen.snapshotViewTreemapKey,
+      key: CodeSizeScreen.diffViewTreemapKey,
       builder: (context, constraints) {
         return Treemap.fromRoot(
           rootNode: diffRoot,

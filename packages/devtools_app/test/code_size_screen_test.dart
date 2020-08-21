@@ -14,54 +14,59 @@ import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/code_size_test_controller.dart';
 import 'support/code_size_test_data/new_v8.dart';
 import 'support/code_size_test_data/old_v8.dart';
 import 'support/code_size_test_data/sizes.dart';
 import 'support/code_size_test_data/unsupported_file.dart';
 import 'support/wrappers.dart';
 
-// TODO(peterdjlee): Clean up the tests once we don't need loadFakeData.
-
 void main() {
   final lastModifiedTime = DateTime.parse('2020-07-28 13:29:00');
 
-  CodeSizeScreen screen;
-  CodeSizeController codeSizeController;
+  final oldV8JsonFile = DevToolsJsonFile(
+    name: 'lib/src/code_size/stub_data/old_v8.dart',
+    lastModifiedTime: lastModifiedTime,
+    data: json.decode(oldV8),
+  );
 
-  const windowSize = Size(2050.0, 1000.0);
+  final newV8JsonFile = DevToolsJsonFile(
+    name: 'lib/src/code_size/stub_data/new_v8.dart',
+    lastModifiedTime: lastModifiedTime,
+    data: json.decode(newV8),
+  );
+
+  CodeSizeScreen screen;
+  CodeSizeTestController codeSizeController;
+
+  const windowSize = Size(2560.0, 1338.0);
+
+  Future<void> pumpCodeSizeScreen(
+    WidgetTester tester, {
+    CodeSizeTestController codeSizeController,
+  }) async {
+    await tester.pumpWidget(wrapWithControllers(
+      const CodeSizeBody(),
+      codeSize: codeSizeController,
+    ));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.byType(CodeSizeBody), findsOneWidget);
+  }
+
+  Future<void> loadDataAndPump(
+    WidgetTester tester, {
+    DevToolsJsonFile data,
+  }) async {
+    data ??= newV8JsonFile;
+    codeSizeController.loadTreeFromJsonFile(data, (error) => {});
+    await tester.pumpAndSettle();
+  }
 
   group('CodeSizeScreen', () {
     setUp(() async {
       screen = const CodeSizeScreen();
-      codeSizeController = CodeSizeController();
+      codeSizeController = CodeSizeTestController();
     });
-
-    Future<void> pumpCodeSizeScreen(
-      WidgetTester tester, {
-      CodeSizeController codeSizeController,
-    }) async {
-      await tester.pumpWidget(wrapWithControllers(
-        const CodeSizeBody(),
-        codeSize: codeSizeController,
-      ));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
-      expect(find.byType(CodeSizeBody), findsOneWidget);
-    }
-
-    final defaultData = DevToolsJsonFile(
-      name: 'lib/src/code_size/stub_data/new_v8.dart',
-      lastModifiedTime: lastModifiedTime,
-      data: json.decode(newV8),
-    );
-
-    Future<void> loadDataAndPump(
-      WidgetTester tester, {
-      DevToolsJsonFile data,
-    }) async {
-      data ??= defaultData;
-      codeSizeController.loadTreeFromJsonFile(data, (error) => {});
-      await tester.pumpAndSettle();
-    }
 
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
@@ -93,8 +98,15 @@ void main() {
       expect(splitter.initialFractions[0], equals(0.67));
       expect(splitter.initialFractions[1], equals(0.33));
     });
+  });
 
-    testWidgetsWithWindowSize('builds snapshot tab', windowSize,
+  group('SnapshotView', () {
+    setUp(() async {
+      screen = const CodeSizeScreen();
+      codeSizeController = CodeSizeTestController();
+    });
+
+    testWidgetsWithWindowSize('imports file and loads data', windowSize,
         (WidgetTester tester) async {
       await pumpCodeSizeScreen(
         tester,
@@ -108,7 +120,14 @@ void main() {
       expect(find.text(SnapshotView.importInstructions), findsOneWidget);
       expect(find.text('No File Selected'), findsOneWidget);
 
-      await loadDataAndPump(tester);
+      codeSizeController.loadTreeFromJsonFile(
+        newV8JsonFile,
+        (error) => {},
+        delayed: true,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text(CodeSizeScreen.loadingMessage), findsOneWidget);
+      await tester.pumpAndSettle();
 
       expect(find.byType(FileImportContainer), findsNothing);
       expect(find.text(SnapshotView.importInstructions), findsNothing);
@@ -122,52 +141,93 @@ void main() {
       );
       expect(find.byKey(CodeSizeScreen.snapshotViewTreemapKey), findsOneWidget);
 
-      // Assumes the treemap is built with treemap_test_data_v8_new.json
       expect(find.text('Root [6.0 MB]'), findsOneWidget);
+      expect(find.text('package:flutter'), findsOneWidget);
+      expect(find.text('dart:core'), findsOneWidget);
 
       expect(find.byType(CodeSizeSnapshotTable), findsOneWidget);
       expect(find.byType(CodeSizeDiffTable), findsNothing);
     });
 
-    testWidgetsWithWindowSize('builds diff tab', windowSize,
+    testWidgetsWithWindowSize('clears data', windowSize,
         (WidgetTester tester) async {
+      await pumpCodeSizeScreen(
+        tester,
+        codeSizeController: codeSizeController,
+      );
+
+      await loadDataAndPump(tester);
+
+      await tester.tap(find.byKey(CodeSizeScreen.clearButtonKey));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(FileImportContainer), findsOneWidget);
+      expect(find.text(SnapshotView.importInstructions), findsOneWidget);
+      expect(find.text('No File Selected'), findsOneWidget);
+    });
+  });
+
+  group('DiffView', () {
+    setUp(() async {
+      screen = const CodeSizeScreen();
+      codeSizeController = CodeSizeTestController();
+    });
+
+    Future<void> loadDiffTabAndSettle(WidgetTester tester) async {
       await pumpCodeSizeScreen(
         tester,
         codeSizeController: codeSizeController,
       );
       await tester.tap(find.byKey(CodeSizeScreen.diffTabKey));
       await tester.pumpAndSettle();
+    }
+
+    Future<void> loadDiffDataAndPump(
+      WidgetTester tester,
+      DevToolsJsonFile oldJsonFile,
+      DevToolsJsonFile newJsonFile,
+    ) async {
+      codeSizeController.loadDiffTreeFromJsonFiles(
+        oldJsonFile,
+        newJsonFile,
+        (error) => {},
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgetsWithWindowSize('builds initial content', windowSize,
+        (WidgetTester tester) async {
+      await loadDiffTabAndSettle(tester);
+
+      expect(find.byKey(CodeSizeScreen.dropdownKey), findsOneWidget);
+      expect(find.byKey(CodeSizeScreen.clearButtonKey), findsOneWidget);
 
       expect(find.byType(DualFileImportContainer), findsOneWidget);
       expect(find.byType(FileImportContainer), findsNWidgets(2));
       expect(find.text(DiffView.importOldInstructions), findsOneWidget);
       expect(find.text(DiffView.importNewInstructions), findsOneWidget);
       expect(find.text('No File Selected'), findsNWidgets(2));
+    });
+
+    testWidgetsWithWindowSize('imports files and loads data', windowSize,
+        (WidgetTester tester) async {
+      await loadDiffTabAndSettle(tester);
 
       codeSizeController.loadDiffTreeFromJsonFiles(
-        DevToolsJsonFile(
-          name: 'lib/src/code_size/stub_data/old_v8.dart',
-          lastModifiedTime: lastModifiedTime,
-          data: json.decode(oldV8),
-        ),
-        DevToolsJsonFile(
-          name: 'lib/src/code_size/stub_data/new_v8.dart',
-          lastModifiedTime: lastModifiedTime,
-          data: json.decode(newV8),
-        ),
+        oldV8JsonFile,
+        newV8JsonFile,
         (error) => {},
+        delayed: true,
       );
-
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text(CodeSizeScreen.loadingMessage), findsOneWidget);
       await tester.pumpAndSettle();
 
-      expect(find.byKey(CodeSizeScreen.dropdownKey), findsOneWidget);
-      expect(find.byKey(CodeSizeScreen.clearButtonKey), findsOneWidget);
-
-      expect(find.byType(DualFileImportContainer), findsNothing);
       expect(find.byType(FileImportContainer), findsNothing);
       expect(find.text(DiffView.importOldInstructions), findsNothing);
       expect(find.text(DiffView.importNewInstructions), findsNothing);
       expect(find.text('No File Selected'), findsNothing);
+
       expect(find.byType(DiffView), findsOneWidget);
       expect(
         find.text(
@@ -176,21 +236,64 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.byKey(CodeSizeScreen.snapshotViewTreemapKey),
+        find.byKey(CodeSizeScreen.diffViewTreemapKey),
         findsOneWidget,
       );
+      expect(
+        find.byKey(CodeSizeScreen.snapshotViewTreemapKey),
+        findsNothing,
+      );
 
-      // Assumes the treemap is built with treemap_test_data_v8_new.json and treemap_test_data_v8_old.json
-      const text = 'package:pointycastle';
-      expect(find.text(text), findsOneWidget);
-      await tester.tap(find.text(text));
-      await tester.pumpAndSettle();
-
-      expect(find.text('ecc'), findsOneWidget);
-      expect(find.text('dart:core'), findsNothing);
+      expect(find.text('Root [+1.5 MB]'), findsOneWidget);
+      expect(find.text('package:pointycastle'), findsOneWidget);
+      expect(find.text('package:flutter'), findsOneWidget);
 
       expect(find.byType(CodeSizeSnapshotTable), findsNothing);
       expect(find.byType(CodeSizeDiffTable), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize(
+        'loads data and shows different tree types', windowSize,
+        (WidgetTester tester) async {
+      await loadDiffTabAndSettle(tester);
+
+      await loadDiffDataAndPump(tester, oldV8JsonFile, newV8JsonFile);
+
+      await tester.tap(find.byKey(CodeSizeScreen.dropdownKey));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Increase Only').hitTestable());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Root [+1.6 MB]'), findsOneWidget);
+      expect(find.text('package:pointycastle'), findsOneWidget);
+      expect(find.text('package:flutter'), findsOneWidget);
+
+      await tester.tap(find.byKey(CodeSizeScreen.dropdownKey));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Decrease Only').hitTestable());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Root'), findsOneWidget);
+      expect(find.text('package:memory'), findsOneWidget);
+      expect(find.text('package:flutter'), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize('clears data', windowSize,
+        (WidgetTester tester) async {
+      await loadDiffTabAndSettle(tester);
+
+      await loadDiffDataAndPump(tester, oldV8JsonFile, newV8JsonFile);
+
+      await tester.tap(find.byKey(CodeSizeScreen.clearButtonKey));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DualFileImportContainer), findsOneWidget);
+      expect(find.byType(FileImportContainer), findsNWidgets(2));
+      expect(find.text(DiffView.importOldInstructions), findsOneWidget);
+      expect(find.text(DiffView.importNewInstructions), findsOneWidget);
+      expect(find.text('No File Selected'), findsNWidgets(2));
     });
   });
 
@@ -199,12 +302,12 @@ void main() {
 
     setUp(() async {
       screen = const CodeSizeScreen();
-      codeSizeController = CodeSizeController();
+      codeSizeController = CodeSizeTestController();
     });
 
     Future<void> pumpCodeSizeScreenWithContext(
       WidgetTester tester, {
-      CodeSizeController codeSizeController,
+      CodeSizeTestController codeSizeController,
     }) async {
       await tester.pumpWidget(wrapWithControllers(
         MaterialApp(
@@ -222,7 +325,11 @@ void main() {
       expect(find.byType(CodeSizeBody), findsOneWidget);
     }
 
-    void loadDiffTreeFromJsonFiles(String firstFile, String secondFile) {
+    Future<void> loadDiffTreeAndPump(
+      WidgetTester tester,
+      String firstFile,
+      String secondFile,
+    ) async {
       codeSizeController.loadDiffTreeFromJsonFiles(
         DevToolsJsonFile(
           name: '',
@@ -236,6 +343,7 @@ void main() {
         ),
         (error) => Notifications.of(buildContext).push(error),
       );
+      await tester.pumpAndSettle();
     }
 
     testWidgetsWithWindowSize(
@@ -271,22 +379,19 @@ void main() {
       await tester.tap(find.byKey(CodeSizeScreen.diffTabKey));
       await tester.pumpAndSettle();
 
-      loadDiffTreeFromJsonFiles(newV8, newV8);
-      await tester.pumpAndSettle();
+      await loadDiffTreeAndPump(tester, newV8, newV8);
       expect(
         find.text(CodeSizeController.identicalFilesError),
         findsOneWidget,
       );
 
-      loadDiffTreeFromJsonFiles(instructionSizes, newV8);
-      await tester.pumpAndSettle();
+      await loadDiffTreeAndPump(tester, instructionSizes, newV8);
       expect(
         find.text(CodeSizeController.differentTypesError),
         findsOneWidget,
       );
 
-      loadDiffTreeFromJsonFiles(unsupportedFile, unsupportedFile);
-      await tester.pumpAndSettle();
+      await loadDiffTreeAndPump(tester, unsupportedFile, unsupportedFile);
       expect(
         find.text(CodeSizeController.unsupportedFileTypeError),
         findsOneWidget,

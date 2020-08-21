@@ -55,10 +55,15 @@ SocketProfile loadSocketProfile() {
 
 Future<TreemapNode> loadSnapshotJsonAsTree(String snapshotJson) async {
   final treemapTestData = jsonDecode(snapshotJson);
-  final processedTestData = treemapFromJson(treemapTestData);
-  processedTestData['n'] = 'Root';
 
-  return generateTree(processedTestData);
+  if (treemapTestData is Map<String, dynamic> &&
+      treemapTestData['type'] == 'apk') {
+    return generateTree(treemapTestData);
+  } else {
+    final processedTestData = treemapFromJson(treemapTestData);
+    processedTestData['n'] = 'Root';
+    return generateTree(processedTestData);
+  }
 }
 
 /// Builds a tree with [TreemapNode] from [treeJson] which represents
