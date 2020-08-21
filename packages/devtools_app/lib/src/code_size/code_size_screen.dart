@@ -183,7 +183,7 @@ class SnapshotView extends StatefulWidget {
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
   static const importInstructions = 'Drag and drop an AOT snapshot or'
-      ' code size analysis file for code size debugging';
+      ' size analysis file for debugging';
 
   @override
   _SnapshotViewState createState() => _SnapshotViewState();
@@ -321,9 +321,9 @@ class DiffView extends StatefulWidget {
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
   static const importOldInstructions = 'Drag and drop an original (old) AOT '
-      'snapshot or code size analysis file for code size debugging';
+      'snapshot or size analysis file for debugging';
   static const importNewInstructions = 'Drag and drop a modified (new) AOT '
-      'snapshot or code size analysis file for code size debugging';
+      'snapshot or size analysis file for debugging';
 
   @override
   _DiffViewState createState() => _DiffViewState();

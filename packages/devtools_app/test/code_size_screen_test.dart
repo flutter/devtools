@@ -116,7 +116,7 @@ void main() {
       expect(find.byType(SnapshotView), findsOneWidget);
       expect(
         find.text(
-          'Dart AOT Snapshot: lib/src/code_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
+          'Dart AOT snapshot: lib/src/code_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
         ),
         findsOneWidget,
       );
@@ -171,7 +171,7 @@ void main() {
       expect(find.byType(DiffView), findsOneWidget);
       expect(
         find.text(
-          'Diffing Snapshots: lib/src/code_size/stub_data/old_v8.dart - 7/28/2020 1:29 PM (OLD)    vs    (NEW) lib/src/code_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
+          'Diffing Dart AOT snapshots: lib/src/code_size/stub_data/old_v8.dart - 7/28/2020 1:29 PM (OLD)    vs    (NEW) lib/src/code_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
         ),
         findsOneWidget,
       );
