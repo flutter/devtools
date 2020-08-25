@@ -147,7 +147,7 @@ class CodeSizeController {
     await delayForBatchProcessing(micros: 10000);
 
     Map<String, dynamic> processedJson;
-    if (jsonFile.isApkFile) {
+    if (jsonFile.isAnalyzeSizeFile) {
       // APK analysis json should be processed already.
       processedJson = jsonFile.data;
     } else {
@@ -188,7 +188,7 @@ class CodeSizeController {
       return;
     }
 
-    if (oldFile.isApkFile != newFile.isApkFile ||
+    if (oldFile.isAnalyzeSizeFile != newFile.isAnalyzeSizeFile ||
         oldFile.isV8Snapshot != newFile.isV8Snapshot) {
       onError(differentTypesError);
       return;
@@ -202,7 +202,7 @@ class CodeSizeController {
     await delayForBatchProcessing(micros: 10000);
 
     Map<String, dynamic> diffMap;
-    if (oldFile.isApkFile && newFile.isApkFile) {
+    if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
       final oldApkProgramInfo = ProgramInfo();
       _apkJsonToProgramInfo(
         program: oldApkProgramInfo,
@@ -404,10 +404,21 @@ class CodeSizeController {
 }
 
 extension CodeSizeJsonFileExtension on DevToolsJsonFile {
-  bool get isApkFile {
+  static const _supportedAnalyzeSizePlatforms = [
+    'apk',
+    'aab',
+    'ios',
+    'macos',
+    'windows',
+    'linux'
+  ];
+
+  bool get isAnalyzeSizeFile {
     if (data is Map<String, dynamic>) {
       final dataMap = data as Map<String, dynamic>;
-      return dataMap['type'] == 'apk';
+      final type = dataMap['type'];
+      return CodeSizeJsonFileExtension._supportedAnalyzeSizePlatforms
+          .contains(type);
     }
     return false;
   }

@@ -184,7 +184,7 @@ class SnapshotView extends StatefulWidget {
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
   static const importInstructions = 'Drag and drop an AOT snapshot or'
-      ' "apk-analysis.json" file for code size debugging';
+      ' size analysis file for debugging';
 
   @override
   _SnapshotViewState createState() => _SnapshotViewState();
@@ -254,8 +254,9 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   }
 
   String _generateSingleFileHeaderText() {
-    String output =
-        controller.snapshotJsonFile.value.isApkFile ? 'APK: ' : 'Snapshot: ';
+    String output = controller.snapshotJsonFile.value.isAnalyzeSizeFile
+        ? 'Total size analysis: '
+        : 'Dart AOT snapshot: ';
     output += controller.snapshotJsonFile.value.displayText;
     return output;
   }
@@ -321,9 +322,9 @@ class DiffView extends StatefulWidget {
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
   static const importOldInstructions = 'Drag and drop an original (old) AOT '
-      'snapshot or "apk-analysis.json" file for code size debugging';
+      'snapshot or size analysis file for debugging';
   static const importNewInstructions = 'Drag and drop a modified (new) AOT '
-      'snapshot or "apk-analysis.json" file for code size debugging';
+      'snapshot or size analysis file for debugging';
 
   @override
   _DiffViewState createState() => _DiffViewState();
@@ -397,9 +398,9 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
 
   String _generateDualFileHeaderText() {
     String output = 'Diffing ';
-    output += controller.oldDiffSnapshotJsonFile.value.isApkFile
-        ? 'APKs: '
-        : 'Snapshots: ';
+    output += controller.oldDiffSnapshotJsonFile.value.isAnalyzeSizeFile
+        ? 'total size analyses: '
+        : 'Dart AOT snapshots: ';
     output += controller.oldDiffSnapshotJsonFile.value.displayText;
     output += ' (OLD)    vs    (NEW) ';
     output += controller.newDiffSnapshotJsonFile.value.displayText;
