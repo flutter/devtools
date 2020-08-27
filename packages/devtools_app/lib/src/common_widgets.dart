@@ -720,18 +720,24 @@ Color _colorForIndex(Color color, int index, ColorScheme colorScheme) {
 }
 
 class BreadcrumbNavigator extends StatelessWidget {
-  const BreadcrumbNavigator({@required this.breadcrumbs});
+  const BreadcrumbNavigator.builder({
+    @required this.itemCount,
+    @required this.builder,
+  });
 
-  final List<Breadcrumb> breadcrumbs;
+  final int itemCount;
+
+  final IndexedWidgetBuilder builder;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: Breadcrumb.height + 2 * borderPadding,
       alignment: Alignment.centerLeft,
-      child: ListView(
+      child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        children: breadcrumbs,
+        itemCount: itemCount,
+        itemBuilder: builder,
       ),
     );
   }

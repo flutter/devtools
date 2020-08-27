@@ -514,15 +514,18 @@ class _TreemapState extends State<Treemap> {
 
   Widget buildBreadcrumbNavigator() {
     final pathFromRoot = widget.rootNode.pathFromRoot();
-    final breadcrumbs = List<Breadcrumb>.generate(pathFromRoot.length, (index) {
-      final node = pathFromRoot[index];
-      return Breadcrumb(
-        text: index < pathFromRoot.length - 1 ? node.name : node.displayText(),
-        isRoot: index == 0,
-        onPressed: () => widget.onRootChangedCallback(node),
-      );
-    });
-    return BreadcrumbNavigator(breadcrumbs: breadcrumbs);
+    return BreadcrumbNavigator.builder(
+      itemCount: pathFromRoot.length,
+      builder: (context, index) {
+        final node = pathFromRoot[index];
+        return Breadcrumb(
+          text:
+              index < pathFromRoot.length - 1 ? node.name : node.displayText(),
+          isRoot: index == 0,
+          onPressed: () => widget.onRootChangedCallback(node),
+        );
+      },
+    );
   }
 
   /// Builds a selectable container with [child] as its child.
