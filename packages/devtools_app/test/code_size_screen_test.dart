@@ -142,8 +142,10 @@ void main() {
       );
       expect(find.byKey(CodeSizeScreen.snapshotViewTreemapKey), findsOneWidget);
 
-      final List<Breadcrumb> breadcrumbs =
-          tester.widgetList(find.byType(Breadcrumb));
+      final List<Breadcrumb> breadcrumbs = tester
+          .widgetList(find.byType(Breadcrumb))
+          .map((widget) => widget as Breadcrumb)
+          .toList();
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [6.0 MB]'));
       expect(find.byType(BreadcrumbNavigator), findsOneWidget);
@@ -249,7 +251,12 @@ void main() {
         findsNothing,
       );
 
-      expect(find.text('Root [+1.5 MB]'), findsOneWidget);
+      final List<Breadcrumb> breadcrumbs = tester
+          .widgetList(find.byType(Breadcrumb))
+          .map((widget) => widget as Breadcrumb)
+          .toList();
+      expect(breadcrumbs.length, 1);
+      expect(breadcrumbs.first.text, equals('Root [+1.5 MB]'));
       expect(find.text('package:pointycastle'), findsOneWidget);
       expect(find.text('package:flutter'), findsOneWidget);
 
@@ -270,7 +277,12 @@ void main() {
       await tester.tap(find.text('Increase Only').hitTestable());
       await tester.pumpAndSettle();
 
-      expect(find.text('Root [+1.6 MB]'), findsOneWidget);
+      final List<Breadcrumb> breadcrumbs = tester
+          .widgetList(find.byType(Breadcrumb))
+          .map((widget) => widget as Breadcrumb)
+          .toList();
+      expect(breadcrumbs.length, 1);
+      expect(breadcrumbs.first.text, equals('Root [+1.6 MB]'));
       expect(find.text('package:pointycastle'), findsOneWidget);
       expect(find.text('package:flutter'), findsOneWidget);
 
