@@ -482,7 +482,7 @@ class _TreemapState extends State<Treemap> {
 
   Widget buildTitleText(BuildContext context) {
     if (widget.isOutermostLevel) {
-      return buildBreadcrumbsNavigator();
+      return buildBreadcrumbNavigator();
     } else {
       return buildSelectable(
         child: Container(
@@ -512,28 +512,19 @@ class _TreemapState extends State<Treemap> {
     );
   }
 
-  Container buildBreadcrumbsNavigator() {
+  Widget buildBreadcrumbNavigator() {
     final pathFromRoot = widget.rootNode.pathFromRoot();
-    return Container(
-      height: Treemap.treeMapHeaderHeight,
-      child: ListView.separated(
-        shrinkWrap: true,
-        scrollDirection: Axis.horizontal,
-        separatorBuilder: (context, index) {
-          return const Text(' > ');
-        },
-        itemCount: pathFromRoot.length,
-        itemBuilder: (BuildContext context, int index) {
-          return buildSelectable(
-            child: Text(
-              index < pathFromRoot.length - 1
-                  ? pathFromRoot[index].name
-                  : pathFromRoot[index].displayText(),
-            ),
-            newRoot: pathFromRoot[index],
-          );
-        },
-      ),
+    return BreadcrumbNavigator.builder(
+      itemCount: pathFromRoot.length,
+      builder: (context, index) {
+        final node = pathFromRoot[index];
+        return Breadcrumb(
+          text:
+              index < pathFromRoot.length - 1 ? node.name : node.displayText(),
+          isRoot: index == 0,
+          onPressed: () => widget.onRootChangedCallback(node),
+        );
+      },
     );
   }
 

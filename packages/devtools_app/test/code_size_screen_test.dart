@@ -8,6 +8,7 @@ import 'package:devtools_app/src/code_size/code_size_screen.dart';
 import 'package:devtools_app/src/code_size/code_size_controller.dart';
 import 'package:devtools_app/src/code_size/code_size_table.dart';
 import 'package:devtools_app/src/code_size/file_import_container.dart';
+import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/notifications.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
@@ -141,7 +142,13 @@ void main() {
       );
       expect(find.byKey(CodeSizeScreen.snapshotViewTreemapKey), findsOneWidget);
 
-      expect(find.text('Root [6.0 MB]'), findsOneWidget);
+      final List<Breadcrumb> breadcrumbs = tester
+          .widgetList(find.byType(Breadcrumb))
+          .map((widget) => widget as Breadcrumb)
+          .toList();
+      expect(breadcrumbs.length, 1);
+      expect(breadcrumbs.first.text, equals('Root [6.0 MB]'));
+      expect(find.byType(BreadcrumbNavigator), findsOneWidget);
       expect(find.text('package:flutter'), findsOneWidget);
       expect(find.text('dart:core'), findsOneWidget);
 
@@ -244,7 +251,12 @@ void main() {
         findsNothing,
       );
 
-      expect(find.text('Root [+1.5 MB]'), findsOneWidget);
+      final List<Breadcrumb> breadcrumbs = tester
+          .widgetList(find.byType(Breadcrumb))
+          .map((widget) => widget as Breadcrumb)
+          .toList();
+      expect(breadcrumbs.length, 1);
+      expect(breadcrumbs.first.text, equals('Root [+1.5 MB]'));
       expect(find.text('package:pointycastle'), findsOneWidget);
       expect(find.text('package:flutter'), findsOneWidget);
 
@@ -265,7 +277,12 @@ void main() {
       await tester.tap(find.text('Increase Only').hitTestable());
       await tester.pumpAndSettle();
 
-      expect(find.text('Root [+1.6 MB]'), findsOneWidget);
+      final List<Breadcrumb> breadcrumbs = tester
+          .widgetList(find.byType(Breadcrumb))
+          .map((widget) => widget as Breadcrumb)
+          .toList();
+      expect(breadcrumbs.length, 1);
+      expect(breadcrumbs.first.text, equals('Root [+1.6 MB]'));
       expect(find.text('package:pointycastle'), findsOneWidget);
       expect(find.text('package:flutter'), findsOneWidget);
 
