@@ -981,7 +981,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final row = tableRowFor(context);
 
     final box = SizedBox(
-      height: defaultRowHeight,
+      height: widget.node == null ? areaPaneHeaderHeight : defaultRowHeight,
       child: Material(
         color: widget.backgroundColor ??
             titleSolidBackgroundColor(Theme.of(context)),

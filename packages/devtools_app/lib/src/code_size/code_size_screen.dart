@@ -16,6 +16,7 @@ import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
+import 'code_size_attribution.dart';
 import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
@@ -240,7 +241,19 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
               axis: Axis.vertical,
               children: [
                 _buildTreemap(),
-                CodeSizeSnapshotTable(rootNode: snapshotRoot),
+                Row(
+                  children: [
+                    Flexible(
+                      child: CodeSizeSnapshotTable(rootNode: snapshotRoot),
+                    ),
+                    if (controller.callGraphRoot.value != null)
+                      Flexible(
+                        child: CallGraphWithDominators(
+                          callGraphRoot: controller.callGraphRoot.value,
+                        ),
+                      ),
+                  ],
+                ),
               ],
               initialFractions: const [
                 initialFractionForTreemap,

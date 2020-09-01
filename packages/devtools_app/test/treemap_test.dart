@@ -43,6 +43,48 @@ void main() {
 
   const windowSize = Size(2225.0, 1000.0);
 
+  group('TreemapNode', () {
+    final child1 = TreemapNode(name: 'package:child1');
+    final child2 = TreemapNode(name: 'package:child2');
+    final grandchild1 = TreemapNode(name: 'non-package-grandchild');
+    final grandchild2 = TreemapNode(name: 'package:grandchild2');
+    final greatGrandchild1 = TreemapNode(name: 'package:greatGrandchild1');
+    final greatGrandchild2 = TreemapNode(name: 'package:greatGrandchild2');
+    final testRoot = TreemapNode(name: 'libapp.so (Dart AOT)')
+      ..addAllChildren([
+        child1
+          ..addChild(
+            grandchild1
+              ..addChild(
+                greatGrandchild1,
+              ),
+          ),
+        child2
+          ..addChild(
+            grandchild2
+              ..addChild(
+                greatGrandchild2,
+              ),
+          ),
+      ]);
+
+    test('packagePath returns correct values', () {
+      expect(testRoot.packagePath(), equals([]));
+      expect(grandchild1.packagePath(), equals(['package:child1']));
+      expect(grandchild2.packagePath(),
+          equals(['package:child2', 'package:grandchild2']));
+      expect(greatGrandchild1.packagePath(),
+          equals(['package:child1', 'package:greatGrandchild1']));
+      expect(
+          greatGrandchild2.packagePath(),
+          equals([
+            'package:child2',
+            'package:grandchild2',
+            'package:greatGrandchild2',
+          ]));
+    });
+  });
+
   group('Treemap from small instruction sizes', () {
     setUp(() async {
       root = await loadSnapshotJsonAsTree(smallInstructionSizes);

@@ -428,6 +428,8 @@ SizedBox areaPaneHeader(
   BuildContext context, {
   @required String title,
   bool needsTopBorder = true,
+  bool needsBottomBorder = true,
+  bool needsLeftBorder = false,
   List<Widget> actions = const [],
   double rightPadding = densePadding,
   bool tall = false,
@@ -440,10 +442,10 @@ SizedBox areaPaneHeader(
     child: Container(
       decoration: BoxDecoration(
         border: Border(
-          top: needsTopBorder
-              ? BorderSide(color: theme.focusColor)
-              : BorderSide.none,
-          bottom: BorderSide(color: theme.focusColor),
+          top: needsTopBorder ? defaultBorderSide(theme) : BorderSide.none,
+          bottom:
+              needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
+          left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
         ),
         color: titleSolidBackgroundColor(theme),
       ),
@@ -464,6 +466,10 @@ SizedBox areaPaneHeader(
       ),
     ),
   );
+}
+
+BorderSide defaultBorderSide(ThemeData theme) {
+  return BorderSide(color: theme.focusColor);
 }
 
 /// Toggle button for use as a child of a [ToggleButtons] widget.
