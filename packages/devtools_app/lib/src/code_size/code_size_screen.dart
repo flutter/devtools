@@ -74,7 +74,7 @@ class CodeSizeBody extends StatefulWidget {
 class _CodeSizeBodyState extends State<CodeSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
   static const tabs = [
-    Tab(text: 'Snapshot', key: CodeSizeScreen.snapshotTabKey),
+    Tab(text: 'Analysis', key: CodeSizeScreen.snapshotTabKey),
     Tab(text: 'Diff', key: CodeSizeScreen.diffTabKey),
   ];
 
@@ -298,9 +298,9 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
               children: [
                 Flexible(
                   child: FileImportContainer(
-                    title: 'Snapshot / APK analysis',
+                    title: 'Size analysis',
                     instructions: SnapshotView.importInstructions,
-                    actionText: 'Analyze Snapshot / APK',
+                    actionText: 'Analyze Size',
                     onAction: (jsonFile) {
                       controller.loadTreeFromJsonFile(
                         jsonFile,
