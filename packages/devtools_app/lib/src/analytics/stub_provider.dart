@@ -9,7 +9,7 @@ class _StubProvider implements AnalyticsProvider {
   bool get isEnabled => false;
 
   @override
-  bool get isFirstRun => false;
+  bool get shouldPrompt => false;
 
   @override
   bool get isGtagsEnabled => false;

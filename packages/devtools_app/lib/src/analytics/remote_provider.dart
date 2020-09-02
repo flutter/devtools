@@ -14,12 +14,14 @@ class _RemoteAnalyticsProvider implements AnalyticsProvider {
     this._isGtagsEnabled,
   );
 
+  bool _isConfigured = false;
+
   @override
   bool get isEnabled => _isEnabled;
   final bool _isEnabled;
 
   @override
-  bool get isFirstRun => _isFirstRun;
+  bool get shouldPrompt => _isFirstRun && !_isConfigured;
   final bool _isFirstRun;
 
   @override
@@ -27,10 +29,16 @@ class _RemoteAnalyticsProvider implements AnalyticsProvider {
   final bool _isGtagsEnabled;
 
   @override
-  void setAllowAnalytics() => analytics.setAllowAnalytics();
+  void setAllowAnalytics() {
+    _isConfigured = true;
+    analytics.setAllowAnalytics();
+  }
 
   @override
-  void setDontAllowAnalytics() => analytics.setDontAllowAnalytics();
+  void setDontAllowAnalytics() {
+    _isConfigured = true;
+    analytics.setDontAllowAnalytics();
+  }
 
   @override
   void setUpAnalytics() {
