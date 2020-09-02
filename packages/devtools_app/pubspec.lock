@@ -762,7 +762,7 @@ packages:
       name: vm_snapshot_analysis
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.4"
+    version: "0.5.5"
   watcher:
     dependency: transitive
     description:

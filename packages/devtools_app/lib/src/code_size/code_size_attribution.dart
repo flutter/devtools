@@ -248,13 +248,11 @@ class DominatorTree extends StatelessWidget {
       keyFactory: (node) => PageStorageKey<String>('${node.callGraphNode.id}'),
       sortColumn: _packageColumn,
       sortDirection: SortDirection.descending,
+      autoExpandRoots: true,
     );
   }
 
   void _expandToSelected() {
-    // Expand the root to start so that all top level nodes are visible.
-    dominatorTreeRoot.expand();
-
     var selected = dominatorTreeRoot.firstChildWithCondition(
         (node) => node.callGraphNode.id == selectedNode.id);
 
