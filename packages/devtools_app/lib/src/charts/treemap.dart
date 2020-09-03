@@ -634,6 +634,27 @@ class TreemapNode extends TreeNode<TreemapNode> {
     return path.reversed.toList();
   }
 
+  /// Returns the package path for this node.
+  ///
+  /// Includes only package nodes (nodes that start with 'package:').
+  List<String> packagePath() {
+    final reversedPath = <String>[];
+    var current = this;
+
+    while (current != null) {
+      if (current.name.contains('(Dart AOT)')) {
+        // This as far up the tree as we want to go, since this is the root of
+        // the Dart AOT snapshot.
+        return reversedPath.reversed.toList();
+      }
+      if (current.name.contains('package:')) {
+        reversedPath.add(current.name);
+      }
+      current = current.parent;
+    }
+    return [];
+  }
+
   void printTree() {
     printTreeHelper(this, '');
   }

@@ -23,7 +23,13 @@ DevToolsServerDriver server;
 final Map<String, Completer<Map<String, dynamic>>> completers = {};
 final StreamController<Map<String, dynamic>> eventController =
     StreamController.broadcast();
+
+/// A broadcast stream of events from the server.
+///
+/// Listening for "server.started" events on this stream may be unreliable because
+/// it may have occurred before the test starts. Use `serverStartedEvent` instead.
 Stream<Map<String, dynamic>> get events => eventController.stream;
+Future<Map<String, dynamic>> serverStartedEvent;
 final Map<String, String> registeredServices = {};
 // A list of PIDs for Chrome instances spawned by tests that should be
 // cleaned up.
@@ -69,6 +75,8 @@ void main() {
         eventController.add(map);
       }
     });
+    serverStartedEvent =
+        events.firstWhere((map) => map['event'] == 'server.started');
 
     await _startApp();
   });
@@ -304,8 +312,7 @@ void main() {
       }, timeout: const Timeout.factor(10));
 
       test('server removes clients that disconnect from the API', () async {
-        final event =
-            await events.firstWhere((map) => map['event'] == 'server.started');
+        final event = await serverStartedEvent;
 
         // Spawn our own Chrome process so we can terminate it.
         final devToolsUri =
