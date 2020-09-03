@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -12,7 +13,7 @@ import '../utils.dart';
 
 enum PivotType { pivotByMiddle, pivotBySize }
 
-class Treemap extends StatelessWidget {
+class Treemap extends StatefulWidget {
   // TODO(peterdjlee): Consider auto-expanding rootNode named 'src'.
   const Treemap.fromRoot({
     @required this.rootNode,
@@ -80,6 +81,13 @@ class Treemap extends StatelessWidget {
   static const minWidthToDisplayCellText = 40.0;
   static const minHeightToDisplayCellText = 50.0;
 
+  @override
+  _TreemapState createState() => _TreemapState();
+}
+
+class _TreemapState extends State<Treemap> {
+  TreemapNode hoveredNode;
+
   /// Computes the total size of a given list of treemap nodes.
   /// [endIndex] defaults to nodes.length - 1.
   int computeByteSizeForNodes({
@@ -96,7 +104,7 @@ class Treemap extends StatelessWidget {
   }
 
   int computePivot(List<TreemapNode> children) {
-    switch (pivotType) {
+    switch (Treemap.pivotType) {
       case PivotType.pivotByMiddle:
         return (children.length / 2).floor();
       case PivotType.pivotBySize:
@@ -172,8 +180,8 @@ class Treemap extends StatelessWidget {
             node: child,
             child: Treemap.fromRoot(
               rootNode: child,
-              levelsVisible: levelsVisible - 1,
-              onRootChangedCallback: onRootChangedCallback,
+              levelsVisible: widget.levelsVisible - 1,
+              onRootChangedCallback: widget.onRootChangedCallback,
               width: newWidth,
               height: newHeight,
             ),
@@ -310,8 +318,8 @@ class Treemap extends StatelessWidget {
         node: pivotNode,
         child: Treemap.fromRoot(
           rootNode: pivotNode,
-          levelsVisible: levelsVisible - 1,
-          onRootChangedCallback: onRootChangedCallback,
+          levelsVisible: widget.levelsVisible - 1,
+          onRootChangedCallback: widget.onRootChangedCallback,
           width: width,
           height: height,
         ),
@@ -342,7 +350,7 @@ class Treemap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (rootNode == null && nodes.isNotEmpty) {
+    if (widget.rootNode == null && widget.nodes.isNotEmpty) {
       // If constructed with Treemap.fromNodes
       return buildSubTreemaps();
     } else {
@@ -360,22 +368,35 @@ class Treemap extends StatelessWidget {
           return const SizedBox();
         }
         final positionedChildren = buildTreemaps(
-          children: nodes,
+          children: widget.nodes,
           x: 0,
           y: 0,
           width: constraints.maxWidth,
           height: constraints.maxHeight,
         );
-        if (levelsVisible <= 1) {
+        if (widget.levelsVisible == 1) {
           // If this is the second to the last level, paint all cells in the last level
           // instead of creating widgets to improve performance.
-          return MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTapDown: (details) => _onTapDown(details, positionedChildren),
-              child: CustomPaint(
-                painter: MultiCellPainter(nodes: positionedChildren),
-                size: Size(constraints.maxWidth, constraints.maxHeight),
+
+          final tooltipMessage = hoveredNode?.displayText() ?? '';
+          return Tooltip(
+            // A key is required to force a rebuild of the tooltips for each cell.
+            // Use tooltipMessage as the key to prevent rebuilds within a cell.
+            key: Key(tooltipMessage),
+            message: tooltipMessage,
+            waitDuration: tooltipWaitLong,
+            preferBelow: false,
+            child: MouseRegion(
+              onHover: (event) => _onHover(event, positionedChildren),
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTapDown: (details) {
+                  widget.onRootChangedCallback(hoveredNode);
+                },
+                child: CustomPaint(
+                  painter: MultiCellPainter(nodes: positionedChildren),
+                  size: Size(constraints.maxWidth, constraints.maxHeight),
+                ),
               ),
             ),
           );
@@ -399,7 +420,7 @@ class Treemap extends StatelessWidget {
   /// ----------------------------
   /// ```
   Widget buildTreemap(BuildContext context) {
-    if (rootNode.children.isNotEmpty) {
+    if (widget.rootNode.children.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.all(1.0),
         child: buildTreemapFromNodes(context),
@@ -413,14 +434,15 @@ class Treemap extends StatelessWidget {
   Widget buildTreemapFromNodes(BuildContext context) {
     return Column(
       children: [
-        if (height > minHeightToDisplayTitleText) buildTitleText(context),
+        if (widget.height > Treemap.minHeightToDisplayTitleText)
+          buildTitleText(context),
         Expanded(
           child: Treemap.fromNodes(
-            nodes: rootNode.children,
-            levelsVisible: levelsVisible,
-            onRootChangedCallback: onRootChangedCallback,
-            width: width,
-            height: height,
+            nodes: widget.rootNode.children,
+            levelsVisible: widget.levelsVisible,
+            onRootChangedCallback: widget.onRootChangedCallback,
+            width: widget.width,
+            height: widget.height,
           ),
         ),
       ],
@@ -430,9 +452,9 @@ class Treemap extends StatelessWidget {
   Column buildTreemapFromRoot(BuildContext context) {
     return Column(
       children: [
-        if (isOutermostLevel) buildTitleText(context),
+        if (widget.isOutermostLevel) buildTitleText(context),
         Expanded(
-          child: isOutermostLevel
+          child: widget.isOutermostLevel
               ? buildCell()
               : buildSelectable(child: buildCell()),
         ),
@@ -443,13 +465,14 @@ class Treemap extends StatelessWidget {
   Container buildCell() {
     return Container(
       decoration: BoxDecoration(
-        color: rootNode.displayColor,
+        color: widget.rootNode.displayColor,
         border: Border.all(color: Colors.black87),
       ),
       child: Center(
-        child: height > minHeightToDisplayCellText
+        child: widget.height > Treemap.minHeightToDisplayCellText
             ? buildNameAndSizeText(
-                textColor: rootNode.showDiff ? Colors.white : Colors.black,
+                textColor:
+                    widget.rootNode.showDiff ? Colors.white : Colors.black,
                 oneLine: false,
               )
             : const SizedBox(),
@@ -458,12 +481,12 @@ class Treemap extends StatelessWidget {
   }
 
   Widget buildTitleText(BuildContext context) {
-    if (isOutermostLevel) {
-      return buildBreadcrumbsNavigator();
+    if (widget.isOutermostLevel) {
+      return buildBreadcrumbNavigator();
     } else {
       return buildSelectable(
         child: Container(
-          height: treeMapHeaderHeight,
+          height: Treemap.treeMapHeaderHeight,
           width: double.infinity,
           decoration: BoxDecoration(
             border: Border.all(color: Colors.black87),
@@ -482,35 +505,26 @@ class Treemap extends StatelessWidget {
     @required bool oneLine,
   }) {
     return Text(
-      rootNode.displayText(oneLine: oneLine),
+      widget.rootNode.displayText(oneLine: oneLine),
       style: TextStyle(color: textColor),
       textAlign: TextAlign.center,
       overflow: TextOverflow.ellipsis,
     );
   }
 
-  Container buildBreadcrumbsNavigator() {
-    final pathFromRoot = rootNode.pathFromRoot();
-    return Container(
-      height: treeMapHeaderHeight,
-      child: ListView.separated(
-        shrinkWrap: true,
-        scrollDirection: Axis.horizontal,
-        separatorBuilder: (context, index) {
-          return const Text(' > ');
-        },
-        itemCount: pathFromRoot.length,
-        itemBuilder: (BuildContext context, int index) {
-          return buildSelectable(
-            child: Text(
-              index < pathFromRoot.length - 1
-                  ? pathFromRoot[index].name
-                  : pathFromRoot[index].displayText(),
-            ),
-            newRoot: pathFromRoot[index],
-          );
-        },
-      ),
+  Widget buildBreadcrumbNavigator() {
+    final pathFromRoot = widget.rootNode.pathFromRoot();
+    return BreadcrumbNavigator.builder(
+      itemCount: pathFromRoot.length,
+      builder: (context, index) {
+        final node = pathFromRoot[index];
+        return Breadcrumb(
+          text:
+              index < pathFromRoot.length - 1 ? node.name : node.displayText(),
+          isRoot: index == 0,
+          onPressed: () => widget.onRootChangedCallback(node),
+        );
+      },
     );
   }
 
@@ -519,16 +533,16 @@ class Treemap extends StatelessWidget {
   /// Selecting this widget will trigger a re-root of the tree
   /// to the associated [TreemapNode].
   ///
-  /// The default value for newRoot is [rootNode].
+  /// The default value for newRoot is [widget.rootNode].
   Widget buildSelectable({@required Widget child, TreemapNode newRoot}) {
-    newRoot ??= rootNode;
+    newRoot ??= widget.rootNode;
     return Tooltip(
-      message: rootNode.displayText(),
-      waitDuration: tooltipWait,
+      message: widget.rootNode.displayText(),
+      waitDuration: tooltipWaitLong,
       preferBelow: false,
       child: InkWell(
         onTap: () {
-          onRootChangedCallback(newRoot);
+          widget.onRootChangedCallback(newRoot);
         },
         child: child,
       ),
@@ -538,21 +552,22 @@ class Treemap extends StatelessWidget {
   /// Checks if the touch point of the given [details] is overlapping with
   /// a cell in [positionedCells].
   ///
-  /// If so, reroot to the matching cell if the cell has children to show.
-  void _onTapDown(
-    TapDownDetails details,
+  /// If so, saves the matching hoveredNode.
+  void _onHover(
+    PointerHoverEvent event,
     List<PositionedCell> positionedCells,
   ) {
-    final x = details.localPosition.dx;
-    final y = details.localPosition.dy;
+    final x = event.localPosition.dx;
+    final y = event.localPosition.dy;
     final touchPoint = Offset(x, y);
     // TODO(peterdjlee): Optimize with more efficient algorithm to find the overlapping cell.
     //                   Currently O(positionedCells.length) but an optimized algorithm with
     //                   O(log(positionedCells.length)) is possible.
-
     for (final cell in positionedCells) {
       if (cell.rect.contains(touchPoint)) {
-        onRootChangedCallback(cell.node);
+        setState(() {
+          hoveredNode = cell.node;
+        });
       }
     }
   }
@@ -617,6 +632,27 @@ class TreemapNode extends TreeNode<TreemapNode> {
       node = node.parent;
     }
     return path.reversed.toList();
+  }
+
+  /// Returns the package path for this node.
+  ///
+  /// Includes only package nodes (nodes that start with 'package:').
+  List<String> packagePath() {
+    final reversedPath = <String>[];
+    var current = this;
+
+    while (current != null) {
+      if (current.name.contains('(Dart AOT)')) {
+        // This as far up the tree as we want to go, since this is the root of
+        // the Dart AOT snapshot.
+        return reversedPath.reversed.toList();
+      }
+      if (current.name.contains('package:')) {
+        reversedPath.add(current.name);
+      }
+      current = current.parent;
+    }
+    return [];
   }
 
   void printTree() {

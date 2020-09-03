@@ -13,18 +13,18 @@ class FakeProvider implements AnalyticsProvider {
   FakeProvider({
     this.gtagsEnabled = false,
     this.enabled = false,
-    this.firstRun = false,
+    this.prompt = false,
   });
 
   final bool gtagsEnabled;
   final bool enabled;
-  final bool firstRun;
+  final bool prompt;
 
   @override
   bool get isEnabled => enabled;
 
   @override
-  bool get isFirstRun => firstRun;
+  bool get shouldPrompt => prompt;
 
   @override
   bool get isGtagsEnabled => gtagsEnabled;
@@ -42,9 +42,10 @@ class FakeProvider implements AnalyticsProvider {
 void main() {
   group('AnalyticsPrompt', () {
     group('with gtags enabled', () {
-      testWidgets('displays prompt on first run', (WidgetTester tester) async {
+      testWidgets('displays prompt if provider indicates to do so',
+          (WidgetTester tester) async {
         final prompt = AnalyticsPrompt(
-          provider: FakeProvider(gtagsEnabled: true, firstRun: true),
+          provider: FakeProvider(gtagsEnabled: true, prompt: true),
           child: const Text('Child Text'),
         );
         await tester.pumpWidget(wrap(prompt));

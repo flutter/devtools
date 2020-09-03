@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
@@ -32,6 +33,13 @@ class CodeSizeController {
   static const identicalFilesError =
       'Failed to load diff: OLD and NEW files are identical.';
 
+  // TODO(kenz): support call graph and dependency dominator tree data for diffs
+  // as well as snapshots.
+  CallGraph _callGraph;
+
+  ValueListenable<CallGraphNode> get callGraphRoot => _callGraphRoot;
+  final _callGraphRoot = ValueNotifier<CallGraphNode>(null);
+
   /// The node set as the snapshot root.
   ///
   /// Used to build the treemap and the tree table for the snapshot tab.
@@ -40,6 +48,16 @@ class CodeSizeController {
 
   void changeSnapshotRoot(TreemapNode newRoot) {
     _snapshotRoot.value = newRoot;
+
+    final programInfoNode =
+        _callGraph?.program?.lookup(newRoot.packagePath()) ??
+            _callGraph?.program?.root;
+
+    // If [programInfoNode is null, we don't have any call graph information
+    // about [newRoot].
+    if (programInfoNode != null) {
+      _callGraphRoot.value = _callGraph.lookup(programInfoNode);
+    }
   }
 
   ValueListenable<DevToolsJsonFile> get snapshotJsonFile => _snapshotJsonFile;
@@ -47,11 +65,6 @@ class CodeSizeController {
 
   void changeSnapshotJsonFile(DevToolsJsonFile newJson) {
     _snapshotJsonFile.value = newJson;
-  }
-
-  void _clearSnapshot() {
-    _snapshotRoot.value = null;
-    _snapshotJsonFile.value = null;
   }
 
   /// The node set as the diff root.
@@ -83,22 +96,32 @@ class CodeSizeController {
   TreemapNode _decreasedDiffTreeRoot;
   TreemapNode _combinedDiffTreeRoot;
 
-  ValueListenable<DevToolsJsonFile> get oldDiffSnapshotJsonFile {
-    return _oldDiffSnapshotJsonFile;
-  }
+  ValueListenable<DevToolsJsonFile> get oldDiffSnapshotJsonFile =>
+      _oldDiffSnapshotJsonFile;
 
   final _oldDiffSnapshotJsonFile = ValueNotifier<DevToolsJsonFile>(null);
+
   void changeOldDiffSnapshotFile(DevToolsJsonFile newJsonFile) {
     _oldDiffSnapshotJsonFile.value = newJsonFile;
   }
 
-  ValueListenable<DevToolsJsonFile> get newDiffSnapshotJsonFile {
-    return _newDiffSnapshotJsonFile;
-  }
+  ValueListenable<DevToolsJsonFile> get newDiffSnapshotJsonFile =>
+      _newDiffSnapshotJsonFile;
 
   final _newDiffSnapshotJsonFile = ValueNotifier<DevToolsJsonFile>(null);
+
   void changeNewDiffSnapshotFile(DevToolsJsonFile newJsonFile) {
     _newDiffSnapshotJsonFile.value = newJsonFile;
+  }
+
+  void clear(Key activeTabKey) {
+    if (activeTabKey == CodeSizeScreen.diffTabKey) {
+      _clearDiff();
+    } else if (activeTabKey == CodeSizeScreen.snapshotTabKey) {
+      _clearSnapshot();
+    }
+    _callGraphRoot.value = null;
+    _callGraph = null;
   }
 
   void _clearDiff() {
@@ -110,12 +133,9 @@ class CodeSizeController {
     _combinedDiffTreeRoot = null;
   }
 
-  void clear(Key activeTabKey) {
-    if (activeTabKey == CodeSizeScreen.diffTabKey) {
-      _clearDiff();
-    } else if (activeTabKey == CodeSizeScreen.snapshotTabKey) {
-      _clearSnapshot();
-    }
+  void _clearSnapshot() {
+    _snapshotRoot.value = null;
+    _snapshotJsonFile.value = null;
   }
 
   /// The active diff tree type used to build the diff treemap.
@@ -147,9 +167,18 @@ class CodeSizeController {
     await delayForBatchProcessing(micros: 10000);
 
     Map<String, dynamic> processedJson;
-    if (jsonFile.isApkFile) {
+    if (jsonFile.isAnalyzeSizeFile) {
       // APK analysis json should be processed already.
       processedJson = jsonFile.data;
+
+      // Extract the precompiler trace, if it exists, and generate a call graph.
+      final precompilerTrace = processedJson.remove('precompiler-trace');
+      if (precompilerTrace != null) {
+        _callGraph = generateCallGraphWithDominators(
+          precompilerTrace,
+          NodeType.packageNode,
+        );
+      }
     } else {
       try {
         processedJson = treemapFromJson(jsonFile.data);
@@ -188,7 +217,7 @@ class CodeSizeController {
       return;
     }
 
-    if (oldFile.isApkFile != newFile.isApkFile ||
+    if (oldFile.isAnalyzeSizeFile != newFile.isAnalyzeSizeFile ||
         oldFile.isV8Snapshot != newFile.isV8Snapshot) {
       onError(differentTypesError);
       return;
@@ -202,7 +231,7 @@ class CodeSizeController {
     await delayForBatchProcessing(micros: 10000);
 
     Map<String, dynamic> diffMap;
-    if (oldFile.isApkFile && newFile.isApkFile) {
+    if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
       final oldApkProgramInfo = ProgramInfo();
       _apkJsonToProgramInfo(
         program: oldApkProgramInfo,
@@ -404,10 +433,21 @@ class CodeSizeController {
 }
 
 extension CodeSizeJsonFileExtension on DevToolsJsonFile {
-  bool get isApkFile {
+  static const _supportedAnalyzeSizePlatforms = [
+    'apk',
+    'aab',
+    'ios',
+    'macos',
+    'windows',
+    'linux'
+  ];
+
+  bool get isAnalyzeSizeFile {
     if (data is Map<String, dynamic>) {
       final dataMap = data as Map<String, dynamic>;
-      return dataMap['type'] == 'apk';
+      final type = dataMap['type'];
+      return CodeSizeJsonFileExtension._supportedAnalyzeSizePlatforms
+          .contains(type);
     }
     return false;
   }
