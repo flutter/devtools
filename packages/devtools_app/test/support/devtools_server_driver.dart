@@ -50,6 +50,7 @@ class DevToolsServerDriver {
     // directory of the devtools_app package.
     final args = [
       '../devtools/bin/devtools.dart',
+      '--verbose',
       '--machine',
       '--port',
       '$port',
@@ -63,6 +64,8 @@ class DevToolsServerDriver {
     if (useChromeHeadless && headlessModeIsSupported) {
       args.add('--headless');
     }
+
+    print('Spawning dart with args: $args');
     final Process process = await Process.start('dart', args);
 
     return DevToolsServerDriver._(

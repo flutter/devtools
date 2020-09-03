@@ -301,18 +301,20 @@ Future<HttpServer> serveDevTools({
             await _handleVmRegister(
               id,
               params,
-              machineMode,
-              headlessMode,
               devToolsUrl,
+              machineMode: machineMode,
+              headlessMode: headlessMode,
+              verboseMode: verboseMode,
             );
             break;
           case 'devTools.launch':
             await _handleDevToolsLaunch(
               id,
               params,
-              machineMode,
-              headlessMode,
               devToolsUrl,
+              machineMode: machineMode,
+              headlessMode: headlessMode,
+              verboseMode: verboseMode,
             );
             break;
           case 'client.list':
@@ -508,10 +510,11 @@ Future<void> _hookupMemoryProfiling(Uri observatoryUri, String profileFile,
 Future<void> _handleVmRegister(
   dynamic id,
   Map<String, dynamic> params,
-  bool machineMode,
-  bool headlessMode,
-  String devToolsUrl,
-) async {
+  String devToolsUrl, {
+  @required bool machineMode,
+  @required bool headlessMode,
+  @required bool verboseMode,
+}) async {
   if (!params.containsKey('uri')) {
     printOutput(
       'Invalid input: $params does not contain the key \'uri\'',
@@ -527,8 +530,10 @@ Future<void> _handleVmRegister(
   final uri = Uri.tryParse(params['uri']);
 
   if (_isValidVmServiceUri(uri)) {
-    await registerLaunchDevToolsService(
-        uri, id, devToolsUrl, machineMode, headlessMode);
+    await registerLaunchDevToolsService(uri, id, devToolsUrl,
+        machineMode: machineMode,
+        headlessMode: headlessMode,
+        verboseMode: verboseMode);
   } else {
     printOutput(
       'Uri must be absolute with a http, https, ws or wss scheme',
@@ -544,10 +549,11 @@ Future<void> _handleVmRegister(
 Future<void> _handleDevToolsLaunch(
   dynamic id,
   Map<String, dynamic> params,
-  bool machineMode,
-  bool headlessMode,
-  String devToolsUrl,
-) async {
+  String devToolsUrl, {
+  @required bool machineMode,
+  @required bool headlessMode,
+  @required bool verboseMode,
+}) async {
   if (!params.containsKey('vmServiceUri')) {
     printOutput(
       'Invalid input: $params does not contain the key \'vmServiceUri\'',
@@ -565,8 +571,10 @@ Future<void> _handleDevToolsLaunch(
 
   if (_isValidVmServiceUri(vmServiceUri)) {
     try {
-      final result = await launchDevTools(
-          params, vmServiceUri, devToolsUrl, headlessMode, machineMode);
+      final result = await launchDevTools(params, vmServiceUri, devToolsUrl,
+          headlessMode: headlessMode,
+          machineMode: machineMode,
+          verboseMode: verboseMode);
       printOutput(
         'DevTools launched',
         {'id': id, 'result': result},
@@ -653,10 +661,11 @@ Future<bool> _tryReuseExistingDevToolsInstance(
 Future<void> registerLaunchDevToolsService(
   Uri vmServiceUri,
   dynamic id,
-  String devToolsUrl,
-  bool machineMode,
-  bool headlessMode,
-) async {
+  String devToolsUrl, {
+  @required bool machineMode,
+  @required bool headlessMode,
+  @required bool verboseMode,
+}) async {
   try {
     // Connect to the vm service and register a method to launch DevTools in
     // chrome.
@@ -669,8 +678,9 @@ Future<void> registerLaunchDevToolsService(
           params,
           vmServiceUri,
           devToolsUrl,
-          headlessMode,
-          machineMode,
+          headlessMode: headlessMode,
+          machineMode: machineMode,
+          verboseMode: verboseMode,
         );
         return {'result': Success().toJson()};
       } catch (e, s) {
@@ -717,11 +727,13 @@ Future<void> registerLaunchDevToolsService(
 }
 
 Future<Map<String, dynamic>> launchDevTools(
-    Map<String, dynamic> params,
-    Uri vmServiceUri,
-    String devToolsUrl,
-    bool headlessMode,
-    bool machineMode) async {
+  Map<String, dynamic> params,
+  Uri vmServiceUri,
+  String devToolsUrl, {
+  @required bool headlessMode,
+  @required bool machineMode,
+  @required bool verboseMode,
+}) async {
   // First see if we have an existing DevTools client open that we can
   // reuse.
   final canReuse = params != null &&
@@ -780,6 +792,17 @@ Future<Map<String, dynamic>> launchDevTools(
           ]
         : <String>[];
     final proc = await Chrome.start([uriToLaunch.toString()], args: args);
+    if (verboseMode)
+      // ignore: unawaited_futures
+      proc.exitCode.then((code) => _emitLogEvent(
+          'chrome: exited with code $code',
+          machineMode: machineMode));
+    proc.stdout.listen((data) => _emitLogEvent(
+        'chrome stdout: ${utf8.decode(data)}',
+        machineMode: machineMode));
+    proc.stderr.listen((data) => _emitLogEvent(
+        'chrome stderr: ${utf8.decode(data)}',
+        machineMode: machineMode));
     browserPid = proc.pid;
   }
   _emitLaunchEvent(
@@ -822,6 +845,20 @@ void _emitLaunchEvent(
     {
       'event': 'client.launch',
       'params': {'reused': reused, 'notified': notified, 'pid': pid},
+    },
+    machineMode: machineMode,
+  );
+}
+
+void _emitLogEvent(
+  String message, {
+  @required bool machineMode,
+}) {
+  printOutput(
+    message,
+    {
+      'event': 'server.log',
+      'params': {'message': message},
     },
     machineMode: machineMode,
   );

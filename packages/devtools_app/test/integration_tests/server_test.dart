@@ -310,7 +310,7 @@ void main() {
         // Spawn our own Chrome process so we can terminate it.
         final devToolsUri =
             'http://${event['params']['host']}:${event['params']['port']}';
-        final chrome = await Chrome.locate().start(url: devToolsUri);
+        final chrome = await _spawnChrome(devToolsUri);
 
         // Wait for DevTools to inform server that it's connected.
         await _waitForClients();
@@ -386,6 +386,21 @@ void main() {
       // The API only works in release mode.
     }, skip: !testInReleaseMode);
   }
+}
+
+Future<ChromeProcess> _spawnChrome(String devToolsUri) async {
+  final chrome = Chrome.locate();
+  print('Located Chrome at ${chrome?.executable}. Launching $devToolsUri...');
+  final proc = await chrome.start(url: devToolsUri);
+
+  // ignore: unawaited_futures
+  proc.process.exitCode.then((code) => print('chrome: exited with code $code'));
+  proc.process.stdout
+      .listen((data) => print('chrome stdout: ${utf8.decode(data)}'));
+  proc.process.stderr
+      .listen((data) => print('chrome stderr: ${utf8.decode(data)}'));
+
+  return proc;
 }
 
 Future<Map<String, dynamic>> _sendLaunchDevToolsRequest({

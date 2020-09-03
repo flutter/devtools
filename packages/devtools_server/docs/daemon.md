@@ -60,6 +60,14 @@ contains the following params:
 - `protocolVersion` - the version number for this protocol (if this field is
   missing it is protocol version `1.0.0`)
 
+#### server.log Event
+
+When running the server with `--verbose` the server may emit verbose log events
+including the stdout/stderr from the launched browser processes (which may
+include console.log output). Each event contains the following params:
+
+- `message` - a string message
+
 <!--
 This request is only used for testing purposes so is currently "undocumented"
 
