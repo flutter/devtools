@@ -4,7 +4,7 @@
 
 abstract class AnalyticsProvider {
   bool get isGtagsEnabled;
-  bool get isFirstRun;
+  bool get shouldPrompt;
   bool get isEnabled;
   void setUpAnalytics();
   void setAllowAnalytics();

@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
 import '../common_widgets.dart';
@@ -14,6 +16,7 @@ import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
+import 'code_size_attribution.dart';
 import 'code_size_controller.dart';
 import 'code_size_table.dart';
 import 'file_import_container.dart';
@@ -32,15 +35,15 @@ class CodeSizeScreen extends Screen {
           icon: Octicons.fileZip,
         );
 
-  static const id = 'codeSize';
-
   static const snapshotTabKey = Key('Snapshot Tab');
   static const diffTabKey = Key('Diff Tab');
+  static const id = 'codeSize';
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
   static const dropdownKey = Key('Diff Tree Type Dropdown');
+
   @visibleForTesting
   static const snapshotViewTreemapKey = Key('Snapshot View Treemap');
   @visibleForTesting
@@ -72,7 +75,7 @@ class CodeSizeBody extends StatefulWidget {
 class _CodeSizeBodyState extends State<CodeSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
   static const tabs = [
-    Tab(text: 'Snapshot', key: CodeSizeScreen.snapshotTabKey),
+    Tab(text: 'Analysis', key: CodeSizeScreen.snapshotTabKey),
     Tab(text: 'Diff', key: CodeSizeScreen.diffTabKey),
   ];
 
@@ -83,6 +86,7 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
   @override
   void initState() {
     super.initState();
+    ga.screen(CodeSizeScreen.id);
     _tabController = TabController(length: tabs.length, vsync: this);
     addAutoDisposeListener(_tabController);
   }
@@ -181,7 +185,7 @@ class SnapshotView extends StatefulWidget {
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
   static const importInstructions = 'Drag and drop an AOT snapshot or'
-      ' "apk-analysis.json" file for code size debugging';
+      ' size analysis file for debugging';
 
   @override
   _SnapshotViewState createState() => _SnapshotViewState();
@@ -237,7 +241,19 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
               axis: Axis.vertical,
               children: [
                 _buildTreemap(),
-                CodeSizeSnapshotTable(rootNode: snapshotRoot),
+                Row(
+                  children: [
+                    Flexible(
+                      child: CodeSizeSnapshotTable(rootNode: snapshotRoot),
+                    ),
+                    if (controller.callGraphRoot.value != null)
+                      Flexible(
+                        child: CallGraphWithDominators(
+                          callGraphRoot: controller.callGraphRoot.value,
+                        ),
+                      ),
+                  ],
+                ),
               ],
               initialFractions: const [
                 initialFractionForTreemap,
@@ -251,8 +267,9 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   }
 
   String _generateSingleFileHeaderText() {
-    String output =
-        controller.snapshotJsonFile.value.isApkFile ? 'APK: ' : 'Snapshot: ';
+    String output = controller.snapshotJsonFile.value.isAnalyzeSizeFile
+        ? 'Total size analysis: '
+        : 'Dart AOT snapshot: ';
     output += controller.snapshotJsonFile.value.displayText;
     return output;
   }
@@ -294,9 +311,9 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
               children: [
                 Flexible(
                   child: FileImportContainer(
-                    title: 'Snapshot / APK analysis',
+                    title: 'Size analysis',
                     instructions: SnapshotView.importInstructions,
-                    actionText: 'Analyze Snapshot / APK',
+                    actionText: 'Analyze Size',
                     onAction: (jsonFile) {
                       controller.loadTreeFromJsonFile(
                         jsonFile,
@@ -318,9 +335,9 @@ class DiffView extends StatefulWidget {
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
   static const importOldInstructions = 'Drag and drop an original (old) AOT '
-      'snapshot or "apk-analysis.json" file for code size debugging';
+      'snapshot or size analysis file for debugging';
   static const importNewInstructions = 'Drag and drop a modified (new) AOT '
-      'snapshot or "apk-analysis.json" file for code size debugging';
+      'snapshot or size analysis file for debugging';
 
   @override
   _DiffViewState createState() => _DiffViewState();
@@ -394,9 +411,9 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
 
   String _generateDualFileHeaderText() {
     String output = 'Diffing ';
-    output += controller.oldDiffSnapshotJsonFile.value.isApkFile
-        ? 'APKs: '
-        : 'Snapshots: ';
+    output += controller.oldDiffSnapshotJsonFile.value.isAnalyzeSizeFile
+        ? 'total size analyses: '
+        : 'Dart AOT snapshots: ';
     output += controller.oldDiffSnapshotJsonFile.value.displayText;
     output += ' (OLD)    vs    (NEW) ';
     output += controller.newDiffSnapshotJsonFile.value.displayText;
@@ -441,7 +458,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
 
   Widget _buildTreemap() {
     return LayoutBuilder(
-      key: CodeSizeScreen.snapshotViewTreemapKey,
+      key: CodeSizeScreen.diffViewTreemapKey,
       builder: (context, constraints) {
         return Treemap.fromRoot(
           rootNode: diffRoot,

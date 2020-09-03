@@ -37,7 +37,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
   void initState() {
     super.initState();
     if (_provider.isGtagsEnabled) {
-      if (_provider.isFirstRun) {
+      if (_provider.shouldPrompt) {
         _isVisible = true;
       } else if (_provider.isEnabled) {
         _provider.setUpAnalytics();

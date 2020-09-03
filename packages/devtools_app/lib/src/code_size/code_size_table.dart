@@ -50,6 +50,7 @@ class CodeSizeSnapshotTable extends StatelessWidget {
       keyFactory: (node) => PageStorageKey<String>(node.name),
       sortColumn: sortColumn,
       sortDirection: SortDirection.descending,
+      autoExpandRoots: true,
     );
   }
 }
@@ -167,12 +168,13 @@ class CodeSizeDiffTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
-      dataRoots: rootNode.children,
+      dataRoots: [rootNode],
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
       sortColumn: sortColumn,
       sortDirection: SortDirection.descending,
+      autoExpandRoots: true,
     );
   }
 }
@@ -182,8 +184,9 @@ class CodeSizeDiffTable extends StatelessWidget {
 class _DiffColumn extends ColumnData<TreemapNode> {
   _DiffColumn() : super('Change', alignment: ColumnAlignment.right);
 
+  // Ensure sort by absolute size.
   @override
-  dynamic getValue(TreemapNode dataObject) => dataObject.byteSize;
+  dynamic getValue(TreemapNode dataObject) => dataObject.unsignedByteSize;
 
 // TODO(peterdjlee): Add up or down arrows indicating increase or decrease for display value.
   @override

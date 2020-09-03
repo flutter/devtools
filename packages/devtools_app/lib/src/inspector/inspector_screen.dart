@@ -5,6 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart';
 import '../auto_dispose_mixin.dart';
 import '../blocking_action_mixin.dart';
 import '../connected_app.dart';
@@ -25,12 +28,14 @@ import 'inspector_tree_flutter.dart';
 class InspectorScreen extends Screen {
   const InspectorScreen()
       : super.conditional(
-          id: 'inspector',
+          id: id,
           requiresLibrary: flutterLibraryUri,
           requiresDebugBuild: true,
           title: 'Flutter Inspector',
           icon: Octicons.deviceMobile,
         );
+
+  static const id = 'inspector';
 
   @override
   String get docPageId => screenId;
@@ -64,8 +69,8 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
   @override
   void initState() {
     super.initState();
-    // TODO(jacobr): support analytics.
-    // ga_platform.setupDimensions();
+    ga.setupDimensions();
+    ga.screen(InspectorScreen.id);
     autoDispose(
         serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
     if (serviceManager.hasConnection) {
@@ -289,8 +294,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   void _refreshInspector() {
-    // TODO(jacobr): support analytics.
-    // ga.select(ga.inspector, ga.refresh);
+    ga.select(inspector, refresh);
     blockWhileInProgress(() async {
       await inspectorController?.onForceRefresh();
     });

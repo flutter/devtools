@@ -56,7 +56,7 @@ packages:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.1-dev.2"
+    version: "0.9.1"
   http:
     dependency: transitive
     description:
@@ -98,14 +98,14 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.2"
+    version: "1.2.3"
   mime:
     dependency: transitive
     description:
       name: mime
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.6+3"
+    version: "0.9.7"
   path:
     dependency: "direct main"
     description:
@@ -126,7 +126,7 @@ packages:
       name: shelf
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.7"
+    version: "0.7.9"
   shelf_proxy:
     dependency: "direct main"
     description:
@@ -203,7 +203,7 @@ packages:
       name: uuid
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.0"
+    version: "2.2.2"
   vm_service:
     dependency: "direct main"
     description:

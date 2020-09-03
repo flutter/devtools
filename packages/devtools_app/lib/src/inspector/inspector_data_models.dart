@@ -155,6 +155,9 @@ class LayoutProperties {
   final bool isFlex;
   final Size size;
 
+  /// Represents the order of [children] to be displayed.
+  List<LayoutProperties> get displayChildren => children;
+
   bool get hasFlexFactor => flexFactor != null && flexFactor > 0;
 
   int get totalChildren => children?.length ?? 0;
@@ -168,7 +171,7 @@ class LayoutProperties {
   double dimension(Axis axis) => axis == Axis.horizontal ? width : height;
 
   List<double> childrenDimensions(Axis axis) {
-    return children?.map((child) => child.dimension(axis))?.toList();
+    return displayChildren?.map((child) => child.dimension(axis))?.toList();
   }
 
   List<double> get childrenWidths => childrenDimensions(Axis.horizontal);
@@ -205,7 +208,6 @@ class LayoutProperties {
   }
 
   static BoxConstraints deserializeConstraints(Map<String, Object> json) {
-    // TODO(albertusangga): Support SliverConstraint
     if (json == null) return null;
     return BoxConstraints(
       minWidth: double.parse(json['minWidth'] ?? '0.0'),
@@ -253,6 +255,19 @@ class LayoutProperties {
 }
 
 final Expando<FlexLayoutProperties> _flexLayoutExpando = Expando();
+
+extension MainAxisAlignmentExtension on MainAxisAlignment {
+  MainAxisAlignment get reversed {
+    switch (this) {
+      case MainAxisAlignment.start:
+        return MainAxisAlignment.end;
+      case MainAxisAlignment.end:
+        return MainAxisAlignment.start;
+      default:
+        return this;
+    }
+  }
+}
 
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class FlexLayoutProperties extends LayoutProperties {
@@ -370,6 +385,15 @@ class FlexLayoutProperties extends LayoutProperties {
   final VerticalDirection verticalDirection;
   final TextBaseline textBaseline;
 
+  List<LayoutProperties> _displayChildren;
+
+  @override
+  List<LayoutProperties> get displayChildren {
+    if (_displayChildren != null) return _displayChildren;
+    return _displayChildren =
+        startIsTopLeft ? children : children.reversed.toList();
+  }
+
   int _totalFlex;
 
   bool get isMainAxisHorizontal => direction == Axis.horizontal;
@@ -417,6 +441,28 @@ class FlexLayoutProperties extends LayoutProperties {
     return height + overflowEpsilon < max(childrenHeights);
   }
 
+  bool get startIsTopLeft {
+    assert(direction != null);
+    switch (direction) {
+      case Axis.horizontal:
+        switch (textDirection) {
+          case TextDirection.ltr:
+            return true;
+          case TextDirection.rtl:
+            return false;
+        }
+        break;
+      case Axis.vertical:
+        switch (verticalDirection) {
+          case VerticalDirection.down:
+            return true;
+          case VerticalDirection.up:
+            return false;
+        }
+    }
+    return true;
+  }
+
   /// render properties for laying out rendered Flex & Flex children widgets
   /// the computation is similar to [RenderFlex].performLayout() method
   List<RenderProperties> childrenRenderProperties({
@@ -428,10 +474,12 @@ class FlexLayoutProperties extends LayoutProperties {
   }) {
     /// calculate the render empty spaces
     final freeSpace = dimension(direction) - sum(childrenDimensions(direction));
+    final displayMainAxisAlignment =
+        startIsTopLeft ? mainAxisAlignment : mainAxisAlignment.reversed;
 
     double leadingSpace(double freeSpace) {
       if (children.isEmpty) return 0.0;
-      switch (mainAxisAlignment) {
+      switch (displayMainAxisAlignment) {
         case MainAxisAlignment.start:
         case MainAxisAlignment.end:
           return freeSpace;
@@ -451,7 +499,7 @@ class FlexLayoutProperties extends LayoutProperties {
 
     double betweenSpace(double freeSpace) {
       if (children.isEmpty) return 0.0;
-      switch (mainAxisAlignment) {
+      switch (displayMainAxisAlignment) {
         case MainAxisAlignment.start:
         case MainAxisAlignment.end:
         case MainAxisAlignment.center:
@@ -536,7 +584,7 @@ class FlexLayoutProperties extends LayoutProperties {
 
     double space(int index) {
       if (index == 0) {
-        if (mainAxisAlignment == MainAxisAlignment.start) return 0.0;
+        if (displayMainAxisAlignment == MainAxisAlignment.start) return 0.0;
         return renderLeadingSpace;
       }
       return renderBetweenSpace;
@@ -565,11 +613,11 @@ class FlexLayoutProperties extends LayoutProperties {
           axis: direction,
           size: Size(widths[i], heights[i]),
           offset: Offset.zero,
-          realSize: children[i].size,
+          realSize: displayChildren[i].size,
         )
           ..mainAxisOffset = calculateMainAxisOffset(i)
           ..crossAxisOffset = calculateCrossAxisOffset(i)
-          ..layoutProperties = children[i],
+          ..layoutProperties = displayChildren[i],
       );
     }
 
@@ -584,7 +632,7 @@ class FlexLayoutProperties extends LayoutProperties {
           ..isFreeSpace = true
           ..layoutProperties = this;
     if (actualLeadingSpace > 0.0 &&
-        mainAxisAlignment != MainAxisAlignment.start) {
+        displayMainAxisAlignment != MainAxisAlignment.start) {
       spaces.add(renderPropsWithFullCrossAxisDimension.clone()
         ..mainAxisOffset = 0.0
         ..mainAxisDimension = renderLeadingSpace
@@ -599,7 +647,7 @@ class FlexLayoutProperties extends LayoutProperties {
           ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension);
       }
     if (actualLeadingSpace > 0.0 &&
-        mainAxisAlignment != MainAxisAlignment.end) {
+        displayMainAxisAlignment != MainAxisAlignment.end) {
       spaces.add(renderPropsWithFullCrossAxisDimension.clone()
         ..mainAxisOffset = childrenRenderProps.last.mainAxisDimension +
             childrenRenderProps.last.mainAxisOffset
@@ -617,7 +665,7 @@ class FlexLayoutProperties extends LayoutProperties {
     final spaces = <RenderProperties>[];
     for (var i = 0; i < children.length; ++i) {
       if (dimension(crossAxisDirection) ==
-              children[i].dimension(crossAxisDirection) ||
+              displayChildren[i].dimension(crossAxisDirection) ||
           childrenRenderProperties[i].crossAxisDimension ==
               maxSizeAvailable(crossAxisDirection)) continue;
 
@@ -759,5 +807,44 @@ class RenderProperties {
       layoutProperties: layoutProperties,
       isFreeSpace: isFreeSpace,
     );
+  }
+
+  @override
+  int get hashCode =>
+      axis.hashCode ^
+      size.hashCode ^
+      offset.hashCode ^
+      realSize.hashCode ^
+      isFreeSpace.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    return other is RenderProperties &&
+        axis == other.axis &&
+        size.closeTo(other.size) &&
+        offset.closeTo(other.offset) &&
+        realSize.closeTo(other.realSize) &&
+        isFreeSpace == other.isFreeSpace;
+  }
+
+  @override
+  String toString() {
+    return '{ axis: $axis, size: $size, offset: $offset, realSize: $realSize, isFreeSpace: $isFreeSpace }';
+  }
+}
+
+bool _closeTo(double a, double b, {int precision = 1}) {
+  return a.toStringAsPrecision(precision) == b.toStringAsPrecision(precision);
+}
+
+extension on Size {
+  bool closeTo(Size other) {
+    return _closeTo(width, other.width) && _closeTo(height, other.height);
+  }
+}
+
+extension on Offset {
+  bool closeTo(Offset other) {
+    return _closeTo(dx, other.dx) && _closeTo(dy, other.dy);
   }
 }

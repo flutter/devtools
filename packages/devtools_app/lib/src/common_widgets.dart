@@ -428,6 +428,8 @@ SizedBox areaPaneHeader(
   BuildContext context, {
   @required String title,
   bool needsTopBorder = true,
+  bool needsBottomBorder = true,
+  bool needsLeftBorder = false,
   List<Widget> actions = const [],
   double rightPadding = densePadding,
   bool tall = false,
@@ -440,10 +442,10 @@ SizedBox areaPaneHeader(
     child: Container(
       decoration: BoxDecoration(
         border: Border(
-          top: needsTopBorder
-              ? BorderSide(color: theme.focusColor)
-              : BorderSide.none,
-          bottom: BorderSide(color: theme.focusColor),
+          top: needsTopBorder ? defaultBorderSide(theme) : BorderSide.none,
+          bottom:
+              needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
+          left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
         ),
         color: titleSolidBackgroundColor(theme),
       ),
@@ -464,6 +466,10 @@ SizedBox areaPaneHeader(
       ),
     ),
   );
+}
+
+BorderSide defaultBorderSide(ThemeData theme) {
+  return BorderSide(color: theme.focusColor);
 }
 
 /// Toggle button for use as a child of a [ToggleButtons] widget.
@@ -716,5 +722,140 @@ Color _colorForIndex(Color color, int index, ColorScheme colorScheme) {
     return color;
   } else {
     return colorScheme.isLight ? color.darken() : color.brighten();
+  }
+}
+
+class BreadcrumbNavigator extends StatelessWidget {
+  const BreadcrumbNavigator.builder({
+    @required this.itemCount,
+    @required this.builder,
+  });
+
+  final int itemCount;
+
+  final IndexedWidgetBuilder builder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: Breadcrumb.height + 2 * borderPadding,
+      alignment: Alignment.centerLeft,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: itemCount,
+        itemBuilder: builder,
+      ),
+    );
+  }
+}
+
+class Breadcrumb extends StatelessWidget {
+  const Breadcrumb({
+    @required this.text,
+    @required this.isRoot,
+    @required this.onPressed,
+  });
+
+  static const height = 28.0;
+
+  static const caretWidth = 4.0;
+
+  final String text;
+
+  final bool isRoot;
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    // Create the text painter here so that we can calculate `breadcrumbWidth`.
+    // We need the width for the wrapping Container that gives the CustomPaint
+    // a bounded width.
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: theme.colorScheme.chartTextColor,
+          decoration: TextDecoration.underline,
+        ),
+      ),
+      textAlign: TextAlign.right,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    final caretWidth =
+        isRoot ? Breadcrumb.caretWidth : Breadcrumb.caretWidth * 2;
+    final breadcrumbWidth = textPainter.width + caretWidth + densePadding * 2;
+
+    return InkWell(
+      onTap: onPressed,
+      child: Container(
+        width: breadcrumbWidth,
+        padding: const EdgeInsets.all(borderPadding),
+        child: CustomPaint(
+          painter: _BreadcrumbPainter(
+            textPainter: textPainter,
+            isRoot: isRoot,
+            breadcrumbWidth: breadcrumbWidth,
+            colorScheme: theme.colorScheme,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BreadcrumbPainter extends CustomPainter {
+  _BreadcrumbPainter({
+    @required this.textPainter,
+    @required this.isRoot,
+    @required this.breadcrumbWidth,
+    @required this.colorScheme,
+  });
+
+  final TextPainter textPainter;
+
+  final bool isRoot;
+
+  final double breadcrumbWidth;
+
+  final ColorScheme colorScheme;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = colorScheme.chartAccentColor;
+    final path = Path()..moveTo(0, 0);
+
+    if (isRoot) {
+      path.lineTo(0, Breadcrumb.height);
+    } else {
+      path
+        ..lineTo(Breadcrumb.caretWidth, Breadcrumb.height / 2)
+        ..lineTo(0, Breadcrumb.height);
+    }
+
+    path
+      ..lineTo(breadcrumbWidth - Breadcrumb.caretWidth, Breadcrumb.height)
+      ..lineTo(breadcrumbWidth, Breadcrumb.height / 2)
+      ..lineTo(breadcrumbWidth - Breadcrumb.caretWidth, 0);
+
+    canvas.drawPath(path, paint);
+
+    final textXOffset =
+        isRoot ? densePadding : Breadcrumb.caretWidth + densePadding;
+    textPainter.paint(
+      canvas,
+      Offset(textXOffset, (Breadcrumb.height - textPainter.height) / 2),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _BreadcrumbPainter oldDelegate) {
+    return textPainter != oldDelegate.textPainter ||
+        isRoot != oldDelegate.isRoot ||
+        breadcrumbWidth != oldDelegate.breadcrumbWidth ||
+        colorScheme != oldDelegate.colorScheme;
   }
 }

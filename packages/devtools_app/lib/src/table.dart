@@ -218,6 +218,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     @required this.sortColumn,
     @required this.sortDirection,
     this.selectionNotifier,
+    this.autoExpandRoots = false,
   })  : assert(columns.contains(treeColumn)),
         assert(columns.contains(sortColumn)),
         assert(columns != null),
@@ -242,6 +243,8 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   final SortDirection sortDirection;
 
   final ValueNotifier<Selection<T>> selectionNotifier;
+
+  final bool autoExpandRoots;
 
   @override
   TreeTableState<T> createState() => TreeTableState<T>();
@@ -311,6 +314,13 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   void _initData() {
+    dataRoots = List.generate(widget.dataRoots.length, (index) {
+      final root = widget.dataRoots[index];
+      if (widget.autoExpandRoots) {
+        root.expand();
+      }
+      return root;
+    });
     dataRoots = List.from(widget.dataRoots);
     sortData(widget.sortColumn, widget.sortDirection);
 
@@ -971,7 +981,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final row = tableRowFor(context);
 
     final box = SizedBox(
-      height: defaultRowHeight,
+      height: widget.node == null ? areaPaneHeaderHeight : defaultRowHeight,
       child: Material(
         color: widget.backgroundColor ??
             titleSolidBackgroundColor(Theme.of(context)),
