@@ -474,7 +474,7 @@ Future<Map<String, dynamic>> _waitForClients({
   final isOnPage = (client) => client['currentPage'] == requiredPage;
   final hasConnectionState = (client) => requiredConnectionState
       // If we require a connected client, also require a non-null page. This
-      // avoids a race in tests where we pay proceed to send messages to a client
+      // avoids a race in tests where we may proceed to send messages to a client
       // that is not fully initialised.
       ? (client['hasConnection'] && client['currentPage'] != null)
       : !client['hasConnection'];
