@@ -419,13 +419,7 @@ abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
 
   @override
   double getNodeIndentPx(T dataObject) {
-    double indentWidth = dataObject.level * treeToggleWidth;
-    if (!dataObject.isExpandable) {
-      // If the object is not expandable, we need to increase the width of our
-      // spacer to account for the missing tree toggle.
-      indentWidth += TreeColumnData.treeToggleWidth;
-    }
-    return indentWidth;
+    return dataObject.level * treeToggleWidth;
   }
 }
 
