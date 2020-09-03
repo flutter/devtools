@@ -98,19 +98,19 @@ class _CallGraphViewState extends State<CallGraphView> {
 
   final _toColumn = ToColumn();
 
-  CallGraphNode node;
+  CallGraphNode selectedNode;
 
   @override
   void initState() {
     super.initState();
-    node = widget.node;
+    selectedNode = widget.node;
   }
 
   @override
   void didUpdateWidget(covariant CallGraphView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.node != widget.node) {
-      node = widget.node;
+      selectedNode = widget.node;
     }
   }
 
@@ -128,9 +128,10 @@ class _CallGraphViewState extends State<CallGraphView> {
                   child: _buildFromTable(),
                 ),
                 Container(
-                    height: constraints.maxHeight,
-                    width: densePadding,
-                    color: titleSolidBackgroundColor(Theme.of(context))),
+                  height: constraints.maxHeight,
+                  width: densePadding,
+                  color: titleSolidBackgroundColor(Theme.of(context)),
+                ),
                 Flexible(
                   child: _buildToTable(),
                 ),
@@ -151,7 +152,7 @@ class _CallGraphViewState extends State<CallGraphView> {
     return FlatTable<CallGraphNode>(
       key: CallGraphView.fromTableKey,
       columns: [_fromColumn],
-      data: node.pred,
+      data: selectedNode.pred,
       keyFactory: (CallGraphNode node) => ValueKey<CallGraphNode>(node),
       onItemSelected: _selectMainNode,
       sortColumn: _fromColumn,
@@ -163,7 +164,7 @@ class _CallGraphViewState extends State<CallGraphView> {
     return FlatTable<CallGraphNode>(
       key: CallGraphView.toTableKey,
       columns: [_toColumn],
-      data: node.succ,
+      data: selectedNode.succ,
       keyFactory: (CallGraphNode node) => ValueKey<CallGraphNode>(node),
       onItemSelected: _selectMainNode,
       sortColumn: _toColumn,
@@ -181,11 +182,11 @@ class _CallGraphViewState extends State<CallGraphView> {
         ),
         Tooltip(
           waitDuration: tooltipWait,
-          message: node.data.toString(),
+          message: selectedNode.data.toString(),
           child: Container(
             padding: const EdgeInsets.all(densePadding),
             child: Text(
-              node.display,
+              selectedNode.display,
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -200,7 +201,7 @@ class _CallGraphViewState extends State<CallGraphView> {
 
   void _selectMainNode(CallGraphNode node) {
     setState(() {
-      this.node = node;
+      selectedNode = node;
     });
   }
 }
@@ -269,9 +270,6 @@ class _PackageColumn extends TreeColumnData<DominatorTreeNode> {
   @override
   String getValue(DominatorTreeNode dataObject) =>
       dataObject.callGraphNode.display;
-
-//  @override
-//  bool get supportsSorting => false;
 }
 
 extension CallGraphNodeDisplay on CallGraphNode {
@@ -298,7 +296,7 @@ extension CallGraphNodeDisplay on CallGraphNode {
 class DominatorTreeNode extends TreeNode<DominatorTreeNode> {
   DominatorTreeNode._(this.callGraphNode);
 
-  static DominatorTreeNode from(CallGraphNode cgNode) {
+  factory DominatorTreeNode.from(CallGraphNode cgNode) {
     final domNode = DominatorTreeNode._(cgNode);
     for (var dominated in cgNode.dominated) {
       domNode.addChild(DominatorTreeNode.from(dominated));

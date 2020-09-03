@@ -634,8 +634,9 @@ class TreemapNode extends TreeNode<TreemapNode> {
     return path.reversed.toList();
   }
 
-  /// Returns the path for this node, including only package nodes (nodes that
-  /// start with 'package:'.
+  /// Returns the package path for this node.
+  ///
+  /// Includes only package nodes (nodes that start with 'package:').
   List<String> packagePath() {
     final reversedPath = <String>[];
     var current = this;
