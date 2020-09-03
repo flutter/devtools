@@ -1,3 +1,8 @@
+## 0.9.1
+* Add opt-in for feature usage reporting
+* Add Code Size Debugging Tools to DevTools
+* Use MIME types for http requests in the Network profiler
+
 ## 0.9.0
 * Add search functionality to Timeline flame chart [#2164](https://github.com/flutter/devtools/pull/2164)
 * Add socket profiling to Network page [#2191](https://github.com/flutter/devtools/pull/2191)
