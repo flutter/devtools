@@ -205,7 +205,7 @@ void main() {
 
     testWidgets('Libraries visible', (WidgetTester tester) async {
       final scripts = [
-        ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
+        ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
       ];
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
@@ -226,7 +226,7 @@ void main() {
           id: 'bp1',
           resolved: false,
           location: UnresolvedSourceLocation(
-            scriptUri: 'package:/test/script.dart',
+            scriptUri: 'package:test/script.dart',
             line: 10,
           ),
         )
@@ -271,7 +271,7 @@ void main() {
               name: 'testCodeRef', id: 'testCodeRef', kind: CodeKind.kDart),
           location: SourceLocation(
             script:
-                ScriptRef(uri: 'package:/test/script.dart', id: 'script.dart'),
+                ScriptRef(uri: 'package:test/script.dart', id: 'script.dart'),
             tokenPos: 10,
           ),
           kind: FrameKind.kRegular,
@@ -279,8 +279,8 @@ void main() {
         Frame(
           index: 1,
           location: SourceLocation(
-            script: ScriptRef(
-                uri: 'package:/test/script1.dart', id: 'script1.dart'),
+            script:
+                ScriptRef(uri: 'package:test/script1.dart', id: 'script1.dart'),
             tokenPos: 10,
           ),
           kind: FrameKind.kRegular,
@@ -293,8 +293,8 @@ void main() {
             kind: CodeKind.kDart,
           ),
           location: SourceLocation(
-            script: ScriptRef(
-                uri: 'package:/test/script2.dart', id: 'script2.dart'),
+            script:
+                ScriptRef(uri: 'package:test/script2.dart', id: 'script2.dart'),
             tokenPos: 10,
           ),
           kind: FrameKind.kRegular,
@@ -307,8 +307,8 @@ void main() {
             kind: CodeKind.kDart,
           ),
           location: SourceLocation(
-            script: ScriptRef(
-                uri: 'package:/test/script3.dart', id: 'script3.dart'),
+            script:
+                ScriptRef(uri: 'package:test/script3.dart', id: 'script3.dart'),
             tokenPos: 10,
           ),
           kind: FrameKind.kRegular,
@@ -316,8 +316,8 @@ void main() {
         Frame(
           index: 4,
           location: SourceLocation(
-            script: ScriptRef(
-                uri: 'package:/test/script4.dart', id: 'script4.dart'),
+            script:
+                ScriptRef(uri: 'package:test/script4.dart', id: 'script4.dart'),
             tokenPos: 10,
           ),
           kind: FrameKind.kAsyncSuspensionMarker,
