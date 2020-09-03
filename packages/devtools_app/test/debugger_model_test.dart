@@ -8,12 +8,12 @@ import 'package:vm_service/vm_service.dart';
 
 void main() {
   group('debugger_model', () {
-    group('FileNode', () {
-      final ScriptRef ref1 = ScriptRef(uri: 'package:foo', id: 'id-1');
-      final ScriptRef ref2 = ScriptRef(uri: 'package:foo/foo.dart', id: 'id-2');
-      final ScriptRef ref3 = ScriptRef(uri: 'package:bar/bar.dart', id: 'id-3');
-      final ScriptRef ref4 = ScriptRef(uri: 'package:bar/baz.dart', id: 'id-4');
+    final ScriptRef ref1 = ScriptRef(uri: 'package:foo', id: 'id-1');
+    final ScriptRef ref2 = ScriptRef(uri: 'package:foo/foo.dart', id: 'id-2');
+    final ScriptRef ref3 = ScriptRef(uri: 'package:bar/bar.dart', id: 'id-3');
+    final ScriptRef ref4 = ScriptRef(uri: 'package:bar/baz.dart', id: 'id-4');
 
+    group('FileNode', () {
       test('handles an empty list', () {
         final roots = FileNode.createRootsFrom([]);
         expect(roots, isEmpty);
@@ -95,6 +95,29 @@ void main() {
         child = child.children[0];
         expect(child.name, 'baz.dart');
         expect(child.scriptRef, isNotNull);
+      });
+    });
+
+    group('ScriptRefUtils', () {
+      test('splitDirectoryParts', () {
+        expect(
+          ScriptRefUtils.splitDirectoryParts(ref1),
+          orderedEquals(['package:foo']),
+        );
+        expect(
+          ScriptRefUtils.splitDirectoryParts(ref2),
+          orderedEquals(['package:foo', 'foo.dart']),
+        );
+        expect(
+          ScriptRefUtils.splitDirectoryParts(
+              ScriptRef(uri: 'package:foo.bar.baz/qux.dart', id: 'id-5')),
+          orderedEquals(['package:foo', 'bar', 'baz', 'qux.dart']),
+        );
+        expect(
+          ScriptRefUtils.splitDirectoryParts(
+              ScriptRef(uri: 'google3:///foo/bar/baz.dart', id: 'id-6')),
+          orderedEquals(['google3:foo', 'bar', 'baz.dart']),
+        );
       });
     });
   });
