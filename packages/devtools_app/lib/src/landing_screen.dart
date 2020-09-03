@@ -75,10 +75,10 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _subtitleText('Analyze and view diffs for your app\'s code size'),
+          _subtitleText('Analyze and view diffs for your app\'s size'),
           const SizedBox(height: denseRowSpacing),
           _captionText('Load Dart AOT v8 snapshots, instruction sizes, or '
-              '"apk-analysis.json" files to track down code size issues'),
+              'code size analysis files to track down size issues in your app'),
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           RaisedButton(
             child: const Text('Open code size tool'),
