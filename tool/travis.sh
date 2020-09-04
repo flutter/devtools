@@ -64,13 +64,13 @@ else
 fi
 
 export PATH=`pwd`/flutter/bin:$PATH
-export PATH=`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
 export PATH=`pwd`/bin:$PATH
 
 flutter config --no-analytics
 flutter doctor
 
-# We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
+echo "which flutter: " `which flutter`
+# We should be using dart from ../flutter/bin/dart.
 echo "which dart: " `which dart`
 
 pushd packages/devtools_app
@@ -83,6 +83,7 @@ dart --disable-analytics
 # Print out the versions and ensure we can call Dart, Pub, and Flutter.
 dart --version
 flutter pub --version
+
 # Put the Flutter version into a variable.
 # First awk extracts "Flutter x.y.z-pre.a":
 #   -F '•'         uses the bullet as field separator
@@ -96,22 +97,16 @@ if [ "$BOT" = "main" ]; then
 
     # Provision our packages.
     flutter pub get
-    flutter pub global activate webdev
 
     # Verify that dart format has been run.
     echo "Checking dart format..."
-
-    if [[ $(dart format -n --set-exit-if-changed lib/ test/ web/) ]]; then
-        echo "Failed dart format check: run dart format lib/ test/ web/"
-        dart format -n --set-exit-if-changed lib/ test/ web/
-        exit 1
-    fi
+    dart format --output=none --set-exit-if-changed lib/ test/ web/
 
     # Make sure the app versions are in sync.
     repo_tool repo-check
 
     # Analyze the source.
-    flutter pub global activate tuneup && flutter pub global run tuneup check
+    dart analyze
 
     # Ensure we can build the app.
     flutter pub run build_runner build -o web:build --release
