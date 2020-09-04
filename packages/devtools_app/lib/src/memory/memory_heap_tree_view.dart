@@ -343,7 +343,9 @@ class HeapTreeViewState extends State<HeapTree>
                 ? 'Graphing...'
                 : _isSnapshotGrouping
                     ? 'Grouping...'
-                    : _isSnapshotComplete ? 'Done' : '...'),
+                    : _isSnapshotComplete
+                        ? 'Done'
+                        : '...'),
       ]);
     } else if (controller.snapshotByLibraryData != null ||
         controller.monitorAllocations.isNotEmpty) {
@@ -363,8 +365,7 @@ class HeapTreeViewState extends State<HeapTree>
             _buildSnapshotControls(textTheme),
             const Expanded(child: SizedBox(width: defaultSpacing)),
             // TODO(peterdjlee): Implement filter and search functionality for treemap.
-            if (!controller.showTreemap.value)
-              _buildSearchFilterControls(),
+            if (!controller.showTreemap.value) _buildSearchFilterControls(),
           ],
         ),
         const SizedBox(height: denseRowSpacing),
@@ -394,8 +395,7 @@ class HeapTreeViewState extends State<HeapTree>
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Expanded(child: snapshotDisplay),
-        if (hasDetails)
-          const SizedBox(width: defaultSpacing),
+        if (hasDetails) const SizedBox(width: defaultSpacing),
         // TODO(terry): Need better focus handling between 2 tables & up/down
         //              arrows in the right-side field instance view table.
         rightSideTable,
