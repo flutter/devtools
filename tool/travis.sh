@@ -97,7 +97,6 @@ if [ "$BOT" = "main" ]; then
 
     # Provision our packages.
     flutter pub get
-    flutter pub global activate webdev
 
     # Verify that dart format has been run.
     echo "Checking formatting..."
