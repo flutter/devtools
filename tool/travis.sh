@@ -111,7 +111,7 @@ if [ "$BOT" = "main" ]; then
     repo_tool repo-check
 
     # Analyze the source.
-    flutter pub global activate tuneup && flutter pub global run tuneup check
+    dart analyze --fatal-infos
 
     # Ensure we can build the app.
     flutter pub run build_runner build -o web:build --release
