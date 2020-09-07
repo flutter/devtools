@@ -40,7 +40,6 @@ class DevToolsServerDriver {
       try {
         return jsonDecode(line) as Map<String, dynamic>;
       } catch (e) {
-        print('item not json: "$line"');
         return null;
       }
     }).where((item) => item != null);
