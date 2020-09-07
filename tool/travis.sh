@@ -100,8 +100,8 @@ if [ "$BOT" = "main" ]; then
 
     # Verify that dart format has been run.
     echo "Checking formatting..."
-
-    dart format --output=none --set-exit-if-changed .
+    # Here, we use the dart instance from the flutter sdk.
+    $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
 
     # Make sure the app versions are in sync.
     repo_tool repo-check
