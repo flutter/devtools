@@ -18,7 +18,7 @@ import '../support/utils.dart';
 
 const bool verboseTesting = false;
 
-WebdevFixture webdevFixture;
+WebBuildFixture webBuildFixture;
 BrowserManager browserManager;
 
 Future<void> waitFor(
@@ -278,10 +278,10 @@ class AppError {
   String toString() => '$message\n$stackTrace';
 }
 
-class WebdevFixture {
-  WebdevFixture._(this.process, this.url, this.verbose);
+class WebBuildFixture {
+  WebBuildFixture._(this.process, this.url, this.verbose);
 
-  static Future<WebdevFixture> serve({
+  static Future<WebBuildFixture> serve({
     bool release = false,
     bool verbose = false,
   }) async {
@@ -335,7 +335,7 @@ class WebdevFixture {
 
     await delay();
 
-    return WebdevFixture._(process, url, verbose);
+    return WebBuildFixture._(process, url, verbose);
   }
 
   static Future<void> build({

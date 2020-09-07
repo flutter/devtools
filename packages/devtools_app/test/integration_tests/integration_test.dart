@@ -23,14 +23,14 @@ void main() {
         final bool testInReleaseMode =
             Platform.environment['WEBDEV_RELEASE'] == 'true';
 
-        webdevFixture = await WebdevFixture.serve(
+        webBuildFixture = await WebBuildFixture.serve(
             release: testInReleaseMode, verbose: true);
         browserManager = await BrowserManager.create();
       });
 
       tearDownAll(() async {
         await browserManager?.teardown();
-        await webdevFixture?.teardown();
+        await webBuildFixture?.teardown();
       });
 
       group('app', appTests, skip: true);

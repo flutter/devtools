@@ -25,7 +25,7 @@ void debuggingTests() {
     appFixture = await CliAppFixture.create('test/fixtures/debugging_app.dart');
 
     final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
@@ -53,7 +53,7 @@ void debuggingTests() {
         CliAppFixture.parseBreakpointLines(source);
 
     final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
@@ -121,7 +121,7 @@ void debuggingTests() {
     final List<int> steppingLines = CliAppFixture.parseSteppingLines(source);
 
     final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
@@ -199,7 +199,7 @@ void debuggingTests() {
     final int exceptionLine = CliAppFixture.parseExceptionLines(source).first;
 
     final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
@@ -245,7 +245,7 @@ void debuggingTests() {
     appFixture = await CliAppFixture.create(
         'test/fixtures/color_console_output_app.dart');
 
-    final tools = DevtoolsManager(tabInstance, webdevFixture.baseUri);
+    final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
@@ -288,7 +288,7 @@ void debuggingTests() {
     appFixture = await CliAppFixture.create('test/fixtures/debugging_app.dart');
 
     final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 

@@ -23,7 +23,7 @@ void appTests() {
 
   test('can switch pages', () async {
     final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('logging');
 
@@ -33,9 +33,9 @@ void appTests() {
 
   test('connect dialog displays', () async {
     // start with no port
-    final Uri baseAppUri = webdevFixture.baseUri.resolve('index.html');
+    final Uri baseAppUri = webBuildFixture.baseUri.resolve('index.html');
     final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(
       appFixture,
       overrideUri: baseAppUri,

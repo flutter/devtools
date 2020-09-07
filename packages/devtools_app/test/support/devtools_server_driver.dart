@@ -11,9 +11,12 @@ import 'chrome.dart';
 const verbose = true;
 
 class DevToolsServerDriver {
-  DevToolsServerDriver._(this._process, this._stdin, Stream<String> _stdout,
-      Stream<String> _stderr)
-      : stdout = _convertToMapStream(_stdout),
+  DevToolsServerDriver._(
+    this._process,
+    this._stdin,
+    Stream<String> _stdout,
+    Stream<String> _stderr,
+  )   : stdout = _convertToMapStream(_stdout),
         stderr = _stderr.map((line) {
           _trace('<== STDERR $line');
           return line;
@@ -58,6 +61,16 @@ class DevToolsServerDriver {
     int tryPorts,
     List<String> additionalArgs = const [],
   }) async {
+    // Here, we call the 'dart' command once, in order to ensure that it's not
+    // in use from elsewhere.
+    // TODO: file a bug about this - the 'flutter/bin/dart' script should not
+    // generally print "Waiting for another flutter command to release the
+    // startup lock..."
+    final Stopwatch timer = Stopwatch()..start();
+    final ProcessResult result = await Process.run('dart', ['--version']);
+    print('dart --version ran in ${timer.elapsed}.');
+    print(result.stdout);
+
     // These tests assume that the devtools package is present in a sibling
     // directory of the devtools_app package.
     final args = [

@@ -23,7 +23,7 @@ void loggingTests() {
 
   test('displays log data', () async {
     final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('logging');
 
@@ -43,7 +43,7 @@ void loggingTests() {
 
   test('log screen postpones write when offscreen', () async {
     final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('logging');
 

@@ -45,7 +45,7 @@ void main() {
       Directory('build').deleteSync(recursive: true);
     }
     // Build the app, as the server can't start without the build output.
-    await WebdevFixture.build(verbose: true);
+    await WebBuildFixture.build(verbose: true);
 
     // The devtools package build directory needs to reflect the latest
     // devtools_app package contents.
