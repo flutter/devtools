@@ -99,13 +99,9 @@ if [ "$BOT" = "main" ]; then
     flutter pub global activate webdev
 
     # Verify that dart format has been run.
-    echo "Checking dart format..."
+    echo "Checking formatting..."
 
-    if [[ $(dart format -n --set-exit-if-changed lib/ test/ web/) ]]; then
-        echo "Failed dart format check: run dart format lib/ test/ web/"
-        dart format -n --set-exit-if-changed lib/ test/ web/
-        exit 1
-    fi
+    dart format --output=none --set-exit-if-changed .
 
     # Make sure the app versions are in sync.
     repo_tool repo-check

@@ -411,8 +411,9 @@ class MemoryController extends DisposableController
   }
 
   final _androidChartVisibleNotifier = ValueNotifier<bool>(false);
-  
-  ValueListenable get androidChartVisibleNotifier => _androidChartVisibleNotifier;
+
+  ValueListenable get androidChartVisibleNotifier =>
+      _androidChartVisibleNotifier;
 
   bool get isAndroidChartVisible => _androidChartVisibleNotifier.value;
 
