@@ -16,55 +16,55 @@ class LayoutExplorerSerializationDelegate
     int subtreeDepth = 1,
     @required WidgetInspectorService service,
   }) : super(
-    groupName: groupName,
-    subtreeDepth: subtreeDepth,
-    service: service,
-    summaryTree: true,
-    addAdditionalPropertiesCallback: (node, delegate) {
-      final Map<String, Object> additionalJson = <String, Object>{};
-      final Object value = node.value;
-      if (value is Element) {
-        final renderObject = value.renderObject;
-        additionalJson['renderObject'] =
-            renderObject.toDiagnosticsNode()?.toJsonMap(
-              delegate.copyWith(
-                subtreeDepth: 0,
-                includeProperties: true,
-              ),
-            );
-        // ignore: invalid_use_of_protected_member
-        final Constraints constraints = renderObject.constraints;
-        if (constraints != null) {
-          final Map<String, Object> constraintsProperty =
-          <String, Object>{
-            'type': constraints.runtimeType.toString(),
-            'description': constraints.toString(),
-          };
-          if (constraints is BoxConstraints) {
-            constraintsProperty.addAll(<String, Object>{
-              'minWidth': constraints.minWidth.toString(),
-              'minHeight': constraints.minHeight.toString(),
-              'maxWidth': constraints.maxWidth.toString(),
-              'maxHeight': constraints.maxHeight.toString(),
-            });
-          }
-          additionalJson['constraints'] = constraintsProperty;
-        }
-        if (renderObject is RenderBox) {
-          additionalJson['size'] = <String, Object>{
-            'width': renderObject.size.width.toString(),
-            'height': renderObject.size.height.toString(),
-          };
+          groupName: groupName,
+          subtreeDepth: subtreeDepth,
+          service: service,
+          summaryTree: true,
+          addAdditionalPropertiesCallback: (node, delegate) {
+            final Map<String, Object> additionalJson = <String, Object>{};
+            final Object value = node.value;
+            if (value is Element) {
+              final renderObject = value.renderObject;
+              additionalJson['renderObject'] =
+                  renderObject.toDiagnosticsNode()?.toJsonMap(
+                        delegate.copyWith(
+                          subtreeDepth: 0,
+                          includeProperties: true,
+                        ),
+                      );
+              // ignore: invalid_use_of_protected_member
+              final Constraints constraints = renderObject.constraints;
+              if (constraints != null) {
+                final Map<String, Object> constraintsProperty =
+                    <String, Object>{
+                  'type': constraints.runtimeType.toString(),
+                  'description': constraints.toString(),
+                };
+                if (constraints is BoxConstraints) {
+                  constraintsProperty.addAll(<String, Object>{
+                    'minWidth': constraints.minWidth.toString(),
+                    'minHeight': constraints.minHeight.toString(),
+                    'maxWidth': constraints.maxWidth.toString(),
+                    'maxHeight': constraints.maxHeight.toString(),
+                  });
+                }
+                additionalJson['constraints'] = constraintsProperty;
+              }
+              if (renderObject is RenderBox) {
+                additionalJson['size'] = <String, Object>{
+                  'width': renderObject.size.width.toString(),
+                  'height': renderObject.size.height.toString(),
+                };
 
-          final ParentData parentData = renderObject.parentData;
-          if (parentData is FlexParentData) {
-            additionalJson['flexFactor'] = parentData.flex;
-            additionalJson['flexFit'] =
-                describeEnum(parentData.fit ?? FlexFit.tight);
-          }
-        }
-      }
-      return additionalJson;
-    },
-  );
+                final ParentData parentData = renderObject.parentData;
+                if (parentData is FlexParentData) {
+                  additionalJson['flexFactor'] = parentData.flex;
+                  additionalJson['flexFit'] =
+                      describeEnum(parentData.fit ?? FlexFit.tight);
+                }
+              }
+            }
+            return additionalJson;
+          },
+        );
 }

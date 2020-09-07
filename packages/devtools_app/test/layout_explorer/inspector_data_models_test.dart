@@ -244,7 +244,8 @@ void main() {
               tester: tester,
             ),
           );
-          expect(originalWidgetRenderProperties, mirroredWidgetRenderProperties);
+          expect(
+              originalWidgetRenderProperties, mirroredWidgetRenderProperties);
         }
       });
     });

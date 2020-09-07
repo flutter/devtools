@@ -73,8 +73,10 @@ const knowClassesToAnalyzeForImages = <WildcardMatch, List<String>>{
 
   // Anything that exactly matches:
   WildcardMatch.exact: [
-    '_Int32List', // 32-bit devices e.g., emulators, Pixel 2, raw images as Int32List.
-    '_Int64List', // 64-bit devices e.g., Pixel 3 XL, raw images as Int64List.
+    '_Int32List',
+    // 32-bit devices e.g., emulators, Pixel 2, raw images as Int32List.
+    '_Int64List',
+    // 64-bit devices e.g., Pixel 3 XL, raw images as Int64List.
     'FrameInfos',
   ],
 
@@ -333,18 +335,20 @@ class HeapTreeViewState extends State<HeapTree>
     final textTheme = Theme.of(context).textTheme;
 
     if (_isSnapshotRunning) {
-      snapshotDisplay = Column(children: [
-        const SizedBox(height: 50.0),
-        snapshotDisplay = const CircularProgressIndicator(),
-        const SizedBox(height: denseSpacing),
-        Text(_isSnapshotStreaming
-            ? 'Processing...'
-            : _isSnapshotGraphing
-                ? 'Graphing...'
-                : _isSnapshotGrouping
-                    ? 'Grouping...'
-                    : _isSnapshotComplete ? 'Done' : '...'),
-      ]);
+      snapshotDisplay = Column(
+        children: [
+          const SizedBox(height: 50.0),
+          snapshotDisplay = const CircularProgressIndicator(),
+          const SizedBox(height: denseSpacing),
+          Text(_isSnapshotStreaming
+              ? 'Processing...'
+              : _isSnapshotGraphing
+                  ? 'Graphing...'
+                  : _isSnapshotGrouping
+                      ? 'Grouping...'
+                      : _isSnapshotComplete ? 'Done' : '...'),
+        ],
+      );
     } else if (controller.snapshotByLibraryData != null ||
         controller.monitorAllocations.isNotEmpty) {
       if (controller.showTreemap.value) {
@@ -363,8 +367,7 @@ class HeapTreeViewState extends State<HeapTree>
             _buildSnapshotControls(textTheme),
             const Expanded(child: SizedBox(width: defaultSpacing)),
             // TODO(peterdjlee): Implement filter and search functionality for treemap.
-            if (!controller.showTreemap.value)
-              _buildSearchFilterControls(),
+            if (!controller.showTreemap.value) _buildSearchFilterControls(),
           ],
         ),
         const SizedBox(height: denseRowSpacing),
@@ -394,8 +397,7 @@ class HeapTreeViewState extends State<HeapTree>
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Expanded(child: snapshotDisplay),
-        if (hasDetails)
-          const SizedBox(width: defaultSpacing),
+        if (hasDetails) const SizedBox(width: defaultSpacing),
         // TODO(terry): Need better focus handling between 2 tables & up/down
         //              arrows in the right-side field instance view table.
         rightSideTable,
