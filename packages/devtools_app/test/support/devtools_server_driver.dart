@@ -11,12 +11,12 @@ import 'chrome.dart';
 const verbose = true;
 
 class DevToolsServerDriver {
-  DevToolsServerDriver._(this._process, this._stdin, Stream<String> _stdout,
-      Stream<String> _stderr)
-      : stdout = _stdout.map((line) {
-          _trace('<== $line');
-          return line;
-        }).map((line) => jsonDecode(line) as Map<String, dynamic>),
+  DevToolsServerDriver._(
+    this._process,
+    this._stdin,
+    Stream<String> _stdout,
+    Stream<String> _stderr,
+  )   : stdout = _convertToMapStream(_stdout),
         stderr = _stderr.map((line) {
           _trace('<== STDERR $line');
           return line;
@@ -31,6 +31,21 @@ class DevToolsServerDriver {
     final line = jsonEncode(request);
     _trace('==> $line');
     _stdin.writeln(line);
+  }
+
+  static Stream<Map<String, dynamic>> _convertToMapStream(
+    Stream<String> stream,
+  ) {
+    return stream.map((line) {
+      _trace('<== $line');
+      return line;
+    }).map((line) {
+      try {
+        return jsonDecode(line) as Map<String, dynamic>;
+      } catch (e) {
+        return null;
+      }
+    }).where((item) => item != null);
   }
 
   static void _trace(String message) {
@@ -66,9 +81,10 @@ class DevToolsServerDriver {
     final Process process = await Process.start('dart', args);
 
     return DevToolsServerDriver._(
-        process,
-        process.stdin,
-        process.stdout.transform(utf8.decoder).transform(const LineSplitter()),
-        process.stderr.transform(utf8.decoder).transform(const LineSplitter()));
+      process,
+      process.stdin,
+      process.stdout.transform(utf8.decoder).transform(const LineSplitter()),
+      process.stderr.transform(utf8.decoder).transform(const LineSplitter()),
+    );
   }
 }
