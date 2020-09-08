@@ -4,10 +4,10 @@ set -e
 
 REPO_DIR=$(dirname $(dirname $BASH_SOURCE))
 
-# Potentially run pub get
+# Potentially run flutter pub get
 if [[ "$REPO_DIR/tool/pubspec.yaml" -nt "$REPO_DIR/tool/.packages" ]]; then
-  echo Running pub get...
-  (cd $REPO_DIR/tool; pub get)
+  echo Running flutter pub get...
+  (cd $REPO_DIR/tool; flutter pub get)
 fi
 
 dart $REPO_DIR/tool/bin/repo_tool.dart "$@"

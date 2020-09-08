@@ -1,65 +1,38 @@
-os:
-  - linux
-  - osx
-  # TODO(devoncarew): Skip testing on windows bots to work around a travis regression.
-  #- windows
-
-language: dart
-dart:
-  - dev
-# Exclude stable for now as we depend on Flutter features not availabe on
-# stable.
-#  - stable
+language: minimal
 addons:
   chrome: stable
+os:
+  - linux
+  # TODO(devoncarew): The macos bots are generally failing; we should determine
+  # what we need to do to get them back on-line.
+  #- osx
+  # TODO(dantup): Skip on windows until we understand/fix Flutter crashing
+  # with "failed to delete build/assets: file is locked by another process".
+  #- windows
 
 matrix:
   fast_finish: true
-
-  exclude:
-    # Skip main bot for Stable build since it does formatting/building checks;
-    # - Formatting will fail on old SDK if the formatter changed in latest.
-    # - Builds are always done by us on latest SDKs so we don't need to ensure
-    #     we can build on an older SDK.
-    - dart: stable
-      env: BOT=main
-
-    # TODO(https://github.com/flutter/devtools/issues/1161): Skip test bots for dart
-    # stable on Linux. They are failing with incompatible kernel versions right now.
-    - os: linux
-      dart: stable
-      env: BOT=test_ddc
-    - os: linux
-      dart: stable
-      env: BOT=test_dart2js
-
-    # TODO(dantup): Skip Flutter builds until we understand/fix Flutter crashing
-    # with "failed to delete build/assets: file is locked by another process".
-    - os: windows
-      env:
-        - BOT=flutter_sdk_tests
-        - BOT=test_ddc
-        - BOT=test_dart2js
-        - BOT=integration_ddc
-        - BOT=integration_dart2js
     
-  include:
-    - dart: dev
-      env: BOT=packages
   # Allow windows bots to fail until we can make the windows tests less flaky.
   # https://github.com/flutter/devtools/issues/963
   allow_failures:
     - os: windows
     - os: osx
+    - env: BOT=main CHANNEL=master
 
 env:
-  - BOT=main
-  - BOT=test_ddc PLATFORM=vm
-  - BOT=test_ddc PLATFORM=chrome
-  - BOT=test_dart2js PLATFORM=vm
-  - BOT=test_dart2js PLATFORM=chrome
-  - BOT=integration_ddc
-  - BOT=integration_dart2js
+  global:
+    - CHANNEL=dev
+  jobs:
+    - BOT=main
+    - BOT=packages
+    - BOT=test_ddc            PLATFORM=vm
+    - BOT=test_ddc            PLATFORM=chrome
+    - BOT=test_dart2js        PLATFORM=vm
+    - BOT=test_dart2js        PLATFORM=chrome
+    - BOT=integration_ddc
+    - BOT=integration_dart2js
+    - BOT=main                CHANNEL=master
 
 script: ./tool/travis.sh
 
@@ -70,8 +43,8 @@ script: ./tool/travis.sh
 # branches:
 #   only: [master]
 
-#cache:
-#  directories:
-#  - $HOME/.pub-cache # macOS / Linux
-#  - $APPDATA/Roaming/Pub/Cache # Windows
-#  - packages/devtools_app/.dart_tool/build
+cache:
+ directories:
+ - $HOME/.pub-cache # macOS / Linux
+ - $APPDATA/Roaming/Pub/Cache # Windows
+ - packages/devtools_app/.dart_tool/build
