@@ -172,8 +172,12 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField> {
   }
 
   Future<String> _getBestStringValue(InstanceRef response) async {
+    // Return the string value iff present and not truncated.
+    // Note: [valueAsStringIsTruncated] is actually a tri-state:
+    // string value is not truncated iff [valueAsStringIsTruncated]
+    // is null or [valueAsStringIsTruncated] is false.
     if (response.valueAsString != null &&
-        response.valueAsStringIsTruncated == false) {
+        response.valueAsStringIsTruncated != true) {
       return response.valueAsString;
     }
 
