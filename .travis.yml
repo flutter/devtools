@@ -1,4 +1,5 @@
 language: minimal
+dist: bionic
 addons:
   chrome: stable
 os:
@@ -19,6 +20,8 @@ matrix:
     - os: windows
     - os: osx
     - env: BOT=main CHANNEL=master
+    - env: BOT=main CHANNEL=beta
+    - env: BOT=main CHANNEL=stable
 
 env:
   global:
@@ -32,6 +35,8 @@ env:
     - BOT=test_dart2js        PLATFORM=chrome
     - BOT=integration_ddc
     - BOT=integration_dart2js
+    - BOT=main                CHANNEL=stable
+    - BOT=main                CHANNEL=beta
     - BOT=main                CHANNEL=master
 
 script: ./tool/travis.sh
