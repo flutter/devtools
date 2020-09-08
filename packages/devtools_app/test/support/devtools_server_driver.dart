@@ -68,8 +68,8 @@ class DevToolsServerDriver {
     // startup lock..."
     final Stopwatch timer = Stopwatch()..start();
     final ProcessResult result = await Process.run('dart', ['--version']);
-    print('dart --version ran in ${timer.elapsed}.');
-    print(result.stdout);
+    print('dart --version (${timer.elapsedMicroseconds / 1000}ms):');
+    print(_resultToString(result));
 
     // These tests assume that the devtools package is present in a sibling
     // directory of the devtools_app package.
@@ -97,4 +97,15 @@ class DevToolsServerDriver {
       process.stderr.transform(utf8.decoder).transform(const LineSplitter()),
     );
   }
+}
+
+String _resultToString(ProcessResult result) {
+  final StringBuffer buf = StringBuffer();
+  if (result.stdout.isNotEmpty) {
+    buf.writeln('  ${result.stdout.trim()}');
+  }
+  if (result.stderr.isNotEmpty) {
+    buf.writeln('  ${result.stderr.trim()}');
+  }
+  return buf.toString();
 }
