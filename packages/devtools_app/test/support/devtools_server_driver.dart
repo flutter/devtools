@@ -61,16 +61,6 @@ class DevToolsServerDriver {
     int tryPorts,
     List<String> additionalArgs = const [],
   }) async {
-    // Here, we call the 'dart' command once, in order to ensure that it's not
-    // in use from elsewhere.
-    // TODO: file a bug about this - the 'flutter/bin/dart' script should not
-    // generally print "Waiting for another flutter command to release the
-    // startup lock..."
-    final Stopwatch timer = Stopwatch()..start();
-    final ProcessResult result = await Process.run('dart', ['--version']);
-    print('dart --version (${timer.elapsedMicroseconds / 1000}ms):');
-    print(_resultToString(result));
-
     // These tests assume that the devtools package is present in a sibling
     // directory of the devtools_app package.
     final args = [
@@ -97,15 +87,4 @@ class DevToolsServerDriver {
       process.stderr.transform(utf8.decoder).transform(const LineSplitter()),
     );
   }
-}
-
-String _resultToString(ProcessResult result) {
-  final StringBuffer buf = StringBuffer();
-  if (result.stdout.isNotEmpty) {
-    buf.writeln('  ${result.stdout.trim()}');
-  }
-  if (result.stderr.isNotEmpty) {
-    buf.writeln('  ${result.stderr.trim()}');
-  }
-  return buf.toString();
 }

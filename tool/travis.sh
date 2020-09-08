@@ -64,12 +64,16 @@ else
     export DEVTOOLS_GOLDENS_SUFFIX=""
 fi
 
-export PATH=`pwd`/flutter/bin:`pwd`/bin:$PATH
+# Look in the dart bin dir first, then the flutter one, then the one for
+# the devtools repo.
+# We don't use the dart script from flutter/bin as that script can and
+# does print 'Waiting for another flutter command...' at inopportune times.
+export PATH=`pwd`/flutter/bin/cache/dart-sdk/bin:`pwd`/flutter/bin:`pwd`/bin:$PATH
 
 flutter config --no-analytics
 flutter doctor
 
-# We should be using dart from ../flutter/bin/dart.
+# We should be using dart from ../flutter/bin/cache/dart-sdk/dart.
 echo "which flutter: " `which flutter`
 echo "which dart: " `which dart`
 
