@@ -1,5 +1,5 @@
 language: minimal
-dist: bionic
+dist: xenial
 addons:
   chrome: stable
 os:
