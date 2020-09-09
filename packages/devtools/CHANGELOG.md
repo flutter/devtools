@@ -1,3 +1,7 @@
+## 0.9.2-dev.1
+* Fix a bug causing extra evaluation for primitive values
+* Fix an issue handling google3: paths [#2288](https://github.com/flutter/devtools/pull/2288)
+
 ## 0.9.1
 * Add opt-in for feature usage reporting
 * Add Code Size Debugging Tools to DevTools
