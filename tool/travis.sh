@@ -7,15 +7,16 @@
 # Fast fail the script on failures.
 set -ex
 
-# In GitBash on Windows, we have to call pub.bat and flutter.bat so we alias
-# them in this script to call the correct one based on the OS.
-function pub {
-	if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-        command pub.bat "$@"
-    else
-        command pub "$@"
-    fi
-}
+if [[ $TRAVIS_OS_NAME == "windows" ]]; then
+    echo Installing Google Chrome Stable...
+    # Install Chrome via Chocolatey while `addons: chrome` doesn't seem to work on Windows yet
+    # https://travis-ci.community/t/installing-google-chrome-stable-but-i-cant-find-it-anywhere/2118
+    choco install googlechrome --acceptlicense --yes --no-progress --ignore-checksums
+fi
+
+
+# In GitBash on Windows, we have to call flutter.bat so we alias them in this
+# script to call the correct one based on the OS.
 function flutter {
 	if [[ $TRAVIS_OS_NAME == "windows" ]]; then
         command flutter.bat "$@"
@@ -24,50 +25,24 @@ function flutter {
     fi
 }
 
-# Some integration tests assume the devtools package is up to date and located
-# adjacent to the devtools_app package.
-pushd packages/devtools
-    # We want to make sure that devtools is retrievable with regular pub.
-    pub get
-    # Only package:devtools and package:devtools_server should be built with
-    # the pub tool. All other devtools packages and their tests now run on
-    # the flutter tool, so all other invocations of pub in this script should
-    # call 'flutter pub' instead of just 'pub'.
-popd
-
-# Add globally activated packages to the path.
-if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-    export PATH=$PATH:$APPDATA/Roaming/Pub/Cache/bin
-else
-    export PATH=$PATH:~/.pub-cache/bin
-fi
-
-if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-    echo Installing Google Chrome Stable...
-    # Install Chrome via Chocolatey while `addons: chrome` doesn't seem to work on Windows yet
-    # https://travis-ci.community/t/installing-google-chrome-stable-but-i-cant-find-it-anywhere/2118
-    choco install googlechrome --acceptlicense --yes --no-progress --ignore-checksums
-fi
-
 # Get Flutter.
-if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
+if [ "$CHANNEL" = "stable" ]; then
     echo "Cloning stable Flutter branch"
     git clone https://github.com/flutter/flutter.git --branch stable ./flutter
 
     # Set the suffix so we use stable goldens.
     export DEVTOOLS_GOLDENS_SUFFIX="_stable"
 else
-    echo "Cloning the Flutter dev branch"
-    git clone https://github.com/flutter/flutter.git --branch dev ./flutter
-    # Set the suffix so we use the master goldens
-    # TODO(devoncarew): Support dev goldens.
+    echo "Cloning the Flutter $CHANNEL branch"
+    git clone https://github.com/flutter/flutter.git --branch $CHANNEL ./flutter
+    # Set the suffix so we use the non-stable goldens
     export DEVTOOLS_GOLDENS_SUFFIX=""
 fi
 
-# Look in the dart bin dir first, then the flutter one, then the one for
-# the devtools repo.
-# We don't use the dart script from flutter/bin as that script can and
-# does print 'Waiting for another flutter command...' at inopportune times.
+# Look in the dart bin dir first, then the flutter one, then the one for the
+# devtools repo. We don't use the dart script from flutter/bin as that script
+# can and does print 'Waiting for another flutter command...' at inopportune
+# times.
 export PATH=`pwd`/flutter/bin/cache/dart-sdk/bin:`pwd`/flutter/bin:`pwd`/bin:$PATH
 
 flutter config --no-analytics
