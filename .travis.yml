@@ -2,7 +2,6 @@ language: generic
 dist: focal
 addons:
   chrome: stable
-
 os:
   - linux
   # TODO(devoncarew): The macos bots are generally failing; we should determine
@@ -36,9 +35,9 @@ env:
     - BOT=test_dart2js        PLATFORM=chrome
     - BOT=integration_ddc
     - BOT=integration_dart2js
-    - BOT=main                CHANNEL=stable
-    - BOT=main                CHANNEL=beta
     - BOT=main                CHANNEL=master
+    - BOT=main                CHANNEL=beta
+    - BOT=main                CHANNEL=stable
 
 script: ./tool/travis.sh
 
