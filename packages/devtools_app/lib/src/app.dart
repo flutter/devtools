@@ -23,6 +23,7 @@ import 'dialogs.dart';
 import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'initializer.dart';
+import 'inspector/inspector_controller.dart';
 import 'inspector/inspector_screen.dart';
 import 'landing_screen.dart';
 import 'logging/logging_controller.dart';
@@ -527,7 +528,10 @@ class SettingsDialog extends StatelessWidget {
 /// Conditional screens can be added to this list, and they will automatically
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
 List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
-      const DevToolsScreen(InspectorScreen(), createController: null),
+      DevToolsScreen<InspectorSettingsController>(
+        const InspectorScreen(),
+        createController: () => InspectorSettingsController(),
+      ),
       DevToolsScreen<PerformanceController>(
         const PerformanceScreen(),
         createController: () => PerformanceController(),

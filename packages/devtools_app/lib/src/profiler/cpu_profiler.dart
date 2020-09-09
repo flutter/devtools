@@ -172,7 +172,7 @@ class _CpuProfilerState extends State<CpuProfiler>
       },
     );
     // TODO(kenz): make this order configurable.
-    return [bottomUp, callTree, cpuFlameChart ];
+    return [bottomUp, callTree, cpuFlameChart];
   }
 
   Widget _expandAllButton(Tab currentTab) {

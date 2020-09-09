@@ -10,7 +10,11 @@ import 'package:devtools_testing/support/flutter_test_driver.dart'
     show FlutterRunConfiguration;
 import 'package:devtools_testing/support/flutter_test_environment.dart';
 
+import 'support/utils.dart';
+
 void main() async {
+  initializeLiveTestWidgetsFlutterBindingWithAssets();
+
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+// ignore: unused_import
+import 'src/other_classes.dart';
+
 void main() => runApp(MyApp());
 
 bool topLevelFieldForTest = false;

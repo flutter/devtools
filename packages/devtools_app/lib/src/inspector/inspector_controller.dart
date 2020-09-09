@@ -52,10 +52,17 @@ TextStyle textStyleForLevel(DiagnosticLevel level, ColorScheme colorScheme) {
   }
 }
 
+class InspectorSettingsController {
+  /// Whether to only show user defined widgets in the summary tree.
+  final ValueNotifier<bool> showOnlyUserDefined = ValueNotifier(false);
+
+  /// Whether to automatically show all widgets in the current build method even
+  /// if they would otherwise be filtered.
+  final ValueNotifier<bool> expandSelectedBuildMethod = ValueNotifier(true);
+}
+
 /// This class is based on the InspectorPanel class from the Flutter IntelliJ
 /// plugin with some refactors to make it more of a true controller than a view.
-///
-/// No changes to this class are allowed to pull in dependencies on dart:html.
 class InspectorController extends DisposableController
     with AutoDisposeControllerMixin
     implements InspectorServiceClient {
@@ -97,8 +104,13 @@ class InspectorController extends DisposableController
 
     flutterIsolateSubscription = serviceManager.isolateManager
         .getSelectedIsolate((IsolateRef flutterIsolate) {
-      // Any time we have a new isolate it means the previous isolate stopped.
-      onIsolateStopped();
+      // TODO(jacobr): listen for real isolate stopped events.
+      // Only send an isolate stopped event if there was a previous isolate or
+      // the isolate has actually changed.
+      if (_activeIsolate != null && _activeIsolate != flutterIsolate) {
+        onIsolateStopped();
+      }
+      _activeIsolate = flutterIsolate;
     });
 
     _checkForExpandCollapseSupport();
@@ -180,6 +192,7 @@ class InspectorController extends DisposableController
   final InspectorService inspectorService;
 
   StreamSubscription<IsolateRef> flutterIsolateSubscription;
+  IsolateRef _activeIsolate;
 
   bool _disposed = false;
 
@@ -362,15 +375,23 @@ class InspectorController extends DisposableController
     maybeLoadUI();
   }
 
+  List<String> _rootDirectories;
+  List<String> get rootDirectories =>
+      _rootDirectories ?? parent.rootDirectories;
+
   Future<void> maybeLoadUI() async {
+    if (parent != null) {
+      // The parent controller will drive loading the UI.
+      return;
+    }
     if (!visibleToUser || !isActive) {
       return;
     }
 
     if (flutterAppFrameReady) {
+      _rootDirectories = await inspectorService.inferPubRootDirectoryIfNeeded();
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
-      await inspectorService.inferPubRootDirectoryIfNeeded();
       await updateSelectionFromService(firstFrame: true);
     } else {
       final ready = await inspectorService.isWidgetTreeReady();
@@ -425,9 +446,6 @@ class InspectorController extends DisposableController
   }
 
   void clearValueToInspectorTreeNodeMapping() {
-    if (parent != null) {
-      valueToInspectorTreeNode.keys.forEach(parent.maybeUpdateValueUI);
-    }
     valueToInspectorTreeNode.clear();
   }
 
@@ -479,7 +497,7 @@ class InspectorController extends DisposableController
       RemoteDiagnosticsNode detailsSelection, bool setSubtreeRoot) {
     newSelection ??= selectedDiagnostic;
     setSelectedNode(findMatchingInspectorTreeNode(newSelection));
-    syncSelectionHelper(setSubtreeRoot, detailsSelection);
+    syncSelectionHelper(setSubtreeRoot, newSelection, detailsSelection);
 
     if (details != null) {
       if (subtreeRoot != null && getSubtreeRootNode() == null) {
@@ -572,6 +590,11 @@ class InspectorController extends DisposableController
   }
 
   Future<void> updateSelectionFromService({@required bool firstFrame}) async {
+    if (parent != null) {
+      // If we have a parent controller we should wait for the parent to update
+      // our selection rather than updating it our self.
+      return;
+    }
     if (_selectionGroups == null) {
       // Already disposed. Ignore this requested to update selection.
       return;
@@ -611,7 +634,7 @@ class InspectorController extends DisposableController
       }
 
       if (!firstFrame &&
-          detailsSelection?.valueRef == details.selectedDiagnostic?.valueRef &&
+          detailsSelection?.valueRef == details?.selectedDiagnostic?.valueRef &&
           newSelection?.valueRef == selectedDiagnostic?.valueRef) {
         // No need to change the selection as it didn't actually change.
         _selectionGroups.cancelNext();
@@ -684,11 +707,6 @@ class InspectorController extends DisposableController
     if (newSelection == selectedNode) {
       return;
     }
-    if (selectedNode != null) {
-      if (!detailsSubtree) {
-        inspectorTree.nodeChanged(selectedNode.parent);
-      }
-    }
 
     selectedNode = newSelection;
 
@@ -729,7 +747,7 @@ class InspectorController extends DisposableController
           details != null &&
           selectedDiagnostic != null &&
           !details.hasDiagnosticsValue(selectedDiagnostic.valueRef);
-      syncSelectionHelper(maybeReroot, null);
+      syncSelectionHelper(maybeReroot, selectedDiagnostic, selectedDiagnostic);
       if (!maybeReroot) {
         if (isSummaryTree && details != null) {
           details.selectAndShowNode(selectedDiagnostic);
@@ -755,19 +773,15 @@ class InspectorController extends DisposableController
     return null;
   }
 
-  void syncSelectionHelper(
-      bool maybeRerootDetailsTree, RemoteDiagnosticsNode detailsSelection) {
-    if (!detailsSubtree && selectedNode != null) {
-      inspectorTree.nodeChanged(selectedNode.parent);
-    }
-    final RemoteDiagnosticsNode diagnostic = selectedDiagnostic;
-    if (diagnostic != null) {
-      if (diagnostic.isCreatedByLocalProject) {
-        _navigateTo(diagnostic);
+  void syncSelectionHelper(bool maybeRerootDetailsTree,
+      RemoteDiagnosticsNode selection, RemoteDiagnosticsNode detailsSelection) {
+    if (selection != null) {
+      if (selection.isCreatedByLocalProject) {
+        _navigateTo(selection);
       }
     }
     if (detailsSubtree || details == null) {
-      if (diagnostic != null) {
+      if (selection != null) {
         var toSelect = selectedNode;
 
         while (toSelect != null && toSelect.diagnostic.isProperty) {
@@ -782,10 +796,9 @@ class InspectorController extends DisposableController
     }
 
     if (maybeRerootDetailsTree) {
-      showDetailSubtrees(diagnostic, detailsSelection);
-    } else if (diagnostic != null) {
+      showDetailSubtrees(selection, detailsSelection);
+    } else if (selection != null) {
       // We can't rely on the details tree to update the selection on the server in this case.
-      final selection = detailsSelection ?? diagnostic;
       selection.setSelectionInspector(true);
     }
   }
@@ -831,7 +844,6 @@ class InspectorController extends DisposableController
     if (valueRef.id != null && !diagnosticsNode.isProperty) {
       valueToInspectorTreeNode[valueRef] = node;
     }
-    parent?.maybeUpdateValueUI(valueRef);
   }
 
   Future<void> expandAllNodesInDetailsTree() async {

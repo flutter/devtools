@@ -17,7 +17,6 @@ import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import '../../inspector_service.dart';
-import '../../inspector_service_flutter_extension.dart';
 import 'arrow.dart';
 import 'free_space.dart';
 import 'overflow_indicator_painter.dart';
