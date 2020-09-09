@@ -56,14 +56,14 @@ packages:
       path: "../devtools_server"
       relative: true
     source: path
-    version: "0.9.1"
+    version: "0.9.2-dev.1"
   devtools_shared:
     dependency: "direct main"
     description:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.1"
+    version: "0.9.2-dev.1"
   http:
     dependency: "direct main"
     description:
@@ -105,7 +105,7 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.2"
+    version: "1.2.3"
   mime:
     dependency: transitive
     description:
@@ -210,7 +210,7 @@ packages:
       name: uuid
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.0"
+    version: "2.2.2"
   vm_service:
     dependency: transitive
     description:
