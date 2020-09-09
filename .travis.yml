@@ -1,7 +1,8 @@
-language: minimal
-dist: xenial
+language: generic
+dist: focal
 addons:
   chrome: stable
+
 os:
   - linux
   # TODO(devoncarew): The macos bots are generally failing; we should determine
