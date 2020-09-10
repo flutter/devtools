@@ -142,9 +142,17 @@ class CliAppFixture extends AppFixture {
     Isolate foundIsolate;
     await waitFor(() async {
       final vm = await serviceConnection.getVM();
-      final isolates = await Future.wait(
-        vm.isolates.map((ref) => serviceConnection.getIsolate(ref.id)),
-      );
+      final isolates = await Future.wait(vm.isolates.map(
+        (ref) => serviceConnection
+            .getIsolate(ref.id)
+            // Sometimes this getIsolate call will fail due to isolates returned
+            // by getVM() above exiting before we fetch them. It's not clear
+            // what these isolates are, but ignore them rather than crashing.
+            // If they happened to be the isolate we wanted, we'll hit the timeout
+            // and fail the test anyway.
+            .catchError((error) =>
+                print('getIsolate(${ref.id}) failed, skipping\n$error')),
+      ));
       foundIsolate = isolates.firstWhere(
         (isolate) =>
             isolate is Isolate && isolate.pauseEvent.kind == pauseEventKind,
