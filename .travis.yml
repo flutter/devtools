@@ -22,10 +22,6 @@ matrix:
     - env: BOT=main CHANNEL=master
     - env: BOT=main CHANNEL=beta
     - env: BOT=main CHANNEL=stable
-  # Allow integration tests to fail until we can make them less flaky.
-  # https://github.com/flutter/devtools/issues/2324
-    - env: BOT=integration_ddc
-    - env: BOT=integration_dart2js
 
 env:
   global:
