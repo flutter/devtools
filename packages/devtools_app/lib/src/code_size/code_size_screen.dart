@@ -37,7 +37,7 @@ class CodeSizeScreen extends Screen {
 
   static const snapshotTabKey = Key('Snapshot Tab');
   static const diffTabKey = Key('Diff Tab');
-  static const id = 'codeSize';
+  static const id = 'code-size';
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
