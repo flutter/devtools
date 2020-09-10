@@ -175,7 +175,7 @@ packages:
       name: coverage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.14.0"
+    version: "0.14.1"
   crypto:
     dependency: transitive
     description:
@@ -671,7 +671,7 @@ packages:
       name: test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.16.0-nullsafety.2"
+    version: "1.16.0-nullsafety.4"
   test_api:
     dependency: transitive
     description:
@@ -685,7 +685,7 @@ packages:
       name: test_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.12-nullsafety.2"
+    version: "0.3.12-nullsafety.4"
   timing:
     dependency: transitive
     description:
@@ -734,7 +734,7 @@ packages:
       name: url_launcher_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.3+1"
+    version: "0.1.3+2"
   usage:
     dependency: transitive
     description:
@@ -762,7 +762,7 @@ packages:
       name: vm_service
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.2.0"
+    version: "5.0.0+1"
   vm_snapshot_analysis:
     dependency: "direct main"
     description:
