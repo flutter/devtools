@@ -23,7 +23,7 @@ dependencies:
   shelf_static: ^0.2.8
   http_multi_server: ^2.2.0
   usage: ^3.4.1
-  vm_service: ^4.1.0
+  vm_service: ^5.0.0+1
 
 dependency_overrides:
 # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.

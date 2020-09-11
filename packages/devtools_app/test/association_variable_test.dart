@@ -34,7 +34,12 @@ void main() {
     });
     setGlobal(ServiceConnectionManager, manager);
     debuggerController = DebuggerController(initialSwitchToIsolate: false)
-      ..isolateRef = IsolateRef(id: '1', number: '2', name: 'main');
+      ..isolateRef = IsolateRef(
+        id: '1',
+        number: '2',
+        name: 'main',
+        isSystemIsolate: false,
+      );
   });
 
   test('Creates bound variables for Map with String key and Double value',
