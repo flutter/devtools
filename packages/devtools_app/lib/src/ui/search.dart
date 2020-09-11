@@ -22,6 +22,7 @@ mixin SearchControllerMixin<T> {
 
   set search(String value) {
     _searchNotifier.value = value;
+    refreshSearchMatches();
   }
 
   String get search => _searchNotifier.value;
@@ -29,6 +30,10 @@ mixin SearchControllerMixin<T> {
   final _searchMatches = ValueNotifier<List<T>>([]);
 
   ValueListenable<List<T>> get searchMatches => _searchMatches;
+
+  void refreshSearchMatches() {
+    updateMatches(matchesForSearch(_searchNotifier.value));
+  }
 
   void updateMatches(List<T> matches) {
     _searchMatches.value = matches;
@@ -76,6 +81,8 @@ mixin SearchControllerMixin<T> {
     assert(activeMatchIndex < searchMatches.value.length);
     _activeSearchMatch.value = searchMatches.value[activeMatchIndex];
   }
+
+  List<T> matchesForSearch(String search) => [];
 }
 
 mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {

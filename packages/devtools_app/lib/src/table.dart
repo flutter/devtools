@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
@@ -12,6 +13,8 @@ import 'table_data.dart';
 import 'theme.dart';
 import 'tree.dart';
 import 'trees.dart';
+import 'ui/colors.dart';
+import 'ui/search.dart';
 import 'utils.dart';
 
 // TODO(devoncarew): We need to render the selected row with a different
@@ -51,6 +54,8 @@ class FlatTable<T> extends StatefulWidget {
     @required this.sortColumn,
     @required this.sortDirection,
     this.onSortChanged,
+    this.searchMatchesNotifier,
+    this.activeSearchMatchNotifier,
   })  : assert(columns != null),
         assert(keyFactory != null),
         assert(data != null),
@@ -74,6 +79,10 @@ class FlatTable<T> extends StatefulWidget {
   final SortDirection sortDirection;
 
   final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
+
+  final ValueListenable<List<T>> searchMatchesNotifier;
+
+  final ValueListenable<T> activeSearchMatchNotifier;
 
   @override
   FlatTableState<T> createState() => FlatTableState<T>();
@@ -129,7 +138,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
         final columnWidths = _computeColumnWidths(constraints.maxWidth);
 
         return _Table<T>(
-          itemCount: data.length,
+          data: data,
           columns: widget.columns,
           columnWidths: columnWidths,
           autoScrollContent: widget.autoScrollContent,
@@ -137,6 +146,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
           sortColumn: widget.sortColumn,
           sortDirection: widget.sortDirection,
           onSortChanged: _sortDataAndUpdate,
+          activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
         );
       },
     );
@@ -157,6 +167,8 @@ class FlatTableState<T> extends State<FlatTable<T>>
       columns: widget.columns,
       columnWidths: columnWidths,
       backgroundColor: alternatingColorForIndexWithContext(index, context),
+      searchMatchesNotifier: widget.searchMatchesNotifier,
+      activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
     );
   }
 
@@ -433,8 +445,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   @override
   Widget build(BuildContext context) {
     return _Table<T>(
+      data: items,
       columns: widget.columns,
-      itemCount: items.length,
       columnWidths: columnWidths,
       rowBuilder: _buildRow,
       sortColumn: widget.sortColumn,
@@ -626,7 +638,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 class _Table<T> extends StatefulWidget {
   const _Table({
     Key key,
-    @required this.itemCount,
+    @required this.data,
     @required this.columns,
     @required this.columnWidths,
     @required this.rowBuilder,
@@ -637,9 +649,10 @@ class _Table<T> extends StatefulWidget {
     this.handleKeyEvent,
     this.autoScrollContent = false,
     this.selectionNotifier,
+    this.activeSearchMatchNotifier,
   }) : super(key: key);
 
-  final int itemCount;
+  final List<T> data;
 
   final bool autoScrollContent;
   final List<ColumnData<T>> columns;
@@ -651,6 +664,7 @@ class _Table<T> extends StatefulWidget {
   final FocusNode focusNode;
   final TableKeyEventHandler handleKeyEvent;
   final ValueNotifier<Selection<T>> selectionNotifier;
+  final ValueListenable<T> activeSearchMatchNotifier;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
@@ -665,6 +679,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   SortDirection sortDirection;
   ScrollController scrollController;
 
+  void Function() activeSearchListener;
+
   @override
   void initState() {
     super.initState();
@@ -673,6 +689,34 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     sortColumn = widget.sortColumn;
     sortDirection = widget.sortDirection;
     scrollController = ScrollController();
+
+    if (widget.activeSearchMatchNotifier != null) {
+      widget.activeSearchMatchNotifier
+          .addListener(activeSearchListener = _onActiveSearchChange);
+
+      // TODO(kenz): why isn't the listener firing when added via
+      // `addAutoDisploseListener`?
+      // addAutoDisposeListener(
+      //      widget.activeSearchMatchNotifier, _onActiveSearchChange);
+    }
+  }
+
+  void _onActiveSearchChange() async {
+    final activeSearch = widget.activeSearchMatchNotifier.value;
+    final index = widget.data.indexOf(activeSearch);
+
+    if (index != -1) {
+      final y = index * defaultRowHeight;
+      final indexInView = y > scrollController.offset &&
+          y < scrollController.offset + scrollController.position.extentInside;
+      if (!indexInView) {
+        await scrollController.animateTo(
+          index * defaultRowHeight,
+          duration: defaultDuration,
+          curve: defaultCurve,
+        );
+      }
+    }
   }
 
   @override
@@ -740,6 +784,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
 
   @override
   void dispose() {
+    widget.activeSearchMatchNotifier.removeListener(activeSearchListener);
     scrollController.dispose();
 
     super.dispose();
@@ -762,7 +807,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     final itemDelegate = SliverChildBuilderDelegate(
       _buildItem,
-      childCount: widget.itemCount,
+      childCount: widget.data.length,
     );
 
     // If we're at the end already, scroll to expose the new content.
@@ -862,6 +907,8 @@ class TableRow<T> extends StatefulWidget {
     this.isExpanded = false,
     this.isExpandable = false,
     this.isShown = true,
+    this.searchMatchesNotifier,
+    this.activeSearchMatchNotifier,
   })  : sortColumn = null,
         sortDirection = null,
         onSortChanged = null,
@@ -886,6 +933,8 @@ class TableRow<T> extends StatefulWidget {
         backgroundColor = null,
         expansionChildren = null,
         onExpansionCompleted = null,
+        searchMatchesNotifier = null,
+        activeSearchMatchNotifier = null,
         super(key: key);
 
   final LinkedScrollControllerGroup linkedScrollControllerGroup;
@@ -933,12 +982,20 @@ class TableRow<T> extends StatefulWidget {
 
   final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
 
+  final ValueListenable<List<T>> searchMatchesNotifier;
+
+  final ValueListenable<T> activeSearchMatchNotifier;
+
   @override
   _TableRowState<T> createState() => _TableRowState<T>();
 }
 
 class _TableRowState<T> extends State<TableRow<T>>
-    with TickerProviderStateMixin, CollapsibleAnimationMixin {
+    with
+        TickerProviderStateMixin,
+        CollapsibleAnimationMixin,
+        AutoDisposeMixin,
+        SearchableMixin {
   Key contentKey;
 
   ScrollController scrollController;
@@ -957,6 +1014,36 @@ class _TableRowState<T> extends State<TableRow<T>>
         widget.onExpansionCompleted();
       }
     });
+
+    if (widget.searchMatchesNotifier != null) {
+      searchMatches = widget.searchMatchesNotifier.value;
+      addAutoDisposeListener(widget.searchMatchesNotifier, () {
+        final isPreviousMatch = searchMatches.contains(widget.node);
+        final isNewMatch =
+            widget.searchMatchesNotifier.value.contains(widget.node);
+        searchMatches = widget.searchMatchesNotifier.value;
+
+        // We only want to rebuild the row if it the match status has changed.
+        if (isPreviousMatch ^ isNewMatch) {
+          setState(() {});
+        }
+      });
+    }
+
+    if (widget.activeSearchMatchNotifier != null) {
+      activeSearchMatch = widget.activeSearchMatchNotifier.value;
+      addAutoDisposeListener(widget.activeSearchMatchNotifier, () {
+        final isPreviousActiveSearchMatch = activeSearchMatch == widget.node;
+        final isNewActiveSearchMatch =
+            widget.activeSearchMatchNotifier.value == widget.node;
+        activeSearchMatch = widget.activeSearchMatchNotifier.value;
+
+        // We only want to rebuild the row if it the match status has changed.
+        if (isPreviousActiveSearchMatch ^ isNewActiveSearchMatch) {
+          setState(() {});
+        }
+      });
+    }
   }
 
   @override
@@ -983,8 +1070,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final box = SizedBox(
       height: widget.node == null ? areaPaneHeaderHeight : defaultRowHeight,
       child: Material(
-        color: widget.backgroundColor ??
-            titleSolidBackgroundColor(Theme.of(context)),
+        color: _searchAwareBackgroundColor(),
         child: widget.onPressed != null
             ? InkWell(
                 canRequestFocus: false,
@@ -1018,6 +1104,22 @@ class _TableRowState<T> extends State<TableRow<T>>
         );
       },
     );
+  }
+
+  Color _searchAwareBackgroundColor() {
+    final backgroundColor =
+        widget.backgroundColor ?? titleSolidBackgroundColor(Theme.of(context));
+    final isSearchMatch = searchMatches.contains(widget.node);
+    final isActiveSearch = activeSearchMatch == widget.node;
+    final searchAwareBackgroundColor = isSearchMatch
+        ? Color.alphaBlend(
+            isActiveSearch
+                ? activeSearchMatchColorOpaque
+                : searchMatchColorOpaque,
+            backgroundColor,
+          )
+        : backgroundColor;
+    return searchAwareBackgroundColor;
   }
 
   Alignment _alignmentFor(ColumnData<T> column) {
