@@ -679,8 +679,6 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   SortDirection sortDirection;
   ScrollController scrollController;
 
-  void Function() activeSearchListener;
-
   @override
   void initState() {
     super.initState();
@@ -691,13 +689,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     scrollController = ScrollController();
 
     if (widget.activeSearchMatchNotifier != null) {
-      widget.activeSearchMatchNotifier
-          .addListener(activeSearchListener = _onActiveSearchChange);
-
-      // TODO(kenz): why isn't the listener firing when added via
-      // `addAutoDisploseListener`?
-      // addAutoDisposeListener(
-      //      widget.activeSearchMatchNotifier, _onActiveSearchChange);
+      _initSearchListener();
     }
   }
 
@@ -717,6 +709,13 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
         );
       }
     }
+  }
+
+  void _initSearchListener() {
+    addAutoDisposeListener(
+      widget.activeSearchMatchNotifier,
+      _onActiveSearchChange,
+    );
   }
 
   @override
@@ -740,6 +739,10 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
         }
       });
     });
+
+    if (widget.activeSearchMatchNotifier != null) {
+      _initSearchListener();
+    }
   }
 
   /// Return the number of visible rows above the selected node.
@@ -784,9 +787,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
 
   @override
   void dispose() {
-    widget.activeSearchMatchNotifier.removeListener(activeSearchListener);
     scrollController.dispose();
-
     super.dispose();
   }
 
@@ -1000,6 +1001,10 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   ScrollController scrollController;
 
+  bool isSearchMatch = false;
+
+  bool isActiveSearchMatch = false;
+
   @override
   void initState() {
     super.initState();
@@ -1015,35 +1020,7 @@ class _TableRowState<T> extends State<TableRow<T>>
       }
     });
 
-    if (widget.searchMatchesNotifier != null) {
-      searchMatches = widget.searchMatchesNotifier.value;
-      addAutoDisposeListener(widget.searchMatchesNotifier, () {
-        final isPreviousMatch = searchMatches.contains(widget.node);
-        final isNewMatch =
-            widget.searchMatchesNotifier.value.contains(widget.node);
-        searchMatches = widget.searchMatchesNotifier.value;
-
-        // We only want to rebuild the row if it the match status has changed.
-        if (isPreviousMatch ^ isNewMatch) {
-          setState(() {});
-        }
-      });
-    }
-
-    if (widget.activeSearchMatchNotifier != null) {
-      activeSearchMatch = widget.activeSearchMatchNotifier.value;
-      addAutoDisposeListener(widget.activeSearchMatchNotifier, () {
-        final isPreviousActiveSearchMatch = activeSearchMatch == widget.node;
-        final isNewActiveSearchMatch =
-            widget.activeSearchMatchNotifier.value == widget.node;
-        activeSearchMatch = widget.activeSearchMatchNotifier.value;
-
-        // We only want to rebuild the row if it the match status has changed.
-        if (isPreviousActiveSearchMatch ^ isNewActiveSearchMatch) {
-          setState(() {});
-        }
-      });
-    }
+    _initSearchListeners();
   }
 
   @override
@@ -1055,6 +1032,9 @@ class _TableRowState<T> extends State<TableRow<T>>
       scrollController?.dispose();
       scrollController = widget.linkedScrollControllerGroup.addAndGet();
     }
+
+    cancel();
+    _initSearchListeners();
   }
 
   @override
@@ -1106,14 +1086,48 @@ class _TableRowState<T> extends State<TableRow<T>>
     );
   }
 
+  void _initSearchListeners() {
+    if (widget.searchMatchesNotifier != null) {
+      searchMatches = widget.searchMatchesNotifier.value;
+      isSearchMatch = searchMatches.contains(widget.node);
+      addAutoDisposeListener(widget.searchMatchesNotifier, () {
+        final isPreviousMatch = searchMatches.contains(widget.node);
+        searchMatches = widget.searchMatchesNotifier.value;
+        final isNewMatch = searchMatches.contains(widget.node);
+
+        // We only want to rebuild the row if it the match status has changed.
+        if (isPreviousMatch != isNewMatch) {
+          setState(() {
+            isSearchMatch = isNewMatch;
+          });
+        }
+      });
+    }
+
+    if (widget.activeSearchMatchNotifier != null) {
+      activeSearchMatch = widget.activeSearchMatchNotifier.value;
+      isActiveSearchMatch = activeSearchMatch == widget.node;
+      addAutoDisposeListener(widget.activeSearchMatchNotifier, () {
+        final isPreviousActiveSearchMatch = activeSearchMatch == widget.node;
+        activeSearchMatch = widget.activeSearchMatchNotifier.value;
+        final isNewActiveSearchMatch = activeSearchMatch == widget.node;
+
+        // We only want to rebuild the row if it the match status has changed.
+        if (isPreviousActiveSearchMatch != isNewActiveSearchMatch) {
+          setState(() {
+            isActiveSearchMatch = isNewActiveSearchMatch;
+          });
+        }
+      });
+    }
+  }
+
   Color _searchAwareBackgroundColor() {
     final backgroundColor =
         widget.backgroundColor ?? titleSolidBackgroundColor(Theme.of(context));
-    final isSearchMatch = searchMatches.contains(widget.node);
-    final isActiveSearch = activeSearchMatch == widget.node;
     final searchAwareBackgroundColor = isSearchMatch
         ? Color.alphaBlend(
-            isActiveSearch
+            isActiveSearchMatch
                 ? activeSearchMatchColorOpaque
                 : searchMatchColorOpaque,
             backgroundColor,

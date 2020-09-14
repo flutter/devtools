@@ -136,8 +136,9 @@ class HttpRequestData extends NetworkRequest {
   /// around the issue by displaying them as "in-progress". It would be
   /// reasonable to display them as "unknown start time" but that seems like
   /// more complexity than it is worth.
-  // TODO(kenz): figure out how to handle HTTP body events in the network
-  // profiler. For now, mark them as invalid.
+  // TODO(kenz): https://github.com/flutter/devtools/issues/2335 - figure out
+  // how to handle HTTP body events in the network profiler. For now, mark them
+  // as invalid.
   bool get isValid =>
       _startEvent != null && !_startEvent.name.contains('HTTP CLIENT response');
 
