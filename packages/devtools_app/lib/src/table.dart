@@ -688,8 +688,41 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     sortDirection = widget.sortDirection;
     scrollController = ScrollController();
 
+    _initSearchListener();
+  }
+
+  @override
+  void didUpdateWidget(_Table oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    cancel();
+
+    // TODO(kenz): pull this code into a helper and also call from initState.
+    // Detect selection changes but only care about scrollIntoView.
+    addAutoDisposeListener(oldWidget.selectionNotifier, () {
+      setState(() {
+        final selection = oldWidget.selectionNotifier.value;
+        if (selection.scrollIntoView) {
+          final int selectedDisplayRow = selection.node.index;
+          // TODO(terry): Optimize selecting row, if row's visible in
+          //              the viewport just select otherwise jumpTo row.
+          final newPos = selectedDisplayRow * defaultRowHeight;
+
+          // TODO(terry): Should animate factor out _moveSelection to reuse here.
+          scrollController.jumpTo(newPos);
+        }
+      });
+    });
+
+    _initSearchListener();
+  }
+
+  void _initSearchListener() {
     if (widget.activeSearchMatchNotifier != null) {
-      _initSearchListener();
+      addAutoDisposeListener(
+        widget.activeSearchMatchNotifier,
+        _onActiveSearchChange,
+      );
     }
   }
 
@@ -708,40 +741,6 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
           curve: defaultCurve,
         );
       }
-    }
-  }
-
-  void _initSearchListener() {
-    addAutoDisposeListener(
-      widget.activeSearchMatchNotifier,
-      _onActiveSearchChange,
-    );
-  }
-
-  @override
-  void didUpdateWidget(_Table oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    cancel();
-
-    // Detect selection changes but only care about scrollIntoView.
-    addAutoDisposeListener(oldWidget.selectionNotifier, () {
-      setState(() {
-        final selection = oldWidget.selectionNotifier.value;
-        if (selection.scrollIntoView) {
-          final int selectedDisplayRow = selection.node.index;
-          // TODO(terry): Optimize selecting row, if row's visible in
-          //              the viewport just select otherwise jumpTo row.
-          final newPos = selectedDisplayRow * defaultRowHeight;
-
-          // TODO(terry): Should animate factor out _moveSelection to reuse here.
-          scrollController.jumpTo(newPos);
-        }
-      });
-    });
-
-    if (widget.activeSearchMatchNotifier != null) {
-      _initSearchListener();
     }
   }
 
