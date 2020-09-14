@@ -12,10 +12,11 @@ import '../config_specific/logger/allowed_error.dart';
 import '../globals.dart';
 import '../http/http_request_data.dart';
 import '../http/http_service.dart';
+import '../ui/search.dart';
 import 'network_model.dart';
 import 'network_service.dart';
 
-class NetworkController {
+class NetworkController with SearchControllerMixin<NetworkRequest> {
   NetworkController() {
     _networkService = NetworkService(this);
   }
@@ -168,6 +169,7 @@ class NetworkController {
       invalidRequests: [],
       outstandingRequestsMap: Map.from(requests.value.outstandingHttpRequests),
     );
+    refreshSearchMatches();
   }
 
   Future<void> _toggleHttpTimelineRecording(bool state) async {
@@ -253,6 +255,25 @@ class NetworkController {
   Future<void> clear() async {
     await _networkService.clearData();
     _requests.value = NetworkRequests();
+    refreshSearchMatches();
     _selectedRequest.value = null;
+  }
+
+  @override
+  List<NetworkRequest> matchesForSearch(String search) {
+    if (search == null || search.isEmpty) return [];
+    final matches = <NetworkRequest>[];
+    final caseInsensitiveSearch = search.toLowerCase();
+
+    // TODO(kenz): support intelligent search queries like t:http (type = http)
+    // or m:GET (method = GET).
+
+    final currentRequests = _requests.value.requests;
+    for (final request in currentRequests) {
+      if (request.uri.toLowerCase().contains(caseInsensitiveSearch)) {
+        matches.add(request);
+      }
+    }
+    return matches;
   }
 }

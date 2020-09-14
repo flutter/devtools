@@ -419,10 +419,7 @@ class TimelineController
     return _exportController.downloadFile(encodedData);
   }
 
-  void updateSearchMatches() {
-    updateMatches(matchesForSearch(search));
-  }
-
+  @override
   List<TimelineEvent> matchesForSearch(String search) {
     if (search == null || search.isEmpty) return [];
     final matches = <TimelineEvent>[];

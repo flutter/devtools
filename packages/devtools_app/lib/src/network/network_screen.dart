@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
@@ -15,10 +16,13 @@ import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
+import '../ui/search.dart';
 import '../utils.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
+
+final networkSearchFieldKey = GlobalKey(debugLabel: 'NetworkSearchFieldKey');
 
 class NetworkScreen extends Screen {
   const NetworkScreen()
@@ -88,7 +92,7 @@ class NetworkScreenBody extends StatefulWidget {
 }
 
 class _NetworkScreenBodyState extends State<NetworkScreenBody>
-    with AutoDisposeMixin {
+    with AutoDisposeMixin, SearchFieldMixin {
   NetworkController _networkController;
 
   bool recording;
@@ -137,7 +141,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   /// pause, etc.)
   Row _buildProfilerControls() {
     const double includeTextWidth = 600;
-
+    final hasRequests = requests.requests.isNotEmpty;
     return Row(
       children: [
         recordButton(
@@ -160,6 +164,18 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
           onPressed: () {
             _networkController.clear();
           },
+        ),
+        const Expanded(child: SizedBox()),
+        Container(
+          width: wideSearchTextWidth,
+          height: defaultSearchTextHeight,
+          child: buildSearchField(
+            controller: _networkController,
+            searchFieldKey: networkSearchFieldKey,
+            searchFieldEnabled: hasRequests,
+            shouldRequestFocus: false,
+            supportsNavigation: true,
+          ),
         ),
       ],
     );
@@ -190,6 +206,9 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
                     NetworkRequestsTable(
                       networkController: _networkController,
                       requests: requests,
+                      searchMatchesNotifier: _networkController.searchMatches,
+                      activeSearchMatchNotifier:
+                          _networkController.activeSearchMatch,
                     ),
                     NetworkRequestInspector(selectedRequest),
                   ],
@@ -216,6 +235,8 @@ class NetworkRequestsTable extends StatelessWidget {
     Key key,
     @required this.networkController,
     @required this.requests,
+    @required this.searchMatchesNotifier,
+    @required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
   static MethodColumn methodColumn = MethodColumn();
@@ -227,6 +248,8 @@ class NetworkRequestsTable extends StatelessWidget {
 
   final NetworkController networkController;
   final List<NetworkRequest> requests;
+  final ValueListenable<List<NetworkRequest>> searchMatchesNotifier;
+  final ValueListenable<NetworkRequest> activeSearchMatchNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -248,6 +271,8 @@ class NetworkRequestsTable extends StatelessWidget {
         autoScrollContent: true,
         sortColumn: timestampColumn,
         sortDirection: SortDirection.ascending,
+        searchMatchesNotifier: searchMatchesNotifier,
+        activeSearchMatchNotifier: activeSearchMatchNotifier,
       ),
     );
   }

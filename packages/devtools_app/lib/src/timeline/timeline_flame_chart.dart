@@ -223,14 +223,6 @@ class TimelineFlameChartState
       _handleSelectedFrame,
     );
 
-    // TODO(kenz): make updateSearchMatches an abstract method on
-    // [SearchController] and then update the matches directly when the search
-    // query changes. This will need to be implemented by all extensions of
-    // [SearchController], so saving for a later CL.
-    addAutoDisposeListener(_timelineController.searchNotifier, () {
-      _timelineController.updateSearchMatches();
-    });
-
     addAutoDisposeListener(_timelineController.activeSearchMatch, () async {
       final activeSearch = _timelineController.activeSearchMatch.value;
       if (activeSearch == null) return;

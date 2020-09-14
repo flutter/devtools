@@ -40,7 +40,9 @@ extension FlameChartColorScheme on ColorScheme {
 const timelineSelectionColor = Color(0xFF36C6F4);
 
 const searchMatchColor = Colors.yellow;
+final searchMatchColorOpaque = Colors.yellow.withOpacity(0.5);
 const activeSearchMatchColor = Colors.orangeAccent;
+final activeSearchMatchColorOpaque = Colors.orangeAccent.withOpacity(0.5);
 
 // Teal 200, 400 - see https://material.io/design/color/#tools-for-picking-colors.
 const asyncColorPalette = [
