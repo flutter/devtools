@@ -1,6 +1,7 @@
-## 0.9.2-dev.1
+## 0.9.2
 * Fix a bug causing extra evaluation for primitive values
 * Fix an issue handling google3: paths [#2288](https://github.com/flutter/devtools/pull/2288)
+* Update dependencies to use package:vm_service 5.0.0+1
 
 ## 0.9.1
 * Add opt-in for feature usage reporting
