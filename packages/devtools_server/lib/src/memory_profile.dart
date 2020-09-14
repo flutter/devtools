@@ -169,8 +169,12 @@ class MemoryProfile {
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
     final isolate = isolates[0];
-    _selectedIsolate =
-        IsolateRef(id: isolate.id, name: isolate.name, number: isolate.number);
+    _selectedIsolate = IsolateRef(
+      id: isolate.id,
+      name: isolate.name,
+      number: isolate.number,
+      isSystemIsolate: isolate.isSystemIsolate,
+    );
 
     if (hasConnection &&
         vm.operatingSystem == 'android' &&

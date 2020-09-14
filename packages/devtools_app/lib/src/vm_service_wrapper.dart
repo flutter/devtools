@@ -755,19 +755,9 @@ class VmServiceWrapper implements VmService {
           _vmService.getRetainingPath(isolateId, targetId, limit));
 
   @override
-  Future<ClientName> getClientName() {
-    return _trackFuture('getClientName', _vmService.getClientName());
-  }
-
-  @override
   Future<ProcessMemoryUsage> getProcessMemoryUsage() {
     return _trackFuture(
         'getProcessMemoryUsage', _vmService.getProcessMemoryUsage());
-  }
-
-  @override
-  Future<WebSocketTarget> getWebSocketTarget() {
-    return _trackFuture('getWebSocketTarget', _vmService.getWebSocketTarget());
   }
 
   @override
@@ -781,26 +771,6 @@ class VmServiceWrapper implements VmService {
     } else {
       return null;
     }
-  }
-
-  @override
-  Future<Success> requirePermissionToResume({
-    bool onPauseStart,
-    bool onPauseReload,
-    bool onPauseExit,
-  }) {
-    return _trackFuture(
-        'requirePermissionToResume',
-        _vmService.requirePermissionToResume(
-          onPauseStart: onPauseStart,
-          onPauseReload: onPauseReload,
-          onPauseExit: onPauseExit,
-        ));
-  }
-
-  @override
-  Future<Success> setClientName(String name) {
-    return _trackFuture('setClientName', _vmService.setClientName(name));
   }
 
   /// Testing only method to indicate that we don't really need to await all
