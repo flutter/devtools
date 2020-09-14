@@ -87,7 +87,7 @@ dart bin/devtools.dart
 #### Publish the packages
 
 ```shell
-./too/pub_publish.sh
+./tool/pub_publish.sh
 ```
 
 #### Revert the change to .gitignore and pubspec files
