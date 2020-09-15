@@ -321,7 +321,7 @@ mixin SearchFieldMixin {
     if (supportsNavigation) {
       return SearchNavigationControls(controller, onClear: onClear);
     } else {
-      return clearTextFieldButton(onClear);
+      return clearInputButton(onClear);
     }
   }
 
@@ -372,11 +372,11 @@ class SearchNavigationControls extends StatelessWidget {
                 ),
               ),
             ),
-            textFieldSuffixButton(Icons.keyboard_arrow_up,
+            inputDecorationSuffixButton(Icons.keyboard_arrow_up,
                 numMatches > 1 ? controller.previousMatch : null),
-            textFieldSuffixButton(Icons.keyboard_arrow_down,
+            inputDecorationSuffixButton(Icons.keyboard_arrow_down,
                 numMatches > 1 ? controller.nextMatch : null),
-            clearTextFieldButton(onClear),
+            clearInputButton(onClear),
           ],
         );
       },

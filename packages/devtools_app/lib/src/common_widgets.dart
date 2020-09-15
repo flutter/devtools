@@ -575,11 +575,11 @@ class FilterButton extends StatelessWidget {
   }
 }
 
-Widget clearTextFieldButton(VoidCallback onPressed) {
-  return textFieldSuffixButton(Icons.clear, onPressed);
+Widget clearInputButton(VoidCallback onPressed) {
+  return inputDecorationSuffixButton(Icons.clear, onPressed);
 }
 
-Widget textFieldSuffixButton(IconData icon, VoidCallback onPressed) {
+Widget inputDecorationSuffixButton(IconData icon, VoidCallback onPressed) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: densePadding),
     width: 24.0,

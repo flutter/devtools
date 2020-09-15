@@ -338,7 +338,7 @@ class NetworkFilter {
     this.showWebSocket = true,
   });
 
-  static NetworkFilter from(NetworkFilter filter) {
+  factory NetworkFilter.from(NetworkFilter filter) {
     return NetworkFilter(
       method: filter.method,
       uriSubstring: filter.uriSubstring,

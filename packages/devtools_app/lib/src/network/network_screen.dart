@@ -594,7 +594,7 @@ class _NetworkFilterDialogState extends State<NetworkFilterDialog> {
           contentPadding: const EdgeInsets.all(denseSpacing),
           border: const OutlineInputBorder(),
           labelText: description,
-          suffix: clearTextFieldButton(textController.clear),
+          suffix: clearInputButton(textController.clear),
         ),
       ),
     );
