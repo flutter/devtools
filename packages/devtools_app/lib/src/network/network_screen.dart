@@ -11,11 +11,13 @@ import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
+import '../dialogs.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
+import '../ui/label.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import 'network_controller.dart';
@@ -58,24 +60,34 @@ class NetworkScreen extends Screen {
         return ValueListenableBuilder<NetworkRequests>(
           valueListenable: networkController.requests,
           builder: (context, networkRequests, _) {
-            final count = networkRequests.requests.length;
+            return ValueListenableBuilder<List<NetworkRequest>>(
+              valueListenable: networkController.filteredRequests,
+              builder: (context, filteredRequests, _) {
+                final filteredCount = filteredRequests.length;
+                final totalCount = networkRequests.requests.length;
 
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('${nf.format(count)} ${pluralize('request', count)}'),
-                const SizedBox(width: denseSpacing),
-                SizedBox(
-                  width: smallProgressSize,
-                  height: smallProgressSize,
-                  child: recording
-                      ? CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(color),
-                        )
-                      : const SizedBox(),
-                ),
-              ],
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Showing ${nf.format(filteredCount)} of '
+                      '${nf.format(totalCount)} '
+                      '${pluralize('request', totalCount)}',
+                    ),
+                    const SizedBox(width: denseSpacing),
+                    SizedBox(
+                      width: smallProgressSize,
+                      height: smallProgressSize,
+                      child: recording
+                          ? CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(color),
+                            )
+                          : const SizedBox(),
+                    ),
+                  ],
+                );
+              },
             );
           },
         );
@@ -98,6 +110,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   bool recording;
 
   NetworkRequests requests;
+
+  List<NetworkRequest> filteredRequests;
 
   @override
   void initState() {
@@ -129,6 +143,12 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
         recording = _networkController.recordingNotifier.value;
       });
     });
+    filteredRequests = _networkController.filteredRequests.value;
+    addAutoDisposeListener(_networkController.filteredRequests, () {
+      setState(() {
+        filteredRequests = _networkController.filteredRequests.value;
+      });
+    });
   }
 
   @override
@@ -141,7 +161,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   /// pause, etc.)
   Row _buildProfilerControls() {
     const double includeTextWidth = 600;
-    final hasRequests = requests.requests.isNotEmpty;
+    final hasRequests = filteredRequests.isNotEmpty;
     return Row(
       children: [
         recordButton(
@@ -168,7 +188,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
         const Expanded(child: SizedBox()),
         Container(
           width: wideSearchTextWidth,
-          height: defaultSearchTextHeight,
+          height: defaultTextFieldHeight,
           child: buildSearchField(
             controller: _networkController,
             searchFieldKey: networkSearchFieldKey,
@@ -177,16 +197,21 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
             supportsNavigation: true,
           ),
         ),
+        const SizedBox(width: denseSpacing),
+        FilterButton(
+          onPressed: _showFilterDialog,
+          isFilterActive: filteredRequests.length != requests.requests.length,
+        ),
       ],
     );
   }
 
-  Widget _buildProfilerBody(List<NetworkRequest> requests) {
+  Widget _buildProfilerBody() {
     return ValueListenableBuilder<NetworkRequest>(
       valueListenable: _networkController.selectedRequest,
       builder: (context, selectedRequest, _) {
         return Expanded(
-          child: (!recording && requests.isEmpty)
+          child: (!recording && filteredRequests.isEmpty)
               ? Center(
                   child: recordingInfo(
                     instructionsKey: NetworkScreen.recordingInstructionsKey,
@@ -205,7 +230,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
                   children: [
                     NetworkRequestsTable(
                       networkController: _networkController,
-                      requests: requests,
+                      requests: filteredRequests,
                       searchMatchesNotifier: _networkController.searchMatches,
                       activeSearchMatchNotifier:
                           _networkController.activeSearchMatch,
@@ -218,13 +243,20 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     );
   }
 
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => NetworkFilterDialog(_networkController),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         _buildProfilerControls(),
         const SizedBox(height: denseRowSpacing),
-        _buildProfilerBody(requests.requests),
+        _buildProfilerBody(),
       ],
     );
   }
@@ -375,5 +407,206 @@ class TimestampColumn extends ColumnData<NetworkRequest> {
   @override
   String getDisplayValue(NetworkRequest dataObject) {
     return formatDateTime(dataObject.startTimestamp);
+  }
+}
+
+class NetworkFilterDialog extends StatefulWidget {
+  const NetworkFilterDialog(this.controller);
+
+  final NetworkController controller;
+
+  @override
+  _NetworkFilterDialogState createState() => _NetworkFilterDialogState();
+}
+
+class _NetworkFilterDialogState extends State<NetworkFilterDialog> {
+  static const dialogWidth = 400.0;
+
+  NetworkFilter currentFilter;
+
+  TextEditingController uriSubstringTextFieldController;
+
+  TextEditingController methodTextFieldController;
+
+  TextEditingController statusTextFieldController;
+
+  TextEditingController typeTextFieldController;
+
+  @override
+  void initState() {
+    super.initState();
+    currentFilter = NetworkFilter.from(widget.controller.activeFilter.value);
+    uriSubstringTextFieldController =
+        TextEditingController(text: currentFilter.uriSubstring);
+    methodTextFieldController =
+        TextEditingController(text: currentFilter.method);
+    statusTextFieldController =
+        TextEditingController(text: currentFilter.status);
+    typeTextFieldController = TextEditingController(text: currentFilter.type);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsDialog(
+      title: _buildDialogTitle(),
+      content: Container(
+        width: dialogWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ..._buildFilterTextFields(),
+            const SizedBox(height: defaultSpacing),
+            ..._buildFilterCheckboxes(),
+          ],
+        ),
+      ),
+      actions: [
+        DialogApplyButton(
+          onPressed: () {
+            widget.controller.filterData(currentFilter);
+          },
+        ),
+        DialogCancelButton(),
+      ],
+    );
+  }
+
+  Widget _buildDialogTitle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        dialogTitleText(Theme.of(context), 'Filters'),
+        FlatButton(
+          onPressed: _resetFilter,
+          child: const MaterialIconLabel(
+            Icons.replay,
+            'Reset to default',
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildFilterTextFields() {
+    return [
+      _buildText(
+        description: 'Uri',
+        textController: uriSubstringTextFieldController,
+        onChanged: (value) {
+          setState(() {
+            currentFilter.uriSubstring = value;
+          });
+        },
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildText(
+        description: 'Method (e.g. GET, POST, PUT, etc.)',
+        textController: methodTextFieldController,
+        onChanged: (value) {
+          setState(() {
+            currentFilter.method = value;
+          });
+        },
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildText(
+        description: 'Status (e.g. 200, 404, 101, etc.)',
+        textController: statusTextFieldController,
+        onChanged: (value) {
+          setState(() {
+            currentFilter.status = value;
+          });
+        },
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildText(
+        description: 'Type (e.g. htm, json, ws, etc.)',
+        textController: typeTextFieldController,
+        onChanged: (value) {
+          setState(() {
+            currentFilter.type = value;
+          });
+        },
+      ),
+    ];
+  }
+
+  List<Widget> _buildFilterCheckboxes() {
+    return [
+      _buildCheckbox(
+        value: currentFilter.showHttp,
+        description: 'HTTP traffic',
+        onChanged: (value) {
+          setState(() {
+            currentFilter.showHttp = value;
+          });
+        },
+      ),
+      _buildCheckbox(
+        value: currentFilter.showWebSocket,
+        description: 'Web socket traffic',
+        onChanged: (value) {
+          setState(() {
+            currentFilter.showWebSocket = value;
+          });
+        },
+      ),
+    ];
+  }
+
+  Widget _buildCheckbox({
+    @required bool value,
+    @required String description,
+    @required void Function(bool value) onChanged,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Checkbox(
+          value: value,
+          onChanged: onChanged,
+        ),
+        Flexible(
+          child: Text(
+            description,
+            overflow: TextOverflow.visible,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildText({
+    @required String description,
+    @required TextEditingController textController,
+    @required void Function(String value) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: defaultSpacing,
+      ),
+      height: defaultTextFieldHeight,
+      child: TextField(
+        controller: textController,
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.all(denseSpacing),
+          border: const OutlineInputBorder(),
+          labelText: description,
+          suffix: clearTextFieldButton(textController.clear),
+        ),
+      ),
+    );
+  }
+
+  void _resetFilter() {
+    setState(() {
+      currentFilter = NetworkController.defaultFilter;
+      uriSubstringTextFieldController.clear();
+      methodTextFieldController.clear();
+      statusTextFieldController.clear();
+      typeTextFieldController.clear();
+    });
   }
 }

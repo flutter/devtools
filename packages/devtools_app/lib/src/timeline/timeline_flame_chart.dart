@@ -104,7 +104,7 @@ class _TimelineFlameChartContainerState
             actions: [
               Container(
                 width: wideSearchTextWidth,
-                height: defaultSearchTextHeight,
+                height: defaultTextFieldHeight,
                 child: buildSearchField(
                   controller: controller,
                   searchFieldKey: timelineSearchFieldKey,

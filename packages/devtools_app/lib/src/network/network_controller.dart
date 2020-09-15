@@ -21,6 +21,8 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     _networkService = NetworkService(this);
   }
 
+  static NetworkFilter defaultFilter = NetworkFilter();
+
   /// Notifies that new Network requests have been processed.
   ValueListenable<NetworkRequests> get requests => _requests;
 
@@ -29,6 +31,15 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
   ValueListenable<NetworkRequest> get selectedRequest => _selectedRequest;
 
   final _selectedRequest = ValueNotifier<NetworkRequest>(null);
+
+  ValueListenable<List<NetworkRequest>> get filteredRequests =>
+      _filteredRequests;
+
+  final _filteredRequests = ValueNotifier<List<NetworkRequest>>([]);
+
+  ValueListenable<NetworkFilter> get activeFilter => _activeFilter;
+
+  final _activeFilter = ValueNotifier<NetworkFilter>(defaultFilter);
 
   /// Notifies that the timeline is currently being recorded.
   ValueListenable<bool> get recordingNotifier => _recordingNotifier;
@@ -169,6 +180,7 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
       invalidRequests: [],
       outstandingRequestsMap: Map.from(requests.value.outstandingHttpRequests),
     );
+    filterData(_activeFilter.value);
     refreshSearchMatches();
   }
 
@@ -255,6 +267,7 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
   Future<void> clear() async {
     await _networkService.clearData();
     _requests.value = NetworkRequests();
+    _filteredRequests.value = [];
     refreshSearchMatches();
     _selectedRequest.value = null;
   }
@@ -268,7 +281,7 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     // TODO(kenz): support intelligent search queries like t:http (type = http)
     // or m:GET (method = GET).
 
-    final currentRequests = _requests.value.requests;
+    final currentRequests = _filteredRequests.value;
     for (final request in currentRequests) {
       if (request.uri.toLowerCase().contains(caseInsensitiveSearch)) {
         matches.add(request);
@@ -276,4 +289,75 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     }
     return matches;
   }
+
+  void filterData(NetworkFilter filter) {
+    if (filter == defaultFilter) {
+      _filteredRequests.value = List.from(_requests.value.requests);
+    }
+    _filteredRequests.value =
+        _requests.value.requests.where((NetworkRequest r) {
+      if (!filter.showHttp && r is HttpRequestData) {
+        return false;
+      }
+      if (!filter.showWebSocket && r is WebSocket) {
+        return false;
+      }
+      if (filter.method != null &&
+          r.method.toLowerCase() != filter.method.toLowerCase()) {
+        return false;
+      }
+      if (filter.uriSubstring != null &&
+          !r.uri.toLowerCase().contains(filter.uriSubstring.toLowerCase())) {
+        return false;
+      }
+      if (filter.status != null &&
+          r.status.toLowerCase() != filter.status.toLowerCase()) {
+        return false;
+      }
+      if (filter.type != null &&
+          r.type.toLowerCase() != filter.type.toLowerCase()) {
+        return false;
+      }
+      return true;
+    }).toList();
+    _activeFilter.value = filter;
+  }
+
+  void resetFilters() {
+    _activeFilter.value = defaultFilter;
+  }
+}
+
+class NetworkFilter {
+  NetworkFilter({
+    this.method,
+    this.uriSubstring,
+    this.status,
+    this.type,
+    this.showHttp = true,
+    this.showWebSocket = true,
+  });
+
+  static NetworkFilter from(NetworkFilter filter) {
+    return NetworkFilter(
+      method: filter.method,
+      uriSubstring: filter.uriSubstring,
+      status: filter.status,
+      type: filter.type,
+      showHttp: filter.showHttp,
+      showWebSocket: filter.showWebSocket,
+    );
+  }
+
+  String method;
+
+  String uriSubstring;
+
+  String status;
+
+  String type;
+
+  bool showHttp;
+
+  bool showWebSocket;
 }
