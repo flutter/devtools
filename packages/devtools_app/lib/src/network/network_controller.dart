@@ -300,16 +300,30 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
           r.method.toLowerCase() != filter.method.toLowerCase()) {
         return false;
       }
-      if (filter.uriSubstring != null &&
-          !r.uri.toLowerCase().contains(filter.uriSubstring.toLowerCase())) {
-        return false;
-      }
       if (filter.status != null &&
-          r.status.toLowerCase() != filter.status.toLowerCase()) {
+          r.status?.toLowerCase() != filter.status.toLowerCase()) {
         return false;
       }
       if (filter.type != null &&
           r.type.toLowerCase() != filter.type.toLowerCase()) {
+        return false;
+      }
+      if (filter.substrings.isNotEmpty) {
+        for (final substring in filter.substrings) {
+          final caseInsensitiveSubstring = substring.toLowerCase();
+          final matchesUri =
+              r.uri.toLowerCase().contains(caseInsensitiveSubstring);
+          final matchesMethod =
+              r.method.toLowerCase().contains(caseInsensitiveSubstring);
+          final matchesStatus =
+              r.status?.toLowerCase()?.contains(caseInsensitiveSubstring) ??
+                  false;
+          final matchesType =
+              r.type.toLowerCase().contains(caseInsensitiveSubstring);
+          if (matchesUri || matchesMethod || matchesStatus || matchesType) {
+            return true;
+          }
+        }
         return false;
       }
       return true;
@@ -325,7 +339,7 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
 class NetworkFilter {
   NetworkFilter({
     this.method,
-    this.uriSubstring,
+    this.substrings = const [],
     this.status,
     this.type,
   });
@@ -333,7 +347,7 @@ class NetworkFilter {
   factory NetworkFilter.from(NetworkFilter filter) {
     return NetworkFilter(
       method: filter.method,
-      uriSubstring: filter.uriSubstring,
+      substrings: filter.substrings,
       status: filter.status,
       type: filter.type,
     );
@@ -342,7 +356,7 @@ class NetworkFilter {
   factory NetworkFilter.fromQuery(String query) {
     final partsBySpace = query.split(' ');
 
-    String uriSubstring;
+    List<String> substrings = [];
     String method;
     String status;
     String type;
@@ -360,12 +374,12 @@ class NetworkFilter {
           }
         }
       } else {
-        uriSubstring = part;
+        substrings.add(part);
       }
     }
     return NetworkFilter(
       method: method,
-      uriSubstring: uriSubstring,
+      substrings: substrings,
       status: status,
       type: type,
     );
@@ -373,18 +387,18 @@ class NetworkFilter {
 
   String method;
 
-  String uriSubstring;
+  List<String> substrings;
 
   String status;
 
   String type;
 
   String get query {
-    final _uriSubstring = uriSubstring ?? '';
+    final _substrings = substrings.join(' ');
     final _method = method != null ? 'method:$method' : '';
     final _status = status != null ? 'status:$status' : '';
     final _type = type != null ? 'type:$type' : '';
-    return '$_uriSubstring $_method $_status $_type'.trim();
+    return '$_substrings $_method $_status $_type'.trim();
   }
 
   static bool isValidFilter({@required List<String> keys, String query}) {

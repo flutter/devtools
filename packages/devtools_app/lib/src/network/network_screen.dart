@@ -425,7 +425,7 @@ class _NetworkFilterDialogState extends State<NetworkFilterDialog> {
   static const queryInstructions = '''
 Type a filter query to show specific requests.
 
-Any free text that is not part of an available filter below will be queried as a substring of the request URI.
+Any text that is not paired with an available filter key below will be queried against all categories (method, uri, status, type).
 
 Available filters:
     'method', 'm'       (e.g. 'm:get', 'm:put')
@@ -435,6 +435,8 @@ Available filters:
 Example queries:
     'my-endpoint method:put status:404 type:json'
     'example.com m:get s:200 t:htm'
+    'http s:404'
+    'POST'
 ''';
 
   TextEditingController queryTextFieldController;
