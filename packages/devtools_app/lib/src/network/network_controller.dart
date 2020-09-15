@@ -351,11 +351,11 @@ class NetworkFilter {
       if (querySeparatorIndex != -1) {
         final value = part.substring(querySeparatorIndex + 1);
         if (value != '') {
-          if (isMethodFilter(part)) {
+          if (isValidFilter(keys: ['m', 'method'], query: part)) {
             method = value;
-          } else if (isStatusFilter(part)) {
+          } else if (isValidFilter(keys: ['s', 'status'], query: part)) {
             status = value;
-          } else if (isTypeFilter(part)) {
+          } else if (isValidFilter(keys: ['t', 'type'], query: part)) {
             type = value;
           }
         }
@@ -387,15 +387,10 @@ class NetworkFilter {
     return '$_uriSubstring $_method $_status $_type'.trim();
   }
 
-  static bool isMethodFilter(String query) {
-    return query.startsWith('m:') || query.startsWith('method:');
-  }
-
-  static bool isStatusFilter(String query) {
-    return query.startsWith('s:') || query.startsWith('status:');
-  }
-
-  static bool isTypeFilter(String query) {
-    return query.startsWith('t:') || query.startsWith('type:');
+  static bool isValidFilter({@required List<String> keys, String query}) {
+    for (final key in keys) {
+      if (query.startsWith('$key:')) return true;
+    }
+    return false;
   }
 }
