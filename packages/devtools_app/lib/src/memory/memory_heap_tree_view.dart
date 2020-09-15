@@ -340,13 +340,17 @@ class HeapTreeViewState extends State<HeapTree>
           const SizedBox(height: 50.0),
           snapshotDisplay = const CircularProgressIndicator(),
           const SizedBox(height: denseSpacing),
-          Text(_isSnapshotStreaming
-              ? 'Processing...'
-              : _isSnapshotGraphing
-                  ? 'Graphing...'
-                  : _isSnapshotGrouping
-                      ? 'Grouping...'
-                      : _isSnapshotComplete ? 'Done' : '...'),
+          Text(
+            _isSnapshotStreaming
+                ? 'Processing...'
+                : _isSnapshotGraphing
+                    ? 'Graphing...'
+                    : _isSnapshotGrouping
+                        ? 'Grouping...'
+                        : _isSnapshotComplete
+                            ? 'Done'
+                            : '...',
+          ),
         ],
       );
     } else if (controller.snapshotByLibraryData != null ||
