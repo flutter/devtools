@@ -420,29 +420,30 @@ class NetworkFilterDialog extends StatefulWidget {
 }
 
 class _NetworkFilterDialogState extends State<NetworkFilterDialog> {
-  static const dialogWidth = 400.0;
+  static const dialogWidth = 500.0;
 
-  NetworkFilter currentFilter;
+  static const queryInstructions = '''
+Type a filter query to show specific requests.
 
-  TextEditingController uriSubstringTextFieldController;
+Any free text that is not part of an available filter below will be queried as a substring of the request URI.
 
-  TextEditingController methodTextFieldController;
+Available filters:
+    'method', 'm'       (e.g. 'm:get', 'm:put')
+    'status', 's'           (e.g. 's:200', 's:404')
+    'type', 't'               (e.g. 't:json', 't:ws')
 
-  TextEditingController statusTextFieldController;
+Example queries:
+    'my-endpoint method:put status:404 type:json'
+    'example.com m:get s:200 t:htm'
+''';
 
-  TextEditingController typeTextFieldController;
+  TextEditingController queryTextFieldController;
 
   @override
   void initState() {
     super.initState();
-    currentFilter = NetworkFilter.from(widget.controller.activeFilter.value);
-    uriSubstringTextFieldController =
-        TextEditingController(text: currentFilter.uriSubstring);
-    methodTextFieldController =
-        TextEditingController(text: currentFilter.method);
-    statusTextFieldController =
-        TextEditingController(text: currentFilter.status);
-    typeTextFieldController = TextEditingController(text: currentFilter.type);
+    queryTextFieldController =
+        TextEditingController(text: widget.controller.activeFilter.value.query);
   }
 
   @override
@@ -450,21 +451,25 @@ class _NetworkFilterDialogState extends State<NetworkFilterDialog> {
     return DevToolsDialog(
       title: _buildDialogTitle(),
       content: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: defaultSpacing,
+        ),
         width: dialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ..._buildFilterTextFields(),
+            _buildQueryTextField(),
             const SizedBox(height: defaultSpacing),
-            ..._buildFilterCheckboxes(),
+            _buildQueryInstructions(),
           ],
         ),
       ),
       actions: [
         DialogApplyButton(
           onPressed: () {
-            widget.controller.filterData(currentFilter);
+            widget.controller.filterData(
+                NetworkFilter.fromQuery(queryTextFieldController.value.text));
           },
         ),
         DialogCancelButton(),
@@ -478,7 +483,7 @@ class _NetworkFilterDialogState extends State<NetworkFilterDialog> {
       children: [
         dialogTitleText(Theme.of(context), 'Filters'),
         FlatButton(
-          onPressed: _resetFilter,
+          onPressed: queryTextFieldController.clear,
           child: const MaterialIconLabel(
             Icons.replay,
             'Reset to default',
@@ -488,125 +493,25 @@ class _NetworkFilterDialogState extends State<NetworkFilterDialog> {
     );
   }
 
-  List<Widget> _buildFilterTextFields() {
-    return [
-      _buildText(
-        description: 'Uri',
-        textController: uriSubstringTextFieldController,
-        onChanged: (value) {
-          setState(() {
-            currentFilter.uriSubstring = value;
-          });
-        },
-      ),
-      const SizedBox(height: defaultSpacing),
-      _buildText(
-        description: 'Method (e.g. GET, POST, PUT, etc.)',
-        textController: methodTextFieldController,
-        onChanged: (value) {
-          setState(() {
-            currentFilter.method = value;
-          });
-        },
-      ),
-      const SizedBox(height: defaultSpacing),
-      _buildText(
-        description: 'Status (e.g. 200, 404, 101, etc.)',
-        textController: statusTextFieldController,
-        onChanged: (value) {
-          setState(() {
-            currentFilter.status = value;
-          });
-        },
-      ),
-      const SizedBox(height: defaultSpacing),
-      _buildText(
-        description: 'Type (e.g. htm, json, ws, etc.)',
-        textController: typeTextFieldController,
-        onChanged: (value) {
-          setState(() {
-            currentFilter.type = value;
-          });
-        },
-      ),
-    ];
-  }
-
-  List<Widget> _buildFilterCheckboxes() {
-    return [
-      _buildCheckbox(
-        value: currentFilter.showHttp,
-        description: 'HTTP traffic',
-        onChanged: (value) {
-          setState(() {
-            currentFilter.showHttp = value;
-          });
-        },
-      ),
-      _buildCheckbox(
-        value: currentFilter.showWebSocket,
-        description: 'Web socket traffic',
-        onChanged: (value) {
-          setState(() {
-            currentFilter.showWebSocket = value;
-          });
-        },
-      ),
-    ];
-  }
-
-  Widget _buildCheckbox({
-    @required bool value,
-    @required String description,
-    @required void Function(bool value) onChanged,
-  }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Checkbox(
-          value: value,
-          onChanged: onChanged,
-        ),
-        Flexible(
-          child: Text(
-            description,
-            overflow: TextOverflow.visible,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildText({
-    @required String description,
-    @required TextEditingController textController,
-    @required void Function(String value) onChanged,
-  }) {
+  Widget _buildQueryTextField() {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: defaultSpacing,
-      ),
       height: defaultTextFieldHeight,
       child: TextField(
-        controller: textController,
-        onChanged: onChanged,
+        controller: queryTextFieldController,
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.all(denseSpacing),
           border: const OutlineInputBorder(),
-          labelText: description,
-          suffix: clearInputButton(textController.clear),
+          labelText: 'Filter query',
+          suffix: clearInputButton(queryTextFieldController.clear),
         ),
       ),
     );
   }
 
-  void _resetFilter() {
-    setState(() {
-      currentFilter = NetworkController.defaultFilter;
-      uriSubstringTextFieldController.clear();
-      methodTextFieldController.clear();
-      statusTextFieldController.clear();
-      typeTextFieldController.clear();
-    });
+  Widget _buildQueryInstructions() {
+    return Text(
+      queryInstructions,
+      style: Theme.of(context).subtleTextStyle,
+    );
   }
 }

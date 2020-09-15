@@ -296,12 +296,6 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     }
     _filteredRequests.value =
         _requests.value.requests.where((NetworkRequest r) {
-      if (!filter.showHttp && r is HttpRequestData) {
-        return false;
-      }
-      if (!filter.showWebSocket && r is WebSocket) {
-        return false;
-      }
       if (filter.method != null &&
           r.method.toLowerCase() != filter.method.toLowerCase()) {
         return false;
@@ -334,8 +328,6 @@ class NetworkFilter {
     this.uriSubstring,
     this.status,
     this.type,
-    this.showHttp = true,
-    this.showWebSocket = true,
   });
 
   factory NetworkFilter.from(NetworkFilter filter) {
@@ -344,8 +336,38 @@ class NetworkFilter {
       uriSubstring: filter.uriSubstring,
       status: filter.status,
       type: filter.type,
-      showHttp: filter.showHttp,
-      showWebSocket: filter.showWebSocket,
+    );
+  }
+
+  factory NetworkFilter.fromQuery(String query) {
+    final partsBySpace = query.split(' ');
+
+    String uriSubstring;
+    String method;
+    String status;
+    String type;
+    for (final part in partsBySpace) {
+      final querySeparatorIndex = part.indexOf(':');
+      if (querySeparatorIndex != -1) {
+        final value = part.substring(querySeparatorIndex + 1);
+        if (value != '') {
+          if (isMethodFilter(part)) {
+            method = value;
+          } else if (isStatusFilter(part)) {
+            status = value;
+          } else if (isTypeFilter(part)) {
+            type = value;
+          }
+        }
+      } else {
+        uriSubstring = part;
+      }
+    }
+    return NetworkFilter(
+      method: method,
+      uriSubstring: uriSubstring,
+      status: status,
+      type: type,
     );
   }
 
@@ -357,7 +379,23 @@ class NetworkFilter {
 
   String type;
 
-  bool showHttp;
+  String get query {
+    final _uriSubstring = uriSubstring ?? '';
+    final _method = method != null ? 'method:$method' : '';
+    final _status = status != null ? 'status:$status' : '';
+    final _type = type != null ? 'type:$type' : '';
+    return '$_uriSubstring $_method $_status $_type'.trim();
+  }
 
-  bool showWebSocket;
+  static bool isMethodFilter(String query) {
+    return query.startsWith('m:') || query.startsWith('method:');
+  }
+
+  static bool isStatusFilter(String query) {
+    return query.startsWith('s:') || query.startsWith('status:');
+  }
+
+  static bool isTypeFilter(String query) {
+    return query.startsWith('t:') || query.startsWith('type:');
+  }
 }
