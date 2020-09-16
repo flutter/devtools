@@ -538,9 +538,11 @@ class TimelineFlameChartState
             Offset(verticalGuidelineX, verticalGuidelineEndY),
           ));
 
-          // Draw the first child since it is guaranteed to be connected to
+          // Draw the horizontal guideline to the first child event that is not
+          // an instant event, since it is guaranteed to be connected to
           // the main vertical we just created.
-          final firstChild = event.children.first;
+          final firstChild = event.children
+              .firstWhere((TimelineEvent e) => !e.isAsyncInstantEvent);
           final horizontalGuidelineEndX =
               chartNodesByEvent[firstChild].rect.left;
           final horizontalGuidelineY =
@@ -556,6 +558,8 @@ class TimelineFlameChartState
             double horizontalGuidelineStartX = verticalGuidelineX;
 
             final child = event.children[i];
+            if (child.isAsyncInstantEvent) continue;
+
             final childNode = chartNodesByEvent[child];
 
             // Helper method to generate a vertical guideline for subsequent
@@ -588,11 +592,27 @@ class TimelineFlameChartState
               horizontalGuidelineStartX = newVerticalGuidelineX;
             }
 
+            FlameChartNode previousSiblingInRow(FlameChartNode child) {
+              final previousNodeIndex = child.row.nodes.indexOf(child) - 1;
+              final previousNode = previousNodeIndex >= 0
+                  ? child.row.nodes[previousNodeIndex]
+                  : null;
+              final isSibling = previousNode?.data?.parent == node.data;
+              return isSibling ? previousNode : null;
+            }
+
             if (childNode.row.index == node.row.index + 1) {
-              final previousChildIndex =
-                  childNode.row.nodes.indexOf(childNode) - 1;
-              final previousNode = childNode.row.nodes[previousChildIndex];
-              generateSubsequentVerticalGuideline(previousNode.rect.right);
+              FlameChartNode previousSibling = previousSiblingInRow(childNode);
+              // Look back until we find the first sibling in this row that is
+              // not an instant event (if present).
+              while (previousSibling != null &&
+                  (previousSibling.data as AsyncTimelineEvent)
+                      .isAsyncInstantEvent) {
+                previousSibling = previousSiblingInRow(previousSibling);
+              }
+              if (previousSibling != null) {
+                generateSubsequentVerticalGuideline(previousSibling.rect.right);
+              }
             }
 
             final horizontalGuidelineEndX = childNode.rect.left;
