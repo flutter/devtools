@@ -654,8 +654,8 @@ class TreemapNode extends TreeNode<TreemapNode> {
       //     package: a
       //     <Type>
       //     <OneByteString>
-      if ((current.name.contains('package:') ||
-              current.name.contains('dart:')) &&
+      if ((current.name.startsWith('package:') ||
+              current.name.startsWith('dart:')) &&
           (reversedPath.isEmpty || reversedPath.last != current.name)) {
         reversedPath.add(current.name);
       }
