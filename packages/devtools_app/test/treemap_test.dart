@@ -68,6 +68,24 @@ void main() {
           ),
       ]);
 
+    final nodeWithDuplicatePackageNameGrandchild =
+        TreemapNode(name: 'grandchild');
+    final nodeWithDuplicatePackageNameChild1 = TreemapNode(name: 'package:a');
+    final nodeWithDuplicatePackageNameChild2 = TreemapNode(name: '<Type>');
+    final nodeWithDuplicatePackageName = TreemapNode(name: 'package:a');
+    TreemapNode(name: 'libapp.so (Dart AOT)')
+      ..addChild(nodeWithDuplicatePackageName
+        ..addAllChildren([
+          nodeWithDuplicatePackageNameChild1
+            ..addChild(nodeWithDuplicatePackageNameGrandchild),
+          nodeWithDuplicatePackageNameChild2,
+        ]));
+
+    final dartLibraryChild = TreemapNode(name: 'dart lib child');
+    final dartLibraryNode = TreemapNode(name: 'dart:core');
+    TreemapNode(name: 'libapp.so (Dart AOT)')
+      ..addChild(dartLibraryNode..addChild(dartLibraryChild));
+
     test('packagePath returns correct values', () {
       expect(testRoot.packagePath(), equals([]));
       expect(grandchild1.packagePath(), equals(['package:child1']));
@@ -82,6 +100,15 @@ void main() {
             'package:grandchild2',
             'package:greatGrandchild2',
           ]));
+    });
+
+    test('packagePath returns correct values for duplicate package name', () {
+      expect(nodeWithDuplicatePackageNameGrandchild.packagePath(),
+          equals(['package:a']));
+    });
+
+    test('packagePath returns correct value for dart library node', () {
+      expect(dartLibraryChild.packagePath(), equals(['dart:core']));
     });
   });
 

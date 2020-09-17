@@ -647,7 +647,16 @@ class TreemapNode extends TreeNode<TreemapNode> {
         // the Dart AOT snapshot.
         return reversedPath.reversed.toList();
       }
-      if (current.name.contains('package:')) {
+
+      // Prevent duplicated package names from being added to the path.
+      // Sometimes the hierarchy can look like this:
+      // package:a
+      //     package: a
+      //     <Type>
+      //     <OneByteString>
+      if ((current.name.contains('package:') ||
+              current.name.contains('dart:')) &&
+          (reversedPath.isEmpty || reversedPath.last != current.name)) {
         reversedPath.add(current.name);
       }
       current = current.parent;
