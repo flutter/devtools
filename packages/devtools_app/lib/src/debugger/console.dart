@@ -62,8 +62,7 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
         children: [
           Expanded(
             child: Console(
-              title: areaPaneHeader(
-                context,
+              title: AreaPaneHeader(
                 title: 'Console',
                 needsTopBorder: false,
                 actions: [

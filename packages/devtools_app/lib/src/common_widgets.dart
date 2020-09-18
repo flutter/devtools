@@ -78,29 +78,36 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
   );
 }
 
-// TODO(kenz): Cleanup - audit the following methods and convert them into
-// Widgets where possible.
-
 /// Button to clear data in the UI.
 ///
 /// * `includeTextWidth`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
-StatelessWidget clearButton({
-  Key key,
-  bool busy = false,
-  double includeTextWidth,
-  @required VoidCallback onPressed,
-}) {
-  return OutlineButton(
-    key: key,
-    onPressed: busy ? null : onPressed,
-    child: MaterialIconLabel(
-      Icons.block,
-      'Clear',
-      includeTextWidth: includeTextWidth,
-    ),
-  );
+class ClearButton extends StatelessWidget {
+  const ClearButton({
+    Key key,
+    this.busy = false,
+    this.includeTextWidth,
+    @required this.onPressed,
+  }) : super(key: key);
+
+  final bool busy;
+
+  final double includeTextWidth;
+
+  final VoidCallback onPressed;
+  @override
+  Widget build(BuildContext context) {
+    return OutlineButton(
+      key: key,
+      onPressed: busy ? null : onPressed,
+      child: MaterialIconLabel(
+        Icons.block,
+        'Clear',
+        includeTextWidth: includeTextWidth,
+      ),
+    );
+  }
 }
 
 /// Button to start recording data.
@@ -110,22 +117,35 @@ StatelessWidget clearButton({
 ///    omitted.
 /// * `labelOverride`: Optional alternative text to use for the button.
 /// * `onPressed`: The callback to be called upon pressing the button.
-StatelessWidget recordButton({
-  Key key,
-  @required bool recording,
-  double includeTextWidth,
-  String labelOverride,
-  @required VoidCallback onPressed,
-}) {
-  return OutlineButton(
-    key: key,
-    onPressed: recording ? null : onPressed,
-    child: MaterialIconLabel(
-      Icons.fiber_manual_record,
-      labelOverride ?? 'Record',
-      includeTextWidth: includeTextWidth,
-    ),
-  );
+class RecordButton extends StatelessWidget {
+  const RecordButton({
+    Key key,
+    @required this.recording,
+    this.includeTextWidth,
+    this.labelOverride,
+    @required this.onPressed,
+  }) : super(key: key);
+
+  final bool recording;
+
+  final double includeTextWidth;
+
+  final String labelOverride;
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlineButton(
+      key: key,
+      onPressed: recording ? null : onPressed,
+      child: MaterialIconLabel(
+        Icons.fiber_manual_record,
+        labelOverride ?? 'Record',
+        includeTextWidth: includeTextWidth,
+      ),
+    );
+  }
 }
 
 /// Button to refresh data.
@@ -134,22 +154,32 @@ StatelessWidget recordButton({
 ///    omitted.
 /// * `labelOverride`: Optional alternative text to use for the button.
 /// * `onPressed`: The callback to be called upon pressing the button.
-StatelessWidget refreshButton({
-  Key key,
-  bool busy = false,
-  double includeTextWidth,
-  String labelOverride,
-  @required VoidCallback onPressed,
-}) {
-  return OutlineButton(
-    key: key,
-    onPressed: busy ? null : onPressed,
-    child: MaterialIconLabel(
-      Icons.refresh,
-      'Refresh',
-      includeTextWidth: includeTextWidth,
-    ),
-  );
+class RefreshButton extends StatelessWidget {
+  const RefreshButton({
+    Key key,
+    this.busy = false,
+    this.includeTextWidth,
+    @required this.onPressed,
+  }) : super(key: key);
+
+  final bool busy;
+
+  final double includeTextWidth;
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlineButton(
+      key: key,
+      onPressed: busy ? null : onPressed,
+      child: MaterialIconLabel(
+        Icons.refresh,
+        'Refresh',
+        includeTextWidth: includeTextWidth,
+      ),
+    );
+  }
 }
 
 /// Button to stop recording data.
@@ -158,125 +188,156 @@ StatelessWidget refreshButton({
 /// * `includeTextWidth`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
-StatelessWidget stopRecordingButton({
-  Key key,
-  @required bool recording,
-  double includeTextWidth,
-  @required VoidCallback onPressed,
-}) {
-  return OutlineButton(
-    key: key,
-    onPressed: !recording ? null : onPressed,
-    child: MaterialIconLabel(
-      Icons.stop,
-      'Stop',
-      includeTextWidth: includeTextWidth,
-    ),
-  );
-}
+class StopRecordingButton extends StatelessWidget {
+  const StopRecordingButton({
+    Key key,
+    @required this.recording,
+    this.includeTextWidth,
+    @required this.onPressed,
+  }) : super(key: key);
 
-// TODO(kenz): make recording info its own stateful widget that handles
-// listening to value notifiers and building info.
-Widget recordingInfo({
-  Key instructionsKey,
-  Key recordingStatusKey,
-  Key processingStatusKey,
-  @required bool recording,
-  @required String recordedObject,
-  @required bool processing,
-  double progressValue,
-  bool isPause = false,
-}) {
-  Widget child;
-  if (processing) {
-    child = processingInfo(
-      key: processingStatusKey,
-      progressValue: progressValue,
-      processedObject: recordedObject,
-    );
-  } else if (recording) {
-    child = _recordingStatus(
-      key: recordingStatusKey,
-      recordedObject: recordedObject,
-    );
-  } else {
-    child = _recordingInstructions(
-      key: instructionsKey,
-      recordedObject: recordedObject,
-      isPause: isPause,
+  final bool recording;
+
+  final double includeTextWidth;
+
+  final VoidCallback onPressed;
+  @override
+  Widget build(BuildContext context) {
+    return OutlineButton(
+      key: key,
+      onPressed: !recording ? null : onPressed,
+      child: MaterialIconLabel(
+        Icons.stop,
+        'Stop',
+        includeTextWidth: includeTextWidth,
+      ),
     );
   }
-  return Center(
-    child: child,
-  );
 }
 
-Widget _recordingInstructions({Key key, String recordedObject, bool isPause}) {
-  final stopOrPauseRow = Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: isPause
-        ? const [
-            Text('Click the pause button '),
-            Icon(Icons.pause),
-            Text(' to pause the recording.'),
-          ]
-        : const [
-            Text('Click the stop button '),
-            Icon(Icons.stop),
-            Text(' to end the recording.'),
-          ],
-  );
-  return Column(
-    key: key,
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('Click the record button '),
-          const Icon(Icons.fiber_manual_record),
-          Text(' to start recording $recordedObject.')
-        ],
-      ),
-      stopOrPauseRow,
-    ],
-  );
-}
+class RecordingInfo extends StatelessWidget {
+  const RecordingInfo({
+    this.instructionsKey,
+    this.recordingStatusKey,
+    this.processingStatusKey,
+    @required this.recording,
+    @required this.recordedObject,
+    @required this.processing,
+    this.progressValue,
+    this.isPause = false,
+  });
 
-Widget _recordingStatus({Key key, String recordedObject}) {
-  return Column(
-    key: key,
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Text('Recording $recordedObject'),
-      const SizedBox(height: defaultSpacing),
-      const CircularProgressIndicator(),
-    ],
-  );
-}
+  final Key instructionsKey;
+  final Key recordingStatusKey;
+  final Key processingStatusKey;
+  final bool recording;
+  final String recordedObject;
+  final bool processing;
+  final double progressValue;
+  final bool isPause;
 
-Widget processingInfo({
-  Key key,
-  @required double progressValue,
-  @required String processedObject,
-}) {
-  return Center(
-    child: Column(
+  @override
+  Widget build(BuildContext context) {
+    Widget child;
+    if (processing) {
+      child = ProcessingInfo(
+        key: processingStatusKey,
+        progressValue: progressValue,
+        processedObject: recordedObject,
+      );
+    } else if (recording) {
+      child = _recordingStatus(
+        key: recordingStatusKey,
+        recordedObject: recordedObject,
+      );
+    } else {
+      child = _recordingInstructions(
+        key: instructionsKey,
+        recordedObject: recordedObject,
+        isPause: isPause,
+      );
+    }
+    return Center(
+      child: child,
+    );
+  }
+
+  Widget _recordingInstructions(
+      {Key key, String recordedObject, bool isPause}) {
+    final stopOrPauseRow = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: isPause
+          ? const [
+              Text('Click the pause button '),
+              Icon(Icons.pause),
+              Text(' to pause the recording.'),
+            ]
+          : const [
+              Text('Click the stop button '),
+              Icon(Icons.stop),
+              Text(' to end the recording.'),
+            ],
+    );
+    return Column(
       key: key,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Processing $processedObject'),
-        const SizedBox(height: defaultSpacing),
-        SizedBox(
-          width: 200.0,
-          height: defaultSpacing,
-          child: LinearProgressIndicator(
-            value: progressValue,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Click the record button '),
+            const Icon(Icons.fiber_manual_record),
+            Text(' to start recording $recordedObject.')
+          ],
         ),
+        stopOrPauseRow,
       ],
-    ),
-  );
+    );
+  }
+
+  Widget _recordingStatus({Key key, String recordedObject}) {
+    return Column(
+      key: key,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Recording $recordedObject'),
+        const SizedBox(height: defaultSpacing),
+        const CircularProgressIndicator(),
+      ],
+    );
+  }
+}
+
+class ProcessingInfo extends StatelessWidget {
+  const ProcessingInfo({
+    Key key,
+    @required this.progressValue,
+    @required this.processedObject,
+  }) : super(key: key);
+
+  final double progressValue;
+
+  final String processedObject;
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        key: key,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Processing $processedObject'),
+          const SizedBox(height: defaultSpacing),
+          SizedBox(
+            width: 200.0,
+            height: defaultSpacing,
+            child: LinearProgressIndicator(
+              value: progressValue,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Common button for exiting offline mode.
@@ -287,15 +348,22 @@ Widget processingInfo({
 /// setState(() {
 ///   offlineMode = false;
 /// }
-Widget exitOfflineButton(FutureOr<void> Function() onPressed) {
-  return OutlineButton(
-    key: const Key('exit offline button'),
-    onPressed: onPressed,
-    child: const MaterialIconLabel(
-      Icons.clear,
-      'Exit offline mode',
-    ),
-  );
+class ExitOfflineButton extends StatelessWidget {
+  const ExitOfflineButton({@required this.onPressed});
+
+  final FutureOr<void> Function() onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlineButton(
+      key: const Key('exit offline button'),
+      onPressed: onPressed,
+      child: const MaterialIconLabel(
+        Icons.clear,
+        'Exit offline mode',
+      ),
+    );
+  }
 }
 
 /// Display a single bullet character in order to act as a stylized spacer
@@ -422,50 +490,66 @@ class ToolbarAction extends StatelessWidget {
 /// on the right-hand side.
 ///
 /// This is typically used as a title for a logical area of the screen.
-// TODO(devoncarew): Refactor this into an 'AreaPaneHeader' widget.
 // TODO(peterdjlee): Consider passing in a list of widgets for content instead of String title.
-SizedBox areaPaneHeader(
-  BuildContext context, {
-  @required String title,
-  bool needsTopBorder = true,
-  bool needsBottomBorder = true,
-  bool needsLeftBorder = false,
-  List<Widget> actions = const [],
-  double rightPadding = densePadding,
-  bool tall = false,
-}) {
-  final theme = Theme.of(context);
+class AreaPaneHeader extends SizedBox {
+  const AreaPaneHeader({
+    @required this.title,
+    this.needsTopBorder = true,
+    this.needsBottomBorder = true,
+    this.needsLeftBorder = false,
+    this.actions = const [],
+    this.rightPadding = densePadding,
+    this.tall = false,
+  });
 
-  return SizedBox(
-    height:
-        tall ? areaPaneHeaderHeight + 2 * densePadding : areaPaneHeaderHeight,
-    child: Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: needsTopBorder ? defaultBorderSide(theme) : BorderSide.none,
-          bottom:
-              needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
-          left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
-        ),
-        color: titleSolidBackgroundColor(theme),
-      ),
-      padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
-      alignment: Alignment.centerLeft,
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.subtitle2,
-            ),
+  final String title;
+
+  final bool needsTopBorder;
+
+  final bool needsBottomBorder;
+
+  final bool needsLeftBorder;
+
+  final List<Widget> actions;
+
+  final double rightPadding;
+
+  final bool tall;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SizedBox(
+      height:
+          tall ? areaPaneHeaderHeight + 2 * densePadding : areaPaneHeaderHeight,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: needsTopBorder ? defaultBorderSide(theme) : BorderSide.none,
+            bottom:
+                needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
+            left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
           ),
-          ...actions,
-        ],
+          color: titleSolidBackgroundColor(theme),
+        ),
+        padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
+        alignment: Alignment.centerLeft,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.subtitle2,
+              ),
+            ),
+            ...actions,
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 BorderSide defaultBorderSide(ThemeData theme) {

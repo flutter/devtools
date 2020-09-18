@@ -217,14 +217,14 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       builder: (context, refreshing, _) {
         return Row(
           children: [
-            refreshButton(
+            RefreshButton(
               key: TimelineScreen.refreshButtonKey,
               busy: refreshing || processing,
               includeTextWidth: _primaryControlsMinIncludeTextWidth,
               onPressed: _refreshTimeline,
             ),
             const SizedBox(width: defaultSpacing),
-            clearButton(
+            ClearButton(
               key: TimelineScreen.clearButtonKey,
               busy: refreshing || processing,
               includeTextWidth: _primaryControlsMinIncludeTextWidth,

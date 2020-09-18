@@ -104,7 +104,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     return Column(children: [
       Row(
         children: [
-          clearButton(onPressed: _clearLogs),
+          ClearButton(onPressed: _clearLogs),
           const Spacer(),
           Container(
             width: defaultSearchTextWidth,
@@ -251,8 +251,7 @@ class _LogDetailsState extends State<LogDetails>
 
     return OutlineDecoration(
       child: Console(
-        title: areaPaneHeader(
-          context,
+        title: AreaPaneHeader(
           title: 'Details',
           needsTopBorder: false,
           actions: [

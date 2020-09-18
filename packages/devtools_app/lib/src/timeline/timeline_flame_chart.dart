@@ -96,8 +96,7 @@ class _TimelineFlameChartContainerState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          areaPaneHeader(
-            context,
+          AreaPaneHeader(
             title: 'Timeline Events',
             tall: true,
             needsTopBorder: false,
@@ -127,7 +126,7 @@ class _TimelineFlameChartContainerState
   }
 
   Widget _buildProcessingInfo() {
-    return processingInfo(
+    return ProcessingInfo(
       progressValue: widget.processingProgress,
       processedObject: 'timeline trace',
     );

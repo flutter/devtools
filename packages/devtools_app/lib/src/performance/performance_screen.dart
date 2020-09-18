@@ -196,21 +196,21 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   Widget _buildPrimaryStateControls() {
     return Row(
       children: [
-        recordButton(
+        RecordButton(
           key: PerformanceScreen.recordButtonKey,
           recording: recording,
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.startRecording,
         ),
         const SizedBox(width: denseSpacing),
-        stopRecordingButton(
+        StopRecordingButton(
           key: PerformanceScreen.stopRecordingButtonKey,
           recording: recording,
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.stopRecording,
         ),
         const SizedBox(width: defaultSpacing),
-        clearButton(
+        ClearButton(
           key: PerformanceScreen.clearButtonKey,
           busy: recording,
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
@@ -239,7 +239,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   }
 
   Widget _buildRecordingInfo() {
-    return recordingInfo(
+    return RecordingInfo(
       instructionsKey: PerformanceScreen.recordingInstructionsKey,
       recordingStatusKey: PerformanceScreen.recordingStatusKey,
       recording: recording,

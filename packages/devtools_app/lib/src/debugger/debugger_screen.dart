@@ -214,15 +214,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           initialFractions: const [0.38, 0.38, 0.24],
           minSizes: const [0.0, 0.0, 0.0],
           headers: <SizedBox>[
-            areaPaneHeader(
-              context,
+            AreaPaneHeader(
               title: callStackTitle,
               needsTopBorder: false,
               actions: debugShowCallStackCount ? [_callStackRightChild()] : [],
             ),
-            areaPaneHeader(context, title: variablesTitle),
-            areaPaneHeader(
-              context,
+            const AreaPaneHeader(title: variablesTitle),
+            AreaPaneHeader(
               title: breakpointsTitle,
               actions: [
                 _breakpointsRightChild(),

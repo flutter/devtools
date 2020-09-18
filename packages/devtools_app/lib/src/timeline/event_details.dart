@@ -39,8 +39,7 @@ class EventDetails extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          areaPaneHeader(
-            context,
+          AreaPaneHeader(
             needsTopBorder: false,
             title: selectedEvent != null
                 ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
@@ -94,7 +93,7 @@ class EventDetails extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: cpuProfilerController.transformer.progressNotifier,
       builder: (context, progress, _) {
-        return processingInfo(
+        return ProcessingInfo(
           progressValue: progress,
           processedObject: 'CPU samples',
         );

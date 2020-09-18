@@ -144,7 +144,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     final hasRequests = requests.requests.isNotEmpty;
     return Row(
       children: [
-        recordButton(
+        RecordButton(
           key: NetworkScreen.recordButtonKey,
           recording: recording,
           labelOverride: 'Record network traffic',
@@ -152,14 +152,14 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
           onPressed: _networkController.startRecording,
         ),
         const SizedBox(width: denseSpacing),
-        stopRecordingButton(
+        StopRecordingButton(
           key: NetworkScreen.stopButtonKey,
           recording: recording,
           includeTextWidth: includeTextWidth,
           onPressed: _networkController.stopRecording,
         ),
         const SizedBox(width: denseSpacing),
-        clearButton(
+        ClearButton(
           key: NetworkScreen.clearButtonKey,
           onPressed: () {
             _networkController.clear();
@@ -188,7 +188,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
         return Expanded(
           child: (!recording && requests.isEmpty)
               ? Center(
-                  child: recordingInfo(
+                  child: RecordingInfo(
                     instructionsKey: NetworkScreen.recordingInstructionsKey,
                     recording: recording,
                     // TODO(kenz): create a processing notifier if necessary

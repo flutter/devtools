@@ -48,8 +48,7 @@ class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        areaPaneHeader(
-          context,
+        AreaPaneHeader(
           title: showCallGraph ? 'Call Graph' : 'Dominator Tree',
           needsTopBorder: false,
           needsBottomBorder: false,

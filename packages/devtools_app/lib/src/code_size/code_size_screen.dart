@@ -172,7 +172,7 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
   }
 
   Widget _buildClearButton(Key activeTabKey) {
-    return clearButton(
+    return ClearButton(
       key: CodeSizeScreen.clearButtonKey,
       onPressed: () => controller.clear(activeTabKey),
     );
@@ -231,8 +231,7 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
     return OutlineDecoration(
       child: Column(
         children: [
-          areaPaneHeader(
-            context,
+          AreaPaneHeader(
             title: _generateSingleFileHeaderText(),
             needsTopBorder: false,
           ),
@@ -386,8 +385,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
     return OutlineDecoration(
       child: Column(
         children: [
-          areaPaneHeader(
-            context,
+          AreaPaneHeader(
             title: _generateDualFileHeaderText(),
             needsTopBorder: false,
           ),
