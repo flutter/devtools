@@ -201,6 +201,7 @@ class StopRecordingButton extends StatelessWidget {
   final double includeTextWidth;
 
   final VoidCallback onPressed;
+
   @override
   Widget build(BuildContext context) {
     return OutlineButton(
@@ -228,12 +229,19 @@ class RecordingInfo extends StatelessWidget {
   });
 
   final Key instructionsKey;
+
   final Key recordingStatusKey;
+
   final Key processingStatusKey;
+
   final bool recording;
+
   final String recordedObject;
+
   final bool processing;
+
   final double progressValue;
+
   final bool isPause;
 
   @override
@@ -318,6 +326,7 @@ class ProcessingInfo extends StatelessWidget {
   final double progressValue;
 
   final String processedObject;
+
   @override
   Widget build(BuildContext context) {
     return Center(
