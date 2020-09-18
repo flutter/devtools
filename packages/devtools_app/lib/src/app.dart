@@ -246,6 +246,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       valueListenable: widget.preferences.darkModeTheme,
       builder: (context, value, _) {
         return MaterialApp(
+          title: 'Dart DevTools',
           debugShowCheckedModeBanner: false,
           theme: themeFor(isDarkTheme: value, ideTheme: ideTheme),
           builder: (context, child) => Notifications(child: child),
