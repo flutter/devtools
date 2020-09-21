@@ -328,7 +328,6 @@ class ProcessingInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        key: key,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text('Processing $processedObject'),
