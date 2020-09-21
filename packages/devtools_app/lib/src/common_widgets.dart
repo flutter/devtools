@@ -537,6 +537,62 @@ class ExportButton extends StatelessWidget {
   }
 }
 
+class FilterButton extends StatelessWidget {
+  const FilterButton({
+    Key key,
+    @required this.onPressed,
+    @required this.isFilterActive,
+  }) : super(key: key);
+
+  final VoidCallback onPressed;
+
+  final bool isFilterActive;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return RoundedOutlinedBorder(
+      child: SizedBox(
+        height: defaultButtonHeight,
+        child: Tooltip(
+          message: 'Filter',
+          child: FlatButton(
+            key: key,
+            onPressed: onPressed,
+            color: isFilterActive
+                ? colorScheme.toggleButtonBackgroundColor
+                : Colors.transparent,
+            child: createIcon(
+              Icons.filter_list,
+              color: isFilterActive
+                  ? colorScheme.toggleButtonForegroundColor
+                  : null,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Widget clearInputButton(VoidCallback onPressed) {
+  return inputDecorationSuffixButton(Icons.clear, onPressed);
+}
+
+Widget inputDecorationSuffixButton(IconData icon, VoidCallback onPressed) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: densePadding),
+    width: 24.0,
+    child: IconButton(
+      padding: const EdgeInsets.all(0.0),
+      onPressed: onPressed,
+      iconSize: defaultIconSize,
+      splashRadius: defaultIconSize,
+      icon: Icon(icon),
+    ),
+  );
+}
+
 class OutlineDecoration extends StatelessWidget {
   const OutlineDecoration({Key key, this.child}) : super(key: key);
 

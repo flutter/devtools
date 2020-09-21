@@ -327,6 +327,7 @@ class TimelineConfigurationsDialog extends StatelessWidget {
       content: Container(
         width: dialogWidth,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ..._defaultRecordedStreams(theme),

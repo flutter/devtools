@@ -21,6 +21,8 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     _networkService = NetworkService(this);
   }
 
+  static NetworkFilter defaultFilter = NetworkFilter();
+
   /// Notifies that new Network requests have been processed.
   ValueListenable<NetworkRequests> get requests => _requests;
 
@@ -29,6 +31,15 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
   ValueListenable<NetworkRequest> get selectedRequest => _selectedRequest;
 
   final _selectedRequest = ValueNotifier<NetworkRequest>(null);
+
+  ValueListenable<List<NetworkRequest>> get filteredRequests =>
+      _filteredRequests;
+
+  final _filteredRequests = ValueNotifier<List<NetworkRequest>>([]);
+
+  ValueListenable<NetworkFilter> get activeFilter => _activeFilter;
+
+  final _activeFilter = ValueNotifier<NetworkFilter>(defaultFilter);
 
   /// Notifies that the timeline is currently being recorded.
   ValueListenable<bool> get recordingNotifier => _recordingNotifier;
@@ -169,6 +180,7 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
       invalidRequests: [],
       outstandingRequestsMap: Map.from(requests.value.outstandingHttpRequests),
     );
+    filterData(_activeFilter.value);
     refreshSearchMatches();
   }
 
@@ -255,6 +267,7 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
   Future<void> clear() async {
     await _networkService.clearData();
     _requests.value = NetworkRequests();
+    _filteredRequests.value = [];
     refreshSearchMatches();
     _selectedRequest.value = null;
   }
@@ -268,12 +281,130 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     // TODO(kenz): support intelligent search queries like t:http (type = http)
     // or m:GET (method = GET).
 
-    final currentRequests = _requests.value.requests;
+    final currentRequests = _filteredRequests.value;
     for (final request in currentRequests) {
       if (request.uri.toLowerCase().contains(caseInsensitiveSearch)) {
         matches.add(request);
       }
     }
     return matches;
+  }
+
+  void filterData(NetworkFilter filter) {
+    if (filter == defaultFilter) {
+      _filteredRequests.value = List.from(_requests.value.requests);
+    }
+    _filteredRequests.value =
+        _requests.value.requests.where((NetworkRequest r) {
+      if (filter.method != null &&
+          r.method.toLowerCase() != filter.method.toLowerCase()) {
+        return false;
+      }
+      if (filter.status != null &&
+          r.status?.toLowerCase() != filter.status.toLowerCase()) {
+        return false;
+      }
+      if (filter.type != null &&
+          r.type.toLowerCase() != filter.type.toLowerCase()) {
+        return false;
+      }
+      if (filter.substrings.isNotEmpty) {
+        for (final substring in filter.substrings) {
+          final caseInsensitiveSubstring = substring.toLowerCase();
+          final matchesUri =
+              r.uri.toLowerCase().contains(caseInsensitiveSubstring);
+          final matchesMethod =
+              r.method.toLowerCase().contains(caseInsensitiveSubstring);
+          final matchesStatus =
+              r.status?.toLowerCase()?.contains(caseInsensitiveSubstring) ??
+                  false;
+          final matchesType =
+              r.type.toLowerCase().contains(caseInsensitiveSubstring);
+          if (matchesUri || matchesMethod || matchesStatus || matchesType) {
+            return true;
+          }
+        }
+        return false;
+      }
+      return true;
+    }).toList();
+    _activeFilter.value = filter;
+  }
+
+  void resetFilters() {
+    _activeFilter.value = defaultFilter;
+  }
+}
+
+class NetworkFilter {
+  NetworkFilter({
+    this.method,
+    this.substrings = const [],
+    this.status,
+    this.type,
+  });
+
+  factory NetworkFilter.from(NetworkFilter filter) {
+    return NetworkFilter(
+      method: filter.method,
+      substrings: filter.substrings,
+      status: filter.status,
+      type: filter.type,
+    );
+  }
+
+  factory NetworkFilter.fromQuery(String query) {
+    final partsBySpace = query.split(' ');
+
+    final substrings = <String>[];
+    String method;
+    String status;
+    String type;
+    for (final part in partsBySpace) {
+      final querySeparatorIndex = part.indexOf(':');
+      if (querySeparatorIndex != -1) {
+        final value = part.substring(querySeparatorIndex + 1);
+        if (value != '') {
+          if (isValidFilter(keys: ['m', 'method'], query: part)) {
+            method = value;
+          } else if (isValidFilter(keys: ['s', 'status'], query: part)) {
+            status = value;
+          } else if (isValidFilter(keys: ['t', 'type'], query: part)) {
+            type = value;
+          }
+        }
+      } else {
+        substrings.add(part);
+      }
+    }
+    return NetworkFilter(
+      method: method,
+      substrings: substrings,
+      status: status,
+      type: type,
+    );
+  }
+
+  String method;
+
+  List<String> substrings;
+
+  String status;
+
+  String type;
+
+  String get query {
+    final _substrings = substrings.join(' ');
+    final _method = method != null ? 'method:$method' : '';
+    final _status = status != null ? 'status:$status' : '';
+    final _type = type != null ? 'type:$type' : '';
+    return '$_substrings $_method $_status $_type'.trim();
+  }
+
+  static bool isValidFilter({@required List<String> keys, String query}) {
+    for (final key in keys) {
+      if (query.startsWith('$key:')) return true;
+    }
+    return false;
   }
 }

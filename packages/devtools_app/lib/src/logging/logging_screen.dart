@@ -108,7 +108,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           const Spacer(),
           Container(
             width: defaultSearchTextWidth,
-            height: defaultSearchTextHeight,
+            height: defaultTextFieldHeight,
             child: TextField(
               controller: filterController,
               decoration: const InputDecoration(

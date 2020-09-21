@@ -56,4 +56,8 @@ bool _showLabelText(BuildContext context, double includeTextWidth) {
       MediaQuery.of(context).size.width > includeTextWidth;
 }
 
-Icon createIcon(IconData iconData) => Icon(iconData, size: 18.0);
+Icon createIcon(IconData iconData, {Color color}) => Icon(
+      iconData,
+      size: 18.0,
+      color: color,
+    );

@@ -321,7 +321,7 @@ mixin SearchFieldMixin {
     if (supportsNavigation) {
       return SearchNavigationControls(controller, onClear: onClear);
     } else {
-      return _clearSearchButton(onClear);
+      return clearInputButton(onClear);
     }
   }
 
@@ -372,11 +372,11 @@ class SearchNavigationControls extends StatelessWidget {
                 ),
               ),
             ),
-            _searchSuffixButton(Icons.keyboard_arrow_up,
+            inputDecorationSuffixButton(Icons.keyboard_arrow_up,
                 numMatches > 1 ? controller.previousMatch : null),
-            _searchSuffixButton(Icons.keyboard_arrow_down,
+            inputDecorationSuffixButton(Icons.keyboard_arrow_down,
                 numMatches > 1 ? controller.nextMatch : null),
-            _clearSearchButton(onClear),
+            clearInputButton(onClear),
           ],
         );
       },
@@ -397,22 +397,4 @@ class SearchNavigationControls extends StatelessWidget {
       },
     );
   }
-}
-
-Widget _clearSearchButton(VoidCallback onPressed) {
-  return _searchSuffixButton(Icons.clear, onPressed);
-}
-
-Widget _searchSuffixButton(IconData icon, VoidCallback onPressed) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: densePadding),
-    width: 24.0,
-    child: IconButton(
-      padding: const EdgeInsets.all(0.0),
-      onPressed: onPressed,
-      iconSize: defaultIconSize,
-      splashRadius: defaultIconSize,
-      icon: Icon(icon),
-    ),
-  );
 }
