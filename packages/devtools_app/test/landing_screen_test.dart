@@ -13,6 +13,6 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(wrap(LandingScreenBody()));
     expect(find.text('Connect to a Running App'), findsOneWidget);
-    expect(find.text('Code Size Tooling'), findsOneWidget);
+    expect(find.text('App Size Tooling'), findsOneWidget);
   });
 }

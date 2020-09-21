@@ -13,7 +13,7 @@ import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../charts/treemap.dart';
 import '../utils.dart';
-import 'code_size_screen.dart';
+import 'app_size_screen.dart';
 
 enum DiffTreeType {
   increaseOnly,
@@ -21,13 +21,11 @@ enum DiffTreeType {
   combined,
 }
 
-// TODO(kenz): cleanup - rename all uses of "snapshot" to analysis
-
-class CodeSizeController {
+class AppSizeController {
   static const unsupportedFileTypeError =
-      'Failed to load snapshot: file type not supported.\n\n'
-      'The code size tool supports Dart AOT v8 snapshots, instruction sizes, '
-      'and apk-analysis files. See documentation for how to generate these files.';
+      'Failed to load size analysis file: file type not supported.\n\n'
+      'The app size tool supports Dart AOT v8 snapshots, instruction sizes, '
+      'and size-analysis files. See documentation for how to generate these files.';
 
   static const differentTypesError =
       'Failed to load diff: OLD and NEW files are different types.';
@@ -48,14 +46,14 @@ class CodeSizeController {
   ValueListenable<CallGraphNode> get diffCallGraphRoot => _diffCallGraphRoot;
   final _diffCallGraphRoot = ValueNotifier<CallGraphNode>(null);
 
-  /// The node set as the snapshot root.
+  /// The node set as the analysis tab root.
   ///
-  /// Used to build the treemap and the tree table for the snapshot tab.
-  ValueListenable<TreemapNode> get snapshotRoot => _snapshotRoot;
-  final _snapshotRoot = ValueNotifier<TreemapNode>(null);
+  /// Used to build the treemap and the tree table for the analysis tab.
+  ValueListenable<TreemapNode> get analysisRoot => _analysisRoot;
+  final _analysisRoot = ValueNotifier<TreemapNode>(null);
 
-  void changeSnapshotRoot(TreemapNode newRoot) {
-    _snapshotRoot.value = newRoot;
+  void changeAnalysisRoot(TreemapNode newRoot) {
+    _analysisRoot.value = newRoot;
 
     final programInfoNode =
         _analysisCallGraph?.program?.lookup(newRoot.packagePath()) ??
@@ -68,11 +66,11 @@ class CodeSizeController {
     }
   }
 
-  ValueListenable<DevToolsJsonFile> get snapshotJsonFile => _snapshotJsonFile;
-  final _snapshotJsonFile = ValueNotifier<DevToolsJsonFile>(null);
+  ValueListenable<DevToolsJsonFile> get analysisJsonFile => _analysisJsonFile;
+  final _analysisJsonFile = ValueNotifier<DevToolsJsonFile>(null);
 
-  void changeSnapshotJsonFile(DevToolsJsonFile newJson) {
-    _snapshotJsonFile.value = newJson;
+  void changeAnalysisJsonFile(DevToolsJsonFile newJson) {
+    _analysisJsonFile.value = newJson;
   }
 
   /// The node set as the diff root.
@@ -118,36 +116,34 @@ class CodeSizeController {
   TreemapNode _decreasedDiffTreeRoot;
   TreemapNode _combinedDiffTreeRoot;
 
-  ValueListenable<DevToolsJsonFile> get oldDiffSnapshotJsonFile =>
-      _oldDiffSnapshotJsonFile;
+  ValueListenable<DevToolsJsonFile> get oldDiffJsonFile => _oldDiffJsonFile;
 
-  final _oldDiffSnapshotJsonFile = ValueNotifier<DevToolsJsonFile>(null);
+  final _oldDiffJsonFile = ValueNotifier<DevToolsJsonFile>(null);
 
-  void changeOldDiffSnapshotFile(DevToolsJsonFile newJsonFile) {
-    _oldDiffSnapshotJsonFile.value = newJsonFile;
+  void changeOldDiffFile(DevToolsJsonFile newJsonFile) {
+    _oldDiffJsonFile.value = newJsonFile;
   }
 
-  ValueListenable<DevToolsJsonFile> get newDiffSnapshotJsonFile =>
-      _newDiffSnapshotJsonFile;
+  ValueListenable<DevToolsJsonFile> get newDiffJsonFile => _newDiffJsonFile;
 
-  final _newDiffSnapshotJsonFile = ValueNotifier<DevToolsJsonFile>(null);
+  final _newDiffJsonFile = ValueNotifier<DevToolsJsonFile>(null);
 
-  void changeNewDiffSnapshotFile(DevToolsJsonFile newJsonFile) {
-    _newDiffSnapshotJsonFile.value = newJsonFile;
+  void changeNewDiffFile(DevToolsJsonFile newJsonFile) {
+    _newDiffJsonFile.value = newJsonFile;
   }
 
   void clear(Key activeTabKey) {
-    if (activeTabKey == CodeSizeScreen.diffTabKey) {
+    if (activeTabKey == AppSizeScreen.diffTabKey) {
       _clearDiff();
-    } else if (activeTabKey == CodeSizeScreen.snapshotTabKey) {
-      _clearSnapshot();
+    } else if (activeTabKey == AppSizeScreen.analysisTabKey) {
+      _clearAnalysis();
     }
   }
 
   void _clearDiff() {
     _diffRoot.value = null;
-    _oldDiffSnapshotJsonFile.value = null;
-    _newDiffSnapshotJsonFile.value = null;
+    _oldDiffJsonFile.value = null;
+    _newDiffJsonFile.value = null;
     _increasedDiffTreeRoot = null;
     _decreasedDiffTreeRoot = null;
     _combinedDiffTreeRoot = null;
@@ -156,9 +152,9 @@ class CodeSizeController {
     _newDiffCallGraph = null;
   }
 
-  void _clearSnapshot() {
-    _snapshotRoot.value = null;
-    _snapshotJsonFile.value = null;
+  void _clearAnalysis() {
+    _analysisRoot.value = null;
+    _analysisJsonFile.value = null;
     _analysisCallGraphRoot.value = null;
     _analysisCallGraph = null;
   }
@@ -186,8 +182,8 @@ class CodeSizeController {
   ) async {
     _processingNotifier.value = true;
 
-    // Free up the thread for the code size page to display the loading message.
-    // Without passing in a high value, the value listenable builder in the code
+    // Free up the thread for the app size page to display the loading message.
+    // Without passing in a high value, the value listenable builder in the app
     // size screen does not get updated.
     await delayForBatchProcessing(micros: 10000);
 
@@ -216,7 +212,7 @@ class CodeSizeController {
       }
     }
 
-    changeSnapshotJsonFile(jsonFile);
+    changeAnalysisJsonFile(jsonFile);
 
     // Set name for root node.
     processedJson['n'] = 'Root';
@@ -224,14 +220,14 @@ class CodeSizeController {
     // Build a tree with [TreemapNode] from [processedJsonMap].
     final newRoot = generateTree(processedJson);
 
-    changeSnapshotRoot(newRoot);
+    changeAnalysisRoot(newRoot);
 
     _processingNotifier.value = false;
   }
 
   // TODO(peterdjlee): Spawn an isolate to run parts of this function to
   //                   prevent the UI from freezing and display a circular
-  //                   progress indicator on code size screen. Needs flutter
+  //                   progress indicator on app size screen. Needs flutter
   //                   web to support working with isolates. See #33577.
   void loadDiffTreeFromJsonFiles(
     DevToolsJsonFile oldFile,
@@ -250,8 +246,8 @@ class CodeSizeController {
 
     _processingNotifier.value = true;
 
-    // Free up the thread for the code size page to display the loading message.
-    // Without passing in a high value, the value listenable builder in the code
+    // Free up the thread for the app size page to display the loading message.
+    // Without passing in a high value, the value listenable builder in the app
     // size screen does not get updated.
     await delayForBatchProcessing(micros: 10000);
 
@@ -312,8 +308,8 @@ class CodeSizeController {
       return;
     }
 
-    changeOldDiffSnapshotFile(oldFile);
-    changeNewDiffSnapshotFile(newFile);
+    changeOldDiffFile(oldFile);
+    changeNewDiffFile(newFile);
 
     diffMap['n'] = 'Root';
 
@@ -374,7 +370,7 @@ class CodeSizeController {
   }
 
   /// Recursively generates a diff tree from [treeJson] that contains the difference
-  /// between an old snapshot and a new snapshot.
+  /// between an old size analysis file and a new size analysis file.
   ///
   /// Each node in the resulting tree represents a change in size for the given node.
   ///
@@ -479,7 +475,7 @@ class CodeSizeController {
   }
 }
 
-extension CodeSizeJsonFileExtension on DevToolsJsonFile {
+extension AppSizeJsonFileExtension on DevToolsJsonFile {
   static const _supportedAnalyzeSizePlatforms = [
     'apk',
     'aab',
@@ -493,7 +489,7 @@ extension CodeSizeJsonFileExtension on DevToolsJsonFile {
     if (data is Map<String, dynamic>) {
       final dataMap = data as Map<String, dynamic>;
       final type = dataMap['type'];
-      return CodeSizeJsonFileExtension._supportedAnalyzeSizePlatforms
+      return AppSizeJsonFileExtension._supportedAnalyzeSizePlatforms
           .contains(type);
     }
     return false;

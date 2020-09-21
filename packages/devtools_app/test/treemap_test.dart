@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 
-import 'support/code_size_test_data/apk_analysis.dart';
-import 'support/code_size_test_data/new_v8.dart';
-import 'support/code_size_test_data/sizes.dart';
-import 'support/code_size_test_data/small_sizes.dart';
+import 'support/app_size_test_data/apk_analysis.dart';
+import 'support/app_size_test_data/new_v8.dart';
+import 'support/app_size_test_data/sizes.dart';
+import 'support/app_size_test_data/small_sizes.dart';
 import 'support/utils.dart';
 import 'support/wrappers.dart';
 

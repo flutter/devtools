@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/code_size/code_size_attribution.dart';
+import 'package:devtools_app/src/app_size/code_size_attribution.dart';
 import 'package:devtools_app/src/table.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
 
-import 'support/code_size_test_data/precompiler_trace.dart';
+import 'support/app_size_test_data/precompiler_trace.dart';
 import 'support/wrappers.dart';
 
 void main() {

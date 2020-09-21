@@ -12,8 +12,8 @@ import 'analytics/analytics_stub.dart'
     if (dart.library.html) 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart';
 import 'analytics/provider.dart';
-import 'code_size/code_size_controller.dart';
-import 'code_size/code_size_screen.dart';
+import 'app_size/app_size_controller.dart';
+import 'app_size/app_size_screen.dart';
 import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'debugger/debugger_controller.dart';
@@ -45,7 +45,7 @@ import 'utils.dart';
 
 const homeRoute = '/';
 const snapshotRoute = '/snapshot';
-const codeSizeRoute = '/codeSize';
+const appSizeRoute = '/app-size';
 
 /// Top-level configuration for the app.
 @immutable
@@ -202,11 +202,11 @@ class DevToolsAppState extends State<DevToolsApp> {
           ideTheme: ideTheme,
         );
       },
-      codeSizeRoute: (_, __, ___) {
+      appSizeRoute: (_, __, ___) {
         return DevToolsScaffold.withChild(
           analyticsProvider: widget.analyticsProvider,
           child: _providedControllers(
-            child: const CodeSizeBody(),
+            child: const AppSizeBody(),
           ),
           ideTheme: ideTheme,
           actions: [
@@ -499,11 +499,10 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
         const LoggingScreen(),
         createController: () => LoggingController(),
       ),
-      if (codeSizeScreenEnabled)
-        DevToolsScreen<CodeSizeController>(
-          const CodeSizeScreen(),
-          createController: () => CodeSizeController(),
-        ),
+      DevToolsScreen<AppSizeController>(
+        const AppSizeScreen(),
+        createController: () => AppSizeController(),
+      ),
 // Uncomment to see a sample implementation of a conditional screen.
 //      DevToolsScreen<ExampleController>(
 //        const ExampleConditionalScreen(),
