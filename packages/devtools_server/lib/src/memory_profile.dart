@@ -19,16 +19,14 @@ class MemoryProfile {
 
     _jsonFile = MemoryJsonFile.create(profileFilename);
 
-    hookUpEvents();
-
-    start();
+    _hookUpEvents();
   }
 
   MemoryJsonFile _jsonFile;
 
   final bool _verboseMode;
 
-  void hookUpEvents() async {
+  void _hookUpEvents() async {
     final streamIds = [
       EventStreams.kExtension,
       EventStreams.kGC,
@@ -39,7 +37,7 @@ class MemoryProfile {
       // TODO(Kenzi): Collect timeline data too.
       // EventStreams.kTimeline,
       EventStreams.kVM,
-      'Service',
+      EventStreams.kService,
     ];
 
     await Future.wait(streamIds.map((String id) async {
@@ -129,7 +127,7 @@ class MemoryProfile {
   }
 
   // TODO(terry): Investigate moving code from this point through end of class to devtools_shared.
-  void start() {
+  void startPolling() {
     _pollingTimer = Timer(updateDelay, _pollMemory);
     service.onGCEvent.listen(_handleGCEvent);
   }
@@ -145,7 +143,7 @@ class MemoryProfile {
     // TODO(terry): expose when GC occured as markers in memory timeline.
   }
 
-  void stop() {
+  void stopPolling() {
     _pollingTimer?.cancel();
     service = null;
   }
