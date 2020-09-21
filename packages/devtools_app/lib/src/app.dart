@@ -45,7 +45,7 @@ import 'utils.dart';
 
 const homeRoute = '/';
 const snapshotRoute = '/snapshot';
-const codeSizeRoute = '/codeSize';
+const appSizeRoute = '/app-size';
 
 /// Top-level configuration for the app.
 @immutable
@@ -203,7 +203,7 @@ class DevToolsAppState extends State<DevToolsApp> {
           ideTheme: ideTheme,
         );
       },
-      codeSizeRoute: (_, __, ___) {
+      appSizeRoute: (_, __, ___) {
         return DevToolsScaffold.withChild(
           analyticsProvider: widget.analyticsProvider,
           child: _providedControllers(

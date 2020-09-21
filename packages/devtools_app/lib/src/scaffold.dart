@@ -278,7 +278,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       for (var screen in widget.tabs)
         Container(
           // TODO(kenz): this padding creates a flash when dragging and dropping
-          // into the code size screen because it creates space that is outside
+          // into the app size screen because it creates space that is outside
           // of the [DragAndDropEventAbsorber] widget. Fix this.
           padding: DevToolsScaffold.appPadding,
           alignment: Alignment.topLeft,

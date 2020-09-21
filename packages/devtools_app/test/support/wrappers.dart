@@ -47,7 +47,7 @@ Widget wrapWithControllers(
   DebuggerController debugger,
   NetworkController network,
   BannerMessagesController bannerMessages,
-  AppSizeController codeSize,
+  AppSizeController appSize,
 }) {
   final _providers = [
     Provider<BannerMessagesController>.value(
@@ -60,7 +60,7 @@ Widget wrapWithControllers(
       Provider<PerformanceController>.value(value: performance),
     if (network != null) Provider<NetworkController>.value(value: network),
     if (debugger != null) Provider<DebuggerController>.value(value: debugger),
-    if (codeSize != null) Provider<AppSizeController>.value(value: codeSize),
+    if (appSize != null) Provider<AppSizeController>.value(value: appSize),
   ];
   return wrap(
     MultiProvider(

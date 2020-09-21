@@ -38,17 +38,17 @@ void main() {
   );
 
   AppSizeScreen screen;
-  AppSizeTestController codeSizeController;
+  AppSizeTestController appSizeController;
 
   const windowSize = Size(2560.0, 1338.0);
 
-  Future<void> pumpCodeSizeScreen(
+  Future<void> pumpAppSizeScreen(
     WidgetTester tester, {
-    AppSizeTestController codeSizeController,
+    AppSizeTestController controller,
   }) async {
     await tester.pumpWidget(wrapWithControllers(
       const AppSizeBody(),
-      codeSize: codeSizeController,
+      appSize: controller,
     ));
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(AppSizeBody), findsOneWidget);
@@ -59,29 +59,29 @@ void main() {
     DevToolsJsonFile data,
   }) async {
     data ??= newV8JsonFile;
-    codeSizeController.loadTreeFromJsonFile(data, (error) => {});
+    appSizeController.loadTreeFromJsonFile(data, (error) => {});
     await tester.pumpAndSettle();
   }
 
-  group('CodeSizeScreen', () {
+  group('AppSizeScreen', () {
     setUp(() async {
       screen = const AppSizeScreen();
-      codeSizeController = AppSizeTestController();
+      appSizeController = AppSizeTestController();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.buildTab),
-        codeSize: codeSizeController,
+        appSize: appSizeController,
       ));
-      expect(find.text('Code Size'), findsOneWidget);
+      expect(find.text('App Size'), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds initial content', windowSize,
         (WidgetTester tester) async {
-      await pumpCodeSizeScreen(
+      await pumpAppSizeScreen(
         tester,
-        codeSizeController: codeSizeController,
+        controller: appSizeController,
       );
 
       expect(find.byType(AppSizeBody), findsOneWidget);
@@ -104,14 +104,14 @@ void main() {
   group('SnapshotView', () {
     setUp(() async {
       screen = const AppSizeScreen();
-      codeSizeController = AppSizeTestController();
+      appSizeController = AppSizeTestController();
     });
 
     testWidgetsWithWindowSize('imports file and loads data', windowSize,
         (WidgetTester tester) async {
-      await pumpCodeSizeScreen(
+      await pumpAppSizeScreen(
         tester,
-        codeSizeController: codeSizeController,
+        controller: appSizeController,
       );
 
       expect(find.byKey(AppSizeScreen.dropdownKey), findsNothing);
@@ -121,7 +121,7 @@ void main() {
       expect(find.text(AnalysisView.importInstructions), findsOneWidget);
       expect(find.text('No File Selected'), findsOneWidget);
 
-      codeSizeController.loadTreeFromJsonFile(
+      appSizeController.loadTreeFromJsonFile(
         newV8JsonFile,
         (error) => {},
         delayed: true,
@@ -158,9 +158,9 @@ void main() {
 
     testWidgetsWithWindowSize('clears data', windowSize,
         (WidgetTester tester) async {
-      await pumpCodeSizeScreen(
+      await pumpAppSizeScreen(
         tester,
-        codeSizeController: codeSizeController,
+        controller: appSizeController,
       );
 
       await loadDataAndPump(tester);
@@ -177,13 +177,13 @@ void main() {
   group('DiffView', () {
     setUp(() async {
       screen = const AppSizeScreen();
-      codeSizeController = AppSizeTestController();
+      appSizeController = AppSizeTestController();
     });
 
     Future<void> loadDiffTabAndSettle(WidgetTester tester) async {
-      await pumpCodeSizeScreen(
+      await pumpAppSizeScreen(
         tester,
-        codeSizeController: codeSizeController,
+        controller: appSizeController,
       );
       await tester.tap(find.byKey(AppSizeScreen.diffTabKey));
       await tester.pumpAndSettle();
@@ -194,7 +194,7 @@ void main() {
       DevToolsJsonFile oldJsonFile,
       DevToolsJsonFile newJsonFile,
     ) async {
-      codeSizeController.loadDiffTreeFromJsonFiles(
+      appSizeController.loadDiffTreeFromJsonFiles(
         oldJsonFile,
         newJsonFile,
         (error) => {},
@@ -220,7 +220,7 @@ void main() {
         (WidgetTester tester) async {
       await loadDiffTabAndSettle(tester);
 
-      codeSizeController.loadDiffTreeFromJsonFiles(
+      appSizeController.loadDiffTreeFromJsonFiles(
         oldV8JsonFile,
         newV8JsonFile,
         (error) => {},
@@ -314,17 +314,17 @@ void main() {
     });
   });
 
-  group('CodeSizeController', () {
+  group('AppSizeController', () {
     BuildContext buildContext;
 
     setUp(() async {
       screen = const AppSizeScreen();
-      codeSizeController = AppSizeTestController();
+      appSizeController = AppSizeTestController();
     });
 
-    Future<void> pumpCodeSizeScreenWithContext(
+    Future<void> pumpAppSizeScreenWithContext(
       WidgetTester tester, {
-      AppSizeTestController codeSizeController,
+      AppSizeTestController controller,
     }) async {
       await tester.pumpWidget(wrapWithControllers(
         MaterialApp(
@@ -336,7 +336,7 @@ void main() {
             },
           ),
         ),
-        codeSize: codeSizeController,
+        appSize: controller,
       ));
       await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(find.byType(AppSizeBody), findsOneWidget);
@@ -347,7 +347,7 @@ void main() {
       String firstFile,
       String secondFile,
     ) async {
-      codeSizeController.loadDiffTreeFromJsonFiles(
+      appSizeController.loadDiffTreeFromJsonFiles(
         DevToolsJsonFile(
           name: '',
           lastModifiedTime: lastModifiedTime,
@@ -366,12 +366,12 @@ void main() {
     testWidgetsWithWindowSize(
         'outputs error notifications for invalid input on the snapshot tab',
         windowSize, (WidgetTester tester) async {
-      await pumpCodeSizeScreenWithContext(
+      await pumpAppSizeScreenWithContext(
         tester,
-        codeSizeController: codeSizeController,
+        controller: appSizeController,
       );
 
-      codeSizeController.loadTreeFromJsonFile(
+      appSizeController.loadTreeFromJsonFile(
         DevToolsJsonFile(
           name: 'unsupported_file.json',
           lastModifiedTime: lastModifiedTime,
@@ -389,9 +389,9 @@ void main() {
     testWidgetsWithWindowSize(
         'outputs error notifications for invalid input on the diff tab',
         windowSize, (WidgetTester tester) async {
-      await pumpCodeSizeScreenWithContext(
+      await pumpAppSizeScreenWithContext(
         tester,
-        codeSizeController: codeSizeController,
+        controller: appSizeController,
       );
       await tester.tap(find.byKey(AppSizeScreen.diffTabKey));
       await tester.pumpAndSettle();

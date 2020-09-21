@@ -82,7 +82,7 @@ void main() {
             DebuggerScreen,
             // NetworkScreen,
             LoggingScreen,
-            // if (codeSizeScreenEnabled) CodeSizeScreen,
+            // AppSizeScreen,
           ]));
     });
 
@@ -136,7 +136,7 @@ void main() {
             DebuggerScreen,
             // NetworkScreen,
             LoggingScreen,
-            // if (codeSizeScreenEnabled) CodeSizeScreen,
+            // AppSizeScreen,
           ]));
     });
 
@@ -154,7 +154,7 @@ void main() {
             // DebuggerScreen,
             // NetworkScreen,
             // LoggingScreen,
-            // if (codeSizeScreenEnabled) CodeSizeScreen,
+            // AppSizeScreen,
           ]));
     });
   });
