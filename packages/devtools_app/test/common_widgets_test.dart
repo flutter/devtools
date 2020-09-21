@@ -19,7 +19,7 @@ void main() {
   group('Common widgets', () {
     testWidgetsWithWindowSize('recordingInfo builds info for pause', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(recordingInfo(
+      await tester.pumpWidget(wrap(const RecordingInfo(
         instructionsKey: instructionsKey,
         recordingStatusKey: recordingStatusKey,
         processingStatusKey: processingStatusKey,
@@ -38,7 +38,7 @@ void main() {
 
     testWidgetsWithWindowSize('recordingInfo builds info for stop', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(recordingInfo(
+      await tester.pumpWidget(wrap(const RecordingInfo(
         instructionsKey: instructionsKey,
         recordingStatusKey: recordingStatusKey,
         processingStatusKey: processingStatusKey,
@@ -57,7 +57,7 @@ void main() {
     testWidgetsWithWindowSize(
         'recordingInfo builds recording status', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(recordingInfo(
+      await tester.pumpWidget(wrap(const RecordingInfo(
         instructionsKey: instructionsKey,
         recordingStatusKey: recordingStatusKey,
         processingStatusKey: processingStatusKey,
@@ -74,7 +74,7 @@ void main() {
     testWidgetsWithWindowSize(
         'recordingInfo builds processing status', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(recordingInfo(
+      await tester.pumpWidget(wrap(const RecordingInfo(
         instructionsKey: instructionsKey,
         recordingStatusKey: recordingStatusKey,
         processingStatusKey: processingStatusKey,
@@ -91,7 +91,7 @@ void main() {
     testWidgetsWithWindowSize(
         'processingInfo builds for progressValue', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(processingInfo(
+      await tester.pumpWidget(wrap(const ProcessingInfo(
         progressValue: 0.0,
         processedObject: 'fake object',
       )));
@@ -102,7 +102,7 @@ void main() {
 
       expect(progressIndicator.value, equals(0.0));
 
-      await tester.pumpWidget(wrap(processingInfo(
+      await tester.pumpWidget(wrap(const ProcessingInfo(
         progressValue: 0.5,
         processedObject: 'fake object',
       )));

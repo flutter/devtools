@@ -94,7 +94,7 @@ class EventDetails extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: cpuProfilerController.transformer.progressNotifier,
       builder: (context, progress, _) {
-        return processingInfo(
+        return ProcessingInfo(
           progressValue: progress,
           processedObject: 'CPU samples',
         );

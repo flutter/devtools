@@ -68,7 +68,7 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
       children: [
         Row(
           children: [
-            exitOfflineButton(() {
+            ExitOfflineButton(onPressed: () {
               Navigator.pop(context);
               reset();
               offlineMode = false;
