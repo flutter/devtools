@@ -74,7 +74,8 @@ class ScriptPickerState extends State<ScriptPicker> {
     return OutlineDecoration(
       child: Column(
         children: [
-          AreaPaneHeader(
+          areaPaneHeader(
+            context,
             title: 'Libraries',
             needsTopBorder: false,
             actions: [

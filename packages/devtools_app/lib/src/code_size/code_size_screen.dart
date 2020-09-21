@@ -231,7 +231,8 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
     return OutlineDecoration(
       child: Column(
         children: [
-          AreaPaneHeader(
+          areaPaneHeader(
+            context,
             title: _generateSingleFileHeaderText(),
             needsTopBorder: false,
           ),
@@ -385,7 +386,8 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
     return OutlineDecoration(
       child: Column(
         children: [
-          AreaPaneHeader(
+          areaPaneHeader(
+            context,
             title: _generateDualFileHeaderText(),
             needsTopBorder: false,
           ),

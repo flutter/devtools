@@ -251,7 +251,8 @@ class _LogDetailsState extends State<LogDetails>
 
     return OutlineDecoration(
       child: Console(
-        title: AreaPaneHeader(
+        title: areaPaneHeader(
+          context,
           title: 'Details',
           needsTopBorder: false,
           actions: [

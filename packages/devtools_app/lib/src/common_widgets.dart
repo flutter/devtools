@@ -499,66 +499,50 @@ class ToolbarAction extends StatelessWidget {
 /// on the right-hand side.
 ///
 /// This is typically used as a title for a logical area of the screen.
+// TODO(devoncarew): Refactor this into an 'AreaPaneHeader' widget.
 // TODO(peterdjlee): Consider passing in a list of widgets for content instead of String title.
-class AreaPaneHeader extends SizedBox {
-  const AreaPaneHeader({
-    @required this.title,
-    this.needsTopBorder = true,
-    this.needsBottomBorder = true,
-    this.needsLeftBorder = false,
-    this.actions = const [],
-    this.rightPadding = densePadding,
-    this.tall = false,
-  });
+SizedBox areaPaneHeader(
+  BuildContext context, {
+  @required String title,
+  bool needsTopBorder = true,
+  bool needsBottomBorder = true,
+  bool needsLeftBorder = false,
+  List<Widget> actions = const [],
+  double rightPadding = densePadding,
+  bool tall = false,
+}) {
+  final theme = Theme.of(context);
 
-  final String title;
-
-  final bool needsTopBorder;
-
-  final bool needsBottomBorder;
-
-  final bool needsLeftBorder;
-
-  final List<Widget> actions;
-
-  final double rightPadding;
-
-  final bool tall;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return SizedBox(
-      height:
-          tall ? areaPaneHeaderHeight + 2 * densePadding : areaPaneHeaderHeight,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: needsTopBorder ? defaultBorderSide(theme) : BorderSide.none,
-            bottom:
-                needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
-            left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
-          ),
-          color: titleSolidBackgroundColor(theme),
+  return SizedBox(
+    height:
+        tall ? areaPaneHeaderHeight + 2 * densePadding : areaPaneHeaderHeight,
+    child: Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: needsTopBorder ? defaultBorderSide(theme) : BorderSide.none,
+          bottom:
+              needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
+          left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
         ),
-        padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
-        alignment: Alignment.centerLeft,
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.subtitle2,
-              ),
-            ),
-            ...actions,
-          ],
-        ),
+        color: titleSolidBackgroundColor(theme),
       ),
-    );
-  }
+      padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
+      alignment: Alignment.centerLeft,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.subtitle2,
+            ),
+          ),
+          ...actions,
+        ],
+      ),
+    ),
+  );
 }
 
 BorderSide defaultBorderSide(ThemeData theme) {

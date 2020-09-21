@@ -39,7 +39,8 @@ class EventDetails extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AreaPaneHeader(
+          areaPaneHeader(
+            context,
             needsTopBorder: false,
             title: selectedEvent != null
                 ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
