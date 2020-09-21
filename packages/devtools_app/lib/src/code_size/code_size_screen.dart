@@ -246,10 +246,10 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
                     Flexible(
                       child: CodeSizeSnapshotTable(rootNode: snapshotRoot),
                     ),
-                    if (controller.callGraphRoot.value != null)
+                    if (controller.analysisCallGraphRoot.value != null)
                       Flexible(
                         child: CallGraphWithDominators(
-                          callGraphRoot: controller.callGraphRoot.value,
+                          callGraphRoot: controller.analysisCallGraphRoot.value,
                         ),
                       ),
                   ],
@@ -396,7 +396,19 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
               axis: Axis.vertical,
               children: [
                 _buildTreemap(),
-                CodeSizeDiffTable(rootNode: diffRoot),
+                Row(
+                  children: [
+                    Flexible(
+                      child: CodeSizeDiffTable(rootNode: diffRoot),
+                    ),
+                    if (controller.diffCallGraphRoot.value != null)
+                      Flexible(
+                        child: CallGraphWithDominators(
+                          callGraphRoot: controller.diffCallGraphRoot.value,
+                        ),
+                      ),
+                  ],
+                ),
               ],
               initialFractions: const [
                 initialFractionForTreemap,

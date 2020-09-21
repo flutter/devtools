@@ -21,6 +21,8 @@ enum DiffTreeType {
   combined,
 }
 
+// TODO(kenz): cleanup - rename all uses of "snapshot" to analysis
+
 class CodeSizeController {
   static const unsupportedFileTypeError =
       'Failed to load snapshot: file type not supported.\n\n'
@@ -33,12 +35,18 @@ class CodeSizeController {
   static const identicalFilesError =
       'Failed to load diff: OLD and NEW files are identical.';
 
-  // TODO(kenz): support call graph and dependency dominator tree data for diffs
-  // as well as snapshots.
-  CallGraph _callGraph;
+  CallGraph _analysisCallGraph;
 
-  ValueListenable<CallGraphNode> get callGraphRoot => _callGraphRoot;
-  final _callGraphRoot = ValueNotifier<CallGraphNode>(null);
+  ValueListenable<CallGraphNode> get analysisCallGraphRoot =>
+      _analysisCallGraphRoot;
+  final _analysisCallGraphRoot = ValueNotifier<CallGraphNode>(null);
+
+  CallGraph _oldDiffCallGraph;
+
+  CallGraph _newDiffCallGraph;
+
+  ValueListenable<CallGraphNode> get diffCallGraphRoot => _diffCallGraphRoot;
+  final _diffCallGraphRoot = ValueNotifier<CallGraphNode>(null);
 
   /// The node set as the snapshot root.
   ///
@@ -50,13 +58,13 @@ class CodeSizeController {
     _snapshotRoot.value = newRoot;
 
     final programInfoNode =
-        _callGraph?.program?.lookup(newRoot.packagePath()) ??
-            _callGraph?.program?.root;
+        _analysisCallGraph?.program?.lookup(newRoot.packagePath()) ??
+            _analysisCallGraph?.program?.root;
 
     // If [programInfoNode is null, we don't have any call graph information
     // about [newRoot].
     if (programInfoNode != null) {
-      _callGraphRoot.value = _callGraph.lookup(programInfoNode);
+      _analysisCallGraphRoot.value = _analysisCallGraph.lookup(programInfoNode);
     }
   }
 
@@ -75,6 +83,20 @@ class CodeSizeController {
 
   void changeDiffRoot(TreemapNode newRoot) {
     _diffRoot.value = newRoot;
+
+    final packagePath = newRoot.packagePath();
+    final newProgramInfoNode = _newDiffCallGraph?.program?.lookup(packagePath);
+    final newProgramInfoNodeRoot = _newDiffCallGraph?.program?.root;
+    final oldProgramInfoNode = _oldDiffCallGraph?.program?.lookup(packagePath);
+
+    if (newProgramInfoNode != null) {
+      _diffCallGraphRoot.value = _newDiffCallGraph.lookup(newProgramInfoNode);
+    } else if (oldProgramInfoNode != null) {
+      _diffCallGraphRoot.value = _oldDiffCallGraph.lookup(oldProgramInfoNode);
+    } else if (newProgramInfoNodeRoot != null) {
+      _diffCallGraphRoot.value =
+          _newDiffCallGraph.lookup(newProgramInfoNodeRoot);
+    }
   }
 
   TreemapNode get _activeDiffRoot {
@@ -120,8 +142,6 @@ class CodeSizeController {
     } else if (activeTabKey == CodeSizeScreen.snapshotTabKey) {
       _clearSnapshot();
     }
-    _callGraphRoot.value = null;
-    _callGraph = null;
   }
 
   void _clearDiff() {
@@ -131,11 +151,16 @@ class CodeSizeController {
     _increasedDiffTreeRoot = null;
     _decreasedDiffTreeRoot = null;
     _combinedDiffTreeRoot = null;
+    _diffCallGraphRoot.value = null;
+    _oldDiffCallGraph = null;
+    _newDiffCallGraph = null;
   }
 
   void _clearSnapshot() {
     _snapshotRoot.value = null;
     _snapshotJsonFile.value = null;
+    _analysisCallGraphRoot.value = null;
+    _analysisCallGraph = null;
   }
 
   /// The active diff tree type used to build the diff treemap.
@@ -174,7 +199,7 @@ class CodeSizeController {
       // Extract the precompiler trace, if it exists, and generate a call graph.
       final precompilerTrace = processedJson.remove('precompiler-trace');
       if (precompilerTrace != null) {
-        _callGraph = generateCallGraphWithDominators(
+        _analysisCallGraph = generateCallGraphWithDominators(
           precompilerTrace,
           NodeType.packageNode,
         );
@@ -239,12 +264,34 @@ class CodeSizeController {
         json: oldFile.data,
       );
 
+      final Map<String, dynamic> oldFileJson = oldFile.data;
+      // Extract the precompiler trace from the old file, if it exists, and
+      // generate a call graph.
+      final oldPrecompilerTrace = oldFileJson.remove('precompiler-trace');
+      if (oldPrecompilerTrace != null) {
+        _oldDiffCallGraph = generateCallGraphWithDominators(
+          oldPrecompilerTrace,
+          NodeType.packageNode,
+        );
+      }
+
       final newApkProgramInfo = ProgramInfo();
       _apkJsonToProgramInfo(
         program: newApkProgramInfo,
         parent: newApkProgramInfo.root,
         json: newFile.data,
       );
+
+      final Map<String, dynamic> newFileJson = newFile.data;
+      // Extract the precompiler trace from the new file, if it exists, and
+      // generate a call graph.
+      final newPrecompilerTrace = newFileJson.remove('precompiler-trace');
+      if (newPrecompilerTrace != null) {
+        _newDiffCallGraph = generateCallGraphWithDominators(
+          newPrecompilerTrace,
+          NodeType.packageNode,
+        );
+      }
 
       diffMap = compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
     } else {
