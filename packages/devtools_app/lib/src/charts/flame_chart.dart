@@ -210,6 +210,25 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
           rows[index].nodes.isEmpty ? sectionSpacing : rowHeightWithPadding,
       computeLength: () => rows.length,
     );
+
+    if (widget.activeSearchMatchNotifier != null) {
+      addAutoDisposeListener(widget.activeSearchMatchNotifier, () async {
+        final activeSearch = widget.activeSearchMatchNotifier.value;
+        if (activeSearch == null) return;
+
+        // Ensure the [activeSearch] is vertically in view.
+        if (!isDataVerticallyInView(activeSearch)) {
+          await scrollVerticallyToData(activeSearch);
+        }
+
+        // TODO(kenz): zoom if the event is less than some min width.
+
+        // Ensure the [activeSearch] is horizontally in view.
+        if (!isDataHorizontallyInView(activeSearch)) {
+          await scrollHorizontallyToData(activeSearch);
+        }
+      });
+    }
   }
 
   @override
@@ -431,6 +450,29 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       );
     }
   }
+
+  Future<void> scrollVerticallyToData(V data) async {
+    await verticalScrollController.animateTo(
+      // Subtract [2 * rowHeightWithPadding] to give the target scroll event top padding.
+      topYForData(data) - 2 * rowHeightWithPadding,
+      duration: shortDuration,
+      curve: defaultCurve,
+    );
+  }
+
+  Future<void> scrollHorizontallyToData(V data) async {
+    final offset =
+        startXForData(data) + widget.startInset - widget.containerWidth * 0.1;
+    await scrollToX(offset);
+  }
+
+  bool isDataVerticallyInView(V data);
+
+  bool isDataHorizontallyInView(V data);
+
+  double topYForData(V data);
+
+  double startXForData(V data);
 }
 
 class ScrollingFlameChartRow<V> extends StatefulWidget {
@@ -936,7 +978,7 @@ class FlameChartNode<T> {
     @required bool searchMatch,
     @required bool activeSearchMatch,
   }) {
-    if (selected) return timelineSelectionColor;
+    if (selected) return defaultSelectionColor;
     if (activeSearchMatch) return activeSearchMatchColor;
     if (searchMatch) return searchMatchColor;
     return backgroundColor;

@@ -10,8 +10,9 @@ import 'package:meta/meta.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
+import '../ui/search.dart';
 
-class CpuProfilerController {
+class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   /// Data for the initial value and reset value of [_dataNotifier].
   ///
   /// When this data is the value of [_dataNotifier], the CPU profiler is in a
@@ -74,6 +75,7 @@ class CpuProfilerController {
     try {
       await transformer.processData(cpuProfileData, processId: processId);
       _dataNotifier.value = cpuProfileData;
+      refreshSearchMatches();
       _processingNotifier.value = false;
     } on AssertionError catch (_) {
       _dataNotifier.value = cpuProfileData;
@@ -85,6 +87,20 @@ class CpuProfilerController {
       // Do nothing because the attempt to process data has been cancelled in
       // favor of a new one.
     }
+  }
+
+  @override
+  List<CpuStackFrame> matchesForSearch(String search) {
+    if (search == null || search.isEmpty) return [];
+    final matches = <CpuStackFrame>[];
+    final caseInsensitiveSearch = search.toLowerCase();
+    final currentStackFrames = _dataNotifier.value.stackFrames.values;
+    for (final frame in currentStackFrames) {
+      if (frame.name.toLowerCase().contains(caseInsensitiveSearch)) {
+        matches.add(frame);
+      }
+    }
+    return matches;
   }
 
   void loadOfflineData(CpuProfileData data) {
@@ -108,6 +124,7 @@ class CpuProfilerController {
     _dataNotifier.value = baseStateCpuProfileData;
     _processingNotifier.value = false;
     transformer.reset();
+    resetSearch();
   }
 
   void dispose() {

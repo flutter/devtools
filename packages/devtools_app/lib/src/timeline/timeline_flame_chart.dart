@@ -222,44 +222,38 @@ class TimelineFlameChartState
       _timelineController.selectedFrame,
       _handleSelectedFrame,
     );
-
-    addAutoDisposeListener(_timelineController.activeSearchMatch, () async {
-      final activeSearch = _timelineController.activeSearchMatch.value;
-      if (activeSearch == null) return;
-
-      // Ensure the [activeSearch] is vertically in view.
-      if (!_isEventVerticallyInView(activeSearch)) {
-        await scrollVerticallyToEvent(activeSearch);
-      }
-
-      // TODO(kenz): zoom if the event is less than some min width.
-
-      // Ensure the [activeSearch] is horizontally in view.
-      if (!_isEventHorizontallyInView(activeSearch)) {
-        await scrollHorizontallyToTime(
-            timeMicros: activeSearch.time.start.inMicroseconds);
-      }
-    });
   }
 
-  bool _isEventVerticallyInView(TimelineEvent event) {
-    final eventTopY = _topYForEvent(event);
+  @override
+  bool isDataVerticallyInView(TimelineEvent data) {
+    final eventTopY = topYForData(data);
     return eventTopY > verticalScrollOffset &&
         eventTopY + rowHeightWithPadding <
             verticalScrollOffset + widget.containerHeight;
   }
 
-  bool _isEventHorizontallyInView(TimelineEvent event) {
-    return visibleTimeRange.contains(event.time.start) &&
-        visibleTimeRange.contains(event.time.end);
+  @override
+  bool isDataHorizontallyInView(TimelineEvent data) {
+    return visibleTimeRange.contains(data.time.start) &&
+        visibleTimeRange.contains(data.time.end);
   }
 
-  double _topYForEvent(TimelineEvent event) {
-    final eventGroup = widget.data.eventGroups[computeEventGroupKey(event)];
+  @override
+  double topYForData(TimelineEvent data) {
+    final eventGroup = widget.data.eventGroups[computeEventGroupKey(data)];
     assert(eventGroup != null);
-    final rowOffsetInGroup = eventGroup.rowIndexForEvent[event];
+    final rowOffsetInGroup = eventGroup.rowIndexForEvent[data];
     return eventGroupStartYValues[eventGroup] +
         rowOffsetInGroup * rowHeightWithPadding;
+  }
+
+  @override
+  double startXForData(TimelineEvent data) {
+    final timeMicros = data.time.start.inMicroseconds;
+    // Horizontally scroll to the frame.
+    final relativeStartTime = timeMicros - startTimeOffset;
+    final ratio = relativeStartTime / widget.data.time.duration.inMicroseconds;
+    return contentWidthWithZoom * ratio;
   }
 
   void _handleSelectedFrame() async {
@@ -275,7 +269,7 @@ class TimelineFlameChartState
       // improve performance.
 
       // Vertically scroll to the frame's UI event.
-      await scrollVerticallyToEvent(selectedFrame.uiEventFlow);
+      await scrollVerticallyToData(selectedFrame.uiEventFlow);
 
       // Bail early if the selection has changed again while the animation was
       // in progress.
@@ -292,9 +286,7 @@ class TimelineFlameChartState
       if (selectedFrame != _selectedFrame) return;
 
       // Horizontally scroll to the frame.
-      await scrollHorizontallyToTime(
-        timeMicros: selectedFrame.time.start.inMicroseconds,
-      );
+      await scrollHorizontallyToData(selectedFrame.uiEventFlow);
     }
   }
 
@@ -310,25 +302,6 @@ class TimelineFlameChartState
             startingPxPerMicro +
         widget.startInset;
     await zoomTo(zoom, forceMouseX: mouseXForZoom);
-  }
-
-  Future<void> scrollHorizontallyToTime({@required int timeMicros}) async {
-    // Horizontally scroll to the frame.
-    final relativeStartTime = timeMicros - startTimeOffset;
-    final ratio = relativeStartTime / widget.data.time.duration.inMicroseconds;
-    final offset = contentWidthWithZoom * ratio +
-        widget.startInset -
-        widget.containerWidth * 0.1;
-    await scrollToX(offset);
-  }
-
-  Future<void> scrollVerticallyToEvent(TimelineEvent event) async {
-    await verticalScrollController.animateTo(
-      // Subtract [2 * rowHeightWithPadding] to give the target scroll event top padding.
-      _topYForEvent(event) - 2 * rowHeightWithPadding,
-      duration: shortDuration,
-      curve: defaultCurve,
-    );
   }
 
   @override
@@ -1061,7 +1034,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
     ));
 
     final paint = Paint()
-      ..color = timelineSelectionColor
+      ..color = defaultSelectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 

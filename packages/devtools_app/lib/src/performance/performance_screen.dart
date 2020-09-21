@@ -25,6 +25,9 @@ import '../theme.dart';
 import '../ui/vm_flag_widgets.dart';
 import 'performance_controller.dart';
 
+final performanceSearchFieldKey =
+    GlobalKey(debugLabel: 'PerformanceSearchFieldKey');
+
 class PerformanceScreen extends Screen {
   const PerformanceScreen()
       : super.conditional(
@@ -150,6 +153,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
               return CpuProfiler(
                 data: cpuProfileData,
                 controller: controller.cpuProfilerController,
+                searchFieldKey: performanceSearchFieldKey,
               );
             },
           ),

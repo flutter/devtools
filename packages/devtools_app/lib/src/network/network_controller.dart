@@ -278,9 +278,6 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     final matches = <NetworkRequest>[];
     final caseInsensitiveSearch = search.toLowerCase();
 
-    // TODO(kenz): support intelligent search queries like t:http (type = http)
-    // or m:GET (method = GET).
-
     final currentRequests = _filteredRequests.value;
     for (final request in currentRequests) {
       if (request.uri.toLowerCase().contains(caseInsensitiveSearch)) {

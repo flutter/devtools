@@ -7,14 +7,18 @@ import 'package:flutter/material.dart';
 import '../charts/flame_chart.dart';
 import '../ui/colors.dart';
 import '../utils.dart';
+import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 
 class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame> {
-  CpuProfileFlameChart(
-    CpuProfileData data, {
+  CpuProfileFlameChart({
+    @required CpuProfileData data,
+    @required this.controller,
     @required double width,
     @required double height,
     @required ValueListenable<CpuStackFrame> selectionNotifier,
+    @required ValueListenable<List<CpuStackFrame>> searchMatchesNotifier,
+    @required ValueListenable<CpuStackFrame> activeSearchMatchNotifier,
     @required Function(CpuStackFrame stackFrame) onSelected,
   }) : super(
           data,
@@ -24,8 +28,12 @@ class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame> {
           startInset: sideInsetSmall,
           endInset: sideInsetSmall,
           selectionNotifier: selectionNotifier,
+          searchMatchesNotifier: searchMatchesNotifier,
+          activeSearchMatchNotifier: activeSearchMatchNotifier,
           onSelected: onSelected,
         );
+
+  final CpuProfilerController controller;
 
   @override
   _CpuProfileFlameChartState createState() => _CpuProfileFlameChartState();
@@ -50,7 +58,7 @@ class _CpuProfileFlameChartState
       final double width =
           widget.startingContentWidth * stackFrame.totalTimeRatio -
               stackFramePadding;
-      final left = leftForStackFrame(stackFrame);
+      final left = startingLeftForStackFrame(stackFrame);
       final backgroundColor = _colorForStackFrame(stackFrame);
 
       final node = FlameChartNode<CpuStackFrame>(
@@ -74,7 +82,33 @@ class _CpuProfileFlameChartState
     createChartNodes(widget.data.cpuProfileRoot, rowOffsetForTopPadding);
   }
 
-  double leftForStackFrame(CpuStackFrame stackFrame) {
+  @override
+  bool isDataVerticallyInView(CpuStackFrame data) {
+    final stackFrameTopY = topYForData(data);
+    return stackFrameTopY > verticalScrollOffset &&
+        stackFrameTopY + rowHeightWithPadding <
+            verticalScrollOffset + widget.containerHeight;
+  }
+
+  @override
+  bool isDataHorizontallyInView(CpuStackFrame data) {
+    final startX = startXForData(data);
+    return startX >= horizontalScrollOffset &&
+        startX <= horizontalScrollOffset + widget.containerWidth;
+  }
+
+  @override
+  double topYForData(CpuStackFrame data) {
+    return data.level * rowHeightWithPadding;
+  }
+
+  @override
+  double startXForData(CpuStackFrame data) {
+    final x = stackFrameLefts[data.id] - widget.startInset;
+    return x * zoomController.value;
+  }
+
+  double startingLeftForStackFrame(CpuStackFrame stackFrame) {
     final CpuStackFrame parent = stackFrame.parent;
     double left;
     if (parent == null) {

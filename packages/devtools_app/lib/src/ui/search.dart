@@ -83,6 +83,11 @@ mixin SearchControllerMixin<T> {
   }
 
   List<T> matchesForSearch(String search) => [];
+
+  void resetSearch() {
+    _searchNotifier.value = '';
+    refreshSearchMatches();
+  }
 }
 
 mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
@@ -339,7 +344,7 @@ mixin SearchFieldMixin {
   void clearSearchField(SearchControllerMixin controller, {force = false}) {
     if (force || controller.search.isNotEmpty) {
       searchTextFieldController.clear();
-      controller.search = '';
+      controller.resetSearch();
     }
   }
 }
