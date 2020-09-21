@@ -132,7 +132,7 @@ Future<void> _serveDevToolsWithArgs(
 ///
 /// `handler` is the [shelf.Handler] that the server will use for all requests.
 /// If null, [defaultHandler] will be used. Defaults to null.
-// Note: this method is used by the Flutter CLI.
+// Note: this method is used by the Flutter CLI and by package:dwds.
 Future<HttpServer> serveDevTools({
   bool enableStdinCommands = true,
   bool machineMode = false,

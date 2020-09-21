@@ -101,7 +101,8 @@ if [ "$BOT" = "main" ]; then
 
     # Run shared tests.
     pushd ../devtools_shared
-    pub run test
+    dart pub get
+    dart test
     popd
 
 elif [ "$BOT" = "test_ddc" ]; then
