@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
@@ -14,6 +13,7 @@ import 'globals.dart';
 import 'navigation.dart';
 import 'notifications.dart';
 import 'theme.dart';
+import 'url_utils.dart';
 import 'utils.dart';
 
 /// The landing screen when starting Dart DevTools without being connected to an

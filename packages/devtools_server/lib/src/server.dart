@@ -197,7 +197,8 @@ Future<HttpServer> serveDevTools({
 
   if (launchBrowser) {
     if (serviceProtocolUri != null) {
-      serviceProtocolUri = normalizeVmServiceUri(serviceProtocolUri).toString();
+      serviceProtocolUri =
+          _normalizeVmServiceUri(serviceProtocolUri).toString();
     }
 
     String url = devToolsUrl.toString();
@@ -985,4 +986,22 @@ void printOutput(
   if (output != null) {
     print(output);
   }
+}
+
+// Note: please keep this copy of normalizeVmServiceUri() in sync with the one
+// in devtools_app.
+Uri _normalizeVmServiceUri(String value) {
+  value = value.trim();
+
+  // Cleanup encoded urls likely copied from the uri of an existing running
+  // DevTools app.
+  if (value.contains('%3A%2F%2F')) {
+    value = Uri.decodeFull(value);
+  }
+  final uri = Uri.parse(value.trim()).removeFragment();
+  if (!uri.isAbsolute) {
+    return null;
+  }
+  if (uri.path.endsWith('/')) return uri;
+  return uri.replace(path: uri.path);
 }

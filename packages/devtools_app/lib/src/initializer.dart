@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -14,6 +13,7 @@ import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'inspector/flutter_widget.dart';
 import 'notifications.dart';
+import 'url_utils.dart';
 
 /// Widget that requires business logic to be loaded before building its
 /// [builder].
