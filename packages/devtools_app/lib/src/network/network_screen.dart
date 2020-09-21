@@ -35,13 +35,6 @@ class NetworkScreen extends Screen {
 
   static const id = 'network';
 
-  @visibleForTesting
-  static const clearButtonKey = Key('Clear Button');
-  @visibleForTesting
-  static const stopButtonKey = Key('Stop Button');
-  @visibleForTesting
-  static const recordButtonKey = Key('Record Button');
-  @visibleForTesting
   static const recordingInstructionsKey = Key('Recording Instructions');
 
   @override
@@ -145,7 +138,6 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     return Row(
       children: [
         RecordButton(
-          key: NetworkScreen.recordButtonKey,
           recording: recording,
           labelOverride: 'Record network traffic',
           includeTextWidth: includeTextWidth,
@@ -153,14 +145,12 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
         ),
         const SizedBox(width: denseSpacing),
         StopRecordingButton(
-          key: NetworkScreen.stopButtonKey,
           recording: recording,
           includeTextWidth: includeTextWidth,
           onPressed: _networkController.stopRecording,
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
-          key: NetworkScreen.clearButtonKey,
           onPressed: () {
             _networkController.clear();
           },

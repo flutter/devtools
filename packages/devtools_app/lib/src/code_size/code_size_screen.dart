@@ -40,8 +40,6 @@ class CodeSizeScreen extends Screen {
   static const id = 'code-size';
 
   @visibleForTesting
-  static const clearButtonKey = Key('Clear Button');
-  @visibleForTesting
   static const dropdownKey = Key('Diff Tree Type Dropdown');
 
   @visibleForTesting
@@ -173,7 +171,6 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
 
   Widget _buildClearButton(Key activeTabKey) {
     return ClearButton(
-      key: CodeSizeScreen.clearButtonKey,
       onPressed: () => controller.clear(activeTabKey),
     );
   }

@@ -43,13 +43,6 @@ class TimelineScreen extends Screen {
           icon: Octicons.pulse,
         );
 
-  @visibleForTesting
-  static const refreshButtonKey = Key('Refresh Button');
-  @visibleForTesting
-  static const clearButtonKey = Key('Clear Button');
-  @visibleForTesting
-  static const exportButtonKey = Key('Export Button');
-
   static const id = 'timeline';
 
   @override
@@ -218,14 +211,12 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         return Row(
           children: [
             RefreshButton(
-              key: TimelineScreen.refreshButtonKey,
               busy: refreshing || processing,
               includeTextWidth: _primaryControlsMinIncludeTextWidth,
               onPressed: _refreshTimeline,
             ),
             const SizedBox(width: defaultSpacing),
             ClearButton(
-              key: TimelineScreen.clearButtonKey,
               busy: refreshing || processing,
               includeTextWidth: _primaryControlsMinIncludeTextWidth,
               onPressed: () async {
@@ -253,7 +244,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         // available.
         const SizedBox(width: defaultSpacing),
         ExportButton(
-          key: TimelineScreen.exportButtonKey,
           onPressed: _exportTimeline,
           includeTextWidth: _secondaryControlsMinIncludeTextWidth,
         ),

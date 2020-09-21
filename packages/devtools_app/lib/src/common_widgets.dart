@@ -99,7 +99,6 @@ class ClearButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlineButton(
-      key: key,
       onPressed: busy ? null : onPressed,
       child: MaterialIconLabel(
         Icons.block,
@@ -137,7 +136,6 @@ class RecordButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlineButton(
-      key: key,
       onPressed: recording ? null : onPressed,
       child: MaterialIconLabel(
         Icons.fiber_manual_record,
@@ -171,7 +169,6 @@ class RefreshButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlineButton(
-      key: key,
       onPressed: busy ? null : onPressed,
       child: MaterialIconLabel(
         Icons.refresh,
@@ -205,7 +202,6 @@ class StopRecordingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlineButton(
-      key: key,
       onPressed: !recording ? null : onPressed,
       child: MaterialIconLabel(
         Icons.stop,

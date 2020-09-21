@@ -36,14 +36,6 @@ class PerformanceScreen extends Screen {
         );
 
   @visibleForTesting
-  static const clearButtonKey = Key('Clear Button');
-  @visibleForTesting
-  static const recordButtonKey = Key('Record Button');
-  @visibleForTesting
-  static const stopRecordingButtonKey = Key('Stop Recording Button');
-  @visibleForTesting
-  static const exportButtonKey = Key('Export Button');
-  @visibleForTesting
   static const recordingInstructionsKey = Key('Recording Instructions');
   @visibleForTesting
   static const recordingStatusKey = Key('Recording Status');
@@ -197,21 +189,18 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
     return Row(
       children: [
         RecordButton(
-          key: PerformanceScreen.recordButtonKey,
           recording: recording,
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.startRecording,
         ),
         const SizedBox(width: denseSpacing),
         StopRecordingButton(
-          key: PerformanceScreen.stopRecordingButtonKey,
           recording: recording,
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.stopRecording,
         ),
         const SizedBox(width: defaultSpacing),
         ClearButton(
-          key: PerformanceScreen.clearButtonKey,
           busy: recording,
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.clear,
@@ -227,7 +216,6 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
         const ProfileGranularityDropdown(PerformanceScreen.id),
         const SizedBox(width: defaultSpacing),
         ExportButton(
-          key: PerformanceScreen.exportButtonKey,
           onPressed: controller.cpuProfileData != null &&
                   !controller.cpuProfileData.isEmpty
               ? _exportPerformance
