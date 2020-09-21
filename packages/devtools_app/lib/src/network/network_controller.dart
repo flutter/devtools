@@ -356,7 +356,7 @@ class NetworkFilter {
   factory NetworkFilter.fromQuery(String query) {
     final partsBySpace = query.split(' ');
 
-    List<String> substrings = [];
+    final substrings = <String>[];
     String method;
     String status;
     String type;

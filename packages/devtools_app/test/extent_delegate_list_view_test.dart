@@ -73,11 +73,9 @@ void main() {
       // Create a hover event so that |testPointer| has a location when
       // generating the scroll.
       testPointer.hover(scrollEventLocation);
-      final result = tester.hitTestOnBinding(scrollEventLocation);
 
       await tester.sendEventToBinding(
         testPointer.scroll(const Offset(0.0, 10.0)),
-        result,
       );
       expect(pointerSignalEventCount, equals(1));
     });
