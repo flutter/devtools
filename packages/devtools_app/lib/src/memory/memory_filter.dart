@@ -246,8 +246,8 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        DialogOkButton(
-          () {
+        DialogApplyButton(
+          onPressed: () {
             // Re-generate librariesFiltered
             controller.libraryFilters.clearFilters();
             controller.filteredLibrariesByGroupName.forEach((groupName, value) {

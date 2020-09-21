@@ -340,13 +340,17 @@ class HeapTreeViewState extends State<HeapTree>
           const SizedBox(height: 50.0),
           snapshotDisplay = const CircularProgressIndicator(),
           const SizedBox(height: denseSpacing),
-          Text(_isSnapshotStreaming
-              ? 'Processing...'
-              : _isSnapshotGraphing
-                  ? 'Graphing...'
-                  : _isSnapshotGrouping
-                      ? 'Grouping...'
-                      : _isSnapshotComplete ? 'Done' : '...'),
+          Text(
+            _isSnapshotStreaming
+                ? 'Processing...'
+                : _isSnapshotGraphing
+                    ? 'Graphing...'
+                    : _isSnapshotGrouping
+                        ? 'Grouping...'
+                        : _isSnapshotComplete
+                            ? 'Done'
+                            : '...',
+          ),
         ],
       );
     } else if (controller.snapshotByLibraryData != null ||
@@ -678,7 +682,7 @@ class HeapTreeViewState extends State<HeapTree>
         Container(
           // TODO(terry): Use a more adaptive layout than forcing to 300.0
           width: defaultSearchTextWidth,
-          height: defaultSearchTextHeight,
+          height: defaultTextFieldHeight,
           child: buildAutoCompleteSearchField(
             controller: controller,
             searchFieldKey: memorySearchFieldKey,
@@ -689,13 +693,11 @@ class HeapTreeViewState extends State<HeapTree>
           ),
         ),
         const SizedBox(width: denseSpacing),
-        Tooltip(
-          message: 'Filter',
-          child: OutlineButton(
-            key: filterButtonKey,
-            onPressed: _filter,
-            child: createIcon(Icons.filter_list),
-          ),
+        FilterButton(
+          key: filterButtonKey,
+          onPressed: _filter,
+          // TODO(kenz): implement isFilterActive
+          isFilterActive: false,
         ),
         // TODO: Add these back in when _settings() is implemented.
 //        const SizedBox(width: denseSpacing),

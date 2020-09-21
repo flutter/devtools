@@ -88,6 +88,7 @@ bool isValidLightColor(Color color) {
   return color.computeLuminance() >= 1 - _lightDarkLuminanceThreshold;
 }
 
+const defaultButtonHeight = 36.0;
 const buttonMinWidth = 36.0;
 
 const defaultIconSize = 16.0;
@@ -151,6 +152,10 @@ extension DevToolsColorScheme on ColorScheme {
   Color get chartTextColor => isLight ? Colors.black : Colors.white;
   Color get chartSubtleColor =>
       isLight ? const Color(0xFF999999) : const Color(0xFF8A8A8A);
+  Color get toggleButtonBackgroundColor =>
+      isLight ? const Color(0xFFE0EEFA) : const Color(0xFF2E3C48);
+  // [toggleButtonForegroundColor] is the same for light and dark theme.
+  Color get toggleButtonForegroundColor => const Color(0xFF2196F3);
 }
 
 TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
@@ -160,7 +165,7 @@ TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
 
 const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
-const defaultSearchTextHeight = 36.0;
+const defaultTextFieldHeight = 36.0;
 
 /// A short duration to use for animations.
 ///

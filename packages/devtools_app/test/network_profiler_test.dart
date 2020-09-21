@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/http/http.dart';
@@ -83,7 +84,7 @@ void main() {
       expect(controller.recordingNotifier.value, false);
 
       // Start recording.
-      await tester.tap(find.byKey(NetworkScreen.recordButtonKey));
+      await tester.tap(find.byType(RecordButton));
       await tester.pump();
 
       // Check that we're polling.
@@ -91,7 +92,7 @@ void main() {
       expect(controller.recordingNotifier.value, true);
 
       // Stop recording.
-      await tester.tap(find.byKey(NetworkScreen.stopButtonKey));
+      await tester.tap(find.byType(StopRecordingButton));
       await tester.pump();
 
       // Check that we've stopped polling.
@@ -107,16 +108,16 @@ void main() {
       // We're not recording; only expect the instructions and buttons to be
       // visible.
       expect(splitFinder, findsNothing);
-      expect(find.byKey(NetworkScreen.recordButtonKey), findsOneWidget);
-      expect(find.byKey(NetworkScreen.stopButtonKey), findsOneWidget);
-      expect(find.byKey(NetworkScreen.clearButtonKey), findsOneWidget);
+      expect(find.byType(RecordButton), findsOneWidget);
+      expect(find.byType(StopRecordingButton), findsOneWidget);
+      expect(find.byType(ClearButton), findsOneWidget);
       expect(
         find.byKey(NetworkScreen.recordingInstructionsKey),
         findsOneWidget,
       );
 
       // Start recording.
-      await tester.tap(find.byKey(NetworkScreen.recordButtonKey));
+      await tester.tap(find.byType(RecordButton));
       await tester.pump();
 
       expect(splitFinder, findsOneWidget);
@@ -264,7 +265,7 @@ void main() {
       }
 
       // Stop recording.
-      await tester.tap(find.byKey(NetworkScreen.stopButtonKey));
+      await tester.tap(find.byType(StopRecordingButton));
       await tester.pump();
 
       await clearTimeouts(tester);
@@ -280,11 +281,11 @@ void main() {
       await loadRequestsAndCheck(tester);
 
       // Stop the profiler.
-      await tester.tap(find.byKey(NetworkScreen.stopButtonKey));
+      await tester.tap(find.byType(StopRecordingButton));
       await tester.pumpAndSettle();
 
       // Clear the results.
-      await tester.tap(find.byKey(NetworkScreen.clearButtonKey));
+      await tester.tap(find.byType(ClearButton));
       // Wait to ensure all the timers have been cancelled.
       await tester.pumpAndSettle(const Duration(seconds: 2));
 

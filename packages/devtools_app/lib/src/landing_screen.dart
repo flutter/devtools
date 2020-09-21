@@ -48,7 +48,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
       children: [
         _buildConnectDialog(),
         const SizedBox(height: defaultSpacing),
-        _buildCodeSizeInstructions(),
+        _buildAppSizeInstructions(),
       ],
     );
   }
@@ -69,20 +69,20 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
     );
   }
 
-  Widget _buildCodeSizeInstructions() {
+  Widget _buildAppSizeInstructions() {
     return _buildSection(
-      title: 'Code Size Tooling',
+      title: 'App Size Tooling',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _subtitleText('Analyze and view diffs for your app\'s size'),
           const SizedBox(height: denseRowSpacing),
           _captionText('Load Dart AOT v8 snapshots, instruction sizes, or '
-              'code size analysis files to track down size issues in your app'),
+              'app size analysis files to track down size issues in your app'),
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           RaisedButton(
-            child: const Text('Open code size tool'),
-            onPressed: () => Navigator.pushNamed(context, codeSizeRoute),
+            child: const Text('Open app size tool'),
+            onPressed: () => Navigator.pushNamed(context, appSizeRoute),
           ),
         ],
       ),

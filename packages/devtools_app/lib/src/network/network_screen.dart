@@ -11,11 +11,13 @@ import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
+import '../dialogs.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
+import '../ui/label.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import 'network_controller.dart';
@@ -35,13 +37,6 @@ class NetworkScreen extends Screen {
 
   static const id = 'network';
 
-  @visibleForTesting
-  static const clearButtonKey = Key('Clear Button');
-  @visibleForTesting
-  static const stopButtonKey = Key('Stop Button');
-  @visibleForTesting
-  static const recordButtonKey = Key('Record Button');
-  @visibleForTesting
   static const recordingInstructionsKey = Key('Recording Instructions');
 
   @override
@@ -58,24 +53,34 @@ class NetworkScreen extends Screen {
         return ValueListenableBuilder<NetworkRequests>(
           valueListenable: networkController.requests,
           builder: (context, networkRequests, _) {
-            final count = networkRequests.requests.length;
+            return ValueListenableBuilder<List<NetworkRequest>>(
+              valueListenable: networkController.filteredRequests,
+              builder: (context, filteredRequests, _) {
+                final filteredCount = filteredRequests.length;
+                final totalCount = networkRequests.requests.length;
 
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('${nf.format(count)} ${pluralize('request', count)}'),
-                const SizedBox(width: denseSpacing),
-                SizedBox(
-                  width: smallProgressSize,
-                  height: smallProgressSize,
-                  child: recording
-                      ? CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(color),
-                        )
-                      : const SizedBox(),
-                ),
-              ],
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Showing ${nf.format(filteredCount)} of '
+                      '${nf.format(totalCount)} '
+                      '${pluralize('request', totalCount)}',
+                    ),
+                    const SizedBox(width: denseSpacing),
+                    SizedBox(
+                      width: smallProgressSize,
+                      height: smallProgressSize,
+                      child: recording
+                          ? CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(color),
+                            )
+                          : const SizedBox(),
+                    ),
+                  ],
+                );
+              },
             );
           },
         );
@@ -98,6 +103,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   bool recording;
 
   NetworkRequests requests;
+
+  List<NetworkRequest> filteredRequests;
 
   @override
   void initState() {
@@ -129,6 +136,12 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
         recording = _networkController.recordingNotifier.value;
       });
     });
+    filteredRequests = _networkController.filteredRequests.value;
+    addAutoDisposeListener(_networkController.filteredRequests, () {
+      setState(() {
+        filteredRequests = _networkController.filteredRequests.value;
+      });
+    });
   }
 
   @override
@@ -141,26 +154,23 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   /// pause, etc.)
   Row _buildProfilerControls() {
     const double includeTextWidth = 600;
-    final hasRequests = requests.requests.isNotEmpty;
+    final hasRequests = filteredRequests.isNotEmpty;
     return Row(
       children: [
-        recordButton(
-          key: NetworkScreen.recordButtonKey,
+        RecordButton(
           recording: recording,
           labelOverride: 'Record network traffic',
           includeTextWidth: includeTextWidth,
           onPressed: _networkController.startRecording,
         ),
         const SizedBox(width: denseSpacing),
-        stopRecordingButton(
-          key: NetworkScreen.stopButtonKey,
+        StopRecordingButton(
           recording: recording,
           includeTextWidth: includeTextWidth,
           onPressed: _networkController.stopRecording,
         ),
         const SizedBox(width: denseSpacing),
-        clearButton(
-          key: NetworkScreen.clearButtonKey,
+        ClearButton(
           onPressed: () {
             _networkController.clear();
           },
@@ -168,7 +178,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
         const Expanded(child: SizedBox()),
         Container(
           width: wideSearchTextWidth,
-          height: defaultSearchTextHeight,
+          height: defaultTextFieldHeight,
           child: buildSearchField(
             controller: _networkController,
             searchFieldKey: networkSearchFieldKey,
@@ -177,18 +187,23 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
             supportsNavigation: true,
           ),
         ),
+        const SizedBox(width: denseSpacing),
+        FilterButton(
+          onPressed: _showFilterDialog,
+          isFilterActive: filteredRequests.length != requests.requests.length,
+        ),
       ],
     );
   }
 
-  Widget _buildProfilerBody(List<NetworkRequest> requests) {
+  Widget _buildProfilerBody() {
     return ValueListenableBuilder<NetworkRequest>(
       valueListenable: _networkController.selectedRequest,
       builder: (context, selectedRequest, _) {
         return Expanded(
-          child: (!recording && requests.isEmpty)
+          child: (!recording && filteredRequests.isEmpty)
               ? Center(
-                  child: recordingInfo(
+                  child: RecordingInfo(
                     instructionsKey: NetworkScreen.recordingInstructionsKey,
                     recording: recording,
                     // TODO(kenz): create a processing notifier if necessary
@@ -205,7 +220,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
                   children: [
                     NetworkRequestsTable(
                       networkController: _networkController,
-                      requests: requests,
+                      requests: filteredRequests,
                       searchMatchesNotifier: _networkController.searchMatches,
                       activeSearchMatchNotifier:
                           _networkController.activeSearchMatch,
@@ -218,13 +233,20 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     );
   }
 
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => NetworkFilterDialog(_networkController),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         _buildProfilerControls(),
         const SizedBox(height: denseRowSpacing),
-        _buildProfilerBody(requests.requests),
+        _buildProfilerBody(),
       ],
     );
   }
@@ -375,5 +397,113 @@ class TimestampColumn extends ColumnData<NetworkRequest> {
   @override
   String getDisplayValue(NetworkRequest dataObject) {
     return formatDateTime(dataObject.startTimestamp);
+  }
+}
+
+class NetworkFilterDialog extends StatefulWidget {
+  const NetworkFilterDialog(this.controller);
+
+  final NetworkController controller;
+
+  @override
+  _NetworkFilterDialogState createState() => _NetworkFilterDialogState();
+}
+
+class _NetworkFilterDialogState extends State<NetworkFilterDialog> {
+  static const dialogWidth = 500.0;
+
+  static const queryInstructions = '''
+Type a filter query to show specific requests.
+
+Any text that is not paired with an available filter key below will be queried against all categories (method, uri, status, type).
+
+Available filters:
+    'method', 'm'       (e.g. 'm:get', 'm:put')
+    'status', 's'           (e.g. 's:200', 's:404')
+    'type', 't'               (e.g. 't:json', 't:ws')
+
+Example queries:
+    'my-endpoint method:put status:404 type:json'
+    'example.com m:get s:200 t:htm'
+    'http s:404'
+    'POST'
+''';
+
+  TextEditingController queryTextFieldController;
+
+  @override
+  void initState() {
+    super.initState();
+    queryTextFieldController =
+        TextEditingController(text: widget.controller.activeFilter.value.query);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsDialog(
+      title: _buildDialogTitle(),
+      content: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: defaultSpacing,
+        ),
+        width: dialogWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildQueryTextField(),
+            const SizedBox(height: defaultSpacing),
+            _buildQueryInstructions(),
+          ],
+        ),
+      ),
+      actions: [
+        DialogApplyButton(
+          onPressed: () {
+            widget.controller.filterData(
+                NetworkFilter.fromQuery(queryTextFieldController.value.text));
+          },
+        ),
+        DialogCancelButton(),
+      ],
+    );
+  }
+
+  Widget _buildDialogTitle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        dialogTitleText(Theme.of(context), 'Filters'),
+        FlatButton(
+          onPressed: queryTextFieldController.clear,
+          child: const MaterialIconLabel(
+            Icons.replay,
+            'Reset to default',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQueryTextField() {
+    return Container(
+      height: defaultTextFieldHeight,
+      child: TextField(
+        controller: queryTextFieldController,
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.all(denseSpacing),
+          border: const OutlineInputBorder(),
+          labelText: 'Filter query',
+          suffix: clearInputButton(queryTextFieldController.clear),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQueryInstructions() {
+    return Text(
+      queryInstructions,
+      style: Theme.of(context).subtleTextStyle,
+    );
   }
 }
