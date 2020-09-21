@@ -61,3 +61,14 @@ const flutterMemory = RegisteredServiceDescription._(
 const flutterListViews = '_flutter.listViews';
 
 const displayRefreshRate = '_flutter.getDisplayRefreshRate';
+
+/// Flutter engine returns estimate how much memory is used by layer/picture raster
+/// cache entries in bytes.
+const flutterEngineRasterCache = '_flutter.estimateRasterCacheMemory';
+
+/// We call this service to get version information about the Flutter Android
+/// memory info using Android's ADB.
+const flutterRaster = RegisteredServiceDescription._(
+  service: flutterEngineRasterCache,
+  title: 'Raster Cache Metrics',
+);

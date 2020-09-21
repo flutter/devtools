@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart' as logger;
@@ -117,6 +118,13 @@ class MemoryTracker {
       adbMemoryInfo = AdbMemoryInfo.empty();
     }
 
+
+    final response = await serviceManager.getDisplayRefreshRate();
+    print('$response');
+
+    final rasterCache = await _fetchRasterCacheInfo();
+    print('$rasterCache');
+
     // Polls for current RSS size.
     _update(await service.getVM(), isolateMemory);
 
@@ -138,6 +146,19 @@ class MemoryTracker {
   void _updateGCEvent(String isolateId, MemoryUsage memoryUsage) {
     isolateHeaps[isolateId] = memoryUsage;
     _recalculate(true);
+  }
+
+  /// Poll Fultter engine's Raster Cache metrics.
+  Future<RasterCache> _fetchRasterCacheInfo() async {
+
+
+
+
+    final response = await serviceManager.getRasterCacheMetrics();
+    if (response == null) return null;
+    final rasterCache = RasterCache.parse(response.json);
+    print(
+        '>>>> layerBytes = ${rasterCache.layerBytes}, pictureBytes = ${rasterCache.pictureBytes}');
   }
 
   /// Poll ADB meminfo
@@ -375,4 +396,33 @@ class InstanceData {
 
   @override
   String toString() => '[InstanceData name: $name, value: $value]';
+}
+
+class RasterCache extends Response {
+  RasterCache({@required this.layerBytes, @required this.pictureBytes});
+
+  RasterCache._fromJson(Map<String, dynamic> json) {
+    layerBytes = json['layerBytes'];
+    pictureBytes = json['pictureBytes'];
+  }
+
+  static RasterCache parse(Map<String, dynamic> json) =>
+      json == null ? null : RasterCache._fromJson(json);
+
+  int layerBytes;
+  int pictureBytes;
+
+  @override
+  Map<String, dynamic> toJson() {
+    final json = <String, dynamic>{};
+    json.addAll({
+      'layerBytes': layerBytes,
+      'pictureBytes': pictureBytes,
+    });
+    return json;
+  }
+
+  @override
+  String toString() =>
+      '[RasterCache layerBytes: $layerBytes, pictureBytes: $pictureBytes]';
 }

@@ -295,6 +295,23 @@ class ServiceConnectionManager {
     );
   }
 
+  /// Flutter engine returns estimate how much memory is used by layer/picture raster
+  /// cache entries in bytes.
+  ///
+  /// Call to returns JSON payload 'EstimateRasterCacheMemory' with two entries:
+  ///   layerBytes - layer raster cache entries in bytes
+  ///   pictureBytes - picture raster cache entries in bytes
+  Future<Response> getRasterCacheMetrics() async {
+    if (connectedApp == null || !await connectedApp.isFlutterApp) {
+      return null;
+    }
+    return await service.callServiceExtension(
+      registrations.flutterEngineRasterCache,
+      isolateId: _isolateManager.selectedIsolate.id,
+      args: {},
+    );
+  }
+
   Future<double> getDisplayRefreshRate() async {
     if (connectedApp == null || !await connectedApp.isFlutterApp) {
       return null;
