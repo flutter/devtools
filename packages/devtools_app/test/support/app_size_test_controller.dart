@@ -1,9 +1,9 @@
-import 'package:devtools_app/src/code_size/code_size_controller.dart';
+import 'package:devtools_app/src/app_size/app_size_controller.dart';
 import 'package:devtools_app/src/utils.dart';
 
 import 'utils.dart';
 
-class CodeSizeTestController extends CodeSizeController {
+class AppSizeTestController extends AppSizeController {
   @override
   void loadTreeFromJsonFile(
     DevToolsJsonFile jsonFile,

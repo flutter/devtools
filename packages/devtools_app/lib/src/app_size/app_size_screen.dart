@@ -16,28 +16,26 @@ import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
+import 'app_size_controller.dart';
+import 'app_size_table.dart';
 import 'code_size_attribution.dart';
-import 'code_size_controller.dart';
-import 'code_size_table.dart';
 import 'file_import_container.dart';
-
-bool codeSizeScreenEnabled = true;
 
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
 
-class CodeSizeScreen extends Screen {
-  const CodeSizeScreen()
+class AppSizeScreen extends Screen {
+  const AppSizeScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
-          title: 'Code Size',
+          title: 'App Size',
           icon: Octicons.fileZip,
         );
 
-  static const snapshotTabKey = Key('Snapshot Tab');
+  static const analysisTabKey = Key('Analysis Tab');
   static const diffTabKey = Key('Diff Tab');
-  static const id = 'code-size';
+  static const id = 'app-size';
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -45,7 +43,7 @@ class CodeSizeScreen extends Screen {
   static const dropdownKey = Key('Diff Tree Type Dropdown');
 
   @visibleForTesting
-  static const snapshotViewTreemapKey = Key('Snapshot View Treemap');
+  static const analysisViewTreemapKey = Key('Analysis View Treemap');
   @visibleForTesting
   static const diffViewTreemapKey = Key('Diff View Treemap');
 
@@ -61,32 +59,32 @@ class CodeSizeScreen extends Screen {
     // and drop events will be absorbed by it, meaning drag and drop actions
     // will be a no-op if they occur over this area. [DragAndDrop] widgets
     // lower in the tree will have priority over this one.
-    return const DragAndDrop(child: CodeSizeBody());
+    return const DragAndDrop(child: AppSizeBody());
   }
 }
 
-class CodeSizeBody extends StatefulWidget {
-  const CodeSizeBody();
+class AppSizeBody extends StatefulWidget {
+  const AppSizeBody();
 
   @override
-  _CodeSizeBodyState createState() => _CodeSizeBodyState();
+  _AppSizeBodyState createState() => _AppSizeBodyState();
 }
 
-class _CodeSizeBodyState extends State<CodeSizeBody>
+class _AppSizeBodyState extends State<AppSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
   static const tabs = [
-    Tab(text: 'Analysis', key: CodeSizeScreen.snapshotTabKey),
-    Tab(text: 'Diff', key: CodeSizeScreen.diffTabKey),
+    Tab(text: 'Analysis', key: AppSizeScreen.analysisTabKey),
+    Tab(text: 'Diff', key: AppSizeScreen.diffTabKey),
   ];
 
-  CodeSizeController controller;
+  AppSizeController controller;
 
   TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    ga.screen(CodeSizeScreen.id);
+    ga.screen(AppSizeScreen.id);
     _tabController = TabController(length: tabs.length, vsync: this);
     addAutoDisposeListener(_tabController);
   }
@@ -101,7 +99,7 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final newController = Provider.of<CodeSizeController>(context);
+    final newController = Provider.of<AppSizeController>(context);
     if (newController == controller) return;
     controller = newController;
 
@@ -125,7 +123,7 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
             ),
             Row(
               children: [
-                if (currentTab.key == CodeSizeScreen.diffTabKey)
+                if (currentTab.key == AppSizeScreen.diffTabKey)
                   _buildDiffTreeTypeDropdown(),
                 const SizedBox(width: defaultSpacing),
                 _buildClearButton(currentTab.key),
@@ -137,7 +135,7 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
           child: TabBarView(
             physics: defaultTabBarViewPhysics,
             children: const [
-              SnapshotView(),
+              AnalysisView(),
               DiffView(),
             ],
             controller: _tabController,
@@ -149,7 +147,7 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
 
   DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
     return DropdownButtonHideUnderline(
-      key: CodeSizeScreen.dropdownKey,
+      key: AppSizeScreen.dropdownKey,
       child: DropdownButton<DiffTreeType>(
         value: controller.activeDiffTreeType.value,
         items: [
@@ -173,14 +171,14 @@ class _CodeSizeBodyState extends State<CodeSizeBody>
 
   Widget _buildClearButton(Key activeTabKey) {
     return clearButton(
-      key: CodeSizeScreen.clearButtonKey,
+      key: AppSizeScreen.clearButtonKey,
       onPressed: () => controller.clear(activeTabKey),
     );
   }
 }
 
-class SnapshotView extends StatefulWidget {
-  const SnapshotView();
+class AnalysisView extends StatefulWidget {
+  const AnalysisView();
 
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
@@ -188,30 +186,30 @@ class SnapshotView extends StatefulWidget {
       ' size analysis file for debugging';
 
   @override
-  _SnapshotViewState createState() => _SnapshotViewState();
+  _AnalysisViewState createState() => _AnalysisViewState();
 }
 
-class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
-  CodeSizeController controller;
+class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
+  AppSizeController controller;
 
-  TreemapNode snapshotRoot;
+  TreemapNode analysisRoot;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final newController = Provider.of<CodeSizeController>(context);
+    final newController = Provider.of<AppSizeController>(context);
     if (newController == controller) return;
     controller = newController;
 
-    snapshotRoot = controller.snapshotRoot.value;
-    addAutoDisposeListener(controller.snapshotRoot, () {
+    analysisRoot = controller.analysisRoot.value;
+    addAutoDisposeListener(controller.analysisRoot, () {
       setState(() {
-        snapshotRoot = controller.snapshotRoot.value;
+        analysisRoot = controller.analysisRoot.value;
       });
     });
 
-    addAutoDisposeListener(controller.snapshotJsonFile);
+    addAutoDisposeListener(controller.analysisJsonFile);
   }
 
   @override
@@ -219,9 +217,9 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
     return Column(
       children: [
         Expanded(
-          child: snapshotRoot != null
+          child: analysisRoot != null
               ? _buildTreemapAndTableSplitView()
-              : _buildImportSnapshotView(),
+              : _buildImportFileView(),
         ),
       ],
     );
@@ -244,7 +242,7 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
                 Row(
                   children: [
                     Flexible(
-                      child: CodeSizeSnapshotTable(rootNode: snapshotRoot),
+                      child: AppSizeAnalysisTable(rootNode: analysisRoot),
                     ),
                     if (controller.analysisCallGraphRoot.value != null)
                       Flexible(
@@ -267,30 +265,30 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
   }
 
   String _generateSingleFileHeaderText() {
-    String output = controller.snapshotJsonFile.value.isAnalyzeSizeFile
+    String output = controller.analysisJsonFile.value.isAnalyzeSizeFile
         ? 'Total size analysis: '
         : 'Dart AOT snapshot: ';
-    output += controller.snapshotJsonFile.value.displayText;
+    output += controller.analysisJsonFile.value.displayText;
     return output;
   }
 
   Widget _buildTreemap() {
     return LayoutBuilder(
-      key: CodeSizeScreen.snapshotViewTreemapKey,
+      key: AppSizeScreen.analysisViewTreemapKey,
       builder: (context, constraints) {
         return Treemap.fromRoot(
-          rootNode: snapshotRoot,
+          rootNode: analysisRoot,
           levelsVisible: 2,
           isOutermostLevel: true,
           width: constraints.maxWidth,
           height: constraints.maxHeight,
-          onRootChangedCallback: controller.changeSnapshotRoot,
+          onRootChangedCallback: controller.changeAnalysisRoot,
         );
       },
     );
   }
 
-  Widget _buildImportSnapshotView() {
+  Widget _buildImportFileView() {
     final notifications = Notifications.of(context);
 
     return ValueListenableBuilder(
@@ -299,7 +297,7 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
           if (processing) {
             return Center(
               child: Text(
-                CodeSizeScreen.loadingMessage,
+                AppSizeScreen.loadingMessage,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).textTheme.headline1.color,
@@ -312,7 +310,7 @@ class _SnapshotViewState extends State<SnapshotView> with AutoDisposeMixin {
                 Flexible(
                   child: FileImportContainer(
                     title: 'Size analysis',
-                    instructions: SnapshotView.importInstructions,
+                    instructions: AnalysisView.importInstructions,
                     actionText: 'Analyze Size',
                     onAction: (jsonFile) {
                       controller.loadTreeFromJsonFile(
@@ -344,7 +342,7 @@ class DiffView extends StatefulWidget {
 }
 
 class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
-  CodeSizeController controller;
+  AppSizeController controller;
 
   TreemapNode diffRoot;
 
@@ -352,7 +350,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final newController = Provider.of<CodeSizeController>(context);
+    final newController = Provider.of<AppSizeController>(context);
     if (newController == controller) return;
     controller = newController;
 
@@ -365,8 +363,8 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
 
     addAutoDisposeListener(controller.activeDiffTreeType);
 
-    addAutoDisposeListener(controller.oldDiffSnapshotJsonFile);
-    addAutoDisposeListener(controller.newDiffSnapshotJsonFile);
+    addAutoDisposeListener(controller.oldDiffJsonFile);
+    addAutoDisposeListener(controller.newDiffJsonFile);
   }
 
   @override
@@ -399,7 +397,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
                 Row(
                   children: [
                     Flexible(
-                      child: CodeSizeDiffTable(rootNode: diffRoot),
+                      child: AppSizeDiffTable(rootNode: diffRoot),
                     ),
                     if (controller.diffCallGraphRoot.value != null)
                       Flexible(
@@ -423,12 +421,12 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
 
   String _generateDualFileHeaderText() {
     String output = 'Diffing ';
-    output += controller.oldDiffSnapshotJsonFile.value.isAnalyzeSizeFile
+    output += controller.oldDiffJsonFile.value.isAnalyzeSizeFile
         ? 'total size analyses: '
         : 'Dart AOT snapshots: ';
-    output += controller.oldDiffSnapshotJsonFile.value.displayText;
+    output += controller.oldDiffJsonFile.value.displayText;
     output += ' (OLD)    vs    (NEW) ';
-    output += controller.newDiffSnapshotJsonFile.value.displayText;
+    output += controller.newDiffJsonFile.value.displayText;
     return output;
   }
 
@@ -439,7 +437,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
         if (processing) {
           return Center(
             child: Text(
-              CodeSizeScreen.loadingMessage,
+              AppSizeScreen.loadingMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Theme.of(context).textTheme.headline1.color,
@@ -470,7 +468,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
 
   Widget _buildTreemap() {
     return LayoutBuilder(
-      key: CodeSizeScreen.diffViewTreemapKey,
+      key: AppSizeScreen.diffViewTreemapKey,
       builder: (context, constraints) {
         return Treemap.fromRoot(
           rootNode: diffRoot,

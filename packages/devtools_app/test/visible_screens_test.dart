@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/app.dart';
-import 'package:devtools_app/src/code_size/code_size_screen.dart';
+import 'package:devtools_app/src/app_size/app_size_screen.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/framework_controller.dart';
 import 'package:devtools_app/src/globals.dart';
@@ -65,7 +65,7 @@ void main() {
             DebuggerScreen,
             NetworkScreen,
             LoggingScreen,
-            if (codeSizeScreenEnabled) CodeSizeScreen,
+            AppSizeScreen,
           ]));
     });
 
@@ -100,7 +100,7 @@ void main() {
             DebuggerScreen,
             NetworkScreen,
             LoggingScreen,
-            if (codeSizeScreenEnabled) CodeSizeScreen,
+            AppSizeScreen,
           ]));
     });
 
@@ -118,7 +118,7 @@ void main() {
             // DebuggerScreen,
             NetworkScreen,
             LoggingScreen,
-            if (codeSizeScreenEnabled) CodeSizeScreen,
+            AppSizeScreen,
           ]));
     });
 
