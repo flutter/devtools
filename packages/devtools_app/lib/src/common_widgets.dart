@@ -96,6 +96,7 @@ class ClearButton extends StatelessWidget {
   final double includeTextWidth;
 
   final VoidCallback onPressed;
+
   @override
   Widget build(BuildContext context) {
     return OutlineButton(
