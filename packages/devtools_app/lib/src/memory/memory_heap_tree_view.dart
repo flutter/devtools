@@ -347,7 +347,9 @@ class HeapTreeViewState extends State<HeapTree>
                     ? 'Graphing...'
                     : _isSnapshotGrouping
                         ? 'Grouping...'
-                        : _isSnapshotComplete ? 'Done' : '...',
+                        : _isSnapshotComplete
+                            ? 'Done'
+                            : '...',
           ),
         ],
       );
