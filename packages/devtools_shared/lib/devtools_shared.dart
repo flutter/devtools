@@ -8,3 +8,4 @@ export 'src/memory/event_sample.dart';
 export 'src/memory/heap_sample.dart';
 export 'src/memory/heap_space.dart';
 export 'src/memory/memory_json.dart';
+export 'src/url_utils.dart';

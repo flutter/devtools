@@ -99,6 +99,11 @@ if [ "$BOT" = "main" ]; then
     # Ensure we can build the app.
     flutter pub run build_runner build -o web:build --release
 
+    # Run shared tests.
+    pushd ../devtools_shared
+    pub run test
+    popd
+
 elif [ "$BOT" = "test_ddc" ]; then
 
     flutter pub get
