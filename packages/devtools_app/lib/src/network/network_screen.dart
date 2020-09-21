@@ -37,13 +37,6 @@ class NetworkScreen extends Screen {
 
   static const id = 'network';
 
-  @visibleForTesting
-  static const clearButtonKey = Key('Clear Button');
-  @visibleForTesting
-  static const stopButtonKey = Key('Stop Button');
-  @visibleForTesting
-  static const recordButtonKey = Key('Record Button');
-  @visibleForTesting
   static const recordingInstructionsKey = Key('Recording Instructions');
 
   @override
@@ -164,23 +157,20 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     final hasRequests = filteredRequests.isNotEmpty;
     return Row(
       children: [
-        recordButton(
-          key: NetworkScreen.recordButtonKey,
+        RecordButton(
           recording: recording,
           labelOverride: 'Record network traffic',
           includeTextWidth: includeTextWidth,
           onPressed: _networkController.startRecording,
         ),
         const SizedBox(width: denseSpacing),
-        stopRecordingButton(
-          key: NetworkScreen.stopButtonKey,
+        StopRecordingButton(
           recording: recording,
           includeTextWidth: includeTextWidth,
           onPressed: _networkController.stopRecording,
         ),
         const SizedBox(width: denseSpacing),
-        clearButton(
-          key: NetworkScreen.clearButtonKey,
+        ClearButton(
           onPressed: () {
             _networkController.clear();
           },
@@ -213,7 +203,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
         return Expanded(
           child: (!recording && filteredRequests.isEmpty)
               ? Center(
-                  child: recordingInfo(
+                  child: RecordingInfo(
                     instructionsKey: NetworkScreen.recordingInstructionsKey,
                     recording: recording,
                     // TODO(kenz): create a processing notifier if necessary

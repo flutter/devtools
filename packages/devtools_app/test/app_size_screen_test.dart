@@ -115,7 +115,7 @@ void main() {
       );
 
       expect(find.byKey(AppSizeScreen.dropdownKey), findsNothing);
-      expect(find.byKey(AppSizeScreen.clearButtonKey), findsOneWidget);
+      expect(find.byType(ClearButton), findsOneWidget);
 
       expect(find.byType(FileImportContainer), findsOneWidget);
       expect(find.text(AnalysisView.importInstructions), findsOneWidget);
@@ -165,7 +165,7 @@ void main() {
 
       await loadDataAndPump(tester);
 
-      await tester.tap(find.byKey(AppSizeScreen.clearButtonKey));
+      await tester.tap(find.byType(ClearButton));
       await tester.pumpAndSettle();
 
       expect(find.byType(FileImportContainer), findsOneWidget);
@@ -207,7 +207,7 @@ void main() {
       await loadDiffTabAndSettle(tester);
 
       expect(find.byKey(AppSizeScreen.dropdownKey), findsOneWidget);
-      expect(find.byKey(AppSizeScreen.clearButtonKey), findsOneWidget);
+      expect(find.byType(ClearButton), findsOneWidget);
 
       expect(find.byType(DualFileImportContainer), findsOneWidget);
       expect(find.byType(FileImportContainer), findsNWidgets(2));
@@ -303,7 +303,7 @@ void main() {
 
       await loadDiffDataAndPump(tester, oldV8JsonFile, newV8JsonFile);
 
-      await tester.tap(find.byKey(AppSizeScreen.clearButtonKey));
+      await tester.tap(find.byType(ClearButton));
       await tester.pumpAndSettle();
 
       expect(find.byType(DualFileImportContainer), findsOneWidget);

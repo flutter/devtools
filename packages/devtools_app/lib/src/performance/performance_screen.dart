@@ -36,14 +36,6 @@ class PerformanceScreen extends Screen {
         );
 
   @visibleForTesting
-  static const clearButtonKey = Key('Clear Button');
-  @visibleForTesting
-  static const recordButtonKey = Key('Record Button');
-  @visibleForTesting
-  static const stopRecordingButtonKey = Key('Stop Recording Button');
-  @visibleForTesting
-  static const exportButtonKey = Key('Export Button');
-  @visibleForTesting
   static const recordingInstructionsKey = Key('Recording Instructions');
   @visibleForTesting
   static const recordingStatusKey = Key('Recording Status');
@@ -196,22 +188,19 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   Widget _buildPrimaryStateControls() {
     return Row(
       children: [
-        recordButton(
-          key: PerformanceScreen.recordButtonKey,
+        RecordButton(
           recording: recording,
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.startRecording,
         ),
         const SizedBox(width: denseSpacing),
-        stopRecordingButton(
-          key: PerformanceScreen.stopRecordingButtonKey,
+        StopRecordingButton(
           recording: recording,
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.stopRecording,
         ),
         const SizedBox(width: defaultSpacing),
-        clearButton(
-          key: PerformanceScreen.clearButtonKey,
+        ClearButton(
           busy: recording,
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.clear,
@@ -227,7 +216,6 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
         const ProfileGranularityDropdown(PerformanceScreen.id),
         const SizedBox(width: defaultSpacing),
         ExportButton(
-          key: PerformanceScreen.exportButtonKey,
           onPressed: controller.cpuProfileData != null &&
                   !controller.cpuProfileData.isEmpty
               ? _exportPerformance
@@ -239,7 +227,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   }
 
   Widget _buildRecordingInfo() {
-    return recordingInfo(
+    return RecordingInfo(
       instructionsKey: PerformanceScreen.recordingInstructionsKey,
       recordingStatusKey: PerformanceScreen.recordingStatusKey,
       recording: recording,

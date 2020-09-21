@@ -168,12 +168,11 @@ class DevToolsAppState extends State<DevToolsApp> {
                   tabs: tabs,
                   analyticsProvider: widget.analyticsProvider,
                   actions: [
+                    // TODO(https://github.com/flutter/devtools/issues/1941)
                     if (serviceManager.connectedApp.isFlutterAppNow) ...[
                       HotReloadButton(),
                       HotRestartButton(),
                     ],
-                    // TODO(kenz): we probably want these actions on every
-                    // scaffold. Refactor so these are always visible.
                     OpenSettingsAction(),
                     OpenAboutAction(),
                   ],

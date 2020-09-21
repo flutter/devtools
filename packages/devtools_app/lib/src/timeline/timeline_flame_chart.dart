@@ -127,7 +127,7 @@ class _TimelineFlameChartContainerState
   }
 
   Widget _buildProcessingInfo() {
-    return processingInfo(
+    return ProcessingInfo(
       progressValue: widget.processingProgress,
       processedObject: 'timeline trace',
     );

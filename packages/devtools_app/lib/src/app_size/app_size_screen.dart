@@ -38,8 +38,6 @@ class AppSizeScreen extends Screen {
   static const id = 'app-size';
 
   @visibleForTesting
-  static const clearButtonKey = Key('Clear Button');
-  @visibleForTesting
   static const dropdownKey = Key('Diff Tree Type Dropdown');
 
   @visibleForTesting
@@ -170,8 +168,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
   }
 
   Widget _buildClearButton(Key activeTabKey) {
-    return clearButton(
-      key: AppSizeScreen.clearButtonKey,
+    return ClearButton(
       onPressed: () => controller.clear(activeTabKey),
     );
   }
