@@ -221,7 +221,7 @@ class InspectorService extends DisposableController
     final parts = path.split('/');
     String pubRootDirectory;
     for (int i = parts.length - 1; i >= 0; i--) {
-      String part;
+      final part = parts[i];
       if (part == 'lib' || part == 'web') {
         pubRootDirectory = parts.sublist(0, i).join('/');
         break;

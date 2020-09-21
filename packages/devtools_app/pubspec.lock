@@ -379,7 +379,7 @@ packages:
       name: mp_chart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.9"
+    version: "0.3.0"
   nested:
     dependency: transitive
     description:
@@ -414,7 +414,7 @@ packages:
       name: optimized_gesture_detector
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.5"
+    version: "0.0.6"
   package_config:
     dependency: transitive
     description:
@@ -622,7 +622,7 @@ packages:
       name: source_span
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.0-nullsafety"
+    version: "1.8.0-nullsafety.1"
   sse:
     dependency: "direct main"
     description:
@@ -806,5 +806,5 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=2.10.0-0.0.dev <2.10.0"
-  flutter: ">=1.16.0 <2.0.0"
+  dart: ">=2.10.0-137.0 <2.10.0"
+  flutter: ">1.21.0 <2.0.0"

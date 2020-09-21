@@ -88,7 +88,7 @@ Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
         await inspectorService.setPubRootDirectories([]);
         final String rootDirectory =
             await inspectorService.inferPubRootDirectoryIfNeeded();
-        expect(rootDirectory, endsWith('/fixtures/flutter_app/lib'));
+        expect(rootDirectory, endsWith('/fixtures/flutter_app'));
         await group.dispose();
       });
 
