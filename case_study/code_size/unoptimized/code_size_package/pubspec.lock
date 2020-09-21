@@ -141,7 +141,7 @@ packages:
       name: source_span
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.0-nullsafety"
+    version: "1.8.0-nullsafety.1"
   stack_trace:
     dependency: transitive
     description:
@@ -192,4 +192,4 @@ packages:
     source: hosted
     version: "2.1.0-nullsafety.2"
 sdks:
-  dart: ">=2.10.0-0.0.dev <2.10.0"
+  dart: ">=2.10.0-137.0 <2.10.0"
