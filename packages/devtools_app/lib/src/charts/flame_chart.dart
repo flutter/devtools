@@ -454,7 +454,8 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   Future<void> scrollVerticallyToData(V data) async {
     await verticalScrollController.animateTo(
       // Subtract [2 * rowHeightWithPadding] to give the target scroll event top padding.
-      topYForData(data) - 2 * rowHeightWithPadding,
+      (topYForData(data) - 2 * rowHeightWithPadding)
+          .clamp(0.0, verticalScrollController.position.maxScrollExtent),
       duration: shortDuration,
       curve: defaultCurve,
     );
