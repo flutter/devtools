@@ -11,6 +11,7 @@ import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../ui/search.dart';
+import '../utils.dart';
 
 class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   /// Data for the initial value and reset value of [_dataNotifier].
@@ -91,12 +92,11 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
 
   @override
   List<CpuStackFrame> matchesForSearch(String search) {
-    if (search == null || search.isEmpty) return [];
+    if (search?.isEmpty ?? true) return [];
     final matches = <CpuStackFrame>[];
-    final caseInsensitiveSearch = search.toLowerCase();
     final currentStackFrames = _dataNotifier.value.stackFrames.values;
     for (final frame in currentStackFrames) {
-      if (frame.name.toLowerCase().contains(caseInsensitiveSearch)) {
+      if (frame.name.caseInsensitiveContains(search)) {
         matches.add(frame);
       }
     }

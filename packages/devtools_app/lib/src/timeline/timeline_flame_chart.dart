@@ -234,8 +234,10 @@ class TimelineFlameChartState
 
   @override
   bool isDataHorizontallyInView(TimelineEvent data) {
-    return visibleTimeRange.contains(data.time.start) &&
-        visibleTimeRange.contains(data.time.end);
+    return (visibleTimeRange.contains(data.time.start) &&
+            visibleTimeRange.contains(data.time.end)) ||
+        (data.time.start <= visibleTimeRange.start &&
+            data.time.end >= visibleTimeRange.end);
   }
 
   @override
