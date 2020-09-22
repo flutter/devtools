@@ -21,6 +21,7 @@ import '../service_manager.dart';
 import '../trace_event.dart';
 import '../trees.dart';
 import '../ui/search.dart';
+import '../utils.dart';
 import 'timeline_model.dart';
 import 'timeline_processor.dart';
 import 'timeline_screen.dart';
@@ -421,12 +422,11 @@ class TimelineController
 
   @override
   List<TimelineEvent> matchesForSearch(String search) {
-    if (search == null || search.isEmpty) return [];
+    if (search?.isEmpty ?? true) return [];
     final matches = <TimelineEvent>[];
-    final caseInsensitiveSearch = search.toLowerCase();
     for (final event in data.timelineEvents) {
       breadthFirstTraversal<TimelineEvent>(event, action: (TimelineEvent e) {
-        if (e.name.toLowerCase().contains(caseInsensitiveSearch)) {
+        if (e.name.caseInsensitiveContains(search)) {
           matches.add(e);
         }
       });

@@ -83,6 +83,11 @@ mixin SearchControllerMixin<T> {
   }
 
   List<T> matchesForSearch(String search) => [];
+
+  void resetSearch() {
+    _searchNotifier.value = '';
+    refreshSearchMatches();
+  }
 }
 
 mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
@@ -113,6 +118,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   OverlayEntry createAutoCompleteOverlay({
     @required GlobalKey searchFieldKey,
   }) {
+    // TODO(kenz): investigate whether we actually need the global key for this.
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField.
     final RenderBox box = searchFieldKey.currentContext.findRenderObject();
@@ -339,7 +345,7 @@ mixin SearchFieldMixin {
   void clearSearchField(SearchControllerMixin controller, {force = false}) {
     if (force || controller.search.isNotEmpty) {
       searchTextFieldController.clear();
-      controller.search = '';
+      controller.resetSearch();
     }
   }
 }

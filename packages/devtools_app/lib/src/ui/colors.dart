@@ -37,7 +37,7 @@ extension FlameChartColorScheme on ColorScheme {
       isLight ? Colors.black54 : const Color.fromARGB(255, 200, 200, 200);
 }
 
-const timelineSelectionColor = Color(0xFF36C6F4);
+const defaultSelectionColor = Color(0xFF36C6F4);
 
 const searchMatchColor = Colors.yellow;
 final searchMatchColorOpaque = Colors.yellow.withOpacity(0.5);

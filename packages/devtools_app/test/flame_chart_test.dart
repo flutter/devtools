@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/flutter_widgets/linked_scroll_controller.dart';
+import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
@@ -22,11 +23,15 @@ void main() {
   group('FlameChart', () {
     // Use an instance of [CpuProfileFlameChart] because the data is simple to
     // stub and [FlameChart] is an abstract class.
+    final controller = CpuProfilerController();
     final flameChart = CpuProfileFlameChart(
-      CpuProfileData.parse(cpuProfileResponseJson),
+      data: CpuProfileData.parse(cpuProfileResponseJson),
+      controller: controller,
       width: 1000.0,
       height: 1000.0,
       selectionNotifier: ValueNotifier<CpuStackFrame>(null),
+      searchMatchesNotifier: controller.searchMatches,
+      activeSearchMatchNotifier: controller.activeSearchMatch,
       onSelected: (_) {},
     );
 
@@ -323,7 +328,7 @@ void main() {
         await pumpFlameChartNode(tester, selected: true, hovered: false);
         expect(nodeFinder, findsOneWidget);
         final Container nodeWidget = tester.widget(nodeFinder);
-        expect(nodeWidget.color, equals(timelineSelectionColor));
+        expect(nodeWidget.color, equals(defaultSelectionColor));
 
         expect(textFinder, findsOneWidget);
         final Text textWidget = tester.widget(textFinder);

@@ -281,7 +281,7 @@ class FlutterFramesChartItem extends StatelessWidget {
         if (selected)
           Container(
             key: selectedFrameIndicatorKey,
-            color: timelineSelectionColor,
+            color: defaultSelectionColor,
             height: selectedIndicatorHeight,
           ),
       ],

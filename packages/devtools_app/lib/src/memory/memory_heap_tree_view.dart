@@ -478,7 +478,7 @@ class HeapTreeViewState extends State<HeapTree>
                 setState(() {
                   controller.closeAutoCompleteOverlay();
                   controller.toggleShowTreemap(value);
-                  controller.search = '';
+                  controller.resetSearch();
                   controller.selectedLeaf = null;
                 });
               },
@@ -963,7 +963,7 @@ class MemorySnapshotTableState extends State<MemorySnapshotTable>
         // Found an exact match.
         selectItemInTree(searchingValue);
         controller.selectTheSearch = false;
-        controller.search = '';
+        controller.resetSearch();
         return true;
       }
 

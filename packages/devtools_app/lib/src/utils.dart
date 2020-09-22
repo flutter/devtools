@@ -978,3 +978,17 @@ void debugLogger(String message) {
     return true;
   }());
 }
+
+final _lowercaseLookup = <String, String>{};
+
+// TODO(kenz): consider moving other String helpers into this extension.
+// TODO(kenz): replace other uses of toLowerCase() for string matching with
+// this extension method.
+extension StringExtension on String {
+  bool caseInsensitiveContains(String str) {
+    final lowerCase = _lowercaseLookup.putIfAbsent(this, () => toLowerCase());
+    final strLowerCase =
+        _lowercaseLookup.putIfAbsent(str, () => str.toLowerCase());
+    return lowerCase.contains(strLowerCase);
+  }
+}
