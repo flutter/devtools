@@ -60,9 +60,9 @@ Future<AnalyticsProvider> get analyticsProvider async {
     }
     if (await analytics.isEnabled) {
       isEnabled = true;
-      if (await analytics.isFirstRun) {
-        isFirstRun = true;
-      }
+    }
+    if (await analytics.isFirstRun) {
+      isFirstRun = true;
     }
     isGtagsEnabled = analytics.isGtagsEnabled();
   } catch (_) {
