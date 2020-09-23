@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart' as logger;
@@ -36,6 +35,9 @@ class MemoryTracker {
 
   /// Polled adb dumpsys meminfo values.
   AdbMemoryInfo adbMemoryInfo;
+
+  /// Polled engine's RasterCache estimates.
+  RasterCache rasterCache;
 
   bool get hasConnection => service != null;
 
@@ -118,12 +120,9 @@ class MemoryTracker {
       adbMemoryInfo = AdbMemoryInfo.empty();
     }
 
-
-    final response = await serviceManager.getDisplayRefreshRate();
-    print('$response');
-
-    final rasterCache = await _fetchRasterCacheInfo();
-    print('$rasterCache');
+    // Query the engine's rasterCache estimate.
+    rasterCache = await _fetchRasterCacheInfo();
+    logger.log('$rasterCache');
 
     // Polls for current RSS size.
     _update(await service.getVM(), isolateMemory);
@@ -149,21 +148,31 @@ class MemoryTracker {
   }
 
   /// Poll Fultter engine's Raster Cache metrics.
+  /// @returns engine's rasterCache estimates or null.
   Future<RasterCache> _fetchRasterCacheInfo() async {
-
-
-
-
     final response = await serviceManager.getRasterCacheMetrics();
     if (response == null) return null;
     final rasterCache = RasterCache.parse(response.json);
-    print(
-        '>>>> layerBytes = ${rasterCache.layerBytes}, pictureBytes = ${rasterCache.pictureBytes}');
+    return rasterCache;
   }
 
   /// Poll ADB meminfo
-  Future<AdbMemoryInfo> _fetchAdbInfo() async =>
-      AdbMemoryInfo.fromJson((await serviceManager.getAdbMemoryInfo()).json);
+  Future<AdbMemoryInfo> _fetchAdbInfo() async {
+    final rawData =
+        AdbMemoryInfo.fromJson((await serviceManager.getAdbMemoryInfo()).json);
+    // All data returned from dumpsys meminfo is in kilobytes adjust to total bytes.
+    return AdbMemoryInfo(
+      rawData.realtime * 1024,
+      rawData.javaHeap * 1024,
+      rawData.nativeHeap * 1024,
+      rawData.code * 1024,
+      rawData.stack * 1024,
+      rawData.graphics * 1024,
+      rawData.other * 1024,
+      rawData.system * 1024,
+      rawData.total * 1024,
+    );
+  }
 
   /// Returns the MemoryUsage of a particular isolate.
   /// @param id isolateId.
@@ -239,6 +248,7 @@ class MemoryTracker {
       fromGC,
       adbMemoryInfo,
       eventSample,
+      rasterCache,
     );
 
     _addSample(sample);
@@ -396,33 +406,4 @@ class InstanceData {
 
   @override
   String toString() => '[InstanceData name: $name, value: $value]';
-}
-
-class RasterCache extends Response {
-  RasterCache({@required this.layerBytes, @required this.pictureBytes});
-
-  RasterCache._fromJson(Map<String, dynamic> json) {
-    layerBytes = json['layerBytes'];
-    pictureBytes = json['pictureBytes'];
-  }
-
-  static RasterCache parse(Map<String, dynamic> json) =>
-      json == null ? null : RasterCache._fromJson(json);
-
-  int layerBytes;
-  int pictureBytes;
-
-  @override
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json.addAll({
-      'layerBytes': layerBytes,
-      'pictureBytes': pictureBytes,
-    });
-    return json;
-  }
-
-  @override
-  String toString() =>
-      '[RasterCache layerBytes: $layerBytes, pictureBytes: $pictureBytes]';
 }
