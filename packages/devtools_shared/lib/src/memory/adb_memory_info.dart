@@ -20,33 +20,37 @@ class AdbMemoryInfo {
   /// @param rawData (from service extension) if true then all data returned from
   /// dumpsys meminfo is in kilobytes adjust to total bytes.
   factory AdbMemoryInfo.fromJson(Map<String, dynamic> json, {rawData = false}) {
-    final rawData = AdbMemoryInfo(
-      json[realTimeKey] as int,
-      json[javaHeapKey] as int,
-      json[nativeHeapKey] as int,
-      json[codeKey] as int,
-      json[stackKey] as int,
-      json[graphicsKey] as int,
-      json[otherKey] as int,
-      json[systemKey] as int,
-      json[totalKey] as int,
-    );
+    int javaHeap = json[javaHeapKey];
+    int nativeHeap = json[nativeHeapKey];
+    int code = json[codeKey];
+    int stack = json[stackKey];
+    int graphics = json[graphicsKey];
+    int other = json[otherKey];
+    int system = json[systemKey];
+    int total = json[totalKey];
 
-    // All data returned from dumpsys meminfo, via service extension, is in
-    // kilobytes adjust to total bytes.
-    return rawData
-        ? AdbMemoryInfo(
-            rawData.realtime * 1024,
-            rawData.javaHeap * 1024,
-            rawData.nativeHeap * 1024,
-            rawData.code * 1024,
-            rawData.stack * 1024,
-            rawData.graphics * 1024,
-            rawData.other * 1024,
-            rawData.system * 1024,
-            rawData.total * 1024,
-          )
-        : rawData;
+    if (rawData) {
+      javaHeap *= 1024;
+      nativeHeap *= 1024;
+      code *= 1024;
+      stack *= 1024;
+      graphics *= 1024;
+      other *= 1024;
+      system *= 1024;
+      total *= 1024;
+    }
+
+    return AdbMemoryInfo(
+      json[realTimeKey] as int,
+      javaHeap,
+      nativeHeap,
+      code,
+      stack,
+      graphics,
+      other,
+      system,
+      total,
+    );
   }
 
   /// JSON keys of data retrieved from ADB tool.
