@@ -3,4 +3,4 @@
 // found in the LICENSE file.
 
 export 'src/external_handlers.dart';
-export 'src/server.dart' show serveDevTools;
+export 'src/server.dart' show serveDevTools, serveDevToolsWithArgs;

@@ -48,6 +48,7 @@ ClientManager clients;
 /// Wraps [serveDevTools] `arguments` parsed, as from the command line.
 ///
 /// For more information on `handler`, see [serveDevTools].
+// Note: this method is used in google3 as well as by DevTools' main method.
 Future<void> serveDevToolsWithArgs(
   List<String> arguments, {
   shelf.Handler handler,
