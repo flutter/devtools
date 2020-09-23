@@ -32,18 +32,21 @@ class AdbMemoryInfo {
       json[totalKey] as int,
     );
 
-    // All data returned from dumpsys meminfo is in kilobytes adjust to total bytes.
-    return AdbMemoryInfo(
-      rawData.realtime * 1024,
-      rawData.javaHeap * 1024,
-      rawData.nativeHeap * 1024,
-      rawData.code * 1024,
-      rawData.stack * 1024,
-      rawData.graphics * 1024,
-      rawData.other * 1024,
-      rawData.system * 1024,
-      rawData.total * 1024,
-    );
+    // All data returned from dumpsys meminfo, via service extension, is in
+    // kilobytes adjust to total bytes.
+    return rawData
+        ? AdbMemoryInfo(
+            rawData.realtime * 1024,
+            rawData.javaHeap * 1024,
+            rawData.nativeHeap * 1024,
+            rawData.code * 1024,
+            rawData.stack * 1024,
+            rawData.graphics * 1024,
+            rawData.other * 1024,
+            rawData.system * 1024,
+            rawData.total * 1024,
+          )
+        : rawData;
   }
 
   /// JSON keys of data retrieved from ADB tool.
