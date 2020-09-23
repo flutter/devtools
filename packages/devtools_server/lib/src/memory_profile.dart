@@ -196,7 +196,7 @@ class MemoryProfile {
 
   /// Poll ADB meminfo
   Future<AdbMemoryInfo> _fetchAdbInfo() async => AdbMemoryInfo.fromJson(
-        (await serviceManager.getAdbMemoryInfo()).json,
+        (await getAdbMemoryInfo()).json,
         rawData: true,
       );
 
