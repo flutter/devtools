@@ -157,22 +157,10 @@ class MemoryTracker {
   }
 
   /// Poll ADB meminfo
-  Future<AdbMemoryInfo> _fetchAdbInfo() async {
-    final rawData =
-        AdbMemoryInfo.fromJson((await serviceManager.getAdbMemoryInfo()).json);
-    // All data returned from dumpsys meminfo is in kilobytes adjust to total bytes.
-    return AdbMemoryInfo(
-      rawData.realtime * 1024,
-      rawData.javaHeap * 1024,
-      rawData.nativeHeap * 1024,
-      rawData.code * 1024,
-      rawData.stack * 1024,
-      rawData.graphics * 1024,
-      rawData.other * 1024,
-      rawData.system * 1024,
-      rawData.total * 1024,
-    );
-  }
+  Future<AdbMemoryInfo> _fetchAdbInfo() async => AdbMemoryInfo.fromJson(
+        (await serviceManager.getAdbMemoryInfo()).json,
+        rawData: true,
+      );
 
   /// Returns the MemoryUsage of a particular isolate.
   /// @param id isolateId.

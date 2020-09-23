@@ -194,8 +194,11 @@ class MemoryProfile {
     _pollingTimer = Timer(updateDelay, _pollMemory);
   }
 
-  Future<AdbMemoryInfo> _fetchAdbInfo() async =>
-      AdbMemoryInfo.fromJson((await getAdbMemoryInfo()).json);
+  /// Poll ADB meminfo
+  Future<AdbMemoryInfo> _fetchAdbInfo() async => AdbMemoryInfo.fromJson(
+        (await serviceManager.getAdbMemoryInfo()).json,
+        rawData: true,
+      );
 
   void _update(VM vm, List<Isolate> isolates) {
     processRss = vm.json['_currentRSS'];
