@@ -853,7 +853,7 @@ class InspectorController extends DisposableController
       final registered = flutterVersionServiceListenable.value;
       if (registered) {
         final flutterVersion = FlutterVersion.parse(
-            (await serviceManager.getFlutterVersion()).json);
+            (await serviceManager.flutterVersion).json);
         if (flutterVersion.isSupported(supportedVersion: version)) {
           callback();
         }

@@ -188,7 +188,6 @@ class MemoryProfile {
 
     // Query the engine's rasterCache estimate.
     rasterCache = await _fetchRasterCacheInfo(_selectedIsolate);
-    print('$rasterCache');
 
     // TODO(terry): There are no user interactions.  However, might be nice to
     //              record VM GC's on the timeline.
@@ -201,9 +200,8 @@ class MemoryProfile {
   }
 
   /// Poll ADB meminfo
-  Future<AdbMemoryInfo> _fetchAdbInfo() async => AdbMemoryInfo.fromJson(
+  Future<AdbMemoryInfo> _fetchAdbInfo() async => AdbMemoryInfo.fromJsonInKB(
         (await getAdbMemoryInfo()).json,
-        rawData: true,
       );
 
   /// Poll Fultter engine's Raster Cache metrics.

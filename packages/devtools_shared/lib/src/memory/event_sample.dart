@@ -181,17 +181,13 @@ class RasterCache {
       json == null ? null : RasterCache.fromJson(json);
 
   int layerBytes;
-  
+
   int pictureBytes;
 
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json.addAll({
-      'layerBytes': layerBytes,
-      'pictureBytes': pictureBytes,
-    });
-    return json;
-  }
+  Map<String, dynamic> toJson() => {
+        'layerBytes': layerBytes,
+        'pictureBytes': pictureBytes,
+      };
 
   @override
   String toString() =>

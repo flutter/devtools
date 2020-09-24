@@ -64,4 +64,4 @@ const displayRefreshRate = '_flutter.getDisplayRefreshRate';
 
 /// Flutter engine returns estimate how much memory is used by layer/picture raster
 /// cache entries in bytes.
-const flutterEngineRasterCache = '_flutter.estimateRasterCacheMemory';
+const flutterEngineEstimateRasterCache = '_flutter.estimateRasterCacheMemory';

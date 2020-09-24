@@ -66,7 +66,7 @@ void main() {
       when(fakeServiceManager.connectedApp.isRunningOnDartVM).thenReturn(true);
       mockIsFlutterApp(fakeServiceManager.connectedApp);
       final flutterVersion = FlutterVersion.parse(
-          (await fakeServiceManager.getFlutterVersion()).json);
+          (await fakeServiceManager.flutterVersion).json);
 
       deviceDialog = DeviceDialog(
         connectedApp: fakeServiceManager.connectedApp,
