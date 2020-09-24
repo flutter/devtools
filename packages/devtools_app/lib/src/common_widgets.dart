@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -986,5 +987,22 @@ class _BreadcrumbPainter extends CustomPainter {
         isRoot != oldDelegate.isRoot ||
         breadcrumbWidth != oldDelegate.breadcrumbWidth ||
         colorScheme != oldDelegate.colorScheme;
+  }
+}
+
+class FormattedJson extends StatelessWidget {
+  const FormattedJson({@required this.json});
+
+  static const encoder = JsonEncoder.withIndent('  ');
+
+  final Map<String, dynamic> json;
+
+  @override
+  Widget build(BuildContext context) {
+    final formattedArgs = encoder.convert(json);
+    return Text(
+      formattedArgs.replaceAll('"', ''),
+      style: const TextStyle(fontFamily: 'RobotoMono'),
+    );
   }
 }

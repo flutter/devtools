@@ -85,8 +85,9 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     @required Map<String, HttpRequestData> outstandingRequestsMap,
   }) {
     final events = timeline.traceEvents;
-    final httpEventIds = <String>{};
-    // Perform initial pass to find the IDs for the HTTP timeline events.
+    // Group all HTTP timeline events with the same ID.
+    final httpEvents = <String, List<Map<String, dynamic>>>{};
+    final httpRequestIdToResponseId = <String, String>{};
     for (final TimelineEvent event in events) {
       final json = event.toJson();
       final id = json['id'];
@@ -100,28 +101,34 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
           !outstandingRequestsMap.containsKey(id)) {
         continue;
       }
-      httpEventIds.add(id);
-    }
 
-    // Group all HTTP timeline events with the same ID.
-    final httpEvents = <String, List<Map<String, dynamic>>>{};
-    for (final event in events) {
-      final json = event.toJson();
-      final id = json['id'];
-      if (id == null) {
-        continue;
+      // Any HTTP event with a specified 'parentId' is the response event of
+      // another request (the request with 'id' = 'parentId'). Store the
+      // relationship in [httpRequestIdToResponseId].
+      final parentId = json['args']['parentId'];
+      if (parentId != null) {
+        httpRequestIdToResponseId[parentId] = id;
       }
-      if (httpEventIds.contains(id)) {
-        httpEvents.putIfAbsent(id, () => []).add(json);
-      }
+      httpEvents.putIfAbsent(id, () => []).add(json);
     }
 
     // Build our list of network requests from the collected events.
     for (final request in httpEvents.entries) {
       final requestId = request.key;
+
+      // Do not handle response events - they are handled as part of the request
+      if (httpRequestIdToResponseId.values.contains(requestId)) continue;
+
+      final responseId = httpRequestIdToResponseId[requestId];
+      final responseEvents = <Map<String, dynamic>>[];
+      if (responseId != null) {
+        responseEvents.addAll(httpEvents[responseId] ?? []);
+      }
+
       final requestData = HttpRequestData.fromTimeline(
-        timelineMicrosOffset,
-        request.value,
+        timelineMicrosBase: timelineMicrosOffset,
+        requestEvents: request.value,
+        responseEvents: responseEvents,
       );
 
       // If there's a new event which matches a request that was previously in

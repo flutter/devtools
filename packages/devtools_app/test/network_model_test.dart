@@ -311,6 +311,15 @@ void main() {
       expect(httpInvalidEvent.hasCookies, isFalse);
       expect(httpInProgressEvent.hasCookies, isFalse);
     });
+
+    test('responseBody returns correct value', () {
+      expect(httpGetEvent.responseBody, isNotNull);
+      expect(httpGetEvent.responseBody.json, equals(httpGetResponseBody));
+      expect(httpPutEvent.responseBody, isNull);
+      expect(httpGetEventWithError.responseBody, isNull);
+      expect(httpInProgressEvent.responseBody, isNull);
+      expect(httpInvalidEvent.responseBody, isNull);
+    });
   });
 
   group('WebSocket', () {

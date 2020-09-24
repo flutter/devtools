@@ -16,12 +16,15 @@ class NetworkRequestInspector extends StatelessWidget {
 
   static const _overviewTabTitle = 'Overview';
   static const _headersTabTitle = 'Headers';
+  static const _responseTabTitle = 'Response';
   static const _cookiesTabTitle = 'Cookies';
 
   @visibleForTesting
   static const overviewTabKey = Key(_overviewTabTitle);
   @visibleForTesting
   static const headersTabKey = Key(_headersTabTitle);
+  @visibleForTesting
+  static const responseTabKey = Key(_responseTabTitle);
   @visibleForTesting
   static const cookiesTabKey = Key(_cookiesTabTitle);
   @visibleForTesting
@@ -45,6 +48,8 @@ class NetworkRequestInspector extends StatelessWidget {
       _buildTab(_overviewTabTitle),
       if (data is HttpRequestData) ...[
         _buildTab(_headersTabTitle),
+        if ((data as HttpRequestData).responseBody != null)
+          _buildTab(_responseTabTitle),
         if ((data as HttpRequestData).hasCookies) _buildTab(_cookiesTabTitle),
       ],
     ];
@@ -69,6 +74,8 @@ class NetworkRequestInspector extends StatelessWidget {
                 NetworkRequestOverviewView(data),
                 if (data is HttpRequestData) ...[
                   HttpRequestHeadersView(data),
+                  if ((data as HttpRequestData).responseBody != null)
+                    HttpResponseView(data),
                   if ((data as HttpRequestData).hasCookies)
                     HttpRequestCookiesView(data),
                 ],

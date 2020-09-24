@@ -136,6 +136,19 @@ class HttpRequestHeadersView extends StatelessWidget {
   }
 }
 
+class HttpResponseView extends StatelessWidget {
+  const HttpResponseView(this.data);
+
+  final HttpRequestData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: FormattedJson(json: data.responseBody.args),
+    );
+  }
+}
+
 /// A [Widget] which displays [Cookie] information in a tab.
 class HttpRequestCookiesView extends StatelessWidget {
   const HttpRequestCookiesView(this.data);
@@ -405,7 +418,6 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
     final _colors = [
       searchMatchColor,
-      mainUiColor,
       mainRasterColor,
     ];
     var _colorIndex = 0;

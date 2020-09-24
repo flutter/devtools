@@ -1,6 +1,7 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 
 import '../network/network_model.dart';
@@ -32,6 +33,7 @@ class HttpRequestData extends NetworkRequest {
     int timelineMicrosBase,
     this._startEvent,
     this._endEvent,
+    this.responseBody,
   ) : super(timelineMicrosBase);
 
   /// Build an instance from timeline events.
@@ -39,34 +41,51 @@ class HttpRequestData extends NetworkRequest {
   /// `timelineMicrosBase` is the offset used to determine the wall-time of a
   /// timeline event. `events` is a list of Chrome trace format timeline
   /// events.
-  factory HttpRequestData.fromTimeline(
-    int timelineMicrosBase,
-    List<Map<String, dynamic>> events,
-  ) {
-    TraceEvent startEvent;
-    TraceEvent endEvent;
-    final instantEvents = <TraceEvent>[];
+  factory HttpRequestData.fromTimeline({
+    @required int timelineMicrosBase,
+    @required List<Map<String, dynamic>> requestEvents,
+    @required List<Map<String, dynamic>> responseEvents,
+  }) {
+    TraceEvent requestStartEvent;
+    TraceEvent requestEndEvent;
+    TraceEvent responseBody;
+    final requestInstantEvents = <TraceEvent>[];
 
-    for (final event in events) {
+    for (final event in requestEvents) {
       final traceEvent = TraceEvent(event);
       if (traceEvent.phase == TraceEvent.asyncBeginPhase) {
-        assert(startEvent == null);
-        startEvent = traceEvent;
+        assert(requestStartEvent == null);
+        requestStartEvent = traceEvent;
       } else if (traceEvent.phase == TraceEvent.asyncEndPhase) {
-        assert(endEvent == null);
-        endEvent = traceEvent;
+        assert(requestEndEvent == null);
+        requestEndEvent = traceEvent;
       } else if (traceEvent.phase == TraceEvent.asyncInstantPhase) {
-        instantEvents.add(traceEvent);
+        requestInstantEvents.add(traceEvent);
       } else {
         assert(false, 'Unexpected event type: ${traceEvent.phase}');
       }
     }
+
+    for (final event in responseEvents) {
+      final traceEvent = TraceEvent(event);
+      // TODO(kenz): consider doing something with the other response events
+      // (phases 'b' and 'e').
+      if (traceEvent.phase == TraceEvent.asyncInstantPhase &&
+          traceEvent.name == 'Response body') {
+        responseBody = traceEvent;
+        break;
+      }
+    }
+
     final data = HttpRequestData._(
       timelineMicrosBase,
-      startEvent,
-      endEvent,
+      requestStartEvent,
+      requestEndEvent,
+      responseBody,
     );
-    data._addInstantEvents(instantEvents.map((e) => HttpInstantEvent._(e)));
+    data._addInstantEvents(
+        requestInstantEvents.map((e) => HttpInstantEvent._(e)));
+
     return data;
   }
 
@@ -87,6 +106,7 @@ class HttpRequestData extends NetworkRequest {
 
   final TraceEvent _startEvent;
   TraceEvent _endEvent;
+  final TraceEvent responseBody;
 
   // Do not add to this list directly! Call `_addInstantEvents` which is
   // responsible for calculating the time offsets of each event.
