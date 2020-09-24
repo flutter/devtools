@@ -27,6 +27,7 @@ class LinkedScrollControllerGroup {
 
   final _allControllers = <_LinkedScrollController>[];
 
+  ChangeNotifier get offsetNotifier => _offsetNotifier;
   _LinkedScrollControllerGroupOffsetNotifier _offsetNotifier;
 
   bool get hasAttachedControllers => _attachedControllers.isNotEmpty;

@@ -118,10 +118,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   double previousZoom = FlameChart.minZoomLevel;
 
-  double verticalScrollOffset = 0.0;
-
-  double horizontalScrollOffset = 0.0;
-
   // Scrolling via WASD controls will pan the left/right 25% of the view.
   double get keyboardScrollUnit => widget.containerWidth * 0.25;
 
@@ -143,6 +139,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       contentWidthWithZoom + widget.startInset + widget.endInset;
 
   TimeRange get visibleTimeRange {
+    final horizontalScrollOffset = linkedHorizontalScrollControllerGroup.offset;
     final startMicros = horizontalScrollOffset < widget.startInset
         ? startTimeOffset
         : startTimeOffset +
@@ -175,7 +172,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     BoxConstraints constraints,
     BuildContext buildContext,
   ) {
-    return [];
+    return const [];
   }
 
   @override
@@ -183,20 +180,8 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     super.initState();
     initFlameChartElements();
 
-    linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup()
-      ..addOffsetChangedListener(() {
-        setState(() {
-          horizontalScrollOffset = linkedHorizontalScrollControllerGroup.offset;
-        });
-      });
-    verticalScrollController = ScrollController()
-      ..addListener(() {
-        if (verticalScrollOffset != verticalScrollController.offset) {
-          setState(() {
-            verticalScrollOffset = verticalScrollController.offset;
-          });
-        }
-      });
+    linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
+    verticalScrollController = ScrollController();
 
     zoomController = AnimationController(
       value: FlameChart.minZoomLevel,
@@ -355,9 +340,11 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
           zoomController.value - keyboardZoomOutUnit,
         ));
       } else if (keyLabel == 'a') {
-        scrollToX(horizontalScrollOffset - keyboardScrollUnit);
+        scrollToX(
+            linkedHorizontalScrollControllerGroup.offset - keyboardScrollUnit);
       } else if (keyLabel == 'd') {
-        scrollToX(horizontalScrollOffset + keyboardScrollUnit);
+        scrollToX(
+            linkedHorizontalScrollControllerGroup.offset + keyboardScrollUnit);
       }
     }
   }
@@ -396,7 +383,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       if (currentZoom == previousZoom) return;
 
       // Store current scroll values for re-calculating scroll location on zoom.
-      final lastScrollOffset = horizontalScrollOffset;
+      final lastScrollOffset = linkedHorizontalScrollControllerGroup.offset;
 
       final safeMouseHoverX = mouseHoverX ?? widget.containerWidth / 2;
       // Position in the zoomable coordinate space that we want to keep fixed.
@@ -1115,37 +1102,48 @@ abstract class FlameChartPainter extends CustomPainter {
   FlameChartPainter({
     @required this.zoom,
     @required this.constraints,
-    @required this.verticalScrollOffset,
-    @required this.horizontalScrollOffset,
+    @required this.verticalScroll,
+    @required this.horizontalScroll,
     @required this.chartStartInset,
     @required this.colorScheme,
-  })  : visible = Rect.fromLTWH(
-          horizontalScrollOffset,
-          verticalScrollOffset,
-          constraints.maxWidth,
-          constraints.maxHeight,
-        ),
-        assert(colorScheme != null);
+  })  : assert(colorScheme != null),
+        super(
+            repaint: Listenable.merge([
+          verticalScroll,
+          horizontalScroll.offsetNotifier,
+        ]));
 
   final double zoom;
 
   final BoxConstraints constraints;
 
-  final double verticalScrollOffset;
+  final ScrollController verticalScroll;
 
-  final double horizontalScrollOffset;
+  final LinkedScrollControllerGroup horizontalScroll;
 
   final double chartStartInset;
 
   /// The absolute coordinates of the flame chart's visible section.
-  final Rect visible;
+  Rect get visibleRect {
+    return Rect.fromLTWH(
+      horizontalScroll.offset,
+      verticalScroll.offset,
+      constraints.maxWidth,
+      constraints.maxHeight,
+    );
+  }
 
   final ColorScheme colorScheme;
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     if (oldDelegate is FlameChartPainter) {
-      return oldDelegate.colorScheme != colorScheme;
+      return verticalScroll != oldDelegate.verticalScroll ||
+          horizontalScroll != oldDelegate.horizontalScroll ||
+          constraints != oldDelegate.constraints ||
+          zoom != oldDelegate.zoom ||
+          chartStartInset != oldDelegate.chartStartInset ||
+          oldDelegate.colorScheme != colorScheme;
     }
     return true;
   }
