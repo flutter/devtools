@@ -49,7 +49,7 @@ void main() {
       final FlameChartState state = tester.state(find.byWidget(flameChart));
 
       expect(state.zoomController.value, equals(1.0));
-      expect(state.linkedHorizontalScrollControllerGroup.offset, equals(0.0));
+      expect(state.horizontalController.offset, equals(0.0));
       state.mouseHoverX = 100.0;
       state.focusNode.requestFocus();
       await tester.pumpAndSettle();
@@ -61,31 +61,31 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.keyW, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(1.5));
-      expect(state.linkedHorizontalScrollControllerGroup.offset, equals(30.0));
+      expect(state.horizontalController.offset, equals(30.0));
 
       // Zoom in further.
       await tester.sendKeyEvent(LogicalKeyboardKey.keyW, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(2.25));
-      expect(state.linkedHorizontalScrollControllerGroup.offset, equals(75.0));
+      expect(state.horizontalController.offset, equals(75.0));
 
       // Zoom out.
       await tester.sendKeyEvent(LogicalKeyboardKey.keyS, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(1.5));
-      expect(state.linkedHorizontalScrollControllerGroup.offset, equals(30.0));
+      expect(state.horizontalController.offset, equals(30.0));
 
       // Zoom out further.
       await tester.sendKeyEvent(LogicalKeyboardKey.keyS, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(1.0));
-      expect(state.linkedHorizontalScrollControllerGroup.offset, equals(0.0));
+      expect(state.horizontalController.offset, equals(0.0));
 
       // Zoom out and verify we cannot go beyond the minimum zoom level (1.0);
       await tester.sendKeyEvent(LogicalKeyboardKey.keyS, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(1.0));
-      expect(state.linkedHorizontalScrollControllerGroup.offset, equals(0.0));
+      expect(state.horizontalController.offset, equals(0.0));
 
       // Verify that the scroll position does not change when the mouse is
       // positioned in an unzoomable area (start or end inset).
@@ -93,7 +93,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.keyW, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(1.5));
-      expect(state.linkedHorizontalScrollControllerGroup.offset, equals(0.0));
+      expect(state.horizontalController.offset, equals(0.0));
     });
 
     testWidgets('WASD keys pan chart', (WidgetTester tester) async {
@@ -102,7 +102,7 @@ void main() {
       final FlameChartState state = tester.state(find.byWidget(flameChart));
 
       expect(state.zoomController.value, equals(1.0));
-      expect(state.linkedHorizontalScrollControllerGroup.offset, equals(0.0));
+      expect(state.horizontalController.offset, equals(0.0));
       state.mouseHoverX = 500.0;
       state.focusNode.requestFocus();
       await tester.pumpAndSettle();
@@ -116,39 +116,37 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.keyW, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(2.25));
-      expect(state.linkedHorizontalScrollControllerGroup.offset, equals(575.0));
+      expect(state.horizontalController.offset, equals(575.0));
 
       // Pan left. Pan unit should equal 1/4th of the original width (1000.0).
       await tester.sendKeyEvent(LogicalKeyboardKey.keyA, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(2.25));
-      expect(state.linkedHorizontalScrollControllerGroup.offset, equals(325.0));
+      expect(state.horizontalController.offset, equals(325.0));
 
       // Pan right. Pan unit should equal 1/4th of the original width (1000.0).
       await tester.sendKeyEvent(LogicalKeyboardKey.keyD, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(2.25));
-      expect(state.linkedHorizontalScrollControllerGroup.offset, equals(575.0));
+      expect(state.horizontalController.offset, equals(575.0));
 
       // Zoom in.
       await tester.sendKeyEvent(LogicalKeyboardKey.keyW, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(3.375));
-      expect(
-          state.linkedHorizontalScrollControllerGroup.offset, equals(1092.5));
+      expect(state.horizontalController.offset, equals(1092.5));
 
       // Pan left. Pan unit should equal 1/4th of the original width (1000.0).
       await tester.sendKeyEvent(LogicalKeyboardKey.keyA, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(3.375));
-      expect(state.linkedHorizontalScrollControllerGroup.offset, equals(842.5));
+      expect(state.horizontalController.offset, equals(842.5));
 
       // Pan right. Pan unit should equal 1/4th of the original width (1000.0).
       await tester.sendKeyEvent(LogicalKeyboardKey.keyD, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(3.375));
-      expect(
-          state.linkedHorizontalScrollControllerGroup.offset, equals(1092.5));
+      expect(state.horizontalController.offset, equals(1092.5));
     });
   });
 

@@ -228,7 +228,7 @@ class TimelineFlameChartState
   @override
   bool isDataVerticallyInView(TimelineEvent data) {
     final eventTopY = topYForData(data);
-    final verticalScrollOffset = verticalScrollController.offset;
+    final verticalScrollOffset = verticalController.offset;
     return eventTopY > verticalScrollOffset &&
         eventTopY + rowHeightWithPadding <
             verticalScrollOffset + widget.containerHeight;
@@ -424,8 +424,8 @@ class TimelineFlameChartState
         painter: AsyncGuidelinePainter(
           zoom: zoom,
           constraints: constraints,
-          verticalScroll: verticalScrollController,
-          horizontalScroll: linkedHorizontalScrollControllerGroup,
+          verticalController: verticalController,
+          horizontalController: horizontalController,
           verticalGuidelines: verticalGuidelines,
           horizontalGuidelines: horizontalGuidelines,
           chartStartInset: widget.startInset,
@@ -436,8 +436,8 @@ class TimelineFlameChartState
         painter: TimelineGridPainter(
           zoom: zoom,
           constraints: constraints,
-          verticalScroll: verticalScrollController,
-          horizontalScroll: linkedHorizontalScrollControllerGroup,
+          verticalController: verticalController,
+          horizontalController: horizontalController,
           chartStartInset: widget.startInset,
           chartEndInset: widget.endInset,
           flameChartWidth: widthWithZoom,
@@ -450,8 +450,8 @@ class TimelineFlameChartState
           _selectedFrame,
           zoom: zoom,
           constraints: constraints,
-          verticalScroll: verticalScrollController,
-          horizontalScroll: linkedHorizontalScrollControllerGroup,
+          verticalController: verticalController,
+          horizontalController: horizontalController,
           chartStartInset: widget.startInset,
           startTimeOffsetMicros: startTimeOffset,
           startingPxPerMicro: startingPxPerMicro,
@@ -468,8 +468,8 @@ class TimelineFlameChartState
           _timelineController.data.eventGroups,
           zoom: zoom,
           constraints: constraints,
-          verticalScroll: verticalScrollController,
-          horizontalScroll: linkedHorizontalScrollControllerGroup,
+          verticalController: verticalController,
+          horizontalController: horizontalController,
           chartStartInset: widget.startInset,
           colorScheme: colorScheme,
         ),
@@ -635,15 +635,15 @@ class SectionLabelPainter extends FlameChartPainter {
     this.eventGroups, {
     @required double zoom,
     @required BoxConstraints constraints,
-    @required ScrollController verticalScroll,
-    @required LinkedScrollControllerGroup horizontalScroll,
+    @required ScrollController verticalController,
+    @required LinkedScrollControllerGroup horizontalController,
     @required double chartStartInset,
     @required ColorScheme colorScheme,
   }) : super(
           zoom: zoom,
           constraints: constraints,
-          verticalScroll: verticalScroll,
-          horizontalScroll: horizontalScroll,
+          verticalController: verticalController,
+          horizontalController: horizontalController,
           chartStartInset: chartStartInset,
           colorScheme: colorScheme,
         );
@@ -652,7 +652,7 @@ class SectionLabelPainter extends FlameChartPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final verticalScrollOffset = verticalScroll.offset;
+    final verticalScrollOffset = verticalController.offset;
     canvas.clipRect(Rect.fromLTWH(
       0.0,
       rowHeight, // We do not want to paint inside the timestamp section.
@@ -708,9 +708,11 @@ class SectionLabelPainter extends FlameChartPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
-    return oldDelegate is SectionLabelPainter &&
-            eventGroups != oldDelegate.eventGroups ||
-        super.shouldRepaint(oldDelegate);
+    if (oldDelegate is SectionLabelPainter) {
+      return eventGroups != oldDelegate.eventGroups ||
+          super.shouldRepaint(oldDelegate);
+    }
+    return true;
   }
 }
 
@@ -718,8 +720,8 @@ class AsyncGuidelinePainter extends FlameChartPainter {
   AsyncGuidelinePainter({
     @required double zoom,
     @required BoxConstraints constraints,
-    @required ScrollController verticalScroll,
-    @required LinkedScrollControllerGroup horizontalScroll,
+    @required ScrollController verticalController,
+    @required LinkedScrollControllerGroup horizontalController,
     @required double chartStartInset,
     @required this.verticalGuidelines,
     @required this.horizontalGuidelines,
@@ -727,8 +729,8 @@ class AsyncGuidelinePainter extends FlameChartPainter {
   }) : super(
           zoom: zoom,
           constraints: constraints,
-          verticalScroll: verticalScroll,
-          horizontalScroll: horizontalScroll,
+          verticalController: verticalController,
+          horizontalController: horizontalController,
           chartStartInset: chartStartInset,
           colorScheme: colorScheme,
         );
@@ -783,8 +785,8 @@ class AsyncGuidelinePainter extends FlameChartPainter {
     List<LineSegment> guidelines,
     int firstLineIndex,
   ) {
-    final horizontalScrollOffset = horizontalScroll.offset;
-    final verticalScrollOffset = verticalScroll.offset;
+    final horizontalScrollOffset = horizontalController.offset;
+    final verticalScrollOffset = verticalController.offset;
 
     final paint = Paint()..color = colorScheme.treeGuidelineColor;
     for (int i = firstLineIndex; i < guidelines.length; i++) {
@@ -849,8 +851,8 @@ class TimelineGridPainter extends FlameChartPainter {
   TimelineGridPainter({
     @required double zoom,
     @required BoxConstraints constraints,
-    @required ScrollController verticalScroll,
-    @required LinkedScrollControllerGroup horizontalScroll,
+    @required ScrollController verticalController,
+    @required LinkedScrollControllerGroup horizontalController,
     @required double chartStartInset,
     @required this.chartEndInset,
     @required this.flameChartWidth,
@@ -859,8 +861,8 @@ class TimelineGridPainter extends FlameChartPainter {
   }) : super(
           zoom: zoom,
           constraints: constraints,
-          verticalScroll: verticalScroll,
-          horizontalScroll: horizontalScroll,
+          verticalController: verticalController,
+          horizontalController: horizontalController,
           chartStartInset: chartStartInset,
           colorScheme: colorScheme,
         );
@@ -969,7 +971,7 @@ class TimelineGridPainter extends FlameChartPainter {
   }
 
   int _startingTimestamp(double intervalWidth, int microsPerInterval) {
-    final horizontalScrollOffset = horizontalScroll.offset;
+    final horizontalScrollOffset = horizontalController.offset;
 
     final startingIntervalIndex = horizontalScrollOffset < chartStartInset
         ? 0
@@ -985,7 +987,7 @@ class TimelineGridPainter extends FlameChartPainter {
     return zoom == other.zoom &&
         constraints == other.constraints &&
         flameChartWidth == other.flameChartWidth &&
-        horizontalScroll == other.horizontalScroll &&
+        horizontalController == other.horizontalController &&
         duration == other.duration &&
         colorScheme == other.colorScheme;
   }
@@ -995,7 +997,7 @@ class TimelineGridPainter extends FlameChartPainter {
         zoom,
         constraints,
         flameChartWidth,
-        horizontalScroll,
+        horizontalController,
         duration,
         colorScheme,
       );
@@ -1006,8 +1008,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
     this.selectedFrame, {
     @required double zoom,
     @required BoxConstraints constraints,
-    @required ScrollController verticalScroll,
-    @required LinkedScrollControllerGroup horizontalScroll,
+    @required ScrollController verticalController,
+    @required LinkedScrollControllerGroup horizontalController,
     @required double chartStartInset,
     @required this.startTimeOffsetMicros,
     @required this.startingPxPerMicro,
@@ -1016,8 +1018,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
   }) : super(
           zoom: zoom,
           constraints: constraints,
-          verticalScroll: verticalScroll,
-          horizontalScroll: horizontalScroll,
+          verticalController: verticalController,
+          horizontalController: horizontalController,
           chartStartInset: chartStartInset,
           colorScheme: colorScheme,
         );
@@ -1159,8 +1161,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
         selectedFrame == other.selectedFrame &&
         zoom == other.zoom &&
         constraints == other.constraints &&
-        verticalScroll == other.verticalScroll &&
-        horizontalScroll == other.horizontalScroll &&
+        verticalController == other.verticalController &&
+        horizontalController == other.horizontalController &&
         colorScheme == other.colorScheme;
   }
 
@@ -1169,8 +1171,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
         selectedFrame,
         zoom,
         constraints,
-        verticalScroll,
-        horizontalScroll,
+        verticalController,
+        horizontalController,
         colorScheme,
       );
 }

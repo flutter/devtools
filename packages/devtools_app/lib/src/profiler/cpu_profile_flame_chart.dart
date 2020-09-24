@@ -84,7 +84,7 @@ class _CpuProfileFlameChartState
 
   @override
   bool isDataVerticallyInView(CpuStackFrame data) {
-    final verticalScrollOffset = verticalScrollController.offset;
+    final verticalScrollOffset = verticalController.offset;
     final stackFrameTopY = topYForData(data);
     return stackFrameTopY > verticalScrollOffset &&
         stackFrameTopY + rowHeightWithPadding <
@@ -93,7 +93,7 @@ class _CpuProfileFlameChartState
 
   @override
   bool isDataHorizontallyInView(CpuStackFrame data) {
-    final horizontalScrollOffset = linkedHorizontalScrollControllerGroup.offset;
+    final horizontalScrollOffset = horizontalController.offset;
     final startX = startXForData(data);
     return startX >= horizontalScrollOffset &&
         startX <= horizontalScrollOffset + widget.containerWidth;
