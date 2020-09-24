@@ -144,7 +144,10 @@ class HttpResponseView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: FormattedJson(json: data.responseBody.args),
+      child: Text(
+        data.responseBody,
+        style: const TextStyle(fontFamily: 'RobotoMono'),
+      ),
     );
   }
 }

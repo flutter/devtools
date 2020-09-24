@@ -1,6 +1,8 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 
@@ -48,7 +50,7 @@ class HttpRequestData extends NetworkRequest {
   }) {
     TraceEvent requestStartEvent;
     TraceEvent requestEndEvent;
-    TraceEvent responseBody;
+    String responseBody;
     final requestInstantEvents = <TraceEvent>[];
 
     for (final event in requestEvents) {
@@ -68,11 +70,12 @@ class HttpRequestData extends NetworkRequest {
 
     for (final event in responseEvents) {
       final traceEvent = TraceEvent(event);
-      // TODO(kenz): consider doing something with the other response events
-      // (phases 'b' and 'e').
+      // TODO(kenz): do we need to do something with the other response events
+      // (phases 'b' and 'e')?
       if (traceEvent.phase == TraceEvent.asyncInstantPhase &&
           traceEvent.name == 'Response body') {
-        responseBody = traceEvent;
+        final encodedData = (traceEvent.args['data'] as List).cast<int>();
+        responseBody = utf8.decode(encodedData);
         break;
       }
     }
@@ -106,7 +109,7 @@ class HttpRequestData extends NetworkRequest {
 
   final TraceEvent _startEvent;
   TraceEvent _endEvent;
-  final TraceEvent responseBody;
+  final String responseBody;
 
   // Do not add to this list directly! Call `_addInstantEvents` which is
   // responsible for calculating the time offsets of each event.
