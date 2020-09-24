@@ -89,7 +89,7 @@ void main() {
       expect(profile.outstandingHttpRequests.isEmpty, true);
 
       // The number of valid requests recorded in the test data.
-      const numRequests = 71;
+      const numRequests = 16;
 
       // Refresh network data and ensure requests are populated.
       await controller.networkService.refreshNetworkData();
