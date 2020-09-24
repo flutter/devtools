@@ -48,8 +48,8 @@ class InfoController extends DisposableController
         final serviceAvailable = flutterVersionServiceListenable.value;
         if (serviceAvailable && !flutterVersionServiceAvailable.isCompleted) {
           flutterVersionServiceAvailable.complete();
-          final FlutterVersion version = FlutterVersion.parse(
-              (await serviceManager.flutterVersion).json);
+          final FlutterVersion version =
+              FlutterVersion.parse((await serviceManager.flutterVersion).json);
           _flutterVersion.value = version;
         } else {
           _flutterVersion.value = null;
