@@ -9,3 +9,7 @@ homepage: https://github.com/flutter/devtools
 
 environment:
   sdk: '>=2.3.0 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter

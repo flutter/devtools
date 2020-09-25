@@ -76,7 +76,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service);
 
   @override
-  Future<double> getDisplayRefreshRate() async => 60;
+  Future<double> get queryDisplayRefreshRate async => 60;
 
   @override
   bool hasConnection;
@@ -108,7 +108,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
-  Future<Response> getFlutterVersion() {
+  Future<Response> get flutterVersion {
     return Future.value(Response.parse({
       'type': 'Success',
       'frameworkVersion': '1.19.0-2.0.pre.59',

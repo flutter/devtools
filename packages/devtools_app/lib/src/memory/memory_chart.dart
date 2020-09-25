@@ -6,6 +6,7 @@ import 'dart:ui' as dart_ui;
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:mp_chart/mp/chart/line_chart.dart';

@@ -281,27 +281,23 @@ class ServiceConnectionManager {
     );
   }
 
-  Future<Response> getFlutterVersion() async {
+  Future<Response> get flutterVersion async {
     return await callService(
       registrations.flutterVersion.service,
       isolateId: _isolateManager.selectedIsolate.id,
     );
   }
 
-  Future<Response> getAdbMemoryInfo() async {
+  Future<Response> get adbMemoryInfo async {
     return await callService(
       registrations.flutterMemory.service,
       isolateId: _isolateManager.selectedIsolate.id,
     );
   }
 
-  Future<double> getDisplayRefreshRate() async {
-    if (connectedApp == null || !await connectedApp.isFlutterApp) {
-      return null;
-    }
-
-    const unknownRefreshRate = 0.0;
-
+  /// @returns view id of selected isolate's 'FlutterView'.
+  /// @throws Exception if no 'FlutterView'.
+  Future<String> get flutterViewId async {
     final flutterViewListResponse = await service.callServiceExtension(
       registrations.flutterListViews,
       isolateId: _isolateManager.selectedIsolate.id,
@@ -322,7 +318,39 @@ class ServiceConnectionManager {
       throw Exception(message);
     }
 
-    final viewId = flutterView['id'];
+    return flutterView['id'];
+  }
+
+  /// Flutter engine returns estimate how much memory is used by layer/picture raster
+  /// cache entries in bytes.
+  ///
+  /// Call to returns JSON payload 'EstimateRasterCacheMemory' with two entries:
+  ///   layerBytes - layer raster cache entries in bytes
+  ///   pictureBytes - picture raster cache entries in bytes
+  Future<Response> get rasterCacheMetrics async {
+    if (connectedApp == null || !await connectedApp.isFlutterApp) {
+      return null;
+    }
+
+    final viewId = await flutterViewId;
+
+    return await service.callServiceExtension(
+      registrations.flutterEngineEstimateRasterCache,
+      args: <String, String>{
+        'viewId': viewId,
+      },
+      isolateId: _isolateManager.selectedIsolate.id,
+    );
+  }
+
+  Future<double> get queryDisplayRefreshRate async {
+    if (connectedApp == null || !await connectedApp.isFlutterApp) {
+      return null;
+    }
+
+    const unknownRefreshRate = 0.0;
+
+    final viewId = await flutterViewId;
     final displayRefreshRateResponse = await service.callServiceExtension(
       registrations.displayRefreshRate,
       isolateId: _isolateManager.selectedIsolate.id,

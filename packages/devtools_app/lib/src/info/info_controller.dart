@@ -26,7 +26,7 @@ class InfoController extends DisposableController
       return null;
     }
 
-    return serviceManager.getFlutterVersion().then((response) {
+    return serviceManager.flutterVersion.then((response) {
       return FlutterVersion.parse(response.json);
     }).catchError((e) => null);
   }
@@ -48,8 +48,8 @@ class InfoController extends DisposableController
         final serviceAvailable = flutterVersionServiceListenable.value;
         if (serviceAvailable && !flutterVersionServiceAvailable.isCompleted) {
           flutterVersionServiceAvailable.complete();
-          final FlutterVersion version = FlutterVersion.parse(
-              (await serviceManager.getFlutterVersion()).json);
+          final FlutterVersion version =
+              FlutterVersion.parse((await serviceManager.flutterVersion).json);
           _flutterVersion.value = version;
         } else {
           _flutterVersion.value = null;

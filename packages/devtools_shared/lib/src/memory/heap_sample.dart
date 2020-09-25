@@ -16,6 +16,7 @@ class HeapSample {
     this.isGC,
     this._adbMemoryInfo,
     this._memoryEventInfo,
+    this._rasterCache,
   );
 
   factory HeapSample.fromJson(Map<String, dynamic> json) => HeapSample(
@@ -27,6 +28,7 @@ class HeapSample {
         json['gc'] as bool,
         AdbMemoryInfo.fromJson(json['adb_memoryInfo']),
         EventSample.fromJson(json['memory_eventInfo']),
+        RasterCache.fromJson(json['raster_cache']),
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -38,6 +40,7 @@ class HeapSample {
         'gc': isGC,
         'adb_memoryInfo': adbMemoryInfo.toJson(),
         'memory_eventInfo': memoryEventInfo.toJson(),
+        'raster_cache': rasterCache.toJson(),
       };
 
   /// Version of HeapSample JSON payload.
@@ -59,6 +62,8 @@ class HeapSample {
 
   AdbMemoryInfo _adbMemoryInfo;
 
+  RasterCache _rasterCache;
+
   AdbMemoryInfo get adbMemoryInfo {
     _adbMemoryInfo ??= AdbMemoryInfo.empty();
     return _adbMemoryInfo;
@@ -69,6 +74,11 @@ class HeapSample {
     return _memoryEventInfo;
   }
 
+  RasterCache get rasterCache {
+    _rasterCache ??= RasterCache.empty();
+    return _rasterCache;
+  }
+
   @override
   String toString() => '[HeapSample timestamp: $timestamp, '
       'rss: $rss, '
@@ -77,5 +87,6 @@ class HeapSample {
       'external: $external, '
       'isGC: $isGC, '
       'AdbMemoryInfo: $adbMemoryInfo, '
-      'MemoryEventInfo: $memoryEventInfo]';
+      'MemoryEventInfo: $memoryEventInfo, '
+      'RasterCache: $rasterCache]';
 }

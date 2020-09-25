@@ -1376,6 +1376,7 @@ class MemoryLog {
         false,
         AdbMemoryInfo.empty(),
         EventSample.empty(),
+        RasterCache.empty(),
       ));
     }
 
