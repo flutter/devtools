@@ -128,7 +128,9 @@ class MemoryTracker {
     // Polls for current RSS size.
     _update(await service.getVM(), isolateMemory);
 
-    _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
+    if (!memoryController.paused.value) {
+      _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
+    }
   }
 
   void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
