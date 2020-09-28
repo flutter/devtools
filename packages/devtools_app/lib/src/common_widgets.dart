@@ -999,7 +999,7 @@ class FormattedJson extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(kenz): we could consider using a prettier format like YAML
+    // TODO(kenz): we could consider using a prettier format like YAML.
     final formattedArgs = encoder.convert(json);
     return Text(
       formattedArgs,
