@@ -999,10 +999,11 @@ class FormattedJson extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(kenz): we could consider using a prettier format like YAML
     final formattedArgs = encoder.convert(json);
     return Text(
-      formattedArgs.replaceAll('"', ''),
-      style: const TextStyle(fontFamily: 'RobotoMono'),
+      formattedArgs,
+      style: fixedFontStyle(context),
     );
   }
 }

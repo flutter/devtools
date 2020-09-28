@@ -86,7 +86,7 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
   }) {
     final events = timeline.traceEvents;
     // Group all HTTP timeline events with the same ID.
-    final httpEvents = <String, List<Map<String, dynamic>>>{};
+    final httpEvents = <String, List<Map<String, Object>>>{};
     final httpRequestIdToResponseId = <String, String>{};
     for (final TimelineEvent event in events) {
       final json = event.toJson();
@@ -120,7 +120,7 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
       if (httpRequestIdToResponseId.values.contains(requestId)) continue;
 
       final responseId = httpRequestIdToResponseId[requestId];
-      final responseEvents = <Map<String, dynamic>>[];
+      final responseEvents = <Map<String, Object>>[];
       if (responseId != null) {
         responseEvents.addAll(httpEvents[responseId] ?? []);
       }
