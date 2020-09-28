@@ -64,17 +64,9 @@ class MemoryTracker {
       // A service of null implies we're disconnected - signal paused.
       memoryController.pauseLiveFeed();
     }
-    paused ??= memoryController.paused.value;
 
-    if (paused) {
-      _pollingTimer?.cancel();
-      _gcStreamListener?.cancel();
-      _gcStreamListener = null;
-      _pollingTimer = null;
-    } else {
-      _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
-      _gcStreamListener ??= service?.onGCEvent?.listen(_handleGCEvent);
-    }
+    _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
+    _gcStreamListener ??= service?.onGCEvent?.listen(_handleGCEvent);
   }
 
   void stop() {
@@ -128,9 +120,7 @@ class MemoryTracker {
     // Polls for current RSS size.
     _update(await service.getVM(), isolateMemory);
 
-    if (!memoryController.paused.value) {
-      _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
-    }
+    _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
   }
 
   void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
