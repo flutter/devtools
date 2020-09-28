@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:devtools_app/src/utils.dart';
 import 'package:test/test.dart';
 
@@ -310,6 +312,16 @@ void main() {
       expect(httpGetEventWithError.hasCookies, isFalse);
       expect(httpInvalidEvent.hasCookies, isFalse);
       expect(httpInProgressEvent.hasCookies, isFalse);
+    });
+
+    test('responseBody returns correct value', () {
+      expect(httpGetEvent.responseBody, isNotNull);
+      expect(httpGetEvent.responseBody,
+          equals(utf8.decode(httpGetResponseBodyData)));
+      expect(httpPutEvent.responseBody, isNull);
+      expect(httpGetEventWithError.responseBody, isNull);
+      expect(httpInProgressEvent.responseBody, isNull);
+      expect(httpInvalidEvent.responseBody, isNull);
     });
   });
 

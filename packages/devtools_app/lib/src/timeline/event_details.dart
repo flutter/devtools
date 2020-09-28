@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
@@ -121,8 +119,6 @@ class EventSummary extends StatelessWidget {
         _eventArgs = Map.from(event.traceEvents.first.event.args)
           ..addAll({for (var trace in event.traceEvents) ...trace.event.args});
 
-  static const encoder = JsonEncoder.withIndent('  ');
-
   final TimelineEvent event;
 
   final List<AsyncTimelineEvent> _connectedEvents;
@@ -193,7 +189,7 @@ class EventSummary extends StatelessWidget {
     };
     return ListTile(
       title: Text(e.name),
-      subtitle: _formattedArgs(eventArgs),
+      subtitle: FormattedJson(json: eventArgs),
     );
   }
 
@@ -202,17 +198,9 @@ class EventSummary extends StatelessWidget {
       title: const Text('Arguments'),
       children: [
         ListTile(
-          subtitle: _formattedArgs(_eventArgs),
+          subtitle: FormattedJson(json: _eventArgs),
         ),
       ],
-    );
-  }
-
-  Widget _formattedArgs(Map<String, dynamic> args) {
-    final formattedArgs = encoder.convert(args);
-    return Text(
-      formattedArgs.replaceAll('"', ''),
-      style: const TextStyle(fontFamily: 'RobotoMono'),
     );
   }
 }

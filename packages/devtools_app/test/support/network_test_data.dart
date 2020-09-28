@@ -8,8 +8,9 @@ import 'package:vm_service/vm_service.dart';
 
 const _getStartTime = 231935000000;
 final httpGetEvent = HttpRequestData.fromTimeline(
-  _getStartTime - 1000000, // - 1000000 is arbitrary.
-  httpGetEventTrace,
+  timelineMicrosBase: _getStartTime - 1000000, // - 1000000 is arbitrary.
+  requestEvents: httpGetEventTrace,
+  responseEvents: httpGetResponseEventTrace,
 );
 final httpGetEventTrace = [
   {
@@ -97,10 +98,128 @@ final httpGetEventTrace = [
   },
 ];
 
+final httpGetResponseBodyData = [
+  123,
+  10,
+  32,
+  32,
+  34,
+  117,
+  115,
+  101,
+  114,
+  73,
+  100,
+  34,
+  58,
+  32,
+  49,
+  44,
+  10,
+  32,
+  32,
+  34,
+  105,
+  100,
+  34,
+  58,
+  32,
+  49,
+  44,
+  10,
+  32,
+  32,
+  34,
+  116,
+  105,
+  116,
+  108,
+  101,
+  34,
+  58,
+  32,
+  34,
+  113,
+  117,
+  105,
+  100,
+  101,
+  109,
+  32,
+  109,
+  111,
+  108,
+  101,
+  115,
+  116,
+  105,
+  97,
+  101,
+  32,
+  101,
+  110,
+  105,
+  109,
+  34,
+  10,
+  125
+];
+
+final httpGetResponseEventTrace = [
+  {
+    'name': 'HTTP CLIENT response of GET',
+    'cat': 'Dart',
+    'tid': 9018,
+    'pid': 8985,
+    'ts': 465424288688,
+    'ph': 'b',
+    'id': '1e',
+    'args': {
+      'requestUri': 'https://jsonplaceholder.typicode.com/albums/1',
+      'statusCode': 200,
+      'reasonPhrase': 'OK',
+      'parentId': '1d',
+      'filterKey': 'HTTP/client',
+      'isolateId': 'isolates/1430600241264643',
+      'isolateGroupId': 'isolateGroups/1765553891304005367'
+    },
+  },
+  {
+    'name': 'Response body',
+    'cat': 'Dart',
+    'tid': 9018,
+    'pid': 8985,
+    'ts': 465424289902,
+    'ph': 'n',
+    'id': '1e',
+    'args': {
+      'data': httpGetResponseBodyData,
+      'filterKey': 'HTTP/client',
+      'isolateId': 'isolates/1430600241264643',
+      'isolateGroupId': 'isolateGroups/1765553891304005367'
+    },
+  },
+  {
+    'name': 'HTTP CLIENT response of GET',
+    'cat': 'Dart',
+    'tid': 9018,
+    'pid': 8985,
+    'ts': 465424291160,
+    'ph': 'e',
+    'id': '1e',
+    'args': {
+      'filterKey': 'HTTP/client',
+      'isolateId': 'isolates/1430600241264643',
+      'isolateGroupId': 'isolateGroups/1765553891304005367'
+    },
+  },
+];
+
 const _putStartTime = 231936000000;
 final httpPutEvent = HttpRequestData.fromTimeline(
-  _putStartTime - 1000000, // - 1000000 is arbitrary.
-  httpPutEventTrace,
+  timelineMicrosBase: _putStartTime - 1000000, // - 1000000 is arbitrary.
+  requestEvents: httpPutEventTrace,
+  responseEvents: [],
 );
 final httpPutEventTrace = [
   {
@@ -191,8 +310,10 @@ final httpPutEventTrace = [
 
 const _getWithErrorStartTime = 231937000000;
 final httpGetEventWithError = HttpRequestData.fromTimeline(
-  _getWithErrorStartTime - 1000000, // - 1000000 is arbitrary.
-  httpGetEventWithErrorTrace,
+  timelineMicrosBase:
+      _getWithErrorStartTime - 1000000, // - 1000000 is arbitrary.
+  requestEvents: httpGetEventWithErrorTrace,
+  responseEvents: [],
 );
 final httpGetEventWithErrorTrace = [
   {
@@ -233,8 +354,9 @@ final httpGetEventWithErrorTrace = [
 
 const _invalidStartTime = 231938000000;
 final httpInvalidEvent = HttpRequestData.fromTimeline(
-  _invalidStartTime - 1000000, // - 1000000 is arbitrary.
-  httpInvalidEventTrace,
+  timelineMicrosBase: _invalidStartTime - 1000000, // - 1000000 is arbitrary.
+  requestEvents: httpInvalidEventTrace,
+  responseEvents: [],
 );
 final httpInvalidEventTrace = [
   {
@@ -280,8 +402,9 @@ final httpInvalidEventTrace = [
 
 const _inProgressStartTime = 231939000000;
 final httpInProgressEvent = HttpRequestData.fromTimeline(
-  _inProgressStartTime - 1000000, // - 1000000 is arbitrary.
-  httpInProgressEventTrace,
+  timelineMicrosBase: _inProgressStartTime - 1000000, // - 1000000 is arbitrary.
+  requestEvents: httpInProgressEventTrace,
+  responseEvents: [],
 );
 final httpInProgressEventTrace = [
   {

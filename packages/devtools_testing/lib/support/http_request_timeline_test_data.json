@@ -2,134 +2,6 @@
   "type": "Timeline",
   "traceEvents": [
     {
-      "name": "thread_name",
-      "ph": "M",
-      "pid": 52406,
-      "tid": 52447,
-      "args": {
-        "name": "DartWorker (52447)",
-        "mode": "basic"
-      }
-    },
-    {
-      "name": "thread_name",
-      "ph": "M",
-      "pid": 52406,
-      "tid": 52414,
-      "args": {
-        "name": "DartWorker (52414)",
-        "mode": "basic"
-      }
-    },
-    {
-      "name": "thread_name",
-      "ph": "M",
-      "pid": 52406,
-      "tid": 52413,
-      "args": {
-        "name": "DartWorker (52413)",
-        "mode": "basic"
-      }
-    },
-    {
-      "name": "thread_name",
-      "ph": "M",
-      "pid": 52406,
-      "tid": 52412,
-      "args": {
-        "name": "DartWorker (52412)",
-        "mode": "basic"
-      }
-    },
-    {
-      "name": "thread_name",
-      "ph": "M",
-      "pid": 52406,
-      "tid": 52411,
-      "args": {
-        "name": "DartWorker (52411)",
-        "mode": "basic"
-      }
-    },
-    {
-      "name": "thread_name",
-      "ph": "M",
-      "pid": 52406,
-      "tid": 52410,
-      "args": {
-        "name": "DartWorker (52410)",
-        "mode": "basic"
-      }
-    },
-    {
-      "name": "thread_name",
-      "ph": "M",
-      "pid": 52406,
-      "tid": 52409,
-      "args": {
-        "name": "Dart Profiler ThreadInterrupter (52409)",
-        "mode": "basic"
-      }
-    },
-    {
-      "name": "thread_name",
-      "ph": "M",
-      "pid": 52406,
-      "tid": 52406,
-      "args": {
-        "name": "Dart_Initialize (52406)",
-        "mode": "basic"
-      }
-    },
-    {
-      "name": "IncrementalCompiler.compile",
-      "cat": "Dart",
-      "tid": 52410,
-      "pid": 52406,
-      "ts": 231932850307,
-      "ph": "b",
-      "id": "0",
-      "args": {
-        "isolateId": "isolates/952411282329351"
-      }
-    },
-    {
-      "name": "BinaryBuilder.readComponent",
-      "cat": "Dart",
-      "tid": 52410,
-      "pid": 52406,
-      "ts": 231932877179,
-      "tts": 144948,
-      "ph": "B",
-      "args": {
-        "isolateId": "isolates/952411282329351"
-      }
-    },
-    {
-      "name": "BinaryBuilder.readComponent",
-      "cat": "Dart",
-      "tid": 52410,
-      "pid": 52406,
-      "ts": 231933099634,
-      "tts": 341648,
-      "ph": "E",
-      "args": {
-        "isolateId": "isolates/952411282329351"
-      }
-    },
-    {
-      "name": "IncrementalCompiler.compile",
-      "cat": "Dart",
-      "tid": 52410,
-      "pid": 52406,
-      "ts": 231933865486,
-      "ph": "e",
-      "id": "0",
-      "args": {
-        "isolateId": "isolates/952411282329351"
-      }
-    },
-    {
       "name": "BinaryPrinter.writeComponentFile",
       "cat": "Dart",
       "tid": 52410,
@@ -207,7 +79,9 @@
       "ph": "n",
       "id": "1",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -219,7 +93,9 @@
       "ph": "n",
       "id": "1",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -231,7 +107,9 @@
       "ph": "n",
       "id": "2",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -243,7 +121,9 @@
       "ph": "n",
       "id": "2",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -255,7 +135,9 @@
       "ph": "n",
       "id": "3",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -267,7 +149,9 @@
       "ph": "n",
       "id": "3",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -309,7 +193,9 @@
       "ph": "n",
       "id": "4",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -321,7 +207,9 @@
       "ph": "n",
       "id": "4",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -333,7 +221,9 @@
       "ph": "n",
       "id": "5",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -345,7 +235,9 @@
       "ph": "n",
       "id": "5",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -372,7 +264,9 @@
       "ph": "n",
       "id": "6",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -384,7 +278,9 @@
       "ph": "n",
       "id": "6",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -411,7 +307,9 @@
       "ph": "n",
       "id": "7",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -423,7 +321,9 @@
       "ph": "n",
       "id": "7",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -435,7 +335,9 @@
       "ph": "n",
       "id": "2",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -447,6 +349,7 @@
       "ph": "e",
       "id": "2",
       "args": {
+        "filterKey":"HTTP/client",
         "requestHeaders": {
           "user-agent": [
             "Dart/2.8 (dart:io)"
@@ -495,45 +398,6 @@
       }
     },
     {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934384467,
-      "ph": "b",
-      "id": "8",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "DELETE",
-        "uri": "http://127.0.0.1:8011/foo?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934385119,
-      "ph": "n",
-      "id": "8",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934385143,
-      "ph": "n",
-      "id": "8",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
       "name": "Response receieved",
       "cat": "Dart",
       "tid": 52414,
@@ -542,7 +406,9 @@
       "ph": "n",
       "id": "6",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -554,6 +420,7 @@
       "ph": "e",
       "id": "6",
       "args": {
+        "filterKey":"HTTP/client",
         "requestHeaders": {
           "user-agent": [
             "Dart/2.8 (dart:io)"
@@ -610,7 +477,9 @@
       "ph": "n",
       "id": "5",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -622,6 +491,7 @@
       "ph": "e",
       "id": "5",
       "args": {
+        "filterKey":"HTTP/client",
         "requestHeaders": {
           "user-agent": [
             "Dart/2.8 (dart:io)"
@@ -670,123 +540,6 @@
       }
     },
     {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934440529,
-      "ph": "b",
-      "id": "9",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "GET",
-        "uri": "http://127.0.0.1:8011/foo",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934440644,
-      "ph": "n",
-      "id": "9",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934440690,
-      "ph": "n",
-      "id": "9",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934468658,
-      "ph": "b",
-      "id": "a",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "GET",
-        "uri": "http://127.0.0.1:8011/foo/bar",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934468777,
-      "ph": "n",
-      "id": "a",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934468833,
-      "ph": "n",
-      "id": "a",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934490567,
-      "ph": "b",
-      "id": "b",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PUT",
-        "uri": "http://127.0.0.1:8011/foo/bar/baz?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934492028,
-      "ph": "n",
-      "id": "b",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934492068,
-      "ph": "n",
-      "id": "b",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
       "name": "Response receieved",
       "cat": "Dart",
       "tid": 52414,
@@ -795,7 +548,9 @@
       "ph": "n",
       "id": "1",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -807,6 +562,7 @@
       "ph": "e",
       "id": "1",
       "args": {
+        "filterKey":"HTTP/client",
         "requestHeaders": {
           "user-agent": [
             "Dart/2.8 (dart:io)"
@@ -860,113 +616,6 @@
       }
     },
     {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934585402,
-      "ph": "b",
-      "id": "c",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "HEAD",
-        "uri": "http://127.0.0.1:8011/foo",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934585490,
-      "ph": "n",
-      "id": "c",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934585528,
-      "ph": "n",
-      "id": "c",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934606949,
-      "ph": "n",
-      "id": "b",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934607394,
-      "ph": "e",
-      "id": "b",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35252,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
       "name": "Response receieved",
       "cat": "Dart",
       "tid": 52414,
@@ -975,7 +624,9 @@
       "ph": "n",
       "id": "4",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -987,6 +638,7 @@
       "ph": "e",
       "id": "4",
       "args": {
+        "filterKey":"HTTP/client",
         "requestHeaders": {
           "user-agent": [
             "Dart/2.8 (dart:io)"
@@ -1040,45 +692,6 @@
       }
     },
     {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934625425,
-      "ph": "b",
-      "id": "d",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "CONNECT",
-        "uri": "http://127.0.0.1:8011/foo?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934625467,
-      "ph": "n",
-      "id": "d",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934625486,
-      "ph": "n",
-      "id": "d",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
       "name": "HTTP CLIENT PATCH",
       "cat": "Dart",
       "tid": 52414,
@@ -1102,7 +715,9 @@
       "ph": "n",
       "id": "e",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -1114,7 +729,9 @@
       "ph": "n",
       "id": "e",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -1126,7 +743,9 @@
       "ph": "n",
       "id": "3",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -1138,6 +757,7 @@
       "ph": "e",
       "id": "3",
       "args": {
+        "filterKey":"HTTP/client",
         "requestHeaders": {
           "user-agent": [
             "Dart/2.8 (dart:io)"
@@ -1186,6 +806,118 @@
       }
     },
     {
+      "name": "HTTP CLIENT response of GET",
+      "cat": "Dart",
+      "tid": 9018,
+      "pid": 8985,
+      "ts": 465424288688,
+      "ph": "b",
+      "id": "5e",
+      "args": {
+        "requestUri": "https://jsonplaceholder.typicode.com/albums/1",
+        "statusCode": 200,
+        "reasonPhrase": "OK",
+        "parentId": "3",
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
+      }
+    },
+    {
+      "name": "Response body",
+      "cat": "Dart",
+      "tid": 9018,
+      "pid": 8985,
+      "ts": 465424289902,
+      "ph": "n",
+      "id": "5e",
+      "args": {
+        "data": [
+          123,
+          10,
+          32,
+          32,
+          34,
+          117,
+          115,
+          101,
+          114,
+          73,
+          100,
+          34,
+          58,
+          32,
+          49,
+          44,
+          10,
+          32,
+          32,
+          34,
+          105,
+          100,
+          34,
+          58,
+          32,
+          49,
+          44,
+          10,
+          32,
+          32,
+          34,
+          116,
+          105,
+          116,
+          108,
+          101,
+          34,
+          58,
+          32,
+          34,
+          113,
+          117,
+          105,
+          100,
+          101,
+          109,
+          32,
+          109,
+          111,
+          108,
+          101,
+          115,
+          116,
+          105,
+          97,
+          101,
+          32,
+          101,
+          110,
+          105,
+          109,
+          34,
+          10,
+          125
+        ],
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
+      }
+    },
+    {
+      "name": "HTTP CLIENT response of GET",
+      "cat": "Dart",
+      "tid": 9018,
+      "pid": 8985,
+      "ts": 465424291160,
+      "ph": "e",
+      "id": "5e",
+      "args": {
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
+      }
+    },
+    {
       "name": "Response receieved",
       "cat": "Dart",
       "tid": 52414,
@@ -1194,7 +926,9 @@
       "ph": "n",
       "id": "7",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -1206,6 +940,7 @@
       "ph": "e",
       "id": "7",
       "args": {
+        "filterKey":"HTTP/client",
         "requestHeaders": {
           "user-agent": [
             "Dart/2.8 (dart:io)"
@@ -1262,7 +997,9 @@
       "ph": "n",
       "id": "e",
       "args": {
-        "isolateId": "isolates/3907117677703047"
+        "filterKey": "HTTP/client",
+        "isolateId": "isolates/1430600241264643",
+        "isolateGroupId": "isolateGroups/1765553891304005367"
       }
     },
     {
@@ -1274,3597 +1011,7 @@
       "ph": "e",
       "id": "e",
       "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35244,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934712254,
-      "ph": "n",
-      "id": "9",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934712694,
-      "ph": "e",
-      "id": "9",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35246,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934715165,
-      "ph": "n",
-      "id": "8",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934715740,
-      "ph": "e",
-      "id": "8",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35240,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934731566,
-      "ph": "b",
-      "id": "f",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PUT",
-        "uri": "http://127.0.0.1:8011",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934731678,
-      "ph": "n",
-      "id": "f",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934731723,
-      "ph": "n",
-      "id": "f",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934733595,
-      "ph": "n",
-      "id": "c",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934734140,
-      "ph": "e",
-      "id": "c",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35238,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": -1,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "transfer-encoding": [
-            "chunked"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934764618,
-      "ph": "b",
-      "id": "10",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "DELETE",
-        "uri": "http://127.0.0.1:8011/foo/bar?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934764726,
-      "ph": "n",
-      "id": "10",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934764770,
-      "ph": "n",
-      "id": "10",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934791085,
-      "ph": "n",
-      "id": "a",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934791510,
-      "ph": "e",
-      "id": "a",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35248,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934829171,
-      "ph": "n",
-      "id": "d",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934829700,
-      "ph": "e",
-      "id": "d",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35252,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934883586,
-      "ph": "b",
-      "id": "11",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "GET",
-        "uri": "http://127.0.0.1:8011/foo/bar",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934883697,
-      "ph": "n",
-      "id": "11",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934883743,
-      "ph": "n",
-      "id": "11",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934917584,
-      "ph": "b",
-      "id": "12",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PUT",
-        "uri": "http://127.0.0.1:8011/foo",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934917706,
-      "ph": "n",
-      "id": "12",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934917763,
-      "ph": "n",
-      "id": "12",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934942542,
-      "ph": "b",
-      "id": "13",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "HEAD",
-        "uri": "http://127.0.0.1:8011/foo/bar",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934942661,
-      "ph": "n",
-      "id": "13",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934942715,
-      "ph": "n",
-      "id": "13",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934966315,
-      "ph": "n",
-      "id": "f",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934966784,
-      "ph": "e",
-      "id": "f",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35246,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934998211,
-      "ph": "n",
-      "id": "12",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231934998658,
-      "ph": "e",
-      "id": "12",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35242,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935006123,
-      "ph": "n",
-      "id": "13",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935006576,
-      "ph": "e",
-      "id": "13",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35244,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": -1,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "transfer-encoding": [
-            "chunked"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935012553,
-      "ph": "b",
-      "id": "14",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "HEAD",
-        "uri": "http://127.0.0.1:8011/foo?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935012674,
-      "ph": "n",
-      "id": "14",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935012722,
-      "ph": "n",
-      "id": "14",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935042618,
-      "ph": "b",
-      "id": "15",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "CONNECT",
-        "uri": "http://127.0.0.1:8011/foo/bar?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935042731,
-      "ph": "n",
-      "id": "15",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935042780,
-      "ph": "n",
-      "id": "15",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935090315,
-      "ph": "n",
-      "id": "14",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935090782,
-      "ph": "e",
-      "id": "14",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35246,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": -1,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "transfer-encoding": [
-            "chunked"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935140023,
-      "ph": "n",
-      "id": "10",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935140332,
-      "ph": "e",
-      "id": "10",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35250,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935154526,
-      "ph": "b",
-      "id": "16",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PATCH",
-        "uri": "http://127.0.0.1:8011/foo/bar/baz?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935154641,
-      "ph": "n",
-      "id": "16",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935154690,
-      "ph": "n",
-      "id": "16",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935155427,
-      "ph": "b",
-      "id": "17",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PUT",
-        "uri": "http://127.0.0.1:8011/foo/bar",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935155497,
-      "ph": "n",
-      "id": "17",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935155527,
-      "ph": "n",
-      "id": "17",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935196281,
-      "ph": "n",
-      "id": "11",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935196796,
-      "ph": "e",
-      "id": "11",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35252,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935223289,
-      "ph": "n",
-      "id": "16",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935223697,
-      "ph": "e",
-      "id": "16",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35250,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935236264,
-      "ph": "n",
-      "id": "15",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935236748,
-      "ph": "e",
-      "id": "15",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35242,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935247643,
-      "ph": "b",
-      "id": "18",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "HEAD",
-        "uri": "http://127.0.0.1:8011/foo?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935247766,
-      "ph": "n",
-      "id": "18",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935247819,
-      "ph": "n",
-      "id": "18",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935263602,
-      "ph": "b",
-      "id": "19",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "GET",
-        "uri": "http://127.0.0.1:8011/foo/bar/baz?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935263714,
-      "ph": "n",
-      "id": "19",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935263761,
-      "ph": "n",
-      "id": "19",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935269582,
-      "ph": "b",
-      "id": "1a",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "POST",
-        "uri": "http://127.0.0.1:8011/foo",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935269690,
-      "ph": "n",
-      "id": "1a",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935269735,
-      "ph": "n",
-      "id": "1a",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935294608,
-      "ph": "b",
-      "id": "1b",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "DELETE",
-        "uri": "http://127.0.0.1:8011/foo/bar?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935294720,
-      "ph": "n",
-      "id": "1b",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935294765,
-      "ph": "n",
-      "id": "1b",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935311559,
-      "ph": "b",
-      "id": "1c",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "HEAD",
-        "uri": "http://127.0.0.1:8011/foo",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935311670,
-      "ph": "n",
-      "id": "1c",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935311716,
-      "ph": "n",
-      "id": "1c",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935321629,
-      "ph": "b",
-      "id": "1d",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "GET",
-        "uri": "http://127.0.0.1:8011/foo/bar?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935321740,
-      "ph": "n",
-      "id": "1d",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935321786,
-      "ph": "n",
-      "id": "1d",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935330099,
-      "ph": "n",
-      "id": "1c",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935330497,
-      "ph": "e",
-      "id": "1c",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35240,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": -1,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "transfer-encoding": [
-            "chunked"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935357618,
-      "ph": "b",
-      "id": "1e",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PUT",
-        "uri": "http://127.0.0.1:8011?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935357730,
-      "ph": "n",
-      "id": "1e",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935357776,
-      "ph": "n",
-      "id": "1e",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935373621,
-      "ph": "b",
-      "id": "1f",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "POST",
-        "uri": "http://127.0.0.1:8011/foo?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935373733,
-      "ph": "n",
-      "id": "1f",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935373780,
-      "ph": "n",
-      "id": "1f",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935433608,
-      "ph": "b",
-      "id": "20",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "CONNECT",
-        "uri": "http://127.0.0.1:8011/foo?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935435211,
-      "ph": "n",
-      "id": "20",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935435251,
-      "ph": "n",
-      "id": "20",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935456595,
-      "ph": "b",
-      "id": "21",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "GET",
-        "uri": "http://127.0.0.1:8011/foo/bar/baz",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935457975,
-      "ph": "n",
-      "id": "21",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935458016,
-      "ph": "n",
-      "id": "21",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935463109,
-      "ph": "n",
-      "id": "1e",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935463487,
-      "ph": "e",
-      "id": "1e",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35240,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935501170,
-      "ph": "n",
-      "id": "19",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935501557,
-      "ph": "e",
-      "id": "19",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35244,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935532600,
-      "ph": "b",
-      "id": "22",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "CONNECT",
-        "uri": "http://127.0.0.1:8011/foo/bar/baz",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935532709,
-      "ph": "n",
-      "id": "22",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935532766,
-      "ph": "n",
-      "id": "22",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935535554,
-      "ph": "b",
-      "id": "23",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "CONNECT",
-        "uri": "http://127.0.0.1:8011/foo",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935535666,
-      "ph": "n",
-      "id": "23",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935535712,
-      "ph": "n",
-      "id": "23",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935597179,
-      "ph": "n",
-      "id": "17",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935597670,
-      "ph": "e",
-      "id": "17",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35246,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935602128,
-      "ph": "n",
-      "id": "1a",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935602513,
-      "ph": "e",
-      "id": "1a",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35250,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935607638,
-      "ph": "b",
-      "id": "24",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PATCH",
-        "uri": "http://127.0.0.1:8011?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935607754,
-      "ph": "n",
-      "id": "24",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935607821,
-      "ph": "n",
-      "id": "24",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935627770,
-      "ph": "n",
-      "id": "23",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935628258,
-      "ph": "e",
-      "id": "23",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35240,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935632489,
-      "ph": "n",
-      "id": "1b",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935632859,
-      "ph": "e",
-      "id": "1b",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35242,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935689642,
-      "ph": "b",
-      "id": "25",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "POST",
-        "uri": "http://127.0.0.1:8011/foo/bar",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935689766,
-      "ph": "n",
-      "id": "25",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935689820,
-      "ph": "n",
-      "id": "25",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935719593,
-      "ph": "b",
-      "id": "26",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PUT",
-        "uri": "http://127.0.0.1:8011/foo",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935719711,
-      "ph": "n",
-      "id": "26",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935719760,
-      "ph": "n",
-      "id": "26",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935740146,
-      "ph": "n",
-      "id": "18",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935740557,
-      "ph": "e",
-      "id": "18",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35252,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": -1,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "transfer-encoding": [
-            "chunked"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935746112,
-      "ph": "n",
-      "id": "1d",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935746494,
-      "ph": "e",
-      "id": "1d",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35248,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935760173,
-      "ph": "n",
-      "id": "24",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935760679,
-      "ph": "e",
-      "id": "24",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35246,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935775572,
-      "ph": "b",
-      "id": "27",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PATCH",
-        "uri": "http://127.0.0.1:8011/foo",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935775683,
-      "ph": "n",
-      "id": "27",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935775729,
-      "ph": "n",
-      "id": "27",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935780191,
-      "ph": "n",
-      "id": "22",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935780716,
-      "ph": "e",
-      "id": "22",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35244,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935782552,
-      "ph": "b",
-      "id": "28",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PATCH",
-        "uri": "http://127.0.0.1:8011/foo",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935782661,
-      "ph": "n",
-      "id": "28",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935782707,
-      "ph": "n",
-      "id": "28",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935813504,
-      "ph": "b",
-      "id": "29",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PATCH",
-        "uri": "http://127.0.0.1:8011",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935813614,
-      "ph": "n",
-      "id": "29",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935813659,
-      "ph": "n",
-      "id": "29",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935832174,
-      "ph": "n",
-      "id": "1f",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935832675,
-      "ph": "e",
-      "id": "1f",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35238,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935838564,
-      "ph": "b",
-      "id": "2a",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "DELETE",
-        "uri": "http://127.0.0.1:8011",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935838694,
-      "ph": "n",
-      "id": "2a",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935838741,
-      "ph": "n",
-      "id": "2a",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935851114,
-      "ph": "n",
-      "id": "25",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935851531,
-      "ph": "e",
-      "id": "25",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35250,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935859104,
-      "ph": "n",
-      "id": "21",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935859477,
-      "ph": "e",
-      "id": "21",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35256,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935872200,
-      "ph": "n",
-      "id": "20",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935872681,
-      "ph": "e",
-      "id": "20",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35254,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935887590,
-      "ph": "b",
-      "id": "2b",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PATCH",
-        "uri": "http://127.0.0.1:8011/foo",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935887698,
-      "ph": "n",
-      "id": "2b",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935887744,
-      "ph": "n",
-      "id": "2b",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935898144,
-      "ph": "n",
-      "id": "29",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935898629,
-      "ph": "e",
-      "id": "29",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35244,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935943606,
-      "ph": "b",
-      "id": "2c",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PATCH",
-        "uri": "http://127.0.0.1:8011/foo/bar/baz?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935943717,
-      "ph": "n",
-      "id": "2c",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935943763,
-      "ph": "n",
-      "id": "2c",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935980208,
-      "ph": "n",
-      "id": "2c",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231935980691,
-      "ph": "e",
-      "id": "2c",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35244,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936016221,
-      "ph": "n",
-      "id": "26",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936016723,
-      "ph": "e",
-      "id": "26",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35242,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936052127,
-      "ph": "n",
-      "id": "2b",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936052530,
-      "ph": "e",
-      "id": "2b",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35254,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936054546,
-      "ph": "b",
-      "id": "2d",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "DELETE",
-        "uri": "http://127.0.0.1:8011/foo/bar",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Connection established",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936054678,
-      "ph": "n",
-      "id": "2d",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Request initiated",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936054724,
-      "ph": "n",
-      "id": "2d",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936090611,
-      "ph": "n",
-      "id": "27",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936090840,
-      "ph": "e",
-      "id": "27",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35246,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936109810,
-      "ph": "n",
-      "id": "2d",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936109975,
-      "ph": "e",
-      "id": "2d",
-      "args": {
+        "filterKey":"HTTP/client",
         "requestHeaders": {
           "user-agent": [
             "Dart/2.8 (dart:io)"
@@ -4936,80 +1083,8 @@
       "ph": "e",
       "id": "2e",
       "args": {
+        "filterKey": "HTTP/client",
         "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35258",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936232768,
-      "ph": "n",
-      "id": "28",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936251552,
-      "ph": "e",
-      "id": "28",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35252,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
         "isolateId": "isolates/3907117677703047"
       }
     },
@@ -5029,79 +1104,6 @@
       }
     },
     {
-      "name": "Response receieved",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936252620,
-      "ph": "n",
-      "id": "2a",
-      "args": {
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936252826,
-      "ph": "e",
-      "id": "2a",
-      "args": {
-        "requestHeaders": {
-          "user-agent": [
-            "Dart/2.8 (dart:io)"
-          ],
-          "accept-encoding": [
-            "gzip"
-          ],
-          "content-length": [
-            "0"
-          ],
-          "host": [
-            "127.0.0.1:8011"
-          ]
-        },
-        "compressionState": "HttpClientResponseCompressionState.notCompressed",
-        "connectionInfo": {
-          "localPort": 35240,
-          "remoteAddress": "127.0.0.1",
-          "remotePort": 8011
-        },
-        "contentLength": 0,
-        "cookies": [
-          "Cookie-Monster=Me-want-cookie!; HttpOnly"
-        ],
-        "responseHeaders": {
-          "x-frame-options": [
-            "SAMEORIGIN"
-          ],
-          "content-type": [
-            "text/plain; charset=utf-8"
-          ],
-          "x-xss-protection": [
-            "1; mode=block"
-          ],
-          "set-cookie": [
-            "Cookie-Monster=Me-want-cookie!; HttpOnly"
-          ],
-          "x-content-type-options": [
-            "nosniff"
-          ],
-          "content-length": [
-            "0"
-          ]
-        },
-        "isRedirect": false,
-        "persistentConnection": true,
-        "reasonPhrase": "OK",
-        "redirects": [],
-        "statusCode": 200,
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
       "name": "HTTP CLIENT DELETE",
       "cat": "Dart",
       "tid": 52414,
@@ -5110,35 +1112,8 @@
       "ph": "e",
       "id": "2f",
       "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35260",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936280547,
-      "ph": "b",
-      "id": "30",
-      "args": {
         "filterKey": "HTTP/client",
-        "method": "DELETE",
-        "uri": "http://127.0.0.1:8011",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936281369,
-      "ph": "e",
-      "id": "30",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35262",
+        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35260",
         "isolateId": "isolates/3907117677703047"
       }
     },
@@ -5166,6 +1141,7 @@
       "ph": "e",
       "id": "31",
       "args": {
+        "filterKey": "HTTP/client",
         "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35264",
         "isolateId": "isolates/3907117677703047"
       }
@@ -5194,63 +1170,8 @@
       "ph": "e",
       "id": "32",
       "args": {
+        "filterKey": "HTTP/client",
         "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35266",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936342590,
-      "ph": "b",
-      "id": "33",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "CONNECT",
-        "uri": "http://127.0.0.1:8011/foo?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936343633,
-      "ph": "e",
-      "id": "33",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35268",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936406570,
-      "ph": "b",
-      "id": "34",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "POST",
-        "uri": "http://127.0.0.1:8011/foo/bar/baz",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936407622,
-      "ph": "e",
-      "id": "34",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35270",
         "isolateId": "isolates/3907117677703047"
       }
     },
@@ -5278,6 +1199,7 @@
       "ph": "e",
       "id": "35",
       "args": {
+        "filterKey": "HTTP/client",
         "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35272",
         "isolateId": "isolates/3907117677703047"
       }
@@ -5306,147 +1228,8 @@
       "ph": "e",
       "id": "36",
       "args": {
+        "filterKey": "HTTP/client",
         "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35274",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936450612,
-      "ph": "b",
-      "id": "37",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "GET",
-        "uri": "http://127.0.0.1:8011?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936451664,
-      "ph": "e",
-      "id": "37",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35276",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936504494,
-      "ph": "b",
-      "id": "38",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "DELETE",
-        "uri": "http://127.0.0.1:8011",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936504900,
-      "ph": "b",
-      "id": "39",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "POST",
-        "uri": "http://127.0.0.1:8011/foo/bar",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936506087,
-      "ph": "e",
-      "id": "38",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35278",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936506830,
-      "ph": "e",
-      "id": "39",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35280",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936534548,
-      "ph": "b",
-      "id": "3a",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PUT",
-        "uri": "http://127.0.0.1:8011/foo/bar/baz",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PUT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936535579,
-      "ph": "e",
-      "id": "3a",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35282",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936556615,
-      "ph": "b",
-      "id": "3b",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "HEAD",
-        "uri": "http://127.0.0.1:8011/foo/bar/baz?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936557670,
-      "ph": "e",
-      "id": "3b",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35284",
         "isolateId": "isolates/3907117677703047"
       }
     },
@@ -5474,287 +1257,8 @@
       "ph": "e",
       "id": "3c",
       "args": {
+        "filterKey": "HTTP/client",
         "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35286",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936653572,
-      "ph": "b",
-      "id": "3d",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "DELETE",
-        "uri": "http://127.0.0.1:8011/foo/bar/baz",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT DELETE",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936654658,
-      "ph": "e",
-      "id": "3d",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35288",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936718562,
-      "ph": "b",
-      "id": "3e",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "GET",
-        "uri": "http://127.0.0.1:8011/foo/bar",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT GET",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936719727,
-      "ph": "e",
-      "id": "3e",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35290",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936780557,
-      "ph": "b",
-      "id": "3f",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "CONNECT",
-        "uri": "http://127.0.0.1:8011/foo/bar/baz",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936781633,
-      "ph": "e",
-      "id": "3f",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35292",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936816539,
-      "ph": "b",
-      "id": "40",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "HEAD",
-        "uri": "http://127.0.0.1:8011",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936817605,
-      "ph": "e",
-      "id": "40",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35294",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936857550,
-      "ph": "b",
-      "id": "41",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "HEAD",
-        "uri": "http://127.0.0.1:8011/foo/bar",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT HEAD",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936858577,
-      "ph": "e",
-      "id": "41",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35296",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936870576,
-      "ph": "b",
-      "id": "42",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "POST",
-        "uri": "http://127.0.0.1:8011/foo/bar?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936871628,
-      "ph": "e",
-      "id": "42",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35298",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936907550,
-      "ph": "b",
-      "id": "43",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "CONNECT",
-        "uri": "http://127.0.0.1:8011/foo",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT CONNECT",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936908597,
-      "ph": "e",
-      "id": "43",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35300",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936931591,
-      "ph": "b",
-      "id": "44",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "PATCH",
-        "uri": "http://127.0.0.1:8011/foo/bar/baz?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT PATCH",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231936932681,
-      "ph": "e",
-      "id": "44",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35302",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231937016599,
-      "ph": "b",
-      "id": "45",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "POST",
-        "uri": "http://127.0.0.1:8011?foo=bar&year=2019",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231937017768,
-      "ph": "e",
-      "id": "45",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35304",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231937063645,
-      "ph": "b",
-      "id": "46",
-      "args": {
-        "filterKey": "HTTP/client",
-        "method": "POST",
-        "uri": "http://127.0.0.1:8011/foo/bar",
-        "isolateId": "isolates/3907117677703047"
-      }
-    },
-    {
-      "name": "HTTP CLIENT POST",
-      "cat": "Dart",
-      "tid": 52414,
-      "pid": 52406,
-      "ts": 231937065295,
-      "ph": "e",
-      "id": "46",
-      "args": {
-        "error": "SocketException: OS Error: Connection refused, errno = 111, address = 127.0.0.1, port = 35306",
         "isolateId": "isolates/3907117677703047"
       }
     }

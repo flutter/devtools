@@ -154,6 +154,7 @@ void main() {
 
         expect(find.byType(NetworkRequestOverviewView), findsNothing);
         expect(find.byType(HttpRequestHeadersView), findsOneWidget);
+        expect(find.byType(HttpResponseView), findsNothing);
         expect(find.byType(HttpRequestCookiesView), findsNothing);
 
         // TODO(kenz): move the headers tab validation into its own testing
@@ -173,14 +174,27 @@ void main() {
         // Check contents of request headers.
         final ExpansionTile requestsTile =
             tester.widget(find.byKey(HttpRequestHeadersView.requestHeadersKey));
-        final numRequestHeaders = data.requestHeaders.length;
+        final numRequestHeaders = data.requestHeaders?.length ?? 0;
         expect(requestsTile.children.length, numRequestHeaders);
 
         // Check contents of response headers.
         final ExpansionTile responsesTile = tester
             .widget(find.byKey(HttpRequestHeadersView.responseHeadersKey));
-        final numResponseHeaders = data.responseHeaders.length;
+        final numResponseHeaders = data.responseHeaders?.length ?? 0;
         expect(responsesTile.children.length, numResponseHeaders);
+      }
+
+      Future<void> validateResponseTab(HttpRequestData data) async {
+        if (data.responseBody != null) {
+          // Switch to response tab.
+          await tester.tap(find.byKey(NetworkRequestInspector.responseTabKey));
+          await tester.pumpAndSettle();
+
+          expect(find.byType(NetworkRequestOverviewView), findsNothing);
+          expect(find.byType(HttpRequestHeadersView), findsNothing);
+          expect(find.byType(HttpResponseView), findsOneWidget);
+          expect(find.byType(HttpRequestCookiesView), findsNothing);
+        }
       }
 
       Future<void> validateOverviewTab(NetworkRequest data) async {
@@ -190,6 +204,7 @@ void main() {
 
         expect(find.byType(NetworkRequestOverviewView), findsOneWidget);
         expect(find.byType(HttpRequestHeadersView), findsNothing);
+        expect(find.byType(HttpResponseView), findsNothing);
         expect(find.byType(HttpRequestCookiesView), findsNothing);
       }
 
@@ -204,6 +219,7 @@ void main() {
 
           expect(find.byType(NetworkRequestOverviewView), findsNothing);
           expect(find.byType(HttpRequestHeadersView), findsNothing);
+          expect(find.byType(HttpResponseView), findsNothing);
           expect(find.byType(HttpRequestCookiesView), findsOneWidget);
 
           // TODO(kenz): move the cookie tab validation into its own testing
@@ -245,11 +261,8 @@ void main() {
         }
       }
 
-      // TODO(devoncarew): The tests don't pass if we try and test more than one
-      // http request.
-      for (final request in controller.requests.value.requests.sublist(0, 1)) {
-        // Tap a row and ensure the inspector is populated.
-        await tester.tap(find.byKey(ValueKey(request)));
+      for (final request in controller.requests.value.requests) {
+        controller.selectRequest(request);
         await tester.pumpAndSettle();
         expect(
           find.byKey(NetworkRequestInspector.noRequestSelectedKey),
@@ -259,6 +272,7 @@ void main() {
         final selection = controller.selectedRequest.value;
         if (selection is HttpRequestData) {
           await validateHeadersTab(selection);
+          await validateResponseTab(selection);
           await validateCookiesTab(selection);
         }
         await validateOverviewTab(selection);
