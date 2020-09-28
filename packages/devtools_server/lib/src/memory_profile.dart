@@ -117,6 +117,8 @@ class MemoryProfile {
 
   EventSample eventSample;
 
+  RasterCache rasterCache;
+
   int heapMax;
 
   Stream<void> get onConnectionClosed => _connectionClosedController.stream;
@@ -184,6 +186,9 @@ class MemoryProfile {
       adbMemoryInfo = AdbMemoryInfo.empty();
     }
 
+    // Query the engine's rasterCache estimate.
+    rasterCache = await _fetchRasterCacheInfo(_selectedIsolate);
+
     // TODO(terry): There are no user interactions.  However, might be nice to
     //              record VM GC's on the timeline.
     eventSample = EventSample.empty();
@@ -194,8 +199,63 @@ class MemoryProfile {
     _pollingTimer = Timer(updateDelay, _pollMemory);
   }
 
-  Future<AdbMemoryInfo> _fetchAdbInfo() async =>
-      AdbMemoryInfo.fromJson((await getAdbMemoryInfo()).json);
+  /// Poll ADB meminfo
+  Future<AdbMemoryInfo> _fetchAdbInfo() async => AdbMemoryInfo.fromJsonInKB(
+        (await getAdbMemoryInfo()).json,
+      );
+
+  /// Poll Fultter engine's Raster Cache metrics.
+  /// @returns engine's rasterCache estimates or null.
+  Future<RasterCache> _fetchRasterCacheInfo(IsolateRef selectedIsolate) async {
+    final response = await getRasterCacheMetrics(selectedIsolate);
+    if (response == null) return null;
+    final rasterCache = RasterCache.parse(response.json);
+    return rasterCache;
+  }
+
+  /// @returns view id of selected isolate's 'FlutterView'.
+  /// @throws Exception if no 'FlutterView'.
+  Future<String> getFlutterViewId(IsolateRef selectedIsolate) async {
+    final flutterViewListResponse = await callService(
+      registrations.flutterListViews,
+      isolateId: selectedIsolate.id,
+    );
+    final List<dynamic> views =
+        flutterViewListResponse.json['views'].cast<Map<String, dynamic>>();
+
+    // Each isolate should only have one FlutterView.
+    final flutterView = views.firstWhere(
+      (view) => view['type'] == 'FlutterView',
+      orElse: () => null,
+    );
+
+    if (flutterView == null) {
+      final message =
+          'No Flutter Views to query: ${flutterViewListResponse.json}';
+      print('ERROR: $message');
+      throw Exception(message);
+    }
+
+    return flutterView['id'];
+  }
+
+  /// Flutter engine returns estimate how much memory is used by layer/picture raster
+  /// cache entries in bytes.
+  ///
+  /// Call to returns JSON payload 'EstimateRasterCacheMemory' with two entries:
+  ///   layerBytes - layer raster cache entries in bytes
+  ///   pictureBytes - picture raster cache entries in bytes
+  Future<Response> getRasterCacheMetrics(IsolateRef selectedIsolate) async {
+    final viewId = await getFlutterViewId(selectedIsolate);
+
+    return await callService(
+      registrations.flutterEngineRasterCache,
+      args: <String, String>{
+        'viewId': viewId,
+      },
+      isolateId: selectedIsolate.id,
+    );
+  }
 
   void _update(VM vm, List<Isolate> isolates) {
     processRss = vm.json['_currentRSS'];
@@ -246,6 +306,7 @@ class MemoryProfile {
       fromGC,
       adbMemoryInfo,
       eventSample,
+      rasterCache,
     );
 
     if (_verboseMode) {

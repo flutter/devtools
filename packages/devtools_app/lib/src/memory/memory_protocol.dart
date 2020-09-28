@@ -36,6 +36,9 @@ class MemoryTracker {
   /// Polled adb dumpsys meminfo values.
   AdbMemoryInfo adbMemoryInfo;
 
+  /// Polled engine's RasterCache estimates.
+  RasterCache rasterCache;
+
   bool get hasConnection => service != null;
 
   Stream<void> get onChange => _changeController.stream;
@@ -117,10 +120,17 @@ class MemoryTracker {
       adbMemoryInfo = AdbMemoryInfo.empty();
     }
 
+    // Query the engine's rasterCache estimate.
+    rasterCache = await _fetchRasterCacheInfo();
+    // TODO(terry): Remove logging, temporarily added for testing.
+    logger.log('$rasterCache');
+
     // Polls for current RSS size.
     _update(await service.getVM(), isolateMemory);
 
-    _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
+    if (!memoryController.paused.value) {
+      _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
+    }
   }
 
   void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
@@ -140,9 +150,19 @@ class MemoryTracker {
     _recalculate(true);
   }
 
-  /// Poll ADB meminfo
-  Future<AdbMemoryInfo> _fetchAdbInfo() async =>
-      AdbMemoryInfo.fromJson((await serviceManager.getAdbMemoryInfo()).json);
+  /// Poll Fultter engine's Raster Cache metrics.
+  /// @returns engine's rasterCache estimates or null.
+  Future<RasterCache> _fetchRasterCacheInfo() async {
+    final response = await serviceManager.rasterCacheMetrics;
+    if (response == null) return null;
+    final rasterCache = RasterCache.parse(response.json);
+    return rasterCache;
+  }
+
+  /// Poll ADB meminfo, ADB returns values in KB convert to total bytes.
+  Future<AdbMemoryInfo> _fetchAdbInfo() async => AdbMemoryInfo.fromJsonInKB(
+        (await serviceManager.adbMemoryInfo).json,
+      );
 
   /// Returns the MemoryUsage of a particular isolate.
   /// @param id isolateId.
@@ -218,6 +238,7 @@ class MemoryTracker {
       fromGC,
       adbMemoryInfo,
       eventSample,
+      rasterCache,
     );
 
     _addSample(sample);

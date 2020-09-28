@@ -25,3 +25,9 @@ const flutterMemory = RegisteredServiceDescription._(
   // TODO(terry): Better icon - icon w/o a Flutter dependency.
   //  icon: FlutterIcons.snapshot,
 );
+
+const flutterListViews = '_flutter.listViews';
+
+/// Flutter engine returns estimate how much memory is used by layer/picture raster
+/// cache entries in bytes.
+const flutterEngineRasterCache = '_flutter.estimateRasterCacheMemory';

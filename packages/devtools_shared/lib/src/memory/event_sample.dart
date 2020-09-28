@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 /// Monitor heap object allocations (in the VM).  The allocation monitor will
 /// cause 'start' event exist in the HeapSample. Immediately afterwards a
 /// 'continues' event is added on each subsequent timestamp tick (HeapSample)
@@ -162,4 +164,32 @@ class EventSample {
       'isEventSnapshot: $isEventSnapshot, '
       'isEventSnapshotAuto: $isEventSnapshotAuto,'
       'allocationAccumulator: \n   $allocationAccumulator]';
+}
+
+/// Engine's Raster Cache estimates.
+class RasterCache {
+  RasterCache({@required this.layerBytes, @required this.pictureBytes});
+
+  RasterCache.fromJson(Map<String, dynamic> json) {
+    layerBytes = json['layerBytes'];
+    pictureBytes = json['pictureBytes'];
+  }
+
+  static RasterCache empty() => RasterCache(layerBytes: 0, pictureBytes: 0);
+
+  static RasterCache parse(Map<String, dynamic> json) =>
+      json == null ? null : RasterCache.fromJson(json);
+
+  int layerBytes;
+
+  int pictureBytes;
+
+  Map<String, dynamic> toJson() => {
+        'layerBytes': layerBytes,
+        'pictureBytes': pictureBytes,
+      };
+
+  @override
+  String toString() =>
+      '[RasterCache layerBytes: $layerBytes, pictureBytes: $pictureBytes]';
 }

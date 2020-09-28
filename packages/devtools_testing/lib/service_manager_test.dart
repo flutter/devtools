@@ -245,7 +245,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
     test('getDisplayRefreshRate', () async {
       await env.setupEnvironment();
 
-      expect(await serviceManager.getDisplayRefreshRate(), equals(60));
+      expect(await serviceManager.queryDisplayRefreshRate, equals(60));
 
       await env.tearDownEnvironment();
     });

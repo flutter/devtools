@@ -150,7 +150,7 @@ class TimelineController
 
     // Initialize displayRefreshRate.
     _displayRefreshRate.value =
-        await serviceManager.getDisplayRefreshRate() ?? defaultRefreshRate;
+        await serviceManager.queryDisplayRefreshRate ?? defaultRefreshRate;
     data?.displayRefreshRate = _displayRefreshRate.value;
   }
 
@@ -225,7 +225,7 @@ class TimelineController
     await clearData(clearVmTimeline: false);
     data = serviceManager.connectedApp.isFlutterAppNow
         ? TimelineData(
-            displayRefreshRate: await serviceManager.getDisplayRefreshRate())
+            displayRefreshRate: await serviceManager.queryDisplayRefreshRate)
         : TimelineData();
 
     _emptyTimeline.value = false;

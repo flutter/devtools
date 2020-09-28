@@ -17,6 +17,9 @@ class AdbMemoryInfo {
     this.total,
   );
 
+  /// All data inside of AdbMemoryInfo is in total bytes. When receiving ADB data
+  /// from the service extension (directly from ADB) then the data is in kilobytes.
+  /// See the factory constructor fromJsonInKB.
   factory AdbMemoryInfo.fromJson(Map<String, dynamic> json) => AdbMemoryInfo(
         json[realTimeKey] as int,
         json[javaHeapKey] as int,
@@ -26,8 +29,46 @@ class AdbMemoryInfo {
         json[graphicsKey] as int,
         json[otherKey] as int,
         json[systemKey] as int,
-        json[totalKey] as int,
+        json[totalKey],
       );
+
+  /// Use when converting data received from the service extension, directly from
+  /// ADB. All data received from ADB dumpsys meminfo is in kilobytes must adjust to
+  /// total bytes for AdbMemoryInfo data.
+  factory AdbMemoryInfo.fromJsonInKB(
+    Map<String, dynamic> json,
+  ) {
+    int javaHeap = json[javaHeapKey];
+    int nativeHeap = json[nativeHeapKey];
+    int code = json[codeKey];
+    int stack = json[stackKey];
+    int graphics = json[graphicsKey];
+    int other = json[otherKey];
+    int system = json[systemKey];
+    int total = json[totalKey];
+
+    // Convert to total bytes.
+    javaHeap *= 1024;
+    nativeHeap *= 1024;
+    code *= 1024;
+    stack *= 1024;
+    graphics *= 1024;
+    other *= 1024;
+    system *= 1024;
+    total *= 1024;
+
+    return AdbMemoryInfo(
+      json[realTimeKey] as int,
+      javaHeap,
+      nativeHeap,
+      code,
+      stack,
+      graphics,
+      other,
+      system,
+      total,
+    );
+  }
 
   /// JSON keys of data retrieved from ADB tool.
   static const String realTimeKey = 'Realtime';
@@ -62,6 +103,8 @@ class AdbMemoryInfo {
   /// This DateTime, from USA PST, would be Dec 31, 1960 16:00:00 (UTC - 8 hours).
   final int realtime;
 
+  /// All remaining values are received from ADB in kilobytes but converted to total
+  /// bytes using the AdbMemoryInfo.fromJsonInKilobytes factory.
   final int javaHeap;
 
   final int nativeHeap;
