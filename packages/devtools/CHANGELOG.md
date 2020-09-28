@@ -1,3 +1,16 @@
+## 0.9.3
+* Add search to the Network profiler [#2333](https://github.com/flutter/devtools/pull/2333)
+* Add filtering to the Network profiler [#2340](https://github.com/flutter/devtools/pull/2340)
+* Fix timeline rendering issue for async instant events [#2342](https://github.com/flutter/devtools/pull/2342)
+* Display call graph and dominator tree for diffs in app size tool [#2344](https://github.com/flutter/devtools/pull/2344)
+* Fix NPE in banner messages [#2358](https://github.com/flutter/devtools/pull/2358)
+* Add "Dart DevTools" window title to web app [#2359](https://github.com/flutter/devtools/pull/2359)
+* Rename "code size tool" to "app size tool" [#2365](https://github.com/flutter/devtools/pull/2365)
+* Add search to Performance page CPU profiler [#2368](https://github.com/flutter/devtools/pull/2368)
+* Fix analytics bug giving the incorrect value for "first run" [#2369](https://github.com/flutter/devtools/pull/2369)
+* Collect RasterCache estimates from the Flutter engine in the Memory profiler [#2371](https://github.com/flutter/devtools/pull/2371)
+* Display HTTP and HTTPS response bodies in the Network profiler [#2374](https://github.com/flutter/devtools/pull/2374)
+
 ## 0.9.2
 * Fix a bug causing extra evaluation for primitive values
 * Fix an issue handling google3: paths [#2288](https://github.com/flutter/devtools/pull/2288)
