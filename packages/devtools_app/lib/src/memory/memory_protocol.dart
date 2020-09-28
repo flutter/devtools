@@ -72,6 +72,12 @@ class MemoryTracker {
   void stop() {
     _updateLiveDataPolling(false);
     memoryController.paused.removeListener(_updateLiveDataPolling);
+
+    _pollingTimer?.cancel();
+    _gcStreamListener?.cancel();
+    _gcStreamListener = null;
+    _pollingTimer = null;
+
     serviceManager = null;
   }
 
