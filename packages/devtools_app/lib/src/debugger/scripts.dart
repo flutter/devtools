@@ -130,7 +130,6 @@ class ScriptPickerState extends State<ScriptPicker> {
       waitDuration: tooltipWait,
       preferBelow: false,
       message: node.name,
-      key: ValueKey(node.name),
       child: Material(
         child: InkWell(
           onTap: () {
