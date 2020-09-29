@@ -17,13 +17,7 @@ import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
-    // TODO(kenz): we may be able to remove this if profiling is turned on by default.
-    // See https://github.com/flutter/flutter/issues/46005.
     let project = FlutterDartProject.init()
-    let arguments = [
-      "--enable-dart-profiling",
-    ]
-    project.engineSwitches = arguments
     let flutterViewController = FlutterViewController.init(project: project)
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
