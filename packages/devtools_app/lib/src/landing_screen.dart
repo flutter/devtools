@@ -77,8 +77,8 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
         children: [
           _subtitleText('Analyze and view diffs for your app\'s size'),
           const SizedBox(height: denseRowSpacing),
-          _captionText('Load Dart AOT v8 snapshots, instruction sizes, or '
-              'app size analysis files to track down size issues in your app'),
+          _captionText('Load Dart AOT snapshots or app size analysis files to '
+              'track down size issues in your app.'),
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           RaisedButton(
             child: const Text('Open app size tool'),
