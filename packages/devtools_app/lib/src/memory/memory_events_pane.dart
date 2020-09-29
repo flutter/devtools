@@ -244,6 +244,9 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
   /// Loads all heap samples (live data or offline).
   void _processAndUpdate() {
+    // If paused don't update the chart (data is still collected).
+    if (_memoryController.paused.value) return;
+
     setState(() {
       // Display new events in the pane.
       _updateEventPane();
@@ -252,14 +255,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
   /// Display any newly received events in the chart.
   void _updateEventPane() {
-    setState(() {
-      _controller.data = ScatterData.fromList(datasets);
+    _controller.data = ScatterData.fromList(datasets);
 
-      // Received new samples ready to plot, signal data has changed.
-      for (final dataset in datasets) {
-        dataset.notifyDataSetChanged();
-      }
-    });
+    // Received new samples ready to plot, signal data has changed.
+    for (final dataset in datasets) {
+      dataset.notifyDataSetChanged();
+    }
   }
 
   @override

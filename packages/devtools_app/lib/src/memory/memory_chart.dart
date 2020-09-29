@@ -597,6 +597,9 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
   /// Display any newly received heap sample(s) in the chart.
   void _updateAllCharts() {
+    // If paused don't update the chart (data is still collected).
+    if (controller.paused.value) return;
+
     setState(() {
       // Update Dart VM chart datasets.
       dartChartController.data = LineData.fromList(chartDatasets);
