@@ -285,6 +285,7 @@ class FileNode extends TreeNode<FileNode> {
       for (var name in directoryParts) {
         node = node._getCreateChild(name);
       }
+
       node.scriptRef = script;
     }
 
@@ -309,6 +310,21 @@ class FileNode extends TreeNode<FileNode> {
 
     for (var child in children) {
       child._trimChildrenAsMapEntries();
+    }
+  }
+
+  @override
+  int get hashCode => scriptRef?.hashCode ?? name.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! FileNode) return false;
+    final FileNode node = other;
+
+    if (scriptRef == null) {
+      return node.scriptRef != null ? false : name == node.name;
+    } else {
+      return node.scriptRef == null ? false : scriptRef == node.scriptRef;
     }
   }
 }
@@ -347,6 +363,13 @@ class ScriptRefUtils {
       ];
     }
 
-    return parts;
+    if (parts.length > 1) {
+      return [
+        parts.first,
+        parts.sublist(1).join('/'),
+      ];
+    } else {
+      return parts;
+    }
   }
 }

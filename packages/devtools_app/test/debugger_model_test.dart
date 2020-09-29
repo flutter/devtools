@@ -65,15 +65,7 @@ void main() {
         expect(child.scriptRef, isNull);
 
         child = child.children[0];
-        expect(child.name, 'bar');
-        expect(child.scriptRef, isNull);
-
-        child = child.children[0];
-        expect(child.name, 'baz');
-        expect(child.scriptRef, isNull);
-
-        child = child.children[0];
-        expect(child.name, 'qux.dart');
+        expect(child.name, 'bar/baz/qux.dart');
         expect(child.scriptRef, isNotNull);
       });
 
@@ -89,11 +81,7 @@ void main() {
         expect(child.scriptRef, isNull);
 
         child = child.children[0];
-        expect(child.name, 'bar');
-        expect(child.scriptRef, isNull);
-
-        child = child.children[0];
-        expect(child.name, 'baz.dart');
+        expect(child.name, 'bar/baz.dart');
         expect(child.scriptRef, isNotNull);
       });
     });
@@ -111,12 +99,12 @@ void main() {
         expect(
           ScriptRefUtils.splitDirectoryParts(
               ScriptRef(uri: 'package:foo.bar.baz/qux.dart', id: 'id-5')),
-          orderedEquals(['package:foo', 'bar', 'baz', 'qux.dart']),
+          orderedEquals(['package:foo', 'bar/baz/qux.dart']),
         );
         expect(
           ScriptRefUtils.splitDirectoryParts(
               ScriptRef(uri: 'google3:///foo/bar/baz.dart', id: 'id-6')),
-          orderedEquals(['google3:foo', 'bar', 'baz.dart']),
+          orderedEquals(['google3:foo', 'bar/baz.dart']),
         );
       });
     });
