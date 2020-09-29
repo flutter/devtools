@@ -29,6 +29,17 @@
 // additional imports to this file.
 // ignore_for_file: unused_import
 
+// This code needs to execute both in null safe and legacy versions of Dart
+// so it needs to be written in a way that is null safe without depending on any
+// of the new null safety syntax. To test that this script works with null safe
+// dart, edit the analysis_options file to enable null safety.
+// If supporting null safe and legacy Dart at the same time becomes too
+// difficult, we can fork this file and provide two polyfill scripts one for the
+// legacy and one for the null safe versions of Dart.
+// We must suppress unnecessary cast lints as the casts are necessary in
+// null safe dart but the devtools_app library has not yet been migrated.
+// ignore_for_file: unnecessary_cast
+
 // Code from this class is executed within the context of the
 // widget_inspector.dart library so using protected members is fine.
 // ignore_for_file: invalid_use_of_visible_for_testing_member
@@ -70,8 +81,8 @@ import 'package:flutter/src/widgets/widget_inspector.dart';
 // WidgetInspectorService show up as in scope as far as the analysis server is
 // concerned.
 extension WidgetInspectorServicePrivateMethods on WidgetInspectorService {
-  Map<String, Object> _nodeToJson(
-    DiagnosticsNode node,
+  Map<String, Object /*?*/ > /*?*/ _nodeToJson(
+    DiagnosticsNode /*?*/ node,
     InspectorSerializationDelegate delegate,
   ) {
     throw 'Dummy extension method to make the code type check when it calls private members';
@@ -94,43 +105,45 @@ String addServiceExtensions() {
         return entry;
       }
     }
-    return null;
+    throw 'Enum value $name not found';
   }
 
   Future<Map<String, dynamic>> getLayoutExplorerNode(
       Map<String, String> parameters) {
-    final String id = parameters['id'];
-    final int subtreeDepth = int.parse(parameters['subtreeDepth']);
-    final String groupName = parameters['groupName'];
-    Map<String, Object> result = {};
+    final id = parameters['id'];
+    final subtreeDepth = int.parse(parameters['subtreeDepth'] as String);
+    final groupName = parameters['groupName'];
+    var result = <String, dynamic>{};
     final instance = WidgetInspectorService.instance;
     final root = instance.toObject(id);
     if (root == null) {
-      result = null;
-    } else {
-      result = instance._nodeToJson(
-        root,
-        InspectorSerializationDelegate(
-            groupName: groupName,
-            summaryTree: true,
-            subtreeDepth: subtreeDepth,
-            service: instance,
-            addAdditionalPropertiesCallback: (node, delegate) {
-              final Map<String, Object> additionalJson = <String, Object>{};
-              final Object value = node.value;
-              if (value is Element) {
-                final renderObject = value.renderObject;
+      return Future.value(<String, dynamic>{
+        'result': result,
+      });
+    }
+    result = instance._nodeToJson(
+      root as DiagnosticsNode,
+      InspectorSerializationDelegate(
+          groupName: groupName,
+          summaryTree: true,
+          subtreeDepth: subtreeDepth,
+          service: instance,
+          addAdditionalPropertiesCallback: (node, delegate) {
+            final Map<String, Object> additionalJson = <String, Object>{};
+            final Object value = node.value as Object;
+            if (value is Element) {
+              final renderObject = value.renderObject;
+              if (renderObject != null) {
                 additionalJson['renderObject'] =
-                    renderObject.toDiagnosticsNode()?.toJsonMap(
+                    renderObject.toDiagnosticsNode().toJsonMap(
                           delegate.copyWith(
                             subtreeDepth: 0,
                             includeProperties: true,
                           ),
-                        );
-                final Constraints constraints = renderObject.constraints;
-                if (constraints != null) {
-                  final Map<String, Object> constraintsProperty =
-                      <String, Object>{
+                        ) as Object;
+                try {
+                  final constraints = renderObject.constraints;
+                  final constraintsProperty = <String, Object>{
                     'type': constraints.runtimeType.toString(),
                     'description': constraints.toString(),
                   };
@@ -143,6 +156,8 @@ String addServiceExtensions() {
                     });
                   }
                   additionalJson['constraints'] = constraintsProperty;
+                } catch (e) {
+                  // Not laid out yet.
                 }
                 if (renderObject is RenderBox) {
                   additionalJson['size'] = <String, Object>{
@@ -150,36 +165,38 @@ String addServiceExtensions() {
                     'height': renderObject.size.height.toString(),
                   };
 
-                  final ParentData parentData = renderObject.parentData;
+                  final ParentData parentData =
+                      renderObject.parentData as ParentData;
                   if (parentData is FlexParentData) {
-                    additionalJson['flexFactor'] = parentData.flex;
+                    additionalJson['flexFactor'] = parentData.flex as int;
                     additionalJson['flexFit'] =
                         describeEnum(parentData.fit ?? FlexFit.tight);
                   }
                 }
               }
-              return additionalJson;
-            }),
-      );
-    }
-    return Future.value(<String, Object>{
+            }
+            return additionalJson;
+          }),
+    ) as Map<String, dynamic>;
+    return Future.value(<String, dynamic>{
       'result': result,
     });
   }
 
   Future<Map<String, dynamic>> setFlexFit(Map<String, String> parameters) {
-    final String id = parameters['id'];
-    final FlexFit flexFit =
-        toEnumEntry<FlexFit>(FlexFit.values, parameters['flexFit']);
+    final String id = parameters['id'] as String;
+    final parameter = parameters['flexFit'] as String;
+    final FlexFit flexFit = toEnumEntry<FlexFit>(FlexFit.values, parameter);
     final dynamic object = WidgetInspectorService.instance.toObject(id);
-    if (object == null) return null;
-    final render = object.renderObject;
-    final parentData = render.parentData;
     bool succeed = false;
-    if (parentData is FlexParentData) {
-      parentData.fit = flexFit;
-      render.markNeedsLayout();
-      succeed = true;
+    if (object != null) {
+      final render = object.renderObject;
+      final parentData = render.parentData;
+      if (parentData is FlexParentData) {
+        parentData.fit = flexFit;
+        render.markNeedsLayout();
+        succeed = true;
+      }
     }
     return Future.value(<String, Object>{
       'result': succeed,
@@ -187,44 +204,46 @@ String addServiceExtensions() {
   }
 
   Future<Map<String, dynamic>> setFlexFactor(Map<String, String> parameters) {
-    final String id = parameters['id'];
-    final String flexFactor = parameters['flexFactor'];
-    final int factor = flexFactor == 'null' ? null : int.parse(flexFactor);
+    final String id = parameters['id'] as String;
+    final String flexFactor = parameters['flexFactor'] as String;
+    final factor = flexFactor == 'null' ? null : int.parse(flexFactor);
     final dynamic object = WidgetInspectorService.instance.toObject(id);
-    if (object == null) return null;
-    final render = object.renderObject;
-    final parentData = render.parentData;
     bool succeed = false;
-    if (parentData is FlexParentData) {
-      parentData.flex = factor;
-      render.markNeedsLayout();
-      succeed = true;
+    if (object != null) {
+      final render = object.renderObject;
+      final parentData = render.parentData;
+      if (parentData is FlexParentData) {
+        parentData.flex = factor;
+        render.markNeedsLayout();
+        succeed = true;
+      }
     }
     return Future.value({'result': succeed});
   }
 
   Future<Map<String, dynamic>> setFlexProperties(
       Map<String, String> parameters) {
-    final String id = parameters['id'];
+    final String id = parameters['id'] as String;
     final MainAxisAlignment mainAxisAlignment = toEnumEntry<MainAxisAlignment>(
       MainAxisAlignment.values,
-      parameters['mainAxisAlignment'],
+      parameters['mainAxisAlignment'] as String,
     );
     final CrossAxisAlignment crossAxisAlignment =
         toEnumEntry<CrossAxisAlignment>(
       CrossAxisAlignment.values,
-      parameters['crossAxisAlignment'],
+      parameters['crossAxisAlignment'] as String,
     );
     final dynamic object = WidgetInspectorService.instance.toObject(id);
-    if (object == null) return null;
-    final render = object.renderObject;
     bool succeed = false;
-    if (render is RenderFlex) {
-      render.mainAxisAlignment = mainAxisAlignment;
-      render.crossAxisAlignment = crossAxisAlignment;
-      render.markNeedsLayout();
-      render.markNeedsPaint();
-      succeed = true;
+    if (object != null) {
+      final render = object.renderObject;
+      if (render is RenderFlex) {
+        render.mainAxisAlignment = mainAxisAlignment;
+        render.crossAxisAlignment = crossAxisAlignment;
+        render.markNeedsLayout();
+        render.markNeedsPaint();
+        succeed = true;
+      }
     }
     return Future.value(<String, Object>{'result': succeed});
   }
@@ -248,8 +267,6 @@ String addServiceExtensions() {
   registerHelper('setFlexFit', setFlexFit);
   registerHelper('setFlexFactor', setFlexFactor);
   registerHelper('setFlexProperties', setFlexProperties);
-  return failures.isNotEmpty
-      ? WidgetInspectorService.instance._safeJsonEncode(failures)
-      : null;
+  return WidgetInspectorService.instance._safeJsonEncode(failures);
   // INSPECTOR_POLYFILL_SCRIPT_END
 }
