@@ -104,11 +104,11 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   double mouseHoverX;
 
-  ScrollController verticalScrollController;
+  ScrollController verticalController;
 
   FixedExtentDelegate verticalExtentDelegate;
 
-  LinkedScrollControllerGroup linkedHorizontalScrollControllerGroup;
+  LinkedScrollControllerGroup horizontalController;
 
   double get maxScrollOffset =>
       widget.containerWidth * (zoomController.value - 1);
@@ -117,10 +117,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   AnimationController zoomController;
 
   double previousZoom = FlameChart.minZoomLevel;
-
-  double verticalScrollOffset = 0.0;
-
-  double horizontalScrollOffset = 0.0;
 
   // Scrolling via WASD controls will pan the left/right 25% of the view.
   double get keyboardScrollUnit => widget.containerWidth * 0.25;
@@ -143,6 +139,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       contentWidthWithZoom + widget.startInset + widget.endInset;
 
   TimeRange get visibleTimeRange {
+    final horizontalScrollOffset = horizontalController.offset;
     final startMicros = horizontalScrollOffset < widget.startInset
         ? startTimeOffset
         : startTimeOffset +
@@ -175,7 +172,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     BoxConstraints constraints,
     BuildContext buildContext,
   ) {
-    return [];
+    return const [];
   }
 
   @override
@@ -183,20 +180,8 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     super.initState();
     initFlameChartElements();
 
-    linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup()
-      ..addOffsetChangedListener(() {
-        setState(() {
-          horizontalScrollOffset = linkedHorizontalScrollControllerGroup.offset;
-        });
-      });
-    verticalScrollController = ScrollController()
-      ..addListener(() {
-        if (verticalScrollOffset != verticalScrollController.offset) {
-          setState(() {
-            verticalScrollOffset = verticalScrollController.offset;
-          });
-        }
-      });
+    horizontalController = LinkedScrollControllerGroup();
+    verticalController = ScrollController();
 
     zoomController = AnimationController(
       value: FlameChart.minZoomLevel,
@@ -235,8 +220,8 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   void didUpdateWidget(T oldWidget) {
     if (widget.data != oldWidget.data) {
       initFlameChartElements();
-      linkedHorizontalScrollControllerGroup.resetScroll();
-      verticalScrollController.jumpTo(FlameChart.minScrollOffset);
+      horizontalController.resetScroll();
+      verticalController.jumpTo(FlameChart.minScrollOffset);
       previousZoom = FlameChart.minZoomLevel;
       zoomController.reset();
       verticalExtentDelegate.recompute();
@@ -247,7 +232,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   @override
   void dispose() {
-    verticalScrollController.dispose();
+    verticalController.dispose();
     zoomController.dispose();
     super.dispose();
   }
@@ -283,13 +268,13 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   Widget _buildFlameChart(BoxConstraints constraints) {
     return ExtentDelegateListView(
-      controller: verticalScrollController,
+      controller: verticalController,
       extentDelegate: verticalExtentDelegate,
       customPointerSignalHandler: _handlePointerSignal,
       childrenDelegate: SliverChildBuilderDelegate(
         (context, index) {
           return ScrollingFlameChartRow<V>(
-            linkedScrollControllerGroup: linkedHorizontalScrollControllerGroup,
+            linkedScrollControllerGroup: horizontalController,
             nodes: rows[index].nodes,
             width: math.max(constraints.maxWidth, widthWithZoom),
             startInset: widget.startInset,
@@ -355,9 +340,9 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
           zoomController.value - keyboardZoomOutUnit,
         ));
       } else if (keyLabel == 'a') {
-        scrollToX(horizontalScrollOffset - keyboardScrollUnit);
+        scrollToX(horizontalController.offset - keyboardScrollUnit);
       } else if (keyLabel == 'd') {
-        scrollToX(horizontalScrollOffset + keyboardScrollUnit);
+        scrollToX(horizontalController.offset + keyboardScrollUnit);
       }
     }
   }
@@ -368,8 +353,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       double deltaY = event.scrollDelta.dy;
       if (deltaY.abs() >= deltaX.abs()) {
         if (_altKeyPressed) {
-          verticalScrollController
-              .jumpTo(verticalScrollController.offset + deltaY);
+          verticalController.jumpTo(verticalController.offset + deltaY);
         } else {
           deltaY = deltaY.clamp(
             -FlameChart.maxScrollWheelDelta,
@@ -396,7 +380,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       if (currentZoom == previousZoom) return;
 
       // Store current scroll values for re-calculating scroll location on zoom.
-      final lastScrollOffset = horizontalScrollOffset;
+      final lastScrollOffset = horizontalController.offset;
 
       final safeMouseHoverX = mouseHoverX ?? widget.containerWidth / 2;
       // Position in the zoomable coordinate space that we want to keep fixed.
@@ -416,7 +400,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       // to call this that guarantees the scroll controller offsets will be
       // updated for the new zoom level and layout size
       // https://github.com/flutter/devtools/issues/2012.
-      linkedHorizontalScrollControllerGroup.jumpTo(
+      horizontalController.jumpTo(
           newScrollOffset.clamp(FlameChart.minScrollOffset, maxScrollOffset));
     });
   }
@@ -441,9 +425,9 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   }) async {
     final target = offset.clamp(FlameChart.minScrollOffset, maxScrollOffset);
     if (jump) {
-      linkedHorizontalScrollControllerGroup.jumpTo(target);
+      horizontalController.jumpTo(target);
     } else {
-      await linkedHorizontalScrollControllerGroup.animateTo(
+      await horizontalController.animateTo(
         target,
         curve: defaultCurve,
         duration: shortDuration,
@@ -452,10 +436,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   }
 
   Future<void> scrollVerticallyToData(V data) async {
-    await verticalScrollController.animateTo(
+    await verticalController.animateTo(
       // Subtract [2 * rowHeightWithPadding] to give the target scroll event top padding.
       (topYForData(data) - 2 * rowHeightWithPadding)
-          .clamp(0.0, verticalScrollController.position.maxScrollExtent),
+          .clamp(0.0, verticalController.position.maxScrollExtent),
       duration: shortDuration,
       curve: defaultCurve,
     );
@@ -1115,37 +1099,48 @@ abstract class FlameChartPainter extends CustomPainter {
   FlameChartPainter({
     @required this.zoom,
     @required this.constraints,
-    @required this.verticalScrollOffset,
-    @required this.horizontalScrollOffset,
+    @required this.verticalController,
+    @required this.horizontalController,
     @required this.chartStartInset,
     @required this.colorScheme,
-  })  : visible = Rect.fromLTWH(
-          horizontalScrollOffset,
-          verticalScrollOffset,
-          constraints.maxWidth,
-          constraints.maxHeight,
-        ),
-        assert(colorScheme != null);
+  })  : assert(colorScheme != null),
+        super(
+            repaint: Listenable.merge([
+          verticalController,
+          horizontalController.offsetNotifier,
+        ]));
 
   final double zoom;
 
   final BoxConstraints constraints;
 
-  final double verticalScrollOffset;
+  final ScrollController verticalController;
 
-  final double horizontalScrollOffset;
+  final LinkedScrollControllerGroup horizontalController;
 
   final double chartStartInset;
 
   /// The absolute coordinates of the flame chart's visible section.
-  final Rect visible;
+  Rect get visibleRect {
+    return Rect.fromLTWH(
+      horizontalController.offset,
+      verticalController.offset,
+      constraints.maxWidth,
+      constraints.maxHeight,
+    );
+  }
 
   final ColorScheme colorScheme;
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     if (oldDelegate is FlameChartPainter) {
-      return oldDelegate.colorScheme != colorScheme;
+      return verticalController != oldDelegate.verticalController ||
+          horizontalController != oldDelegate.horizontalController ||
+          constraints != oldDelegate.constraints ||
+          zoom != oldDelegate.zoom ||
+          chartStartInset != oldDelegate.chartStartInset ||
+          oldDelegate.colorScheme != colorScheme;
     }
     return true;
   }
