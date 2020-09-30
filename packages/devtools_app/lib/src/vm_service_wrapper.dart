@@ -440,6 +440,7 @@ class VmServiceWrapper implements VmService {
     String isolateId,
   ) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
+    // ignore: deprecated_member_use
     return _trackFuture('getHttpEnableTimelineLogging',
         _vmService.getHttpEnableTimelineLogging(isolateId));
   }
@@ -449,6 +450,7 @@ class VmServiceWrapper implements VmService {
     bool enable,
   ) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
+    // ignore: deprecated_member_use
     return _trackFuture('setHttpEnableTimelineLogging',
         _vmService.setHttpEnableTimelineLogging(isolateId, enable));
   }
