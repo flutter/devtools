@@ -433,24 +433,16 @@ class VmServiceWrapper implements VmService {
   Future<bool> isHttpTimelineLoggingAvailable(String isolateId) async {
     final Isolate isolate = await getIsolate(isolateId);
     return isolate.extensionRPCs
-        .contains('ext.dart.io.setHttpEnableTimelineLogging');
+        .contains('ext.dart.io.httpEnableTimelineLogging');
   }
 
-  Future<HttpTimelineLoggingState> getHttpEnableTimelineLogging(
-    String isolateId,
-  ) async {
-    assert(await isHttpTimelineLoggingAvailable(isolateId));
-    return _trackFuture('getHttpEnableTimelineLogging',
-        _vmService.getHttpEnableTimelineLogging(isolateId));
-  }
-
-  Future<Success> setHttpEnableTimelineLogging(
-    String isolateId,
+  Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
+    String isolateId, [
     bool enable,
-  ) async {
+  ]) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
-    return _trackFuture('setHttpEnableTimelineLogging',
-        _vmService.setHttpEnableTimelineLogging(isolateId, enable));
+    return _trackFuture('httpEnableTimelineLogging',
+        _vmService.httpEnableTimelineLogging(isolateId, enable));
   }
 
   // TODO(kenz): move this method to
