@@ -342,11 +342,11 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult);
 
   @override
-  Future<Success> setHttpEnableTimelineLogging(
+  Future<HttpTimelineLoggingState> setHttpEnableTimelineLogging(
     String isolateId,
     bool enable,
   ) async =>
-      Success();
+      HttpTimelineLoggingState(enabled: enable);
 
   @override
   Future<Timestamp> getVMTimelineMicros() async => Timestamp(timestamp: 0);
