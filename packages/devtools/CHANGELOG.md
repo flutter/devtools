@@ -10,6 +10,10 @@
 * Fix analytics bug giving the incorrect value for "first run" [#2369](https://github.com/flutter/devtools/pull/2369)
 * Collect RasterCache estimates from the Flutter engine in the Memory profiler [#2371](https://github.com/flutter/devtools/pull/2371)
 * Display HTTP and HTTPS response bodies in the Network profiler [#2374](https://github.com/flutter/devtools/pull/2374)
+* Pause should still record memory stats just not update charts [#2382](https://github.com/flutter/devtools/pull/2382)
+* Simplify the debugger's libraries view [#2386](https://github.com/flutter/devtools/pull/2386)
+* Make inspector polyfill compatible with both null safe and legacy Flutter [#2387](https://github.com/flutter/devtools/pull/2387)
+* Fixed RSS plotting and plotting RasterCache data [#2389](https://github.com/flutter/devtools/pull/2389)
 
 ## 0.9.2
 * Fix a bug causing extra evaluation for primitive values
