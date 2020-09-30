@@ -278,8 +278,10 @@ class MemoryTimeline {
       final capacityEntry =
           Entry(x: timestamp, y: capacity, icon: dataPointImage);
       final rssEntry = Entry(x: timestamp, y: rss, icon: dataPointImage);
-      final rasterLayerEntry = Entry(x: timestamp, y: rasterLayer, icon: dataPointImage);
-      final rasterPictureEntry = Entry(x: timestamp, y: rasterPicture, icon: dataPointImage);
+      final rasterLayerEntry =
+          Entry(x: timestamp, y: rasterLayer, icon: dataPointImage);
+      final rasterPictureEntry =
+          Entry(x: timestamp, y: rasterPicture, icon: dataPointImage);
 
       // Engine memory values (ADB Android):
       final javaHeap = sample.adbMemoryInfo.javaHeap.toDouble();

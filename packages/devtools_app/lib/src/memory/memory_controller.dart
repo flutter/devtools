@@ -362,7 +362,7 @@ class MemoryController extends DisposableController
         rasterPictureValue: arg[MemoryTimeline.rasterPictureValueKey],
         minutesToDisplay: intervalDurationInMs,
       );
-      
+
       memoryTimeline.androidChartData.addTraceEntries(
         javaValue: arg[MemoryTimeline.javaHeapValueKey],
         nativeValue: arg[MemoryTimeline.nativeHeapValueKey],
