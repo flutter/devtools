@@ -35,6 +35,7 @@ class VmServiceWrapper implements VmService {
 
   VmService _vmService;
   Version _protocolVersion;
+  Version _dartIoVersion;
   final Uri connectedUri;
   final bool trackFutures;
   final Map<String, Future<Success>> _activeStreams = {};
@@ -432,8 +433,10 @@ class VmServiceWrapper implements VmService {
   // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
   Future<bool> isHttpTimelineLoggingAvailable(String isolateId) async {
     final Isolate isolate = await getIsolate(isolateId);
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 5, minor: 2))) {
+    if (await isDartIoVersionSupported(
+      supportedVersion: SemanticVersion(major: 1, minor: 3),
+      isolateId: isolateId,
+    )) {
       return isolate.extensionRPCs
           .contains('ext.dart.io.httpEnableTimelineLogging');
     } else {
@@ -447,8 +450,10 @@ class VmServiceWrapper implements VmService {
     bool enable,
   ]) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 5, minor: 2))) {
+    if (await isDartIoVersionSupported(
+      supportedVersion: SemanticVersion(major: 1, minor: 3),
+      isolateId: isolateId,
+    )) {
       if (enable == null) {
         return _trackFuture(
             'getHttpEnableTimelineLogging',
@@ -803,14 +808,37 @@ class VmServiceWrapper implements VmService {
     @required SemanticVersion supportedVersion,
   }) async {
     _protocolVersion ??= await getVersion();
-    return protocolVersionSupported(supportedVersion: supportedVersion);
+    return isProtocolVersionSupportedNow(supportedVersion: supportedVersion);
   }
 
-  bool protocolVersionSupported({@required SemanticVersion supportedVersion}) {
+  bool isProtocolVersionSupportedNow({
+    @required SemanticVersion supportedVersion,
+  }) {
+    return _versionSupported(
+      version: _protocolVersion,
+      supportedVersion: supportedVersion,
+    );
+  }
+
+  bool _versionSupported({
+    @required Version version,
+    @required SemanticVersion supportedVersion,
+  }) {
     return SemanticVersion(
-      major: _protocolVersion.major,
-      minor: _protocolVersion.minor,
+      major: version.major,
+      minor: version.minor,
     ).isSupported(supportedVersion: supportedVersion);
+  }
+
+  Future<bool> isDartIoVersionSupported({
+    @required SemanticVersion supportedVersion,
+    @required String isolateId,
+  }) async {
+    _dartIoVersion ??= await getDartIOVersion(isolateId);
+    return _versionSupported(
+      version: _dartIoVersion,
+      supportedVersion: supportedVersion,
+    );
   }
 
   /// Retrieves the full string value of a [stringRef].
