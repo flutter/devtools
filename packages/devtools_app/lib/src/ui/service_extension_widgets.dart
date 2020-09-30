@@ -421,7 +421,7 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
     try {
       await action();
 
-      if (widget.completedText != null) {
+      if (mounted && widget.completedText != null) {
         Notifications.of(context).push(widget.completedText);
       }
     } catch (e, st) {
@@ -429,9 +429,11 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
 
       Notifications.of(context).push(widget.describeError(e));
     } finally {
-      setState(() {
-        disabled = false;
-      });
+      if (mounted) {
+        setState(() {
+          disabled = false;
+        });
+      }
     }
   }
 }

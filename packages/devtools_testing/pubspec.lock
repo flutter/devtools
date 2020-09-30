@@ -615,7 +615,7 @@ packages:
       name: vm_service
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.0+1"
+    version: "5.2.0"
   vm_snapshot_analysis:
     dependency: transitive
     description:
@@ -659,5 +659,5 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=2.10.0-110 <=2.11.0-161.0.dev"
+  dart: ">=2.10.0-110 <=2.11.0-177.0.dev"
   flutter: ">1.21.0 <2.0.0"
