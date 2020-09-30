@@ -570,6 +570,20 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     chartDatasets[ChartDataSets.rssSet.index] = dataset;
   }
 
+  // Trace #5 Raster Layer.
+  LineDataSet get rasterLayerSet =>
+      chartDatasets[ChartDataSets.rasterLayerSet.index];
+  set rasterLayerSet(LineDataSet dataset) {
+    chartDatasets[ChartDataSets.rasterLayerSet.index] = dataset;
+  }
+
+  // Trace #6 Raster Picture.
+  LineDataSet get rasterPictureSet =>
+      chartDatasets[ChartDataSets.rasterPictureSet.index];
+  set rasterPictureSet(LineDataSet dataset) {
+    chartDatasets[ChartDataSets.rasterPictureSet.index] = dataset;
+  }
+
   /// Loads all heap samples (live data or offline).
   void _processAndUpdate([bool reloadAllData = false]) {
     setState(() {
@@ -699,6 +713,34 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setFillColor(ColorUtils.HOLO_ORANGE_LIGHT)
       ..setDrawCircleHole(false);
 
+    // Raster Layer dataset.
+    rasterLayerSet =
+        LineDataSet(dartChartData.rasterLayerSetSize, 'RasterLayer')
+          ..setAxisDependency(AxisDependency.LEFT)
+          ..setColor1(ColorUtils.HOLO_GREEN_LIGHT)
+          ..setValueTextColor(ColorUtils.HOLO_GREEN_LIGHT)
+          ..setLineWidth(.5)
+          ..enableDashedLine(5, 5, 0)
+          ..setDrawCircles(false)
+          ..setDrawValues(false)
+          ..setFillAlpha(65)
+          ..setFillColor(ColorUtils.HOLO_GREEN_LIGHT)
+          ..setDrawCircleHole(false);
+
+    // Raster Picture dataset.
+    rasterPictureSet =
+        LineDataSet(dartChartData.rasterPictureSetSize, 'RasterPicture')
+          ..setAxisDependency(AxisDependency.LEFT)
+          ..setColor1(ColorUtils.HOLO_RED_LIGHT)
+          ..setValueTextColor(ColorUtils.HOLO_RED_LIGHT)
+          ..setLineWidth(.5)
+          ..enableDashedLine(5, 5, 0)
+          ..setDrawCircles(false)
+          ..setDrawValues(false)
+          ..setFillAlpha(65)
+          ..setFillColor(ColorUtils.HOLO_RED_LIGHT)
+          ..setDrawCircleHole(false);
+
     // Create a data object with all the data sets.
     dartChartController.data = LineData.fromList(
       [
@@ -706,6 +748,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         externalMemorySet,
         capacityHeapSet,
         rssSetTrace,
+        rasterLayerSet,
+        rasterPictureSet,
       ],
     );
 
@@ -800,6 +844,8 @@ class SelectedDataPoint extends LineChartMarker {
     final num heapUsed = values.used.toDouble();
     final num external = values.external.toDouble();
     final num rss = values.rss.toDouble();
+    final num rasterLayer = values.rasterCache.layerBytes.toDouble();
+    final num rasterPicture = values.rasterCache.pictureBytes.toDouble();
     final bool isGced = values.isGC;
 
     // Alpha filled stacked:
@@ -835,7 +881,9 @@ class SelectedDataPoint extends LineChartMarker {
             '${_formatter.getFormattedValue1(heapUsed)}\n'
             '${_formatter.getFormattedValue1(external)}\n'
             '${_formatter.getFormattedValue1(rss)}\n'
-            '$isGced',
+            '$isGced\n'
+            '${_formatter.getFormattedValue1(rasterLayer)}\n'
+            '${_formatter.getFormattedValue1(rasterPicture)}',
             textColor,
             fontSize,
           )

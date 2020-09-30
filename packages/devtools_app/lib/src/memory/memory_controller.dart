@@ -358,8 +358,11 @@ class MemoryController extends DisposableController
         capacityValue: arg[MemoryTimeline.capcityValueKey],
         usedValue: arg[MemoryTimeline.usedValueKey],
         externalValue: arg[MemoryTimeline.externalValueKey],
+        rasterLayerValue: arg[MemoryTimeline.rasterLayerValueKey],
+        rasterPictureValue: arg[MemoryTimeline.rasterPictureValueKey],
         minutesToDisplay: intervalDurationInMs,
       );
+      
       memoryTimeline.androidChartData.addTraceEntries(
         javaValue: arg[MemoryTimeline.javaHeapValueKey],
         nativeValue: arg[MemoryTimeline.nativeHeapValueKey],
@@ -1114,6 +1117,8 @@ enum ChartDataSets {
   externalHeapSet,
   // Datapoint entries for each RSS value.
   rssSet,
+  rasterLayerSet,
+  rasterPictureSet,
 }
 
 /// Prepare data to plot in MPChart.
@@ -1133,6 +1138,10 @@ class MPChartData {
   List<Entry> get capacity => datasets[ChartDataSets.capacitySet.index];
   List<Entry> get externalHeap => datasets[ChartDataSets.externalHeapSet.index];
   List<Entry> get residentSetSize => datasets[ChartDataSets.rssSet.index];
+  List<Entry> get rasterLayerSetSize =>
+      datasets[ChartDataSets.rasterLayerSet.index];
+  List<Entry> get rasterPictureSetSize =>
+      datasets[ChartDataSets.rasterPictureSet.index];
 
   /// Add each entry to its corresponding trace.
   void addTraceEntries({
@@ -1140,6 +1149,8 @@ class MPChartData {
     Entry capacityValue,
     Entry usedValue,
     Entry externalValue,
+    Entry rasterLayerValue,
+    Entry rasterPictureValue,
     int minutesToDisplay,
   }) {
     if (!_pruning &&
@@ -1159,6 +1170,8 @@ class MPChartData {
     used.add(usedValue);
     capacity.add(capacityValue);
     residentSetSize.add(rssValue);
+    rasterLayerSetSize.add(rasterLayerValue);
+    rasterPictureSetSize.add(rasterPictureValue);
   }
 
   /// Remove all plotted entries in all traces.
