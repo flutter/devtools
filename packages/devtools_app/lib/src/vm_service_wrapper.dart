@@ -525,8 +525,8 @@ class VmServiceWrapper implements VmService {
   Future<Version> getVersion() =>
       _trackFuture('getVersion', _vmService.getVersion());
 
-  Future<Version> _getDartIoVersion(String isolateId) =>
-      _trackFuture('_getDartIoVersion', _vmService.getDartIOVersion(isolateId));
+  Future<Version> _getDartIOVersion(String isolateId) =>
+      _trackFuture('_getDartIOVersion', _vmService.getDartIOVersion(isolateId));
 
   @override
   Future<MemoryUsage> getMemoryUsage(String isolateId) =>
@@ -841,7 +841,7 @@ class VmServiceWrapper implements VmService {
     // We must call `_getDartIoVersion` instead of `getDartIoVersion` here.
     // Otherwise, we get a NoSuchMethodError on `_call` due to mismatched
     // arguments.
-    _dartIoVersion ??= await _getDartIoVersion(isolateId);
+    _dartIoVersion ??= await _getDartIOVersion(isolateId);
     return _versionSupported(
       version: _dartIoVersion,
       supportedVersion: supportedVersion,
