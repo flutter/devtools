@@ -441,16 +441,16 @@ class VmServiceWrapper implements VmService {
   ) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
     return _trackFuture('getHttpEnableTimelineLogging',
-        _vmService.httpEnableTimelineLogging(isolateId));
+        _vmService.getHttpEnableTimelineLogging(isolateId));
   }
 
-  Future<HttpTimelineLoggingState> setHttpEnableTimelineLogging(
+  Future<Success> setHttpEnableTimelineLogging(
     String isolateId,
     bool enable,
   ) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
     return _trackFuture('setHttpEnableTimelineLogging',
-        _vmService.httpEnableTimelineLogging(isolateId, enable));
+        _vmService.setHttpEnableTimelineLogging(isolateId, enable));
   }
 
   // TODO(kenz): move this method to
