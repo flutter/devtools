@@ -414,15 +414,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setFillColor(ColorUtils.LTGRAY)
       ..setDrawCircleHole(false);
 
-    // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web see issue
-    //              https://github.com/flutter/flutter/issues/49882.
-    if (kIsWeb) {
-      // Disable dash and set the color to greenish.
-      totalSizeSet
-        ..disableDashedLine()
-        ..setColor1(ColorUtils.HOLO_GREEN_LIGHT);
-    }
-
     // Create a data object with all the data sets.
     androidChartController.data = LineData.fromList(
       [
@@ -671,15 +662,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setFillAlpha(65)
       ..setFillColor(ColorUtils.GRAY)
       ..setDrawCircleHole(false);
-
-    // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web see issue
-    //              https://github.com/flutter/flutter/issues/49882.
-    if (kIsWeb) {
-      // Disable dash and set the color to greenish.
-      capacityHeapSet
-        ..disableDashedLine()
-        ..setColor1(ColorUtils.HOLO_GREEN_LIGHT);
-    }
 
     // Create external memory dataset.
     const externalColorLine =
@@ -978,14 +960,12 @@ class SelectedDataPoint extends LineChartMarker {
 
   // These are the alpha blended values.
   final List<LegendColor> _dartVMColors = [
-    // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web
-    //              use a green color on Web see Flutter issue/49882.
     // Total dashed line (Capacity))
-    LegendColor(kIsWeb ? const Color(0xff00ff00) : ColorUtils.GRAY, true),
+    LegendColor(ColorUtils.GRAY, true),
     LegendColor(const Color(0xff315a69), false), // Aqua (Used)
     LegendColor(const Color(0xff77aed5), false), // Light-Blue (External)
     LegendColor(ColorUtils.HOLO_ORANGE_LIGHT, true), // RSS
-    LegendColor(ColorUtils.BLACK, false), // RSS
+    LegendColor(ColorUtils.BLACK, false), // GC
     LegendColor(ColorUtils.HOLO_GREEN_LIGHT, true), // Raster Layer
     LegendColor(ColorUtils.HOLO_RED_LIGHT, true), // Raster Picture
   ];
@@ -1003,10 +983,8 @@ class SelectedDataPoint extends LineChartMarker {
 
   // These are the alpha blended values.
   final List<LegendColor> _androidColors = [
-    // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web
-    //              use a green color on Web see Flutter issue/49882.
     // Total dashed line (Total)
-    LegendColor(kIsWeb ? const Color(0xff00ff00) : ColorUtils.WHITE, true),
+    LegendColor(ColorUtils.WHITE, true),
     LegendColor(const Color(0xff945caf), false), // Purple-ish (Other)
     LegendColor(const Color(0xff6a5caf), false), // Gray Purple-ish (Code)
     LegendColor(const Color(0xff607ebe), false), // Blue-ish (Native Heap)
