@@ -34,6 +34,8 @@ class MemoryTimeline {
   static const usedValueKey = 'usedValue';
   static const externalValueKey = 'externalValue';
   static const rssValueKey = 'rssValue';
+  static const rasterLayerValueKey = 'rasterLayerValue';
+  static const rasterPictureValueKey = 'rasterPictureValue';
 
   /// Keys used in a map to store all the MPEngineChart Entries we construct to be plotted,
   /// ADB memory info.
@@ -265,8 +267,10 @@ class MemoryTimeline {
       final used = sample.used.toDouble();
       final external = sample.external.toDouble();
 
-      // TOOD(terry): Need to plot.
       final rss = (sample.rss ?? 0).toDouble();
+
+      final rasterLayer = sample.rasterCache.layerBytes.toDouble();
+      final rasterPicture = sample.rasterCache.pictureBytes.toDouble();
 
       final extEntry = Entry(x: timestamp, y: external, icon: dataPointImage);
       final usedEntry =
@@ -274,6 +278,10 @@ class MemoryTimeline {
       final capacityEntry =
           Entry(x: timestamp, y: capacity, icon: dataPointImage);
       final rssEntry = Entry(x: timestamp, y: rss, icon: dataPointImage);
+      final rasterLayerEntry =
+          Entry(x: timestamp, y: rasterLayer, icon: dataPointImage);
+      final rasterPictureEntry =
+          Entry(x: timestamp, y: rasterPicture, icon: dataPointImage);
 
       // Engine memory values (ADB Android):
       final javaHeap = sample.adbMemoryInfo.javaHeap.toDouble();
@@ -397,6 +405,8 @@ class MemoryTimeline {
         usedValueKey: usedEntry,
         externalValueKey: extEntry,
         rssValueKey: rssEntry,
+        rasterLayerValueKey: rasterLayerEntry,
+        rasterPictureValueKey: rasterPictureEntry,
         javaHeapValueKey: javaHeapEntry,
         nativeHeapValueKey: nativeHeapEntry,
         codeValueKey: codeEntry,

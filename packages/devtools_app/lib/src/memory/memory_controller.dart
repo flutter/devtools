@@ -354,11 +354,15 @@ class MemoryController extends DisposableController
     // may not match data collected (based on display interval).
     for (var arg in args) {
       memoryTimeline.dartChartData.addTraceEntries(
+        rssValue: arg[MemoryTimeline.rssValueKey],
         capacityValue: arg[MemoryTimeline.capcityValueKey],
         usedValue: arg[MemoryTimeline.usedValueKey],
         externalValue: arg[MemoryTimeline.externalValueKey],
+        rasterLayerValue: arg[MemoryTimeline.rasterLayerValueKey],
+        rasterPictureValue: arg[MemoryTimeline.rasterPictureValueKey],
         minutesToDisplay: intervalDurationInMs,
       );
+
       memoryTimeline.androidChartData.addTraceEntries(
         javaValue: arg[MemoryTimeline.javaHeapValueKey],
         nativeValue: arg[MemoryTimeline.nativeHeapValueKey],
@@ -1111,8 +1115,10 @@ enum ChartDataSets {
   capacitySet,
   // Datapoint entries for each external memory value.
   externalHeapSet,
-  // TODO(terry): Datapoint entries for each RSS value.
-  // rssSet,
+  // Datapoint entries for each RSS value.
+  rssSet,
+  rasterLayerSet,
+  rasterPictureSet,
 }
 
 /// Prepare data to plot in MPChart.
@@ -1131,14 +1137,20 @@ class MPChartData {
   List<Entry> get used => datasets[ChartDataSets.usedSet.index];
   List<Entry> get capacity => datasets[ChartDataSets.capacitySet.index];
   List<Entry> get externalHeap => datasets[ChartDataSets.externalHeapSet.index];
-  // TODO(terry): Implement RSS plotting.
-  // List<Entry> get rssSet => datasets[ChartDataSets.rssSet.index];
+  List<Entry> get residentSetSize => datasets[ChartDataSets.rssSet.index];
+  List<Entry> get rasterLayerSetSize =>
+      datasets[ChartDataSets.rasterLayerSet.index];
+  List<Entry> get rasterPictureSetSize =>
+      datasets[ChartDataSets.rasterPictureSet.index];
 
   /// Add each entry to its corresponding trace.
   void addTraceEntries({
+    Entry rssValue,
     Entry capacityValue,
     Entry usedValue,
     Entry externalValue,
+    Entry rasterLayerValue,
+    Entry rasterPictureValue,
     int minutesToDisplay,
   }) {
     if (!_pruning &&
@@ -1157,6 +1169,9 @@ class MPChartData {
     externalHeap.add(externalValue);
     used.add(usedValue);
     capacity.add(capacityValue);
+    residentSetSize.add(rssValue);
+    rasterLayerSetSize.add(rasterLayerValue);
+    rasterPictureSetSize.add(rasterPictureValue);
   }
 
   /// Remove all plotted entries in all traces.
