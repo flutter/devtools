@@ -326,7 +326,7 @@ class MemoryTracker {
 class ClassHeapDetailStats {
   ClassHeapDetailStats(this.json) {
     classRef = ClassRef.parse(json['class']);
-    if (serviceManager.service.protocolVersionSupported(
+    if (serviceManager.service.isProtocolVersionSupportedNow(
         supportedVersion: SemanticVersion(major: 3, minor: 18))) {
       instancesCurrent = json['instancesCurrent'];
       instancesDelta = json['instancesAccumulated'];

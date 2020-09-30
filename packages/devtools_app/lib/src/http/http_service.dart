@@ -12,7 +12,7 @@ class HttpService {
       final httpLoggingAvailable = await serviceManager.service
           .isHttpTimelineLoggingAvailable(isolate.id);
       if (httpLoggingAvailable) {
-        final future = serviceManager.service.setHttpEnableTimelineLogging(
+        final future = serviceManager.service.httpEnableTimelineLogging(
           isolate.id,
           state,
         );

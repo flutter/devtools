@@ -337,16 +337,15 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       Future.value(true);
 
   @override
-  Future<HttpTimelineLoggingState> getHttpEnableTimelineLogging(
-          String isolateId) async =>
-      HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult);
-
-  @override
-  Future<Success> setHttpEnableTimelineLogging(
-    String isolateId,
+  Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
+    String isolateId, [
     bool enable,
-  ) async =>
-      Success();
+  ]) async {
+    if (enable != null) {
+      return HttpTimelineLoggingState(enabled: enable);
+    }
+    return HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult);
+  }
 
   @override
   Future<Timestamp> getVMTimelineMicros() async => Timestamp(timestamp: 0);
