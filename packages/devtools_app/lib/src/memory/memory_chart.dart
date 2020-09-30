@@ -977,17 +977,9 @@ class SelectedDataPoint extends LineChartMarker {
   final int _titlesDartVmLines = _titlesDartVm.split('\n').length;
 
   // These are the alpha blended values.
-  final List<Color> _dartVMColorsOld = [
+  final List<LegendColor> _dartVMColors = [
     // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web
     //              use a green color on Web see Flutter issue/49882.
-    kIsWeb
-        ? const Color(0xff00ff00)
-        : ColorUtils.GRAY, // Total dashed line (Capacity)
-    const Color(0xff315a69), // Aqua (Used)
-    const Color(0xff77aed5), // Light-Blue (External)
-  ];
-
-  final List<LegendColor> _dartVMColors = [
     // Total dashed line (Capacity))
     LegendColor(kIsWeb ? const Color(0xff00ff00) : ColorUtils.GRAY, true),
     LegendColor(const Color(0xff315a69), false), // Aqua (Used)
@@ -1008,21 +1000,6 @@ class SelectedDataPoint extends LineChartMarker {
       'Graphics';
 
   final int _titlesAndroidLines = _titlesAndroid.split('\n').length;
-
-  // These are the alpha blended values.
-  final List<Color> _androidColorsOld = [
-    // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web
-    //              use a green color on Web see Flutter issue/49882.
-    kIsWeb
-        ? const Color(0xff00ff00)
-        : ColorUtils.WHITE, // Total dashed line (Total)
-    const Color(0xff945caf), // Purple-ish (Other)
-    const Color(0xff6a5caf), // Gray Purple-ish (Code)
-    const Color(0xff607ebe), // Blue-ish (Native Heap)
-    const Color(0xff75b479), // Green-ish (Java Heap)
-    const Color(0xffe1dbea), // White-ish (Stack)
-    const Color(0xffec935d), // Orangy (Graphics)
-  ];
 
   // These are the alpha blended values.
   final List<LegendColor> _androidColors = [
