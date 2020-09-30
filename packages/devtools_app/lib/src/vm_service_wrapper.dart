@@ -432,8 +432,14 @@ class VmServiceWrapper implements VmService {
   // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
   Future<bool> isHttpTimelineLoggingAvailable(String isolateId) async {
     final Isolate isolate = await getIsolate(isolateId);
-    return isolate.extensionRPCs
-        .contains('ext.dart.io.httpEnableTimelineLogging');
+    if (await isProtocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 5, minor: 2))) {
+      return isolate.extensionRPCs
+          .contains('ext.dart.io.httpEnableTimelineLogging');
+    } else {
+      return isolate.extensionRPCs
+          .contains('ext.dart.io.setHttpEnableTimelineLogging');
+    }
   }
 
   Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
@@ -441,6 +447,21 @@ class VmServiceWrapper implements VmService {
     bool enable,
   ]) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
+    if (await isProtocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 5, minor: 2))) {
+      if (enable == null) {
+        return _trackFuture(
+            'getHttpEnableTimelineLogging',
+            // ignore: deprecated_member_use
+            _vmService.getHttpEnableTimelineLogging(isolateId));
+      } else {
+        await _trackFuture(
+            'setHttpEnableTimelineLogging',
+            // ignore: deprecated_member_use
+            _vmService.setHttpEnableTimelineLogging(isolateId, enable));
+        return HttpTimelineLoggingState(enabled: enable);
+      }
+    }
     return _trackFuture('httpEnableTimelineLogging',
         _vmService.httpEnableTimelineLogging(isolateId, enable));
   }
