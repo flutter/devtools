@@ -838,7 +838,7 @@ class VmServiceWrapper implements VmService {
     @required SemanticVersion supportedVersion,
     @required String isolateId,
   }) async {
-    // We must call `_getDartIoVersion` instead of `getDartIoVersion` here.
+    // We must call [_getDartIOVersion] instead of [getDartIoVersion] here.
     // Otherwise, we get a NoSuchMethodError on `_call` due to mismatched
     // arguments.
     _dartIoVersion ??= await _getDartIOVersion(isolateId);
