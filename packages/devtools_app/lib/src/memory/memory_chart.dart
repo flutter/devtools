@@ -564,6 +564,12 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     chartDatasets[ChartDataSets.externalHeapSet.index] = dataset;
   }
 
+  // Trace #4 Resident Set Size.
+  LineDataSet get rssSetTrace => chartDatasets[ChartDataSets.rssSet.index];
+  set rssSetTrace(LineDataSet dataset) {
+    chartDatasets[ChartDataSets.rssSet.index] = dataset;
+  }
+
   /// Loads all heap samples (live data or offline).
   void _processAndUpdate([bool reloadAllData = false]) {
     setState(() {
@@ -680,12 +686,26 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setFillColor(externalColor)
       ..setFillAlpha(190);
 
+    // Resident Set Size dataset.
+    rssSetTrace = LineDataSet(dartChartData.residentSetSize, 'RSS')
+      ..setAxisDependency(AxisDependency.LEFT)
+      ..setColor1(ColorUtils.HOLO_ORANGE_LIGHT)
+      ..setValueTextColor(ColorUtils.HOLO_ORANGE_LIGHT)
+      ..setLineWidth(.5)
+      ..enableDashedLine(5, 5, 0)
+      ..setDrawCircles(false)
+      ..setDrawValues(false)
+      ..setFillAlpha(65)
+      ..setFillColor(ColorUtils.HOLO_ORANGE_LIGHT)
+      ..setDrawCircleHole(false);
+
     // Create a data object with all the data sets.
     dartChartController.data = LineData.fromList(
       [
         usedHeapSet,
         externalMemorySet,
         capacityHeapSet,
+        rssSetTrace,
       ],
     );
 
@@ -702,6 +722,13 @@ class XAxisFormatter extends ValueFormatter {
   String getFormattedValue1(double value) {
     return mFormat.format(DateTime.fromMillisecondsSinceEpoch(value.toInt()));
   }
+}
+
+class LegendColor {
+  LegendColor(this.color, this.dashed);
+
+  final Color color;
+  final bool dashed;
 }
 
 typedef SelectionCallback = void Function(int timestamp);
@@ -895,12 +922,14 @@ class SelectedDataPoint extends LineChartMarker {
       'Used\n'
       'External\n'
       'RSS\n'
-      'GC';
+      'GC\n'
+      'Raster Layer\n'
+      'Raster Picture\n';
 
   final int _titlesDartVmLines = _titlesDartVm.split('\n').length;
 
   // These are the alpha blended values.
-  final List<Color> _dartVMColors = [
+  final List<Color> _dartVMColorsOld = [
     // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web
     //              use a green color on Web see Flutter issue/49882.
     kIsWeb
@@ -908,6 +937,17 @@ class SelectedDataPoint extends LineChartMarker {
         : ColorUtils.GRAY, // Total dashed line (Capacity)
     const Color(0xff315a69), // Aqua (Used)
     const Color(0xff77aed5), // Light-Blue (External)
+  ];
+
+  final List<LegendColor> _dartVMColors = [
+    // Total dashed line (Capacity))
+    LegendColor(kIsWeb ? const Color(0xff00ff00) : ColorUtils.GRAY, true),
+    LegendColor(const Color(0xff315a69), false), // Aqua (Used)
+    LegendColor(const Color(0xff77aed5), false), // Light-Blue (External)
+    LegendColor(ColorUtils.HOLO_ORANGE_LIGHT, true), // RSS
+    LegendColor(ColorUtils.BLACK, false), // RSS
+    LegendColor(ColorUtils.HOLO_GREEN_LIGHT, true), // Raster Layer
+    LegendColor(ColorUtils.HOLO_RED_LIGHT, true), // Raster Picture
   ];
 
   static const _titlesAndroid = 'Time\n'
@@ -922,7 +962,7 @@ class SelectedDataPoint extends LineChartMarker {
   final int _titlesAndroidLines = _titlesAndroid.split('\n').length;
 
   // These are the alpha blended values.
-  final List<Color> _androidColors = [
+  final List<Color> _androidColorsOld = [
     // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web
     //              use a green color on Web see Flutter issue/49882.
     kIsWeb
@@ -936,8 +976,21 @@ class SelectedDataPoint extends LineChartMarker {
     const Color(0xffec935d), // Orangy (Graphics)
   ];
 
+  // These are the alpha blended values.
+  final List<LegendColor> _androidColors = [
+    // TODO(terry): Dash crashes Canvas unimplemented in Flutter Web
+    //              use a green color on Web see Flutter issue/49882.
+    // Total dashed line (Total)
+    LegendColor(kIsWeb ? const Color(0xff00ff00) : ColorUtils.WHITE, true),
+    LegendColor(const Color(0xff945caf), false), // Purple-ish (Other)
+    LegendColor(const Color(0xff6a5caf), false), // Gray Purple-ish (Code)
+    LegendColor(const Color(0xff607ebe), false), // Blue-ish (Native Heap)
+    LegendColor(const Color(0xff75b479), false), // Green-ish (Java Heap)
+    LegendColor(const Color(0xffe1dbea), false), // White-ish (Stack)
+    LegendColor(const Color(0xffec935d), false), // Orangy (Graphics)
+  ];
   void _drawColorLegend(
-    List<Color> colors,
+    List<LegendColor> colors,
     Canvas canvas,
     Paint paint,
     Offset pos,
@@ -954,28 +1007,39 @@ class SelectedDataPoint extends LineChartMarker {
     final xOffset = pos.dx - swatchXOffset;
     var yOffset = pos.dy + swatchYOffset + swatchYHalfOffset; // Dashed line
 
-    // Draw the dashed line key.
-    paint.color = colors[0];
-    paint.strokeWidth = 2;
-    paint.style = PaintingStyle.stroke;
-    var p1 = Offset(xOffset, yOffset);
-    var p2 = p1.translate(dashDrawWidth, 0);
-    canvas.drawLine(p1, p2, paint);
-    p1 = p2.translate(dashSkipWidth, 0);
-    p2 = p1.translate(dashDrawWidth, 0);
-    canvas.drawLine(p1, p2, paint);
+    var firstSwatch = true;
+    for (var index = 0; index < colors.length; index++) {
+      final legendColor = colors[index];
+      if (legendColor.dashed) {
+        if (index > 0) {
+          yOffset += swatchYHalfOffset - 2;
+        }
+        // Draw the dashed line key.
+        paint.color = colors[index].color;
+        paint.strokeWidth = 2;
+        paint.style = PaintingStyle.stroke;
+        var p1 = Offset(xOffset, yOffset);
+        var p2 = p1.translate(dashDrawWidth, 0);
+        canvas.drawLine(p1, p2, paint);
+        p1 = p2.translate(dashSkipWidth, 0);
+        p2 = p1.translate(dashDrawWidth, 0);
+        canvas.drawLine(p1, p2, paint);
+        yOffset += swatchYHalfOffset;
+      } else {
+        if (firstSwatch) {
+          // Color swatches start vertically after time and dashed line entries.
+          yOffset = pos.dy + swatchYOffset * 2 + 2;
+          firstSwatch = false;
+        }
 
-    // Color swatches start vertically after time and dashed line entries.
-    yOffset = pos.dy + swatchYOffset * 2 + 2;
-
-    paint.style = PaintingStyle.fill;
-    for (var index = 1; index < colors.length; index++) {
-      paint.color = colors[index];
-      canvas.drawRect(
-        Rect.fromLTWH(xOffset, yOffset, swatchWidth, swatchHeight),
-        paint,
-      );
-      yOffset += swatchYOffset;
+        paint.style = PaintingStyle.fill;
+        paint.color = colors[index].color;
+        canvas.drawRect(
+          Rect.fromLTWH(xOffset, yOffset, swatchWidth, swatchHeight),
+          paint,
+        );
+        yOffset += swatchXOffset;
+      }
     }
   }
 }
