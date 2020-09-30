@@ -454,6 +454,9 @@ class VmServiceWrapper implements VmService {
       supportedVersion: SemanticVersion(major: 1, minor: 3),
       isolateId: isolateId,
     )) {
+      return _trackFuture('httpEnableTimelineLogging',
+          _vmService.httpEnableTimelineLogging(isolateId, enable));
+    } else {
       if (enable == null) {
         return _trackFuture(
             'getHttpEnableTimelineLogging',
@@ -467,8 +470,6 @@ class VmServiceWrapper implements VmService {
         return HttpTimelineLoggingState(enabled: enable);
       }
     }
-    return _trackFuture('httpEnableTimelineLogging',
-        _vmService.httpEnableTimelineLogging(isolateId, enable));
   }
 
   // TODO(kenz): move this method to
@@ -523,6 +524,9 @@ class VmServiceWrapper implements VmService {
   @override
   Future<Version> getVersion() =>
       _trackFuture('getVersion', _vmService.getVersion());
+
+  Future<Version> _getDartIoVersion(String isolateId) =>
+      _trackFuture('_getDartIoVersion', _vmService.getDartIOVersion(isolateId));
 
   @override
   Future<MemoryUsage> getMemoryUsage(String isolateId) =>
@@ -834,7 +838,10 @@ class VmServiceWrapper implements VmService {
     @required SemanticVersion supportedVersion,
     @required String isolateId,
   }) async {
-    _dartIoVersion ??= await getDartIOVersion(isolateId);
+    // We must call `_getDartIoVersion` instead of `getDartIoVersion` here.
+    // Otherwise, we get a NoSuchMethodError on `_call` due to mismatched
+    // arguments.
+    _dartIoVersion ??= await _getDartIoVersion(isolateId);
     return _versionSupported(
       version: _dartIoVersion,
       supportedVersion: supportedVersion,
