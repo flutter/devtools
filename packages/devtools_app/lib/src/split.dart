@@ -272,7 +272,11 @@ class _SplitState extends State<Split> {
           ),
       ]);
     }
-    return Flex(direction: widget.axis, children: children);
+    return Flex(
+      direction: widget.axis,
+      children: children,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+    );
   }
 
   double _totalSplitterSize() {
