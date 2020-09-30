@@ -120,8 +120,6 @@ class MemoryTracker {
 
     // Query the engine's rasterCache estimate.
     rasterCache = await _fetchRasterCacheInfo();
-    // TODO(terry): Remove logging, temporarily added for testing.
-    logger.log('$rasterCache');
 
     // Polls for current RSS size.
     _update(await service.getVM(), isolateMemory);
