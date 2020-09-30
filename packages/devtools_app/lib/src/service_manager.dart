@@ -586,28 +586,27 @@ class ServiceExtensionManager {
         await _onFrameEventReceived();
         break;
       case 'Flutter.ServiceExtensionStateChanged':
-        final String name = event.json['extensionData']['extension'].toString();
-        final String valueString =
-            event.json['extensionData']['value'].toString();
-        await _updateServiceExtensionForStateChange(name, valueString);
+        final name = event.json['extensionData']['extension'].toString();
+        final encodedValue = event.json['extensionData']['value'].toString();
+        await _updateServiceExtensionForStateChange(name, encodedValue);
         break;
       case 'HttpTimelineLoggingStateChange':
         final name = extensions.httpEnableTimelineLogging.extension;
-        final valueString = event.json['extensionData']['enabled'].toString();
-        await _updateServiceExtensionForStateChange(name, valueString);
+        final encodedValue = event.json['extensionData']['enabled'].toString();
+        await _updateServiceExtensionForStateChange(name, encodedValue);
     }
   }
 
   Future<void> _updateServiceExtensionForStateChange(
     String name,
-    String valueString,
+    String encodedValue,
   ) async {
     final extension = extensions.serviceExtensionsAllowlist[name];
     if (extension != null) {
-      final dynamic value = _getExtensionValue(name, valueString);
+      final dynamic extensionValue = _getExtensionValue(name, encodedValue);
       final enabled =
           extension is extensions.ToggleableServiceExtensionDescription
-              ? value == extension.enabledValue
+              ? extensionValue == extension.enabledValue
               // For extensions that have more than two states
               // (enabled / disabled), we will always consider them to be
               // enabled with the current value.
@@ -616,23 +615,23 @@ class ServiceExtensionManager {
       await setServiceExtensionState(
         name,
         enabled,
-        value,
+        encodedValue,
         callExtension: false,
       );
     }
   }
 
-  dynamic _getExtensionValue(String name, String valueString) {
+  dynamic _getExtensionValue(String name, String encodedValue) {
     final expectedValueType =
         extensions.serviceExtensionsAllowlist[name].values.first.runtimeType;
     switch (expectedValueType) {
       case bool:
-        return valueString == 'true';
+        return encodedValue == 'true';
       case int:
       case double:
-        return num.parse(valueString);
+        return num.parse(encodedValue);
       default:
-        return valueString;
+        return encodedValue;
     }
   }
 

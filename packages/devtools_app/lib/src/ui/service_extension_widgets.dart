@@ -427,7 +427,9 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
     } catch (e, st) {
       log('$e\n$st');
 
-      Notifications.of(context).push(widget.describeError(e));
+      if (mounted) {
+        Notifications.of(context).push(widget.describeError(e));
+      }
     } finally {
       if (mounted) {
         setState(() {
