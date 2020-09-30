@@ -436,21 +436,21 @@ class VmServiceWrapper implements VmService {
         .contains('ext.dart.io.setHttpEnableTimelineLogging');
   }
 
+  // ignore: deprecated_member_use
   Future<HttpTimelineLoggingState> getHttpEnableTimelineLogging(
     String isolateId,
   ) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
-    // ignore: deprecated_member_use
     return _trackFuture('getHttpEnableTimelineLogging',
         _vmService.getHttpEnableTimelineLogging(isolateId));
   }
 
+  // ignore: deprecated_member_use
   Future<Success> setHttpEnableTimelineLogging(
     String isolateId,
     bool enable,
   ) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
-    // ignore: deprecated_member_use
     return _trackFuture('setHttpEnableTimelineLogging',
         _vmService.setHttpEnableTimelineLogging(isolateId, enable));
   }
