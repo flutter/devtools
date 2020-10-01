@@ -40,6 +40,8 @@ class TimelineData {
 
   static const rasterKey = 'Raster';
 
+  static const gcKey = 'GC';
+
   static const unknownKey = 'Unknown';
 
   static const displayRefreshRateKey = 'displayRefreshRate';
@@ -509,6 +511,9 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
 
   bool get isAsyncInstantEvent =>
       traceEvents.first.event.phase == TraceEvent.asyncInstantPhase;
+
+  bool get isGCEvent =>
+      traceEvents.first.event.category == TraceEvent.gcCategory;
 
   bool get isWellFormed => time.start != null && time.end != null;
 

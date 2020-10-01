@@ -38,6 +38,8 @@ class TraceEvent {
   static const flowStartPhase = 's';
   static const flowEndPhase = 'f';
 
+  static const gcCategory = 'GC';
+
   /// The original event JSON.
   final Map<String, dynamic> json;
 

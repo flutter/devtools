@@ -1049,3 +1049,26 @@ final testTimelineJson = {
   'timeOriginMicros': 118039650802,
   'timeExtentMicros': 118039679873 - 118039650802,
 };
+
+final gcEventStartTrace = testTraceEventWrapper({
+  'name': 'ConcurrentMark',
+  'cat': 'GC',
+  'tid': 38147,
+  'pid': 48043,
+  'ts': 794638620007,
+  'ph': 'B',
+  'args': {'isolateGroupId': 'isolateGroups/18139071461608741439'}
+});
+
+final gcEventEndTrace = testTraceEventWrapper({
+  'name': 'ConcurrentMark',
+  'cat': 'GC',
+  'tid': 25091,
+  'pid': 48043,
+  'ts': 794638633011,
+  'ph': 'E',
+  'args': {'isolateGroupId': 'isolateGroups/18139071461608741439'}
+});
+
+final gcEvent = testSyncTimelineEvent(gcEventStartTrace)
+  ..addEndEvent(gcEventEndTrace);

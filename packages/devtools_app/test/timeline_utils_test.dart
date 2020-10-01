@@ -25,5 +25,13 @@ void main() {
       // A child async event should return the key of its root.
       expect(computeEventGroupKey(asyncEventB), equals('A'));
     });
+
+    test('computeEventGroupKey for Async event', () async {
+      expect(computeEventGroupKey(gcEvent), equals('GC'));
+    });
+
+    test('computeEventGroupKey for Async event', () async {
+      expect(computeEventGroupKey(unknownEvent), equals('Unknown'));
+    });
   });
 }

@@ -13,6 +13,8 @@ String computeEventGroupKey(TimelineEvent event) {
     return TimelineData.uiKey;
   } else if (event.isRasterEvent) {
     return TimelineData.rasterKey;
+  } else if (event.isGCEvent) {
+    return TimelineData.gcKey;
   } else {
     return TimelineData.unknownKey;
   }
