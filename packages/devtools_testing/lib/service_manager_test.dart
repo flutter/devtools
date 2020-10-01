@@ -201,6 +201,8 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
       await env.tearDownEnvironment();
     });
 
+    // TODO(kenz): once hot restart tests are fixed, add a hot restart test
+    // that verifies the state of service extensions after a hot restart.
     // TODO(jacobr): uncomment out the hotRestart tests once
     // https://github.com/flutter/devtools/issues/337 is fixed.
     /*
@@ -423,15 +425,11 @@ Future<void> runServiceManagerTestsWithDriverFactory(
       );
       await serviceManager
           .serviceExtensionManager.extensionStatesUpdated.future;
-      // TODO(kenz): Uncomment this once
-      // https://github.com/flutter/devtools/issues/1351 is fixed.
-      /*
       await _verifyExtensionStateInServiceManager(
         boolExtensionDescription.extension,
         true,
         boolExtensionDescription.enabledValue,
       );
-      */
       await _verifyExtensionStateInServiceManager(
         stringExtensionDescription.extension,
         true,
