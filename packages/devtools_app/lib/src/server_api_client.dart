@@ -35,7 +35,14 @@ class DevToolsServerConnection {
     try {
       // ignore: unused_local_variable
       final response = await http.get(uri).timeout(const Duration(seconds: 1));
-      if (response.statusCode != 200) {
+      if (response.statusCode != 200 ||
+          // When running locally with `flutter run`, missing request return a 200
+          // status with the HTML of the homepage so also consider text/html as
+          // not valid.
+          // TODO(dantup): Remove this check and/or change this to inspect ping's
+          // response depending on the outcome of
+          // https://github.com/flutter/flutter/issues/67053
+          response.headers['content-type'] == 'text/html') {
         // unable to locate dev server
         log('devtools server not available (${response.statusCode})');
         return null;
