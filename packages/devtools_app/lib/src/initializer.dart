@@ -6,11 +6,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'app.dart';
 import 'auto_dispose_mixin.dart';
 import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'notifications.dart';
+import 'routing.dart';
 import 'url_utils.dart';
 
 /// Widget that requires business logic to be loaded before building its
@@ -139,7 +139,7 @@ class _InitializerState extends State<Initializer>
                 RaisedButton(
                     onPressed: () {
                       hideDisconnectedOverlay();
-                      Navigator.of(context).popAndPushNamed(homeRoute);
+                      Navigator.of(context).popAndPushNamed(homePageId);
                     },
                     child: const Text('Connect to Another App'))
               else

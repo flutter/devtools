@@ -21,8 +21,8 @@ import 'framework_controller.dart';
 import 'globals.dart';
 import 'navigation.dart';
 import 'notifications.dart';
+import 'routing.dart';
 import 'screen.dart';
-import 'snapshot_screen.dart';
 import 'status_line.dart';
 import 'theme.dart';
 
@@ -37,7 +37,7 @@ class DevToolsScaffold extends StatefulWidget {
     Key key,
     @required this.tabs,
     @required this.analyticsProvider,
-    this.initialPage,
+    this.page,
     this.actions,
     this.embed = false,
     @required this.ideTheme,
@@ -82,8 +82,8 @@ class DevToolsScaffold extends StatefulWidget {
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
 
-  /// The initial page to render.
-  final String initialPage;
+  /// The page being rendered.
+  final String page;
 
   /// Whether to render the embedded view (without the header).
   final bool embed;
@@ -146,7 +146,17 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       }
       // Create a new tab controller to reflect the changed tabs.
       _setupTabController();
+      // TODO(dantup): DONOCOMMIT - DO WE NEED THIS?
       _tabController.index = newIndex;
+      DevToolsRouterDelegate.of(context)
+          .pushPageIfNotCurrent(widget.tabs[newIndex].screenId);
+    } else if (widget.tabs[_tabController.index].screenId != widget.page) {
+      // If the page changed (eg. the route was modified by pressing back in the
+      // browser), animate to the new one.
+      final newIndex = widget.page == null
+          ? 0 // When there's no supplied page, we show the first one.
+          : widget.tabs.indexWhere((t) => t.screenId == widget.page);
+      _tabController.animateTo(newIndex);
     }
   }
 
@@ -181,9 +191,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     _tabController?.dispose();
     _tabController = TabController(length: widget.tabs.length, vsync: this);
 
-    if (widget.initialPage != null) {
-      final initialIndex = widget.tabs
-          .indexWhere((screen) => screen.screenId == widget.initialPage);
+    if (widget.page != null) {
+      final initialIndex =
+          widget.tabs.indexWhere((screen) => screen.screenId == widget.page);
       if (initialIndex != -1) {
         _tabController.index = initialIndex;
       }
@@ -199,6 +209,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         // Send the page change info to the framework controller (it can then
         // send it on to the devtools server, if one is connected).
         frameworkController.notifyPageChange(screen?.screenId);
+
+        // Update routing with the change.
+        DevToolsRouterDelegate.of(context)
+            .pushPageIfNotCurrent(screen?.screenId);
       }
     });
 
@@ -227,31 +241,15 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         widget.tabs.indexWhere((screen) => screen.screenId == pageId);
 
     if (newIndex != -1 && newIndex != existingTabIndex) {
+      // TODO(dantup): DO NOT COMMIT... test if we need this!
       _tabController.animateTo(newIndex);
-      _pushScreenToLocalPageRoute(newIndex);
-    }
-  }
-
-  /// Pushes tab changes into the navigation history.
-  ///
-  /// Note that this currently works very well, but it doesn't integrate with
-  /// the browser's history yet.
-  void _pushScreenToLocalPageRoute(int newIndex) {
-    if (_tabController.indexIsChanging) {
-      final previousTabIndex = _tabController.previousIndex;
-      ModalRoute.of(context).addLocalHistoryEntry(LocalHistoryEntry(
-        onRemove: () {
-          if (widget.tabs.length >= previousTabIndex) {
-            _tabController.animateTo(previousTabIndex);
-          }
-        },
-      ));
+      DevToolsRouterDelegate.of(context).pushPageIfNotCurrent(pageId);
     }
   }
 
   /// Pushes the snapshot screen for an offline import.
   void _pushSnapshotScreenForImport(String screenId) {
-    final args = SnapshotArguments(screenId);
+    final args = {'screen': screenId};
     if (offlineMode) {
       // If we are already in offline mode, only handle routing from existing
       // '/snapshot' route. In this case, we need to first pop the existing
@@ -263,11 +261,15 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       // We want to avoid this because the routes underneath the existing
       // '/snapshot' route should remain unchanged while '/snapshot' sits on
       // top.
-      if (ModalRoute.of(context).settings.name == snapshotRoute) {
-        Navigator.popAndPushNamed(context, snapshotRoute, arguments: args);
+      final routerDelegate = DevToolsRouterDelegate.of(context);
+      if (routerDelegate.currentConfiguration.page == snapshotPageId) {
+        routerDelegate
+          ..popPage()
+          ..pushPageIfNotCurrent(snapshotPageId, args);
       }
     } else {
-      Navigator.pushNamed(context, snapshotRoute, arguments: args);
+      DevToolsRouterDelegate.of(context)
+          .pushPageIfNotCurrent(snapshotPageId, args);
     }
     setState(() {
       enterOfflineMode();
@@ -336,7 +338,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       tabBar = TabBar(
         controller: _tabController,
         isScrollable: true,
-        onTap: _pushScreenToLocalPageRoute,
         tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
       );
       preferredSize = isNarrow
