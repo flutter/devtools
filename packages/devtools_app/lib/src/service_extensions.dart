@@ -177,6 +177,17 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
   gaItem: ga.togglePlatform,
 );
 
+final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.dart.io.httpEnableTimelineLogging',
+  description: 'Whether HTTP timeline logging is enabled',
+  enabledValue: true,
+  disabledValue: false,
+  enabledTooltip: 'HTTP timeline logging enabled',
+  disabledTooltip: 'HTTP timeline logging disabled',
+  gaScreenName: null,
+  gaItem: null,
+);
+
 // Legacy extension to show the inspector and enable inspector select mode.
 final toggleOnDeviceWidgetInspector =
     ToggleableServiceExtensionDescription<bool>._(
@@ -254,6 +265,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   togglePlatformMode,
   slowAnimations,
   structuredErrors,
+  httpEnableTimelineLogging,
 ];
 
 final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =

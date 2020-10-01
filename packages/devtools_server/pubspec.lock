@@ -243,4 +243,4 @@ packages:
     source: hosted
     version: "0.7.3"
 sdks:
-  dart: ">=2.10.0-110 <=2.11.0-161.0.dev"
+  dart: ">=2.10.0-110 <=2.11.0-177.0.dev"

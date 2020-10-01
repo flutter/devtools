@@ -586,43 +586,52 @@ class ServiceExtensionManager {
         await _onFrameEventReceived();
         break;
       case 'Flutter.ServiceExtensionStateChanged':
-        final String name = event.json['extensionData']['extension'].toString();
-        final String valueFromJson =
-            event.json['extensionData']['value'].toString();
-
-        final extension = extensions.serviceExtensionsAllowlist[name];
-        if (extension != null) {
-          final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
-
-          final enabled =
-              extension is extensions.ToggleableServiceExtensionDescription
-                  ? value == extension.enabledValue
-                  // For extensions that have more than two states
-                  // (enabled / disabled), we will always consider them to be
-                  // enabled with the current value.
-                  : true;
-
-          await setServiceExtensionState(
-            name,
-            enabled,
-            value,
-            callExtension: false,
-          );
-        }
+        final name = event.json['extensionData']['extension'].toString();
+        final encodedValue = event.json['extensionData']['value'].toString();
+        await _updateServiceExtensionForStateChange(name, encodedValue);
+        break;
+      case 'HttpTimelineLoggingStateChange':
+        final name = extensions.httpEnableTimelineLogging.extension;
+        final encodedValue = event.json['extensionData']['enabled'].toString();
+        await _updateServiceExtensionForStateChange(name, encodedValue);
     }
   }
 
-  dynamic _getExtensionValueFromJson(String name, String valueFromJson) {
+  Future<void> _updateServiceExtensionForStateChange(
+    String name,
+    String encodedValue,
+  ) async {
+    final extension = extensions.serviceExtensionsAllowlist[name];
+    if (extension != null) {
+      final dynamic extensionValue = _getExtensionValue(name, encodedValue);
+      final enabled =
+          extension is extensions.ToggleableServiceExtensionDescription
+              ? extensionValue == extension.enabledValue
+              // For extensions that have more than two states
+              // (enabled / disabled), we will always consider them to be
+              // enabled with the current value.
+              : true;
+
+      await setServiceExtensionState(
+        name,
+        enabled,
+        encodedValue,
+        callExtension: false,
+      );
+    }
+  }
+
+  dynamic _getExtensionValue(String name, String encodedValue) {
     final expectedValueType =
         extensions.serviceExtensionsAllowlist[name].values.first.runtimeType;
     switch (expectedValueType) {
       case bool:
-        return valueFromJson == 'true' ? true : false;
+        return encodedValue == 'true';
       case int:
       case double:
-        return num.parse(valueFromJson);
+        return num.parse(encodedValue);
       default:
-        return valueFromJson;
+        return encodedValue;
     }
   }
 
@@ -788,11 +797,20 @@ class ServiceExtensionManager {
 
     assert(value != null);
     if (value is bool) {
-      await _service.callServiceExtension(
-        name,
-        isolateId: _isolateManager.selectedIsolate.id,
-        args: {'enabled': value},
-      );
+      // TODO(kenz): stop special casing http timeline logging once it can be
+      // called via `callServiceExtension`. See
+      // https://github.com/dart-lang/sdk/issues/43628.
+      if (name == extensions.httpEnableTimelineLogging.extension) {
+        await _service.forEachIsolate((isolate) async {
+          await _service.httpEnableTimelineLogging(isolate.id, value);
+        });
+      } else {
+        await _service.callServiceExtension(
+          name,
+          isolateId: _isolateManager.selectedIsolate.id,
+          args: {'enabled': value},
+        );
+      }
     } else if (value is String) {
       await _service.callServiceExtension(
         name,
