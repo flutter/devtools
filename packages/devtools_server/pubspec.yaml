@@ -3,7 +3,7 @@ description: A server that supports Dart DevTools.
 
 # Note: this version should only be updated by running tools/update_version.sh
 # that updates all versions of packages from packages/devtools.
-version: 0.9.3
+version: 0.9.3+1
 
 homepage: https://github.com/flutter/devtools
 
