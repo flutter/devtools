@@ -278,7 +278,7 @@ class HttpRequestData extends NetworkRequest {
       // status code to associate with the request.
       statusCode = 'Error';
     } else {
-      statusCode = endArgs[_statusCodeKey].toString();
+      statusCode = endArgs[_statusCodeKey]?.toString();
     }
     return statusCode;
   }
