@@ -22,13 +22,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.7"
-  characters:
-    dependency: transitive
-    description:
-      name: characters
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.1.0-nullsafety.3"
   charcode:
     dependency: transitive
     description:
@@ -42,7 +35,7 @@ packages:
       name: collection
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.15.0-nullsafety.3"
+    version: "1.14.13"
   convert:
     dependency: transitive
     description:
@@ -63,12 +56,7 @@ packages:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.3+2"
-  flutter:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
+    version: "0.9.3+3"
   http:
     dependency: transitive
     description:
@@ -110,7 +98,7 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.0-nullsafety.3"
+    version: "1.2.3"
   mime:
     dependency: transitive
     description:
@@ -153,11 +141,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.8"
-  sky_engine:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.99"
   source_span:
     dependency: transitive
     description:
@@ -206,7 +189,7 @@ packages:
       name: typed_data
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.0-nullsafety.3"
+    version: "1.2.0"
   usage:
     dependency: "direct main"
     description:
@@ -221,13 +204,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.2"
-  vector_math:
-    dependency: transitive
-    description:
-      name: vector_math
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.1.0-nullsafety.3"
   vm_service:
     dependency: "direct main"
     description:
@@ -243,4 +219,4 @@ packages:
     source: hosted
     version: "0.7.3"
 sdks:
-  dart: ">=2.10.0-110 <=2.11.0-181.0.dev"
+  dart: ">=2.6.0 <3.0.0"

@@ -203,28 +203,28 @@ packages:
       path: "../devtools"
       relative: true
     source: path
-    version: "0.9.3+1"
+    version: "0.9.3+3"
   devtools_server:
     dependency: "direct overridden"
     description:
       path: "../devtools_server"
       relative: true
     source: path
-    version: "0.9.3+1"
+    version: "0.9.3+3"
   devtools_shared:
     dependency: "direct main"
     description:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.3+1"
+    version: "0.9.3+3"
   devtools_testing:
     dependency: "direct dev"
     description:
       path: "../devtools_testing"
       relative: true
     source: path
-    version: "0.9.3+1"
+    version: "0.9.3+3"
   fake_async:
     dependency: transitive
     description:
@@ -643,7 +643,7 @@ packages:
       name: stack_trace
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.10.0-nullsafety.2"
+    version: "1.10.0-nullsafety.1"
   stream_channel:
     dependency: transitive
     description:
@@ -827,5 +827,5 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=2.10.0-110 <=2.11.0-181.0.dev"
+  dart: ">=2.10.0-110 <=2.11.0-161.0.dev"
   flutter: ">1.21.0 <2.0.0"

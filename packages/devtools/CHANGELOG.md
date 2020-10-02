@@ -1,8 +1,14 @@
+## 0.9.3+3
+* Remove flutter dependency from devtools_shared
+
 ## 0.9.3+2
 * Fix a bug causing "null" statuses in the Network profiler
 
 ## 0.9.3+1
-* Added meta dependency to devtools_shared.
+* Added meta dependency to devtools_shared
+* Group GC events together in the timeline
+* Restore http logging state after hot restart
+* Cleanup for DevTools dialogs
 
 ## 0.9.3
 * Add search to the Network profiler [#2333](https://github.com/flutter/devtools/pull/2333)
