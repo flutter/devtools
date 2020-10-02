@@ -63,7 +63,7 @@ packages:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.3"
+    version: "0.9.3+1"
   flutter:
     dependency: transitive
     description: flutter
