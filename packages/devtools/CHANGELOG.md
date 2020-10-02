@@ -1,3 +1,6 @@
+## 0.9.3+2
+* Fix a bug causing "null" statuses in the Network profiler
+
 ## 0.9.3+1
 * Added meta dependency to devtools_shared.
 
