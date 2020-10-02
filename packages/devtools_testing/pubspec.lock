@@ -126,21 +126,21 @@ packages:
       path: "../devtools_app"
       relative: true
     source: path
-    version: "0.9.3"
+    version: "0.9.3+1"
   devtools_server:
     dependency: "direct overridden"
     description:
       path: "../devtools_server"
       relative: true
     source: path
-    version: "0.9.3"
+    version: "0.9.3+1"
   devtools_shared:
     dependency: "direct main"
     description:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.3"
+    version: "0.9.3+1"
   fake_async:
     dependency: transitive
     description:
@@ -659,5 +659,5 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=2.10.0-110 <=2.11.0-177.0.dev"
+  dart: ">=2.10.0-110 <=2.11.0-161.0.dev"
   flutter: ">1.21.0 <2.0.0"

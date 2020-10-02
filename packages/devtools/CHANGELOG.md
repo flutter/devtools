@@ -1,3 +1,6 @@
+## 0.9.3+1
+* Added meta dependency to devtools_shared.
+
 ## 0.9.3
 * Add search to the Network profiler [#2333](https://github.com/flutter/devtools/pull/2333)
 * Add filtering to the Network profiler [#2340](https://github.com/flutter/devtools/pull/2340)

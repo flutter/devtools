@@ -63,14 +63,14 @@ packages:
       path: "../devtools_server"
       relative: true
     source: path
-    version: "0.9.3"
+    version: "0.9.3+1"
   devtools_shared:
     dependency: "direct main"
     description:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.3"
+    version: "0.9.3+1"
   flutter:
     dependency: transitive
     description: flutter
@@ -250,4 +250,4 @@ packages:
     source: hosted
     version: "0.7.3"
 sdks:
-  dart: ">=2.10.0-110 <=2.11.0-177.0.dev"
+  dart: ">=2.10.0-110 <=2.11.0-161.0.dev"
