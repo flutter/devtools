@@ -832,7 +832,9 @@ extension ThemeDataExtension on ThemeData {
 
   TextStyle get subtleTextStyle => TextStyle(color: unselectedWidgetColor);
 
-  TextStyle get selectedTextStyle => TextStyle(color: textSelectionColor);
+  // TODO(terry): Migrate to TextSelectionThemeData.selectionColor.
+  // ignore: deprecated_member_use
+  TextStyle get selectedTextStyle => TextStyle(color: textSelectionColor); 
 }
 
 /// Gets an alternating color to use for indexed UI elements.
