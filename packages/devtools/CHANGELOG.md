@@ -1,3 +1,7 @@
+## 0.9.3+4
+* Do not try to launch Chrome by default when running the server in `--machine` mode
+* Prevent exceptions launching Chrome from terminate the server
+
 ## 0.9.3+3
 * Remove flutter dependency from devtools_shared
 
