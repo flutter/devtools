@@ -74,7 +74,9 @@ Future<void> _serveDevToolsWithArgs(
 }) async {
   final help = args[argHelp];
   final bool machineMode = args[argMachine];
-  final bool launchBrowser = args[argLaunchBrowser];
+  // launchBrowser defaults based on machine-mode if not explicitly supplied.
+  final bool launchBrowser =
+      args.wasParsed(argLaunchBrowser) ? args[argLaunchBrowser] : !machineMode;
   final bool enableNotifications = args[argEnableNotifications];
   final bool allowEmbedding = args[argAllowEmbedding];
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
@@ -210,7 +212,11 @@ Future<HttpServer> serveDevTools({
       }).toString();
     }
 
-    await Chrome.start([url]);
+    try {
+      await Chrome.start([url]);
+    } catch (e) {
+      print('Unable to launch Chrome: $e\n');
+    }
   }
 
   if (enableStdinCommands) {
@@ -456,8 +462,8 @@ ArgParser _createArgsParser(bool verbose) {
     )
     ..addFlag(
       argLaunchBrowser,
-      defaultsTo: true,
-      help: 'Launches DevTools in a browser immediately at start.',
+      help:
+          'Launches DevTools in a browser immediately at start.\n(defaults to on unless in --machine mode)',
     )
 // TODO: Remove this - prefer that clients use the rest arg.
     ..addOption(
