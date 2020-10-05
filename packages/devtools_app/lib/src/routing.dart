@@ -65,9 +65,9 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
 
   @override
   Widget build(BuildContext context) {
-    final routeConfig = routes.last;
-    final page = routeConfig.page;
-    final args = routeConfig.args ?? {};
+    final routeConfig = currentConfiguration;
+    final page = routeConfig?.page;
+    final args = routeConfig?.args ?? {};
 
     return Navigator(
       key: navigatorKey,
