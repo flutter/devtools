@@ -8,22 +8,22 @@ set -x #echo on
 echo "Publishing devtools_* packages"
 
 pushd packages/devtools_shared
-pub publish --force
+flutter pub publish --force
 
 popd
 pushd packages/devtools_server
-pub publish --force
+flutter pub publish --force
 
 popd
 pushd packages/devtools_testing
-pub publish --force
+flutter pub publish --force
 
 popd
 pushd packages/devtools_app
-pub publish --force
+flutter pub publish --force
 
 popd
 pushd packages/devtools
-pub publish --force
+flutter pub publish --force
 
 popd
