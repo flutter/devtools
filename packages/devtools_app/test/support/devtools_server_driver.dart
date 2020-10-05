@@ -66,8 +66,6 @@ class DevToolsServerDriver {
     final args = [
       '../devtools/bin/devtools.dart',
       '--machine',
-      // TODO(dantup): Remove this once https://github.com/flutter/devtools/pull/2406 is merged.
-      '--no-launch-browser',
       '--port',
       '$port',
       ...additionalArgs
