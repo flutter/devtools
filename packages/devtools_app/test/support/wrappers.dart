@@ -30,13 +30,16 @@ import '../support/mocks.dart';
 Widget wrap(Widget widget) {
   return MaterialApp.router(
     theme: themeFor(isDarkTheme: false, ideTheme: null),
-    routerDelegate:
-        DevToolsRouterDelegate((context, page, args) => MaterialPage(
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: widget,
-              ),
-            )),
+    routerDelegate: DevToolsRouterDelegate(
+      (context, page, args) => MaterialPage(
+        child: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: widget,
+          ),
+        ),
+      ),
+    ),
     routeInformationParser: DevToolsRouteInformationParser(),
   );
 }
