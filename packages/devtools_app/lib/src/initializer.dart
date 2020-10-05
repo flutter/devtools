@@ -81,6 +81,16 @@ class _InitializerState extends State<Initializer>
     _attemptUrlConnection();
   }
 
+  @override
+  void didUpdateWidget(Initializer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Handle widget rebuild when the URL has changed.
+    if (widget.url != null && widget.url != oldWidget.url) {
+      _attemptUrlConnection();
+    }
+  }
+
   Future<void> _attemptUrlConnection() async {
     if (widget.url == null) {
       _handleNoConnection();

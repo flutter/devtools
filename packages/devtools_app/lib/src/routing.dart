@@ -11,39 +11,37 @@ const appSizePageId = 'app-size';
 const homePageId = '';
 const snapshotPageId = 'snapshot';
 
+/// Represents a Page/route for a DevTools screen.
 class DevToolsRouteConfiguration {
   DevToolsRouteConfiguration(this.page, this.args);
 
   final String page;
   final Map<String, String> args;
-
-  RouteInformation toRouteInformation() {
-    final path = '/${page ?? ''}';
-    final params = (args?.length ?? 0) != 0 ? args : null;
-    return RouteInformation(
-        location: Uri(path: path, queryParameters: params).toString());
-  }
-
-  static DevToolsRouteConfiguration fromRouteInformation(
-      RouteInformation routeInformation) {
-    final uri = Uri.parse(routeInformation.location);
-    return DevToolsRouteConfiguration(
-        uri.path.substring(1), uri.queryParameters);
-  }
 }
 
+/// Converts between structured DevToolsRouteConfiguration (our internal data
+/// for pages/routing) and RouteInformation (generic data that can be persisted
+/// in the address bar/state objects).
 class DevToolsRouteInformationParser
     extends RouteInformationParser<DevToolsRouteConfiguration> {
   @override
   Future<DevToolsRouteConfiguration> parseRouteInformation(
-          RouteInformation routeInformation) =>
-      SynchronousFuture<DevToolsRouteConfiguration>(
-          DevToolsRouteConfiguration.fromRouteInformation(routeInformation));
+      RouteInformation routeInformation) {
+    final uri = Uri.parse(routeInformation.location);
+    final path = uri.path.isNotEmpty ? uri.path.substring(1) : '';
+    final configuration = DevToolsRouteConfiguration(path, uri.queryParameters);
+    return SynchronousFuture<DevToolsRouteConfiguration>(configuration);
+  }
 
   @override
   RouteInformation restoreRouteInformation(
-          DevToolsRouteConfiguration configuration) =>
-      configuration.toRouteInformation();
+      DevToolsRouteConfiguration configuration) {
+    final path = '/${configuration.page ?? ''}';
+    final params =
+        (configuration.args?.length ?? 0) != 0 ? configuration.args : null;
+    return RouteInformation(
+        location: Uri(path: path, queryParameters: params).toString());
+  }
 }
 
 class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>

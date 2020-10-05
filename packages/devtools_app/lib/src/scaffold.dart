@@ -19,7 +19,6 @@ import 'config_specific/ide_theme/ide_theme.dart';
 import 'config_specific/import_export/import_export.dart';
 import 'framework_controller.dart';
 import 'globals.dart';
-import 'navigation.dart';
 import 'notifications.dart';
 import 'routing.dart';
 import 'screen.dart';
@@ -146,10 +145,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       }
       // Create a new tab controller to reflect the changed tabs.
       _setupTabController();
-      // TODO(dantup): DONOCOMMIT - DO WE NEED THIS?
       _tabController.index = newIndex;
-      DevToolsRouterDelegate.of(context)
-          .pushPageIfNotCurrent(widget.tabs[newIndex].screenId);
     } else if (widget.tabs[_tabController.index].screenId != widget.page) {
       // If the page changed (eg. the route was modified by pressing back in the
       // browser), animate to the new one.
@@ -224,11 +220,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// IDE via the server API to reuse the DevTools window after being disconnected
   /// (for example if the user stops a debug session then launches a new one).
   void _connectVm(event) {
-    final routeName = routeNameWithQueryParams(context, '/', {
+    DevToolsRouterDelegate.of(context).updateArgsIfNotCurrent({
       'uri': event.serviceProtocolUri.toString(),
       if (event.notify) 'notify': 'true',
     });
-    Navigator.of(context).pushReplacementNamed(routeName);
   }
 
   /// Switch to the given page ID. This request usually comes from the server API
@@ -241,8 +236,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         widget.tabs.indexWhere((screen) => screen.screenId == pageId);
 
     if (newIndex != -1 && newIndex != existingTabIndex) {
-      // TODO(dantup): DO NOT COMMIT... test if we need this!
-      _tabController.animateTo(newIndex);
       DevToolsRouterDelegate.of(context).pushPageIfNotCurrent(pageId);
     }
   }
