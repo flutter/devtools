@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/app_size/app_size_controller.dart';
+import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
@@ -11,6 +11,7 @@ import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/notifications.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/routing.dart';
 import 'package:devtools_app/src/theme.dart';
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:flutter/material.dart';
@@ -27,14 +28,16 @@ import '../support/mocks.dart';
 /// [Material] to support elements like [TextField] that draw ink effects, and a
 /// [Directionality] to support [RenderFlex] widgets like [Row] and [Column].
 Widget wrap(Widget widget) {
-  return MaterialApp(
+  return MaterialApp.router(
     theme: themeFor(isDarkTheme: false, ideTheme: null),
-    home: Material(
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: widget,
-      ),
-    ),
+    routerDelegate:
+        DevToolsRouterDelegate((context, page, args) => MaterialPage(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: widget,
+              ),
+            )),
+    routeInformationParser: DevToolsRouteInformationParser(),
   );
 }
 
