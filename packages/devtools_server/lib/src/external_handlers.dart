@@ -88,7 +88,7 @@ Future<shelf.Handler> defaultHandler(
     }
 
     if (request.url.path == 'api/ping') {
-      return shelf.Response(HttpStatus.ok);
+      return shelf.Response(HttpStatus.ok, body: 'OK');
     }
 
     // The API handler takes all other calls to api/.
