@@ -620,6 +620,9 @@ void main() {
             child: SizedBox(width: 400.0, height: 400.0, child: split),
           ),
         ));
+        // TODO(dantup): These now fail, as the results are 100/176/100. It's not
+        // clear why these expectations are different to the above when it's
+        // in the same size box?
         expectEqualSizes(tester.element(find.byKey(_k1)).size,
             const Size(182.5242718446602, 400));
         expectEqualSizes(tester.element(find.byKey(_k2)).size,
