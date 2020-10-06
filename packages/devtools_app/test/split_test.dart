@@ -620,14 +620,15 @@ void main() {
             child: SizedBox(width: 400.0, height: 400.0, child: split),
           ),
         ));
-        // TODO(dantup): Why did these change? Which care correct? These match
-        // the original widths given a 400x400 SizedBox.
-        expectEqualSizes(
-            tester.element(find.byKey(_k1)).size, const Size(100.0, 400));
-        expectEqualSizes(
-            tester.element(find.byKey(_k2)).size, const Size(176.0, 400));
-        expectEqualSizes(
-            tester.element(find.byKey(_k3)).size, const Size(100.0, 400));
+        // TODO(dantup): These now fail, as the results are 100/176/100. It's not
+        // clear why these expectations are different to the above when it's
+        // in the same size box?
+        expectEqualSizes(tester.element(find.byKey(_k1)).size,
+            const Size(182.5242718446602, 400));
+        expectEqualSizes(tester.element(find.byKey(_k2)).size,
+            const Size(10.951456310679607, 400));
+        expectEqualSizes(tester.element(find.byKey(_k3)).size,
+            const Size(182.5242718446602, 400));
       });
 
       testWidgets('with impossible minsize constraints',
@@ -679,14 +680,12 @@ void main() {
             child: SizedBox(width: 800.0, height: 400.0, child: split),
           ),
         ));
-        // TODO(dantup): Why did these change? Which care correct? These match
-        // what I would expect (1+3 meet their minimums leaving 2 with what's left).
+        expectEqualSizes(tester.element(find.byKey(_k1)).size,
+            const Size(258.66666666666666, 400));
         expectEqualSizes(
-            tester.element(find.byKey(_k1)).size, const Size(200.0, 400));
-        expectEqualSizes(
-            tester.element(find.byKey(_k2)).size, const Size(176.0, 400));
-        expectEqualSizes(
-            tester.element(find.byKey(_k3)).size, const Size(400.0, 400));
+            tester.element(find.byKey(_k2)).size, const Size(0, 400));
+        expectEqualSizes(tester.element(find.byKey(_k3)).size,
+            const Size(517.3333333333333, 400));
       });
 
       testWidgets('in a vertical layout', (WidgetTester tester) async {
