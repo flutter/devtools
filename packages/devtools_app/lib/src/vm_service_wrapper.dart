@@ -525,10 +525,8 @@ class VmServiceWrapper implements VmService {
   Future<Version> getVersion() =>
       _trackFuture('getVersion', _vmService.getVersion());
 
-  Future<Version> getDartIOVersion(String isolateId) {
-    return _trackFuture(
-        '_getDartIOVersion', _vmService.getDartIOVersion(isolateId));
-  }
+  Future<Version> getDartIOVersion(String isolateId) =>
+      _trackFuture('_getDartIOVersion', _vmService.getDartIOVersion(isolateId));
 
   @override
   Future<MemoryUsage> getMemoryUsage(String isolateId) =>
