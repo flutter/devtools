@@ -272,32 +272,34 @@ class HttpRequestCookiesView extends StatelessWidget {
     final responseCookies = data.responseCookies;
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Column(
-          children: [
-            if (responseCookies.isNotEmpty)
-              _buildCookiesTable(
-                context,
-                'Response Cookies',
-                responseCookies,
-                constraints,
-                responseCookiesKey,
-              ),
-            // Add padding between the cookie tables if displaying both
-            // response and request cookies.
-            if (responseCookies.isNotEmpty && requestCookies.isNotEmpty)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 24.0),
-              ),
-            if (requestCookies.isNotEmpty)
-              _buildCookiesTable(
-                context,
-                'Request Cookies',
-                requestCookies,
-                constraints,
-                requestCookiesKey,
-                requestCookies: true,
-              ),
-          ],
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              if (responseCookies.isNotEmpty)
+                _buildCookiesTable(
+                  context,
+                  'Response Cookies',
+                  responseCookies,
+                  constraints,
+                  responseCookiesKey,
+                ),
+              // Add padding between the cookie tables if displaying both
+              // response and request cookies.
+              if (responseCookies.isNotEmpty && requestCookies.isNotEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 24.0),
+                ),
+              if (requestCookies.isNotEmpty)
+                _buildCookiesTable(
+                  context,
+                  'Request Cookies',
+                  requestCookies,
+                  constraints,
+                  requestCookiesKey,
+                  requestCookies: true,
+                ),
+            ],
+          ),
         );
       },
     );
@@ -318,17 +320,19 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(defaultSpacing),
-      child: Column(
-        children: [
-          ..._buildGeneralRows(context),
-          if (data is WebSocket) ..._buildSocketOverviewRows(context),
-          const PaddedDivider(
-            padding: EdgeInsets.only(bottom: denseRowSpacing),
-          ),
-          ..._buildTimingOverview(context),
-        ],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(defaultSpacing),
+        child: Column(
+          children: [
+            ..._buildGeneralRows(context),
+            if (data is WebSocket) ..._buildSocketOverviewRows(context),
+            const PaddedDivider(
+              padding: EdgeInsets.only(bottom: denseRowSpacing),
+            ),
+            ..._buildTimingOverview(context),
+          ],
+        ),
       ),
     );
   }
