@@ -118,12 +118,12 @@ class DevToolsAppState extends State<DevToolsApp> {
         );
         return true;
       }());
-      return MaterialPage(child: widget);
+      return MaterialPage(builder: (context) => widget);
     }
 
     // Return a page not found.
     return MaterialPage(
-      child: DevToolsScaffold.withChild(
+      builder: (context) => DevToolsScaffold.withChild(
         key: const Key('not-found'),
         child: CenteredMessage("'$page' not found."),
         ideTheme: ideTheme,
