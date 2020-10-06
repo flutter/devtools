@@ -272,7 +272,7 @@ class HttpRequestCookiesView extends StatelessWidget {
     final responseCookies = data.responseCookies;
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Column(
+        return ListView(
           children: [
             if (responseCookies.isNotEmpty)
               _buildCookiesTable(
@@ -318,18 +318,16 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return ListView(
       padding: const EdgeInsets.all(defaultSpacing),
-      child: Column(
-        children: [
-          ..._buildGeneralRows(context),
-          if (data is WebSocket) ..._buildSocketOverviewRows(context),
-          const PaddedDivider(
-            padding: EdgeInsets.only(bottom: denseRowSpacing),
-          ),
-          ..._buildTimingOverview(context),
-        ],
-      ),
+      children: [
+        ..._buildGeneralRows(context),
+        if (data is WebSocket) ..._buildSocketOverviewRows(context),
+        const PaddedDivider(
+          padding: EdgeInsets.only(bottom: denseRowSpacing),
+        ),
+        ..._buildTimingOverview(context),
+      ],
     );
   }
 
