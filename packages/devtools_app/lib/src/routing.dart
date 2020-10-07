@@ -28,6 +28,9 @@ class DevToolsRouteInformationParser
   Future<DevToolsRouteConfiguration> parseRouteInformation(
       RouteInformation routeInformation) {
     final uri = Uri.parse(routeInformation.location);
+    // routeInformation.path comes from the address bar and (when not empty) is
+    // prefixed with a leading slash. Internally we use "page IDs" that do not
+    // start with slashes but match the screenId for each screen.
     final path = uri.path.isNotEmpty ? uri.path.substring(1) : '';
     final configuration = DevToolsRouteConfiguration(path, uri.queryParameters);
     return SynchronousFuture<DevToolsRouteConfiguration>(configuration);
@@ -35,10 +38,13 @@ class DevToolsRouteInformationParser
 
   @override
   RouteInformation restoreRouteInformation(
-      DevToolsRouteConfiguration configuration) {
+    DevToolsRouteConfiguration configuration,
+  ) {
+    // Add a leading slash to convert the page ID to a URL path (this is
+    // the opposite of what's done in [parseRouteInformation]).
     final path = '/${configuration.page ?? ''}';
     final params =
-        (configuration.args?.length ?? 0) != 0 ? configuration.args : null;
+        (configuration.args?.isNotEmpty ?? false) ? configuration.args : null;
     params?.removeWhere((key, value) => value == null);
     return RouteInformation(
         location: Uri(path: path, queryParameters: params).toString());
@@ -91,18 +97,17 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   ///
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [updateArgs].
-  void pushPageIfNotCurrent(String page, [Map<String, String> updateArgs]) {
+  void pushPageIfNotCurrent(String page, [Map<String, String> argUpdates]) {
     final pageChanged = page != currentConfiguration.page;
-    final argsChanged = !mapEquals(
-      {...currentConfiguration.args, ...?updateArgs},
-      currentConfiguration.args,
-    );
+    final argsChanged = _changesArgs(argUpdates);
     if (!pageChanged && !argsChanged) {
       return;
     }
 
     routes.add(DevToolsRouteConfiguration(
-        page, {...currentConfiguration.args, ...?updateArgs}));
+      page,
+      {...currentConfiguration.args, ...?argUpdates},
+    ));
 
     notifyListeners();
   }
@@ -116,21 +121,25 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   /// Updates arguments for the current page.
   ///
   /// Existing arguments (for example &uri=) will be preserved unless
-  /// overwritten by [updateArgs].
-  void updateArgsIfNotCurrent(Map<String, String> updateArgs) {
-    final argsChanged = !mapEquals(
-      {...currentConfiguration.args, ...?updateArgs},
-      currentConfiguration.args,
-    );
+  /// overwritten by [argUpdates].
+  void updateArgsIfNotCurrent(Map<String, String> argUpdates) {
+    final argsChanged = _changesArgs(argUpdates);
     if (!argsChanged) {
       return;
     }
 
     routes.add(DevToolsRouteConfiguration(
       currentConfiguration.page,
-      {...currentConfiguration.args, ...updateArgs},
+      {...currentConfiguration.args, ...argUpdates},
     ));
 
     notifyListeners();
   }
+
+  /// Checks whether applying [changes] over the current routes args will result
+  /// in any changes.
+  bool _changesArgs(Map<String, String> changes) => !mapEquals(
+        {...?currentConfiguration.args, ...?changes},
+        {...?currentConfiguration.args},
+      );
 }

@@ -133,11 +133,14 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 
   Widget _buildTabbedPage(
-      BuildContext context, String page, Map<String, String> params) {
-    final appServiceUrl = params['uri'];
+    BuildContext context,
+    String page,
+    Map<String, String> params,
+  ) {
+    final vmServiceUri = params['uri'];
 
     // Always return the landing screen if there's no VM service URI.
-    if (appServiceUrl?.isEmpty ?? true) {
+    if (vmServiceUri?.isEmpty ?? true) {
       return DevToolsScaffold.withChild(
         key: const Key('landing'),
         child: LandingScreenBody(),
@@ -158,7 +161,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     }
     final embed = params['embed'] == 'true';
     return Initializer(
-      url: appServiceUrl,
+      url: vmServiceUri,
       allowConnectionScreenOnDisconnect: !embed,
       builder: (_) {
         final tabs = embed && page != null

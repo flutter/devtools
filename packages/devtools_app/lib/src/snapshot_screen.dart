@@ -100,6 +100,8 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
 
 class SnapshotArguments {
   SnapshotArguments(this.screenId);
+
   SnapshotArguments.fromArgs(Map<String, String> args) : this(args['screen']);
+
   final String screenId;
 }
