@@ -51,6 +51,9 @@ const showVmDeveloperMode = false;
 /// Whether this DevTools build is external.
 bool isExternalBuild = true;
 
+// Disabled until VM developer mode functionality is added.
+const showVmDeveloperMode = false;
+
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
