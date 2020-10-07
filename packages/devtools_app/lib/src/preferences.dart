@@ -25,7 +25,7 @@ class PreferencesController {
 
     // Get the current values and listen for and write back changes.
     String value = await storage.getValue('ui.darkMode');
-    _darkModeTheme.value = value == null || value == 'true';
+    toggleDarkModeTheme(value == null || value == 'true');
     _darkModeTheme.addListener(() {
       storage.setValue('ui.darkMode', '${_darkModeTheme.value}');
     });
