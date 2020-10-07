@@ -428,33 +428,49 @@ class SettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final preferences = DevToolsApp.of(context).preferences;
 
+    InkWell buildOption({
+      Text label,
+      ValueListenable listenable,
+      Function(bool) toggle,
+    }) {
+      return InkWell(
+        onTap: () => toggle(!listenable.value),
+        child: Row(
+          children: [
+            ValueListenableBuilder(
+              valueListenable: listenable,
+              builder: (context, value, _) {
+                return Checkbox(
+                  value: value,
+                  onChanged: (bool value) => toggle(value),
+                );
+              },
+            ),
+            label,
+          ],
+        ),
+      );
+    }
+
+    // Disabled until VM developer mode functionality is added.
+    const showVmDeveloperMode = false;
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Settings'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
-            onTap: () {
-              preferences.toggleDarkModeTheme(!preferences.darkModeTheme.value);
-            },
-            child: Row(
-              children: [
-                ValueListenableBuilder(
-                  valueListenable: preferences.darkModeTheme,
-                  builder: (context, value, _) {
-                    return Checkbox(
-                      value: value,
-                      onChanged: (bool value) {
-                        preferences.toggleDarkModeTheme(value);
-                      },
-                    );
-                  },
-                ),
-                const Text('Use a dark theme'),
-              ],
-            ),
+          buildOption(
+            label: const Text('Use a dark theme'),
+            listenable: preferences.darkModeTheme,
+            toggle: preferences.toggleDarkModeTheme,
           ),
+          if (showVmDeveloperMode)
+            buildOption(
+              label: const Text('Enable VM developer mode'),
+              listenable: preferences.vmDeveloperModeEnabled,
+              toggle: preferences.toggleVmDeveloperMode,
+            ),
         ],
       ),
       actions: [

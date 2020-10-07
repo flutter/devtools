@@ -10,12 +10,16 @@ import 'package:vm_service/vm_service.dart';
 import 'profiler/cpu_profile_model.dart';
 import 'version.dart';
 
+typedef TrackFuture = Future<T> Function<T>(String, Future<T>);
+
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
     this._vmService,
     this.connectedUri, {
     this.trackFutures = false,
-  });
+  }) {
+    trackFuture = _trackFuture;
+  }
 
   VmServiceWrapper.fromNewVmService(
     Stream<dynamic> /*String|List<int>*/ inStream,
@@ -31,6 +35,7 @@ class VmServiceWrapper implements VmService {
       log: log,
       disposeHandler: disposeHandler,
     );
+    trackFuture = _trackFuture;
   }
 
   VmService _vmService;
@@ -40,6 +45,8 @@ class VmServiceWrapper implements VmService {
   final bool trackFutures;
   final Map<String, Future<Success>> _activeStreams = {};
 
+  @visibleForTesting
+  TrackFuture trackFuture;
   final Set<TrackedFuture<Object>> activeFutures = {};
   Completer<bool> _allFuturesCompleter = Completer<bool>()
     // Mark the future as completed by default so if we don't track any
@@ -68,13 +75,13 @@ class VmServiceWrapper implements VmService {
     int line, {
     int column,
   }) {
-    return _trackFuture('addBreakpoint',
+    return trackFuture('addBreakpoint',
         _vmService.addBreakpoint(isolateId, scriptId, line, column: column));
   }
 
   @override
   Future<Breakpoint> addBreakpointAtEntry(String isolateId, String functionId) {
-    return _trackFuture('addBreakpointAtEntry',
+    return trackFuture('addBreakpointAtEntry',
         _vmService.addBreakpointAtEntry(isolateId, functionId));
   }
 
@@ -85,7 +92,7 @@ class VmServiceWrapper implements VmService {
     int line, {
     int column,
   }) {
-    return _trackFuture(
+    return trackFuture(
         'addBreakpointWithScriptUri',
         _vmService.addBreakpointWithScriptUri(
           isolateId,
@@ -97,7 +104,7 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Response> callMethod(String method, {String isolateId, Map args}) {
-    return _trackFuture('callMethod $method',
+    return trackFuture('callMethod $method',
         _vmService.callMethod(method, isolateId: isolateId, args: args));
   }
 
@@ -107,7 +114,7 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     Map args,
   }) {
-    return _trackFuture(
+    return trackFuture(
         'callServiceExtension $method',
         _vmService.callServiceExtension(
           method,
@@ -120,12 +127,12 @@ class VmServiceWrapper implements VmService {
   Future<Success> clearCpuSamples(String isolateId) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 27))) {
-      return _trackFuture(
+      return trackFuture(
         'clearCpuSamples',
         _vmService.clearCpuSamples(isolateId),
       );
     } else {
-      final response = await _trackFuture(
+      final response = await trackFuture(
         'clearCpuSamples',
         callMethod('_clearCpuProfile', isolateId: isolateId),
       );
@@ -137,10 +144,10 @@ class VmServiceWrapper implements VmService {
   Future<Success> clearVMTimeline() async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 19))) {
-      return _trackFuture('clearVMTimeline', _vmService.clearVMTimeline());
+      return trackFuture('clearVMTimeline', _vmService.clearVMTimeline());
     } else {
       final response =
-          await _trackFuture('clearVMTimeline', callMethod('_clearVMTimeline'));
+          await trackFuture('clearVMTimeline', callMethod('_clearVMTimeline'));
       return response as Success;
     }
   }
@@ -159,7 +166,7 @@ class VmServiceWrapper implements VmService {
     Map<String, String> scope,
     bool disableBreakpoints,
   }) {
-    return _trackFuture(
+    return trackFuture(
         'evaluate $expression',
         _vmService.evaluate(
           isolateId,
@@ -178,7 +185,7 @@ class VmServiceWrapper implements VmService {
     Map<String, String> scope,
     bool disableBreakpoints,
   }) {
-    return _trackFuture(
+    return trackFuture(
         'evaluateInFrame $expression',
         _vmService.evaluateInFrame(
           isolateId,
@@ -197,7 +204,7 @@ class VmServiceWrapper implements VmService {
   }) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 18))) {
-      return _trackFuture(
+      return trackFuture(
         'getAllocationProfile',
         _vmService.getAllocationProfile(isolateId, reset: reset, gc: gc),
       );
@@ -209,7 +216,7 @@ class VmServiceWrapper implements VmService {
       if (reset != null && reset) {
         args['reset'] = reset;
       }
-      final response = await _trackFuture(
+      final response = await trackFuture(
         'getAllocationProfile',
         callMethod('_getAllocationProfile', isolateId: isolateId, args: args),
       );
@@ -220,7 +227,7 @@ class VmServiceWrapper implements VmService {
   @override
   Future<CpuSamples> getCpuSamples(
       String isolateId, int timeOriginMicros, int timeExtentMicros) async {
-    return _trackFuture(
+    return trackFuture(
         'getCpuSamples',
         _vmService.getCpuSamples(
           isolateId,
@@ -298,7 +305,7 @@ class VmServiceWrapper implements VmService {
       }
       return CpuProfileData.parse(traceObject);
     } else {
-      return _trackFuture(
+      return trackFuture(
           'getCpuProfileTimeline',
           callMethod(
             '_getCpuProfileTimeline',
@@ -314,7 +321,7 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<FlagList> getFlagList() =>
-      _trackFuture('getFlagList', _vmService.getFlagList());
+      trackFuture('getFlagList', _vmService.getFlagList());
 
   @override
   Future<InstanceSet> getInstances(
@@ -325,12 +332,12 @@ class VmServiceWrapper implements VmService {
   }) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 20))) {
-      return _trackFuture(
+      return trackFuture(
         'getInstances',
         _vmService.getInstances(isolateId, objectId, limit),
       );
     } else {
-      final response = await _trackFuture(
+      final response = await trackFuture(
         'getInstances',
         callMethod('_getInstances', args: {
           'isolateId': isolateId,
@@ -344,18 +351,18 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Isolate> getIsolate(String isolateId) {
-    return _trackFuture('getIsolate', _vmService.getIsolate(isolateId));
+    return trackFuture('getIsolate', _vmService.getIsolate(isolateId));
   }
 
   @override
   Future<IsolateGroup> getIsolateGroup(String isolateGroupId) {
-    return _trackFuture(
+    return trackFuture(
         'getIsolateGroup', _vmService.getIsolateGroup(isolateGroupId));
   }
 
   @override
   Future<MemoryUsage> getIsolateGroupMemoryUsage(String isolateGroupId) {
-    return _trackFuture('getIsolateGroupMemoryUsage',
+    return trackFuture('getIsolateGroupMemoryUsage',
         _vmService.getIsolateGroupMemoryUsage(isolateGroupId));
   }
 
@@ -366,17 +373,17 @@ class VmServiceWrapper implements VmService {
     int offset,
     int count,
   }) {
-    return _trackFuture('getObject', _vmService.getObject(isolateId, objectId));
+    return trackFuture('getObject', _vmService.getObject(isolateId, objectId));
   }
 
   @override
   Future<ScriptList> getScripts(String isolateId) {
-    return _trackFuture('getScripts', _vmService.getScripts(isolateId));
+    return trackFuture('getScripts', _vmService.getScripts(isolateId));
   }
 
   @override
   Future<ClassList> getClassList(String isolateId) {
-    return _trackFuture('getClassList', _vmService.getClassList(isolateId));
+    return trackFuture('getClassList', _vmService.getClassList(isolateId));
   }
 
   @override
@@ -388,7 +395,7 @@ class VmServiceWrapper implements VmService {
     int endTokenPos,
     bool forceCompile,
   }) {
-    return _trackFuture(
+    return trackFuture(
         'getSourceReport',
         _vmService.getSourceReport(
           isolateId,
@@ -402,11 +409,11 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Stack> getStack(String isolateId) {
-    return _trackFuture('getStack', _vmService.getStack(isolateId));
+    return trackFuture('getStack', _vmService.getStack(isolateId));
   }
 
   @override
-  Future<VM> getVM() => _trackFuture('getVM', _vmService.getVM());
+  Future<VM> getVM() => trackFuture('getVM', _vmService.getVM());
 
   @override
   Future<Timeline> getVMTimeline({
@@ -415,7 +422,7 @@ class VmServiceWrapper implements VmService {
   }) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 19))) {
-      return _trackFuture(
+      return trackFuture(
         'getVMTimeline',
         _vmService.getVMTimeline(
           timeOriginMicros: timeOriginMicros,
@@ -424,7 +431,7 @@ class VmServiceWrapper implements VmService {
       );
     } else {
       final Response response =
-          await _trackFuture('getVMTimeline', callMethod('_getVMTimeline'));
+          await trackFuture('getVMTimeline', callMethod('_getVMTimeline'));
       return Timeline.parse(response.json);
     }
   }
@@ -454,16 +461,16 @@ class VmServiceWrapper implements VmService {
       supportedVersion: SemanticVersion(major: 1, minor: 3),
       isolateId: isolateId,
     )) {
-      return _trackFuture('httpEnableTimelineLogging',
+      return trackFuture('httpEnableTimelineLogging',
           _vmService.httpEnableTimelineLogging(isolateId, enable));
     } else {
       if (enable == null) {
-        return _trackFuture(
+        return trackFuture(
             'getHttpEnableTimelineLogging',
             // ignore: deprecated_member_use
             _vmService.getHttpEnableTimelineLogging(isolateId));
       } else {
-        await _trackFuture(
+        await trackFuture(
             'setHttpEnableTimelineLogging',
             // ignore: deprecated_member_use
             _vmService.setHttpEnableTimelineLogging(isolateId, enable));
@@ -481,38 +488,38 @@ class VmServiceWrapper implements VmService {
 
   Future<Success> startSocketProfiling(String isolateId) async {
     assert(await isSocketProfilingAvailable(isolateId));
-    return _trackFuture(
+    return trackFuture(
         'startSocketProfiling', _vmService.startSocketProfiling(isolateId));
   }
 
   Future<Success> pauseSocketProfiling(String isolateId) async {
     assert(await isSocketProfilingAvailable(isolateId));
-    return _trackFuture(
+    return trackFuture(
         'pauseSocketProfiling', _vmService.pauseSocketProfiling(isolateId));
   }
 
   Future<Success> clearSocketProfile(String isolateId) async {
     assert(await isSocketProfilingAvailable(isolateId));
-    return _trackFuture(
+    return trackFuture(
         'clearSocketProfile', _vmService.clearSocketProfile(isolateId));
   }
 
   Future<SocketProfile> getSocketProfile(String isolateId) async {
     assert(await isSocketProfilingAvailable(isolateId));
-    return _trackFuture(
+    return trackFuture(
         'getSocketProfile', _vmService.getSocketProfile(isolateId));
   }
 
   @override
   Future<TimelineFlags> getVMTimelineFlags() {
-    return _trackFuture('getVMTimelineFlags', _vmService.getVMTimelineFlags());
+    return trackFuture('getVMTimelineFlags', _vmService.getVMTimelineFlags());
   }
 
   @override
   Future<Timestamp> getVMTimelineMicros() async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 21))) {
-      return _trackFuture(
+      return trackFuture(
         'getVMTimelineMicros',
         _vmService.getVMTimelineMicros(),
       );
@@ -523,14 +530,14 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Version> getVersion() =>
-      _trackFuture('getVersion', _vmService.getVersion());
+      trackFuture('getVersion', _vmService.getVersion());
 
   Future<Version> _getDartIOVersion(String isolateId) =>
-      _trackFuture('_getDartIOVersion', _vmService.getDartIOVersion(isolateId));
+      trackFuture('_getDartIOVersion', _vmService.getDartIOVersion(isolateId));
 
   @override
   Future<MemoryUsage> getMemoryUsage(String isolateId) =>
-      _trackFuture('getMemoryUsage', _vmService.getMemoryUsage(isolateId));
+      trackFuture('getMemoryUsage', _vmService.getMemoryUsage(isolateId));
 
   @override
   Future<Response> invoke(
@@ -540,7 +547,7 @@ class VmServiceWrapper implements VmService {
     List<String> argumentIds, {
     bool disableBreakpoints,
   }) {
-    return _trackFuture(
+    return trackFuture(
         'invoke $selector',
         _vmService.invoke(
           isolateId,
@@ -553,7 +560,7 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Success> requestHeapSnapshot(String isolateId) {
-    return _trackFuture(
+    return trackFuture(
       'requestHeapSnapshot',
       _vmService.requestHeapSnapshot(isolateId),
     );
@@ -565,7 +572,7 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Success> kill(String isolateId) {
-    return _trackFuture('kill', _vmService.kill(isolateId));
+    return trackFuture('kill', _vmService.kill(isolateId));
   }
 
   @override
@@ -612,7 +619,7 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Success> pause(String isolateId) {
-    return _trackFuture('pause', _vmService.pause(isolateId));
+    return trackFuture('pause', _vmService.pause(isolateId));
   }
 
   @override
@@ -623,7 +630,7 @@ class VmServiceWrapper implements VmService {
         ? 'registerService'
         : '_registerService';
 
-    final response = await _trackFuture(
+    final response = await trackFuture(
       '$registerServiceMethodName $service',
       callMethod(registerServiceMethodName,
           args: {'service': service, 'alias': alias}),
@@ -635,7 +642,7 @@ class VmServiceWrapper implements VmService {
     // that don't support public registerService (added in July 2019, VM service
     // v3.22) we can replace the above with a direct call to vm_service_lib's
     // registerService (as long as we're pinned to version >= 3.22.0).
-    // return _trackFuture(
+    // return trackFuture(
     //     'registerService $service', _vmService.registerService(service, alias));
   }
 
@@ -652,7 +659,7 @@ class VmServiceWrapper implements VmService {
     String rootLibUri,
     String packagesUri,
   }) {
-    return _trackFuture(
+    return trackFuture(
         'reloadSources',
         _vmService.reloadSources(
           isolateId,
@@ -665,25 +672,25 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Success> removeBreakpoint(String isolateId, String breakpointId) {
-    return _trackFuture('removeBreakpoint',
+    return trackFuture('removeBreakpoint',
         _vmService.removeBreakpoint(isolateId, breakpointId));
   }
 
   @override
   Future<Success> resume(String isolateId, {String step, int frameIndex}) {
-    return _trackFuture('resume',
+    return trackFuture('resume',
         _vmService.resume(isolateId, step: step, frameIndex: frameIndex));
   }
 
   @override
   Future<Success> setExceptionPauseMode(String isolateId, String mode) {
-    return _trackFuture('setExceptionPauseMode',
+    return trackFuture('setExceptionPauseMode',
         _vmService.setExceptionPauseMode(isolateId, mode));
   }
 
   @override
   Future<Response> setFlag(String name, String value) {
-    return _trackFuture('setFlag', _vmService.setFlag(name, value));
+    return trackFuture('setFlag', _vmService.setFlag(name, value));
   }
 
   @override
@@ -692,30 +699,30 @@ class VmServiceWrapper implements VmService {
     String libraryId,
     bool isDebuggable,
   ) {
-    return _trackFuture('setLibraryDebuggable',
+    return trackFuture('setLibraryDebuggable',
         _vmService.setLibraryDebuggable(isolateId, libraryId, isDebuggable));
   }
 
   @override
   Future<Success> setName(String isolateId, String name) {
-    return _trackFuture('setName', _vmService.setName(isolateId, name));
+    return trackFuture('setName', _vmService.setName(isolateId, name));
   }
 
   @override
   Future<Success> setVMName(String name) {
-    return _trackFuture('setVMName', _vmService.setVMName(name));
+    return trackFuture('setVMName', _vmService.setVMName(name));
   }
 
   @override
   Future<Success> setVMTimelineFlags(List<String> recordedStreams) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 19))) {
-      return _trackFuture(
+      return trackFuture(
         'setVMTimelineFlags',
         _vmService.setVMTimelineFlags(recordedStreams),
       );
     } else {
-      final response = await _trackFuture(
+      final response = await trackFuture(
           'setVMTimelineFlags',
           callMethod(
             '_setVMTimelineFlags',
@@ -728,7 +735,7 @@ class VmServiceWrapper implements VmService {
   @override
   Future<Success> streamCancel(String streamId) {
     _activeStreams.remove(streamId);
-    return _trackFuture('streamCancel', _vmService.streamCancel(streamId));
+    return trackFuture('streamCancel', _vmService.streamCancel(streamId));
   }
 
   // We tweaked this method so that we do not try to listen to the same stream
@@ -738,7 +745,7 @@ class VmServiceWrapper implements VmService {
   Future<Success> streamListen(String streamId) {
     if (!_activeStreams.containsKey(streamId)) {
       final Future<Success> future =
-          _trackFuture('streamListen', _vmService.streamListen(streamId));
+          trackFuture('streamListen', _vmService.streamListen(streamId));
       _activeStreams[streamId] = future;
       return future;
     } else {
@@ -754,12 +761,12 @@ class VmServiceWrapper implements VmService {
   ) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 25))) {
-      return _trackFuture(
+      return trackFuture(
         'getInboundReferences',
         _vmService.getInboundReferences(isolateId, targetId, limit),
       );
     } else {
-      return _trackFuture(
+      return trackFuture(
         'getInboundReferences',
         _vmService.callMethod(
           '_getInboundReferences',
@@ -773,12 +780,12 @@ class VmServiceWrapper implements VmService {
   @override
   Future<RetainingPath> getRetainingPath(
           String isolateId, String targetId, int limit) =>
-      _trackFuture('getRetainingPath',
+      trackFuture('getRetainingPath',
           _vmService.getRetainingPath(isolateId, targetId, limit));
 
   @override
   Future<ProcessMemoryUsage> getProcessMemoryUsage() {
-    return _trackFuture(
+    return trackFuture(
         'getProcessMemoryUsage', _vmService.getProcessMemoryUsage());
   }
 
@@ -786,7 +793,7 @@ class VmServiceWrapper implements VmService {
   Future<ProtocolList> getSupportedProtocols() async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 35))) {
-      return _trackFuture(
+      return trackFuture(
         'getSupportedProtocols',
         _vmService.getSupportedProtocols(),
       );
@@ -977,4 +984,38 @@ class _CpuProfileTimelineTree {
     }
     return child;
   }
+}
+
+/// Adds support for private VM RPCs that can only be used when VM developer
+/// mode is enabled. Not for use outside of VM developer pages.
+extension VmServicePrivate on VmServiceWrapper {
+  /// Allows callers to invoke extension methods for private RPCs. This should
+  /// only be set by [PreferencesController.toggleVmDeveloperMode] or tests.
+  static bool enablePrivateRpcs = false;
+
+  Future<T> _privateRpcInvoke<T>(
+    String method, {
+    @required T Function(Map<String, dynamic>) parser,
+    String isolateId,
+    Map args,
+  }) async {
+    if (!enablePrivateRpcs) {
+      throw StateError('Attempted to invoke private RPC');
+    }
+    final result = await trackFuture(
+      method,
+      callMethod(
+        '_$method',
+        isolateId: isolateId,
+        args: args,
+      ),
+    );
+    return parser(result.json);
+  }
+
+  /// Forces the VM to perform a full garbage collection.
+  Future<Success> collectAllGarbage() => _privateRpcInvoke(
+        'collectAllGarbage',
+        parser: Success.parse,
+      );
 }
