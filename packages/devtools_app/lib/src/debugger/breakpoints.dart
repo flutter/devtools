@@ -15,14 +15,14 @@ import 'debugger_model.dart';
 const executableLineRadius = 1.5;
 const breakpointRadius = 6.0;
 
-class BreakpointPicker extends StatefulWidget {
-  const BreakpointPicker({Key key}) : super(key: key);
+class Breakpoints extends StatefulWidget {
+  const Breakpoints({Key key}) : super(key: key);
 
   @override
-  _BreakpointPickerState createState() => _BreakpointPickerState();
+  _BreakpointsState createState() => _BreakpointsState();
 }
 
-class _BreakpointPickerState extends State<BreakpointPicker> {
+class _BreakpointsState extends State<Breakpoints> {
   DebuggerController controller;
 
   @override
