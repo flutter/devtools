@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
 import 'globals.dart';
+import 'routing.dart';
 import 'screen.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
@@ -69,7 +70,8 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
         Row(
           children: [
             ExitOfflineButton(onPressed: () {
-              Navigator.pop(context);
+              DevToolsRouterDelegate.of(context)
+                  .pushPageIfNotCurrent(homePageId, {'screen': null});
               reset();
               offlineMode = false;
             }),

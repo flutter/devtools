@@ -39,6 +39,7 @@ class DevToolsRouteInformationParser
     final path = '/${configuration.page ?? ''}';
     final params =
         (configuration.args?.length ?? 0) != 0 ? configuration.args : null;
+    params?.removeWhere((key, value) => value == null);
     return RouteInformation(
         location: Uri(path: path, queryParameters: params).toString());
   }
