@@ -449,6 +449,8 @@ class SettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final preferences = DevToolsApp.of(context).preferences;
+    // Disabled until VM developer mode functionality is added.
+    const showVmDeveloperMode = false;
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Settings'),
       content: Column(
