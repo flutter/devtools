@@ -43,8 +43,8 @@ class DevToolsRouteInformationParser
     // Add a leading slash to convert the page ID to a URL path (this is
     // the opposite of what's done in [parseRouteInformation]).
     final path = '/${configuration.page ?? ''}';
-    final params =
-        (configuration.args?.isNotEmpty ?? false) ? configuration.args : null;
+    // Create a new map in case the one we were given was unmodifiable.
+    final params = {...?configuration.args};
     params?.removeWhere((key, value) => value == null);
     return RouteInformation(
         location: Uri(path: path, queryParameters: params).toString());
@@ -95,6 +95,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
 
   /// Pushes a new page, optionally updating arguments.
   ///
+  /// If page and args would be the same, does nothing.
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [updateArgs].
   void pushPageIfNotCurrent(String page, [Map<String, String> argUpdates]) {
@@ -108,6 +109,23 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       page,
       {...currentConfiguration.args, ...?argUpdates},
     ));
+
+    notifyListeners();
+  }
+
+  /// Replaces a page, optionally updating arguments.
+  ///
+  /// If there is no current page, the new page will still be pushed.
+  /// Existing arguments (for example &uri=) will be preserved unless
+  /// overwritten by [updateArgs].
+  void replaceCurrent(String page, [Map<String, String> argUpdates]) {
+    // TODO(dantup): This does not appear to work.. clicking back in the browser
+    // will still navigate to that previous page.
+    final newArgs = {...currentConfiguration.args, ...?argUpdates};
+    if (routes.isNotEmpty) {
+      routes.removeLast();
+    }
+    routes.add(DevToolsRouteConfiguration(page, newArgs));
 
     notifyListeners();
   }

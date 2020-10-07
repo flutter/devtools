@@ -243,30 +243,15 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// Pushes the snapshot screen for an offline import.
   void _pushSnapshotScreenForImport(String screenId) {
     final args = {'screen': screenId};
+    final routerDelegate = DevToolsRouterDelegate.of(context);
+    // If we are already in offline mode, we need to replace the existing page
+    // so clicking Back does not go through all of the old snapshots.
     if (offlineMode) {
-      // If we are already in offline mode, only handle routing from existing
-      // '/snapshot' route. In this case, we need to first pop the existing
-      // '/snapshot' route and push a new one.
-      //
-      // If we allow other routes that are not the '/snapshot' route to handle
-      // routing when we are already offline, the other routes will pop their
-      // existing screen ('/connect', or '/') and push '/snapshot' over the top.
-      // We want to avoid this because the routes underneath the existing
-      // '/snapshot' route should remain unchanged while '/snapshot' sits on
-      // top.
-      final routerDelegate = DevToolsRouterDelegate.of(context);
-      if (routerDelegate.currentConfiguration.page == snapshotPageId) {
-        routerDelegate
-          ..popPage()
-          ..pushPageIfNotCurrent(snapshotPageId, args);
-      }
+      routerDelegate.replaceCurrent(snapshotPageId, args);
     } else {
-      DevToolsRouterDelegate.of(context)
-          .pushPageIfNotCurrent(snapshotPageId, args);
-    }
-    setState(() {
       enterOfflineMode();
-    });
+      routerDelegate.pushPageIfNotCurrent(snapshotPageId, args);
+    }
   }
 
   @override

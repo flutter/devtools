@@ -70,10 +70,10 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
         Row(
           children: [
             ExitOfflineButton(onPressed: () {
-              DevToolsRouterDelegate.of(context)
-                  .pushPageIfNotCurrent(homePageId, {'screen': null});
-              reset();
               offlineMode = false;
+              reset();
+              DevToolsRouterDelegate.of(context)
+                  .replaceCurrent(homePageId, {'screen': null});
             }),
           ],
         ),

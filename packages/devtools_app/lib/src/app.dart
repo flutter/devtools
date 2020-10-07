@@ -206,7 +206,7 @@ class DevToolsAppState extends State<DevToolsApp> {
       snapshotPageId: (_, __, args) {
         final snapshotArgs = SnapshotArguments.fromArgs(args);
         return DevToolsScaffold.withChild(
-          key: const Key('snapshot'),
+          key: UniqueKey(),
           analyticsProvider: widget.analyticsProvider,
           child: _providedControllers(
             offline: true,
