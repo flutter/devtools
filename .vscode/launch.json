@@ -7,12 +7,6 @@
 			"request": "launch",
 			"program": "lib/main.dart",
 			"cwd": "${workspaceFolder}/packages/devtools_app",
-			// TODO: I can't get the flutter device selector to show up from the top level
-			// directory. I can get it when running vscode on packages/devtools_app.
-			"args": [
-				"-d",
-				"chrome"
-			]
 		},
 		{
 			"type": "dart",
@@ -50,6 +44,21 @@
 			"env": {
 				"WEBDEV_RELEASE": true,
 			}
-		}
+		},
+		{
+			"name": "Test on Device",
+			"type": "dart",
+			"request": "launch",
+			"runTestsOnDevice": true,
+			"program": "${file}",
+			"codeLens": {
+				"for": [
+					"debug-test-file",
+					"run-test-file"
+				],
+				"path": "packages/devtools_app/test",
+				"title": "${debugType} on Device"
+			}
+		},
 	]
 }
