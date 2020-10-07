@@ -49,8 +49,8 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     with
         ChangeNotifier,
         PopNavigatorRouterDelegateMixin<DevToolsRouteConfiguration> {
-  DevToolsRouterDelegate(this._getPage)
-      : navigatorKey = GlobalKey<NavigatorState>();
+  DevToolsRouterDelegate(this._getPage, [GlobalKey<NavigatorState> key])
+      : navigatorKey = key ?? GlobalKey<NavigatorState>();
 
   static DevToolsRouterDelegate of(BuildContext context) =>
       Router.of(context).routerDelegate as DevToolsRouterDelegate;

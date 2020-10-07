@@ -22,6 +22,10 @@ import 'package:provider/provider.dart';
 
 import '../support/mocks.dart';
 
+/// The RouterDelegate must use the same NavigatorKey when building in order
+/// for widget state to be preserved.
+final _testNavigatorKey = GlobalKey<NavigatorState>();
+
 /// Wraps [widget] with the build context it needs to load in a test.
 ///
 /// This includes a [MaterialApp] to provide context like [Theme.of], a
@@ -39,6 +43,7 @@ Widget wrap(Widget widget) {
           ),
         ),
       ),
+      _testNavigatorKey,
     ),
     routeInformationParser: DevToolsRouteInformationParser(),
   );
