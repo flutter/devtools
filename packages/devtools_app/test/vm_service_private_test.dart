@@ -17,9 +17,8 @@ void main() {
 
   test('Ensure private RPCs can only be enabled with VM Developer Mode enabled',
       () async {
-    // ignore: unnecessary_cast
-    when(fakeServiceManager.service.trackFuture as Function).thenReturn(
-      <T>(String _, Future<T> future) => future,
+    when(fakeServiceManager.service.trackFuture(any, any)).thenAnswer(
+      (invocation) => invocation.positionalArguments[1],
     );
     when(fakeServiceManager.service
             .callMethod(argThat(equals('_collectAllGarbage'))))
