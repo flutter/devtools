@@ -10,16 +10,12 @@ import 'package:vm_service/vm_service.dart';
 import 'profiler/cpu_profile_model.dart';
 import 'version.dart';
 
-typedef TrackFuture = Future<T> Function<T>(String, Future<T>);
-
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
     this._vmService,
     this.connectedUri, {
     this.trackFutures = false,
-  }) {
-    trackFuture = _trackFuture;
-  }
+  });
 
   VmServiceWrapper.fromNewVmService(
     Stream<dynamic> /*String|List<int>*/ inStream,
@@ -35,7 +31,6 @@ class VmServiceWrapper implements VmService {
       log: log,
       disposeHandler: disposeHandler,
     );
-    trackFuture = _trackFuture;
   }
 
   VmService _vmService;
@@ -45,8 +40,6 @@ class VmServiceWrapper implements VmService {
   final bool trackFutures;
   final Map<String, Future<Success>> _activeStreams = {};
 
-  @visibleForTesting
-  TrackFuture trackFuture;
   final Set<TrackedFuture<Object>> activeFutures = {};
   Completer<bool> _allFuturesCompleter = Completer<bool>()
     // Mark the future as completed by default so if we don't track any
@@ -894,7 +887,8 @@ class VmServiceWrapper implements VmService {
           ? 'Service'
           : '_Service';
 
-  Future<T> _trackFuture<T>(String name, Future<T> future) {
+  @visibleForTesting
+  Future<T> trackFuture<T>(String name, Future<T> future) {
     if (!trackFutures) {
       return future;
     }

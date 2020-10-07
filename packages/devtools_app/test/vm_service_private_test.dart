@@ -14,6 +14,7 @@ void main() {
     fakeServiceManager = FakeServiceManager();
     setGlobal(ServiceConnectionManager, fakeServiceManager);
   });
+
   test('Ensure private RPCs can only be enabled with VM Developer Mode enabled',
       () async {
     // ignore: unnecessary_cast

@@ -38,7 +38,7 @@ void main() {
         valueChanged = true;
       });
 
-      controller.toggleVmDeveloperMode(!controller.darkModeTheme.value);
+      controller.toggleVmDeveloperMode(!controller.vmDeveloperModeEnabled.value);
       expect(valueChanged, isTrue);
       expect(controller.vmDeveloperModeEnabled.value, isNot(originalValue));
     });

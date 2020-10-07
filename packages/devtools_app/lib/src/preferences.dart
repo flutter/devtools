@@ -13,8 +13,8 @@ class PreferencesController {
   final ValueNotifier<bool> _darkModeTheme = ValueNotifier(true);
   final ValueNotifier<bool> _vmDeveloperMode = ValueNotifier(false);
 
-  ValueListenable get darkModeTheme => _darkModeTheme;
-  ValueListenable get vmDeveloperModeEnabled => _vmDeveloperMode;
+  ValueListenable<bool> get darkModeTheme => _darkModeTheme;
+  ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;
 
   Future<void> init() async {
     if (storage == null) {
@@ -31,7 +31,7 @@ class PreferencesController {
     });
 
     value = await storage.getValue('ui.vmDeveloperMode');
-    toggleVmDeveloperMode(value == 'false');
+    toggleVmDeveloperMode(value == 'true');
     _vmDeveloperMode.addListener(() {
       storage.setValue('ui.vmDeveloperMode', '${_vmDeveloperMode.value}');
     });
