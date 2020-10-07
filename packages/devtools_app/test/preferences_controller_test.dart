@@ -38,7 +38,8 @@ void main() {
         valueChanged = true;
       });
 
-      controller.toggleVmDeveloperMode(!controller.vmDeveloperModeEnabled.value);
+      controller
+          .toggleVmDeveloperMode(!controller.vmDeveloperModeEnabled.value);
       expect(valueChanged, isTrue);
       expect(controller.vmDeveloperModeEnabled.value, isNot(originalValue));
     });
