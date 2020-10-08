@@ -16,15 +16,12 @@ import 'timeline_model.dart';
 class FlutterFramesChart extends StatefulWidget {
   const FlutterFramesChart(
     this.frames,
-    this.longestFrameDurationMs,
     this.displayRefreshRate,
   );
 
   static const chartLegendKey = Key('Flutter frames chart legend');
 
   final List<TimelineFrame> frames;
-
-  final int longestFrameDurationMs;
 
   final double displayRefreshRate;
 
@@ -34,9 +31,6 @@ class FlutterFramesChart extends StatefulWidget {
 
 class _FlutterFramesChartState extends State<FlutterFramesChart>
     with AutoDisposeMixin {
-  static const maxMsForDisplay = 48.0;
-  static const minMsForDisplay = 18.0;
-
   static const defaultFrameWidthWithPadding =
       FlutterFramesChartItem.defaultFrameWidth + densePadding * 2;
 
@@ -56,9 +50,13 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   double get availableChartHeight => defaultChartHeight - defaultSpacing;
 
+  /// Milliseconds per pixel value for the y-axis.
+  ///
+  /// This value will result in a y-axis time range spanning two times the
+  /// target frame time for a single frame (e.g. 16.6 * 2 for a 60 FPS device).
   double get msPerPx =>
-      widget.longestFrameDurationMs.clamp(minMsForDisplay, maxMsForDisplay) /
-      availableChartHeight;
+      // Multiply by two to reach two times the target frame time.
+      1 / widget.displayRefreshRate * 1000 * 2 / availableChartHeight;
 
   @override
   void initState() {

@@ -22,7 +22,7 @@ void main() {
     @required List<TimelineFrame> frames,
   }) async {
     await tester.pumpWidget(wrapWithControllers(
-      FlutterFramesChart(frames, 20, defaultRefreshRate),
+      FlutterFramesChart(frames, defaultRefreshRate),
       timeline: TimelineController(),
     ));
     await tester.pumpAndSettle();

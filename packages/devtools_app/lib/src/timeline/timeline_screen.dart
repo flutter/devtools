@@ -149,7 +149,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
               builder: (context, displayRefreshRate, _) {
                 return FlutterFramesChart(
                   frames,
-                  controller.longestFramePortionMs,
                   displayRefreshRate,
                 );
               },
