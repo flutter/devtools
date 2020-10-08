@@ -50,6 +50,10 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   double get availableChartHeight => defaultChartHeight - defaultSpacing;
 
+  /// Milliseconds per pixel value for the y-axis.
+  ///
+  /// This value will result in a y-axis time range spanning two times the
+  /// target frame time for a single frame (e.g. 16.6 * 2 for a 60 FPS device).
   double get msPerPx =>
       // Multiply by two to reach two times the target frame time.
       1 / widget.displayRefreshRate * 1000 * 2 / availableChartHeight;
