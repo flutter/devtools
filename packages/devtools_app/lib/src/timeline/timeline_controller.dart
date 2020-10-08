@@ -128,13 +128,6 @@ class TimelineController
   /// This list is cleared and repopulated each time "Refresh" is clicked.
   List<TraceEventWrapper> allTraceEvents = [];
 
-  /// Tracks the longest frame portion (UI or Raster) time for the current
-  /// timeline data.
-  ///
-  /// This is used by [FlutterFramesChart] when calculating the scale for the
-  /// chart's Y axis.
-  int longestFramePortionMs = 0;
-
   void _startTimeline() async {
     await serviceManager.onServiceAvailable;
     unawaited(allowedError(
@@ -211,14 +204,7 @@ class TimelineController
   }
 
   void addFrame(TimelineFrame frame) {
-    // Ensure we start tracking [longestFramePortionMs] at 0.
-    if (data.frames.isEmpty) longestFramePortionMs = 0;
-
     data.frames.add(frame);
-    if (frame.uiDurationMs > longestFramePortionMs ||
-        frame.rasterDurationMs > longestFramePortionMs) {
-      longestFramePortionMs = frame.time.duration.inMilliseconds;
-    }
   }
 
   Future<void> refreshData() async {
@@ -478,7 +464,6 @@ class TimelineController
     cpuProfilerController.reset();
     data?.clear();
     processor?.reset();
-    longestFramePortionMs = 0;
     _flutterFrames.value = [];
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
