@@ -161,13 +161,15 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   }
 
   Widget _buildFrame(TimelineFrame frame) {
-    return FlutterFramesChartItem(
-      frame: frame,
-      selected: frame == _selectedFrame,
-      onSelected: () => _controller.selectFrame(frame),
-      msPerPx: msPerPx,
-      availableChartHeight: availableChartHeight - 2 * outlineBorderWidth,
-      displayRefreshRate: widget.displayRefreshRate,
+    return InkWell(
+      onTap: () => _controller.selectFrame(frame),
+      child: FlutterFramesChartItem(
+        frame: frame,
+        selected: frame == _selectedFrame,
+        msPerPx: msPerPx,
+        availableChartHeight: availableChartHeight - 2 * outlineBorderWidth,
+        displayRefreshRate: widget.displayRefreshRate,
+      ),
     );
   }
 
@@ -204,7 +206,6 @@ class FlutterFramesChartItem extends StatelessWidget {
   const FlutterFramesChartItem({
     @required this.frame,
     @required this.selected,
-    @required this.onSelected,
     @required this.msPerPx,
     @required this.availableChartHeight,
     @required this.displayRefreshRate,
@@ -220,8 +221,6 @@ class FlutterFramesChartItem extends StatelessWidget {
   final TimelineFrame frame;
 
   final bool selected;
-
-  final VoidCallback onSelected;
 
   final double msPerPx;
 
@@ -258,21 +257,17 @@ class FlutterFramesChartItem extends StatelessWidget {
             children: [
               // Dummy child so that the InkWell does not take up the entire column.
               const Expanded(child: SizedBox()),
-              InkWell(
-                // TODO(kenz): make tooltip to persist if the frame is selected.
-                // TODO(kenz): change color on hover.
-                onTap: onSelected,
-                child: Tooltip(
-                  message: _tooltipText(frame),
-                  padding: const EdgeInsets.all(denseSpacing),
-                  preferBelow: false,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      ui,
-                      raster,
-                    ],
-                  ),
+              // TODO(kenz): make tooltip to persist if the frame is selected.
+              Tooltip(
+                message: _tooltipText(frame),
+                padding: const EdgeInsets.all(denseSpacing),
+                preferBelow: false,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    ui,
+                    raster,
+                  ],
                 ),
               ),
             ],

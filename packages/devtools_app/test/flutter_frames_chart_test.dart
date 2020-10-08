@@ -76,7 +76,6 @@ void main() {
                     return FlutterFramesChartItem(
                       frame: testFrame0,
                       selected: true,
-                      onSelected: () {},
                       msPerPx: 1,
                       availableChartHeight: 100.0,
                       displayRefreshRate: defaultRefreshRate,
