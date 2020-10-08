@@ -231,7 +231,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           children: const [
             CallStack(),
             Variables(),
-            BreakpointPicker(),
+            Breakpoints(),
           ],
         );
       },
