@@ -42,6 +42,7 @@ class _RemoteAnalyticsProvider implements AnalyticsProvider {
 
   @override
   void setUpAnalytics() {
+    if (!_isGtagsEnabled) return;
     analytics.initializeGA();
     analytics.jsHookupListenerForGA();
   }
