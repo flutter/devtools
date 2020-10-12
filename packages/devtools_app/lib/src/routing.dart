@@ -64,6 +64,11 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   @override
   final GlobalKey<NavigatorState> navigatorKey;
   final Page Function(BuildContext, String, Map<String, String>) _getPage;
+
+  /// A list of any routes/pages on the stack.
+  ///
+  /// This will usually only contain a single item (it's the visible stack,
+  /// not the history).
   final routes = ListQueue<DevToolsRouteConfiguration>();
 
   @override
@@ -79,11 +84,11 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     return Navigator(
       key: navigatorKey,
       pages: [_getPage(context, page, args)],
-      onPopPage: (route, result) => popPage(),
+      onPopPage: _handleOnPopPage,
     );
   }
 
-  bool popPage() {
+  bool _handleOnPopPage(Route<dynamic> route, dynamic result) {
     if (routes.length <= 1) {
       return false;
     }
@@ -93,46 +98,33 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     return true;
   }
 
-  /// Pushes a new page, optionally updating arguments.
+  /// Navigates to a new page, optionally updating arguments.
   ///
   /// If page and args would be the same, does nothing.
   /// Existing arguments (for example &uri=) will be preserved unless
-  /// overwritten by [updateArgs].
-  void pushPageIfNotCurrent(String page, [Map<String, String> argUpdates]) {
+  /// overwritten by [argUpdates].
+  void navigateIfNotCurrent(String page, [Map<String, String> argUpdates]) {
     final pageChanged = page != currentConfiguration.page;
     final argsChanged = _changesArgs(argUpdates);
     if (!pageChanged && !argsChanged) {
       return;
     }
 
-    routes.add(DevToolsRouteConfiguration(
-      page,
-      {...currentConfiguration.args, ...?argUpdates},
-    ));
-
+    final newArgs = {...currentConfiguration.args, ...?argUpdates};
+    _replaceStack(DevToolsRouteConfiguration(page, newArgs));
     notifyListeners();
   }
 
-  /// Replaces a page, optionally updating arguments.
-  ///
-  /// If there is no current page, the new page will still be pushed.
-  /// Existing arguments (for example &uri=) will be preserved unless
-  /// overwritten by [updateArgs].
-  void replaceCurrent(String page, [Map<String, String> argUpdates]) {
-    // TODO(dantup): This does not appear to work.. clicking back in the browser
-    // will still navigate to that previous page.
-    final newArgs = {...currentConfiguration.args, ...?argUpdates};
-    if (routes.isNotEmpty) {
-      routes.removeLast();
-    }
-    routes.add(DevToolsRouteConfiguration(page, newArgs));
-
-    notifyListeners();
+  /// Replaces the navigation stack with a new route.
+  void _replaceStack(DevToolsRouteConfiguration configuration) {
+    routes
+      ..clear()
+      ..add(configuration);
   }
 
   @override
   Future<void> setNewRoutePath(DevToolsRouteConfiguration configuration) {
-    routes.add(configuration);
+    _replaceStack(configuration);
     return SynchronousFuture<void>(null);
   }
 
@@ -146,11 +138,9 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       return;
     }
 
-    routes.add(DevToolsRouteConfiguration(
-      currentConfiguration.page,
-      {...currentConfiguration.args, ...argUpdates},
-    ));
-
+    final currentPage = currentConfiguration.page;
+    final newArgs = {...currentConfiguration.args, ...?argUpdates};
+    _replaceStack(DevToolsRouteConfiguration(currentPage, newArgs));
     notifyListeners();
   }
 

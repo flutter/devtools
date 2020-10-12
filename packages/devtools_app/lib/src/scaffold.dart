@@ -208,7 +208,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
         // Update routing with the change.
         DevToolsRouterDelegate.of(context)
-            .pushPageIfNotCurrent(screen?.screenId);
+            .navigateIfNotCurrent(screen?.screenId);
       }
     });
 
@@ -236,7 +236,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         widget.tabs.indexWhere((screen) => screen.screenId == pageId);
 
     if (newIndex != -1 && newIndex != existingTabIndex) {
-      DevToolsRouterDelegate.of(context).pushPageIfNotCurrent(pageId);
+      DevToolsRouterDelegate.of(context).navigateIfNotCurrent(pageId);
     }
   }
 
@@ -246,11 +246,15 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final routerDelegate = DevToolsRouterDelegate.of(context);
     // If we are already in offline mode, we need to replace the existing page
     // so clicking Back does not go through all of the old snapshots.
-    if (offlineMode) {
-      routerDelegate.replaceCurrent(snapshotPageId, args);
-    } else {
+    if (!offlineMode) {
       enterOfflineMode();
-      routerDelegate.pushPageIfNotCurrent(snapshotPageId, args);
+      routerDelegate.navigateIfNotCurrent(snapshotPageId, args);
+    } else {
+      // Router.neglect will cause the router to ignore this change, so
+      // dragging a new export into the browser will not result in a new
+      // history entry.
+      Router.neglect(context,
+          () => routerDelegate.navigateIfNotCurrent(snapshotPageId, args));
     }
   }
 

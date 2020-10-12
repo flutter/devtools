@@ -65,6 +65,7 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
 
   @override
   Widget build(BuildContext context) {
+    final routerDelegate = DevToolsRouterDelegate.of(context);
     return Column(
       children: [
         Row(
@@ -72,9 +73,14 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
             ExitOfflineButton(onPressed: () {
               offlineMode = false;
               reset();
-              DevToolsRouterDelegate.of(context).replaceCurrent(
-                homePageId,
-                {'screen': null},
+              // Use Router.neglect to replace the current history entry with
+              // the homepage so that clicking Back will not return here.
+              Router.neglect(
+                context,
+                () => routerDelegate.navigateIfNotCurrent(
+                  homePageId,
+                  {'screen': null},
+                ),
               );
             }),
           ],

@@ -81,7 +81,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
           RaisedButton(
             child: const Text('Open app size tool'),
             onPressed: () => DevToolsRouterDelegate.of(context)
-                .pushPageIfNotCurrent(appSizePageId),
+                .navigateIfNotCurrent(appSizePageId),
           ),
         ],
       ),
