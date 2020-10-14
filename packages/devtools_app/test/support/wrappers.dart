@@ -36,7 +36,7 @@ Widget wrap(Widget widget) {
     theme: themeFor(isDarkTheme: false, ideTheme: null),
     routerDelegate: DevToolsRouterDelegate(
       (context, page, args) => MaterialPage(
-        builder: (context) => Material(
+        child: Material(
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: widget,
