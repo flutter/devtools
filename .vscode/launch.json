@@ -6,7 +6,7 @@
 			"type": "dart",
 			"request": "launch",
 			"program": "lib/main.dart",
-			"cwd": "${workspaceFolder}/packages/devtools_app"
+			"cwd": "${workspaceFolder}/packages/devtools_app",
 		},
 		{
 			"type": "dart",
