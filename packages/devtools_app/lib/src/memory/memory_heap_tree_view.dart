@@ -460,11 +460,11 @@ class HeapTreeViewState extends State<HeapTree>
     return Row(
       children: [
         Tooltip(
-          message: 'Snapshot',
+          message: 'Take snapshot',
           child: OutlineButton(
             key: snapshotButtonKey,
             onPressed: _isSnapshotRunning ? null : _snapshot,
-            child: createIcon(Icons.camera),
+            child: const MaterialIconLabel(Icons.camera, 'Snapshot'),
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -538,7 +538,8 @@ class HeapTreeViewState extends State<HeapTree>
                   child: createIcon(Icons.vertical_align_bottom),
                 ),
               ),
-        const SizedBox(width: defaultSpacing),
+
+        if (!controller.showTreemap.value) const SizedBox(width: defaultSpacing),
 
         Tooltip(
           message: 'Monitor Allocations',
