@@ -825,7 +825,7 @@ class VmServiceWrapper implements VmService {
   @override
   Future<PortList> getPorts(String isolateId) async {
     if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 5, minor: 4))) {
+        supportedVersion: SemanticVersion(major: 3, minor: 42))) {
       return trackFuture(
         'getPorts',
         _vmService.getPorts(isolateId),
@@ -1048,5 +1048,11 @@ extension VmServicePrivate on VmServiceWrapper {
   Future<Success> collectAllGarbage() => _privateRpcInvoke(
         'collectAllGarbage',
         parser: Success.parse,
+      );
+
+  Future<PortList> getPorts(String isolateId) => _privateRpcInvoke(
+        'getPorts',
+        isolateId: isolateId,
+        parser: PortList.parse,
       );
 }

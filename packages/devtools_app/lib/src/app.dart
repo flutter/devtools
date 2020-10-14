@@ -44,15 +44,13 @@ import 'timeline/timeline_controller.dart';
 import 'timeline/timeline_screen.dart';
 import 'ui/service_extension_widgets.dart';
 import 'utils.dart';
+import 'vm_developer/vm_developer_tools_screen.dart';
 
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
 
 /// Whether this DevTools build is external.
 bool isExternalBuild = true;
-
-// Disabled until VM developer mode functionality is added.
-const showVmDeveloperMode = false;
 
 /// Top-level configuration for the app.
 @immutable
@@ -174,35 +172,42 @@ class DevToolsAppState extends State<DevToolsApp> {
       url: vmServiceUri,
       allowConnectionScreenOnDisconnect: !embed,
       builder: (_) {
-        final tabs = _visibleScreens()
-            .where((p) => embed && page != null ? p.screenId == page : true)
-            .where((p) => !hide.contains(p.screenId))
-            .toList();
-        if (tabs.isEmpty) {
-          return DevToolsScaffold.withChild(
-            child: CenteredMessage(
-                'The "$page" screen is not available for this application.'),
-            ideTheme: ideTheme,
-            analyticsProvider: widget.analyticsProvider,
-          );
-        }
-        return _providedControllers(
-          child: DevToolsScaffold(
-            embed: embed,
-            ideTheme: ideTheme,
-            page: page,
-            tabs: tabs,
-            analyticsProvider: widget.analyticsProvider,
-            actions: [
-              // TODO(https://github.com/flutter/devtools/issues/1941)
-              if (serviceManager.connectedApp.isFlutterAppNow) ...[
-                HotReloadButton(),
-                HotRestartButton(),
-              ],
-              OpenSettingsAction(),
-              OpenAboutAction(),
-            ],
-          ),
+        // Rebuild when VM developer mode is enabled or disabled to update the
+        // visible screens list.
+        return ValueListenableBuilder(
+          valueListenable: widget.preferences.vmDeveloperModeEnabled,
+          builder: (context, value, _) {
+            final tabs = _visibleScreens()
+                .where((p) => embed && page != null ? p.screenId == page : true)
+                .where((p) => !hide.contains(p.screenId))
+                .toList();
+            if (tabs.isEmpty) {
+              return DevToolsScaffold.withChild(
+                child: CenteredMessage(
+                    'The "$page" screen is not available for this application.'),
+                ideTheme: ideTheme,
+                analyticsProvider: widget.analyticsProvider,
+              );
+            }
+            return _providedControllers(
+              child: DevToolsScaffold(
+                embed: embed,
+                ideTheme: ideTheme,
+                page: page,
+                tabs: tabs,
+                analyticsProvider: widget.analyticsProvider,
+                actions: [
+                  // TODO(https://github.com/flutter/devtools/issues/1941)
+                  if (serviceManager.connectedApp.isFlutterAppNow) ...[
+                    HotReloadButton(),
+                    HotRestartButton(),
+                  ],
+                  OpenSettingsAction(),
+                  OpenAboutAction(),
+                ],
+              ),
+            );
+          },
         );
       },
     );
@@ -266,16 +271,21 @@ class DevToolsAppState extends State<DevToolsApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: widget.preferences.darkModeTheme,
+    return ValueListenableBuilder<bool>(
+      valueListenable: widget.preferences.vmDeveloperModeEnabled,
       builder: (context, value, _) {
-        return MaterialApp.router(
-          title: 'Dart DevTools',
-          debugShowCheckedModeBanner: false,
-          theme: themeFor(isDarkTheme: value, ideTheme: ideTheme),
-          builder: (context, child) => Notifications(child: child),
-          routerDelegate: DevToolsRouterDelegate(_getPage),
-          routeInformationParser: DevToolsRouteInformationParser(),
+        return ValueListenableBuilder<bool>(
+          valueListenable: widget.preferences.darkModeTheme,
+          builder: (context, value, _) {
+            return MaterialApp.router(
+              title: 'Dart DevTools',
+              debugShowCheckedModeBanner: false,
+              theme: themeFor(isDarkTheme: value, ideTheme: ideTheme),
+              builder: (context, child) => Notifications(child: child),
+              routerDelegate: DevToolsRouterDelegate(_getPage),
+              routeInformationParser: DevToolsRouteInformationParser(),
+            );
+          },
         );
       },
     );
@@ -452,8 +462,6 @@ class SettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final preferences = DevToolsApp.of(context).preferences;
-    // Disabled until VM developer mode functionality is added.
-    const showVmDeveloperMode = false;
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Settings'),
       content: Column(
@@ -471,12 +479,11 @@ class SettingsDialog extends StatelessWidget {
               listenable: ga.gaEnabledNotifier,
               toggle: ga.setAnalyticsEnabled,
             ),
-          if (showVmDeveloperMode)
-            _buildOption(
-              label: const Text('Enable VM developer mode'),
-              listenable: preferences.vmDeveloperModeEnabled,
-              toggle: preferences.toggleVmDeveloperMode,
-            ),
+          _buildOption(
+            label: const Text('Enable VM developer mode'),
+            listenable: preferences.vmDeveloperModeEnabled,
+            toggle: preferences.toggleVmDeveloperMode,
+          ),
         ],
       ),
       actions: [
@@ -549,6 +556,10 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
         const AppSizeScreen(),
         createController: () => AppSizeController(),
       ),
+      DevToolsScreen<VMDeveloperToolsScreen>(
+        const VMDeveloperToolsScreen(),
+        createController: () => null,
+      )
 // Uncomment to see a sample implementation of a conditional screen.
 //      DevToolsScreen<ExampleController>(
 //        const ExampleConditionalScreen(),
