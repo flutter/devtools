@@ -47,9 +47,3 @@ script: ./tool/travis.sh
 # See https://github.com/flutter/devtools/pull/398
 # branches:
 #   only: [master]
-
-cache:
- directories:
- - $HOME/.pub-cache # macOS / Linux
- - $APPDATA/Roaming/Pub/Cache # Windows
- - packages/devtools_app/.dart_tool/build
