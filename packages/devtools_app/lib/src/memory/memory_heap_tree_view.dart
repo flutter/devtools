@@ -484,63 +484,56 @@ class HeapTreeViewState extends State<HeapTree>
             ),
           ],
         ),
-        const SizedBox(width: defaultSpacing),
-        controller.showTreemap.value
-            ? const SizedBox()
-            : _groupByDropdown(textTheme),
-        const SizedBox(width: defaultSpacing),
-        // TODO(terry): Mechanism to handle expand/collapse on both
-        // tables objects/fields. Maybe notion in table?
-        controller.showTreemap.value
-            ? const SizedBox()
-            : Tooltip(
-                message: 'Collapse All',
-                child: OutlineButton(
-                  key: collapseAllButtonKey,
-                  onPressed: snapshotDisplay is MemorySnapshotTable
-                      ? () {
-                          if (snapshotDisplay is MemorySnapshotTable) {
-                            controller.groupByTreeTable.dataRoots
-                                .every((element) {
-                              element.collapseCascading();
-                              return true;
-                            });
-                            if (controller.instanceFieldsTreeTable != null) {
-                              // We're collapsing close the fields table.
-                              controller.selectedLeaf = null;
-                            }
-                            // All nodes collapsed - signal tree state changed.
-                            controller.treeChanged();
-                          }
+        if (!controller.showTreemap.value) ...[
+          const SizedBox(width: defaultSpacing),
+          _groupByDropdown(textTheme),
+          const SizedBox(width: defaultSpacing),
+          // TODO(terry): Mechanism to handle expand/collapse on both tables
+          // objects/fields. Maybe notion in table?
+          Tooltip(
+            message: 'Collapse All',
+            child: OutlineButton(
+              key: collapseAllButtonKey,
+              onPressed: snapshotDisplay is MemorySnapshotTable
+                  ? () {
+                      if (snapshotDisplay is MemorySnapshotTable) {
+                        controller.groupByTreeTable.dataRoots.every((element) {
+                          element.collapseCascading();
+                          return true;
+                        });
+                        if (controller.instanceFieldsTreeTable != null) {
+                          // We're collapsing close the fields table.
+                          controller.selectedLeaf = null;
                         }
-                      : null,
-                  child: createIcon(Icons.vertical_align_top),
-                )),
-        controller.showTreemap.value
-            ? const SizedBox()
-            : Tooltip(
-                message: 'Expand All',
-                child: OutlineButton(
-                  key: expandAllButtonKey,
-                  onPressed: snapshotDisplay is MemorySnapshotTable
-                      ? () {
-                          if (snapshotDisplay is MemorySnapshotTable) {
-                            controller.groupByTreeTable.dataRoots
-                                .every((element) {
-                              element.expandCascading();
-                              return true;
-                            });
-                          }
-                          // All nodes expanded - signal tree state  changed.
-                          controller.treeChanged();
-                        }
-                      : null,
-                  child: createIcon(Icons.vertical_align_bottom),
-                ),
-              ),
-
-        if (!controller.showTreemap.value) const SizedBox(width: defaultSpacing),
-
+                        // All nodes collapsed - signal tree state changed.
+                        controller.treeChanged();
+                      }
+                    }
+                  : null,
+              child: createIcon(Icons.vertical_align_top),
+            ),
+          ),
+          Tooltip(
+            message: 'Expand All',
+            child: OutlineButton(
+              key: expandAllButtonKey,
+              onPressed: snapshotDisplay is MemorySnapshotTable
+                  ? () {
+                      if (snapshotDisplay is MemorySnapshotTable) {
+                        controller.groupByTreeTable.dataRoots.every((element) {
+                          element.expandCascading();
+                          return true;
+                        });
+                      }
+                      // All nodes expanded - signal tree state  changed.
+                      controller.treeChanged();
+                    }
+                  : null,
+              child: createIcon(Icons.vertical_align_bottom),
+            ),
+          ),
+        ],
+        const SizedBox(width: defaultSpacing),
         Tooltip(
           message: 'Monitor Allocations',
           child: OutlineButton(
