@@ -9,18 +9,15 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
-import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:flutter_test/flutter_test.dart' show equalsIgnoringHashCodes;
 import 'package:test/test.dart';
 
 import 'matchers/matchers.dart';
-import 'support/file_utils.dart';
 import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
 import 'support/flutter_test_environment.dart';
 
 Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
-  Catalog.setCatalog(Catalog.decode(await widgetsJson()));
   InspectorService inspectorService;
 
   env.afterNewSetup = () async {

@@ -4,11 +4,7 @@
 
 library flutter_widget;
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'package:meta/meta.dart';
 
 import '../ui/icons.dart';
 import '../utils.dart';
@@ -122,59 +118,4 @@ class FlutterWidget {
   List<String> get categories => JsonUtils.getValues(json, 'categories');
 
   List<String> get subCategories => JsonUtils.getValues(json, 'subcategories');
-}
-
-/// Catalog of widgets derived from widgets.json.
-class Catalog {
-  Catalog._(this.widgets);
-
-  final Map<String, FlutterWidget> widgets;
-
-  static Future<Catalog> _cachedCatalog;
-
-  static Catalog get instance => _instance;
-  static Catalog _instance;
-
-  static Future<Catalog> load() {
-    return _cachedCatalog ??= _loadHelper();
-  }
-
-  static Future<Catalog> _loadHelper() async {
-    // Local copy of: https://github.com/flutter/website/blob/master/src/_data/catalog/widgets.json
-    final Response response = await get('widgets.json');
-    _instance = decode(response.body);
-    return _instance;
-  }
-
-  @visibleForTesting
-  static void setCatalog(Catalog catalog) {
-    _instance = catalog;
-    _cachedCatalog = Future.value(catalog);
-  }
-
-  static Catalog decode(String source) {
-    final List<Object> json = jsonDecode(source);
-    final Map<String, FlutterWidget> widgets = {};
-
-    for (Map<String, Object> element in json) {
-      final FlutterWidget widget = FlutterWidget(element);
-      final String name = widget.name;
-      // TODO(pq): add validation once json is repaired (https://github.com/flutter/flutter/issues/12930).
-      // if (widgets.containsKey(name)) throw new IllegalStateException('Unexpected contents: widget `${name}` is duplicated');
-      widgets[name] = widget;
-    }
-    return Catalog._(widgets);
-  }
-
-  List<FlutterWidget> get allWidgets {
-    return widgets.values.toList();
-  }
-
-  FlutterWidget getWidget(String name) {
-    return name != null ? widgets[name] : null;
-  }
-
-  String dumpJson() {
-    return jsonEncode(json);
-  }
 }

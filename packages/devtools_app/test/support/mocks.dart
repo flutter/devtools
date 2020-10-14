@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/initializer.dart' as initializer;
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart'
     as flutter_memory;
@@ -694,7 +693,6 @@ Future<void> ensureInspectorDependencies() async {
     '\n'
     "To fix this, mark the failing test as @TestOn('vm')",
   );
-  await initializer.ensureInspectorDependencies();
 }
 
 void mockIsFlutterApp(MockConnectedApp connectedApp, [isFlutterApp = true]) {

@@ -13,7 +13,6 @@ import 'package:vm_service/vm_service.dart';
 import '../enum_utils.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
-import 'flutter_widget.dart';
 import 'inspector_service.dart';
 
 final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
@@ -589,10 +588,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     }
 */
     return Future.value('Unable to find property source');
-  }
-
-  FlutterWidget get widget {
-    return Catalog.instance?.getWidget(widgetRuntimeType);
   }
 
   Widget get icon {

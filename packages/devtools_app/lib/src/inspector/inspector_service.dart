@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This code is directly based on
-// src/io/flutter/InspectorService.java
+// This code is directly based on src/io/flutter/InspectorService.java.
+//
 // If you add methods to this class you should also add them to
-// InspectorService.java
+// InspectorService.java.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -17,7 +17,6 @@ import '../auto_dispose.dart';
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
 import 'diagnostics_node.dart';
-import 'flutter_widget.dart';
 
 // TODO(jacobr): remove flutter_web entry once flutter_web and flutter are
 // unified.
@@ -33,7 +32,6 @@ Future<void> ensureInspectorServiceDependencies() async {
   if (_inspectorDependenciesLoaded) {
     return;
   }
-  await Catalog.load();
   // TODO(jacobr): consider also loading common icons needed by the inspector
   // to avoid flicker on icon load.
   _inspectorDependenciesLoaded = true;

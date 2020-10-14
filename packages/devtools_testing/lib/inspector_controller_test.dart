@@ -7,7 +7,6 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +15,9 @@ import 'package:test/test.dart';
 
 import 'matchers/matchers.dart';
 import 'support/fake_inspector_tree.dart';
-import 'support/file_utils.dart';
 import 'support/flutter_test_environment.dart';
 
 Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
-  Catalog.setCatalog(Catalog.decode(await widgetsJson()));
   InspectorService inspectorService;
   InspectorController inspectorController;
   FakeInspectorTree tree;
