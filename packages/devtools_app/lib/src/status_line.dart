@@ -50,18 +50,20 @@ class StatusLine extends StatelessWidget {
         ValueListenableBuilder<bool>(
           valueListenable: currentScreen.showIsolateSelector,
           builder: (context, showIsolateSelector, _) {
-            return Flexible(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Align(
-                      child: buildIsolateSelector(context, textTheme),
+            return showIsolateSelector
+                ? Flexible(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Align(
+                            child: buildIsolateSelector(context, textTheme),
+                          ),
+                        ),
+                        const BulletSpacer(),
+                      ],
                     ),
-                  ),
-                  const BulletSpacer(),
-                ],
-              ),
-            );
+                  )
+                : Container();
           },
         ),
       );

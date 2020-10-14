@@ -7,6 +7,9 @@
 			"request": "launch",
 			"program": "lib/main.dart",
 			"cwd": "${workspaceFolder}/packages/devtools_app",
+			"args": [
+				"--device-id=macos"
+			]
 		},
 		{
 			"type": "dart",
