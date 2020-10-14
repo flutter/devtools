@@ -45,14 +45,26 @@ class StatusLine extends StatelessWidget {
     children.add(const BulletSpacer());
 
     // Optionally display an isolate selector.
-    if (currentScreen != null && currentScreen.showIsolateSelector) {
-      children.add(Expanded(
-        child: Align(
-          child: buildIsolateSelector(context, textTheme),
+    if (currentScreen != null) {
+      children.add(
+        ValueListenableBuilder<bool>(
+          valueListenable: currentScreen.showIsolateSelector,
+          builder: (context, showIsolateSelector, _) {
+            return Flexible(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Align(
+                      child: buildIsolateSelector(context, textTheme),
+                    ),
+                  ),
+                  const BulletSpacer(),
+                ],
+              ),
+            );
+          },
         ),
-      ));
-
-      children.add(const BulletSpacer());
+      );
     }
 
     // Optionally display page specific status.

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -46,7 +47,7 @@ class DebuggerScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  bool get showIsolateSelector => true;
+  ValueListenable<bool> get showIsolateSelector => ValueNotifier<bool>(true);
 
   @override
   Widget build(BuildContext context) => const DebuggerScreenBody();
