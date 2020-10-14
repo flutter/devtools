@@ -206,9 +206,18 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         // send it on to the devtools server, if one is connected).
         frameworkController.notifyPageChange(screen?.screenId);
 
+        // If the tab index is 0 and the current route has no page ID (eg. we're
+        // at the URL /?uri= with no page ID), those are equivilent pages but
+        // navigateIfNotCurrent does not know that and will try to navigate, so
+        // skip that here.
+        final routerDelegate = DevToolsRouterDelegate.of(context);
+        if (_tabController.index == 0 &&
+            (routerDelegate.currentConfiguration.page?.isEmpty ?? true)) {
+          return;
+        }
+
         // Update routing with the change.
-        DevToolsRouterDelegate.of(context)
-            .navigateIfNotCurrent(screen?.screenId);
+        routerDelegate.navigateIfNotCurrent(screen?.screenId);
       }
     });
 

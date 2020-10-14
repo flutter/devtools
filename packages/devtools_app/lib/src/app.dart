@@ -156,7 +156,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     // TODO(dantup): We should be able simplify this a little, removing params['page']
     // and only supporting /inspector (etc.) instead of also &page=inspector if
     // all IDEs switch over to those URLs.
-    if ((page?.length ?? 0) == 0) {
+    if (page?.isEmpty ?? true) {
       page = params['page'];
     }
     final embed = params['embed'] == 'true';
