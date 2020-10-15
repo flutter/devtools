@@ -4,12 +4,6 @@ import 'dart:io' as io;
 import 'package:package_resolver/package_resolver.dart';
 import 'package:test/test.dart';
 
-/// Loads the widgets.json file that describes the widgets [Catalog].
-Future<String> widgetsJson() async {
-  final devtoolsPath = await resolvePackagePath('devtools_app');
-  return await io.File('$devtoolsPath/web/widgets.json').readAsString();
-}
-
 /// Finds the path to a given package.
 ///
 /// This includes a workaround to package:package_resolver not working

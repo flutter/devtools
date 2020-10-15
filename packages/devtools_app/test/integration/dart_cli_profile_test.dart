@@ -11,7 +11,6 @@ import 'dart:typed_data';
 import 'package:devtools_app/src/analytics/stub_provider.dart';
 import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/framework/framework_core.dart';
-import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/file_utils.dart';
@@ -46,7 +45,6 @@ Future<void> main() async {
     const FlutterRunConfiguration(withDebugger: true),
   );
   compensateForFlutterTestDirectoryBug();
-  Catalog.setCatalog(Catalog.decode(await widgetsJson()));
 
   group('Whole app', () {
     testWidgets('CLI Memory Profile Collection', (tester) async {

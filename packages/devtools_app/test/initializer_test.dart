@@ -4,8 +4,7 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/initializer.dart'
-    hide ensureInspectorDependencies;
+import 'package:devtools_app/src/initializer.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

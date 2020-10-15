@@ -12,7 +12,6 @@ import '../auto_dispose_mixin.dart';
 import '../blocking_action_mixin.dart';
 import '../connected_app.dart';
 import '../globals.dart';
-import '../initializer.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../service_extensions.dart' as extensions;
@@ -239,7 +238,6 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
 
     try {
       // Init the inspector service, or return null.
-      await ensureInspectorDependencies();
       await ensureInspectorServiceDependencies();
       inspectorService =
           await InspectorService.create(service).catchError((e) => null);

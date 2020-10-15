@@ -74,7 +74,6 @@ flutter:
     - icons/inspector/
     - icons/memory/
     - icons/perf/
-    - web/widgets.json
 
   fonts:
     - family: Roboto
