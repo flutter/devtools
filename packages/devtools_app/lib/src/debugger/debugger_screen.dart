@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +14,7 @@ import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/host_platform/host_platform.dart';
 import '../flex_split_column.dart';
+import '../listenable.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -46,7 +48,8 @@ class DebuggerScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  bool get showIsolateSelector => true;
+  ValueListenable<bool> get showIsolateSelector =>
+      const FixedValueListenable<bool>(true);
 
   @override
   Widget build(BuildContext context) => const DebuggerScreenBody();
