@@ -14,6 +14,7 @@ import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/host_platform/host_platform.dart';
 import '../flex_split_column.dart';
+import '../listenable.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';

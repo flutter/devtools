@@ -492,23 +492,6 @@ class ToolbarAction extends StatelessWidget {
   }
 }
 
-/// A [ValueListenable] that ignores all added listeners and returns a fixed
-/// value.
-class FixedValueListenable<T> extends ValueListenable<T> {
-  const FixedValueListenable(this._value);
-
-  final T _value;
-
-  @override
-  void addListener(listener) => null;
-
-  @override
-  void removeListener(listener) => null;
-
-  @override
-  T get value => _value;
-}
-
 /// Create a bordered, fixed-height header area with a title and optional child
 /// on the right-hand side.
 ///
