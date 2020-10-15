@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'common_widgets.dart';
 import 'globals.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -80,7 +81,8 @@ abstract class Screen {
   ///
   /// Some screens act on all isolates; for these screens, displaying a
   /// selector doesn't make sense.
-  ValueListenable<bool> get showIsolateSelector => ValueNotifier<bool>(false);
+  ValueListenable<bool> get showIsolateSelector =>
+      const FixedValueListenable<bool>(false);
 
   /// The id to use to synthesize a help URL.
   ///

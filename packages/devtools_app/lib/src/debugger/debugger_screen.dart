@@ -47,7 +47,8 @@ class DebuggerScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  ValueListenable<bool> get showIsolateSelector => ValueNotifier<bool>(true);
+  ValueListenable<bool> get showIsolateSelector =>
+      const FixedValueListenable<bool>(true);
 
   @override
   Widget build(BuildContext context) => const DebuggerScreenBody();
