@@ -7,11 +7,11 @@ Future<bool> get isFirstRun async {
   throw Exception(unsupportedMessage);
 }
 
-Future<bool> isEnabled() {
+Future<bool> isAnalyticsEnabled() {
   throw Exception(unsupportedMessage);
 }
 
-Future<bool> setEnabled([bool value = true]) {
+Future<bool> setAnalyticsEnabled([bool value = true]) {
   throw Exception(unsupportedMessage);
 }
 

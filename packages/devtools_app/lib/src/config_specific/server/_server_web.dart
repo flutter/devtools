@@ -43,7 +43,7 @@ Future<bool> get isFirstRun async {
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
 /// '~\.devtools'.
-Future<bool> get isEnabled async {
+Future<bool> get isAnalyticsEnabled async {
   bool enabled = false;
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiGetDevToolsEnabled);
@@ -60,7 +60,7 @@ Future<bool> get isEnabled async {
 /// '~/.devtools'.
 ///
 /// Returns whether the set call was successful.
-Future<bool> setEnabled([bool value = true]) async {
+Future<bool> setAnalyticsEnabled([bool value = true]) async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(
       '$apiSetDevToolsEnabled'
