@@ -27,11 +27,12 @@ class GTag {
 
   /// Collect the analytic's event and its parameters.
   static void event(String eventName, GtagEvent gaEvent) async {
-    if (await ga.isEnabled) _gTagCommandName(_event, eventName, gaEvent);
+    if (await ga.isAnalyticsEnabled())
+      _gTagCommandName(_event, eventName, gaEvent);
   }
 
   static void exception(GtagException gaException) async {
-    if (await ga.isEnabled) {
+    if (await ga.isAnalyticsEnabled()) {
       _gTagCommandName(_event, _exception, gaException);
     }
   }
