@@ -27,7 +27,7 @@ void main() {
         expectEqualSizes(
             tester.element(find.byKey(_k2)).size, const Size(591.0, 600));
         expectEqualSizes(tester.element(find.byKey(split.dividerKey(0))).size,
-            const Size(12, 12));
+            const Size(12, 600));
       });
 
       testWidgets('with 50% space to first child', (WidgetTester tester) async {
@@ -41,7 +41,7 @@ void main() {
         expectEqualSizes(
             tester.element(find.byKey(_k2)).size, const Size(394, 600));
         expectEqualSizes(tester.element(find.byKey(split.dividerKey(0))).size,
-            const Size(12, 12));
+            const Size(12, 600));
       });
 
       testWidgets('with 75% space to first child', (WidgetTester tester) async {
@@ -55,7 +55,7 @@ void main() {
         expectEqualSizes(
             tester.element(find.byKey(_k2)).size, const Size(197.0, 600));
         expectEqualSizes(tester.element(find.byKey(split.dividerKey(0))).size,
-            const Size(12, 12));
+            const Size(12, 600));
       });
 
       testWidgets('with 0% space to first child', (WidgetTester tester) async {
@@ -69,7 +69,7 @@ void main() {
         expectEqualSizes(
             tester.element(find.byKey(_k2)).size, const Size(788, 600));
         expectEqualSizes(tester.element(find.byKey(split.dividerKey(0))).size,
-            const Size(12, 12));
+            const Size(12, 600));
       });
 
       testWidgets('with 100% space to first child',
@@ -87,7 +87,7 @@ void main() {
         expectEqualSizes(
             tester.element(find.byKey(_k2)).size, const Size(0, 600));
         expectEqualSizes(tester.element(find.byKey(split.dividerKey(0))).size,
-            const Size(12, 12));
+            const Size(12, 600));
       });
 
       testWidgets('with n children', (WidgetTester tester) async {
@@ -147,11 +147,11 @@ void main() {
         expect(find.byKey(_k2), findsOneWidget);
         expect(find.byKey(split.dividerKey(0)), findsOneWidget);
         expectEqualSizes(
-            tester.element(find.byKey(_k1)).size, const Size(800, 147.0));
+            tester.element(find.byKey(_k1)).size, const Size(800, 147));
         expectEqualSizes(
-            tester.element(find.byKey(_k2)).size, const Size(800, 441.0));
+            tester.element(find.byKey(_k2)).size, const Size(800, 441));
         expectEqualSizes(tester.element(find.byKey(split.dividerKey(0))).size,
-            const Size(12, 12));
+            const Size(800, 12));
       });
 
       testWidgets('with 50% space to first child', (WidgetTester tester) async {
@@ -183,7 +183,7 @@ void main() {
         expectEqualSizes(
             tester.element(find.byKey(_k2)).size, const Size(800, 588));
         expectEqualSizes(tester.element(find.byKey(split.dividerKey(0))).size,
-            const Size(12, 12));
+            const Size(800, 12));
       });
 
       testWidgets('with 100% space to first child',
@@ -198,7 +198,7 @@ void main() {
         expectEqualSizes(
             tester.element(find.byKey(_k2)).size, const Size(800, 0));
         expectEqualSizes(tester.element(find.byKey(split.dividerKey(0))).size,
-            const Size(12, 12));
+            const Size(800, 12));
       });
 
       testWidgets('with n children', (WidgetTester tester) async {
