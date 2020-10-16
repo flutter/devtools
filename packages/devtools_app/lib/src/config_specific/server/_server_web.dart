@@ -26,7 +26,7 @@ Future<HttpRequest> _request(String url) async {
 
 /// Request DevTools property value 'firstRun' (GA dialog) stored in the file
 /// '~\.devtools'.
-Future<bool> get isFirstRun async {
+Future<bool> isFirstRun() async {
   bool firstRun = false;
 
   if (isDevToolsServerAvailable) {
@@ -43,7 +43,7 @@ Future<bool> get isFirstRun async {
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
 /// '~\.devtools'.
-Future<bool> get isAnalyticsEnabled async {
+Future<bool> isAnalyticsEnabled() async {
   bool enabled = false;
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiGetDevToolsEnabled);
@@ -86,7 +86,7 @@ Future<bool> setAnalyticsEnabled([bool value = true]) async {
 /// Return bool.
 /// Return value of false implies either GA is disabled or the Flutter Tool has
 /// never been run (null returned from the server).
-Future<bool> get isFlutterGAEnabled async {
+Future<bool> _isFlutterGAEnabled() async {
   bool enabled = false;
 
   if (isDevToolsServerAvailable) {
@@ -115,7 +115,7 @@ Future<String> flutterGAClientID() async {
   if (isDevToolsServerAvailable) {
     // Test if Flutter is enabled (or if Flutter Tool ever ran) if not enabled
     // is false, we don't want to be the first to create a ~/.flutter file.
-    if (await isFlutterGAEnabled) {
+    if (await _isFlutterGAEnabled()) {
       final resp = await _request(apiGetFlutterGAClientId);
       if (resp?.status == HttpStatus.ok) {
         clientId = json.decode(resp.responseText);

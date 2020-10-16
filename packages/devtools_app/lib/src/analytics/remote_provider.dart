@@ -60,10 +60,10 @@ Future<AnalyticsProvider> get analyticsProvider async {
     if (analytics.isGtagsReset()) {
       await server.resetDevToolsFile();
     }
-    if (await analytics.isAnalyticsEnabled) {
+    if (await analytics.isAnalyticsEnabled()) {
       isEnabled = true;
     }
-    if (await server.isFirstRun) {
+    if (await server.isFirstRun()) {
       isFirstRun = true;
     }
     isGtagsEnabled = analytics.isGtagsEnabled();

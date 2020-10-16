@@ -174,7 +174,7 @@ bool gaEnabled() => _gaEnabled;
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
 /// '~\.devtools'.
-Future<bool> get isAnalyticsEnabled async {
+Future<bool> isAnalyticsEnabled() async {
   _gaEnabled ??= await server.isAnalyticsEnabled();
   return _gaEnabled;
 }
@@ -389,7 +389,7 @@ external String devToolsProperty();
 @JS('hookupListenerForGA')
 external void jsHookupListenerForGA();
 
-Future<bool> get isAnalyticsAllowed async => await isAnalyticsEnabled;
+Future<bool> get isAnalyticsAllowed async => await isAnalyticsEnabled();
 
 void setAllowAnalytics() {
   setAnalyticsEnabled();
