@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../config_specific/server/server.dart' as server;
 import 'analytics.dart' as analytics;
 import 'provider.dart';
 
@@ -57,12 +58,12 @@ Future<AnalyticsProvider> get analyticsProvider async {
   try {
     analytics.exposeGaDevToolsEnabledToJs();
     if (analytics.isGtagsReset()) {
-      await analytics.resetDevToolsFile();
+      await server.resetDevToolsFile();
     }
-    if (await analytics.isEnabled) {
+    if (await analytics.isAnalyticsEnabled) {
       isEnabled = true;
     }
-    if (await analytics.isFirstRun) {
+    if (await server.isFirstRun) {
       isFirstRun = true;
     }
     isGtagsEnabled = analytics.isGtagsEnabled();

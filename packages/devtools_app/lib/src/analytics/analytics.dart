@@ -8,18 +8,16 @@ library gtags;
 // ignore_for_file: non_constant_identifier_names
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:html';
 
-import 'package:devtools_shared/devtools_shared.dart' as server;
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
 import '../../devtools.dart' as devtools show version;
 import '../config_specific/logger/logger.dart';
+import '../config_specific/server/server.dart' as server;
 import '../globals.dart';
 import '../ui/gtags.dart';
-import '../utils.dart';
 import '../version.dart';
 import 'constants.dart';
 
@@ -169,120 +167,6 @@ class GtagExceptionDevTools extends GtagException {
   external String get flutter_client_id;
 }
 
-// Code to check if DevTools server is available, will only be true in release
-// mode, debug mode will be set to false.
-bool get isDevToolsServerAvailable => !isDebugBuild();
-
-/// Helper to catch any server request which could fail we don't want to fail
-/// because Analytics had a problem.
-///
-/// Returns HttpRequest or null (if server failure).
-Future<HttpRequest> _request(String url) async {
-  HttpRequest response;
-
-  try {
-    response = await HttpRequest.request(url, method: 'POST');
-  } catch (_) {}
-
-  return response;
-}
-
-void _logWarning(HttpRequest response, String apiType, [String respText]) {
-  log(
-    'HttpRequest $apiType failed status = ${response?.status}'
-    '${respText != null ? ', responseText = $respText' : ''}',
-    LogLevel.warning,
-  );
-}
-
-// TODO(terry): Move to an API scheme similar to the VM service extension where
-// '/api/devToolsEnabled' returns the value (identical VM service) and
-// '/api/devToolsEnabled?value=true' sets the value.
-
-/// Request Flutter tool stored property value enabled (GA enabled) stored in
-/// the file '~\.flutter'.
-///
-/// Return bool.
-/// Return value of false implies either GA is disabled or the Flutter Tool has
-/// never been run (null returned from the server).
-Future<bool> get isFlutterGAEnabled async {
-  bool enabled = false;
-
-  if (isDevToolsServerAvailable) {
-    final resp = await _request(server.apiGetFlutterGAEnabled);
-    if (resp?.status == HttpStatus.ok) {
-      // A return value of 'null' implies Flutter tool has never been run so
-      // return false for Flutter GA enabled.
-      final responseValue = json.decode(resp.responseText);
-      enabled = responseValue == null ? false : responseValue;
-    } else {
-      _logWarning(resp, server.apiGetFlutterGAEnabled);
-    }
-  }
-
-  return enabled;
-}
-
-/// Request Flutter tool stored property value clientID (GA enabled) stored in
-/// the file '~\.flutter'.
-///
-/// Return as a String, empty string implies Flutter Tool has never been run.
-Future<String> flutterGAClientID() async {
-  // Default empty string, Flutter tool never run.
-  String clientId = '';
-
-  if (isDevToolsServerAvailable) {
-    // Test if Flutter is enabled (or if Flutter Tool ever ran) if not enabled
-    // is false, we don't want to be the first to create a ~/.flutter file.
-    if (await isFlutterGAEnabled) {
-      final resp = await _request(server.apiGetFlutterGAClientId);
-      if (resp?.status == HttpStatus.ok) {
-        clientId = json.decode(resp.responseText);
-        if (clientId == null) {
-          // Requested value of 'null' (Flutter tool never ran). Server request
-          // apiGetFlutterGAClientId should not happen because the
-          // isFlutterGAEnabled test should have been false.
-          log('${server.apiGetFlutterGAClientId} is null', LogLevel.warning);
-        }
-      } else {
-        _logWarning(resp, server.apiGetFlutterGAClientId);
-      }
-    }
-  }
-
-  return clientId;
-}
-
-/// Requests all .devtools properties to be reset to their default values in the
-/// file '~/.devtools'.
-Future<void> resetDevToolsFile() async {
-  if (isDevToolsServerAvailable) {
-    final resp = await _request(server.apiResetDevTools);
-    if (resp?.status == HttpStatus.ok) {
-      assert(json.decode(resp.responseText));
-    } else {
-      _logWarning(resp, server.apiResetDevTools);
-    }
-  }
-}
-
-/// Request DevTools property value 'firstRun' (GA dialog) stored in the file
-/// '~\.devtools'.
-Future<bool> get isFirstRun async {
-  bool firstRun = false;
-
-  if (isDevToolsServerAvailable) {
-    final resp = await _request(server.apiGetDevToolsFirstRun);
-    if (resp?.status == HttpStatus.ok) {
-      firstRun = json.decode(resp.responseText);
-    } else {
-      _logWarning(resp, server.apiGetDevToolsFirstRun);
-    }
-  }
-
-  return firstRun;
-}
-
 bool _gaEnabled;
 
 // Exposed function to JS via allowInterop.
@@ -290,138 +174,19 @@ bool gaEnabled() => _gaEnabled;
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
 /// '~\.devtools'.
-Future<bool> get isEnabled async {
+Future<bool> get isAnalyticsEnabled async {
   if (_gaEnabled != null) return _gaEnabled;
-
-  bool enabled = false;
-
-  if (isDevToolsServerAvailable) {
-    final resp = await _request(server.apiGetDevToolsEnabled);
-    if (resp?.status == HttpStatus.ok) {
-      enabled = json.decode(resp.responseText);
-    } else {
-      _logWarning(resp, server.apiGetDevToolsEnabled);
-    }
-  }
-  _gaEnabled = enabled;
-
-  return enabled;
+  _gaEnabled = await server.isEnabled();
+  return _gaEnabled;
 }
 
 /// Set the DevTools property 'enabled' (GA enabled) stored in the file
 /// '~/.devtools'.
-Future<void> setEnabled([bool value = true]) async {
-  if (isDevToolsServerAvailable) {
-    final resp = await _request(
-      '${server.apiSetDevToolsEnabled}'
-      '?${server.devToolsEnabledPropertyName}=$value',
-    );
-    if (resp?.status == HttpStatus.ok) {
-      assert(json.decode(resp.responseText) == value);
-      _gaEnabled = value;
-    } else {
-      _logWarning(resp, server.apiSetDevToolsEnabled, resp.responseText);
-    }
+Future<void> setAnalyticsEnabled([bool value = true]) async {
+  final didSet = await server.setEnabled(value);
+  if (didSet) {
+    _gaEnabled = value;
   }
-}
-
-/// Set DevTools parameter value for the active survey (e.g. 'Q1-2020').
-///
-/// The value is stored in the file '~\.devtools'.
-///
-/// This method must be called before calling other survey related methods
-/// ([isSurveyActionTaken], [setSurveyActionTaken], [surveyShownCount],
-/// [incrementSurveyShownCount]). If the active survey is not set, warnings are
-/// logged.
-Future<bool> setActiveSurvey(String value) async {
-  if (isDevToolsServerAvailable) {
-    final resp = await _request('${server.apiSetActiveSurvey}'
-        '?${server.activeSurveyName}=$value');
-    if (resp?.status == HttpStatus.ok && json.decode(resp.responseText)) {
-      return true;
-    }
-    if (resp?.status != HttpStatus.ok || !json.decode(resp.responseText)) {
-      _logWarning(resp, server.apiSetActiveSurvey);
-    }
-  }
-  return false;
-}
-
-/// Request DevTools property value 'surveyActionTaken' for the active survey.
-///
-/// The value is stored in the file '~\.devtools'.
-///
-/// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<bool> get isSurveyActionTaken async {
-  bool surveyActionTaken = false;
-
-  if (isDevToolsServerAvailable) {
-    final resp = await _request(server.apiGetSurveyActionTaken);
-    if (resp?.status == HttpStatus.ok) {
-      surveyActionTaken = json.decode(resp.responseText);
-    } else {
-      _logWarning(resp, server.apiGetSurveyActionTaken);
-    }
-  }
-
-  return surveyActionTaken;
-}
-
-/// Set DevTools property value 'surveyActionTaken' for the active survey.
-///
-/// The value is stored in the file '~\.devtools'.
-///
-/// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<void> setSurveyActionTaken() async {
-  if (isDevToolsServerAvailable) {
-    final resp = await _request(
-      '${server.apiSetSurveyActionTaken}'
-      '?${server.surveyActionTakenPropertyName}=true',
-    );
-    if (resp?.status != HttpStatus.ok || !json.decode(resp.responseText)) {
-      _logWarning(resp, server.apiSetSurveyActionTaken, resp.responseText);
-    }
-  }
-}
-
-/// Request DevTools property value 'surveyShownCount' for the active survey.
-///
-/// The value is stored in the file '~\.devtools'.
-///
-/// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<int> get surveyShownCount async {
-  int surveyShownCount = 0;
-
-  if (isDevToolsServerAvailable) {
-    final resp = await _request(server.apiGetSurveyShownCount);
-    if (resp?.status == HttpStatus.ok) {
-      surveyShownCount = json.decode(resp.responseText);
-    } else {
-      _logWarning(resp, server.apiGetSurveyShownCount);
-    }
-  }
-
-  return surveyShownCount;
-}
-
-/// Increment DevTools property value 'surveyShownCount' for the active survey.
-///
-/// The value is stored in the file '~\.devtools'.
-///
-/// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<int> get incrementSurveyShownCount async {
-  // Any failure will still return 0.
-  int surveyShownCount = 0;
-
-  if (isDevToolsServerAvailable) {
-    final resp = await _request(server.apiIncrementSurveyShownCount);
-    if (resp?.status == HttpStatus.ok) {
-      surveyShownCount = json.decode(resp.responseText);
-    } else {
-      _logWarning(resp, server.apiIncrementSurveyShownCount);
-    }
-  }
-  return surveyShownCount;
 }
 
 void screen(
@@ -625,14 +390,14 @@ external String devToolsProperty();
 @JS('hookupListenerForGA')
 external void jsHookupListenerForGA();
 
-Future<bool> get isAnalyticsAllowed async => await isEnabled;
+Future<bool> get isAnalyticsAllowed async => await isAnalyticsEnabled;
 
 void setAllowAnalytics() {
-  setEnabled();
+  setAnalyticsEnabled();
 }
 
 void setDontAllowAnalytics() {
-  setEnabled(false);
+  setAnalyticsEnabled(false);
 }
 
 /// Computes the DevTools application. Fills in the devtoolsPlatformType and
@@ -674,7 +439,7 @@ void computeDevToolsQueryParams() {
 }
 
 void computeFlutterClientId() async {
-  flutterClientId = await flutterGAClientID();
+  flutterClientId = await server.flutterGAClientID();
 }
 
 bool _computing = false;
