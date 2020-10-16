@@ -175,8 +175,7 @@ bool gaEnabled() => _gaEnabled;
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
 /// '~\.devtools'.
 Future<bool> get isAnalyticsEnabled async {
-  if (_gaEnabled != null) return _gaEnabled;
-  _gaEnabled = await server.isAnalyticsEnabled();
+  _gaEnabled ??= await server.isAnalyticsEnabled();
   return _gaEnabled;
 }
 
