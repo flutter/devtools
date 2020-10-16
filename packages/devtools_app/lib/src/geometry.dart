@@ -4,10 +4,11 @@ import 'package:meta/meta.dart';
 // TODO(kenz): consolidate the logic between [VerticalLineSegment] and
 // [HorizontalLineSegment] by using [LineSegment] and switching on the main axis
 abstract class LineSegment {
-  LineSegment(this.start, this.end);
+  LineSegment(this.start, this.end, {@required this.opacity});
 
   final Offset start;
   final Offset end;
+  final double opacity;
 
   /// Whether [this] line segment intersects [rect] along the cross axis.
   ///
@@ -46,9 +47,9 @@ abstract class LineSegment {
 
 class HorizontalLineSegment extends LineSegment
     implements Comparable<HorizontalLineSegment> {
-  HorizontalLineSegment(Offset start, Offset end)
+  HorizontalLineSegment(Offset start, Offset end, {double opacity = 1.0})
       : assert(start.dy == end.dy),
-        super(start, end);
+        super(start, end, opacity: opacity);
 
   double get y => start.dy;
 
@@ -86,15 +87,19 @@ class HorizontalLineSegment extends LineSegment
     return HorizontalLineSegment(
       Offset(zoomedLineStartX, start.dy),
       Offset(zoomedLineEndX, end.dy),
+      opacity: opacity,
     );
   }
 }
 
 class VerticalLineSegment extends LineSegment
     implements Comparable<VerticalLineSegment> {
-  VerticalLineSegment(Offset start, Offset end)
-      : assert(start.dx == end.dx),
-        super(start, end);
+  VerticalLineSegment(
+    Offset start,
+    Offset end, {
+    double opacity = 1.0,
+  })  : assert(start.dx == end.dx),
+        super(start, end, opacity: opacity);
 
   double get x => start.dx;
 
@@ -127,6 +132,7 @@ class VerticalLineSegment extends LineSegment
     return VerticalLineSegment(
       Offset(zoomedLineStartX, start.dy),
       Offset(zoomedLineStartX, end.dy),
+      opacity: opacity,
     );
   }
 }

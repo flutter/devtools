@@ -788,7 +788,7 @@ class AsyncGuidelinePainter extends FlameChartPainter {
     final horizontalScrollOffset = horizontalController.offset;
     final verticalScrollOffset = verticalController.offset;
 
-    final paint = Paint()..color = colorScheme.treeGuidelineColor;
+    final defaultPaint = Paint()..color = colorScheme.treeGuidelineColor;
     for (int i = firstLineIndex; i < guidelines.length; i++) {
       final line = guidelines[i];
       // Take [chartStartInset] and
@@ -835,7 +835,11 @@ class AsyncGuidelinePainter extends FlameChartPainter {
             (zoomedLine.end.dy - verticalScrollOffset)
                 .clamp(0.0, constraints.maxHeight),
           ),
-          paint,
+          zoomedLine.opacity == 1.0
+              ? defaultPaint
+              : (Paint()
+                ..color = colorScheme.treeGuidelineColor
+                    .withOpacity(zoomedLine.opacity)),
         );
       }
     }
