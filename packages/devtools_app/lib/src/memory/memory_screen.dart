@@ -405,7 +405,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   static const resetLegend = '${base}reset_glyph.png';
   static const gcManualLegend = '${base}gc_manual_glyph.png';
   static const gcVMLegend = '${base}gc_vm_glyph.png';
-  static const capcityLegend = '${base}capacity_glyph.png';
+  static const capacityLegend = '${base}capacity_glyph.png';
   static const usedLegend = '${base}used_glyph.png';
   static const externalLegend = '${base}external_glyph.png';
   static const rssLegend = '${base}rss_glyph.png';
@@ -517,7 +517,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
                   padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
                   child: Text('Memory Legend', style: legendHeading),
                 ),
-                legendRow(name1: 'Capcity', image1: capcityLegend),
+                legendRow(name1: 'Capacity', image1: capacityLegend),
                 legendRow(name1: 'Used', image1: usedLegend),
                 legendRow(name1: 'External', image1: externalLegend),
                 legendRow(name1: 'RSS', image1: rssLegend),

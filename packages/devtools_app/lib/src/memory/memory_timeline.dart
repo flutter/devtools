@@ -30,7 +30,7 @@ class MemoryTimeline {
   static const version = 1;
 
   /// Keys used in a map to store all the MPChart Entries we construct to be plotted.
-  static const capcityValueKey = 'capacityValue';
+  static const capacityValueKey = 'capacityValue';
   static const usedValueKey = 'usedValue';
   static const externalValueKey = 'externalValue';
   static const rssValueKey = 'rssValue';
@@ -401,7 +401,7 @@ class MemoryTimeline {
       );
 
       final args = {
-        capcityValueKey: capacityEntry,
+        capacityValueKey: capacityEntry,
         usedValueKey: usedEntry,
         externalValueKey: extEntry,
         rssValueKey: rssEntry,
