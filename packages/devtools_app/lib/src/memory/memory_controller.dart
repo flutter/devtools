@@ -355,7 +355,7 @@ class MemoryController extends DisposableController
     for (var arg in args) {
       memoryTimeline.dartChartData.addTraceEntries(
         rssValue: arg[MemoryTimeline.rssValueKey],
-        capacityValue: arg[MemoryTimeline.capcityValueKey],
+        capacityValue: arg[MemoryTimeline.capacityValueKey],
         usedValue: arg[MemoryTimeline.usedValueKey],
         externalValue: arg[MemoryTimeline.externalValueKey],
         rasterLayerValue: arg[MemoryTimeline.rasterLayerValueKey],
