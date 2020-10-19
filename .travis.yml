@@ -30,9 +30,13 @@ env:
     - BOT=main
     - BOT=packages
     - BOT=test_ddc            PLATFORM=vm
-    - BOT=test_ddc            PLATFORM=chrome
+# PLATFORM=chrome is going away. We need to move these tests to run with
+# chromedriver. https://github.com/flutter/devtools/issues/2437
+#    - BOT=test_ddc            PLATFORM=chrome
     - BOT=test_dart2js        PLATFORM=vm
-    - BOT=test_dart2js        PLATFORM=chrome
+# PLATFORM=chrome is going away. We need to move these tests to run with
+# chromedriver. https://github.com/flutter/devtools/issues/2437
+#   - BOT=test_dart2js        PLATFORM=chrome
     - BOT=integration_ddc
     - BOT=integration_dart2js
     - BOT=main                CHANNEL=master
