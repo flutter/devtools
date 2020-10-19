@@ -143,13 +143,6 @@ this flag.  For example, it is OK to do the following:
 flutter test test/ui/
 ```
 
-Some tests are intended to run on chrome instead of in the regular Dart VM.  To run these tests,
-pass the flag `--platform=chrome` to `flutter test`:
-
-```
-flutter test -j1 --platform=chrome
-```
-
 ### Updating golden files
 
 Some of the golden file tests will fail if Flutter changes the implementation or diagnostic
