@@ -103,19 +103,49 @@ class NotificationsState extends State<_NotificationsProvider>
     super.dispose();
   }
 
-  // TODO(peterdjlee): Support clickable links in notifications. See #2268.
-  /// Pushes a notification [message].
+  // TODO(peterdjlee): Support clickable links in notification text. See #2268.
+  /// Pushes a notification [message], and returns whether the notification was
+  /// successfully pushed.
   @override
-  void push(String message) {
+  bool push(
+    String message, {
+    List<NotificationAction> actions,
+    Duration duration = Notifications.defaultDuration,
+    bool allowDuplicates = true,
+  }) {
+    if (!allowDuplicates &&
+        _notifications.isNotEmpty &&
+        _notifications.where((n) => n.message == message).isNotEmpty) {
+      return false;
+    }
     setState(() {
       _notifications.add(
         _Notification(
           message: message,
+          actions: actions,
           remove: _removeNotification,
+          duration: duration,
         ),
       );
       _overlayEntry?.markNeedsBuild();
     });
+    return true;
+  }
+
+  /// Dismisses all notifications with a matching message.
+  void dismiss(String message) {
+    bool didDismiss = false;
+    for (final notification in _notifications) {
+      if (notification.message == message) {
+        _notifications.remove(notification);
+        didDismiss = true;
+      }
+    }
+    if (didDismiss) {
+      setState(() {
+        _overlayEntry?.markNeedsBuild();
+      });
+    }
   }
 
   void _removeNotification(_Notification notification) {
@@ -161,6 +191,7 @@ class _Notification extends StatefulWidget {
   const _Notification({
     Key key,
     @required this.message,
+    this.actions = const [],
     this.duration = Notifications.defaultDuration,
     @required this.remove,
   })  : assert(message != null),
@@ -170,6 +201,7 @@ class _Notification extends StatefulWidget {
 
   final Duration duration;
   final String message;
+  final List<NotificationAction> actions;
   final void Function(_Notification) remove;
 
   @override
@@ -235,19 +267,65 @@ class _NotificationState extends State<_Notification>
                 theme.primaryTextTheme.subtitle1,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Text(
-                  widget.message,
-                  style: theme.textTheme.bodyText1,
-                  overflow: TextOverflow.visible,
-                  maxLines: 6,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildMessage(),
+                  const SizedBox(height: defaultSpacing),
+                  _buildActions(),
+                ],
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildMessage() {
+    return Text(
+      widget.message,
+      style: Theme.of(context).textTheme.bodyText1,
+      overflow: TextOverflow.visible,
+      maxLines: 6,
+    );
+  }
+
+  Widget _buildActions() {
+    if (widget.actions.isEmpty) return const SizedBox();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        for (int i = 0; i < widget.actions.length; i++) ...[
+          widget.actions[i],
+          if (i != widget.actions.length - 1)
+            const SizedBox(width: denseSpacing)
+        ]
+      ],
+    );
+  }
+}
+
+class NotificationAction extends StatelessWidget {
+  const NotificationAction(this.label, this.onAction, {this.isPrimary = false});
+
+  final String label;
+
+  final VoidCallback onAction;
+
+  final bool isPrimary;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelText = Text(label);
+    return isPrimary
+        ? RaisedButton(
+            onPressed: onAction,
+            child: labelText,
+          )
+        : OutlineButton(
+            onPressed: onAction,
+            child: labelText,
+          );
   }
 }

@@ -73,8 +73,9 @@ class DevToolsUsage {
 
   IOPersistentProperties properties;
 
-  static const String _surveyActionTaken = 'surveyActionTaken';
-  static const String _surveyShownCount = 'surveyShownCount';
+  static const _surveyActionTaken = 'surveyActionTaken';
+  static const _surveyShownCount = 'surveyShownCount';
+  static const _lastSurveyContentCheck = 'lastSurveyContentCheckMs';
 
   void reset() {
     properties.remove('firstRun');
@@ -117,6 +118,12 @@ class DevToolsUsage {
       // Create the survey if property is non-existent in ~/.devtools
       _addSurvey(activeSurvey);
     }
+  }
+
+  int get lastSurveyContentCheckMs => properties[_lastSurveyContentCheck];
+  set lastSurveyContentCheckMs(int ms) {
+    assert(ms != null);
+    properties[_lastSurveyContentCheck] = ms;
   }
 
   /// Need to rewrite the entire survey structure for property to be persisted.

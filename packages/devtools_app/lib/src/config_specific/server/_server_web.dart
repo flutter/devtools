@@ -148,12 +148,43 @@ Future<bool> setActiveSurvey(String value) async {
         '?$activeSurveyName=$value');
     if (resp?.status == HttpStatus.ok && json.decode(resp.responseText)) {
       return true;
-    }
-    if (resp?.status != HttpStatus.ok || !json.decode(resp.responseText)) {
+    } else {
       logWarning(resp, apiSetActiveSurvey);
     }
   }
   return false;
+}
+
+/// Gets the DevTools parameter value for the last time (in milliseconds since
+/// epoch) that the survey content was checked from flutter.dev.
+///
+/// The value is stored in the file '~/.devtools'.
+Future<int> getLastSurveyContentCheckMs() async {
+  if (isDevToolsServerAvailable) {
+    final resp = await _request(apiGetLastSurveyContentCheckMs);
+    if (resp?.status == HttpStatus.ok) {
+      final lastCheckMs = json.decode(resp.responseText);
+      return lastCheckMs;
+    }
+  }
+  return null;
+}
+
+/// Sets the DevTools parameter value for the last time (in milliseconds since
+/// epoch) that the survey content was checked from flutter.dev.
+///
+/// The value is stored in the file '~/.devtools'.
+Future<bool> setLastSurveyContentCheckMs(int ms) async {
+  if (isDevToolsServerAvailable) {
+    final resp = await _request('$apiSetLastSurveyContentCheckMs'
+        '?$lastSurveyContentCheckMs=$ms');
+    if (resp?.status == HttpStatus.ok && json.decode(resp.responseText)) {
+      return true;
+    } else {
+      logWarning(resp, apiSetLastSurveyContentCheckMs);
+    }
+  }
+  return null;
 }
 
 /// Request DevTools property value 'surveyActionTaken' for the active survey.
@@ -161,7 +192,7 @@ Future<bool> setActiveSurvey(String value) async {
 /// The value is stored in the file '~\.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<bool> get isSurveyActionTaken async {
+Future<bool> surveyActionTaken() async {
   bool surveyActionTaken = false;
 
   if (isDevToolsServerAvailable) {
@@ -198,7 +229,7 @@ Future<void> setSurveyActionTaken() async {
 /// The value is stored in the file '~\.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<int> get surveyShownCount async {
+Future<int> surveyShownCount() async {
   int surveyShownCount = 0;
 
   if (isDevToolsServerAvailable) {
@@ -218,7 +249,7 @@ Future<int> get surveyShownCount async {
 /// The value is stored in the file '~\.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<int> get incrementSurveyShownCount async {
+Future<int> incrementSurveyShownCount() async {
   // Any failure will still return 0.
   int surveyShownCount = 0;
 
