@@ -136,14 +136,14 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   }
 
   /// When to have verbose Dropdown based on media width.
-  static const verboseDropDownMininumWidth = 950;
+  static const verboseDropDownMinimumWidth = 950;
 
   @override
   Widget build(BuildContext context) {
     final mediaWidth = MediaQuery.of(context).size.width;
     final textTheme = Theme.of(context).textTheme;
 
-    controller.memorySourcePrefix = mediaWidth > verboseDropDownMininumWidth
+    controller.memorySourcePrefix = mediaWidth > verboseDropDownMinimumWidth
         ? MemoryScreen.memorySourceMenuItemPrefix
         : '';
 
@@ -182,7 +182,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
     files.insert(0, MemoryController.liveFeed);
 
     final mediaWidth = MediaQuery.of(context).size.width;
-    final isVerboseDropdown = mediaWidth > verboseDropDownMininumWidth;
+    final isVerboseDropdown = mediaWidth > verboseDropDownMinimumWidth;
 
     final _displayTypes = [
       MemoryController.displayOneMinute,
