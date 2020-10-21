@@ -162,6 +162,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       Notifications.of(context),
       _pushSnapshotScreenForImport,
     );
+    // This needs to be called at the scaffold level because we need an instance
+    // of Notifications above this context.
+    surveyService.maybeShowSurveyPrompt(context);
   }
 
   @override

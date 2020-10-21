@@ -73,8 +73,8 @@ class DevToolsUsage {
 
   IOPersistentProperties properties;
 
-  static const String _surveyActionTaken = 'surveyActionTaken';
-  static const String _surveyShownCount = 'surveyShownCount';
+  static const _surveyActionTaken = 'surveyActionTaken';
+  static const _surveyShownCount = 'surveyShownCount';
 
   void reset() {
     properties.remove('firstRun');

@@ -13,6 +13,7 @@ import '../framework_controller.dart';
 import '../globals.dart';
 import '../service.dart';
 import '../service_manager.dart';
+import '../survey.dart';
 import '../vm_service_wrapper.dart';
 
 typedef ErrorReporter = void Function(String title, dynamic error);
@@ -22,6 +23,7 @@ class FrameworkCore {
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
     setGlobal(MessageBus, MessageBus());
     setGlobal(FrameworkController, FrameworkController());
+    setGlobal(SurveyService, SurveyService());
   }
 
   static void init({String url}) {

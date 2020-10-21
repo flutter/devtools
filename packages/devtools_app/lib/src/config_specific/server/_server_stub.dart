@@ -21,6 +21,26 @@ Future<String> flutterGAClientID() async {
   throw Exception(unsupportedMessage);
 }
 
+Future<bool> setActiveSurvey(String value) async {
+  throw Exception(unsupportedMessage);
+}
+
+Future<bool> surveyActionTaken() async {
+  throw Exception(unsupportedMessage);
+}
+
+Future<void> setSurveyActionTaken() async {
+  throw Exception(unsupportedMessage);
+}
+
+Future<int> surveyShownCount() async {
+  throw Exception(unsupportedMessage);
+}
+
+Future<int> incrementSurveyShownCount() async {
+  throw Exception(unsupportedMessage);
+}
+
 Future<void> resetDevToolsFile() async {
   throw Exception(unsupportedMessage);
 }
