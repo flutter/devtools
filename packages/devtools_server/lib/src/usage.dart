@@ -75,7 +75,6 @@ class DevToolsUsage {
 
   static const _surveyActionTaken = 'surveyActionTaken';
   static const _surveyShownCount = 'surveyShownCount';
-  static const _lastSurveyContentCheck = 'lastSurveyContentCheckMs';
 
   void reset() {
     properties.remove('firstRun');
