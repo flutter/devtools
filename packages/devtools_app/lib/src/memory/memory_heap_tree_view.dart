@@ -264,7 +264,7 @@ class HeapTreeViewState extends State<HeapTree>
     bool takeSnapshot = false;
     final sampleTime = Duration(milliseconds: heapSample.timestamp);
 
-    final rssExceeded = heapSum > heapSample.rss;
+    final rssExceeded = heapSample.rss != null && heapSum > heapSample.rss;
     if (rssExceeded) {
       final increase = heapSum - lastSnapshotMemoryTotal;
       final rssPercentIncrease = lastSnapshotMemoryTotal > 0
