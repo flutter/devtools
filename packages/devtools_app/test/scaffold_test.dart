@@ -8,6 +8,7 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/scaffold.dart';
 import 'package:devtools_app/src/screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/survey.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -26,6 +27,7 @@ void main() {
           .thenAnswer((_) => const Stream<bool>.empty());
       setGlobal(ServiceConnectionManager, mockServiceManager);
       setGlobal(FrameworkController, FrameworkController());
+      setGlobal(SurveyService, SurveyService());
     });
 
     testWidgetsWithWindowSize('displays in narrow mode without error',
