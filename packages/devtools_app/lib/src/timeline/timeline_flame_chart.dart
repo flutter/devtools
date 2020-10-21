@@ -789,6 +789,7 @@ class AsyncGuidelinePainter extends FlameChartPainter {
     final verticalScrollOffset = verticalController.offset;
 
     final paint = Paint()..color = colorScheme.treeGuidelineColor;
+    var lastOpacity = 1.0;
     for (int i = firstLineIndex; i < guidelines.length; i++) {
       final line = guidelines[i];
       // Take [chartStartInset] and
@@ -822,6 +823,11 @@ class AsyncGuidelinePainter extends FlameChartPainter {
 
       // Only paint lines that intersect [visible] along both axes.
       if (zoomedLine.intersects(visible)) {
+        final opacity = zoomedLine.opacity;
+        if (opacity != lastOpacity) {
+          paint.color = colorScheme.treeGuidelineColor.withOpacity(opacity);
+          lastOpacity = opacity;
+        }
         canvas.drawLine(
           Offset(
             (zoomedLine.start.dx - horizontalScrollOffset)
