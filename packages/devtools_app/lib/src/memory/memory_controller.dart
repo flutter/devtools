@@ -45,8 +45,7 @@ final String _memoryLogFilename =
 /// This class contains the business logic for [memory.dart].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
-/// of the complicated logic in this class to run on the VM and will help
-/// simplify porting this code to work with Flutter Web.
+/// of the complicated logic in this class to run on the VM.
 class MemoryController extends DisposableController
     with
         AutoDisposeControllerMixin,
@@ -59,15 +58,7 @@ class MemoryController extends DisposableController
 
   static const logFilenamePrefix = 'memory_log_';
 
-  final _showTreemap = ValueNotifier<bool>(false);
-
-  ValueListenable<bool> get showTreemap => _showTreemap;
-
-  void toggleShowTreemap(bool value) {
-    _showTreemap.value = value;
-  }
-
-  final snapshots = <Snapshot>[];
+  final List<Snapshot> snapshots = [];
 
   Snapshot get lastSnapshot => snapshots.safeLast;
 
@@ -1135,11 +1126,16 @@ class MPChartData {
 
   /// Compute each dataset Entry's.
   List<Entry> get used => datasets[ChartDataSets.usedSet.index];
+
   List<Entry> get capacity => datasets[ChartDataSets.capacitySet.index];
+
   List<Entry> get externalHeap => datasets[ChartDataSets.externalHeapSet.index];
+
   List<Entry> get residentSetSize => datasets[ChartDataSets.rssSet.index];
+
   List<Entry> get rasterLayerSetSize =>
       datasets[ChartDataSets.rasterLayerSet.index];
+
   List<Entry> get rasterPictureSetSize =>
       datasets[ChartDataSets.rasterPictureSet.index];
 
@@ -1218,13 +1214,20 @@ class MPEventsChartData {
 
   /// Compute each dataset Entry's.
   List<Entry> get ghosts => datasets[EventDataSets.ghostsSet.index];
+
   List<Entry> get gcUser => datasets[EventDataSets.gcUserSet.index];
+
   List<Entry> get gcVm => datasets[EventDataSets.gcVmSet.index];
+
   List<Entry> get snapshot => datasets[EventDataSets.snapshotSet.index];
+
   List<Entry> get snapshotAuto => datasets[EventDataSets.snapshotAutoSet.index];
+
   List<Entry> get monitorStart => datasets[EventDataSets.monitorStartSet.index];
+
   List<Entry> get monitorContinues =>
       datasets[EventDataSets.monitorContinuesSet.index];
+
   List<Entry> get monitorReset => datasets[EventDataSets.monitorResetSet.index];
 
   /// Add each entry to its corresponding trace.
@@ -1304,18 +1307,25 @@ class MPEngineChartData {
 
   // Datapoint entries for each Java heap value.
   List<Entry> get javaHeap => datasets[ADBDataSets.javaHeapSet.index];
+
   // Datapoint entries for each native heap value.
   List<Entry> get nativeHeap => datasets[ADBDataSets.nativeHeapSet.index];
+
   // Datapoint entries for code size value.
   List<Entry> get code => datasets[ADBDataSets.codeSet.index];
+
   // Datapoint entries for stack size value.
   List<Entry> get stack => datasets[ADBDataSets.stackSet.index];
+
   // Datapoint entries for graphics size value.
   List<Entry> get graphics => datasets[ADBDataSets.graphicsSet.index];
+
   // Datapoint entries for other size value.
   List<Entry> get other => datasets[ADBDataSets.otherSet.index];
+
   // Datapoint entries for system size value.
   List<Entry> get system => datasets[ADBDataSets.systemSet.index];
+
   // Datapoint entries for total size value.
   List<Entry> get total => datasets[ADBDataSets.totalSet.index];
 

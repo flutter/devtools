@@ -21,6 +21,7 @@ import 'memory_chart.dart';
 import 'memory_controller.dart';
 import 'memory_events_pane.dart';
 import 'memory_heap_tree_view.dart';
+import 'memory_heap_treemap.dart';
 
 /// Width of application when memory buttons loose their text.
 const _primaryControlsMinVerboseWidth = 1100.0;
@@ -77,11 +78,20 @@ class MemoryScreen extends Screen {
 class MemoryBody extends StatefulWidget {
   const MemoryBody();
 
+  static const ValueKey dartHeapTabKey = ValueKey('Dart Heap');
+  static const ValueKey heapTreemapTabKey = ValueKey('Heap Treemap');
+
+  static final List<Tab> memoryTabs = [
+    Tab(text: dartHeapTabKey.value, key: dartHeapTabKey),
+    Tab(text: heapTreemapTabKey.value, key: heapTreemapTabKey),
+  ];
+
   @override
   MemoryBodyState createState() => MemoryBodyState();
 }
 
-class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
+class MemoryBodyState extends State<MemoryBody>
+    with AutoDisposeMixin, SingleTickerProviderStateMixin {
   @visibleForTesting
   static const androidChartButtonKey = Key('Android Chart');
 
@@ -89,13 +99,21 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   MemoryEventsPane _memoryEvents;
 
   MemoryController controller;
+  TabController tabController;
 
   OverlayEntry legendOverlayEntry;
 
   @override
   void initState() {
     super.initState();
+
     ga.screen(MemoryScreen.id);
+
+    tabController = TabController(
+      length: MemoryBody.memoryTabs.length,
+      vsync: this,
+    );
+    addAutoDisposeListener(tabController);
   }
 
   @override
@@ -148,6 +166,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         : '';
 
     _memoryEvents ??= MemoryEventsPane();
+    // TODO: Should this use ??= ?
     _memoryChart = MemoryChart();
 
     return Column(
@@ -167,9 +186,28 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         SizedBox(
           child: _memoryChart,
         ),
-        const PaddedDivider(padding: EdgeInsets.zero),
+        const SizedBox(height: defaultSpacing),
+        Row(
+          children: [
+            TabBar(
+              labelColor: textTheme.bodyText1.color,
+              isScrollable: true,
+              controller: tabController,
+              tabs: MemoryBody.memoryTabs,
+            ),
+            const Expanded(child: SizedBox()),
+          ],
+        ),
+        const SizedBox(width: defaultSpacing),
         Expanded(
-          child: HeapTree(controller),
+          child: TabBarView(
+            physics: defaultTabBarViewPhysics,
+            controller: tabController,
+            children: [
+              HeapTree(controller),
+              MemoryHeapTreemap(controller),
+            ],
+          ),
         ),
       ],
     );
@@ -471,79 +509,69 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         height: controller.isAndroidChartVisible
             ? legendHeight2Charts
             : legendHeight1Chart,
-        child: Opacity(
-          opacity: 0.6,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(
-              0,
-              5,
-              0,
-              8,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              border: Border.all(
-                color: Colors.yellow,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(0, 5, 0, 8),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            border: Border.all(color: Colors.yellow),
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          width: legendWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+                child: Text('Events Legend', style: legendHeading),
               ),
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            width: legendWidth,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              legendRow(
+                name1: 'Snapshot',
+                image1: snapshotManualLegend,
+                name2: 'Auto',
+                image2: snapshotAutoLegend,
+              ),
+              legendRow(
+                name1: 'Monitor',
+                image1: monitorLegend,
+                name2: 'Reset',
+                image2: resetLegend,
+              ),
+              legendRow(
+                name1: 'GC VM',
+                image1: gcVMLegend,
+                name2: 'Manual',
+                image2: gcManualLegend,
+              ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+                child: Text('Memory Legend', style: legendHeading),
+              ),
+              legendRow(name1: 'Capacity', image1: capacityLegend),
+              legendRow(name1: 'Used', image1: usedLegend),
+              legendRow(name1: 'External', image1: externalLegend),
+              legendRow(name1: 'RSS', image1: rssLegend),
+              if (controller.isAndroidChartVisible)
+                const Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 9)),
+              if (controller.isAndroidChartVisible)
                 Container(
                   padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
-                  child: Text('Events Legend', style: legendHeading),
+                  child: Text('Android Legend', style: legendHeading),
                 ),
-                legendRow(
-                  name1: 'Snapshot',
-                  image1: snapshotManualLegend,
-                  name2: 'Auto',
-                  image2: snapshotAutoLegend,
-                ),
-                legendRow(
-                  name1: 'Monitor',
-                  image1: monitorLegend,
-                  name2: 'Reset',
-                  image2: resetLegend,
-                ),
-                legendRow(
-                  name1: 'GC VM',
-                  image1: gcVMLegend,
-                  name2: 'Manual',
-                  image2: gcManualLegend,
-                ),
-                Container(
-                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
-                  child: Text('Memory Legend', style: legendHeading),
-                ),
-                legendRow(name1: 'Capacity', image1: capacityLegend),
-                legendRow(name1: 'Used', image1: usedLegend),
-                legendRow(name1: 'External', image1: externalLegend),
-                legendRow(name1: 'RSS', image1: rssLegend),
-                if (controller.isAndroidChartVisible)
-                  const Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 9)),
-                if (controller.isAndroidChartVisible)
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
-                    child: Text('Android Legend', style: legendHeading),
-                  ),
-                if (controller.isAndroidChartVisible)
-                  legendRow(name1: 'Total', image1: androidTotalLegend),
-                if (controller.isAndroidChartVisible)
-                  legendRow(name1: 'Other', image1: androidOtherLegend),
-                if (controller.isAndroidChartVisible)
-                  legendRow(name1: 'Code', image1: androidCodeLegend),
-                if (controller.isAndroidChartVisible)
-                  legendRow(name1: 'Native', image1: androidNativeLegend),
-                if (controller.isAndroidChartVisible)
-                  legendRow(name1: 'Java', image1: androidJavaLegend),
-                if (controller.isAndroidChartVisible)
-                  legendRow(name1: 'Stack', image1: androidStackLegend),
-                if (controller.isAndroidChartVisible)
-                  legendRow(name1: 'Graphics', image1: androidGraphicsLegend),
-              ],
-            ),
+              if (controller.isAndroidChartVisible)
+                legendRow(name1: 'Total', image1: androidTotalLegend),
+              if (controller.isAndroidChartVisible)
+                legendRow(name1: 'Other', image1: androidOtherLegend),
+              if (controller.isAndroidChartVisible)
+                legendRow(name1: 'Code', image1: androidCodeLegend),
+              if (controller.isAndroidChartVisible)
+                legendRow(name1: 'Native', image1: androidNativeLegend),
+              if (controller.isAndroidChartVisible)
+                legendRow(name1: 'Java', image1: androidJavaLegend),
+              if (controller.isAndroidChartVisible)
+                legendRow(name1: 'Stack', image1: androidStackLegend),
+              if (controller.isAndroidChartVisible)
+                legendRow(name1: 'Graphics', image1: androidGraphicsLegend),
+            ],
           ),
         ),
       ),

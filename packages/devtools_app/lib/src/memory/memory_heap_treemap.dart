@@ -8,21 +8,23 @@ import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
-
+import '../common_widgets.dart';
+import '../theme.dart';
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';
 
-class MemoryTreemap extends StatefulWidget {
-  const MemoryTreemap(this.controller);
+class MemoryHeapTreemap extends StatefulWidget {
+  const MemoryHeapTreemap(this.controller);
 
   final MemoryController controller;
 
   @override
-  MemoryTreemapState createState() => MemoryTreemapState(controller);
+  MemoryHeapTreemapState createState() => MemoryHeapTreemapState(controller);
 }
 
-class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
-  MemoryTreemapState(this.controller);
+class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
+    with AutoDisposeMixin {
+  MemoryHeapTreemapState(this.controller);
 
   InstructionsSize sizes;
 
@@ -41,9 +43,10 @@ class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
     // TODO(terry): Unable to short-circuit need to investigate why?
     controller = Provider.of<MemoryController>(context);
 
-    sizes = InstructionsSize.fromSnapshot(controller);
-
-    root = sizes.root;
+    if (controller.heapGraph != null) {
+      sizes = InstructionsSize.fromSnapshot(controller);
+      root = sizes.root;
+    }
 
     cancel();
 
@@ -90,22 +93,38 @@ class MemoryTreemapState extends State<MemoryTreemap> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (sizes != null) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          return Treemap.fromRoot(
-            rootNode: root,
-            levelsVisible: 2,
-            isOutermostLevel: true,
-            width: constraints.maxWidth,
-            height: constraints.maxHeight,
-            onRootChangedCallback: _onRootChanged,
-          );
-        },
+    if (sizes == null) {
+      return Column(
+        children: [
+          const SizedBox(height: denseRowSpacing),
+          Expanded(
+            child: OutlineDecoration(
+              child: Row(children: const [SizedBox()]),
+            ),
+          ),
+        ],
       );
-    } else {
-      return const SizedBox();
     }
+
+    return Column(
+      children: [
+        const SizedBox(height: denseRowSpacing),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Treemap.fromRoot(
+                rootNode: root,
+                levelsVisible: 2,
+                isOutermostLevel: true,
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                onRootChangedCallback: _onRootChanged,
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 }
 
