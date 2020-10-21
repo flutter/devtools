@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1165,8 +1165,8 @@ class FlexChildVisualizer extends StatelessWidget {
         opacity: min([state.entranceCurve.value * 5, 1.0]),
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: (renderSize.width - size.width) / 2,
-            vertical: (renderSize.height - size.height) / 2,
+            horizontal: math.max(0.0, (renderSize.width - size.width) / 2),
+            vertical: math.max(0.0, (renderSize.height - size.height) / 2),
           ),
           child: child,
         ),
