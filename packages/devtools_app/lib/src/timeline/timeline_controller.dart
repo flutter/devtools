@@ -132,7 +132,7 @@ class TimelineController
   Future<void> get timelineStarted => _timelineStarted;
 
   Future<void> _startTimeline() {
-    _timelineStarted = _startTimelineHelper();
+    return _timelineStarted = _startTimelineHelper();
   }
 
   Future<void> _startTimelineHelper() async {
