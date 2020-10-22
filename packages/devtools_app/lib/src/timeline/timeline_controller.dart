@@ -128,7 +128,14 @@ class TimelineController
   /// This list is cleared and repopulated each time "Refresh" is clicked.
   List<TraceEventWrapper> allTraceEvents = [];
 
-  void _startTimeline() async {
+  Future<void> _timelineStarted;
+  Future<void> get timelineStarted => _timelineStarted;
+
+  Future<void> _startTimeline() {
+    _timelineStarted = _startTimelineHelper();
+  }
+
+  Future<void> _startTimelineHelper() async {
     await serviceManager.onServiceAvailable;
     unawaited(allowedError(
       _cpuProfilerService.setProfilePeriod(mediumProfilePeriod),
