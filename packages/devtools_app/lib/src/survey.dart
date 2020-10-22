@@ -29,11 +29,11 @@ class SurveyService {
 
   Future<DevToolsSurvey> get activeSurvey async {
     _cachedSurvey ??= await _fetchSurveyContent();
-    if (_cachedSurvey != null) {
+    if (_cachedSurvey != null && server.isDevToolsServerAvailable) {
       await server.setActiveSurvey(_cachedSurvey.id);
     }
 
-    if (await _shouldShowSurvey()) {
+    if ( server.isDevToolsServerAvailable && await _shouldShowSurvey()) {
       return _cachedSurvey;
     }
     return null;

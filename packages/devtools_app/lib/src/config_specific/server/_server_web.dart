@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+// TODO(jacobr): this should use package:http instead of dart:html.
 import 'dart:html';
 
 import 'package:devtools_shared/devtools_shared.dart';
