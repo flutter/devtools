@@ -78,12 +78,9 @@ class MemoryScreen extends Screen {
 class MemoryBody extends StatefulWidget {
   const MemoryBody();
 
-  static const ValueKey dartHeapTabKey = ValueKey('Dart Heap');
-  static const ValueKey heapTreemapTabKey = ValueKey('Heap Treemap');
-
-  static final List<Tab> memoryTabs = [
-    Tab(text: dartHeapTabKey.value, key: dartHeapTabKey),
-    Tab(text: heapTreemapTabKey.value, key: heapTreemapTabKey),
+  static const List<Tab> memoryTabs = [
+    Tab(text: 'Dart Heap'),
+    Tab(text: 'Heap Treemap'),
   ];
 
   @override
@@ -94,9 +91,6 @@ class MemoryBodyState extends State<MemoryBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
   @visibleForTesting
   static const androidChartButtonKey = Key('Android Chart');
-
-  MemoryChart _memoryChart;
-  MemoryEventsPane _memoryEvents;
 
   MemoryController controller;
   TabController tabController;
@@ -165,10 +159,6 @@ class MemoryBodyState extends State<MemoryBody>
         ? MemoryScreen.memorySourceMenuItemPrefix
         : '';
 
-    _memoryEvents ??= MemoryEventsPane();
-    // TODO: Should this use ??= ?
-    _memoryChart = MemoryChart();
-
     return Column(
       children: [
         Row(
@@ -181,10 +171,10 @@ class MemoryBodyState extends State<MemoryBody>
         ),
         SizedBox(
           height: 50,
-          child: _memoryEvents,
+          child: MemoryEventsPane(),
         ),
         SizedBox(
-          child: _memoryChart,
+          child: MemoryChart(),
         ),
         const SizedBox(height: defaultSpacing),
         Row(

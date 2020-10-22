@@ -360,24 +360,26 @@ class HeapTreeViewState extends State<HeapTree>
       snapshotDisplay = const SizedBox();
     }
 
-    return Column(
-      children: [
-        const SizedBox(height: denseRowSpacing),
-        Row(
-          children: [
-            _buildSnapshotControls(textTheme),
-            const Expanded(child: SizedBox(width: defaultSpacing)),
-            // TODO(peterdjlee): Implement filter and search functionality for treemap.
-            _buildSearchFilterControls(),
-          ],
-        ),
-        const SizedBox(height: denseRowSpacing),
-        Expanded(
-          child: OutlineDecoration(
-            child: buildSnapshotTables(snapshotDisplay),
+    return Padding(
+      padding: const EdgeInsets.only(top: denseRowSpacing),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              _buildSnapshotControls(textTheme),
+              const Expanded(child: SizedBox(width: defaultSpacing)),
+              // TODO(peterdjlee): Implement filter and search functionality for treemap.
+              _buildSearchFilterControls(),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: denseRowSpacing),
+          Expanded(
+            child: OutlineDecoration(
+              child: buildSnapshotTables(snapshotDisplay),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -106,24 +106,20 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
       );
     }
 
-    return Column(
-      children: [
-        const SizedBox(height: denseRowSpacing),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Treemap.fromRoot(
-                rootNode: root,
-                levelsVisible: 2,
-                isOutermostLevel: true,
-                width: constraints.maxWidth,
-                height: constraints.maxHeight,
-                onRootChangedCallback: _onRootChanged,
-              );
-            },
-          ),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(top: denseRowSpacing),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Treemap.fromRoot(
+            rootNode: root,
+            levelsVisible: 2,
+            isOutermostLevel: true,
+            width: constraints.maxWidth,
+            height: constraints.maxHeight,
+            onRootChangedCallback: _onRootChanged,
+          );
+        },
+      ),
     );
   }
 }
