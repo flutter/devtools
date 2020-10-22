@@ -208,6 +208,7 @@ class ServiceConnectionManager {
     _stateController.add(true);
 
     await _isolateManager._initIsolates(vm.isolates);
+    service.onDebugEvent.listen(_isolateManager._handleDebugEvent);
     service.onIsolateEvent.listen(_isolateManager._handleIsolateEvent);
     service.onExtensionEvent
         .listen(_serviceExtensionManager._handleExtensionEvent);
@@ -461,7 +462,8 @@ class IsolateManager {
           ._maybeAddServiceExtension(event.extensionRPC);
 
       // Check to see if there is a new isolate.
-      if (_selectedIsolate == null && _isFlutterExtension(event.extensionRPC)) {
+      if (_selectedIsolate == null &&
+          extensions.isFlutterExtension(event.extensionRPC)) {
         await _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == EventKind.kIsolateExit) {
@@ -478,15 +480,23 @@ class IsolateManager {
     }
   }
 
+  Future<void> _handleDebugEvent(Event event) async {
+    if (event.kind == EventKind.kResume) {
+      final isolateId = event.isolate.id;
+      final callbacks =
+          _serviceExtensionManager.callbacksOnIsolateResume[isolateId];
+      for (final callback in callbacks) {
+        await callback();
+      }
+      callbacks.clear();
+    }
+  }
+
   void _sendToMessageBus(Event event) {
     messageBus.addEvent(BusEvent(
       'debugger',
       data: event,
     ));
-  }
-
-  bool _isFlutterExtension(String extensionName) {
-    return extensionName.startsWith('ext.flutter.');
   }
 
   Future<void> _initSelectedIsolate(List<IsolateRef> isolates) async {
@@ -499,7 +509,7 @@ class IsolateManager {
         final Isolate isolate = await _service.getIsolate(ref.id);
         if (isolate.extensionRPCs != null) {
           for (String extensionName in isolate.extensionRPCs) {
-            if (_isFlutterExtension(extensionName)) {
+            if (extensions.isFlutterExtension(extensionName)) {
               await _setSelectedIsolate(ref);
               return;
             }
@@ -574,6 +584,8 @@ class ServiceExtensionManager {
   /// add extensions until the first frame event has been received
   /// [_firstFrameEventReceived].
   final _pendingServiceExtensions = <String>{};
+
+  final callbacksOnIsolateResume = <String, List<AsyncCallback>>{};
 
   var extensionStatesUpdated = Completer<void>();
 
@@ -744,37 +756,51 @@ class ServiceExtensionManager {
     final expectedValueType =
         extensions.serviceExtensionsAllowlist[name].values.first.runtimeType;
 
-    try {
-      final response = await _service.callServiceExtension(
-        name,
-        isolateId: _isolateManager.selectedIsolate.id,
-      );
-      switch (expectedValueType) {
-        case bool:
-          final bool enabled =
-              response.json['enabled'] == 'true' ? true : false;
-          await _maybeRestoreExtension(name, enabled);
-          return;
-        case String:
-          final String value = response.json['value'];
-          await _maybeRestoreExtension(name, value);
-          return;
-        case int:
-        case double:
-          final num value = num.parse(
-              response.json[name.substring(name.lastIndexOf('.') + 1)]);
-          await _maybeRestoreExtension(name, value);
-          return;
-        default:
-          return;
+    final restore = () async {
+      try {
+        final response = await _service.callServiceExtension(
+          name,
+          isolateId: _isolateManager.selectedIsolate.id,
+        );
+        switch (expectedValueType) {
+          case bool:
+            final bool enabled =
+                response.json['enabled'] == 'true' ? true : false;
+            await _maybeRestoreExtension(name, enabled);
+            return;
+          case String:
+            final String value = response.json['value'];
+            await _maybeRestoreExtension(name, value);
+            return;
+          case int:
+          case double:
+            final num value = num.parse(
+                response.json[name.substring(name.lastIndexOf('.') + 1)]);
+            await _maybeRestoreExtension(name, value);
+            return;
+          default:
+            return;
+        }
+      } catch (e) {
+        // Do not report an error if the VMService has gone away or the
+        // selectedIsolate has been closed probably due to a hot restart.
+        // There is no need
+        // TODO(jacobr): validate that the exception is one of a short list
+        // of allowed network related exceptions rather than ignoring all
+        // exceptions.
       }
-    } catch (e) {
-      // Do not report an error if the VMService has gone away or the
-      // selectedIsolate has been closed probably due to a hot restart.
-      // There is no need
-      // TODO(jacobr): validate that the exception is one of a short list
-      // of allowed network related exceptions rather than ignoring all
-      // exceptions.
+    };
+
+    final Isolate isolate =
+        await _service.getIsolate(_isolateManager.selectedIsolate.id);
+    // Do not try to restore Dart IO extensions for a paused isolate.
+    if (extensions.isDartIoExtension(name) &&
+        isolate.pauseEvent.kind.contains('Pause')) {
+      callbacksOnIsolateResume
+          .putIfAbsent(_isolateManager.selectedIsolate.id, () => [])
+          .add(restore);
+    } else {
+      await restore();
     }
   }
 
@@ -795,36 +821,50 @@ class ServiceExtensionManager {
       return;
     }
 
-    assert(value != null);
-    if (value is bool) {
-      // TODO(kenz): stop special casing http timeline logging once it can be
-      // called via `callServiceExtension`. See
-      // https://github.com/dart-lang/sdk/issues/43628.
-      if (name == extensions.httpEnableTimelineLogging.extension) {
-        await _service.forEachIsolate((isolate) async {
-          await _service.httpEnableTimelineLogging(isolate.id, value);
-        });
-      } else {
+    final callExtension = () async {
+      assert(value != null);
+      if (value is bool) {
+        // TODO(kenz): stop special casing http timeline logging once it can be
+        // called via `callServiceExtension`. See
+        // https://github.com/dart-lang/sdk/issues/43628.
+        if (name == extensions.httpEnableTimelineLogging.extension) {
+          await _service.forEachIsolate((isolate) async {
+            await _service.httpEnableTimelineLogging(isolate.id, value);
+          });
+        } else {
+          await _service.callServiceExtension(
+            name,
+            isolateId: _isolateManager.selectedIsolate.id,
+            args: {'enabled': value},
+          );
+        }
+      } else if (value is String) {
         await _service.callServiceExtension(
           name,
           isolateId: _isolateManager.selectedIsolate.id,
-          args: {'enabled': value},
+          args: {'value': value},
+        );
+      } else if (value is double) {
+        await _service.callServiceExtension(
+          name,
+          isolateId: _isolateManager.selectedIsolate.id,
+          // The param name for a numeric service extension will be the last part
+          // of the extension name (ext.flutter.extensionName => extensionName).
+          args: {name.substring(name.lastIndexOf('.') + 1): value},
         );
       }
-    } else if (value is String) {
-      await _service.callServiceExtension(
-        name,
-        isolateId: _isolateManager.selectedIsolate.id,
-        args: {'value': value},
-      );
-    } else if (value is double) {
-      await _service.callServiceExtension(
-        name,
-        isolateId: _isolateManager.selectedIsolate.id,
-        // The param name for a numeric service extension will be the last part
-        // of the extension name (ext.flutter.extensionName => extensionName).
-        args: {name.substring(name.lastIndexOf('.') + 1): value},
-      );
+    };
+
+    final Isolate isolate =
+        await _service.getIsolate(_isolateManager.selectedIsolate.id);
+    // Do not try to call Dart IO extensions for a paused isolate.
+    if (extensions.isDartIoExtension(name) &&
+        isolate.pauseEvent.kind.contains('Pause')) {
+      callbacksOnIsolateResume
+          .putIfAbsent(_isolateManager.selectedIsolate.id, () => [])
+          .add(callExtension);
+    } else {
+      await callExtension();
     }
   }
 
