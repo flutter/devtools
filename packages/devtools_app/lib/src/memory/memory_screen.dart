@@ -21,7 +21,7 @@ import 'memory_chart.dart';
 import 'memory_controller.dart';
 import 'memory_events_pane.dart';
 import 'memory_heap_tree_view.dart';
-//import 'memory_heap_treemap.dart';
+import 'memory_heap_treemap.dart';
 
 /// Width of application when memory buttons loose their text.
 const _primaryControlsMinVerboseWidth = 1100.0;
@@ -80,7 +80,7 @@ class MemoryBody extends StatefulWidget {
 
   static const List<Tab> memoryTabs = [
     Tab(text: 'Dart Heap'),
-    //Tab(text: 'Heap Treemap'),
+    Tab(text: 'Heap Treemap'),
   ];
 
   @override
@@ -195,7 +195,7 @@ class MemoryBodyState extends State<MemoryBody>
             controller: tabController,
             children: [
               HeapTree(controller),
-              //MemoryHeapTreemap(controller),
+              MemoryHeapTreemap(controller),
             ],
           ),
         ),
