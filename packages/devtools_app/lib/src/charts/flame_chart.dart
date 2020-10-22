@@ -47,7 +47,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   });
 
   static const minZoomLevel = 1.0;
-  static const maxZoomLevel = 1000000.0;
+  static const maxZoomLevel = double.infinity;
   static const zoomMultiplier = 0.01;
   static const minScrollOffset = 0.0;
   static const rowOffsetForBottomPadding = 1;
