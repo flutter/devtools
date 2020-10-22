@@ -676,13 +676,19 @@ extension SafeAccess<T> on Iterable<T> {
   T get safeLast => isNotEmpty ? last : null;
 }
 
+/// Range class for all nums (double and int).
+///
+/// Only operations that work on both double and int should be added to this
+/// class.
 class Range {
   const Range(this.begin, this.end) : assert(begin <= end);
 
-  final double begin;
-  final double end;
+  final num begin;
+  final num end;
 
-  double get size => end - begin;
+  num get size => end - begin;
+
+  bool contains(num target) => target >= begin && target <= end;
 
   @override
   String toString() => 'Range($begin, $end)';
@@ -990,5 +996,16 @@ extension StringExtension on String {
     final strLowerCase =
         _lowercaseLookup.putIfAbsent(str, () => str.toLowerCase());
     return lowerCase.contains(strLowerCase);
+  }
+}
+
+extension ListExtension<T> on List<T> {
+  List<T> joinWith(T separator) {
+    return [
+      for (int i = 0; i < length; i++) ...[
+        this[i],
+        if (i != length - 1) separator,
+      ]
+    ];
   }
 }

@@ -148,8 +148,7 @@ Future<bool> setActiveSurvey(String value) async {
         '?$activeSurveyName=$value');
     if (resp?.status == HttpStatus.ok && json.decode(resp.responseText)) {
       return true;
-    }
-    if (resp?.status != HttpStatus.ok || !json.decode(resp.responseText)) {
+    } else {
       logWarning(resp, apiSetActiveSurvey);
     }
   }
@@ -161,7 +160,7 @@ Future<bool> setActiveSurvey(String value) async {
 /// The value is stored in the file '~\.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<bool> get isSurveyActionTaken async {
+Future<bool> surveyActionTaken() async {
   bool surveyActionTaken = false;
 
   if (isDevToolsServerAvailable) {
@@ -198,7 +197,7 @@ Future<void> setSurveyActionTaken() async {
 /// The value is stored in the file '~\.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<int> get surveyShownCount async {
+Future<int> surveyShownCount() async {
   int surveyShownCount = 0;
 
   if (isDevToolsServerAvailable) {
@@ -218,7 +217,7 @@ Future<int> get surveyShownCount async {
 /// The value is stored in the file '~\.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<int> get incrementSurveyShownCount async {
+Future<int> incrementSurveyShownCount() async {
   // Any failure will still return 0.
   int surveyShownCount = 0;
 
