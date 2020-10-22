@@ -29,7 +29,7 @@ ThemeData _darkTheme(IdeTheme ideTheme) {
   final theme = ThemeData.dark();
   final background = isValidDarkColor(ideTheme?.backgroundColor)
       ? ideTheme?.backgroundColor
-      : null;
+      : theme.canvasColor;
 
   return theme.copyWith(
     primaryColor: devtoolsGrey[900],
@@ -43,6 +43,7 @@ ThemeData _darkTheme(IdeTheme ideTheme) {
     selectedRowColor: devtoolsGrey[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
     scaffoldBackgroundColor: background,
+    colorScheme: theme.colorScheme.copyWith(background: background),
   );
 }
 
@@ -50,7 +51,7 @@ ThemeData _lightTheme(IdeTheme ideTheme) {
   final theme = ThemeData.light();
   final background = isValidLightColor(ideTheme?.backgroundColor)
       ? ideTheme?.backgroundColor
-      : null;
+      : theme.canvasColor;
   return theme.copyWith(
     primaryColor: devtoolsBlue[600],
     primaryColorDark: devtoolsBlue[700],
@@ -63,6 +64,7 @@ ThemeData _lightTheme(IdeTheme ideTheme) {
     selectedRowColor: devtoolsBlue[600],
     buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
     scaffoldBackgroundColor: background,
+    colorScheme: theme.colorScheme.copyWith(background: background),
   );
 }
 
@@ -218,6 +220,9 @@ AnimationController longAnimationController(
 }
 
 /// The default curve we use for animations.
+///
+/// Inspector animations benefit from a symmetric animation curve which makes
+/// it easier to reverse animations.
 const defaultCurve = Curves.easeInOutCubic;
 
 /// Builds a [CurvedAnimation] with [defaultCurve].
