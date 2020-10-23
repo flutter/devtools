@@ -250,7 +250,7 @@ class DevToolsAppState extends State<DevToolsApp> {
         return MaterialApp(
           title: 'Dart DevTools',
           debugShowCheckedModeBanner: false,
-          theme: themeFor(isDarkTheme: value, ideTheme: ideTheme),
+          theme: themeFor(isDarkTheme: value, ideTheme: ideTheme, context: context),
           builder: (context, child) => Notifications(child: child),
           onGenerateRoute: _generateRoute,
         );

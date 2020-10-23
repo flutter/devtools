@@ -9,20 +9,43 @@ import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'ui/theme.dart';
 
+const DEFAULT_FONT_SIZE = 14.0;
+
 /// Constructs the light or dark theme for the app taking into account
 /// IDE-supplied theming.
 ThemeData themeFor({
   @required bool isDarkTheme,
   @required IdeTheme ideTheme,
+  BuildContext context,
 }) {
+  ThemeData colorTheme;
   // If the theme specifies a background color, use it to infer a theme.
   if (isValidDarkColor(ideTheme?.backgroundColor)) {
-    return _darkTheme(ideTheme);
+    colorTheme = _darkTheme(ideTheme);
   } else if (isValidLightColor(ideTheme?.backgroundColor)) {
-    return _lightTheme(ideTheme);
+    colorTheme = _lightTheme(ideTheme);
+  } else {
+    colorTheme = isDarkTheme ? _darkTheme(ideTheme) : _lightTheme(ideTheme);
   }
 
-  return isDarkTheme ? _darkTheme(ideTheme) : _lightTheme(ideTheme);
+  final fontSizeFactor = ideTheme?.fontSize != null && context != null
+      ? ideTheme.fontSize / DEFAULT_FONT_SIZE
+      : 1.0;
+
+  return colorTheme.copyWith(
+    primaryTextTheme: Theme.of(context)
+        .primaryTextTheme
+        .merge(colorTheme.primaryTextTheme)
+        .apply(fontSizeFactor: fontSizeFactor),
+    textTheme: Theme.of(context)
+        .textTheme
+        .merge(colorTheme.textTheme)
+        .apply(fontSizeFactor: fontSizeFactor),
+    accentTextTheme: Theme.of(context)
+        .accentTextTheme
+        .merge(colorTheme.accentTextTheme)
+        .apply(fontSizeFactor: fontSizeFactor),
+  );
 }
 
 ThemeData _darkTheme(IdeTheme ideTheme) {
