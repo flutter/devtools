@@ -4,26 +4,24 @@
 
 name: devtools
 
+
 on:
   pull_request:
   push:
     branches:
       - master
 
+
 env:
   CHANNEL: dev
-
-
-defaults:
-  runs-on: ubuntu-latest
-  strategy:
-    fail-fast: false
 
 
 jobs:
 
   main_dev:
     name: Main bot (dev channel)
+    runs-on: ubuntu-latest
+    strategy: { fail-fast: false }
     steps:
       - name: git clone
         uses: actions/checkout@v2
@@ -35,6 +33,8 @@ jobs:
 
   main_beta:
     name: Main bot (beta channel)
+    runs-on: ubuntu-latest
+    strategy: { fail-fast: false }
     steps:
       - name: git clone
         uses: actions/checkout@v2
@@ -46,6 +46,8 @@ jobs:
 
   main_stable:
     name: Main bot (stable channel)
+    runs-on: ubuntu-latest
+    strategy: { fail-fast: false }
     steps:
       - name: git clone
         uses: actions/checkout@v2
