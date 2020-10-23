@@ -756,7 +756,7 @@ class ServiceExtensionManager {
     final expectedValueType =
         extensions.serviceExtensionsAllowlist[name].values.first.runtimeType;
 
-    final restore = () async {
+    Future<void> restore() async {
       try {
         final response = await _service.callServiceExtension(
           name,
@@ -789,7 +789,7 @@ class ServiceExtensionManager {
         // of allowed network related exceptions rather than ignoring all
         // exceptions.
       }
-    };
+    }
 
     final Isolate isolate =
         await _service.getIsolate(_isolateManager.selectedIsolate.id);
@@ -821,7 +821,7 @@ class ServiceExtensionManager {
       return;
     }
 
-    final callExtension = () async {
+    Future<void> callExtension() async {
       assert(value != null);
       if (value is bool) {
         // TODO(kenz): stop special casing http timeline logging once it can be
@@ -853,7 +853,7 @@ class ServiceExtensionManager {
           args: {name.substring(name.lastIndexOf('.') + 1): value},
         );
       }
-    };
+    }
 
     final Isolate isolate =
         await _service.getIsolate(_isolateManager.selectedIsolate.id);
