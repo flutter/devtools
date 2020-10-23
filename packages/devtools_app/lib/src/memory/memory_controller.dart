@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math';
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
