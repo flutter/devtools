@@ -274,3 +274,11 @@ final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
   key: (extension) => extension.extension,
   value: (extension) => extension,
 );
+
+bool isFlutterExtension(String extensionName) {
+  return extensionName.startsWith('ext.flutter.');
+}
+
+bool isDartIoExtension(String extensionName) {
+  return extensionName.startsWith('ext.dart.io.');
+}
