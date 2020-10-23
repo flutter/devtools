@@ -17,6 +17,7 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
   TimelineController timelineController;
   env.afterNewSetup = () async {
     timelineController = TimelineController()..data = TimelineData();
+    await timelineController.timelineStarted;
   };
 
   group('TimelineController', () {

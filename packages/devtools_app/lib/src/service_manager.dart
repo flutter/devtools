@@ -479,7 +479,7 @@ class IsolateManager {
   }
 
   void _sendToMessageBus(Event event) {
-    messageBus.addEvent(BusEvent(
+    messageBus?.addEvent(BusEvent(
       'debugger',
       data: event,
     ));
