@@ -168,16 +168,18 @@ class GtagExceptionDevTools extends GtagException {
   external String get flutter_client_id;
 }
 
-ValueNotifier<bool> gaEnabledNotifier = ValueNotifier(false);
+ValueNotifier<bool> _gaEnabledNotifier = ValueNotifier(false);
+
+ValueListenable<bool> get gaEnabledNotifier => _gaEnabledNotifier;
 
 // Exposed function to JS via allowInterop.
-bool gaEnabled() => gaEnabledNotifier.value;
+bool gaEnabled() => _gaEnabledNotifier.value;
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
 /// '~\.devtools'.
 Future<bool> isAnalyticsEnabled() async {
-  gaEnabledNotifier.value = await server.isAnalyticsEnabled();
-  return gaEnabledNotifier.value;
+  _gaEnabledNotifier.value = await server.isAnalyticsEnabled();
+  return _gaEnabledNotifier.value;
 }
 
 /// Set the DevTools property 'enabled' (GA enabled) stored in the file
@@ -185,7 +187,7 @@ Future<bool> isAnalyticsEnabled() async {
 Future<void> setAnalyticsEnabled([bool value = true]) async {
   final didSet = await server.setAnalyticsEnabled(value);
   if (didSet) {
-    gaEnabledNotifier.value = value;
+    _gaEnabledNotifier.value = value;
   }
 }
 
