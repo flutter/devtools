@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../common_widgets.dart';
+import '../theme.dart';
 import '../trees.dart';
 import '../ui/colors.dart';
 import '../utils.dart';
@@ -514,17 +515,21 @@ class _TreemapState extends State<Treemap> {
 
   Widget buildBreadcrumbNavigator() {
     final pathFromRoot = widget.rootNode.pathFromRoot();
-    return BreadcrumbNavigator.builder(
-      itemCount: pathFromRoot.length,
-      builder: (context, index) {
-        final node = pathFromRoot[index];
-        return Breadcrumb(
-          text:
-              index < pathFromRoot.length - 1 ? node.name : node.displayText(),
-          isRoot: index == 0,
-          onPressed: () => widget.onRootChangedCallback(node),
-        );
-      },
+    return Padding(
+      padding: const EdgeInsets.only(bottom: denseRowSpacing),
+      child: BreadcrumbNavigator.builder(
+        itemCount: pathFromRoot.length,
+        builder: (context, index) {
+          final node = pathFromRoot[index];
+          return Breadcrumb(
+            text: index < pathFromRoot.length - 1
+                ? node.name
+                : node.displayText(),
+            isRoot: index == 0,
+            onPressed: () => widget.onRootChangedCallback(node),
+          );
+        },
+      ),
     );
   }
 

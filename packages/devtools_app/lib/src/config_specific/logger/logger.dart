@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-export 'logger_default.dart' if (dart.library.html) 'logger_html.dart';
+export 'logger_default.dart'
+    if (dart.library.html) 'logger_html.dart'
+    if (dart.library.io) 'logger_io.dart';
 
 enum LogLevel {
   debug,
