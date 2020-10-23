@@ -11,10 +11,19 @@ import 'package:flutter/widgets.dart';
 
 import 'custom_pointer_scroll_view.dart';
 
+class _ExtentDelegateChangeNotifier extends ChangeNotifier {
+  void onChanged() {
+    notifyListeners();
+  }
+}
+
 /// Base class for delegate providing extent information for items in a list.
 abstract class ExtentDelegate {
   /// Optional callback to execute after the layout of the extents is modified.
-  VoidCallback onLayoutDirty;
+
+  Listenable get layoutDirty => _layoutDirty;
+  final _ExtentDelegateChangeNotifier _layoutDirty =
+      _ExtentDelegateChangeNotifier();
 
   int get length;
 
@@ -39,19 +48,14 @@ abstract class ExtentDelegate {
 
   @mustCallSuper
   void recompute() {
-    if (onLayoutDirty != null) {
-      onLayoutDirty();
-    }
+    _layoutDirty.onChanged();
   }
 }
 
 /// [ExtentDelegate] implementation for the case where sizes for each
 /// item are known but absolute positions are not known.
-class FixedExtentDelegate extends ExtentDelegate {
-  FixedExtentDelegate({
-    @required this.computeExtent,
-    @required this.computeLength,
-  }) {
+abstract class FixedExtentDelegateBase extends ExtentDelegate {
+  FixedExtentDelegateBase() {
     recompute();
   }
 
@@ -63,8 +67,11 @@ class FixedExtentDelegate extends ExtentDelegate {
   @override
   int get length => _offsets.length - 1;
 
-  final double Function(int index) computeExtent;
-  final int Function() computeLength;
+  @protected
+  double computeExtent(int index);
+
+  @protected
+  int computeLength();
 
   @override
   void recompute() {
@@ -118,6 +125,25 @@ class FixedExtentDelegate extends ExtentDelegate {
     assert(_offsets[index] < endScrollOffset);
     return index;
   }
+}
+
+class FixedExtentDelegate extends FixedExtentDelegateBase {
+  FixedExtentDelegate({
+    @required double Function(int index) computeExtent,
+    @required int Function() computeLength,
+  })  : _computeExtent = computeExtent,
+        _computeLength = computeLength {
+    recompute();
+  }
+
+  final double Function(int index) _computeExtent;
+  final int Function() _computeLength;
+
+  @override
+  double computeExtent(int index) => _computeExtent(index);
+
+  @override
+  int computeLength() => _computeLength();
 }
 
 /// A scrollable list of widgets arranged linearly where each item has an extent
@@ -227,16 +253,26 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
     @required RenderSliverBoxChildManager childManager,
     @required ExtentDelegate extentDelegate,
   }) : super(childManager: childManager) {
+    _markNeedsLayout = markNeedsLayout;
     this.extentDelegate = extentDelegate;
   }
 
   set extentDelegate(ExtentDelegate delegate) {
+    if (delegate == _extentDelegate) return;
+    assert(_markNeedsLayout != null);
+
+    // Unregister from the previous delegate if there was one.
+    if (_extentDelegate != null) {
+      _extentDelegate.layoutDirty.removeListener(_markNeedsLayout);
+    }
+
     // We need to listen for when the delegate changes its layout.
-    delegate.onLayoutDirty = markNeedsLayout;
+    delegate.layoutDirty.addListener(_markNeedsLayout);
     _extentDelegate = delegate;
   }
 
   ExtentDelegate _extentDelegate;
+  VoidCallback _markNeedsLayout;
 
   /// Called to estimate the total scrollable extents of this object.
   ///
@@ -284,6 +320,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
 
   BoxConstraints buildChildConstraints(int index) {
     final currentItemExtent = _extentDelegate.itemExtent(index);
+    assert(currentItemExtent >= 0);
     return constraints.asBoxConstraints(
       minExtent: currentItemExtent,
       maxExtent: currentItemExtent,
@@ -347,6 +384,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
           }
           max = _extentDelegate.layoutOffset(possibleFirstIndex);
         }
+        assert(max >= 0.0);
         geometry = SliverGeometry(
           scrollExtent: _extentDelegate.layoutOffset(_extentDelegate.length),
           maxPaintExtent: max,
@@ -452,6 +490,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
         ? _extentDelegate
             .maxChildIndexForScrollOffset(targetEndScrollOffsetForPaint)
         : null;
+    assert(paintExtent <= estimatedMaxScrollOffset);
     geometry = SliverGeometry(
       scrollExtent: _extentDelegate.layoutOffset(_extentDelegate.length),
       paintExtent: paintExtent,
