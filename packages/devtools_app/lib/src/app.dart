@@ -440,6 +440,11 @@ class SettingsDialog extends StatelessWidget {
             listenable: preferences.darkModeTheme,
             toggle: preferences.toggleDarkModeTheme,
           ),
+          _buildOption(
+            label: const Text('Enable analytics'),
+            listenable: ga.gaEnabledNotifier,
+            toggle: ga.setAnalyticsEnabled,
+          ),
           if (showVmDeveloperMode)
             _buildOption(
               label: const Text('Enable VM developer mode'),
