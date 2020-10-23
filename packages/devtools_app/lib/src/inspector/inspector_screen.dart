@@ -47,10 +47,10 @@ class InspectorScreenBody extends StatefulWidget {
   const InspectorScreenBody();
 
   @override
-  _InspectorScreenBodyState createState() => _InspectorScreenBodyState();
+  InspectorScreenBodyState createState() => InspectorScreenBodyState();
 }
 
-class _InspectorScreenBodyState extends State<InspectorScreenBody>
+class InspectorScreenBodyState extends State<InspectorScreenBody>
     with BlockingActionMixin, AutoDisposeMixin {
   bool _expandCollapseSupported = false;
   bool _layoutExplorerSupported = false;

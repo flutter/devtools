@@ -22,7 +22,8 @@ import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
-  InspectorScreen screen;
+  const screen = InspectorScreen();
+
   FakeServiceManager fakeServiceManager;
   FakeServiceExtensionManager fakeExtensionManager;
   const windowSize = Size(2600.0, 1200.0);
@@ -38,8 +39,6 @@ void main() {
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       mockIsFlutterApp(serviceManager.connectedApp);
-
-      screen = const InspectorScreen();
     });
 
     void mockExtensions() {

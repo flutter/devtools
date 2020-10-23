@@ -38,36 +38,52 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
   }
 
-  void _addDescription(
-    List<Widget> output,
+  Iterable<TextSpan> _buildDescriptionTextSpans(
     String description,
     TextStyle textStyle,
-    ColorScheme colorScheme, {
-    bool isProperty,
-  }) {
+    ColorScheme colorScheme,
+  ) sync* {
     if (diagnostic.isDiagnosticableValue) {
       final match = treeNodePrimaryDescriptionPattern.firstMatch(description);
       if (match != null) {
-        output.add(Text(match.group(1), style: textStyle));
+        yield TextSpan(text: match.group(1), style: textStyle);
         if (match.group(2).isNotEmpty) {
-          output.add(Text(
-            match.group(2),
+          yield TextSpan(
+            text: match.group(2),
             style: inspector_text_styles.unimportant(colorScheme),
-          ));
+          );
         }
         return;
       }
     } else if (diagnostic.type == 'ErrorDescription') {
       final match = assertionThrownBuildingError.firstMatch(description);
       if (match != null) {
-        output.add(Text(match.group(1), style: textStyle));
-        output.add(Text(match.group(3), style: textStyle));
+        yield TextSpan(text: match.group(1), style: textStyle);
+        yield TextSpan(text: match.group(3), style: textStyle);
         return;
       }
     }
     if (description?.isNotEmpty == true) {
-      output.add(Text(description, style: textStyle));
+      yield TextSpan(text: description, style: textStyle);
     }
+  }
+
+  Widget buildDescription(
+    String description,
+    TextStyle textStyle,
+    ColorScheme colorScheme, {
+    bool isProperty,
+  }) {
+    return RichText(
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        children: _buildDescriptionTextSpans(
+          description,
+          textStyle,
+          colorScheme,
+        ).toList(),
+      ),
+    );
   }
 
   @override
@@ -83,7 +99,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       children.add(_paddedIcon(icon));
     }
     final String name = diagnostic.name;
-    TextStyle textStyle = textStyleForLevel(diagnostic.level, colorScheme);
+
+    TextStyle textStyle = DefaultTextStyle.of(context)
+        .style
+        .merge(textStyleForLevel(diagnostic.level, colorScheme));
     if (diagnostic.isProperty) {
       // Display of inline properties.
       final String propertyType = diagnostic.propertyType;
@@ -144,13 +163,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       // TODO(jacobr): custom display for units, iterables, and padding.
-      _addDescription(
-        children,
-        description,
-        textStyle,
-        colorScheme,
-        isProperty: true,
-      );
+      children.add(Flexible(
+        child: buildDescription(
+          description,
+          textStyle,
+          colorScheme,
+          isProperty: true,
+        ),
+      ));
 
       if (diagnostic.level == DiagnosticLevel.fine &&
           diagnostic.hasDefaultValue) {
@@ -189,13 +209,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
             textStyle.merge(inspector_text_styles.regularBold(colorScheme));
       }
 
-      _addDescription(
-        children,
-        diagnostic.description,
-        textStyle,
-        colorScheme,
-        isProperty: false,
-      );
+      children.add(Flexible(
+        child: buildDescription(
+          diagnostic.description,
+          textStyle,
+          colorScheme,
+          isProperty: false,
+        ),
+      ));
     }
 
     return Row(mainAxisSize: MainAxisSize.min, children: children);
