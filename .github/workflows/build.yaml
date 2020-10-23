@@ -12,7 +12,7 @@ env:
 
 jobs:
   build:
-    name: "${{ env.BOT }} on ${{ env.CHANNEL }} channel"
+    name: "todo build job name"
 
     runs-on: ubuntu-latest
 
@@ -30,7 +30,7 @@ jobs:
       #     echo "::add-path::`pwd`/dart-sdk/bin"
       #     echo "::add-path::$HOME/.pub-cache/bin"
 
-      - name: Test ${{ env.BOT }} on ${{ env.CHANNEL }}
+      - name: Run CI script
         #working-directory: ${{ matrix.bot }}
         # TODO: Rename this script.
         run: ./tool/travis.sh
