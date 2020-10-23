@@ -7,6 +7,7 @@
 # Fast fail the script on failures.
 set -ex
 
+# TODO: Also support windows on github actions.
 if [[ $TRAVIS_OS_NAME == "windows" ]]; then
     echo Installing Google Chrome Stable...
     # Install Chrome via Chocolatey while `addons: chrome` doesn't seem to work on Windows yet
@@ -14,10 +15,10 @@ if [[ $TRAVIS_OS_NAME == "windows" ]]; then
     choco install googlechrome --acceptlicense --yes --no-progress --ignore-checksums
 fi
 
-
 # In GitBash on Windows, we have to call flutter.bat so we alias them in this
 # script to call the correct one based on the OS.
 function flutter {
+    # TODO: Also support windows on github actions.
 	if [[ $TRAVIS_OS_NAME == "windows" ]]; then
         command flutter.bat "$@"
     else
@@ -53,7 +54,7 @@ echo "which flutter: " `which flutter`
 echo "which dart: " `which dart`
 
 # Disable analytics to ensure that the welcome message for the dart cli tooling
-# doesn't interrupt travis.
+# doesn't interrupt the CI bots.
 dart --disable-analytics
 
 # Print out the versions and ensure we can call Dart, Pub, and Flutter.
