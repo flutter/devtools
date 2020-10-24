@@ -44,6 +44,7 @@ jobs:
           CHANNEL: beta
         run: ./tool/travis.sh
 
+  # TODO: The stable channel currently fails.
   main_stable:
     name: Main bot (stable channel)
     runs-on: ubuntu-latest
