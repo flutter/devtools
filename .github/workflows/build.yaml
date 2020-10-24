@@ -1,4 +1,9 @@
+# Copyright 2020 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 name: devtools
+
 
 on:
   pull_request:
@@ -6,31 +11,49 @@ on:
     branches:
       - master
 
+
 env:
   CHANNEL: dev
-  BOT: main
+
 
 jobs:
-  build:
-    name: "${{ env.BOT }} on ${{ env.CHANNEL }} channel"
 
+  main_dev:
+    name: Main bot (dev channel)
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-
+    strategy: { fail-fast: false }
     steps:
-      - uses: actions/checkout@v2
-
-      # - name: Install Dart
-      #   env:
-      #     DART_VERSION: ${{ matrix.dart-version }}
-      #   run: |
-      #     ./.github/install-dart.sh
-      #     echo "::add-path::`pwd`/dart-sdk/bin"
-      #     echo "::add-path::$HOME/.pub-cache/bin"
-
-      - name: Test ${{ env.BOT }} on ${{ env.CHANNEL }}
-        #working-directory: ${{ matrix.bot }}
-        # TODO: Rename this script.
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/travis.sh
+        env:
+          BOT: main
+          CHANNEL: dev
         run: ./tool/travis.sh
+
+  main_beta:
+    name: Main bot (beta channel)
+    runs-on: ubuntu-latest
+    strategy: { fail-fast: false }
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/travis.sh
+        env:
+          BOT: main
+          CHANNEL: beta
+        run: ./tool/travis.sh
+
+  # TODO: The stable channel currently fails.
+  # main_stable:
+  #   name: Main bot (stable channel)
+  #   runs-on: ubuntu-latest
+  #   strategy: { fail-fast: false }
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@v2
+  #     - name: tool/travis.sh
+  #       env:
+  #         BOT: main
+  #         CHANNEL: stable
+  #       run: ./tool/travis.sh
