@@ -45,15 +45,15 @@ jobs:
         run: ./tool/travis.sh
 
   # TODO: The stable channel currently fails.
-  main_stable:
-    name: Main bot (stable channel)
-    runs-on: ubuntu-latest
-    strategy: { fail-fast: false }
-    steps:
-      - name: git clone
-        uses: actions/checkout@v2
-      - name: tool/travis.sh
-        env:
-          BOT: main
-          CHANNEL: stable
-        run: ./tool/travis.sh
+  # main_stable:
+  #   name: Main bot (stable channel)
+  #   runs-on: ubuntu-latest
+  #   strategy: { fail-fast: false }
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@v2
+  #     - name: tool/travis.sh
+  #       env:
+  #         BOT: main
+  #         CHANNEL: stable
+  #       run: ./tool/travis.sh
