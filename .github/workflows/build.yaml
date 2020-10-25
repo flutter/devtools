@@ -19,7 +19,7 @@ env:
 jobs:
 
   main_dev:
-    name: Main bot (dev channel)
+    name: Main (dev channel)
     runs-on: ubuntu-latest
     strategy: { fail-fast: false }
     steps:
@@ -32,7 +32,7 @@ jobs:
         run: ./tool/travis.sh
 
   main_beta:
-    name: Main bot (beta channel)
+    name: Main (beta channel)
     runs-on: ubuntu-latest
     strategy: { fail-fast: false }
     steps:
@@ -46,7 +46,7 @@ jobs:
 
   # TODO: The stable channel currently fails.
   # main_stable:
-  #   name: Main bot (stable channel)
+  #   name: Main (stable channel)
   #   runs-on: ubuntu-latest
   #   strategy: { fail-fast: false }
   #   steps:
@@ -57,3 +57,73 @@ jobs:
   #         BOT: main
   #         CHANNEL: stable
   #       run: ./tool/travis.sh
+
+  packages:
+    name: packages
+    runs-on: ubuntu-latest
+    strategy: { fail-fast: false }
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/travis.sh
+        env:
+          BOT: packages
+        run: ./tool/travis.sh
+
+  test_ddc:
+    name: test_ddc
+    runs-on: ubuntu-latest
+    strategy: { fail-fast: false }
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/travis.sh
+        env:
+          BOT: test_ddc
+          PLATFORM: vm
+        run: ./tool/travis.sh
+
+  test_dart2js:
+    name: test_dart2js
+    runs-on: ubuntu-latest
+    strategy: { fail-fast: false }
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/travis.sh
+        env:
+          BOT: test_dart2js   
+          PLATFORM: vm
+        run: ./tool/travis.sh
+
+  integration_ddc:
+    name: integration_ddc
+    runs-on: ubuntu-latest
+    strategy: { fail-fast: false }
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/travis.sh
+        env:
+          BOT: integration_ddc
+        run: ./tool/travis.sh
+
+  integration_dart2js:
+    name: integration_dart2js
+    runs-on: ubuntu-latest
+    strategy: { fail-fast: false }
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/travis.sh
+        env:
+          BOT: integration_dart2js
+        run: ./tool/travis.sh
+
+
+# PLATFORM=chrome is going away. We need to move these tests to run with
+# chromedriver. https://github.com/flutter/devtools/issues/2437
+#    - BOT=test_ddc            PLATFORM=chrome
+# PLATFORM=chrome is going away. We need to move these tests to run with
+# chromedriver. https://github.com/flutter/devtools/issues/2437
+#   - BOT=test_dart2js        PLATFORM=chrome
