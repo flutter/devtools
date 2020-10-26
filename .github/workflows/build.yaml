@@ -18,50 +18,32 @@ env:
 
 jobs:
 
-  main_dev:
-    name: Main (dev channel)
+  main:
+    name: Main (${{ matrix.channel }} channel)
     runs-on: ubuntu-latest
-    strategy: { fail-fast: false }
+    strategy:
+      fail-fast: false
+      matrix:
+        channel:
+          - master
+          - dev
+          - beta
+          # TODO: The stable channel currently fails.
+          # - stable
     steps:
       - name: git clone
         uses: actions/checkout@v2
       - name: tool/travis.sh
         env:
           BOT: main
-          CHANNEL: dev
+          CHANNEL: ${{ matrix.channel }}
         run: ./tool/travis.sh
-
-  main_beta:
-    name: Main (beta channel)
-    runs-on: ubuntu-latest
-    strategy: { fail-fast: false }
-    steps:
-      - name: git clone
-        uses: actions/checkout@v2
-      - name: tool/travis.sh
-        env:
-          BOT: main
-          CHANNEL: beta
-        run: ./tool/travis.sh
-
-  # TODO: The stable channel currently fails.
-  # main_stable:
-  #   name: Main (stable channel)
-  #   runs-on: ubuntu-latest
-  #   strategy: { fail-fast: false }
-  #   steps:
-  #     - name: git clone
-  #       uses: actions/checkout@v2
-  #     - name: tool/travis.sh
-  #       env:
-  #         BOT: main
-  #         CHANNEL: stable
-  #       run: ./tool/travis.sh
 
   packages:
     name: packages
     runs-on: ubuntu-latest
-    strategy: { fail-fast: false }
+    strategy:
+      fail-fast: false
     steps:
       - name: git clone
         uses: actions/checkout@v2
@@ -70,54 +52,39 @@ jobs:
           BOT: packages
         run: ./tool/travis.sh
 
-  test_ddc:
-    name: test_ddc
+  test:
+    name: test ${{ matrix.bot }}
     runs-on: ubuntu-latest
-    strategy: { fail-fast: false }
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - test_ddc
+          - test_dart2js
     steps:
       - name: git clone
         uses: actions/checkout@v2
       - name: tool/travis.sh
         env:
-          BOT: test_ddc
+          BOT: ${{ matrix.bot }}
           PLATFORM: vm
         run: ./tool/travis.sh
 
-  test_dart2js:
-    name: test_dart2js
+  integration:
+    name: integration ${{ matrix.bot }}
     runs-on: ubuntu-latest
-    strategy: { fail-fast: false }
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - integration_ddc
+          - integration_dart2js
     steps:
       - name: git clone
         uses: actions/checkout@v2
       - name: tool/travis.sh
         env:
-          BOT: test_dart2js   
-          PLATFORM: vm
-        run: ./tool/travis.sh
-
-  integration_ddc:
-    name: integration_ddc
-    runs-on: ubuntu-latest
-    strategy: { fail-fast: false }
-    steps:
-      - name: git clone
-        uses: actions/checkout@v2
-      - name: tool/travis.sh
-        env:
-          BOT: integration_ddc
-        run: ./tool/travis.sh
-
-  integration_dart2js:
-    name: integration_dart2js
-    runs-on: ubuntu-latest
-    strategy: { fail-fast: false }
-    steps:
-      - name: git clone
-        uses: actions/checkout@v2
-      - name: tool/travis.sh
-        env:
-          BOT: integration_dart2js
+          BOT: ${{ matrix.bot }}
         run: ./tool/travis.sh
 
 
