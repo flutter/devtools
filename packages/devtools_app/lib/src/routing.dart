@@ -110,6 +110,14 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       return;
     }
 
+    navigate(page, argUpdates);
+  }
+
+  /// Navigates to a new page, optionally updating arguments.
+  ///
+  /// Existing arguments (for example &uri=) will be preserved unless
+  /// overwritten by [argUpdates].
+  void navigate(String page, [Map<String, String> argUpdates]) {
     final newArgs = {...currentConfiguration.args, ...?argUpdates};
     _replaceStack(DevToolsRouteConfiguration(page, newArgs));
     notifyListeners();

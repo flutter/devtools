@@ -80,8 +80,8 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           RaisedButton(
             child: const Text('Open app size tool'),
-            onPressed: () => DevToolsRouterDelegate.of(context)
-                .navigateIfNotCurrent(appSizePageId),
+            onPressed: () =>
+                DevToolsRouterDelegate.of(context).navigate(appSizePageId),
           ),
         ],
       ),

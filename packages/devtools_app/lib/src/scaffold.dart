@@ -257,13 +257,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // so clicking Back does not go through all of the old snapshots.
     if (!offlineMode) {
       enterOfflineMode();
-      routerDelegate.navigateIfNotCurrent(snapshotPageId, args);
+      routerDelegate.navigate(snapshotPageId, args);
     } else {
       // Router.neglect will cause the router to ignore this change, so
       // dragging a new export into the browser will not result in a new
       // history entry.
-      Router.neglect(context,
-          () => routerDelegate.navigateIfNotCurrent(snapshotPageId, args));
+      Router.neglect(
+          context, () => routerDelegate.navigate(snapshotPageId, args));
     }
   }
 

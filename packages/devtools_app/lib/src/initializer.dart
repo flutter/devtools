@@ -150,7 +150,7 @@ class _InitializerState extends State<Initializer>
                     onPressed: () {
                       hideDisconnectedOverlay();
                       DevToolsRouterDelegate.of(context)
-                          .navigateIfNotCurrent(homePageId, {'uri': null});
+                          .navigate(homePageId, {'uri': null});
                     },
                     child: const Text('Connect to Another App'))
               else

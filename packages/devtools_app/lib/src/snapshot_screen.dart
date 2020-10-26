@@ -77,7 +77,7 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
               // the homepage so that clicking Back will not return here.
               Router.neglect(
                 context,
-                () => routerDelegate.navigateIfNotCurrent(
+                () => routerDelegate.navigate(
                   homePageId,
                   {'screen': null},
                 ),
