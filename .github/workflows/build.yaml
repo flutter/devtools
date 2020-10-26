@@ -19,7 +19,7 @@ env:
 jobs:
 
   main:
-    name: Main (${{ matrix.channel }} channel)
+    name: main (${{ matrix.channel }} channel)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
