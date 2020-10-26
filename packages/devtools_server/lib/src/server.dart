@@ -41,6 +41,8 @@ const argTryPorts = 'try-ports';
 const argVerbose = 'verbose';
 const launchDevToolsService = 'launchDevTools';
 
+const defaultTryPorts = 10;
+
 const errorLaunchingBrowserCode = 500;
 
 ClientManager clients;
@@ -82,8 +84,9 @@ Future<void> _serveDevToolsWithArgs(
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
   final bool headlessMode = args[argHeadlessMode];
   final bool debugMode = args[argDebugMode];
-  final numPortsToTry =
-      args[argTryPorts] != null ? int.tryParse(args[argTryPorts]) ?? 1 : 1;
+  final numPortsToTry = args[argTryPorts] != null
+      ? int.tryParse(args[argTryPorts]) ?? defaultTryPorts
+      : defaultTryPorts;
   final bool verboseMode = args[argVerbose];
   final String hostname = args[argHost];
 
@@ -147,7 +150,7 @@ Future<HttpServer> serveDevTools({
   bool verboseMode = false,
   String hostname,
   int port = 0,
-  int numPortsToTry = 1,
+  int numPortsToTry = defaultTryPorts,
   shelf.Handler handler,
   String serviceProtocolUri,
   String profileFilename,
@@ -496,7 +499,7 @@ ArgParser _createArgsParser(bool verbose) {
   parser
     ..addOption(
       argTryPorts,
-      defaultsTo: '1',
+      defaultsTo: defaultTryPorts.toString(),
       valueHelp: 'count',
       help: 'The number of ascending ports to try binding to before failing '
           'with an error. ',

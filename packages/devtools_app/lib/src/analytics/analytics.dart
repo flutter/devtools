@@ -10,6 +10,7 @@ library gtags;
 import 'dart:async';
 import 'dart:html';
 
+import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
@@ -167,16 +168,18 @@ class GtagExceptionDevTools extends GtagException {
   external String get flutter_client_id;
 }
 
-bool _gaEnabled;
+ValueNotifier<bool> _gaEnabledNotifier = ValueNotifier(false);
+
+ValueListenable<bool> get gaEnabledNotifier => _gaEnabledNotifier;
 
 // Exposed function to JS via allowInterop.
-bool gaEnabled() => _gaEnabled;
+bool gaEnabled() => _gaEnabledNotifier.value;
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
 /// '~\.devtools'.
 Future<bool> isAnalyticsEnabled() async {
-  _gaEnabled ??= await server.isAnalyticsEnabled();
-  return _gaEnabled;
+  _gaEnabledNotifier.value = await server.isAnalyticsEnabled();
+  return _gaEnabledNotifier.value;
 }
 
 /// Set the DevTools property 'enabled' (GA enabled) stored in the file
@@ -184,7 +187,7 @@ Future<bool> isAnalyticsEnabled() async {
 Future<void> setAnalyticsEnabled([bool value = true]) async {
   final didSet = await server.setAnalyticsEnabled(value);
   if (didSet) {
-    _gaEnabled = value;
+    _gaEnabledNotifier.value = value;
   }
 }
 
