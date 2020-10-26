@@ -192,6 +192,23 @@ class HttpRequestData extends NetworkRequest {
     return connectionInfo != null ? connectionInfo[_localPortKey] : null;
   }
 
+  @override
+  bool get didFail {
+    if (status == null) return false;
+    try {
+      final code = int.parse(status);
+      // Status codes 400-499 are client errors and 500-599 are server errors.
+      if (code >= 400) {
+        return true;
+      }
+    } on Exception catch (_) {
+      if (status == 'Error') {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /// True if the HTTP request hasn't completed yet, determined by the lack of
   /// an end event.
   bool get inProgress => _endEvent == null;

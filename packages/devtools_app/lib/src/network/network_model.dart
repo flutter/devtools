@@ -26,6 +26,8 @@ abstract class NetworkRequest {
 
   int get port;
 
+  bool get didFail;
+
   String get durationDisplay =>
       'Duration: ${duration != null ? msText(duration) : 'Pending'}';
 
@@ -82,6 +84,10 @@ class WebSocket extends NetworkRequest {
 
   @override
   int get port => _socket.port;
+
+  // TODO(kenz): what determines a web socket request failure?
+  @override
+  bool get didFail => false;
 
   int get readBytes => _socket.readBytes;
 

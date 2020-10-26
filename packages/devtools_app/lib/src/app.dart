@@ -16,6 +16,7 @@ import 'app_size/app_size_controller.dart';
 import 'app_size/app_size_screen.dart';
 import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
+import 'config_specific/server/_server_stub.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/debugger_screen.dart';
 import 'dialogs.dart';
@@ -455,7 +456,7 @@ class SettingsDialog extends StatelessWidget {
             listenable: preferences.darkModeTheme,
             toggle: preferences.toggleDarkModeTheme,
           ),
-          if (allowAnalyticsChanges)
+          if (allowAnalyticsChanges && isDevToolsServerAvailable)
             _buildOption(
               label: const Text('Enable analytics'),
               listenable: ga.gaEnabledNotifier,
