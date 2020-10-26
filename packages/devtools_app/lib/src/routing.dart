@@ -19,8 +19,8 @@ class DevToolsRouteConfiguration {
   final Map<String, String> args;
 }
 
-/// Converts between structured DevToolsRouteConfiguration (our internal data
-/// for pages/routing) and RouteInformation (generic data that can be persisted
+/// Converts between structured [DevToolsRouteConfiguration] (our internal data
+/// for pages/routing) and [RouteInformation] (generic data that can be persisted
 /// in the address bar/state objects).
 class DevToolsRouteInformationParser
     extends RouteInformationParser<DevToolsRouteConfiguration> {
@@ -63,6 +63,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
 
   @override
   final GlobalKey<NavigatorState> navigatorKey;
+
   final Page Function(BuildContext, String, Map<String, String>) _getPage;
 
   /// A list of any routes/pages on the stack.
