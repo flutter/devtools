@@ -232,6 +232,10 @@ class CpuStackFrame extends TreeNode<CpuStackFrame> {
       ..exclusiveSampleCount = exclusiveSampleCount
       ..inclusiveSampleCount =
           resetInclusiveSampleCount ? null : inclusiveSampleCount;
+
+    if (isExpanded) {
+      copy.expand();
+    }
     return copy;
   }
 
