@@ -50,6 +50,9 @@ const appSizeRoute = '/app-size';
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
 
+/// Whether users are able to make changes to analytics settings.
+bool allowAnalyticsChanges = true;
+
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
@@ -424,7 +427,7 @@ class DevToolsAboutDialog extends StatelessWidget {
   }
 }
 
-// TODO(devoncarew): Add an analytics setting.
+// TODO(kenz): merge the checkbox functionality here with [NotifierCheckbox]
 class SettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -440,6 +443,12 @@ class SettingsDialog extends StatelessWidget {
             listenable: preferences.darkModeTheme,
             toggle: preferences.toggleDarkModeTheme,
           ),
+          if (allowAnalyticsChanges)
+            _buildOption(
+              label: const Text('Enable analytics'),
+              listenable: ga.gaEnabledNotifier,
+              toggle: ga.setAnalyticsEnabled,
+            ),
           if (showVmDeveloperMode)
             _buildOption(
               label: const Text('Enable VM developer mode'),
