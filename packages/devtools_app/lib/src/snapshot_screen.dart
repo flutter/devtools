@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
 import 'globals.dart';
+import 'routing.dart';
 import 'screen.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
@@ -64,14 +65,23 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
 
   @override
   Widget build(BuildContext context) {
+    final routerDelegate = DevToolsRouterDelegate.of(context);
     return Column(
       children: [
         Row(
           children: [
             ExitOfflineButton(onPressed: () {
-              Navigator.pop(context);
-              reset();
               offlineMode = false;
+              reset();
+              // Use Router.neglect to replace the current history entry with
+              // the homepage so that clicking Back will not return here.
+              Router.neglect(
+                context,
+                () => routerDelegate.navigate(
+                  homePageId,
+                  {'screen': null},
+                ),
+              );
             }),
           ],
         ),
@@ -98,5 +108,8 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
 
 class SnapshotArguments {
   SnapshotArguments(this.screenId);
+
+  SnapshotArguments.fromArgs(Map<String, String> args) : this(args['screen']);
+
   final String screenId;
 }

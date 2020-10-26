@@ -34,6 +34,7 @@ import 'notifications.dart';
 import 'performance/performance_controller.dart';
 import 'performance/performance_screen.dart';
 import 'preferences.dart';
+import 'routing.dart';
 import 'scaffold.dart';
 import 'screen.dart';
 import 'snapshot_screen.dart';
@@ -42,10 +43,6 @@ import 'timeline/timeline_controller.dart';
 import 'timeline/timeline_screen.dart';
 import 'ui/service_extension_widgets.dart';
 import 'utils.dart';
-
-const homeRoute = '/';
-const snapshotRoute = '/snapshot';
-const appSizeRoute = '/app-size';
 
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
@@ -105,111 +102,125 @@ class DevToolsAppState extends State<DevToolsApp> {
     _clearCachedRoutes();
   }
 
-  /// Generates routes, separating the path from URL query parameters.
-  Route _generateRoute(RouteSettings settings) {
-    final uri = Uri.parse(settings.name);
-    final path = uri.path.isEmpty ? homeRoute : uri.path;
-    final args = settings.arguments;
-
+  /// Gets the page for a given page/path and args.
+  Page _getPage(BuildContext context, String page, Map<String, String> args) {
     // Provide the appropriate page route.
-    if (routes.containsKey(path)) {
-      WidgetBuilder builder = (context) => routes[path](
-            context,
-            uri.queryParameters,
-            args,
-          );
+    if (pages.containsKey(page)) {
+      Widget widget = pages[page](
+        context,
+        page,
+        args,
+      );
       assert(() {
-        builder = (context) => _AlternateCheckedModeBanner(
-              builder: (context) => routes[path](
-                context,
-                uri.queryParameters,
-                args,
-              ),
-            );
+        widget = _AlternateCheckedModeBanner(
+          builder: (context) => pages[page](
+            context,
+            page,
+            args,
+          ),
+        );
         return true;
       }());
-      return MaterialPageRoute(settings: settings, builder: builder);
+      return MaterialPage(child: widget);
     }
 
     // Return a page not found.
-    return MaterialPageRoute(
-      settings: settings,
-      builder: (BuildContext context) {
-        return DevToolsScaffold.withChild(
-          child: CenteredMessage("'$uri' not found."),
-          ideTheme: ideTheme,
-          analyticsProvider: widget.analyticsProvider,
+    return MaterialPage(
+      child: DevToolsScaffold.withChild(
+        key: const Key('not-found'),
+        child: CenteredMessage("'$page' not found."),
+        ideTheme: ideTheme,
+        analyticsProvider: widget.analyticsProvider,
+      ),
+    );
+  }
+
+  Widget _buildTabbedPage(
+    BuildContext context,
+    String page,
+    Map<String, String> params,
+  ) {
+    final vmServiceUri = params['uri'];
+
+    // Always return the landing screen if there's no VM service URI.
+    if (vmServiceUri?.isEmpty ?? true) {
+      return DevToolsScaffold.withChild(
+        key: const Key('landing'),
+        child: LandingScreenBody(),
+        ideTheme: ideTheme,
+        analyticsProvider: widget.analyticsProvider,
+        actions: [
+          OpenSettingsAction(),
+          OpenAboutAction(),
+        ],
+      );
+    }
+
+    // TODO(dantup): We should be able simplify this a little, removing params['page']
+    // and only supporting /inspector (etc.) instead of also &page=inspector if
+    // all IDEs switch over to those URLs.
+    if (page?.isEmpty ?? true) {
+      page = params['page'];
+    }
+    final embed = params['embed'] == 'true';
+    return Initializer(
+      url: vmServiceUri,
+      allowConnectionScreenOnDisconnect: !embed,
+      builder: (_) {
+        final tabs = embed && page != null
+            ? _visibleScreens().where((p) => p.screenId == page).toList()
+            : _visibleScreens();
+        if (tabs.isEmpty) {
+          return DevToolsScaffold.withChild(
+            child: CenteredMessage(
+                'The "$page" screen is not available for this application.'),
+            ideTheme: ideTheme,
+            analyticsProvider: widget.analyticsProvider,
+          );
+        }
+        return _providedControllers(
+          child: DevToolsScaffold(
+            embed: embed,
+            ideTheme: ideTheme,
+            page: page,
+            tabs: tabs,
+            analyticsProvider: widget.analyticsProvider,
+            actions: [
+              // TODO(https://github.com/flutter/devtools/issues/1941)
+              if (serviceManager.connectedApp.isFlutterAppNow) ...[
+                HotReloadButton(),
+                HotRestartButton(),
+              ],
+              OpenSettingsAction(),
+              OpenAboutAction(),
+            ],
+          ),
         );
       },
     );
   }
 
-  /// The routes that the app exposes.
-  Map<String, UrlParametersBuilder> get routes {
+  /// The pages that the app exposes.
+  Map<String, UrlParametersBuilder> get pages {
     return _routes ??= {
-      homeRoute: (_, params, __) {
-        if (params['uri']?.isNotEmpty ?? false) {
-          final embed = params['embed'] == 'true';
-          final page = params['page'];
-          return Initializer(
-            url: params['uri'],
-            allowConnectionScreenOnDisconnect: !embed,
-            builder: (_) {
-              final tabs = embed && page != null
-                  ? _visibleScreens().where((p) => p.screenId == page).toList()
-                  : _visibleScreens();
-              if (tabs.isEmpty) {
-                return DevToolsScaffold.withChild(
-                  child: CenteredMessage(
-                      'The "$page" screen is not available for this application.'),
-                  ideTheme: ideTheme,
-                  analyticsProvider: widget.analyticsProvider,
-                );
-              }
-              return _providedControllers(
-                child: DevToolsScaffold(
-                  embed: embed,
-                  ideTheme: ideTheme,
-                  initialPage: page,
-                  tabs: tabs,
-                  analyticsProvider: widget.analyticsProvider,
-                  actions: [
-                    // TODO(https://github.com/flutter/devtools/issues/1941)
-                    if (serviceManager.connectedApp.isFlutterAppNow) ...[
-                      HotReloadButton(),
-                      HotRestartButton(),
-                    ],
-                    OpenSettingsAction(),
-                    OpenAboutAction(),
-                  ],
-                ),
-              );
-            },
-          );
-        } else {
-          return DevToolsScaffold.withChild(
-            child: LandingScreenBody(),
-            ideTheme: ideTheme,
-            analyticsProvider: widget.analyticsProvider,
-            actions: [
-              OpenSettingsAction(),
-              OpenAboutAction(),
-            ],
-          );
-        }
-      },
-      snapshotRoute: (_, __, args) {
+      homePageId: _buildTabbedPage,
+      for (final screen in widget.screens)
+        screen.screen.screenId: _buildTabbedPage,
+      snapshotPageId: (_, __, args) {
+        final snapshotArgs = SnapshotArguments.fromArgs(args);
         return DevToolsScaffold.withChild(
+          key: UniqueKey(),
           analyticsProvider: widget.analyticsProvider,
           child: _providedControllers(
             offline: true,
-            child: SnapshotScreenBody(args, _screens),
+            child: SnapshotScreenBody(snapshotArgs, _screens),
           ),
           ideTheme: ideTheme,
         );
       },
-      appSizeRoute: (_, __, ___) {
+      appSizePageId: (_, __, ___) {
         return DevToolsScaffold.withChild(
+          key: const Key('appsize'),
           analyticsProvider: widget.analyticsProvider,
           child: _providedControllers(
             child: const AppSizeBody(),
@@ -250,12 +261,13 @@ class DevToolsAppState extends State<DevToolsApp> {
     return ValueListenableBuilder(
       valueListenable: widget.preferences.darkModeTheme,
       builder: (context, value, _) {
-        return MaterialApp(
+        return MaterialApp.router(
           title: 'Dart DevTools',
           debugShowCheckedModeBanner: false,
           theme: themeFor(isDarkTheme: value, ideTheme: ideTheme),
           builder: (context, child) => Notifications(child: child),
-          onGenerateRoute: _generateRoute,
+          routerDelegate: DevToolsRouterDelegate(_getPage),
+          routeInformationParser: DevToolsRouteInformationParser(),
         );
       },
     );
@@ -301,8 +313,8 @@ class DevToolsScreen<C> {
 /// args.
 typedef UrlParametersBuilder = Widget Function(
   BuildContext,
+  String,
   Map<String, String>,
-  SnapshotArguments args,
 );
 
 /// Displays the checked mode banner in the bottom end corner instead of the
