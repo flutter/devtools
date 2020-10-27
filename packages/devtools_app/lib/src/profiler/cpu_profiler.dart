@@ -20,7 +20,7 @@ class CpuProfiler extends StatefulWidget {
     @required this.data,
     @required this.controller,
     this.searchFieldKey,
-  })  : callTreeRoots = [data.cpuProfileRoot.deepCopy()],
+  })  : callTreeRoots = data != null ? [data.cpuProfileRoot.deepCopy()] : [],
         bottomUpRoots = data != null
             ? BottomUpProfileTransformer.processData(data.cpuProfileRoot)
             : [];
