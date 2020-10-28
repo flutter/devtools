@@ -210,17 +210,17 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         return Row(
           children: [
             RefreshButton(
-              busy: refreshing || processing,
               includeTextWidth: _primaryControlsMinIncludeTextWidth,
-              onPressed: _refreshTimeline,
+              onPressed: (refreshing || processing) ? null : _refreshTimeline,
             ),
             const SizedBox(width: defaultSpacing),
             ClearButton(
-              busy: refreshing || processing,
               includeTextWidth: _primaryControlsMinIncludeTextWidth,
-              onPressed: () async {
-                await _clearTimeline();
-              },
+              onPressed: (refreshing || processing)
+                  ? null
+                  : () async {
+                      await _clearTimeline();
+                    },
             ),
           ],
         );

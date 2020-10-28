@@ -79,20 +79,17 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
   );
 }
 
-/// Button to clear data in the UI.
+/// Button to pause.
 ///
 /// * `includeTextWidth`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
-class ClearButton extends StatelessWidget {
-  const ClearButton({
+class PauseButton extends StatelessWidget {
+  const PauseButton({
     Key key,
-    this.busy = false,
     this.includeTextWidth,
     @required this.onPressed,
   }) : super(key: key);
-
-  final bool busy;
 
   final double includeTextWidth;
 
@@ -101,7 +98,65 @@ class ClearButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlineButton(
-      onPressed: busy ? null : onPressed,
+      onPressed: onPressed,
+      child: MaterialIconLabel(
+        Icons.pause,
+        'Pause',
+        includeTextWidth: includeTextWidth,
+      ),
+    );
+  }
+}
+
+/// Button to resume.
+///
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
+/// * `onPressed`: The callback to be called upon pressing the button.
+class ResumeButton extends StatelessWidget {
+  const ResumeButton({
+    Key key,
+    this.includeTextWidth,
+    @required this.onPressed,
+  }) : super(key: key);
+
+  final double includeTextWidth;
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlineButton(
+      onPressed: onPressed,
+      child: MaterialIconLabel(
+        Icons.play_arrow,
+        'Resume',
+        includeTextWidth: includeTextWidth,
+      ),
+    );
+  }
+}
+
+/// Button to clear data in the UI.
+///
+/// * `includeTextWidth`: The minimum width the button can be before the text is
+///    omitted.
+/// * `onPressed`: The callback to be called upon pressing the button.
+class ClearButton extends StatelessWidget {
+  const ClearButton({
+    Key key,
+    this.includeTextWidth,
+    @required this.onPressed,
+  }) : super(key: key);
+
+  final double includeTextWidth;
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlineButton(
+      onPressed: onPressed,
       child: MaterialIconLabel(
         Icons.block,
         'Clear',
@@ -152,17 +207,13 @@ class RecordButton extends StatelessWidget {
 ///
 /// * `includeTextWidth`: The minimum width the button can be before the text is
 ///    omitted.
-/// * `labelOverride`: Optional alternative text to use for the button.
 /// * `onPressed`: The callback to be called upon pressing the button.
 class RefreshButton extends StatelessWidget {
   const RefreshButton({
     Key key,
-    this.busy = false,
     this.includeTextWidth,
     @required this.onPressed,
   }) : super(key: key);
-
-  final bool busy;
 
   final double includeTextWidth;
 
@@ -171,7 +222,7 @@ class RefreshButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlineButton(
-      onPressed: busy ? null : onPressed,
+      onPressed: onPressed,
       child: MaterialIconLabel(
         Icons.refresh,
         'Refresh',
