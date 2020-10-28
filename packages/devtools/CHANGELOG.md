@@ -1,4 +1,6 @@
 ## 0.9.4
+* Color failed network requests with red status codes [#2466](https://github.com/flutter/devtools/pull/2466)
+* Fix bug with Expand All control in the CPU profiler [#2465](https://github.com/flutter/devtools/pull/2465)
 * Add average FPS information to the Timeline [#2462](https://github.com/flutter/devtools/pull/2462)
 * Increase number of try ports when launching DevTools [#2458](https://github.com/flutter/devtools/pull/2458)
 * Prevent dart.io extensions from being called on paused isolates [#2450](https://github.com/flutter/devtools/pull/2450)

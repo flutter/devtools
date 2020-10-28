@@ -334,7 +334,8 @@ class MethodColumn extends ColumnData<NetworkRequest> {
   }
 }
 
-class StatusColumn extends ColumnData<NetworkRequest> {
+class StatusColumn extends ColumnData<NetworkRequest>
+    implements ColumnRenderer<NetworkRequest> {
   StatusColumn()
       : super('Status', alignment: ColumnAlignment.right, fixedWidthPx: 62);
 
@@ -346,6 +347,17 @@ class StatusColumn extends ColumnData<NetworkRequest> {
   @override
   String getDisplayValue(NetworkRequest dataObject) {
     return dataObject.status == null ? '--' : dataObject.status.toString();
+  }
+
+  @override
+  Widget build(BuildContext context, NetworkRequest data) {
+    final theme = Theme.of(context);
+    return Text(
+      getDisplayValue(data),
+      style: data.didFail
+          ? theme.regularTextStyle.copyWith(color: devtoolsError)
+          : theme.regularTextStyle,
+    );
   }
 }
 
