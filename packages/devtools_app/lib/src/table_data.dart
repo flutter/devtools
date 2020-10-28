@@ -321,36 +321,6 @@ class TreeTableData<T extends TreeNode<T>> extends TableData<T> {
     _selectedObject ??= dataObject;
     setRows(data);
   }
-
-  void expandAll() {
-    // Store visited nodes so that we do not expand the same root multiple
-    // times.
-    final visited = <T>{};
-    for (T dataObject in data) {
-      final root = dataObject.root;
-      if (!visited.contains(root)) {
-        root.expandCascading();
-        visited.add(root);
-      }
-    }
-
-    setRows(data);
-  }
-
-  void collapseAll() {
-    // Store visited nodes so that we do not collapse the same root multiple
-    // times.
-    final visited = <T>{};
-    for (T dataObject in data) {
-      final root = dataObject.root;
-      if (!visited.contains(root)) {
-        root.collapseCascading();
-        visited.add(root);
-      }
-    }
-
-    setRows(data);
-  }
 }
 
 // TODO(peterdjlee): Remove get from method names.
