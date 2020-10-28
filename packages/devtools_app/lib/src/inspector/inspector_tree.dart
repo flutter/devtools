@@ -43,14 +43,8 @@ extension InspectorColorScheme on ColorScheme {
 const double iconPadding = 5.0;
 const double chartLineStrokeWidth = 1.0;
 const double columnWidth = 16.0;
-
-double verticalPadding() {
-  return 10.0 * fontSizeFactorFromTheme();
-}
-
-double rowHeight() {
-  return 24.0 * fontSizeFactorFromTheme();
-}
+double get verticalPadding => 10.0 * fontSizeFactorFromTheme();
+double get rowHeight => 24.0 * fontSizeFactorFromTheme();
 
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector
@@ -464,7 +458,7 @@ abstract class InspectorTreeController {
   }
 
   double getRowY(int index) {
-    return rowHeight() * index + verticalPadding();
+    return rowHeight * index + verticalPadding;
   }
 
   void nodeChanged(InspectorTreeNode node) {
@@ -517,7 +511,7 @@ abstract class InspectorTreeController {
   int get numRows => root != null ? root.subtreeSize : 0;
 
   int getRowIndex(double y) =>
-      (y - verticalPadding()) ~/ rowHeight();
+      (y - verticalPadding) ~/ rowHeight;
 
   InspectorTreeRow getRowForNode(InspectorTreeNode node) {
     return getCachedRow(root.getRowIndex(node));

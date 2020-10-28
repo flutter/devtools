@@ -29,7 +29,7 @@ class CodeView extends StatefulWidget {
   }) : super(key: key);
 
   static double get rowHeight => 20.0 * fontSizeFactorFromTheme();
-  static const assumedCharacterWidth = 16.0;
+  static double get assumedCharacterWidth => 16.0 * fontSizeFactorFromTheme();
 
   final DebuggerController controller;
   final ScriptRef scriptRef;
