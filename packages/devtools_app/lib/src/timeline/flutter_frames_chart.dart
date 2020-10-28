@@ -219,8 +219,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           ),
     );
     final avgFrameTime = sumFrameTimesMs / widget.frames.length;
-    final avgFps =
-        math.min(widget.displayRefreshRate, 1 / avgFrameTime * 1000).round();
+    final avgFps = (1 / avgFrameTime * 1000).round();
     return Text(
       '$avgFps FPS (average)',
       maxLines: 2,
