@@ -12,16 +12,8 @@ import 'ui/theme.dart';
 const DEFAULT_FONT_SIZE = 14.0;
 var fontSizeFactor = 1.0;
 
-double rowHeightFromTheme() {
-  return fontSizeFactor * (DEFAULT_FONT_SIZE + 10.0);
-}
-
-double verticalPaddingFromTheme() {
-  return fontSizeFactor * 10.0;
-}
-
-double deltaFromTheme() {
-  return fontSizeFactor * 20.0;
+double fontSizeFactorFromTheme() {
+  return fontSizeFactor;
 }
 
 /// Constructs the light or dark theme for the app taking into account

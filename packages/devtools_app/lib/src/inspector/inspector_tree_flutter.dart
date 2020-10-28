@@ -42,7 +42,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: rowHeightFromTheme(),
+      height: rowHeight(),
       child: InspectorRowContent(
         row: widget.row,
         expandArrowAnimation: expandArrowAnimation,
@@ -103,7 +103,7 @@ class InspectorTreeControllerFlutter extends Object
       getDepthIndent(row.depth),
       getRowY(row.index),
       rowWidth,
-      rowHeightFromTheme(),
+      rowHeight(),
     );
   }
 
@@ -400,7 +400,7 @@ class _InspectorTreeState extends State<InspectorTree>
                 autofocus: widget.isSummaryTree,
                 focusNode: _focusNode,
                 child: ListView.custom(
-                  itemExtent: rowHeightFromTheme(),
+                  itemExtent: rowHeight(),
                   childrenDelegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final InspectorTreeRow row =
@@ -463,7 +463,7 @@ class _RowPainter extends CustomPainter {
       // an ancestor of this node and some other node in the tree.
       canvas.drawLine(
         Offset(currentX, 0.0),
-        Offset(currentX, rowHeightFromTheme()),
+        Offset(currentX, rowHeight()),
         paint,
       );
     }
@@ -474,12 +474,12 @@ class _RowPainter extends CustomPainter {
       final double width = showExpandCollapse ? columnWidth * 0.5 : columnWidth;
       canvas.drawLine(
         Offset(currentX, 0.0),
-        Offset(currentX, rowHeightFromTheme() * 0.5),
+        Offset(currentX, rowHeight() * 0.5),
         paint,
       );
       canvas.drawLine(
-        Offset(currentX, rowHeightFromTheme() * 0.5),
-        Offset(currentX + width, rowHeightFromTheme() * 0.5),
+        Offset(currentX, rowHeight() * 0.5),
+        Offset(currentX + width, rowHeight() * 0.5),
         paint,
       );
     }
@@ -535,7 +535,7 @@ class InspectorRowContent extends StatelessWidget {
     final node = row.node;
     return CustomPaint(
       painter: _RowPainter(row, controller, colorScheme),
-      size: Size(currentX, rowHeightFromTheme()),
+      size: Size(currentX, rowHeight()),
       child: Padding(
         padding: EdgeInsets.only(left: currentX),
         child: ClipRect(
@@ -568,7 +568,7 @@ class InspectorRowContent extends StatelessWidget {
                     controller.requestFocus();
                   },
                   child: Container(
-                    height: rowHeightFromTheme(),
+                    height: rowHeight(),
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: DiagnosticsNodeDescription(node.diagnostic),
                   ),

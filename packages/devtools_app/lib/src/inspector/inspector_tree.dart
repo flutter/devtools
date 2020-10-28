@@ -44,6 +44,14 @@ const double iconPadding = 5.0;
 const double chartLineStrokeWidth = 1.0;
 const double columnWidth = 16.0;
 
+double verticalPadding() {
+  return 10.0 * fontSizeFactorFromTheme();
+}
+
+double rowHeight() {
+  return 24.0 * fontSizeFactorFromTheme();
+}
+
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector
 /// specific as that is the only case we care about.
@@ -456,7 +464,7 @@ abstract class InspectorTreeController {
   }
 
   double getRowY(int index) {
-    return rowHeightFromTheme() * index + verticalPaddingFromTheme();
+    return rowHeight() * index + verticalPadding();
   }
 
   void nodeChanged(InspectorTreeNode node) {
@@ -509,7 +517,7 @@ abstract class InspectorTreeController {
   int get numRows => root != null ? root.subtreeSize : 0;
 
   int getRowIndex(double y) =>
-      (y - verticalPaddingFromTheme()) ~/ rowHeightFromTheme();
+      (y - verticalPadding()) ~/ rowHeight();
 
   InspectorTreeRow getRowForNode(InspectorTreeNode node) {
     return getCachedRow(root.getRowIndex(node));
@@ -693,7 +701,7 @@ mixin InspectorTreeFixedRowHeightController on InspectorTreeController {
 
     if (targetRect == null || targetRect.isEmpty) return;
 
-    targetRect = targetRect.inflate(deltaFromTheme());
+    targetRect = targetRect.inflate(20.0 * fontSizeFactorFromTheme());
     scrollToRect(targetRect);
   }
 }

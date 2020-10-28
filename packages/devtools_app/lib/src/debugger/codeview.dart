@@ -28,7 +28,7 @@ class CodeView extends StatefulWidget {
     this.onSelected,
   }) : super(key: key);
 
-  static const rowHeight = 20.0;
+  static double get rowHeight => 20.0 * fontSizeFactorFromTheme();
   static const assumedCharacterWidth = 16.0;
 
   final DebuggerController controller;
