@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 
+import '../config_specific/logger/logger.dart';
 import '../network/network_model.dart';
 import '../trace_event.dart';
 import '../utils.dart';
@@ -195,6 +196,8 @@ class HttpRequestData extends NetworkRequest {
   @override
   bool get didFail {
     if (status == null) return false;
+    if (status == 'Error') return true;
+
     try {
       final code = int.parse(status);
       // Status codes 400-499 are client errors and 500-599 are server errors.
@@ -202,9 +205,11 @@ class HttpRequestData extends NetworkRequest {
         return true;
       }
     } on Exception catch (_) {
-      if (status == 'Error') {
-        return true;
-      }
+      log(
+        'Could not parse HTTP request status: $status',
+        LogLevel.error,
+      );
+      return true;
     }
     return false;
   }
