@@ -210,9 +210,14 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   Widget _buildAverageFps() {
     final double sumFrameTimesMs = widget.frames.fold(
-        0.0,
-        (sum, frame) =>
-            sum + math.max(frame.uiDurationMs, frame.rasterDurationMs));
+      0.0,
+      (sum, frame) =>
+          sum +
+          math.max(
+            1000 / widget.displayRefreshRate,
+            math.max(frame.uiDurationMs, frame.rasterDurationMs),
+          ),
+    );
     final avgFrameTime = sumFrameTimesMs / widget.frames.length;
     final avgFps =
         math.min(widget.displayRefreshRate, 1 / avgFrameTime * 1000).round();
@@ -469,7 +474,7 @@ class FPSLinePainter extends CustomPainter {
     );
 
     // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
-    final targetMsPerFrame = 1 / displayRefreshRate * 1000;
+    final targetMsPerFrame = 1000 / displayRefreshRate;
     final targetLineY = constraints.maxHeight - targetMsPerFrame / msPerPx;
 
     canvas.drawLine(
