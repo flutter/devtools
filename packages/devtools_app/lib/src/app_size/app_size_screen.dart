@@ -35,13 +35,19 @@ class AppSizeScreen extends Screen {
 
   static const analysisTabKey = Key('Analysis Tab');
   static const diffTabKey = Key('Diff Tab');
-  static const id = 'app-size';
+
+  /// The ID (used in routing) for the tabbed app-size page.
+  ///
+  /// This must be different to the top-level appSizePageId which is also used
+  /// in routing when to ensure they have unique URLs.
+  static const id = 'appsize';
 
   @visibleForTesting
   static const dropdownKey = Key('Diff Tree Type Dropdown');
 
   @visibleForTesting
   static const analysisViewTreemapKey = Key('Analysis View Treemap');
+
   @visibleForTesting
   static const diffViewTreemapKey = Key('Diff View Treemap');
 
