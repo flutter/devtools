@@ -27,6 +27,7 @@ void main() {
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
           .thenReturn(false);
+      when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       screen = const PerformanceScreen();
     });
