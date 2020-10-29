@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 ///
 /// This must be different to the AppSizeScreen ID which is also used in routing when
 /// cnnected to a VM to ensure they have unique URLs.
-const appSizePageId = 'app-size';
+const appSizePageId = 'appsize';
 
 const homePageId = '';
 const snapshotPageId = 'snapshot';

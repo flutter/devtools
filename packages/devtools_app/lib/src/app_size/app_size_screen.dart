@@ -40,7 +40,7 @@ class AppSizeScreen extends Screen {
   ///
   /// This must be different to the top-level appSizePageId which is also used
   /// in routing when to ensure they have unique URLs.
-  static const id = 'appsize';
+  static const id = 'app-size';
 
   @visibleForTesting
   static const dropdownKey = Key('Diff Tree Type Dropdown');
