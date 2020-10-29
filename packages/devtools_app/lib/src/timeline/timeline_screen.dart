@@ -216,11 +216,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
             const SizedBox(width: defaultSpacing),
             ClearButton(
               includeTextWidth: _primaryControlsMinIncludeTextWidth,
-              onPressed: (refreshing || processing)
-                  ? null
-                  : () async {
-                      await _clearTimeline();
-                    },
+              onPressed: (refreshing || processing) ? null : _clearTimeline,
             ),
           ],
         );
