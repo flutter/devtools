@@ -7,7 +7,12 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-const appSizePageId = 'app-size';
+/// The page ID (used in routing) for the standalone app-size page.
+///
+/// This must be different to the AppSizeScreen ID which is also used in routing when
+/// cnnected to a VM to ensure they have unique URLs.
+const appSizePageId = 'appsize';
+
 const homePageId = '';
 const snapshotPageId = 'snapshot';
 
