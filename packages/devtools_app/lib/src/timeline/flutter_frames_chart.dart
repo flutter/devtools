@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -109,7 +111,14 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         children: [
           Expanded(child: _buildChart()),
           const SizedBox(width: defaultSpacing),
-          _buildChartLegend(),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildChartLegend(),
+              if (widget.frames.isNotEmpty) _buildAverageFps(),
+            ],
+          ),
         ],
       ),
     );
@@ -196,6 +205,24 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         const SizedBox(width: denseSpacing),
         Text(description),
       ],
+    );
+  }
+
+  Widget _buildAverageFps() {
+    final double sumFrameTimesMs = widget.frames.fold(
+      0.0,
+      (sum, frame) =>
+          sum +
+          math.max(
+            1000 / widget.displayRefreshRate,
+            math.max(frame.uiDurationMs, frame.rasterDurationMs),
+          ),
+    );
+    final avgFrameTime = sumFrameTimesMs / widget.frames.length;
+    final avgFps = (1 / avgFrameTime * 1000).round();
+    return Text(
+      '$avgFps FPS (average)',
+      maxLines: 2,
     );
   }
 }
@@ -446,7 +473,7 @@ class FPSLinePainter extends CustomPainter {
     );
 
     // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
-    final targetMsPerFrame = 1 / displayRefreshRate * 1000;
+    final targetMsPerFrame = 1000 / displayRefreshRate;
     final targetLineY = constraints.maxHeight - targetMsPerFrame / msPerPx;
 
     canvas.drawLine(
