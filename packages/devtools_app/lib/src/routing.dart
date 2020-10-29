@@ -7,7 +7,7 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// The page ID (used in routing) for the standalong app-size page.
+/// The page ID (used in routing) for the standalone app-size page.
 ///
 /// This must be different to the AppSizeScreen ID which is also used in routing when
 /// cnnected to a VM to ensure they have unique URLs.
