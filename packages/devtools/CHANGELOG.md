@@ -1,4 +1,5 @@
 ## 0.9.4
+* Fix NPE in VM flags table [#2472](https://github.com/flutter/devtools/pull/2472)
 * Color failed network requests with red status codes [#2466](https://github.com/flutter/devtools/pull/2466)
 * Fix bug with Expand All control in the CPU profiler [#2465](https://github.com/flutter/devtools/pull/2465)
 * Add average FPS information to the Timeline [#2462](https://github.com/flutter/devtools/pull/2462)
