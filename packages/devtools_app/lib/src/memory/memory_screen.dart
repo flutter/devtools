@@ -317,24 +317,16 @@ class MemoryBodyState extends State<MemoryBody>
       builder: (context, paused, _) {
         return Row(
           children: [
-            OutlineButton(
+            PauseButton(
               key: MemoryScreen.pauseButtonKey,
+              includeTextWidth: _primaryControlsMinVerboseWidth,
               onPressed: paused ? null : controller.pauseLiveFeed,
-              child: const MaterialIconLabel(
-                Icons.pause,
-                'Pause',
-                includeTextWidth: _primaryControlsMinVerboseWidth,
-              ),
             ),
             const SizedBox(width: denseSpacing),
-            OutlineButton(
+            ResumeButton(
               key: MemoryScreen.resumeButtonKey,
+              includeTextWidth: _primaryControlsMinVerboseWidth,
               onPressed: paused ? controller.resumeLiveFeed : null,
-              child: const MaterialIconLabel(
-                Icons.play_arrow,
-                'Resume',
-                includeTextWidth: _primaryControlsMinVerboseWidth,
-              ),
             ),
             const SizedBox(width: defaultSpacing),
             OutlineButton(
