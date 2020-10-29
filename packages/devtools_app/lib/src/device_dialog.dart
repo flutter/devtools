@@ -254,9 +254,9 @@ class _ValueColumn extends ColumnData<_DialogFlag> {
 
 class _DialogFlag {
   _DialogFlag(this.flag)
-      : filterText = '${flag.name.toLowerCase()}\n'
-            '${flag.comment.toLowerCase()}\n'
-            '${flag.valueAsString.toLowerCase()}';
+      : filterText = '${flag.name?.toLowerCase()}\n'
+            '${flag.comment?.toLowerCase()}\n'
+            '${flag.valueAsString?.toLowerCase()}';
 
   final Flag flag;
   final String filterText;
