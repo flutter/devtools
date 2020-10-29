@@ -19,7 +19,9 @@ class CpuBottomUpTable extends StatelessWidget {
       TotalTimeColumn(),
       startingSortColumn,
       treeColumn,
-      SourceColumn(),
+      // TODO(kenz): add source column when
+      // https://github.com/dart-lang/sdk/issues/37553 is fixed.
+      // SourceColumn(),
     ]);
     return CpuBottomUpTable._(
       key,

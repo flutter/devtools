@@ -19,7 +19,9 @@ class CpuCallTreeTable extends StatelessWidget {
       startingSortColumn,
       SelfTimeColumn(),
       treeColumn,
-      SourceColumn(),
+      // TODO(kenz): add source column when
+      // https://github.com/dart-lang/sdk/issues/37553 is fixed.
+      // SourceColumn(),
     ]);
     return CpuCallTreeTable._(
       key,
