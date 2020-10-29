@@ -635,6 +635,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 }
 
+// TODO(kenz): https://github.com/flutter/devtools/issues/1522. The table code
+// needs to be refactored to support flexible column widths.
 class _Table<T> extends StatefulWidget {
   const _Table({
     Key key,
@@ -667,7 +669,7 @@ class _Table<T> extends StatefulWidget {
   final ValueListenable<T> activeSearchMatchNotifier;
 
   /// The width to assume for columns that don't specify a width.
-  static const defaultColumnWidth = 500.0;
+  static const defaultColumnWidth = 1000.0;
 
   @override
   _TableState<T> createState() => _TableState<T>();

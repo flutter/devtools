@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../globals.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../utils.dart';
@@ -19,9 +20,9 @@ class CpuCallTreeTable extends StatelessWidget {
       startingSortColumn,
       SelfTimeColumn(),
       treeColumn,
-      // TODO(kenz): add source column when
+      // TODO(kenz): add source column for flutter apps once
       // https://github.com/dart-lang/sdk/issues/37553 is fixed.
-      // SourceColumn(),
+      if (serviceManager.connectedApp.isDartCliAppNow) SourceColumn(),
     ]);
     return CpuCallTreeTable._(
       key,
