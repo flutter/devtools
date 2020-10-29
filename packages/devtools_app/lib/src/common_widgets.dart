@@ -106,8 +106,8 @@ class IconLabelButton extends StatelessWidget {
     return OutlineButton(
       onPressed: onPressed,
       child: MaterialIconLabel(
-        Icons.pause,
-        'Pause',
+        icon,
+        label,
         includeTextWidth: includeTextWidth,
       ),
     );
