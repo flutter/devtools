@@ -56,14 +56,14 @@ packages:
       path: "../devtools_server"
       relative: true
     source: path
-    version: "0.9.3+4"
+    version: "0.9.4"
   devtools_shared:
     dependency: "direct main"
     description:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.3+4"
+    version: "0.9.4"
   http:
     dependency: "direct main"
     description:
@@ -161,7 +161,7 @@ packages:
       name: sse
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.5.0"
+    version: "3.6.0"
   stack_trace:
     dependency: transitive
     description:
@@ -217,7 +217,7 @@ packages:
       name: vm_service
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.2.0"
+    version: "5.4.0"
   webkit_inspection_protocol:
     dependency: transitive
     description:
