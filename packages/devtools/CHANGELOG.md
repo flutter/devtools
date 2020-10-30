@@ -1,3 +1,17 @@
+## 0.9.4
+* Fix NPE in VM flags table [#2472](https://github.com/flutter/devtools/pull/2472)
+* Color failed network requests with red status codes [#2466](https://github.com/flutter/devtools/pull/2466)
+* Fix bug with Expand All control in the CPU profiler [#2465](https://github.com/flutter/devtools/pull/2465)
+* Add average FPS information to the Timeline [#2462](https://github.com/flutter/devtools/pull/2462)
+* Increase number of try ports when launching DevTools [#2458](https://github.com/flutter/devtools/pull/2458)
+* Prevent dart.io extensions from being called on paused isolates [#2450](https://github.com/flutter/devtools/pull/2450)
+* Remove the max zoom level bound for flame charts [#2447](https://github.com/flutter/devtools/pull/2447)
+* Fix an NPE in the memory page [#2443](https://github.com/flutter/devtools/pull/2443)
+* Add prompt for Q4 DevTools survey [#2442](https://github.com/flutter/devtools/pull/2442)
+* Improvements to the memory page controls [#2432](https://github.com/flutter/devtools/pull/2432)
+* Usability improvements for the Timeline Flutter frames chart [#2419](https://github.com/flutter/devtools/pull/2419), [#2421](https://github.com/flutter/devtools/pull/2421)
+* Use new routing API to support permalinks [#2406](https://github.com/flutter/devtools/pull/2406)
+
 ## 0.9.3+4
 * Do not try to launch Chrome by default when running the server in `--machine` mode
 * Prevent exceptions launching Chrome from terminate the server

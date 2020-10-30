@@ -205,9 +205,8 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
         ),
         const SizedBox(width: defaultSpacing),
         ClearButton(
-          busy: recording,
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: controller.clear,
+          onPressed: recording ? null : controller.clear,
         ),
       ],
     );

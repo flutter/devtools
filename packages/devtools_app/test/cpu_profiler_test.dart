@@ -112,11 +112,12 @@ void main() {
       await tester.pumpWidget(wrap(cpuProfiler));
       await tester.tap(find.text('Call Tree'));
       await tester.pumpAndSettle();
+
       expect(cpuProfileData.cpuProfileRoot.isExpanded, isFalse);
       await tester.tap(find.byKey(CpuProfiler.expandButtonKey));
-      expect(cpuProfileData.cpuProfileRoot.isExpanded, isTrue);
+      expect(cpuProfiler.callTreeRoots.first.isExpanded, isTrue);
       await tester.tap(find.byKey(CpuProfiler.collapseButtonKey));
-      expect(cpuProfileData.cpuProfileRoot.isExpanded, isFalse);
+      expect(cpuProfiler.callTreeRoots.first.isExpanded, isFalse);
 
       await tester.tap(find.text('Bottom Up'));
       await tester.pumpAndSettle();

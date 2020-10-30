@@ -20,13 +20,16 @@ class CpuProfiler extends StatefulWidget {
     @required this.data,
     @required this.controller,
     this.searchFieldKey,
-  }) : bottomUpRoots = data != null
+  })  : callTreeRoots = data != null ? [data.cpuProfileRoot.deepCopy()] : [],
+        bottomUpRoots = data != null
             ? BottomUpProfileTransformer.processData(data.cpuProfileRoot)
             : [];
 
   final CpuProfileData data;
 
   final CpuProfilerController controller;
+
+  final List<CpuStackFrame> callTreeRoots;
 
   final List<CpuStackFrame> bottomUpRoots;
 
@@ -166,7 +169,7 @@ class _CpuProfilerState extends State<CpuProfiler>
         );
       },
     );
-    final callTree = CpuCallTreeTable(widget.data);
+    final callTree = CpuCallTreeTable(widget.callTreeRoots);
     final bottomUp = CpuBottomUpTable(widget.bottomUpRoots);
     // TODO(kenz): make this order configurable.
     return [cpuFlameChart, callTree, bottomUp];
@@ -197,7 +200,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     Tab currentTab,
   ) {
     final roots = currentTab.key == CpuProfiler.callTreeTab
-        ? [widget.data.cpuProfileRoot]
+        ? widget.callTreeRoots
         : widget.bottomUpRoots;
     setState(() {
       roots.forEach(callback);

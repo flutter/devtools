@@ -6,11 +6,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'app.dart';
 import 'auto_dispose_mixin.dart';
 import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'notifications.dart';
+import 'routing.dart';
 import 'url_utils.dart';
 
 /// Widget that requires business logic to be loaded before building its
@@ -81,6 +81,16 @@ class _InitializerState extends State<Initializer>
     _attemptUrlConnection();
   }
 
+  @override
+  void didUpdateWidget(Initializer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Handle widget rebuild when the URL has changed.
+    if (widget.url != null && widget.url != oldWidget.url) {
+      _attemptUrlConnection();
+    }
+  }
+
   Future<void> _attemptUrlConnection() async {
     if (widget.url == null) {
       _handleNoConnection();
@@ -139,7 +149,8 @@ class _InitializerState extends State<Initializer>
                 RaisedButton(
                     onPressed: () {
                       hideDisconnectedOverlay();
-                      Navigator.of(context).popAndPushNamed(homeRoute);
+                      DevToolsRouterDelegate.of(context)
+                          .navigate(homePageId, {'uri': null});
                     },
                     child: const Text('Connect to Another App'))
               else

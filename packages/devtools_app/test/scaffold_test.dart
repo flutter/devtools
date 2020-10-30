@@ -103,7 +103,7 @@ void main() {
       await tester.pumpWidget(wrap(
         DevToolsScaffold(
           tabs: const [screen1, screen2],
-          initialPage: screen2.screenId,
+          page: screen2.screenId,
           ideTheme: null,
           analyticsProvider: await analyticsProvider,
         ),

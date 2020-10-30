@@ -4,14 +4,12 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:pedantic/pedantic.dart';
 
-import 'app.dart';
 import 'common_widgets.dart';
 import 'framework/framework_core.dart';
 import 'globals.dart';
-import 'navigation.dart';
 import 'notifications.dart';
+import 'routing.dart';
 import 'theme.dart';
 import 'url_utils.dart';
 import 'utils.dart';
@@ -82,7 +80,8 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           RaisedButton(
             child: const Text('Open app size tool'),
-            onPressed: () => Navigator.pushNamed(context, appSizeRoute),
+            onPressed: () =>
+                DevToolsRouterDelegate.of(context).navigate(appSizePageId),
           ),
         ],
       ),
@@ -184,12 +183,8 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
     );
     if (connected) {
       final connectedUri = serviceManager.service.connectedUri;
-      unawaited(
-        Navigator.pushNamed(
-          context,
-          routeNameWithQueryParams(context, '/', {'uri': '$connectedUri'}),
-        ),
-      );
+      DevToolsRouterDelegate.of(context)
+          .updateArgsIfNotCurrent({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       Notifications.of(context).push(
         'Successfully connected to $shortUri.',
