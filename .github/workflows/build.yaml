@@ -4,17 +4,14 @@
 
 name: devtools
 
-
 on:
   pull_request:
   push:
     branches:
       - master
 
-
 env:
   CHANNEL: dev
-
 
 jobs:
 
@@ -87,10 +84,10 @@ jobs:
           BOT: ${{ matrix.bot }}
         run: ./tool/travis.sh
 
-
+# TODO(https://github.com/flutter/devtools/issues/2437):
 # PLATFORM=chrome is going away. We need to move these tests to run with
-# chromedriver. https://github.com/flutter/devtools/issues/2437
+# chromedriver. 
 #    - BOT=test_ddc            PLATFORM=chrome
 # PLATFORM=chrome is going away. We need to move these tests to run with
-# chromedriver. https://github.com/flutter/devtools/issues/2437
+# chromedriver.
 #   - BOT=test_dart2js        PLATFORM=chrome
