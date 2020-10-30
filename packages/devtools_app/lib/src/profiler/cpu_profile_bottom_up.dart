@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../globals.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../utils.dart';
@@ -19,7 +20,9 @@ class CpuBottomUpTable extends StatelessWidget {
       TotalTimeColumn(),
       startingSortColumn,
       treeColumn,
-      SourceColumn(),
+      // TODO(kenz): add source column for flutter apps once
+      // https://github.com/dart-lang/sdk/issues/37553 is fixed.
+      if (serviceManager.connectedApp.isDartCliAppNow) SourceColumn(),
     ]);
     return CpuBottomUpTable._(
       key,
