@@ -14,7 +14,7 @@ dependencies:
   args: ^1.5.1
   browser_launcher: ^0.1.5
   devtools_shared: 0.9.4
-  intl: ^0.16.0
+  intl: ^0.17.0-nullsafety.1
   meta: ^1.1.0
   path: ^1.6.0
   sse: ^3.1.2
