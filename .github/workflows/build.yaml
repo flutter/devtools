@@ -12,6 +12,8 @@ on:
 
 env:
   CHANNEL: dev
+  # TODO: temp
+  TRAVIS_OS_NAME: linux
 
 jobs:
 
