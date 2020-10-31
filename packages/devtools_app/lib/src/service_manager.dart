@@ -245,6 +245,10 @@ class ServiceConnectionManager {
       }
     }));
 
+    // This needs to be called before calling
+    // `ga.setupUserApplicationDimensions()`.
+    await connectedApp.initializeValues();
+
     // Set up analytics dimensions for the connected app.
     await ga.setupUserApplicationDimensions();
 

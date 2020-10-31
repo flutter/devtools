@@ -359,7 +359,9 @@ bool _userApplicationDimensionsComputed = false;
 Future<void> computeUserApplicationCustomGTagData() async {
   if (_userApplicationDimensionsComputed) return;
 
-  await serviceManager.connectedApp.initializeValues();
+  assert(serviceManager.connectedApp.isFlutterAppNow != null);
+  assert(serviceManager.connectedApp.isDartWebAppNow != null);
+  assert(serviceManager.connectedApp.isProfileBuildNow != null);
 
   if (serviceManager.connectedApp.isFlutterAppNow) {
     userPlatformType = (await serviceManager.service.isProtocolVersionSupported(
@@ -510,7 +512,7 @@ Map<String, dynamic> generateSurveyQueryParameters() {
   const fromValuePrefix = '#/';
   final startIndex = url.indexOf(fromValuePrefix);
   final endIndex = url.indexOf('?');
-  final fromValue = url.substring(
+  final fromPage = url.substring(
     startIndex + fromValuePrefix.length,
     endIndex,
   );
@@ -521,7 +523,7 @@ Map<String, dynamic> generateSurveyQueryParameters() {
   return {
     clientIdKey: clientId,
     ideKey: ideLaunched,
-    fromKey: fromValue,
+    fromKey: fromPage,
     internalKey: internalValue,
   };
 }

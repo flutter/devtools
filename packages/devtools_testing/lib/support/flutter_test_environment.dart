@@ -102,8 +102,10 @@ class FlutterTestEnvironment {
 
       _service = _flutter.vmService;
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-      await serviceManager.vmServiceOpened(_service,
-          onClosed: Completer().future);
+      await serviceManager.vmServiceOpened(
+        _service,
+        onClosed: Completer().future,
+      );
 
       if (_afterNewSetup != null) await _afterNewSetup();
     }
