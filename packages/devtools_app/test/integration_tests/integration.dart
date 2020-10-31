@@ -361,6 +361,15 @@ class WebBuildFixture {
     final Completer<void> buildFinished = Completer<void>();
 
     _toLines(process.stderr).listen((String line) {
+      // TODO(https://github.com/flutter/devtools/issues/2477): this is a
+      // work around for an expected warning that would otherwise fail the test.
+      if (line.toLowerCase().contains('warning')) {
+        return;
+      }
+      if (line.toLowerCase().contains(' from path ../devtools_')) {
+        return;
+      }
+
       final err = 'error building flutter: $line';
       if (!buildFinished.isCompleted) {
         buildFinished.completeError(err);

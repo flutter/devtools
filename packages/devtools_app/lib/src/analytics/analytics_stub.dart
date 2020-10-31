@@ -27,3 +27,7 @@ void selectFrame(
 ]) {}
 
 Future<void> setupDimensions() async {}
+
+Future<void> setupUserApplicationDimensions() async {}
+
+Map<String, dynamic> generateSurveyQueryParameters() => {};

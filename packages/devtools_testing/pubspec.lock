@@ -218,7 +218,7 @@ packages:
       name: intl
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.16.1"
+    version: "0.17.0-nullsafety.1"
   io:
     dependency: transitive
     description:
@@ -267,7 +267,7 @@ packages:
       name: mp_chart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.0"
+    version: "0.3.1"
   nested:
     dependency: transitive
     description:
@@ -344,14 +344,7 @@ packages:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.11"
-  path_provider_linux:
-    dependency: transitive
-    description:
-      name: path_provider_linux
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.1+2"
+    version: "1.6.9"
   path_provider_macos:
     dependency: transitive
     description:
@@ -372,7 +365,7 @@ packages:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.10.0-nullsafety.1"
+    version: "1.10.0-nullsafety.2"
   platform:
     dependency: transitive
     description:
@@ -400,14 +393,7 @@ packages:
       name: pool
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.0-nullsafety.1"
-  process:
-    dependency: transitive
-    description:
-      name: process
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.0.13"
+    version: "1.5.0-nullsafety.2"
   provider:
     dependency: transitive
     description:
@@ -475,14 +461,14 @@ packages:
       name: source_map_stack_trace
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0-nullsafety.2"
+    version: "2.1.0-nullsafety.3"
   source_maps:
     dependency: transitive
     description:
       name: source_maps
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.10.10-nullsafety.1"
+    version: "0.10.10-nullsafety.2"
   source_span:
     dependency: transitive
     description:
@@ -644,13 +630,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.7.3"
-  xdg_directories:
-    dependency: transitive
-    description:
-      name: xdg_directories
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.0"
   yaml:
     dependency: transitive
     description:
@@ -659,5 +638,5 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=2.11.0-0.0 <=2.11.0-260.0.dev"
+  dart: ">=2.11.0-180.0.dev <=2.12.0-3.0.dev"
   flutter: ">1.21.0 <2.0.0"
