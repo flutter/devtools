@@ -10,6 +10,8 @@ import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
+import 'analytics/analytics_stub.dart'
+    if (dart.library.html) 'analytics/analytics.dart' as ga;
 import 'config_specific/logger/logger.dart';
 import 'connected_app.dart';
 import 'core/message_bus.dart';
@@ -243,7 +245,9 @@ class ServiceConnectionManager {
       }
     }));
 
-    await connectedApp.initializeValues();
+    // Set up analytics dimensions for the connected app.
+    await ga.setupUserApplicationDimensions();
+
     _connectionAvailableController.add(service);
   }
 

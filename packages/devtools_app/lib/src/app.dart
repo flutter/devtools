@@ -48,8 +48,8 @@ import 'utils.dart';
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
 
-/// Whether users are able to make changes to analytics settings.
-bool allowAnalyticsChanges = true;
+/// Whether this DevTools build is external.
+bool isExternalBuild = true;
 
 /// Top-level configuration for the app.
 @immutable
@@ -89,6 +89,8 @@ class DevToolsAppState extends State<DevToolsApp> {
   @override
   void initState() {
     super.initState();
+
+    ga.setupDimensions();
 
     serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
       setState(() {
@@ -456,7 +458,7 @@ class SettingsDialog extends StatelessWidget {
             listenable: preferences.darkModeTheme,
             toggle: preferences.toggleDarkModeTheme,
           ),
-          if (allowAnalyticsChanges && isDevToolsServerAvailable)
+          if (isExternalBuild && isDevToolsServerAvailable)
             _buildOption(
               label: const Text('Enable analytics'),
               listenable: ga.gaEnabledNotifier,

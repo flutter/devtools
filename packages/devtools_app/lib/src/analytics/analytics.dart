@@ -15,6 +15,7 @@ import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
 import '../../devtools.dart' as devtools show version;
+import '../app.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../globals.dart';
@@ -348,36 +349,34 @@ set flutterClientId(String __flutterClientId) {
   _flutterClientId = __flutterClientId;
 }
 
+bool _computingDimensions = false;
 bool _analyticsComputed = false;
 
-bool get isDimensionsComputed => _analyticsComputed;
-
-void dimensionsComputed() {
-  _analyticsComputed = true;
-}
+bool _computingUserApplicationDimensions = false;
+bool _userApplicationDimensionsComputed = false;
 
 // Computes the running application.
 Future<void> computeUserApplicationCustomGTagData() async {
-  if (isDimensionsComputed) return;
+  if (_userApplicationDimensionsComputed) return;
 
-  final isFlutter = await serviceManager.connectedApp.isFlutterApp;
-  final isWebApp = await serviceManager.connectedApp.isDartWebApp;
-  final isProfile = await serviceManager.connectedApp.isProfileBuild;
+  await serviceManager.connectedApp.initializeValues();
 
-  if (isFlutter) {
+  if (serviceManager.connectedApp.isFlutterAppNow) {
     userPlatformType = (await serviceManager.service.isProtocolVersionSupported(
             supportedVersion: SemanticVersion(major: 3, minor: 24)))
         ? serviceManager.vm.operatingSystem
         : 'unknown';
   }
 
-  if (isFlutter) {
+  if (serviceManager.connectedApp.isFlutterAppNow) {
     userAppType = appTypeFlutter;
   }
-  if (isWebApp) {
+  if (serviceManager.connectedApp.isDartWebAppNow) {
     userAppType = appTypeWeb;
   }
-  userBuildType = isProfile ? buildTypeProfile : buildTypeDebug;
+  userBuildType = serviceManager.connectedApp.isProfileBuildNow
+      ? buildTypeProfile
+      : buildTypeDebug;
 
   _analyticsComputed = true;
 }
@@ -433,7 +432,11 @@ void computeDevToolsCustomGTagsData() {
 void computeDevToolsQueryParams() {
   ideLaunched = ideLaunchedCLI; // Default is Command Line launch.
 
-  final Uri uri = Uri.parse(window.location.toString());
+  // TODO(https://github.com/flutter/devtools/issues/2475): fix url structure
+  // Remove the fragment for the purpose of reading the query parameters.
+  final modifiedUri =
+      window.location.toString().replaceFirst(RegExp(r'#\/(\w+)[?]'), '?');
+  final uri = Uri.parse(modifiedUri);
   final ideValue = uri.queryParameters[ideLaunchedQuery];
   if (ideValue != null) {
     ideLaunched = ideValue;
@@ -444,12 +447,10 @@ void computeFlutterClientId() async {
   flutterClientId = await server.flutterGAClientID();
 }
 
-bool _computing = false;
-
 int _stillWaiting = 0;
 void waitForDimensionsComputed(String screenName) {
   Timer(const Duration(milliseconds: 100), () async {
-    if (isDimensionsComputed) {
+    if (_analyticsComputed) {
       screen(screenName);
     } else {
       if (_stillWaiting++ < 50) {
@@ -465,7 +466,7 @@ void waitForDimensionsComputed(String screenName) {
 // all the dimension data.
 void setupAndGaScreen(String screenName) async {
   if (isGtagsEnabled()) {
-    if (!isDimensionsComputed) {
+    if (!_analyticsComputed) {
       _stillWaiting++;
       waitForDimensionsComputed(screenName);
     } else {
@@ -474,18 +475,53 @@ void setupAndGaScreen(String screenName) async {
   }
 }
 
-Future<void> setupDimensions() async {
-  if (serviceManager.connectedApp != null &&
-      isGtagsEnabled() &&
-      !isDimensionsComputed &&
-      !_computing) {
-    _computing = true;
-    // While spinning up DevTools first time wait until dimensions data is
-    // available before first GA event sent.
-    await computeUserApplicationCustomGTagData();
+void setupDimensions() {
+  if (isGtagsEnabled() && !_analyticsComputed && !_computingDimensions) {
+    _computingDimensions = true;
     computeDevToolsCustomGTagsData();
     computeDevToolsQueryParams();
     computeFlutterClientId();
-    dimensionsComputed();
+    _analyticsComputed = true;
   }
+}
+
+Future<void> setupUserApplicationDimensions() async {
+  if (serviceManager.connectedApp != null &&
+      !_userApplicationDimensionsComputed &&
+      !_computingUserApplicationDimensions) {
+    _computingUserApplicationDimensions = true;
+    await computeUserApplicationCustomGTagData();
+    _userApplicationDimensionsComputed = true;
+  }
+}
+
+Map<String, dynamic> generateSurveyQueryParameters() {
+  const clientIdKey = 'ClientId';
+  const ideKey = 'IDE';
+  const fromKey = 'From';
+  const internalKey = 'Internal';
+
+  // TODO(https://github.com/flutter/devtools/issues/2475): fix url structure
+  // Parsing the url via Uri.parse returns an incorrect value for fragment.
+  // Grab the fragment value manually. The url will be of the form
+  // http://127.0.0.1:9100/#/timeline?ide=IntelliJ-IDEA&uri=..., and we want the
+  // part equal to '/timeline'.
+  final url = window.location.toString();
+  const fromValuePrefix = '#/';
+  final startIndex = url.indexOf(fromValuePrefix);
+  final endIndex = url.indexOf('?');
+  final fromValue = url.substring(
+    startIndex + fromValuePrefix.length,
+    endIndex,
+  );
+
+  final clientId = flutterClientId;
+  final internalValue = (!isExternalBuild).toString();
+
+  return {
+    clientIdKey: clientId,
+    ideKey: ideLaunched,
+    fromKey: fromValue,
+    internalKey: internalValue,
+  };
 }
