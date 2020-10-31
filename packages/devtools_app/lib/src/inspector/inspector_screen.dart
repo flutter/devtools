@@ -68,7 +68,6 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
   @override
   void initState() {
     super.initState();
-    ga.setupDimensions();
     ga.screen(InspectorScreen.id);
     autoDispose(
         serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
