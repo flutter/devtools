@@ -10,6 +10,7 @@ import 'package:flutter/scheduler.dart';
 import 'common_widgets.dart';
 import 'status_line.dart' as status_line;
 import 'theme.dart';
+import 'utils.dart';
 
 const _notificationHeight = 175.0;
 final _notificationWidth = _notificationHeight * goldenRatio;
@@ -135,7 +136,10 @@ class NotificationsState extends State<_NotificationsProvider>
   /// Dismisses all notifications with a matching message.
   void dismiss(String message) {
     bool didDismiss = false;
-    for (final notification in _notifications) {
+    // Make a copy so we do not remove a notification from [_notifications]
+    // while iterating over it.
+    final notifications = List.from(_notifications);
+    for (final notification in notifications) {
       if (notification.message == message) {
         _notifications.remove(notification);
         didDismiss = true;
@@ -201,7 +205,7 @@ class _Notification extends StatefulWidget {
 
   final Duration duration;
   final String message;
-  final List<NotificationAction> actions;
+  final List<Widget> actions;
   final void Function(_Notification) remove;
 
   @override
@@ -295,13 +299,7 @@ class _NotificationState extends State<_Notification>
     if (widget.actions.isEmpty) return const SizedBox();
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        for (int i = 0; i < widget.actions.length; i++) ...[
-          widget.actions[i],
-          if (i != widget.actions.length - 1)
-            const SizedBox(width: denseSpacing)
-        ]
-      ],
+      children: widget.actions.joinWith(const SizedBox(width: denseSpacing)),
     );
   }
 }

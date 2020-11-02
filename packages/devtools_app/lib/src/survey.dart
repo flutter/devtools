@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'dart:io' if (dart.library.html) 'dart:html';
-
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 
@@ -11,13 +9,13 @@ import 'notifications.dart';
 import 'utils.dart';
 
 class SurveyService {
-  static const noThanksLabel = 'NO THANKS';
+  static const _noThanksLabel = 'NO THANKS';
 
-  static const takeSurveyLabel = 'TAKE SURVEY';
+  static const _takeSurveyLabel = 'TAKE SURVEY';
 
-  static const maxShowSurveyCount = 5;
+  static const _maxShowSurveyCount = 5;
 
-  static const metadataUrl =
+  static const _metadataUrl =
       'https://flutter.dev/f/dart-devtools-survey-metadata.json';
 
   /// Duration for which we should show the survey notification.
@@ -25,23 +23,17 @@ class SurveyService {
   /// We use a very long time here to give the appearance of a persistent
   /// notification. The user will need to interact with the prompt to dismiss
   /// it.
-  static const notificationDuration = Duration(days: 1);
-
-  /// The amount of time (one day) to wait between checks to the file at
-  /// [metadataUrl].
-  static const checkInterval = Duration(days: 1);
+  static const _notificationDuration = Duration(days: 1);
 
   DevToolsSurvey _cachedSurvey;
 
   Future<DevToolsSurvey> get activeSurvey async {
-    if (await shouldFetchSurveyContent()) {
-      _cachedSurvey = await fetchSurveyContent();
-      if (_cachedSurvey != null) {
-        await server.setActiveSurvey(_cachedSurvey.id);
-      }
+    _cachedSurvey ??= await _fetchSurveyContent();
+    if (_cachedSurvey != null) {
+      await server.setActiveSurvey(_cachedSurvey.id);
     }
 
-    if (await shouldShowSurvey()) {
+    if (await _shouldShowSurvey()) {
       return _cachedSurvey;
     }
     return null;
@@ -53,12 +45,19 @@ class SurveyService {
       final message = survey.title;
       final actions = [
         NotificationAction(
-          noThanksLabel,
-          () => _noThanksPressed(message, context),
+          _noThanksLabel,
+          () => _noThanksPressed(
+            message: message,
+            context: context,
+          ),
         ),
         NotificationAction(
-          takeSurveyLabel,
-          () => _takeSurveyPressed(survey.url, context),
+          _takeSurveyLabel,
+          () => _takeSurveyPressed(
+            surveyUrl: survey.url,
+            message: message,
+            context: context,
+          ),
           isPrimary: true,
         ),
       ];
@@ -66,7 +65,7 @@ class SurveyService {
         final didPush = Notifications.of(context).push(
           message,
           actions: actions,
-          duration: notificationDuration,
+          duration: _notificationDuration,
           allowDuplicates: false,
         );
         if (didPush) {
@@ -76,11 +75,11 @@ class SurveyService {
     }
   }
 
-  Future<bool> shouldShowSurvey() async {
+  Future<bool> _shouldShowSurvey() async {
     if (_cachedSurvey == null) return false;
 
     final surveyShownCount = await server.surveyShownCount();
-    if (surveyShownCount >= maxShowSurveyCount) return false;
+    if (surveyShownCount >= _maxShowSurveyCount) return false;
 
     final surveyActionTaken = await server.surveyActionTaken();
     if (surveyActionTaken) return false;
@@ -93,28 +92,11 @@ class SurveyService {
     return activeSurveyRange.contains(currentTimeMs);
   }
 
-  Future<bool> shouldFetchSurveyContent() async {
-    // TODO(kenz): consider storing the survey content on DevTools server, or
-    // else the content will be re-fetched for each instance of DevTools (e.g.
-    // if it was closed and re-opened).
-    if (_cachedSurvey == null) return true;
-
-    // Don't check more often than daily.
-    final currentTimeMs = DateTime.now().millisecondsSinceEpoch;
-    final lastCheckedTimeMs = await server.getLastSurveyContentCheckMs();
-
-    final shouldFetch = lastCheckedTimeMs == null ||
-        currentTimeMs - lastCheckedTimeMs >= checkInterval.inMilliseconds;
-    return shouldFetch;
-  }
-
-  Future<DevToolsSurvey> fetchSurveyContent() async {
+  Future<DevToolsSurvey> _fetchSurveyContent() async {
     try {
-      final response = await get(metadataUrl);
-      if (response.statusCode == HttpStatus.ok) {
+      final response = await get(_metadataUrl);
+      if (response.statusCode == 200) {
         final Map<String, dynamic> contents = json.decode(response.body);
-        await server
-            .setLastSurveyContentCheckMs(DateTime.now().millisecondsSinceEpoch);
         return DevToolsSurvey.parse(contents);
       }
     } on Error catch (e) {
@@ -123,14 +105,22 @@ class SurveyService {
     return null;
   }
 
-  void _noThanksPressed(String message, BuildContext context) async {
+  void _noThanksPressed({
+    @required String message,
+    @required BuildContext context,
+  }) async {
     await server.setSurveyActionTaken();
     Notifications.of(context).dismiss(message);
   }
 
-  void _takeSurveyPressed(String surveyUrl, BuildContext context) async {
-    await server.setSurveyActionTaken();
+  void _takeSurveyPressed({
+    @required String surveyUrl,
+    @required String message,
+    @required BuildContext context,
+  }) async {
     await launchUrl(surveyUrl, context);
+    await server.setSurveyActionTaken();
+    Notifications.of(context).dismiss(message);
   }
 }
 

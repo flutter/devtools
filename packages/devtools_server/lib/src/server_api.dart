@@ -94,29 +94,6 @@ class ServerApi {
         }
 
         return api.getCompleted(request, json.encode(result));
-      case apiGetLastSurveyContentCheckMs:
-        String result;
-        if (_devToolsUsage.lastSurveyContentCheckMs != null) {
-          result = _devToolsUsage.lastSurveyContentCheckMs.toString();
-        }
-        return api.getCompleted(request, json.encode(result));
-      case apiSetLastSurveyContentCheckMs:
-        // Assume failure.
-        bool result = false;
-
-        final queryParams = request.requestedUri.queryParameters;
-        if (queryParams.keys.length == 1 &&
-            queryParams.containsKey(lastSurveyContentCheckMs)) {
-          final String lastCheckMs = queryParams[lastSurveyContentCheckMs];
-          try {
-            _devToolsUsage.lastSurveyContentCheckMs = int.parse(lastCheckMs);
-            result = true;
-          } on Error catch (e) {
-            return api.badRequest('Unable to parse $lastCheckMs '
-                '- $apiSetLastSurveyContentCheckMs');
-          }
-        }
-        return api.getCompleted(request, json.encode(result));
       case apiGetSurveyActionTaken:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {

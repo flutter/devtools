@@ -33,21 +33,6 @@ const String apiGetSurveyActionTaken = '${apiPrefix}getSurveyActionTaken';
 /// Sets the surveyActionTaken of the of the activeSurvey (apiSetActiveSurvey).
 const String apiSetSurveyActionTaken = '${apiPrefix}setSurveyActionTaken';
 
-/// Property name passed as a query parameter to
-/// [apiSetLastSurveyContentCheckMs] calls, as well as the property name in
-/// ~/.devtools.
-const String lastSurveyContentCheckMs = 'lastSurveyContentCheckMs';
-
-/// Returns the last time in millisecondsFromEpoch that survey content was
-/// checked from flutter.dev.
-const String apiGetLastSurveyContentCheckMs =
-    '${apiPrefix}getLastSurveyContentCheckMs';
-
-/// Sets the last time in millisecondsFromEpoch that survey content was checked
-/// from flutter.dev.
-const String apiSetLastSurveyContentCheckMs =
-    '${apiPrefix}setLastSurveyContentCheckMs';
-
 /// Property name to apiSetSurveyActionTaken the surveyActionTaken is the name
 /// passed in queryParameter:
 const String surveyActionTakenPropertyName = 'surveyActionTaken';

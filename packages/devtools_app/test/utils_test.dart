@@ -878,6 +878,14 @@ void main() {
         expect(toCssHexColor(const Color(0xFFAABBCC)), equals('#aabbccff'));
       });
     });
+
+    group('ListExtension', () {
+      test('joinWith generates correct list', () {
+        expect([1, 2, 3, 4].joinWith(0), equals([1, 0, 2, 0, 3, 0, 4]));
+        expect([1].joinWith(0), equals([1]));
+        expect(['a', 'b'].joinWith('z'), equals(['a', 'z', 'b']));
+      });
+    });
   });
 }
 

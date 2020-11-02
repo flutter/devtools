@@ -998,3 +998,14 @@ extension StringExtension on String {
     return lowerCase.contains(strLowerCase);
   }
 }
+
+extension ListExtension<T> on List<T> {
+  List<T> joinWith(T separator) {
+    return [
+      for (int i = 0; i < length; i++) ...[
+        this[i],
+        if (i != length - 1) separator,
+      ]
+    ];
+  }
+}

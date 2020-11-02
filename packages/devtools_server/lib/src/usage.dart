@@ -120,12 +120,6 @@ class DevToolsUsage {
     }
   }
 
-  int get lastSurveyContentCheckMs => properties[_lastSurveyContentCheck];
-  set lastSurveyContentCheckMs(int ms) {
-    assert(ms != null);
-    properties[_lastSurveyContentCheck] = ms;
-  }
-
   /// Need to rewrite the entire survey structure for property to be persisted.
   void rewriteActiveSurvey(bool actionTaken, int shownCount) {
     assert(activeSurvey != null);

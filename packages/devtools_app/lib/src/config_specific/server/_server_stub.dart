@@ -25,14 +25,6 @@ Future<bool> setActiveSurvey(String value) async {
   throw Exception(unsupportedMessage);
 }
 
-Future<int> getLastSurveyContentCheckMs() async {
-  throw Exception(unsupportedMessage);
-}
-
-Future<void> setLastSurveyContentCheckMs(int ms) async {
-  throw Exception(unsupportedMessage);
-}
-
 Future<bool> surveyActionTaken() async {
   throw Exception(unsupportedMessage);
 }
