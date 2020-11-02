@@ -189,7 +189,7 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
   void _updatePollingState(bool recording) {
     if (recording) {
       _pollingTimer ??= Timer.periodic(
-        const Duration(milliseconds: 500),
+        const Duration(milliseconds: 2000),
         (_) => _networkService.refreshNetworkData(),
       );
     } else {
