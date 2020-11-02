@@ -147,6 +147,9 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
 
+  /// Specifies the return value of `socketProfilingEnabled`.
+  bool socketProfilingEnabledResult = true;
+
   final VmFlagManager _vmFlagManager;
   final Timeline _timelineData;
   SocketProfile _socketProfile;
@@ -295,13 +298,15 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<Success> startSocketProfiling(String isolateId) {
-    return Future.value(Success());
-  }
-
-  @override
-  Future<Success> pauseSocketProfiling(String isolateId) {
-    return Future.value(Success());
+  Future<SocketProfilingState> socketProfilingEnabled(
+    String isolateId, [
+    bool enabled,
+  ]) {
+    if (enabled != null) {
+      return Future.value(SocketProfilingState(enabled: enabled));
+    }
+    return Future.value(
+        SocketProfilingState(enabled: socketProfilingEnabledResult));
   }
 
   @override
@@ -338,12 +343,13 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   @override
   Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
     String isolateId, [
-    bool enable,
+    bool enabled,
   ]) async {
-    if (enable != null) {
-      return HttpTimelineLoggingState(enabled: enable);
+    if (enabled != null) {
+      return Future.value(HttpTimelineLoggingState(enabled: enabled));
     }
-    return HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult);
+    return Future.value(
+        HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult));
   }
 
   @override

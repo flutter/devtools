@@ -447,7 +447,7 @@ class VmServiceWrapper implements VmService {
 
   Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
     String isolateId, [
-    bool enable,
+    bool enabled,
   ]) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
     if (await isDartIoVersionSupported(
@@ -455,9 +455,9 @@ class VmServiceWrapper implements VmService {
       isolateId: isolateId,
     )) {
       return trackFuture('httpEnableTimelineLogging',
-          _vmService.httpEnableTimelineLogging(isolateId, enable));
+          _vmService.httpEnableTimelineLogging(isolateId, enabled));
     } else {
-      if (enable == null) {
+      if (enabled == null) {
         return trackFuture(
             'getHttpEnableTimelineLogging',
             // ignore: deprecated_member_use
@@ -466,8 +466,8 @@ class VmServiceWrapper implements VmService {
         await trackFuture(
             'setHttpEnableTimelineLogging',
             // ignore: deprecated_member_use
-            _vmService.setHttpEnableTimelineLogging(isolateId, enable));
-        return HttpTimelineLoggingState(enabled: enable);
+            _vmService.setHttpEnableTimelineLogging(isolateId, enabled));
+        return HttpTimelineLoggingState(enabled: enabled);
       }
     }
   }
@@ -479,24 +479,39 @@ class VmServiceWrapper implements VmService {
     return isolate.extensionRPCs.contains('ext.dart.io.getSocketProfile');
   }
 
-  Future<Success> startSocketProfiling(String isolateId) async {
+  Future<SocketProfilingState> socketProfilingEnabled(
+    String isolateId, [
+    bool enabled,
+  ]) async {
     assert(await isSocketProfilingAvailable(isolateId));
-    return trackFuture(
-      'startSocketProfiling',
-      // TODO(kenz): support new socket API.
-      // ignore: deprecated_member_use
-      _vmService.startSocketProfiling(isolateId),
-    );
-  }
-
-  Future<Success> pauseSocketProfiling(String isolateId) async {
-    assert(await isSocketProfilingAvailable(isolateId));
-    return trackFuture(
-      'pauseSocketProfiling',
-      // TODO(kenz): support new socket API.
-      // ignore: deprecated_member_use
-      _vmService.pauseSocketProfiling(isolateId),
-    );
+    if (await isDartIoVersionSupported(
+      supportedVersion: SemanticVersion(major: 1, minor: 5),
+      isolateId: isolateId,
+    )) {
+      return trackFuture('socketProfilingEnabled',
+          _vmService.socketProfilingEnabled(isolateId, enabled));
+    } else {
+      if (enabled == null) {
+        // Before Dart IO version 1.5, there was not a getter, so return the
+        // default state of false.
+        return Future.value(SocketProfilingState(enabled: false));
+      } else {
+        if (enabled) {
+          await trackFuture(
+            'startSocketProfiling',
+            // ignore: deprecated_member_use
+            _vmService.startSocketProfiling(isolateId),
+          );
+        } else {
+          await trackFuture(
+            'pauseSocketProfiling',
+            // ignore: deprecated_member_use
+            _vmService.pauseSocketProfiling(isolateId),
+          );
+        }
+        return SocketProfilingState(enabled: enabled);
+      }
+    }
   }
 
   Future<Success> clearSocketProfile(String isolateId) async {

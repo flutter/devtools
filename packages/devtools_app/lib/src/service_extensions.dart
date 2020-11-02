@@ -23,6 +23,7 @@ class ToggleableServiceExtensionDescription<T>
     @required String disabledTooltip,
     @required String gaScreenName,
     @required String gaItem,
+    bool shouldCallOnAllIsolates = false,
   }) : super(
           extension: extension,
           description: description,
@@ -31,6 +32,7 @@ class ToggleableServiceExtensionDescription<T>
           tooltips: [enabledTooltip, disabledTooltip],
           gaScreenName: gaScreenName,
           gaItem: gaItem,
+          shouldCallOnAllIsolates: shouldCallOnAllIsolates,
         );
 
   static const enabledValueIndex = 0;
@@ -56,6 +58,7 @@ class ServiceExtensionDescription<T> {
     @required this.tooltips,
     @required this.gaScreenName,
     @required this.gaItem,
+    this.shouldCallOnAllIsolates = false,
   }) : displayValues =
             displayValues ?? values.map((v) => v.toString()).toList();
 
@@ -74,6 +77,8 @@ class ServiceExtensionDescription<T> {
   final String gaScreenName; // Analytics screen (screen name where item lives).
 
   final String gaItem; // Analytics item name (toggleable item's name).
+
+  final bool shouldCallOnAllIsolates;
 }
 
 final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
@@ -186,6 +191,19 @@ final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
   disabledTooltip: 'HTTP timeline logging disabled',
   gaScreenName: null,
   gaItem: null,
+  shouldCallOnAllIsolates: true,
+);
+
+final socketProfiling = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.dart.io.socketProfilingEnabled',
+  description: 'Whether socket profiling is enabled',
+  enabledValue: true,
+  disabledValue: false,
+  enabledTooltip: 'Socket profiling enabled',
+  disabledTooltip: 'Socket profiling disabled',
+  gaScreenName: null,
+  gaItem: null,
+  shouldCallOnAllIsolates: true,
 );
 
 // Legacy extension to show the inspector and enable inspector select mode.
@@ -266,6 +284,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   slowAnimations,
   structuredErrors,
   httpEnableTimelineLogging,
+  socketProfiling,
 ];
 
 final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
