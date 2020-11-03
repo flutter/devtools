@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,6 +19,7 @@ import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
+import '../ui/colors.dart';
 import '../ui/service_extension_widgets.dart';
 import '../utils.dart';
 import 'logging_controller.dart';
@@ -87,16 +89,14 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       controller.filterText = filterController.text;
     });
 
-    addAutoDisposeListener(controller.onLogsUpdated, () {
+    selected = controller.selectedLog.value;
+    addAutoDisposeListener(controller.selectedLog, () {
       setState(() {
-        if (selected != null) {
-          final List<LogData> items = controller.filteredData;
-          if (!items.contains(selected)) {
-            selected = null;
-          }
-        }
+        selected = controller.selectedLog.value;
       });
     });
+
+    addAutoDisposeListener(controller.onLogsUpdated);
   }
 
   @override
@@ -133,7 +133,8 @@ class _LoggingScreenState extends State<LoggingScreenBody>
             OutlineDecoration(
               child: LogsTable(
                 data: controller.filteredData,
-                onItemSelected: _select,
+                onItemSelected: controller.selectLog,
+                selectionNotifier: controller.selectedLog,
               ),
             ),
             LogDetails(log: selected),
@@ -141,10 +142,6 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         ),
       ),
     ]);
-  }
-
-  void _select(LogData log) {
-    setState(() => selected = log);
   }
 
   void _clearLogs() {
@@ -156,10 +153,16 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 }
 
 class LogsTable extends StatelessWidget {
-  LogsTable({Key key, this.data, this.onItemSelected}) : super(key: key);
+  LogsTable({
+    Key key,
+    this.data,
+    this.onItemSelected,
+    this.selectionNotifier,
+  }) : super(key: key);
 
   final List<LogData> data;
   final ItemCallback<LogData> onItemSelected;
+  final ValueListenable<LogData> selectionNotifier;
 
   final ColumnData<LogData> when = _WhenColumn();
   final ColumnData<LogData> kind = _KindColumn();
@@ -175,6 +178,7 @@ class LogsTable extends StatelessWidget {
       autoScrollContent: true,
       keyFactory: (LogData data) => ValueKey<LogData>(data),
       onItemSelected: onItemSelected,
+      selectionNotifier: selectionNotifier,
       sortColumn: when,
       sortDirection: SortDirection.ascending,
     );
@@ -298,7 +302,11 @@ class _KindColumn extends ColumnData<LogData>
   String getValue(LogData dataObject) => dataObject.kind;
 
   @override
-  Widget build(BuildContext context, LogData item) {
+  Widget build(
+    BuildContext context,
+    LogData item, {
+    bool isRowSelected = false,
+  }) {
     final String kind = item.kind;
 
     Color color = const Color.fromARGB(0xff, 0x61, 0x61, 0x61);
@@ -346,13 +354,22 @@ class _MessageColumn extends ColumnData<LogData>
       dataObject.summary ?? dataObject.details;
 
   @override
-  Widget build(BuildContext context, LogData data) {
+  Widget build(
+    BuildContext context,
+    LogData data, {
+    bool isRowSelected = false,
+  }) {
+    TextStyle textStyle = fixedFontStyle(context);
+    if (isRowSelected) {
+      textStyle = textStyle.copyWith(color: defaultSelectionForegroundColor);
+    }
+
     if (data.kind == 'flutter.frame') {
       const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
       final Text text = Text(
         getDisplayValue(data),
         overflow: TextOverflow.ellipsis,
-        style: fixedFontStyle(context),
+        style: textStyle,
       );
 
       double frameLength = 0.0;
@@ -382,7 +399,7 @@ class _MessageColumn extends ColumnData<LogData>
             // TODO(helin24): Recompute summary length considering ansi codes.
             //  The current summary is generally the first 200 chars of details.
             getDisplayValue(data),
-            fixedFontStyle(context),
+            textStyle,
           ),
         ),
         overflow: TextOverflow.ellipsis,

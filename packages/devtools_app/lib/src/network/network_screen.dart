@@ -310,7 +310,11 @@ class UriColumn extends ColumnData<NetworkRequest>
   }
 
   @override
-  Widget build(BuildContext context, NetworkRequest data) {
+  Widget build(
+    BuildContext context,
+    NetworkRequest data, {
+    bool isRowSelected = false,
+  }) {
     final value = getDisplayValue(data);
 
     return Tooltip(
@@ -350,7 +354,11 @@ class StatusColumn extends ColumnData<NetworkRequest>
   }
 
   @override
-  Widget build(BuildContext context, NetworkRequest data) {
+  Widget build(
+    BuildContext context,
+    NetworkRequest data, {
+    bool isRowSelected = false,
+  }) {
     final theme = Theme.of(context);
     return Text(
       getDisplayValue(data),
