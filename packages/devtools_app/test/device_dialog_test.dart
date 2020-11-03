@@ -61,7 +61,7 @@ void main() {
       expect(findSubstring(deviceDialog, 'Dart Version'), findsOneWidget);
       expect(findSubstring(deviceDialog, 'Flutter Version'), findsNothing);
       expect(
-          findSubstring(deviceDialog, 'VM Service connection'), findsOneWidget);
+          findSubstring(deviceDialog, 'VM Service Connection'), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds dialog flutter', windowSize,
@@ -83,7 +83,7 @@ void main() {
       expect(findSubstring(deviceDialog, 'Dart Version'), findsOneWidget);
       expect(findSubstring(deviceDialog, 'Flutter Version'), findsOneWidget);
       expect(
-          findSubstring(deviceDialog, 'VM Service connection'), findsOneWidget);
+          findSubstring(deviceDialog, 'VM Service Connection'), findsOneWidget);
     });
   });
 
