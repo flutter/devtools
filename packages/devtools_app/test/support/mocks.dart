@@ -185,6 +185,10 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   };
 
   @override
+  Uri get connectedUri => _connectedUri;
+  final _connectedUri = Uri.parse('ws://127.0.0.1:56137/ISsyt6ki0no=/ws');
+
+  @override
   Future<void> forEachIsolate(Future<void> Function(IsolateRef) callback) =>
       callback(
         IsolateRef.parse(

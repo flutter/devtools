@@ -13,6 +13,7 @@ import 'connected_app.dart';
 import 'dialogs.dart';
 import 'globals.dart';
 import 'info/info_controller.dart';
+import 'routing.dart';
 import 'table.dart';
 import 'table_data.dart';
 import 'theme.dart';
@@ -59,6 +60,13 @@ class DeviceDialog extends StatelessWidget {
           '${flutterVersion.engineRevision}';
     }
 
+    if (serviceManager.service.connectedUri != null) {
+      items['VM Service Connection'] =
+          serviceManager.service.connectedUri.toString();
+    }
+
+    // TODO(kenz): set actions alignment to `spaceBetween` if
+    // https://github.com/flutter/flutter/issues/69708 is fixed.
     return DevToolsDialog(
       title: dialogTitleText(theme, 'Device Info'),
       content: Column(
@@ -78,9 +86,20 @@ class DeviceDialog extends StatelessWidget {
         ],
       ),
       actions: [
+        _connectToNewAppButton(context),
         if (connectedApp.isRunningOnDartVM) _ViewVMFlagsButton(),
         DialogCloseButton(),
       ],
+    );
+  }
+
+  Widget _connectToNewAppButton(BuildContext context) {
+    return RaisedButton(
+      onPressed: () {
+        DevToolsRouterDelegate.of(context).navigate(homePageId, {'uri': null});
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+      },
+      child: const Text('CONNECT TO A NEW APP'),
     );
   }
 }
@@ -97,7 +116,7 @@ class _ViewVMFlagsButton extends StatelessWidget {
           builder: (context) => VMFlagsDialog(),
         ));
       },
-      child: Text('View VM Flags...'.toUpperCase()),
+      child: Text('View VM Flags'.toUpperCase()),
     );
   }
 }

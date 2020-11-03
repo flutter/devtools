@@ -52,6 +52,7 @@ class DevToolsDialog extends StatelessWidget {
           contentPadding, 0, contentPadding, contentPadding),
       content: content,
       actions: actions,
+      buttonPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
     );
   }
 }
