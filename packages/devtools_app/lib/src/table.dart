@@ -170,7 +170,9 @@ class FlatTableState<T> extends State<FlatTable<T>>
       columns: widget.columns,
       columnWidths: columnWidths,
       backgroundColor: alternatingColorForIndexWithContext(index, context),
-      isSelected: node == widget.selectionNotifier.value,
+      isSelected: widget.selectionNotifier != null
+          ? node == widget.selectionNotifier.value
+          : false,
       searchMatchesNotifier: widget.searchMatchesNotifier,
       activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
     );
