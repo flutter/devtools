@@ -37,8 +37,6 @@ class NetworkScreen extends Screen {
 
   static const id = 'network';
 
-  static const recordingInstructionsKey = Key('Recording Instructions');
-
   @override
   Widget build(BuildContext context) => const NetworkScreenBody();
 
