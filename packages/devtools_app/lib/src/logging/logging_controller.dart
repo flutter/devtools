@@ -205,9 +205,9 @@ class LoggingController {
     return _cachedFilteredData;
   }
 
-  ValueListenable<LogData> get selectedLog => _selectedLog;
-
   final _selectedLog = ValueNotifier<LogData>(null);
+
+  ValueListenable<LogData> get selectedLog => _selectedLog;
 
   final List<StreamSubscription> _subscriptions = [];
 
