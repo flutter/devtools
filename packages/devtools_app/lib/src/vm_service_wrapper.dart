@@ -482,13 +482,21 @@ class VmServiceWrapper implements VmService {
   Future<Success> startSocketProfiling(String isolateId) async {
     assert(await isSocketProfilingAvailable(isolateId));
     return trackFuture(
-        'startSocketProfiling', _vmService.startSocketProfiling(isolateId));
+      'startSocketProfiling',
+      // TODO(kenz): support new socket API.
+      // ignore: deprecated_member_use
+      _vmService.startSocketProfiling(isolateId),
+    );
   }
 
   Future<Success> pauseSocketProfiling(String isolateId) async {
     assert(await isSocketProfilingAvailable(isolateId));
     return trackFuture(
-        'pauseSocketProfiling', _vmService.pauseSocketProfiling(isolateId));
+      'pauseSocketProfiling',
+      // TODO(kenz): support new socket API.
+      // ignore: deprecated_member_use
+      _vmService.pauseSocketProfiling(isolateId),
+    );
   }
 
   Future<Success> clearSocketProfile(String isolateId) async {
@@ -789,6 +797,19 @@ class VmServiceWrapper implements VmService {
       return trackFuture(
         'getSupportedProtocols',
         _vmService.getSupportedProtocols(),
+      );
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  Future<PortList> getPorts(String isolateId) async {
+    if (await isProtocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 5, minor: 4))) {
+      return trackFuture(
+        'getPorts',
+        _vmService.getPorts(isolateId),
       );
     } else {
       return null;

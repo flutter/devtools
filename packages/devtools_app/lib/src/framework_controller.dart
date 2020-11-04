@@ -23,7 +23,7 @@ class FrameworkController {
   final StreamController<Uri> _connectedController =
       StreamController.broadcast();
   final StreamController _disconnectedController = StreamController.broadcast();
-  final StreamController<String> _pageChangeController =
+  final StreamController<PageChangeEvent> _pageChangeController =
       StreamController.broadcast();
 
   /// Show the indicated page.
@@ -50,13 +50,11 @@ class FrameworkController {
   Stream<Uri> get onConnected => _connectedController.stream;
 
   /// Notifies when the current page changes.
-  ///
-  /// This notifies with the page ID.
-  Stream<String> get onPageChange => _pageChangeController.stream;
+  Stream<PageChangeEvent> get onPageChange => _pageChangeController.stream;
 
   /// Notify the controller that the current page has changed.
-  void notifyPageChange(String pageId) {
-    _pageChangeController.add(pageId);
+  void notifyPageChange(PageChangeEvent page) {
+    _pageChangeController.add(page);
   }
 
   /// Notifies when a device disconnects from DevTools.
@@ -78,4 +76,11 @@ class ConnectVmEvent {
 
   final Uri serviceProtocolUri;
   final bool notify;
+}
+
+class PageChangeEvent {
+  PageChangeEvent(this.id, this.embedded);
+
+  final String id;
+  final bool embedded;
 }
