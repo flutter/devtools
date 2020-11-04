@@ -205,6 +205,10 @@ class LoggingController {
     return _cachedFilteredData;
   }
 
+  final _selectedLog = ValueNotifier<LogData>(null);
+
+  ValueListenable<LogData> get selectedLog => _selectedLog;
+
   final List<StreamSubscription> _subscriptions = [];
 
   final Reporter onLogsUpdated = Reporter();
@@ -219,9 +223,24 @@ class LoggingController {
   set filterText(String value) {
     _filterText = value;
     _cachedFilteredData = null;
+    _updateSelection();
 
     onLogsUpdated.notify();
     _updateStatus();
+  }
+
+  void selectLog(LogData data) {
+    _selectedLog.value = data;
+  }
+
+  void _updateSelection() {
+    final selected = _selectedLog.value;
+    if (selected != null) {
+      final List<LogData> items = filteredData;
+      if (!items.contains(selected)) {
+        _selectedLog.value = null;
+      }
+    }
   }
 
   /// ObjectGroup for Flutter (null for non-Flutter apps).
@@ -253,6 +272,7 @@ class LoggingController {
   void clear() {
     data.clear();
     _cachedFilteredData = null;
+    _selectedLog.value = null;
     _updateStatus();
   }
 
@@ -504,6 +524,8 @@ class LoggingController {
       }
       data = data.sublist(itemsToRemove);
     }
+
+    _updateSelection();
 
     onLogsUpdated.notify();
     _updateStatus();

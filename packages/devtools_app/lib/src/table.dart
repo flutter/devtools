@@ -56,6 +56,7 @@ class FlatTable<T> extends StatefulWidget {
     this.onSortChanged,
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
+    this.selectionNotifier,
   })  : assert(columns != null),
         assert(keyFactory != null),
         assert(data != null),
@@ -83,6 +84,8 @@ class FlatTable<T> extends StatefulWidget {
   final ValueListenable<List<T>> searchMatchesNotifier;
 
   final ValueListenable<T> activeSearchMatchNotifier;
+
+  final ValueListenable<T> selectionNotifier;
 
   @override
   FlatTableState<T> createState() => FlatTableState<T>();
@@ -167,6 +170,9 @@ class FlatTableState<T> extends State<FlatTable<T>>
       columns: widget.columns,
       columnWidths: columnWidths,
       backgroundColor: alternatingColorForIndexWithContext(index, context),
+      isSelected: widget.selectionNotifier != null
+          ? node == widget.selectionNotifier.value
+          : false,
       searchMatchesNotifier: widget.searchMatchesNotifier,
       activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
     );
@@ -881,7 +887,7 @@ abstract class ColumnRenderer<T> {
   ///
   /// This method can return `null` to indicate that the default rendering
   /// should be used instead.
-  Widget build(BuildContext context, T data);
+  Widget build(BuildContext context, T data, {bool isRowSelected = false});
 }
 
 /// Callback for when a specific item in a table is selected.
@@ -908,6 +914,7 @@ class TableRow<T> extends StatefulWidget {
     this.onExpansionCompleted,
     this.isExpanded = false,
     this.isExpandable = false,
+    this.isSelected = false,
     this.isShown = true,
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
@@ -930,6 +937,7 @@ class TableRow<T> extends StatefulWidget {
   })  : node = null,
         isExpanded = false,
         isExpandable = false,
+        isSelected = false,
         expandableColumn = null,
         isShown = true,
         backgroundColor = null,
@@ -945,6 +953,7 @@ class TableRow<T> extends StatefulWidget {
   final List<ColumnData<T>> columns;
   final ItemCallback<T> onPressed;
   final List<double> columnWidths;
+  final bool isSelected;
 
   /// Which column, if any, should show expansion affordances
   /// and nested rows.
@@ -1126,6 +1135,9 @@ class _TableRowState<T> extends State<TableRow<T>>
   Color _searchAwareBackgroundColor() {
     final backgroundColor =
         widget.backgroundColor ?? titleSolidBackgroundColor(Theme.of(context));
+    if (widget.isSelected) {
+      return defaultSelectionColor;
+    }
     final searchAwareBackgroundColor = isSearchMatch
         ? Color.alphaBlend(
             isActiveSearchMatch
@@ -1199,7 +1211,11 @@ class _TableRowState<T> extends State<TableRow<T>>
         assert(padding >= 0);
 
         if (column is ColumnRenderer) {
-          content = (column as ColumnRenderer).build(context, node);
+          content = (column as ColumnRenderer).build(
+            context,
+            node,
+            isRowSelected: widget.isSelected,
+          );
         }
         content ??= Text(
           column.getDisplayValue(node),
@@ -1259,7 +1275,9 @@ class _TableRowState<T> extends State<TableRow<T>>
   }
 
   TextStyle contentTextStyle(ColumnData<T> column) {
-    final textColor = column.getTextColor(widget.node);
+    final textColor = widget.isSelected
+        ? defaultSelectionForegroundColor
+        : column.getTextColor(widget.node);
     final fontStyle = fixedFontStyle(context);
     return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
   }

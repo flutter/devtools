@@ -394,7 +394,17 @@ class MockConnectedApp extends Mock implements ConnectedApp {}
 class MockBannerMessagesController extends Mock
     implements BannerMessagesController {}
 
-class MockLoggingController extends Mock implements LoggingController {}
+class MockLoggingController extends Mock implements LoggingController {
+  @override
+  ValueListenable<LogData> get selectedLog => _selectedLog;
+
+  final _selectedLog = ValueNotifier<LogData>(null);
+
+  @override
+  void selectLog(LogData data) {
+    _selectedLog.value = data;
+  }
+}
 
 class MockMemoryController extends Mock implements MemoryController {}
 
