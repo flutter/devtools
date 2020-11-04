@@ -18,6 +18,8 @@ import 'support/wrappers.dart';
 void main() {
   FakeServiceManager fakeServiceManager;
 
+  const windowSize = Size(2000.0, 1000.0);
+
   group('DeviceDialog', () {
     void initServiceManager({
       bool useFakeService = true,
@@ -43,7 +45,8 @@ void main() {
       initServiceManager();
     });
 
-    testWidgets('builds dialog dart web', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('builds dialog dart web', windowSize,
+        (WidgetTester tester) async {
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(true);
       when(fakeServiceManager.connectedApp.isRunningOnDartVM).thenReturn(false);
 
@@ -57,10 +60,11 @@ void main() {
 
       expect(findSubstring(deviceDialog, 'Dart Version'), findsOneWidget);
       expect(findSubstring(deviceDialog, 'Flutter Version'), findsNothing);
+      expect(
+          findSubstring(deviceDialog, 'VM Service Connection'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize(
-        'builds dialog flutter', const Size(1000.0, 1000.0),
+    testWidgetsWithWindowSize('builds dialog flutter', windowSize,
         (WidgetTester tester) async {
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isRunningOnDartVM).thenReturn(true);
@@ -78,6 +82,8 @@ void main() {
 
       expect(findSubstring(deviceDialog, 'Dart Version'), findsOneWidget);
       expect(findSubstring(deviceDialog, 'Flutter Version'), findsOneWidget);
+      expect(
+          findSubstring(deviceDialog, 'VM Service Connection'), findsOneWidget);
     });
   });
 
