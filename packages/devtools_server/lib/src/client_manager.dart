@@ -45,17 +45,23 @@ class ClientManager {
   /// and it disconnected, then started debugging again, we want to reuse
   /// the open DevTools window).
   DevToolsClient findReusableClient() {
-    return _clients.firstWhere((c) => !c.hasConnection, orElse: () => null);
+    return _clients.firstWhere(
+      (c) => !c.hasConnection && !c.embedded,
+      orElse: () => null,
+    );
   }
 
   /// Finds a client that may already be connected to this VM Service.
-  DevToolsClient findExistingConnectedClient(Uri vmServiceUri) {
+  DevToolsClient findExistingConnectedReusableClient(Uri vmServiceUri) {
     // Checking the whole URI will fail if DevTools converted it from HTTP to
     // WS, so just check the host, port and first segment of path (token).
     return _clients.firstWhere(
-        (c) =>
-            c.hasConnection && _areSameVmServices(c.vmServiceUri, vmServiceUri),
-        orElse: () => null);
+      (c) =>
+          c.hasConnection &&
+          !c.embedded &&
+          _areSameVmServices(c.vmServiceUri, vmServiceUri),
+      orElse: () => null,
+    );
   }
 
   bool _areSameVmServices(Uri uri1, Uri uri2) {
@@ -86,6 +92,7 @@ class DevToolsClient {
           return;
         case 'currentPage':
           _currentPage = request['params']['id'];
+          _embedded = request['params']['embedded'] == true;
           _respond(request);
           return;
         case 'disconnected':
@@ -163,12 +170,14 @@ class DevToolsClient {
   }
 
   final SseConnection _connection;
+
   Uri _vmServiceUri;
-
   Uri get vmServiceUri => _vmServiceUri;
-
   bool get hasConnection => _vmServiceUri != null;
-  String _currentPage;
 
+  String _currentPage;
   String get currentPage => _currentPage;
+
+  bool _embedded = false;
+  bool get embedded => _embedded;
 }
