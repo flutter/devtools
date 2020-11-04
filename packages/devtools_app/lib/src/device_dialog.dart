@@ -99,7 +99,7 @@ class DeviceDialog extends StatelessWidget {
         DevToolsRouterDelegate.of(context).navigate(homePageId, {'uri': null});
         Navigator.of(context, rootNavigator: true).pop('dialog');
       },
-      child: const Text('CONNECT TO A NEW APP'),
+      child: Text('Connect to a new app'.toUpperCase()),
     );
   }
 }
