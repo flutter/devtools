@@ -111,8 +111,8 @@ the following parameters.
   the query string that may influence DevTools behaviour, such as:
   - `theme` - allows using the `dark` theme
   - `ide` - the client (eg. `VSCode`) to be logged in analytics
-  - `hide` - IDs of pages to hide (eg. `debugger` when launching from an IDE
-    with its own debugger)
+  - `hide` - comma-separated list of IDs of pages to hide (eg. `debugger` when
+    launching from an IDE with its own debugger)
 
 #### Example
 
@@ -125,7 +125,7 @@ the following parameters.
 		'notify': true,
 		'page': 'inspector',
 		'queryParams': {
-			'hide': 'debugger',
+			'hide': 'debugger,logging',
 			'ide': 'VSCode',
 			'theme': 'dark'
 		},
