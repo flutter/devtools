@@ -357,6 +357,40 @@ void main() {
         expect(serverResponse['clients'], hasLength(1));
       }, timeout: const Timeout.factor(10));
 
+      test('Server does not reuses DevTools instance if embedded', () async {
+        // Register the VM.
+        await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
+
+        // Spawn an embedded version of DevTools in a browser.
+        final event = await serverStartedEvent;
+        final devToolsUri =
+            'http://${event['params']['host']}:${event['params']['port']}';
+        final launchUrl = '$devToolsUri/?embed=true&page=logging'
+            '&uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}';
+        final chrome = await Chrome.locate().start(url: launchUrl);
+        try {
+          {
+            final serverResponse =
+                await _waitForClients(requiredConnectionState: true);
+            expect(serverResponse['clients'], hasLength(1));
+          }
+
+          // Send a request to the server to launch and ensure it did
+          // not reuse the existing connection. Launch it on a different page
+          // so we can easily tell once this one has connected.
+          final launchResponse = await _sendLaunchDevToolsRequest(
+              useVmService: useVmService, reuseWindows: true, page: 'memory');
+          expect(launchResponse['reused'], isFalse);
+
+          // Ensure there's now two connections.
+          final serverResponse = await _waitForClients(
+              requiredConnectionState: true, requiredPage: 'memory');
+          expect(serverResponse['clients'], hasLength(2));
+        } finally {
+          chrome?.kill();
+        }
+      }, timeout: const Timeout.factor(10));
+
       test('Server reuses DevTools instance if not connected to a VM',
           () async {
         // Register the VM.

@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'config_specific/logger/logger.dart';
 import 'config_specific/notifications/notifications.dart';
 import 'config_specific/sse/sse_shim.dart';
+import 'framework_controller.dart';
 import 'globals.dart';
 
 /// This class coordinates the connection between the DevTools server and the
@@ -72,8 +73,8 @@ class DevToolsServerConnection {
       _notifyConnected(vmServiceUri);
     });
 
-    frameworkController.onPageChange.listen((pageId) {
-      _notifyCurrentPage(pageId);
+    frameworkController.onPageChange.listen((page) {
+      _notifyCurrentPage(page);
     });
 
     frameworkController.onDisconnected.listen((_) {
@@ -162,8 +163,14 @@ class DevToolsServerConnection {
     _callMethod('connected', {'uri': vmServiceUri.toString()});
   }
 
-  void _notifyCurrentPage(String pageId) {
-    _callMethod('currentPage', {'id': pageId});
+  void _notifyCurrentPage(PageChangeEvent page) {
+    _callMethod(
+      'currentPage',
+      {
+        'id': page.id,
+        if (page.embedded != null) 'embedded': page.embedded,
+      },
+    );
   }
 
   void _notifyDisconnected() {

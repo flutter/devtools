@@ -204,7 +204,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
         // Send the page change info to the framework controller (it can then
         // send it on to the devtools server, if one is connected).
-        frameworkController.notifyPageChange(screen?.screenId);
+        frameworkController.notifyPageChange(
+          PageChangeEvent(screen?.screenId, widget.embed),
+        );
 
         // If the tab index is 0 and the current route has no page ID (eg. we're
         // at the URL /?uri= with no page ID), those are equivalent pages but
@@ -222,7 +224,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     });
 
     // Broadcast the initial page.
-    frameworkController.notifyPageChange(_currentScreen.value.screenId);
+    frameworkController.notifyPageChange(
+      PageChangeEvent(_currentScreen.value.screenId, widget.embed),
+    );
   }
 
   /// Connects to the VM with the given URI. This request usually comes from the

@@ -703,6 +703,7 @@ Future<void> _handleClientsList(
             .map((c) => {
                   'hasConnection': c.hasConnection,
                   'currentPage': c.currentPage,
+                  'embedded': c.embedded,
                   'vmServiceUri': c.vmServiceUri?.toString(),
                 })
             .toList()
@@ -719,7 +720,8 @@ Future<bool> _tryReuseExistingDevToolsInstance(
 ) async {
   // First try to find a client that's already connected to this VM service,
   // and just send the user a notification for that one.
-  final existingClient = clients.findExistingConnectedClient(vmServiceUri);
+  final existingClient =
+      clients.findExistingConnectedReusableClient(vmServiceUri);
   if (existingClient != null) {
     try {
       await existingClient.showPage(page);
