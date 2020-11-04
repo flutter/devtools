@@ -166,13 +166,15 @@ class DevToolsAppState extends State<DevToolsApp> {
       page = params['page'];
     }
     final embed = params['embed'] == 'true';
+    final hide = {...?params['hide']?.split(',')};
     return Initializer(
       url: vmServiceUri,
       allowConnectionScreenOnDisconnect: !embed,
       builder: (_) {
-        final tabs = embed && page != null
-            ? _visibleScreens().where((p) => p.screenId == page).toList()
-            : _visibleScreens();
+        final tabs = _visibleScreens()
+            .where((p) => embed && page != null ? p.screenId == page : true)
+            .where((p) => !hide.contains(p.screenId))
+            .toList();
         if (tabs.isEmpty) {
           return DevToolsScaffold.withChild(
             child: CenteredMessage(
