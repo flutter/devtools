@@ -125,7 +125,7 @@ the following parameters.
 		'notify': true,
 		'page': 'inspector',
 		'queryParams': {
-			'hide': 'debugger',
+			'hide': 'debugger,logging',
 			'ide': 'VSCode',
 			'theme': 'dark'
 		},
