@@ -189,6 +189,8 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
   void _updatePollingState(bool recording) {
     if (recording) {
       _pollingTimer ??= Timer.periodic(
+        // TODO(kenz): look into improving performance by caching more data.
+        // Polling less frequently helps performance.
         const Duration(milliseconds: 2000),
         (_) => _networkService.refreshNetworkData(),
       );
