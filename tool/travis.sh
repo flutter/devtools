@@ -19,7 +19,7 @@ fi
 # script to call the correct one based on the OS.
 function flutter {
     # TODO: Also support windows on github actions.
-	if [[ $TRAVIS_OS_NAME == "windows" ]]; then
+    if [[ $TRAVIS_OS_NAME == "windows" ]]; then
         command flutter.bat "$@"
     else
         command flutter "$@"
