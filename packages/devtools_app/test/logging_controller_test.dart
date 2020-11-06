@@ -9,6 +9,7 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/ui/filter.dart';
 import 'package:test/test.dart';
 
 import 'inspector_screen_test.dart';
@@ -27,6 +28,15 @@ void main() {
       ));
     }
 
+    void addGcData(String message) {
+      controller.log(LogData(
+        'gc',
+        jsonEncode({'kind': 'gc', 'message': message}),
+        0,
+        summary: message,
+      ));
+    }
+
     setUp(() async {
       setGlobal(
         ServiceConnectionManager,
@@ -40,8 +50,8 @@ void main() {
 
     test('initial state', () {
       expect(controller.data, isEmpty);
-      expect(controller.filteredData, isEmpty);
-      expect(controller.filterText, isNull);
+      expect(controller.filteredData.value, isEmpty);
+      expect(controller.activeFilter.value, isNull);
     });
 
     test('receives data', () {
@@ -50,7 +60,7 @@ void main() {
       addStdoutData('Abc.');
 
       expect(controller.data, isNotEmpty);
-      expect(controller.filteredData, isNotEmpty);
+      expect(controller.filteredData.value, isNotEmpty);
 
       expect(controller.data.first.summary, contains('Abc'));
     });
@@ -59,36 +69,38 @@ void main() {
       addStdoutData('Abc.');
 
       expect(controller.data, isNotEmpty);
-      expect(controller.filteredData, isNotEmpty);
+      expect(controller.filteredData.value, isNotEmpty);
 
       controller.clear();
 
       expect(controller.data, isEmpty);
-      expect(controller.filteredData, isEmpty);
+      expect(controller.filteredData.value, isEmpty);
     });
 
     test('filteredData', () {
       addStdoutData('abc');
       addStdoutData('def');
       addStdoutData('abc ghi');
+      addGcData('gc1');
+      addGcData('gc2');
 
-      expect(controller.data, hasLength(3));
-      expect(controller.filteredData, hasLength(3));
+      expect(controller.data, hasLength(5));
+      expect(controller.filteredData.value, hasLength(5));
 
-      controller.filterText = 'abc';
+      controller.filterData(QueryFilter.parse('abc', []));
 
-      expect(controller.data, hasLength(3));
-      expect(controller.filteredData, hasLength(2));
+      expect(controller.data, hasLength(5));
+      expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterText = 'def';
+      controller.filterData(QueryFilter.parse('def', []));
 
-      expect(controller.data, hasLength(3));
-      expect(controller.filteredData, hasLength(1));
+      expect(controller.data, hasLength(5));
+      expect(controller.filteredData.value, hasLength(1));
 
-      controller.filterText = null;
+      controller.filterData(null);
 
-      expect(controller.data, hasLength(3));
-      expect(controller.filteredData, hasLength(3));
+      expect(controller.data, hasLength(5));
+      expect(controller.filteredData.value, hasLength(5));
     });
   });
 

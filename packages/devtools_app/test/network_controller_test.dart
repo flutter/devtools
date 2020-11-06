@@ -134,5 +134,7 @@ void main() {
       expect(profile.outstandingHttpRequests.isEmpty, true);
       controller.removeClient();
     });
+
+    // TODO(kenz): add filter tests before landing this CL.
   });
 }
