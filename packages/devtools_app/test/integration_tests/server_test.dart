@@ -489,7 +489,7 @@ Future<Map<String, dynamic>> _waitForClients({
           (requiredConnectionState == null || clients.any(hasConnectionState));
     },
     timeoutMessage: timeoutMessage,
-    delay: const Duration(seconds: 1),
+    delay: const Duration(seconds: 10),
   );
 
   return serverResponse;
