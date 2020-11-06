@@ -11,6 +11,8 @@ mixin FilterControllerMixin<T> {
 
   final activeFilter = ValueNotifier<QueryFilter>(null);
 
+  List<FilterArgument> get filterArgs;
+
   void filterData(QueryFilter filter);
 
   void resetFilter() {

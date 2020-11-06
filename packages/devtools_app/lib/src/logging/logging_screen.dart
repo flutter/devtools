@@ -77,10 +77,6 @@ Example queries:
 
 class _LoggingScreenState extends State<LoggingScreenBody>
     with AutoDisposeMixin, SearchFieldMixin {
-  final filterArgs = [
-    FilterArgument(id: LoggingController.kindFilterId, keys: ['kind', 'k']),
-  ];
-
   LogData selected;
 
   LoggingController controller;
@@ -184,7 +180,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         onApplyFilter: (query) => controller.filterData(
           QueryFilter.parse(
             query,
-            filterArgs,
+            controller.filterArgs,
           ),
         ),
         queryInstructions: LoggingScreenBody.filterQueryInstructions,

@@ -77,7 +77,28 @@ void main() {
       expect(controller.filteredData.value, isEmpty);
     });
 
-    test('filteredData', () {
+    test('matchesForSearch', () {
+      addStdoutData('abc');
+      addStdoutData('def');
+      addStdoutData('abc ghi');
+      addGcData('gc1');
+      addGcData('gc2');
+
+      expect(controller.filteredData.value, hasLength(5));
+      expect(controller.matchesForSearch('abc').length, equals(2));
+      expect(controller.matchesForSearch('ghi').length, equals(1));
+      expect(controller.matchesForSearch('abcd').length, equals(0));
+      expect(controller.matchesForSearch('').length, equals(0));
+
+      // Search by event kind.
+      expect(controller.matchesForSearch('stdout').length, equals(3));
+      expect(controller.matchesForSearch('gc').length, equals(2));
+
+      // Search with incorrect case.
+      expect(controller.matchesForSearch('STDOUT').length, equals(3));
+    });
+
+    test('filterData', () {
       addStdoutData('abc');
       addStdoutData('def');
       addStdoutData('abc ghi');
@@ -87,18 +108,29 @@ void main() {
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(5));
 
-      controller.filterData(QueryFilter.parse('abc', []));
-
+      controller.filterData(QueryFilter.parse('abc', controller.filterArgs));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterData(QueryFilter.parse('def', []));
-
+      controller.filterData(QueryFilter.parse('def', controller.filterArgs));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(1));
 
-      controller.filterData(null);
+      controller
+          .filterData(QueryFilter.parse('kind:gc', controller.filterArgs));
+      expect(controller.data, hasLength(5));
+      expect(controller.filteredData.value, hasLength(2));
 
+      controller
+          .filterData(QueryFilter.parse('k:stdout', controller.filterArgs));
+      expect(controller.data, hasLength(5));
+      expect(controller.filteredData.value, hasLength(3));
+
+      controller.filterData(QueryFilter.parse('-k:gc', controller.filterArgs));
+      expect(controller.data, hasLength(5));
+      expect(controller.filteredData.value, hasLength(3));
+
+      controller.filterData(null);
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(5));
     });

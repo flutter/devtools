@@ -114,12 +114,6 @@ Example queries:
 
 class _NetworkScreenBodyState extends State<NetworkScreenBody>
     with AutoDisposeMixin, SearchFieldMixin {
-  final filterArgs = [
-    FilterArgument(id: NetworkController.methodFilterId, keys: ['method', 'm']),
-    FilterArgument(id: NetworkController.statusFilterId, keys: ['status', 's']),
-    FilterArgument(id: NetworkController.typeFilterId, keys: ['type', 't']),
-  ];
-
   NetworkController _networkController;
 
   bool recording;
@@ -263,7 +257,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
         onApplyFilter: (query) => _networkController.filterData(
           QueryFilter.parse(
             query,
-            filterArgs,
+            _networkController.filterArgs,
           ),
         ),
         queryInstructions: NetworkScreenBody.filterQueryInstructions,

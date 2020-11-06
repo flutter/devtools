@@ -31,6 +31,15 @@ class NetworkController
 
   static const typeFilterId = 'network-type-filter';
 
+  final _filterArgs = [
+    FilterArgument(id: NetworkController.methodFilterId, keys: ['method', 'm']),
+    FilterArgument(id: NetworkController.statusFilterId, keys: ['status', 's']),
+    FilterArgument(id: NetworkController.typeFilterId, keys: ['type', 't']),
+  ];
+
+  @override
+  List<FilterArgument> get filterArgs => _filterArgs;
+
   /// Notifies that new Network requests have been processed.
   ValueListenable<NetworkRequests> get requests => _requests;
 

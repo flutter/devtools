@@ -165,6 +165,13 @@ class LoggingController
 
   static const kindFilterId = 'logging-kind-filter';
 
+  final _filterArgs = [
+    FilterArgument(id: kindFilterId, keys: ['kind', 'k']),
+  ];
+
+  @override
+  List<FilterArgument> get filterArgs => _filterArgs;
+
   /// Listen on a stream and track the stream subscription for automatic
   /// disposal if the dispose method is called.
   StreamSubscription<T> _listen<T>(Stream<T> stream, void onData(T event)) {
