@@ -192,6 +192,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
           },
         ),
         const Expanded(child: SizedBox()),
+        // TODO(kenz): fix focus issue when state is refreshed
         Container(
           width: wideSearchTextWidth,
           height: defaultTextFieldHeight,
@@ -199,7 +200,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
             controller: _networkController,
             searchFieldKey: networkSearchFieldKey,
             searchFieldEnabled: hasRequests,
-            shouldRequestFocus: true,
+            shouldRequestFocus: false,
             supportsNavigation: true,
           ),
         ),

@@ -133,6 +133,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         const Spacer(),
         StructuredErrorsToggle(),
         const SizedBox(width: denseSpacing),
+        // TODO(kenz): fix focus issue when state is refreshed
         Container(
           width: wideSearchTextWidth,
           height: defaultTextFieldHeight,
@@ -140,7 +141,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
             controller: controller,
             searchFieldKey: loggingSearchFieldKey,
             searchFieldEnabled: hasData,
-            shouldRequestFocus: true,
+            shouldRequestFocus: false,
             supportsNavigation: true,
           ),
         ),
