@@ -168,8 +168,6 @@ void main() {
           find.byKey(treemapKey),
           matchesGoldenFile('goldens/treemap_sizes.png'),
         );
-        // Await delay for golden comparison.
-        await tester.pumpAndSettle(const Duration(seconds: 2));
       },
       skip: kIsWeb || !Platform.isMacOS,
     );
