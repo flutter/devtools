@@ -22,6 +22,7 @@ import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
 import 'stream_value_listenable.dart';
 import 'utils.dart';
+import 'version.dart';
 import 'vm_service_wrapper.dart';
 
 // Note: don't check this in enabled.
@@ -614,6 +615,11 @@ class ServiceExtensionManager {
         final name = extensions.httpEnableTimelineLogging.extension;
         final encodedValue = event.json['extensionData']['enabled'].toString();
         await _updateServiceExtensionForStateChange(name, encodedValue);
+        break;
+      case 'SocketProfilingStateChange':
+        final name = extensions.socketProfiling.extension;
+        final encodedValue = event.json['extensionData']['enabled'].toString();
+        await _updateServiceExtensionForStateChange(name, encodedValue);
     }
   }
 
@@ -635,7 +641,7 @@ class ServiceExtensionManager {
       await setServiceExtensionState(
         name,
         enabled,
-        encodedValue,
+        extensionValue,
         callExtension: false,
       );
     }
@@ -832,19 +838,33 @@ class ServiceExtensionManager {
     Future<void> callExtension() async {
       assert(value != null);
       if (value is bool) {
-        // TODO(kenz): stop special casing http timeline logging once it can be
-        // called via `callServiceExtension`. See
-        // https://github.com/dart-lang/sdk/issues/43628.
-        if (name == extensions.httpEnableTimelineLogging.extension) {
-          await _service.forEachIsolate((isolate) async {
-            await _service.httpEnableTimelineLogging(isolate.id, value);
-          });
-        } else {
+        Future<void> call(String isolateId, bool value) async {
           await _service.callServiceExtension(
             name,
-            isolateId: _isolateManager.selectedIsolate.id,
+            isolateId: isolateId,
             args: {'enabled': value},
           );
+        }
+
+        if (extensions
+            .serviceExtensionsAllowlist[name].shouldCallOnAllIsolates) {
+          await _service.forEachIsolate((isolate) async {
+            // TODO(kenz): stop special casing http timeline logging once
+            // dart io version 1.4 hits stable (when vm_service 5.3.0 hits
+            // Flutter stable).
+            // See https://github.com/dart-lang/sdk/issues/43628.
+            if (name == extensions.httpEnableTimelineLogging.extension &&
+                !(await _service.isDartIoVersionSupported(
+                  supportedVersion: SemanticVersion(major: 1, minor: 4),
+                  isolateId: isolate.id,
+                ))) {
+              await _service.httpEnableTimelineLogging(isolate.id, value);
+            } else {
+              await call(isolate.id, value);
+            }
+          });
+        } else {
+          await call(_isolateManager.selectedIsolate.id, value);
         }
       } else if (value is String) {
         await _service.callServiceExtension(

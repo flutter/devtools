@@ -4,56 +4,94 @@
 
 name: devtools
 
-
 on:
   pull_request:
   push:
     branches:
       - master
 
-
 env:
   CHANNEL: dev
-
+  # TODO: temp
+  TRAVIS_OS_NAME: linux
 
 jobs:
 
-  main_dev:
-    name: Main bot (dev channel)
+  main:
+    name: main (${{ matrix.channel }} channel)
     runs-on: ubuntu-latest
-    strategy: { fail-fast: false }
+    strategy:
+      fail-fast: false
+      matrix:
+        channel:
+          - master
+          - dev
+          - beta
+          # TODO: The stable channel currently fails.
+          # - stable
     steps:
       - name: git clone
         uses: actions/checkout@v2
       - name: tool/travis.sh
         env:
           BOT: main
-          CHANNEL: dev
+          CHANNEL: ${{ matrix.channel }}
         run: ./tool/travis.sh
 
-  main_beta:
-    name: Main bot (beta channel)
+  packages:
+    name: packages
     runs-on: ubuntu-latest
-    strategy: { fail-fast: false }
+    strategy:
+      fail-fast: false
     steps:
       - name: git clone
         uses: actions/checkout@v2
       - name: tool/travis.sh
         env:
-          BOT: main
-          CHANNEL: beta
+          BOT: packages
         run: ./tool/travis.sh
 
-  # TODO: The stable channel currently fails.
-  # main_stable:
-  #   name: Main bot (stable channel)
+  # TODO(devoncarew): These bots are disabled due to persistent failures.
+  # https://github.com/flutter/devtools/pull/2460/checks?check_run_id=1330254613
+  # test:
+  #   name: test ${{ matrix.bot }}
   #   runs-on: ubuntu-latest
-  #   strategy: { fail-fast: false }
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       bot:
+  #         - test_ddc
+  #         - test_dart2js
   #   steps:
   #     - name: git clone
   #       uses: actions/checkout@v2
   #     - name: tool/travis.sh
   #       env:
-  #         BOT: main
-  #         CHANNEL: stable
+  #         BOT: ${{ matrix.bot }}
+  #         PLATFORM: vm
   #       run: ./tool/travis.sh
+
+  integration:
+    name: integration ${{ matrix.bot }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - integration_ddc
+          - integration_dart2js
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/travis.sh
+        env:
+          BOT: ${{ matrix.bot }}
+        run: ./tool/travis.sh
+
+# TODO(https://github.com/flutter/devtools/issues/2437):
+# PLATFORM=chrome is going away. We need to move these tests to run with
+# chromedriver. 
+#    - BOT=test_ddc            PLATFORM=chrome
+# PLATFORM=chrome is going away. We need to move these tests to run with
+# chromedriver.
+#   - BOT=test_dart2js        PLATFORM=chrome

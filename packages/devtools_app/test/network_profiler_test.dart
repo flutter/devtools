@@ -77,23 +77,22 @@ void main() {
       WidgetTester tester,
     ) async {
       controller = NetworkController();
-      await pumpNetworkScreen(tester);
 
       // Ensure we're not recording initially.
       expect(controller.isPolling, false);
       expect(controller.recordingNotifier.value, false);
 
-      // Start recording.
-      await tester.tap(find.byType(RecordButton));
-      await tester.pump();
+      await pumpNetworkScreen(tester);
+      await tester.pumpAndSettle();
 
       // Check that we're polling.
       expect(controller.isPolling, true);
       expect(controller.recordingNotifier.value, true);
 
-      // Stop recording.
-      await tester.tap(find.byType(StopRecordingButton));
-      await tester.pump();
+      // Pause recording.
+      expect(find.byType(PauseButton), findsOneWidget);
+      await tester.tap(find.byType(PauseButton));
+      await tester.pumpAndSettle();
 
       // Check that we've stopped polling.
       expect(controller.isPolling, false);
@@ -103,24 +102,10 @@ void main() {
     });
 
     Future<void> loadRequestsAndCheck(WidgetTester tester) async {
-      final splitFinder = find.byType(Split);
-
-      // We're not recording; only expect the instructions and buttons to be
-      // visible.
-      expect(splitFinder, findsNothing);
-      expect(find.byType(RecordButton), findsOneWidget);
-      expect(find.byType(StopRecordingButton), findsOneWidget);
+      expect(find.byType(ResumeButton), findsOneWidget);
+      expect(find.byType(PauseButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
-      expect(
-        find.byKey(NetworkScreen.recordingInstructionsKey),
-        findsOneWidget,
-      );
-
-      // Start recording.
-      await tester.tap(find.byType(RecordButton));
-      await tester.pump();
-
-      expect(splitFinder, findsOneWidget);
+      expect(find.byType(Split), findsOneWidget);
 
       // Advance the clock to populate the network requests table.
       await tester.pump(const Duration(seconds: 1));
@@ -278,8 +263,8 @@ void main() {
         await validateOverviewTab(selection);
       }
 
-      // Stop recording.
-      await tester.tap(find.byType(StopRecordingButton));
+      // Pause recording.
+      await tester.tap(find.byType(PauseButton));
       await tester.pump();
 
       await clearTimeouts(tester);
@@ -294,23 +279,14 @@ void main() {
       // Populate the screen with requests.
       await loadRequestsAndCheck(tester);
 
-      // Stop the profiler.
-      await tester.tap(find.byType(StopRecordingButton));
+      // Pause the profiler.
+      await tester.tap(find.byType(PauseButton));
       await tester.pumpAndSettle();
 
       // Clear the results.
       await tester.tap(find.byType(ClearButton));
       // Wait to ensure all the timers have been cancelled.
       await tester.pumpAndSettle(const Duration(seconds: 2));
-
-      // Ensure that the recording instructions are displayed when no requests
-      // are displayed and recording is disabled.
-      expect(find.byType(PaginatedDataTable), findsNothing);
-      expect(find.byType(NetworkRequestInspector), findsNothing);
-      expect(
-        find.byKey(NetworkScreen.recordingInstructionsKey),
-        findsOneWidget,
-      );
     });
   });
 
