@@ -1,3 +1,5 @@
+import 'dart:io';
+
 @TestOn('vm')
 import 'package:devtools_app/src/charts/chart_controller.dart';
 import 'package:devtools_app/src/charts/chart_trace.dart';
@@ -12,6 +14,11 @@ import 'support/wrappers.dart';
 
 void main() {
   const windowSize = Size(2225.0, 1000.0);
+
+  final nowDT = DateTime.now();
+  final isUSLocalePST = Platform.localeName == 'en_US' &&
+      nowDT.timeZoneOffset.inHours == -8 &&
+      nowDT.timeZoneName == 'PST';
 
   group(
     'Chart Timeseries',
@@ -312,18 +319,22 @@ void main() {
           expect(controller.leftLabelTimestamp, equals(1595682514617));
           expect(controller.centerLabelTimestamp, equals(1595682534381));
           expect(controller.rightLabelTimestamp, equals(1595682556248));
-          expect(
-            prettyTimestamp(controller.leftLabelTimestamp),
-            equals('06:08:34'),
-          );
-          expect(
-            prettyTimestamp(controller.centerLabelTimestamp),
-            equals('06:08:54'),
-          );
-          expect(
-            prettyTimestamp(controller.rightLabelTimestamp),
-            equals('06:09:16'),
-          );
+
+          // Only validate if run in a known country, language and timezone.
+          if (isUSLocalePST) {
+            expect(
+              prettyTimestamp(controller.leftLabelTimestamp),
+              equals('06:08:34'),
+            );
+            expect(
+              prettyTimestamp(controller.centerLabelTimestamp),
+              equals('06:08:54'),
+            );
+            expect(
+              prettyTimestamp(controller.rightLabelTimestamp),
+              equals('06:09:16'),
+            );
+          }
         },
       );
 
@@ -370,18 +381,22 @@ void main() {
         expect(controller.leftLabelTimestamp, equals(1595682525980));
         expect(controller.centerLabelTimestamp, equals(1595682556248));
         expect(controller.rightLabelTimestamp, equals(1595682556248));
-        expect(
-          prettyTimestamp(controller.leftLabelTimestamp),
-          equals('06:08:45'),
-        );
-        expect(
-          prettyTimestamp(controller.centerLabelTimestamp),
-          equals('06:09:16'),
-        );
-        expect(
-          prettyTimestamp(controller.rightLabelTimestamp),
-          equals('06:09:16'),
-        );
+
+        // Only validate if run in a known country, language and timezone.
+        if (isUSLocalePST) {
+          expect(
+            prettyTimestamp(controller.leftLabelTimestamp),
+            equals('06:08:45'),
+          );
+          expect(
+            prettyTimestamp(controller.centerLabelTimestamp),
+            equals('06:09:16'),
+          );
+          expect(
+            prettyTimestamp(controller.rightLabelTimestamp),
+            equals('06:09:16'),
+          );
+        }
       });
 
       testWidgetsWithWindowSize('Scaled Y-axis Five Minutes', windowSize,
@@ -425,10 +440,14 @@ void main() {
         expect(controller.centerLabelTimestamp, isNull);
         expect(controller.rightLabelTimestamp, isNotNull);
         expect(controller.rightLabelTimestamp, equals(1595682492441));
-        expect(
-          prettyTimestamp(controller.rightLabelTimestamp),
-          equals('06:08:12'),
-        );
+
+        // Only validate if run in a known country, language and timezone.
+        if (isUSLocalePST) {
+          expect(
+            prettyTimestamp(controller.rightLabelTimestamp),
+            equals('06:08:12'),
+          );
+        }
       });
 
       ///////////////////////////////////////////////////////////////////////////
@@ -721,18 +740,22 @@ void main() {
           expect(controller.leftLabelTimestamp, equals(1595682514617));
           expect(controller.centerLabelTimestamp, equals(1595682534381));
           expect(controller.rightLabelTimestamp, equals(1595682556248));
-          expect(
-            prettyTimestamp(controller.leftLabelTimestamp),
-            equals('06:08:34'),
-          );
-          expect(
-            prettyTimestamp(controller.centerLabelTimestamp),
-            equals('06:08:54'),
-          );
-          expect(
-            prettyTimestamp(controller.rightLabelTimestamp),
-            equals('06:09:16'),
-          );
+
+          // Only validate if run in a known country, language and timezone.
+          if (isUSLocalePST) {
+            expect(
+              prettyTimestamp(controller.leftLabelTimestamp),
+              equals('06:08:34'),
+            );
+            expect(
+              prettyTimestamp(controller.centerLabelTimestamp),
+              equals('06:08:54'),
+            );
+            expect(
+              prettyTimestamp(controller.rightLabelTimestamp),
+              equals('06:09:16'),
+            );
+          }
         },
       );
 
@@ -809,18 +832,22 @@ void main() {
         expect(controller.leftLabelTimestamp, equals(1595682525980));
         expect(controller.centerLabelTimestamp, equals(1595682556248));
         expect(controller.rightLabelTimestamp, equals(1595682556248));
-        expect(
-          prettyTimestamp(controller.leftLabelTimestamp),
-          equals('06:08:45'),
-        );
-        expect(
-          prettyTimestamp(controller.centerLabelTimestamp),
-          equals('06:09:16'),
-        );
-        expect(
-          prettyTimestamp(controller.rightLabelTimestamp),
-          equals('06:09:16'),
-        );
+
+        // Only validate if run in a known country, language and timezone.
+        if (isUSLocalePST) {
+          expect(
+            prettyTimestamp(controller.leftLabelTimestamp),
+            equals('06:08:45'),
+          );
+          expect(
+            prettyTimestamp(controller.centerLabelTimestamp),
+            equals('06:09:16'),
+          );
+          expect(
+            prettyTimestamp(controller.rightLabelTimestamp),
+            equals('06:09:16'),
+          );
+        }
       });
 
       testWidgetsWithWindowSize('Fixed Y-axis 5 Minutes', windowSize,
@@ -895,10 +922,14 @@ void main() {
         expect(controller.centerLabelTimestamp, isNull);
         expect(controller.rightLabelTimestamp, isNotNull);
         expect(controller.rightLabelTimestamp, equals(1595682492441));
-        expect(
-          prettyTimestamp(controller.rightLabelTimestamp),
-          equals('06:08:12'),
-        );
+
+        // Only validate if run in a known country, language and timezone.
+        if (isUSLocalePST) {
+          expect(
+            prettyTimestamp(controller.rightLabelTimestamp),
+            equals('06:08:12'),
+          );
+        }
       });
     },
   );
