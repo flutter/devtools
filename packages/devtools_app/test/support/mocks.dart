@@ -233,8 +233,8 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<Stack> getStack(String isolateId) {
-    return Future.value(Stack(frames: [], messages: []));
+  Future<Stack> getStack(String isolateId, {int limit}) {
+    return Future.value(Stack(frames: [], messages: [], truncated: false));
   }
 
   @override
