@@ -182,7 +182,6 @@ void main() {
         await pumpChart(tester, chartKey, theChart, 250);
 
         expect(find.byWidget(theChart), findsOneWidget);
-        final ChartState state = tester.state(find.byWidget(theChart));
 
         // Validate the X axis before data added.
         expect(controller.visibleTicks, equals(214));
@@ -594,7 +593,6 @@ void main() {
         await pumpChart(tester, chartKey, theChart, 150);
 
         expect(find.byWidget(theChart), findsOneWidget);
-        final ChartState state = tester.state(find.byWidget(theChart));
 
         setupFixedTraces(controller);
 
