@@ -31,14 +31,14 @@ class NetworkController
 
   static const typeFilterId = 'network-type-filter';
 
-  final _filterArgs = [
-    FilterArgument(id: NetworkController.methodFilterId, keys: ['method', 'm']),
-    FilterArgument(id: NetworkController.statusFilterId, keys: ['status', 's']),
-    FilterArgument(id: NetworkController.typeFilterId, keys: ['type', 't']),
-  ];
+  final _filterArgs = {
+    methodFilterId: FilterArgument(keys: ['method', 'm']),
+    statusFilterId: FilterArgument(keys: ['status', 's']),
+    typeFilterId: FilterArgument(keys: ['type', 't']),
+  };
 
   @override
-  List<FilterArgument> get filterArgs => _filterArgs;
+  Map<String, FilterArgument> get filterArgs => _filterArgs;
 
   /// Notifies that new Network requests have been processed.
   ValueListenable<NetworkRequests> get requests => _requests;
@@ -323,38 +323,42 @@ class NetworkController
       filteredData.value = List.from(_requests.value.requests);
     } else {
       filteredData.value = _requests.value.requests.where((NetworkRequest r) {
-        for (final arg in filter.filterArguments) {
-          if (arg.id == methodFilterId) {
-            if (!arg.matchesValue(r.method.toLowerCase())) {
-              return false;
-            }
-          }
-          if (arg.id == statusFilterId) {
-            if (!arg.matchesValue(r.status?.toLowerCase())) {
-              return false;
-            }
-          }
-          if (arg.id == typeFilterId) {
-            if (!arg.matchesValue(r.type.toLowerCase())) {
-              return false;
-            }
-          }
+        final methodArg = filter.filterArguments[methodFilterId];
+        if (methodArg != null &&
+            !methodArg.matchesValue(r.method.toLowerCase())) {
+          return false;
         }
+
+        final statusArg = filter.filterArguments[statusFilterId];
+        if (statusArg != null &&
+            !statusArg.matchesValue(r.status?.toLowerCase())) {
+          return false;
+        }
+
+        final typeArg = filter.filterArguments[typeFilterId];
+        if (typeArg != null && !typeArg.matchesValue(r.type.toLowerCase())) {
+          return false;
+        }
+
         if (filter.substrings.isNotEmpty) {
           for (final substring in filter.substrings) {
             final caseInsensitiveSubstring = substring.toLowerCase();
             final matchesUri =
                 r.uri.toLowerCase().contains(caseInsensitiveSubstring);
+            if (matchesUri) return true;
+
             final matchesMethod =
                 r.method.toLowerCase().contains(caseInsensitiveSubstring);
+            if (matchesMethod) return true;
+
             final matchesStatus =
                 r.status?.toLowerCase()?.contains(caseInsensitiveSubstring) ??
                     false;
+            if (matchesStatus) return true;
+
             final matchesType =
                 r.type.toLowerCase().contains(caseInsensitiveSubstring);
-            if (matchesUri || matchesMethod || matchesStatus || matchesType) {
-              return true;
-            }
+            if (matchesType) return true;
           }
           return false;
         }

@@ -11,7 +11,7 @@ mixin FilterControllerMixin<T> {
 
   final activeFilter = ValueNotifier<QueryFilter>(null);
 
-  List<FilterArgument> get filterArgs;
+  Map<String, FilterArgument> get filterArgs;
 
   void filterData(QueryFilter filter);
 
@@ -129,9 +129,9 @@ class QueryFilter<T> {
     this.substrings = const [],
   });
 
-  factory QueryFilter.parse(String query, List<FilterArgument> args) {
+  factory QueryFilter.parse(String query, Map<String, FilterArgument> args) {
     // Reset all argument values before generating a new QueryFilter.
-    for (final arg in args) {
+    for (final arg in args.values) {
       arg.reset();
     }
 
@@ -142,10 +142,10 @@ class QueryFilter<T> {
       if (querySeparatorIndex != -1) {
         final value = part.substring(querySeparatorIndex + 1);
         if (value != '') {
-          for (var arg in args) {
+          for (var arg in args.values) {
             if (arg.matchesKey(part)) {
-              arg.isNegative = part.startsWith('-');
-              arg.value = value;
+              arg.isNegative = part.startsWith(FilterArgument.negativePrefix);
+              arg.values = value.split(FilterArgument.valueSeparator);
             }
           }
         }
@@ -156,34 +156,36 @@ class QueryFilter<T> {
     return QueryFilter(filterArguments: args, substrings: substrings);
   }
 
-  final List<FilterArgument> filterArguments;
+  final Map<String, FilterArgument> filterArguments;
 
   final List<String> substrings;
 
   String get query => [
         ...substrings,
-        for (final arg in filterArguments) arg.display,
+        for (final arg in filterArguments.values) arg.display,
       ].join(' ').trim();
 }
 
 class FilterArgument {
   FilterArgument({
-    @required this.id,
     @required this.keys,
-    this.value,
+    this.values = const [],
     this.isNegative = false,
   });
 
-  final String id;
+  static const negativePrefix = '-';
+
+  static const valueSeparator = ',';
 
   final List<String> keys;
 
-  String value;
+  List<String> values;
 
   bool isNegative;
 
-  String get display =>
-      value != null ? '${isNegative ? '-' : ''}${keys.first}:$value' : '';
+  String get display => values.isNotEmpty
+      ? '${isNegative ? negativePrefix : ''}${keys.first}:${values.join(valueSeparator)}'
+      : '';
 
   bool matchesKey(String query) {
     for (final key in keys) {
@@ -193,17 +195,20 @@ class FilterArgument {
   }
 
   bool matchesValue(String dataValue) {
-    if (value != null) {
-      final match = dataValue == value.toLowerCase();
-      return isNegative ? !match : match;
+    // If there are no specified filter values, consider [dataValue] to match
+    // this filter.
+    if (values.isEmpty) return true;
+
+    var matches = false;
+    for (final value in values) {
+      matches = dataValue == value.toLowerCase();
+      if (matches) break;
     }
-    // If the filter argument value is not specified, consider [dataValue] to
-    // match this filter.
-    return true;
+    return isNegative ? !matches : matches;
   }
 
   void reset() {
-    value = null;
+    values = [];
     isNegative = false;
   }
 }

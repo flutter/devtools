@@ -165,12 +165,12 @@ class LoggingController
 
   static const kindFilterId = 'logging-kind-filter';
 
-  final _filterArgs = [
-    FilterArgument(id: kindFilterId, keys: ['kind', 'k']),
-  ];
+  final _filterArgs = {
+    kindFilterId: FilterArgument(keys: ['kind', 'k']),
+  };
 
   @override
-  List<FilterArgument> get filterArgs => _filterArgs;
+  Map<String, FilterArgument> get filterArgs => _filterArgs;
 
   /// Listen on a stream and track the stream subscription for automatic
   /// disposal if the dispose method is called.
@@ -634,25 +634,25 @@ class LoggingController
       filteredData.value = List.from(data);
     } else {
       filteredData.value = data.where((log) {
-        for (final arg in filter.filterArguments) {
-          if (arg.id == kindFilterId) {
-            if (!arg.matchesValue(log.kind.toLowerCase())) {
-              return false;
-            }
-          }
+        final kindArg = filter.filterArguments[kindFilterId];
+        if (kindArg != null && !kindArg.matchesValue(log.kind.toLowerCase())) {
+          return false;
         }
+
         if (filter.substrings.isNotEmpty) {
           for (final substring in filter.substrings) {
             final caseInsensitiveSubstring = substring.toLowerCase();
             final matchesKind = log.kind != null &&
                 log.kind.toLowerCase().contains(caseInsensitiveSubstring);
+            if (matchesKind) return true;
+
             final matchesSummary = log.summary != null &&
                 log.summary.toLowerCase().contains(caseInsensitiveSubstring);
+            if (matchesSummary) return true;
+
             final matchesDetails = log.details != null &&
                 log.summary.toLowerCase().contains(caseInsensitiveSubstring);
-            if (matchesKind || matchesSummary || matchesDetails) {
-              return true;
-            }
+            if (matchesDetails) return true;
           }
           return false;
         }

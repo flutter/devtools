@@ -64,10 +64,10 @@ Type a filter query to show or hide specific logs.
 Any text that is not paired with an available filter key below will be queried against all categories (kind, message).
 
 Available filters:
-    'kind', 'k'       (e.g. 'k:flutter.frame', '-k:gc')
+    'kind', 'k'       (e.g. 'k:flutter.frame', '-k:gc,stdout')
 
 Example queries:
-    'my log message k:stdout'
+    'my log message k:stdout,stdin'
     'flutter -k:gc'
 ''';
 

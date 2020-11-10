@@ -116,19 +116,34 @@ void main() {
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(1));
 
+      controller.filterData(
+          QueryFilter.parse('k:stdout abc def', controller.filterArgs));
+      expect(controller.data, hasLength(5));
+      expect(controller.filteredData.value, hasLength(3));
+
       controller
           .filterData(QueryFilter.parse('kind:gc', controller.filterArgs));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
       controller
-          .filterData(QueryFilter.parse('k:stdout', controller.filterArgs));
+          .filterData(QueryFilter.parse('k:stdout abc', controller.filterArgs));
       expect(controller.data, hasLength(5));
-      expect(controller.filteredData.value, hasLength(3));
+      expect(controller.filteredData.value, hasLength(2));
 
       controller.filterData(QueryFilter.parse('-k:gc', controller.filterArgs));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(3));
+
+      controller
+          .filterData(QueryFilter.parse('-k:gc,stdout', controller.filterArgs));
+      expect(controller.data, hasLength(5));
+      expect(controller.filteredData.value, hasLength(0));
+
+      controller.filterData(QueryFilter.parse(
+          'k:gc,stdout,stdin,flutter.frame', controller.filterArgs));
+      expect(controller.data, hasLength(5));
+      expect(controller.filteredData.value, hasLength(5));
 
       controller.filterData(null);
       expect(controller.data, hasLength(5));

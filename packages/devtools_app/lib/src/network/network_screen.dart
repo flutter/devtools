@@ -97,13 +97,13 @@ Type a filter query to show or hide specific requests.
 Any text that is not paired with an available filter key below will be queried against all categories (method, uri, status, type).
 
 Available filters:
-    'method', 'm'       (e.g. 'm:get', '-m:put')
+    'method', 'm'       (e.g. 'm:get', '-m:put,patch')
     'status', 's'           (e.g. 's:200', '-s:404')
     'type', 't'               (e.g. 't:json', '-t:ws')
 
 Example queries:
-    'my-endpoint method:put -status:404 type:json'
-    'example.com -m:get s:200 t:htm'
+    'my-endpoint method:put,post -status:404 type:json'
+    'example.com -m:get s:200,201 t:htm,html,json'
     'http s:404'
     'POST'
 ''';

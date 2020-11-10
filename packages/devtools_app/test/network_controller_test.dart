@@ -161,6 +161,10 @@ void main() {
       await controller.networkService.refreshNetworkData();
       final profile = requestsNotifier.value;
 
+      for (final r in profile.requests) {
+        print('${r.uri}, ${r.method}, ${r.status}, ${r.type}');
+      }
+
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(numRequests));
 
@@ -231,6 +235,26 @@ void main() {
       controller.filterData(null);
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(numRequests));
+
+      controller
+          .filterData(QueryFilter.parse('-t:ws,http', controller.filterArgs));
+      expect(profile.requests, hasLength(numRequests));
+      expect(controller.filteredData.value, hasLength(7));
+
+      controller.filterData(
+          QueryFilter.parse('-t:ws,http method:put', controller.filterArgs));
+      expect(profile.requests, hasLength(numRequests));
+      expect(controller.filteredData.value, hasLength(1));
+
+      controller.filterData(
+          QueryFilter.parse('-status:error method:get', controller.filterArgs));
+      expect(profile.requests, hasLength(numRequests));
+      expect(controller.filteredData.value, hasLength(3));
+
+      controller.filterData(QueryFilter.parse(
+          '-status:error method:get t:conf', controller.filterArgs));
+      expect(profile.requests, hasLength(numRequests));
+      expect(controller.filteredData.value, hasLength(1));
     });
   });
 }
