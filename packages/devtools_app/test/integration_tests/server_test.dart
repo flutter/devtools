@@ -16,6 +16,7 @@ import 'package:vm_service/vm_service.dart';
 import '../support/chrome.dart';
 import '../support/cli_test_driver.dart';
 import '../support/devtools_server_driver.dart';
+import '../support/utils.dart';
 import 'integration.dart';
 
 CliAppFixture appFixture;
@@ -515,6 +516,9 @@ Future<Map<String, dynamic>> _waitForClients({
 
   await waitFor(
     () async {
+      // Await a short delay to give the client time to connect.
+      await delay();
+
       serverResponse = await _send('client.list');
       final clients = serverResponse['clients'];
       return clients is List &&

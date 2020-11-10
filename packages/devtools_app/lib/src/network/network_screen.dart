@@ -37,8 +37,6 @@ class NetworkScreen extends Screen {
 
   static const id = 'network';
 
-  static const recordingInstructionsKey = Key('Recording Instructions');
-
   @override
   Widget build(BuildContext context) => const NetworkScreenBody();
 
@@ -119,10 +117,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     final newController = Provider.of<NetworkController>(context);
     if (newController == _networkController) return;
 
-    _networkController?.removeClient();
-
     _networkController = newController;
-    _networkController.addClient();
+    _networkController.startRecording();
 
     requests = _networkController.requests.value;
     addAutoDisposeListener(_networkController.requests, () {
@@ -146,7 +142,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 
   @override
   void dispose() {
-    _networkController?.removeClient();
+    _networkController?.stopRecording();
     super.dispose();
   }
 
@@ -157,17 +153,16 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     final hasRequests = filteredRequests.isNotEmpty;
     return Row(
       children: [
-        RecordButton(
-          recording: recording,
-          labelOverride: 'Record network traffic',
+        PauseButton(
           includeTextWidth: includeTextWidth,
-          onPressed: _networkController.startRecording,
+          onPressed:
+              recording ? () => _networkController.togglePolling(false) : null,
         ),
         const SizedBox(width: denseSpacing),
-        StopRecordingButton(
-          recording: recording,
+        ResumeButton(
           includeTextWidth: includeTextWidth,
-          onPressed: _networkController.stopRecording,
+          onPressed:
+              recording ? null : () => _networkController.togglePolling(true),
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
@@ -201,33 +196,20 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
       valueListenable: _networkController.selectedRequest,
       builder: (context, selectedRequest, _) {
         return Expanded(
-          child: (!recording && filteredRequests.isEmpty)
-              ? Center(
-                  child: RecordingInfo(
-                    instructionsKey: NetworkScreen.recordingInstructionsKey,
-                    recording: recording,
-                    // TODO(kenz): create a processing notifier if necessary
-                    // for this data.
-                    processing: false,
-                    recordedObject: 'network traffic',
-                    isPause: true,
-                  ),
-                )
-              : Split(
-                  initialFractions: const [0.5, 0.5],
-                  minSizes: const [200, 200],
-                  axis: Axis.horizontal,
-                  children: [
-                    NetworkRequestsTable(
-                      networkController: _networkController,
-                      requests: filteredRequests,
-                      searchMatchesNotifier: _networkController.searchMatches,
-                      activeSearchMatchNotifier:
-                          _networkController.activeSearchMatch,
-                    ),
-                    NetworkRequestInspector(selectedRequest),
-                  ],
-                ),
+          child: Split(
+            initialFractions: const [0.5, 0.5],
+            minSizes: const [200, 200],
+            axis: Axis.horizontal,
+            children: [
+              NetworkRequestsTable(
+                networkController: _networkController,
+                requests: filteredRequests,
+                searchMatchesNotifier: _networkController.searchMatches,
+                activeSearchMatchNotifier: _networkController.activeSearchMatch,
+              ),
+              NetworkRequestInspector(selectedRequest),
+            ],
+          ),
         );
       },
     );

@@ -39,10 +39,11 @@ void main() {
     test('initialize recording state', () async {
       expect(controller.isPolling, false);
 
-      // Fake service pretends HTTP timeline logging is always enabled.
-      await controller.addClient();
+      // Fake service pretends HTTP timeline logging and socket profiling are
+      // always enabled.
+      await controller.startRecording();
       expect(controller.isPolling, true);
-      controller.removeClient();
+      controller.stopRecording();
     });
 
     test('start and pause recording', () async {
@@ -55,33 +56,27 @@ void main() {
           expect(controller.isPolling, true);
         },
         callback: () async {
-          await controller.addClient();
           await controller.startRecording();
         },
       );
 
-      await addListenerScope(
-        listenable: notifier,
-        listener: () {
-          expect(notifier.value, false);
-          expect(controller.isPolling, false);
-        },
-        callback: () async => await controller.stopRecording(),
-      );
+      // Pause polling.
+      controller.togglePolling(false);
+      expect(notifier.value, false);
+      expect(controller.isPolling, false);
 
-      await addListenerScope(
-        listenable: notifier,
-        listener: () {
-          expect(notifier.value, true);
-          expect(controller.isPolling, true);
-        },
-        callback: () async => await controller.startRecording(),
-      );
-      controller.removeClient();
+      // Resume polling.
+      controller.togglePolling(true);
+      expect(notifier.value, true);
+      expect(controller.isPolling, true);
+
+      controller.stopRecording();
+      expect(notifier.value, false);
+      expect(controller.isPolling, false);
     });
 
     test('process network data', () async {
-      await controller.addClient();
+      await controller.startRecording();
       final requestsNotifier = controller.requests;
       NetworkRequests profile = requestsNotifier.value;
       // Check profile is initially empty.
@@ -132,7 +127,7 @@ void main() {
       profile = requestsNotifier.value;
       expect(profile.requests.isEmpty, true);
       expect(profile.outstandingHttpRequests.isEmpty, true);
-      controller.removeClient();
+      controller.stopRecording();
     });
   });
 }

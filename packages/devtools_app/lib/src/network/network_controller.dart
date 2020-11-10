@@ -13,6 +13,7 @@ import '../globals.dart';
 import '../http/http_request_data.dart';
 import '../http/http_service.dart';
 import '../ui/search.dart';
+import '../utils.dart';
 import 'network_model.dart';
 import 'network_service.dart';
 
@@ -60,12 +61,6 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
   /// The last timestamp at which HTTP and Socket information was refreshed.
   int lastRefreshMicros = 0;
 
-  // TODO(jacobr): clear this flag on hot restart.
-  bool _recordingStateInitializedForIsolates = false;
-
-  // The number of active clients helps us track whether we should be polling
-  // or not.
-  int _countActiveClients = 0;
   Timer _pollingTimer;
 
   @visibleForTesting
@@ -191,24 +186,12 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     refreshSearchMatches();
   }
 
-  Future<void> _toggleHttpTimelineRecording(bool state) async {
-    await HttpService.toggleHttpRequestLogging(state);
-    // Start polling once we've enabled logging.
-    updatePollingState(state);
-    _recordingNotifier.value = state;
-  }
-
-  Future<void> _toggleSocketProfiling(bool state) async {
-    await networkService.toggleSocketProfiling(state);
-    // Start polling once we've enabled socket profiling.
-    updatePollingState(state);
-    _recordingNotifier.value = state;
-  }
-
-  void updatePollingState(bool recording) {
-    if (recording && _countActiveClients > 0) {
+  void _updatePollingState(bool recording) {
+    if (recording) {
       _pollingTimer ??= Timer.periodic(
-        const Duration(milliseconds: 500),
+        // TODO(kenz): look into improving performance by caching more data.
+        // Polling less frequently helps performance.
+        const Duration(milliseconds: 2000),
         (_) => _networkService.refreshNetworkData(),
       );
     } else {
@@ -217,16 +200,24 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     }
   }
 
+  Future<void> startRecording() async {
+    await _startRecording(alreadyRecordingHttp: await recordingHttpTraffic());
+  }
+
   /// Enables network traffic recording on all isolates and starts polling for
   /// HTTP and Socket information.
   ///
   /// If `alreadyRecording` is true, the last refresh time will be assumed to
   /// be the beginning of the process (time 0).
-  Future<void> startRecording({
-    bool alreadyRecording = false,
+  Future<void> _startRecording({
+    bool alreadyRecordingHttp = false,
   }) async {
+    // Cancel existing polling timer before starting recording.
+    _updatePollingState(false);
+
     final timestamp = await _networkService.updateLastRefreshTime(
-        alreadyRecording: alreadyRecording);
+      alreadyRecordingHttp: alreadyRecordingHttp,
+    );
 
     // Determine the offset that we'll use to calculate the approximate
     // wall-time a request was made. This won't be 100% accurate, but it should
@@ -239,33 +230,40 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     await allowedError(
         serviceManager.service.setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
 
-    await _toggleHttpTimelineRecording(true);
-    await _toggleSocketProfiling(true);
+    // TODO(kenz): only call these if http logging and socket profiling are not
+    // already enabled. Listen to service manager streams for this info.
+    await Future.wait([
+      HttpService.toggleHttpRequestLogging(true),
+      networkService.toggleSocketProfiling(true),
+    ]);
+    togglePolling(true);
   }
 
-  /// Pauses the output of HTTP traffic to the timeline, as well as pauses any
-  /// socket profiling.
-  ///
-  /// May result in some incomplete timeline events.
-  Future<void> stopRecording() async {
-    await _toggleHttpTimelineRecording(false);
-    await _toggleSocketProfiling(false);
+  void stopRecording() {
+    togglePolling(false);
   }
 
-  /// Checks to see if HTTP requests are currently being output. If so, recording
-  /// is automatically started upon initialization.
-  Future<void> addClient() async {
-    _countActiveClients++;
-    if (!_recordingStateInitializedForIsolates) {
-      _recordingStateInitializedForIsolates = true;
-      await _networkService.initializeRecordingState();
-    }
-    updatePollingState(_recordingNotifier.value);
+  void togglePolling(bool state) {
+    // Do not toggle the vm recording state - just enable or disable polling.
+    _updatePollingState(state);
+    _recordingNotifier.value = state;
   }
 
-  void removeClient() {
-    _countActiveClients--;
-    updatePollingState(_recordingNotifier.value);
+  Future<bool> recordingHttpTraffic() async {
+    bool enabled = true;
+    await serviceManager.service.forEachIsolate(
+      (isolate) async {
+        final httpFuture =
+            serviceManager.service.httpEnableTimelineLogging(isolate.id);
+        // The above call won't complete immediately if the isolate is paused,
+        // so give up waiting after 500ms.
+        final state = await timeout(httpFuture, 500);
+        if (state == null || !state.enabled) {
+          enabled = false;
+        }
+      },
+    );
+    return enabled;
   }
 
   /// Clears the previously collected HTTP timeline events, clears the socket
