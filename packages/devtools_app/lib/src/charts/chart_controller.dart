@@ -370,6 +370,8 @@ class ChartController extends DisposableController
     return traces[index];
   }
 
+  int traceIndex(Trace trace) => traces.indexOf(trace);
+
   int createTrace(
     ChartType chartType,
     PaintCharacteristics characteristics, {
@@ -378,7 +380,7 @@ class ChartController extends DisposableController
   }) {
     final traceIndex = traces.length;
 
-    final trace = Trace(chartType, characteristics);
+    final trace = Trace(this, chartType, characteristics);
 
     if (name != null) trace.name = name;
     if (data != null) trace.data.addAll(data);

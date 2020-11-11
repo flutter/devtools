@@ -116,16 +116,11 @@ void main() {
       }
 
       void addDataToTrace(
-          ChartController controller, int traceIndex, Data data) {
+        ChartController controller,
+        int traceIndex,
+        Data data,
+      ) {
         controller.trace(traceIndex).addDatum(data);
-
-        if (data.y > controller.yMaxValue) {
-          controller.yMaxValue = data.y.toDouble();
-        }
-
-        // New data has arrived notify listeners this data needs to be plotted.
-        controller.traceChanged.value = TraceNotifier(
-            traceIndex, controller.traces[traceIndex].data.length - 1);
       }
 
       Future<void> pumpChart(WidgetTester tester, Key theKey, Chart theChart,

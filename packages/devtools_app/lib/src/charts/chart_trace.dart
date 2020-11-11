@@ -6,6 +6,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import 'chart_controller.dart';
+
 class Data {
   Data(this.timestamp, this.y);
 
@@ -41,7 +43,7 @@ class PaintCharacteristics {
 }
 
 class Trace {
-  Trace(this._chartType, this.characteristics) {
+  Trace(this.controller, this._chartType, this.characteristics) {
     double minY = characteristics.fixedMinY;
     minY ??= 0.0;
 
@@ -50,6 +52,8 @@ class Trace {
 
     yAxis = AxisScale(minY, maxY, 30);
   }
+
+  final ChartController controller;
 
   final ChartType _chartType;
 
@@ -77,6 +81,13 @@ class Trace {
       dataYMax = datum.y.toDouble();
       yAxis = AxisScale(0, dataYMax, 30);
     }
+
+    if (datum.y > controller?.yMaxValue) controller?.yMaxValue = datum.y;
+
+    final traceIndex = controller.traceIndex(this);
+
+    // New data has arrived notify listeners this data needs to be plotted.
+    controller.traceChanged.value = TraceNotifier(traceIndex, data.length - 1);
   }
 }
 
