@@ -85,17 +85,17 @@ Create each trace, in this example we're creating a red circle and blue ball to 
 This implies that even though different datum could be contained in a single trace each datum would need to hold its rendering characteristics when a datum is rendered in the trace. Considering that a trace may contain many thousands (tens of thousands) of pieces of data that would create unnessary datum overhead as well as more complex painting inside the canvas code when rendering different datum in a trace. The internal chart rendering instead, blasts each trace's data with the same trace's monolithic rendering characterstics.
 ```
   void setupTraces() {
-    // Red Circle
-    redTraceIndex = controller.createTrace(
+    // Green Circle
+    greenTraceIndex = controller.createTrace(
       ChartType.symbol,
       PaintCharacteristics(
-        color: Colors.red,
+        color: Colors.green,
         strokeWidth: 4,
         diameter: 6,
         fixedMinY: 0.4,
         fixedMaxY: 2.4,
       ),
-      name: 'Red Circle',
+      name: 'Green Circle',
     );
 
     // Small Blue Ball
@@ -112,46 +112,73 @@ This implies that even though different datum could be contained in a single tra
     );
 
     // Red Circle
-    greenTraceIndex = controller.createTrace(
+    redTraceIndex = controller.createTrace(
       ChartType.symbol,
       PaintCharacteristics(
-        color: Colors.green,
+        color: Colors.red,
         strokeWidth: 4,
         diameter: 6,
         fixedMinY: 0.4,
         fixedMaxY: 2.4,
       ),
-      name: 'Green Circle',
+      name: 'Red Circle',
     );
-
   }
 ```
 ## Adding Data
-Simply create the datum (see Data class) then call addDatum on the created Trace. In the below example, a datum is created first and added to the redTrace then every 10 seconds a datum is created and added to the blueTrace:
+Create a datum (see Data class) and add the data to a trace (adddatum). In the below example, a datum is created first and added to the green trace (green circle), every second a datum is added to the blue trace (blue ball) then after 30 seconds the last datum is added to the red trace (red circle).
 ```
-const greenPosition = 0.4;  // Starting position
-const bluePosition = 1.4;   // Every 10 seconds
-const redPosition = 2.4;    // Stop position
+  static const greenPosition = 0.4;    // Starting symbol position
+  static const bluePosition = 1.4;     // Every second symbol position
+  static const redPosition = 2.4;      // Stoping symbol position
 
-var previousTime = DateTime.now();
-final startDatum = Data(previousTime.millisecondsSinceEpoch, greenPosition);
-controller.trace(greenTraceIndex).addDatum(startDatum);
+  var previousTime = DateTime.now();
+  final startDatum = Data(previousTime.millisecondsSinceEpoch, greenPosition);
 
-var items = 0;
-while (items < 20) {
-  final currentTime = DateTime.now();
-  if (current.difference(previousTime).inSeconds >= 10) {
-    final datum = Data(current.millisecondsSinceEpoch, bluePosition);
-    controller.trace(blueTraceIndex).addDatum(datum);
-    previousTime = currentTime;
-  }
-}
+  // Start the heartbeat.
+  controller.timestamps.add(startDatum.timestamp);
+  
+  // Add the first real datum.
+  controller.trace(greenTraceIndex).addDatum(startDatum);
 
-final stopDatum = Data(previousTime.millisecondsSinceEpoch, redPosition);
-controller.trace(redTraceIndex).addDatum(stopDatum);
+  Timer.periodic(
+    const Duration(seconds: 1),
+    (Timer timer) {
+      if (controller.trace(blueTraceIndex).data.length < 30) {
+        final currentTime = DateTime.now();
+        final  = currentTime.millisecondsSinceEpoch;
+
+        // Once a second heartbeat.
+        controller.timestamps.add(timestamp);
+
+        // Add the blue ball.
+        final datum = Data(timestamp, bluePosition);
+        controller.trace(blueTraceIndex).addDatum(datum);
+
+        previousTime = currentTime;
+      } else {
+        controller.timestamps.add(previousTime.millisecondsSinceEpoch);
+        final stopDatum = Data(
+          previousTime.millisecondsSinceEpoch,
+          redPosition,
+        );
+        // Last datum is the red circle.
+        controller.trace(redTraceIndex).addDatum(stopDatum);
+
+        timer.cancel();
+      }
+    },
+  );
 ```
 Each call to addDatum will 
 1. notifies the chart that new data has arrived.
 1. compute the Y-axis scale (if not fixed)
 1. chart the data
 1. update the X-axis.
+
+ One important piece of information is adding a heartbeat. If a live chart is needed where the timeline (X axis) moves in a linear fashion requires adding a heart beat (at the grandularity requested of the X axis) a tickstamp is added to the ChartController timestamps field on every tick e.g.,
+
+```
+            controller.timestamps.add(currentTime.millisecondsSinceEpoch)
+```
+The heartbeat allows the data to be replayed as if the data collection is live, at the same rate of experiencing the collecting of the live data.
