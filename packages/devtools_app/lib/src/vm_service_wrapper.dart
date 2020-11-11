@@ -404,8 +404,9 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Stack> getStack(String isolateId) {
-    return trackFuture('getStack', _vmService.getStack(isolateId));
+  Future<Stack> getStack(String isolateId, {int limit}) {
+    return trackFuture(
+        'getStack', _vmService.getStack(isolateId, limit: limit));
   }
 
   @override
