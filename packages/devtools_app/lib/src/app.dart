@@ -45,6 +45,7 @@ import 'timeline/timeline_screen.dart';
 import 'ui/service_extension_widgets.dart';
 import 'utils.dart';
 import 'vm_developer/vm_developer_tools_screen.dart';
+import 'vm_developer/vm_developer_tools_screen_controller.dart';
 
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
@@ -87,6 +88,12 @@ class DevToolsAppState extends State<DevToolsApp> {
   PreferencesController get preferences => widget.preferences;
   IdeTheme get ideTheme => widget.ideTheme;
 
+  bool get isDarkThemeEnabled => _isDarkThemeEnabled;
+  bool _isDarkThemeEnabled;
+
+  bool get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
+  bool _vmDeveloperModeEnabled;
+
   @override
   void initState() {
     super.initState();
@@ -96,6 +103,22 @@ class DevToolsAppState extends State<DevToolsApp> {
     serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
       setState(() {
         _clearCachedRoutes();
+      });
+    });
+
+    _isDarkThemeEnabled = preferences.darkModeTheme.value;
+    preferences.darkModeTheme.addListener(() {
+      setState(() {
+        _isDarkThemeEnabled = preferences.darkModeTheme.value;
+      });
+    });
+
+    _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
+    preferences.vmDeveloperModeEnabled.addListener(() {
+      print(
+          'developer mode enabled: ${preferences.vmDeveloperModeEnabled.value}');
+      setState(() {
+        _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
       });
     });
   }
@@ -172,11 +195,11 @@ class DevToolsAppState extends State<DevToolsApp> {
       url: vmServiceUri,
       allowConnectionScreenOnDisconnect: !embed,
       builder: (_) {
-        // Rebuild when VM developer mode is enabled or disabled to update the
-        // visible screens list.
-        return ValueListenableBuilder(
-          valueListenable: widget.preferences.vmDeveloperModeEnabled,
-          builder: (context, value, _) {
+        // Force regeneration of visible screens when VM developer mode is
+        // enabled.
+        return ValueListenableBuilder<bool>(
+          valueListenable: preferences.vmDeveloperModeEnabled,
+          builder: (_, __, ___) {
             final tabs = _visibleScreens()
                 .where((p) => embed && page != null ? p.screenId == page : true)
                 .where((p) => !hide.contains(p.screenId))
@@ -271,23 +294,13 @@ class DevToolsAppState extends State<DevToolsApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: widget.preferences.vmDeveloperModeEnabled,
-      builder: (context, value, _) {
-        return ValueListenableBuilder<bool>(
-          valueListenable: widget.preferences.darkModeTheme,
-          builder: (context, value, _) {
-            return MaterialApp.router(
-              title: 'Dart DevTools',
-              debugShowCheckedModeBanner: false,
-              theme: themeFor(isDarkTheme: value, ideTheme: ideTheme),
-              builder: (context, child) => Notifications(child: child),
-              routerDelegate: DevToolsRouterDelegate(_getPage),
-              routeInformationParser: DevToolsRouteInformationParser(),
-            );
-          },
-        );
-      },
+    return MaterialApp.router(
+      title: 'Dart DevTools',
+      debugShowCheckedModeBanner: false,
+      theme: themeFor(isDarkTheme: isDarkThemeEnabled, ideTheme: ideTheme),
+      builder: (context, child) => Notifications(child: child),
+      routerDelegate: DevToolsRouterDelegate(_getPage),
+      routeInformationParser: DevToolsRouteInformationParser(),
     );
   }
 }
@@ -556,9 +569,9 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
         const AppSizeScreen(),
         createController: () => AppSizeController(),
       ),
-      DevToolsScreen<VMDeveloperToolsScreen>(
+      DevToolsScreen<VMDeveloperToolsScreenController>(
         const VMDeveloperToolsScreen(),
-        createController: () => null,
+        createController: () => VMDeveloperToolsScreenController(),
       )
 // Uncomment to see a sample implementation of a conditional screen.
 //      DevToolsScreen<ExampleController>(

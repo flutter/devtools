@@ -163,11 +163,12 @@ void main() {
             // AppSizeScreen,
             // VMDeveloperToolsScreen,
           ]));
+      offlineMode = false;
     });
 
     testWidgets('are correct for Dart CLI app with VM developer mode enabled',
         (WidgetTester tester) async {
-      VmServicePrivate.enablePrivateRpcs = true;
+      preferences.toggleVmDeveloperMode(true);
       setupMockValues();
       expect(
           visibleScreenTypes,
@@ -182,7 +183,7 @@ void main() {
             AppSizeScreen,
             VMDeveloperToolsScreen,
           ]));
-      VmServicePrivate.enablePrivateRpcs = false;
+      preferences.toggleVmDeveloperMode(false);
     });
   });
 }

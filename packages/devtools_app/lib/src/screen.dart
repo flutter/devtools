@@ -172,9 +172,7 @@ bool shouldShowScreen(Screen screen) {
     }
   }
   if (screen.requiresVmDeveloperMode) {
-    // TODO(bkonyi): this might be a bit brittle. Should have a global getter
-    // somewhere for 'vmDeveloperModeEnabled'.
-    if (!VmServicePrivate.enablePrivateRpcs) {
+    if (!preferences.vmDeveloperModeEnabled.value) {
       return false;
     }
   }

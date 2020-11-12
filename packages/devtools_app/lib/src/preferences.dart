@@ -17,24 +17,24 @@ class PreferencesController {
   ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;
 
   Future<void> init() async {
-    if (storage == null) {
+    if (storage != null) {
+      // Get the current values and listen for and write back changes.
+      String value = await storage.getValue('ui.darkMode');
+      toggleDarkModeTheme(value == null || value == 'true');
+      _darkModeTheme.addListener(() {
+        storage.setValue('ui.darkMode', '${_darkModeTheme.value}');
+      });
+
+      value = await storage.getValue('ui.vmDeveloperMode');
+      toggleVmDeveloperMode(value == 'true');
+      _vmDeveloperMode.addListener(() {
+        storage.setValue('ui.vmDeveloperMode', '${_vmDeveloperMode.value}');
+      });
+    } else {
       // This can happen when running tests.
       log('PreferencesController: storage not initialized');
-      return;
     }
-
-    // Get the current values and listen for and write back changes.
-    String value = await storage.getValue('ui.darkMode');
-    toggleDarkModeTheme(value == null || value == 'true');
-    _darkModeTheme.addListener(() {
-      storage.setValue('ui.darkMode', '${_darkModeTheme.value}');
-    });
-
-    value = await storage.getValue('ui.vmDeveloperMode');
-    toggleVmDeveloperMode(value == 'true');
-    _vmDeveloperMode.addListener(() {
-      storage.setValue('ui.vmDeveloperMode', '${_vmDeveloperMode.value}');
-    });
+    setGlobal(PreferencesController, this);
   }
 
   /// Change the value for the dark mode setting.

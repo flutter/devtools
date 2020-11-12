@@ -4,7 +4,9 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../auto_dispose_mixin.dart';
 import '../screen.dart';
 import '../theme.dart';
 import 'isolate_statistics_view.dart';
@@ -48,13 +50,13 @@ class VMDeveloperToolsScreen extends Screen {
 
   @override
   ValueListenable<bool> get showIsolateSelector =>
-      VMDeveloperToolsScreenBody.controller.showIsolateSelector;
+      _VMDeveloperToolsScreenState.controller.showIsolateSelector;
 
   @override
   Widget build(BuildContext context) => const VMDeveloperToolsScreenBody();
 }
 
-class VMDeveloperToolsScreenBody extends StatelessWidget {
+class VMDeveloperToolsScreenBody extends StatefulWidget {
   const VMDeveloperToolsScreenBody();
 
   static const List<VMDeveloperView> views = [
@@ -62,10 +64,24 @@ class VMDeveloperToolsScreenBody extends StatelessWidget {
     IsolateStatisticsView(),
   ];
 
+  @override
+  _VMDeveloperToolsScreenState createState() => _VMDeveloperToolsScreenState();
+}
+
+class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
+    with AutoDisposeMixin {
   // TODO(bkonyi): do we want this to be static? Currently necessary to provide
   // access to the `showIsolateSelector` via `VMDeveloperToolsScreen`
-  static final VMDeveloperToolsScreenController controller =
-      VMDeveloperToolsScreenController();
+  static VMDeveloperToolsScreenController controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newController =
+        Provider.of<VMDeveloperToolsScreenController>(context);
+    if (newController == controller) return;
+    controller = newController;
+  }
 
   @override
   Widget build(BuildContext context) {
