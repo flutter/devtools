@@ -423,8 +423,6 @@ Future<void> runServiceManagerTestsWithDriverFactory(
         service,
         onClosed: Completer().future,
       );
-      await serviceManager
-          .serviceExtensionManager.extensionStatesUpdated.future;
       await _verifyExtensionStateInServiceManager(
         boolExtensionDescription.extension,
         true,
@@ -461,17 +459,22 @@ Future<void> _verifyInitialExtensionStateInServiceManager(
 
 Future<void> _verifyExtensionStateInServiceManager(
     String extensionName, bool enabled, dynamic value) async {
-  final StreamSubscription<ServiceExtensionState> stream = serviceManager
-      .serviceExtensionManager
-      .getServiceExtensionState(extensionName, null);
+  final stateListenable = serviceManager.serviceExtensionManager
+      .getServiceExtensionState(extensionName);
 
+  // Wait for the service extension state to match the expected value.
   final Completer<ServiceExtensionState> stateCompleter = Completer();
-  stream.onData((ServiceExtensionState state) {
-    stateCompleter.complete(state);
-    stream.cancel();
-  });
+  final stateListener = () {
+    if (stateListenable.value.value == value) {
+      stateCompleter.complete(stateListenable.value);
+    }
+  };
+
+  stateListenable.addListener(stateListener);
+  stateListener();
 
   final ServiceExtensionState state = await stateCompleter.future;
+  stateListenable.removeListener(stateListener);
   expect(state.enabled, equals(enabled));
   expect(state.value, equals(value));
 }
