@@ -11,7 +11,6 @@ import 'globals.dart';
 import 'listenable.dart';
 import 'scaffold.dart';
 import 'theme.dart';
-import 'vm_service_wrapper.dart';
 
 /// Defines a page shown in the DevTools [TabBar].
 @immutable

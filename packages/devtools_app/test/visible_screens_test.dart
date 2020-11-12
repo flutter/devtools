@@ -16,7 +16,6 @@ import 'package:devtools_app/src/screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/timeline/timeline_screen.dart';
 import 'package:devtools_app/src/vm_developer/vm_developer_tools_screen.dart';
-import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/mocks.dart';
