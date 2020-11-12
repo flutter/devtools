@@ -1,6 +1,5 @@
 import 'dart:io';
 
-@TestOn('vm')
 import 'package:devtools_app/src/charts/chart_controller.dart';
 import 'package:devtools_app/src/charts/chart_trace.dart';
 import 'package:devtools_app/src/charts/chart.dart';
@@ -217,37 +216,18 @@ void main() {
             yScale.labelUnitExponent.toInt(),
           );
 
-          switch (labelIndex.toInt()) {
-            case 0:
-              expect(labelName, '0');
-              break;
-            case 1:
-              expect(labelName, '100M');
-              break;
-            case 2:
-              expect(labelName, '200M');
-              break;
-            case 3:
-              expect(labelName, '300M');
-              break;
-            case 4:
-              expect(labelName, '400M');
-              break;
-            case 5:
-              expect(labelName, '500M');
-              break;
-            case 6:
-              expect(labelName, '600M');
-              break;
-            case 7:
-              expect(labelName, '700M');
-              break;
-            default:
-              expect(
-                false,
-                'Unexpected label Index of ${labelIndex.toInt()} and Label of $labelName',
-              );
-          }
+          // Ensure Y axis labels match.
+          final expectedLabels = [
+            '0',
+            '100M',
+            '200M',
+            '300M',
+            '400M',
+            '500M',
+            '600M',
+            '700M',
+          ];
+          expect(labelName, expectedLabels[labelIndex.toInt()]);
         }
       }
 
@@ -261,7 +241,7 @@ void main() {
           await setupScaledChart(tester, controller, chartKey);
 
           // Check live view zoom.
-          controller.setXAxisZoomDuration(const Duration());
+          controller.zoomDuration = const Duration();
           await tester.pumpAndSettle(const Duration(seconds: 2));
 
           await expectLater(
@@ -341,7 +321,7 @@ void main() {
         await setupScaledChart(tester, controller, chartKey);
 
         // Check A=all data view zoom.
-        controller.setXAxisZoomDuration(null);
+        controller.zoomDuration = null;
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         await expectLater(
@@ -402,7 +382,7 @@ void main() {
         await setupScaledChart(tester, controller, chartKey);
 
         // Check 5 minute data view zoom.
-        controller.setXAxisZoomDuration(const Duration(minutes: 5));
+        controller.zoomDuration = const Duration(minutes: 5);
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         await expectLater(
@@ -642,7 +622,7 @@ void main() {
           await setupFixedChart(tester, controller, chartKey);
 
           // Check live view zoom.
-          controller.setXAxisZoomDuration(const Duration());
+          controller.zoomDuration = const Duration();
           await tester.pumpAndSettle(const Duration(seconds: 2));
 
           await expectLater(
@@ -710,22 +690,8 @@ void main() {
               yScale.labelUnitExponent.toInt(),
             );
 
-            switch (labelIndex.toInt()) {
-              case 0:
-                expect(labelName, '0');
-                break;
-              case 1:
-                expect(labelName, '1');
-                break;
-              case 2:
-                expect(labelName, '2');
-                break;
-              default:
-                expect(
-                  false,
-                  'Unexpected label Index of ${labelIndex.toInt()} and Label of $labelName',
-                );
-            }
+            final expectedLabels = ['0', '1', '2'];
+            expect(labelName, expectedLabels[labelIndex.toInt()]);
           }
 
           // Validate the x-axis labels.
@@ -762,7 +728,7 @@ void main() {
         await setupFixedChart(tester, controller, chartKey);
 
         // Check all data view zoom.
-        controller.setXAxisZoomDuration(null);
+        controller.zoomDuration = null;
         await tester.pumpAndSettle(const Duration(seconds: 15));
 
         await expectLater(
@@ -799,25 +765,8 @@ void main() {
             yScale.labelUnitExponent.toInt(),
           );
 
-          switch (labelIndex.toInt()) {
-            case 0:
-              expect(labelName, '0');
-              break;
-            case 1:
-              expect(labelName, '1');
-              break;
-            case 2:
-              expect(labelName, '2');
-              break;
-            case 3:
-              expect(labelName, '3');
-              break;
-            default:
-              expect(
-                false,
-                'Unexpected label Index of ${labelIndex.toInt()} and Label of $labelName',
-              );
-          }
+          final expectedLabels = ['0', '1', '2', '3'];
+          expect(labelName, expectedLabels[labelIndex.toInt()]);
         }
 
         // Validate the x-axis labels.
@@ -853,7 +802,7 @@ void main() {
         await setupFixedChart(tester, controller, chartKey);
 
         // Check all data view zoom.
-        controller.setXAxisZoomDuration(const Duration(minutes: 5));
+        controller.zoomDuration = const Duration(minutes: 5);
         await tester.pumpAndSettle(const Duration(seconds: 15));
 
         await expectLater(
@@ -890,26 +839,8 @@ void main() {
             yScale.labelUnitExponent.toInt(),
           );
 
-          switch (labelIndex.toInt()) {
-            case 0:
-              expect(labelName, '0');
-              break;
-            case 1:
-              expect(labelName, '1');
-              break;
-            case 2:
-              expect(labelName, '2');
-              break;
-            case 3:
-              expect(labelName, '3');
-              break;
-
-            default:
-              expect(
-                false,
-                'Unexpected label Index of ${labelIndex.toInt()} and Label of $labelName',
-              );
-          }
+          final expectedLabels = ['0', '1', '2', '3'];
+          expect(labelName, expectedLabels[labelIndex.toInt()]);
         }
 
         // Validate the x-axis labels.

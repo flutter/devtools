@@ -1,4 +1,4 @@
-## DevTools Charting Package
+## DevTools Charting
 
 ![GitHub contributors](https://img.shields.io/github/contributors/flutter/devtools.svg)
 
@@ -21,7 +21,7 @@ DevTools has used a number of existing charting packages with various issues e.g
 * not flexible enough without hacky code to augment
 * not Dart or Flutter compliant
 
-This charting library plots [timeseries data](https://en.wikipedia.org/wiki/Time_series).  Two basic charts are supported:
+This charting subsystem plots [timeseries data](https://en.wikipedia.org/wiki/Time_series).  Two basic charts are supported:
 1. line chart to display non-numeric values e.g., events
 1. scatter chats with or without shading from 0 to their Y coordinate.
 

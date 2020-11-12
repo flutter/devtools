@@ -10,31 +10,6 @@ import '../auto_dispose.dart';
 
 import 'chart_trace.dart';
 
-/// Zoom level of chart
-enum displayDuration { live, fiveMinutes, fifteenMinutes, all }
-
-/// Given a durationLabel return the displayDuration.
-displayDuration durationToDisplayDuration(
-  displayDuration currentZoomDuration,
-  Duration duration,
-) {
-  if (currentZoomDuration == displayDuration.live) {
-    if (duration.inMinutes == 0 && duration.inSeconds >= 10) {
-      return displayDuration.live;
-    }
-  } else if (currentZoomDuration == displayDuration.fifteenMinutes) {
-    if (duration.inMinutes >= 5) {
-      return displayDuration.fifteenMinutes;
-    }
-  } else if (currentZoomDuration == displayDuration.fiveMinutes) {
-    if (duration.inMinutes == 3) {
-      return displayDuration.fiveMinutes;
-    }
-  }
-
-  return null;
-}
-
 String prettyTimestamp(int timestamp) {
   final timestampDT = DateTime.fromMillisecondsSinceEpoch(timestamp);
   return intl.DateFormat.Hms().format(timestampDT); // HH:mm:ss
@@ -45,28 +20,29 @@ const leftLabelIndex = 0;
 const centerLabelIndex = 1;
 const rightLabelIndex = 2;
 
-/*
-                                          xPaddingRight
-                                          |
-      leftPadding          topPadding     |  rightPadding
-      |                    |              |  |
-    ==|====================|==============|==|=
-    " |                    V              |  |
-    " V ----------------------------------V  V
-    "   |
-    "   |
-    "   |
-    "   | ------ canvasChartWidth --------
-    "   |
-    "   |
-    "   ---------------------------------- <----- yCanvasChart
-    "   '  '  '  '  '  '  '  '  '  '  '  '    {-------- bottomPadding
-    "   ^                ^                     \
-    ====|================|======================
-        |                |
-        xCanvasChart     X-axis ticks
-
-*/
+///_____________________________________________________________________
+///
+///                                       xPaddingRight
+///                                       |
+///   leftPadding          topPadding     |  rightPadding
+///   |                    |              |  |
+/// ==|====================|==============|==|=
+/// " |                    V              |  |
+/// " V ----------------------------------V  V
+/// "   |
+/// "   |
+/// "   |
+/// "   | ------ canvasChartWidth --------
+/// "   |
+/// "   |
+/// "   ---------------------------------- <----- yCanvasChart
+/// "   '  '  '  '  '  '  '  '  '  '  '  '    {-------- bottomPadding
+/// "   ^                ^                     \
+/// ====|================|======================
+///     |                |
+///     xCanvasChart     X-axis ticks
+///_____________________________________________________________________
+///
 class ChartController extends DisposableController
     with AutoDisposeControllerMixin {
   ChartController({
@@ -86,16 +62,17 @@ class ChartController extends DisposableController
   // TODO(terry): Compute dynamically based on X-axis lables text height.
   final bottomPadding = 40.0;
 
-  // TODO(terry): Consider computation of each X-axis tick width (scaled).
-  double tickWidth = 10.0;
+  double get tickWidth => _tickWidth;
+
+  double _tickWidth = 10.0;
 
   int visibleTicks;
 
   // TODO(terry): For now three labels.  Need better mechanism, some number of labels
   //              based on x-axis zoom factor and default unit to display for labels e.g.,
   //              live take the duration (visible) and divide by some nice unit e.g., 10/20
-  //              seconds, 5 minute show 1 minute units, 15 minutes show 5 minute units, etc.
-
+  //              seconds, 5 minute show 1 minute units, 15 minutes show 5 minute units, width
+  //              of the window, etc.
   final List<int> _xAxisLabeledTimestamps = [null, null, null];
 
   int getLabelsCount() => _xAxisLabeledTimestamps.length;
@@ -105,16 +82,19 @@ class ChartController extends DisposableController
 
   int getLabelTimestampByIndex(int index) => _xAxisLabeledTimestamps[index];
 
+  // TODO(terry): See TODO on _xAxisLabeledTimestamps.
   int get leftLabelTimestamp => _xAxisLabeledTimestamps[leftLabelIndex];
   set leftLabelTimestamp(int timestamp) {
     _xAxisLabeledTimestamps[leftLabelIndex] = timestamp;
   }
 
+  // TODO(terry): See TODO on _xAxisLabeledTimestamps.
   int get centerLabelTimestamp => _xAxisLabeledTimestamps[centerLabelIndex];
   set centerLabelTimestamp(int timestamp) {
     _xAxisLabeledTimestamps[centerLabelIndex] = timestamp;
   }
 
+  // TODO(terry): See TODO on _xAxisLabeledTimestamps.
   int get rightLabelTimestamp => _xAxisLabeledTimestamps[rightLabelIndex];
   set rightLabelTimestamp(int timestamp) {
     _xAxisLabeledTimestamps[rightLabelIndex] = timestamp;
@@ -125,7 +105,7 @@ class ChartController extends DisposableController
 
   Duration durationLabel;
 
-  // TODO(terry): Duration based on x-axis zoom factor (live,5 min,15 min,etc).
+  // TODO(terry): Duration based on x-axis zoom factor (live, 5 min, 15 min, etc).
   void computeDurationLabel() {
     if (durationLabel == null && rightLabelTimestamp != null) {
       final timestampsLength = timestamps.length;
@@ -275,18 +255,23 @@ class ChartController extends DisposableController
 
   String title;
 
-  displayDuration zoomDuration = displayDuration.live;
+  /// zoomDuration values of:
+  ///     null implies all (default)
+  ///     Duration() imples live
+  ///     Duration(minutes: 5) implies 5 minute interval
+  ///     Duration(minutes: 15) implies 15 minute interval
+  Duration _zoomDuration = const Duration();
+
+  Duration get zoomDuration => _zoomDuration;
 
   static const oneMinuteInMs = 1000 * 60;
 
-  void setXAxisZoomDuration(Duration duration) {
+  set zoomDuration(Duration duration) {
     if (duration == null) {
       // Display all items.
-      tickWidth = canvasChartWidth / timestamps.length;
-      zoomDuration = displayDuration.all;
+      _tickWidth = canvasChartWidth / timestamps.length;
     } else if (duration.inMinutes == 0) {
-      tickWidth = 10.0; // Live
-      zoomDuration = displayDuration.live;
+      _tickWidth = 10.0; // Live
     } else if (duration.inMinutes == 5 || duration.inMinutes == 15) {
       final firstDT = DateTime.fromMillisecondsSinceEpoch(timestamps.first);
       final lastDT = DateTime.fromMillisecondsSinceEpoch(timestamps.last);
@@ -308,7 +293,7 @@ class ChartController extends DisposableController
 
         final ticksVisible =
             timestamps.length - timestamps.indexOf(startOfLastNMinutes);
-        tickWidth = canvasChartWidth / ticksVisible;
+        _tickWidth = canvasChartWidth / ticksVisible;
       } else {
         // No but lets scale x-axis based on the last two timestamps diffs we have.
         // TODO(terry): Consider using all the data maybe average out the time between
@@ -322,13 +307,11 @@ class ChartController extends DisposableController
           final diffTS = lastTS.difference(previousTS);
           final ticksPerMinute = oneMinuteInMs / diffTS.inMilliseconds;
           final ticksVisible = ticksPerMinute * duration.inMinutes;
-          tickWidth = canvasChartWidth / ticksVisible;
+          _tickWidth = canvasChartWidth / ticksVisible;
         }
       }
 
-      zoomDuration = duration.inMinutes == 5
-          ? displayDuration.fiveMinutes
-          : displayDuration.fifteenMinutes;
+      _zoomDuration = duration;
     }
 
     // All tick labels need to be recompted.
@@ -336,6 +319,9 @@ class ChartController extends DisposableController
   }
 
   void computeChartArea() {
+    // Check if ready to start coputations?
+    if (size == null) return;
+
     xCanvasChart = leftPadding;
     final width = size.width - leftPadding - rightPadding;
     // Compute max number of ticks visible on X-Axis.
@@ -355,15 +341,16 @@ class ChartController extends DisposableController
     }
   }
 
-  double xPositonToYCanvasCoord(double y) {
-    final zeroPosition = xCanvasChart + canvasChartWidth;
-    return zeroPosition - yScale?.tickFromValue(y);
-  }
+  double get zeroXPosition => xCanvasChart + canvasChartWidth;
 
-  double yPositonToYCanvasCoord(double y) {
-    final zeroPosition = yCanvasChart + canvasChartHeight;
-    return zeroPosition - yScale?.tickFromValue(y);
-  }
+  double get zeroYPosition => yCanvasChart + canvasChartHeight;
+
+  double yPositon(double y) => yScale?.tickFromValue(y);
+
+  // Returns a negative value, the value is subtracted from zeroPosition to
+  // return the real canvas coord (adjusted from Y-axis zero location in the
+  // chart).
+  double yPositonToYCanvasCoord(double y) => -yPositon(y);
 
   Trace trace(int index) {
     assert(index < traces.length);
@@ -423,25 +410,29 @@ class ChartController extends DisposableController
     return -1;
   }
 
-  int get xCoordLeftMostVisibleTimestamp {
-    int indexOffset = xCanvasChart.toInt();
+  /// X coordinate of left most visible datum. The timestampXCanvasCoord
+  /// returns a zero based X-coord this X-coord must be translated by the
+  /// value of this getter.
+  double get xCoordLeftMostVisibleTimestamp {
+    double indexOffset = xCanvasChart;
     final totalTimestamps = timestamps.length;
     final visibleCount = numberOfVisibleXAxisTicks;
     if (totalTimestamps < visibleCount) {
       final startIndex = visibleCount - totalTimestamps;
-      indexOffset += (startIndex * tickWidth).toInt();
+      indexOffset += startIndex * tickWidth;
     }
 
     return indexOffset;
   }
 
-  // -1 implies not visible.
+  /// Returns a 0 based X-coordinate, this coordinate is not yet translated
+  /// to the coordinates of the rendered chart. Returns -1 if timestamp not
+  /// visible.
   double timestampXCanvasCoord(int timestamp) {
     final index = timestamps.indexOf(timestamp);
     final visibleIndex = normalizeTimestampIndex(index);
     if (visibleIndex >= 0) {
-      return (xCoordLeftMostVisibleTimestamp + (visibleIndex * tickWidth))
-          .toDouble();
+      return (visibleIndex * tickWidth).toDouble();
     } else {
       return -1;
     }

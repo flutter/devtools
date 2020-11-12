@@ -17,7 +17,7 @@ class Data {
 
 class PaintCharacteristics {
   PaintCharacteristics({
-    this.color = Colors.black,
+    @required this.color,
     this.symbol = ChartSymbol.ring,
     this.strokeWidth = 1,
     this.diameter = 1,
@@ -94,8 +94,12 @@ class Trace {
 class TraceNotifier {
   TraceNotifier(this.traceIndex, this.dataIndex);
 
-  int traceIndex;
-  int dataIndex;
+  /// Index of the trace that just changed, see ChartController field traces.
+  final int traceIndex;
+
+  /// Index of the datum that that changed for the Trace's data field (see
+  /// Trace's data field).
+  final int dataIndex;
 }
 
 enum ChartType {
@@ -122,13 +126,14 @@ class AxisScale {
 
   final double maxTicks;
 
-  double _computedMin, _computedMax;
+  double get tickSpacing => _tickSpacing;
 
   double _tickSpacing;
 
-  double get tickSpacing => _tickSpacing;
   double get computedMin => _computedMin;
   double get computedMax => _computedMax;
+
+  double _computedMin, _computedMax;
 
   double _range;
 
@@ -156,15 +161,9 @@ class AxisScale {
     }
   }
 
-  double _calculateMin() {
-    final floored = (minPoint / _tickSpacing).floor();
-    return floored * _tickSpacing;
-  }
+  double _calculateMin() => (minPoint / _tickSpacing).floor() * _tickSpacing;
 
-  double _calculateMax() {
-    final ceiled = (maxPoint / _tickSpacing).ceil();
-    return ceiled * _tickSpacing;
-  }
+  double _calculateMax() => (maxPoint / _tickSpacing).ceil() * _tickSpacing;
 
   Map _exponentFraction(double range) {
     if (range == 0) return {};
@@ -175,6 +174,12 @@ class AxisScale {
     return {'exponent': exponent, 'fraction': fraction};
   }
 
+  /// Produce a rounded or first number of the Y-axis scale and its
+  /// exponent.  Don't want too many labels or too little. The goal
+  /// is to show high water mark (over 7) flips to 10's unit and
+  /// it's exponent. In the end, used to compute the range of values
+  /// on the Y-axis for min, max and exponent (our unit of measurement
+  /// e.g., K, M, B, etc.).
   double _niceNum(double range, bool round) {
     if (range == 0) return 0;
 
@@ -209,5 +214,6 @@ class AxisScale {
     return niceFraction * pow(10, exponent);
   }
 
-  int tickFromValue(double value) => (value / tickSpacing).truncate();
+  double tickFromValue(double value) =>
+      (value / tickSpacing).truncateToDouble();
 }
