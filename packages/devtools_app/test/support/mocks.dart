@@ -16,7 +16,6 @@ import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/stream_value_listenable.dart';
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
@@ -24,7 +23,6 @@ import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -45,7 +43,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
                 memoryData,
               )
             : MockVmService() {
-    _flagManager.service = service;
+    _flagManager.vmServiceOpened(service);
   }
 
   static final _flagManager = VmFlagManager();
@@ -437,11 +435,10 @@ class FakeServiceExtensionManager extends Fake
     implements ServiceExtensionManager {
   bool _firstFrameEventReceived = false;
 
-  final Map<String, StreamController<bool>> _serviceExtensionController = {};
-  final Map<String, StreamController<ServiceExtensionState>>
+  final Map<String, ValueNotifier<ServiceExtensionState>>
       _serviceExtensionStateController = {};
 
-  final Map<String, ValueListenable<bool>> _serviceExtensionListenables = {};
+  final Map<String, ValueNotifier<bool>> _serviceExtensionAvailable = {};
 
   /// All available service extensions.
   final _serviceExtensions = <String>{};
@@ -454,9 +451,6 @@ class FakeServiceExtensionManager extends Fake
   /// [_firstFrameEventReceived].
   final Set<String> _pendingServiceExtensions = {};
 
-  @override
-  Completer<void> extensionStatesUpdated = Completer();
-
   /// Hook to simulate receiving the first frame event.
   ///
   /// Service extensions are only reported once a frame has been received.
@@ -468,16 +462,13 @@ class FakeServiceExtensionManager extends Fake
 
   @override
   ValueListenable<bool> hasServiceExtensionListener(String name) {
-    return _serviceExtensionListenables.putIfAbsent(
+    return _hasServiceExtensionNotifier(name);
+  }
+
+  ValueNotifier<bool> _hasServiceExtensionNotifier(String name) {
+    return _serviceExtensionAvailable.putIfAbsent(
       name,
-      () => StreamValueListenable<bool>(
-        (notifier) {
-          return hasServiceExtension(name, (value) {
-            notifier.value = value;
-          });
-        },
-        () => _hasServiceExtensionNow(name),
-      ),
+      () => ValueNotifier(_hasServiceExtensionNow(name)),
     );
   }
 
@@ -546,27 +537,43 @@ class FakeServiceExtensionManager extends Fake
     for (String extension in _pendingServiceExtensions) {
       await _addServiceExtension(extension);
     }
-    extensionStatesUpdated.complete();
     _pendingServiceExtensions.clear();
   }
 
-  Future<void> _addServiceExtension(String name) async {
-    final streamController = _getServiceExtensionController(name);
+  Future<void> _addServiceExtension(String name) {
+    _hasServiceExtensionNotifier(name).value = true;
 
     _serviceExtensions.add(name);
-    streamController.add(true);
 
     if (_enabledServiceExtensions.containsKey(name)) {
       // Restore any previously enabled states by calling their service
       // extension. This will restore extension states on the device after a hot
       // restart. [_enabledServiceExtensions] will be empty on page refresh or
       // initial start.
-      await callServiceExtension(name, _enabledServiceExtensions[name].value);
+      return callServiceExtension(name, _enabledServiceExtensions[name].value);
     } else {
       // Set any extensions that are already enabled on the device. This will
       // enable extension states in DevTools on page refresh or initial start.
-      await _restoreExtensionFromDevice(name);
+      return _restoreExtensionFromDevice(name);
     }
+  }
+
+  @override
+  ValueListenable<ServiceExtensionState> getServiceExtensionState(String name) {
+    return _serviceExtensionState(name);
+  }
+
+  ValueNotifier<ServiceExtensionState> _serviceExtensionState(String name) {
+    return _serviceExtensionStateController.putIfAbsent(
+      name,
+      () {
+        return ValueNotifier<ServiceExtensionState>(
+          _enabledServiceExtensions.containsKey(name)
+              ? _enabledServiceExtensions[name]
+              : ServiceExtensionState(false, null),
+        );
+      },
+    );
   }
 
   Future<void> _restoreExtensionFromDevice(String name) async {
@@ -590,15 +597,13 @@ class FakeServiceExtensionManager extends Fake
   }
 
   @override
-  void resetAvailableExtensions() {
-    extensionStatesUpdated = Completer();
+  void vmServiceClosed() {
     _firstFrameEventReceived = false;
     _pendingServiceExtensions.clear();
     _serviceExtensions.clear();
-    _serviceExtensionController
-        .forEach((String name, StreamController<bool> stream) {
-      stream.add(false);
-    });
+    for (var listenable in _serviceExtensionAvailable.values) {
+      listenable.value = false;
+    }
   }
 
   /// Sets the state for a service extension and makes the call to the VMService.
@@ -613,9 +618,7 @@ class FakeServiceExtensionManager extends Fake
       await callServiceExtension(name, value);
     }
 
-    final StreamController<ServiceExtensionState> streamController =
-        _getServiceExtensionStateController(name);
-    streamController.add(ServiceExtensionState(enabled, value));
+    _serviceExtensionState(name).value = ServiceExtensionState(enabled, value);
 
     // Add or remove service extension from [enabledServiceExtensions].
     if (enabled) {
@@ -630,79 +633,6 @@ class FakeServiceExtensionManager extends Fake
     return _serviceExtensions.contains(name) ||
         _pendingServiceExtensions.contains(name);
   }
-
-  @override
-  StreamSubscription<bool> hasServiceExtension(
-    String name,
-    void onData(bool value),
-  ) {
-    if (_serviceExtensions.contains(name) && onData != null) {
-      onData(true);
-    }
-    final StreamController<bool> streamController =
-        _getServiceExtensionController(name);
-    return streamController.stream.listen(onData);
-  }
-
-  @override
-  StreamSubscription<ServiceExtensionState> getServiceExtensionState(
-    String name,
-    void onData(ServiceExtensionState state),
-  ) {
-    if (_enabledServiceExtensions.containsKey(name) && onData != null) {
-      onData(_enabledServiceExtensions[name]);
-    }
-    final StreamController<ServiceExtensionState> streamController =
-        _getServiceExtensionStateController(name);
-    return streamController.stream.listen(onData);
-  }
-
-  StreamController<bool> _getServiceExtensionController(String name) {
-    return _getStreamController(
-      name,
-      _serviceExtensionController,
-      onFirstListenerSubscribed: () {
-        // If the service extension is in [_serviceExtensions], then we have been
-        // waiting for a listener to add the initial true event. Otherwise, the
-        // service extension is not available, so we should add a false event.
-        _serviceExtensionController[name]
-            .add(_serviceExtensions.contains(name));
-      },
-    );
-  }
-
-  StreamController<ServiceExtensionState> _getServiceExtensionStateController(
-      String name) {
-    return _getStreamController(
-      name,
-      _serviceExtensionStateController,
-      onFirstListenerSubscribed: () {
-        // If the service extension is enabled, add the current state as the first
-        // event. Otherwise, add a disabled state as the first event.
-        if (_enabledServiceExtensions.containsKey(name)) {
-          assert(_enabledServiceExtensions[name].enabled);
-          _serviceExtensionStateController[name]
-              .add(_enabledServiceExtensions[name]);
-        } else {
-          _serviceExtensionStateController[name]
-              .add(ServiceExtensionState(false, null));
-        }
-      },
-    );
-  }
-}
-
-/// Given a map of Strings to StreamControllers [streamControllers], get the
-/// stream controller for the given name. If it does not exist, initialize a
-/// generic stream controller and map it to the name.
-StreamController<T> _getStreamController<T>(
-    String name, Map<String, StreamController<T>> streamControllers,
-    {@required void onFirstListenerSubscribed()}) {
-  streamControllers.putIfAbsent(
-    name,
-    () => StreamController<T>.broadcast(onListen: onFirstListenerSubscribed),
-  );
-  return streamControllers[name];
 }
 
 Future<void> ensureInspectorDependencies() async {

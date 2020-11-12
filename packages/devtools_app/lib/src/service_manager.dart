@@ -12,15 +12,15 @@ import 'package:vm_service/vm_service.dart' hide Error;
 
 import 'analytics/analytics_stub.dart'
     if (dart.library.html) 'analytics/analytics.dart' as ga;
+import 'auto_dispose.dart';
 import 'config_specific/logger/logger.dart';
 import 'connected_app.dart';
 import 'core/message_bus.dart';
-import 'eval_on_dart_library.dart';
 import 'globals.dart';
 import 'logging/vm_service_logger.dart';
 import 'service_extensions.dart' as extensions;
+import 'service_extensions.dart';
 import 'service_registrations.dart' as registrations;
-import 'stream_value_listenable.dart';
 import 'utils.dart';
 import 'version.dart';
 import 'vm_service_wrapper.dart';
@@ -153,26 +153,28 @@ class ServiceConnectionManager {
     VmServiceWrapper service, {
     @required Future<void> onClosed,
   }) async {
+    this.service = service;
+    connectedApp = ConnectedApp();
+    // It is critical we call vmServiceOpened on each manager class before
+    // performing any async operations. Otherwise, we may get end up with
+    // race conditions where managers cannot listen for events soon enough.
+    isolateManager.vmServiceOpened(service);
+    vmFlagManager.vmServiceOpened(service);
+    serviceExtensionManager.vmServiceOpened(service, connectedApp);
+    if (debugLogServiceProtocolEvents) {
+      serviceTrafficLogger = VmServiceTrafficLogger(service);
+    }
+
     final serviceStreamName = await service.serviceStreamName;
 
-    final vm = await service.getVM();
-    this.vm = vm;
+    vm = await service.getVM();
 
     sdkVersion = vm.version;
     if (sdkVersion.contains(' ')) {
       sdkVersion = sdkVersion.substring(0, sdkVersion.indexOf(' '));
     }
 
-    this.service = service;
-
-    if (debugLogServiceProtocolEvents) {
-      serviceTrafficLogger = VmServiceTrafficLogger(service);
-    }
-
     _serviceAvailable.complete(service);
-
-    connectedApp = ConnectedApp();
-    serviceExtensionManager.connectedApp = connectedApp;
 
     setDeviceBusy(false);
 
@@ -204,18 +206,9 @@ class ServiceConnectionManager {
 
     service.onEvent(serviceStreamName).listen(handleServiceEvent);
 
-    _isolateManager._service = service;
-    _serviceExtensionManager._service = service;
-    _vmFlagManager.service = service;
-
     _stateController.add(true);
 
     await _isolateManager._initIsolates(vm.isolates);
-    service.onDebugEvent.listen(_isolateManager._handleDebugEvent);
-    service.onIsolateEvent.listen(_isolateManager._handleIsolateEvent);
-    service.onExtensionEvent
-        .listen(_serviceExtensionManager._handleExtensionEvent);
-    service.onVMEvent.listen(_vmFlagManager.handleVmEvent);
 
     final streamIds = [
       EventStreams.kDebug,
@@ -263,8 +256,8 @@ class ServiceConnectionManager {
     vm = null;
     sdkVersion = null;
     connectedApp = null;
-    serviceExtensionManager.connectedApp = null;
-    serviceExtensionManager.resetAvailableExtensions();
+    vmFlagManager.vmServiceClosed();
+    serviceExtensionManager.vmServiceClosed();
 
     serviceTrafficLogger?.dispose();
 
@@ -393,7 +386,7 @@ class ServiceConnectionManager {
   }
 }
 
-class IsolateManager {
+class IsolateManager extends Disposer {
   List<IsolateRef> _isolates = <IsolateRef>[];
   IsolateRef _selectedIsolate;
   VmServiceWrapper _service;
@@ -443,6 +436,12 @@ class IsolateManager {
     _isolates = isolates;
     _isolates.forEach(isolateIndex);
 
+    // It is critical that the _serviceExtensionManager is already listening
+    // for events indicating that new extension rpcs are registered before this
+    // call otherwise there is a race condition where service extensions are not
+    // described in the selectedIsolate or recieved as an event. It is ok if a
+    // service extension is included in both places as duplicate extensions are
+    // handled gracefully.
     await _initSelectedIsolate(isolates);
 
     if (_selectedIsolate != null) {
@@ -484,7 +483,7 @@ class IsolateManager {
           selectedIsolateAvailable = Completer();
         }
         _selectedIsolateController.add(_selectedIsolate);
-        _serviceExtensionManager.resetAvailableExtensions();
+        _serviceExtensionManager.vmServiceClosed();
       }
     }
   }
@@ -564,24 +563,38 @@ class IsolateManager {
   }
 
   void _handleVmServiceClosed() {
+    cancel();
     _lastIsolateIndex = 0;
     _setSelectedIsolate(null);
     _isolateIndexMap.clear();
     _isolates.clear();
   }
+
+  void vmServiceOpened(VmServiceWrapper service) {
+    cancel();
+    _service = service;
+    autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
+    autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
+  }
 }
 
-class ServiceExtensionManager {
+class ServiceExtensionManager extends Disposer {
   VmServiceWrapper _service;
   IsolateManager _isolateManager;
 
-  bool _firstFrameEventReceived = false;
+  // Id so it is easy to avoid long running requests that were started
+  // for a previous vm service connection.
+  int vmServiceId = 0;
 
-  final Map<String, StreamController<bool>> _serviceExtensionController = {};
-  final Map<String, StreamController<ServiceExtensionState>>
+  bool _checkForFirstFrameStarted = false;
+  bool get _firstFrameEventReceived => _firstFrameReceived.isCompleted;
+  Completer<void> _firstFrameReceived = Completer<void>();
+  Future<void> get firstFrameReceived => _firstFrameReceived.future;
+
+  final Map<String, ValueNotifier<bool>> _serviceExtensionAvailable = {};
+
+  final Map<String, ValueNotifier<ServiceExtensionState>>
       _serviceExtensionStateController = {};
-
-  final Map<String, ValueListenable<bool>> _serviceExtensionListenables = {};
 
   /// All available service extensions.
   final Set<String> _serviceExtensions = {};
@@ -596,9 +609,8 @@ class ServiceExtensionManager {
 
   final callbacksOnIsolateResume = <String, List<AsyncCallback>>{};
 
-  var extensionStatesUpdated = Completer<void>();
-
-  ConnectedApp connectedApp;
+  ConnectedApp get connectedApp => _connectedApp;
+  ConnectedApp _connectedApp;
 
   Future<void> _handleExtensionEvent(Event event) async {
     switch (event.extensionKind) {
@@ -666,7 +678,7 @@ class ServiceExtensionManager {
       // The first frame event was already received.
       return;
     }
-    _firstFrameEventReceived = true;
+    _firstFrameReceived.complete();
 
     final extensionsToProcess = _pendingServiceExtensions.toList();
     _pendingServiceExtensions.clear();
@@ -674,7 +686,6 @@ class ServiceExtensionManager {
       for (String extension in extensionsToProcess)
         _addServiceExtension(extension)
     ]);
-    extensionStatesUpdated.complete();
   }
 
   Future<void> _addRegisteredExtensionRPCs(IsolateRef isolateRef) async {
@@ -687,46 +698,6 @@ class ServiceExtensionManager {
         for (String extension in isolate.extensionRPCs) {
           await _maybeAddServiceExtension(extension);
         }
-
-        if (_pendingServiceExtensions.isEmpty) {
-          extensionStatesUpdated.complete();
-        }
-
-        if (!_firstFrameEventReceived) {
-          bool didSendFirstFrameEvent = false;
-          if (isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
-            // We listen for the result here in a Future, instead of awaiting
-            // the call, so that we don't block the connection initialization.
-            // If the app is paused, this call won't return until the app is
-            // resumed.
-            unawaited(_service
-                .callServiceExtension(
-              extensions.didSendFirstFrameEvent,
-              isolateId: _isolateManager.selectedIsolate.id,
-            )
-                .then((value) async {
-              didSendFirstFrameEvent = value?.json['enabled'] == 'true';
-
-              if (didSendFirstFrameEvent) {
-                await _onFrameEventReceived();
-              }
-            }));
-          } else {
-            final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
-              ['package:flutter/src/widgets/binding.dart'],
-              _service,
-            );
-            final InstanceRef value = await flutterLibrary.eval(
-              'WidgetsBinding?.instance?.debugDidSendFirstFrameEvent ?? false',
-              isAlive: null,
-            );
-
-            didSendFirstFrameEvent = value?.valueAsString == 'true';
-            if (didSendFirstFrameEvent) {
-              await _onFrameEventReceived();
-            }
-          }
-        }
       } else {
         for (String extension in isolate.extensionRPCs) {
           await _addServiceExtension(extension);
@@ -735,31 +706,55 @@ class ServiceExtensionManager {
     }
   }
 
+  Future<void> _maybeCheckForFirstFlutterFrame() async {
+    final lastVmServiceId = vmServiceId;
+    if (_checkForFirstFrameStarted || _firstFrameEventReceived) return;
+    if (!isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
+      return;
+    }
+    _checkForFirstFrameStarted = true;
+
+    final value = await _service.callServiceExtension(
+      extensions.didSendFirstFrameEvent,
+      isolateId: _isolateManager.selectedIsolate.id,
+    );
+    if (lastVmServiceId != vmServiceId) return;
+    final didSendFirstFrameEvent = value?.json['enabled'] == 'true';
+
+    if (didSendFirstFrameEvent) {
+      await _onFrameEventReceived();
+    }
+  }
+
   Future<void> _maybeAddServiceExtension(String name) async {
-    if (_firstFrameEventReceived) {
-      assert(_pendingServiceExtensions.isEmpty);
+    if (_firstFrameEventReceived || !isUnsafeBeforeFirstFlutterFrame(name)) {
       await _addServiceExtension(name);
     } else {
       _pendingServiceExtensions.add(name);
     }
   }
 
-  Future<void> _addServiceExtension(String name) {
-    final streamController = _getServiceExtensionController(name);
-
-    _serviceExtensions.add(name);
-    streamController.add(true);
+  Future<void> _addServiceExtension(String name) async {
+    if (!_serviceExtensions.add(name)) {
+      // If the service extension was already added we do not need to add it
+      // again. This can happen depending on the timing between when extension
+      // added events were received and when we requested the list of all
+      // service extensions already defined for the isolate.
+      return;
+    }
+    _hasServiceExtensionNotifier(name).value = true;
 
     if (_enabledServiceExtensions.containsKey(name)) {
       // Restore any previously enabled states by calling their service
       // extension. This will restore extension states on the device after a hot
       // restart. [_enabledServiceExtensions] will be empty on page refresh or
       // initial start.
-      return _callServiceExtension(name, _enabledServiceExtensions[name].value);
+      return await _callServiceExtension(
+          name, _enabledServiceExtensions[name].value);
     } else {
       // Set any extensions that are already enabled on the device. This will
       // enable extension states in DevTools on page refresh or initial start.
-      return _restoreExtensionFromDevice(name);
+      return await _restoreExtensionFromDevice(name);
     }
   }
 
@@ -896,15 +891,16 @@ class ServiceExtensionManager {
     }
   }
 
-  void resetAvailableExtensions() {
-    extensionStatesUpdated = Completer();
-    _firstFrameEventReceived = false;
+  void vmServiceClosed() {
+    _connectedApp = null;
+    _firstFrameReceived = Completer();
+    _checkForFirstFrameStarted = false;
     _pendingServiceExtensions.clear();
     _serviceExtensions.clear();
-    _serviceExtensionController
-        .forEach((String name, StreamController<bool> stream) {
-      stream.add(false);
-    });
+    for (var listenable in _serviceExtensionAvailable.values) {
+      listenable.value = false;
+    }
+    cancel();
   }
 
   /// Sets the state for a service extension and makes the call to the VMService.
@@ -918,9 +914,9 @@ class ServiceExtensionManager {
       await _callServiceExtension(name, value);
     }
 
-    final StreamController<ServiceExtensionState> streamController =
-        _getServiceExtensionStateController(name);
-    streamController.add(ServiceExtensionState(enabled, value));
+    // TODO(jacobr): we might want to be a little smarter about when the value
+    // hasn't really changed.
+    _serviceExtensionState(name).value = ServiceExtensionState(enabled, value);
 
     // Add or remove service extension from [enabledServiceExtensions].
     if (enabled) {
@@ -936,93 +932,43 @@ class ServiceExtensionManager {
   }
 
   ValueListenable<bool> hasServiceExtensionListener(String name) {
-    return _serviceExtensionListenables.putIfAbsent(
+    return _hasServiceExtensionNotifier(name);
+  }
+
+  ValueNotifier<bool> _hasServiceExtensionNotifier(String name) {
+    return _serviceExtensionAvailable.putIfAbsent(
       name,
-      () => StreamValueListenable<bool>(
-        (notifier) {
-          return hasServiceExtension(name, (value) {
-            notifier.value = value;
-          });
-        },
-        () => _hasServiceExtensionNow(name),
-      ),
+      () => ValueNotifier(_serviceExtensions.contains(name)),
     );
   }
 
-  bool _hasServiceExtensionNow(String name) {
-    return _serviceExtensions.contains(name);
+  ValueListenable<ServiceExtensionState> getServiceExtensionState(String name) {
+    return _serviceExtensionState(name);
   }
 
-  StreamSubscription<bool> hasServiceExtension(
-    String name,
-    void onData(bool value),
-  ) {
-    if (_hasServiceExtensionNow(name) && onData != null) {
-      onData(true);
-    }
-    final StreamController<bool> streamController =
-        _getServiceExtensionController(name);
-    return streamController.stream.listen(onData);
-  }
-
-  StreamSubscription<ServiceExtensionState> getServiceExtensionState(
-    String name,
-    void onData(ServiceExtensionState state),
-  ) {
-    if (_enabledServiceExtensions.containsKey(name) && onData != null) {
-      onData(_enabledServiceExtensions[name]);
-    }
-    final StreamController<ServiceExtensionState> streamController =
-        _getServiceExtensionStateController(name);
-    return streamController.stream.listen(onData);
-  }
-
-  StreamController<bool> _getServiceExtensionController(String name) {
-    return _getStreamController(
+  ValueNotifier<ServiceExtensionState> _serviceExtensionState(String name) {
+    return _serviceExtensionStateController.putIfAbsent(
       name,
-      _serviceExtensionController,
-      onFirstListenerSubscribed: () {
-        // If the service extension is in [_serviceExtensions], then we have been
-        // waiting for a listener to add the initial true event. Otherwise, the
-        // service extension is not available, so we should add a false event.
-        _serviceExtensionController[name]
-            .add(_serviceExtensions.contains(name));
+      () {
+        return ValueNotifier<ServiceExtensionState>(
+          _enabledServiceExtensions.containsKey(name)
+              ? _enabledServiceExtensions[name]
+              : ServiceExtensionState(false, null),
+        );
       },
     );
   }
 
-  StreamController<ServiceExtensionState> _getServiceExtensionStateController(
-      String name) {
-    return _getStreamController(
-      name,
-      _serviceExtensionStateController,
-      onFirstListenerSubscribed: () {
-        // If the service extension is enabled, add the current state as the first
-        // event. Otherwise, add a disabled state as the first event.
-        if (_enabledServiceExtensions.containsKey(name)) {
-          assert(_enabledServiceExtensions[name].enabled);
-          _serviceExtensionStateController[name]
-              .add(_enabledServiceExtensions[name]);
-        } else {
-          _serviceExtensionStateController[name]
-              .add(ServiceExtensionState(false, null));
-        }
-      },
-    );
+  void vmServiceOpened(VmServiceWrapper service, ConnectedApp connectedApp) {
+    _checkForFirstFrameStarted = false;
+    cancel();
+    _connectedApp = connectedApp;
+    _service = service;
+    autoDispose(service.onExtensionEvent.listen(_handleExtensionEvent));
+    addAutoDisposeListener(
+        hasServiceExtensionListener(extensions.didSendFirstFrameEvent),
+        _maybeCheckForFirstFlutterFrame);
   }
-}
-
-/// Given a map of Strings to StreamControllers [streamControllers], get the
-/// stream controller for the given name. If it does not exist, initialize a
-/// generic stream controller and map it to the name.
-StreamController<T> _getStreamController<T>(
-    String name, Map<String, StreamController<T>> streamControllers,
-    {@required void onFirstListenerSubscribed()}) {
-  streamControllers.putIfAbsent(
-    name,
-    () => StreamController<T>.broadcast(onListen: onFirstListenerSubscribed),
-  );
-  return streamControllers[name];
 }
 
 class ServiceExtensionState {
@@ -1037,15 +983,9 @@ class ServiceExtensionState {
   final dynamic value;
 }
 
-class VmFlagManager {
+class VmFlagManager extends Disposer {
   VmServiceWrapper get service => _service;
   VmServiceWrapper _service;
-
-  set service(VmServiceWrapper service) {
-    _service = service;
-    // Upon setting the vm service, get initial values for vm flags.
-    _initFlags();
-  }
 
   ValueListenable get flags => _flags;
   final _flags = ValueNotifier<FlagList>(null);
@@ -1082,6 +1022,19 @@ class VmFlagManager {
         _flags.value = await service.getFlagList();
       }
     }
+  }
+
+  void vmServiceOpened(VmServiceWrapper service) {
+    cancel();
+    _service = service;
+    // Upon setting the vm service, get initial values for vm flags.
+    _initFlags();
+
+    autoDispose(service.onVMEvent.listen(handleVmEvent));
+  }
+
+  void vmServiceClosed() {
+    _flags.value = null;
   }
 }
 
