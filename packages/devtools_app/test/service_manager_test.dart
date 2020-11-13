@@ -15,5 +15,4 @@ void main() async {
   );
 
   await runServiceManagerTests(env);
-  await runServiceManagerTestsWithDriverFactory();
 }

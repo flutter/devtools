@@ -118,9 +118,9 @@ class InspectorController extends DisposableController
     }
   }
 
-  ValueListenable<bool> get _supportsToggleSelectWidgetMode => serviceManager
-      .serviceExtensionManager
-      .hasServiceExtensionListener(extensions.toggleSelectWidgetMode.extension);
+  ValueListenable<bool> get _supportsToggleSelectWidgetMode =>
+      serviceManager.serviceExtensionManager
+          .hasServiceExtension(extensions.toggleSelectWidgetMode.extension);
 
   void _onClientChange(bool added) {
     _clientCount += added ? 1 : -1;

@@ -441,21 +441,21 @@ class FakeServiceExtensionManager extends Fake
     implements ServiceExtensionManager {
   bool _firstFrameEventReceived = false;
 
-  final Map<String, ValueNotifier<ServiceExtensionState>>
-      _serviceExtensionStateController = {};
+  final _serviceExtensionStateController =
+      <String, ValueNotifier<ServiceExtensionState>>{};
 
-  final Map<String, ValueNotifier<bool>> _serviceExtensionAvailable = {};
+  final _serviceExtensionAvailable = <String, ValueNotifier<bool>>{};
 
   /// All available service extensions.
   final _serviceExtensions = <String>{};
 
   /// All service extensions that are currently enabled.
-  final Map<String, ServiceExtensionState> _enabledServiceExtensions = {};
+  final _enabledServiceExtensions = <String, ServiceExtensionState>{};
 
   /// Temporarily stores service extensions that we need to add. We should not
   /// add extensions until the first frame event has been received
   /// [_firstFrameEventReceived].
-  final Set<String> _pendingServiceExtensions = {};
+  final _pendingServiceExtensions = <String>{};
 
   /// Hook to simulate receiving the first frame event.
   ///
@@ -467,11 +467,11 @@ class FakeServiceExtensionManager extends Fake
   Map<String, dynamic> extensionValueOnDevice = {};
 
   @override
-  ValueListenable<bool> hasServiceExtensionListener(String name) {
-    return _hasServiceExtensionNotifier(name);
+  ValueListenable<bool> hasServiceExtension(String name) {
+    return _hasServiceExtension(name);
   }
 
-  ValueNotifier<bool> _hasServiceExtensionNotifier(String name) {
+  ValueNotifier<bool> _hasServiceExtension(String name) {
     return _serviceExtensionAvailable.putIfAbsent(
       name,
       () => ValueNotifier(_hasServiceExtensionNow(name)),
@@ -547,7 +547,7 @@ class FakeServiceExtensionManager extends Fake
   }
 
   Future<void> _addServiceExtension(String name) {
-    _hasServiceExtensionNotifier(name).value = true;
+    _hasServiceExtension(name).value = true;
 
     _serviceExtensions.add(name);
 

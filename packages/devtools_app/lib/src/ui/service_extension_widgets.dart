@@ -80,7 +80,7 @@ class _ServiceExtensionButtonGroupState
       });
       // Track whether the extension is actually exposed by the VM.
       final listenable = serviceManager.serviceExtensionManager
-          .hasServiceExtensionListener(extensionName);
+          .hasServiceExtension(extensionName);
       extension.isAvailable = listenable.value;
       addAutoDisposeListener(
         listenable,

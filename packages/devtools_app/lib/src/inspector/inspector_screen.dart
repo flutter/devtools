@@ -116,7 +116,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
           children: [
             ValueListenableBuilder(
               valueListenable: serviceManager.serviceExtensionManager
-                  .hasServiceExtensionListener(
+                  .hasServiceExtension(
                       extensions.toggleSelectWidgetMode.extension),
               builder: (_, selectModeSupported, __) {
                 return ServiceExtensionButtonGroup(

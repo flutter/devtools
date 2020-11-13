@@ -7,19 +7,15 @@
 
 @TestOn('vm')
 import 'dart:async';
-import 'dart:io';
 
 import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/service_registrations.dart' as registrations;
-import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'support/constants.dart';
-import 'support/flutter_test_driver.dart';
 import 'support/flutter_test_environment.dart';
 
 // Error codes defined by
@@ -79,6 +75,8 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
         env.service,
       );
 
+      await _serviceExtensionAvailable(extensionName);
+
       await _verifyExtensionStateOnTestDevice(evalExpression, 'false', library);
       await _verifyInitialExtensionStateInServiceManager(extensionName);
 
@@ -100,6 +98,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
       await serviceManager.service.allFuturesCompleted;
 
       final extensionName = extensions.togglePlatformMode.extension;
+      await _serviceExtensionAvailable(extensionName);
       const evalExpression = 'defaultTargetPlatform.toString()';
       final library = EvalOnDartLibrary(
         [
@@ -142,6 +141,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
       await serviceManager.service.allFuturesCompleted;
 
       final extensionName = extensions.slowAnimations.extension;
+      await _serviceExtensionAvailable(extensionName);
       const evalExpression = 'timeDilation';
       final library = EvalOnDartLibrary(
         [
@@ -288,71 +288,54 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
       await env.tearDownEnvironment();
     });
   }, timeout: const Timeout.factor(4));
-}
 
-Future<void> runServiceManagerTestsWithDriverFactory(
-    {FlutterDriverFactory flutterDriverFactory =
-        defaultFlutterRunDriver}) async {
   group('ServiceConnectionManager - restoring device-enabled extension', () {
-    FlutterRunTestDriver _flutter;
-    String _flutterIsolateId;
-    VmServiceWrapper service;
+    test('all extension types', () async {
+      await env.setupEnvironment();
 
-    setUp(() async {
-      _flutter = flutterDriverFactory(
-          Directory('$devtoolsTestingPackageRoot/fixtures/flutter_app'));
-      await _flutter.run(
-          runConfig: const FlutterRunConfiguration(withDebugger: true));
-      _flutterIsolateId = await _flutter.getFlutterIsolateId();
+      final service = serviceManager.service;
+      final _flutterIsolateId =
+          serviceManager.isolateManager.mainIsolate.value.id;
+      expect(_flutterIsolateId, isNotNull);
 
-      service = _flutter.vmService;
-      setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-    });
+      /// Helper method to call an extension on the test device and verify that
+      /// the device reflects the new extension state.
+      Future<void> _enableExtensionOnTestDevice(
+        extensions.ServiceExtensionDescription extensionDescription,
+        Map<String, dynamic> args,
+        String evalExpression,
+        EvalOnDartLibrary library, {
+        String newValue,
+        String oldValue,
+      }) async {
+        if (extensionDescription
+            is extensions.ToggleableServiceExtensionDescription) {
+          newValue ??= extensionDescription.enabledValue.toString();
+          oldValue ??= extensionDescription.disabledValue.toString();
+        }
 
-    tearDown(() async {
-      await service.allFuturesCompleted;
-      await _flutter.stop();
-    });
+        // Verify initial extension state on test device.
+        await _verifyExtensionStateOnTestDevice(
+          evalExpression,
+          oldValue,
+          library,
+        );
 
-    /// Helper method to call an extension on the test device and verify that
-    /// the device reflects the new extension state.
-    Future<void> _enableExtensionOnTestDevice(
-      extensions.ServiceExtensionDescription extensionDescription,
-      Map<String, dynamic> args,
-      String evalExpression,
-      EvalOnDartLibrary library, {
-      String newValue,
-      String oldValue,
-    }) async {
-      if (extensionDescription
-          is extensions.ToggleableServiceExtensionDescription) {
-        newValue ??= extensionDescription.enabledValue.toString();
-        oldValue ??= extensionDescription.disabledValue.toString();
+        // Enable service extension on test device.
+        await service.callServiceExtension(
+          extensionDescription.extension,
+          isolateId: _flutterIsolateId,
+          args: args,
+        );
+
+        // Verify extension state after calling the service extension.
+        await _verifyExtensionStateOnTestDevice(
+          evalExpression,
+          newValue,
+          library,
+        );
       }
 
-      // Verify initial extension state on test device.
-      await _verifyExtensionStateOnTestDevice(
-        evalExpression,
-        oldValue,
-        library,
-      );
-
-      // Enable service extension on test device.
-      await _flutter.vmService.callServiceExtension(
-        extensionDescription.extension,
-        isolateId: _flutterIsolateId,
-        args: args,
-      );
-
-      // Verify extension state after calling the service extension.
-      await _verifyExtensionStateOnTestDevice(
-        evalExpression,
-        newValue,
-        library,
-      );
-    }
-
-    test('all extension types', () async {
       // Enable a boolean extension on the test device.
       final boolExtensionDescription = extensions.debugPaint;
       final boolArgs = {'enabled': true};
@@ -417,12 +400,6 @@ Future<void> runServiceManagerTestsWithDriverFactory(
         numericLibrary,
       );
 
-      // Open the VmService and verify that the enabled extension states are
-      // reflected in [ServiceExtensionManager].
-      await serviceManager.vmServiceOpened(
-        service,
-        onClosed: Completer().future,
-      );
       await _verifyExtensionStateInServiceManager(
         boolExtensionDescription.extension,
         true,
@@ -438,8 +415,26 @@ Future<void> runServiceManagerTestsWithDriverFactory(
         true,
         numericExtensionDescription.enabledValue,
       );
+      await env.tearDownEnvironment();
     });
-  }, timeout: const Timeout.factor(8));
+  }, timeout: const Timeout.factor(4));
+}
+
+// Returns a future that completes when the service extension is available.
+Future<void> _serviceExtensionAvailable(String extensionName) async {
+  final listenable =
+      serviceManager.serviceExtensionManager.hasServiceExtension(extensionName);
+
+  final completer = Completer<void>();
+  final listener = () {
+    if (listenable.value == true && !completer.isCompleted) {
+      completer.complete();
+    }
+  };
+  listener();
+  listenable.addListener(listener);
+  await completer.future;
+  listenable.removeListener(listener);
 }
 
 Future<void> _verifyExtensionStateOnTestDevice(String evalExpression,
