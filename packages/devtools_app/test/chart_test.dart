@@ -14,27 +14,19 @@ import 'support/wrappers.dart';
 void main() {
   const windowSize = Size(2225.0, 1000.0);
 
-  /// Hours from Zulu (UTC).
-  const pstHourOffsetFromZ = -8;
-
+  /// All data collected in PDT so convert to UTC.
   final nowDT = DateTime.now();
-  final isUSLocalePST = Platform.localeName == 'en_US' &&
-      nowDT.timeZoneOffset.inHours == pstHourOffsetFromZ &&
-      nowDT.timeZoneName == 'PST';
+  final hoursToUTC = -nowDT.timeZoneOffset.inHours;
 
-  /// Normalize timestamp to PST for test comparision
+  /// Normalize timestamp to UTC for test comparision
   /// of formatted DateTime strings.
-  int convertTimestampToPST(int timestamp) {
-    if (isUSLocalePST) return timestamp;
+  int convertTimestampToUTC(int timestamp) {
+    final dt = DateTime.fromMillisecondsSinceEpoch(
+      timestamp,
+      isUtc: true,
+    ).add(Duration(hours: hoursToUTC));
 
-    final currZOffset = nowDT.timeZoneOffset.inHours;
-    expect(currZOffset, isNot(equals(pstHourOffsetFromZ)));
-    final timeShiftToPST = -(currZOffset - pstHourOffsetFromZ);
-
-    final hoursToAdjust = Duration(hours: timeShiftToPST);
-    return DateTime.fromMillisecondsSinceEpoch(timestamp)
-        .add(hoursToAdjust)
-        .millisecondsSinceEpoch;
+    return dt.millisecondsSinceEpoch;
   }
 
   group(
@@ -313,30 +305,30 @@ void main() {
           expect(controller.centerLabelTimestamp, equals(1595682534381));
           expect(controller.rightLabelTimestamp, equals(1595682556248));
 
-          // Validate to a known country and language convert to PST timezone.
+          // Validate using UTC timezone.
           expect(
             prettyTimestamp(
-              convertTimestampToPST(
+              convertTimestampToUTC(
                 controller.leftLabelTimestamp,
               ),
             ),
-            equals('06:08:34'),
+            equals('14:08:34'),
           );
           expect(
             prettyTimestamp(
-              convertTimestampToPST(
+              convertTimestampToUTC(
                 controller.centerLabelTimestamp,
               ),
             ),
-            equals('06:08:54'),
+            equals('14:08:54'),
           );
           expect(
             prettyTimestamp(
-              convertTimestampToPST(
+              convertTimestampToUTC(
                 controller.rightLabelTimestamp,
               ),
             ),
-            equals('06:09:16'),
+            equals('14:09:16'),
           );
         },
       );
@@ -385,30 +377,30 @@ void main() {
         expect(controller.centerLabelTimestamp, equals(1595682556248));
         expect(controller.rightLabelTimestamp, equals(1595682556248));
 
-        // Validate to a known country and language convert to PST timezone.
+        // Validate to UTC timezone.
         expect(
           prettyTimestamp(
-            convertTimestampToPST(
+            convertTimestampToUTC(
               controller.leftLabelTimestamp,
             ),
           ),
-          equals('06:08:45'),
+          equals('14:08:45'),
         );
         expect(
           prettyTimestamp(
-            convertTimestampToPST(
+            convertTimestampToUTC(
               controller.centerLabelTimestamp,
             ),
           ),
-          equals('06:09:16'),
+          equals('14:09:16'),
         );
         expect(
           prettyTimestamp(
-            convertTimestampToPST(
+            convertTimestampToUTC(
               controller.rightLabelTimestamp,
             ),
           ),
-          equals('06:09:16'),
+          equals('14:09:16'),
         );
       });
 
@@ -454,14 +446,14 @@ void main() {
         expect(controller.rightLabelTimestamp, isNotNull);
         expect(controller.rightLabelTimestamp, equals(1595682492441));
 
-        // Validate to a known country and language convert to PST timezone.
+        // Validate to UTC timezone.
         expect(
           prettyTimestamp(
-            convertTimestampToPST(
+            convertTimestampToUTC(
               controller.rightLabelTimestamp,
             ),
           ),
-          equals('06:08:12'),
+          equals('14:08:12'),
         );
       });
 
@@ -742,30 +734,30 @@ void main() {
           expect(controller.centerLabelTimestamp, equals(1595682534381));
           expect(controller.rightLabelTimestamp, equals(1595682556248));
 
-          // Validate to a known country and language convert to PST timezone.
+          // Validate to UTC timezone.
           expect(
             prettyTimestamp(
-              convertTimestampToPST(
+              convertTimestampToUTC(
                 controller.leftLabelTimestamp,
               ),
             ),
-            equals('06:08:34'),
+            equals('14:08:34'),
           );
           expect(
             prettyTimestamp(
-              convertTimestampToPST(
+              convertTimestampToUTC(
                 controller.centerLabelTimestamp,
               ),
             ),
-            equals('06:08:54'),
+            equals('14:08:54'),
           );
           expect(
             prettyTimestamp(
-              convertTimestampToPST(
+              convertTimestampToUTC(
                 controller.rightLabelTimestamp,
               ),
             ),
-            equals('06:09:16'),
+            equals('14:09:16'),
           );
         },
       );
@@ -827,30 +819,30 @@ void main() {
         expect(controller.centerLabelTimestamp, equals(1595682556248));
         expect(controller.rightLabelTimestamp, equals(1595682556248));
 
-        // Validate to a known country and language convert to PST timezone.
+        // Validate to UTC timezone.
         expect(
           prettyTimestamp(
-            convertTimestampToPST(
+            convertTimestampToUTC(
               controller.leftLabelTimestamp,
             ),
           ),
-          equals('06:08:45'),
+          equals('14:08:45'),
         );
         expect(
           prettyTimestamp(
-            convertTimestampToPST(
+            convertTimestampToUTC(
               controller.centerLabelTimestamp,
             ),
           ),
-          equals('06:09:16'),
+          equals('14:09:16'),
         );
         expect(
           prettyTimestamp(
-            convertTimestampToPST(
+            convertTimestampToUTC(
               controller.rightLabelTimestamp,
             ),
           ),
-          equals('06:09:16'),
+          equals('14:09:16'),
         );
       });
 
@@ -909,14 +901,14 @@ void main() {
         expect(controller.rightLabelTimestamp, isNotNull);
         expect(controller.rightLabelTimestamp, equals(1595682492441));
 
-        // Validate to a known country and language convert to PST timezone.
+        // Validate to UTC timezone.
         expect(
           prettyTimestamp(
-            convertTimestampToPST(
+            convertTimestampToUTC(
               controller.rightLabelTimestamp,
             ),
           ),
-          equals('06:08:12'),
+          equals('14:08:12'),
         );
       });
     },
