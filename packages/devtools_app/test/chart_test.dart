@@ -23,6 +23,9 @@ void main() {
       nowDT.timeZoneName == 'PST';
 
   int convertTimestampToPST(int timestamp) {
+    expect(nowDT.timeZoneName, equals('PST'));
+    expect(nowDT.timeZoneOffset.inHours, equals(-8));
+    
     if (isUSLocalePST) return timestamp;
 
     final currZOffset = nowDT.timeZoneOffset.inHours;
