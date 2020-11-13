@@ -13,16 +13,25 @@ import '../auto_dispose_mixin.dart';
 import 'chart_controller.dart';
 import 'chart_trace.dart';
 
-/// Helper function to:
+typedef DrawCodeCallback = void Function(Canvas canvas);
+
+/// Perform some draw operations on a canvas after applying translate.
+///
+/// This helper function performs basic booking for translate tasks:
 ///   1. save canvas state
 ///   2. translate coordinates
 ///   3. draw to the canvas with respect to translation coordinates
 ///   4. restore canvas state back to the saved state.
-void translate(Canvas canvas, double x, double y, VoidCallback drawCode) {
+void drawTranslate(
+  Canvas canvas,
+  double x,
+  double y,
+  DrawCodeCallback drawCode,
+) {
   canvas.save();
   canvas.translate(x, y);
 
-  drawCode();
+  drawCode(canvas);
 
   canvas.restore();
 }
@@ -35,18 +44,22 @@ class Chart extends StatefulWidget {
   final ChartController controller;
 
   @override
-  ChartState createState() => ChartState(controller);
+  ChartState createState() => ChartState();
 }
 
 class ChartState extends State<Chart> with AutoDisposeMixin {
-  ChartState(this.controller);
+  ChartState();
 
-  final ChartController controller;
+  ChartController get controller => widget.controller;
 
   /// Helper to hookup notifiers.
   void _initSetup() {
     addAutoDisposeListener(controller.traceChanged, () {
       setState(() {
+        if (controller.isZoomAll) {
+          controller.computeZoomRatio();
+        }
+
         controller.computeChartArea();
       });
     });
@@ -66,12 +79,6 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
     if (oldWidget.controller != controller) {
       _initSetup();
     }
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -119,11 +126,11 @@ class ChartPainter extends CustomPainter {
     chartController.size = size;
     chartController.computeChartArea();
 
-    translate(
+    drawTranslate(
       canvas,
       chartController.xCanvasChart,
       chartController.yCanvasChart,
-      () {
+      (canavas) {
         drawAxes(canvas, size, axis);
       },
     );
@@ -213,11 +220,11 @@ class ChartPainter extends CustomPainter {
               // Get ready to render on canvas. Remember old canvas state
               // and setup translations for x,y coordinates into the rendering
               // area of the chart.
-              translate(
+              drawTranslate(
                 canvas,
                 xTranslation,
                 yTranslation,
-                () {
+                (canvas) {
                   final xCoord = xCanvasCoord;
                   final yCoord =
                       chartController.yPositonToYCanvasCoord(traceData.y);
@@ -303,11 +310,11 @@ class ChartPainter extends CustomPainter {
       }
 
       // Y translation is below X-axis line.
-      translate(
+      drawTranslate(
         canvas,
         xTranslation,
         chartController.zeroYPosition + 1,
-        () {
+        (canvas) {
           // Draw right-most tick label (first major tick).
           drawXTick(
             canvas,
@@ -323,11 +330,11 @@ class ChartPainter extends CustomPainter {
     }
 
     // Y translation is below X-axis line.
-    translate(
+    drawTranslate(
       canvas,
       xTranslation,
       chartController.zeroYPosition + 1,
-      () {
+      (canvas) {
         // Draw the major labels.
         for (var labelIndex = 0;
             labelIndex < chartController.getLabelsCount();
@@ -343,17 +350,17 @@ class ChartPainter extends CustomPainter {
     );
 
     // X translation is left-most edge of chart widget.
-    translate(
+    drawTranslate(
       canvas,
       chartController.xCanvasChart,
       yTranslation,
-      () {
+      (canvas) {
         // Rescale Y-axis to max visible Y range.
         chartController.resetYMaxValue(visibleYMax);
 
         // Draw Y-axis ticks and labels.
         // TODO(terry): Optimization add a listener for Y-axis range changing
-        //              only need to redraw Y-axis is range changed.
+        //              only need to redraw Y-axis if the range changed.
         if (chartController.displayYLabels) {
           drawYTicks(canvas, chartController, axis);
         }

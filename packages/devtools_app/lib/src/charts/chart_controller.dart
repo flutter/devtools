@@ -256,23 +256,29 @@ class ChartController extends DisposableController
   String title;
 
   /// zoomDuration values of:
-  ///     null implies all (default)
-  ///     Duration() imples live
+  ///     null implies all
+  ///     Duration() imples live (default)
   ///     Duration(minutes: 5) implies 5 minute interval
-  ///     Duration(minutes: 15) implies 15 minute interval
   Duration _zoomDuration = const Duration();
 
   Duration get zoomDuration => _zoomDuration;
 
   static const oneMinuteInMs = 1000 * 60;
 
+  bool get isZoomAll => _zoomDuration == null;
+
+  void computeZoomRatio() {
+    if (isZoomAll) {
+      _tickWidth = canvasChartWidth / timestamps.length;
+    }
+  }
+
   set zoomDuration(Duration duration) {
     if (duration == null) {
       // Display all items.
-      _tickWidth = canvasChartWidth / timestamps.length;
     } else if (duration.inMinutes == 0) {
       _tickWidth = 10.0; // Live
-    } else if (duration.inMinutes == 5 || duration.inMinutes == 15) {
+    } else if (duration.inMinutes > 0) {
       final firstDT = DateTime.fromMillisecondsSinceEpoch(timestamps.first);
       final lastDT = DateTime.fromMillisecondsSinceEpoch(timestamps.last);
       // Greater or equal to range we're zooming in on?
@@ -310,16 +316,17 @@ class ChartController extends DisposableController
           _tickWidth = canvasChartWidth / ticksVisible;
         }
       }
-
-      _zoomDuration = duration;
     }
+
+    _zoomDuration = duration;
+    computeZoomRatio();
 
     // All tick labels need to be recompted.
     recomputeLabels(refresh: true);
   }
 
   void computeChartArea() {
-    // Check if ready to start coputations?
+    // Check if ready to start computations?
     if (size == null) return;
 
     xCanvasChart = leftPadding;
@@ -340,8 +347,6 @@ class ChartController extends DisposableController
       yScale = AxisScale(0, yMaxValue, canvasChartHeight.toDouble() - 5);
     }
   }
-
-  double get zeroXPosition => xCanvasChart + canvasChartWidth;
 
   double get zeroYPosition => yCanvasChart + canvasChartHeight;
 

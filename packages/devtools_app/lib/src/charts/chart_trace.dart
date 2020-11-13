@@ -174,12 +174,18 @@ class AxisScale {
     return {'exponent': exponent, 'fraction': fraction};
   }
 
-  /// Produce a rounded or first number of the Y-axis scale and its
-  /// exponent.  Don't want too many labels or too little. The goal
-  /// is to show high water mark (over 7) flips to 10's unit and
-  /// it's exponent. In the end, used to compute the range of values
-  /// on the Y-axis for min, max and exponent (our unit of measurement
-  /// e.g., K, M, B, etc.).
+  /// Produce a whole number for the Y-axis scale and its unit using
+  /// the exponent. Goal is to compute the range of values for min, max
+  /// and exponent (our unit of measurement e.g., K, M, B, etc.). The axis
+  /// labels are displayed in 1s, 10s and 100s e.g., 10M, 50M, 100M or
+  /// 1B, 2B, 3B.
+  /// 
+  /// @param round if false, chunks the whole number to keep more available
+  /// space above the max Y value highpoint to handle future bigger data
+  /// values w/o having to rescale too quickly e.g., over 3e+3 displays:
+  ///    10K, 20K, 30K, 40K, 50K
+  /// This allows new data points >30K to be plotted w/o having to
+  /// re-layout new Y-axis scale.
   double _niceNum(double range, bool round) {
     if (range == 0) return 0;
 
@@ -199,15 +205,11 @@ class AxisScale {
         niceFraction = 2;
       else if (fraction <= 3)
         niceFraction = 3;
-      else if (fraction <= 4)
-        niceFraction = 4;
       else if (fraction <= 5)
         niceFraction = 5;
-      else if (fraction <= 6)
-        niceFraction = 6;
       else if (fraction <= 7)
         niceFraction = 7;
-      else
+      else if (fraction <= 10)
         niceFraction = 10;
     }
 

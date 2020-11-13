@@ -39,17 +39,18 @@ In all cases, the above 4 traces share the same X-Axis time scale.  However, the
 First, create a StatefulWidget to contain the chart e.g.,
 ```
 class MyChart extends StatefulWidget {
-  const MyChart({Key key}) : super(key: key);
+  MyChart({Key key}) : super(key: key);
+
+  final controller = ChartController();
 
   @override
-  State<StatefulWidget> createState() => MyChartState(ChartController());
+  State<StatefulWidget> createState() => MyChartState();
 }
 
 class MyChartState extends State<MyChart> {
   MyChartState(this.controller);
 
-  ChartController controller;
-
+  ChartController get controller => widget.controller;
 }
 ```
 Then, override the State's initState and build methods in MyChartState e.g.,
