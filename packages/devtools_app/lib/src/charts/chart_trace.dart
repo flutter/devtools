@@ -179,7 +179,7 @@ class AxisScale {
   /// and exponent (our unit of measurement e.g., K, M, B, etc.). The axis
   /// labels are displayed in 1s, 10s and 100s e.g., 10M, 50M, 100M or
   /// 1B, 2B, 3B.
-  /// 
+  ///
   /// @param round if false, chunks the whole number to keep more available
   /// space above the max Y value highpoint to handle future bigger data
   /// values w/o having to rescale too quickly e.g., over 3e+3 displays:
@@ -209,8 +209,7 @@ class AxisScale {
         niceFraction = 5;
       else if (fraction <= 7)
         niceFraction = 7;
-      else if (fraction <= 10)
-        niceFraction = 10;
+      else if (fraction <= 10) niceFraction = 10;
     }
 
     return niceFraction * pow(10, exponent);
