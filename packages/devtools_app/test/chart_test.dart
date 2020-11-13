@@ -14,7 +14,7 @@ import 'support/wrappers.dart';
 void main() {
   const windowSize = Size(2225.0, 1000.0);
 
-  const oneHourInMilliseconds = 3600000;
+  /// Hours from Zulu (UTC).
   const pstHourOffsetFromZ = -8;
 
   final nowDT = DateTime.now();
@@ -22,17 +22,19 @@ void main() {
       nowDT.timeZoneOffset.inHours == pstHourOffsetFromZ &&
       nowDT.timeZoneName == 'PST';
 
+  /// Normalize timestamp to PST for test comparision
+  /// of formatted DateTime strings.
   int convertTimestampToPST(int timestamp) {
-    expect(nowDT.timeZoneName, equals('PST'));
-    expect(nowDT.timeZoneOffset.inHours, equals(-8));
-
     if (isUSLocalePST) return timestamp;
 
     final currZOffset = nowDT.timeZoneOffset.inHours;
     expect(currZOffset, isNot(equals(pstHourOffsetFromZ)));
-    final timeShiftToPST = currZOffset - pstHourOffsetFromZ;
-    final adjustHrs = timeShiftToPST.abs() * oneHourInMilliseconds;
-    return timestamp += adjustHrs;
+    final timeShiftToPST = -(currZOffset - pstHourOffsetFromZ);
+
+    final hoursToAdjust = Duration(hours: timeShiftToPST);
+    return DateTime.fromMillisecondsSinceEpoch(timestamp)
+        .add(hoursToAdjust)
+        .millisecondsSinceEpoch;
   }
 
   group(
