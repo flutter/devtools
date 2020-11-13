@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:devtools_app/src/charts/chart_controller.dart';
 import 'package:devtools_app/src/charts/chart_trace.dart';
 import 'package:devtools_app/src/charts/chart.dart';
