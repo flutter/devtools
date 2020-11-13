@@ -36,7 +36,7 @@ void main() {
     }
 
     setUp(() async {
-      fakeServiceManager = FakeServiceManager(useFakeService: true);
+      fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
 

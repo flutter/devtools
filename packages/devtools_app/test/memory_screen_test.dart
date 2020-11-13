@@ -27,8 +27,7 @@ void main() {
     // Load canned data testHeapSampleData.
     final memoryJson = MemoryJson.decode(argJsonString: testHeapSampleData);
     fakeServiceManager = FakeServiceManager(
-      useFakeService: true,
-      memoryData: memoryJson,
+      service: FakeServiceManager.createFakeService(memoryData: memoryJson),
     );
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
@@ -64,7 +63,7 @@ void main() {
   group('MemoryScreen', () {
     setUp(() async {
       await ensureInspectorDependencies();
-      fakeServiceManager = FakeServiceManager(useFakeService: true);
+      fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
           .thenReturn(false);

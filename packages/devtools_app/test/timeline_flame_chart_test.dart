@@ -6,9 +6,9 @@ import 'dart:io';
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_flame_chart.dart';
 import 'package:devtools_app/src/timeline/timeline_screen.dart';
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_testing/support/timeline_test_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +24,9 @@ void main() {
   group('TimelineFlameChartContent', () {
     void _setupForTimeline(Map<String, dynamic> timelineJson) {
       fakeServiceManager = FakeServiceManager(
-        useFakeService: true,
-        timelineData: vm_service.Timeline.parse(timelineJson),
+        service: FakeServiceManager.createFakeService(
+          timelineData: vm_service.Timeline.parse(timelineJson),
+        ),
       );
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);

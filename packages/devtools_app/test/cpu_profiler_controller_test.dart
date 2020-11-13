@@ -16,7 +16,7 @@ void main() {
     FakeServiceManager fakeServiceManager;
 
     setUp(() {
-      fakeServiceManager = FakeServiceManager(useFakeService: true);
+      fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       controller = CpuProfilerController();
     });

@@ -44,7 +44,7 @@ void main() {
       when(mockLoggingController.filteredData).thenReturn([]);
       when(mockLoggingController.onLogsUpdated).thenReturn(Reporter());
 
-      fakeServiceManager = FakeServiceManager(useFakeService: true);
+      fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isFlutterWebAppNow)
           .thenReturn(false);
       when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);

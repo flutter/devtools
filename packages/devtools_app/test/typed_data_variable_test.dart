@@ -5,16 +5,15 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:devtools_app/src/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/debugger/debugger_model.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
-
-import 'package:devtools_app/src/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/debugger/debugger_model.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
 
 import 'support/mocks.dart';
 
@@ -23,19 +22,23 @@ void main() {
   DebuggerController debuggerController;
 
   setUp(() {
-    manager = FakeServiceManager();
-    when(manager.service.onDebugEvent).thenAnswer((_) {
+    final service = MockVmService();
+    when(service.onDebugEvent).thenAnswer((_) {
       return const Stream.empty();
     });
-    when(manager.service.onIsolateEvent).thenAnswer((_) {
+    when(service.onIsolateEvent).thenAnswer((_) {
       return const Stream.empty();
     });
-    when(manager.service.onStdoutEvent).thenAnswer((_) {
+    when(service.onStdoutEvent).thenAnswer((_) {
       return const Stream.empty();
     });
-    when(manager.service.onStderrEvent).thenAnswer((_) {
+    when(service.onStderrEvent).thenAnswer((_) {
       return const Stream.empty();
     });
+    when(service.onVMEvent).thenAnswer((_) {
+      return const Stream.empty();
+    });
+    manager = FakeServiceManager(service: service);
     setGlobal(ServiceConnectionManager, manager);
     debuggerController = DebuggerController(initialSwitchToIsolate: false)
       ..isolateRef = IsolateRef(

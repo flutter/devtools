@@ -28,25 +28,25 @@ import 'package:vm_service/vm_service.dart';
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({
-    bool useFakeService = false,
+    VmServiceWrapper service,
     this.hasConnection = true,
     this.availableServices = const [],
     this.availableLibraries = const [],
+  }) : service = service ?? createFakeService() {
+    _flagManager.vmServiceOpened(this.service);
+  }
+
+  static FakeVmService createFakeService({
     Timeline timelineData,
     SocketProfile socketProfile,
     MemoryJson memoryData,
-  }) : service = useFakeService
-            ? FakeVmService(
-                _flagManager,
-                timelineData,
-                socketProfile,
-                memoryData,
-              )
-            : MockVmService() {
-    _flagManager.vmServiceOpened(service);
-  }
-
-  static final _flagManager = VmFlagManager();
+  }) =>
+      FakeVmService(
+        _flagManager,
+        timelineData,
+        socketProfile,
+        memoryData,
+      );
 
   final List<String> availableServices;
 
@@ -55,7 +55,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final MockVM _mockVM = MockVM();
 
   @override
-  final VmServiceWrapper service;
+  VmServiceWrapper service;
 
   @override
   Future<VmService> onServiceAvailable = Future.value();
@@ -84,8 +84,11 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   @override
   VM get vm => _mockVM;
 
+  // TODO(jacobr): the fact that this has to be a static final is ugly.
+  static final VmFlagManager _flagManager = VmFlagManager();
+
   @override
-  final VmFlagManager vmFlagManager = _flagManager;
+  VmFlagManager get vmFlagManager => _flagManager;
 
   @override
   final FakeServiceExtensionManager serviceExtensionManager =
@@ -368,6 +371,9 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Stream<Event> get onGCEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onVMEvent => const Stream.empty();
 
   @override
   Stream<Event> get onLoggingEvent => const Stream.empty();
