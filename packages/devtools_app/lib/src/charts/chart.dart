@@ -504,10 +504,7 @@ class ChartPainter extends CustomPainter {
     );
 
     if (displayTime) {
-      final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-      final formattedTime = intl.DateFormat.Hms().format(date); // HH:mm:ss
-
-      final tp = createText(formattedTime, 1);
+      final tp = createText(prettyTimestamp(timestamp), 1);
       tp.paint(
         canvas,
         Offset(

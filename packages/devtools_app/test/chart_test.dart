@@ -12,21 +12,6 @@ import 'support/wrappers.dart';
 void main() {
   const windowSize = Size(2225.0, 1000.0);
 
-  /// All data collected in PDT so convert to UTC.
-  final nowDT = DateTime.now();
-  final hoursToUTC = -nowDT.timeZoneOffset.inHours;
-
-  /// Normalize timestamp to UTC for test comparision
-  /// of formatted DateTime strings.
-  int convertTimestampToUTC(int timestamp) {
-    final dt = DateTime.fromMillisecondsSinceEpoch(
-      timestamp,
-      isUtc: true,
-    ).add(Duration(hours: hoursToUTC));
-
-    return dt.millisecondsSinceEpoch;
-  }
-
   group(
     'Chart Timeseries',
     () {
@@ -305,28 +290,16 @@ void main() {
 
           // Validate using UTC timezone.
           expect(
-            prettyTimestamp(
-              convertTimestampToUTC(
-                controller.leftLabelTimestamp,
-              ),
-            ),
-            equals('14:08:34'),
+            prettyTimestamp(controller.leftLabelTimestamp, isUtc: true),
+            equals('13:08:34'),
           );
           expect(
-            prettyTimestamp(
-              convertTimestampToUTC(
-                controller.centerLabelTimestamp,
-              ),
-            ),
-            equals('14:08:54'),
+            prettyTimestamp(controller.centerLabelTimestamp, isUtc: true),
+            equals('13:08:54'),
           );
           expect(
-            prettyTimestamp(
-              convertTimestampToUTC(
-                controller.rightLabelTimestamp,
-              ),
-            ),
-            equals('14:09:16'),
+            prettyTimestamp(controller.rightLabelTimestamp, isUtc: true),
+            equals('13:09:16'),
           );
         },
       );
@@ -377,28 +350,16 @@ void main() {
 
         // Validate to UTC timezone.
         expect(
-          prettyTimestamp(
-            convertTimestampToUTC(
-              controller.leftLabelTimestamp,
-            ),
-          ),
-          equals('14:08:45'),
+          prettyTimestamp(controller.leftLabelTimestamp, isUtc: true),
+          equals('13:08:45'),
         );
         expect(
-          prettyTimestamp(
-            convertTimestampToUTC(
-              controller.centerLabelTimestamp,
-            ),
-          ),
-          equals('14:09:16'),
+          prettyTimestamp(controller.centerLabelTimestamp, isUtc: true),
+          equals('13:09:16'),
         );
         expect(
-          prettyTimestamp(
-            convertTimestampToUTC(
-              controller.rightLabelTimestamp,
-            ),
-          ),
-          equals('14:09:16'),
+          prettyTimestamp(controller.rightLabelTimestamp, isUtc: true),
+          equals('13:09:16'),
         );
       });
 
@@ -446,12 +407,8 @@ void main() {
 
         // Validate to UTC timezone.
         expect(
-          prettyTimestamp(
-            convertTimestampToUTC(
-              controller.rightLabelTimestamp,
-            ),
-          ),
-          equals('14:08:12'),
+          prettyTimestamp(controller.rightLabelTimestamp, isUtc: true),
+          equals('13:08:12'),
         );
       });
 
@@ -734,28 +691,16 @@ void main() {
 
           // Validate to UTC timezone.
           expect(
-            prettyTimestamp(
-              convertTimestampToUTC(
-                controller.leftLabelTimestamp,
-              ),
-            ),
-            equals('14:08:34'),
+            prettyTimestamp(controller.leftLabelTimestamp, isUtc: true),
+            equals('13:08:34'),
           );
           expect(
-            prettyTimestamp(
-              convertTimestampToUTC(
-                controller.centerLabelTimestamp,
-              ),
-            ),
-            equals('14:08:54'),
+            prettyTimestamp(controller.centerLabelTimestamp, isUtc: true),
+            equals('13:08:54'),
           );
           expect(
-            prettyTimestamp(
-              convertTimestampToUTC(
-                controller.rightLabelTimestamp,
-              ),
-            ),
-            equals('14:09:16'),
+            prettyTimestamp(controller.rightLabelTimestamp, isUtc: true),
+            equals('13:09:16'),
           );
         },
       );
@@ -819,28 +764,16 @@ void main() {
 
         // Validate to UTC timezone.
         expect(
-          prettyTimestamp(
-            convertTimestampToUTC(
-              controller.leftLabelTimestamp,
-            ),
-          ),
-          equals('14:08:45'),
+          prettyTimestamp(controller.leftLabelTimestamp, isUtc: true),
+          equals('13:08:45'),
         );
         expect(
-          prettyTimestamp(
-            convertTimestampToUTC(
-              controller.centerLabelTimestamp,
-            ),
-          ),
-          equals('14:09:16'),
+          prettyTimestamp(controller.centerLabelTimestamp, isUtc: true),
+          equals('13:09:16'),
         );
         expect(
-          prettyTimestamp(
-            convertTimestampToUTC(
-              controller.rightLabelTimestamp,
-            ),
-          ),
-          equals('14:09:16'),
+          prettyTimestamp(controller.rightLabelTimestamp, isUtc: true),
+          equals('13:09:16'),
         );
       });
 
@@ -901,12 +834,8 @@ void main() {
 
         // Validate to UTC timezone.
         expect(
-          prettyTimestamp(
-            convertTimestampToUTC(
-              controller.rightLabelTimestamp,
-            ),
-          ),
-          equals('14:08:12'),
+          prettyTimestamp(controller.rightLabelTimestamp, isUtc: true),
+          equals('13:08:12'),
         );
       });
     },
