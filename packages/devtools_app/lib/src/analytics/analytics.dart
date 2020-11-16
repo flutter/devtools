@@ -18,6 +18,7 @@ import '../../devtools.dart' as devtools show version;
 import '../app.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
+import '../config_specific/url/url.dart';
 import '../globals.dart';
 import '../ui/gtags.dart';
 import '../version.dart';
@@ -434,12 +435,8 @@ void computeDevToolsCustomGTagsData() {
 void computeDevToolsQueryParams() {
   ideLaunched = ideLaunchedCLI; // Default is Command Line launch.
 
-  // TODO(https://github.com/flutter/devtools/issues/2475): fix url structure
-  // Remove the fragment for the purpose of reading the query parameters.
-  final modifiedUri =
-      window.location.toString().replaceFirst(RegExp(r'#\/(\w+)[?]'), '?');
-  final uri = Uri.parse(modifiedUri);
-  final ideValue = uri.queryParameters[ideLaunchedQuery];
+  final queryParameters = loadQueryParams();
+  final ideValue = queryParameters[ideLaunchedQuery];
   if (ideValue != null) {
     ideLaunched = ideValue;
   }

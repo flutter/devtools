@@ -8,11 +8,12 @@ import 'package:flutter/widgets.dart';
 
 import '../../utils.dart';
 import '../logger/logger.dart';
+import '../url/url.dart';
 import 'ide_theme.dart';
 
 /// Load any IDE-supplied theming.
 IdeTheme getIdeTheme() {
-  final queryParams = _loadQueryParams();
+  final queryParams = loadQueryParams();
 
   final overrides = IdeTheme(
     backgroundColor: _tryParseColor(queryParams['backgroundColor']),
@@ -33,21 +34,6 @@ IdeTheme getIdeTheme() {
 Color backgroundColor;
 Color foregroundColor;
 double fontSize;
-
-Map<String, String> _loadQueryParams() {
-  // The querystring could be in one of two places:
-  // http://localhost:123/?backgroundColor=00000
-  // http://localhost:123/#/?backgroundColor=00000
-  final queryString = window.location.hash.startsWith('#/?')
-      ? window.location.hash.substring(2)
-      : window.location.search;
-
-  final queryParams = queryString.startsWith('?')
-      ? Uri().replace(query: queryString.substring(1)).queryParameters
-      : <String, String>{};
-
-  return queryParams;
-}
 
 Color _tryParseColor(String input) {
   try {
