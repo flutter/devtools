@@ -8,6 +8,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:usage/usage_io.dart';
 
+import 'file_system.dart';
+
 /// Access the file '~/.flutter'.
 class FlutterUsage {
   /// Create a new Usage instance; [versionOverride] and [configDirOverride] are
@@ -24,7 +26,7 @@ class FlutterUsage {
 
   /// Does the .flutter store exist?
   static bool get doesStoreExist {
-    final flutterStore = File('${DevToolsUsage.userHomeDir()}/.flutter');
+    final flutterStore = File('${LocalFileSystem.userHomeDir()}/.flutter');
     return flutterStore.existsSync();
   }
 
@@ -48,7 +50,7 @@ class DevToolsUsage {
   }) {
     properties = IOPersistentProperties(
       settingsName,
-      documentDirPath: userHomeDir(),
+      documentDirPath: LocalFileSystem.userHomeDir(),
     );
   }
 
@@ -63,13 +65,6 @@ class DevToolsUsage {
   /// calling any survey method on DevToolsUsage (addSurvey, rewriteActiveSurvey,
   /// surveyShownCount, incrementSurveyShownCount, or surveyActionTaken).
   String _activeSurvey;
-
-  static String userHomeDir() {
-    final String envKey =
-        Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-    final String value = Platform.environment[envKey];
-    return value == null ? '.' : value;
-  }
 
   IOPersistentProperties properties;
 
@@ -179,7 +174,7 @@ class IOPersistentProperties extends PersistentProperties {
     String documentDirPath,
   }) : super(name) {
     final String fileName = '.${name.replaceAll(' ', '_')}';
-    documentDirPath ??= DevToolsUsage.userHomeDir();
+    documentDirPath ??= LocalFileSystem.userHomeDir();
     _file = File(path.join(documentDirPath, fileName));
     if (!_file.existsSync()) {
       _file.createSync();

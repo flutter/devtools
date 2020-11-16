@@ -1,5 +1,6 @@
 import 'package:devtools_app/src/app_size/app_size_controller.dart';
 import 'package:devtools_app/src/utils.dart';
+import 'package:flutter/widgets.dart';
 
 import 'utils.dart';
 
@@ -17,15 +18,16 @@ class AppSizeTestController extends AppSizeController {
   }
 
   @override
-  void loadDiffTreeFromJsonFiles(
-    DevToolsJsonFile oldFile,
-    DevToolsJsonFile newFile,
-    void Function(String error) onError, {
+  void loadDiffTreeFromJsonFiles({
+    @required DevToolsJsonFile oldFile,
+    @required DevToolsJsonFile newFile,
+    @required void Function(String error) onError,
     bool delayed = false,
   }) async {
     if (delayed) {
       await delay();
     }
-    super.loadDiffTreeFromJsonFiles(oldFile, newFile, onError);
+    super.loadDiffTreeFromJsonFiles(
+        oldFile: oldFile, newFile: newFile, onError: onError);
   }
 }

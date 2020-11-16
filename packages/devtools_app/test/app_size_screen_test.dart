@@ -195,9 +195,9 @@ void main() {
       DevToolsJsonFile newJsonFile,
     ) async {
       appSizeController.loadDiffTreeFromJsonFiles(
-        oldJsonFile,
-        newJsonFile,
-        (error) => {},
+        oldFile: oldJsonFile,
+        newFile: newJsonFile,
+        onError: (error) => {},
       );
       await tester.pumpAndSettle();
     }
@@ -221,9 +221,9 @@ void main() {
       await loadDiffTabAndSettle(tester);
 
       appSizeController.loadDiffTreeFromJsonFiles(
-        oldV8JsonFile,
-        newV8JsonFile,
-        (error) => {},
+        oldFile: oldV8JsonFile,
+        newFile: newV8JsonFile,
+        onError: (error) => {},
         delayed: true,
       );
       await tester.pump(const Duration(milliseconds: 500));
@@ -348,17 +348,17 @@ void main() {
       String secondFile,
     ) async {
       appSizeController.loadDiffTreeFromJsonFiles(
-        DevToolsJsonFile(
+        oldFile: DevToolsJsonFile(
           name: '',
           lastModifiedTime: lastModifiedTime,
           data: json.decode(firstFile),
         ),
-        DevToolsJsonFile(
+        newFile: DevToolsJsonFile(
           name: '',
           lastModifiedTime: lastModifiedTime,
           data: json.decode(secondFile),
         ),
-        (error) => Notifications.of(buildContext).push(error),
+        onError: (error) => Notifications.of(buildContext).push(error),
       );
       await tester.pumpAndSettle();
     }

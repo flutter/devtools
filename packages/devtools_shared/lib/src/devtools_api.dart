@@ -43,3 +43,13 @@ const String apiGetSurveyShownCount = '${apiPrefix}getSurveyShownCount';
 /// Increments the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey).
 const String apiIncrementSurveyShownCount =
     '${apiPrefix}incrementSurveyShownCount';
+
+/// Returns the primary app size file, if present.
+const String apiGetPrimaryAppSizeFile = '${apiPrefix}getPrimaryAppSizeFile';
+
+/// Returns the secondary app size file, if present.
+const String apiGetSecondaryAppSizeFile = '${apiPrefix}getSecondaryAppSizeFile';
+
+const String primaryAppSizeFilePropertyName = 'appSizePrimary';
+
+const String secondaryAppSizeFilePropertyName = 'appSizeSecondary';

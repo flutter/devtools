@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:shelf/shelf.dart' as shelf;
 
+import 'file_system.dart';
 import 'usage.dart';
 
 /// The DevTools server API.
@@ -148,6 +149,32 @@ class ServerApi {
           request,
           json.encode(_devToolsUsage.surveyShownCount),
         );
+      case apiGetPrimaryAppSizeFile:
+        final queryParams = request.requestedUri.queryParameters;
+        if (queryParams.containsKey(primaryAppSizeFilePropertyName)) {
+          final filePath = queryParams[primaryAppSizeFilePropertyName];
+          final fileJson = LocalFileSystem.fileAsJson(filePath);
+          if (fileJson == null) {
+            return api.badRequest('No JSON file available at $filePath.');
+          }
+          return api.getCompleted(request, fileJson);
+        }
+        return api.badRequest('Request for primary app size file does not '
+            'contain a query parameter with the expected key: '
+            '$primaryAppSizeFilePropertyName');
+      case apiGetSecondaryAppSizeFile:
+        final queryParams = request.requestedUri.queryParameters;
+        if (queryParams.containsKey(secondaryAppSizeFilePropertyName)) {
+          final filePath = queryParams[secondaryAppSizeFilePropertyName];
+          final fileJson = LocalFileSystem.fileAsJson(filePath);
+          if (fileJson == null) {
+            return api.badRequest('No JSON file available at $filePath.');
+          }
+          return api.getCompleted(request, fileJson);
+        }
+        return api.badRequest('Request for secondary app size file does not '
+            'contain a query parameter with the expected key: '
+            '$secondaryAppSizeFilePropertyName');
       default:
         return api.notImplemented(request);
     }

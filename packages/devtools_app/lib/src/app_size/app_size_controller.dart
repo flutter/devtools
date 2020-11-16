@@ -229,11 +229,11 @@ class AppSizeController {
   //                   prevent the UI from freezing and display a circular
   //                   progress indicator on app size screen. Needs flutter
   //                   web to support working with isolates. See #33577.
-  void loadDiffTreeFromJsonFiles(
-    DevToolsJsonFile oldFile,
-    DevToolsJsonFile newFile,
-    void Function(String error) onError,
-  ) async {
+  void loadDiffTreeFromJsonFiles({
+    @required DevToolsJsonFile oldFile,
+    @required DevToolsJsonFile newFile,
+    @required void Function(String error) onError,
+  }) async {
     if (oldFile == null || newFile == null) {
       return;
     }

@@ -250,6 +250,49 @@ Future<void> resetDevToolsFile() async {
   }
 }
 
+Future<DevToolsJsonFile> requestPrimaryAppSizeFile(String path) async {
+  if (isDevToolsServerAvailable) {
+    final resp = await _request(
+      '$apiGetPrimaryAppSizeFile?$primaryAppSizeFilePropertyName=$path',
+    );
+    if (resp?.status == HttpStatus.ok) {
+      return _devToolsJsonFileFromAppSizeResponse(resp, path);
+    } else {
+      logWarning(resp, apiGetPrimaryAppSizeFile);
+    }
+  }
+  return null;
+}
+
+Future<DevToolsJsonFile> requestSecondaryAppSizeFile(String path) async {
+  if (isDevToolsServerAvailable) {
+    final resp = await _request(
+      '$apiGetSecondaryAppSizeFile?$secondaryAppSizeFilePropertyName=$path',
+    );
+    if (resp?.status == HttpStatus.ok) {
+      return _devToolsJsonFileFromAppSizeResponse(resp, path);
+    } else {
+      logWarning(resp, apiGetPrimaryAppSizeFile);
+    }
+  }
+  return null;
+}
+
+DevToolsJsonFile _devToolsJsonFileFromAppSizeResponse(
+  HttpRequest resp,
+  String filePath,
+) {
+  final _json = json.decode(resp.response);
+  final lastModified = _json['lastModifiedTime'];
+  final lastModifiedTime =
+      lastModified != null ? DateTime.parse(lastModified) : DateTime.now();
+  return DevToolsJsonFile(
+    name: filePath,
+    lastModifiedTime: lastModifiedTime,
+    data: _json,
+  );
+}
+
 void logWarning(HttpRequest response, String apiType, [String respText]) {
   log(
     'HttpRequest $apiType failed status = ${response?.status}'
