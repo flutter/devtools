@@ -93,6 +93,18 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   gaItem: ga.debugBanner,
 );
 
+final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.invertOversizedImages',
+  description: 'Invert Oversized Images',
+  icon: createImageIcon('icons/debug_banner@2x.png'),
+  enabledValue: true,
+  disabledValue: false,
+  enabledTooltip: 'Enable Invert Oversized Images',
+  disabledTooltip: 'Disable Invert Oversized Images',
+  gaScreenName: ga.inspector,
+  gaItem: ga.debugBanner,
+);
+
 final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaint',
   description: 'Debug Paint',
@@ -285,6 +297,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   structuredErrors,
   httpEnableTimelineLogging,
   socketProfiling,
+  invertOversizedImages,
 ];
 
 final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =

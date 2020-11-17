@@ -53,6 +53,45 @@ class Console extends StatelessWidget {
   }
 }
 
+/// Renders a _ConsoleText widget with ConsoleControls overlaid on the
+/// top-right corner.
+class ConsoleUsingTextWidget extends StatelessWidget {
+  const ConsoleUsingTextWidget({
+    this.controls,
+    @required this.lines,
+    this.title,
+  }) : super();
+
+  final Widget title;
+  final List<Widget> controls;
+  final List<String> lines;
+
+  String get textContent => lines.join('\n');
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (title != null) title,
+        Expanded(
+          child: Material(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _ConsoleText(text: textContent),
+                if (controls != null && controls.isNotEmpty)
+                  _ConsoleControls(
+                    controls: controls,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Renders a top-right aligned ButtonBar wrapping a List of IconButtons
 /// (`controls`).
 class _ConsoleControls extends StatelessWidget {
@@ -70,6 +109,30 @@ class _ConsoleControls extends StatelessWidget {
         buttonPadding: EdgeInsets.zero,
         alignment: MainAxisAlignment.end,
         children: controls,
+      ),
+    );
+  }
+}
+
+class _ConsoleText extends StatelessWidget {
+  const _ConsoleText({@required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textStyle =
+        theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
+
+    return Padding(
+      padding: const EdgeInsets.all(denseSpacing),
+      child: SingleChildScrollView(
+        child: Text(
+          text,
+          style: textStyle,
+          softWrap: true,
+        ),
       ),
     );
   }
@@ -114,7 +177,6 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
       child: ListView.builder(
         padding: const EdgeInsets.all(denseSpacing),
         itemCount: widget.lines?.length ?? 0,
-        // TODO: Get from theme?
         itemExtent: CodeView.rowHeight,
         controller: _scroll,
         itemBuilder: (context, index) {

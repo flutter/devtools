@@ -4,11 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart' as logger;
@@ -120,7 +122,6 @@ class LoggingDetailsController {
 
     // See if we need to asynchronously compute the log entry details.
     if (data.needsComputing) {
-      assert(data.node == null);
       onShowDetails(text: '');
 
       data.compute().then((_) {
@@ -136,7 +137,6 @@ class LoggingDetailsController {
   }
 
   void _updateUIFromData() {
-    assert(data.node == null);
     if (data.details.startsWith('{') && data.details.endsWith('}')) {
       try {
         // If the string decodes properly, then format the json.
@@ -325,6 +325,7 @@ class LoggingController {
     if (filteredEvents.contains(e.extensionKind)) {
       return;
     }
+
     if (e.extensionKind == FrameInfo.eventName) {
       final FrameInfo frame = FrameInfo.from(e.extensionData.data);
 
@@ -338,6 +339,18 @@ class LoggingController {
         e.timestamp,
         summary: frameInfoText,
       ));
+    } else if (e.extensionKind == ImageSizesForFrame.eventName) {
+      final List<ImageSizesForFrame> images =
+          ImageSizesForFrame.from(e.extensionData.data);
+
+      for (ImageSizesForFrame image in images) {
+        log(LogData(
+          e.extensionKind.toLowerCase(),
+          jsonEncode(image.rawJson),
+          e.timestamp,
+          summary: image.summary,
+        ));
+      }
     } else if (e.extensionKind == NavigationInfo.eventName) {
       final NavigationInfo navInfo = NavigationInfo.from(e.extensionData.data);
 
@@ -379,10 +392,9 @@ class LoggingController {
       final RemoteDiagnosticsNode summary = _findFirstSummary(node) ?? node;
       log(LogData(
         e.extensionKind.toLowerCase(),
-        jsonEncode(e.json),
+        jsonEncode(e.extensionData.data),
         e.timestamp,
         summary: summary.toDiagnosticsNode().toString(),
-        node: node,
       ));
     } else {
       log(LogData(
@@ -809,6 +821,69 @@ class FrameInfo {
 
   @override
   String toString() => 'frame $number ${elapsedMs.toStringAsFixed(1)}ms';
+}
+
+class ImageSizesForFrame {
+  ImageSizesForFrame(
+    this.source,
+    this.displaySize,
+    this.imageSize,
+    this.rawJson,
+  );
+
+  static const String eventName = 'Flutter.ImageSizesForFrame';
+
+  static List<ImageSizesForFrame> from(Map<String, dynamic> data) {
+    //     "packages/flutter_gallery_assets/assets/icons/material/2.0x/material.png": {
+    //       "source": "packages/flutter_gallery_assets/assets/icons/material/2.0x/material.png",
+    //       "displaySize": {
+    //         "width": 64.0,
+    //         "height": 63.99999999999999
+    //       },
+    //       "imageSize": {
+    //         "width": 128.0,
+    //         "height": 128.0
+    //       },
+    //       "displaySizeInBytes": 21845,
+    //       "decodedSizeInBytes": 87381
+    //     }
+
+    return data.values.map((entry) {
+      return ImageSizesForFrame(
+        entry['source'],
+        entry['displaySize'],
+        entry['imageSize'],
+        entry,
+      );
+    }).toList();
+  }
+
+  final String source;
+  final Map<String, Object> displaySize;
+  final Map<String, Object> imageSize;
+  final Map<String, Object> rawJson;
+
+  String get summary {
+    final file = path.basename(source);
+
+    final int displaySizeInBytes = rawJson['displaySizeInBytes'];
+    final int decodedSizeInBytes = rawJson['decodedSizeInBytes'];
+
+    final double expansion =
+        math.sqrt(decodedSizeInBytes ?? 0) / math.sqrt(displaySizeInBytes ?? 1);
+
+    return 'Image $file • displayed at '
+        '${_round(displaySize['width'])}x${_round(displaySize['height'])}'
+        ' • created at '
+        '${_round(imageSize['width'])}x${_round(imageSize['height'])}'
+        ' • ${expansion.toStringAsFixed(1)}x';
+  }
+
+  int _round(num value) => value.round();
+
+  @override
+  String toString() =>
+      '$source ${displaySize['width']}x${displaySize['height']}';
 }
 
 class NavigationInfo {

@@ -221,10 +221,7 @@ class _LogDetailsState extends State<LogDetails>
     }
   }
 
-  bool showInspector(LogData log) => log != null && log.node != null;
-
-  bool showSimple(LogData log) =>
-      log != null && log.node == null && !log.needsComputing;
+  bool showSimple(LogData log) => log != null && !log.needsComputing;
 
   @override
   Widget build(BuildContext context) {
@@ -234,27 +231,21 @@ class _LogDetailsState extends State<LogDetails>
   }
 
   Widget _buildContent(BuildContext context, LogData log) {
-    if (showInspector(log)) {
-      return _buildInspector(context, log);
-    } else {
-      return Stack(
-        children: [
-          _buildSimpleLog(context, log),
-          if (log != null && log.needsComputing)
-            const Center(child: CircularProgressIndicator()),
-        ],
-      );
-    }
+    // TODO(#1370): Handle showing flutter errors in a structured manner.
+    return Stack(
+      children: [
+        _buildSimpleLog(context, log),
+        if (log != null && log.needsComputing)
+          const Center(child: CircularProgressIndicator()),
+      ],
+    );
   }
-
-  // TODO(#1370): implement this.
-  Widget _buildInspector(BuildContext context, LogData log) => const SizedBox();
 
   Widget _buildSimpleLog(BuildContext context, LogData log) {
     final disabled = log?.details == null || log.details.isEmpty;
 
     return OutlineDecoration(
-      child: Console(
+      child: ConsoleUsingTextWidget(
         title: areaPaneHeader(
           context,
           title: 'Details',
@@ -266,7 +257,7 @@ class _LogDetailsState extends State<LogDetails>
             ),
           ],
         ),
-        lines: log?.prettyPrinted?.split('\n'),
+        lines: log?.prettyPrinted?.split('\n') ?? [],
       ),
     );
   }
@@ -296,7 +287,7 @@ class _KindColumn extends ColumnData<LogData>
   bool get supportsSorting => false;
 
   @override
-  double get fixedWidthPx => 145;
+  double get fixedWidthPx => 155;
 
   @override
   String getValue(LogData dataObject) => dataObject.kind;

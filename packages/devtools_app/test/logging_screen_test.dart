@@ -208,8 +208,8 @@ void main() {
           (WidgetTester tester) async {
         const index = 9;
         bool containsJson(Widget widget) {
-          if (widget is! Console) return false;
-          final content = (widget as Console).textContent.trim();
+          if (widget is! ConsoleUsingTextWidget) return false;
+          final content = (widget as ConsoleUsingTextWidget).textContent.trim();
           return content.startsWith('{') && content.endsWith('}');
         }
 
