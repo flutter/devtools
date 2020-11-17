@@ -241,7 +241,7 @@ class _LogDetailsState extends State<LogDetails>
         children: [
           _buildSimpleLog(context, log),
           if (log != null && log.needsComputing)
-            const Center(child: CircularProgressIndicator()),
+            const CenteredCircularProgressIndicator(),
         ],
       );
     }

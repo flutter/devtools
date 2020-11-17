@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../common_widgets.dart';
 import '../globals.dart';
 import '../screen.dart';
 
@@ -79,9 +80,7 @@ class _ExampleConditionalScreenBodyState
         if (loadingOfflineData)
           Container(
             color: Colors.grey[50],
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: const CenteredCircularProgressIndicator(),
           ),
       ],
     );

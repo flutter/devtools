@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'auto_dispose_mixin.dart';
+import 'common_widgets.dart';
 import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'notifications.dart';
@@ -176,9 +177,7 @@ class _InitializerState extends State<Initializer>
     return _checkLoaded()
         ? widget.builder(context)
         : const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: CenteredCircularProgressIndicator(),
           );
   }
 }
