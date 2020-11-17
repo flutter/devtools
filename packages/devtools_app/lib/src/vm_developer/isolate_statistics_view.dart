@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../common_widgets.dart';
 import '../profiler/cpu_profiler.dart';
+import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../utils.dart';
@@ -35,8 +36,7 @@ class IsolateStatisticsView extends VMDeveloperView {
 }
 
 class IsolateStatisticsViewBody extends StatelessWidget {
-  final IsolateStatisticsViewController controller =
-      IsolateStatisticsViewController();
+  final controller = IsolateStatisticsViewController();
 
   @override
   Widget build(BuildContext context) {
@@ -55,44 +55,52 @@ class IsolateStatisticsViewBody extends StatelessWidget {
             Flexible(
               child: Column(
                 children: [
-                  Flexible(
-                    child: Row(
-                      children: [
-                        GeneralIsolateStatisticsWidget(
-                          controller: controller,
-                        ),
-                        TagStatisticsWidget(
-                          controller: controller,
-                        ),
-                        ServiceExtensionsWidget(
-                          controller: controller,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Flexible(
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: IsolateMemoryStatisticsWidget(
-                            controller: controller,
-                          ),
-                        ),
-                        Flexible(
-                          flex: 2,
-                          child: IsolatePortsWidget(
-                            controller: controller,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
+                  _buildTopRow(),
+                  _buildBottomRow(),
                 ],
               ),
             ),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildTopRow() {
+    return Flexible(
+      child: Row(
+        children: [
+          GeneralIsolateStatisticsWidget(
+            controller: controller,
+          ),
+          TagStatisticsWidget(
+            controller: controller,
+          ),
+          ServiceExtensionsWidget(
+            controller: controller,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomRow() {
+    return Flexible(
+      child: Row(
+        children: [
+          Flexible(
+            child: IsolateMemoryStatisticsWidget(
+              controller: controller,
+            ),
+          ),
+          Flexible(
+            flex: 2,
+            child: IsolatePortsWidget(
+              controller: controller,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -111,7 +119,7 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
     if (isolate == null) {
       return null;
     }
-    final DateFormat startedAtFormatter = DateFormat.yMMMMd().add_jms();
+    final startedAtFormatter = DateFormat.yMMMMd().add_jms();
     return startedAtFormatter.format(
       DateTime.fromMillisecondsSinceEpoch(
         isolate.startTime,
@@ -123,7 +131,7 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
     if (isolate == null) {
       return null;
     }
-    final DateFormat uptimeFormatter = DateFormat.Hms();
+    final uptimeFormatter = DateFormat.Hms();
     return uptimeFormatter.format(
       DateTime.now()
           .subtract(
@@ -136,15 +144,17 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isolate = controller.isolate;
-    return VMInfoCard(
-      title: 'General',
-      rowKeyValues: [
-        MapEntry('Name', isolate?.name),
-        MapEntry('Started at', _startTime(isolate)),
-        MapEntry('Uptime', _uptime(isolate)),
-        MapEntry('Root Library', isolate?.rootLib?.uri),
-        MapEntry('ID', isolate?.id),
-      ],
+    return Flexible(
+      child: VMInfoCard(
+        title: 'General',
+        rowKeyValues: [
+          MapEntry('Name', isolate?.name),
+          MapEntry('Started at', _startTime(isolate)),
+          MapEntry('Uptime', _uptime(isolate)),
+          MapEntry('Root Library', isolate?.rootLib?.uri),
+          MapEntry('ID', isolate?.id),
+        ],
+      ),
     );
   }
 }
@@ -161,7 +171,7 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
 
   String _buildMemoryString(num usage, num capacity) {
     if (usage == null || capacity == null) {
-      return null;
+      return '--';
     }
     return '${prettyPrintBytes(usage, includeUnit: true)}'
         ' of ${prettyPrintBytes(capacity, includeUnit: true)}';
@@ -169,46 +179,48 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pIsolate = controller.isolate.toPrivateView();
+    final isolate = controller.isolate;
     return Column(
       children: [
-        VMInfoCard(
-          title: 'Memory',
-          rowKeyValues: [
-            MapEntry(
-              'Dart Heap',
-              _buildMemoryString(
-                pIsolate?.dartHeapSize,
-                pIsolate?.dartHeapCapacity,
+        Flexible(
+          child: VMInfoCard(
+            title: 'Memory',
+            rowKeyValues: [
+              MapEntry(
+                'Dart Heap',
+                _buildMemoryString(
+                  isolate?.dartHeapSize,
+                  isolate?.dartHeapCapacity,
+                ),
               ),
-            ),
-            MapEntry(
-              'New Space',
-              _buildMemoryString(
-                pIsolate?.newSpaceUsage,
-                pIsolate?.newSpaceUsage,
+              MapEntry(
+                'New Space',
+                _buildMemoryString(
+                  isolate?.newSpaceUsage,
+                  isolate?.newSpaceUsage,
+                ),
               ),
-            ),
-            MapEntry(
-              'Old Space',
-              _buildMemoryString(
-                pIsolate?.oldSpaceUsage,
-                pIsolate?.oldSpaceCapacity,
+              MapEntry(
+                'Old Space',
+                _buildMemoryString(
+                  isolate?.oldSpaceUsage,
+                  isolate?.oldSpaceCapacity,
+                ),
               ),
-            ),
-            MapEntry(
-              'Max Zone Capacity',
-              prettyPrintBytes(
-                controller.zoneCapacityHighWatermark,
-                includeUnit: true,
+              MapEntry(
+                'Max Zone Capacity',
+                prettyPrintBytes(
+                  controller.zoneCapacityHighWatermark,
+                  includeUnit: true,
+                ),
               ),
-            ),
-            MapEntry('# of Zone Handles', pIsolate?.zoneHandleCount),
-            MapEntry('# of Scoped Handles', pIsolate?.scopedHandleCount),
-          ],
-          table: Flexible(
-            child: ThreadMemoryTable(
-              controller: controller,
+              MapEntry('# of Zone Handles', isolate?.zoneHandleCount),
+              MapEntry('# of Scoped Handles', isolate?.scopedHandleCount),
+            ],
+            table: Flexible(
+              child: ThreadMemoryTable(
+                controller: controller,
+              ),
             ),
           ),
         ),
@@ -222,29 +234,31 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
 class TagStatisticsWidget extends StatelessWidget {
   TagStatisticsWidget({@required this.controller});
 
-  final ColumnData<VMTag> name = _TagColumn();
-  final ColumnData<VMTag> percentage = _PercentageColumn();
+  final name = _TagColumn();
+  final percentage = _PercentageColumn();
 
   List<ColumnData<VMTag>> get columns => [name, percentage];
   final IsolateStatisticsViewController controller;
 
   @override
   Widget build(BuildContext context) {
-    return VMInfoCard(
-      title: 'Execution Time',
-      table: Flexible(
-        child: (controller.cpuProfilerController.profilerEnabled)
-            ? FlatTable<VMTag>(
-                columns: columns,
-                data: controller.tags,
-                keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
-                sortColumn: percentage,
-                sortDirection: SortDirection.descending,
-                onItemSelected: (_) => null,
-              )
-            : CpuProfilerDisabled(
-                controller.cpuProfilerController,
-              ),
+    return Flexible(
+      child: VMInfoCard(
+        title: 'Execution Time',
+        table: Flexible(
+          child: controller.cpuProfilerController.profilerEnabled
+              ? FlatTable<VMTag>(
+                  columns: columns,
+                  data: controller.tags,
+                  keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
+                  sortColumn: percentage,
+                  sortDirection: SortDirection.descending,
+                  onItemSelected: (_) => null,
+                )
+              : CpuProfilerDisabled(
+                  controller.cpuProfilerController,
+                ),
+        ),
       ),
     );
   }
@@ -275,10 +289,10 @@ class _PercentageColumn extends ColumnData<VMTag> {
 class ThreadMemoryTable extends StatelessWidget {
   ThreadMemoryTable({@required this.controller});
 
-  final ColumnData<Thread> id = _IDColumn();
-  final ColumnData<Thread> kind = _KindColumn();
-  final ColumnData<Thread> watermark = _HighWatermarkColumn();
-  final ColumnData<Thread> capacity = _ZoneCapacityColumn();
+  final id = _IDColumn();
+  final kind = _KindColumn();
+  final watermark = _HighWatermarkColumn();
+  final capacity = _ZoneCapacityColumn();
 
   List<ColumnData<Thread>> get columns => [
         id,
@@ -290,11 +304,11 @@ class ThreadMemoryTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final threads = controller.isolate.toPrivateView()?.threads ?? [];
+    final threads = controller.isolate?.threads ?? [];
     return Column(
       children: [
         areaPaneHeader(context, title: 'Threads (${threads.length})'),
-        Flexible(
+        Expanded(
           child: FlatTable<Thread>(
             columns: columns,
             data: threads,
@@ -386,7 +400,7 @@ class StackTraceViewerWidget extends StatelessWidget {
   StackTraceViewerWidget({@required this.stackTrace});
 
   final InstanceRef stackTrace;
-  final ColumnData<String> frame = _StackTraceViewerFrameColumn();
+  final frame = _StackTraceViewerFrameColumn();
 
   @override
   Widget build(BuildContext context) {
@@ -394,26 +408,28 @@ class StackTraceViewerWidget extends StatelessWidget {
         ?.split('\n')
         ?.where((e) => e.isNotEmpty)
         ?.toList();
-    return VMInfoList(
-      title: 'Allocation Location',
-      table: lines == null
-          ? const Expanded(
-              child: Center(
-                child: Text('No port selected'),
+    return Flexible(
+      child: VMInfoList(
+        title: 'Allocation Location',
+        table: lines == null
+            ? const Expanded(
+                child: Center(
+                  child: Text('No port selected'),
+                ),
+              )
+            : Flexible(
+                child: FlatTable<String>(
+                  columns: [
+                    frame,
+                  ],
+                  data: lines,
+                  keyFactory: (String s) => ValueKey<String>(s),
+                  onItemSelected: (_) => null,
+                  sortColumn: frame,
+                  sortDirection: SortDirection.ascending,
+                ),
               ),
-            )
-          : Flexible(
-              child: FlatTable<String>(
-                columns: [
-                  frame,
-                ],
-                data: lines,
-                keyFactory: (String s) => ValueKey<String>(s),
-                onItemSelected: (_) => null,
-                sortColumn: frame,
-                sortDirection: SortDirection.ascending,
-              ),
-            ),
+      ),
     );
   }
 }
@@ -433,10 +449,10 @@ class IsolatePortsWidget extends StatefulWidget {
 }
 
 class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
-  final ColumnData<InstanceRef> id = _PortIDColumn();
-  final ColumnData<InstanceRef> name = _PortNameColumn();
+  final id = _PortIDColumn();
+  final name = _PortNameColumn();
 
-  InstanceRef currentPort;
+  final selectedPort = ValueNotifier<InstanceRef>(null);
 
   List<ColumnData<InstanceRef>> get columns => [
         name,
@@ -448,40 +464,36 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
     final ports = widget.controller.ports;
     return Column(
       children: [
-        VMInfoCard(
-          title: 'Open Ports (${ports.length})',
-          table: Flexible(
-            child: Row(
-              children: [
-                Flexible(
-                  child: FlatTable<InstanceRef>(
-                    columns: columns,
-                    data: ports,
-                    keyFactory: (InstanceRef port) =>
-                        ValueKey<String>(port.debugName),
-                    sortColumn: id,
-                    sortDirection: SortDirection.ascending,
-                    onItemSelected: (InstanceRef port) => setState(
-                      () {
-                        if (port == currentPort) {
-                          currentPort = null;
-                        } else {
-                          currentPort = port;
-                        }
-                      },
-                    ),
+        Flexible(
+          child: VMInfoCard(
+            title: 'Open Ports (${ports.length})',
+            table: Flexible(
+              child: Split(axis: Axis.horizontal, children: [
+                FlatTable<InstanceRef>(
+                  columns: columns,
+                  data: ports,
+                  keyFactory: (InstanceRef port) =>
+                      ValueKey<String>(port.debugName),
+                  sortColumn: id,
+                  sortDirection: SortDirection.ascending,
+                  selectionNotifier: selectedPort,
+                  onItemSelected: (InstanceRef port) => setState(
+                    () {
+                      if (port == selectedPort.value) {
+                        selectedPort.value = null;
+                      } else {
+                        selectedPort.value = port;
+                      }
+                    },
                   ),
                 ),
-                const VerticalDivider(
-                  width: 0,
+                StackTraceViewerWidget(
+                  stackTrace: selectedPort.value,
                 ),
-                Flexible(
-                  flex: 2,
-                  child: StackTraceViewerWidget(
-                    stackTrace: currentPort,
-                  ),
-                )
-              ],
+              ], initialFractions: const [
+                0.3,
+                0.7,
+              ]),
             ),
           ),
         ),
@@ -502,7 +514,7 @@ class _ServiceExtensionNameColumn extends ColumnData<String> {
 class ServiceExtensionsWidget extends StatelessWidget {
   ServiceExtensionsWidget({@required this.controller});
 
-  final ColumnData<String> name = _ServiceExtensionNameColumn();
+  final name = _ServiceExtensionNameColumn();
 
   List<ColumnData<String>> get columns => [
         name,
@@ -513,16 +525,18 @@ class ServiceExtensionsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final extensions = controller.isolate?.extensionRPCs ?? [];
-    return VMInfoCard(
-      title: 'Service Extensions (${extensions.length})',
-      table: Flexible(
-        child: FlatTable<String>(
-          columns: columns,
-          data: extensions,
-          keyFactory: (String extension) => ValueKey<String>(extension),
-          sortColumn: name,
-          sortDirection: SortDirection.ascending,
-          onItemSelected: (_) => null,
+    return Flexible(
+      child: VMInfoCard(
+        title: 'Service Extensions (${extensions.length})',
+        table: Flexible(
+          child: FlatTable<String>(
+            columns: columns,
+            data: extensions,
+            keyFactory: (String extension) => ValueKey<String>(extension),
+            sortColumn: name,
+            sortDirection: SortDirection.ascending,
+            onItemSelected: (_) => null,
+          ),
         ),
       ),
     );

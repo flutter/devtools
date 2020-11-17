@@ -44,8 +44,8 @@ import 'timeline/timeline_controller.dart';
 import 'timeline/timeline_screen.dart';
 import 'ui/service_extension_widgets.dart';
 import 'utils.dart';
+import 'vm_developer/vm_developer_tools_controller.dart';
 import 'vm_developer/vm_developer_tools_screen.dart';
-import 'vm_developer/vm_developer_tools_screen_controller.dart';
 
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
@@ -115,8 +115,6 @@ class DevToolsAppState extends State<DevToolsApp> {
 
     _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
     preferences.vmDeveloperModeEnabled.addListener(() {
-      print(
-          'developer mode enabled: ${preferences.vmDeveloperModeEnabled.value}');
       setState(() {
         _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
       });
@@ -569,10 +567,10 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
         const AppSizeScreen(),
         createController: () => AppSizeController(),
       ),
-      DevToolsScreen<VMDeveloperToolsScreenController>(
+      DevToolsScreen<VMDeveloperToolsController>(
         const VMDeveloperToolsScreen(),
-        createController: () => VMDeveloperToolsScreenController(),
-      )
+        createController: () => VMDeveloperToolsController(),
+      ),
 // Uncomment to see a sample implementation of a conditional screen.
 //      DevToolsScreen<ExampleController>(
 //        const ExampleConditionalScreen(),

@@ -6,16 +6,16 @@ import 'package:flutter/foundation.dart';
 
 import 'vm_developer_tools_screen.dart';
 
-class VMDeveloperToolsScreenController {
+class VMDeveloperToolsController {
   ValueListenable<int> get selectedIndex => _selectedIndex;
-  final ValueNotifier<int> _selectedIndex = ValueNotifier<int>(0);
+  final _selectedIndex = ValueNotifier<int>(0);
 
-  void setSelectedIndex(int index) {
+  void selectIndex(int index) {
     _selectedIndex.value = index;
     _showIsolateSelector.value =
         VMDeveloperToolsScreenBody.views[index].showIsolateSelector;
   }
 
   ValueListenable<bool> get showIsolateSelector => _showIsolateSelector;
-  final ValueNotifier<bool> _showIsolateSelector = ValueNotifier<bool>(false);
+  final _showIsolateSelector = ValueNotifier<bool>(false);
 }

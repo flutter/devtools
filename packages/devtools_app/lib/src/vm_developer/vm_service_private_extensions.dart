@@ -10,62 +10,38 @@ import 'package:vm_service/vm_service.dart';
 /// fashion. Objects and extensions in this class should not be used outside of
 /// the `vm_developer` directory.
 
-/// Convenience extension to create a [VMPrivateView] from a [VM].
+/// An extension on [VM] which allows for access to VM internal fields.
 extension VMPrivateViewExtension on VM {
-  VMPrivateView toPrivateView() {
-    return this == null ? null : VMPrivateView._(this);
-  }
+  String get embedder => json['_embedder'];
+  String get profilerMode => json['_profilerMode'];
+  int get currentMemory => json['_currentMemory'];
+  int get currentRSS => json['_currentRSS'];
+  int get maxRSS => json['_maxRSS'];
+  int get nativeZoneMemoryUsage => json['_nativeZoneMemoryUsage'];
 }
 
-// TODO(bkonyi): figure out if we can properly extend VM.
-/// A wrapper around [VM] which allows for access to VM internal fields.
-class VMPrivateView {
-  VMPrivateView._(this.vm);
-
-  String get embedder => vm.json['_embedder'];
-  String get profilerMode => vm.json['_profilerMode'];
-  int get currentMemory => vm.json['_currentMemory'];
-  int get currentRSS => vm.json['_currentRSS'];
-  int get maxRSS => vm.json['_maxRSS'];
-  int get nativeZoneMemoryUsage => vm.json['_nativeZoneMemoryUsage'];
-
-  final VM vm;
-}
-
-/// Convenience extension to create a [IsolatePrivateView] from an [Isolate].
+/// An extension on [Isolate] which allows for access to VM internal fields.
 extension IsolatePrivateViewExtension on Isolate {
-  IsolatePrivateView toPrivateView() {
-    return this == null ? null : IsolatePrivateView._(this);
-  }
-}
-
-// TODO(bkonyi): figure out if we can properly extend Isolate.
-/// A wrapper around [Isolate] which allows for access to VM internal fields.
-class IsolatePrivateView {
-  IsolatePrivateView._(this.isolate);
-
-  final Isolate isolate;
-
   List<Thread> get threads {
-    return (isolate.json['_threads'].cast<Map<String, dynamic>>())
-        .map(Thread.parse)
+    return (json['_threads'].cast<Map<String, dynamic>>())
+        .map((e) => Thread.parse(e))
         .toList()
         .cast<Thread>();
   }
 
-  Map<String, dynamic> get tagCounters => isolate.json['_tagCounters'];
+  Map<String, dynamic> get tagCounters => json['_tagCounters'];
 
   int get dartHeapSize => newSpaceUsage + oldSpaceUsage;
   int get dartHeapCapacity => newSpaceCapacity + oldSpaceCapacity;
 
-  int get newSpaceUsage => isolate.json['_heaps']['new']['used'];
-  int get oldSpaceUsage => isolate.json['_heaps']['old']['used'];
+  int get newSpaceUsage => json['_heaps']['new']['used'];
+  int get oldSpaceUsage => json['_heaps']['old']['used'];
 
-  int get newSpaceCapacity => isolate.json['_heaps']['new']['capacity'];
-  int get oldSpaceCapacity => isolate.json['_heaps']['old']['capacity'];
+  int get newSpaceCapacity => json['_heaps']['new']['capacity'];
+  int get oldSpaceCapacity => json['_heaps']['old']['capacity'];
 
-  int get zoneHandleCount => isolate.json['_numZoneHandles'];
-  int get scopedHandleCount => isolate.json['_numScopedHandles'];
+  int get zoneHandleCount => json['_numZoneHandles'];
+  int get scopedHandleCount => json['_numScopedHandles'];
 }
 
 /// An internal representation of a thread running within an isolate.
@@ -77,7 +53,7 @@ class Thread {
     @required this.zoneCapacity,
   });
 
-  static Thread parse(Map<String, dynamic> json) {
+  factory Thread.parse(Map<String, dynamic> json) {
     return Thread(
       id: json['id'],
       kind: json['kind'],

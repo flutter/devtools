@@ -10,7 +10,7 @@ import '../auto_dispose_mixin.dart';
 import '../screen.dart';
 import '../theme.dart';
 import 'isolate_statistics_view.dart';
-import 'vm_developer_tools_screen_controller.dart';
+import 'vm_developer_tools_controller.dart';
 import 'vm_statistics_view.dart';
 
 abstract class VMDeveloperView {
@@ -72,13 +72,12 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
     with AutoDisposeMixin {
   // TODO(bkonyi): do we want this to be static? Currently necessary to provide
   // access to the `showIsolateSelector` via `VMDeveloperToolsScreen`
-  static VMDeveloperToolsScreenController controller;
+  static VMDeveloperToolsController controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController =
-        Provider.of<VMDeveloperToolsScreenController>(context);
+    final newController = Provider.of<VMDeveloperToolsController>(context);
     if (newController == controller) return;
     controller = newController;
   }
@@ -95,7 +94,7 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                 selectedIndex: selectedIndex,
                 elevation: 10.0,
                 labelType: NavigationRailLabelType.all,
-                onDestinationSelected: controller.setSelectedIndex,
+                onDestinationSelected: controller.selectIndex,
                 destinations: [
                   for (final view in VMDeveloperToolsScreenBody.views)
                     NavigationRailDestination(

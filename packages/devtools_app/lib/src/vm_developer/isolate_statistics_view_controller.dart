@@ -53,15 +53,15 @@ class IsolateStatisticsViewController extends DisposableController
 
     // Retrieve updated isolate information and refresh the page.
     _isolate = await _service.getIsolate(isolateRef.id);
-    _updateTagCounters(isolate.toPrivateView());
-    _updateZoneUsageData(isolate.toPrivateView());
+    _updateTagCounters(isolate);
+    _updateZoneUsageData(isolate);
     _ports = (await _service.getPorts(_isolate.id)).ports;
     _serviceExtensions = isolate.extensionRPCs;
     _serviceExtensions.sort();
     _refreshing.value = false;
   }
 
-  void _updateTagCounters(IsolatePrivateView isolate) {
+  void _updateTagCounters(Isolate isolate) {
     // Tag counters aren't available if the profiler is disabled.
     if (isolate.tagCounters != null) {
       // Tag counters are incremented when a profiler tick occurs within a
@@ -85,7 +85,7 @@ class IsolateStatisticsViewController extends DisposableController
     }
   }
 
-  void _updateZoneUsageData(IsolatePrivateView isolate) {
+  void _updateZoneUsageData(Isolate isolate) {
     final currentWatermark =
         isolate.threads.fold(0, (p, t) => p + t.zoneHighWatermark);
     if (currentWatermark > _zoneCapacityHighWatermark) {

@@ -30,13 +30,11 @@ class VMInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(
-      child: Card(
-        child: VMInfoList(
-          title: title,
-          rowKeyValues: rowKeyValues,
-          table: table,
-        ),
+    return Card(
+      child: VMInfoList(
+        title: title,
+        rowKeyValues: rowKeyValues,
+        table: table,
       ),
     );
   }
@@ -70,13 +68,16 @@ class VMInfoList extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
+                    SelectableText(
                       '${row.key.toString()}:',
                       style: fixedFontStyle(context),
                     ),
-                    Text(
-                      row?.value?.toString() ?? '',
-                      style: fixedFontStyle(context),
+                    const SizedBox(width: denseSpacing),
+                    Flexible(
+                      child: SelectableText(
+                        row?.value?.toString() ?? '--',
+                        style: fixedFontStyle(context),
+                      ),
                     ),
                   ],
                 )
@@ -95,27 +96,13 @@ class VMInfoList extends StatelessWidget {
   }
 
   Widget _buildAlternatingRow(BuildContext context, int index, Widget row) {
-    return SizedBox(
+    return Container(
+      color: alternatingColorForIndexWithContext(index, context),
       height: defaultRowHeight,
-      child: Material(
-        color: alternatingColorForIndexWithContext(
-          index,
-          context,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: defaultSpacing,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Flexible(
-                child: row,
-              ),
-            ],
-          ),
-        ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: defaultSpacing,
       ),
+      child: row,
     );
   }
 }

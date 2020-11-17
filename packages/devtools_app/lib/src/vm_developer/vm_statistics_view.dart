@@ -44,7 +44,7 @@ class VMStatisticsViewBody extends StatelessWidget {
                 ),
               ],
             ),
-            Flexible(
+            Expanded(
               child: VMStatisticsWidget(
                 controller: controller,
               ),
@@ -112,29 +112,31 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = controller.vm;
-    return VMInfoCard(
-      title: 'VM',
-      rowKeyValues: [
-        MapEntry('Name', vm?.name),
-        MapEntry('Version', vm?.version),
-        MapEntry('Embedder', vm.toPrivateView()?.embedder),
-        MapEntry(
-          'Started',
-          vm == null
-              ? null
-              : formatDateTime(
-                  DateTime.fromMillisecondsSinceEpoch(vm.startTime),
-                ),
-        ),
-        MapEntry('Profiler Mode', vm.toPrivateView()?.profilerMode),
-        MapEntry(
-          'Current Memory',
-          prettyPrintBytes(
-            vm.toPrivateView()?.currentMemory,
-            includeUnit: true,
+    return Flexible(
+      child: VMInfoCard(
+        title: 'VM',
+        rowKeyValues: [
+          MapEntry('Name', vm?.name),
+          MapEntry('Version', vm?.version),
+          MapEntry('Embedder', vm?.embedder),
+          MapEntry(
+            'Started',
+            vm == null
+                ? null
+                : formatDateTime(
+                    DateTime.fromMillisecondsSinceEpoch(vm.startTime),
+                  ),
           ),
-        ),
-      ],
+          MapEntry('Profiler Mode', vm?.profilerMode),
+          MapEntry(
+            'Current Memory',
+            prettyPrintBytes(
+              vm?.currentMemory,
+              includeUnit: true,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -154,36 +156,41 @@ class ProcessStatisticsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = controller.vm;
-    return VMInfoCard(
-      title: 'Process',
-      rowKeyValues: [
-        MapEntry('PID', vm?.pid),
-        MapEntry('Host CPU',
-            vm == null ? null : '${vm.hostCPU} (${vm.architectureBits}-bits)'),
-        MapEntry('Target CPU', vm?.targetCPU),
-        MapEntry('Operating System', vm?.operatingSystem),
-        MapEntry(
-          'Max Memory (RSS)',
-          prettyPrintBytes(
-            vm.toPrivateView()?.maxRSS,
-            includeUnit: true,
+    return Flexible(
+      child: VMInfoCard(
+        title: 'Process',
+        rowKeyValues: [
+          MapEntry('PID', vm?.pid),
+          MapEntry(
+              'Host CPU',
+              vm == null
+                  ? null
+                  : '${vm.hostCPU} (${vm.architectureBits}-bits)'),
+          MapEntry('Target CPU', vm?.targetCPU),
+          MapEntry('Operating System', vm?.operatingSystem),
+          MapEntry(
+            'Max Memory (RSS)',
+            prettyPrintBytes(
+              vm?.maxRSS,
+              includeUnit: true,
+            ),
           ),
-        ),
-        MapEntry(
-          'Current Memory (RSS)',
-          prettyPrintBytes(
-            vm.toPrivateView()?.currentRSS,
-            includeUnit: true,
+          MapEntry(
+            'Current Memory (RSS)',
+            prettyPrintBytes(
+              vm?.currentRSS,
+              includeUnit: true,
+            ),
           ),
-        ),
-        MapEntry(
-          'Zone Memory',
-          prettyPrintBytes(
-            vm.toPrivateView()?.nativeZoneMemoryUsage,
-            includeUnit: true,
+          MapEntry(
+            'Zone Memory',
+            prettyPrintBytes(
+              vm?.nativeZoneMemoryUsage,
+              includeUnit: true,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -195,8 +202,8 @@ class _IsolateNameColumn extends ColumnData<Isolate> {
   String getValue(Isolate i) => i.name;
 }
 
-class _IsolateNumberColumn extends ColumnData<Isolate> {
-  _IsolateNumberColumn() : super('Number');
+class _IsolateIDColumn extends ColumnData<Isolate> {
+  _IsolateIDColumn() : super('ID');
 
   @override
   String getValue(Isolate i) => i.number;
@@ -219,30 +226,30 @@ class _IsolateNewSpaceColumn extends _IsolateMemoryColumn {
   _IsolateNewSpaceColumn() : super('New Space');
 
   @override
-  int getCapacity(Isolate i) => i.toPrivateView().newSpaceCapacity;
+  int getCapacity(Isolate i) => i.newSpaceCapacity;
 
   @override
-  int getUsage(Isolate i) => i.toPrivateView().newSpaceUsage;
+  int getUsage(Isolate i) => i.newSpaceUsage;
 }
 
 class _IsolateOldSpaceColumn extends _IsolateMemoryColumn {
   _IsolateOldSpaceColumn() : super('Old Space');
 
   @override
-  int getCapacity(Isolate i) => i.toPrivateView().oldSpaceCapacity;
+  int getCapacity(Isolate i) => i.oldSpaceCapacity;
 
   @override
-  int getUsage(Isolate i) => i.toPrivateView().oldSpaceUsage;
+  int getUsage(Isolate i) => i.oldSpaceUsage;
 }
 
 class _IsolateHeapColumn extends _IsolateMemoryColumn {
   _IsolateHeapColumn() : super('Heap');
 
   @override
-  int getCapacity(Isolate i) => i.toPrivateView().dartHeapCapacity;
+  int getCapacity(Isolate i) => i.dartHeapCapacity;
 
   @override
-  int getUsage(Isolate i) => i.toPrivateView().dartHeapSize;
+  int getUsage(Isolate i) => i.dartHeapSize;
 }
 
 /// Displays general statistics about running isolates including:
@@ -256,11 +263,11 @@ class IsolatesPreviewWidget extends StatelessWidget {
     this.systemIsolates = false,
   });
 
-  final ColumnData<Isolate> name = _IsolateNameColumn();
-  final ColumnData<Isolate> number = _IsolateNumberColumn();
-  final ColumnData<Isolate> newSpace = _IsolateNewSpaceColumn();
-  final ColumnData<Isolate> oldSpace = _IsolateOldSpaceColumn();
-  final ColumnData<Isolate> heap = _IsolateHeapColumn();
+  final name = _IsolateNameColumn();
+  final number = _IsolateIDColumn();
+  final newSpace = _IsolateNewSpaceColumn();
+  final oldSpace = _IsolateOldSpaceColumn();
+  final heap = _IsolateHeapColumn();
 
   List<ColumnData<Isolate>> get columns => [
         name,
@@ -278,16 +285,18 @@ class IsolatesPreviewWidget extends StatelessWidget {
     final title = systemIsolates ? 'System Isolates' : 'Isolates';
     final isolates =
         systemIsolates ? controller.systemIsolates : controller.isolates;
-    return VMInfoCard(
-      title: '$title (${isolates?.length ?? 0})',
-      table: Flexible(
-        child: FlatTable<Isolate>(
-          columns: columns,
-          data: isolates,
-          keyFactory: (Isolate i) => ValueKey<String>(i.id),
-          sortColumn: name,
-          sortDirection: SortDirection.descending,
-          onItemSelected: (_) => null,
+    return Flexible(
+      child: VMInfoCard(
+        title: '$title (${isolates?.length ?? 0})',
+        table: Flexible(
+          child: FlatTable<Isolate>(
+            columns: columns,
+            data: isolates,
+            keyFactory: (Isolate i) => ValueKey<String>(i.id),
+            sortColumn: name,
+            sortDirection: SortDirection.descending,
+            onItemSelected: (_) => null,
+          ),
         ),
       ),
     );
