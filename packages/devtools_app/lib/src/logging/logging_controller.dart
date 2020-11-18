@@ -340,10 +340,9 @@ class LoggingController {
         summary: frameInfoText,
       ));
     } else if (e.extensionKind == ImageSizesForFrame.eventName) {
-      final List<ImageSizesForFrame> images =
-          ImageSizesForFrame.from(e.extensionData.data);
+      final images = ImageSizesForFrame.from(e.extensionData.data);
 
-      for (ImageSizesForFrame image in images) {
+      for (final image in images) {
         log(LogData(
           e.extensionKind.toLowerCase(),
           jsonEncode(image.rawJson),
@@ -775,9 +774,12 @@ class LogData {
   }
 
   String get prettyPrinted {
-    if (needsComputing) return details;
+    if (needsComputing) {
+      return details;
+    }
+
     try {
-      return prettyPrinter.convert(jsonDecode(details));
+      return prettyPrinter.convert(jsonDecode(details)).replaceAll(r'\n', '\n');
     } catch (_) {
       return details;
     }

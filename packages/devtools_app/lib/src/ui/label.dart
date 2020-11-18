@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class ImageIconLabel extends StatelessWidget {
   const ImageIconLabel(this.icon, this.text, {this.minIncludeTextWidth});
 
-  final Image icon;
+  final Widget icon;
   final String text;
   final double minIncludeTextWidth;
 

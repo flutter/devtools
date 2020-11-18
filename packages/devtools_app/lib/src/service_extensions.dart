@@ -8,13 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import 'analytics/constants.dart' as ga;
+import 'theme.dart';
 import 'ui/icons.dart';
 
 // Each service extension needs to be added to [_extensionDescriptions].
 class ToggleableServiceExtensionDescription<T>
     extends ServiceExtensionDescription {
   ToggleableServiceExtensionDescription._({
-    Image icon,
+    Widget icon,
     @required String extension,
     @required String description,
     @required T enabledValue,
@@ -66,7 +67,7 @@ class ServiceExtensionDescription<T> {
 
   final String description;
 
-  final Image icon;
+  final Widget icon;
 
   final List<T> values;
 
@@ -96,11 +97,11 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
 final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.invertOversizedImages',
   description: 'Invert Oversized Images',
-  icon: createImageIcon('icons/debug_banner@2x.png'),
+  icon: const Icon(Icons.image, size: actionsIconSize),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Enable Invert Oversized Images',
-  disabledTooltip: 'Disable Invert Oversized Images',
+  enabledTooltip: 'Disable Invert Oversized Images',
+  disabledTooltip: 'Enable Invert Oversized Images',
   gaScreenName: ga.inspector,
   gaItem: ga.debugBanner,
 );
