@@ -201,9 +201,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     }
 
     if (script == null) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const CenteredCircularProgressIndicator();
     }
 
     return buildCodeArea(context);

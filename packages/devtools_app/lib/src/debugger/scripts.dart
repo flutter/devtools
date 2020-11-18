@@ -109,10 +109,7 @@ class ScriptPickerState extends State<ScriptPicker> {
               ),
             ),
           ),
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
+          if (_isLoading) const CenteredCircularProgressIndicator(),
           if (!_isLoading)
             Expanded(
               child: TreeView<FileNode>(
