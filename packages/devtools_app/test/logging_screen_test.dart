@@ -4,6 +4,7 @@
 
 @TestOn('vm')
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/common_widgets.dart';
@@ -14,7 +15,6 @@ import 'package:devtools_app/src/logging/logging_screen.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/service_extension_widgets.dart';
-import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -26,6 +26,7 @@ import 'support/wrappers.dart';
 void main() {
   LoggingScreen screen;
   MockLoggingController mockLoggingController;
+  const windowSize = Size(1000.0, 1000.0);
 
   group('Logging Screen', () {
     FakeServiceManager fakeServiceManager;
@@ -41,8 +42,12 @@ void main() {
       await ensureInspectorDependencies();
       mockLoggingController = MockLoggingController();
       when(mockLoggingController.data).thenReturn([]);
-      when(mockLoggingController.filteredData).thenReturn([]);
-      when(mockLoggingController.onLogsUpdated).thenReturn(Reporter());
+      when(mockLoggingController.search).thenReturn('');
+      when(mockLoggingController.searchMatches)
+          .thenReturn(ValueNotifier<List<LogData>>([]));
+      when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
+      when(mockLoggingController.filteredData)
+          .thenReturn(ValueNotifier<List<LogData>>([]));
 
       fakeServiceManager = FakeServiceManager(useFakeService: true);
       when(fakeServiceManager.connectedApp.isFlutterWebAppNow)
@@ -58,7 +63,8 @@ void main() {
       expect(find.text('Logging'), findsOneWidget);
     });
 
-    testWidgets('builds with no data', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('builds with no data', windowSize,
+        (WidgetTester tester) async {
       await pumpLoggingScreen(tester);
       expect(find.byType(LoggingScreenBody), findsOneWidget);
       expect(find.byType(LogsTable), findsOneWidget);
@@ -68,21 +74,28 @@ void main() {
       expect(find.byType(StructuredErrorsToggle), findsOneWidget);
     });
 
-    testWidgets('can clear logs', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('can clear logs', windowSize,
+        (WidgetTester tester) async {
       await pumpLoggingScreen(tester);
       verifyNever(mockLoggingController.clear());
       await tester.tap(find.text('Clear'));
       verify(mockLoggingController.clear()).called(1);
     });
 
-    testWidgets('can enter filter text', (WidgetTester tester) async {
+    testWidgetsWithWindowSize(
+        'search field is disabled with no data', windowSize,
+        (WidgetTester tester) async {
       await pumpLoggingScreen(tester);
       verifyNever(mockLoggingController.clear());
-      await tester.enterText(find.byType(TextField), 'abc');
-      verify(mockLoggingController.filterText = 'abc');
+
+      final textFieldFinder = find.byKey(loggingSearchFieldKey);
+      expect(textFieldFinder, findsOneWidget);
+      final TextField textField = tester.widget(textFieldFinder) as TextField;
+      expect(textField.enabled, isFalse);
     });
 
-    testWidgets('can toggle structured errors', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('can toggle structured errors', windowSize,
+        (WidgetTester tester) async {
       final serviceManager = FakeServiceManager();
       when(serviceManager.connectedApp.isFlutterWebAppNow).thenReturn(false);
       when(serviceManager.connectedApp.isProfileBuildNow).thenReturn(false);
@@ -106,10 +119,12 @@ void main() {
     group('with data', () {
       setUp(() {
         when(mockLoggingController.data).thenReturn(fakeLogData);
-        when(mockLoggingController.filteredData).thenReturn(fakeLogData);
+        when(mockLoggingController.filteredData)
+            .thenReturn(ValueNotifier<List<LogData>>(fakeLogData));
       });
 
-      testWidgets('shows log items', (WidgetTester tester) async {
+      testWidgetsWithWindowSize('shows log items', windowSize,
+          (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
         expect(find.byType(LogsTable), findsOneWidget);
@@ -123,7 +138,7 @@ void main() {
         );
       });
 
-      testWidgets('can show non-computing log data',
+      testWidgetsWithWindowSize('can show non-computing log data', windowSize,
           (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
@@ -137,14 +152,28 @@ void main() {
         );
       });
 
-      testWidgets('can show null log data', (WidgetTester tester) async {
+      testWidgetsWithWindowSize('can show null log data', windowSize,
+          (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(ValueKey(fakeLogData[7])));
         await tester.pumpAndSettle();
       });
 
-      testWidgets('Copy to clipboard button enables/disables correctly',
+      testWidgetsWithWindowSize('search field can enter text', windowSize,
+          (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+        verifyNever(mockLoggingController.clear());
+
+        final textFieldFinder = find.byKey(loggingSearchFieldKey);
+        expect(textFieldFinder, findsOneWidget);
+        final TextField textField = tester.widget(textFieldFinder) as TextField;
+        expect(textField.enabled, isTrue);
+        await tester.enterText(find.byType(TextField), 'abc');
+      });
+
+      testWidgetsWithWindowSize(
+          'Copy to clipboard button enables/disables correctly', windowSize,
           (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
 
@@ -183,7 +212,8 @@ void main() {
         );
       });
 
-      testWidgets('can compute details of non-json log data',
+      testWidgetsWithWindowSize(
+          'can compute details of non-json log data', windowSize,
           (WidgetTester tester) async {
         const index = 8;
         final log = fakeLogData[index];
@@ -204,7 +234,7 @@ void main() {
         expect(find.richText(nonJsonOutput), findsOneWidget);
       });
 
-      testWidgets('can show details of json log data',
+      testWidgetsWithWindowSize('can show details of json log data', windowSize,
           (WidgetTester tester) async {
         const index = 9;
         bool containsJson(Widget widget) {
@@ -234,7 +264,8 @@ void main() {
         expect(findJson, findsOneWidget);
       });
 
-      testWidgets('can process Ansi codes', (WidgetTester tester) async {
+      testWidgetsWithWindowSize('can process Ansi codes', windowSize,
+          (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(ValueKey(fakeLogData[5])));

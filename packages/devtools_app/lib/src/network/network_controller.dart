@@ -12,17 +12,34 @@ import '../config_specific/logger/allowed_error.dart';
 import '../globals.dart';
 import '../http/http_request_data.dart';
 import '../http/http_service.dart';
+import '../ui/filter.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import 'network_model.dart';
 import 'network_service.dart';
 
-class NetworkController with SearchControllerMixin<NetworkRequest> {
+class NetworkController
+    with
+        SearchControllerMixin<NetworkRequest>,
+        FilterControllerMixin<NetworkRequest> {
   NetworkController() {
     _networkService = NetworkService(this);
   }
 
-  static NetworkFilter defaultFilter = NetworkFilter();
+  static const methodFilterId = 'network-method-filter';
+
+  static const statusFilterId = 'network-status-filter';
+
+  static const typeFilterId = 'network-type-filter';
+
+  final _filterArgs = {
+    methodFilterId: FilterArgument(keys: ['method', 'm']),
+    statusFilterId: FilterArgument(keys: ['status', 's']),
+    typeFilterId: FilterArgument(keys: ['type', 't']),
+  };
+
+  @override
+  Map<String, FilterArgument> get filterArgs => _filterArgs;
 
   /// Notifies that new Network requests have been processed.
   ValueListenable<NetworkRequests> get requests => _requests;
@@ -32,15 +49,6 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
   ValueListenable<NetworkRequest> get selectedRequest => _selectedRequest;
 
   final _selectedRequest = ValueNotifier<NetworkRequest>(null);
-
-  ValueListenable<List<NetworkRequest>> get filteredRequests =>
-      _filteredRequests;
-
-  final _filteredRequests = ValueNotifier<List<NetworkRequest>>([]);
-
-  ValueListenable<NetworkFilter> get activeFilter => _activeFilter;
-
-  final _activeFilter = ValueNotifier<NetworkFilter>(defaultFilter);
 
   /// Notifies that the timeline is currently being recorded.
   ValueListenable<bool> get recordingNotifier => _recordingNotifier;
@@ -182,8 +190,8 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
       invalidRequests: [],
       outstandingRequestsMap: Map.from(requests.value.outstandingHttpRequests),
     );
-    filterData(_activeFilter.value);
-    refreshSearchMatches();
+    _updateData();
+    _updateSelection();
   }
 
   void _updatePollingState(bool recording) {
@@ -272,9 +280,24 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
   Future<void> clear() async {
     await _networkService.clearData();
     _requests.value = NetworkRequests();
-    _filteredRequests.value = [];
+    resetFilter();
+    _updateData();
+    _updateSelection();
+  }
+
+  void _updateData() {
+    filterData(activeFilter.value);
     refreshSearchMatches();
-    _selectedRequest.value = null;
+  }
+
+  void _updateSelection() {
+    final selected = _selectedRequest.value;
+    if (selected != null) {
+      final requests = filteredData.value;
+      if (!requests.contains(selected)) {
+        _selectedRequest.value = null;
+      }
+    }
   }
 
   @override
@@ -283,7 +306,7 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     final matches = <NetworkRequest>[];
     final caseInsensitiveSearch = search.toLowerCase();
 
-    final currentRequests = _filteredRequests.value;
+    final currentRequests = filteredData.value;
     for (final request in currentRequests) {
       if (request.uri.toLowerCase().contains(caseInsensitiveSearch)) {
         matches.add(request);
@@ -292,121 +315,54 @@ class NetworkController with SearchControllerMixin<NetworkRequest> {
     return matches;
   }
 
-  void filterData(NetworkFilter filter) {
-    if (filter == defaultFilter) {
-      _filteredRequests.value = List.from(_requests.value.requests);
-    }
-    _filteredRequests.value =
-        _requests.value.requests.where((NetworkRequest r) {
-      if (filter.method != null &&
-          r.method.toLowerCase() != filter.method.toLowerCase()) {
-        return false;
-      }
-      if (filter.status != null &&
-          r.status?.toLowerCase() != filter.status.toLowerCase()) {
-        return false;
-      }
-      if (filter.type != null &&
-          r.type.toLowerCase() != filter.type.toLowerCase()) {
-        return false;
-      }
-      if (filter.substrings.isNotEmpty) {
-        for (final substring in filter.substrings) {
-          final caseInsensitiveSubstring = substring.toLowerCase();
-          final matchesUri =
-              r.uri.toLowerCase().contains(caseInsensitiveSubstring);
-          final matchesMethod =
-              r.method.toLowerCase().contains(caseInsensitiveSubstring);
-          final matchesStatus =
-              r.status?.toLowerCase()?.contains(caseInsensitiveSubstring) ??
-                  false;
-          final matchesType =
-              r.type.toLowerCase().contains(caseInsensitiveSubstring);
-          if (matchesUri || matchesMethod || matchesStatus || matchesType) {
-            return true;
-          }
+  @override
+  void filterData(QueryFilter filter) {
+    if (filter == null) {
+      filteredData.value = List.from(_requests.value.requests);
+    } else {
+      filteredData.value = _requests.value.requests.where((NetworkRequest r) {
+        final methodArg = filter.filterArguments[methodFilterId];
+        if (methodArg != null &&
+            !methodArg.matchesValue(r.method.toLowerCase())) {
+          return false;
         }
-        return false;
-      }
-      return true;
-    }).toList();
-    _activeFilter.value = filter;
-  }
 
-  void resetFilters() {
-    _activeFilter.value = defaultFilter;
-  }
-}
-
-class NetworkFilter {
-  NetworkFilter({
-    this.method,
-    this.substrings = const [],
-    this.status,
-    this.type,
-  });
-
-  factory NetworkFilter.from(NetworkFilter filter) {
-    return NetworkFilter(
-      method: filter.method,
-      substrings: filter.substrings,
-      status: filter.status,
-      type: filter.type,
-    );
-  }
-
-  factory NetworkFilter.fromQuery(String query) {
-    final partsBySpace = query.split(' ');
-
-    final substrings = <String>[];
-    String method;
-    String status;
-    String type;
-    for (final part in partsBySpace) {
-      final querySeparatorIndex = part.indexOf(':');
-      if (querySeparatorIndex != -1) {
-        final value = part.substring(querySeparatorIndex + 1);
-        if (value != '') {
-          if (isValidFilter(keys: ['m', 'method'], query: part)) {
-            method = value;
-          } else if (isValidFilter(keys: ['s', 'status'], query: part)) {
-            status = value;
-          } else if (isValidFilter(keys: ['t', 'type'], query: part)) {
-            type = value;
-          }
+        final statusArg = filter.filterArguments[statusFilterId];
+        if (statusArg != null &&
+            !statusArg.matchesValue(r.status?.toLowerCase())) {
+          return false;
         }
-      } else {
-        substrings.add(part);
-      }
+
+        final typeArg = filter.filterArguments[typeFilterId];
+        if (typeArg != null && !typeArg.matchesValue(r.type.toLowerCase())) {
+          return false;
+        }
+
+        if (filter.substrings.isNotEmpty) {
+          for (final substring in filter.substrings) {
+            final caseInsensitiveSubstring = substring.toLowerCase();
+            final matchesUri =
+                r.uri.toLowerCase().contains(caseInsensitiveSubstring);
+            if (matchesUri) return true;
+
+            final matchesMethod =
+                r.method.toLowerCase().contains(caseInsensitiveSubstring);
+            if (matchesMethod) return true;
+
+            final matchesStatus =
+                r.status?.toLowerCase()?.contains(caseInsensitiveSubstring) ??
+                    false;
+            if (matchesStatus) return true;
+
+            final matchesType =
+                r.type.toLowerCase().contains(caseInsensitiveSubstring);
+            if (matchesType) return true;
+          }
+          return false;
+        }
+        return true;
+      }).toList();
     }
-    return NetworkFilter(
-      method: method,
-      substrings: substrings,
-      status: status,
-      type: type,
-    );
-  }
-
-  String method;
-
-  List<String> substrings;
-
-  String status;
-
-  String type;
-
-  String get query {
-    final _substrings = substrings.join(' ');
-    final _method = method != null ? 'method:$method' : '';
-    final _status = status != null ? 'status:$status' : '';
-    final _type = type != null ? 'type:$type' : '';
-    return '$_substrings $_method $_status $_type'.trim();
-  }
-
-  static bool isValidFilter({@required List<String> keys, String query}) {
-    for (final key in keys) {
-      if (query.startsWith('$key:')) return true;
-    }
-    return false;
+    activeFilter.value = filter;
   }
 }
