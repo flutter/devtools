@@ -1009,3 +1009,15 @@ extension ListExtension<T> on List<T> {
     ];
   }
 }
+
+Map<String, String> devToolsQueryParams(String url) {
+  // DevTools urls can have the form:
+  // http://localhost:123/?key=value
+  // http://localhost:123/#/?key=value
+  // http://localhost:123/#/page-id?key=value
+  // Since we just want the query params, we will modify the url to have an
+  // easy-to-parse form.
+  final modifiedUri = url.replaceFirst(RegExp(r'#\/(\w*)[?]'), '?');
+  final uri = Uri.parse(modifiedUri);
+  return uri.queryParameters;
+}
