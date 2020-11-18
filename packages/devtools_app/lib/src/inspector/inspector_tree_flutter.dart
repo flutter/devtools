@@ -11,6 +11,7 @@ import 'package:pedantic/pedantic.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../collapsible_mixin.dart';
+import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/theme.dart';
@@ -383,7 +384,7 @@ class _InspectorTreeState extends State<InspectorTree>
     super.build(context);
     if (controller == null) {
       // Indicate the tree is loading.
-      return const Center(child: CircularProgressIndicator());
+      return const CenteredCircularProgressIndicator();
     }
 
     return Scrollbar(

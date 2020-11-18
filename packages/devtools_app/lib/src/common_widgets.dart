@@ -747,6 +747,17 @@ class CenteredMessage extends StatelessWidget {
   }
 }
 
+class CenteredCircularProgressIndicator extends StatelessWidget {
+  const CenteredCircularProgressIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+}
+
 class CircularIconButton extends StatelessWidget {
   const CircularIconButton({
     @required this.icon,

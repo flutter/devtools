@@ -1,9 +1,15 @@
 name: memory_leak
 description: A new Flutter project.
 
+environment:
+  sdk: '>=2.10.0 <3.0.0'
+
 dependencies:
   flutter:
     sdk: flutter
+
+environment:
+  sdk: ">=2.10.0 <3.0.0"
 
 dev_dependencies:
   flutter_test:
