@@ -289,7 +289,7 @@ class _LogDetailsState extends State<LogDetails>
     final disabled = log?.details == null || log.details.isEmpty;
 
     return OutlineDecoration(
-      child: ConsoleUsingTextWidget(
+      child: Console(
         title: areaPaneHeader(
           context,
           title: 'Details',
