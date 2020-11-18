@@ -11,13 +11,12 @@ import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
-import '../dialogs.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
-import '../ui/label.dart';
+import '../ui/filter.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import 'network_controller.dart';
@@ -52,7 +51,7 @@ class NetworkScreen extends Screen {
           valueListenable: networkController.requests,
           builder: (context, networkRequests, _) {
             return ValueListenableBuilder<List<NetworkRequest>>(
-              valueListenable: networkController.filteredRequests,
+              valueListenable: networkController.filteredData,
               builder: (context, filteredRequests, _) {
                 final filteredCount = filteredRequests.length;
                 final totalCount = networkRequests.requests.length;
@@ -89,6 +88,23 @@ class NetworkScreen extends Screen {
 
 class NetworkScreenBody extends StatefulWidget {
   const NetworkScreenBody();
+
+  static const filterQueryInstructions = '''
+Type a filter query to show or hide specific requests.
+
+Any text that is not paired with an available filter key below will be queried against all categories (method, uri, status, type).
+
+Available filters:
+    'method', 'm'       (e.g. 'm:get', '-m:put,patch')
+    'status', 's'           (e.g. 's:200', '-s:404')
+    'type', 't'               (e.g. 't:json', '-t:ws')
+
+Example queries:
+    'my-endpoint method:put,post -status:404 type:json'
+    'example.com -m:get s:200,201 t:htm,html,json'
+    'http s:404'
+    'POST'
+''';
 
   @override
   State<StatefulWidget> createState() => _NetworkScreenBodyState();
@@ -132,10 +148,10 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
         recording = _networkController.recordingNotifier.value;
       });
     });
-    filteredRequests = _networkController.filteredRequests.value;
-    addAutoDisposeListener(_networkController.filteredRequests, () {
+    filteredRequests = _networkController.filteredData.value;
+    addAutoDisposeListener(_networkController.filteredData, () {
       setState(() {
-        filteredRequests = _networkController.filteredRequests.value;
+        filteredRequests = _networkController.filteredData.value;
       });
     });
   }
@@ -171,6 +187,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
           },
         ),
         const Expanded(child: SizedBox()),
+        // TODO(kenz): fix focus issue when state is refreshed
         Container(
           width: wideSearchTextWidth,
           height: defaultTextFieldHeight,
@@ -218,7 +235,16 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void _showFilterDialog() {
     showDialog(
       context: context,
-      builder: (context) => NetworkFilterDialog(_networkController),
+      builder: (context) => FilterDialog(
+        controller: _networkController,
+        onApplyFilter: (query) => _networkController.filterData(
+          QueryFilter.parse(
+            query,
+            _networkController.filterArgs,
+          ),
+        ),
+        queryInstructions: NetworkScreenBody.filterQueryInstructions,
+      ),
     );
   }
 
@@ -399,113 +425,5 @@ class TimestampColumn extends ColumnData<NetworkRequest> {
   @override
   String getDisplayValue(NetworkRequest dataObject) {
     return formatDateTime(dataObject.startTimestamp);
-  }
-}
-
-class NetworkFilterDialog extends StatefulWidget {
-  const NetworkFilterDialog(this.controller);
-
-  final NetworkController controller;
-
-  @override
-  _NetworkFilterDialogState createState() => _NetworkFilterDialogState();
-}
-
-class _NetworkFilterDialogState extends State<NetworkFilterDialog> {
-  static const dialogWidth = 500.0;
-
-  static const queryInstructions = '''
-Type a filter query to show specific requests.
-
-Any text that is not paired with an available filter key below will be queried against all categories (method, uri, status, type).
-
-Available filters:
-    'method', 'm'       (e.g. 'm:get', 'm:put')
-    'status', 's'           (e.g. 's:200', 's:404')
-    'type', 't'               (e.g. 't:json', 't:ws')
-
-Example queries:
-    'my-endpoint method:put status:404 type:json'
-    'example.com m:get s:200 t:htm'
-    'http s:404'
-    'POST'
-''';
-
-  TextEditingController queryTextFieldController;
-
-  @override
-  void initState() {
-    super.initState();
-    queryTextFieldController =
-        TextEditingController(text: widget.controller.activeFilter.value.query);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsDialog(
-      title: _buildDialogTitle(),
-      content: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: defaultSpacing,
-        ),
-        width: dialogWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildQueryTextField(),
-            const SizedBox(height: defaultSpacing),
-            _buildQueryInstructions(),
-          ],
-        ),
-      ),
-      actions: [
-        DialogApplyButton(
-          onPressed: () {
-            widget.controller.filterData(
-                NetworkFilter.fromQuery(queryTextFieldController.value.text));
-          },
-        ),
-        DialogCancelButton(),
-      ],
-    );
-  }
-
-  Widget _buildDialogTitle() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        dialogTitleText(Theme.of(context), 'Filters'),
-        FlatButton(
-          onPressed: queryTextFieldController.clear,
-          child: const MaterialIconLabel(
-            Icons.replay,
-            'Reset to default',
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQueryTextField() {
-    return Container(
-      height: defaultTextFieldHeight,
-      child: TextField(
-        controller: queryTextFieldController,
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.all(denseSpacing),
-          border: const OutlineInputBorder(),
-          labelText: 'Filter query',
-          suffix: clearInputButton(queryTextFieldController.clear),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQueryInstructions() {
-    return Text(
-      queryInstructions,
-      style: Theme.of(context).subtleTextStyle,
-    );
   }
 }
