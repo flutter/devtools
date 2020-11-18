@@ -4,16 +4,16 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/common_widgets.dart';
-import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/http/http.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
+import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/network/network_model.dart';
 import 'package:devtools_app/src/network/network_request_inspector.dart';
 import 'package:devtools_app/src/network/network_request_inspector_views.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
-import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -56,9 +56,10 @@ void main() {
   group('Network Profiler', () {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(
-        useFakeService: true,
-        timelineData: timeline,
-        socketProfile: socketProfile,
+        service: FakeServiceManager.createFakeService(
+          timelineData: timeline,
+          socketProfile: socketProfile,
+        ),
       );
       (fakeServiceManager.service as FakeVmService)
           .httpEnableTimelineLoggingResult = false;

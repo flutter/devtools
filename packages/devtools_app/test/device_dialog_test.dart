@@ -22,7 +22,6 @@ void main() {
 
   group('DeviceDialog', () {
     void initServiceManager({
-      bool useFakeService = true,
       bool flutterVersionServiceAvailable = true,
     }) {
       final availableServices = [
@@ -30,7 +29,6 @@ void main() {
           registrations.flutterVersion.service,
       ];
       fakeServiceManager = FakeServiceManager(
-        useFakeService: useFakeService,
         availableServices: availableServices,
       );
       when(fakeServiceManager.vm.version).thenReturn('1.9.1');
@@ -89,7 +87,6 @@ void main() {
 
   group('VMFlagsDialog', () {
     void initServiceManager({
-      bool useFakeService = true,
       bool flutterVersionServiceAvailable = true,
     }) {
       final availableServices = [
@@ -97,7 +94,6 @@ void main() {
           registrations.flutterVersion.service,
       ];
       fakeServiceManager = FakeServiceManager(
-        useFakeService: useFakeService,
         availableServices: availableServices,
       );
       when(fakeServiceManager.vm.version).thenReturn('1.9.1');

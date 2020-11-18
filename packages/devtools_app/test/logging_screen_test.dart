@@ -49,7 +49,7 @@ void main() {
       when(mockLoggingController.filteredData)
           .thenReturn(ValueNotifier<List<LogData>>([]));
 
-      fakeServiceManager = FakeServiceManager(useFakeService: true);
+      fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isFlutterWebAppNow)
           .thenReturn(false);
       when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);

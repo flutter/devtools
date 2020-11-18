@@ -33,7 +33,7 @@ void main() {
     }
 
     setUp(() {
-      final fakeServiceManager = FakeServiceManager(useFakeService: true);
+      final fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     });

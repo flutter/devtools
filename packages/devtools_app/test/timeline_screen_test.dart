@@ -28,8 +28,9 @@ void main() {
 
   void _setUpServiceManagerForTimeline(Map<String, dynamic> timelineJson) {
     fakeServiceManager = FakeServiceManager(
-      useFakeService: true,
-      timelineData: vm_service.Timeline.parse(timelineJson),
+      service: FakeServiceManager.createFakeService(
+        timelineData: vm_service.Timeline.parse(timelineJson),
+      ),
     );
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);

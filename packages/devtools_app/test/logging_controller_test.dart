@@ -40,7 +40,7 @@ void main() {
     setUp(() async {
       setGlobal(
         ServiceConnectionManager,
-        FakeServiceManager(useFakeService: true),
+        FakeServiceManager(),
       );
 
       final InspectorService inspectorService = MockInspectorService();

@@ -5,13 +5,14 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/core/message_bus.dart';
-import 'package:devtools_app/src/notifications.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/notifications.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/service_registrations.dart';
 import 'package:devtools_app/src/ui/service_extension_widgets.dart';
 import 'package:devtools_app/src/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -124,24 +125,25 @@ void main() {
   });
 
   group('Structured Errors toggle', () {
-    StreamSubscription serviceState;
+    ValueListenable<ServiceExtensionState> serviceState;
     ServiceExtensionState mostRecentState;
+    final serviceStateListener = () {
+      mostRecentState = serviceState.value;
+    };
+
     setUp(() {
       (mockServiceManager.serviceExtensionManager
               as FakeServiceExtensionManager)
           .fakeFrame();
-      serviceState =
-          mockServiceManager.serviceExtensionManager.getServiceExtensionState(
-        structuredErrors.extension,
-        (data) {
-          mostRecentState = data;
-        },
-      );
+      serviceState = mockServiceManager.serviceExtensionManager
+          .getServiceExtensionState(structuredErrors.extension);
+      serviceState.addListener(serviceStateListener);
     });
 
     tearDown(() async {
-      await serviceState.cancel();
+      serviceState.removeListener(serviceStateListener);
     });
+
     testWidgets('toggles', (WidgetTester tester) async {
       await (mockServiceManager.serviceExtensionManager
               as FakeServiceExtensionManager)

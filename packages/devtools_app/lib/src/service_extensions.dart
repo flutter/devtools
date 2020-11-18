@@ -294,6 +294,32 @@ final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
   value: (extension) => extension,
 );
 
+/// Service extensions that are not safe to call unless a frame has already
+/// been rendered.
+///
+/// Flutter can sometimes crash if these extensions are called before the first
+/// frame is done rendering. We are intentionally conservative about which
+/// extensions are safe to run before the first frame as there is little harm
+/// in setting these extensions after one frame has rendered without the
+/// extension set.
+final Set<String> _unsafeBeforeFirstFrameFlutterExtensions =
+    <ServiceExtensionDescription>[
+  debugPaint,
+  debugPaintBaselines,
+  repaintRainbow,
+  performanceOverlay,
+  debugAllowBanner,
+  toggleOnDeviceWidgetInspector,
+  toggleSelectWidgetMode,
+  enableOnDeviceInspector,
+  togglePlatformMode,
+  slowAnimations,
+].map((extension) => extension.extension).toSet();
+
+bool isUnsafeBeforeFirstFlutterFrame(String extensionName) {
+  return _unsafeBeforeFirstFrameFlutterExtensions.contains(extensionName);
+}
+
 bool isFlutterExtension(String extensionName) {
   return extensionName.startsWith('ext.flutter.');
 }

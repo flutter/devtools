@@ -26,9 +26,10 @@ void main() {
       timeline = await loadNetworkProfileTimeline();
       socketProfile = loadSocketProfile();
       fakeServiceManager = FakeServiceManager(
-        useFakeService: true,
-        timelineData: timeline,
-        socketProfile: socketProfile,
+        service: FakeServiceManager.createFakeService(
+          timelineData: timeline,
+          socketProfile: socketProfile,
+        ),
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       controller = NetworkController();

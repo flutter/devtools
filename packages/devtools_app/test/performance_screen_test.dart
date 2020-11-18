@@ -23,7 +23,7 @@ void main() {
 
   group('PerformanceScreen', () {
     setUp(() async {
-      fakeServiceManager = FakeServiceManager(useFakeService: true);
+      fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
           .thenReturn(false);
