@@ -114,7 +114,6 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
       child: ListView.builder(
         padding: const EdgeInsets.all(denseSpacing),
         itemCount: widget.lines?.length ?? 0,
-        // TODO: Get from theme?
         itemExtent: CodeView.rowHeight,
         controller: _scroll,
         itemBuilder: (context, index) {
