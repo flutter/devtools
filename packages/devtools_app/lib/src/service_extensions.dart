@@ -8,13 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import 'analytics/constants.dart' as ga;
+import 'theme.dart';
 import 'ui/icons.dart';
 
 // Each service extension needs to be added to [_extensionDescriptions].
 class ToggleableServiceExtensionDescription<T>
     extends ServiceExtensionDescription {
   ToggleableServiceExtensionDescription._({
-    Image icon,
+    Widget icon,
     @required String extension,
     @required String description,
     @required T enabledValue,
@@ -66,7 +67,7 @@ class ServiceExtensionDescription<T> {
 
   final String description;
 
-  final Image icon;
+  final Widget icon;
 
   final List<T> values;
 
@@ -89,6 +90,18 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Hide Debug Banner',
   disabledTooltip: 'Show Debug Banner',
+  gaScreenName: ga.inspector,
+  gaItem: ga.debugBanner,
+);
+
+final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.invertOversizedImages',
+  description: 'Invert Oversized Images',
+  icon: const Icon(Icons.image, size: actionsIconSize),
+  enabledValue: true,
+  disabledValue: false,
+  enabledTooltip: 'Disable Invert Oversized Images',
+  disabledTooltip: 'Enable Invert Oversized Images',
   gaScreenName: ga.inspector,
   gaItem: ga.debugBanner,
 );
@@ -285,6 +298,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   structuredErrors,
   httpEnableTimelineLogging,
   socketProfiling,
+  invertOversizedImages,
 ];
 
 final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
@@ -293,6 +307,32 @@ final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
   key: (extension) => extension.extension,
   value: (extension) => extension,
 );
+
+/// Service extensions that are not safe to call unless a frame has already
+/// been rendered.
+///
+/// Flutter can sometimes crash if these extensions are called before the first
+/// frame is done rendering. We are intentionally conservative about which
+/// extensions are safe to run before the first frame as there is little harm
+/// in setting these extensions after one frame has rendered without the
+/// extension set.
+final Set<String> _unsafeBeforeFirstFrameFlutterExtensions =
+    <ServiceExtensionDescription>[
+  debugPaint,
+  debugPaintBaselines,
+  repaintRainbow,
+  performanceOverlay,
+  debugAllowBanner,
+  toggleOnDeviceWidgetInspector,
+  toggleSelectWidgetMode,
+  enableOnDeviceInspector,
+  togglePlatformMode,
+  slowAnimations,
+].map((extension) => extension.extension).toSet();
+
+bool isUnsafeBeforeFirstFlutterFrame(String extensionName) {
+  return _unsafeBeforeFirstFrameFlutterExtensions.contains(extensionName);
+}
 
 bool isFlutterExtension(String extensionName) {
   return extensionName.startsWith('ext.flutter.');

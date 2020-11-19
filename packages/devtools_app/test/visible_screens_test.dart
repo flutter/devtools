@@ -24,8 +24,7 @@ void main() {
     FakeServiceManager fakeServiceManager;
 
     setUp(() async {
-      fakeServiceManager =
-          FakeServiceManager(useFakeService: true, availableLibraries: []);
+      fakeServiceManager = FakeServiceManager(availableLibraries: []);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(FrameworkController, FrameworkController());
 

@@ -4,9 +4,9 @@
 
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/common_widgets.dart';
-import 'package:devtools_app/src/scaffold.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
+import 'package:devtools_app/src/scaffold.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -22,7 +22,7 @@ void main() {
 
   setUp(() {
     controller = BannerMessagesController();
-    fakeServiceManager = FakeServiceManager(useFakeService: true);
+    fakeServiceManager = FakeServiceManager();
     setGlobal(ServiceConnectionManager, fakeServiceManager);
   });
 

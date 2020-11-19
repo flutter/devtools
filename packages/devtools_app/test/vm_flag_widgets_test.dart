@@ -25,7 +25,7 @@ void main() {
     BuildContext buildContext;
 
     setUp(() {
-      fakeServiceManager = FakeServiceManager(useFakeService: true);
+      fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       dropdown = const ProfileGranularityDropdown(PerformanceScreen.id);
     });

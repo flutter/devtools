@@ -116,7 +116,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
           children: [
             ValueListenableBuilder(
               valueListenable: serviceManager.serviceExtensionManager
-                  .hasServiceExtensionListener(
+                  .hasServiceExtension(
                       extensions.toggleSelectWidgetMode.extension),
               builder: (_, selectModeSupported, __) {
                 return ServiceExtensionButtonGroup(
@@ -179,7 +179,10 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
       const SizedBox(width: denseSpacing),
       ServiceExtensionButtonGroup(
         minIncludeTextWidth: 1250,
-        extensions: [extensions.repaintRainbow, extensions.debugAllowBanner],
+        extensions: [
+          extensions.repaintRainbow,
+          extensions.invertOversizedImages,
+        ],
       ),
       // TODO(jacobr): implement TogglePlatformSelector.
       //  TogglePlatformSelector().selector

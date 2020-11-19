@@ -8,23 +8,33 @@ import 'package:vm_service/vm_service.dart';
 import 'support/mocks.dart';
 
 void main() {
-  FakeServiceManager fakeServiceManager;
-
-  setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-  });
-
   test('Ensure private RPCs can only be enabled with VM Developer Mode enabled',
       () async {
-    when(fakeServiceManager.service.trackFuture(any, any)).thenAnswer(
+    final service = MockVmService();
+    when(service.trackFuture(any, any)).thenAnswer(
       (invocation) => invocation.positionalArguments[1],
     );
-    when(fakeServiceManager.service
-            .callMethod(argThat(equals('_collectAllGarbage'))))
-        .thenAnswer(
+    when(service.callMethod(argThat(equals('_collectAllGarbage')))).thenAnswer(
       (_) => Future.value(Success()),
     );
+    when(service.onDebugEvent).thenAnswer((_) {
+      return const Stream.empty();
+    });
+    when(service.onVMEvent).thenAnswer((_) {
+      return const Stream.empty();
+    });
+    when(service.onIsolateEvent).thenAnswer((_) {
+      return const Stream.empty();
+    });
+    when(service.onStdoutEvent).thenAnswer((_) {
+      return const Stream.empty();
+    });
+    when(service.onStderrEvent).thenAnswer((_) {
+      return const Stream.empty();
+    });
+
+    final fakeServiceManager = FakeServiceManager(service: service);
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
     VmServicePrivate.enablePrivateRpcs = false;
     try {
       await fakeServiceManager.service.collectAllGarbage();

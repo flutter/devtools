@@ -6,8 +6,8 @@
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/timeline/flutter_frames_chart.dart';
-import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
+import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/ui/colors.dart';
 import 'package:devtools_testing/support/timeline_test_data.dart';
 import 'package:flutter/material.dart';
@@ -31,8 +31,7 @@ void main() {
 
   group('FlutterFramesChart', () {
     setUp(() async {
-      setGlobal(
-          ServiceConnectionManager, FakeServiceManager(useFakeService: true));
+      setGlobal(ServiceConnectionManager, FakeServiceManager());
     });
 
     testWidgets('builds with no frames', (WidgetTester tester) async {
