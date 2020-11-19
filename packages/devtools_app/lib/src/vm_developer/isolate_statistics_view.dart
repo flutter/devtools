@@ -55,8 +55,12 @@ class IsolateStatisticsViewBody extends StatelessWidget {
             Flexible(
               child: Column(
                 children: [
-                  _buildTopRow(),
-                  _buildBottomRow(),
+                  Flexible(
+                    child: _buildTopRow(),
+                  ),
+                  Flexible(
+                    child: _buildBottomRow(),
+                  ),
                 ],
               ),
             ),
@@ -67,40 +71,42 @@ class IsolateStatisticsViewBody extends StatelessWidget {
   }
 
   Widget _buildTopRow() {
-    return Flexible(
-      child: Row(
-        children: [
-          GeneralIsolateStatisticsWidget(
+    return Row(
+      children: [
+        Flexible(
+          child: GeneralIsolateStatisticsWidget(
             controller: controller,
           ),
-          TagStatisticsWidget(
+        ),
+        Flexible(
+          child: TagStatisticsWidget(
             controller: controller,
           ),
-          ServiceExtensionsWidget(
+        ),
+        Flexible(
+          child: ServiceExtensionsWidget(
             controller: controller,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildBottomRow() {
-    return Flexible(
-      child: Row(
-        children: [
-          Flexible(
-            child: IsolateMemoryStatisticsWidget(
-              controller: controller,
-            ),
+    return Row(
+      children: [
+        Flexible(
+          child: IsolateMemoryStatisticsWidget(
+            controller: controller,
           ),
-          Flexible(
-            flex: 2,
-            child: IsolatePortsWidget(
-              controller: controller,
-            ),
+        ),
+        Flexible(
+          flex: 2,
+          child: IsolatePortsWidget(
+            controller: controller,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -144,17 +150,15 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isolate = controller.isolate;
-    return Flexible(
-      child: VMInfoCard(
-        title: 'General',
-        rowKeyValues: [
-          MapEntry('Name', isolate?.name),
-          MapEntry('Started at', _startTime(isolate)),
-          MapEntry('Uptime', _uptime(isolate)),
-          MapEntry('Root Library', isolate?.rootLib?.uri),
-          MapEntry('ID', isolate?.id),
-        ],
-      ),
+    return VMInfoCard(
+      title: 'General',
+      rowKeyValues: [
+        MapEntry('Name', isolate?.name),
+        MapEntry('Started at', _startTime(isolate)),
+        MapEntry('Uptime', _uptime(isolate)),
+        MapEntry('Root Library', isolate?.rootLib?.uri),
+        MapEntry('ID', isolate?.id),
+      ],
     );
   }
 }
@@ -242,23 +246,21 @@ class TagStatisticsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(
-      child: VMInfoCard(
-        title: 'Execution Time',
-        table: Flexible(
-          child: controller.cpuProfilerController.profilerEnabled
-              ? FlatTable<VMTag>(
-                  columns: columns,
-                  data: controller.tags,
-                  keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
-                  sortColumn: percentage,
-                  sortDirection: SortDirection.descending,
-                  onItemSelected: (_) => null,
-                )
-              : CpuProfilerDisabled(
-                  controller.cpuProfilerController,
-                ),
-        ),
+    return VMInfoCard(
+      title: 'Execution Time',
+      table: Flexible(
+        child: controller.cpuProfilerController.profilerEnabled
+            ? FlatTable<VMTag>(
+                columns: columns,
+                data: controller.tags,
+                keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
+                sortColumn: percentage,
+                sortDirection: SortDirection.descending,
+                onItemSelected: (_) => null,
+              )
+            : CpuProfilerDisabled(
+                controller.cpuProfilerController,
+              ),
       ),
     );
   }
@@ -408,28 +410,26 @@ class StackTraceViewerWidget extends StatelessWidget {
         ?.split('\n')
         ?.where((e) => e.isNotEmpty)
         ?.toList();
-    return Flexible(
-      child: VMInfoList(
-        title: 'Allocation Location',
-        table: lines == null
-            ? const Expanded(
-                child: Center(
-                  child: Text('No port selected'),
-                ),
-              )
-            : Flexible(
-                child: FlatTable<String>(
-                  columns: [
-                    frame,
-                  ],
-                  data: lines,
-                  keyFactory: (String s) => ValueKey<String>(s),
-                  onItemSelected: (_) => null,
-                  sortColumn: frame,
-                  sortDirection: SortDirection.ascending,
-                ),
+    return VMInfoList(
+      title: 'Allocation Location',
+      table: lines == null
+          ? const Expanded(
+              child: Center(
+                child: Text('No port selected'),
               ),
-      ),
+            )
+          : Flexible(
+              child: FlatTable<String>(
+                columns: [
+                  frame,
+                ],
+                data: lines,
+                keyFactory: (String s) => ValueKey<String>(s),
+                onItemSelected: (_) => null,
+                sortColumn: frame,
+                sortDirection: SortDirection.ascending,
+              ),
+            ),
     );
   }
 }
@@ -468,32 +468,36 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
           child: VMInfoCard(
             title: 'Open Ports (${ports.length})',
             table: Flexible(
-              child: Split(axis: Axis.horizontal, children: [
-                FlatTable<InstanceRef>(
-                  columns: columns,
-                  data: ports,
-                  keyFactory: (InstanceRef port) =>
-                      ValueKey<String>(port.debugName),
-                  sortColumn: id,
-                  sortDirection: SortDirection.ascending,
-                  selectionNotifier: selectedPort,
-                  onItemSelected: (InstanceRef port) => setState(
-                    () {
-                      if (port == selectedPort.value) {
-                        selectedPort.value = null;
-                      } else {
-                        selectedPort.value = port;
-                      }
-                    },
+              child: Split(
+                axis: Axis.horizontal,
+                children: [
+                  FlatTable<InstanceRef>(
+                    columns: columns,
+                    data: ports,
+                    keyFactory: (InstanceRef port) =>
+                        ValueKey<String>(port.debugName),
+                    sortColumn: id,
+                    sortDirection: SortDirection.ascending,
+                    selectionNotifier: selectedPort,
+                    onItemSelected: (InstanceRef port) => setState(
+                      () {
+                        if (port == selectedPort.value) {
+                          selectedPort.value = null;
+                        } else {
+                          selectedPort.value = port;
+                        }
+                      },
+                    ),
                   ),
-                ),
-                StackTraceViewerWidget(
-                  stackTrace: selectedPort.value,
-                ),
-              ], initialFractions: const [
-                0.3,
-                0.7,
-              ]),
+                  StackTraceViewerWidget(
+                    stackTrace: selectedPort.value,
+                  ),
+                ],
+                initialFractions: const [
+                  0.3,
+                  0.7,
+                ],
+              ),
             ),
           ),
         ),
@@ -525,18 +529,16 @@ class ServiceExtensionsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final extensions = controller.isolate?.extensionRPCs ?? [];
-    return Flexible(
-      child: VMInfoCard(
-        title: 'Service Extensions (${extensions.length})',
-        table: Flexible(
-          child: FlatTable<String>(
-            columns: columns,
-            data: extensions,
-            keyFactory: (String extension) => ValueKey<String>(extension),
-            sortColumn: name,
-            sortDirection: SortDirection.ascending,
-            onItemSelected: (_) => null,
-          ),
+    return VMInfoCard(
+      title: 'Service Extensions (${extensions.length})',
+      table: Flexible(
+        child: FlatTable<String>(
+          columns: columns,
+          data: extensions,
+          keyFactory: (String extension) => ValueKey<String>(extension),
+          sortColumn: name,
+          sortDirection: SortDirection.ascending,
+          onItemSelected: (_) => null,
         ),
       ),
     );

@@ -69,11 +69,15 @@ class VMStatisticsWidget extends StatelessWidget {
           flex: 3,
           child: Column(
             children: [
-              GeneralVMStatisticsWidget(
-                controller: controller,
+              Flexible(
+                child: GeneralVMStatisticsWidget(
+                  controller: controller,
+                ),
               ),
-              ProcessStatisticsWidget(
-                controller: controller,
+              Flexible(
+                child: ProcessStatisticsWidget(
+                  controller: controller,
+                ),
               )
             ],
           ),
@@ -82,12 +86,16 @@ class VMStatisticsWidget extends StatelessWidget {
           flex: 4,
           child: Column(
             children: [
-              IsolatesPreviewWidget(
-                controller: controller,
+              Flexible(
+                child: IsolatesPreviewWidget(
+                  controller: controller,
+                ),
               ),
-              IsolatesPreviewWidget(
-                controller: controller,
-                systemIsolates: true,
+              Flexible(
+                child: IsolatesPreviewWidget(
+                  controller: controller,
+                  systemIsolates: true,
+                ),
               ),
             ],
           ),
@@ -112,31 +120,29 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = controller.vm;
-    return Flexible(
-      child: VMInfoCard(
-        title: 'VM',
-        rowKeyValues: [
-          MapEntry('Name', vm?.name),
-          MapEntry('Version', vm?.version),
-          MapEntry('Embedder', vm?.embedder),
-          MapEntry(
-            'Started',
-            vm == null
-                ? null
-                : formatDateTime(
-                    DateTime.fromMillisecondsSinceEpoch(vm.startTime),
-                  ),
+    return VMInfoCard(
+      title: 'VM',
+      rowKeyValues: [
+        MapEntry('Name', vm?.name),
+        MapEntry('Version', vm?.version),
+        MapEntry('Embedder', vm?.embedder),
+        MapEntry(
+          'Started',
+          vm == null
+              ? null
+              : formatDateTime(
+                  DateTime.fromMillisecondsSinceEpoch(vm.startTime),
+                ),
+        ),
+        MapEntry('Profiler Mode', vm?.profilerMode),
+        MapEntry(
+          'Current Memory',
+          prettyPrintBytes(
+            vm?.currentMemory,
+            includeUnit: true,
           ),
-          MapEntry('Profiler Mode', vm?.profilerMode),
-          MapEntry(
-            'Current Memory',
-            prettyPrintBytes(
-              vm?.currentMemory,
-              includeUnit: true,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -156,41 +162,36 @@ class ProcessStatisticsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = controller.vm;
-    return Flexible(
-      child: VMInfoCard(
-        title: 'Process',
-        rowKeyValues: [
-          MapEntry('PID', vm?.pid),
-          MapEntry(
-              'Host CPU',
-              vm == null
-                  ? null
-                  : '${vm.hostCPU} (${vm.architectureBits}-bits)'),
-          MapEntry('Target CPU', vm?.targetCPU),
-          MapEntry('Operating System', vm?.operatingSystem),
-          MapEntry(
-            'Max Memory (RSS)',
-            prettyPrintBytes(
-              vm?.maxRSS,
-              includeUnit: true,
-            ),
+    return VMInfoCard(
+      title: 'Process',
+      rowKeyValues: [
+        MapEntry('PID', vm?.pid),
+        MapEntry('Host CPU',
+            vm == null ? null : '${vm.hostCPU} (${vm.architectureBits}-bits)'),
+        MapEntry('Target CPU', vm?.targetCPU),
+        MapEntry('Operating System', vm?.operatingSystem),
+        MapEntry(
+          'Max Memory (RSS)',
+          prettyPrintBytes(
+            vm?.maxRSS,
+            includeUnit: true,
           ),
-          MapEntry(
-            'Current Memory (RSS)',
-            prettyPrintBytes(
-              vm?.currentRSS,
-              includeUnit: true,
-            ),
+        ),
+        MapEntry(
+          'Current Memory (RSS)',
+          prettyPrintBytes(
+            vm?.currentRSS,
+            includeUnit: true,
           ),
-          MapEntry(
-            'Zone Memory',
-            prettyPrintBytes(
-              vm?.nativeZoneMemoryUsage,
-              includeUnit: true,
-            ),
+        ),
+        MapEntry(
+          'Zone Memory',
+          prettyPrintBytes(
+            vm?.nativeZoneMemoryUsage,
+            includeUnit: true,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -285,18 +286,16 @@ class IsolatesPreviewWidget extends StatelessWidget {
     final title = systemIsolates ? 'System Isolates' : 'Isolates';
     final isolates =
         systemIsolates ? controller.systemIsolates : controller.isolates;
-    return Flexible(
-      child: VMInfoCard(
-        title: '$title (${isolates?.length ?? 0})',
-        table: Flexible(
-          child: FlatTable<Isolate>(
-            columns: columns,
-            data: isolates,
-            keyFactory: (Isolate i) => ValueKey<String>(i.id),
-            sortColumn: name,
-            sortDirection: SortDirection.descending,
-            onItemSelected: (_) => null,
-          ),
+    return VMInfoCard(
+      title: '$title (${isolates?.length ?? 0})',
+      table: Flexible(
+        child: FlatTable<Isolate>(
+          columns: columns,
+          data: isolates,
+          keyFactory: (Isolate i) => ValueKey<String>(i.id),
+          sortColumn: name,
+          sortDirection: SortDirection.descending,
+          onItemSelected: (_) => null,
         ),
       ),
     );

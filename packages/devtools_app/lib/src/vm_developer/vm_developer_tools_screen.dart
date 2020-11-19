@@ -103,7 +103,7 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                     )
                 ],
               ),
-            Flexible(
+            Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(
                   left: defaultSpacing,
