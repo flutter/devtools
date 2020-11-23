@@ -36,7 +36,10 @@ void drawTranslate(
 }
 
 class Chart extends StatefulWidget {
-  Chart(this.controller, String title) {
+  Chart(
+    this.controller, {
+    String title,
+  }) {
     controller.title = title;
   }
 
@@ -82,19 +85,14 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-      child: LayoutBuilder(
-        // Inner container
-        builder: (_, constraints) => Container(
-          width: constraints.widthConstraints().maxWidth,
-          height: constraints.widthConstraints().maxHeight,
-          child: ClipRect(
-            child: CustomPaint(
-              painter: ChartPainter(controller),
-            ),
+    return LayoutBuilder(
+      // Inner container
+      builder: (_, constraints) => Container(
+        width: constraints.widthConstraints().maxWidth,
+        height: constraints.widthConstraints().maxHeight,
+          child: CustomPaint(
+            painter: ChartPainter(controller),
           ),
-        ),
       ),
     );
   }
@@ -130,7 +128,13 @@ class ChartPainter extends CustomPainter {
       chartController.xCanvasChart,
       chartController.yCanvasChart,
       (canavas) {
-        drawAxes(canvas, size, axis);
+        drawAxes(
+          canvas,
+          size,
+          axis,
+          displayX: chartController.displayXAxis,
+          displayTopLine: chartController.displayTopLine,
+        );
       },
     );
 
@@ -308,45 +312,47 @@ class ChartPainter extends CustomPainter {
         );
       }
 
+      if (chartController.displayXAxis || chartController.displayXLabels)
+        // Y translation is below X-axis line.
+        drawTranslate(
+          canvas,
+          xTranslation,
+          chartController.zeroYPosition + 1,
+          (canvas) {
+            // Draw right-most tick label (first major tick).
+            drawXTick(
+              canvas,
+              currentTimestamp,
+              chartController.timestampXCanvasCoord(currentTimestamp),
+              axis,
+              shortTick: minorTick,
+            );
+          },
+        );
+
+      if (!minorTick) tickIndex = 0;
+    }
+
+    if (chartController.displayXAxis || chartController.displayXLabels)
       // Y translation is below X-axis line.
       drawTranslate(
         canvas,
         xTranslation,
         chartController.zeroYPosition + 1,
         (canvas) {
-          // Draw right-most tick label (first major tick).
-          drawXTick(
-            canvas,
-            currentTimestamp,
-            chartController.timestampXCanvasCoord(currentTimestamp),
-            axis,
-            shortTick: minorTick,
-          );
+          // Draw the major labels.
+          for (var labelIndex = 0;
+              labelIndex < chartController.getLabelsCount();
+              labelIndex++) {
+            final timestamp =
+                chartController.getLabelTimestampByIndex(labelIndex);
+            if (timestamp != null) {
+              final xCoord = chartController.timestampXCanvasCoord(timestamp);
+              drawXTick(canvas, timestamp, xCoord, axis, displayTime: true);
+            }
+          }
         },
       );
-
-      if (!minorTick) tickIndex = 0;
-    }
-
-    // Y translation is below X-axis line.
-    drawTranslate(
-      canvas,
-      xTranslation,
-      chartController.zeroYPosition + 1,
-      (canvas) {
-        // Draw the major labels.
-        for (var labelIndex = 0;
-            labelIndex < chartController.getLabelsCount();
-            labelIndex++) {
-          final timestamp =
-              chartController.getLabelTimestampByIndex(labelIndex);
-          if (timestamp != null) {
-            final xCoord = chartController.timestampXCanvasCoord(timestamp);
-            drawXTick(canvas, timestamp, xCoord, axis, displayTime: true);
-          }
-        }
-      },
-    );
 
     // X translation is left-most edge of chart widget.
     drawTranslate(
@@ -390,27 +396,40 @@ class ChartPainter extends CustomPainter {
     tp.paint(canvas, Offset(size.width / 2 - tp.width / 2, 0));
   }
 
-  void drawAxes(Canvas canvas, Size size, Paint axis) {
+  void drawAxes(
+    Canvas canvas,
+    Size size,
+    Paint axis, {
+    bool displayX = true,
+    bool displayY = true,
+    bool displayTopLine = true,
+  }) {
     final chartWidthPosition =
         chartController.canvasChartWidth - chartController.xPaddingRight;
     final chartHeight = chartController.canvasChartHeight;
 
     // Top line of chart.
-    canvas.drawLine(const Offset(0, 0), Offset(chartWidthPosition, 0), axis);
+    if (displayTopLine) {
+      canvas.drawLine(const Offset(0, 0), Offset(chartWidthPosition, 0), axis);
+    }
 
     // Left-side of chart
-    canvas.drawLine(
-      const Offset(0, 0),
-      Offset(0, chartHeight),
-      axis,
-    );
+    if (displayY) {
+      canvas.drawLine(
+        const Offset(0, 0),
+        Offset(0, chartHeight),
+        axis,
+      );
+    }
 
     // Bottom line of chart.
-    canvas.drawLine(
-      Offset(0, chartHeight),
-      Offset(chartWidthPosition, chartHeight),
-      axis,
-    );
+    if (displayX) {
+      canvas.drawLine(
+        Offset(0, chartHeight),
+        Offset(chartWidthPosition, chartHeight),
+        axis,
+      );
+    }
   }
 
   /// Separated out from drawAxis because we don't know range until plotted.
@@ -520,10 +539,14 @@ class ChartPainter extends CustomPainter {
   }
 
   TextPainter createText(String textValue, double scale) {
+    TextStyle(
+    color: Colors.black,
+    fontSize: 30,
+  );
     final span = TextSpan(
       // TODO(terry): All text in a chart is grey. A chart like a Trace
       //              should have PaintCharacteristics.
-      style: TextStyle(color: Colors.grey[600]),
+      style: TextStyle(color: Colors.grey[600], fontSize: 10),
       text: textValue,
     );
     final tp = TextPainter(

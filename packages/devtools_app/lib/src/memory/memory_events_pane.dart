@@ -2,37 +2,57 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
-import 'package:mp_chart/mp/chart/scatter_chart.dart';
-import 'package:mp_chart/mp/controller/scatter_chart_controller.dart';
-import 'package:mp_chart/mp/core/common_interfaces.dart';
-import 'package:mp_chart/mp/core/data/scatter_data.dart';
-import 'package:mp_chart/mp/core/data_set/scatter_data_set.dart';
-import 'package:mp_chart/mp/core/description.dart';
-import 'package:mp_chart/mp/core/entry/entry.dart';
-import 'package:mp_chart/mp/core/enums/scatter_shape.dart';
-import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
-import 'package:mp_chart/mp/core/enums/y_axis_label_position.dart';
-import 'package:mp_chart/mp/core/highlight/highlight.dart';
-import 'package:mp_chart/mp/core/utils/color_utils.dart';
+
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../charts/chart.dart';
+import '../charts/chart_controller.dart';
+import '../charts/chart_trace.dart' as trace;
 import '../theme.dart';
 
 import 'memory_controller.dart';
 import 'memory_timeline.dart';
 
 class MemoryEventsPane extends StatefulWidget {
+  const MemoryEventsPane(this.chartController);
+
+  final ChartController chartController;
+
   @override
   MemoryEventsPaneState createState() => MemoryEventsPaneState();
 }
 
-class MemoryEventsPaneState extends State<MemoryEventsPane>
-    with AutoDisposeMixin, OnChartValueSelectedListener {
-  ScatterChartController _controller;
+/// Name of each trace being charted, index order is the trace index
+/// too (order of trace creation top-down order).
+enum TraceName {
+  snapshot,
+  autoSnapshot,
+  manualGC,
+  monitor,
+  monitorReset,
+  gc,
+}
 
+class MemoryEventsPaneState extends State<MemoryEventsPane>
+    with AutoDisposeMixin {
+  /// Controller attached to the chart.
+  ChartController get _chartController => widget.chartController;
+
+  /// Controller for managing memory collection.
   MemoryController _memoryController;
+
+  /// Event to display in the event pane (User initiated GC, snapshot,
+  /// automatic snapshot, etc.)
+  static const visibleEvent = 2.4;
+
+  /// Monitor events Y axis.
+  static const visibleMonitorEvent = 1.4;
+
+  /// VM's GCs are displayed in a smaller glyph and closer to the heap graph.
+  static const visibleVmEvent = 0.4;
 
   MemoryTimeline get _memoryTimeline => _memoryController.memoryTimeline;
 
@@ -40,6 +60,11 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
   @override
   void initState() {
+    // Line chart fixed Y range.
+    _chartController.setFixedYRange(visibleVmEvent, visibleEvent);
+
+    setupTraces();
+
     super.initState();
   }
 
@@ -48,130 +73,164 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     super.didChangeDependencies();
 
     _memoryController = Provider.of<MemoryController>(context);
+
     // TODO(jacobr): this is an ugly way to be using the theme. It would be
     // better if the controllers weren't involved with the color scheme.
     colorScheme = Theme.of(context).colorScheme;
 
-    _initController(colorScheme);
-
     cancel();
+
+    setupTraces();
+    setupChartData();
 
     addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
       _setupEventsChartData(colorScheme);
-      _processAndUpdate();
+      setState(() {
+        _processHeapSample(_memoryTimeline.sampleAddedNotifier.value);
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_controller != null) {
+    if (_chartController != null) {
       colorScheme = Theme.of(context).colorScheme;
       _setupEventsChartData(colorScheme);
-      final hasData = _controller.data.dataSets.first.getEntryCount() > 0;
-      if (hasData) {
-        return Container(child: ScatterChart(_controller), height: 50);
+
+      if (_chartController.timestamps.isNotEmpty) {
+        return Chart(_chartController);
       }
     }
 
     return const SizedBox(width: denseSpacing);
   }
 
-  void _initController(ColorScheme colorScheme) {
-    final desc = Description()..enabled = false;
-    _controller ??= ScatterChartController(
-      axisLeftSettingFunction: (axisLeft, controller) {
-        axisLeft
-          ..position = YAxisLabelPosition.OUTSIDE_CHART
-          ..drawGridLines = false
-          ..granularityEnabled = true
-          // Set to baseline min and auto track max axis range.
-          ..setStartAtZero(true);
-      },
-      axisRightSettingFunction: (axisRight, controller) {
-        axisRight.enabled = false;
-      },
-      legendSettingFunction: (legend, controller) {
-        legend.enabled = false;
-      },
-      xAxisSettingFunction: (xAxis, controller) {
-        xAxis
-          ..enabled = true
-          ..position = XAxisPosition.TOP
-          // Hide the text (same as background).
-          ..textColor = colorScheme.defaultBackgroundColor
-          ..drawAxisLine = true
-          ..drawGridLines = true;
-      },
-      backgroundColor: colorScheme.defaultBackgroundColor,
-      maxVisibleCount: 1000,
-      maxHighlightDistance: 50,
-      selectionListener: this,
-      description: desc,
-      minOffset: 0,
+  void setupTraces() {
+    if (_chartController.traces.isNotEmpty) {
+      assert(_chartController.traces.length == TraceName.values.length);
+
+      final snapshotIndex = TraceName.snapshot.index;
+      assert(_chartController.trace(snapshotIndex).name ==
+          TraceName.values[snapshotIndex].toString());
+
+      final autoSnapshotIndex = TraceName.autoSnapshot.index;
+      assert(_chartController.trace(autoSnapshotIndex).name ==
+          TraceName.values[autoSnapshotIndex].toString());
+
+      final manualGCIndex = TraceName.manualGC.index;
+      assert(_chartController.trace(manualGCIndex).name ==
+          TraceName.values[manualGCIndex].toString());
+
+      final monitorIndex = TraceName.monitor.index;
+      assert(_chartController.trace(monitorIndex).name ==
+          TraceName.values[monitorIndex].toString());
+
+      final monitorResetIndex = TraceName.monitorReset.index;
+      assert(_chartController.trace(monitorResetIndex).name ==
+          TraceName.values[monitorResetIndex].toString());
+
+      final gcIndex = TraceName.gc.index;
+      assert(_chartController.trace(gcIndex).name ==
+          TraceName.values[gcIndex].toString());
+
+      return;
+    }
+
+    final snapshotIndex = _chartController.createTrace(
+      trace.ChartType.symbol,
+      trace.PaintCharacteristics(
+        color: Colors.green,
+        strokeWidth: 4,
+        diameter: 6,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: visibleEvent,
+      ),
+      name: TraceName.snapshot.toString(),
     );
+    assert(snapshotIndex == TraceName.snapshot.index);
+    assert(_chartController.trace(snapshotIndex).name ==
+        TraceName.values[snapshotIndex].toString());
 
-    _controller.setViewPortOffsets(
-        defaultSpacing * 3, denseSpacing, defaultSpacing, 0);
-  }
+    // Auto-snapshot
+    final autoSnapshotIndex = _chartController.createTrace(
+      trace.ChartType.symbol,
+      trace.PaintCharacteristics(
+        color: Colors.red,
+        strokeWidth: 4,
+        diameter: 6,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: visibleEvent,
+      ),
+      name: TraceName.autoSnapshot.toString(),
+    );
+    assert(autoSnapshotIndex == TraceName.autoSnapshot.index);
+    assert(_chartController.trace(autoSnapshotIndex).name ==
+        TraceName.values[autoSnapshotIndex].toString());
 
-  final datasets = List<ScatterDataSet>.generate(
-    EventDataSets.values.length,
-    (int) => null,
-  );
+    // Manual GC
+    final manualGCIndex = _chartController.createTrace(
+      trace.ChartType.symbol,
+      trace.PaintCharacteristics(
+        color: Colors.blue,
+        strokeWidth: 4,
+        diameter: 6,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: visibleEvent,
+      ),
+      name: TraceName.manualGC.toString(),
+    );
+    assert(manualGCIndex == TraceName.manualGC.index);
+    assert(_chartController.trace(manualGCIndex).name ==
+        TraceName.values[manualGCIndex].toString());
 
-  /// Point to keep Y axis from scaling, entries invisible foreground color of
-  /// points are background color of the event pane.
-  ScatterDataSet get _ghostTopLineSet =>
-      datasets[EventDataSets.ghostsSet.index];
-  set _ghostTopLineSet(ScatterDataSet dataset) {
-    datasets[EventDataSets.ghostsSet.index] = dataset;
-  }
+    // Monitor
+    final monitorIndex = _chartController.createTrace(
+      trace.ChartType.symbol,
+      trace.PaintCharacteristics(
+        color: Colors.yellow,
+        strokeWidth: 4,
+        diameter: 6,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: visibleEvent,
+      ),
+      name: TraceName.monitor.toString(),
+    );
+    assert(monitorIndex == TraceName.monitor.index);
+    assert(_chartController.trace(monitorIndex).name ==
+        TraceName.values[monitorIndex].toString());
 
-  /// VM is GCing.
-  ScatterDataSet get _gcVmDataSet => datasets[EventDataSets.gcVmSet.index];
-  set _gcVmDataSet(ScatterDataSet dataset) {
-    datasets[EventDataSets.gcVmSet.index] = dataset;
-  }
+    final monitorResetIndex = _chartController.createTrace(
+      trace.ChartType.symbol,
+      trace.PaintCharacteristics(
+        color: Colors.yellowAccent,
+        strokeWidth: 4,
+        diameter: 6,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: visibleEvent,
+      ),
+      name: TraceName.monitorReset.toString(),
+    );
+    assert(monitorResetIndex == TraceName.monitorReset.index);
+    assert(_chartController.trace(monitorResetIndex).name ==
+        TraceName.values[monitorResetIndex].toString());
 
-  /// Used to signal start allocation monitoring
-  ScatterDataSet get _allocationStartSet =>
-      datasets[EventDataSets.monitorStartSet.index];
-  set _allocationStartSet(ScatterDataSet dataset) {
-    datasets[EventDataSets.monitorStartSet.index] = dataset;
-  }
+    // VM GC
+    final gcIndex = _chartController.createTrace(
+      trace.ChartType.symbol,
+      trace.PaintCharacteristics(
+        color: Colors.blue,
+        symbol: trace.ChartSymbol.disc,
+        diameter: 4,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: visibleEvent,
+      ),
+      name: TraceName.gc.toString(),
+    );
+    assert(gcIndex == TraceName.gc.index);
+    assert(_chartController.trace(gcIndex).name ==
+        TraceName.values[gcIndex].toString());
 
-  /// Montoring continuing...
-  ScatterDataSet get _allocationContinueSet =>
-      datasets[EventDataSets.monitorContinuesSet.index];
-  set _allocationContinueSet(ScatterDataSet dataset) {
-    datasets[EventDataSets.monitorContinuesSet.index] = dataset;
-  }
-
-  /// Reset allocation accumulators
-  ScatterDataSet get _allocationResetSet =>
-      datasets[EventDataSets.monitorResetSet.index];
-  set _allocationResetSet(ScatterDataSet dataset) {
-    datasets[EventDataSets.monitorResetSet.index] = dataset;
-  }
-
-  /// GC initiated by user pressing GC button.
-  ScatterDataSet get _gcUserDataSet => datasets[EventDataSets.gcUserSet.index];
-  set _gcUserDataSet(ScatterDataSet dataset) {
-    datasets[EventDataSets.gcUserSet.index] = dataset;
-  }
-
-  /// User initiated snapshot.
-  ScatterDataSet get _snapshotDataSet =>
-      datasets[EventDataSets.snapshotSet.index];
-  set _snapshotDataSet(ScatterDataSet dataset) {
-    datasets[EventDataSets.snapshotSet.index] = dataset;
-  }
-
-  /// Automatically initiated snapshot.
-  ScatterDataSet get _snapshotAutoDataSet =>
-      datasets[EventDataSets.snapshotAutoSet.index];
-  set _snapshotAutoDataSet(ScatterDataSet dataset) {
-    datasets[EventDataSets.snapshotAutoSet.index] = dataset;
+    assert(_chartController.traces.length == TraceName.values.length);
   }
 
   /// Pulls the visible EventSamples added as trace data to actual data list to be
@@ -180,6 +239,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     final eventsData = _memoryController.memoryTimeline.eventsChartData;
 
     // Ghosting dataset, prevents auto-scaling of the Y-axis.
+/*
     _ghostTopLineSet = ScatterDataSet(eventsData.ghosts, 'Ghosting Trace');
     _ghostTopLineSet.setScatterShape(ScatterShape.CIRCLE);
     _ghostTopLineSet.setScatterShapeSize(0);
@@ -240,36 +300,77 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     // create a data object with the data sets
     _controller.data = ScatterData.fromList(datasets);
     _controller.data.setDrawValues(false);
+*/
+  }
+
+  // TODO(terry): Only load max visible data collected, when pruning of data
+  //              charted is added.
+  /// Preload any existing data collected but not in the chart.
+  void setupChartData() {
+    final chartDataLength = _chartController.timestamps.length;
+    final liveDataLength = _memoryTimeline.liveData.length;
+
+    final liveRange = _memoryTimeline.liveData.getRange(
+      chartDataLength,
+      liveDataLength,
+    );
+
+    liveRange.forEach(_addSampleToChart);
   }
 
   /// Loads all heap samples (live data or offline).
-  void _processAndUpdate() {
+  void _addSampleToChart(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.paused.value) return;
 
-    setState(() {
-      // Display new events in the pane.
-      _updateEventPane();
-    });
-  }
+    _chartController.timestamps.add(sample.timestamp);
 
-  /// Display any newly received events in the chart.
-  void _updateEventPane() {
-    _controller.data = ScatterData.fromList(datasets);
+    if (sample.isGC) {
+      // Plot the VM GC on the VmEvent trace with a fixed Y coordinate.
+      addDataToTrace(
+        TraceName.gc.index,
+        trace.Data(sample.timestamp, visibleVmEvent),
+      );
+    }
+    final events = sample.memoryEventInfo;
+    // User events snapshot, auto-snapshot, manual GC, are plotted on the top-line
+    // of the event pane (visible Events).
+    final data = trace.Data(sample.timestamp, visibleEvent);
 
-    // Received new samples ready to plot, signal data has changed.
-    for (final dataset in datasets) {
-      dataset.notifyDataSetChanged();
+    if (events.isEventGC) {
+      // Plot manual requested GC on the visibleEvent Y coordinate.
+      addDataToTrace(TraceName.manualGC.index, data);
+    }
+
+    if (events.isEventSnapshot) {
+      // Plot snapshot on the visibleEvent Y coordinate.
+      addDataToTrace(TraceName.snapshot.index, data);
+    }
+
+    if (events.isEventSnapshotAuto) {
+      // Plot auto-snapshot on the visibleEvent Y coordinate.
+      addDataToTrace(TraceName.autoSnapshot.index, data);
+    }
+
+    if (sample.memoryEventInfo.isEventAllocationAccumulator) {
+      final allocationEvent = events.allocationAccumulator;
+      final data = trace.Data(sample.timestamp, visibleMonitorEvent);
+      if (allocationEvent.isReset) {
+        addDataToTrace(TraceName.monitorReset.index, data);
+      } else if (allocationEvent.isStart) {
+        addDataToTrace(TraceName.monitor.index, data);
+      }
     }
   }
 
-  @override
-  void onNothingSelected() {
-    // TODO: implement onNothingSelected
+  /// Loads all heap samples (live data or offline).
+  void _processHeapSample(HeapSample sample) {
+    // If paused don't update the chart (data is still collected).
+    if (_memoryController.paused.value) return;
+    _addSampleToChart(sample);
   }
 
-  @override
-  void onValueSelected(Entry e, Highlight h) {
-    // TODO: implement onValueSelected
+  void addDataToTrace(int traceIndex, trace.Data data) {
+    _chartController.trace(traceIndex).addDatum(data);
   }
 }

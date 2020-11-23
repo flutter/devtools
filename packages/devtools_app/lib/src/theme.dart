@@ -108,7 +108,7 @@ const smallProgressSize = 12.0;
 
 const defaultListItemHeight = 28.0;
 
-const defaultChartHeight = 140.0;
+const defaultChartHeight = 150.0;
 
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 

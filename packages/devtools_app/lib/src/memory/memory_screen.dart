@@ -9,6 +9,7 @@ import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
+import '../charts/chart_controller.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
@@ -17,11 +18,12 @@ import '../screen.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import '../utils.dart';
-import 'memory_chart.dart';
+import 'memory_android_chart.dart';
 import 'memory_controller.dart';
 import 'memory_events_pane.dart';
 import 'memory_heap_tree_view.dart';
 import 'memory_heap_treemap.dart';
+import 'memory_vm_chart.dart';
 
 /// Width of application when memory buttons loose their text.
 const _primaryControlsMinVerboseWidth = 1100.0;
@@ -92,6 +94,10 @@ class MemoryBodyState extends State<MemoryBody>
   @visibleForTesting
   static const androidChartButtonKey = Key('Android Chart');
 
+  ChartController eventChartController;
+  ChartController vMChartController;
+  ChartController androidChartController;
+
   MemoryController controller;
   TabController tabController;
 
@@ -100,6 +106,14 @@ class MemoryBodyState extends State<MemoryBody>
   @override
   void initState() {
     super.initState();
+
+    eventChartController = ChartController(
+      displayYLabels: false,
+      displayXAxis: false,
+      displayXLabels: false,
+    );
+    vMChartController = ChartController(displayTopLine: false);
+    androidChartController = ChartController();
 
     ga.screen(MemoryScreen.id);
 
@@ -158,7 +172,6 @@ class MemoryBodyState extends State<MemoryBody>
     controller.memorySourcePrefix = mediaWidth > verboseDropDownMinimumWidth
         ? MemoryScreen.memorySourceMenuItemPrefix
         : '';
-
     return Column(
       children: [
         Row(
@@ -171,11 +184,17 @@ class MemoryBodyState extends State<MemoryBody>
         ),
         SizedBox(
           height: 50,
-          child: MemoryEventsPane(),
+          child: MemoryEventsPane(eventChartController),
         ),
         SizedBox(
-          child: MemoryChart(),
+          child: MemoryVMChart(vMChartController),
         ),
+        controller.isAndroidChartVisible
+            ? SizedBox(
+                height: defaultChartHeight,
+                child: MemoryAndroidChart(androidChartController),
+              )
+            : const SizedBox(),
         const SizedBox(height: defaultSpacing),
         Row(
           children: [
@@ -213,6 +232,7 @@ class MemoryBodyState extends State<MemoryBody>
     final isVerboseDropdown = mediaWidth > verboseDropDownMinimumWidth;
 
     final _displayTypes = [
+      MemoryController.displayDefault,
       MemoryController.displayOneMinute,
       MemoryController.displayFiveMinutes,
       MemoryController.displayTenMinutes,
@@ -221,12 +241,15 @@ class MemoryBodyState extends State<MemoryBody>
       (
         String value,
       ) {
+        final unit = value == MemoryController.displayDefault
+            ? ''
+            : 'Minute${value == MemoryController.displayOneMinute ? '' : 's'}';
+
         return DropdownMenuItem<String>(
           key: MemoryScreen.intervalMenuItem,
           value: value,
           child: Text(
-            '${isVerboseDropdown ? 'Display' : ''} $value '
-            'Minute${value == MemoryController.displayOneMinute ? '' : 's'}',
+            '${isVerboseDropdown ? 'Display' : ''} $value $unit',
             key: MemoryScreen.intervalKey,
           ),
         );
@@ -241,6 +264,31 @@ class MemoryBodyState extends State<MemoryBody>
         onChanged: (String newValue) {
           setState(() {
             controller.displayInterval = newValue;
+
+            Duration duration;
+            switch (newValue) {
+              case MemoryController.displayOneMinute:
+                duration = const Duration(minutes: 1);
+                break;
+              case MemoryController.displayFiveMinutes:
+                duration = const Duration(minutes: 5);
+                break;
+              case MemoryController.displayTenMinutes:
+                duration = const Duration(minutes: 10);
+                break;
+              case MemoryController.displayAllMinutes:
+                duration = null;
+                break;
+              case MemoryController.displayDefault:
+              default:
+                // Live view default tick width.
+                duration = const Duration();
+                break;
+            }
+
+            eventChartController?.zoomDuration = duration;
+            vMChartController?.zoomDuration = duration;
+            androidChartController?.zoomDuration = duration;
           });
         },
         items: _displayTypes,
@@ -580,6 +628,11 @@ class MemoryBodyState extends State<MemoryBody>
     controller.classRoot = null;
     controller.topNode = null;
     controller.selectedSnapshotTimestamp = null;
+
+    // Remove history of all plotted data in all charts.
+    eventChartController?.reset();
+    vMChartController?.reset();
+    androidChartController?.reset();
   }
 
   Future<void> _gc() async {

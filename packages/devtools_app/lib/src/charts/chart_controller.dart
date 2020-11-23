@@ -56,26 +56,35 @@ const rightLabelIndex = 2;
 class ChartController extends DisposableController
     with AutoDisposeControllerMixin {
   ChartController({
+    this.displayTopLine = true,
+    this.displayXAxis = true,
     this.displayXLabels = true,
     this.displayYLabels = true,
-  });
+  }) {
+    // TODO(terry): Compute dynamically based on X-axis lables text height.
+    bottomPadding = !displayXLabels ? 0.0 : 40.0;
+  }
 
   // Total size of area to display the chart (includes title, axis, labels, etc.).
   Size size;
 
-  // TODO(terry): Compute dynamically based on title text height.
-  final topPadding = 20.0;
+  /// Spacing for title iff title != null.
+  double topPadding = 0.0;
+
   // TODO(terry): Compute dynamically based on Y-axis lables text width.
   final leftPadding = 50.0;
-  // Computed minimum right padding.
+
+  /// Computed minimum right padding.
   int rightPadding = 25;
-  // TODO(terry): Compute dynamically based on X-axis lables text height.
-  final bottomPadding = 40.0;
+
+  /// Space for X-Axis labels and tick marks;
+  double bottomPadding = 40.0;
 
   double get tickWidth => _tickWidth;
 
   double _tickWidth = 10.0;
 
+  /// Number of ticks visible (on the X-axis);
   int visibleTicks;
 
   // TODO(terry): For now three labels.  Need better mechanism, some number of labels
@@ -110,7 +119,16 @@ class ChartController extends DisposableController
     _xAxisLabeledTimestamps[rightLabelIndex] = timestamp;
   }
 
+  /// If false displays top horizontal line of chart.
+  final bool displayTopLine;
+
+  /// If false hides X axis and displayXLabels is also set to false.
+  final bool displayXAxis;
+
+  /// Display the X labels and ticks horizontal axis is still displayed
+  /// unless displayXAxis is set to false
   final bool displayXLabels;
+
   final bool displayYLabels;
 
   Duration durationLabel;
@@ -144,7 +162,7 @@ class ChartController extends DisposableController
   /// @param timestamp current timestamp received implies building all
   /// parts of the x-axis labels.
   void recomputeLabels({int timestamp, bool refresh = false}) {
-    if (refresh) {
+    if (refresh && timestamps.isNotEmpty) {
       // Need the correct tickWidth based on current zoom.
       computeChartArea();
 
@@ -263,7 +281,15 @@ class ChartController extends DisposableController
 
   double get fixedMaxY => _fixedMaxY;
 
-  String title;
+  String get title => _title;
+
+  set title(String newTitle) {
+    // TODO(terry): Compute dynamically based on title text height.
+    topPadding = newTitle != null ? 20.0 : 0.0;
+    _title = newTitle;
+  }
+
+  String _title = null;
 
   /// zoomDuration values of:
   ///     null implies all
@@ -288,7 +314,7 @@ class ChartController extends DisposableController
       // Display all items.
     } else if (duration.inMinutes == 0) {
       _tickWidth = 10.0; // Live
-    } else if (duration.inMinutes > 0) {
+    } else if (timestamps.isNotEmpty && duration.inMinutes > 0) {
       final firstDT = DateTime.fromMillisecondsSinceEpoch(timestamps.first);
       final lastDT = DateTime.fromMillisecondsSinceEpoch(timestamps.last);
       // Greater or equal to range we're zooming in on?
@@ -333,6 +359,14 @@ class ChartController extends DisposableController
 
     // All tick labels need to be recompted.
     recomputeLabels(refresh: true);
+  }
+
+  /// Clear all data in the chart.
+  void reset() {
+    for (var index = 0; index < traces?.length;  index++) {
+      traces[index].data.clear();
+    }
+    timestamps.clear();
   }
 
   void computeChartArea() {
@@ -414,6 +448,8 @@ class ChartController extends DisposableController
   }
 
   int normalizeTimestampIndex(int index) {
+    if (index == -1) return -1;
+
     if (isTimestampVisible(timestamps[index], index)) {
       final firstVisibleIndex = leftVisibleIndex;
       if (totalTimestampTicks < 0) {

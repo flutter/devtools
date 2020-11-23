@@ -1,0 +1,233 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../auto_dispose_mixin.dart';
+import '../charts/chart.dart';
+import '../charts/chart_controller.dart';
+import '../charts/chart_trace.dart' as trace;
+import '../theme.dart';
+
+import 'memory_controller.dart';
+import 'memory_timeline.dart';
+
+class MemoryVMChart extends StatefulWidget {
+  const MemoryVMChart(this.chartController);
+
+  final ChartController chartController;
+
+  @override
+  MemoryVMChartState createState() => MemoryVMChartState();
+}
+
+/// Name of each trace being charted, index order is the trace index
+/// too (order of trace creation top-down order).
+enum TraceName {
+  external,
+  used,
+  capacity,
+  rSS,
+}
+
+class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
+  /// Controller attached to the chart.
+  ChartController get _chartController => widget.chartController;
+
+  /// Controller for managing memory collection.
+  MemoryController _memoryController;
+
+  MemoryTimeline get _memoryTimeline => _memoryController.memoryTimeline;
+
+  ColorScheme colorScheme;
+
+  @override
+  void initState() {
+    setupTraces();
+
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _memoryController = Provider.of<MemoryController>(context);
+
+    // TODO(jacobr): this is an ugly way to be using the theme. It would be
+    // better if the controllers weren't involved with the color scheme.
+    colorScheme = Theme.of(context).colorScheme;
+
+    //_initController(colorScheme);
+
+    cancel();
+
+    setupTraces();
+    setupChartData();
+
+    addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
+      setState(() {
+        _processHeapSample(_memoryTimeline.sampleAddedNotifier.value);
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_chartController != null) {
+/*
+      colorScheme = Theme.of(context).colorScheme;
+      _setupEventsChartData(colorScheme);
+*/
+      if (_chartController.timestamps.isNotEmpty) {
+        return Container(
+            child: Chart(_chartController), height: defaultChartHeight);
+      }
+    }
+
+    return const SizedBox(width: denseSpacing);
+  }
+
+  // TODO(terry): definition in mp_chart color_utils.dart.
+  static Color getHoloBlue() => const Color.fromARGB(255, 51, 181, 229);
+
+  void setupTraces() {
+    if (_chartController.traces.isNotEmpty) {
+      assert(_chartController.traces.length == TraceName.values.length);
+
+      final externalIndex = TraceName.external.index;
+      assert(_chartController.trace(externalIndex).name ==
+          TraceName.values[externalIndex].toString());
+
+      final usedIndex = TraceName.used.index;
+      assert(_chartController.trace(usedIndex).name ==
+          TraceName.values[usedIndex].toString());
+
+      final capacityIndex = TraceName.capacity.index;
+      assert(_chartController.trace(capacityIndex).name ==
+          TraceName.values[capacityIndex].toString());
+
+      final rSSIndex = TraceName.rSS.index;
+      assert(_chartController.trace(rSSIndex).name ==
+          TraceName.values[rSSIndex].toString());
+
+      return;
+    }
+
+    final externalIndex = _chartController.createTrace(
+      trace.ChartType.line,
+      trace.PaintCharacteristics(
+        color: Colors.lightGreen,
+        symbol: trace.ChartSymbol.disc,
+        diameter: 1.5,
+      ),
+      name: TraceName.external.toString(),
+    );
+    assert(externalIndex == TraceName.external.index);
+    assert(_chartController.trace(externalIndex).name ==
+        TraceName.values[externalIndex].toString());
+
+    // Used Heap
+    final usedIndex = _chartController.createTrace(
+      trace.ChartType.line,
+      trace.PaintCharacteristics(
+        color: getHoloBlue(), // Pull in Colors from mp_chart colors_utils.dart
+        symbol: trace.ChartSymbol.disc,
+        diameter: 1.5,
+      ),
+      name: TraceName.used.toString(),
+    );
+    assert(usedIndex == TraceName.used.index);
+    assert(_chartController.trace(usedIndex).name ==
+        TraceName.values[usedIndex].toString());
+
+    // Heap Capacity
+    final capacityIndex = _chartController.createTrace(
+      trace.ChartType.line,
+      trace.PaintCharacteristics(
+        color: Colors.grey[400],
+        diameter: 0.0,
+        symbol: trace.ChartSymbol.dashedLine,
+      ),
+      name: TraceName.capacity.toString(),
+    );
+    assert(capacityIndex == TraceName.capacity.index);
+    assert(_chartController.trace(capacityIndex).name ==
+        TraceName.values[capacityIndex].toString());
+
+    // RSS
+    final rSSIndex = _chartController.createTrace(
+      trace.ChartType.line,
+      trace.PaintCharacteristics(
+        color: Colors.yellow,
+        symbol: trace.ChartSymbol.dashedLine,
+        strokeWidth: 2,
+      ),
+      name: TraceName.rSS.toString(),
+    );
+    assert(rSSIndex == TraceName.rSS.index);
+    assert(_chartController.trace(rSSIndex).name ==
+        TraceName.values[rSSIndex].toString());
+
+    // TODO(terry): Add Raster Cache Picture and Layers traces.
+
+    assert(_chartController.traces.length == TraceName.values.length);
+  }
+
+  // TODO(terry): Only load max visible data collected, when pruning of data
+  //              charted is added.
+  /// Preload any existing data collected but not in the chart.
+  void setupChartData() {
+    final chartDataLength = _chartController.timestamps.length;
+    final liveDataLength = _memoryTimeline.liveData.length;
+
+    final liveRange = _memoryTimeline.liveData.getRange(
+      chartDataLength,
+      liveDataLength,
+    );
+
+    liveRange.forEach(_addSampleToChart);
+  }
+
+  /// Loads all heap samples (live data or offline).
+  void _addSampleToChart(HeapSample sample) {
+    // If paused don't update the chart (data is still collected).
+    if (_memoryController.paused.value) return;
+
+    _chartController.timestamps.add(sample.timestamp);
+
+    // TODO(terry): Trace should compute stacked or not here.
+    final timestamp = sample.timestamp;
+    final externalValue = sample.external.toDouble();
+    addDataToTrace(
+      TraceName.external.index,
+      trace.Data(timestamp, externalValue),
+    );
+
+    final usedValue = externalValue + sample.used;
+    addDataToTrace(TraceName.used.index, trace.Data(timestamp, usedValue));
+
+    final capacityValue = sample.capacity.toDouble();
+    addDataToTrace(
+      TraceName.capacity.index,
+      trace.Data(timestamp, capacityValue),
+    );
+
+    final rssValue = sample.rss.toDouble();
+    addDataToTrace(TraceName.rSS.index, trace.Data(timestamp, rssValue));
+  }
+
+  /// Loads all heap samples (live data or offline).
+  void _processHeapSample(HeapSample sample) {
+    // If paused don't update the chart (data is still collected).
+    if (_memoryController.paused.value) return;
+    _addSampleToChart(sample);
+  }
+
+  void addDataToTrace(int traceIndex, trace.Data data) {
+    _chartController.trace(traceIndex).addDatum(data);
+  }
+}

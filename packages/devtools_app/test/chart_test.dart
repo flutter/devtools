@@ -167,7 +167,7 @@ void main() {
 
       Future<void> setupScaledChart(
           WidgetTester tester, ChartController controller, Key chartKey) async {
-        final theChart = Chart(controller, 'Scaled Chart');
+        final theChart = Chart(controller, title: 'Scaled Chart');
 
         setupTraces(controller);
 
@@ -178,11 +178,11 @@ void main() {
         expect(find.byWidget(theChart), findsOneWidget);
 
         // Validate the X axis before data added.
-        expect(controller.visibleTicks, equals(214));
+        expect(controller.visibleTicks, equals(215));
         expect(controller.xCanvasChart, equals(50.0));
         expect(controller.xPaddingRight, equals(0.0));
         expect(controller.displayXLabels, true);
-        expect(controller.canvasChartWidth, equals(2140.0));
+        expect(controller.canvasChartWidth, equals(2150.0));
 
         // Validate the Y axis before data added.
         expect(controller.yScale.computedMin, equals(0.0));
@@ -191,7 +191,7 @@ void main() {
         expect(controller.yScale.labelUnitExponent, 0.0);
         expect(controller.yScale.tickSpacing, equals(1.0));
         expect(controller.yScale.maxPoint, equals(0.0));
-        expect(controller.yScale.maxTicks, equals(165.0));
+        expect(controller.yScale.maxTicks, equals(185.0));
 
         chartAllData(controller);
       }
@@ -245,20 +245,20 @@ void main() {
           await tester.pumpAndSettle(const Duration(seconds: 2));
 
           // Validate the X axis after data added to all traces.
-          expect(controller.visibleTicks, equals(214));
+          expect(controller.visibleTicks, equals(215));
           expect(controller.xCanvasChart, equals(50.0));
           expect(controller.xPaddingRight, equals(0.0));
           expect(controller.displayXLabels, true);
-          expect(controller.canvasChartWidth, equals(2140.0));
+          expect(controller.canvasChartWidth, equals(2150.0));
 
           // Validate the Y axis after data added to all traces.
           expect(controller.yScale.computedMin, equals(0.0));
-          expect(controller.yScale.computedMax, equals(687573964.4970415));
+          expect(controller.yScale.computedMax, equals(685185185.1851852));
           expect(controller.yScale.labelTicks, equals(7.0));
           expect(controller.yScale.labelUnitExponent, 8.0);
-          expect(controller.yScale.tickSpacing, equals(4142011.834319527));
+          expect(controller.yScale.tickSpacing, equals(3703703.703703704));
           expect(controller.yScale.maxPoint, equals(684801744.0));
-          expect(controller.yScale.maxTicks, equals(170.0));
+          expect(controller.yScale.maxTicks, equals(190.0));
 
           final externalTrace = controller.trace(externalTraceIndex);
           expect(externalTrace.dataYMax, equals(633719952.0));
@@ -284,7 +284,7 @@ void main() {
           expect(controller.leftLabelTimestamp, isNotNull);
           expect(controller.centerLabelTimestamp, isNotNull);
           expect(controller.rightLabelTimestamp, isNotNull);
-          expect(controller.leftLabelTimestamp, equals(1595682514617));
+          expect(controller.leftLabelTimestamp, equals(1595682514316));
           expect(controller.centerLabelTimestamp, equals(1595682534381));
           expect(controller.rightLabelTimestamp, equals(1595682556248));
 
@@ -327,16 +327,16 @@ void main() {
         expect(controller.xCanvasChart, equals(50.0));
         expect(controller.xPaddingRight, equals(0.0));
         expect(controller.displayXLabels, true);
-        expect(controller.canvasChartWidth, equals(2140.0));
+        expect(controller.canvasChartWidth, equals(2150.0));
 
         // Validate the Y axis after data added to all traces.
         expect(controller.yScale.computedMin, equals(0.0));
-        expect(controller.yScale.computedMax, equals(687573964.4970415));
+        expect(controller.yScale.computedMax, equals(685185185.1851852));
         expect(controller.yScale.labelTicks, equals(7.0));
         expect(controller.yScale.labelUnitExponent, 8.0);
-        expect(controller.yScale.tickSpacing, equals(4142011.834319527));
+        expect(controller.yScale.tickSpacing, equals(3703703.703703704));
         expect(controller.yScale.maxPoint, equals(684801744.0));
-        expect(controller.yScale.maxTicks, equals(170.0));
+        expect(controller.yScale.maxTicks, equals(190.0));
 
         validateScaledYLabels(controller);
 
@@ -384,18 +384,18 @@ void main() {
         // Validate the X axis after data added to all traces.
         expect(controller.visibleTicks, equals(996));
         expect(controller.xCanvasChart, equals(50.0));
-        expect(controller.xPaddingRight, equals(1.4552000000003318));
+        expect(controller.xPaddingRight, equals(1.461999999999989));
         expect(controller.displayXLabels, true);
-        expect(controller.canvasChartWidth, equals(2138.5447999999997));
+        expect(controller.canvasChartWidth, equals(2148.538));
 
         // Validate the Y axis after data added to all traces.
         expect(controller.yScale.computedMin, equals(0.0));
-        expect(controller.yScale.computedMax, equals(687573964.4970415));
+        expect(controller.yScale.computedMax, equals(685185185.1851852));
         expect(controller.yScale.labelTicks, equals(7.0));
         expect(controller.yScale.labelUnitExponent, 8.0);
-        expect(controller.yScale.tickSpacing, equals(4142011.834319527));
+        expect(controller.yScale.tickSpacing, equals(3703703.703703704));
         expect(controller.yScale.maxPoint, equals(684801744.0));
-        expect(controller.yScale.maxTicks, equals(170.0));
+        expect(controller.yScale.maxTicks, equals(190.0));
 
         validateScaledYLabels(controller);
 
@@ -569,7 +569,7 @@ void main() {
           WidgetTester tester, ChartController controller, Key chartKey) async {
         controller.setFixedYRange(0.4, 2.4);
 
-        final theChart = Chart(controller, 'Fixed Chart');
+        final theChart = Chart(controller, title: 'Fixed Chart');
 
         await pumpChart(tester, chartKey, theChart, 150);
 
@@ -580,20 +580,20 @@ void main() {
         loadData();
 
         // Validate the X axis before any data.
-        expect(controller.visibleTicks, equals(214));
+        expect(controller.visibleTicks, equals(215));
         expect(controller.xCanvasChart, equals(50.0));
         expect(controller.xPaddingRight, equals(0.0));
         expect(controller.displayXLabels, true);
-        expect(controller.canvasChartWidth, equals(2140.0));
+        expect(controller.canvasChartWidth, equals(2150.0));
 
         // Validate the Y axis before any data.
-        expect(controller.yScale.computedMin, equals(0.3913043478260869));
-        expect(controller.yScale.computedMax, equals(2.4347826086956523));
+        expect(controller.yScale.computedMin, equals(0.3707865168539326));
+        expect(controller.yScale.computedMax, equals(2.426966292134831));
         expect(controller.yScale.labelTicks, equals(3.0));
         expect(controller.yScale.labelUnitExponent, 0.0);
-        expect(controller.yScale.tickSpacing, equals(0.043478260869565216));
+        expect(controller.yScale.tickSpacing, equals(0.033707865168539325));
         expect(controller.yScale.maxPoint, equals(2.4));
-        expect(controller.yScale.maxTicks, equals(70.0));
+        expect(controller.yScale.maxTicks, equals(90.0));
 
         // Load all data in the chart.
         chartAllFixedData(controller);
@@ -620,25 +620,25 @@ void main() {
           await tester.pumpAndSettle(const Duration(seconds: 2));
 
           // Validate the X axis after data added to all traces.
-          expect(controller.visibleTicks, equals(214));
+          expect(controller.visibleTicks, equals(215));
           expect(controller.xCanvasChart, equals(50.0));
           expect(controller.xPaddingRight, equals(0.0));
           expect(controller.displayXLabels, true);
-          expect(controller.canvasChartWidth, equals(2140.0));
+          expect(controller.canvasChartWidth, equals(2150.0));
 
           // Validate the Y axis after data added to all traces.
           expect(controller.yScale.computedMin, equals(0.0));
 
           // Rest of data is out of view because we're live view max is now 1.4
           // and only 2 labels visible.
-          expect(controller.yScale.computedMax, equals(1.4202898550724639));
+          expect(controller.yScale.computedMax, equals(1.4157303370786516));
           expect(controller.yScale.labelTicks, equals(2.0));
 
           expect(controller.yScale.labelUnitExponent, 0.0);
-          expect(controller.yScale.tickSpacing, equals(0.028985507246376812));
+          expect(controller.yScale.tickSpacing, equals(0.02247191011235955));
           // Max live view max is 1.4 other data is not in the visible view.
           expect(controller.yScale.maxPoint, equals(1.4));
-          expect(controller.yScale.maxTicks, equals(70.0));
+          expect(controller.yScale.maxTicks, equals(90.0));
 
           final snapshotTrace = controller.trace(snapshotTraceIndex);
           expect(snapshotTrace.dataYMax, equals(0.0));
@@ -685,7 +685,7 @@ void main() {
           expect(controller.leftLabelTimestamp, isNotNull);
           expect(controller.centerLabelTimestamp, isNotNull);
           expect(controller.rightLabelTimestamp, isNotNull);
-          expect(controller.leftLabelTimestamp, equals(1595682514617));
+          expect(controller.leftLabelTimestamp, equals(1595682514316));
           expect(controller.centerLabelTimestamp, equals(1595682534381));
           expect(controller.rightLabelTimestamp, equals(1595682556248));
 
@@ -728,16 +728,16 @@ void main() {
         expect(controller.xCanvasChart, equals(50.0));
         expect(controller.xPaddingRight, equals(0.0));
         expect(controller.displayXLabels, true);
-        expect(controller.canvasChartWidth, equals(2140.0));
+        expect(controller.canvasChartWidth, equals(2150.0));
 
         // Validate the Y axis after data added to all traces.
         expect(controller.yScale.computedMin, equals(0.0));
-        expect(controller.yScale.computedMax, equals(2.4347826086956523));
+        expect(controller.yScale.computedMax, equals(2.426966292134831));
         expect(controller.yScale.labelTicks, equals(3.0));
         expect(controller.yScale.labelUnitExponent, 0.0);
-        expect(controller.yScale.tickSpacing, equals(0.043478260869565216));
+        expect(controller.yScale.tickSpacing, equals(0.033707865168539325));
         expect(controller.yScale.maxPoint, equals(2.4));
-        expect(controller.yScale.maxTicks, equals(70.0));
+        expect(controller.yScale.maxTicks, equals(90.0));
 
         // Validate the labels displayed on the y-axis.
         final yScale = controller.yScale;
@@ -798,18 +798,18 @@ void main() {
         // Validate the X axis after data added to all traces.
         expect(controller.visibleTicks, equals(996));
         expect(controller.xCanvasChart, equals(50.0));
-        expect(controller.xPaddingRight, equals(1.4552000000003318));
+        expect(controller.xPaddingRight, equals(1.461999999999989));
         expect(controller.displayXLabels, true);
-        expect(controller.canvasChartWidth, equals(2138.5447999999997));
+        expect(controller.canvasChartWidth, equals(2148.538));
 
         // Validate the Y axis after data added to all traces.
         expect(controller.yScale.computedMin, equals(0.0));
-        expect(controller.yScale.computedMax, equals(2.4347826086956523));
+        expect(controller.yScale.computedMax, equals(2.426966292134831));
         expect(controller.yScale.labelTicks, equals(3.0));
         expect(controller.yScale.labelUnitExponent, 0.0);
-        expect(controller.yScale.tickSpacing, equals(0.043478260869565216));
+        expect(controller.yScale.tickSpacing, equals(0.033707865168539325));
         expect(controller.yScale.maxPoint, equals(2.4));
-        expect(controller.yScale.maxTicks, equals(70.0));
+        expect(controller.yScale.maxTicks, equals(90.0));
 
         // Validate the labels displayed on the y-axis.
         final yScale = controller.yScale;

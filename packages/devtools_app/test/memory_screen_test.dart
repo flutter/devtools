@@ -4,10 +4,10 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/memory/memory_chart.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
+import 'package:devtools_app/src/memory/memory_vm_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/memory_test_data.dart';
@@ -95,7 +95,7 @@ void main() {
 
       expect(find.byKey(MemoryScreen.gcButtonKey), findsOneWidget);
 
-      expect(find.byType(MemoryChart), findsOneWidget);
+      expect(find.byType(MemoryVMChart), findsOneWidget);
 
       expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
       expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);

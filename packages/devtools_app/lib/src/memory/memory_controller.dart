@@ -275,13 +275,15 @@ class MemoryController extends DisposableController
   }
 
   /// Automatic pruning of memory statistics (plotted) full data is still retained.
+  static const displayDefault = 'Default';
   static const displayOneMinute = '1';
   static const displayFiveMinutes = '5';
   static const displayTenMinutes = '10';
   static const displayAllMinutes = 'All';
 
-  /// Default is to display last minute of collected data in the chart.
-  final _displayIntervalNotifier = ValueNotifier<String>(displayOneMinute);
+  /// Default is to display default tick width based on width of chart of the collected
+  /// data in the chart.
+  final _displayIntervalNotifier = ValueNotifier<String>(displayDefault);
 
   ValueListenable<String> get displayIntervalNotifier =>
       _displayIntervalNotifier;
