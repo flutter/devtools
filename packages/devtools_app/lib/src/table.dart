@@ -1,3 +1,7 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -1250,8 +1254,9 @@ class _TableRowState<T> extends State<TableRow<T>>
         );
       }
 
-      content = SizedBox(
+      content = Container(
         width: columnWidth,
+        padding: const EdgeInsets.only(right: borderPadding),
         child: Align(
           alignment: _alignmentFor(column),
           child: content,
