@@ -22,6 +22,9 @@ class IsolateStatisticsViewController extends DisposableController
     cpuProfilerController.profilerFlagNotifier.addListener(
       () => refresh(),
     );
+    serviceManager.isolateManager.onSelectedIsolateChanged.listen((isolate) {
+      switchToIsolate(isolate);
+    });
     switchToIsolate(serviceManager.isolateManager.selectedIsolate);
   }
 
@@ -56,7 +59,7 @@ class IsolateStatisticsViewController extends DisposableController
     _updateTagCounters(isolate);
     _updateZoneUsageData(isolate);
     _ports = (await _service.getPorts(_isolate.id)).ports;
-    _serviceExtensions = isolate.extensionRPCs;
+    _serviceExtensions = isolate.extensionRPCs ?? [];
     _serviceExtensions.sort();
     _refreshing.value = false;
   }
