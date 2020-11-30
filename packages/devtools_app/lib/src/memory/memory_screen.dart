@@ -9,7 +9,6 @@ import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
-import '../charts/chart_controller.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
@@ -94,9 +93,9 @@ class MemoryBodyState extends State<MemoryBody>
   @visibleForTesting
   static const androidChartButtonKey = Key('Android Chart');
 
-  ChartController eventChartController;
-  ChartController vMChartController;
-  ChartController androidChartController;
+  EventChartController eventChartController;
+  VMChartController vmChartController;
+  AndroidChartController androidChartController;
 
   MemoryController controller;
   TabController tabController;
@@ -106,14 +105,6 @@ class MemoryBodyState extends State<MemoryBody>
   @override
   void initState() {
     super.initState();
-
-    eventChartController = ChartController(
-      displayYLabels: false,
-      displayXAxis: false,
-      displayXLabels: false,
-    );
-    vMChartController = ChartController(displayTopLine: false);
-    androidChartController = ChartController();
 
     ga.screen(MemoryScreen.id);
 
@@ -131,7 +122,12 @@ class MemoryBodyState extends State<MemoryBody>
 
     final newController = Provider.of<MemoryController>(context);
     if (newController == controller) return;
+
     controller = newController;
+
+    eventChartController = EventChartController(controller);
+    vmChartController = VMChartController(controller);
+    androidChartController = AndroidChartController(controller);
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
@@ -140,6 +136,14 @@ class MemoryBodyState extends State<MemoryBody>
         //              by Class or by Objects.
         // Create the snapshot data by Library.
         controller.createSnapshotByLibrary();
+      });
+    });
+
+    // Update the chart when the memorySource changes.
+    addAutoDisposeListener(controller.memorySourceNotifier, () {
+      setState(() {
+        controller.updatedMemorySource();
+        _refreshCharts();
       });
     });
 
@@ -187,7 +191,7 @@ class MemoryBodyState extends State<MemoryBody>
           child: MemoryEventsPane(eventChartController),
         ),
         SizedBox(
-          child: MemoryVMChart(vMChartController),
+          child: MemoryVMChart(vmChartController),
         ),
         controller.isAndroidChartVisible
             ? SizedBox(
@@ -220,6 +224,28 @@ class MemoryBodyState extends State<MemoryBody>
         ),
       ],
     );
+  }
+
+  void _refreshCharts() {
+    // Remove history of all plotted data in all charts.
+    eventChartController?.reset();
+    vmChartController?.reset();
+    androidChartController?.reset();
+
+    _recomputeChartData();
+  }
+
+  /// Recompute (attach data to the chart) for either live or offline data source.
+  void _recomputeChartData() {
+    if (eventChartController.traces.isNotEmpty) {
+      eventChartController.setupData();
+    }
+    if (vmChartController.traces.isNotEmpty) {
+      vmChartController.setupData();
+    }
+    if (androidChartController.traces.isNotEmpty) {
+      androidChartController.setupData();
+    }
   }
 
   Widget _intervalDropdown(TextTheme textTheme) {
@@ -287,8 +313,12 @@ class MemoryBodyState extends State<MemoryBody>
             }
 
             eventChartController?.zoomDuration = duration;
-            vMChartController?.zoomDuration = duration;
+            vmChartController?.zoomDuration = duration;
             androidChartController?.zoomDuration = duration;
+
+            eventChartController?.dirty = true;
+            vmChartController?.dirty = true;
+            androidChartController?.dirty = true;
           });
         },
         items: _displayTypes,
@@ -400,7 +430,7 @@ class MemoryBodyState extends State<MemoryBody>
     return OutlineButton(
       key: androidChartButtonKey,
       onPressed: controller.isConnectedDeviceAndroid
-          ? _toggleAndroidChartVisibility
+          ? controller.toggleAndroidChartVisibility
           : null,
       child: MaterialIconLabel(
         controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
@@ -408,12 +438,6 @@ class MemoryBodyState extends State<MemoryBody>
         includeTextWidth: 900,
       ),
     );
-  }
-
-  void _toggleAndroidChartVisibility() {
-    setState(() {
-      controller.toggleAndroidChartVisibility();
-    });
   }
 
   Widget _buildMemoryControls(TextTheme textTheme) {
@@ -631,7 +655,7 @@ class MemoryBodyState extends State<MemoryBody>
 
     // Remove history of all plotted data in all charts.
     eventChartController?.reset();
-    vMChartController?.reset();
+    vmChartController?.reset();
     androidChartController?.reset();
   }
 

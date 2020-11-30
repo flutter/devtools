@@ -15,10 +15,69 @@ import '../theme.dart';
 import 'memory_controller.dart';
 import 'memory_timeline.dart';
 
+class VMChartController extends ChartController {
+  VMChartController(this._memoryController)
+      : super(
+          displayTopLine: false,
+          name: 'VM Memory',
+        );
+
+  final MemoryController _memoryController;
+
+  // TODO(terry): Only load max visible data collected, when pruning of data
+  //              charted is added.
+  /// Preload any existing data collected but not in the chart.
+  @override
+  void setupData() {
+    final chartDataLength = timestampsSize;
+    final dataLength = _memoryController.memoryTimeline.data.length;
+
+    final dataRange = _memoryController.memoryTimeline.data.getRange(
+      chartDataLength,
+      dataLength,
+    );
+
+    dataRange.forEach(addSampleToChart);
+  }
+
+  /// Loads all heap samples (live data or offline).
+  void addSampleToChart(HeapSample sample) {
+    // If paused don't update the chart (data is still collected).
+    if (_memoryController.isPaused) return;
+
+    addTimestamp(sample.timestamp);
+
+    // TODO(terry): Trace should compute stacked or not here.
+    final timestamp = sample.timestamp;
+    final externalValue = sample.external.toDouble();
+    addDataToTrace(
+      TraceName.external.index,
+      trace.Data(timestamp, externalValue),
+    );
+
+    // TODO(terry): Trace should compute stacked or not here.
+    final usedValue = externalValue + sample.used;
+    addDataToTrace(TraceName.used.index, trace.Data(timestamp, usedValue));
+
+    final capacityValue = sample.capacity.toDouble();
+    addDataToTrace(
+      TraceName.capacity.index,
+      trace.Data(timestamp, capacityValue),
+    );
+
+    final rssValue = sample.rss.toDouble();
+    addDataToTrace(TraceName.rSS.index, trace.Data(timestamp, rssValue));
+  }
+
+  void addDataToTrace(int traceIndex, trace.Data data) {
+    this.trace(traceIndex).addDatum(data);
+  }
+}
+
 class MemoryVMChart extends StatefulWidget {
   const MemoryVMChart(this.chartController);
 
-  final ChartController chartController;
+  final VMChartController chartController;
 
   @override
   MemoryVMChartState createState() => MemoryVMChartState();
@@ -35,7 +94,7 @@ enum TraceName {
 
 class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   /// Controller attached to the chart.
-  ChartController get _chartController => widget.chartController;
+  VMChartController get _chartController => widget.chartController;
 
   /// Controller for managing memory collection.
   MemoryController _memoryController;
@@ -46,9 +105,9 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
 
   @override
   void initState() {
-    setupTraces();
-
     super.initState();
+
+    setupTraces();
   }
 
   @override
@@ -66,7 +125,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     cancel();
 
     setupTraces();
-    setupChartData();
+    _chartController.setupData();
 
     addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
       setState(() {
@@ -78,13 +137,11 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     if (_chartController != null) {
-/*
-      colorScheme = Theme.of(context).colorScheme;
-      _setupEventsChartData(colorScheme);
-*/
       if (_chartController.timestamps.isNotEmpty) {
         return Container(
-            child: Chart(_chartController), height: defaultChartHeight);
+          height: defaultChartHeight,
+          child: Chart(_chartController),
+        );
       }
     }
 
@@ -177,57 +234,10 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     assert(_chartController.traces.length == TraceName.values.length);
   }
 
-  // TODO(terry): Only load max visible data collected, when pruning of data
-  //              charted is added.
-  /// Preload any existing data collected but not in the chart.
-  void setupChartData() {
-    final chartDataLength = _chartController.timestamps.length;
-    final liveDataLength = _memoryTimeline.liveData.length;
-
-    final liveRange = _memoryTimeline.liveData.getRange(
-      chartDataLength,
-      liveDataLength,
-    );
-
-    liveRange.forEach(_addSampleToChart);
-  }
-
-  /// Loads all heap samples (live data or offline).
-  void _addSampleToChart(HeapSample sample) {
-    // If paused don't update the chart (data is still collected).
-    if (_memoryController.paused.value) return;
-
-    _chartController.timestamps.add(sample.timestamp);
-
-    // TODO(terry): Trace should compute stacked or not here.
-    final timestamp = sample.timestamp;
-    final externalValue = sample.external.toDouble();
-    addDataToTrace(
-      TraceName.external.index,
-      trace.Data(timestamp, externalValue),
-    );
-
-    final usedValue = externalValue + sample.used;
-    addDataToTrace(TraceName.used.index, trace.Data(timestamp, usedValue));
-
-    final capacityValue = sample.capacity.toDouble();
-    addDataToTrace(
-      TraceName.capacity.index,
-      trace.Data(timestamp, capacityValue),
-    );
-
-    final rssValue = sample.rss.toDouble();
-    addDataToTrace(TraceName.rSS.index, trace.Data(timestamp, rssValue));
-  }
-
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.paused.value) return;
-    _addSampleToChart(sample);
-  }
-
-  void addDataToTrace(int traceIndex, trace.Data data) {
-    _chartController.trace(traceIndex).addDatum(data);
+    _chartController.addSampleToChart(sample);
   }
 }

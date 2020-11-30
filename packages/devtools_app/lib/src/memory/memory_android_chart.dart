@@ -15,10 +15,88 @@ import '../theme.dart';
 import 'memory_controller.dart';
 import 'memory_timeline.dart';
 
+class AndroidChartController extends ChartController {
+  AndroidChartController(this._memoryController)
+      : super(
+          displayTopLine: false,
+          name: 'Android',
+        );
+
+  final MemoryController _memoryController;
+
+  // TODO(terry): Only load max visible data collected, when pruning of data
+  //              charted is added.
+  /// Preload any existing data collected but not in the chart.
+  @override
+  void setupData() {
+    final chartDataLength = timestampsSize;
+    final dataLength = _memoryController.memoryTimeline.data.length;
+
+    final dataRange = _memoryController.memoryTimeline.data.getRange(
+      chartDataLength,
+      dataLength,
+    );
+
+    dataRange.forEach(addSampleToChart);
+  }
+
+  /// Loads all heap samples (live data or offline).
+  void addSampleToChart(HeapSample sample) {
+    // If paused don't update the chart (data is still collected).
+    if (_memoryController.isPaused) return;
+
+    addTimestamp(sample.timestamp);
+
+    final timestamp = sample.timestamp;
+    final adb = sample.adbMemoryInfo;
+
+    final stackValue = adb.stack.toDouble();
+    addDataToTrace(TraceName.stack.index, trace.Data(timestamp, stackValue));
+
+    final graphicValue = adb.graphics.toDouble();
+    addDataToTrace(
+        TraceName.graphics.index,
+        trace.Data(
+          timestamp,
+          graphicValue,
+        ));
+
+    final nativeHeapValue = adb.nativeHeap.toDouble();
+    addDataToTrace(
+        TraceName.nativeHeap.index,
+        trace.Data(
+          timestamp,
+          nativeHeapValue,
+        ));
+
+    final javaHeapValue = adb.javaHeap.toDouble();
+    addDataToTrace(
+      TraceName.javaHeap.index,
+      trace.Data(timestamp, javaHeapValue),
+    );
+
+    final codeValue = adb.code.toDouble();
+    addDataToTrace(TraceName.code.index, trace.Data(timestamp, codeValue));
+
+    final otherValue = adb.other.toDouble();
+    addDataToTrace(TraceName.other.index, trace.Data(timestamp, otherValue));
+
+    final systemValue = adb.system.toDouble();
+    addDataToTrace(TraceName.system.index, trace.Data(timestamp, systemValue));
+
+    final totalValue = adb.total.toDouble();
+    addDataToTrace(TraceName.total.index, trace.Data(timestamp, totalValue));
+  }
+
+  void addDataToTrace(int traceIndex, trace.Data data) {
+    this.trace(traceIndex).addDatum(data);
+  }
+}
+
 class MemoryAndroidChart extends StatefulWidget {
   const MemoryAndroidChart(this.chartController);
 
-  final ChartController chartController;
+  final AndroidChartController chartController;
 
   @override
   MemoryAndroidChartState createState() => MemoryAndroidChartState();
@@ -40,7 +118,7 @@ enum TraceName {
 class MemoryAndroidChartState extends State<MemoryAndroidChart>
     with AutoDisposeMixin {
   /// Controller attached to the chart.
-  ChartController get _chartController => widget.chartController;
+  AndroidChartController get _chartController => widget.chartController;
 
   /// Controller for managing memory collection.
   MemoryController _memoryController;
@@ -51,9 +129,9 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
   @override
   void initState() {
-    setupTraces();
-
     super.initState();
+
+    setupTraces();
   }
 
   @override
@@ -71,7 +149,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     cancel();
 
     setupTraces();
-    setupChartData();
+    _chartController.setupData();
 
     addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
       _processHeapSample(_memoryTimeline.sampleAddedNotifier.value);
@@ -81,10 +159,6 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   @override
   Widget build(BuildContext context) {
     if (_chartController != null) {
-/*
-      colorScheme = Theme.of(context).colorScheme;
-      _setupEventsChartData(colorScheme);
-*/
       if (_chartController.timestamps.isNotEmpty) {
         return Container(
             child: Chart(_chartController), height: defaultChartHeight);
@@ -94,13 +168,13 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     return const SizedBox(width: denseSpacing);
   }
 
-  // TODO(terry): definition in mp_chart color_utils.dart.
-  static Color getHoloBlue() => const Color.fromARGB(255, 51, 181, 229);
-  static const Color HOLO_ORANGE_DARK = Color(0xffff8800);
-  static const Color HOLO_BLUE_LIGHT = Color(0xff33b5e5);
-  static const Color HOLO_PURPLE = Color(0xffaa66cc);
-  static const Color HOLO_GREEN_DARK = Color(0xff669900);
-  static const Color LTGRAY = Color(0xFFCCCCCC);
+  /// TODO(terry): Colors used in charts (move to theme).
+  static const haloBlue = Color.fromARGB(255, 51, 181, 229);
+  static const holoOrangeDark = Color(0xffff8800);
+  static const holoBlueLight = Color(0xff33b5e5);
+  static const holoPurple = Color(0xffaa66cc);
+  static const holoGreenDark = Color(0xff669900);
+  static const lightGray = Color(0xFFCCCCCC);
 
   void setupTraces() {
     if (_chartController.traces.isNotEmpty) {
@@ -158,7 +232,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     final graphicIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: HOLO_ORANGE_DARK,
+        color: holoOrangeDark,
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -171,7 +245,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     final nativeHeapIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: HOLO_BLUE_LIGHT,
+        color: holoBlueLight,
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -210,7 +284,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     final otherIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: HOLO_PURPLE,
+        color: holoPurple,
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -223,7 +297,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     final systemIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: HOLO_GREEN_DARK,
+        color: holoGreenDark,
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -236,7 +310,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     final totalIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: LTGRAY,
+        color: lightGray,
         symbol: trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
@@ -249,76 +323,10 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     assert(_chartController.traces.length == TraceName.values.length);
   }
 
-  // TODO(terry): Only load max visible data collected, when pruning of data
-  //              charted is added.
-  /// Preload any existing data collected but not in the chart.
-  void setupChartData() {
-    final chartDataLength = _chartController.timestamps.length;
-    final liveDataLength = _memoryTimeline.liveData.length;
-
-    final liveRange = _memoryTimeline.liveData.getRange(
-      chartDataLength,
-      liveDataLength,
-    );
-
-    liveRange.forEach(_addSampleToChart);
-  }
-
-  void _addSampleToChart(HeapSample sample) {
-    // If paused don't update the chart (data is still collected).
-    if (_memoryController.paused.value) return;
-
-    _chartController.timestamps.add(sample.timestamp);
-
-    final timestamp = sample.timestamp;
-    final adb = sample.adbMemoryInfo;
-
-    final stackValue = adb.stack.toDouble();
-    addDataToTrace(TraceName.stack.index, trace.Data(timestamp, stackValue));
-
-    final graphicValue = adb.graphics.toDouble();
-    addDataToTrace(
-        TraceName.graphics.index,
-        trace.Data(
-          timestamp,
-          graphicValue,
-        ));
-
-    final nativeHeapValue = adb.nativeHeap.toDouble();
-    addDataToTrace(
-        TraceName.nativeHeap.index,
-        trace.Data(
-          timestamp,
-          nativeHeapValue,
-        ));
-
-    final javaHeapValue = adb.javaHeap.toDouble();
-    addDataToTrace(
-      TraceName.javaHeap.index,
-      trace.Data(timestamp, javaHeapValue),
-    );
-
-    final codeValue = adb.code.toDouble();
-    addDataToTrace(TraceName.code.index, trace.Data(timestamp, codeValue));
-
-    final otherValue = adb.other.toDouble();
-    addDataToTrace(TraceName.other.index, trace.Data(timestamp, otherValue));
-
-    final systemValue = adb.system.toDouble();
-    addDataToTrace(TraceName.system.index, trace.Data(timestamp, systemValue));
-
-    final totalValue = adb.total.toDouble();
-    addDataToTrace(TraceName.total.index, trace.Data(timestamp, totalValue));
-  }
-
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.paused.value) return;
-    _addSampleToChart(sample);
-  }
-
-  void addDataToTrace(int traceIndex, trace.Data data) {
-    _chartController.trace(traceIndex).addDatum(data);
+    _chartController.addSampleToChart(sample);
   }
 }

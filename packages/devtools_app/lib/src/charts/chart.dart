@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../config_specific/logger/logger.dart' as logger;
 import 'chart_controller.dart';
 import 'chart_trace.dart';
 
@@ -85,14 +86,20 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      // Inner container
-      builder: (_, constraints) => Container(
-        width: constraints.widthConstraints().maxWidth,
-        height: constraints.widthConstraints().maxHeight,
+    // Need to wrap in a RepaintBoundary. Otherwise when entering in a button
+    // the CustomPainter's (on the same layer as buttons) paint method is called
+    // for each frame (looks like 3). However, the CustomPainter's shouldRepaint
+    // is never called.
+    return RepaintBoundary(
+      child: LayoutBuilder(
+        // Inner container
+        builder: (_, constraints) => Container(
+          width: constraints.widthConstraints().maxWidth,
+          height: constraints.widthConstraints().maxHeight,
           child: CustomPaint(
             painter: ChartPainter(controller),
           ),
+        ),
       ),
     );
   }
@@ -116,6 +123,12 @@ class ChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // TODO(terry): Used to monitor total painting time. For large
+    //              datasets e.g., offline files of 10,000s of data
+    //              points time can be kind of slows. Consider only
+    //              sampling 1 point per horizontal pixel.
+    final startTime = DateTime.now();
+
     final axis = Paint()
       ..strokeWidth = axisWidth
       ..color = Colors.grey;
@@ -163,13 +176,13 @@ class ChartPainter extends CustomPainter {
 
     // TODO(terry): Need to compute x-axis left-most position for last timestamp.
     //              May need to do the other direction so it looks better.
-    final timeStampsLength = chartController.timestamps.length;
-    int xTickIndex = timeStampsLength;
-    final endVisibleIndex = xTickIndex - chartController.visibleTicks;
+    final endVisibleIndex =
+        chartController.timestampsSize - chartController.visibleTicks;
 
     final xTranslation = chartController.xCoordLeftMostVisibleTimestamp;
     final yTranslation = chartController.zeroYPosition;
 
+    int xTickIndex = chartController.timestampsSize;
     while (--xTickIndex >= 0) {
       // Hide left-side label when its ticks scrolls out.
       final leftTimestamp = chartController.leftLabelTimestamp;
@@ -373,6 +386,14 @@ class ChartPainter extends CustomPainter {
     );
 
     drawTitle(canvas, size, chartController.title);
+
+    final elapsedTime = DateTime.now().difference(startTime).inMilliseconds;
+    if (elapsedTime > 500)
+      logger.log('${chartController.name} ${chartController.timestampsSize} CustomPainter paint elapsed time'
+          ' $elapsedTime');
+
+    // Once painted we're not dirty anymore.
+    chartController.dirty = false;
   }
 
   void clipChart(Canvas canvas, {ClipOp op = ClipOp.intersect}) {
@@ -514,14 +535,14 @@ class ChartPainter extends CustomPainter {
     shortTick = true,
     displayTime = false,
   }) {
-    // Draw vertical tick (short or long).
-    canvas.drawLine(
-      Offset(xTickCoord, 0),
-      Offset(xTickCoord, shortTick ? 2 : 6),
-      axis,
-    );
-
     if (displayTime) {
+      // Draw vertical tick (short or long).
+      canvas.drawLine(
+        Offset(xTickCoord, 0),
+        Offset(xTickCoord, shortTick ? 2 : 6),
+        axis,
+      );
+
       final tp = createText(prettyTimestamp(timestamp), 1);
       tp.paint(
         canvas,
@@ -539,10 +560,10 @@ class ChartPainter extends CustomPainter {
   }
 
   TextPainter createText(String textValue, double scale) {
-    TextStyle(
-    color: Colors.black,
-    fontSize: 30,
-  );
+    const TextStyle(
+      color: Colors.black,
+      fontSize: 30,
+    );
     final span = TextSpan(
       // TODO(terry): All text in a chart is grey. A chart like a Trace
       //              should have PaintCharacteristics.
@@ -649,7 +670,7 @@ class ChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(ChartPainter oldDelegate) => false;
+  bool shouldRepaint(ChartPainter oldDelegate) => chartController.isDirty;
 
   Data _reduceHelper(Data curr, Data next) => curr.y > next.y ? curr : next;
 

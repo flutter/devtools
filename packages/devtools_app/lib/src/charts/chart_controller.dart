@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
@@ -60,10 +62,14 @@ class ChartController extends DisposableController
     this.displayXAxis = true,
     this.displayXLabels = true,
     this.displayYLabels = true,
+    this.name,
   }) {
     // TODO(terry): Compute dynamically based on X-axis lables text height.
     bottomPadding = !displayXLabels ? 0.0 : 40.0;
   }
+
+  /// Used for debugging to determine which chart.
+  final String name;
 
   // Total size of area to display the chart (includes title, axis, labels, etc.).
   Size size;
@@ -122,11 +128,12 @@ class ChartController extends DisposableController
   /// If false displays top horizontal line of chart.
   final bool displayTopLine;
 
-  /// If false hides X axis and displayXLabels is also set to false.
+  /// If true the X axis line is rendered, if false then both the X axis line
+  /// is not rendered and the labels and ticks are also not rendered.
   final bool displayXAxis;
 
-  /// Display the X labels and ticks horizontal axis is still displayed
-  /// unless displayXAxis is set to false
+  /// If true render the labels and ticks on the X axis, if displayXAxis is
+  /// false then the labels and ticks are not rendered.
   final bool displayXLabels;
 
   final bool displayYLabels;
@@ -136,7 +143,7 @@ class ChartController extends DisposableController
   // TODO(terry): Duration based on x-axis zoom factor (live, 5 min, 15 min, etc).
   void computeDurationLabel() {
     if (durationLabel == null && rightLabelTimestamp != null) {
-      final timestampsLength = timestamps.length;
+      final timestampsLength = timestampsSize;
       final midTick = (visibleTicks / 2).truncate();
       if (timestampsLength > visibleTicks) {
         // Lots of collected data > visible ticks so compute the visible mid tick.
@@ -174,14 +181,13 @@ class ChartController extends DisposableController
         [null, null, null],
       );
 
-      final timestampsLength = timestamps.length;
       final midPt = (visibleTicks / 2).truncate();
-      if (timestampsLength > visibleTicks) {
-        leftLabelTimestamp = timestamps[timestamps.length - visibleTicks + 10];
-        centerLabelTimestamp = timestamps[timestamps.length - midPt];
+      if (timestampsSize > visibleTicks) {
+        leftLabelTimestamp = timestamps[timestampsSize - visibleTicks + 10];
+        centerLabelTimestamp = timestamps[timestampsSize - midPt];
         rightLabelTimestamp = timestamps.last;
-      } else if (timestampsLength > midPt) {
-        centerLabelTimestamp = timestamps[timestamps.length - midPt];
+      } else if (timestampsSize > midPt) {
+        centerLabelTimestamp = timestamps[timestampsSize - midPt];
         rightLabelTimestamp = timestamps.last;
       } else if (timestamps.isNotEmpty) {
         rightLabelTimestamp = timestamps.first;
@@ -222,23 +228,43 @@ class ChartController extends DisposableController
     rightLabelTimestamp = null;
   }
 
-  // xCanvas coord for plotting data.
+  /// xCanvas coord for plotting data.
   double xCanvasChart;
 
-  // Width of the canvas for plotting data (#).
+  /// Width of the canvas for plotting data (#).
   double canvasChartWidth;
 
-  // Right-side padding after computing minPadding and max number of integral ticks for canvasChartWidth.
+  /// Right-side padding after computing minPadding and max number of integral ticks for canvasChartWidth.
   double xPaddingRight;
 
-  // yCanvas coord for plotting data.
+  /// yCanvas coord for plotting data.
   double yCanvasChart = 0;
 
-  // yCanvas height for plotting data.
+  /// yCanvas height for plotting data.
   double canvasChartHeight = 0;
 
-  // X axis ticks, each timestamp is a tick on the X axis.
-  final timestamps = <int>[];
+  bool get isDirty => dirty;
+
+  bool dirty = false;
+
+  // TODO(terry): Consider timestamps returning UnmodifiableListView
+  //              if loaded from a file (not live).
+  List<int> get timestamps => _timestamps;
+
+  /// X axis ticks, each timestamp is a tick on the X axis.
+  final _timestamps = <int>[];
+
+  void addTimestamp(int timestamp) {
+    _timestamps.add(timestamp);
+    dirty = true;
+  }
+
+  void timestampsClear() {
+    _timestamps.clear();
+    dirty = true;
+  }
+
+  int get timestampsSize => _timestamps.length;
 
   final traces = <Trace>[];
 
@@ -283,13 +309,13 @@ class ChartController extends DisposableController
 
   String get title => _title;
 
-  set title(String newTitle) {
-    // TODO(terry): Compute dynamically based on title text height.
-    topPadding = newTitle != null ? 20.0 : 0.0;
-    _title = newTitle;
-  }
+  String _title;
 
-  String _title = null;
+  set title(String value) {
+    // TODO(terry): Compute dynamically based on title text height.
+    topPadding = value != null ? 20.0 : 0.0;
+    _title = value;
+  }
 
   /// zoomDuration values of:
   ///     null implies all
@@ -305,7 +331,7 @@ class ChartController extends DisposableController
 
   void computeZoomRatio() {
     if (isZoomAll) {
-      _tickWidth = canvasChartWidth / timestamps.length;
+      _tickWidth = canvasChartWidth / timestampsSize;
     }
   }
 
@@ -334,13 +360,13 @@ class ChartController extends DisposableController
         );
 
         final ticksVisible =
-            timestamps.length - timestamps.indexOf(startOfLastNMinutes);
+            timestampsSize - timestamps.indexOf(startOfLastNMinutes);
         _tickWidth = canvasChartWidth / ticksVisible;
       } else {
         // No but lets scale x-axis based on the last two timestamps diffs we have.
         // TODO(terry): Consider using all the data maybe average out the time between
         //              ticks.
-        final length = timestamps.length;
+        final length = timestampsSize;
         // Enough data (at least 2 points) to know how many ticks for the duration.
         if (length > 1) {
           final lastTS = DateTime.fromMillisecondsSinceEpoch(timestamps.last);
@@ -363,11 +389,14 @@ class ChartController extends DisposableController
 
   /// Clear all data in the chart.
   void reset() {
-    for (var index = 0; index < traces?.length;  index++) {
-      traces[index].data.clear();
+    for (var trace in traces) {
+      trace.dataClear();
     }
-    timestamps.clear();
+    timestampsClear();
   }
+
+  /// Override to load data from another source e.g., live, offline, etc.
+  void setupData() {}
 
   void computeChartArea() {
     // Check if ready to start computations?
@@ -419,7 +448,7 @@ class ChartController extends DisposableController
     final trace = Trace(this, chartType, characteristics);
 
     if (name != null) trace.name = name;
-    if (data != null) trace.data.addAll(data);
+    if (data != null) trace.addAllData(data);
 
     traces.add(trace);
     assert(trace == traces[traceIndex]);
@@ -430,14 +459,14 @@ class ChartController extends DisposableController
   int get numberOfVisibleXAxisTicks => visibleTicks;
 
   /// If negative then total ticks collected < number of visible ticks to display.
-  int get totalTimestampTicks => timestamps.length - numberOfVisibleXAxisTicks;
+  int get totalTimestampTicks => timestampsSize - numberOfVisibleXAxisTicks;
 
   int get leftVisibleIndex {
     final leftIndex = totalTimestampTicks;
     if (leftIndex > 0) return leftIndex;
 
     // Less ticks than total size of ticks to show.
-    return numberOfVisibleXAxisTicks - timestamps.length;
+    return numberOfVisibleXAxisTicks - timestampsSize;
   }
 
   bool isTimestampVisible(int timestamp, int timestampIndex) {
@@ -448,8 +477,6 @@ class ChartController extends DisposableController
   }
 
   int normalizeTimestampIndex(int index) {
-    if (index == -1) return -1;
-
     if (isTimestampVisible(timestamps[index], index)) {
       final firstVisibleIndex = leftVisibleIndex;
       if (totalTimestampTicks < 0) {
@@ -466,7 +493,7 @@ class ChartController extends DisposableController
   /// value of this getter.
   double get xCoordLeftMostVisibleTimestamp {
     double indexOffset = xCanvasChart;
-    final totalTimestamps = timestamps.length;
+    final totalTimestamps = timestampsSize;
     final visibleCount = numberOfVisibleXAxisTicks;
     if (totalTimestamps < visibleCount) {
       final startIndex = visibleCount - totalTimestamps;
@@ -481,11 +508,13 @@ class ChartController extends DisposableController
   /// visible.
   double timestampXCanvasCoord(int timestamp) {
     final index = timestamps.indexOf(timestamp);
-    final visibleIndex = normalizeTimestampIndex(index);
-    if (visibleIndex >= 0) {
-      return (visibleIndex * tickWidth).toDouble();
-    } else {
-      return -1;
+    if (index >= 0) {
+      // Valid index.
+      final visibleIndex = normalizeTimestampIndex(index);
+      if (visibleIndex >= 0) {
+        return (visibleIndex * tickWidth).toDouble();
+      }
     }
+    return -1;
   }
 }

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:mp_chart/mp/core/adapter_android_mp.dart';
+//import 'package:mp_chart/mp/core/adapter_android_mp.dart';
 
 import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
@@ -236,7 +236,7 @@ Color titleSolidBackgroundColor(ThemeData theme) {
 }
 
 const chartFontSizeSmall = 12.0;
-
+/*
 final chartLightTypeFace = TypeFace(
   fontFamily: 'OpenSans',
   fontWeight: FontWeight.w100,
@@ -246,7 +246,7 @@ final chartBoldTypeFace = TypeFace(
   fontFamily: 'OpenSans',
   fontWeight: FontWeight.w800,
 );
-
+*/
 const lightSelection = Color(0xFFD4D7DA);
 
 /// Return the fixed font style for DevTools.

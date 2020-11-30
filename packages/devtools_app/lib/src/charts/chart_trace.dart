@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -63,14 +64,28 @@ class Trace {
 
   double dataYMax = 0;
 
-  final data = <Data>[];
+  final _data = <Data>[];
+
+  // TODO(terry): Consider UnmodifiableListView if data is loaded from offline file (not live).
+  List<Data> get data => _data;
+
+  void addAllData(List<Data> data) {
+    _data.addAll(data);
+    controller.dirty = true;
+  }
 
   ChartType get chartType => _chartType;
 
   AxisScale yAxis;
 
+  void dataClear() {
+    _data.clear();
+    controller.dirty = true;
+  }
+
   void addDatum(Data datum) {
-    data.add(datum);
+    _data.add(datum);
+    controller.dirty = true;
 
     if (characteristics.fixedMaxY != null) {
       assert(

@@ -8,7 +8,6 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
-import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../analytics/constants.dart';
@@ -322,75 +321,6 @@ class MemoryController extends DisposableController
       // Switching to an offline memory log (JSON file in /tmp).
       memoryLog.loadOffline(memorySource);
     }
-
-    // The memory source has changed, clear all plotted values.
-    memoryTimeline.dartChartData.reset();
-    memoryTimeline.eventsChartData.reset();
-    memoryTimeline.androidChartData.reset();
-  }
-
-  void recomputeOfflineData() {
-    final args = memoryTimeline.recomputeData(intervalDurationInMs);
-    processDataset(args);
-  }
-
-  void recomputeData() {
-    final args = memoryTimeline.recomputeData(intervalDurationInMs);
-    processDataset(args);
-    // TODO(terry): need to recomputeOffline data?
-  }
-
-  void processDataset(List<Map> args) {
-    // Add entries of entries plotted in the chart.  Entries plotted
-    // may not match data collected (based on display interval).
-    for (var arg in args) {
-      memoryTimeline.dartChartData.addTraceEntries(
-        rssValue: arg[MemoryTimeline.rssValueKey],
-        capacityValue: arg[MemoryTimeline.capacityValueKey],
-        usedValue: arg[MemoryTimeline.usedValueKey],
-        externalValue: arg[MemoryTimeline.externalValueKey],
-        rasterLayerValue: arg[MemoryTimeline.rasterLayerValueKey],
-        rasterPictureValue: arg[MemoryTimeline.rasterPictureValueKey],
-        minutesToDisplay: intervalDurationInMs,
-      );
-
-      memoryTimeline.androidChartData.addTraceEntries(
-        javaValue: arg[MemoryTimeline.javaHeapValueKey],
-        nativeValue: arg[MemoryTimeline.nativeHeapValueKey],
-        codeValue: arg[MemoryTimeline.codeValueKey],
-        stackValue: arg[MemoryTimeline.stackValueKey],
-        graphicsValue: arg[MemoryTimeline.graphicsValueKey],
-        otherValue: arg[MemoryTimeline.otherValueKey],
-        systemValue: arg[MemoryTimeline.systemValueKey],
-        totalValue: arg[MemoryTimeline.totalValueKey],
-        minutesToDisplay: intervalDurationInMs,
-      );
-
-      // Process the events
-      memoryTimeline.eventsChartData.addTraceEntries(
-        gcVmValue: arg[MemoryTimeline.gcVmEventKey],
-        gcUserValue: arg[MemoryTimeline.gcUserEventKey],
-        snapshotValue: arg[MemoryTimeline.snapshotEventKey],
-        snapshotAutoValue: arg[MemoryTimeline.snapshotAutoEventKey],
-        monitorStartValue: arg[MemoryTimeline.monitorStartEventKey],
-        monitorContinuesValue: arg[MemoryTimeline.monitorContinuesEventKey],
-        monitorResetValue: arg[MemoryTimeline.monitorResetEventKey],
-        minutesToDisplay: intervalDurationInMs,
-      );
-
-      if (memoryTimeline.dartChartData.pruned) {
-        memoryTimeline.startingIndex++;
-      }
-    }
-  }
-
-  void processData([bool reloadAllData = false]) {
-    final args = offline
-        ? memoryTimeline
-            .fetchMemoryLogFileData() // TODO(terry): Need to fetch events data on disk too.
-        : memoryTimeline.fetchLiveData(reloadAllData);
-
-    processDataset(args);
   }
 
   final _paused = ValueNotifier<bool>(false);
@@ -404,6 +334,8 @@ class MemoryController extends DisposableController
   void resumeLiveFeed() {
     _paused.value = false;
   }
+
+  bool get isPaused => _paused.value;
 
   final _androidChartVisibleNotifier = ValueNotifier<bool>(false);
 
@@ -1112,74 +1044,6 @@ enum ChartDataSets {
   rasterPictureSet,
 }
 
-/// Prepare data to plot in MPChart.
-class MPChartData {
-  bool _pruning = false;
-
-  /// Signal that every addTrace will cause a prune.
-  bool get pruned => _pruning;
-
-  final datasets = List<List<Entry>>.generate(
-    ChartDataSets.values.length,
-    (int) => <Entry>[],
-  );
-
-  /// Compute each dataset Entry's.
-  List<Entry> get used => datasets[ChartDataSets.usedSet.index];
-
-  List<Entry> get capacity => datasets[ChartDataSets.capacitySet.index];
-
-  List<Entry> get externalHeap => datasets[ChartDataSets.externalHeapSet.index];
-
-  List<Entry> get residentSetSize => datasets[ChartDataSets.rssSet.index];
-
-  List<Entry> get rasterLayerSetSize =>
-      datasets[ChartDataSets.rasterLayerSet.index];
-
-  List<Entry> get rasterPictureSetSize =>
-      datasets[ChartDataSets.rasterPictureSet.index];
-
-  /// Add each entry to its corresponding trace.
-  void addTraceEntries({
-    Entry rssValue,
-    Entry capacityValue,
-    Entry usedValue,
-    Entry externalValue,
-    Entry rasterLayerValue,
-    Entry rasterPictureValue,
-    int minutesToDisplay,
-  }) {
-    if (!_pruning &&
-        externalHeap.isNotEmpty &&
-        (externalValue.x - externalHeap.first.x) > minutesToDisplay) {
-      _pruning = true;
-      assert(externalValue.x - externalHeap.last.x <= minutesToDisplay);
-    }
-
-    if (_pruning) {
-      for (final dataset in datasets) {
-        dataset.removeAt(0);
-      }
-    }
-
-    externalHeap.add(externalValue);
-    used.add(usedValue);
-    capacity.add(capacityValue);
-    residentSetSize.add(rssValue);
-    rasterLayerSetSize.add(rasterLayerValue);
-    rasterPictureSetSize.add(rasterPictureValue);
-  }
-
-  /// Remove all plotted entries in all traces.
-  void reset() {
-    // Clear all Entries in each dataset.
-    for (final dataset in datasets) {
-      dataset.clear();
-    }
-    _pruning = false;
-  }
-}
-
 /// Index in datasets to each dataset's list of Entry's.
 enum EventDataSets {
   // Datapoint entries for ghost trace to stop auto-scaling of Y-axis.
@@ -1198,181 +1062,6 @@ enum EventDataSets {
   monitorContinuesSet,
   // Reset all Allocation Accumulators.
   monitorResetSet,
-}
-
-/// Prepare data to plot in Event Chart.
-class MPEventsChartData {
-  bool _pruning = false;
-
-  /// Signal that every addTrace will cause a prune.
-  bool get pruned => _pruning;
-
-  final datasets = List<List<Entry>>.generate(
-    EventDataSets.values.length,
-    (int) => <Entry>[],
-  );
-
-  /// Compute each dataset Entry's.
-  List<Entry> get ghosts => datasets[EventDataSets.ghostsSet.index];
-
-  List<Entry> get gcUser => datasets[EventDataSets.gcUserSet.index];
-
-  List<Entry> get gcVm => datasets[EventDataSets.gcVmSet.index];
-
-  List<Entry> get snapshot => datasets[EventDataSets.snapshotSet.index];
-
-  List<Entry> get snapshotAuto => datasets[EventDataSets.snapshotAutoSet.index];
-
-  List<Entry> get monitorStart => datasets[EventDataSets.monitorStartSet.index];
-
-  List<Entry> get monitorContinues =>
-      datasets[EventDataSets.monitorContinuesSet.index];
-
-  List<Entry> get monitorReset => datasets[EventDataSets.monitorResetSet.index];
-
-  /// Add each entry to its corresponding trace.
-  void addTraceEntries({
-    Entry gcUserValue,
-    Entry gcVmValue,
-    Entry snapshotValue,
-    Entry snapshotAutoValue,
-    Entry monitorStartValue,
-    Entry monitorContinuesValue,
-    Entry monitorResetValue,
-    int minutesToDisplay,
-  }) {
-    if (!_pruning &&
-        gcUser.isNotEmpty &&
-        (gcUserValue.x - gcUser.first.x) > minutesToDisplay) {
-      _pruning = true;
-      assert(gcUserValue.x - gcUser.last.x <= minutesToDisplay);
-    }
-
-    if (_pruning) {
-      for (final dataset in datasets) {
-        dataset.removeAt(0);
-      }
-    }
-
-    ghosts.add(Entry(x: gcUserValue.x, y: MemoryTimeline.visibleEvent));
-    gcUser.add(gcUserValue);
-    gcVm.add(gcVmValue);
-    snapshot.add(snapshotValue);
-    snapshotAuto.add(snapshotAutoValue);
-    monitorStart.add(monitorStartValue);
-    monitorContinues.add(monitorContinuesValue);
-    monitorReset.add(monitorResetValue);
-  }
-
-  /// Remove all plotted entries in all traces.
-  void reset() {
-    // Clear all Entries in each dataset.
-    for (final dataset in datasets) {
-      dataset.clear();
-    }
-    _pruning = false;
-  }
-}
-
-/// Index in datasets to each dataset's list of Entry's.
-enum ADBDataSets {
-  // Datapoint entries for each Java heap value.
-  javaHeapSet,
-  // Datapoint entries for each native heap value.
-  nativeHeapSet,
-  // Datapoint entries for code size value.
-  codeSet,
-  // Datapoint entries for stack size value.
-  stackSet,
-  // Datapoint entries for graphics size value.
-  graphicsSet,
-  // Datapoint entries for other size value.
-  otherSet,
-  // Datapoint entries for system size value.
-  systemSet,
-  // Datapoint entries for total size value.
-  totalSet,
-}
-
-/// Prepare Engine (ADB memory info) data to plot in MPChart.
-class MPEngineChartData {
-  bool _pruning = false;
-
-  final datasets = List<List<Entry>>.generate(
-    ADBDataSets.values.length,
-    (int) => <Entry>[],
-  );
-
-  // Compute each dataset Entry's.
-
-  // Datapoint entries for each Java heap value.
-  List<Entry> get javaHeap => datasets[ADBDataSets.javaHeapSet.index];
-
-  // Datapoint entries for each native heap value.
-  List<Entry> get nativeHeap => datasets[ADBDataSets.nativeHeapSet.index];
-
-  // Datapoint entries for code size value.
-  List<Entry> get code => datasets[ADBDataSets.codeSet.index];
-
-  // Datapoint entries for stack size value.
-  List<Entry> get stack => datasets[ADBDataSets.stackSet.index];
-
-  // Datapoint entries for graphics size value.
-  List<Entry> get graphics => datasets[ADBDataSets.graphicsSet.index];
-
-  // Datapoint entries for other size value.
-  List<Entry> get other => datasets[ADBDataSets.otherSet.index];
-
-  // Datapoint entries for system size value.
-  List<Entry> get system => datasets[ADBDataSets.systemSet.index];
-
-  // Datapoint entries for total size value.
-  List<Entry> get total => datasets[ADBDataSets.totalSet.index];
-
-  /// Add each entry to its corresponding trace.
-  void addTraceEntries({
-    Entry javaValue,
-    Entry nativeValue,
-    Entry codeValue,
-    Entry stackValue,
-    Entry graphicsValue,
-    Entry otherValue,
-    Entry systemValue,
-    Entry totalValue,
-    int minutesToDisplay,
-  }) {
-    if (!_pruning &&
-        javaHeap.isNotEmpty &&
-        (javaValue.x - javaHeap.first.x) > minutesToDisplay) {
-      _pruning = true;
-
-      assert(javaValue.x - javaHeap.last.x <= minutesToDisplay);
-    }
-
-    if (_pruning) {
-      for (final dataset in datasets) {
-        dataset.removeAt(0);
-      }
-    }
-
-    javaHeap.add(javaValue);
-    nativeHeap.add(nativeValue);
-    code.add(codeValue);
-    stack.add(stackValue);
-    graphics.add(graphicsValue);
-    other.add(otherValue);
-    system.add(systemValue);
-    total.add(totalValue);
-  }
-
-  /// Remove all plotted entries in all traces.
-  void reset() {
-    // Clear all Entries in each dataset.
-    for (final dataset in datasets) {
-      dataset.clear();
-    }
-    _pruning = false;
-  }
 }
 
 /// Supports saving and loading memory samples.

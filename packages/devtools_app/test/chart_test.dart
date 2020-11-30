@@ -148,7 +148,7 @@ void main() {
           final capacity = datum.capacity.toDouble();
           final rss = datum.rss.toDouble();
 
-          controller.timestamps.add(datum.timestamp);
+          controller.addTimestamp(datum.timestamp);
 
           _rawExternal.add(Data(datum.timestamp, external));
 
@@ -276,7 +276,7 @@ void main() {
           expect(rssTrace.dataYMax, equals(571727872.0));
           expect(rssTrace.data.length, equals(_rawRSS.length));
 
-          expect(controller.timestamps.length, equals(292));
+          expect(controller.timestampsSize, equals(292));
 
           validateScaledYLabels(controller);
 
@@ -523,7 +523,7 @@ void main() {
             datumIndex++) {
           final datum = memoryJson.data[datumIndex];
 
-          controller.timestamps.add(datum.timestamp);
+          controller.addTimestamp(datum.timestamp);
 
           final event = datum.memoryEventInfo;
           if (datum.isGC) {
@@ -664,7 +664,7 @@ void main() {
           expect(gcTrace.dataYMax, equals(0.0));
           expect(gcTrace.data.length, equals(70));
 
-          expect(controller.timestamps.length, equals(292));
+          expect(controller.timestampsSize, equals(292));
 
           // Validate the labels displayed on the y-axis.
           final yScale = controller.yScale;
