@@ -656,7 +656,7 @@ class ServiceExtensionManager extends Disposer {
   Future<void> _handleDebugEvent(Event event) async {
     if (event.kind == EventKind.kResume) {
       final isolateId = event.isolate.id;
-      final callbacks = _callbacksOnIsolateResume[isolateId];
+      final callbacks = _callbacksOnIsolateResume[isolateId] ?? [];
       _callbacksOnIsolateResume = {};
       for (final callback in callbacks) {
         try {
