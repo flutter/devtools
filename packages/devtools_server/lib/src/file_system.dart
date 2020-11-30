@@ -11,7 +11,7 @@ class LocalFileSystem {
     return value == null ? '.' : value;
   }
 
-  static File file(String pathFromHomeDir) {
+  static File fileFromPath(String pathFromHomeDir) {
     final file = File('${userHomeDir()}/$pathFromHomeDir');
     if (!file.existsSync()) {
       return null;
@@ -20,15 +20,15 @@ class LocalFileSystem {
   }
 
   static String fileAsJson(String pathFromHomeDir) {
-    final _file = file(pathFromHomeDir);
-    if (_file == null) return null;
+    final file = fileFromPath(pathFromHomeDir);
+    if (file == null) return null;
 
-    final fileName = path.basename(_file.path);
+    final fileName = path.basename(file.path);
     if (!fileName.endsWith('.json')) return null;
 
-    final content = _file.readAsStringSync();
+    final content = file.readAsStringSync();
     final json = jsonDecode(content);
-    json['lastModifiedTime'] = _file.lastModifiedSync().toString();
+    json['lastModifiedTime'] = file.lastModifiedSync().toString();
     return jsonEncode(json);
   }
 }
