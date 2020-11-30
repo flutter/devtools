@@ -116,13 +116,13 @@ class _AppSizeBodyState extends State<AppSizeBody>
           controller.loadDiffTreeFromJsonFiles(
             oldFile: baseAppSizeFile,
             newFile: testAppSizeFile,
-            onError: (error) => Notifications.of(context).push(error),
+            onError: _pushErrorMessage,
           );
           _tabController.animateTo(tabs.indexOf(diffTab));
         } else {
           controller.loadTreeFromJsonFile(
-            baseAppSizeFile,
-            (error) => Notifications.of(context).push(error),
+            jsonFile: baseAppSizeFile,
+            onError: _pushErrorMessage,
           );
           _tabController.animateTo(tabs.indexOf(analysisTab));
         }
@@ -139,6 +139,10 @@ class _AppSizeBodyState extends State<AppSizeBody>
   void dispose() {
     super.dispose();
     _tabController.dispose();
+  }
+
+  void _pushErrorMessage(String error) {
+    if (mounted) Notifications.of(context).push(error);
   }
 
   @override
@@ -339,8 +343,6 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
   }
 
   Widget _buildImportFileView() {
-    final notifications = Notifications.of(context);
-
     return ValueListenableBuilder(
         valueListenable: controller.processingNotifier,
         builder: (context, processing, _) {
@@ -364,8 +366,10 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
                     actionText: 'Analyze Size',
                     onAction: (jsonFile) {
                       controller.loadTreeFromJsonFile(
-                        jsonFile,
-                        (error) => notifications.push(error),
+                        jsonFile: jsonFile,
+                        onError: (error) {
+                          if (mounted) Notifications.of(context).push(error);
+                        },
                       );
                     },
                   ),

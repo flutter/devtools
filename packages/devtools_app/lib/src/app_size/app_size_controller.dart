@@ -176,10 +176,10 @@ class AppSizeController {
   ValueListenable get processingNotifier => _processingNotifier;
   final _processingNotifier = ValueNotifier<bool>(false);
 
-  void loadTreeFromJsonFile(
-    DevToolsJsonFile jsonFile,
-    void Function(String error) onError,
-  ) async {
+  void loadTreeFromJsonFile({
+    @required DevToolsJsonFile jsonFile,
+    @required void Function(String error) onError,
+  }) async {
     _processingNotifier.value = true;
 
     // Free up the thread for the app size page to display the loading message.

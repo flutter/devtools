@@ -59,7 +59,10 @@ void main() {
     DevToolsJsonFile data,
   }) async {
     data ??= newV8JsonFile;
-    appSizeController.loadTreeFromJsonFile(data, (error) => {});
+    appSizeController.loadTreeFromJsonFile(
+      jsonFile: data,
+      onError: (error) => {},
+    );
     await tester.pumpAndSettle();
   }
 
@@ -122,8 +125,8 @@ void main() {
       expect(find.text('No File Selected'), findsOneWidget);
 
       appSizeController.loadTreeFromJsonFile(
-        newV8JsonFile,
-        (error) => {},
+        jsonFile: newV8JsonFile,
+        onError: (error) => {},
         delayed: true,
       );
       await tester.pump(const Duration(milliseconds: 500));
@@ -372,12 +375,12 @@ void main() {
       );
 
       appSizeController.loadTreeFromJsonFile(
-        DevToolsJsonFile(
+        jsonFile: DevToolsJsonFile(
           name: 'unsupported_file.json',
           lastModifiedTime: lastModifiedTime,
           data: unsupportedFile,
         ),
-        (error) => Notifications.of(buildContext).push(error),
+        onError: (error) => Notifications.of(buildContext).push(error),
       );
       await tester.pumpAndSettle();
       expect(
