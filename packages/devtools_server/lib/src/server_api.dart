@@ -149,32 +149,32 @@ class ServerApi {
           request,
           json.encode(_devToolsUsage.surveyShownCount),
         );
-      case apiGetPrimaryAppSizeFile:
+      case apiGetBaseAppSizeFile:
         final queryParams = request.requestedUri.queryParameters;
-        if (queryParams.containsKey(primaryAppSizeFilePropertyName)) {
-          final filePath = queryParams[primaryAppSizeFilePropertyName];
+        if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
+          final filePath = queryParams[baseAppSizeFilePropertyName];
           final fileJson = LocalFileSystem.fileAsJson(filePath);
           if (fileJson == null) {
             return api.badRequest('No JSON file available at $filePath.');
           }
           return api.getCompleted(request, fileJson);
         }
-        return api.badRequest('Request for primary app size file does not '
+        return api.badRequest('Request for base app size file does not '
             'contain a query parameter with the expected key: '
-            '$primaryAppSizeFilePropertyName');
-      case apiGetSecondaryAppSizeFile:
+            '$baseAppSizeFilePropertyName');
+      case apiGetTestAppSizeFile:
         final queryParams = request.requestedUri.queryParameters;
-        if (queryParams.containsKey(secondaryAppSizeFilePropertyName)) {
-          final filePath = queryParams[secondaryAppSizeFilePropertyName];
+        if (queryParams.containsKey(testAppSizeFilePropertyName)) {
+          final filePath = queryParams[testAppSizeFilePropertyName];
           final fileJson = LocalFileSystem.fileAsJson(filePath);
           if (fileJson == null) {
             return api.badRequest('No JSON file available at $filePath.');
           }
           return api.getCompleted(request, fileJson);
         }
-        return api.badRequest('Request for secondary app size file does not '
+        return api.badRequest('Request for test app size file does not '
             'contain a query parameter with the expected key: '
-            '$secondaryAppSizeFilePropertyName');
+            '$testAppSizeFilePropertyName');
       default:
         return api.notImplemented(request);
     }

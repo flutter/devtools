@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:html';
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../utils.dart';
 import '../logger/logger.dart';
@@ -251,45 +252,49 @@ Future<void> resetDevToolsFile() async {
 }
 
 Future<DevToolsJsonFile> requestPrimaryAppSizeFile(String path) async {
-  if (isDevToolsServerAvailable) {
-    final resp = await _request(
-      '$apiGetPrimaryAppSizeFile?$primaryAppSizeFilePropertyName=$path',
-    );
-    if (resp?.status == HttpStatus.ok) {
-      return _devToolsJsonFileFromAppSizeResponse(resp, path);
-    } else {
-      logWarning(resp, apiGetPrimaryAppSizeFile);
-    }
-  }
-  return null;
+  return requestFile(
+    api: apiGetBaseAppSizeFile,
+    fileKey: baseAppSizeFilePropertyName,
+    filePath: path,
+  );
 }
 
 Future<DevToolsJsonFile> requestSecondaryAppSizeFile(String path) async {
+  return requestFile(
+    api: apiGetTestAppSizeFile,
+    fileKey: testAppSizeFilePropertyName,
+    filePath: path,
+  );
+}
+
+Future<DevToolsJsonFile> requestFile({
+  @required String api,
+  @required String fileKey,
+  @required String filePath,
+}) async {
   if (isDevToolsServerAvailable) {
-    final resp = await _request(
-      '$apiGetSecondaryAppSizeFile?$secondaryAppSizeFilePropertyName=$path',
-    );
+    final resp = await _request('$api?$fileKey=$filePath');
     if (resp?.status == HttpStatus.ok) {
-      return _devToolsJsonFileFromAppSizeResponse(resp, path);
+      return _devToolsJsonFileFromResponse(resp, filePath);
     } else {
-      logWarning(resp, apiGetPrimaryAppSizeFile);
+      logWarning(resp, api);
     }
   }
   return null;
 }
 
-DevToolsJsonFile _devToolsJsonFileFromAppSizeResponse(
+DevToolsJsonFile _devToolsJsonFileFromResponse(
   HttpRequest resp,
   String filePath,
 ) {
-  final _json = json.decode(resp.response);
-  final lastModified = _json['lastModifiedTime'];
+  final data = json.decode(resp.response);
+  final lastModified = data['lastModifiedTime'];
   final lastModifiedTime =
       lastModified != null ? DateTime.parse(lastModified) : DateTime.now();
   return DevToolsJsonFile(
     name: filePath,
     lastModifiedTime: lastModifiedTime,
-    data: _json,
+    data: data,
   );
 }
 

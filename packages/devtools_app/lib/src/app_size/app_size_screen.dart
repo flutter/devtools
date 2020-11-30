@@ -101,28 +101,27 @@ class _AppSizeBodyState extends State<AppSizeBody>
 
   Future<void> maybeLoadAppSizeFiles() async {
     final queryParams = loadQueryParams();
-    if (queryParams.containsKey(primaryAppSizeFilePropertyName)) {
+    if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
       preLoadingData = true;
-      final primaryAppSizeFile = await server.requestPrimaryAppSizeFile(
-          queryParams[primaryAppSizeFilePropertyName]);
-      DevToolsJsonFile secondaryAppSizeFile;
-      if (queryParams.containsKey(secondaryAppSizeFilePropertyName)) {
-        secondaryAppSizeFile = await server.requestSecondaryAppSizeFile(
-            queryParams[secondaryAppSizeFilePropertyName]);
+      final baseAppSizeFile = await server
+          .requestBaseAppSizeFile(queryParams[baseAppSizeFilePropertyName]);
+      DevToolsJsonFile testAppSizeFile;
+      if (queryParams.containsKey(testAppSizeFilePropertyName)) {
+        testAppSizeFile = await server
+            .requestTestAppSizeFile(queryParams[testAppSizeFilePropertyName]);
       }
 
-      if (primaryAppSizeFile != null) {
-        preLoadingData = true;
-        if (secondaryAppSizeFile != null) {
+      if (baseAppSizeFile != null) {
+        if (testAppSizeFile != null) {
           controller.loadDiffTreeFromJsonFiles(
-            oldFile: secondaryAppSizeFile,
-            newFile: primaryAppSizeFile,
+            oldFile: baseAppSizeFile,
+            newFile: testAppSizeFile,
             onError: (error) => Notifications.of(context).push(error),
           );
           _tabController.animateTo(tabs.indexOf(diffTab));
         } else {
           controller.loadTreeFromJsonFile(
-            primaryAppSizeFile,
+            baseAppSizeFile,
             (error) => Notifications.of(context).push(error),
           );
           _tabController.animateTo(tabs.indexOf(analysisTab));

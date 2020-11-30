@@ -44,12 +44,13 @@ const String apiGetSurveyShownCount = '${apiPrefix}getSurveyShownCount';
 const String apiIncrementSurveyShownCount =
     '${apiPrefix}incrementSurveyShownCount';
 
-/// Returns the primary app size file, if present.
-const String apiGetPrimaryAppSizeFile = '${apiPrefix}getPrimaryAppSizeFile';
+/// Returns the base app size file, if present.
+const String apiGetBaseAppSizeFile = '${apiPrefix}getBaseAppSizeFile';
 
-/// Returns the secondary app size file, if present.
-const String apiGetSecondaryAppSizeFile = '${apiPrefix}getSecondaryAppSizeFile';
+/// Returns the test app size file used for comparing two files in a diff, if
+/// present.
+const String apiGetTestAppSizeFile = '${apiPrefix}getTestAppSizeFile';
 
-const String primaryAppSizeFilePropertyName = 'appSizePrimary';
+const String baseAppSizeFilePropertyName = 'appSizeBase';
 
-const String secondaryAppSizeFilePropertyName = 'appSizeSecondary';
+const String testAppSizeFilePropertyName = 'appSizeTest';

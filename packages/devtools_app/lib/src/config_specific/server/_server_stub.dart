@@ -51,11 +51,11 @@ Future<void> resetDevToolsFile() async {
   throw Exception(unsupportedMessage);
 }
 
-Future<DevToolsJsonFile> requestPrimaryAppSizeFile(String path) async {
+Future<DevToolsJsonFile> requestBaseAppSizeFile(String path) async {
   throw Exception(unsupportedMessage);
 }
 
-Future<DevToolsJsonFile> requestSecondaryAppSizeFile(String path) async {
+Future<DevToolsJsonFile> requestTestAppSizeFile(String path) async {
   throw Exception(unsupportedMessage);
 }
 
