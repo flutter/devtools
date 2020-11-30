@@ -248,7 +248,7 @@ class MemoryTimeline {
   static String fineGrainTimestampFormat(int timestamp) =>
       _milliFormat.format(DateTime.fromMillisecondsSinceEpoch(timestamp));
 
-  void _computeStartingIndex(int displayInterval) {
+  void computeStartingIndex(int displayInterval) {
     // Compute a new starting index from length - N minutes.
     final timeLastSample = data.last.timestamp;
     var dataIndex = data.length - 1;
