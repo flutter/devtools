@@ -12,6 +12,7 @@ import 'package:devtools_app/src/logging/logging_screen.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
+import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_app/src/screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/timeline/timeline_screen.dart';
@@ -28,6 +29,7 @@ void main() {
       fakeServiceManager = FakeServiceManager(availableLibraries: []);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(FrameworkController, FrameworkController());
+      setGlobal(PreferencesController, PreferencesController());
 
       await serviceManager.isolateManager.selectedIsolateAvailable.future;
     });
