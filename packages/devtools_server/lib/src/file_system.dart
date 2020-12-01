@@ -18,36 +18,29 @@ class LocalFileSystem {
     return path.join(_userHomeDir(), '.flutter-devtools');
   }
 
-  /// Moves the .devtools file to ~/.devtools/.devtools if the .devtools file
+  /// Moves the .devtools file to ~/.flutter-devtools/.devtools if the .devtools file
   /// exists in the user's home directory.
   static void maybeMoveLegacyDevToolsStore() {
     final file = File(path.join(_userHomeDir(), DevToolsUsage.storeName));
     if (file.existsSync()) {
-      // Store the existing .devtools file in a tmp file so that we can delete
-      // the .devtools file before creating the .devtools directory. Otherwise,
-      // we will get a naming conflict.
-      final tmp = file.copySync(path.join(_userHomeDir(), '.tmp-devtools'));
-      file.deleteSync();
-
       ensureDevToolsDirectory();
-
-      tmp.copySync(path.join(devToolsDir(), DevToolsUsage.storeName));
-      tmp.deleteSync();
+      file.copySync(path.join(devToolsDir(), DevToolsUsage.storeName));
+      file.deleteSync();
     }
   }
 
-  /// Creates the ~/.devtools directory if it does not already exist.
+  /// Creates the ~/.flutter-devtools directory if it does not already exist.
   static void ensureDevToolsDirectory() {
     Directory('${LocalFileSystem.devToolsDir()}').createSync();
   }
 
   /// Returns a DevTools file from the given path.
   ///
-  /// Only files within ~/.devtools/ can be accessed.
+  /// Only files within ~/.flutter-devtools/ can be accessed.
   static File devToolsFileFromPath(String pathFromDevToolsDir) {
-    if (pathFromDevToolsDir.contains('../')) {
+    if (pathFromDevToolsDir.contains('..')) {
       // The passed in path should not be able to walk up the directory tree
-      // outside of the ~/.dart-devtools/ directory.
+      // outside of the ~/.flutter-devtools/ directory.
       return null;
     }
     ensureDevToolsDirectory();
@@ -60,7 +53,7 @@ class LocalFileSystem {
 
   /// Returns a DevTools file from the given path as encoded json.
   ///
-  /// Only files within ~/.devtools/ can be accessed.
+  /// Only files within ~/.flutter-devtools/ can be accessed.
   static String devToolsFileAsJson(String pathFromDevToolsDir) {
     final file = devToolsFileFromPath(pathFromDevToolsDir);
     if (file == null) return null;

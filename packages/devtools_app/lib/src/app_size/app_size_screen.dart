@@ -102,6 +102,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
   Future<void> maybeLoadAppSizeFiles() async {
     final queryParams = loadQueryParams();
     if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
+      // TODO(kenz): does this have to be in a setState()?
       preLoadingData = true;
       final baseAppSizeFile = await server
           .requestBaseAppSizeFile(queryParams[baseAppSizeFilePropertyName]);
@@ -111,6 +112,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
             .requestTestAppSizeFile(queryParams[testAppSizeFilePropertyName]);
       }
 
+      // TODO(kenz): add error handling if the files are null
       if (baseAppSizeFile != null) {
         if (testAppSizeFile != null) {
           controller.loadDiffTreeFromJsonFiles(
