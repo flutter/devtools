@@ -153,7 +153,7 @@ class ServerApi {
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
           final filePath = queryParams[baseAppSizeFilePropertyName];
-          final fileJson = LocalFileSystem.fileAsJson(filePath);
+          final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
           if (fileJson == null) {
             return api.badRequest('No JSON file available at $filePath.');
           }
@@ -166,7 +166,7 @@ class ServerApi {
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(testAppSizeFilePropertyName)) {
           final filePath = queryParams[testAppSizeFilePropertyName];
-          final fileJson = LocalFileSystem.fileAsJson(filePath);
+          final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
           if (fileJson == null) {
             return api.badRequest('No JSON file available at $filePath.');
           }

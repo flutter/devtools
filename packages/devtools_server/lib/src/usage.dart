@@ -26,8 +26,7 @@ class FlutterUsage {
 
   /// Does the .flutter store exist?
   static bool get doesStoreExist {
-    final flutterStore = File('${LocalFileSystem.userHomeDir()}/.flutter');
-    return flutterStore.existsSync();
+    return LocalFileSystem.flutterStoreExists();
   }
 
   bool get isFirstRun => _analytics.firstRun;
@@ -39,20 +38,22 @@ class FlutterUsage {
   String get clientId => _analytics.clientId;
 }
 
-// Access the DevTools on disk store (~/.devtools).
+// Access the DevTools on disk store (~/.devtools/.devtools).
 class DevToolsUsage {
   /// Create a new Usage instance; [versionOverride] and [configDirOverride] are
   /// used for testing.
   DevToolsUsage({
-    String settingsName = 'devtools',
     String versionOverride,
     String configDirOverride,
   }) {
+    LocalFileSystem.maybeMoveLegacyDevToolsStore();
     properties = IOPersistentProperties(
-      settingsName,
-      documentDirPath: LocalFileSystem.userHomeDir(),
+      storeName,
+      documentDirPath: LocalFileSystem.devToolsDir(),
     );
   }
+
+  static const storeName = '.devtools';
 
   /// The activeSurvey is the property name of a top-level property
   /// existing or created in the file ~/.devtools
@@ -173,11 +174,11 @@ class IOPersistentProperties extends PersistentProperties {
     String name, {
     String documentDirPath,
   }) : super(name) {
-    final String fileName = '.${name.replaceAll(' ', '_')}';
-    documentDirPath ??= LocalFileSystem.userHomeDir();
+    final String fileName = name.replaceAll(' ', '_');
+    documentDirPath ??= LocalFileSystem.devToolsDir();
     _file = File(path.join(documentDirPath, fileName));
     if (!_file.existsSync()) {
-      _file.createSync();
+      _file.createSync(recursive: true);
     }
     syncSettings();
   }
@@ -185,7 +186,7 @@ class IOPersistentProperties extends PersistentProperties {
   IOPersistentProperties.fromFile(File file) : super(path.basename(file.path)) {
     _file = file;
     if (!_file.existsSync()) {
-      _file.createSync();
+      _file.createSync(recursive: true);
     }
     syncSettings();
   }

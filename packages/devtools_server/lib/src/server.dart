@@ -555,10 +555,10 @@ File _devToolsBackup;
 
 bool backupAndCreateDevToolsStore() {
   assert(_devToolsBackup == null);
-  final devToolsStore = File('${LocalFileSystem.userHomeDir()}/.devtools');
+  final devToolsStore = File(_devToolsStoreLocation());
   if (devToolsStore.existsSync()) {
     _devToolsBackup = devToolsStore
-        .copySync('${LocalFileSystem.userHomeDir()}/.devtools_backup_test');
+        .copySync('${LocalFileSystem.devToolsDir()}/.devtools_backup_test');
     devToolsStore.deleteSync();
   }
 
@@ -568,7 +568,8 @@ bool backupAndCreateDevToolsStore() {
 String restoreDevToolsStore() {
   if (_devToolsBackup != null) {
     // Read the current ~/.devtools file
-    final devToolsStore = File('${LocalFileSystem.userHomeDir()}/.devtools');
+    LocalFileSystem.maybeMoveLegacyDevToolsStore();
+    final devToolsStore = File(_devToolsStoreLocation());
     final content = devToolsStore.readAsStringSync();
 
     // Delete the temporary ~/.devtools file
@@ -576,7 +577,7 @@ String restoreDevToolsStore() {
     if (_devToolsBackup.existsSync()) {
       // Restore the backup ~/.devtools file we created in
       // backupAndCreateDevToolsStore.
-      _devToolsBackup.copySync('${LocalFileSystem.userHomeDir()}/.devtools');
+      _devToolsBackup.copySync(_devToolsStoreLocation());
       _devToolsBackup.deleteSync();
       _devToolsBackup = null;
     }
@@ -584,6 +585,10 @@ String restoreDevToolsStore() {
   }
 
   return null;
+}
+
+String _devToolsStoreLocation() {
+  return path.join(LocalFileSystem.devToolsDir(), DevToolsUsage.storeName);
 }
 
 Future<void> _hookupMemoryProfiling(
