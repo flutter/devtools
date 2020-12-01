@@ -273,7 +273,8 @@ Future<DevToolsJsonFile> requestFile({
   @required String filePath,
 }) async {
   if (isDevToolsServerAvailable) {
-    final resp = await _request('$api?$fileKey=$filePath');
+    final url = Uri(path: api, queryParameters: {fileKey: filePath});
+    final resp = await _request(url.toString());
     if (resp?.status == HttpStatus.ok) {
       return _devToolsJsonFileFromResponse(resp, filePath);
     } else {
