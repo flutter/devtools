@@ -15,7 +15,7 @@ class LocalFileSystem {
 
   /// Returns the path to the DevTools storage directory.
   static String devToolsDir() {
-    return path.join(_userHomeDir(), '.devtools');
+    return path.join(_userHomeDir(), '.flutter-devtools');
   }
 
   /// Moves the .devtools file to ~/.devtools/.devtools if the .devtools file
@@ -43,8 +43,13 @@ class LocalFileSystem {
 
   /// Returns a DevTools file from the given path.
   ///
-  /// Only files withing ~/.devtools/ can be accessed.
+  /// Only files within ~/.devtools/ can be accessed.
   static File devToolsFileFromPath(String pathFromDevToolsDir) {
+    if (pathFromDevToolsDir.contains('../')) {
+      // The passed in path should not be able to walk up the directory tree
+      // outside of the ~/.dart-devtools/ directory.
+      return null;
+    }
     ensureDevToolsDirectory();
     final file = File(path.join(devToolsDir(), pathFromDevToolsDir));
     if (!file.existsSync()) {
@@ -55,7 +60,7 @@ class LocalFileSystem {
 
   /// Returns a DevTools file from the given path as encoded json.
   ///
-  /// Only files withing ~/.devtools/ can be accessed.
+  /// Only files within ~/.devtools/ can be accessed.
   static String devToolsFileAsJson(String pathFromDevToolsDir) {
     final file = devToolsFileFromPath(pathFromDevToolsDir);
     if (file == null) return null;
