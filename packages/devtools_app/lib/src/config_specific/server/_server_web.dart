@@ -251,7 +251,7 @@ Future<void> resetDevToolsFile() async {
   }
 }
 
-Future<DevToolsJsonFile> requestPrimaryAppSizeFile(String path) async {
+Future<DevToolsJsonFile> requestBaseAppSizeFile(String path) async {
   return requestFile(
     api: apiGetBaseAppSizeFile,
     fileKey: baseAppSizeFilePropertyName,
@@ -259,7 +259,7 @@ Future<DevToolsJsonFile> requestPrimaryAppSizeFile(String path) async {
   );
 }
 
-Future<DevToolsJsonFile> requestSecondaryAppSizeFile(String path) async {
+Future<DevToolsJsonFile> requestTestAppSizeFile(String path) async {
   return requestFile(
     api: apiGetTestAppSizeFile,
     fileKey: testAppSizeFilePropertyName,
