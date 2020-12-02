@@ -205,13 +205,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.4"
-  image_gallery_saver:
-    dependency: transitive
-    description:
-      name: image_gallery_saver
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.5.0"
   intl:
     dependency: transitive
     description:
@@ -261,13 +254,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.9.7"
-  mp_chart:
-    dependency: transitive
-    description:
-      name: mp_chart
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.1"
   nested:
     dependency: transitive
     description:
@@ -296,13 +282,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.4.12"
-  optimized_gesture_detector:
-    dependency: transitive
-    description:
-      name: optimized_gesture_detector
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.6"
   package_config:
     dependency: transitive
     description:
@@ -324,41 +303,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.0-nullsafety.3"
-  path_drawing:
-    dependency: transitive
-    description:
-      name: path_drawing
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.4.1"
-  path_parsing:
-    dependency: transitive
-    description:
-      name: path_parsing
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.4"
-  path_provider:
-    dependency: transitive
-    description:
-      name: path_provider
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.6.9"
-  path_provider_macos:
-    dependency: transitive
-    description:
-      name: path_provider_macos
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.4+3"
-  path_provider_platform_interface:
-    dependency: transitive
-    description:
-      name: path_provider_platform_interface
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.2"
   pedantic:
     dependency: "direct main"
     description:
@@ -366,13 +310,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.10.0-nullsafety.2"
-  platform:
-    dependency: transitive
-    description:
-      name: platform
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.2.1"
   platform_detect:
     dependency: transitive
     description:
@@ -408,13 +345,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.4.4"
-  screenshot:
-    dependency: transitive
-    description:
-      name: screenshot
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.1"
   shelf:
     dependency: transitive
     description:
@@ -638,5 +568,5 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=2.12.0-0.0 <=2.12.0-31.0.dev"
-  flutter: ">1.21.0 <2.0.0"
+  dart: ">=2.12.0-0.0 <=2.12.0-76.0.dev"
+  flutter: ">=1.16.0 <2.0.0"
