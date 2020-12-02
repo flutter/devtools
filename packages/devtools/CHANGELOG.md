@@ -1,4 +1,7 @@
 ## 0.9.5
+* Add padding between columns and add minWidth for flexible columns. [#2526](https://github.com/flutter/devtools/pull/2526)
+* Fix import bug. [#2528](https://github.com/flutter/devtools/pull/2528)
+* Support loading app size files from query parameters and local storage [#2510](https://github.com/flutter/devtools/pull/2510)
 * Remove use of mp_flutterchart and use new charting subsystem. [#2517](https://github.com/flutter/devtools/pull/2517)
 * Fix null error in service manager [#2515](https://github.com/flutter/devtools/pull/2515)
 * Expose information about oversized images [#2509](https://github.com/flutter/devtools/pull/2509)
