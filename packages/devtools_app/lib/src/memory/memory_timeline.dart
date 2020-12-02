@@ -8,7 +8,6 @@ import 'dart:ui' as dart_ui;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-import 'package:mp_chart/mp/core/entry/entry.dart';
 
 import '../config_specific/logger/logger.dart';
 import '../utils.dart';
@@ -59,15 +58,6 @@ class MemoryTimeline {
   static const Duration updateDelay = Duration(milliseconds: delayMs);
 
   final MemoryController controller;
-
-  /// Flutter Framework information (Dart heaps).
-  final dartChartData = MPChartData();
-
-  /// Flutter Engine (ADB memory information).
-  final androidChartData = MPEngineChartData();
-
-  /// Memory Events (GC, snapshots, allocation reset, etc.)
-  final eventsChartData = MPEventsChartData();
 
   /// Return the data payload that is active.
   List<HeapSample> get data => controller.offline ? offlineData : liveData;
@@ -235,9 +225,6 @@ class MemoryTimeline {
   void reset() {
     liveData.clear();
     startingIndex = 0;
-    dartChartData.reset();
-    eventsChartData.reset();
-    androidChartData.reset();
   }
 
   /// Y-coordinate of an Event entry to not display (the no event state).
@@ -255,224 +242,13 @@ class MemoryTimeline {
 
   /// Common utility function to handle loading of the data into the
   /// chart for either offline or live Feed.
-  List<Map> _processData(int index) {
-    final result = <Map<String, Entry>>[];
-
-    for (var lastIndex = index; lastIndex < data.length; lastIndex++) {
-      final sample = data[lastIndex];
-      final timestamp = sample.timestamp.toDouble();
-
-      // Flutter Framework memory (Dart VM Heaps)
-      final capacity = sample.capacity.toDouble();
-      final used = sample.used.toDouble();
-      final external = sample.external.toDouble();
-
-      final rss = (sample.rss ?? 0).toDouble();
-
-      final rasterLayer = sample.rasterCache.layerBytes.toDouble();
-      final rasterPicture = sample.rasterCache.pictureBytes.toDouble();
-
-      final extEntry = Entry(x: timestamp, y: external, icon: dataPointImage);
-      final usedEntry =
-          Entry(x: timestamp, y: used + external, icon: dataPointImage);
-      final capacityEntry =
-          Entry(x: timestamp, y: capacity, icon: dataPointImage);
-      final rssEntry = Entry(x: timestamp, y: rss, icon: dataPointImage);
-      final rasterLayerEntry =
-          Entry(x: timestamp, y: rasterLayer, icon: dataPointImage);
-      final rasterPictureEntry =
-          Entry(x: timestamp, y: rasterPicture, icon: dataPointImage);
-
-      // Engine memory values (ADB Android):
-      final javaHeap = sample.adbMemoryInfo.javaHeap.toDouble();
-      final nativeHeap = sample.adbMemoryInfo.nativeHeap.toDouble();
-      final code = sample.adbMemoryInfo.code.toDouble();
-      final stack = sample.adbMemoryInfo.stack.toDouble();
-      final graphics = sample.adbMemoryInfo.graphics.toDouble();
-      final other = sample.adbMemoryInfo.other.toDouble();
-      final system = sample.adbMemoryInfo.system.toDouble();
-      final total = sample.adbMemoryInfo.total.toDouble();
-
-      // Y position for each trace, each trace is stacked on top of each other.
-      double yPosition = 0;
-
-      yPosition += graphics;
-      final graphicsEntry = Entry(
-        x: timestamp,
-        y: yPosition,
-        icon: dataPointImage,
-      );
-
-      yPosition += stack;
-      final stackEntry = Entry(
-        x: timestamp,
-        y: yPosition,
-        icon: dataPointImage,
-      );
-
-      yPosition += javaHeap;
-      final javaHeapEntry = Entry(
-        x: timestamp,
-        y: yPosition,
-        icon: dataPointImage,
-      );
-
-      yPosition += nativeHeap;
-      final nativeHeapEntry = Entry(
-        x: timestamp,
-        y: yPosition,
-        icon: dataPointImage,
-      );
-
-      yPosition += code;
-      final codeEntry = Entry(
-        x: timestamp,
-        y: yPosition,
-        icon: dataPointImage,
-      );
-
-      yPosition += other;
-      final otherEntry = Entry(
-        x: timestamp,
-        y: yPosition,
-        icon: dataPointImage,
-      );
-
-      yPosition += system;
-      final systemEntry = Entry(
-        x: timestamp,
-        y: yPosition,
-        icon: dataPointImage,
-      );
-
-      final totalEntry = Entry(
-        x: timestamp,
-        y: total,
-        icon: dataPointImage,
-      );
-
-      // User initiated GC or a GC has occurred in the VM.
-      final isUserGcEvent = sample.memoryEventInfo.isEventGC;
-      final isSnapshotEvent = sample.memoryEventInfo.isEventSnapshot;
-      final isSnapshotAutoEvent = sample.memoryEventInfo.isEventSnapshotAuto;
-
-      final gcUserEntry = Entry(
-        x: timestamp,
-        y: isUserGcEvent ? visibleEvent : emptyEvent,
-      );
-      final gcVmEntry = Entry(
-        x: timestamp,
-        y: sample.isGC ? visibleVmEvent : emptyEvent,
-      );
-      final snapshotEntry = Entry(
-        x: timestamp,
-        y: isSnapshotEvent ? visibleEvent : emptyEvent,
-      );
-      final snapshotAutoEntry = Entry(
-        x: timestamp,
-        y: isSnapshotAutoEvent ? visibleEvent : emptyEvent,
-      );
-
-      final monitoring = sample.memoryEventInfo.allocationAccumulator;
-      final monitorStart = monitoring != null && monitoring.isStart;
-      final monitorContinues = monitoring != null && monitoring.isContinues;
-
-      final monitorReset = monitoring != null && monitoring.isReset;
-
-      final monitorStartEntry = Entry(
-        x: timestamp,
-        y: monitorStart ? visibleMonitorEvent : emptyEvent,
-      );
-      final monitorY = monitorContinues && monitoring.isContinuesVisible
-          ? visibleMonitorEvent
-          : emptyEvent;
-      // TODO(terry): Consider contiuous event marker in pane between the
-      //              monitorStart and monitorReset? Use monitorY of:
-      //    monitorContinuesState == ContinuesState.next && !monitorStart
-      //        ? visibleMonitorEvent
-      //        : emptyEvent;
-      final monitorContinuesEntry = Entry(
-        x: timestamp,
-        y: monitorY,
-      );
-      final monitorResetEntry = Entry(
-        x: timestamp,
-        y: monitorReset ? visibleMonitorEvent : emptyEvent,
-      );
-
-      final args = {
-        capacityValueKey: capacityEntry,
-        usedValueKey: usedEntry,
-        externalValueKey: extEntry,
-        rssValueKey: rssEntry,
-        rasterLayerValueKey: rasterLayerEntry,
-        rasterPictureValueKey: rasterPictureEntry,
-        javaHeapValueKey: javaHeapEntry,
-        nativeHeapValueKey: nativeHeapEntry,
-        codeValueKey: codeEntry,
-        stackValueKey: stackEntry,
-        graphicsValueKey: graphicsEntry,
-        otherValueKey: otherEntry,
-        systemValueKey: systemEntry,
-        totalValueKey: totalEntry,
-        gcUserEventKey: gcUserEntry,
-        gcVmEventKey: gcVmEntry,
-        snapshotEventKey: snapshotEntry,
-        snapshotAutoEventKey: snapshotAutoEntry,
-        monitorStartEventKey: monitorStartEntry,
-        monitorContinuesEventKey: monitorContinuesEntry,
-        monitorResetEventKey: monitorResetEntry,
-      };
-
-      result.add(args);
-    }
-
-    return result;
-  }
-
-  /// Fetch all the data in the loaded from a memory log (JSON file in /tmp).
-  List<Map> fetchMemoryLogFileData() {
-    assert(controller.offline);
-    assert(offlineData.isNotEmpty);
-    return _processData(startingIndex);
-  }
 
   static final DateFormat _milliFormat = DateFormat('hh:mm:ss.mmm');
 
   static String fineGrainTimestampFormat(int timestamp) =>
       _milliFormat.format(DateTime.fromMillisecondsSinceEpoch(timestamp));
 
-  List<Map> fetchLiveData([bool reloadAllData = false]) {
-    assert(!controller.offline);
-    assert(liveData.isNotEmpty);
-
-    if (endingIndex - startingIndex != liveData.length || reloadAllData) {
-      // Process the data received (startingDataIndex is the last sample).
-      final args = _processData(endingIndex < 0 ? 0 : endingIndex);
-
-      // Debugging data - to enable remove logical not operator.
-      if (!true) {
-        log('Time range Live data '
-            'start: ${fineGrainTimestampFormat(liveData[startingIndex].timestamp.toInt())}, '
-            'end: ${fineGrainTimestampFormat(liveData[endingIndex].timestamp.toInt())}');
-      }
-
-      return args;
-    }
-
-    return [];
-  }
-
-  List<Map> recomputeData(int displayInterval) {
-    assert(displayInterval > 0);
-
-    _computeStartingIndex(displayInterval);
-
-    // Start from the first sample to display in this time interval.
-    return _processData(startingIndex);
-  }
-
-  void _computeStartingIndex(int displayInterval) {
+  void computeStartingIndex(int displayInterval) {
     // Compute a new starting index from length - N minutes.
     final timeLastSample = data.last.timestamp;
     var dataIndex = data.length - 1;

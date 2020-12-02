@@ -32,7 +32,6 @@ dependencies:
   js: ^0.6.1+1
   meta: ^1.1.0
   mime: ^0.9.7
-  mp_chart: ^0.3.1
   path: ^1.6.0
   pedantic: ^1.7.0
   provider: ^4.0.0

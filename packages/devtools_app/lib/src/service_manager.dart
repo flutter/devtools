@@ -294,7 +294,7 @@ class ServiceConnectionManager {
   Future<Response> get adbMemoryInfo async {
     return await callService(
       registrations.flutterMemory.service,
-      isolateId: _isolateManager.selectedIsolate.id,
+      isolateId: _isolateManager.selectedIsolate?.id,
     );
   }
 

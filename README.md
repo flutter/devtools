@@ -1,6 +1,6 @@
 # Dart DevTools (preview)
 
-[![Build Status](https://travis-ci.org/flutter/devtools.svg?branch=master)](https://travis-ci.org/flutter/devtools)
+[![Build Status](https://github.com/flutter/devtools/workflows/devtools/badge.svg)](https://github.com/flutter/devtools/actions)
 
 ## What is this?
 
