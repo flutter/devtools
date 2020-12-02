@@ -308,13 +308,10 @@ class _LogDetailsState extends State<LogDetails>
 }
 
 class _WhenColumn extends ColumnData<LogData> {
-  _WhenColumn() : super('When');
+  _WhenColumn() : super('When', fixedWidthPx: 120);
 
   @override
   bool get supportsSorting => false;
-
-  @override
-  double get fixedWidthPx => 120;
 
   @override
   String getValue(LogData dataObject) => dataObject.timestamp == null
@@ -325,13 +322,10 @@ class _WhenColumn extends ColumnData<LogData> {
 
 class _KindColumn extends ColumnData<LogData>
     implements ColumnRenderer<LogData> {
-  _KindColumn() : super('Kind');
+  _KindColumn() : super('Kind', fixedWidthPx: 155);
 
   @override
   bool get supportsSorting => false;
-
-  @override
-  double get fixedWidthPx => 155;
 
   @override
   String getValue(LogData dataObject) => dataObject.kind;

@@ -87,6 +87,8 @@ class FlatTable<T> extends StatefulWidget {
 
   final ValueListenable<T> selectionNotifier;
 
+  int get numSpacers => max(0, columns.length - 1);
+
   @override
   FlatTableState<T> createState() => FlatTableState<T>();
 }
@@ -117,18 +119,36 @@ class FlatTableState<T> extends State<FlatTable<T>>
     sortData(widget.sortColumn, widget.sortDirection);
   }
 
-  List<double> _computeColumnWidths(double maxWidth) {
+  @visibleForTesting
+  List<double> computeColumnWidths(double maxWidth) {
+    // Subtract width from outer padding around table.
     maxWidth -= 2 * defaultSpacing;
+    maxWidth -= widget.numSpacers * defaultSpacing;
+    maxWidth = max(0, maxWidth);
 
     final unconstrainedCount =
         widget.columns.where((col) => col.fixedWidthPx == null).length;
-    final allocatedWidth = widget.columns.fold(0,
-        (val, col) => col.fixedWidthPx == null ? val : col.fixedWidthPx + val);
-    final available = maxWidth - allocatedWidth;
+    double allocatedWidth = 0;
+    for (var col in widget.columns) {
+      if (col.fixedWidthPx != null) {
+        allocatedWidth += col.fixedWidthPx;
+      } else {
+        if (col.minWidthPx != null) {
+          allocatedWidth += col.minWidthPx;
+        }
+      }
+    }
+    final available = max(0, maxWidth - allocatedWidth);
 
     final widths = <double>[];
     for (ColumnData<T> column in widget.columns) {
-      final width = column.fixedWidthPx ?? (available / unconstrainedCount);
+      double width = column.fixedWidthPx;
+      if (width == null) {
+        width = available / unconstrainedCount;
+        if (column.minWidthPx != null) {
+          width += column.minWidthPx;
+        }
+      }
       widths.add(width);
     }
     return widths;
@@ -138,7 +158,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columnWidths = _computeColumnWidths(constraints.maxWidth);
+        final columnWidths = computeColumnWidths(constraints.maxWidth);
 
         return _Table<T>(
           data: data,
@@ -677,6 +697,8 @@ class _Table<T> extends StatefulWidget {
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 1000.0;
 
+  int get numSpacers => max(0, columns.length - 1);
+
   @override
   _TableState<T> createState() => _TableState<T>();
 }
@@ -799,8 +821,14 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   }
 
   /// The width of all columns in the table, with additional padding.
-  double get tableWidth =>
-      widget.columnWidths.reduce((x, y) => x + y) + (2 * defaultSpacing);
+  double get tableWidth {
+    var tableWidth = 2 * defaultSpacing;
+    tableWidth += widget.numSpacers * defaultSpacing;
+    for (var columnWidth in widget.columnWidths) {
+      tableWidth += columnWidth;
+    }
+    return tableWidth;
+  }
 
   Widget _buildItem(BuildContext context, int index) {
     return widget.rowBuilder(
@@ -996,6 +1024,8 @@ class TableRow<T> extends StatefulWidget {
   final ValueListenable<List<T>> searchMatchesNotifier;
 
   final ValueListenable<T> activeSearchMatchNotifier;
+
+  int get numSpacers => max(0, columns.length - 1);
 
   @override
   _TableRowState<T> createState() => _TableRowState<T>();
@@ -1265,11 +1295,16 @@ class _TableRowState<T> extends State<TableRow<T>>
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         controller: scrollController,
-        itemCount: widget.columns.length,
-        itemBuilder: (context, int i) => columnFor(
-          widget.columns[i],
-          widget.columnWidths[i],
-        ),
+        itemCount: widget.columns.length + widget.numSpacers,
+        itemBuilder: (context, int i) {
+          if (i % 2 == 1) {
+            return const SizedBox(width: defaultSpacing);
+          }
+          return columnFor(
+            widget.columns[i ~/ 2],
+            widget.columnWidths[i ~/ 2],
+          );
+        },
       ),
     );
   }

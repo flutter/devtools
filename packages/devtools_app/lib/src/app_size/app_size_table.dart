@@ -77,7 +77,8 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
 }
 
 class _SizeColumn extends ColumnData<TreemapNode> {
-  _SizeColumn() : super('Size', alignment: ColumnAlignment.right);
+  _SizeColumn()
+      : super('Size', alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
 
   @override
   dynamic getValue(TreemapNode dataObject) => dataObject.byteSize;
@@ -100,14 +101,12 @@ class _SizeColumn extends ColumnData<TreemapNode> {
     final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => 100.0;
 }
 
 class _SizePercentageColumn extends ColumnData<TreemapNode> {
   _SizePercentageColumn({@required this.totalSize})
-      : super('% of Total Size', alignment: ColumnAlignment.right);
+      : super('% of Total Size',
+            alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
 
   final int totalSize;
 
@@ -128,9 +127,6 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
     final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => 100.0;
 }
 
 class AppSizeDiffTable extends StatelessWidget {
@@ -182,7 +178,8 @@ class AppSizeDiffTable extends StatelessWidget {
 // TODO(peterdjlee): Add an opaque overlay / background to differentiate from
 //                   other columns.
 class _DiffColumn extends ColumnData<TreemapNode> {
-  _DiffColumn() : super('Change', alignment: ColumnAlignment.right);
+  _DiffColumn()
+      : super('Change', alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
 
   // Ensure sort by absolute size.
   @override
@@ -201,9 +198,6 @@ class _DiffColumn extends ColumnData<TreemapNode> {
     final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => 100.0;
 
   @override
   Color getTextColor(TreemapNode dataObject) {

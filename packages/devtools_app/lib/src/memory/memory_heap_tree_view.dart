@@ -1202,7 +1202,7 @@ class _LibraryRefColumn extends TreeColumnData<Reference> {
 
 class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
   _ClassOrInstanceCountColumn()
-      : super('Count', alignment: ColumnAlignment.right);
+      : super('Count', alignment: ColumnAlignment.right, fixedWidthPx: 75.0);
 
   @override
   dynamic getValue(Reference dataObject) {
@@ -1292,13 +1292,11 @@ class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
     final Comparable valueB = b.isAnalysis ? 0 : getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => 75.0;
 }
 
 class _ShallowSizeColumn extends ColumnData<Reference> {
-  _ShallowSizeColumn() : super('Shallow', alignment: ColumnAlignment.right);
+  _ShallowSizeColumn()
+      : super('Shallow', alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
 
   int sizeAllVisibleLibraries(List<Reference> references) {
     var sum = 0;
@@ -1412,13 +1410,12 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
     final Comparable valueB = b.isAnalysis ? 0 : getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => 100.0;
 }
 
 class _RetainedSizeColumn extends ColumnData<Reference> {
-  _RetainedSizeColumn() : super('Retained', alignment: ColumnAlignment.right);
+  _RetainedSizeColumn()
+      : super('Retained',
+            alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
 
   @override
   dynamic getValue(Reference dataObject) {
@@ -1470,7 +1467,4 @@ class _RetainedSizeColumn extends ColumnData<Reference> {
     final Comparable valueB = b.isAnalysis ? 0 : getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => 100.0;
 }
