@@ -32,7 +32,7 @@ class EventChartController extends ChartController {
   /// Preload any existing data collected but not in the chart.
   @override
   void setupData() {
-    final chartDataLength = timestampsSize;
+    final chartDataLength = timestampsLength;
     final dataLength = _memoryController.memoryTimeline.data.length;
 
     final dataRange = _memoryController.memoryTimeline.data.getRange(
@@ -40,11 +40,11 @@ class EventChartController extends ChartController {
       dataLength,
     );
 
-    dataRange.forEach(addSampleToChart);
+    dataRange.forEach(addSample);
   }
 
   /// Loads all heap samples (live data or offline).
-  void addSampleToChart(HeapSample sample) {
+  void addSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.paused.value) return;
 
@@ -316,6 +316,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.isPaused) return;
-    _chartController.addSampleToChart(sample);
+    _chartController.addSample(sample);
   }
 }

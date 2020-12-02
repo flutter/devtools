@@ -29,7 +29,7 @@ class VMChartController extends ChartController {
   /// Preload any existing data collected but not in the chart.
   @override
   void setupData() {
-    final chartDataLength = timestampsSize;
+    final chartDataLength = timestampsLength;
     final dataLength = _memoryController.memoryTimeline.data.length;
 
     final dataRange = _memoryController.memoryTimeline.data.getRange(
@@ -37,11 +37,11 @@ class VMChartController extends ChartController {
       dataLength,
     );
 
-    dataRange.forEach(addSampleToChart);
+    dataRange.forEach(addSample);
   }
 
   /// Loads all heap samples (live data or offline).
-  void addSampleToChart(HeapSample sample) {
+  void addSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.isPaused) return;
 
@@ -148,8 +148,14 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     return const SizedBox(width: denseSpacing);
   }
 
-  // TODO(terry): definition in mp_chart color_utils.dart.
-  static Color getHoloBlue() => const Color.fromARGB(255, 51, 181, 229);
+  // TODO(terry): Move colors to theme?
+  final capacityColor = Colors.grey[400];
+  //static const usedColor = Color.fromARGB(255, 51, 181, 229);
+  static const usedColor = Color(0xff33b5e5); // HoloBlue
+  static const rasterLayerColor = Color(0xff99cc00); // HoloGreenLight
+  static const rssColor = Color(0xffffbb33); // HoloOrangeLight
+  static const rasterPictureColor = Color(0xffff4444); // HoloRedLight
+  static const externalColor = Color(0xff42a5f5); // Color.blue[400]
 
   void setupTraces() {
     if (_chartController.traces.isNotEmpty) {
@@ -177,7 +183,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     final externalIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: Colors.lightGreen,
+        color: externalColor,
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -191,7 +197,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     final usedIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: getHoloBlue(), // Pull in Colors from mp_chart colors_utils.dart
+        color: usedColor,
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -205,7 +211,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     final capacityIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: Colors.grey[400],
+        color: capacityColor,
         diameter: 0.0,
         symbol: trace.ChartSymbol.dashedLine,
       ),
@@ -219,7 +225,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     final rSSIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: Colors.yellow,
+        color: rssColor,
         symbol: trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
@@ -238,6 +244,6 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.paused.value) return;
-    _chartController.addSampleToChart(sample);
+    _chartController.addSample(sample);
   }
 }

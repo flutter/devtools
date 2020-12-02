@@ -141,7 +141,6 @@ class ChartController extends DisposableController
   // TODO(terry): Duration based on x-axis zoom factor (live, 5 min, 15 min, etc).
   void computeDurationLabel() {
     if (durationLabel == null && rightLabelTimestamp != null) {
-      final timestampsLength = timestampsSize;
       final midTick = (visibleTicks / 2).truncate();
       if (timestampsLength > visibleTicks) {
         // Lots of collected data > visible ticks so compute the visible mid tick.
@@ -167,6 +166,9 @@ class ChartController extends DisposableController
   /// @param timestamp current timestamp received implies building all
   /// parts of the x-axis labels.
   void recomputeLabels({int timestamp, bool refresh = false}) {
+    // Chart not realized yet.
+    if (size == null) return;
+
     if (refresh && timestamps.isNotEmpty) {
       // Need the correct tickWidth based on current zoom.
       computeChartArea();
@@ -180,12 +182,12 @@ class ChartController extends DisposableController
       );
 
       final midPt = (visibleTicks / 2).truncate();
-      if (timestampsSize > visibleTicks) {
-        leftLabelTimestamp = timestamps[timestampsSize - visibleTicks + 10];
-        centerLabelTimestamp = timestamps[timestampsSize - midPt];
+      if (timestampsLength > visibleTicks) {
+        leftLabelTimestamp = timestamps[timestampsLength - visibleTicks + 10];
+        centerLabelTimestamp = timestamps[timestampsLength - midPt];
         rightLabelTimestamp = timestamps.last;
-      } else if (timestampsSize > midPt) {
-        centerLabelTimestamp = timestamps[timestampsSize - midPt];
+      } else if (timestampsLength > midPt) {
+        centerLabelTimestamp = timestamps[timestampsLength - midPt];
         rightLabelTimestamp = timestamps.last;
       } else if (timestamps.isNotEmpty) {
         rightLabelTimestamp = timestamps.first;
@@ -262,7 +264,7 @@ class ChartController extends DisposableController
     dirty = true;
   }
 
-  int get timestampsSize => _timestamps.length;
+  int get timestampsLength => _timestamps.length;
 
   final traces = <Trace>[];
 
@@ -328,8 +330,11 @@ class ChartController extends DisposableController
   bool get isZoomAll => _zoomDuration == null;
 
   void computeZoomRatio() {
+    // Check if ready to start computations?
+    if (size == null) return;
+
     if (isZoomAll) {
-      _tickWidth = canvasChartWidth / timestampsSize;
+      _tickWidth = canvasChartWidth / timestampsLength;
     }
   }
 
@@ -358,13 +363,13 @@ class ChartController extends DisposableController
         );
 
         final ticksVisible =
-            timestampsSize - timestamps.indexOf(startOfLastNMinutes);
+            timestampsLength - timestamps.indexOf(startOfLastNMinutes);
         _tickWidth = canvasChartWidth / ticksVisible;
       } else {
         // No but lets scale x-axis based on the last two timestamps diffs we have.
         // TODO(terry): Consider using all the data maybe average out the time between
         //              ticks.
-        final length = timestampsSize;
+        final length = timestampsLength;
         // Enough data (at least 2 points) to know how many ticks for the duration.
         if (length > 1) {
           final lastTS = DateTime.fromMillisecondsSinceEpoch(timestamps.last);
@@ -383,12 +388,14 @@ class ChartController extends DisposableController
 
     // All tick labels need to be recompted.
     recomputeLabels(refresh: true);
+
+    dirty = true;
   }
 
   /// Clear all data in the chart.
   void reset() {
     for (var trace in traces) {
-      trace.dataClear();
+      trace.clearData();
     }
     timestampsClear();
   }
@@ -457,14 +464,14 @@ class ChartController extends DisposableController
   int get numberOfVisibleXAxisTicks => visibleTicks;
 
   /// If negative then total ticks collected < number of visible ticks to display.
-  int get totalTimestampTicks => timestampsSize - numberOfVisibleXAxisTicks;
+  int get totalTimestampTicks => timestampsLength - numberOfVisibleXAxisTicks;
 
   int get leftVisibleIndex {
     final leftIndex = totalTimestampTicks;
     if (leftIndex > 0) return leftIndex;
 
     // Less ticks than total size of ticks to show.
-    return numberOfVisibleXAxisTicks - timestampsSize;
+    return numberOfVisibleXAxisTicks - timestampsLength;
   }
 
   bool isTimestampVisible(int timestamp, int timestampIndex) {
@@ -491,7 +498,7 @@ class ChartController extends DisposableController
   /// value of this getter.
   double get xCoordLeftMostVisibleTimestamp {
     double indexOffset = xCanvasChart;
-    final totalTimestamps = timestampsSize;
+    final totalTimestamps = timestampsLength;
     final visibleCount = numberOfVisibleXAxisTicks;
     if (totalTimestamps < visibleCount) {
       final startIndex = visibleCount - totalTimestamps;

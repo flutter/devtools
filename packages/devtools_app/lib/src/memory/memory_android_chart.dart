@@ -29,19 +29,23 @@ class AndroidChartController extends ChartController {
   /// Preload any existing data collected but not in the chart.
   @override
   void setupData() {
-    final chartDataLength = timestampsSize;
-    final dataLength = _memoryController.memoryTimeline.data.length;
+    // Only display if traces have been created. Android memory may not
+    // have been toggled to be displayed - yet.
+    if (traces.isNotEmpty) {
+      final chartDataLength = timestampsLength;
+      final dataLength = _memoryController.memoryTimeline.data.length;
 
-    final dataRange = _memoryController.memoryTimeline.data.getRange(
-      chartDataLength,
-      dataLength,
-    );
+      final dataRange = _memoryController.memoryTimeline.data.getRange(
+        chartDataLength,
+        dataLength,
+      );
 
-    dataRange.forEach(addSampleToChart);
+      dataRange.forEach(addSample);
+    }
   }
 
   /// Loads all heap samples (live data or offline).
-  void addSampleToChart(HeapSample sample) {
+  void addSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.isPaused) return;
 
@@ -169,12 +173,12 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   }
 
   /// TODO(terry): Colors used in charts (move to theme).
-  static const haloBlue = Color.fromARGB(255, 51, 181, 229);
-  static const holoOrangeDark = Color(0xffff8800);
-  static const holoBlueLight = Color(0xff33b5e5);
-  static const holoPurple = Color(0xffaa66cc);
-  static const holoGreenDark = Color(0xff669900);
-  static const lightGray = Color(0xFFCCCCCC);
+  static const stackColor = Colors.white;
+  static const graphicColor = Color(0xffff8800); // HoloOrangeDark
+  static const nativeHeapColor = Color(0xff33b5e5); // HoloBlueLight
+  static const otherColor = Color(0xffaa66cc); // HoloPurple
+  static const systemColor = Color(0xff669900); // HoloGreenDark
+  static const totalColor = Color(0xFFCCCCCC); // Light Grey
 
   void setupTraces() {
     if (_chartController.traces.isNotEmpty) {
@@ -219,7 +223,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     final stackIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: Colors.white,
+        color: stackColor,
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -232,7 +236,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     final graphicIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: holoOrangeDark,
+        color: graphicColor,
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -245,7 +249,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     final nativeHeapIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: holoBlueLight,
+        color: nativeHeapColor,
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -284,7 +288,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     final otherIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: holoPurple,
+        color: otherColor,
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -297,7 +301,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     final systemIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: holoGreenDark,
+        color: systemColor,
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -310,7 +314,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     final totalIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: lightGray,
+        color: totalColor,
         symbol: trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
@@ -327,6 +331,6 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.paused.value) return;
-    _chartController.addSampleToChart(sample);
+    _chartController.addSample(sample);
   }
 }

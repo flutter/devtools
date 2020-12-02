@@ -156,6 +156,7 @@ class MemoryBodyState extends State<MemoryBody>
     addAutoDisposeListener(controller.androidChartVisibleNotifier, () {
       setState(() {
         if (controller.isLegendVisible) {
+          // Recompute the legend with the new traces now visible.
           hideLegend();
           showLegend(context);
         }
@@ -237,15 +238,12 @@ class MemoryBodyState extends State<MemoryBody>
 
   /// Recompute (attach data to the chart) for either live or offline data source.
   void _recomputeChartData() {
-    if (eventChartController.traces.isNotEmpty) {
-      eventChartController.setupData();
-    }
-    if (vmChartController.traces.isNotEmpty) {
-      vmChartController.setupData();
-    }
-    if (androidChartController.traces.isNotEmpty) {
-      androidChartController.setupData();
-    }
+    eventChartController.setupData();
+    eventChartController.dirty = true;
+    vmChartController.setupData();
+    vmChartController.dirty = true;
+    androidChartController.setupData();
+    androidChartController.dirty = true;
   }
 
   Widget _intervalDropdown(TextTheme textTheme) {
@@ -257,19 +255,16 @@ class MemoryBodyState extends State<MemoryBody>
     final mediaWidth = MediaQuery.of(context).size.width;
     final isVerboseDropdown = mediaWidth > verboseDropDownMinimumWidth;
 
-    final _displayTypes = [
-      MemoryController.displayDefault,
-      MemoryController.displayOneMinute,
-      MemoryController.displayFiveMinutes,
-      MemoryController.displayTenMinutes,
-      MemoryController.displayAllMinutes,
-    ].map<DropdownMenuItem<String>>(
+    final displayOneMinute =
+        chartDuration(ChartInterval.OneMinute).inMinutes.toString();
+
+    final _displayTypes = displayDurationsStrings.map<DropdownMenuItem<String>>(
       (
         String value,
       ) {
-        final unit = value == MemoryController.displayDefault
+        final unit = value == displayDefault || value == displayAll
             ? ''
-            : 'Minute${value == MemoryController.displayOneMinute ? '' : 's'}';
+            : 'Minute${value == displayOneMinute ? '' : 's'}';
 
         return DropdownMenuItem<String>(
           key: MemoryScreen.intervalMenuItem,
@@ -286,39 +281,15 @@ class MemoryBodyState extends State<MemoryBody>
       child: DropdownButton<String>(
         key: MemoryScreen.dropdownIntervalMenuButtonKey,
         style: textTheme.bodyText2,
-        value: controller.displayInterval,
+        value: displayDuration(controller.displayInterval),
         onChanged: (String newValue) {
           setState(() {
-            controller.displayInterval = newValue;
-
-            Duration duration;
-            switch (newValue) {
-              case MemoryController.displayOneMinute:
-                duration = const Duration(minutes: 1);
-                break;
-              case MemoryController.displayFiveMinutes:
-                duration = const Duration(minutes: 5);
-                break;
-              case MemoryController.displayTenMinutes:
-                duration = const Duration(minutes: 10);
-                break;
-              case MemoryController.displayAllMinutes:
-                duration = null;
-                break;
-              case MemoryController.displayDefault:
-              default:
-                // Live view default tick width.
-                duration = const Duration();
-                break;
-            }
+            controller.displayInterval = chartInterval(newValue);
+            final duration = chartDuration(controller.displayInterval);
 
             eventChartController?.zoomDuration = duration;
             vmChartController?.zoomDuration = duration;
             androidChartController?.zoomDuration = duration;
-
-            eventChartController?.dirty = true;
-            vmChartController?.dirty = true;
-            androidChartController?.dirty = true;
           });
         },
         items: _displayTypes,

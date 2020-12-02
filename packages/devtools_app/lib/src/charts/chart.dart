@@ -86,10 +86,10 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    // Need to wrap in a RepaintBoundary. Otherwise when entering in a button
-    // the CustomPainter's (on the same layer as buttons) paint method is called
-    // for each frame (looks like 3). However, the CustomPainter's shouldRepaint
-    // is never called.
+    // Chart's Custom Painter (paint) can be expensive for lots of data points (10,000s).
+    // A repaint boundary is necessary.
+    // TODO(terry): Optimize the 10,000s of data points to just the number of pixels in the
+    //              chart - this will make paint very fast.
     return RepaintBoundary(
       child: LayoutBuilder(
         // Inner container
@@ -117,6 +117,8 @@ class ChartPainter extends CustomPainter {
 //    marginTopY = createText(chartController.title, 1.5).height + paddingY;
   }
 
+  final debugTrackPaintTime = false;
+
   final ChartController chartController;
 
   static const double axisWidth = 2;
@@ -133,8 +135,10 @@ class ChartPainter extends CustomPainter {
       ..strokeWidth = axisWidth
       ..color = Colors.grey;
 
-    chartController.size = size;
-    chartController.computeChartArea();
+    if (size != chartController.size) {
+      chartController.size = size;
+      chartController.computeChartArea();
+    }
 
     drawTranslate(
       canvas,
@@ -177,12 +181,12 @@ class ChartPainter extends CustomPainter {
     // TODO(terry): Need to compute x-axis left-most position for last timestamp.
     //              May need to do the other direction so it looks better.
     final endVisibleIndex =
-        chartController.timestampsSize - chartController.visibleTicks;
+        chartController.timestampsLength - chartController.visibleTicks;
 
     final xTranslation = chartController.xCoordLeftMostVisibleTimestamp;
     final yTranslation = chartController.zeroYPosition;
 
-    int xTickIndex = chartController.timestampsSize;
+    int xTickIndex = chartController.timestampsLength;
     while (--xTickIndex >= 0) {
       // Hide left-side label when its ticks scrolls out.
       final leftTimestamp = chartController.leftLabelTimestamp;
@@ -232,7 +236,7 @@ class ChartPainter extends CustomPainter {
           final xCanvasCoord =
               chartController.timestampXCanvasCoord(xTimestamp);
           if (currentTimestamp == xTimestamp) {
-            if (xCanvasCoord != -1) {
+            if (xCanvasCoord != null) {
               // Get ready to render on canvas. Remember old canvas state
               // and setup translations for x,y coordinates into the rendering
               // area of the chart.
@@ -388,9 +392,10 @@ class ChartPainter extends CustomPainter {
     drawTitle(canvas, size, chartController.title);
 
     final elapsedTime = DateTime.now().difference(startTime).inMilliseconds;
-    if (elapsedTime > 500)
-      logger.log('${chartController.name} ${chartController.timestampsSize} CustomPainter paint elapsed time'
-          ' $elapsedTime');
+    if (debugTrackPaintTime && elapsedTime > 500) {
+      logger.log('${chartController.name} ${chartController.timestampsLength} '
+          'CustomPainter paint elapsed time $elapsedTime');
+    }
 
     // Once painted we're not dirty anymore.
     chartController.dirty = false;
@@ -655,7 +660,7 @@ class ChartPainter extends CustomPainter {
     final paint = Paint()
       ..style = PaintingStyle.fill
       ..strokeWidth = characteristics.strokeWidth
-      ..color = characteristics.color.withAlpha(100);
+      ..color = characteristics.color.withAlpha(140);
 
     final fillArea = Path()
       ..moveTo(x0, y0Bottom)

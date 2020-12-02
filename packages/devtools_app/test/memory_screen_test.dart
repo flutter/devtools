@@ -232,10 +232,12 @@ void main() {
     expect(resetMonitors.length, 2);
 
     final interval1Min = MemoryController.displayIntervalToIntervalDurationInMs(
-        MemoryController.displayOneMinute);
+      ChartInterval.OneMinute,
+    );
     expect(interval1Min, 60000);
     final interval5Min = MemoryController.displayIntervalToIntervalDurationInMs(
-        MemoryController.displayFiveMinutes);
+      ChartInterval.FiveMinutes,
+    );
     expect(interval5Min, 300000);
 
     // TODO(terry): Check intervals and autosnapshot does it snapshot same points?

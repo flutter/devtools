@@ -276,7 +276,7 @@ void main() {
           expect(rssTrace.dataYMax, equals(571727872.0));
           expect(rssTrace.data.length, equals(_rawRSS.length));
 
-          expect(controller.timestampsSize, equals(292));
+          expect(controller.timestampsLength, equals(292));
 
           validateScaledYLabels(controller);
 
@@ -664,7 +664,7 @@ void main() {
           expect(gcTrace.dataYMax, equals(0.0));
           expect(gcTrace.data.length, equals(70));
 
-          expect(controller.timestampsSize, equals(292));
+          expect(controller.timestampsLength, equals(292));
 
           // Validate the labels displayed on the y-axis.
           final yScale = controller.yScale;

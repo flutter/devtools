@@ -39,6 +39,67 @@ typedef chartStateListener = void Function();
 final String _memoryLogFilename =
     '${MemoryController.logFilenamePrefix}${DateFormat("yyyyMMdd_hh_mm").format(DateTime.now())}';
 
+/// Automatic pruning of collected memory statistics (plotted) full data is
+/// still retained. Default is the best view each tick is 10 pixels, the
+/// width of an event symbol e.g., snapshot, monitor, etc.
+enum ChartInterval {
+  Default,
+  OneMinute,
+  FiveMinutes,
+  TenMinutes,
+  All,
+}
+
+/// Duration for each ChartInterval.
+const displayDurations = <Duration>[
+  Duration(), // ChartInterval.Default
+  Duration(minutes: 1), // ChartInterval.OneMinute
+  Duration(minutes: 5), // ChartInterval.FiveMinutes
+  Duration(minutes: 10), // ChartInterval.TenMinutes
+  null, // ChartInterval.All
+];
+
+Duration chartDuration(ChartInterval interval) =>
+    displayDurations[interval.index];
+
+const displayDefault = 'Default';
+const displayAll = 'All';
+
+final displayDurationsStrings = <String>[
+  displayDefault,
+  chartDuration(ChartInterval.OneMinute).inMinutes.toString(),
+  chartDuration(ChartInterval.FiveMinutes).inMinutes.toString(),
+  chartDuration(ChartInterval.TenMinutes).inMinutes.toString(),
+  displayAll,
+];
+
+String displayDuration(ChartInterval interval) =>
+    displayDurationsStrings[interval.index];
+
+ChartInterval chartInterval(String displayName) {
+  final index = displayDurationsStrings.indexOf(displayName);
+  switch (index) {
+    case 0:
+      assert(index == ChartInterval.Default.index);
+      return ChartInterval.Default;
+    case 1:
+      assert(index == ChartInterval.OneMinute.index);
+      return ChartInterval.OneMinute;
+    case 2:
+      assert(index == ChartInterval.FiveMinutes.index);
+      return ChartInterval.FiveMinutes;
+    case 3:
+      assert(index == ChartInterval.TenMinutes.index);
+      return ChartInterval.TenMinutes;
+    case 4:
+      assert(index == ChartInterval.All.index);
+      return ChartInterval.All;
+    default:
+      assert(false);
+      return null;
+  }
+}
+
 /// This class contains the business logic for [memory.dart].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
@@ -273,33 +334,27 @@ class MemoryController extends DisposableController
     return stops == 0 ? 1 : stops;
   }
 
-  /// Automatic pruning of memory statistics (plotted) full data is still retained.
-  static const displayDefault = 'Default';
-  static const displayOneMinute = '1';
-  static const displayFiveMinutes = '5';
-  static const displayTenMinutes = '10';
-  static const displayAllMinutes = 'All';
-
   /// Default is to display default tick width based on width of chart of the collected
   /// data in the chart.
-  final _displayIntervalNotifier = ValueNotifier<String>(displayDefault);
+  final _displayIntervalNotifier =
+      ValueNotifier<ChartInterval>(ChartInterval.Default);
 
-  ValueListenable<String> get displayIntervalNotifier =>
+  ValueListenable<ChartInterval> get displayIntervalNotifier =>
       _displayIntervalNotifier;
 
-  set displayInterval(String interval) {
+  set displayInterval(ChartInterval interval) {
     _displayIntervalNotifier.value = interval;
   }
 
-  String get displayInterval => _displayIntervalNotifier.value;
+  ChartInterval get displayInterval => _displayIntervalNotifier.value;
 
   /// 1 minute in milliseconds.
   static const int minuteInMs = 60 * 1000;
 
-  static int displayIntervalToIntervalDurationInMs(String interval) {
-    return interval == displayAllMinutes
+  static int displayIntervalToIntervalDurationInMs(ChartInterval interval) {
+    return interval == ChartInterval.All
         ? maxJsInt
-        : int.parse(interval) * minuteInMs;
+        : chartDuration(interval).inMilliseconds;
   }
 
   /// Return the pruning interval in milliseconds.

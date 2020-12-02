@@ -77,7 +77,7 @@ class Trace {
 
   AxisScale yAxis;
 
-  void dataClear() {
+  void clearData() {
     _data.clear();
     controller.dirty = true;
   }
@@ -96,7 +96,9 @@ class Trace {
       yAxis = AxisScale(0, dataYMax, 30);
     }
 
-    if (datum.y > controller?.yMaxValue) controller?.yMaxValue = datum.y;
+    if (datum.y > controller?.yMaxValue) {
+      controller?.yMaxValue = datum.y;
+    }
 
     final traceIndex = controller.traceIndex(this);
 
