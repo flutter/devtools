@@ -21,6 +21,7 @@ import 'package:vm_service/vm_service.dart' hide Isolate;
 
 import 'client_manager.dart';
 import 'external_handlers.dart';
+import 'file_system.dart';
 import 'memory_profile.dart';
 import 'usage.dart';
 
@@ -554,10 +555,10 @@ File _devToolsBackup;
 
 bool backupAndCreateDevToolsStore() {
   assert(_devToolsBackup == null);
-  final devToolsStore = File('${DevToolsUsage.userHomeDir()}/.devtools');
+  final devToolsStore = File(_devToolsStoreLocation());
   if (devToolsStore.existsSync()) {
     _devToolsBackup = devToolsStore
-        .copySync('${DevToolsUsage.userHomeDir()}/.devtools_backup_test');
+        .copySync('${LocalFileSystem.devToolsDir()}/.devtools_backup_test');
     devToolsStore.deleteSync();
   }
 
@@ -567,7 +568,8 @@ bool backupAndCreateDevToolsStore() {
 String restoreDevToolsStore() {
   if (_devToolsBackup != null) {
     // Read the current ~/.devtools file
-    final devToolsStore = File('${DevToolsUsage.userHomeDir()}/.devtools');
+    LocalFileSystem.maybeMoveLegacyDevToolsStore();
+    final devToolsStore = File(_devToolsStoreLocation());
     final content = devToolsStore.readAsStringSync();
 
     // Delete the temporary ~/.devtools file
@@ -575,7 +577,7 @@ String restoreDevToolsStore() {
     if (_devToolsBackup.existsSync()) {
       // Restore the backup ~/.devtools file we created in
       // backupAndCreateDevToolsStore.
-      _devToolsBackup.copySync('${DevToolsUsage.userHomeDir()}/.devtools');
+      _devToolsBackup.copySync(_devToolsStoreLocation());
       _devToolsBackup.deleteSync();
       _devToolsBackup = null;
     }
@@ -583,6 +585,10 @@ String restoreDevToolsStore() {
   }
 
   return null;
+}
+
+String _devToolsStoreLocation() {
+  return path.join(LocalFileSystem.devToolsDir(), DevToolsUsage.storeName);
 }
 
 Future<void> _hookupMemoryProfiling(

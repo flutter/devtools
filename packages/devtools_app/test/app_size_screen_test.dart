@@ -59,7 +59,10 @@ void main() {
     DevToolsJsonFile data,
   }) async {
     data ??= newV8JsonFile;
-    appSizeController.loadTreeFromJsonFile(data, (error) => {});
+    appSizeController.loadTreeFromJsonFile(
+      jsonFile: data,
+      onError: (error) => {},
+    );
     await tester.pumpAndSettle();
   }
 
@@ -122,8 +125,8 @@ void main() {
       expect(find.text('No File Selected'), findsOneWidget);
 
       appSizeController.loadTreeFromJsonFile(
-        newV8JsonFile,
-        (error) => {},
+        jsonFile: newV8JsonFile,
+        onError: (error) => {},
         delayed: true,
       );
       await tester.pump(const Duration(milliseconds: 500));
@@ -195,9 +198,9 @@ void main() {
       DevToolsJsonFile newJsonFile,
     ) async {
       appSizeController.loadDiffTreeFromJsonFiles(
-        oldJsonFile,
-        newJsonFile,
-        (error) => {},
+        oldFile: oldJsonFile,
+        newFile: newJsonFile,
+        onError: (error) => {},
       );
       await tester.pumpAndSettle();
     }
@@ -221,9 +224,9 @@ void main() {
       await loadDiffTabAndSettle(tester);
 
       appSizeController.loadDiffTreeFromJsonFiles(
-        oldV8JsonFile,
-        newV8JsonFile,
-        (error) => {},
+        oldFile: oldV8JsonFile,
+        newFile: newV8JsonFile,
+        onError: (error) => {},
         delayed: true,
       );
       await tester.pump(const Duration(milliseconds: 500));
@@ -348,17 +351,17 @@ void main() {
       String secondFile,
     ) async {
       appSizeController.loadDiffTreeFromJsonFiles(
-        DevToolsJsonFile(
+        oldFile: DevToolsJsonFile(
           name: '',
           lastModifiedTime: lastModifiedTime,
           data: json.decode(firstFile),
         ),
-        DevToolsJsonFile(
+        newFile: DevToolsJsonFile(
           name: '',
           lastModifiedTime: lastModifiedTime,
           data: json.decode(secondFile),
         ),
-        (error) => Notifications.of(buildContext).push(error),
+        onError: (error) => Notifications.of(buildContext).push(error),
       );
       await tester.pumpAndSettle();
     }
@@ -372,12 +375,12 @@ void main() {
       );
 
       appSizeController.loadTreeFromJsonFile(
-        DevToolsJsonFile(
+        jsonFile: DevToolsJsonFile(
           name: 'unsupported_file.json',
           lastModifiedTime: lastModifiedTime,
           data: unsupportedFile,
         ),
-        (error) => Notifications.of(buildContext).push(error),
+        onError: (error) => Notifications.of(buildContext).push(error),
       );
       await tester.pumpAndSettle();
       expect(

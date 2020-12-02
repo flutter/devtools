@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,11 +12,14 @@ import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
 import '../common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
+import '../config_specific/server/server.dart' as server;
+import '../config_specific/url/url.dart';
 import '../notifications.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
+import '../utils.dart';
 import 'app_size_controller.dart';
 import 'app_size_table.dart';
 import 'code_size_attribution.dart';
@@ -76,14 +80,16 @@ class AppSizeBody extends StatefulWidget {
 
 class _AppSizeBodyState extends State<AppSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  static const tabs = [
-    Tab(text: 'Analysis', key: AppSizeScreen.analysisTabKey),
-    Tab(text: 'Diff', key: AppSizeScreen.diffTabKey),
-  ];
+  static const diffTab = Tab(text: 'Diff', key: AppSizeScreen.diffTabKey);
+  static const analysisTab =
+      Tab(text: 'Analysis', key: AppSizeScreen.analysisTabKey);
+  static const tabs = [analysisTab, diffTab];
 
   AppSizeController controller;
 
   TabController _tabController;
+
+  bool preLoadingData = false;
 
   @override
   void initState() {
@@ -93,10 +99,52 @@ class _AppSizeBodyState extends State<AppSizeBody>
     addAutoDisposeListener(_tabController);
   }
 
+  Future<void> maybeLoadAppSizeFiles() async {
+    final queryParams = loadQueryParams();
+    if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
+      // TODO(kenz): does this have to be in a setState()?
+      preLoadingData = true;
+      final baseAppSizeFile = await server
+          .requestBaseAppSizeFile(queryParams[baseAppSizeFilePropertyName]);
+      DevToolsJsonFile testAppSizeFile;
+      if (queryParams.containsKey(testAppSizeFilePropertyName)) {
+        testAppSizeFile = await server
+            .requestTestAppSizeFile(queryParams[testAppSizeFilePropertyName]);
+      }
+
+      // TODO(kenz): add error handling if the files are null
+      if (baseAppSizeFile != null) {
+        if (testAppSizeFile != null) {
+          controller.loadDiffTreeFromJsonFiles(
+            oldFile: baseAppSizeFile,
+            newFile: testAppSizeFile,
+            onError: _pushErrorMessage,
+          );
+          _tabController.animateTo(tabs.indexOf(diffTab));
+        } else {
+          controller.loadTreeFromJsonFile(
+            jsonFile: baseAppSizeFile,
+            onError: _pushErrorMessage,
+          );
+          _tabController.animateTo(tabs.indexOf(analysisTab));
+        }
+      }
+    }
+    if (preLoadingData) {
+      setState(() {
+        preLoadingData = false;
+      });
+    }
+  }
+
   @override
   void dispose() {
     super.dispose();
     _tabController.dispose();
+  }
+
+  void _pushErrorMessage(String error) {
+    if (mounted) Notifications.of(context).push(error);
   }
 
   @override
@@ -107,11 +155,16 @@ class _AppSizeBodyState extends State<AppSizeBody>
     if (newController == controller) return;
     controller = newController;
 
+    maybeLoadAppSizeFiles();
+
     addAutoDisposeListener(controller.activeDiffTreeType);
   }
 
   @override
   Widget build(BuildContext context) {
+    if (preLoadingData) {
+      return const CenteredCircularProgressIndicator();
+    }
     final currentTab = tabs[_tabController.index];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,8 +345,6 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
   }
 
   Widget _buildImportFileView() {
-    final notifications = Notifications.of(context);
-
     return ValueListenableBuilder(
         valueListenable: controller.processingNotifier,
         builder: (context, processing, _) {
@@ -317,8 +368,10 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
                     actionText: 'Analyze Size',
                     onAction: (jsonFile) {
                       controller.loadTreeFromJsonFile(
-                        jsonFile,
-                        (error) => notifications.push(error),
+                        jsonFile: jsonFile,
+                        onError: (error) {
+                          if (mounted) Notifications.of(context).push(error);
+                        },
                       );
                     },
                   ),
@@ -438,15 +491,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
       valueListenable: controller.processingNotifier,
       builder: (context, processing, _) {
         if (processing) {
-          return Center(
-            child: Text(
-              AppSizeScreen.loadingMessage,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.headline1.color,
-              ),
-            ),
-          );
+          return _buildLoadingMessage();
         } else {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -459,13 +504,30 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
                   firstInstructions: DiffView.importOldInstructions,
                   secondInstructions: DiffView.importNewInstructions,
                   actionText: 'Analyze Diff',
-                  onAction: controller.loadDiffTreeFromJsonFiles,
+                  onAction: (oldFile, newFile, onError) =>
+                      controller.loadDiffTreeFromJsonFiles(
+                    oldFile: oldFile,
+                    newFile: newFile,
+                    onError: onError,
+                  ),
                 ),
               ),
             ],
           );
         }
       },
+    );
+  }
+
+  Widget _buildLoadingMessage() {
+    return Center(
+      child: Text(
+        AppSizeScreen.loadingMessage,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Theme.of(context).textTheme.headline1.color,
+        ),
+      ),
     );
   }
 

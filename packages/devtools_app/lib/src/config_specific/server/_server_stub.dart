@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import '../../utils.dart';
+
 const unsupportedMessage =
     'Unsupported RPC: The DevTools Server is not available on Desktop';
 
@@ -46,6 +48,14 @@ Future<int> incrementSurveyShownCount() async {
 }
 
 Future<void> resetDevToolsFile() async {
+  throw Exception(unsupportedMessage);
+}
+
+Future<DevToolsJsonFile> requestBaseAppSizeFile(String path) async {
+  throw Exception(unsupportedMessage);
+}
+
+Future<DevToolsJsonFile> requestTestAppSizeFile(String path) async {
   throw Exception(unsupportedMessage);
 }
 

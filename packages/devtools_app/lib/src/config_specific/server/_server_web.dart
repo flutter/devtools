@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:html';
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../utils.dart';
 import '../logger/logger.dart';
@@ -248,6 +249,54 @@ Future<void> resetDevToolsFile() async {
       logWarning(resp, apiResetDevTools);
     }
   }
+}
+
+Future<DevToolsJsonFile> requestBaseAppSizeFile(String path) async {
+  return requestFile(
+    api: apiGetBaseAppSizeFile,
+    fileKey: baseAppSizeFilePropertyName,
+    filePath: path,
+  );
+}
+
+Future<DevToolsJsonFile> requestTestAppSizeFile(String path) async {
+  return requestFile(
+    api: apiGetTestAppSizeFile,
+    fileKey: testAppSizeFilePropertyName,
+    filePath: path,
+  );
+}
+
+Future<DevToolsJsonFile> requestFile({
+  @required String api,
+  @required String fileKey,
+  @required String filePath,
+}) async {
+  if (isDevToolsServerAvailable) {
+    final url = Uri(path: api, queryParameters: {fileKey: filePath});
+    final resp = await _request(url.toString());
+    if (resp?.status == HttpStatus.ok) {
+      return _devToolsJsonFileFromResponse(resp, filePath);
+    } else {
+      logWarning(resp, api);
+    }
+  }
+  return null;
+}
+
+DevToolsJsonFile _devToolsJsonFileFromResponse(
+  HttpRequest resp,
+  String filePath,
+) {
+  final data = json.decode(resp.response);
+  final lastModified = data['lastModifiedTime'];
+  final lastModifiedTime =
+      lastModified != null ? DateTime.parse(lastModified) : DateTime.now();
+  return DevToolsJsonFile(
+    name: filePath,
+    lastModifiedTime: lastModifiedTime,
+    data: data,
+  );
 }
 
 void logWarning(HttpRequest response, String apiType, [String respText]) {

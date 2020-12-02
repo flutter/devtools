@@ -535,7 +535,6 @@ SizedBox areaPaneHeader(
   bool tall = false,
 }) {
   final theme = Theme.of(context);
-
   return SizedBox(
     height:
         tall ? areaPaneHeaderHeight + 2 * densePadding : areaPaneHeaderHeight,
@@ -558,7 +557,7 @@ SizedBox areaPaneHeader(
               title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.subtitle2,
+              style: theme.textTheme.subtitle2,
             ),
           ),
           ...actions,

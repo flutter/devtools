@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:shelf/shelf.dart' as shelf;
 
+import 'file_system.dart';
 import 'usage.dart';
 
 /// The DevTools server API.
@@ -148,6 +149,32 @@ class ServerApi {
           request,
           json.encode(_devToolsUsage.surveyShownCount),
         );
+      case apiGetBaseAppSizeFile:
+        final queryParams = request.requestedUri.queryParameters;
+        if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
+          final filePath = queryParams[baseAppSizeFilePropertyName];
+          final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
+          if (fileJson == null) {
+            return api.badRequest('No JSON file available at $filePath.');
+          }
+          return api.getCompleted(request, fileJson);
+        }
+        return api.badRequest('Request for base app size file does not '
+            'contain a query parameter with the expected key: '
+            '$baseAppSizeFilePropertyName');
+      case apiGetTestAppSizeFile:
+        final queryParams = request.requestedUri.queryParameters;
+        if (queryParams.containsKey(testAppSizeFilePropertyName)) {
+          final filePath = queryParams[testAppSizeFilePropertyName];
+          final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
+          if (fileJson == null) {
+            return api.badRequest('No JSON file available at $filePath.');
+          }
+          return api.getCompleted(request, fileJson);
+        }
+        return api.badRequest('Request for test app size file does not '
+            'contain a query parameter with the expected key: '
+            '$testAppSizeFilePropertyName');
       default:
         return api.notImplemented(request);
     }
