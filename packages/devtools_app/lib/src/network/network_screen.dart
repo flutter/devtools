@@ -310,7 +310,7 @@ class NetworkRequestsTable extends StatelessWidget {
 
 class UriColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
-  UriColumn() : super.wide('Uri');
+  UriColumn() : super.wide('Uri', minWidthPx: 50);
 
   @override
   dynamic getValue(NetworkRequest dataObject) {

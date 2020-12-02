@@ -328,16 +328,20 @@ abstract class ColumnData<T> {
   ColumnData(
     this.title, {
     this.alignment = ColumnAlignment.left,
-    this.fixedWidthPx,
-  });
+    @required this.fixedWidthPx,
+  })  : assert(fixedWidthPx != null),
+        minWidthPx = null;
 
-  ColumnData.wide(this.title, {this.alignment = ColumnAlignment.left})
+  ColumnData.wide(this.title,
+      {this.minWidthPx, this.alignment = ColumnAlignment.left})
       : fixedWidthPx = null;
 
   final String title;
 
   /// Width of the column expressed as a fixed number of pixels.
   final double fixedWidthPx;
+
+  final double minWidthPx;
 
   /// How much to indent the data object by.
   ///
@@ -373,7 +377,7 @@ abstract class ColumnData<T> {
 }
 
 abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
-  TreeColumnData(String title) : super(title);
+  TreeColumnData(String title) : super.wide(title);
 
   static const treeToggleWidth = 14.0;
 

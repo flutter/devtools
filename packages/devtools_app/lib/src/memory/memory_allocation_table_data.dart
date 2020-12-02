@@ -10,7 +10,7 @@ import 'memory_protocol.dart';
 const defaultNumberFieldWidth = 100.0;
 
 class FieldClassName extends ColumnData<ClassHeapDetailStats> {
-  FieldClassName() : super('Class');
+  FieldClassName() : super('Class', fixedWidthPx: 200.0);
 
   @override
   String getValue(ClassHeapDetailStats dataObject) => dataObject.classRef.name;
@@ -28,9 +28,6 @@ class FieldClassName extends ColumnData<ClassHeapDetailStats> {
     final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => 200.0;
 }
 
 class FieldInstanceCountColumn extends ColumnData<ClassHeapDetailStats> {
@@ -38,6 +35,7 @@ class FieldInstanceCountColumn extends ColumnData<ClassHeapDetailStats> {
       : super(
           'Instances',
           alignment: ColumnAlignment.right,
+          fixedWidthPx: defaultNumberFieldWidth,
         );
 
   @override
@@ -60,9 +58,6 @@ class FieldInstanceCountColumn extends ColumnData<ClassHeapDetailStats> {
     final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => defaultNumberFieldWidth;
 }
 
 class FieldInstanceDeltaColumn extends ColumnData<ClassHeapDetailStats> {
@@ -70,6 +65,7 @@ class FieldInstanceDeltaColumn extends ColumnData<ClassHeapDetailStats> {
       : super(
           'Delta',
           alignment: ColumnAlignment.right,
+          fixedWidthPx: defaultNumberFieldWidth,
         );
 
   @override
@@ -93,9 +89,6 @@ class FieldInstanceDeltaColumn extends ColumnData<ClassHeapDetailStats> {
     final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => defaultNumberFieldWidth;
 }
 
 class FieldSizeColumn extends ColumnData<ClassHeapDetailStats> {
@@ -103,6 +96,7 @@ class FieldSizeColumn extends ColumnData<ClassHeapDetailStats> {
       : super(
           'Bytes',
           alignment: ColumnAlignment.right,
+          fixedWidthPx: defaultNumberFieldWidth,
         );
 
   @override
@@ -124,9 +118,6 @@ class FieldSizeColumn extends ColumnData<ClassHeapDetailStats> {
     final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => defaultNumberFieldWidth;
 }
 
 class FieldSizeDeltaColumn extends ColumnData<ClassHeapDetailStats> {
@@ -134,6 +125,7 @@ class FieldSizeDeltaColumn extends ColumnData<ClassHeapDetailStats> {
       : super(
           'Delta',
           alignment: ColumnAlignment.right,
+          fixedWidthPx: defaultNumberFieldWidth,
         );
 
   @override
@@ -157,7 +149,4 @@ class FieldSizeDeltaColumn extends ColumnData<ClassHeapDetailStats> {
     final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => defaultNumberFieldWidth;
 }

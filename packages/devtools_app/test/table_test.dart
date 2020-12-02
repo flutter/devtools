@@ -39,6 +39,11 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
+      // Make sure the total wi
+      final FlatTableState state = tester.state(find.byWidget(table));
+      final columnWidths = state.computeColumnWidths(1000);
+      expect(columnWidths.length, 1);
+      expect(columnWidths.first, 300);
       expect(find.byKey(const Key('empty')), findsOneWidget);
     });
 
@@ -179,6 +184,114 @@ void main() {
         ),
       ));
       expect(find.byWidget(table), findsOneWidget);
+      // TODO(jacobr): add a golden image test.
+    });
+
+    testWidgets('displays with wide column', (WidgetTester tester) async {
+      final table = FlatTable<TestData>(
+        columns: [
+          flatNameColumn,
+          _NumberColumn(),
+          _WideColumn(),
+        ],
+        data: flatData,
+        onItemSelected: noop,
+        keyFactory: (data) => Key(data.name),
+        sortColumn: flatNameColumn,
+        sortDirection: SortDirection.ascending,
+      );
+      await tester.pumpWidget(wrap(
+        SizedBox(
+          width: 800.0,
+          height: 200.0,
+          child: table,
+        ),
+      ));
+      expect(find.byWidget(table), findsOneWidget);
+      {
+        final FlatTableState<TestData> state =
+            tester.state(find.byWidget(table));
+        final columnWidths = state.computeColumnWidths(800.0);
+        expect(columnWidths.length, equals(3));
+        expect(columnWidths[0], equals(300.0));
+        expect(columnWidths[1], equals(400.0));
+        expect(columnWidths[2], equals(36.0));
+      }
+
+      // TODO(jacobr): add a golden image test.
+
+      await tester.pumpWidget(wrap(
+        SizedBox(
+          width: 200.0,
+          height: 200.0,
+          child: table,
+        ),
+      ));
+
+      {
+        final FlatTableState<TestData> state =
+            tester.state(find.byWidget(table));
+        final columnWidths = state.computeColumnWidths(200.0);
+        expect(columnWidths.length, equals(3));
+        expect(columnWidths[0], equals(300.0)); // Fixed width column.
+        expect(columnWidths[1], equals(400.0)); // Fixed width column.
+        expect(columnWidths[2], equals(0.0)); // Variable width column.
+      }
+
+      // TODO(jacobr): add a golden image test.
+    });
+
+    testWidgets('displays with multiple wide columns',
+        (WidgetTester tester) async {
+      final table = FlatTable<TestData>(
+        columns: [
+          flatNameColumn,
+          _WideMinWidthColumn(),
+          _NumberColumn(),
+          _WideColumn(),
+        ],
+        data: flatData,
+        onItemSelected: noop,
+        keyFactory: (data) => Key(data.name),
+        sortColumn: flatNameColumn,
+        sortDirection: SortDirection.ascending,
+      );
+      await tester.pumpWidget(wrap(
+        SizedBox(
+          width: 1000.0,
+          height: 200.0,
+          child: table,
+        ),
+      ));
+      expect(find.byWidget(table), findsOneWidget);
+      {
+        final FlatTableState<TestData> state =
+            tester.state(find.byWidget(table));
+        final columnWidths = state.computeColumnWidths(1000.0);
+        expect(columnWidths.length, equals(4));
+        expect(columnWidths[0], equals(300.0)); // Fixed width column.
+        expect(columnWidths[1], equals(160.0)); // Min width wide column
+        expect(columnWidths[2], equals(400.0)); // Fixed width column.
+        expect(columnWidths[3], equals(60.0)); // Variable width wide column.
+      }
+
+      await tester.pumpWidget(wrap(
+        SizedBox(
+          width: 200.0,
+          height: 200.0,
+          child: table,
+        ),
+      ));
+      {
+        final FlatTableState<TestData> state =
+            tester.state(find.byWidget(table));
+        final columnWidths = state.computeColumnWidths(200.0);
+        expect(columnWidths.length, equals(4));
+        expect(columnWidths[0], equals(300.0)); // Fixed width column.
+        expect(columnWidths[1], equals(100.0)); // Min width wide column
+        expect(columnWidths[2], equals(400.0)); // Fixed width column.
+        expect(columnWidths[3], equals(0.0)); // Variable width wide column.
+      }
     });
 
     testWidgets('can select an item', (WidgetTester tester) async {
@@ -478,6 +591,8 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       final TreeTableState state = tester.state(find.byWidget(table));
+      expect(state.columnWidths[0], equals(400));
+      expect(state.columnWidths[1], equals(1000));
       final tree = state.dataRoots[0];
       expect(tree.children[0].name, equals('Bar'));
       expect(tree.children[0].children[0].name, equals('Baz'));
@@ -754,40 +869,47 @@ class _NameColumn extends TreeColumnData<TestData> {
 }
 
 class _NumberColumn extends ColumnData<TestData> {
-  _NumberColumn() : super('Number');
+  _NumberColumn() : super('Number', fixedWidthPx: 400.0);
 
   @override
   int getValue(TestData dataObject) => dataObject.number;
-
-  @override
-  double get fixedWidthPx => 400.0;
 
   @override
   bool get supportsSorting => true;
 }
 
 class _FlatNameColumn extends ColumnData<TestData> {
-  _FlatNameColumn() : super('FlatName');
+  _FlatNameColumn() : super('FlatName', fixedWidthPx: 300.0);
 
   @override
   String getValue(TestData dataObject) => dataObject.name;
-
-  @override
-  double get fixedWidthPx => 300.0;
 
   @override
   bool get supportsSorting => true;
 }
 
 class _CombinedColumn extends ColumnData<TestData> {
-  _CombinedColumn() : super('Name & Number');
+  _CombinedColumn() : super('Name & Number', fixedWidthPx: 400.0);
 
   @override
   String getValue(TestData dataObject) =>
       '${dataObject.name} ${dataObject.number}';
+}
+
+class _WideColumn extends ColumnData<TestData> {
+  _WideColumn() : super.wide('Wide Column');
 
   @override
-  double get fixedWidthPx => 400.0;
+  String getValue(TestData dataObject) =>
+      '${dataObject.name} ${dataObject.number} bla bla bla bla bla bla bla bla';
+}
+
+class _WideMinWidthColumn extends ColumnData<TestData> {
+  _WideMinWidthColumn() : super.wide('Wide MinWidth Column', minWidthPx: 100.0);
+
+  @override
+  String getValue(TestData dataObject) =>
+      '${dataObject.name} ${dataObject.number} with min width';
 }
 
 void noop(TestData data) {}

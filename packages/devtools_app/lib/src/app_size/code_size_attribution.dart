@@ -207,14 +207,14 @@ class _CallGraphViewState extends State<CallGraphView> {
 }
 
 class FromColumn extends ColumnData<CallGraphNode> {
-  FromColumn() : super('From');
+  FromColumn() : super.wide('From');
 
   @override
   String getValue(CallGraphNode dataObject) => dataObject.display;
 }
 
 class ToColumn extends ColumnData<CallGraphNode> {
-  ToColumn() : super('To');
+  ToColumn() : super.wide('To');
 
   @override
   ColumnAlignment get alignment => ColumnAlignment.right;

@@ -72,7 +72,7 @@ class MethodNameColumn extends TreeColumnData<CpuStackFrame> {
 
 // TODO(kenz): make these urls clickable once we can jump to source.
 class SourceColumn extends ColumnData<CpuStackFrame> {
-  SourceColumn() : super('Source', alignment: ColumnAlignment.right);
+  SourceColumn() : super.wide('Source', alignment: ColumnAlignment.right);
 
   @override
   dynamic getValue(CpuStackFrame dataObject) => dataObject.url;

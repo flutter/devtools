@@ -587,7 +587,7 @@ class _AnalysisFieldNameColumn extends TreeColumnData<AnalysisField> {
 }
 
 class _AnalysisFieldValueColumn extends ColumnData<AnalysisField> {
-  _AnalysisFieldValueColumn() : super('Value');
+  _AnalysisFieldValueColumn() : super('Value', fixedWidthPx: 250.0);
 
   @override
   dynamic getValue(AnalysisField dataObject) => dataObject.value;
@@ -610,9 +610,6 @@ class _AnalysisFieldValueColumn extends ColumnData<AnalysisField> {
     final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => 250.0;
 }
 
 class ClassFields {

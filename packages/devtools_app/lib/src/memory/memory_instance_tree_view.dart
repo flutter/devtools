@@ -101,7 +101,7 @@ class _FieldTypeColumn extends TreeColumnData<FieldReference> {
 }
 
 class _FieldNameColumn extends ColumnData<FieldReference> {
-  _FieldNameColumn() : super('Name');
+  _FieldNameColumn() : super('Name', fixedWidthPx: 150.0);
 
   @override
   dynamic getValue(FieldReference dataObject) =>
@@ -120,13 +120,10 @@ class _FieldNameColumn extends ColumnData<FieldReference> {
     final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => 150.0;
 }
 
 class _FieldValueColumn extends ColumnData<FieldReference> {
-  _FieldValueColumn() : super('Value');
+  _FieldValueColumn() : super('Value', fixedWidthPx: 250.0);
 
   @override
   dynamic getValue(FieldReference dataObject) =>
@@ -164,7 +161,4 @@ class _FieldValueColumn extends ColumnData<FieldReference> {
     final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
-
-  @override
-  double get fixedWidthPx => 250.0;
 }

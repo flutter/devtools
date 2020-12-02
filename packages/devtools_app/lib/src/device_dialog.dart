@@ -254,7 +254,7 @@ class _NameColumn extends ColumnData<_DialogFlag> {
 }
 
 class _DescriptionColumn extends ColumnData<_DialogFlag> {
-  _DescriptionColumn() : super.wide('Description');
+  _DescriptionColumn() : super.wide('Description', minWidthPx: 100);
 
   @override
   String getValue(_DialogFlag dataObject) => dataObject.description;
