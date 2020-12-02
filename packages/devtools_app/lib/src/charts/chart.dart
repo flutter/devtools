@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../config_specific/logger/logger.dart' as logger;
 import 'chart_controller.dart';
 import 'chart_trace.dart';
 
@@ -36,7 +37,10 @@ void drawTranslate(
 }
 
 class Chart extends StatefulWidget {
-  Chart(this.controller, String title) {
+  Chart(
+    this.controller, {
+    String title,
+  }) {
     controller.title = title;
   }
 
@@ -82,17 +86,18 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+    // Chart's Custom Painter (paint) can be expensive for lots of data points (10,000s).
+    // A repaint boundary is necessary.
+    // TODO(terry): Optimize the 10,000s of data points to just the number of pixels in the
+    //              chart - this will make paint very fast.
+    return RepaintBoundary(
       child: LayoutBuilder(
         // Inner container
         builder: (_, constraints) => Container(
           width: constraints.widthConstraints().maxWidth,
           height: constraints.widthConstraints().maxHeight,
-          child: ClipRect(
-            child: CustomPaint(
-              painter: ChartPainter(controller),
-            ),
+          child: CustomPaint(
+            painter: ChartPainter(controller),
           ),
         ),
       ),
@@ -112,25 +117,41 @@ class ChartPainter extends CustomPainter {
 //    marginTopY = createText(chartController.title, 1.5).height + paddingY;
   }
 
+  final debugTrackPaintTime = false;
+
   final ChartController chartController;
 
   static const double axisWidth = 2;
 
   @override
   void paint(Canvas canvas, Size size) {
+    // TODO(terry): Used to monitor total painting time. For large
+    //              datasets e.g., offline files of 10,000s of data
+    //              points time can be kind of slows. Consider only
+    //              sampling 1 point per horizontal pixel.
+    final startTime = DateTime.now();
+
     final axis = Paint()
       ..strokeWidth = axisWidth
       ..color = Colors.grey;
 
-    chartController.size = size;
-    chartController.computeChartArea();
+    if (size != chartController.size) {
+      chartController.size = size;
+      chartController.computeChartArea();
+    }
 
     drawTranslate(
       canvas,
       chartController.xCanvasChart,
       chartController.yCanvasChart,
       (canavas) {
-        drawAxes(canvas, size, axis);
+        drawAxes(
+          canvas,
+          size,
+          axis,
+          displayX: chartController.displayXAxis,
+          displayTopLine: chartController.displayTopLine,
+        );
       },
     );
 
@@ -159,13 +180,13 @@ class ChartPainter extends CustomPainter {
 
     // TODO(terry): Need to compute x-axis left-most position for last timestamp.
     //              May need to do the other direction so it looks better.
-    final timeStampsLength = chartController.timestamps.length;
-    int xTickIndex = timeStampsLength;
-    final endVisibleIndex = xTickIndex - chartController.visibleTicks;
+    final endVisibleIndex =
+        chartController.timestampsLength - chartController.visibleTicks;
 
     final xTranslation = chartController.xCoordLeftMostVisibleTimestamp;
     final yTranslation = chartController.zeroYPosition;
 
+    int xTickIndex = chartController.timestampsLength;
     while (--xTickIndex >= 0) {
       // Hide left-side label when its ticks scrolls out.
       final leftTimestamp = chartController.leftLabelTimestamp;
@@ -215,7 +236,7 @@ class ChartPainter extends CustomPainter {
           final xCanvasCoord =
               chartController.timestampXCanvasCoord(xTimestamp);
           if (currentTimestamp == xTimestamp) {
-            if (xCanvasCoord != -1) {
+            if (xCanvasCoord != null) {
               // Get ready to render on canvas. Remember old canvas state
               // and setup translations for x,y coordinates into the rendering
               // area of the chart.
@@ -308,45 +329,47 @@ class ChartPainter extends CustomPainter {
         );
       }
 
+      if (chartController.displayXAxis || chartController.displayXLabels)
+        // Y translation is below X-axis line.
+        drawTranslate(
+          canvas,
+          xTranslation,
+          chartController.zeroYPosition + 1,
+          (canvas) {
+            // Draw right-most tick label (first major tick).
+            drawXTick(
+              canvas,
+              currentTimestamp,
+              chartController.timestampXCanvasCoord(currentTimestamp),
+              axis,
+              shortTick: minorTick,
+            );
+          },
+        );
+
+      if (!minorTick) tickIndex = 0;
+    }
+
+    if (chartController.displayXAxis || chartController.displayXLabels)
       // Y translation is below X-axis line.
       drawTranslate(
         canvas,
         xTranslation,
         chartController.zeroYPosition + 1,
         (canvas) {
-          // Draw right-most tick label (first major tick).
-          drawXTick(
-            canvas,
-            currentTimestamp,
-            chartController.timestampXCanvasCoord(currentTimestamp),
-            axis,
-            shortTick: minorTick,
-          );
+          // Draw the major labels.
+          for (var labelIndex = 0;
+              labelIndex < chartController.getLabelsCount();
+              labelIndex++) {
+            final timestamp =
+                chartController.getLabelTimestampByIndex(labelIndex);
+            if (timestamp != null) {
+              final xCoord = chartController.timestampXCanvasCoord(timestamp);
+              drawXTick(canvas, timestamp, xCoord, axis, displayTime: true);
+            }
+          }
         },
       );
-
-      if (!minorTick) tickIndex = 0;
-    }
-
-    // Y translation is below X-axis line.
-    drawTranslate(
-      canvas,
-      xTranslation,
-      chartController.zeroYPosition + 1,
-      (canvas) {
-        // Draw the major labels.
-        for (var labelIndex = 0;
-            labelIndex < chartController.getLabelsCount();
-            labelIndex++) {
-          final timestamp =
-              chartController.getLabelTimestampByIndex(labelIndex);
-          if (timestamp != null) {
-            final xCoord = chartController.timestampXCanvasCoord(timestamp);
-            drawXTick(canvas, timestamp, xCoord, axis, displayTime: true);
-          }
-        }
-      },
-    );
 
     // X translation is left-most edge of chart widget.
     drawTranslate(
@@ -367,6 +390,15 @@ class ChartPainter extends CustomPainter {
     );
 
     drawTitle(canvas, size, chartController.title);
+
+    final elapsedTime = DateTime.now().difference(startTime).inMilliseconds;
+    if (debugTrackPaintTime && elapsedTime > 500) {
+      logger.log('${chartController.name} ${chartController.timestampsLength} '
+          'CustomPainter paint elapsed time $elapsedTime');
+    }
+
+    // Once painted we're not dirty anymore.
+    chartController.dirty = false;
   }
 
   void clipChart(Canvas canvas, {ClipOp op = ClipOp.intersect}) {
@@ -390,27 +422,40 @@ class ChartPainter extends CustomPainter {
     tp.paint(canvas, Offset(size.width / 2 - tp.width / 2, 0));
   }
 
-  void drawAxes(Canvas canvas, Size size, Paint axis) {
+  void drawAxes(
+    Canvas canvas,
+    Size size,
+    Paint axis, {
+    bool displayX = true,
+    bool displayY = true,
+    bool displayTopLine = true,
+  }) {
     final chartWidthPosition =
         chartController.canvasChartWidth - chartController.xPaddingRight;
     final chartHeight = chartController.canvasChartHeight;
 
     // Top line of chart.
-    canvas.drawLine(const Offset(0, 0), Offset(chartWidthPosition, 0), axis);
+    if (displayTopLine) {
+      canvas.drawLine(const Offset(0, 0), Offset(chartWidthPosition, 0), axis);
+    }
 
     // Left-side of chart
-    canvas.drawLine(
-      const Offset(0, 0),
-      Offset(0, chartHeight),
-      axis,
-    );
+    if (displayY) {
+      canvas.drawLine(
+        const Offset(0, 0),
+        Offset(0, chartHeight),
+        axis,
+      );
+    }
 
     // Bottom line of chart.
-    canvas.drawLine(
-      Offset(0, chartHeight),
-      Offset(chartWidthPosition, chartHeight),
-      axis,
-    );
+    if (displayX) {
+      canvas.drawLine(
+        Offset(0, chartHeight),
+        Offset(chartWidthPosition, chartHeight),
+        axis,
+      );
+    }
   }
 
   /// Separated out from drawAxis because we don't know range until plotted.
@@ -495,14 +540,14 @@ class ChartPainter extends CustomPainter {
     shortTick = true,
     displayTime = false,
   }) {
-    // Draw vertical tick (short or long).
-    canvas.drawLine(
-      Offset(xTickCoord, 0),
-      Offset(xTickCoord, shortTick ? 2 : 6),
-      axis,
-    );
-
     if (displayTime) {
+      // Draw vertical tick (short or long).
+      canvas.drawLine(
+        Offset(xTickCoord, 0),
+        Offset(xTickCoord, shortTick ? 2 : 6),
+        axis,
+      );
+
       final tp = createText(prettyTimestamp(timestamp), 1);
       tp.paint(
         canvas,
@@ -520,10 +565,14 @@ class ChartPainter extends CustomPainter {
   }
 
   TextPainter createText(String textValue, double scale) {
+    const TextStyle(
+      color: Colors.black,
+      fontSize: 30,
+    );
     final span = TextSpan(
       // TODO(terry): All text in a chart is grey. A chart like a Trace
       //              should have PaintCharacteristics.
-      style: TextStyle(color: Colors.grey[600]),
+      style: TextStyle(color: Colors.grey[600], fontSize: 10),
       text: textValue,
     );
     final tp = TextPainter(
@@ -611,7 +660,7 @@ class ChartPainter extends CustomPainter {
     final paint = Paint()
       ..style = PaintingStyle.fill
       ..strokeWidth = characteristics.strokeWidth
-      ..color = characteristics.color.withAlpha(100);
+      ..color = characteristics.color.withAlpha(140);
 
     final fillArea = Path()
       ..moveTo(x0, y0Bottom)
@@ -626,7 +675,7 @@ class ChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(ChartPainter oldDelegate) => false;
+  bool shouldRepaint(ChartPainter oldDelegate) => chartController.isDirty;
 
   Data _reduceHelper(Data curr, Data next) => curr.y > next.y ? curr : next;
 

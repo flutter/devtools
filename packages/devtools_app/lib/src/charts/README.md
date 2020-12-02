@@ -137,7 +137,7 @@ Create a datum (see Data class) and add the data to a trace (adddatum). In the b
   final startDatum = Data(previousTime.millisecondsSinceEpoch, greenPosition);
 
   // Start the heartbeat.
-  controller.timestamps.add(startDatum.timestamp);
+  controller.addTimestamp(startDatum.timestamp);
   
   // Add the first real datum.
   controller.trace(greenTraceIndex).addDatum(startDatum);
@@ -150,7 +150,7 @@ Create a datum (see Data class) and add the data to a trace (adddatum). In the b
         final  = currentTime.millisecondsSinceEpoch;
 
         // Once a second heartbeat.
-        controller.timestamps.add(timestamp);
+        controller.addTimestamps(timestamp);
 
         // Add the blue ball.
         final datum = Data(timestamp, bluePosition);
@@ -158,7 +158,7 @@ Create a datum (see Data class) and add the data to a trace (adddatum). In the b
 
         previousTime = currentTime;
       } else {
-        controller.timestamps.add(previousTime.millisecondsSinceEpoch);
+        controller.addTimestamps(previousTime.millisecondsSinceEpoch);
         final stopDatum = Data(
           previousTime.millisecondsSinceEpoch,
           redPosition,
@@ -180,6 +180,6 @@ Each call to addDatum will
  One important piece of information is adding a heartbeat. If a live chart is needed where the timeline (X axis) moves in a linear fashion requires adding a heart beat (at the grandularity requested of the X axis) a tickstamp is added to the ChartController timestamps field on every tick e.g.,
 
 ```
-            controller.timestamps.add(currentTime.millisecondsSinceEpoch)
+            controller.addTimestamps(currentTime.millisecondsSinceEpoch)
 ```
 The heartbeat allows the data to be replayed as if the data collection is live, at the same rate of experiencing the collecting of the live data.

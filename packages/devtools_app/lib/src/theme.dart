@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:mp_chart/mp/core/adapter_android_mp.dart';
 
 import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
@@ -108,7 +107,7 @@ const smallProgressSize = 12.0;
 
 const defaultListItemHeight = 28.0;
 
-const defaultChartHeight = 140.0;
+const defaultChartHeight = 150.0;
 
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 
@@ -236,16 +235,6 @@ Color titleSolidBackgroundColor(ThemeData theme) {
 }
 
 const chartFontSizeSmall = 12.0;
-
-final chartLightTypeFace = TypeFace(
-  fontFamily: 'OpenSans',
-  fontWeight: FontWeight.w100,
-);
-
-final chartBoldTypeFace = TypeFace(
-  fontFamily: 'OpenSans',
-  fontWeight: FontWeight.w800,
-);
 
 const lightSelection = Color(0xFFD4D7DA);
 

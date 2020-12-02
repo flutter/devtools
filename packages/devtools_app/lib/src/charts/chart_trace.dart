@@ -63,14 +63,28 @@ class Trace {
 
   double dataYMax = 0;
 
-  final data = <Data>[];
+  final _data = <Data>[];
+
+  // TODO(terry): Consider UnmodifiableListView if data is loaded from offline file (not live).
+  List<Data> get data => _data;
+
+  void addAllData(List<Data> data) {
+    _data.addAll(data);
+    controller.dirty = true;
+  }
 
   ChartType get chartType => _chartType;
 
   AxisScale yAxis;
 
+  void clearData() {
+    _data.clear();
+    controller.dirty = true;
+  }
+
   void addDatum(Data datum) {
-    data.add(datum);
+    _data.add(datum);
+    controller.dirty = true;
 
     if (characteristics.fixedMaxY != null) {
       assert(
@@ -82,7 +96,9 @@ class Trace {
       yAxis = AxisScale(0, dataYMax, 30);
     }
 
-    if (datum.y > controller?.yMaxValue) controller?.yMaxValue = datum.y;
+    if (datum.y > controller?.yMaxValue) {
+      controller?.yMaxValue = datum.y;
+    }
 
     final traceIndex = controller.traceIndex(this);
 

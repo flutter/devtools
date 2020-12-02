@@ -17,11 +17,12 @@ import '../screen.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import '../utils.dart';
-import 'memory_chart.dart';
+import 'memory_android_chart.dart';
 import 'memory_controller.dart';
 import 'memory_events_pane.dart';
 import 'memory_heap_tree_view.dart';
 import 'memory_heap_treemap.dart';
+import 'memory_vm_chart.dart';
 
 /// Width of application when memory buttons loose their text.
 const _primaryControlsMinVerboseWidth = 1100.0;
@@ -92,6 +93,10 @@ class MemoryBodyState extends State<MemoryBody>
   @visibleForTesting
   static const androidChartButtonKey = Key('Android Chart');
 
+  EventChartController eventChartController;
+  VMChartController vmChartController;
+  AndroidChartController androidChartController;
+
   MemoryController controller;
   TabController tabController;
 
@@ -117,7 +122,12 @@ class MemoryBodyState extends State<MemoryBody>
 
     final newController = Provider.of<MemoryController>(context);
     if (newController == controller) return;
+
     controller = newController;
+
+    eventChartController = EventChartController(controller);
+    vmChartController = VMChartController(controller);
+    androidChartController = AndroidChartController(controller);
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
@@ -126,6 +136,14 @@ class MemoryBodyState extends State<MemoryBody>
         //              by Class or by Objects.
         // Create the snapshot data by Library.
         controller.createSnapshotByLibrary();
+      });
+    });
+
+    // Update the chart when the memorySource changes.
+    addAutoDisposeListener(controller.memorySourceNotifier, () {
+      setState(() {
+        controller.updatedMemorySource();
+        _refreshCharts();
       });
     });
 
@@ -138,6 +156,7 @@ class MemoryBodyState extends State<MemoryBody>
     addAutoDisposeListener(controller.androidChartVisibleNotifier, () {
       setState(() {
         if (controller.isLegendVisible) {
+          // Recompute the legend with the new traces now visible.
           hideLegend();
           showLegend(context);
         }
@@ -158,7 +177,6 @@ class MemoryBodyState extends State<MemoryBody>
     controller.memorySourcePrefix = mediaWidth > verboseDropDownMinimumWidth
         ? MemoryScreen.memorySourceMenuItemPrefix
         : '';
-
     return Column(
       children: [
         Row(
@@ -171,11 +189,17 @@ class MemoryBodyState extends State<MemoryBody>
         ),
         SizedBox(
           height: 50,
-          child: MemoryEventsPane(),
+          child: MemoryEventsPane(eventChartController),
         ),
         SizedBox(
-          child: MemoryChart(),
+          child: MemoryVMChart(vmChartController),
         ),
+        controller.isAndroidChartVisible
+            ? SizedBox(
+                height: defaultChartHeight,
+                child: MemoryAndroidChart(androidChartController),
+              )
+            : const SizedBox(),
         const SizedBox(height: defaultSpacing),
         Row(
           children: [
@@ -203,6 +227,25 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
+  void _refreshCharts() {
+    // Remove history of all plotted data in all charts.
+    eventChartController?.reset();
+    vmChartController?.reset();
+    androidChartController?.reset();
+
+    _recomputeChartData();
+  }
+
+  /// Recompute (attach data to the chart) for either live or offline data source.
+  void _recomputeChartData() {
+    eventChartController.setupData();
+    eventChartController.dirty = true;
+    vmChartController.setupData();
+    vmChartController.dirty = true;
+    androidChartController.setupData();
+    androidChartController.dirty = true;
+  }
+
   Widget _intervalDropdown(TextTheme textTheme) {
     final files = controller.memoryLog.offlineFiles();
 
@@ -212,21 +255,22 @@ class MemoryBodyState extends State<MemoryBody>
     final mediaWidth = MediaQuery.of(context).size.width;
     final isVerboseDropdown = mediaWidth > verboseDropDownMinimumWidth;
 
-    final _displayTypes = [
-      MemoryController.displayOneMinute,
-      MemoryController.displayFiveMinutes,
-      MemoryController.displayTenMinutes,
-      MemoryController.displayAllMinutes,
-    ].map<DropdownMenuItem<String>>(
+    final displayOneMinute =
+        chartDuration(ChartInterval.OneMinute).inMinutes.toString();
+
+    final _displayTypes = displayDurationsStrings.map<DropdownMenuItem<String>>(
       (
         String value,
       ) {
+        final unit = value == displayDefault || value == displayAll
+            ? ''
+            : 'Minute${value == displayOneMinute ? '' : 's'}';
+
         return DropdownMenuItem<String>(
           key: MemoryScreen.intervalMenuItem,
           value: value,
           child: Text(
-            '${isVerboseDropdown ? 'Display' : ''} $value '
-            'Minute${value == MemoryController.displayOneMinute ? '' : 's'}',
+            '${isVerboseDropdown ? 'Display' : ''} $value $unit',
             key: MemoryScreen.intervalKey,
           ),
         );
@@ -237,10 +281,15 @@ class MemoryBodyState extends State<MemoryBody>
       child: DropdownButton<String>(
         key: MemoryScreen.dropdownIntervalMenuButtonKey,
         style: textTheme.bodyText2,
-        value: controller.displayInterval,
+        value: displayDuration(controller.displayInterval),
         onChanged: (String newValue) {
           setState(() {
-            controller.displayInterval = newValue;
+            controller.displayInterval = chartInterval(newValue);
+            final duration = chartDuration(controller.displayInterval);
+
+            eventChartController?.zoomDuration = duration;
+            vmChartController?.zoomDuration = duration;
+            androidChartController?.zoomDuration = duration;
           });
         },
         items: _displayTypes,
@@ -352,7 +401,7 @@ class MemoryBodyState extends State<MemoryBody>
     return OutlineButton(
       key: androidChartButtonKey,
       onPressed: controller.isConnectedDeviceAndroid
-          ? _toggleAndroidChartVisibility
+          ? controller.toggleAndroidChartVisibility
           : null,
       child: MaterialIconLabel(
         controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
@@ -360,12 +409,6 @@ class MemoryBodyState extends State<MemoryBody>
         includeTextWidth: 900,
       ),
     );
-  }
-
-  void _toggleAndroidChartVisibility() {
-    setState(() {
-      controller.toggleAndroidChartVisibility();
-    });
   }
 
   Widget _buildMemoryControls(TextTheme textTheme) {
@@ -580,6 +623,11 @@ class MemoryBodyState extends State<MemoryBody>
     controller.classRoot = null;
     controller.topNode = null;
     controller.selectedSnapshotTimestamp = null;
+
+    // Remove history of all plotted data in all charts.
+    eventChartController?.reset();
+    vmChartController?.reset();
+    androidChartController?.reset();
   }
 
   Future<void> _gc() async {
