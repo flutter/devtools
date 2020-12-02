@@ -51,25 +51,23 @@ jobs:
           BOT: packages
         run: ./tool/travis.sh
 
-  # TODO(devoncarew): These bots are disabled due to persistent failures.
-  # https://github.com/flutter/devtools/pull/2460/checks?check_run_id=1330254613
-  # test:
-  #   name: test ${{ matrix.bot }}
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       bot:
-  #         - test_ddc
-  #         - test_dart2js
-  #   steps:
-  #     - name: git clone
-  #       uses: actions/checkout@v2
-  #     - name: tool/travis.sh
-  #       env:
-  #         BOT: ${{ matrix.bot }}
-  #         PLATFORM: vm
-  #       run: ./tool/travis.sh
+  test:
+    name: test ${{ matrix.bot }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - test_ddc
+          - test_dart2js
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/travis.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          PLATFORM: vm
+        run: ./tool/travis.sh
 
   integration:
     name: integration ${{ matrix.bot }}
