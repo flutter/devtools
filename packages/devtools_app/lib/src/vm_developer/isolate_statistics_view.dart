@@ -267,14 +267,15 @@ class TagStatisticsWidget extends StatelessWidget {
 }
 
 class _TagColumn extends ColumnData<VMTag> {
-  _TagColumn() : super('Tag');
+  _TagColumn() : super.wide('Tag');
 
   @override
   String getValue(VMTag dataObject) => dataObject.name;
 }
 
 class _PercentageColumn extends ColumnData<VMTag> {
-  _PercentageColumn() : super('Percentage', alignment: ColumnAlignment.right);
+  _PercentageColumn()
+      : super.wide('Percentage', alignment: ColumnAlignment.right);
 
   @override
   double getValue(VMTag dataObject) => dataObject.percentage;
@@ -326,21 +327,21 @@ class ThreadMemoryTable extends StatelessWidget {
 }
 
 class _IDColumn extends ColumnData<Thread> {
-  _IDColumn() : super('ID');
+  _IDColumn() : super.wide('ID');
 
   @override
   String getValue(Thread thread) => thread.id;
 }
 
 class _KindColumn extends ColumnData<Thread> {
-  _KindColumn() : super('Kind');
+  _KindColumn() : super.wide('Kind');
 
   @override
   String getValue(Thread thread) => thread.kind;
 }
 
 class _HighWatermarkColumn extends ColumnData<Thread> {
-  _HighWatermarkColumn() : super('Max Zone Capacity');
+  _HighWatermarkColumn() : super.wide('Max Zone Capacity');
 
   @override
   int getValue(Thread thread) => thread.zoneHighWatermark;
@@ -353,7 +354,7 @@ class _HighWatermarkColumn extends ColumnData<Thread> {
 }
 
 class _ZoneCapacityColumn extends ColumnData<Thread> {
-  _ZoneCapacityColumn() : super('Current Zone Capacity');
+  _ZoneCapacityColumn() : super.wide('Current Zone Capacity');
 
   @override
   int getValue(Thread thread) => thread.zoneCapacity;
@@ -366,14 +367,14 @@ class _ZoneCapacityColumn extends ColumnData<Thread> {
 }
 
 class _PortIDColumn extends ColumnData<InstanceRef> {
-  _PortIDColumn() : super('ID');
+  _PortIDColumn() : super.wide('ID');
 
   @override
   String getValue(InstanceRef port) => port.portId.toString();
 }
 
 class _PortNameColumn extends ColumnData<InstanceRef> {
-  _PortNameColumn() : super('Name');
+  _PortNameColumn() : super.wide('Name');
 
   @override
   String getValue(InstanceRef port) =>
@@ -381,7 +382,7 @@ class _PortNameColumn extends ColumnData<InstanceRef> {
 }
 
 class _StackTraceViewerFrameColumn extends ColumnData<String> {
-  _StackTraceViewerFrameColumn() : super('Frame');
+  _StackTraceViewerFrameColumn() : super.wide('Frame');
 
   @override
   String getValue(String frame) => frame;
@@ -507,7 +508,7 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
 }
 
 class _ServiceExtensionNameColumn extends ColumnData<String> {
-  _ServiceExtensionNameColumn() : super('Name');
+  _ServiceExtensionNameColumn() : super.wide('Name');
 
   @override
   String getValue(String s) => s;
