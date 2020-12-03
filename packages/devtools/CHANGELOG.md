@@ -1,3 +1,23 @@
+## 0.9.5
+* Add padding between columns and add minWidth for flexible columns. [#2526](https://github.com/flutter/devtools/pull/2526)
+* Fix import bug. [#2528](https://github.com/flutter/devtools/pull/2528)
+* Support loading app size files from query parameters and local storage [#2510](https://github.com/flutter/devtools/pull/2510)
+* Remove use of mp_flutterchart and use new charting subsystem. [#2517](https://github.com/flutter/devtools/pull/2517)
+* Fix null error in service manager [#2515](https://github.com/flutter/devtools/pull/2515)
+* Expose information about oversized images [#2509](https://github.com/flutter/devtools/pull/2509)
+* Fix race condition in service_manager. [#2501](https://github.com/flutter/devtools/pull/2501)
+* Url and query param parsing cleanup [#2502](https://github.com/flutter/devtools/pull/2502)
+* Add CenteredCircularProgressIndicator helper widget. [#2508](https://github.com/flutter/devtools/pull/2508)
+* Add search and filter to the logging page; refactor filter code [#2493](https://github.com/flutter/devtools/pull/2493)
+* Add a lower bound sdk constraint [#2511](https://github.com/flutter/devtools/pull/2511)
+* New chart [#2498](https://github.com/flutter/devtools/pull/2498)
+* Run pub upgrade and update VMService wrapper. [#2496](https://github.com/flutter/devtools/pull/2496)
+* Restore socket profiling state after hot restart [#2481](https://github.com/flutter/devtools/pull/248)
+* Add vm service connection info and option to connect to a new app [#2484](https://github.com/flutter/devtools/pull/2484)
+* Add selection styling to Logs table [#2485](https://github.com/flutter/devtools/pull/2485)
+* Add support for hide=debugger [#2487](https://github.com/flutter/devtools/pull/2487)
+* Don't reuse embedded windows in launchDevTools [#2489](https://github.com/flutter/devtools/pull/2489)
+
 ## 0.9.4
 * Fix NPE in VM flags table [#2472](https://github.com/flutter/devtools/pull/2472)
 * Color failed network requests with red status codes [#2466](https://github.com/flutter/devtools/pull/2466)
