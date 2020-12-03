@@ -4,6 +4,7 @@
 
 import 'core/message_bus.dart';
 import 'framework_controller.dart';
+import 'preferences.dart';
 import 'service_manager.dart';
 import 'storage.dart';
 import 'survey.dart';
@@ -27,6 +28,8 @@ FrameworkController get frameworkController => globals[FrameworkController];
 Storage get storage => globals[Storage];
 
 SurveyService get surveyService => globals[SurveyService];
+
+PreferencesController get preferences => globals[PreferencesController];
 
 void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;
