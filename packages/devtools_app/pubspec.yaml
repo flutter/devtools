@@ -18,7 +18,9 @@ environment:
   flutter: '>=1.10.0'
 
 dependencies:
-  ansicolor: ^1.0.2
+  # Pin ansicolor to version before pre-NNBD version 1.1.0, should be ^1.0.5
+  # See https://github.com/flutter/devtools/issues/2530 
+  ansicolor: 1.0.5
   ansi_up:
     ^0.0.2
 #     path: ../../third_party/packages/ansi_up
