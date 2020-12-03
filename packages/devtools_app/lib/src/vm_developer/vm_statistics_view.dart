@@ -197,21 +197,21 @@ class ProcessStatisticsWidget extends StatelessWidget {
 }
 
 class _IsolateNameColumn extends ColumnData<Isolate> {
-  _IsolateNameColumn() : super('Name');
+  _IsolateNameColumn() : super.wide('Name');
 
   @override
   String getValue(Isolate i) => i.name;
 }
 
 class _IsolateIDColumn extends ColumnData<Isolate> {
-  _IsolateIDColumn() : super('ID');
+  _IsolateIDColumn() : super.wide('ID');
 
   @override
   String getValue(Isolate i) => i.number;
 }
 
 abstract class _IsolateMemoryColumn extends ColumnData<Isolate> {
-  _IsolateMemoryColumn(String title) : super(title);
+  _IsolateMemoryColumn(String title) : super.wide(title);
 
   int getCapacity(Isolate i);
   int getUsage(Isolate i);
