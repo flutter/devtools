@@ -1202,7 +1202,11 @@ class _LibraryRefColumn extends TreeColumnData<Reference> {
 
 class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
   _ClassOrInstanceCountColumn()
-      : super('Count', alignment: ColumnAlignment.right, fixedWidthPx: 75.0);
+      : super(
+          'Count',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: 75.0,
+        );
 
   @override
   dynamic getValue(Reference dataObject) {
@@ -1296,7 +1300,11 @@ class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
 
 class _ShallowSizeColumn extends ColumnData<Reference> {
   _ShallowSizeColumn()
-      : super('Shallow', alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
+      : super(
+          'Shallow',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: 100.0,
+        );
 
   int sizeAllVisibleLibraries(List<Reference> references) {
     var sum = 0;
@@ -1414,8 +1422,11 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
 
 class _RetainedSizeColumn extends ColumnData<Reference> {
   _RetainedSizeColumn()
-      : super('Retained',
-            alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
+      : super(
+          'Retained',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: 100.0,
+        );
 
   @override
   dynamic getValue(Reference dataObject) {

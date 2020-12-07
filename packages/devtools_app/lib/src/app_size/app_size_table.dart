@@ -78,7 +78,11 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
 
 class _SizeColumn extends ColumnData<TreemapNode> {
   _SizeColumn()
-      : super('Size', alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
+      : super(
+          'Size',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: 100.0,
+        );
 
   @override
   dynamic getValue(TreemapNode dataObject) => dataObject.byteSize;
@@ -105,8 +109,11 @@ class _SizeColumn extends ColumnData<TreemapNode> {
 
 class _SizePercentageColumn extends ColumnData<TreemapNode> {
   _SizePercentageColumn({@required this.totalSize})
-      : super('% of Total Size',
-            alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
+      : super(
+          '% of Total Size',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: 100.0,
+        );
 
   final int totalSize;
 
@@ -179,7 +186,11 @@ class AppSizeDiffTable extends StatelessWidget {
 //                   other columns.
 class _DiffColumn extends ColumnData<TreemapNode> {
   _DiffColumn()
-      : super('Change', alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
+      : super(
+          'Change',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: 100.0,
+        );
 
   // Ensure sort by absolute size.
   @override

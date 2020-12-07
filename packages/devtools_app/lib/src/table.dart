@@ -126,31 +126,80 @@ class FlatTableState<T> extends State<FlatTable<T>>
     maxWidth -= widget.numSpacers * defaultSpacing;
     maxWidth = max(0, maxWidth);
 
-    final unconstrainedCount =
-        widget.columns.where((col) => col.fixedWidthPx == null).length;
-    double allocatedWidth = 0;
+    double available = maxWidth;
+    // Columns sorted by increasing minWidth.
+    final sortedColumns = widget.columns.toList()
+      ..sort((a, b) {
+        if (a.minWidthPx != null && b.minWidthPx != null) {
+          return a.minWidthPx.compareTo(b.minWidthPx);
+        }
+        if (a.minWidthPx != null) return -1;
+        if (b.minWidthPx != null) return 1;
+        return 0;
+      });
+
     for (var col in widget.columns) {
       if (col.fixedWidthPx != null) {
-        allocatedWidth += col.fixedWidthPx;
-      } else {
-        if (col.minWidthPx != null) {
-          allocatedWidth += col.minWidthPx;
+        available -= col.fixedWidthPx;
+      } else if (col.minWidthPx != null) {
+        available -= col.minWidthPx;
+      }
+    }
+    available = max(available, 0);
+    int unconstrainedCount = 0;
+    for (var column in sortedColumns) {
+      if (column.fixedWidthPx == null && column.minWidthPx == null) {
+        unconstrainedCount++;
+      }
+    }
+
+    if (available > 0) {
+      // We need to find how many columns with minWidth constraints can actually
+      // be treated as unconstrained as their minWidth constraint is satisfied
+      // by the width given to all unconstrained columns.
+      // We use a greedy algorithm to accurately compute this by iterating
+      // through the columns from the smallest minWidth to largest minWidth
+      // incrementally adding columns where the minWidth constraint can be
+      // satisfied using the width given to unconstrained columns.
+      for (var column in sortedColumns) {
+        if (column.fixedWidthPx == null && column.minWidthPx != null) {
+          // Width of this column if it was not clamped to its min width.
+          // We add column.minWidthPx to the avaialable width because
+          // available is currently not considering the space reserved for this
+          // column's min width as available.
+          final widthIfUnconstrainedByMinWidth =
+              (available + column.minWidthPx) / (unconstrainedCount + 1);
+          if (widthIfUnconstrainedByMinWidth < column.minWidthPx) {
+            // We have found the first column that will have to be clamped to
+            // its min width.
+            break;
+          }
+          // As this column's width in the final layout is greater than its
+          // min width, we can treat it as unconstrained and give its min width
+          // back to the available pool.
+          unconstrainedCount++;
+          available += column.minWidthPx;
         }
       }
     }
-    final available = max(0, maxWidth - allocatedWidth);
-
+    final unconstrainedWidth =
+        unconstrainedCount > 0 ? available / unconstrainedCount : available;
+    int unconstrainedFound = 0;
     final widths = <double>[];
     for (ColumnData<T> column in widget.columns) {
       double width = column.fixedWidthPx;
       if (width == null) {
-        width = available / unconstrainedCount;
-        if (column.minWidthPx != null) {
-          width += column.minWidthPx;
+        if (column.minWidthPx != null &&
+            column.minWidthPx > unconstrainedWidth) {
+          width = column.minWidthPx;
+        } else {
+          width = unconstrainedWidth;
+          unconstrainedFound++;
         }
       }
       widths.add(width);
     }
+    assert(unconstrainedCount == unconstrainedFound);
     return widths;
   }
 

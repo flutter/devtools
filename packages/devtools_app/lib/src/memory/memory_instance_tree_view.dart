@@ -101,7 +101,11 @@ class _FieldTypeColumn extends TreeColumnData<FieldReference> {
 }
 
 class _FieldNameColumn extends ColumnData<FieldReference> {
-  _FieldNameColumn() : super('Name', fixedWidthPx: 150.0);
+  _FieldNameColumn()
+      : super(
+          'Name',
+          fixedWidthPx: 150.0,
+        );
 
   @override
   dynamic getValue(FieldReference dataObject) =>
@@ -123,7 +127,11 @@ class _FieldNameColumn extends ColumnData<FieldReference> {
 }
 
 class _FieldValueColumn extends ColumnData<FieldReference> {
-  _FieldValueColumn() : super('Value', fixedWidthPx: 250.0);
+  _FieldValueColumn()
+      : super(
+          'Value',
+          fixedWidthPx: 250.0,
+        );
 
   @override
   dynamic getValue(FieldReference dataObject) =>
