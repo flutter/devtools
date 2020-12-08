@@ -222,7 +222,7 @@ class ChartController extends DisposableController
 
   /// Label is displayed every N seconds, default is 20 seconds
   /// for live view.  See computeLabelInterval method.
-  int labelInterval = 20;
+  int labelInterval = labelsLiveSeconds;
 
   /// List of timestamps where a label is displayed.  First in the left-most
   /// label (which will eventually scroll out of view and be replaced).
@@ -297,6 +297,16 @@ class ChartController extends DisposableController
     dirty = true;
   }
 
+  /// Label rate unit in seconds. Default label every 20 seconds for live view.
+  static const labelsLiveSeconds = 20;
+  static const labelsFifteenSeconds = 15;
+  static const labelsThirtySeconds = 30;
+  static const labelsOneMinute = 60;
+  static const labelsTwoMinutes = 120;
+  static const labelsOneHour = 60 * 60;
+  static const labelsFourHours = 60 * 60 * 4;
+  static const labelsTwelveHours = 60 * 60 * 12;
+
   void computeLabelInterval() {
     if (zoomDuration == null && timestamps.isNotEmpty) {
       final firstDT = DateTime.fromMillisecondsSinceEpoch(timestamps.first);
@@ -306,34 +316,34 @@ class ChartController extends DisposableController
       if (totalHours == 0) {
         final totalMinutes = totalDuration.inMinutes;
         if (totalMinutes == 0) {
-          labelInterval = 30; // Every 30 seconds
+          labelInterval = labelsThirtySeconds;
         } else if (totalMinutes < 10) {
-          labelInterval = 60; // Every minute
+          labelInterval = labelsOneMinute;
         } else {
-          labelInterval = 120; // Every 2 minutes
+          labelInterval = labelsTwoMinutes;
         }
       } else if (totalHours > 0 && totalHours < 8) {
-        labelInterval = 60 * 60; // Every hour.
+        labelInterval = labelsOneHour;
       } else if (totalHours < 24) {
-        labelInterval = 60 * 60 * 4; // Every 4 hour.
+        labelInterval = labelsFourHours;
       } else {
-        labelInterval = 60 * 60 * 12; // Every 12 hours
+        labelInterval = labelsTwelveHours;
       }
     } else {
       final rangeInMinutes = zoomDuration?.inMinutes;
       if (rangeInMinutes == null) return;
       switch (rangeInMinutes) {
         case 0: // Live
-          labelInterval = 20;
+          labelInterval = labelsLiveSeconds;
           break;
-        case 1:
-          labelInterval = 15;
+        case 1: // 1 minute
+          labelInterval = labelsFifteenSeconds;
           break;
-        case 5:
-          labelInterval = 60;
+        case 5: // 5 minute
+          labelInterval = labelsOneMinute;
           break;
-        case 10:
-          labelInterval = 120;
+        case 10: // 10 minute
+          labelInterval = labelsTwoMinutes;
           break;
         default:
           assert(false, 'Unexpected Duration $rangeInMinutes');
