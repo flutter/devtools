@@ -25,11 +25,6 @@ String prettyTimestamp(
   return intl.DateFormat.Hms().format(timestampDT); // HH:mm:ss
 }
 
-/// Indexes into xAxisLabeledTimestamps.
-const leftLabelIndex = 0;
-const centerLabelIndex = 1;
-const rightLabelIndex = 2;
-
 ///_____________________________________________________________________
 ///
 ///                                       xPaddingRight
@@ -61,9 +56,15 @@ class ChartController extends DisposableController
     this.displayXLabels = true,
     this.displayYLabels = true,
     this.name,
+    List<int> sharedLabelsTimestamps,
   }) {
     // TODO(terry): Compute dynamically based on X-axis lables text height.
     bottomPadding = !displayXLabels ? 0.0 : 40.0;
+
+    if (sharedLabelsTimestamps != null) {
+      labelTimestamps = sharedLabelsTimestamps;
+      _labelsShared = true;
+    }
   }
 
   /// Used for debugging to determine which chart.
@@ -105,24 +106,6 @@ class ChartController extends DisposableController
 
   int getLabelTimestampByIndex(int index) => _xAxisLabeledTimestamps[index];
 
-  // TODO(terry): See TODO on _xAxisLabeledTimestamps.
-  int get leftLabelTimestamp => _xAxisLabeledTimestamps[leftLabelIndex];
-  set leftLabelTimestamp(int timestamp) {
-    _xAxisLabeledTimestamps[leftLabelIndex] = timestamp;
-  }
-
-  // TODO(terry): See TODO on _xAxisLabeledTimestamps.
-  int get centerLabelTimestamp => _xAxisLabeledTimestamps[centerLabelIndex];
-  set centerLabelTimestamp(int timestamp) {
-    _xAxisLabeledTimestamps[centerLabelIndex] = timestamp;
-  }
-
-  // TODO(terry): See TODO on _xAxisLabeledTimestamps.
-  int get rightLabelTimestamp => _xAxisLabeledTimestamps[rightLabelIndex];
-  set rightLabelTimestamp(int timestamp) {
-    _xAxisLabeledTimestamps[rightLabelIndex] = timestamp;
-  }
-
   /// If false displays top horizontal line of chart.
   final bool displayTopLine;
 
@@ -135,98 +118,6 @@ class ChartController extends DisposableController
   final bool displayXLabels;
 
   final bool displayYLabels;
-
-  Duration durationLabel;
-
-  // TODO(terry): Duration based on x-axis zoom factor (live, 5 min, 15 min, etc).
-  void computeDurationLabel() {
-    if (durationLabel == null && rightLabelTimestamp != null) {
-      final midTick = (visibleTicks / 2).truncate();
-      if (timestampsLength > visibleTicks) {
-        // Lots of collected data > visible ticks so compute the visible mid tick.
-        final midTimestamp = timestamps[timestampsLength - midTick];
-        final lastTimestamp = rightLabelTimestamp;
-        final midDT = DateTime.fromMillisecondsSinceEpoch(midTimestamp);
-        final lastDT = DateTime.fromMillisecondsSinceEpoch(lastTimestamp);
-        durationLabel = lastDT.difference(midDT);
-      } else if (timestampsLength > midTick) {
-        // Still collecting data when mid tick is collected compute the duration
-        // of the mid tick.
-        final midTimestamp = timestamps[midTick];
-        final lastTimestamp = rightLabelTimestamp;
-        final midDT = DateTime.fromMillisecondsSinceEpoch(midTimestamp);
-        final lastDT = DateTime.fromMillisecondsSinceEpoch(lastTimestamp);
-        durationLabel = midDT.difference(lastDT);
-      }
-    }
-  }
-
-  /// Used to compute incoming ticks.
-  /// @param refresh true rebuild all labels (probably zoom changed).
-  /// @param timestamp current timestamp received implies building all
-  /// parts of the x-axis labels.
-  void recomputeLabels({int timestamp, bool refresh = false}) {
-    // Chart not realized yet.
-    if (size == null) return;
-
-    if (refresh && timestamps.isNotEmpty) {
-      // Need the correct tickWidth based on current zoom.
-      computeChartArea();
-
-      // All labels need to be recomputed.
-      durationLabel = null;
-      _xAxisLabeledTimestamps.replaceRange(
-        0,
-        _xAxisLabeledTimestamps.length,
-        [null, null, null],
-      );
-
-      final midPt = (visibleTicks / 2).truncate();
-      if (timestampsLength > visibleTicks) {
-        leftLabelTimestamp = timestamps[timestampsLength - visibleTicks + 10];
-        centerLabelTimestamp = timestamps[timestampsLength - midPt];
-        rightLabelTimestamp = timestamps.last;
-      } else if (timestampsLength > midPt) {
-        centerLabelTimestamp = timestamps[timestampsLength - midPt];
-        rightLabelTimestamp = timestamps.last;
-      } else if (timestamps.isNotEmpty) {
-        rightLabelTimestamp = timestamps.first;
-      }
-      return;
-    }
-
-    if (durationLabel == null && rightLabelTimestamp == null) {
-      // No center label so start first label (right-side).
-      rightLabelTimestamp = timestamp;
-    } else if (durationLabel != null && centerLabelTimestamp == null) {
-      // Need a center label are we at the duration we want for the
-      // next tick label?
-      final rightDT = DateTime.fromMillisecondsSinceEpoch(rightLabelTimestamp);
-      final currentDT = DateTime.fromMillisecondsSinceEpoch(timestamp);
-      if (currentDT.difference(rightDT).inSeconds >= durationLabel.inSeconds) {
-        slideLabelsLeft();
-        rightLabelTimestamp = timestamp;
-      }
-    } else if (durationLabel != null && leftLabelTimestamp == null) {
-      // Need a left label are we at the duration we want for the
-      // next tick label?
-      final rightDT = DateTime.fromMillisecondsSinceEpoch(rightLabelTimestamp);
-      final currentDT = DateTime.fromMillisecondsSinceEpoch(timestamp);
-      if (currentDT.difference(rightDT).inSeconds >= durationLabel.inSeconds) {
-        slideLabelsLeft();
-        rightLabelTimestamp = timestamp;
-      }
-    }
-  }
-
-  void slideLabelsLeft() {
-    // Left-side out of visible range. Slide center and right labels to
-    // left-most and center. Need to eventually recompute right-most when
-    // duration gap is met.
-    leftLabelTimestamp = centerLabelTimestamp;
-    centerLabelTimestamp = rightLabelTimestamp;
-    rightLabelTimestamp = null;
-  }
 
   /// xCanvas coord for plotting data.
   double xCanvasChart;
@@ -329,6 +220,19 @@ class ChartController extends DisposableController
 
   bool get isZoomAll => _zoomDuration == null;
 
+  /// Label is displayed every N seconds, default is 20 seconds
+  /// for live view.  See computeLabelInterval method.
+  int labelInterval = 20;
+
+  /// List of timestamps where a label is displayed.  First in the left-most
+  /// label (which will eventually scroll out of view and be replaced).
+  var labelTimestamps = <int>[];
+
+  bool get isLabelsShared => _labelsShared;
+
+  /// If true signals that labels are compute from another controller.
+  var _labelsShared = false;
+
   void computeZoomRatio() {
     // Check if ready to start computations?
     if (size == null) return;
@@ -387,9 +291,118 @@ class ChartController extends DisposableController
     computeZoomRatio();
 
     // All tick labels need to be recompted.
-    recomputeLabels(refresh: true);
+    computeChartArea();
+    computeLabelInterval();
 
     dirty = true;
+  }
+
+  void computeLabelInterval() {
+    if (zoomDuration == null && timestamps.isNotEmpty) {
+      final firstDT = DateTime.fromMillisecondsSinceEpoch(timestamps.first);
+      final lastDT = DateTime.fromMillisecondsSinceEpoch(timestamps.last);
+      final totalDuration = lastDT.difference(firstDT);
+      final totalHours = totalDuration.inHours;
+      if (totalHours == 0) {
+        final totalMinutes = totalDuration.inMinutes;
+        if (totalMinutes == 0) {
+          labelInterval = 30; // Every 30 seconds
+        } else if (totalMinutes < 10) {
+          labelInterval = 60; // Every minute
+        } else {
+          labelInterval = 120; // Every 2 minutes
+        }
+      } else if (totalHours > 0 && totalHours < 8) {
+        labelInterval = 60 * 60; // Every hour.
+      } else if (totalHours < 24) {
+        labelInterval = 60 * 60 * 4; // Every 4 hour.
+      } else {
+        labelInterval = 60 * 60 * 12; // Every 12 hours
+      }
+    } else {
+      final rangeInMinutes = zoomDuration?.inMinutes;
+      if (rangeInMinutes == null) return;
+      switch (rangeInMinutes) {
+        case 0: // Live
+          labelInterval = 20;
+          break;
+        case 1:
+          labelInterval = 15;
+          break;
+        case 5:
+          labelInterval = 60;
+          break;
+        case 10:
+          labelInterval = 120;
+          break;
+        default:
+          assert(false, 'Unexpected Duration $rangeInMinutes');
+      }
+    }
+
+    buildLabelTimestamps(refresh: true);
+  }
+
+  void buildLabelTimestamps({refresh = false}) {
+    if (isLabelsShared || timestamps.isEmpty) return;
+
+    if (refresh) {
+      labelTimestamps.clear();
+      final leftMostTimestamp = leftMostVisibleTimestampIndex;
+      final lastTimestamp = timestamps[leftMostTimestamp];
+      labelTimestamps.add(lastTimestamp);
+      var lastLabelDT = DateTime.fromMillisecondsSinceEpoch(lastTimestamp);
+      for (var index = leftMostTimestamp; index < timestampsLength; index++) {
+        final currentTimestamp = timestamps[index];
+        final currentDT = DateTime.fromMillisecondsSinceEpoch(currentTimestamp);
+        if (currentDT.difference(lastLabelDT).inSeconds >= labelInterval) {
+          labelTimestamps.add(currentTimestamp);
+          lastLabelDT = currentDT;
+        }
+      }
+
+      return;
+    }
+
+    if (labelTimestamps.isEmpty) {
+      labelTimestamps.add(timestamps.last);
+    } else {
+      // Check left label is it out of range?
+      final leftEdge = leftMostVisibleTimestampIndex;
+      if (labelTimestamps.first < timestamps[leftEdge]) {
+        // Label is outside of visible range, remove the left label.
+        labelTimestamps.removeAt(0);
+      }
+    }
+
+    if (labelTimestamps.isEmpty) return;
+
+    final rightLabelTimestamp = labelTimestamps.last;
+    final rightMostLableDT =
+        DateTime.fromMillisecondsSinceEpoch(rightLabelTimestamp);
+    final rightMostTimestampDT =
+        DateTime.fromMillisecondsSinceEpoch(timestamps.last);
+
+    final nSeconds =
+        rightMostTimestampDT.difference(rightMostLableDT).inSeconds;
+
+    if (nSeconds >= labelInterval) {
+      int foundTimestamp;
+      if (nSeconds == labelInterval) {
+        foundTimestamp = timestamps.last;
+      } else {
+        // Find the interval that's closest to the next interval.
+        final startIndex = timestamps.indexOf(rightLabelTimestamp);
+        for (var index = startIndex; index < timestampsLength; index++) {
+          foundTimestamp = timestamps[index];
+          final nextDT = DateTime.fromMillisecondsSinceEpoch(foundTimestamp);
+          final secsDiff = nextDT.difference(rightMostTimestampDT).inSeconds;
+          if (secsDiff >= labelInterval) break;
+        }
+      }
+      assert(foundTimestamp != null);
+      labelTimestamps.add(foundTimestamp);
+    }
   }
 
   /// Clear all data in the chart.
@@ -398,6 +411,7 @@ class ChartController extends DisposableController
       trace.clearData();
     }
     timestampsClear();
+    labelTimestamps.clear();
   }
 
   /// Override to load data from another source e.g., live, offline, etc.
@@ -493,15 +507,23 @@ class ChartController extends DisposableController
     return -1;
   }
 
+  /// Return timestamps index of the left most visible datum.
+  int get leftMostVisibleTimestampIndex {
+    var index = 0;
+    if (timestampsLength > numberOfVisibleXAxisTicks) {
+      index = timestampsLength - numberOfVisibleXAxisTicks;
+    }
+
+    return index;
+  }
+
   /// X coordinate of left most visible datum. The timestampXCanvasCoord
   /// returns a zero based X-coord this X-coord must be translated by the
   /// value of this getter.
   double get xCoordLeftMostVisibleTimestamp {
     double indexOffset = xCanvasChart;
-    final totalTimestamps = timestampsLength;
-    final visibleCount = numberOfVisibleXAxisTicks;
-    if (totalTimestamps < visibleCount) {
-      final startIndex = visibleCount - totalTimestamps;
+    if (timestampsLength < numberOfVisibleXAxisTicks) {
+      final startIndex = numberOfVisibleXAxisTicks - timestampsLength;
       indexOffset += startIndex * tickWidth;
     }
 

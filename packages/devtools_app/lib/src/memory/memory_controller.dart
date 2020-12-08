@@ -52,7 +52,7 @@ enum ChartInterval {
 
 /// Duration for each ChartInterval.
 const displayDurations = <Duration>[
-  Duration(), // ChartInterval.Default
+  Duration.zero, // ChartInterval.Default
   Duration(minutes: 1), // ChartInterval.OneMinute
   Duration(minutes: 5), // ChartInterval.FiveMinutes
   Duration(minutes: 10), // ChartInterval.TenMinutes

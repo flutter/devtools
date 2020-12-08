@@ -281,28 +281,43 @@ void main() {
           validateScaledYLabels(controller);
 
           // Validate the x-axis labels.
-          expect(controller.leftLabelTimestamp, isNotNull);
-          expect(controller.centerLabelTimestamp, isNotNull);
-          expect(controller.rightLabelTimestamp, isNotNull);
-          expect(controller.leftLabelTimestamp, equals(1595682514316));
-          expect(controller.centerLabelTimestamp, equals(1595682534381));
-          expect(controller.rightLabelTimestamp, equals(1595682556248));
+          expect(controller.labelTimestamps.length, equals(3));
+          expect(controller.labelTimestamps[0], equals(1595682513450));
+          expect(controller.labelTimestamps[1], equals(1595682533744));
+          expect(controller.labelTimestamps[2], equals(1595682553811));
 
           // Validate using UTC timezone.
           expect(
-            prettyTimestamp(controller.leftLabelTimestamp, isUtc: true),
-            equals('13:08:34'),
+            prettyTimestamp(controller.labelTimestamps[0], isUtc: true),
+            equals('13:08:33'),
           );
           expect(
-            prettyTimestamp(controller.centerLabelTimestamp, isUtc: true),
-            equals('13:08:54'),
+            prettyTimestamp(controller.labelTimestamps[1], isUtc: true),
+            equals('13:08:53'),
           );
           expect(
-            prettyTimestamp(controller.rightLabelTimestamp, isUtc: true),
-            equals('13:09:16'),
+            prettyTimestamp(controller.labelTimestamps[2], isUtc: true),
+            equals('13:09:13'),
           );
         },
       );
+
+      void checkScaledXAxis2Labels(ChartController controller) {
+        // Validate the x-axis labels.
+        expect(controller.labelTimestamps.length, equals(2));
+        expect(controller.labelTimestamps[0], equals(1595682492441));
+        expect(controller.labelTimestamps[1], equals(1595682552535));
+
+        // Validate using UTC timezone.
+        expect(
+          prettyTimestamp(controller.labelTimestamps[0], isUtc: true),
+          equals('13:08:12'),
+        );
+        expect(
+          prettyTimestamp(controller.labelTimestamps[1], isUtc: true),
+          equals('13:09:12'),
+        );
+      }
 
       testWidgetsWithWindowSize('Scaled Y-axis all', windowSize,
           (WidgetTester tester) async {
@@ -340,27 +355,7 @@ void main() {
 
         validateScaledYLabels(controller);
 
-        // Validate the x-axis labels.
-        expect(controller.leftLabelTimestamp, isNotNull);
-        expect(controller.centerLabelTimestamp, isNotNull);
-        expect(controller.rightLabelTimestamp, isNotNull);
-        expect(controller.leftLabelTimestamp, equals(1595682525980));
-        expect(controller.centerLabelTimestamp, equals(1595682556248));
-        expect(controller.rightLabelTimestamp, equals(1595682556248));
-
-        // Validate to UTC timezone.
-        expect(
-          prettyTimestamp(controller.leftLabelTimestamp, isUtc: true),
-          equals('13:08:45'),
-        );
-        expect(
-          prettyTimestamp(controller.centerLabelTimestamp, isUtc: true),
-          equals('13:09:16'),
-        );
-        expect(
-          prettyTimestamp(controller.rightLabelTimestamp, isUtc: true),
-          equals('13:09:16'),
-        );
+        checkScaledXAxis2Labels(controller);
       });
 
       testWidgetsWithWindowSize('Scaled Y-axis Five Minutes', windowSize,
@@ -399,17 +394,7 @@ void main() {
 
         validateScaledYLabels(controller);
 
-        // Validate the x-axis labels.
-        expect(controller.leftLabelTimestamp, isNull);
-        expect(controller.centerLabelTimestamp, isNull);
-        expect(controller.rightLabelTimestamp, isNotNull);
-        expect(controller.rightLabelTimestamp, equals(1595682492441));
-
-        // Validate to UTC timezone.
-        expect(
-          prettyTimestamp(controller.rightLabelTimestamp, isUtc: true),
-          equals('13:08:12'),
-        );
+        checkScaledXAxis2Labels(controller);
       });
 
       ///////////////////////////////////////////////////////////////////////////
@@ -682,28 +667,43 @@ void main() {
           }
 
           // Validate the x-axis labels.
-          expect(controller.leftLabelTimestamp, isNotNull);
-          expect(controller.centerLabelTimestamp, isNotNull);
-          expect(controller.rightLabelTimestamp, isNotNull);
-          expect(controller.leftLabelTimestamp, equals(1595682514316));
-          expect(controller.centerLabelTimestamp, equals(1595682534381));
-          expect(controller.rightLabelTimestamp, equals(1595682556248));
+          expect(controller.labelTimestamps.length, equals(3));
+          expect(controller.labelTimestamps[0], equals(1595682513450));
+          expect(controller.labelTimestamps[1], equals(1595682533744));
+          expect(controller.labelTimestamps[2], equals(1595682553811));
 
-          // Validate to UTC timezone.
+          // Validate using UTC timezone.
           expect(
-            prettyTimestamp(controller.leftLabelTimestamp, isUtc: true),
-            equals('13:08:34'),
+            prettyTimestamp(controller.labelTimestamps[0], isUtc: true),
+            equals('13:08:33'),
           );
           expect(
-            prettyTimestamp(controller.centerLabelTimestamp, isUtc: true),
-            equals('13:08:54'),
+            prettyTimestamp(controller.labelTimestamps[1], isUtc: true),
+            equals('13:08:53'),
           );
           expect(
-            prettyTimestamp(controller.rightLabelTimestamp, isUtc: true),
-            equals('13:09:16'),
+            prettyTimestamp(controller.labelTimestamps[2], isUtc: true),
+            equals('13:09:13'),
           );
         },
       );
+
+      void checkFixedXAxis2Labels(ChartController controller) {
+        // Validate the x-axis labels.
+        expect(controller.labelTimestamps.length, equals(2));
+        expect(controller.labelTimestamps[0], equals(1595682492441));
+        expect(controller.labelTimestamps[1], equals(1595682552535));
+
+        // Validate using UTC timezone.
+        expect(
+          prettyTimestamp(controller.labelTimestamps[0], isUtc: true),
+          equals('13:08:12'),
+        );
+        expect(
+          prettyTimestamp(controller.labelTimestamps[1], isUtc: true),
+          equals('13:09:12'),
+        );
+      }
 
       testWidgetsWithWindowSize('Fixed Y-axis all', windowSize,
           (WidgetTester tester) async {
@@ -754,27 +754,7 @@ void main() {
           expect(labelName, expectedLabels[labelIndex.toInt()]);
         }
 
-        // Validate the x-axis labels.
-        expect(controller.leftLabelTimestamp, isNotNull);
-        expect(controller.centerLabelTimestamp, isNotNull);
-        expect(controller.rightLabelTimestamp, isNotNull);
-        expect(controller.leftLabelTimestamp, equals(1595682525980));
-        expect(controller.centerLabelTimestamp, equals(1595682556248));
-        expect(controller.rightLabelTimestamp, equals(1595682556248));
-
-        // Validate to UTC timezone.
-        expect(
-          prettyTimestamp(controller.leftLabelTimestamp, isUtc: true),
-          equals('13:08:45'),
-        );
-        expect(
-          prettyTimestamp(controller.centerLabelTimestamp, isUtc: true),
-          equals('13:09:16'),
-        );
-        expect(
-          prettyTimestamp(controller.rightLabelTimestamp, isUtc: true),
-          equals('13:09:16'),
-        );
+        checkFixedXAxis2Labels(controller);
       });
 
       testWidgetsWithWindowSize('Fixed Y-axis 5 Minutes', windowSize,
@@ -826,17 +806,7 @@ void main() {
           expect(labelName, expectedLabels[labelIndex.toInt()]);
         }
 
-        // Validate the x-axis labels.
-        expect(controller.leftLabelTimestamp, isNull);
-        expect(controller.centerLabelTimestamp, isNull);
-        expect(controller.rightLabelTimestamp, isNotNull);
-        expect(controller.rightLabelTimestamp, equals(1595682492441));
-
-        // Validate to UTC timezone.
-        expect(
-          prettyTimestamp(controller.rightLabelTimestamp, isUtc: true),
-          equals('13:08:12'),
-        );
+        checkFixedXAxis2Labels(controller);
       });
     },
   );
