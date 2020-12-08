@@ -20,7 +20,7 @@ class AndroidChartController extends ChartController {
       : super(
           displayTopLine: false,
           name: 'Android',
-          sharedLabelsTimestamps: sharedLabels,
+          sharedLabelimestamps: sharedLabels,
         );
 
   final MemoryController _memoryController;

@@ -56,13 +56,13 @@ class ChartController extends DisposableController
     this.displayXLabels = true,
     this.displayYLabels = true,
     this.name,
-    List<int> sharedLabelsTimestamps,
+    List<int> sharedLabelimestamps,
   }) {
     // TODO(terry): Compute dynamically based on X-axis lables text height.
     bottomPadding = !displayXLabels ? 0.0 : 40.0;
 
-    if (sharedLabelsTimestamps != null) {
-      labelTimestamps = sharedLabelsTimestamps;
+    if (sharedLabelimestamps != null) {
+      labelTimestamps = sharedLabelimestamps;
       _labelsShared = true;
     }
   }
