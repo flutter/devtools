@@ -164,11 +164,6 @@ class ChartPainter extends CustomPainter {
       },
     );
 
-    /// Number of minor ticks between major ticks.
-    const tickMarkInterval = 4;
-
-    int tickIndex = 0;
-
     /// Key is trace index and value is x,y point.
     final previousTracesData = <int, Point>{};
 
@@ -188,29 +183,9 @@ class ChartPainter extends CustomPainter {
 
     int xTickIndex = chartController.timestampsLength;
     while (--xTickIndex >= 0) {
-      // Hide left-side label when its ticks scrolls out.
-      final leftTimestamp = chartController.leftLabelTimestamp;
-      if (endVisibleIndex >= 0 &&
-          leftTimestamp != null &&
-          leftTimestamp < chartController.timestamps[endVisibleIndex]) {
-        chartController.leftLabelTimestamp = null;
-      }
-
-      // Make sure duration label has been computed.
-      chartController.computeDurationLabel();
-
       final currentTimestamp = chartController.timestamps[xTickIndex];
-      final xLabelIndex =
-          chartController.getLabeledIndexByTimestamp(currentTimestamp);
 
       if (xTickIndex < endVisibleIndex) {
-        // Has left label has slid out of visible range?
-        if (xLabelIndex == leftLabelIndex) {
-          // Yes, slide other labels left.
-          chartController.slideLabelsLeft();
-          chartController.rightLabelTimestamp = currentTimestamp;
-        }
-
         // Once outside of visible range of data skip the rest of the collected data.
         break;
       }
@@ -315,79 +290,44 @@ class ChartPainter extends CustomPainter {
 
       // Undo the clipRect at beginning of for loop.
       canvas.restore();
-
-      /////////////////////////////////////////////////////////////////////////
-      // Compute the ticks to label.
-      /////////////////////////////////////////////////////////////////////////
-
-      final minorTick = tickIndex++ < tickMarkInterval;
-
-      // Compute major tick labels
-      if (!minorTick) {
-        chartController.recomputeLabels(
-          timestamp: chartController.timestamps.last,
-        );
-      }
-
-      if (chartController.displayXAxis || chartController.displayXLabels)
-        // Y translation is below X-axis line.
-        drawTranslate(
-          canvas,
-          xTranslation,
-          chartController.zeroYPosition + 1,
-          (canvas) {
-            // Draw right-most tick label (first major tick).
-            drawXTick(
-              canvas,
-              currentTimestamp,
-              chartController.timestampXCanvasCoord(currentTimestamp),
-              axis,
-              shortTick: minorTick,
-            );
-          },
-        );
-
-      if (!minorTick) tickIndex = 0;
     }
 
-    if (chartController.displayXAxis || chartController.displayXLabels)
+    chartController.computeChartArea();
+    chartController.buildLabelTimestamps();
+
+    if (chartController.displayXAxis || chartController.displayXLabels) {
       // Y translation is below X-axis line.
       drawTranslate(
         canvas,
         xTranslation,
         chartController.zeroYPosition + 1,
         (canvas) {
-          // Draw the major labels.
-          for (var labelIndex = 0;
-              labelIndex < chartController.getLabelsCount();
-              labelIndex++) {
-            final timestamp =
-                chartController.getLabelTimestampByIndex(labelIndex);
-            if (timestamp != null) {
-              final xCoord = chartController.timestampXCanvasCoord(timestamp);
-              drawXTick(canvas, timestamp, xCoord, axis, displayTime: true);
-            }
+          // Draw the X-axis labels.
+          for (var timestamp in chartController.labelTimestamps) {
+            final xCoord = chartController.timestampXCanvasCoord(timestamp);
+            drawXTick(canvas, timestamp, xCoord, axis, displayTime: true);
           }
         },
       );
 
-    // X translation is left-most edge of chart widget.
-    drawTranslate(
-      canvas,
-      chartController.xCanvasChart,
-      yTranslation,
-      (canvas) {
-        // Rescale Y-axis to max visible Y range.
-        chartController.resetYMaxValue(visibleYMax);
+      // X translation is left-most edge of chart widget.
+      drawTranslate(
+        canvas,
+        chartController.xCanvasChart,
+        yTranslation,
+        (canvas) {
+          // Rescale Y-axis to max visible Y range.
+          chartController.resetYMaxValue(visibleYMax);
 
-        // Draw Y-axis ticks and labels.
-        // TODO(terry): Optimization add a listener for Y-axis range changing
-        //              only need to redraw Y-axis if the range changed.
-        if (chartController.displayYLabels) {
-          drawYTicks(canvas, chartController, axis);
-        }
-      },
-    );
+          // Draw Y-axis ticks and labels.
+          // TODO(terry): Optimization add a listener for Y-axis range changing
+          //              only need to redraw Y-axis if the range changed.
+          if (chartController.displayYLabels) {
+            drawYTicks(canvas, chartController, axis);
+          }
+        },
+      );
+    }
 
     drawTitle(canvas, size, chartController.title);
 

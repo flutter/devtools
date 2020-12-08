@@ -16,10 +16,11 @@ import 'memory_controller.dart';
 import 'memory_timeline.dart';
 
 class AndroidChartController extends ChartController {
-  AndroidChartController(this._memoryController)
+  AndroidChartController(this._memoryController, {List<int> sharedLabels})
       : super(
           displayTopLine: false,
           name: 'Android',
+          sharedLabelimestamps: sharedLabels,
         );
 
   final MemoryController _memoryController;

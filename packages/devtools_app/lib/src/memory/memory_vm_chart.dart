@@ -67,6 +67,18 @@ class VMChartController extends ChartController {
 
     final rssValue = sample.rss.toDouble();
     addDataToTrace(TraceName.rSS.index, trace.Data(timestamp, rssValue));
+
+    final rasterLayerValue = sample.rasterCache.layerBytes.toDouble();
+    addDataToTrace(
+      TraceName.rasterLayer.index,
+      trace.Data(timestamp, rasterLayerValue),
+    );
+
+    final rasterPictureValue = sample.rasterCache.pictureBytes.toDouble();
+    addDataToTrace(
+      TraceName.rasterPicture.index,
+      trace.Data(timestamp, rasterPictureValue),
+    );
   }
 
   void addDataToTrace(int traceIndex, trace.Data data) {
@@ -90,6 +102,8 @@ enum TraceName {
   used,
   capacity,
   rSS,
+  rasterLayer,
+  rasterPicture,
 }
 
 class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
@@ -149,13 +163,12 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   }
 
   // TODO(terry): Move colors to theme?
-  final capacityColor = Colors.grey[400];
-  //static const usedColor = Color.fromARGB(255, 51, 181, 229);
-  static const usedColor = Color(0xff33b5e5); // HoloBlue
+  static final capacityColor = Colors.grey[400];
+  static final externalColor = Colors.blue[400];
   static const rasterLayerColor = Color(0xff99cc00); // HoloGreenLight
-  static const rssColor = Color(0xffffbb33); // HoloOrangeLight
   static const rasterPictureColor = Color(0xffff4444); // HoloRedLight
-  static const externalColor = Color(0xff42a5f5); // Color.blue[400]
+  static const rssColor = Color(0xffffbb33); // HoloOrangeLight
+  static const usedColor = Color(0xff33b5e5); // HoloBlue
 
   void setupTraces() {
     if (_chartController.traces.isNotEmpty) {
@@ -176,6 +189,14 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
       final rSSIndex = TraceName.rSS.index;
       assert(_chartController.trace(rSSIndex).name ==
           TraceName.values[rSSIndex].toString());
+
+      final rasterLayerIndex = TraceName.rasterLayer.index;
+      assert(_chartController.trace(rasterLayerIndex).name ==
+          TraceName.values[rasterLayerIndex].toString());
+
+      final rasterPictureIndex = TraceName.rasterPicture.index;
+      assert(_chartController.trace(rasterPictureIndex).name ==
+          TraceName.values[rasterPictureIndex].toString());
 
       return;
     }
@@ -235,7 +256,31 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     assert(_chartController.trace(rSSIndex).name ==
         TraceName.values[rSSIndex].toString());
 
-    // TODO(terry): Add Raster Cache Picture and Layers traces.
+    final rasterLayerIndex = _chartController.createTrace(
+      trace.ChartType.line,
+      trace.PaintCharacteristics(
+        color: rasterLayerColor,
+        symbol: trace.ChartSymbol.disc,
+        strokeWidth: 2,
+      ),
+      name: TraceName.rasterLayer.toString(),
+    );
+    assert(rasterLayerIndex == TraceName.rasterLayer.index);
+    assert(_chartController.trace(rasterLayerIndex).name ==
+        TraceName.values[rasterLayerIndex].toString());
+
+    final rasterPictureIndex = _chartController.createTrace(
+      trace.ChartType.line,
+      trace.PaintCharacteristics(
+        color: rasterPictureColor,
+        symbol: trace.ChartSymbol.disc,
+        strokeWidth: 2,
+      ),
+      name: TraceName.rasterPicture.toString(),
+    );
+    assert(rasterPictureIndex == TraceName.rasterPicture.index);
+    assert(_chartController.trace(rasterPictureIndex).name ==
+        TraceName.values[rasterPictureIndex].toString());
 
     assert(_chartController.traces.length == TraceName.values.length);
   }
