@@ -163,8 +163,8 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   }
 
   // TODO(terry): Move colors to theme?
-  final capacityColor = Colors.grey[400];
-  static const externalColor = Color(0xff42a5f5); // Color.blue[400]
+  static final capacityColor = Colors.grey[400];
+  static final externalColor = Colors.blue[400];
   static const rasterLayerColor = Color(0xff99cc00); // HoloGreenLight
   static const rasterPictureColor = Color(0xffff4444); // HoloRedLight
   static const rssColor = Color(0xffffbb33); // HoloOrangeLight

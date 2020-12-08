@@ -379,6 +379,8 @@ class ChartController extends DisposableController
     } else {
       // Check left label is it out of range?
       final leftEdge = leftMostVisibleTimestampIndex;
+      // TODO(terry): Need to insure that more than one label may not be
+      //              visible e.g., when panning the chart.
       if (labelTimestamps.first < timestamps[leftEdge]) {
         // Label is outside of visible range, remove the left label.
         labelTimestamps.removeAt(0);
