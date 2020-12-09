@@ -1,3 +1,6 @@
+## 0.9.6-dev
+* Support truncated frames with a corresponding `SHOW ALL` button.
+
 ## 0.9.5
 * Add padding between columns and add minWidth for flexible columns. [#2526](https://github.com/flutter/devtools/pull/2526)
 * Fix import bug. [#2528](https://github.com/flutter/devtools/pull/2528)
