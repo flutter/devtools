@@ -278,6 +278,18 @@ class InspectorController extends DisposableController
     return true;
   }
 
+  InspectorTreeNode findMatchingInspectorTreeNodeByRefId(String refId) {
+    final matchingInspectorInstanceRef =
+        valueToInspectorTreeNode.keys.firstWhere(
+      (valueRef) => valueRef.id == refId,
+      orElse: () => null,
+    );
+    if (matchingInspectorInstanceRef != null) {
+      return valueToInspectorTreeNode[matchingInspectorInstanceRef];
+    }
+    return null;
+  }
+
   InspectorTreeNode findMatchingInspectorTreeNode(RemoteDiagnosticsNode node) {
     if (node?.valueRef == null) {
       return null;
