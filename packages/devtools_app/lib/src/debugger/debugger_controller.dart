@@ -1175,7 +1175,7 @@ class EvalHistory {
 }
 
 class _StackInfo {
+  _StackInfo(this.frames, this.truncated);
   final List<StackFrameAndSourcePosition> frames;
   final bool truncated;
-  _StackInfo(this.frames, this.truncated);
 }
