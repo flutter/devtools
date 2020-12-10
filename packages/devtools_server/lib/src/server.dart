@@ -30,6 +30,8 @@ const argHelp = 'help';
 const argVmUri = 'vm-uri';
 const argEnableNotifications = 'enable-notifications';
 const argAllowEmbedding = 'allow-embedding';
+const argAppSizeBase = 'appSizeBase';
+const argAppSizeTest = 'appSizeTest';
 const argHeadlessMode = 'headless';
 const argDebugMode = 'debug';
 const argLaunchBrowser = 'launch-browser';
@@ -90,6 +92,8 @@ Future<void> _serveDevToolsWithArgs(
       : defaultTryPorts;
   final bool verboseMode = args[argVerbose];
   final String hostname = args[argHost];
+  final String appSizeBase = args[argAppSizeBase];
+  final String appSizeTest = args[argAppSizeTest];
 
   if (help) {
     print('Dart DevTools version ${await _getVersion()}');
@@ -132,6 +136,8 @@ Future<void> _serveDevToolsWithArgs(
     profileFilename: profileFilename,
     verboseMode: verboseMode,
     hostname: hostname,
+    appSizeBase: appSizeBase,
+    appSizeTest: appSizeTest,
   );
 }
 
@@ -155,6 +161,8 @@ Future<HttpServer> serveDevTools({
   shelf.Handler handler,
   String serviceProtocolUri,
   String profileFilename,
+  String appSizeBase,
+  String appSizeTest,
 }) async {
   hostname ??= 'localhost';
 
@@ -208,12 +216,27 @@ Future<HttpServer> serveDevTools({
           _normalizeVmServiceUri(serviceProtocolUri).toString();
     }
 
-    String url = devToolsUrl.toString();
-    // If serviceProtocolUri != null, add it to the url.
-    if (serviceProtocolUri != null) {
-      url = Uri.parse(devToolsUrl).replace(queryParameters: {
-        'uri': serviceProtocolUri,
-      }).toString();
+    final queryParameters = {
+      if (serviceProtocolUri != null) 'uri': serviceProtocolUri,
+      if (appSizeBase != null) 'appSizeBase': appSizeBase,
+      if (appSizeTest != null) 'appSizeTest': appSizeTest,
+    };
+    String url = Uri.parse(devToolsUrl)
+        .replace(queryParameters: queryParameters)
+        .toString();
+
+    // If app size parameters are present, open to the standalone `appsize`
+    // page, regardless if there is a vm service uri specified. We only check
+    // for the presence of [appSizeBase] here because [appSizeTest] may or may
+    // not be specified (it should only be present for diffs). If [appSizeTest]
+    // is present without [appSizeBase], we will ignore the parameter.
+    if (appSizeBase != null) {
+      final startQueryParamIndex = url.indexOf('?');
+      if (startQueryParamIndex != -1) {
+        url = '${url.substring(0, startQueryParamIndex)}'
+            '/#/appsize'
+            '${url.substring(startQueryParamIndex)}';
+      }
     }
 
     try {
@@ -493,6 +516,20 @@ ArgParser _createArgsParser(bool verbose) {
     ..addOption(
       argProfileMemoryOld,
       defaultsTo: 'memory_samples.json',
+      hide: true,
+    )
+    ..addOption(
+      argAppSizeBase,
+      valueHelp: 'appSizeBase',
+      help: 'Path to the base app size file used for app size debugging.',
+      hide: true,
+    )
+    ..addOption(
+      argAppSizeTest,
+      valueHelp: 'appSizeTest',
+      help: 'Path to the test app size file used for app size debugging. This '
+          'file should only be specified if a base app size file (appSizeBase) '
+          'is also specified.',
       hide: true,
     );
 
