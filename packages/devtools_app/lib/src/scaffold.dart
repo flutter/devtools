@@ -293,6 +293,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
     ];
 
+    // TODO(issues/2547) - Remove.
+    // ignore: deprecated_member_use
     return ValueListenableProvider.value(
       value: _currentScreen,
       child: Provider<BannerMessagesController>(
