@@ -33,11 +33,11 @@ class _CallStackState extends State<CallStack> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<StackFrameAndSourcePosition>>(
-        valueListenable: controller.stackFramesWithLocation,
-        builder: (context, stackFrames, _) {
-          return Column(children: [
-            Expanded(
+    return Column(children: [
+      ValueListenableBuilder<List<StackFrameAndSourcePosition>>(
+          valueListenable: controller.stackFramesWithLocation,
+          builder: (context, stackFrames, _) {
+            return Expanded(
                 child: ValueListenableBuilder<StackFrameAndSourcePosition>(
               valueListenable: controller.selectedStackFrame,
               builder: (context, selectedFrame, _) {
@@ -50,14 +50,20 @@ class _CallStackState extends State<CallStack> {
                   },
                 );
               },
-            )),
-            if (controller.hasTruncatedFrames)
-              FlatButton(
+            ));
+          }),
+      ValueListenableBuilder<bool>(
+          valueListenable: controller.hasTruncatedFrames,
+          builder: (_, hasTruncatedFrames, __) {
+            if (hasTruncatedFrames) {
+              return FlatButton(
                 onPressed: () => controller.getFullStack(),
                 child: const Text('SHOW ALL'),
-              )
-          ]);
-        });
+              );
+            }
+            return Container(height: 0, width: 0);
+          })
+    ]);
   }
 
   Widget _buildStackFrame(

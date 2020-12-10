@@ -569,8 +569,8 @@ class DebuggerController extends DisposableController
     }
   }
 
-  bool _hasTruncatedFrames = false;
-  bool get hasTruncatedFrames => _hasTruncatedFrames;
+  final _hasTruncatedFrames = ValueNotifier<bool>(false);
+  ValueListenable<bool> get hasTruncatedFrames => _hasTruncatedFrames;
 
   CancelableOperation<_StackInfo> _getStackOperation;
 
@@ -623,9 +623,10 @@ class DebuggerController extends DisposableController
 
   void _populateFrameInfo(List<StackFrameAndSourcePosition> frames,
       {bool truncated}) {
+    truncated ??= false;
     _log.log('populated frame info');
     _stackFramesWithLocation.value = frames;
-    _hasTruncatedFrames = truncated ??= false;
+    _hasTruncatedFrames.value = truncated;
     if (frames.isEmpty) {
       selectStackFrame(null);
     } else {
