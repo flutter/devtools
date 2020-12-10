@@ -160,10 +160,6 @@ class InspectorController extends DisposableController
   /// for now mainly to minimize risk.
   static const double refreshFramesPerSecond = 5.0;
 
-  final _treeNodeSelectedController = StreamController<void>.broadcast();
-
-  Stream<void> get onTreeNodeSelected => _treeNodeSelectedController.stream;
-
   final bool isSummaryTree;
 
   final VoidCallback onExpandCollapseSupported;
@@ -691,8 +687,6 @@ class InspectorController extends DisposableController
       if (!detailsSubtree) {
         inspectorTree.nodeChanged(selectedNode.parent);
       }
-    } else {
-      _treeNodeSelectedController.add(null);
     }
 
     selectedNode = newSelection;
