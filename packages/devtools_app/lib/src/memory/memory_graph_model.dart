@@ -120,7 +120,7 @@ HeapGraph convertHeapGraph(
 
   // Construct all the classes in the snapshot.
   final List<HeapGraphClassLive> classes =
-      List<HeapGraphClassLive>(graph.classes.length);
+      List<HeapGraphClassLive>.filled(graph.classes.length, null);
   for (int i = 0; i < graph.classes.length; i++) {
     final HeapSnapshotClass c = graph.classes[i];
 
@@ -148,7 +148,7 @@ HeapGraph convertHeapGraph(
 
   // Pre-allocate the number of objects in the snapshot.
   final List<HeapGraphElementLive> elements =
-      List<HeapGraphElementLive>(graph.objects.length);
+      List<HeapGraphElementLive>.filled(graph.objects.length, null);
 
   // Construct all objects.
   for (int i = 0; i < graph.objects.length; i++) {
@@ -188,7 +188,8 @@ HeapGraph convertHeapGraph(
   final snapshotExternals = graph.externalProperties;
 
   // Pre-allocate the number of external objects in the snapshot.
-  final externals = List<HeapGraphExternalLive>(snapshotExternals.length);
+  final externals =
+      List<HeapGraphExternalLive>.filled(snapshotExternals.length, null);
 
   // Construct all external objects and link to its live element.
   for (int index = 0; index < snapshotExternals.length; index++) {
