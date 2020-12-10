@@ -391,7 +391,6 @@ void main() {
       when(debuggerController.hasTruncatedFrames)
           .thenReturn(ValueNotifier(true));
       await pumpDebuggerScreen(tester, debuggerController);
-      // SHOW ALL when truncated
       expect(find.text('SHOW ALL'), findsOneWidget);
     });
 
@@ -401,7 +400,6 @@ void main() {
       when(debuggerController.hasTruncatedFrames)
           .thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
-      // SHOW ALL when truncated
       expect(find.text('SHOW ALL'), findsNothing);
     });
     testWidgetsWithWindowSize(
