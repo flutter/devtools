@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:pedantic/pedantic.dart';
@@ -213,7 +214,8 @@ class DebuggerController extends DisposableController
     if (ref == null) {
       _breakpoints.value = [];
       _breakpointsWithLocation.value = [];
-      _stackFramesWithLocation.value = [];
+      await _getStackOperation?.cancel();
+      _populateFrameInfo([]);
       return;
     }
 
@@ -567,15 +569,20 @@ class DebuggerController extends DisposableController
     }
   }
 
+  final _hasTruncatedFrames = ValueNotifier<bool>(false);
+  ValueListenable<bool> get hasTruncatedFrames => _hasTruncatedFrames;
+
+  CancelableOperation<_StackInfo> _getStackOperation;
+
   Future<void> _pause(bool paused, {Event pauseEvent}) async {
+    await _getStackOperation?.cancel();
     _isPaused.value = paused;
 
     _log.log('_pause(running: ${!paused})');
 
     // Perform an early exit if we're not paused.
     if (!paused) {
-      _stackFramesWithLocation.value = [];
-      selectStackFrame(null);
+      _populateFrameInfo([]);
       return;
     }
 
@@ -585,31 +592,57 @@ class DebuggerController extends DisposableController
         [pauseEvent.topFrame],
         reportedException: pauseEvent?.exception,
       );
-      _stackFramesWithLocation.value = [
-        await _createStackFrameWithLocation(tempFrames.first),
-      ];
+      _populateFrameInfo(
+        [await _createStackFrameWithLocation(tempFrames.first)],
+        truncated: true,
+      );
       _log.log('created first frame');
-      selectStackFrame(_stackFramesWithLocation.value.first);
     }
 
-    // Then, issue an asynchronous request to populate the frame information.
-    _log.log('getStack()');
-    final stack = await _service.getStack(isolateRef.id);
+    // We populate the first 10 frames to match the behavior in VS Code.
+    _getStackOperation =
+        CancelableOperation.fromFuture(_getStackInfo(limit: 10));
+    final stackInfo = await _getStackOperation.value;
+    _populateFrameInfo(stackInfo.frames, truncated: stackInfo.truncated);
+  }
+
+  Future<_StackInfo> _getStackInfo({int limit}) async {
+    _log.log('getStack() with limit: $limit');
+    final stack = await _service.getStack(isolateRef.id, limit: limit);
     _log.log('getStack() completed (frames: ${stack.frames.length})');
+
     final frames = _framesForCallStack(
       stack.frames,
       asyncCausalFrames: stack.asyncCausalFrames,
-      reportedException: pauseEvent?.exception,
+      reportedException: _lastEvent?.exception,
     );
 
-    _stackFramesWithLocation.value =
-        await Future.wait(frames.map(_createStackFrameWithLocation));
+    return _StackInfo(
+      await Future.wait(frames.map(_createStackFrameWithLocation)),
+      stack.truncated,
+    );
+  }
+
+  void _populateFrameInfo(
+    List<StackFrameAndSourcePosition> frames, {
+    bool truncated,
+  }) {
+    truncated ??= false;
     _log.log('populated frame info');
-    if (_stackFramesWithLocation.value.isEmpty) {
+    _stackFramesWithLocation.value = frames;
+    _hasTruncatedFrames.value = truncated;
+    if (frames.isEmpty) {
       selectStackFrame(null);
     } else {
-      selectStackFrame(_stackFramesWithLocation.value.first);
+      selectStackFrame(frames.first);
     }
+  }
+
+  Future<void> getFullStack() async {
+    await _getStackOperation?.cancel();
+    _getStackOperation = CancelableOperation.fromFuture(_getStackInfo());
+    final stackInfo = await _getStackOperation.value;
+    _populateFrameInfo(stackInfo.frames, truncated: stackInfo.truncated);
   }
 
   void _clearCaches() {
@@ -1144,4 +1177,10 @@ class EvalHistory {
   String get currentText {
     return _historyPosition == -1 ? null : _evalHistory[_historyPosition];
   }
+}
+
+class _StackInfo {
+  _StackInfo(this.frames, this.truncated);
+  final List<StackFrameAndSourcePosition> frames;
+  final bool truncated;
 }
