@@ -164,7 +164,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
       for (var column in sortedColumns) {
         if (column.fixedWidthPx == null && column.minWidthPx != null) {
           // Width of this column if it was not clamped to its min width.
-          // We add column.minWidthPx to the avaialable width because
+          // We add column.minWidthPx to the available width because
           // available is currently not considering the space reserved for this
           // column's min width as available.
           final widthIfUnconstrainedByMinWidth =
