@@ -212,7 +212,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       builder: (context, constraints) {
         return FlexSplitColumn(
           totalHeight: constraints.maxHeight,
-          initialFractions: const [0.38, 0.38, 0.24],
+          initialFractions: const [0.40, 0.40, 0.20],
           minSizes: const [0.0, 0.0, 0.0],
           headers: <SizedBox>[
             areaPaneHeader(
