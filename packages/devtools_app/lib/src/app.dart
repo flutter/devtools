@@ -78,7 +78,7 @@ class DevToolsApp extends StatefulWidget {
 
 /// Initializer for the [FrameworkCore] and the app's navigation.
 ///
-/// This manages the route generation, and marshalls URL query parameters into
+/// This manages the route generation, and marshals URL query parameters into
 /// flutter route parameters.
 // TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
 // navigate the full app.
