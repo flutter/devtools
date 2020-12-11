@@ -587,7 +587,11 @@ class _AnalysisFieldNameColumn extends TreeColumnData<AnalysisField> {
 }
 
 class _AnalysisFieldValueColumn extends ColumnData<AnalysisField> {
-  _AnalysisFieldValueColumn() : super('Value', fixedWidthPx: 250.0);
+  _AnalysisFieldValueColumn()
+      : super(
+          'Value',
+          fixedWidthPx: 250.0,
+        );
 
   @override
   dynamic getValue(AnalysisField dataObject) => dataObject.value;

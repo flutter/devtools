@@ -30,7 +30,12 @@ final loggingSearchFieldKey = GlobalKey(debugLabel: 'LoggingSearchFieldKey');
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
-  const LoggingScreen() : super(id, title: 'Logging', icon: Octicons.clippy);
+  const LoggingScreen()
+      : super(
+          id,
+          title: 'Logging',
+          icon: Octicons.clippy,
+        );
 
   static const id = 'logging';
 
@@ -308,7 +313,11 @@ class _LogDetailsState extends State<LogDetails>
 }
 
 class _WhenColumn extends ColumnData<LogData> {
-  _WhenColumn() : super('When', fixedWidthPx: 120);
+  _WhenColumn()
+      : super(
+          'When',
+          fixedWidthPx: 120,
+        );
 
   @override
   bool get supportsSorting => false;
@@ -322,7 +331,11 @@ class _WhenColumn extends ColumnData<LogData> {
 
 class _KindColumn extends ColumnData<LogData>
     implements ColumnRenderer<LogData> {
-  _KindColumn() : super('Kind', fixedWidthPx: 155);
+  _KindColumn()
+      : super(
+          'Kind',
+          fixedWidthPx: 155,
+        );
 
   @override
   bool get supportsSorting => false;

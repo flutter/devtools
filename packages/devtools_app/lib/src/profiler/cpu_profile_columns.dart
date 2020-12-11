@@ -6,7 +6,11 @@ import 'cpu_profile_model.dart';
 const _timeColumnWidthPx = 160.0;
 
 class SelfTimeColumn extends ColumnData<CpuStackFrame> {
-  SelfTimeColumn() : super('Self Time', fixedWidthPx: _timeColumnWidthPx);
+  SelfTimeColumn()
+      : super(
+          'Self Time',
+          fixedWidthPx: _timeColumnWidthPx,
+        );
 
   @override
   bool get numeric => true;
@@ -32,7 +36,11 @@ class SelfTimeColumn extends ColumnData<CpuStackFrame> {
 }
 
 class TotalTimeColumn extends ColumnData<CpuStackFrame> {
-  TotalTimeColumn() : super('Total Time', fixedWidthPx: _timeColumnWidthPx);
+  TotalTimeColumn()
+      : super(
+          'Total Time',
+          fixedWidthPx: _timeColumnWidthPx,
+        );
 
   @override
   bool get numeric => true;
