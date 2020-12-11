@@ -593,8 +593,9 @@ class DebuggerController extends DisposableController
         reportedException: pauseEvent?.exception,
       );
       _populateFrameInfo(
-          [await _createStackFrameWithLocation(tempFrames.first)],
-          truncated: true);
+        [await _createStackFrameWithLocation(tempFrames.first)],
+        truncated: true,
+      );
       _log.log('created first frame');
     }
 
@@ -617,12 +618,15 @@ class DebuggerController extends DisposableController
     );
 
     return _StackInfo(
-        await Future.wait(frames.map(_createStackFrameWithLocation)),
-        stack.truncated);
+      await Future.wait(frames.map(_createStackFrameWithLocation)),
+      stack.truncated,
+    );
   }
 
-  void _populateFrameInfo(List<StackFrameAndSourcePosition> frames,
-      {bool truncated}) {
+  void _populateFrameInfo(
+    List<StackFrameAndSourcePosition> frames, {
+    bool truncated,
+  }) {
     truncated ??= false;
     _log.log('populated frame info');
     _stackFramesWithLocation.value = frames;
