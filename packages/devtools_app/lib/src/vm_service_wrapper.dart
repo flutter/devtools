@@ -406,9 +406,12 @@ class VmServiceWrapper implements VmService {
   @override
   Future<Stack> getStack(String isolateId, {int limit}) async {
     if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 42))) {
+      supportedVersion: SemanticVersion(major: 3, minor: 42),
+    )) {
       return trackFuture(
-          'getStack', _vmService.getStack(isolateId, limit: limit));
+        'getStack',
+        _vmService.getStack(isolateId, limit: limit),
+      );
     } else {
       return trackFuture('getStack', _vmService.getStack(isolateId));
     }

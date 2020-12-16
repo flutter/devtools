@@ -603,8 +603,10 @@ class DebuggerController extends DisposableController
     _getStackOperation =
         CancelableOperation.fromFuture(_getStackInfo(limit: 10));
     final stackInfo = await _getStackOperation.value;
-    _populateFrameInfo(stackInfo.frames,
-        truncated: stackInfo.truncated ?? false);
+    _populateFrameInfo(
+      stackInfo.frames,
+      truncated: stackInfo.truncated ?? false,
+    );
   }
 
   Future<_StackInfo> _getStackInfo({int limit}) async {
