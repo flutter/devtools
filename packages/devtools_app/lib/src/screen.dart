@@ -109,7 +109,6 @@ abstract class Screen {
       valueListenable:
           serviceManager.errorBadgeManager.errorCountNotifier(screenId),
       builder: (context, count, _) {
-        print('tab: $screenId, count: $count');
         final tab = Tab(
           key: tabKey,
           child: Row(
@@ -140,7 +139,7 @@ abstract class Screen {
                 children: [
                   CustomPaint(
                     size: Size(defaultIconSize + denseSpacing + titleWidth, 0),
-                    painter: TabBadgePainter(count: 2),
+                    painter: TabBadgePainter(count: count),
                   ),
                   tab,
                 ],
