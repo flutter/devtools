@@ -23,6 +23,7 @@ import '../ui/filter.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
+import 'logging_screen.dart';
 
 // For performance reasons, we drop old logs in batches, so the log will grow
 // to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
@@ -251,6 +252,7 @@ class LoggingController
   void clear() {
     resetFilter();
     _updateData([]);
+    serviceManager.errorBadgeManager.clearErrors(LoggingScreen.id);
   }
 
   void _handleConnectionStart(VmServiceWrapper service) async {

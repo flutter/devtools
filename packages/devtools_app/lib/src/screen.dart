@@ -105,46 +105,53 @@ abstract class Screen {
   /// This will not be used if the [Screen] is the only one shown in the
   /// scaffold.
   Widget buildTab(BuildContext context) {
-    final tab = Tab(
-      key: tabKey,
-      child: Row(
-        children: <Widget>[
-          Icon(icon, size: defaultIconSize),
-          Padding(
-            padding: const EdgeInsets.only(left: denseSpacing),
-            child: Text(title),
-          ),
-        ],
-      ),
-    );
-
-    if (badgeCount > 0) {
-      // Calculate the width of the title text so that we can provide an accurate
-      // size for the [TabBadgePainter]
-      final painter = TextPainter(
-        text: TextSpan(
-          text: title,
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      final titleWidth = painter.width;
-
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          return Stack(
-            children: [
-              CustomPaint(
-                size: Size(defaultIconSize + denseSpacing + titleWidth, 0),
-                painter: TabBadgePainter(count: 2),
+    return ValueListenableBuilder<int>(
+      valueListenable:
+          serviceManager.errorBadgeManager.errorCountNotifier(screenId),
+      builder: (context, count, _) {
+        print('tab: $screenId, count: $count');
+        final tab = Tab(
+          key: tabKey,
+          child: Row(
+            children: <Widget>[
+              Icon(icon, size: defaultIconSize),
+              Padding(
+                padding: const EdgeInsets.only(left: denseSpacing),
+                child: Text(title),
               ),
-              tab,
             ],
-          );
-        },
-      );
-    }
+          ),
+        );
 
-    return tab;
+        if (count > 0) {
+          // Calculate the width of the title text so that we can provide an accurate
+          // size for the [TabBadgePainter]
+          final painter = TextPainter(
+            text: TextSpan(
+              text: title,
+            ),
+            textDirection: TextDirection.ltr,
+          )..layout();
+          final titleWidth = painter.width;
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                children: [
+                  CustomPaint(
+                    size: Size(defaultIconSize + denseSpacing + titleWidth, 0),
+                    painter: TabBadgePainter(count: 2),
+                  ),
+                  tab,
+                ],
+              );
+            },
+          );
+        }
+
+        return tab;
+      },
+    );
   }
 
   /// Builds the body to display for this tab.

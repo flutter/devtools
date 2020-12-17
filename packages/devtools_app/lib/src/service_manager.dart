@@ -17,6 +17,7 @@ import 'auto_dispose.dart';
 import 'config_specific/logger/logger.dart';
 import 'connected_app.dart';
 import 'core/message_bus.dart';
+import 'error_badge_manager.dart';
 import 'globals.dart';
 import 'logging/vm_service_logger.dart';
 import 'service_extensions.dart' as extensions;
@@ -77,6 +78,9 @@ class ServiceConnectionManager {
 
   IsolateManager get isolateManager => _isolateManager;
   IsolateManager _isolateManager;
+
+  ErrorBadgeManager get errorBadgeManager => _errorBadgeManager;
+  final _errorBadgeManager = ErrorBadgeManager();
 
   ServiceExtensionManager get serviceExtensionManager =>
       _serviceExtensionManager;
@@ -158,6 +162,7 @@ class ServiceConnectionManager {
     // race conditions where managers cannot listen for events soon enough.
     isolateManager.vmServiceOpened(service);
     vmFlagManager.vmServiceOpened(service);
+    errorBadgeManager.vmServiceOpened(service);
 
     serviceExtensionManager.vmServiceOpened(service, connectedApp);
 
