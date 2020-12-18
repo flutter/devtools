@@ -36,6 +36,8 @@ void main() {
         .thenReturn(false);
     when(fakeServiceManager.connectedApp.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
+    when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+        .thenReturn(ValueNotifier<int>(0));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
     controller.offline = true;

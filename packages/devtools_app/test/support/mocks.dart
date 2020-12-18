@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/error_badge_manager.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart'
     as flutter_memory;
@@ -80,6 +81,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   final IsolateManager isolateManager = FakeIsolateManager();
+
+  @override
+  final ErrorBadgeManager errorBadgeManager = MockErrorBadgeManager();
 
   @override
   VM get vm => _mockVM;
@@ -419,6 +423,8 @@ class MockLoggingController extends Mock implements LoggingController {
     _selectedLog.value = data;
   }
 }
+
+class MockErrorBadgeManager extends Mock implements ErrorBadgeManager {}
 
 class MockMemoryController extends Mock implements MemoryController {}
 

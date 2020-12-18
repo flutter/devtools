@@ -66,14 +66,6 @@ void main() {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
     });
 
-    testWidgets('builds its tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: const NetworkScreen().buildTab),
-        network: NetworkController(),
-      ));
-      expect(find.text('Network'), findsOneWidget);
-    });
-
     testWidgetsWithWindowSize('starts and stops', windowSize, (
       WidgetTester tester,
     ) async {

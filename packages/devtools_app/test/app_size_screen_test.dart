@@ -9,17 +9,21 @@ import 'package:devtools_app/src/app_size/app_size_controller.dart';
 import 'package:devtools_app/src/app_size/app_size_table.dart';
 import 'package:devtools_app/src/app_size/file_import_container.dart';
 import 'package:devtools_app/src/common_widgets.dart';
+import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/notifications.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 import 'support/app_size_test_controller.dart';
 import 'support/app_size_test_data/new_v8.dart';
 import 'support/app_size_test_data/old_v8.dart';
 import 'support/app_size_test_data/sizes.dart';
 import 'support/app_size_test_data/unsupported_file.dart';
+import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
@@ -39,6 +43,7 @@ void main() {
 
   AppSizeScreen screen;
   AppSizeTestController appSizeController;
+  FakeServiceManager fakeServiceManager;
 
   const windowSize = Size(2560.0, 1338.0);
 
@@ -70,6 +75,10 @@ void main() {
     setUp(() async {
       screen = const AppSizeScreen();
       appSizeController = AppSizeTestController();
+      fakeServiceManager = FakeServiceManager();
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+          .thenReturn(ValueNotifier<int>(0));
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {

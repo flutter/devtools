@@ -32,6 +32,8 @@ void main() {
         timelineData: vm_service.Timeline.parse(timelineJson),
       ),
     );
+    when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+        .thenReturn(ValueNotifier<int>(0));
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
     when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
