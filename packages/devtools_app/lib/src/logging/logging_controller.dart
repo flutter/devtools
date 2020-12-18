@@ -353,7 +353,6 @@ class LoggingController extends DisposableController
         summary: '${changedInfo.extension}: ${changedInfo.value}',
       ));
     } else if (e.extensionKind == 'Flutter.Error') {
-      print('logging error event in loggign controller');
       // TODO(pq): add tests for error extension handling once framework changes
       // are landed.
       final RemoteDiagnosticsNode node =
