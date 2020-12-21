@@ -62,8 +62,8 @@ void main() {
           equals([
             // InspectorScreen,
             TimelineScreen,
-            MemoryScreen,
             ProfilerScreen,
+            MemoryScreen,
             DebuggerScreen,
             NetworkScreen,
             LoggingScreen,
@@ -80,8 +80,8 @@ void main() {
           equals([
             // InspectorScreen,
             // TimelineScreen,
+            // ProfilerScreen,
             // MemoryScreen,
-            // PerformanceScreen,
             DebuggerScreen,
             // NetworkScreen,
             LoggingScreen,
@@ -99,8 +99,8 @@ void main() {
           equals([
             InspectorScreen,
             TimelineScreen,
-            MemoryScreen,
             ProfilerScreen,
+            MemoryScreen,
             DebuggerScreen,
             NetworkScreen,
             LoggingScreen,
@@ -118,8 +118,8 @@ void main() {
           equals([
             // InspectorScreen,
             TimelineScreen,
-            MemoryScreen,
             ProfilerScreen,
+            MemoryScreen,
             // DebuggerScreen,
             NetworkScreen,
             LoggingScreen,
@@ -137,8 +137,8 @@ void main() {
           equals([
             InspectorScreen,
             // TimelineScreen,
+            // ProfilerScreen,
             // MemoryScreen,
-            // PerformanceScreen,
             DebuggerScreen,
             // NetworkScreen,
             LoggingScreen,
@@ -156,8 +156,8 @@ void main() {
           equals([
             // InspectorScreen,
             TimelineScreen, // Works offline, so appears regardless of web flag
-            // MemoryScreen,
             ProfilerScreen, // Works offline, so appears regardless of web flag
+            // MemoryScreen,
             // DebuggerScreen,
             // NetworkScreen,
             // LoggingScreen,
@@ -176,8 +176,8 @@ void main() {
           equals([
             // InspectorScreen,
             TimelineScreen,
-            MemoryScreen,
             ProfilerScreen,
+            MemoryScreen,
             DebuggerScreen,
             NetworkScreen,
             LoggingScreen,
