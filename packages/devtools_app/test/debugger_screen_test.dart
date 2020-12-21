@@ -39,6 +39,8 @@ void main() {
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+          .thenReturn(ValueNotifier<int>(0));
 
       screen = const DebuggerScreen();
 

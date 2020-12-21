@@ -28,6 +28,8 @@ void main() {
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
           .thenReturn(false);
       when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(true);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+          .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       screen = const PerformanceScreen();
     });
