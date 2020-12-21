@@ -34,7 +34,6 @@ import 'network/network_screen.dart';
 import 'notifications.dart';
 import 'performance/performance_controller.dart';
 import 'performance/performance_screen.dart';
-import 'preferences.dart';
 import 'routing.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -58,22 +57,16 @@ bool isExternalBuild = true;
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
     this.screens,
-    this.preferences,
     this.ideTheme,
     this.analyticsProvider,
   );
 
   final List<DevToolsScreen> screens;
-  final PreferencesController preferences;
   final IdeTheme ideTheme;
   final AnalyticsProvider analyticsProvider;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
-
-  static DevToolsAppState of(BuildContext context) {
-    return context.findAncestorStateOfType<DevToolsAppState>();
-  }
 }
 
 /// Initializer for the [FrameworkCore] and the app's navigation.
@@ -85,7 +78,6 @@ class DevToolsApp extends StatefulWidget {
 class DevToolsAppState extends State<DevToolsApp> {
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
-  PreferencesController get preferences => widget.preferences;
   IdeTheme get ideTheme => widget.ideTheme;
 
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
@@ -472,7 +464,6 @@ class DevToolsAboutDialog extends StatelessWidget {
 class SettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final preferences = DevToolsApp.of(context).preferences;
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Settings'),
       content: Column(

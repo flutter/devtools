@@ -63,6 +63,6 @@ void main() async {
 
   // Now run the app.
   runApp(
-    DevToolsApp(defaultScreens, preferences, ideTheme, await analyticsProvider),
+    DevToolsApp(defaultScreens, ideTheme, await analyticsProvider),
   );
 }

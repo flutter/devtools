@@ -56,7 +56,6 @@ Future<void> main() async {
         bundle: _DiskAssetBundle(),
         child: DevToolsApp(
           const [],
-          preferences,
           null,
           await analyticsProvider,
         ),
