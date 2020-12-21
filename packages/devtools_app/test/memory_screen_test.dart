@@ -36,8 +36,6 @@ void main() {
         .thenReturn(false);
     when(fakeServiceManager.connectedApp.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
-        .thenReturn(ValueNotifier<int>(0));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
     controller.offline = true;
@@ -70,9 +68,11 @@ void main() {
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
           .thenReturn(false);
       when(fakeServiceManager.vm.operatingSystem).thenReturn('iOS');
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-      when(serviceManager.connectedApp.isDartWebApp)
+      when(fakeServiceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+          .thenReturn(ValueNotifier<int>(0));
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
       screen = const MemoryScreen();
     });
 
