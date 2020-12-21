@@ -25,6 +25,13 @@ void main() {
       when(mockServiceManager.service).thenReturn(null);
       when(mockServiceManager.onStateChange)
           .thenAnswer((_) => const Stream<bool>.empty());
+
+      final mockErrorBadgeManager = MockErrorBadgeManager();
+      when(mockServiceManager.errorBadgeManager)
+          .thenReturn(mockErrorBadgeManager);
+      when(mockErrorBadgeManager.errorCountNotifier(any))
+          .thenReturn(ValueNotifier<int>(0));
+
       setGlobal(ServiceConnectionManager, mockServiceManager);
       setGlobal(FrameworkController, FrameworkController());
       setGlobal(SurveyService, SurveyService());
