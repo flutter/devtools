@@ -21,6 +21,8 @@ void main() {
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+          .thenReturn(ValueNotifier<int>(0));
       screen = const NetworkScreen();
     });
 

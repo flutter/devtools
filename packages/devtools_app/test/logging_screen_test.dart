@@ -53,6 +53,8 @@ void main() {
       when(fakeServiceManager.connectedApp.isFlutterWebAppNow)
           .thenReturn(false);
       when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+          .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
 
       screen = const LoggingScreen();

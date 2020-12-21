@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -96,23 +97,59 @@ abstract class Screen {
   /// should return `null`.
   String get docPageId => null;
 
+  int get badgeCount => 0;
+
   /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main
   /// navbar.
   ///
   /// This will not be used if the [Screen] is the only one shown in the
   /// scaffold.
   Widget buildTab(BuildContext context) {
-    return Tab(
-      key: tabKey,
-      child: Row(
-        children: <Widget>[
-          Icon(icon, size: defaultIconSize),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(title),
+    return ValueListenableBuilder<int>(
+      valueListenable:
+          serviceManager.errorBadgeManager.errorCountNotifier(screenId),
+      builder: (context, count, _) {
+        final tab = Tab(
+          key: tabKey,
+          child: Row(
+            children: <Widget>[
+              Icon(icon, size: defaultIconSize),
+              Padding(
+                padding: const EdgeInsets.only(left: denseSpacing),
+                child: Text(title),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+
+        if (count > 0) {
+          // Calculate the width of the title text so that we can provide an accurate
+          // size for the [TabBadgePainter]
+          final painter = TextPainter(
+            text: TextSpan(
+              text: title,
+            ),
+            textDirection: TextDirection.ltr,
+          )..layout();
+          final titleWidth = painter.width;
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                children: [
+                  CustomPaint(
+                    size: Size(defaultIconSize + denseSpacing + titleWidth, 0),
+                    painter: TabBadgePainter(count: count),
+                  ),
+                  tab,
+                ],
+              );
+            },
+          );
+        }
+
+        return tab;
+      },
     );
   }
 
@@ -176,4 +213,51 @@ bool shouldShowScreen(Screen screen) {
     }
   }
   return true;
+}
+
+class TabBadgePainter extends CustomPainter {
+  TabBadgePainter({@required this.count});
+
+  final int count;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    print(size.width);
+    final paint = Paint()
+      ..color = devtoolsError
+      ..style = PaintingStyle.fill;
+
+    final countPainter = TextPainter(
+      text: TextSpan(
+        text: '$count',
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    final badgeWidth = math.max(
+      defaultIconSize,
+      countPainter.width + denseSpacing,
+    );
+    canvas.drawOval(
+      Rect.fromLTWH(size.width, 0, badgeWidth, defaultIconSize),
+      paint,
+    );
+
+    countPainter.paint(
+      canvas,
+      Offset(size.width + (badgeWidth - countPainter.width) / 2, 0),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    if (oldDelegate is TabBadgePainter) {
+      return count != oldDelegate.count;
+    }
+    return true;
+  }
 }
