@@ -4,8 +4,8 @@
 
 import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
-import 'package:devtools_app/src/performance/performance_screen.dart';
+import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
+import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/vm_flag_widgets.dart';
@@ -18,10 +18,10 @@ import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
-  PerformanceScreen screen;
+  ProfilerScreen screen;
   FakeServiceManager fakeServiceManager;
 
-  group('PerformanceScreen', () {
+  group('ProfilerScreen', () {
     setUp(() async {
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
@@ -29,40 +29,40 @@ void main() {
           .thenReturn(false);
       when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      screen = const PerformanceScreen();
+      screen = const ProfilerScreen();
     });
 
     void verifyBaseState(
-      PerformanceScreenBody perfScreenBody,
+      ProfilerScreenBody perfScreenBody,
       WidgetTester tester,
     ) {
       expect(find.byType(RecordButton), findsOneWidget);
       expect(find.byType(StopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
       expect(find.byType(ProfileGranularityDropdown), findsOneWidget);
-      expect(find.byKey(PerformanceScreen.recordingInstructionsKey),
+      expect(find.byKey(ProfilerScreen.recordingInstructionsKey),
           findsOneWidget);
-      expect(find.byKey(PerformanceScreen.recordingStatusKey), findsNothing);
+      expect(find.byKey(ProfilerScreen.recordingStatusKey), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(CpuProfiler), findsNothing);
     }
 
-    Future<void> pumpPerformanceBody(
+    Future<void> pumpProfilerScreenBody(
       WidgetTester tester,
-      PerformanceScreenBody body,
+        ProfilerScreenBody body,
     ) async {
       await tester.pumpWidget(wrapWithControllers(
         body,
-        performance: PerformanceController(),
+        profiler: ProfilerScreenController(),
       ));
     }
 
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.buildTab),
-        performance: PerformanceController(),
+        profiler: ProfilerScreenController(),
       ));
-      expect(find.text('Performance'), findsOneWidget);
+      expect(find.text('CPU Profiler'), findsOneWidget);
     });
 
     const windowSize = Size(1000.0, 1000.0);
@@ -71,18 +71,18 @@ void main() {
       'builds proper content for recording state',
       windowSize,
       (WidgetTester tester) async {
-        const perfScreenBody = PerformanceScreenBody();
-        await pumpPerformanceBody(tester, perfScreenBody);
-        expect(find.byType(PerformanceScreenBody), findsOneWidget);
+        const perfScreenBody = ProfilerScreenBody();
+        await pumpProfilerScreenBody(tester, perfScreenBody);
+        expect(find.byType(ProfilerScreenBody), findsOneWidget);
         verifyBaseState(perfScreenBody, tester);
 
         // Start recording.
         await tester.tap(find.byType(RecordButton));
         await tester.pump();
-        expect(find.byKey(PerformanceScreen.recordingInstructionsKey),
+        expect(find.byKey(ProfilerScreen.recordingInstructionsKey),
             findsNothing);
         expect(
-            find.byKey(PerformanceScreen.recordingStatusKey), findsOneWidget);
+            find.byKey(ProfilerScreen.recordingStatusKey), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
         expect(find.byType(CpuProfiler), findsNothing);
 
@@ -102,11 +102,11 @@ void main() {
     testWidgetsWithWindowSize('builds for disabled profiler', windowSize,
         (WidgetTester tester) async {
       await serviceManager.service.setFlag(vm_flags.profiler, 'false');
-      const perfScreenBody = PerformanceScreenBody();
-      await pumpPerformanceBody(tester, perfScreenBody);
+      const perfScreenBody = ProfilerScreenBody();
+      await pumpProfilerScreenBody(tester, perfScreenBody);
       expect(find.byType(CpuProfilerDisabled), findsOneWidget);
       expect(
-        find.byKey(PerformanceScreen.recordingInstructionsKey),
+        find.byKey(ProfilerScreen.recordingInstructionsKey),
         findsNothing,
       );
       expect(find.byType(RecordButton), findsNothing);

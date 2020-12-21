@@ -7,8 +7,8 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
-import '../profiler/cpu_profile_model.dart';
 import '../vm_flags.dart' as vm_flags;
+import 'cpu_profile_model.dart';
 
 /// Manages interactions between the Cpu Profiler and the VmService.
 class CpuProfilerService {

@@ -40,9 +40,7 @@ class EventDetails extends StatelessWidget {
           areaPaneHeader(
             context,
             needsTopBorder: false,
-            title: selectedEvent != null
-                ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
-                : noEventSelected,
+            title: _generateHeaderText(selectedEvent),
           ),
           Expanded(
             child: selectedEvent != null
@@ -52,6 +50,14 @@ class EventDetails extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _generateHeaderText(TimelineEvent event) {
+    if (selectedEvent == null) {
+      return noEventSelected;
+    }
+    return '${selectedEvent.isUiEvent ? 'CPU Profile: ' : ''}'
+        '${selectedEvent.name} (${msText(selectedEvent.time.duration)})';
   }
 
   Widget _buildDetails(TimelineController controller) {

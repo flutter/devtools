@@ -11,7 +11,7 @@ import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart'
     as flutter_memory;
 import 'package:devtools_app/src/memory/memory_controller.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
@@ -427,7 +427,8 @@ class MockFlutterMemoryController extends Mock
 
 class MockTimelineController extends Mock implements TimelineController {}
 
-class MockPerformanceController extends Mock implements PerformanceController {}
+class MockProfilerScreenController extends Mock
+    implements ProfilerScreenController {}
 
 class MockDebuggerController extends Mock implements DebuggerController {}
 
