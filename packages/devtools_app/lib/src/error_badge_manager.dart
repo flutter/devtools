@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 import 'auto_dispose.dart';
 import 'globals.dart';
+import 'listenable.dart';
 import 'service_extensions.dart' as extensions;
 import 'vm_service_wrapper.dart';
 
