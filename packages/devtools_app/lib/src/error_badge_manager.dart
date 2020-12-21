@@ -40,7 +40,7 @@ class ErrorBadgeManager extends DisposableController
   }
 
   ValueListenable<int> errorCountNotifier(String screenId) {
-    return _activeErrorCounts[screenId] ?? ValueNotifier<int>(0);
+    return _activeErrorCounts[screenId] ?? const FixedValueListenable<int>(0);
   }
 
   void clearErrors(String screenId) {

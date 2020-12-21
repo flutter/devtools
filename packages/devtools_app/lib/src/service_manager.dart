@@ -162,9 +162,10 @@ class ServiceConnectionManager {
     // race conditions where managers cannot listen for events soon enough.
     isolateManager.vmServiceOpened(service);
     vmFlagManager.vmServiceOpened(service);
-    errorBadgeManager.vmServiceOpened(service);
-
     serviceExtensionManager.vmServiceOpened(service, connectedApp);
+    // This needs to be called last in the above group of `vmServiceOpened`
+    // calls.
+    errorBadgeManager.vmServiceOpened(service);
 
     if (debugLogServiceProtocolEvents) {
       serviceTrafficLogger = VmServiceTrafficLogger(service);
