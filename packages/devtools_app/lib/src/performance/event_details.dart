@@ -13,8 +13,8 @@ import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profiler.dart';
 import '../trace_event.dart';
 import '../utils.dart';
-import 'timeline_controller.dart';
-import 'timeline_model.dart';
+import 'performance_controller.dart';
+import 'performance_model.dart';
 
 class EventDetails extends StatelessWidget {
   const EventDetails(this.selectedEvent);
@@ -31,7 +31,7 @@ class EventDetails extends StatelessWidget {
     // from the offline data, show message notifying that CPU profile data is
     // unavailable for snapshots and provide link to return to offline profile
     // (see html_event_details.dart).
-    final controller = Provider.of<TimelineController>(context);
+    final controller = Provider.of<PerformanceController>(context);
     final textTheme = Theme.of(context).textTheme;
     return OutlineDecoration(
       child: Column(
@@ -60,7 +60,7 @@ class EventDetails extends StatelessWidget {
         '${selectedEvent.name} (${msText(selectedEvent.time.duration)})';
   }
 
-  Widget _buildDetails(TimelineController controller) {
+  Widget _buildDetails(PerformanceController controller) {
     if (selectedEvent.isUiEvent) {
       // In [offlineMode], we do not need to worry about whether the profiler is
       // enabled.

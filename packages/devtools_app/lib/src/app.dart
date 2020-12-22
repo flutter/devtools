@@ -32,6 +32,8 @@ import 'memory/memory_screen.dart';
 import 'network/network_controller.dart';
 import 'network/network_screen.dart';
 import 'notifications.dart';
+import 'performance/performance_controller.dart';
+import 'performance/performance_screen.dart';
 import 'profiler/profiler_screen.dart';
 import 'profiler/profiler_screen_controller.dart';
 import 'routing.dart';
@@ -39,8 +41,6 @@ import 'scaffold.dart';
 import 'screen.dart';
 import 'snapshot_screen.dart';
 import 'theme.dart';
-import 'timeline/timeline_controller.dart';
-import 'timeline/timeline_screen.dart';
 import 'ui/service_extension_widgets.dart';
 import 'utils.dart';
 import 'vm_developer/vm_developer_tools_controller.dart';
@@ -528,9 +528,9 @@ class SettingsDialog extends StatelessWidget {
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
 List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
       const DevToolsScreen(InspectorScreen(), createController: null),
-      DevToolsScreen<TimelineController>(
-        const TimelineScreen(),
-        createController: () => TimelineController(),
+      DevToolsScreen<PerformanceController>(
+        const PerformanceScreen(),
+        createController: () => PerformanceController(),
         supportsOffline: true,
       ),
       DevToolsScreen<ProfilerScreenController>(

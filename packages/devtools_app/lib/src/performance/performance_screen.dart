@@ -26,47 +26,47 @@ import '../ui/service_extension_widgets.dart';
 import '../ui/vm_flag_widgets.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
-import 'timeline_controller.dart';
+import 'performance_controller.dart';
+import 'performance_model.dart';
 import 'timeline_flame_chart.dart';
-import 'timeline_model.dart';
 
 // TODO(kenz): handle small screen widths better by using Wrap instead of Row
 // where applicable.
 
-class TimelineScreen extends Screen {
-  const TimelineScreen()
+class PerformanceScreen extends Screen {
+  const PerformanceScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
           worksOffline: true,
-          title: 'Timeline',
+          title: 'Performance',
           icon: Octicons.pulse,
         );
 
-  static const id = 'timeline';
+  static const id = 'performance';
 
   @override
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) => const TimelineScreenBody();
+  Widget build(BuildContext context) => const PerformanceScreenBody();
 }
 
-class TimelineScreenBody extends StatefulWidget {
-  const TimelineScreenBody();
+class PerformanceScreenBody extends StatefulWidget {
+  const PerformanceScreenBody();
 
   @override
-  TimelineScreenBodyState createState() => TimelineScreenBodyState();
+  PerformanceScreenBodyState createState() => PerformanceScreenBodyState();
 }
 
-class TimelineScreenBodyState extends State<TimelineScreenBody>
+class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     with
         AutoDisposeMixin,
-        OfflineScreenMixin<TimelineScreenBody, OfflineTimelineData> {
+        OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData> {
   static const _primaryControlsMinIncludeTextWidth = 725.0;
   static const _secondaryControlsMinIncludeTextWidth = 1100.0;
 
-  TimelineController controller;
+  PerformanceController controller;
 
   bool processing = false;
 
@@ -75,15 +75,15 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   @override
   void initState() {
     super.initState();
-    ga.screen(TimelineScreen.id);
+    ga.screen(PerformanceScreen.id);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    maybePushDebugModePerformanceMessage(context, TimelineScreen.id);
+    maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
-    final newController = Provider.of<TimelineController>(context);
+    final newController = Provider.of<PerformanceController>(context);
     if (newController == controller) return;
     controller = newController;
 
@@ -118,14 +118,14 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       // require a top level field named "traceEvents". See how timeline data is
       // encoded in [ExportController.encode].
       final timelineJson =
-          Map<String, dynamic>.from(offlineDataJson[TimelineScreen.id])
+          Map<String, dynamic>.from(offlineDataJson[PerformanceScreen.id])
             ..addAll({
-              TimelineData.traceEventsKey:
-                  offlineDataJson[TimelineData.traceEventsKey]
+              PerformanceData.traceEventsKey:
+                  offlineDataJson[PerformanceData.traceEventsKey]
             });
-      final offlineTimelineData = OfflineTimelineData.parse(timelineJson);
-      if (!offlineTimelineData.isEmpty) {
-        loadOfflineData(offlineTimelineData);
+      final offlinePerformanceData = OfflinePerformanceData.parse(timelineJson);
+      if (!offlinePerformanceData.isEmpty) {
+        loadOfflineData(offlinePerformanceData);
       }
     }
   }
@@ -133,12 +133,12 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   @override
   Widget build(BuildContext context) {
     final isOfflineFlutterApp = offlineMode &&
-        controller.offlineTimelineData != null &&
-        controller.offlineTimelineData.frames.isNotEmpty;
+        controller.offlinePerformanceData != null &&
+        controller.offlinePerformanceData.frames.isNotEmpty;
 
-    final timelineScreen = Column(
+    final performanceScreen = Column(
       children: [
-        if (!offlineMode) _buildTimelineControls(),
+        if (!offlineMode) _buildPerformanceControls(),
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
             (!offlineMode && serviceManager.connectedApp.isFlutterAppNow))
@@ -181,7 +181,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     // empty UI while data is being processed.
     return Stack(
       children: [
-        timelineScreen,
+        performanceScreen,
         if (loadingOfflineData)
           Container(
             color: Theme.of(context).scaffoldBackgroundColor,
@@ -191,7 +191,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Widget _buildTimelineControls() {
+  Widget _buildPerformanceControls() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -209,12 +209,14 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           children: [
             RefreshButton(
               includeTextWidth: _primaryControlsMinIncludeTextWidth,
-              onPressed: (refreshing || processing) ? null : _refreshTimeline,
+              onPressed:
+                  (refreshing || processing) ? null : _refreshPerformanceData,
             ),
             const SizedBox(width: defaultSpacing),
             ClearButton(
               includeTextWidth: _primaryControlsMinIncludeTextWidth,
-              onPressed: (refreshing || processing) ? null : _clearTimeline,
+              onPressed:
+                  (refreshing || processing) ? null : _clearPerformanceData,
             ),
           ],
         );
@@ -226,7 +228,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        const ProfileGranularityDropdown(TimelineScreen.id),
+        const ProfileGranularityDropdown(PerformanceScreen.id),
         const SizedBox(width: defaultSpacing),
         if (!serviceManager.connectedApp.isDartCliAppNow)
           ServiceExtensionButtonGroup(
@@ -237,7 +239,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         // available.
         const SizedBox(width: defaultSpacing),
         ExportButton(
-          onPressed: _exportTimeline,
+          onPressed: _exportPerformanceData,
           includeTextWidth: _secondaryControlsMinIncludeTextWidth,
         ),
         const SizedBox(width: defaultSpacing),
@@ -262,16 +264,16 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Future<void> _refreshTimeline() async {
+  Future<void> _refreshPerformanceData() async {
     await controller.refreshData();
   }
 
-  Future<void> _clearTimeline() async {
+  Future<void> _clearPerformanceData() async {
     await controller.clearData();
     setState(() {});
   }
 
-  void _exportTimeline() {
+  void _exportPerformanceData() {
     final exportedFile = controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
@@ -281,7 +283,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   @override
-  FutureOr<void> processOfflineData(OfflineTimelineData offlineData) async {
+  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
     await controller.processOfflineData(offlineData);
   }
 
@@ -289,8 +291,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   bool shouldLoadOfflineData() {
     return offlineMode &&
         offlineDataJson.isNotEmpty &&
-        offlineDataJson[TimelineScreen.id] != null &&
-        offlineDataJson[TimelineData.traceEventsKey] != null;
+        offlineDataJson[PerformanceScreen.id] != null &&
+        offlineDataJson[PerformanceData.traceEventsKey] != null;
   }
 }
 
@@ -299,7 +301,7 @@ class TimelineConfigurationsDialog extends StatelessWidget {
 
   static const dialogWidth = 700.0;
 
-  final TimelineController controller;
+  final PerformanceController controller;
 
   @override
   Widget build(BuildContext context) {

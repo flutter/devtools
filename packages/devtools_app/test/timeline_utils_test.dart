@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/timeline/timeline_utils.dart';
-import 'package:devtools_testing/support/timeline_test_data.dart';
+import 'package:devtools_app/src/performance/performance_utils.dart';
+import 'package:devtools_testing/support/performance_test_data.dart';
 import 'package:test/test.dart';
 
 void main() {

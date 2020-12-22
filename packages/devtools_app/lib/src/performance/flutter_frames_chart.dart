@@ -12,8 +12,8 @@ import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../utils.dart';
-import 'timeline_controller.dart';
-import 'timeline_model.dart';
+import 'performance_controller.dart';
+import 'performance_model.dart';
 
 class FlutterFramesChart extends StatefulWidget {
   const FlutterFramesChart(
@@ -23,7 +23,7 @@ class FlutterFramesChart extends StatefulWidget {
 
   static const chartLegendKey = Key('Flutter frames chart legend');
 
-  final List<TimelineFrame> frames;
+  final List<FlutterFrame> frames;
 
   final double displayRefreshRate;
 
@@ -42,11 +42,11 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   static const outlineBorderWidth = 1.0;
 
-  TimelineController _controller;
+  PerformanceController _controller;
 
   ScrollController scrollController;
 
-  TimelineFrame _selectedFrame;
+  FlutterFrame _selectedFrame;
 
   double horizontalScrollOffset = 0.0;
 
@@ -72,7 +72,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController = Provider.of<TimelineController>(context);
+    final newController = Provider.of<PerformanceController>(context);
     if (newController == _controller) return;
     _controller = newController;
 
@@ -167,7 +167,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     );
   }
 
-  Widget _buildFrame(TimelineFrame frame) {
+  Widget _buildFrame(FlutterFrame frame) {
     return InkWell(
       onTap: () => _controller.selectFrame(frame),
       child: FlutterFramesChartItem(
@@ -243,7 +243,7 @@ class FlutterFramesChartItem extends StatelessWidget {
   static const selectedFrameIndicatorKey =
       Key('flutter frames chart - selected frame indicator');
 
-  final TimelineFrame frame;
+  final FlutterFrame frame;
 
   final bool selected;
 
@@ -308,12 +308,12 @@ class FlutterFramesChartItem extends StatelessWidget {
     );
   }
 
-  String _tooltipText(TimelineFrame frame) {
+  String _tooltipText(FlutterFrame frame) {
     return 'UI: ${msText(frame.uiEventFlow.time.duration)}\n'
         'Raster: ${msText(frame.rasterEventFlow.time.duration)}';
   }
 
-  bool _isFrameJanky(TimelineFrame frame) {
+  bool _isFrameJanky(FlutterFrame frame) {
     final targetMsPerFrame = 1 / displayRefreshRate * 1000;
     return frame.uiDurationMs > targetMsPerFrame ||
         frame.rasterDurationMs > targetMsPerFrame;

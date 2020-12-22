@@ -6,10 +6,10 @@ import 'dart:io';
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
-import 'package:devtools_app/src/timeline/timeline_flame_chart.dart';
-import 'package:devtools_app/src/timeline/timeline_screen.dart';
-import 'package:devtools_testing/support/timeline_test_data.dart';
+import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
+import 'package:devtools_app/src/performance/performance_screen.dart';
+import 'package:devtools_testing/support/performance_test_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,7 +22,9 @@ import 'support/wrappers.dart';
 void main() {
   FakeServiceManager fakeServiceManager;
   group('TimelineFlameChartContent', () {
-    void _setupForTimeline(Map<String, dynamic> timelineJson) {
+    void _setUpServiceManagerWithTimeline(
+      Map<String, dynamic> timelineJson,
+    ) {
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
           timelineData: vm_service.Timeline.parse(timelineJson),
@@ -39,16 +41,16 @@ void main() {
     }
 
     setUp(() async {
-      _setupForTimeline(testTimelineJson);
+      _setUpServiceManagerWithTimeline(testTimelineJson);
     });
 
     Future<void> pumpTimelineBody(
       WidgetTester tester,
-      TimelineController controller,
+      PerformanceController controller,
     ) async {
       await tester.pumpWidget(wrapWithControllers(
-        const TimelineScreenBody(),
-        timeline: controller,
+        const PerformanceScreenBody(),
+        performance: controller,
       ));
       // Delay to ensure the timeline has started.
       await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -58,7 +60,7 @@ void main() {
 
     testWidgetsWithWindowSize('builds flame chart with data', windowSize,
         (WidgetTester tester) async {
-      await pumpTimelineBody(tester, TimelineController());
+      await pumpTimelineBody(tester, PerformanceController());
       await tester.pumpAndSettle();
       expect(find.byType(TimelineFlameChart), findsOneWidget);
       expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
@@ -67,8 +69,8 @@ void main() {
 
     testWidgetsWithWindowSize('builds flame chart with no data', windowSize,
         (WidgetTester tester) async {
-      _setupForTimeline({});
-      await pumpTimelineBody(tester, TimelineController());
+      _setUpServiceManagerWithTimeline({});
+      await pumpTimelineBody(tester, PerformanceController());
       await tester.pumpAndSettle();
       expect(find.byType(TimelineFlameChart), findsNothing);
       expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
@@ -78,10 +80,10 @@ void main() {
     testWidgetsWithWindowSize(
         'builds flame chart with selected frame', windowSize,
         (WidgetTester tester) async {
-      final controller = TimelineController();
+      final controller = PerformanceController();
       await pumpTimelineBody(tester, controller);
       expect(controller.data.frames.length, equals(1));
-      controller.selectFrame(controller.data.frames.first);
+      await controller.selectFrame(controller.data.frames.first);
       await tester.pumpAndSettle();
 
       expect(find.byType(TimelineFlameChart), findsOneWidget);

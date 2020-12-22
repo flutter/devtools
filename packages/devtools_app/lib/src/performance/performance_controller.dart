@@ -22,29 +22,28 @@ import '../trace_event.dart';
 import '../trees.dart';
 import '../ui/search.dart';
 import '../utils.dart';
-import 'timeline_model.dart';
-import 'timeline_processor.dart';
-import 'timeline_screen.dart';
+import 'performance_model.dart';
+import 'performance_screen.dart';
+import 'timeline_event_processor.dart';
 import 'timeline_streams.dart';
 
-/// This class contains the business logic for [timeline_screen.dart].
+/// This class contains the business logic for [performance_screen.dart].
 ///
 /// The controller manages the timeline data model and communicates with the
 /// view to give and receive data updates. It also manages data processing via
-/// [TimelineProcessor] and [CpuProfileTransformer], and it communicates with
-/// [TimelineService].
+/// [TimelineEventProcessor] and [CpuProfileTransformer].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
-class TimelineController
+class PerformanceController
     with
         CpuProfilerControllerProviderMixin,
         SearchControllerMixin<TimelineEvent>
     implements DisposableController {
-  TimelineController() {
-    processor = TimelineProcessor(this);
-    _startTimeline();
+  PerformanceController() {
+    processor = TimelineEventProcessor(this);
+    _init();
   }
 
   final _exportController = ExportController();
@@ -57,12 +56,12 @@ class TimelineController
   final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent>(null);
 
   /// The currently selected timeline frame.
-  ValueListenable<TimelineFrame> get selectedFrame => _selectedFrameNotifier;
-  final _selectedFrameNotifier = ValueNotifier<TimelineFrame>(null);
+  ValueListenable<FlutterFrame> get selectedFrame => _selectedFrameNotifier;
+  final _selectedFrameNotifier = ValueNotifier<FlutterFrame>(null);
 
   /// The flutter frames in the current timeline.
-  ValueListenable<List<TimelineFrame>> get flutterFrames => _flutterFrames;
-  final _flutterFrames = ValueNotifier<List<TimelineFrame>>([]);
+  ValueListenable<List<FlutterFrame>> get flutterFrames => _flutterFrames;
+  final _flutterFrames = ValueNotifier<List<FlutterFrame>>([]);
 
   /// Whether an empty timeline recording was just recorded.
   ValueListenable<bool> get emptyTimeline => _emptyTimeline;
@@ -104,11 +103,11 @@ class TimelineController
   /// Active timeline data.
   ///
   /// This is the true source of data for the UI. In the case of an offline
-  /// import, this will begin as a copy of [offlineTimelineData] (the original
+  /// import, this will begin as a copy of [offlinePerformanceData] (the original
   /// data from the imported file). If any modifications are made while the data
   /// is displayed (e.g. change in selected timeline event, selected frame,
   /// etc.), those changes will be tracked here.
-  TimelineData data;
+  PerformanceData data;
 
   /// Timeline data loaded via import.
   ///
@@ -119,23 +118,23 @@ class TimelineController
   /// will start as a copy of offlineTimelineData in this case, and will track
   /// any data modifications that occur while the data is displayed (e.g. change
   /// in selected timeline event, selected frame, etc.).
-  TimelineData offlineTimelineData;
+  PerformanceData offlinePerformanceData;
 
-  TimelineProcessor processor;
+  TimelineEventProcessor processor;
 
   /// Trace events in the current timeline.
   ///
   /// This list is cleared and repopulated each time "Refresh" is clicked.
   List<TraceEventWrapper> allTraceEvents = [];
 
-  Future<void> _timelineStarted;
-  Future<void> get timelineStarted => _timelineStarted;
+  Future<void> _initialized;
+  Future<void> get initialized => _initialized;
 
-  Future<void> _startTimeline() {
-    return _timelineStarted = _startTimelineHelper();
+  Future<void> _init() {
+    return _initialized = _initHelper();
   }
 
-  Future<void> _startTimelineHelper() async {
+  Future<void> _initHelper() async {
     await serviceManager.onServiceAvailable;
     unawaited(allowedError(
       _cpuProfilerService.setProfilePeriod(mediumProfilePeriod),
@@ -163,7 +162,7 @@ class TimelineController
     cpuProfilerController.reset();
 
     // Fetch a profile if not in offline mode and if the profiler is enabled.
-    if ((!offlineMode || offlineTimelineData == null) &&
+    if ((!offlineMode || offlinePerformanceData == null) &&
         cpuProfilerController.profilerEnabled) {
       await getCpuProfileForSelectedEvent();
     }
@@ -184,17 +183,14 @@ class TimelineController
   ValueListenable<double> get displayRefreshRate => _displayRefreshRate;
   final _displayRefreshRate = ValueNotifier<double>(defaultRefreshRate);
 
-  void selectFrame(TimelineFrame frame) {
+  Future<void> selectFrame(FlutterFrame frame) async {
     if (frame == null || data == null || data.selectedFrame == frame) {
       return;
     }
     data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 
-    data.selectedEvent = null;
-    _selectedTimelineEventNotifier.value = null;
-    data.cpuProfileData = null;
-    cpuProfilerController.reset();
+    await selectTimelineEvent(frame.uiEventFlow);
 
     if (debugTimeline && frame != null) {
       final buf = StringBuffer();
@@ -210,16 +206,16 @@ class TimelineController
     }
   }
 
-  void addFrame(TimelineFrame frame) {
+  void addFrame(FlutterFrame frame) {
     data.frames.add(frame);
   }
 
   Future<void> refreshData() async {
     await clearData(clearVmTimeline: false);
     data = serviceManager.connectedApp.isFlutterAppNow
-        ? TimelineData(
+        ? PerformanceData(
             displayRefreshRate: await serviceManager.queryDisplayRefreshRate)
-        : TimelineData();
+        : PerformanceData();
 
     _emptyTimeline.value = false;
     _refreshing.value = true;
@@ -324,7 +320,7 @@ class TimelineController
     }
   }
 
-  FutureOr<void> processOfflineData(OfflineTimelineData offlineData) async {
+  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
     await clearData();
     final traceEvents = [
       for (var trace in offlineData.traceEvents)
@@ -339,7 +335,7 @@ class TimelineController
     final uiThreadId = _threadIdForEvents({uiEventName}, traceEvents);
     final rasterThreadId = _threadIdForEvents({rasterEventName}, traceEvents);
 
-    offlineTimelineData = offlineData.shallowClone();
+    offlinePerformanceData = offlineData.shallowClone();
     data = offlineData.shallowClone();
 
     // Process offline data.
@@ -350,7 +346,7 @@ class TimelineController
     await processTraceEvents(traceEvents);
     if (data.cpuProfileData != null) {
       await cpuProfilerController.transformer
-          .processData(offlineTimelineData.cpuProfileData);
+          .processData(offlinePerformanceData.cpuProfileData);
     }
 
     // Set offline data.
@@ -373,9 +369,9 @@ class TimelineController
   }
 
   void setOfflineData() {
-    _flutterFrames.value = offlineTimelineData.frames;
-    final frameToSelect = offlineTimelineData.frames.firstWhere(
-      (frame) => frame.id == offlineTimelineData.selectedFrameId,
+    _flutterFrames.value = offlinePerformanceData.frames;
+    final frameToSelect = offlinePerformanceData.frames.firstWhere(
+      (frame) => frame.id == offlinePerformanceData.selectedFrameId,
       orElse: () => null,
     );
     if (frameToSelect != null) {
@@ -384,24 +380,25 @@ class TimelineController
       // programmatially select the frame from the offline snapshot.
       _selectedFrameNotifier.value = frameToSelect;
     }
-    if (offlineTimelineData.selectedEvent != null) {
+    if (offlinePerformanceData.selectedEvent != null) {
       for (var timelineEvent in data.timelineEvents) {
         final eventToSelect = timelineEvent.firstChildWithCondition((event) {
-          return event.name == offlineTimelineData.selectedEvent.name &&
-              event.time == offlineTimelineData.selectedEvent.time;
+          return event.name == offlinePerformanceData.selectedEvent.name &&
+              event.time == offlinePerformanceData.selectedEvent.time;
         });
         if (eventToSelect != null) {
           data
             ..selectedEvent = eventToSelect
-            ..cpuProfileData = offlineTimelineData.cpuProfileData;
+            ..cpuProfileData = offlinePerformanceData.cpuProfileData;
           _selectedTimelineEventNotifier.value = eventToSelect;
           break;
         }
       }
     }
 
-    if (offlineTimelineData.cpuProfileData != null) {
-      cpuProfilerController.loadOfflineData(offlineTimelineData.cpuProfileData);
+    if (offlinePerformanceData.cpuProfileData != null) {
+      cpuProfilerController
+          .loadOfflineData(offlinePerformanceData.cpuProfileData);
     }
   }
 
@@ -409,7 +406,8 @@ class TimelineController
   ///
   /// This method returns the name of the file that was downloaded.
   String exportData() {
-    final encodedData = _exportController.encode(TimelineScreen.id, data.json);
+    final encodedData =
+        _exportController.encode(PerformanceScreen.id, data.json);
     return _exportController.downloadFile(encodedData);
   }
 
@@ -467,7 +465,7 @@ class TimelineController
       _emptyTimeline.value = true;
     }
     allTraceEvents.clear();
-    offlineTimelineData = null;
+    offlinePerformanceData = null;
     cpuProfilerController.reset();
     data?.clear();
     processor?.reset();

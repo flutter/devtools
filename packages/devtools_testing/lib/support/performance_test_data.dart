@@ -5,7 +5,7 @@
 // ignore_for_file: implementation_imports
 import 'dart:convert';
 
-import 'package:devtools_app/src/timeline/timeline_model.dart';
+import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/utils.dart';
 
@@ -39,15 +39,15 @@ final frameEndEvent = testTraceEventWrapper({
   'args': {}
 });
 
-final testFrame0 = TimelineFrame('id_0')
+final testFrame0 = FlutterFrame('id_0')
   ..setEventFlow(goldenUiTimelineEvent)
   ..setEventFlow(goldenRasterTimelineEvent);
 
-final testFrame1 = TimelineFrame('id_1')
+final testFrame1 = FlutterFrame('id_1')
   ..setEventFlow(goldenUiTimelineEvent)
   ..setEventFlow(goldenRasterTimelineEvent);
 
-final jankyFrame = TimelineFrame('jankyFrame')
+final jankyFrame = FlutterFrame('jankyFrame')
   // ignore: invalid_use_of_visible_for_testing_member
   ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
     ..time = (TimeRange()
@@ -966,17 +966,17 @@ final unknownEventEndTrace = testTraceEventWrapper({
   'args': {'isolateId': 'isolates/2139247553966975'},
 });
 
-// Mark: OfflineTimelineData.
+// Mark: OfflinePerformanceData.
 final goldenTraceEventsJson = List<Map<String, dynamic>>.from(
     goldenUiTraceEvents.map((trace) => trace.json).toList()
       ..addAll(goldenRasterTraceEvents.map((trace) => trace.json).toList()));
 
-final offlineTimelineDataJson = {
-  TimelineData.traceEventsKey: goldenTraceEventsJson,
-  TimelineData.cpuProfileKey: goldenCpuProfileDataJson,
-  TimelineData.selectedFrameIdKey: 'PipelineItem-1',
-  TimelineData.selectedEventKey: vsyncEvent.json,
-  TimelineData.displayRefreshRateKey: 120.0,
+final offlinePerformanceDataJson = {
+  PerformanceData.traceEventsKey: goldenTraceEventsJson,
+  PerformanceData.cpuProfileKey: goldenCpuProfileDataJson,
+  PerformanceData.selectedFrameIdKey: 'PipelineItem-1',
+  PerformanceData.selectedEventKey: vsyncEvent.json,
+  PerformanceData.displayRefreshRateKey: 120.0,
 };
 
 // Mark: Duration events with duplicate traces

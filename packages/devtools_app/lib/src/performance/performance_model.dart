@@ -11,13 +11,13 @@ import '../service_manager.dart';
 import '../trace_event.dart';
 import '../trees.dart';
 import '../utils.dart';
-import 'timeline_processor.dart';
-import 'timeline_utils.dart';
+import 'timeline_event_processor.dart';
+import 'performance_utils.dart';
 
-class TimelineData {
-  TimelineData({
+class PerformanceData {
+  PerformanceData({
     List<Map<String, dynamic>> traceEvents,
-    List<TimelineFrame> frames,
+    List<FlutterFrame> frames,
     this.selectedFrame,
     this.selectedEvent,
     this.cpuProfileData,
@@ -69,9 +69,9 @@ class TimelineData {
   double displayRefreshRate;
 
   /// All frames currently visible in the timeline.
-  List<TimelineFrame> frames = [];
+  List<FlutterFrame> frames = [];
 
-  TimelineFrame selectedFrame;
+  FlutterFrame selectedFrame;
 
   String get selectedFrameId => selectedFrame?.id;
 
@@ -254,11 +254,11 @@ class TimelineRowData {
   TimelineEvent lastEvent;
 }
 
-class OfflineTimelineData extends TimelineData {
-  OfflineTimelineData._({
+class OfflinePerformanceData extends PerformanceData {
+  OfflinePerformanceData._({
     List<Map<String, dynamic>> traceEvents,
-    List<TimelineFrame> frames,
-    TimelineFrame selectedFrame,
+    List<FlutterFrame> frames,
+    FlutterFrame selectedFrame,
     String selectedFrameId,
     TimelineEvent selectedEvent,
     double displayRefreshRate,
@@ -273,19 +273,20 @@ class OfflineTimelineData extends TimelineData {
           cpuProfileData: cpuProfileData,
         );
 
-  static OfflineTimelineData parse(Map<String, dynamic> json) {
+  static OfflinePerformanceData parse(Map<String, dynamic> json) {
     final List<dynamic> traceEvents =
-        (json[TimelineData.traceEventsKey] ?? []).cast<Map<String, dynamic>>();
+        (json[PerformanceData.traceEventsKey] ?? [])
+            .cast<Map<String, dynamic>>();
 
     final Map<String, dynamic> cpuProfileJson =
-        json[TimelineData.cpuProfileKey] ?? {};
+        json[PerformanceData.cpuProfileKey] ?? {};
     final CpuProfileData cpuProfileData =
         cpuProfileJson.isNotEmpty ? CpuProfileData.parse(cpuProfileJson) : null;
 
-    final String selectedFrameId = json[TimelineData.selectedFrameIdKey];
+    final String selectedFrameId = json[PerformanceData.selectedFrameIdKey];
 
     final Map<String, dynamic> selectedEventJson =
-        json[TimelineData.selectedEventKey] ?? {};
+        json[PerformanceData.selectedEventKey] ?? {};
     final OfflineTimelineEvent selectedEvent = selectedEventJson.isNotEmpty
         ? OfflineTimelineEvent(
             (selectedEventJson[TimelineEvent.firstTraceKey] ?? {})
@@ -293,9 +294,9 @@ class OfflineTimelineData extends TimelineData {
         : null;
 
     final double displayRefreshRate =
-        json[TimelineData.displayRefreshRateKey] ?? defaultRefreshRate;
+        json[PerformanceData.displayRefreshRateKey] ?? defaultRefreshRate;
 
-    return OfflineTimelineData._(
+    return OfflinePerformanceData._(
       traceEvents: traceEvents,
       selectedFrameId: selectedFrameId,
       selectedEvent: selectedEvent,
@@ -308,15 +309,15 @@ class OfflineTimelineData extends TimelineData {
   String get selectedFrameId => _selectedFrameId;
   final String _selectedFrameId;
 
-  /// Creates a new instance of [OfflineTimelineData] with references to the
+  /// Creates a new instance of [OfflinePerformanceData] with references to the
   /// same objects contained in this instance.
   ///
   /// This is not a deep copy. We are not modifying the before-mentioned
   /// objects, only pointing our reference variables at different objects.
   /// Therefore, we do not need to store a copy of all these objects (and the
   /// objects they contain) in memory.
-  OfflineTimelineData shallowClone() {
-    return OfflineTimelineData._(
+  OfflinePerformanceData shallowClone() {
+    return OfflinePerformanceData._(
       traceEvents: traceEvents,
       frames: frames,
       selectedFrame: selectedFrame,
@@ -376,13 +377,13 @@ class OfflineTimelineEvent extends TimelineEvent {
           'instance of OfflineTimelineEvent');
 }
 
-/// Data describing a single frame.
+/// Data describing a single Flutter frame.
 ///
-/// Each TimelineFrame should have 2 distinct pieces of data:
+/// Each [FlutterFrame] should have 2 distinct pieces of data:
 /// * [uiEventFlow] : flow of events showing the UI work for the frame.
 /// * [rasterEventFlow] : flow of events showing the Raster work for the frame.
-class TimelineFrame {
-  TimelineFrame(this.id);
+class FlutterFrame {
+  FlutterFrame(this.id);
 
   final String id;
 
