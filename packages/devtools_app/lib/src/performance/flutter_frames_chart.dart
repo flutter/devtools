@@ -42,8 +42,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   static const outlineBorderWidth = 1.0;
 
-  static const scrollBarOffset = 10.0;
-
   PerformanceController _controller;
 
   ScrollController scrollController;
@@ -108,13 +106,13 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         right: denseSpacing,
         bottom: defaultSpacing,
       ),
-      height: defaultChartHeight + scrollBarOffset,
+      height: defaultChartHeight + defaultScrollBarOffset,
       child: Row(
         children: [
           Expanded(child: _buildChart()),
           const SizedBox(width: defaultSpacing),
           Padding(
-            padding: const EdgeInsets.only(bottom: scrollBarOffset),
+            padding: const EdgeInsets.only(bottom: defaultScrollBarOffset),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,7 +135,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           isAlwaysShown: true,
           controller: scrollController,
           child: Padding(
-            padding: const EdgeInsets.only(bottom: scrollBarOffset),
+            padding: const EdgeInsets.only(bottom: defaultScrollBarOffset),
             child: RoundedOutlinedBorder(
               child: ListView.builder(
                 controller: scrollController,
@@ -360,7 +358,7 @@ class ChartAxisPainter extends CustomPainter {
       _FlutterFramesChartState.yAxisUnitsSpace,
       0.0,
       constraints.maxWidth - _FlutterFramesChartState.yAxisUnitsSpace,
-      constraints.maxHeight - _FlutterFramesChartState.scrollBarOffset,
+      constraints.maxHeight - defaultScrollBarOffset,
     );
 
     _paintYAxisLabels(canvas, chartArea);
@@ -482,7 +480,7 @@ class FPSLinePainter extends CustomPainter {
       _FlutterFramesChartState.yAxisUnitsSpace,
       0.0,
       constraints.maxWidth - _FlutterFramesChartState.yAxisUnitsSpace,
-      constraints.maxHeight - _FlutterFramesChartState.scrollBarOffset,
+      constraints.maxHeight - defaultScrollBarOffset,
     );
 
     // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
