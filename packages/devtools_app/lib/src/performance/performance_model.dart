@@ -11,8 +11,8 @@ import '../service_manager.dart';
 import '../trace_event.dart';
 import '../trees.dart';
 import '../utils.dart';
-import 'timeline_event_processor.dart';
 import 'performance_utils.dart';
+import 'timeline_event_processor.dart';
 
 class PerformanceData {
   PerformanceData({
