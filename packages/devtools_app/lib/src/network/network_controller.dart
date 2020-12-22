@@ -320,7 +320,7 @@ class NetworkController
   void filterData(QueryFilter filter) {
     serviceManager.errorBadgeManager.clearErrors(NetworkScreen.id);
     if (filter == null) {
-      final requests = List.from(_requests.value.requests);
+      final requests = List<NetworkRequest>.from(_requests.value.requests);
       requests.forEach(_checkForError);
       filteredData.value = requests;
     } else {
