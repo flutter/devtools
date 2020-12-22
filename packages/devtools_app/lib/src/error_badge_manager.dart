@@ -8,14 +8,15 @@ import 'package:vm_service/vm_service.dart';
 import 'auto_dispose.dart';
 import 'globals.dart';
 import 'listenable.dart';
+import 'logging/logging_screen.dart';
 import 'service_extensions.dart' as extensions;
 import 'vm_service_wrapper.dart';
 
 class ErrorBadgeManager extends DisposableController
     with AutoDisposeControllerMixin {
-  // TODO(kenz): populate this map with screens as support is added
-  // (e.g. { LoggingScreen.id: ValueNotifier<int>(0) }
-  final _activeErrorCounts = <String, ValueNotifier<int>>{};
+  final _activeErrorCounts = <String, ValueNotifier<int>>{
+    LoggingScreen.id: ValueNotifier<int>(0),
+  };
 
   void vmServiceOpened(VmServiceWrapper service) {
     // Ensure structured errors are enabled.
@@ -33,15 +34,30 @@ class ErrorBadgeManager extends DisposableController
   }
 
   void _handleExtensionEvent(Event e) async {
-    // TODO(kenz): handle Flutter.Error extension events.
+    // TODO(jacobr): badge inspector for appropriate errors.
+    if (e.extensionKind == 'Flutter.Error') {
+      incrementBadgeCount(LoggingScreen.id);
+    }
   }
 
   void _handleStdErr(Event e) {
-    // TODO(kenz): handle stderr events
+    incrementBadgeCount(LoggingScreen.id);
+  }
+
+  void incrementBadgeCount(String screenId) {
+    final notifier = _errorCountNotifier(screenId);
+    if (notifier == null) return;
+
+    final currentCount = notifier.value;
+    notifier.value = currentCount + 1;
   }
 
   ValueListenable<int> errorCountNotifier(String screenId) {
-    return _activeErrorCounts[screenId] ?? const FixedValueListenable<int>(0);
+    return _errorCountNotifier(screenId) ?? const FixedValueListenable<int>(0);
+  }
+
+  ValueNotifier<int> _errorCountNotifier(String screenId) {
+    return _activeErrorCounts[screenId];
   }
 
   void clearErrors(String screenId) {
