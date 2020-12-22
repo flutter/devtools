@@ -619,6 +619,10 @@ class ServiceExtensionManager extends Disposer {
   /// All service extensions that are currently enabled.
   final _enabledServiceExtensions = <String, ServiceExtensionState>{};
 
+  /// Map from service extension name to [Completer] that completes when the
+  /// service extension is registered or the isolate shuts down.
+  final _maybeRegisteringServiceExtensions = <String, Completer<bool>>{};
+
   /// Temporarily stores service extensions that we need to add. We should not
   /// add extensions until the first frame event has been received
   /// [_firstFrameEventReceived].
@@ -991,6 +995,16 @@ class ServiceExtensionManager extends Disposer {
     _checkForFirstFrameStarted = false;
     _pendingServiceExtensions.clear();
     _serviceExtensions.clear();
+
+    // If the isolate has closed, there is no need to wait any longer for
+    // service extensions that might be registered.
+    for (var completer in _maybeRegisteringServiceExtensions.values) {
+      if (!completer.isCompleted) {
+        completer.complete(false);
+      }
+    }
+    _maybeRegisteringServiceExtensions.clear();
+
     for (var listenable in _serviceExtensionAvailable.values) {
       listenable.value = false;
     }
@@ -1021,6 +1035,28 @@ class ServiceExtensionManager extends Disposer {
   bool isServiceExtensionAvailable(String name) {
     return _serviceExtensions.contains(name) ||
         _pendingServiceExtensions.contains(name);
+  }
+
+  Future<bool> waitForServiceExtensionAvailable(String name) {
+    if (isServiceExtensionAvailable(name)) return Future.value(true);
+
+    Completer<bool> createCompleter() {
+      // Listen for when the service extension is added and use it.
+      final completer = Completer<bool>();
+      final listenable = hasServiceExtension(name);
+      VoidCallback listener;
+      listener = () {
+        if (listenable.value || completer.isCompleted) {
+          listenable.removeListener(listener);
+          completer.complete(true);
+        }
+      };
+      hasServiceExtension(name).addListener(listener);
+      return completer;
+    }
+
+    _maybeRegisteringServiceExtensions[name] ??= createCompleter();
+    return _maybeRegisteringServiceExtensions[name].future;
   }
 
   ValueListenable<bool> hasServiceExtension(String name) {
