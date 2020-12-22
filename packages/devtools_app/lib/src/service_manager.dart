@@ -966,6 +966,7 @@ class ServiceExtensionManager extends Disposer {
       }
     }
 
+    if (mainIsolate == null) return;
     final Isolate isolate = await _service.getIsolate(mainIsolate.id);
     if (_mainIsolate.value != mainIsolate) return;
 
