@@ -276,19 +276,15 @@ void main() {
 
         // Re-launch, allowing reuse and with a different page.
         await _sendLaunchDevToolsRequest(
-            useVmService: useVmService,
-            reuseWindows: true,
-            page: 'performance');
+            useVmService: useVmService, reuseWindows: true, page: 'logging');
 
-        final serverResponse =
-            await _waitForClients(requiredPage: 'performance');
+        final serverResponse = await _waitForClients(requiredPage: 'logging');
         expect(serverResponse, isNotNull);
         expect(serverResponse['clients'], hasLength(1));
         expect(serverResponse['clients'][0]['hasConnection'], isTrue);
         expect(serverResponse['clients'][0]['vmServiceUri'],
             equals(appFixture.serviceUri.toString()));
-        expect(
-            serverResponse['clients'][0]['currentPage'], equals('performance'));
+        expect(serverResponse['clients'][0]['currentPage'], equals('logging'));
       }, timeout: const Timeout.factor(10));
 
       test('DevTools reports disconnects from a VM', () async {
