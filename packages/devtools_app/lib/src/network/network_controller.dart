@@ -16,6 +16,7 @@ import '../ui/filter.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import 'network_model.dart';
+import 'network_screen.dart';
 import 'network_service.dart';
 
 class NetworkController
@@ -317,8 +318,11 @@ class NetworkController
 
   @override
   void filterData(QueryFilter filter) {
+    serviceManager.errorBadgeManager.clearErrors(NetworkScreen.id);
     if (filter == null) {
-      filteredData.value = List.from(_requests.value.requests);
+      final requests = List.from(_requests.value.requests);
+      requests.forEach(_checkForError);
+      filteredData.value = requests;
     } else {
       filteredData.value = _requests.value.requests.where((NetworkRequest r) {
         final methodArg = filter.filterArguments[methodFilterId];
@@ -343,26 +347,45 @@ class NetworkController
             final caseInsensitiveSubstring = substring.toLowerCase();
             final matchesUri =
                 r.uri.toLowerCase().contains(caseInsensitiveSubstring);
-            if (matchesUri) return true;
+            if (matchesUri) {
+              _checkForError(r);
+              return true;
+            }
 
             final matchesMethod =
                 r.method.toLowerCase().contains(caseInsensitiveSubstring);
-            if (matchesMethod) return true;
+            if (matchesMethod) {
+              _checkForError(r);
+              return true;
+            }
 
             final matchesStatus =
                 r.status?.toLowerCase()?.contains(caseInsensitiveSubstring) ??
                     false;
-            if (matchesStatus) return true;
+            if (matchesStatus) {
+              _checkForError(r);
+              return true;
+            }
 
             final matchesType =
                 r.type.toLowerCase().contains(caseInsensitiveSubstring);
-            if (matchesType) return true;
+            if (matchesType) {
+              _checkForError(r);
+              return true;
+            }
           }
           return false;
         }
+        _checkForError(r);
         return true;
       }).toList();
     }
     activeFilter.value = filter;
+  }
+
+  void _checkForError(NetworkRequest r) {
+    if (r.didFail) {
+      serviceManager.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
+    }
   }
 }
