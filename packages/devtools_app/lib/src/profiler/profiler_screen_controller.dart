@@ -5,12 +5,12 @@
 import 'package:flutter/foundation.dart';
 
 import '../config_specific/import_export/import_export.dart';
-import '../profiler/cpu_profile_controller.dart';
-import '../profiler/cpu_profile_model.dart';
 import '../utils.dart';
-import 'performance_screen.dart';
+import 'cpu_profile_controller.dart';
+import 'cpu_profile_model.dart';
+import 'profiler_screen.dart';
 
-class PerformanceController with CpuProfilerControllerProviderMixin {
+class ProfilerScreenController with CpuProfilerControllerProviderMixin {
   final _exportController = ExportController();
 
   CpuProfileData get cpuProfileData => cpuProfilerController.dataNotifier.value;
@@ -36,12 +36,12 @@ class PerformanceController with CpuProfilerControllerProviderMixin {
     );
   }
 
-  /// Exports the current performance data to a .json file.
+  /// Exports the current profiler data to a .json file.
   ///
   /// This method returns the name of the file that was downloaded.
   String exportData() {
     final encodedData =
-        _exportController.encode(PerformanceScreen.id, cpuProfileData.json);
+        _exportController.encode(ProfilerScreen.id, cpuProfileData.json);
     return _exportController.downloadFile(encodedData);
   }
 

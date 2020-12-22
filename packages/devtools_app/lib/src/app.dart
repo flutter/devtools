@@ -32,8 +32,8 @@ import 'memory/memory_screen.dart';
 import 'network/network_controller.dart';
 import 'network/network_screen.dart';
 import 'notifications.dart';
-import 'performance/performance_controller.dart';
-import 'performance/performance_screen.dart';
+import 'profiler/profiler_screen.dart';
+import 'profiler/profiler_screen_controller.dart';
 import 'routing.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -533,14 +533,14 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
         createController: () => TimelineController(),
         supportsOffline: true,
       ),
+      DevToolsScreen<ProfilerScreenController>(
+        const ProfilerScreen(),
+        createController: () => ProfilerScreenController(),
+        supportsOffline: true,
+      ),
       DevToolsScreen<MemoryController>(
         const MemoryScreen(),
         createController: () => MemoryController(),
-      ),
-      DevToolsScreen<PerformanceController>(
-        const PerformanceScreen(),
-        createController: () => PerformanceController(),
-        supportsOffline: true,
       ),
       DevToolsScreen<DebuggerController>(
         const DebuggerScreen(),

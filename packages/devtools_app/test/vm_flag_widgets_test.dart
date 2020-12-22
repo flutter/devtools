@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/performance/performance_screen.dart';
+import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/theme.dart';
@@ -27,7 +27,7 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      dropdown = const ProfileGranularityDropdown(PerformanceScreen.id);
+      dropdown = const ProfileGranularityDropdown(ProfilerScreen.id);
     });
 
     Future<void> pumpDropdown(WidgetTester tester) async {
@@ -99,7 +99,7 @@ void main() {
       // Verify we are showing the high profile granularity warning.
       expect(
         bannerMessagesController(buildContext)
-            .messagesForScreen(PerformanceScreen.id)
+            .messagesForScreen(ProfilerScreen.id)
             .value
             .length,
         equals(1),
@@ -123,7 +123,7 @@ void main() {
       // Verify we are not showing the high profile granularity warning.
       expect(
         bannerMessagesController(buildContext)
-            .messagesForScreen(PerformanceScreen.id)
+            .messagesForScreen(ProfilerScreen.id)
             .value,
         isEmpty,
       );

@@ -10,6 +10,7 @@ import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:devtools_testing/support/timeline_test_data.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -17,6 +18,8 @@ import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
+  const windowSize = Size(2000.0, 1000.0);
+
   group('EventDetails', () {
     EventDetails eventDetails;
 
@@ -38,7 +41,8 @@ void main() {
       when(serviceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     });
 
-    testWidgets('builds for UI event', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('builds for UI event', windowSize,
+        (WidgetTester tester) async {
       await pumpEventDetails(goldenUiTimelineEvent, tester);
       expect(find.byType(CpuProfiler), findsOneWidget);
       expect(find.byType(CpuProfilerDisabled), findsNothing);
@@ -47,7 +51,8 @@ void main() {
       expect(find.text(EventDetails.instructions), findsNothing);
     });
 
-    testWidgets('builds for Raster event', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('builds for Raster event', windowSize,
+        (WidgetTester tester) async {
       await pumpEventDetails(goldenRasterTimelineEvent, tester);
       expect(find.byType(CpuProfiler), findsNothing);
       expect(find.byType(CpuProfilerDisabled), findsNothing);
@@ -56,7 +61,8 @@ void main() {
       expect(find.text(EventDetails.instructions), findsNothing);
     });
 
-    testWidgets('builds for ASYNC event', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('builds for ASYNC event', windowSize,
+        (WidgetTester tester) async {
       await pumpEventDetails(asyncEventWithInstantChildren, tester);
       expect(find.byType(CpuProfiler), findsNothing);
       expect(find.byType(CpuProfilerDisabled), findsNothing);
@@ -65,7 +71,8 @@ void main() {
       expect(find.text(EventDetails.instructions), findsNothing);
     });
 
-    testWidgets('builds for null event', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('builds for null event', windowSize,
+        (WidgetTester tester) async {
       await pumpEventDetails(null, tester);
       expect(find.byType(CpuProfiler), findsNothing);
       expect(find.byType(CpuProfilerDisabled), findsNothing);
@@ -74,7 +81,8 @@ void main() {
       expect(find.text(EventDetails.instructions), findsOneWidget);
     });
 
-    testWidgets('builds for disabled profiler', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('builds for disabled profiler', windowSize,
+        (WidgetTester tester) async {
       await serviceManager.service.setFlag(vm_flags.profiler, 'false');
       await pumpEventDetails(goldenUiTimelineEvent, tester);
       expect(find.byType(CpuProfiler), findsNothing);

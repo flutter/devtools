@@ -48,9 +48,9 @@ class CpuProfiler extends StatefulWidget {
   // TODO(kenz): the summary tab should be available for UI events in the
   // timeline.
   static const tabs = [
-    Tab(key: flameChartTab, text: 'CPU Flame Chart'),
-    Tab(key: callTreeTab, text: 'Call Tree'),
     Tab(key: bottomUpTab, text: 'Bottom Up'),
+    Tab(key: callTreeTab, text: 'Call Tree'),
+    Tab(key: flameChartTab, text: 'CPU Flame Chart'),
   ];
 
   static const emptyCpuProfile = 'No CPU profile data';
@@ -155,6 +155,8 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   List<Widget> _buildProfilerViews() {
+    final bottomUp = CpuBottomUpTable(widget.bottomUpRoots);
+    final callTree = CpuCallTreeTable(widget.callTreeRoots);
     final cpuFlameChart = LayoutBuilder(
       builder: (context, constraints) {
         return CpuProfileFlameChart(
@@ -169,10 +171,8 @@ class _CpuProfilerState extends State<CpuProfiler>
         );
       },
     );
-    final callTree = CpuCallTreeTable(widget.callTreeRoots);
-    final bottomUp = CpuBottomUpTable(widget.bottomUpRoots);
     // TODO(kenz): make this order configurable.
-    return [cpuFlameChart, callTree, bottomUp];
+    return [bottomUp, callTree, cpuFlameChart ];
   }
 
   Widget _expandAllButton(Tab currentTab) {

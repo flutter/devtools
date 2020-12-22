@@ -2,21 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:test/test.dart';
 
 import 'support/mocks.dart';
 
 void main() {
-  group('PerformanceController', () {
-    PerformanceController controller;
+  group('ProfilerScreenController', () {
+    ProfilerScreenController controller;
     FakeServiceManager fakeServiceManager;
 
     setUp(() {
       fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      controller = PerformanceController();
+      controller = ProfilerScreenController();
     });
 
     test('start and stop recording', () async {

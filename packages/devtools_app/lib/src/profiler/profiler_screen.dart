@@ -17,24 +17,24 @@ import '../config_specific/import_export/import_export.dart';
 import '../globals.dart';
 import '../notifications.dart';
 import '../octicons.dart';
-import '../profiler/cpu_profile_controller.dart';
-import '../profiler/cpu_profile_model.dart';
-import '../profiler/cpu_profiler.dart';
 import '../screen.dart';
 import '../theme.dart';
 import '../ui/vm_flag_widgets.dart';
-import 'performance_controller.dart';
+import 'cpu_profile_controller.dart';
+import 'cpu_profile_model.dart';
+import 'cpu_profiler.dart';
+import 'profiler_screen_controller.dart';
 
-final performanceSearchFieldKey =
-    GlobalKey(debugLabel: 'PerformanceSearchFieldKey');
+final profilerScreenSearchFieldKey =
+    GlobalKey(debugLabel: 'ProfilerScreenSearchFieldKey');
 
-class PerformanceScreen extends Screen {
-  const PerformanceScreen()
+class ProfilerScreen extends Screen {
+  const ProfilerScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
           worksOffline: true,
-          title: 'Performance',
+          title: 'CPU Profiler',
           icon: Octicons.dashboard,
         );
 
@@ -43,30 +43,30 @@ class PerformanceScreen extends Screen {
   @visibleForTesting
   static const recordingStatusKey = Key('Recording Status');
 
-  static const id = 'performance';
+  static const id = 'cpu-profiler';
 
   @override
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) => const PerformanceScreenBody();
+  Widget build(BuildContext context) => const ProfilerScreenBody();
 }
 
-class PerformanceScreenBody extends StatefulWidget {
-  const PerformanceScreenBody();
+class ProfilerScreenBody extends StatefulWidget {
+  const ProfilerScreenBody();
 
   @override
-  _PerformanceScreenBodyState createState() => _PerformanceScreenBodyState();
+  _ProfilerScreenBodyState createState() => _ProfilerScreenBodyState();
 }
 
-class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
+class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     with
         AutoDisposeMixin,
-        OfflineScreenMixin<PerformanceScreenBody, CpuProfileData> {
+        OfflineScreenMixin<ProfilerScreenBody, CpuProfileData> {
   static const _primaryControlsMinIncludeTextWidth = 600.0;
   static const _secondaryControlsMinIncludeTextWidth = 1100.0;
 
-  PerformanceController controller;
+  ProfilerScreenController controller;
 
   bool recording = false;
 
@@ -77,15 +77,15 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   void initState() {
     super.initState();
-    ga.screen(PerformanceScreen.id);
+    ga.screen(ProfilerScreen.id);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
+    maybePushDebugModePerformanceMessage(context, ProfilerScreen.id);
 
-    final newController = Provider.of<PerformanceController>(context);
+    final newController = Provider.of<ProfilerScreenController>(context);
     if (newController == controller) return;
     controller = newController;
 
@@ -112,34 +112,34 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
       });
     });
 
-    // Load offline performance data if available.
+    // Load offline profiler data if available.
     if (shouldLoadOfflineData()) {
-      final performanceJson =
-          Map<String, dynamic>.from(offlineDataJson[PerformanceScreen.id]);
-      final offlinePerformanceData = CpuProfileData.parse(performanceJson);
-      if (!offlinePerformanceData.isEmpty) {
-        loadOfflineData(offlinePerformanceData);
+      final profilerJson =
+          Map<String, dynamic>.from(offlineDataJson[ProfilerScreen.id]);
+      final offlineProfilerData = CpuProfileData.parse(profilerJson);
+      if (!offlineProfilerData.isEmpty) {
+        loadOfflineData(offlineProfilerData);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (offlineMode) return _buildPerformanceBody(controller);
+    if (offlineMode) return _buildProfilerScreenBody(controller);
     return ValueListenableBuilder<Flag>(
       valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
       builder: (context, profilerFlag, _) {
         return profilerFlag.valueAsString == 'true'
-            ? _buildPerformanceBody(controller)
+            ? _buildProfilerScreenBody(controller)
             : CpuProfilerDisabled(controller.cpuProfilerController);
       },
     );
   }
 
-  Widget _buildPerformanceBody(PerformanceController controller) {
-    final performanceScreen = Column(
+  Widget _buildProfilerScreenBody(ProfilerScreenController controller) {
+    final profilerScreen = Column(
       children: [
-        if (!offlineMode) _buildPerformanceControls(),
+        if (!offlineMode) _buildProfilerControls(),
         const SizedBox(height: denseRowSpacing),
         Expanded(
           child: ValueListenableBuilder<CpuProfileData>(
@@ -153,7 +153,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
               return CpuProfiler(
                 data: cpuProfileData,
                 controller: controller.cpuProfilerController,
-                searchFieldKey: performanceSearchFieldKey,
+                searchFieldKey: profilerScreenSearchFieldKey,
               );
             },
           ),
@@ -167,7 +167,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
     // empty UI while data is being processed.
     return Stack(
       children: [
-        performanceScreen,
+        profilerScreen,
         if (loadingOfflineData)
           Container(
             color: Theme.of(context).scaffoldBackgroundColor,
@@ -177,7 +177,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
     );
   }
 
-  Widget _buildPerformanceControls() {
+  Widget _buildProfilerControls() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -214,7 +214,7 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        const ProfileGranularityDropdown(PerformanceScreen.id),
+        const ProfileGranularityDropdown(ProfilerScreen.id),
         const SizedBox(width: defaultSpacing),
         ExportButton(
           onPressed: controller.cpuProfileData != null &&
@@ -229,8 +229,8 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   Widget _buildRecordingInfo() {
     return RecordingInfo(
-      instructionsKey: PerformanceScreen.recordingInstructionsKey,
-      recordingStatusKey: PerformanceScreen.recordingStatusKey,
+      instructionsKey: ProfilerScreen.recordingInstructionsKey,
+      recordingStatusKey: ProfilerScreen.recordingStatusKey,
       recording: recording,
       processing: processing,
       progressValue: processingProgress,
@@ -257,6 +257,6 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   bool shouldLoadOfflineData() {
     return offlineMode &&
         offlineDataJson.isNotEmpty &&
-        offlineDataJson[PerformanceScreen.id] != null;
+        offlineDataJson[ProfilerScreen.id] != null;
   }
 }

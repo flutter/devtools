@@ -5,7 +5,7 @@
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/performance/performance_screen.dart';
+import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/scaffold.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
@@ -162,7 +162,7 @@ BannerMessagesController bannerMessagesController(BuildContext context) {
 
 const testMessage1ScreenId = SimpleScreen.id;
 const testMessage2ScreenId = SimpleScreen.id;
-const testMessage3ScreenId = PerformanceScreen.id;
+const testMessage3ScreenId = ProfilerScreen.id;
 const k1 = Key('test message 1');
 const k2 = Key('test message 2');
 const k3 = Key('test message 3');
