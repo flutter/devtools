@@ -37,7 +37,10 @@ void main() {
   });
 
   group('Cpu Profiler', () {
-    testWidgets('builds for null cpuProfileData', (WidgetTester tester) async {
+    const windowSize = Size(2000.0, 1000.0);
+
+    testWidgetsWithWindowSize('builds for null cpuProfileData', windowSize,
+        (WidgetTester tester) async {
       cpuProfiler = CpuProfiler(
         data: null,
         controller: controller,
@@ -51,7 +54,8 @@ void main() {
       expect(find.byType(CpuBottomUpTable), findsNothing);
     });
 
-    testWidgets('builds for empty cpuProfileData', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('builds for empty cpuProfileData', windowSize,
+        (WidgetTester tester) async {
       cpuProfileData = CpuProfileData.parse(emptyCpuProfileDataJson);
       cpuProfiler = CpuProfiler(
         data: cpuProfileData,
@@ -66,19 +70,7 @@ void main() {
       expect(find.byType(CpuBottomUpTable), findsNothing);
     });
 
-    testWidgets('builds for valid cpuProfileData', (WidgetTester tester) async {
-      cpuProfiler = CpuProfiler(
-        data: cpuProfileData,
-        controller: controller,
-      );
-      await tester.pumpWidget(wrap(cpuProfiler));
-      expect(find.byType(TabBar), findsOneWidget);
-      expect(find.text(CpuProfiler.emptyCpuProfile), findsNothing);
-      expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
-      expect(find.byType(CpuProfileFlameChart), findsOneWidget);
-    });
-
-    testWidgetsWithWindowSize('switches tabs', const Size(1000, 1000),
+    testWidgetsWithWindowSize('builds for valid cpuProfileData', windowSize,
         (WidgetTester tester) async {
       cpuProfiler = CpuProfiler(
         data: cpuProfileData,
@@ -88,11 +80,24 @@ void main() {
       expect(find.byType(TabBar), findsOneWidget);
       expect(find.text(CpuProfiler.emptyCpuProfile), findsNothing);
       expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
-      expect(find.byType(CpuProfileFlameChart), findsOneWidget);
+      expect(find.byType(CpuBottomUpTable), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize('switches tabs', windowSize,
+        (WidgetTester tester) async {
+      cpuProfiler = CpuProfiler(
+        data: cpuProfileData,
+        controller: controller,
+      );
+      await tester.pumpWidget(wrap(cpuProfiler));
+      expect(find.byType(TabBar), findsOneWidget);
+      expect(find.text(CpuProfiler.emptyCpuProfile), findsNothing);
+      expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
+      expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsNothing);
-      expect(find.byType(CpuBottomUpTable), findsNothing);
-      expect(find.byKey(CpuProfiler.expandButtonKey), findsNothing);
-      expect(find.byKey(CpuProfiler.collapseButtonKey), findsNothing);
+      expect(find.byType(CpuBottomUpTable), findsOneWidget);
+      expect(find.byKey(CpuProfiler.expandButtonKey), findsOneWidget);
+      expect(find.byKey(CpuProfiler.collapseButtonKey), findsOneWidget);
 
       await tester.tap(find.text('Call Tree'));
       await tester.pumpAndSettle();
@@ -102,17 +107,16 @@ void main() {
       expect(find.byKey(CpuProfiler.expandButtonKey), findsOneWidget);
       expect(find.byKey(CpuProfiler.collapseButtonKey), findsOneWidget);
 
-      await tester.tap(find.text('Bottom Up'));
+      await tester.tap(find.text('CPU Flame Chart'));
       await tester.pumpAndSettle();
-      expect(find.byType(CpuProfileFlameChart), findsNothing);
+      expect(find.byType(CpuProfileFlameChart), findsOneWidget);
       expect(find.byType(CpuCallTreeTable), findsNothing);
-      expect(find.byType(CpuBottomUpTable), findsOneWidget);
-      expect(find.byKey(CpuProfiler.expandButtonKey), findsOneWidget);
-      expect(find.byKey(CpuProfiler.collapseButtonKey), findsOneWidget);
+      expect(find.byType(CpuBottomUpTable), findsNothing);
+      expect(find.byKey(CpuProfiler.expandButtonKey), findsNothing);
+      expect(find.byKey(CpuProfiler.collapseButtonKey), findsNothing);
     });
 
-    testWidgetsWithWindowSize(
-        'can expand and collapse data', const Size(1000, 1000),
+    testWidgetsWithWindowSize('can expand and collapse data', windowSize,
         (WidgetTester tester) async {
       cpuProfiler = CpuProfiler(
         data: cpuProfileData,

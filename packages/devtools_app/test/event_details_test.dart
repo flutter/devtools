@@ -18,7 +18,7 @@ import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
-  const windowSize = Size(2050.0, 1000.0);
+  const windowSize = Size(2000.0, 1000.0);
 
   group('EventDetails', () {
     EventDetails eventDetails;
