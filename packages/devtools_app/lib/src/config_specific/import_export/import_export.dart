@@ -7,8 +7,8 @@ import 'dart:convert';
 import '../../../devtools.dart';
 import '../../globals.dart';
 import '../../notifications.dart';
-import '../../timeline/timeline_model.dart';
-import '../../timeline/timeline_screen.dart';
+import '../../performance/performance_model.dart';
+import '../../performance/performance_screen.dart';
 import '../../utils.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
@@ -102,11 +102,11 @@ abstract class ExportController {
     // This is a workaround to guarantee that DevTools exports are compatible
     // with other trace viewers (catapult, perfetto, chrome://tracing), which
     // require a top level field named "traceEvents".
-    if (activeScreenId == TimelineScreen.id) {
+    if (activeScreenId == PerformanceScreen.id) {
       final traceEvents = List<Map<String, dynamic>>.from(
-          contents[TimelineData.traceEventsKey]);
-      _contents[TimelineData.traceEventsKey] = traceEvents;
-      contents.remove(TimelineData.traceEventsKey);
+          contents[PerformanceData.traceEventsKey]);
+      _contents[PerformanceData.traceEventsKey] = traceEvents;
+      contents.remove(PerformanceData.traceEventsKey);
     }
     return jsonEncode(_contents..addAll({activeScreenId: contents}));
   }

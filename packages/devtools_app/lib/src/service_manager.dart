@@ -161,8 +161,8 @@ class ServiceConnectionManager {
     // performing any async operations. Otherwise, we may get end up with
     // race conditions where managers cannot listen for events soon enough.
     isolateManager.vmServiceOpened(service);
-    vmFlagManager.vmServiceOpened(service);
     serviceExtensionManager.vmServiceOpened(service, connectedApp);
+    vmFlagManager.vmServiceOpened(service);
     // This needs to be called last in the above group of `vmServiceOpened`
     // calls.
     errorBadgeManager.vmServiceOpened(service);
@@ -966,6 +966,7 @@ class ServiceExtensionManager extends Disposer {
       }
     }
 
+    if (mainIsolate == null) return;
     final Isolate isolate = await _service.getIsolate(mainIsolate.id);
     if (_mainIsolate.value != mainIsolate) return;
 

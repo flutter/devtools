@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'timeline_model.dart';
+import 'performance_model.dart';
 
 String computeEventGroupKey(TimelineEvent event) {
   if (event.groupKey != null) {
@@ -10,12 +10,12 @@ String computeEventGroupKey(TimelineEvent event) {
   } else if (event.isAsyncEvent) {
     return event.root.name;
   } else if (event.isUiEvent) {
-    return TimelineData.uiKey;
+    return PerformanceData.uiKey;
   } else if (event.isRasterEvent) {
-    return TimelineData.rasterKey;
+    return PerformanceData.rasterKey;
   } else if (event.isGCEvent) {
-    return TimelineData.gcKey;
+    return PerformanceData.gcKey;
   } else {
-    return TimelineData.unknownKey;
+    return PerformanceData.unknownKey;
   }
 }

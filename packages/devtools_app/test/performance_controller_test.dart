@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_testing/timeline_controller_test.dart';
+import 'package:devtools_testing/performance_controller_test.dart';
 import 'package:devtools_testing/support/flutter_test_driver.dart'
     show FlutterRunConfiguration;
 import 'package:devtools_testing/support/flutter_test_environment.dart';
@@ -14,5 +14,5 @@ void main() async {
     const FlutterRunConfiguration(withDebugger: true),
   );
 
-  await runTimelineControllerTests(env);
+  await runPerformanceControllerTests(env);
 }

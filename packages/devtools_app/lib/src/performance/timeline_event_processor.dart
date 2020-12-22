@@ -11,8 +11,8 @@ import '../config_specific/logger/logger.dart';
 import '../trace_event.dart';
 import '../utils.dart';
 //import '../simple_trace_example.dart';
-import 'timeline_controller.dart';
-import 'timeline_model.dart';
+import 'performance_controller.dart';
+import 'performance_model.dart';
 
 // For documentation, see the Chrome "Trace Event Format" document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU.
@@ -48,14 +48,14 @@ const String messageLoopFlushTasks = 'MessageLoop::FlushTasks';
 const String pipelineItem = 'PipelineItem';
 
 /// Processor for composing a recorded list of trace events into a timeline of
-/// [AsyncTimelineEvent]s, [SyncTimelineEvent]s, and [TimelineFrame]s.
-class TimelineProcessor {
-  TimelineProcessor(this.timelineController);
+/// [AsyncTimelineEvent]s, [SyncTimelineEvent]s, and [FlutterFrame]s.
+class TimelineEventProcessor {
+  TimelineEventProcessor(this.timelineController);
 
   /// Number of traceEvents we will process in each batch.
   static const _defaultBatchSize = 2000;
 
-  final TimelineController timelineController;
+  final PerformanceController timelineController;
 
   /// Notifies with the current progress value of processing Timeline data.
   ///
@@ -90,7 +90,7 @@ class TimelineProcessor {
   /// Once frames have a start and end time, we will remove them from this Map
   /// and add them to the timeline.
   @visibleForTesting
-  final pendingFrames = <String, TimelineFrame>{};
+  final pendingFrames = <String, FlutterFrame>{};
 
   /// Pending root duration complete event that has not yet been added to the
   /// timeline.
@@ -522,11 +522,11 @@ class TimelineProcessor {
     final frames = pendingFrames.values
         .where((frame) => frame.pipelineItemTime.start != null)
         .toList()
-          ..sort((TimelineFrame a, TimelineFrame b) {
+          ..sort((FlutterFrame a, FlutterFrame b) {
             return a.pipelineItemTime.start.inMicroseconds
                 .compareTo(b.pipelineItemTime.start.inMicroseconds);
           });
-    for (TimelineFrame frame in frames) {
+    for (FlutterFrame frame in frames) {
       final eventAdded = _maybeAddEventToFrame(event, frame);
       if (eventAdded) {
         break;
@@ -536,7 +536,7 @@ class TimelineProcessor {
 
   /// Attempts to add [event] to [frame], and returns a bool indicating whether
   /// the attempt was successful.
-  bool _maybeAddEventToFrame(SyncTimelineEvent event, TimelineFrame frame) {
+  bool _maybeAddEventToFrame(SyncTimelineEvent event, FlutterFrame frame) {
     // Ensure the frame does not already have an event of this type and that
     // the event fits within the frame's time boundaries.
     if (frame.eventFlows[event.type.index] != null ||
@@ -553,7 +553,7 @@ class TimelineProcessor {
 
   // The [rasterEventFlow] should always start after the [uiEventFlow].
   @visibleForTesting
-  bool satisfiesUiRasterOrder(SyncTimelineEvent e, TimelineFrame f) {
+  bool satisfiesUiRasterOrder(SyncTimelineEvent e, FlutterFrame f) {
     if (e.isUiEventFlow && f.rasterEventFlow != null) {
       return e.time.start.inMicroseconds <
           f.rasterEventFlow.time.start.inMicroseconds;
@@ -566,7 +566,7 @@ class TimelineProcessor {
     return true;
   }
 
-  void _maybeAddCompletedFrame(TimelineFrame frame) {
+  void _maybeAddCompletedFrame(FlutterFrame frame) {
     assert(pendingFrames.containsKey(frame.id));
     if (frame.isReadyForTimeline) {
       timelineController.addFrame(frame);
@@ -574,9 +574,9 @@ class TimelineProcessor {
     }
   }
 
-  TimelineFrame _frameFromEvent(TraceEvent event) {
+  FlutterFrame _frameFromEvent(TraceEvent event) {
     final id = _frameId(event);
-    return pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
+    return pendingFrames.putIfAbsent(id, () => FlutterFrame(id));
   }
 
   String _frameId(TraceEvent event) {

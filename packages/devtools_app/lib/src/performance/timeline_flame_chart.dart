@@ -20,9 +20,9 @@ import '../ui/colors.dart';
 import '../ui/search.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
-import 'timeline_controller.dart';
-import 'timeline_model.dart';
-import 'timeline_utils.dart';
+import 'performance_controller.dart';
+import 'performance_model.dart';
+import 'performance_utils.dart';
 
 final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
@@ -47,13 +47,13 @@ class TimelineFlameChartContainer extends StatefulWidget {
 class _TimelineFlameChartContainerState
     extends State<TimelineFlameChartContainer>
     with AutoDisposeMixin, SearchFieldMixin {
-  TimelineController controller;
+  PerformanceController controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final newController = Provider.of<TimelineController>(context);
+    final newController = Provider.of<PerformanceController>(context);
     if (newController == controller) return;
     controller = newController;
   }
@@ -140,9 +140,9 @@ class _TimelineFlameChartContainerState
 
 // TODO(kenz): make flame chart sections collapsible.
 
-class TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
+class TimelineFlameChart extends FlameChart<PerformanceData, TimelineEvent> {
   TimelineFlameChart(
-    TimelineData data, {
+    PerformanceData data, {
     @required double width,
     @required double height,
     @required ValueListenable<TimelineEvent> selectionNotifier,
@@ -161,7 +161,7 @@ class TimelineFlameChart extends FlameChart<TimelineData, TimelineEvent> {
           onSelected: onSelection,
         );
 
-  static double _calculateStartInset(TimelineData data) {
+  static double _calculateStartInset(PerformanceData data) {
     const spaceFor0msText = 55.0;
     const maxStartInset = 300.0;
     var maxMeasuredWidth = 0.0;
@@ -205,9 +205,9 @@ class TimelineFlameChartState
 
   int widestRow = -1;
 
-  TimelineController _timelineController;
+  PerformanceController _timelineController;
 
-  TimelineFrame _selectedFrame;
+  FlutterFrame _selectedFrame;
 
   @override
   int get rowOffsetForTopPadding => TimelineFlameChart.rowOffsetForTopPadding;
@@ -215,7 +215,7 @@ class TimelineFlameChartState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController = Provider.of<TimelineController>(context);
+    final newController = Provider.of<PerformanceController>(context);
     if (newController == _timelineController) return;
     _timelineController = newController;
 
@@ -261,7 +261,7 @@ class TimelineFlameChartState
   }
 
   void _handleSelectedFrame() async {
-    final TimelineFrame selectedFrame = _timelineController.selectedFrame.value;
+    final FlutterFrame selectedFrame = _timelineController.selectedFrame.value;
     if (selectedFrame != null) {
       if (selectedFrame == _selectedFrame) return;
 
@@ -1035,7 +1035,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
   static const bracketCurveWidth = 8.0;
   static const bracketVerticalPadding = 8.0;
 
-  final TimelineFrame selectedFrame;
+  final FlutterFrame selectedFrame;
 
   final int startTimeOffsetMicros;
 

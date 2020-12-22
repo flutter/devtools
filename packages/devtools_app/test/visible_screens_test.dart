@@ -15,7 +15,7 @@ import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_app/src/screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/timeline/timeline_screen.dart';
+import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/vm_developer/vm_developer_tools_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -61,7 +61,7 @@ void main() {
           visibleScreenTypes,
           equals([
             // InspectorScreen,
-            TimelineScreen,
+            PerformanceScreen,
             ProfilerScreen,
             MemoryScreen,
             DebuggerScreen,
@@ -98,7 +98,7 @@ void main() {
           visibleScreenTypes,
           equals([
             InspectorScreen,
-            TimelineScreen,
+            PerformanceScreen,
             ProfilerScreen,
             MemoryScreen,
             DebuggerScreen,
@@ -117,7 +117,7 @@ void main() {
           visibleScreenTypes,
           equals([
             // InspectorScreen,
-            TimelineScreen,
+            PerformanceScreen,
             ProfilerScreen,
             MemoryScreen,
             // DebuggerScreen,
@@ -155,7 +155,7 @@ void main() {
           visibleScreenTypes,
           equals([
             // InspectorScreen,
-            TimelineScreen, // Works offline, so appears regardless of web flag
+            PerformanceScreen, // Works offline, so appears regardless of web flag
             ProfilerScreen, // Works offline, so appears regardless of web flag
             // MemoryScreen,
             // DebuggerScreen,
@@ -175,7 +175,7 @@ void main() {
           visibleScreenTypes,
           equals([
             // InspectorScreen,
-            TimelineScreen,
+            PerformanceScreen,
             ProfilerScreen,
             MemoryScreen,
             DebuggerScreen,

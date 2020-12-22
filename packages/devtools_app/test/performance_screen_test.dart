@@ -7,12 +7,12 @@ import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/split.dart';
-import 'package:devtools_app/src/timeline/event_details.dart';
-import 'package:devtools_app/src/timeline/flutter_frames_chart.dart';
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
-import 'package:devtools_app/src/timeline/timeline_flame_chart.dart';
-import 'package:devtools_app/src/timeline/timeline_screen.dart';
-import 'package:devtools_testing/support/timeline_test_data.dart';
+import 'package:devtools_app/src/performance/event_details.dart';
+import 'package:devtools_app/src/performance/flutter_frames_chart.dart';
+import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
+import 'package:devtools_app/src/performance/performance_screen.dart';
+import 'package:devtools_testing/support/performance_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -22,11 +22,11 @@ import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
-  TimelineScreen screen;
-  TimelineController controller;
+  PerformanceScreen screen;
+  PerformanceController controller;
   FakeServiceManager fakeServiceManager;
 
-  void _setUpServiceManagerForTimeline(Map<String, dynamic> timelineJson) {
+  void _setUpServiceManagerWithTimeline(Map<String, dynamic> timelineJson) {
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         timelineData: vm_service.Timeline.parse(timelineJson),
@@ -44,39 +44,40 @@ void main() {
     setGlobal(ServiceConnectionManager, fakeServiceManager);
   }
 
-  Future<void> pumpTimelineScreen(
+  Future<void> pumpPerformanceScreen(
     WidgetTester tester, {
-    TimelineController timelineController,
+    PerformanceController performanceController,
   }) async {
     await tester.pumpWidget(wrapWithControllers(
-      const TimelineScreenBody(),
-      timeline: controller = timelineController ?? TimelineController(),
+      const PerformanceScreenBody(),
+      performance: controller =
+          performanceController ?? PerformanceController(),
     ));
     // Delay to ensure the timeline has started.
     await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.byType(TimelineScreenBody), findsOneWidget);
+    expect(find.byType(PerformanceScreenBody), findsOneWidget);
   }
 
   const windowSize = Size(2050.0, 1000.0);
 
-  group('TimelineScreen', () {
+  group('PerformanceScreen', () {
     setUp(() async {
       await ensureInspectorDependencies();
-      _setUpServiceManagerForTimeline(testTimelineJson);
-      screen = const TimelineScreen();
+      _setUpServiceManagerWithTimeline(testTimelineJson);
+      screen = const PerformanceScreen();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.buildTab),
-        timeline: TimelineController(),
+        performance: PerformanceController(),
       ));
-      expect(find.text('Timeline'), findsOneWidget);
+      expect(find.text('Performance'), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds initial content', windowSize,
         (WidgetTester tester) async {
-      await pumpTimelineScreen(tester);
+      await pumpPerformanceScreen(tester);
       await tester.pumpAndSettle();
       expect(find.byType(FlutterFramesChart), findsOneWidget);
       expect(find.byType(TimelineFlameChart), findsOneWidget);
@@ -95,7 +96,7 @@ void main() {
 
     testWidgetsWithWindowSize('clears timeline on clear', windowSize,
         (WidgetTester tester) async {
-      await pumpTimelineScreen(tester);
+      await pumpPerformanceScreen(tester);
       await tester.pumpAndSettle();
       expect(controller.allTraceEvents, isNotEmpty);
       expect(find.byType(FlutterFramesChart), findsOneWidget);
@@ -116,8 +117,8 @@ void main() {
 
     testWidgetsWithWindowSize('refreshes with empty timeline', windowSize,
         (WidgetTester tester) async {
-      _setUpServiceManagerForTimeline({});
-      await pumpTimelineScreen(tester);
+      _setUpServiceManagerWithTimeline({});
+      await pumpPerformanceScreen(tester);
       await tester.pumpAndSettle();
       expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
           findsOneWidget);
