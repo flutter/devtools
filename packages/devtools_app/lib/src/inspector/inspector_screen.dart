@@ -86,6 +86,11 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
     if (queryParams.containsKey(inspectorRefQueryParam)) {
       final treeNode = inspectorController.findMatchingInspectorTreeNodeByRefId(
           queryParams[inspectorRefQueryParam]);
+      print('tree node: $treeNode');
+      if (treeNode != null) {
+        inspectorController.setSelectedNode(treeNode);
+        inspectorController.syncTreeSelection();
+      }
     }
   }
 

@@ -259,6 +259,7 @@ class InspectorController extends DisposableController
   }
 
   bool highlightShowFromNodeInstanceRef(InspectorInstanceRef ref) {
+    print('in highlightShowFromNodeInstanceRef: ref = $ref');
     return highlightShowNode(valueToInspectorTreeNode[ref]);
   }
 
@@ -275,11 +276,14 @@ class InspectorController extends DisposableController
   }
 
   InspectorTreeNode findMatchingInspectorTreeNodeByRefId(String refId) {
+    print('findingFor $refId');
+    print('valueToInspectorTreeNode.keys.length = ${valueToInspectorTreeNode.keys.length}');
     final matchingInspectorInstanceRef =
         valueToInspectorTreeNode.keys.firstWhere(
       (valueRef) => valueRef.id == refId,
       orElse: () => null,
     );
+    print('matchingInspectorInstanceRef: $matchingInspectorInstanceRef');
     if (matchingInspectorInstanceRef != null) {
       return valueToInspectorTreeNode[matchingInspectorInstanceRef];
     }
