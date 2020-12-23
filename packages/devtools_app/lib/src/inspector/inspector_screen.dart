@@ -10,7 +10,6 @@ import '../analytics/analytics_stub.dart'
 import '../analytics/constants.dart';
 import '../auto_dispose_mixin.dart';
 import '../blocking_action_mixin.dart';
-import '../config_specific/url/url.dart';
 import '../connected_app.dart';
 import '../globals.dart';
 import '../octicons.dart';
@@ -24,8 +23,6 @@ import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
 import 'inspector_service.dart';
 import 'inspector_tree_flutter.dart';
-
-const inspectorRefQueryParam = 'inspectorRef';
 
 class InspectorScreen extends Screen {
   const InspectorScreen()
@@ -79,19 +76,6 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
     }
     autoDispose(
         serviceManager.onConnectionClosed.listen(_handleConnectionStop));
-  }
-
-  void maybeSelectTreeNodeFromUrl() {
-    final queryParams = loadQueryParams();
-    if (queryParams.containsKey(inspectorRefQueryParam)) {
-      final treeNode = inspectorController.findMatchingInspectorTreeNodeByRefId(
-          queryParams[inspectorRefQueryParam]);
-      print('tree node: $treeNode');
-      if (treeNode != null) {
-        inspectorController.setSelectedNode(treeNode);
-        inspectorController.syncTreeSelection();
-      }
-    }
   }
 
   @override
@@ -281,8 +265,6 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         onExpandCollapseSupported: _onExpandCollapseSupported,
         onLayoutExplorerSupported: _onLayoutExplorerSupported,
       );
-
-      maybeSelectTreeNodeFromUrl();
 
       // TODO(jacobr): move this notice display to once a day.
       if (!displayedWidgetTrackingNotice) {

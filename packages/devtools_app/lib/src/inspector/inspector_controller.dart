@@ -23,6 +23,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';
 import '../config_specific/logger/logger.dart';
+import '../config_specific/url/url.dart';
 import '../globals.dart';
 import '../service_extensions.dart' as extensions;
 import '../service_registrations.dart' as registrations;
@@ -32,6 +33,8 @@ import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
+
+const inspectorRefQueryParam = 'inspectorRef';
 
 TextStyle textStyleForLevel(DiagnosticLevel level, ColorScheme colorScheme) {
   switch (level) {
@@ -259,7 +262,6 @@ class InspectorController extends DisposableController
   }
 
   bool highlightShowFromNodeInstanceRef(InspectorInstanceRef ref) {
-    print('in highlightShowFromNodeInstanceRef: ref = $ref');
     return highlightShowNode(valueToInspectorTreeNode[ref]);
   }
 
@@ -273,21 +275,6 @@ class InspectorController extends DisposableController
 
     currentShowNode = node;
     return true;
-  }
-
-  InspectorTreeNode findMatchingInspectorTreeNodeByRefId(String refId) {
-    print('findingFor $refId');
-    print('valueToInspectorTreeNode.keys.length = ${valueToInspectorTreeNode.keys.length}');
-    final matchingInspectorInstanceRef =
-        valueToInspectorTreeNode.keys.firstWhere(
-      (valueRef) => valueRef.id == refId,
-      orElse: () => null,
-    );
-    print('matchingInspectorInstanceRef: $matchingInspectorInstanceRef');
-    if (matchingInspectorInstanceRef != null) {
-      return valueToInspectorTreeNode[matchingInspectorInstanceRef];
-    }
-    return null;
   }
 
   InspectorTreeNode findMatchingInspectorTreeNode(RemoteDiagnosticsNode node) {
@@ -593,42 +580,56 @@ class InspectorController extends DisposableController
     _selectionGroups.cancelNext();
 
     final group = _selectionGroups.next;
-    final pendingSelectionFuture = group.getSelection(
-      selectedDiagnostic,
-      treeType,
-      isSummaryTree: isSummaryTree,
-    );
 
-    final Future<RemoteDiagnosticsNode> pendingDetailsFuture = isSummaryTree
-        ? group.getSelection(selectedDiagnostic, treeType, isSummaryTree: false)
-        : null;
+    if (firstFrame) {
+      final queryParams = loadQueryParams();
+      if (queryParams.containsKey(inspectorRefQueryParam)) {
+        print('trying to select from service');
+        await group.setSelectionInspector(
+          InspectorInstanceRef(queryParams[inspectorRefQueryParam]),
+          false,
+        );
+      }
+    } else {
+      final pendingSelectionFuture = group.getSelection(
+        selectedDiagnostic,
+        treeType,
+        isSummaryTree: isSummaryTree,
+      );
 
-    try {
-      final RemoteDiagnosticsNode newSelection = await pendingSelectionFuture;
-      if (group.disposed) return;
-      RemoteDiagnosticsNode detailsSelection;
+      final Future<RemoteDiagnosticsNode> pendingDetailsFuture = isSummaryTree
+          ? group.getSelection(selectedDiagnostic, treeType,
+              isSummaryTree: false)
+          : null;
 
-      if (pendingDetailsFuture != null) {
-        detailsSelection = await pendingDetailsFuture;
+      try {
+        final RemoteDiagnosticsNode newSelection = await pendingSelectionFuture;
         if (group.disposed) return;
-      }
+        RemoteDiagnosticsNode detailsSelection;
 
-      if (!firstFrame &&
-          detailsSelection?.valueRef == details.selectedDiagnostic?.valueRef &&
-          newSelection?.valueRef == selectedDiagnostic?.valueRef) {
-        // No need to change the selection as it didn't actually change.
-        _selectionGroups.cancelNext();
-        return;
-      }
-      _selectionGroups.promoteNext();
+        if (pendingDetailsFuture != null) {
+          detailsSelection = await pendingDetailsFuture;
+          if (group.disposed) return;
+        }
 
-      subtreeRoot = newSelection;
+        if (!firstFrame &&
+            detailsSelection?.valueRef ==
+                details.selectedDiagnostic?.valueRef &&
+            newSelection?.valueRef == selectedDiagnostic?.valueRef) {
+          // No need to change the selection as it didn't actually change.
+          _selectionGroups.cancelNext();
+          return;
+        }
+        _selectionGroups.promoteNext();
 
-      applyNewSelection(newSelection, detailsSelection, true);
-    } catch (error) {
-      if (_selectionGroups.next == group) {
-        log(error.toString(), LogLevel.error);
-        _selectionGroups.cancelNext();
+        subtreeRoot = newSelection;
+
+        applyNewSelection(newSelection, detailsSelection, true);
+      } catch (error) {
+        if (_selectionGroups.next == group) {
+          log(error.toString(), LogLevel.error);
+          _selectionGroups.cancelNext();
+        }
       }
     }
   }
