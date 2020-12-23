@@ -345,34 +345,20 @@ class NetworkController
         if (filter.substrings.isNotEmpty) {
           for (final substring in filter.substrings) {
             final caseInsensitiveSubstring = substring.toLowerCase();
-            final matchesUri =
-                r.uri.toLowerCase().contains(caseInsensitiveSubstring);
-            if (matchesUri) {
-              _checkForError(r);
-              return true;
+            bool matches(String stringToMatch) {
+              if (stringToMatch
+                  .toLowerCase()
+                  .contains(caseInsensitiveSubstring)) {
+                _checkForError(r);
+                return true;
+              }
+              return false;
             }
 
-            final matchesMethod =
-                r.method.toLowerCase().contains(caseInsensitiveSubstring);
-            if (matchesMethod) {
-              _checkForError(r);
-              return true;
-            }
-
-            final matchesStatus =
-                r.status?.toLowerCase()?.contains(caseInsensitiveSubstring) ??
-                    false;
-            if (matchesStatus) {
-              _checkForError(r);
-              return true;
-            }
-
-            final matchesType =
-                r.type.toLowerCase().contains(caseInsensitiveSubstring);
-            if (matchesType) {
-              _checkForError(r);
-              return true;
-            }
+            if (matches(r.uri)) return true;
+            if (matches(r.method)) return true;
+            if (matches(r.status ?? '')) return true;
+            if (matches(r.type)) return true;
           }
           return false;
         }
