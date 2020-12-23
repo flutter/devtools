@@ -80,7 +80,7 @@ abstract class FixedExtentDelegateBase extends ExtentDelegate {
     // want to query for _offsets(length) to cheaply determine the total size
     // of the list. Additionally, the logic for binary search assumes that we
     // have one offset past the end of the list.
-    _offsets = List(length + 1);
+    _offsets = List.filled(length + 1, 0.0);
     double offset = 0;
     // The first item in the list is at offset zero.
     // TODO(jacobr): remove this line once we have NNBD lists.

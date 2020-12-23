@@ -247,7 +247,11 @@ class _FlagTable extends StatelessWidget {
 }
 
 class _NameColumn extends ColumnData<_DialogFlag> {
-  _NameColumn() : super('Name', fixedWidthPx: 180);
+  _NameColumn()
+      : super(
+          'Name',
+          fixedWidthPx: 180,
+        );
 
   @override
   String getValue(_DialogFlag dataObject) => dataObject.name;
@@ -265,7 +269,11 @@ class _DescriptionColumn extends ColumnData<_DialogFlag> {
 
 class _ValueColumn extends ColumnData<_DialogFlag> {
   _ValueColumn()
-      : super('Value', fixedWidthPx: 160, alignment: ColumnAlignment.right);
+      : super(
+          'Value',
+          fixedWidthPx: 160,
+          alignment: ColumnAlignment.right,
+        );
 
   @override
   String getValue(_DialogFlag dataObject) => dataObject.value;

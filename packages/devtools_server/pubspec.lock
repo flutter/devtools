@@ -21,7 +21,7 @@ packages:
       name: browser_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.7"
+    version: "0.1.8"
   charcode:
     dependency: transitive
     description:
@@ -63,7 +63,7 @@ packages:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.5"
+    version: "0.9.6"
   http:
     dependency: transitive
     description:

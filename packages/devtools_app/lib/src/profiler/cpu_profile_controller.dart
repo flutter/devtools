@@ -5,11 +5,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 
-import '../profiler/cpu_profile_model.dart';
-import '../profiler/cpu_profile_service.dart';
-import '../profiler/cpu_profile_transformer.dart';
 import '../ui/search.dart';
 import '../utils.dart';
+import 'cpu_profile_model.dart';
+import 'cpu_profile_service.dart';
+import 'cpu_profile_transformer.dart';
 
 class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   /// Data for the initial value and reset value of [_dataNotifier].

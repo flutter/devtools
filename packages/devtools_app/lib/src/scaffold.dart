@@ -293,6 +293,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
     ];
 
+    // TODO(issues/2547) - Remove.
+    // ignore: deprecated_member_use
     return ValueListenableProvider.value(
       value: _currentScreen,
       child: Provider<BannerMessagesController>(
@@ -340,8 +342,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           : const Size.fromHeight(kToolbarHeight);
       final alignment = isNarrow ? Alignment.bottomLeft : Alignment.centerRight;
 
-      final rightAdjust =
-          isNarrow ? 0.0 : DevToolsScaffold.actionWidgetSize / 2;
+      final rightAdjust = isNarrow ? 0.0 : DevToolsScaffold.actionWidgetSize;
       final rightPadding = isNarrow
           ? 0.0
           : math.max(

@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
@@ -14,19 +14,24 @@ import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
 import '../config_specific/import_export/import_export.dart';
+import '../dialogs.dart';
 import '../globals.dart';
 import '../notifications.dart';
 import '../octicons.dart';
-import '../profiler/cpu_profile_controller.dart';
-import '../profiler/cpu_profile_model.dart';
-import '../profiler/cpu_profiler.dart';
 import '../screen.dart';
+import '../service_extensions.dart';
+import '../split.dart';
 import '../theme.dart';
+import '../ui/service_extension_widgets.dart';
 import '../ui/vm_flag_widgets.dart';
+import 'event_details.dart';
+import 'flutter_frames_chart.dart';
 import 'performance_controller.dart';
+import 'performance_model.dart';
+import 'timeline_flame_chart.dart';
 
-final performanceSearchFieldKey =
-    GlobalKey(debugLabel: 'PerformanceSearchFieldKey');
+// TODO(kenz): handle small screen widths better by using Wrap instead of Row
+// where applicable.
 
 class PerformanceScreen extends Screen {
   const PerformanceScreen()
@@ -35,13 +40,8 @@ class PerformanceScreen extends Screen {
           requiresDartVm: true,
           worksOffline: true,
           title: 'Performance',
-          icon: Octicons.dashboard,
+          icon: Octicons.pulse,
         );
-
-  @visibleForTesting
-  static const recordingInstructionsKey = Key('Recording Instructions');
-  @visibleForTesting
-  static const recordingStatusKey = Key('Recording Status');
 
   static const id = 'performance';
 
@@ -56,19 +56,17 @@ class PerformanceScreenBody extends StatefulWidget {
   const PerformanceScreenBody();
 
   @override
-  _PerformanceScreenBodyState createState() => _PerformanceScreenBodyState();
+  PerformanceScreenBodyState createState() => PerformanceScreenBodyState();
 }
 
-class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
+class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     with
         AutoDisposeMixin,
-        OfflineScreenMixin<PerformanceScreenBody, CpuProfileData> {
-  static const _primaryControlsMinIncludeTextWidth = 600.0;
+        OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData> {
+  static const _primaryControlsMinIncludeTextWidth = 725.0;
   static const _secondaryControlsMinIncludeTextWidth = 1100.0;
 
   PerformanceController controller;
-
-  bool recording = false;
 
   bool processing = false;
 
@@ -91,32 +89,41 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
     cancel();
 
-    addAutoDisposeListener(controller.recordingNotifier, () {
+    processing = controller.processing.value;
+    addAutoDisposeListener(controller.processing, () {
       setState(() {
-        recording = controller.recordingNotifier.value;
+        processing = controller.processing.value;
       });
     });
 
-    addAutoDisposeListener(controller.cpuProfilerController.processingNotifier,
-        () {
+    processingProgress = controller.processor.progressNotifier.value;
+    addAutoDisposeListener(controller.processor.progressNotifier, () {
       setState(() {
-        processing = controller.cpuProfilerController.processingNotifier.value;
+        processingProgress = controller.processor.progressNotifier.value;
       });
     });
 
-    addAutoDisposeListener(
-        controller.cpuProfilerController.transformer.progressNotifier, () {
-      setState(() {
-        processingProgress =
-            controller.cpuProfilerController.transformer.progressNotifier.value;
-      });
-    });
+    addAutoDisposeListener(controller.selectedFrame);
 
-    // Load offline performance data if available.
+    // Refresh data on page load if data is null. On subsequent tab changes,
+    // this should not be called.
+    if (controller.data == null && !offlineMode) {
+      controller.refreshData();
+    }
+
+    // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
-      final performanceJson =
-          Map<String, dynamic>.from(offlineDataJson[PerformanceScreen.id]);
-      final offlinePerformanceData = CpuProfileData.parse(performanceJson);
+      // This is a workaround to guarantee that DevTools exports are compatible
+      // with other trace viewers (catapult, perfetto, chrome://tracing), which
+      // require a top level field named "traceEvents". See how timeline data is
+      // encoded in [ExportController.encode].
+      final timelineJson =
+          Map<String, dynamic>.from(offlineDataJson[PerformanceScreen.id])
+            ..addAll({
+              PerformanceData.traceEventsKey:
+                  offlineDataJson[PerformanceData.traceEventsKey]
+            });
+      final offlinePerformanceData = OfflinePerformanceData.parse(timelineJson);
       if (!offlinePerformanceData.isEmpty) {
         loadOfflineData(offlinePerformanceData);
       }
@@ -125,37 +132,44 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    if (offlineMode) return _buildPerformanceBody(controller);
-    return ValueListenableBuilder<Flag>(
-      valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
-      builder: (context, profilerFlag, _) {
-        return profilerFlag.valueAsString == 'true'
-            ? _buildPerformanceBody(controller)
-            : CpuProfilerDisabled(controller.cpuProfilerController);
-      },
-    );
-  }
+    final isOfflineFlutterApp = offlineMode &&
+        controller.offlinePerformanceData != null &&
+        controller.offlinePerformanceData.frames.isNotEmpty;
 
-  Widget _buildPerformanceBody(PerformanceController controller) {
     final performanceScreen = Column(
       children: [
         if (!offlineMode) _buildPerformanceControls(),
         const SizedBox(height: denseRowSpacing),
+        if (isOfflineFlutterApp ||
+            (!offlineMode && serviceManager.connectedApp.isFlutterAppNow))
+          ValueListenableBuilder(
+            valueListenable: controller.flutterFrames,
+            builder: (context, frames, _) => ValueListenableBuilder(
+              valueListenable: controller.displayRefreshRate,
+              builder: (context, displayRefreshRate, _) {
+                return FlutterFramesChart(
+                  frames,
+                  displayRefreshRate,
+                );
+              },
+            ),
+          ),
         Expanded(
-          child: ValueListenableBuilder<CpuProfileData>(
-            valueListenable: controller.cpuProfilerController.dataNotifier,
-            builder: (context, cpuProfileData, _) {
-              if (cpuProfileData ==
-                      CpuProfilerController.baseStateCpuProfileData ||
-                  cpuProfileData == null) {
-                return _buildRecordingInfo();
-              }
-              return CpuProfiler(
-                data: cpuProfileData,
-                controller: controller.cpuProfilerController,
-                searchFieldKey: performanceSearchFieldKey,
-              );
-            },
+          child: Split(
+            axis: Axis.vertical,
+            initialFractions: const [0.6, 0.4],
+            children: [
+              TimelineFlameChartContainer(
+                processing: processing,
+                processingProgress: processingProgress,
+              ),
+              ValueListenableBuilder(
+                valueListenable: controller.selectedTimelineEvent,
+                builder: (context, selectedEvent, _) {
+                  return EventDetails(selectedEvent);
+                },
+              ),
+            ],
           ),
         ),
       ],
@@ -188,25 +202,25 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   }
 
   Widget _buildPrimaryStateControls() {
-    return Row(
-      children: [
-        RecordButton(
-          recording: recording,
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: controller.startRecording,
-        ),
-        const SizedBox(width: denseSpacing),
-        StopRecordingButton(
-          recording: recording,
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: controller.stopRecording,
-        ),
-        const SizedBox(width: defaultSpacing),
-        ClearButton(
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: recording ? null : controller.clear,
-        ),
-      ],
+    return ValueListenableBuilder(
+      valueListenable: controller.refreshing,
+      builder: (context, refreshing, _) {
+        return Row(
+          children: [
+            RefreshButton(
+              includeTextWidth: _primaryControlsMinIncludeTextWidth,
+              onPressed:
+                  (refreshing || processing) ? null : _refreshPerformanceData,
+            ),
+            const SizedBox(width: defaultSpacing),
+            ClearButton(
+              includeTextWidth: _primaryControlsMinIncludeTextWidth,
+              onPressed:
+                  (refreshing || processing) ? null : _clearPerformanceData,
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -216,29 +230,50 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
       children: [
         const ProfileGranularityDropdown(PerformanceScreen.id),
         const SizedBox(width: defaultSpacing),
+        if (!serviceManager.connectedApp.isDartCliAppNow)
+          ServiceExtensionButtonGroup(
+            minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+            extensions: [performanceOverlay, profileWidgetBuilds],
+          ),
+        // TODO(kenz): hide or disable button if http timeline logging is not
+        // available.
+        const SizedBox(width: defaultSpacing),
         ExportButton(
-          onPressed: controller.cpuProfileData != null &&
-                  !controller.cpuProfileData.isEmpty
-              ? _exportPerformance
-              : null,
+          onPressed: _exportPerformanceData,
           includeTextWidth: _secondaryControlsMinIncludeTextWidth,
+        ),
+        const SizedBox(width: defaultSpacing),
+        ActionButton(
+          child: OutlineButton(
+            child: const Icon(
+              Icons.tune,
+              size: defaultIconSize,
+            ),
+            onPressed: _openSettingsDialog,
+          ),
+          tooltip: 'Timeline Configuration',
         ),
       ],
     );
   }
 
-  Widget _buildRecordingInfo() {
-    return RecordingInfo(
-      instructionsKey: PerformanceScreen.recordingInstructionsKey,
-      recordingStatusKey: PerformanceScreen.recordingStatusKey,
-      recording: recording,
-      processing: processing,
-      progressValue: processingProgress,
-      recordedObject: 'CPU samples',
+  void _openSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => TimelineConfigurationsDialog(controller),
     );
   }
 
-  void _exportPerformance() {
+  Future<void> _refreshPerformanceData() async {
+    await controller.refreshData();
+  }
+
+  Future<void> _clearPerformanceData() async {
+    await controller.clearData();
+    setState(() {});
+  }
+
+  void _exportPerformanceData() {
     final exportedFile = controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
@@ -248,15 +283,126 @@ class _PerformanceScreenBodyState extends State<PerformanceScreenBody>
   }
 
   @override
-  FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
-    await controller.cpuProfilerController.transformer.processData(offlineData);
-    controller.cpuProfilerController.loadOfflineData(offlineData);
+  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
+    await controller.processOfflineData(offlineData);
   }
 
   @override
   bool shouldLoadOfflineData() {
     return offlineMode &&
         offlineDataJson.isNotEmpty &&
-        offlineDataJson[PerformanceScreen.id] != null;
+        offlineDataJson[PerformanceScreen.id] != null &&
+        offlineDataJson[PerformanceData.traceEventsKey] != null;
+  }
+}
+
+class TimelineConfigurationsDialog extends StatelessWidget {
+  const TimelineConfigurationsDialog(this.controller);
+
+  static const dialogWidth = 700.0;
+
+  final PerformanceController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return DevToolsDialog(
+      title: dialogTitleText(theme, 'Recorded Streams'),
+      content: Container(
+        width: dialogWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ..._defaultRecordedStreams(theme),
+            const SizedBox(height: denseSpacing),
+            ...dialogSubHeader(theme, 'Advanced'),
+            ..._advancedStreams(theme),
+          ],
+        ),
+      ),
+      actions: [
+        DialogCloseButton(),
+      ],
+    );
+  }
+
+  List<Widget> _defaultRecordedStreams(ThemeData theme) {
+    return [
+      ..._timelineStreams(theme, advanced: false),
+      // Special case "Network Traffic" because it is not implemented as a
+      // Timeline recorded stream in the VM. The user does not need to be aware of
+      // the distinction, however.
+      _buildStream(
+        name: 'Network',
+        description: ' • Http traffic',
+        listenable: controller.httpTimelineLoggingEnabled,
+        onChanged: controller.toggleHttpRequestLogging,
+        theme: theme,
+      ),
+    ];
+  }
+
+  List<Widget> _advancedStreams(ThemeData theme) {
+    return _timelineStreams(theme, advanced: true);
+  }
+
+  List<Widget> _timelineStreams(
+    ThemeData theme, {
+    @required bool advanced,
+  }) {
+    final settings = <Widget>[];
+    final streams = controller.recordedStreams
+        .where((s) => s.advanced == advanced)
+        .toList();
+    for (final stream in streams) {
+      settings.add(_buildStream(
+        name: stream.name,
+        description: ' • ${stream.description}',
+        listenable: stream.enabled,
+        onChanged: (_) => controller.toggleTimelineStream(stream),
+        theme: theme,
+      ));
+    }
+    return settings;
+  }
+
+  Widget _buildStream({
+    @required String name,
+    @required String description,
+    @required ValueListenable listenable,
+    @required void Function(bool) onChanged,
+    @required ThemeData theme,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ValueListenableBuilder(
+          valueListenable: listenable,
+          builder: (context, value, _) {
+            return Checkbox(
+              value: value,
+              onChanged: onChanged,
+            );
+          },
+        ),
+        Flexible(
+          child: RichText(
+            overflow: TextOverflow.visible,
+            text: TextSpan(
+              text: name,
+              style: theme.regularTextStyle,
+              children: [
+                TextSpan(
+                  text: description,
+                  style: theme.subtleTextStyle,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

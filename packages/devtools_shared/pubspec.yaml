@@ -3,7 +3,7 @@ description: Package of shared structures between devtools_app and devtools_serv
 
 # Note: this version should only be updated by running tools/update_version.sh
 # that updates all versions of packages from packages/devtools.
-version: 0.9.5
+version: 0.9.6
 
 homepage: https://github.com/flutter/devtools
 

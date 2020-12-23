@@ -7,16 +7,17 @@ import 'dart:async';
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/error_badge_manager.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart'
     as flutter_memory;
 import 'package:devtools_app/src/memory/memory_controller.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
+import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/vm_service_wrapper.dart';
@@ -80,6 +81,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   final IsolateManager isolateManager = FakeIsolateManager();
+
+  @override
+  final ErrorBadgeManager errorBadgeManager = MockErrorBadgeManager();
 
   @override
   VM get vm => _mockVM;
@@ -420,14 +424,17 @@ class MockLoggingController extends Mock implements LoggingController {
   }
 }
 
+class MockErrorBadgeManager extends Mock implements ErrorBadgeManager {}
+
 class MockMemoryController extends Mock implements MemoryController {}
 
 class MockFlutterMemoryController extends Mock
     implements flutter_memory.MemoryController {}
 
-class MockTimelineController extends Mock implements TimelineController {}
+class MockTimelineController extends Mock implements PerformanceController {}
 
-class MockPerformanceController extends Mock implements PerformanceController {}
+class MockProfilerScreenController extends Mock
+    implements ProfilerScreenController {}
 
 class MockDebuggerController extends Mock implements DebuggerController {}
 

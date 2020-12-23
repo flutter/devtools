@@ -10,10 +10,10 @@ import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/notifications.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/routing.dart';
 import 'package:devtools_app/src/theme.dart';
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
+import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -53,8 +53,8 @@ Widget wrapWithControllers(
   Widget widget, {
   LoggingController logging,
   MemoryController memory,
-  TimelineController timeline,
   PerformanceController performance,
+  ProfilerScreenController profiler,
   DebuggerController debugger,
   NetworkController network,
   BannerMessagesController bannerMessages,
@@ -66,9 +66,10 @@ Widget wrapWithControllers(
     ),
     if (logging != null) Provider<LoggingController>.value(value: logging),
     if (memory != null) Provider<MemoryController>.value(value: memory),
-    if (timeline != null) Provider<TimelineController>.value(value: timeline),
     if (performance != null)
       Provider<PerformanceController>.value(value: performance),
+    if (profiler != null)
+      Provider<ProfilerScreenController>.value(value: profiler),
     if (network != null) Provider<NetworkController>.value(value: network),
     if (debugger != null) Provider<DebuggerController>.value(value: debugger),
     if (appSize != null) Provider<AppSizeController>.value(value: appSize),

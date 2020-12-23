@@ -13,6 +13,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
+import '../auto_dispose.dart';
 import '../config_specific/logger/logger.dart' as logger;
 import '../core/message_bus.dart';
 import '../globals.dart';
@@ -23,6 +24,7 @@ import '../ui/filter.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
+import 'logging_screen.dart';
 
 // For performance reasons, we drop old logs in batches, so the log will grow
 // to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
@@ -46,11 +48,14 @@ Future<String> _retrieveFullStringValue(
   IsolateRef isolateRef,
   InstanceRef stringRef,
 ) {
-  return service.retrieveFullStringValue(
-    isolateRef.id,
-    stringRef,
-    onUnavailable: (truncatedValue) => '${stringRef.valueAsString}...',
-  );
+  final fallback = '${stringRef.valueAsString}...';
+  // TODO(kenz): why is service null?
+  return service?.retrieveFullStringValue(
+        isolateRef.id,
+        stringRef,
+        onUnavailable: (truncatedValue) => fallback,
+      ) ??
+      fallback;
 }
 
 class LoggingDetailsController {
@@ -152,14 +157,19 @@ class LoggingDetailsController {
   }
 }
 
-class LoggingController
-    with SearchControllerMixin<LogData>, FilterControllerMixin<LogData> {
+class LoggingController extends DisposableController
+    with
+        SearchControllerMixin<LogData>,
+        FilterControllerMixin<LogData>,
+        AutoDisposeControllerMixin {
   LoggingController({this.inspectorService}) {
-    _listen(serviceManager.onConnectionAvailable, _handleConnectionStart);
+    autoDispose(
+        serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
     if (serviceManager.hasConnection) {
       _handleConnectionStart(serviceManager.service);
     }
-    _listen(serviceManager.onConnectionClosed, _handleConnectionStop);
+    autoDispose(
+        serviceManager.onConnectionClosed.listen(_handleConnectionStop));
     _handleBusEvents();
   }
 
@@ -171,14 +181,6 @@ class LoggingController
 
   @override
   Map<String, FilterArgument> get filterArgs => _filterArgs;
-
-  /// Listen on a stream and track the stream subscription for automatic
-  /// disposal if the dispose method is called.
-  StreamSubscription<T> _listen<T>(Stream<T> stream, void onData(T event)) {
-    final subscription = stream.listen(onData);
-    _subscriptions.add(subscription);
-    return subscription;
-  }
 
   final StreamController<String> _logStatusController =
       StreamController.broadcast();
@@ -197,8 +199,6 @@ class LoggingController
   final _selectedLog = ValueNotifier<LogData>(null);
 
   ValueListenable<LogData> get selectedLog => _selectedLog;
-
-  final List<StreamSubscription> _subscriptions = [];
 
   void selectLog(LogData data) {
     _selectedLog.value = data;
@@ -251,27 +251,28 @@ class LoggingController
   void clear() {
     resetFilter();
     _updateData([]);
+    serviceManager.errorBadgeManager.clearErrors(LoggingScreen.id);
   }
 
   void _handleConnectionStart(VmServiceWrapper service) async {
     // Log stdout events.
     final _StdoutEventHandler stdoutHandler =
         _StdoutEventHandler(this, 'stdout');
-    _listen(service.onStdoutEvent, stdoutHandler.handle);
+    autoDispose(service.onStdoutEvent.listen(stdoutHandler.handle));
 
     // Log stderr events.
     final _StdoutEventHandler stderrHandler =
         _StdoutEventHandler(this, 'stderr', isError: true);
-    _listen(service.onStderrEvent, stderrHandler.handle);
+    autoDispose(service.onStderrEvent.listen(stderrHandler.handle));
 
     // Log GC events.
-    _listen(service.onGCEvent, _handleGCEvent);
+    autoDispose(service.onGCEvent.listen(_handleGCEvent));
 
     // Log `dart:developer` `log` events.
-    _listen(service.onLoggingEvent, _handleDeveloperLogEvent);
+    autoDispose(service.onLoggingEvent.listen(_handleDeveloperLogEvent));
 
     // Log Flutter extension events.
-    _listen(service.onExtensionEvent, _handleExtensionEvent);
+    autoDispose(service.onExtensionEvent.listen(_handleExtensionEvent));
 
     if (inspectorService == null) {
       await ensureInspectorServiceDependencies();
@@ -536,17 +537,11 @@ class LoggingController
     return null;
   }
 
-  void dispose() {
-    for (var subscription in _subscriptions) {
-      subscription.cancel();
-    }
-    _subscriptions.clear();
-  }
-
   void _handleBusEvents() {
     // TODO(jacobr): expose the messageBus for use by vm tests.
     if (messageBus != null) {
-      _listen(messageBus.onEvent(type: 'reload.end'), (BusEvent event) {
+      autoDispose(
+          messageBus.onEvent(type: 'reload.end').listen((BusEvent event) {
         log(
           LogData(
             'hot.reload',
@@ -554,9 +549,10 @@ class LoggingController
             DateTime.now().millisecondsSinceEpoch,
           ),
         );
-      });
+      }));
 
-      _listen(messageBus.onEvent(type: 'restart.end'), (BusEvent event) {
+      autoDispose(
+          messageBus.onEvent(type: 'restart.end').listen((BusEvent event) {
         log(
           LogData(
             'hot.restart',
@@ -564,22 +560,20 @@ class LoggingController
             DateTime.now().millisecondsSinceEpoch,
           ),
         );
-      });
+      }));
 
       // Listen for debugger events.
-      _listen(
-        messageBus.onEvent().where((event) =>
-            event.type == 'debugger' || event.type.startsWith('debugger.')),
-        _handleDebuggerEvent,
-      );
+      autoDispose(messageBus
+          .onEvent()
+          .where((event) =>
+              event.type == 'debugger' || event.type.startsWith('debugger.'))
+          .listen(_handleDebuggerEvent));
 
       // Listen for DevTools internal events.
-      _listen(
-        messageBus
-            .onEvent()
-            .where((event) => event.type.startsWith('devtools.')),
-        _handleDevToolsEvent,
-      );
+      autoDispose(messageBus
+          .onEvent()
+          .where((event) => event.type.startsWith('devtools.'))
+          .listen(_handleDevToolsEvent));
     }
   }
 

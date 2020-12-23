@@ -17,6 +17,7 @@ import 'auto_dispose.dart';
 import 'config_specific/logger/logger.dart';
 import 'connected_app.dart';
 import 'core/message_bus.dart';
+import 'error_badge_manager.dart';
 import 'globals.dart';
 import 'logging/vm_service_logger.dart';
 import 'service_extensions.dart' as extensions;
@@ -77,6 +78,9 @@ class ServiceConnectionManager {
 
   IsolateManager get isolateManager => _isolateManager;
   IsolateManager _isolateManager;
+
+  ErrorBadgeManager get errorBadgeManager => _errorBadgeManager;
+  final _errorBadgeManager = ErrorBadgeManager();
 
   ServiceExtensionManager get serviceExtensionManager =>
       _serviceExtensionManager;
@@ -157,9 +161,11 @@ class ServiceConnectionManager {
     // performing any async operations. Otherwise, we may get end up with
     // race conditions where managers cannot listen for events soon enough.
     isolateManager.vmServiceOpened(service);
-    vmFlagManager.vmServiceOpened(service);
-
     serviceExtensionManager.vmServiceOpened(service, connectedApp);
+    vmFlagManager.vmServiceOpened(service);
+    // This needs to be called last in the above group of `vmServiceOpened`
+    // calls.
+    errorBadgeManager.vmServiceOpened(service);
 
     if (debugLogServiceProtocolEvents) {
       serviceTrafficLogger = VmServiceTrafficLogger(service);
@@ -613,6 +619,10 @@ class ServiceExtensionManager extends Disposer {
   /// All service extensions that are currently enabled.
   final _enabledServiceExtensions = <String, ServiceExtensionState>{};
 
+  /// Map from service extension name to [Completer] that completes when the
+  /// service extension is registered or the isolate shuts down.
+  final _maybeRegisteringServiceExtensions = <String, Completer<bool>>{};
+
   /// Temporarily stores service extensions that we need to add. We should not
   /// add extensions until the first frame event has been received
   /// [_firstFrameEventReceived].
@@ -960,6 +970,7 @@ class ServiceExtensionManager extends Disposer {
       }
     }
 
+    if (mainIsolate == null) return;
     final Isolate isolate = await _service.getIsolate(mainIsolate.id);
     if (_mainIsolate.value != mainIsolate) return;
 
@@ -984,6 +995,16 @@ class ServiceExtensionManager extends Disposer {
     _checkForFirstFrameStarted = false;
     _pendingServiceExtensions.clear();
     _serviceExtensions.clear();
+
+    // If the isolate has closed, there is no need to wait any longer for
+    // service extensions that might be registered.
+    for (var completer in _maybeRegisteringServiceExtensions.values) {
+      if (!completer.isCompleted) {
+        completer.complete(false);
+      }
+    }
+    _maybeRegisteringServiceExtensions.clear();
+
     for (var listenable in _serviceExtensionAvailable.values) {
       listenable.value = false;
     }
@@ -1014,6 +1035,28 @@ class ServiceExtensionManager extends Disposer {
   bool isServiceExtensionAvailable(String name) {
     return _serviceExtensions.contains(name) ||
         _pendingServiceExtensions.contains(name);
+  }
+
+  Future<bool> waitForServiceExtensionAvailable(String name) {
+    if (isServiceExtensionAvailable(name)) return Future.value(true);
+
+    Completer<bool> createCompleter() {
+      // Listen for when the service extension is added and use it.
+      final completer = Completer<bool>();
+      final listenable = hasServiceExtension(name);
+      VoidCallback listener;
+      listener = () {
+        if (listenable.value || completer.isCompleted) {
+          listenable.removeListener(listener);
+          completer.complete(true);
+        }
+      };
+      hasServiceExtension(name).addListener(listener);
+      return completer;
+    }
+
+    _maybeRegisteringServiceExtensions[name] ??= createCompleter();
+    return _maybeRegisteringServiceExtensions[name].future;
   }
 
   ValueListenable<bool> hasServiceExtension(String name) {

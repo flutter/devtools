@@ -5,11 +5,11 @@
 @TestOn('vm')
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/timeline/flutter_frames_chart.dart';
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
-import 'package:devtools_app/src/timeline/timeline_model.dart';
+import 'package:devtools_app/src/performance/flutter_frames_chart.dart';
+import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/ui/colors.dart';
-import 'package:devtools_testing/support/timeline_test_data.dart';
+import 'package:devtools_testing/support/performance_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,11 +19,11 @@ import 'support/wrappers.dart';
 void main() {
   Future<void> pumpChart(
     WidgetTester tester, {
-    @required List<TimelineFrame> frames,
+    @required List<FlutterFrame> frames,
   }) async {
     await tester.pumpWidget(wrapWithControllers(
       FlutterFramesChart(frames, defaultRefreshRate),
-      timeline: TimelineController(),
+      performance: PerformanceController(),
     ));
     await tester.pumpAndSettle();
     expect(find.byType(FlutterFramesChart), findsOneWidget);

@@ -33,6 +33,8 @@ void main() {
       fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
       when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
       when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+          .thenReturn(ValueNotifier<int>(0));
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       mockIsFlutterApp(serviceManager.connectedApp);

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/timeline/timeline_controller.dart';
-import 'package:devtools_app/src/timeline/timeline_model.dart';
-import 'package:devtools_app/src/timeline/timeline_processor.dart';
+import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/performance/performance_model.dart';
+import 'package:devtools_app/src/performance/timeline_event_processor.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/test_utils.dart';
-import 'package:devtools_testing/support/timeline_test_data.dart';
+import 'package:devtools_testing/support/performance_test_data.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -35,10 +35,10 @@ void main() {
   });
 
   group('TimelineProcessor', () {
-    TimelineProcessor processor;
+    TimelineEventProcessor processor;
 
     setUp(() {
-      processor = TimelineProcessor(MockTimelineController())
+      processor = TimelineEventProcessor(MockTimelineController())
         ..primeThreadIds(
           uiThreadId: testUiThreadId,
           rasterThreadId: testRasterThreadId,
@@ -65,7 +65,7 @@ void main() {
     test('frame events satisfy ui gpu order', () {
       const frameStartTime = 2000;
       const frameEndTime = 8000;
-      TimelineFrame frame = TimelineFrame('frameId')
+      FlutterFrame frame = FlutterFrame('frameId')
         ..pipelineItemTime.start = const Duration(microseconds: frameStartTime)
         ..pipelineItemTime.end = const Duration(microseconds: frameEndTime);
 
@@ -85,7 +85,7 @@ void main() {
       frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
       expect(processor.satisfiesUiRasterOrder(gpuEvent, frame), isFalse);
 
-      frame = TimelineFrame('frameId')
+      frame = FlutterFrame('frameId')
         ..pipelineItemTime.start = const Duration(microseconds: frameStartTime)
         ..pipelineItemTime.end = const Duration(microseconds: frameEndTime);
 
@@ -269,9 +269,9 @@ void main() {
   });
 }
 
-class MockTimelineController extends Mock implements TimelineController {
+class MockTimelineController extends Mock implements PerformanceController {
   @override
-  final data = TimelineData();
+  final data = PerformanceData();
 
   @override
   void addTimelineEvent(TimelineEvent event) {
@@ -279,7 +279,7 @@ class MockTimelineController extends Mock implements TimelineController {
   }
 
   @override
-  void addFrame(TimelineFrame frame) {
+  void addFrame(FlutterFrame frame) {
     data.frames.add(frame);
   }
 

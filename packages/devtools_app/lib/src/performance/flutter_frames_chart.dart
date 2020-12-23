@@ -12,8 +12,8 @@ import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../utils.dart';
-import 'timeline_controller.dart';
-import 'timeline_model.dart';
+import 'performance_controller.dart';
+import 'performance_model.dart';
 
 class FlutterFramesChart extends StatefulWidget {
   const FlutterFramesChart(
@@ -23,7 +23,7 @@ class FlutterFramesChart extends StatefulWidget {
 
   static const chartLegendKey = Key('Flutter frames chart legend');
 
-  final List<TimelineFrame> frames;
+  final List<FlutterFrame> frames;
 
   final double displayRefreshRate;
 
@@ -42,11 +42,11 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   static const outlineBorderWidth = 1.0;
 
-  TimelineController _controller;
+  PerformanceController _controller;
 
   ScrollController scrollController;
 
-  TimelineFrame _selectedFrame;
+  FlutterFrame _selectedFrame;
 
   double horizontalScrollOffset = 0.0;
 
@@ -72,7 +72,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController = Provider.of<TimelineController>(context);
+    final newController = Provider.of<PerformanceController>(context);
     if (newController == _controller) return;
     _controller = newController;
 
@@ -106,18 +106,21 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         right: denseSpacing,
         bottom: defaultSpacing,
       ),
-      height: defaultChartHeight,
+      height: defaultChartHeight + defaultScrollBarOffset,
       child: Row(
         children: [
           Expanded(child: _buildChart()),
           const SizedBox(width: defaultSpacing),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildChartLegend(),
-              if (widget.frames.isNotEmpty) _buildAverageFps(),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(bottom: defaultScrollBarOffset),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildChartLegend(),
+                if (widget.frames.isNotEmpty) _buildAverageFps(),
+              ],
+            ),
           ),
         ],
       ),
@@ -128,13 +131,21 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     return LayoutBuilder(
       builder: (context, constraints) {
         final themeData = Theme.of(context);
-        final chart = RoundedOutlinedBorder(
-          child: ListView.builder(
-            controller: scrollController,
-            scrollDirection: Axis.horizontal,
-            itemCount: widget.frames.length,
-            itemExtent: defaultFrameWidthWithPadding,
-            itemBuilder: (context, index) => _buildFrame(widget.frames[index]),
+        final chart = Scrollbar(
+          isAlwaysShown: true,
+          controller: scrollController,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: defaultScrollBarOffset),
+            child: RoundedOutlinedBorder(
+              child: ListView.builder(
+                controller: scrollController,
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.frames.length,
+                itemExtent: defaultFrameWidthWithPadding,
+                itemBuilder: (context, index) =>
+                    _buildFrame(widget.frames[index]),
+              ),
+            ),
           ),
         );
         final chartAxisPainter = CustomPaint(
@@ -167,7 +178,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     );
   }
 
-  Widget _buildFrame(TimelineFrame frame) {
+  Widget _buildFrame(FlutterFrame frame) {
     return InkWell(
       onTap: () => _controller.selectFrame(frame),
       child: FlutterFramesChartItem(
@@ -243,7 +254,7 @@ class FlutterFramesChartItem extends StatelessWidget {
   static const selectedFrameIndicatorKey =
       Key('flutter frames chart - selected frame indicator');
 
-  final TimelineFrame frame;
+  final FlutterFrame frame;
 
   final bool selected;
 
@@ -308,12 +319,12 @@ class FlutterFramesChartItem extends StatelessWidget {
     );
   }
 
-  String _tooltipText(TimelineFrame frame) {
+  String _tooltipText(FlutterFrame frame) {
     return 'UI: ${msText(frame.uiEventFlow.time.duration)}\n'
         'Raster: ${msText(frame.rasterEventFlow.time.duration)}';
   }
 
-  bool _isFrameJanky(TimelineFrame frame) {
+  bool _isFrameJanky(FlutterFrame frame) {
     final targetMsPerFrame = 1 / displayRefreshRate * 1000;
     return frame.uiDurationMs > targetMsPerFrame ||
         frame.rasterDurationMs > targetMsPerFrame;
@@ -347,7 +358,7 @@ class ChartAxisPainter extends CustomPainter {
       _FlutterFramesChartState.yAxisUnitsSpace,
       0.0,
       constraints.maxWidth - _FlutterFramesChartState.yAxisUnitsSpace,
-      constraints.maxHeight,
+      constraints.maxHeight - defaultScrollBarOffset,
     );
 
     _paintYAxisLabels(canvas, chartArea);
@@ -399,7 +410,7 @@ class ChartAxisPainter extends CustomPainter {
     );
 
     // Paint a tick on the axis.
-    final tickY = constraints.maxHeight - timeMs / msPerPx;
+    final tickY = chartArea.height - timeMs / msPerPx;
     canvas.drawLine(
       Offset(chartArea.left - yAxisTickWidth / 2, tickY),
       Offset(chartArea.left + yAxisTickWidth / 2, tickY),
@@ -428,7 +439,7 @@ class ChartAxisPainter extends CustomPainter {
             yAxisTickWidth / 2 -
             densePadding - // Padding between y axis tick and label
             textPainter.width,
-        constraints.maxHeight -
+        chartArea.height -
             timeMs / msPerPx -
             textPainter.height / 2 -
             baselineAdjust,
@@ -469,12 +480,12 @@ class FPSLinePainter extends CustomPainter {
       _FlutterFramesChartState.yAxisUnitsSpace,
       0.0,
       constraints.maxWidth - _FlutterFramesChartState.yAxisUnitsSpace,
-      constraints.maxHeight,
+      constraints.maxHeight - defaultScrollBarOffset,
     );
 
     // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
     final targetMsPerFrame = 1000 / displayRefreshRate;
-    final targetLineY = constraints.maxHeight - targetMsPerFrame / msPerPx;
+    final targetLineY = chartArea.height - targetMsPerFrame / msPerPx;
 
     canvas.drawLine(
       Offset(chartArea.left, targetLineY),
