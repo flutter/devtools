@@ -9,6 +9,7 @@ import 'auto_dispose.dart';
 import 'globals.dart';
 import 'listenable.dart';
 import 'logging/logging_screen.dart';
+import 'network/network_screen.dart';
 import 'service_extensions.dart' as extensions;
 import 'vm_service_wrapper.dart';
 
@@ -16,6 +17,7 @@ class ErrorBadgeManager extends DisposableController
     with AutoDisposeControllerMixin {
   final _activeErrorCounts = <String, ValueNotifier<int>>{
     LoggingScreen.id: ValueNotifier<int>(0),
+    NetworkScreen.id: ValueNotifier<int>(0),
   };
 
   void vmServiceOpened(VmServiceWrapper service) {
