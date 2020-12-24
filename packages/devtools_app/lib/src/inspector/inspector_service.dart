@@ -1011,7 +1011,7 @@ class InspectorInstanceRef {
   int get hashCode => id.hashCode;
 
   @override
-  String toString() => 'instance-$id';
+  String toString() => id;
 
   final String id;
 }
