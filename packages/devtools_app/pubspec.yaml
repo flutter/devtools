@@ -31,7 +31,7 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   http: ^0.12.0+1
-  intl: ^0.17.0-nullsafety.1
+  intl: ^0.16.1
   js: ^0.6.1+1
   meta: ^1.1.0
   mime: ^0.9.7
