@@ -23,6 +23,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';
 import '../config_specific/logger/logger.dart';
+import '../config_specific/url/url.dart';
 import '../globals.dart';
 import '../service_extensions.dart' as extensions;
 import '../service_registrations.dart' as registrations;
@@ -32,6 +33,8 @@ import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
+
+const inspectorRefQueryParam = 'inspectorRef';
 
 TextStyle textStyleForLevel(DiagnosticLevel level, ColorScheme colorScheme) {
   switch (level) {
@@ -159,10 +162,6 @@ class InspectorController extends DisposableController
   /// simulator or high powered native device. The frame rate is set low
   /// for now mainly to minimize risk.
   static const double refreshFramesPerSecond = 5.0;
-
-  final _treeNodeSelectedController = StreamController<void>.broadcast();
-
-  Stream<void> get onTreeNodeSelected => _treeNodeSelectedController.stream;
 
   final bool isSummaryTree;
 
@@ -581,6 +580,16 @@ class InspectorController extends DisposableController
     _selectionGroups.cancelNext();
 
     final group = _selectionGroups.next;
+
+    if (firstFrame) {
+      final queryParams = loadQueryParams();
+      if (queryParams.containsKey(inspectorRefQueryParam)) {
+        await group.setSelectionInspector(
+          InspectorInstanceRef(queryParams[inspectorRefQueryParam]),
+          false,
+        );
+      }
+    }
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
       treeType,
@@ -679,8 +688,6 @@ class InspectorController extends DisposableController
       if (!detailsSubtree) {
         inspectorTree.nodeChanged(selectedNode.parent);
       }
-    } else {
-      _treeNodeSelectedController.add(null);
     }
 
     selectedNode = newSelection;
