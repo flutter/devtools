@@ -498,9 +498,10 @@ class InspectorController extends DisposableController
     newSelection ??= selectedDiagnostic;
     setSelectedNode(findMatchingInspectorTreeNode(newSelection));
     syncSelectionHelper(
-        maybeRerootDetailsTree: setSubtreeRoot,
-        selection: newSelection,
-        detailsSelection: detailsSelection);
+      maybeRerootDetailsTree: setSubtreeRoot,
+      selection: newSelection,
+      detailsSelection: detailsSelection,
+    );
 
     if (details != null) {
       if (subtreeRoot != null && getSubtreeRootNode() == null) {
