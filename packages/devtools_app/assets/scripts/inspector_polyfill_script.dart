@@ -253,7 +253,8 @@ String addServiceExtensions() {
   }
 
   Future<Map<String, dynamic>> getPubRootDirectories(
-      Map<String, String> parameters) {
+    Map<String, String> parameters,
+  ) {
     return Future.value(<String, Object>{
       'result': WidgetInspectorService.instance._pubRootDirectories ?? [],
     });

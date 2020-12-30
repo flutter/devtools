@@ -78,16 +78,19 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   Map<String, Object> get size => json['size'];
 
-  bool _isLocalClass;
-
   bool get isLocalClass {
     final objectGroup = inspectorService;
     if (objectGroup is ObjectGroup) {
       return _isLocalClass ??= objectGroup.inspectorService.isLocalClass(this);
     } else {
-      return false;
+      // TODO(jacobr): if objectGroup is a Future<ObjectGroup> we cannot compute
+      // whether classes are local as for convenience we need this method to
+      // return synchronously.
+      return _isLocalClass = false;
     }
   }
+
+  bool _isLocalClass;
 
   @override
   bool operator ==(dynamic other) {

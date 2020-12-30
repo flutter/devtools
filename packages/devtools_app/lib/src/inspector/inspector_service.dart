@@ -230,8 +230,15 @@ class InspectorService extends DisposableController
       final google3Index = path.lastIndexOf('google3');
       if (google3Index != -1 && google3Index + 1 < path.length) {
         var packageParts = path.sublist(google3Index + 1);
-        //
-        if (packageParts[0] == 'third_party' && packageParts.length >= 3) {
+        // A well formed third_party dart package should be in a directory of
+        // the form
+        // third_party/dart/packageName                    (package:packageName)
+        // or
+        // third_party/dart_src/long/package/name    (package:long.package.name)
+        // so its path should be at minimum depth 3.
+        const minThirdPartyPathDepth = 3;
+        if (packageParts[0] == 'third_party' &&
+            packageParts.length >= minThirdPartyPathDepth) {
           assert(packageParts[1] == 'dart' || packageParts[1] == 'dart_src');
           packageParts = packageParts.sublist(2);
         }
@@ -287,6 +294,9 @@ class InspectorService extends DisposableController
 
   bool isLocalClass(RemoteDiagnosticsNode node) {
     if (node.widgetRuntimeType == null) return false;
+    // widgetRuntimeType may contain some generic type arguments which we need
+    // to strip out. If widgetRuntimeType is "FooWidget<Bar>" then we are only
+    // interested in the raw type "FooWidget".
     final rawType = node.widgetRuntimeType.split('<').first;
     return localClasses.containsKey(rawType);
   }

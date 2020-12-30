@@ -375,9 +375,9 @@ class InspectorController extends DisposableController
     maybeLoadUI();
   }
 
-  List<String> _rootDirectories;
   List<String> get rootDirectories =>
       _rootDirectories ?? parent.rootDirectories;
+  List<String> _rootDirectories;
 
   Future<void> maybeLoadUI() async {
     if (parent != null) {
@@ -497,7 +497,10 @@ class InspectorController extends DisposableController
       RemoteDiagnosticsNode detailsSelection, bool setSubtreeRoot) {
     newSelection ??= selectedDiagnostic;
     setSelectedNode(findMatchingInspectorTreeNode(newSelection));
-    syncSelectionHelper(setSubtreeRoot, newSelection, detailsSelection);
+    syncSelectionHelper(
+        maybeRerootDetailsTree: setSubtreeRoot,
+        selection: newSelection,
+        detailsSelection: detailsSelection);
 
     if (details != null) {
       if (subtreeRoot != null && getSubtreeRootNode() == null) {
@@ -747,7 +750,12 @@ class InspectorController extends DisposableController
           details != null &&
           selectedDiagnostic != null &&
           !details.hasDiagnosticsValue(selectedDiagnostic.valueRef);
-      syncSelectionHelper(maybeReroot, selectedDiagnostic, selectedDiagnostic);
+      syncSelectionHelper(
+        maybeRerootDetailsTree: maybeReroot,
+        selection: selectedDiagnostic,
+        detailsSelection: selectedDiagnostic,
+      );
+
       if (!maybeReroot) {
         if (isSummaryTree && details != null) {
           details.selectAndShowNode(selectedDiagnostic);
@@ -773,8 +781,11 @@ class InspectorController extends DisposableController
     return null;
   }
 
-  void syncSelectionHelper(bool maybeRerootDetailsTree,
-      RemoteDiagnosticsNode selection, RemoteDiagnosticsNode detailsSelection) {
+  void syncSelectionHelper({
+    @required bool maybeRerootDetailsTree,
+    @required RemoteDiagnosticsNode selection,
+    @required RemoteDiagnosticsNode detailsSelection,
+  }) {
     if (selection != null) {
       if (selection.isCreatedByLocalProject) {
         _navigateTo(selection);

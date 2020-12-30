@@ -89,7 +89,7 @@ Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
         await group.dispose();
       });
 
-      test('localClasses', () async {
+      test('local classes', () async {
         await env.setupEnvironment();
         final group = inspectorService.createObjectGroup('test-group');
         // These tests are moot if widget creation is not tracked.
@@ -163,8 +163,23 @@ Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
             ),
             isFalse,
           );
+        } finally {
+          // Restore.
+          await inspectorService.setPubRootDirectories(originalRootDirectories);
 
-          // Test bazel project like cases.
+          await group.dispose();
+        }
+      });
+
+      test('local classes for bazel projects', () async {
+        await env.setupEnvironment();
+        final group = inspectorService.createObjectGroup('test-group');
+        // These tests are moot if widget creation is not tracked.
+        expect(await inspectorService.isWidgetCreationTracked(), isTrue);
+        await inspectorService.setPubRootDirectories([]);
+        final originalRootDirectories =
+            (await inspectorService.inferPubRootDirectoryIfNeeded()).toList();
+        try {
           await inspectorService.setPubRootDirectories(
               ['/usr/me/clients/google3/foo/bar/baz/lib/src/bla']);
           expect(
