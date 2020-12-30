@@ -4,13 +4,16 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:devtools_app/src/charts/treemap.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
+import 'package:path/path.dart' as path;
 
 import 'network_test_data.dart';
 
@@ -120,4 +123,61 @@ extension RichTextChecking on CommonFinders {
     return find.byWidgetPredicate(
         (widget) => widget is RichText && widget.text.toPlainText() == text);
   }
+}
+
+/// Workaround to initialize the live widget binding with assets.
+///
+/// The [LiveTestWidgetsFlutterBinding] is useful for unit tests that need to
+/// perform true async operations such as communicating with the VM Service.
+/// Unfortunately the default implementation doesn't work with the patterns we
+/// use to load assets in the devtools application.
+/// TODO(jacobr): consider writing proper integration tests instead rather than
+/// using this code path.
+void initializeLiveTestWidgetsFlutterBindingWithAssets() {
+  TestWidgetsFlutterBinding.ensureInitialized({'FLUTTER_TEST': 'false'});
+  _mockFlutterAssets();
+}
+
+// Copied from _binding_io.dart from package:flutter_test,
+// This code is typically used to load assets in regular unittests but not
+// unittests run with the LiveTestWidgetsFlutterBinding. Assets should be able
+// to load normally when running unittests using the
+// LiveTestWidgetsFlutterBinding but that is not the case at least for the
+// devtools app so we use this workaround.
+void _mockFlutterAssets() {
+  if (!Platform.environment.containsKey('UNIT_TEST_ASSETS')) {
+    return;
+  }
+  final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
+  assert(Platform.environment['APP_NAME'] != null);
+  final String prefix = 'packages/${Platform.environment['APP_NAME']}/';
+
+  /// Navigation related actions (pop, push, replace) broadcasts these actions via
+  /// platform messages.
+  SystemChannels.navigation
+      .setMockMethodCallHandler((MethodCall methodCall) async {});
+
+  ServicesBinding.instance.defaultBinaryMessenger
+      .setMockMessageHandler('flutter/assets', (ByteData message) async {
+    assert(message != null);
+    String key = utf8.decode(message.buffer.asUint8List());
+    File asset = File(path.join(assetFolderPath, key));
+
+    if (!asset.existsSync()) {
+      // For tests in package, it will load assets with its own package prefix.
+      // In this case, we do a best-effort look up.
+      if (!key.startsWith(prefix)) {
+        return null;
+      }
+
+      key = key.replaceFirst(prefix, '');
+      asset = File(path.join(assetFolderPath, key));
+      if (!asset.existsSync()) {
+        return null;
+      }
+    }
+
+    final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
+    return Future<ByteData>.value(encoded.buffer.asByteData());
+  });
 }

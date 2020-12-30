@@ -78,6 +78,20 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   Map<String, Object> get size => json['size'];
 
+  bool get isLocalClass {
+    final objectGroup = inspectorService;
+    if (objectGroup is ObjectGroup) {
+      return _isLocalClass ??= objectGroup.inspectorService.isLocalClass(this);
+    } else {
+      // TODO(jacobr): if objectGroup is a Future<ObjectGroup> we cannot compute
+      // whether classes are local as for convenience we need this method to
+      // return synchronously.
+      return _isLocalClass = false;
+    }
+  }
+
+  bool _isLocalClass;
+
   @override
   bool operator ==(dynamic other) {
     if (other is! RemoteDiagnosticsNode) return false;
@@ -442,9 +456,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return json.containsKey('children') || _children != null || !hasChildren;
   }
 
-  Future<List<RemoteDiagnosticsNode>> get children {
-    _computeChildren();
-    return _childrenFuture;
+  Future<List<RemoteDiagnosticsNode>> get children async {
+    await _computeChildren();
+    if (_children != null) return _children;
+    return await _childrenFuture;
   }
 
   List<RemoteDiagnosticsNode> get childrenNow {

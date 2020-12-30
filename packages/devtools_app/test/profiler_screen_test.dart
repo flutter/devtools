@@ -42,8 +42,8 @@ void main() {
       expect(find.byType(StopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
       expect(find.byType(ProfileGranularityDropdown), findsOneWidget);
-      expect(find.byKey(ProfilerScreen.recordingInstructionsKey),
-          findsOneWidget);
+      expect(
+          find.byKey(ProfilerScreen.recordingInstructionsKey), findsOneWidget);
       expect(find.byKey(ProfilerScreen.recordingStatusKey), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(CpuProfiler), findsNothing);
@@ -51,7 +51,7 @@ void main() {
 
     Future<void> pumpProfilerScreenBody(
       WidgetTester tester,
-        ProfilerScreenBody body,
+      ProfilerScreenBody body,
     ) async {
       await tester.pumpWidget(wrapWithControllers(
         body,
@@ -81,10 +81,9 @@ void main() {
         // Start recording.
         await tester.tap(find.byType(RecordButton));
         await tester.pump();
-        expect(find.byKey(ProfilerScreen.recordingInstructionsKey),
-            findsNothing);
         expect(
-            find.byKey(ProfilerScreen.recordingStatusKey), findsOneWidget);
+            find.byKey(ProfilerScreen.recordingInstructionsKey), findsNothing);
+        expect(find.byKey(ProfilerScreen.recordingStatusKey), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
         expect(find.byType(CpuProfiler), findsNothing);
 

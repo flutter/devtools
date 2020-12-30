@@ -91,6 +91,10 @@ extension WidgetInspectorServicePrivateMethods on WidgetInspectorService {
   String _safeJsonEncode(Object object) {
     throw 'Dummy extension method to make the code type check when it calls private members';
   }
+
+  List<String> /*?*/ get _pubRootDirectories {
+    throw 'Dummy extension method to make the code type check when it calls private members';
+  }
 }
 
 // Returns json describing which service extensions failed to load.
@@ -248,6 +252,14 @@ String addServiceExtensions() {
     return Future.value(<String, Object>{'result': succeed});
   }
 
+  Future<Map<String, dynamic>> getPubRootDirectories(
+    Map<String, String> parameters,
+  ) {
+    return Future.value(<String, Object>{
+      'result': WidgetInspectorService.instance._pubRootDirectories ?? [],
+    });
+  }
+
   final failures = <String, String>{};
   void registerHelper(String name, ServiceExtensionCallback callback) {
     try {
@@ -267,6 +279,7 @@ String addServiceExtensions() {
   registerHelper('setFlexFit', setFlexFit);
   registerHelper('setFlexFactor', setFlexFactor);
   registerHelper('setFlexProperties', setFlexProperties);
+  registerHelper('getPubRootDirectories', getPubRootDirectories);
   return WidgetInspectorService.instance._safeJsonEncode(failures);
   // INSPECTOR_POLYFILL_SCRIPT_END
 }

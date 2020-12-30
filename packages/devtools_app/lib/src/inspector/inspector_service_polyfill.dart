@@ -13,7 +13,19 @@ Future<String> loadPolyfillScript() {
   return asset.loadString('assets/scripts/inspector_polyfill_script.dart');
 }
 
-Future<void> invokeInspectorPolyfill(ObjectGroup group) async {
+final _polyfillReadyExpando = Expando<Future>();
+
+Future<void> invokeInspectorPolyfill(ObjectGroup group) {
+  // Avoid invoking the polyfill more than once.
+  var polyFillReady = _polyfillReadyExpando[group.inspectorLibrary.isolate];
+  if (polyFillReady != null) return polyFillReady;
+
+  polyFillReady = _invokeInspectorPolyfill(group);
+  _polyfillReadyExpando[group.inspectorLibrary.isolate] = polyFillReady;
+  return polyFillReady;
+}
+
+Future<void> _invokeInspectorPolyfill(ObjectGroup group) async {
   final String script = await loadPolyfillScript();
   var startIndex = script.indexOf(_inspectorPolyfillStart);
   final endIndex = script.indexOf(_inspectorPolyfillEnd);

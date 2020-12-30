@@ -66,11 +66,15 @@ class EvalOnDartLibrary {
   Future<LibraryRef> get libraryRef => _libraryRef.future;
   Completer allPendingRequestsDone;
 
+  Isolate get isolate => _isolate;
+  Isolate _isolate;
+
   Future<void> _initialize(String isolateId) async {
     _isolateId = isolateId;
 
     try {
       final Isolate isolate = await service.getIsolate(_isolateId);
+      _isolate = isolate;
       if (isolate == null || _libraryRef.isCompleted) {
         // Nothing to do here.
         return;
