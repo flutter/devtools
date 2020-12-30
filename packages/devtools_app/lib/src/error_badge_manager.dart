@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 import 'auto_dispose.dart';
 import 'globals.dart';
+import 'inspector/inspector_screen.dart';
 import 'listenable.dart';
 import 'logging/logging_screen.dart';
 import 'network/network_screen.dart';
@@ -16,8 +17,9 @@ import 'vm_service_wrapper.dart';
 class ErrorBadgeManager extends DisposableController
     with AutoDisposeControllerMixin {
   final _activeErrorCounts = <String, ValueNotifier<int>>{
-    LoggingScreen.id: ValueNotifier<int>(0),
+    InspectorScreen.id: ValueNotifier<int>(0),
     NetworkScreen.id: ValueNotifier<int>(0),
+    LoggingScreen.id: ValueNotifier<int>(0),
   };
 
   void vmServiceOpened(VmServiceWrapper service) {
@@ -36,9 +38,16 @@ class ErrorBadgeManager extends DisposableController
   }
 
   void _handleExtensionEvent(Event e) async {
-    // TODO(jacobr): badge inspector for appropriate errors.
     if (e.extensionKind == 'Flutter.Error') {
       incrementBadgeCount(LoggingScreen.id);
+
+      final json = e.extensionData.data;
+      final objectId = json['objectId'] as String;
+      // TODO(kenz): verify that the object id is referring to an element or
+      // widget.
+      if (objectId?.contains('inspector-') ?? false) {
+        incrementBadgeCount(InspectorScreen.id);
+      }
     }
   }
 

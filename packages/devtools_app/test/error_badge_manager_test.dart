@@ -14,8 +14,9 @@ import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const supportedScreenIds = [
-  LoggingScreen.id,
+  InspectorScreen.id,
   NetworkScreen.id,
+  LoggingScreen.id,
 ];
 
 const allScreenIds = [
