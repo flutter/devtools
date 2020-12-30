@@ -268,7 +268,7 @@ class FlutterFramesChartItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final bool janky = _isFrameJanky(frame);
+    final bool janky = frame.isJanky(displayRefreshRate);
     // TODO(kenz): add some indicator when a frame is so janky that it exceeds the
     // available axis space.
     final ui = Container(
@@ -322,12 +322,6 @@ class FlutterFramesChartItem extends StatelessWidget {
   String _tooltipText(FlutterFrame frame) {
     return 'UI: ${msText(frame.uiEventFlow.time.duration)}\n'
         'Raster: ${msText(frame.rasterEventFlow.time.duration)}';
-  }
-
-  bool _isFrameJanky(FlutterFrame frame) {
-    final targetMsPerFrame = 1 / displayRefreshRate * 1000;
-    return frame.uiDurationMs > targetMsPerFrame ||
-        frame.rasterDurationMs > targetMsPerFrame;
   }
 }
 

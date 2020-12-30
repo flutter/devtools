@@ -27,6 +27,7 @@ class DevToolsDialog extends StatelessWidget {
   const DevToolsDialog({
     @required this.title,
     @required this.content,
+    this.includeDivider = true,
     this.actions,
   });
 
@@ -34,6 +35,7 @@ class DevToolsDialog extends StatelessWidget {
 
   final Widget title;
   final Widget content;
+  final bool includeDivider;
   final List<Widget> actions;
 
   @override
@@ -43,9 +45,11 @@ class DevToolsDialog extends StatelessWidget {
       title: Column(
         children: [
           title,
-          const PaddedDivider(
-            padding: EdgeInsets.only(bottom: denseRowSpacing),
-          ),
+          includeDivider
+              ? const PaddedDivider(
+                  padding: EdgeInsets.only(bottom: denseRowSpacing),
+                )
+              : const SizedBox(height: defaultSpacing),
         ],
       ),
       contentPadding: const EdgeInsets.fromLTRB(

@@ -11,6 +11,7 @@ import 'inspector/inspector_screen.dart';
 import 'listenable.dart';
 import 'logging/logging_screen.dart';
 import 'network/network_screen.dart';
+import 'performance/performance_screen.dart';
 import 'service_extensions.dart' as extensions;
 import 'vm_service_wrapper.dart';
 
@@ -18,6 +19,7 @@ class ErrorBadgeManager extends DisposableController
     with AutoDisposeControllerMixin {
   final _activeErrorCounts = <String, ValueNotifier<int>>{
     InspectorScreen.id: ValueNotifier<int>(0),
+    PerformanceScreen.id: ValueNotifier<int>(0),
     NetworkScreen.id: ValueNotifier<int>(0),
     LoggingScreen.id: ValueNotifier<int>(0),
   };

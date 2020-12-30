@@ -23,6 +23,7 @@ import '../service_extensions.dart';
 import '../split.dart';
 import '../theme.dart';
 import '../ui/service_extension_widgets.dart';
+import '../ui/utils.dart';
 import '../ui/vm_flag_widgets.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
@@ -246,7 +247,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         ActionButton(
           child: OutlineButton(
             child: const Icon(
-              Icons.tune,
+              Icons.settings,
               size: defaultIconSize,
             ),
             onPressed: _openSettingsDialog,
@@ -308,17 +309,32 @@ class TimelineConfigurationsDialog extends StatelessWidget {
     final theme = Theme.of(context);
 
     return DevToolsDialog(
-      title: dialogTitleText(theme, 'Recorded Streams'),
+      title: dialogTitleText(theme, 'Performance Settings'),
+      includeDivider: false,
       content: Container(
         width: dialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            ...dialogSubHeader(theme, 'Default Recorded Timeline Streams'),
             ..._defaultRecordedStreams(theme),
             const SizedBox(height: denseSpacing),
-            ...dialogSubHeader(theme, 'Advanced'),
+            ...dialogSubHeader(theme, 'Advanced Recorded Timeline Streams'),
             ..._advancedStreams(theme),
+            const SizedBox(height: denseSpacing),
+            ...dialogSubHeader(theme, 'Additional Settings'),
+            Row(
+              children: [
+                NotifierCheckbox(notifier: controller.badgeTabForJankyFrames),
+                Text(
+                  'Badge Performance tab when Flutter UI jank is detected',
+                  // Specify font size to match style of other RichText widgets
+                  // in dialog.
+                  style: theme.regularTextStyle.copyWith(fontSize: 14.0),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -378,6 +394,7 @@ class TimelineConfigurationsDialog extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // TODO(kenz): refactor so that we can use NotifierCheckbox here.
         ValueListenableBuilder(
           valueListenable: listenable,
           builder: (context, value, _) {
