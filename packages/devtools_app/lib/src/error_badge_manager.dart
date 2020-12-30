@@ -43,6 +43,8 @@ class ErrorBadgeManager extends DisposableController
 
       final json = e.extensionData.data;
       final objectId = json['objectId'] as String;
+      // TODO(kenz): verify that the object id is referring to an element or
+      // widget.
       if (objectId?.contains('inspector-') ?? false) {
         incrementBadgeCount(InspectorScreen.id);
       }
