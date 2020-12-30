@@ -145,7 +145,7 @@ class Repository {
     }
   }
 
-  final Map<String, List<_Matcher>> patterns = {};
+  final patterns = <String, List<_Matcher>>{};
 
   Map<String, dynamic> toJson() {
     return {
@@ -342,13 +342,7 @@ class _MultilineMatcher extends _Matcher {
       // the beginning of the string.
       throw StateError('Expected ${begin.pattern} to match.');
     }
-    if (contentName == null || (beginCaptures ?? captures) != null) {
-      return _applyCapture(scanner, beginCaptures ?? captures, line, column);
-    } else {
-      // If there's no explicit captures and contentName is provided, don't
-      // create a span for the match.
-      return [];
-    }
+    return _processCaptureHelper(scanner, beginCaptures, line, column);
   }
 
   List<ScopeSpan> _scanToEndOfLine(Grammar grammar, LineScanner scanner) {
@@ -402,8 +396,17 @@ class _MultilineMatcher extends _Matcher {
     if (!scanner.scan(end)) {
       return null;
     }
-    if (contentName == null || (endCaptures ?? captures) != null) {
-      return _applyCapture(scanner, endCaptures ?? captures, line, column);
+    return _processCaptureHelper(scanner, beginCaptures, line, column);
+  }
+
+  List<ScopeSpan> _processCaptureHelper(
+    LineScanner scanner,
+    Map<String, dynamic> customCaptures,
+    int line,
+    int column,
+  ) {
+    if (contentName == null || (customCaptures ?? captures) != null) {
+      return _applyCapture(scanner, customCaptures ?? captures, line, column);
     } else {
       // If there's no explicit captures and contentName is provided, don't
       // create a span for the match.
@@ -448,7 +451,7 @@ class _MultilineMatcher extends _Matcher {
         } else {
           results.addAll(_scanUpToEndMatch(grammar, scanner));
         }
-        final List<ScopeSpan> endSpans = _scanEnd(scanner);
+        final endSpans = _scanEnd(scanner);
 
         // If beginSpans is not empty and there's no captures specified, there
         // will only be a single span with a scope that covers [beginMatch.start,
@@ -505,11 +508,11 @@ class _IncludeMatcher extends _Matcher {
       : include = include.substring(1),
         super._({});
 
+  final String include;
+
   static bool isType(Map<String, dynamic> json) {
     return json.containsKey('include');
   }
-
-  final String include;
 
   @override
   List<ScopeSpan> scan(Grammar grammar, LineScanner scanner) {
