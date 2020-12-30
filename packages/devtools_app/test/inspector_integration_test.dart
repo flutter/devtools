@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:flutter/material.dart';
@@ -134,7 +136,7 @@ void main() async {
       );
 
       await env.tearDownEnvironment();
-    });
+    }, skip: !Platform.isMacOS);
 
     // TODO(jacobr): convert these tests to screenshot tests like the initial
     // state test.
