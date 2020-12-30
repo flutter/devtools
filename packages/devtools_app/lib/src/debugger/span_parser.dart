@@ -34,20 +34,23 @@ abstract class SpanParser {
 
 /// A representation of a TextMate grammar used to create [ScopeSpan]s
 /// representing scopes within a body of text.
-/// 
+///
 /// References used:
-///   - Grammar specification: 
+///   - Grammar specification:
 ///       https://macromates.com/manual/en/language_grammars#language_grammars
-///   - Helpful blog post which clears up ambiguities in the spec: 
+///   - Helpful blog post which clears up ambiguities in the spec:
 ///       https://www.apeth.com/nonblog/stories/textmatebundle.html
-/// 
+///
 class Grammar {
   factory Grammar.fromJson(Map<String, dynamic> json) {
     return Grammar._(
       name: json['name'],
       scopeName: json['scopeName'],
-      topLevelMatchers:
-          _parseMatchers(json['patterns'].cast<Map<String, dynamic>>()),
+      topLevelMatchers: json['patterns']
+          ?.cast<Map<String, dynamic>>()
+          ?.map((e) => _Matcher.parse(e))
+          ?.toList()
+          ?.cast<_Matcher>(),
       repository: Repository.build(json),
     );
   }
@@ -59,29 +62,13 @@ class Grammar {
     this.repository,
   });
 
-  static List<_Matcher> _parseMatchers(List<Map<String, dynamic>> patterns) {
-    final List<_Matcher> parsed = [];
+  final String name;
 
-    void _parseMatchersHelper(List<_Matcher> patternList) {
-      if (patternList == null) {
-        return;
-      }
-      for (final pattern in patternList) {
-        if (pattern is _MultilineMatcher) {
-          _parseMatchersHelper(pattern.patterns);
-        }
-      }
-    }
+  final String scopeName;
 
-    for (final patternJson in patterns) {
-      final pattern = _Matcher.parse(patternJson);
-      parsed.add(pattern);
-      if (pattern is _MultilineMatcher) {
-        _parseMatchersHelper(pattern.patterns);
-      }
-    }
-    return parsed;
-  }
+  final List<_Matcher> topLevelMatchers;
+
+  final Repository repository;
 
   @override
   String toString() {
@@ -92,11 +79,6 @@ class Grammar {
       'repository': repository.toJson(),
     });
   }
-
-  final String name;
-  final String scopeName;
-  final List<_Matcher> topLevelMatchers;
-  final Repository repository;
 }
 
 /// A representation of a span of text which has `scope` applied to it.
@@ -109,25 +91,12 @@ class ScopeSpan {
         _start = start,
         _end = end;
 
-  int get length => _end - _start;
-
-  final int _start;
-  int _end;
-
-  final int line;
-  final int column;
-
-  final List<String> scopes;
-
-  @override
-  String toString() {
-    return '[$_start, $_end, $line:$column (len: $length)] = $scopes';
-  }
-
   /// Adds [matcher.name] to the scope stack, if non-null. This scope will be
   /// included in each [ScopeSpan] created within [callback].
   static List<ScopeSpan> applyScope(
-      _Matcher matcher, List<ScopeSpan> Function() callback) {
+    _Matcher matcher,
+    List<ScopeSpan> Function() callback,
+  ) {
     if (matcher.name != null) {
       _scopeStack.addLast(matcher.name);
     }
@@ -140,6 +109,23 @@ class ScopeSpan {
   }
 
   static final ListQueue<String> _scopeStack = ListQueue<String>();
+
+  int get length => _end - _start;
+
+  final int _start;
+
+  int _end;
+
+  final int line;
+
+  final int column;
+
+  final List<String> scopes;
+
+  @override
+  String toString() {
+    return '[$_start, $_end, $line:$column (len: $length)] = $scopes';
+  }
 }
 
 /// A top-level repository of rules that can be referenced within other rules
@@ -159,14 +145,14 @@ class Repository {
     }
   }
 
+  final Map<String, List<_Matcher>> patterns = {};
+
   Map<String, dynamic> toJson() {
     return {
       for (final entry in patterns.entries)
         entry.key: entry.value.map((e) => e.toJson()).toList(),
     };
   }
-
-  final Map<String, List<_Matcher>> patterns = {};
 }
 
 abstract class _Matcher {
@@ -182,6 +168,8 @@ abstract class _Matcher {
   }
 
   _Matcher._(Map<String, dynamic> json) : name = json['name'];
+
+  final String name;
 
   List<ScopeSpan> scan(Grammar grammar, LineScanner scanner);
 
@@ -239,8 +227,6 @@ abstract class _Matcher {
   }
 
   Map<String, dynamic> toJson();
-
-  final String name;
 }
 
 /// A simple matcher which matches a single line.
@@ -253,6 +239,10 @@ class _SimpleMatcher extends _Matcher {
   static bool isType(Map<String, dynamic> json) {
     return json.containsKey('match');
   }
+
+  final RegExp match;
+
+  final Map<String, dynamic> captures;
 
   @override
   List<ScopeSpan> scan(Grammar grammar, LineScanner scanner) {
@@ -276,9 +266,6 @@ class _SimpleMatcher extends _Matcher {
       if (captures != null) 'captures': captures,
     };
   }
-
-  final RegExp match;
-  final Map<String, dynamic> captures;
 }
 
 class _MultilineMatcher extends _Matcher {
@@ -303,6 +290,49 @@ class _MultilineMatcher extends _Matcher {
     return json.containsKey('begin') &&
         (json.containsKey('end') || json.containsKey('while'));
   }
+
+  /// A regular expression which defines the beginning match of this rule. This
+  /// property is required and must be defined along with either `end` or
+  /// `while`.
+  final RegExp begin;
+
+  /// A set of scopes to apply to groups captured by `begin`. `captures` should
+  /// be null if this property is provided.
+  final Map<String, dynamic> beginCaptures;
+
+  /// The scope that applies to the content between the matches found by
+  /// `begin` and `end`.
+  final String contentName;
+
+  /// A regular expression which defines the match signaling the end of the
+  /// rule application. This property is mutually exclusive with the `while`
+  /// property.
+  final RegExp end;
+
+  /// A set of scopes to apply to groups captured by `begin`. `captures` should
+  /// be null if this property is provided.
+  final Map<String, dynamic> endCaptures;
+
+  /// A regular expression corresponding with the `while` property used to
+  /// determine if the next line should have the current rule applied. If
+  /// `patterns` is provided, the contents of a line that satisfy this regular
+  /// expression will be processed against the provided patterns.
+  ///
+  /// This expression is applied to every line **after** the first line matched
+  /// by `begin`. If this expression fails after the line matched by `begin`,
+  /// the overall rule does not fail and the resulting [ScopeSpan]s will consist
+  /// of matches found in the first line.
+  ///
+  /// This property is mutually exclusive with the `end` property.
+  final RegExp whileCond;
+
+  /// A set of scopes to apply to groups captured by `begin` and `end`.
+  /// Providing this property is the equivalent of setting `beginCaptures` and
+  /// `endCaptures` to the same value. `beginCaptures` and `endCaptures` should
+  /// be null if this property is provided.
+  final Map<String, dynamic> captures;
+
+  final List<_Matcher> patterns;
 
   List<ScopeSpan> _scanBegin(LineScanner scanner) {
     final line = scanner.line;
@@ -465,48 +495,6 @@ class _MultilineMatcher extends _Matcher {
         'patterns': patterns.map((e) => e.toJson()).toList(),
     };
   }
-
-  /// A regular expression which defines the beginning match of this rule. This
-  /// property is required and must be defined along with either `end` or
-  /// `while`.
-  final RegExp begin;
-
-  /// A set of scopes to apply to groups captured by `begin`. `captures` should
-  /// be null if this property is provided.
-  final Map<String, dynamic> beginCaptures;
-
-  /// The scope that applies to the content between the matches found by
-  /// `begin` and `end`.
-  final String contentName;
-
-  /// A regular expression which defines the match signaling the end of the
-  /// rule application. This property is mutually exclusive with the `while`
-  /// property.
-  final RegExp end;
-
-  /// A set of scopes to apply to groups captured by `begin`. `captures` should
-  /// be null if this property is provided.
-  final Map<String, dynamic> endCaptures;
-
-  /// A regular expression corresponding with the `while` property used to
-  /// determine if the next line should have the current rule applied. If
-  /// `patterns` is provided, the contents of a line that satisfy this regular
-  /// expression will be processed against the provided patterns.
-  ///
-  /// This expression is applied to every line **after** the first line matched
-  /// by `begin`. If this expression fails after the line matched by `begin`,
-  /// the overall rule does not fail and the resulting [ScopeSpan]s will consist
-  /// of matches found in the first line.
-  ///
-  /// This property is mutually exclusive with the `end` property.
-  final RegExp whileCond;
-
-  /// A set of scopes to apply to groups captured by `begin` and `end`.
-  /// Providing this property is the equivalent of setting `beginCaptures` and
-  /// `endCaptures` to the same value. `beginCaptures` and `endCaptures` should
-  /// be null if this property is provided.
-  final Map<String, dynamic> captures;
-  final List<_Matcher> patterns;
 }
 
 /// A [_Matcher] that corresponds to an `include` rule referenced in a
@@ -520,6 +508,8 @@ class _IncludeMatcher extends _Matcher {
   static bool isType(Map<String, dynamic> json) {
     return json.containsKey('include');
   }
+
+  final String include;
 
   @override
   List<ScopeSpan> scan(Grammar grammar, LineScanner scanner) {
@@ -544,5 +534,4 @@ class _IncludeMatcher extends _Matcher {
       'include': include,
     };
   }
-  final String include;
 }
