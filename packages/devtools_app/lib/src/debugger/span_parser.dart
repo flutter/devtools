@@ -122,6 +122,8 @@ class ScopeSpan {
 
   final List<String> scopes;
 
+  bool contains(int token) => (_start <= token) && (token < _end);
+
   @override
   String toString() {
     return '[$_start, $_end, $line:$column (len: $length)] = $scopes';

@@ -159,6 +159,23 @@ extension DevToolsColorScheme on ColorScheme {
       isLight ? const Color(0xFFE0EEFA) : const Color(0xFF2E3C48);
   // [toggleButtonForegroundColor] is the same for light and dark theme.
   Color get toggleButtonForegroundColor => const Color(0xFF2196F3);
+
+  Color get functionSyntaxColor =>
+      isLight ? const Color(0xFF795E26) : const Color(0xFFDCDCAA);
+  Color get declarationsSyntaxColor =>
+      isLight ? const Color(0xFF267f99) : const Color(0xFF4EC9B0);
+  Color get modifierSyntaxColor =>
+      isLight ? const Color(0xFF0000FF) : const Color(0xFF569CD6);
+  Color get controlFlowSyntaxColor =>
+      isLight ? const Color(0xFFAF00DB) : const Color(0xFFC586C0);
+  Color get variableSyntaxColor =>
+      isLight ? const Color(0xFF001080) : const Color(0xFF9CDCFE);
+  Color get commentSyntaxColor =>
+      isLight ? const Color(0xFF008000) : const Color(0xFF6A9955);
+  Color get stringSyntaxColor =>
+      isLight ? const Color(0xFFB20001) : const Color(0xFFD88E73);
+  Color get numericConstantSyntaxColor =>
+      isLight ? const Color(0xFF098658) : const Color(0xFFB5CEA8);
 }
 
 TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
