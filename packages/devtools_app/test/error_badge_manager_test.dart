@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 const supportedScreenIds = [
   InspectorScreen.id,
+  PerformanceScreen.id,
   NetworkScreen.id,
   LoggingScreen.id,
 ];

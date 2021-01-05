@@ -30,6 +30,7 @@ import '../service_registrations.dart' as registrations;
 import '../utils.dart';
 import '../version.dart';
 import 'diagnostics_node.dart';
+import 'inspector_screen.dart';
 import 'inspector_service.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
@@ -355,6 +356,10 @@ class InspectorController extends DisposableController
       return Future.value();
     }
     recomputeTreeRoot(null, null, false);
+
+    // TODO(kenz): recalculate inspector badge count based on whether or not
+    // widgets with errors are still in the tree.
+    serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
 
     return getPendingUpdateDone();
   }

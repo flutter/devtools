@@ -85,6 +85,9 @@ class PerformanceController
       _httpTimelineLoggingEnabled;
   final _httpTimelineLoggingEnabled = ValueNotifier<bool>(false);
 
+  ValueListenable<bool> get badgeTabForJankyFrames => _badgeTabForJankyFrames;
+  final _badgeTabForJankyFrames = ValueNotifier<bool>(false);
+
   // TODO(kenz): switch to use VmFlagManager-like pattern once
   // https://github.com/dart-lang/sdk/issues/41822 is fixed.
   /// Recorded timeline stream values.
@@ -136,6 +139,11 @@ class PerformanceController
 
   Future<void> _initHelper() async {
     await serviceManager.onServiceAvailable;
+
+    // Default to true for profile builds only.
+    _badgeTabForJankyFrames.value =
+        await serviceManager.connectedApp.isProfileBuild;
+
     unawaited(allowedError(
       _cpuProfilerService.setProfilePeriod(mediumProfilePeriod),
       logError: false,
@@ -242,6 +250,19 @@ class PerformanceController
     _processing.value = false;
 
     _flutterFrames.value = data.frames;
+
+    _maybeBadgeTabForJankyFrames();
+  }
+
+  void _maybeBadgeTabForJankyFrames() {
+    if (_badgeTabForJankyFrames.value) {
+      for (final frame in _flutterFrames.value) {
+        if (frame.isJanky(_displayRefreshRate.value)) {
+          serviceManager.errorBadgeManager
+              .incrementBadgeCount(PerformanceScreen.id);
+        }
+      }
+    }
   }
 
   void primeThreadIds(vm_service.Timeline timeline) {
@@ -473,6 +494,7 @@ class PerformanceController
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
     _processing.value = false;
+    serviceManager.errorBadgeManager.clearErrors(PerformanceScreen.id);
   }
 
   void recordTrace(Map<String, dynamic> trace) {

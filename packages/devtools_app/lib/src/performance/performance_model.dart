@@ -458,6 +458,12 @@ class FlutterFrame {
     return null;
   }
 
+  bool isJanky(double displayRefreshRate) {
+    final targetMsPerFrame = 1 / displayRefreshRate * 1000;
+    return uiDurationMs > targetMsPerFrame ||
+        rasterDurationMs > targetMsPerFrame;
+  }
+
   @override
   String toString() {
     return 'Frame $id - $time, ui: ${uiEventFlow.time}, '
