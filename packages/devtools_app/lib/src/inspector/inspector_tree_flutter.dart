@@ -556,22 +556,24 @@ class InspectorRowContent extends StatelessWidget {
                     )
                   : const SizedBox(
                       width: defaultSpacing, height: defaultSpacing),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                ),
-                child: InkWell(
-                  onTap: () {
-                    controller.onSelectRow(row);
-                    // TODO(gmoothart): It may be possible to capture the tap
-                    // and request focus directly from the InspectorTree. Then
-                    // we wouldn't need this.
-                    controller.requestFocus();
-                  },
-                  child: Container(
-                    height: rowHeight,
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: DiagnosticsNodeDescription(node.diagnostic),
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      controller.onSelectRow(row);
+                      // TODO(gmoothart): It may be possible to capture the tap
+                      // and request focus directly from the InspectorTree. Then
+                      // we wouldn't need this.
+                      controller.requestFocus();
+                    },
+                    child: Container(
+                      height: rowHeight,
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: DiagnosticsNodeDescription(node.diagnostic),
+                    ),
                   ),
                 ),
               ),

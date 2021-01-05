@@ -1,27 +1,38 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: implementation_imports
-// ignore_for_file: invalid_use_of_visible_for_testing_member
+import 'dart:io';
 
-import 'dart:async';
-
-import 'package:devtools_app/src/inspector/inspector_controller.dart';
-import 'package:devtools_app/src/inspector/inspector_service.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart' show equalsIgnoringHashCodes;
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-import 'matchers/matchers.dart';
-import 'support/fake_inspector_tree.dart';
-import 'support/flutter_test_environment.dart';
+import 'package:devtools_testing/support/flutter_test_driver.dart'
+    show FlutterRunConfiguration;
+import 'package:devtools_testing/support/flutter_test_environment.dart';
 
-Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
+import 'package:devtools_app/src/inspector/inspector_service.dart';
+
+import 'support/utils.dart';
+import 'support/wrappers.dart';
+
+// This is a bit conservative to ensure we do not get flakes due to
+// slow interactions with the VM Service. This delay could likely be
+// reduced to under 1 second without introducing flakes.
+const inspectorChangeSettleTime = Duration(seconds: 2);
+
+void main() async {
+  // We need to use real async in this test so we need to use this binding.
+  initializeLiveTestWidgetsFlutterBindingWithAssets();
+  const windowSize = Size(2600.0, 1200.0);
+
+  final FlutterTestEnvironment env = FlutterTestEnvironment(
+    const FlutterRunConfiguration(withDebugger: true),
+  );
+
   InspectorService inspectorService;
-  InspectorController inspectorController;
-  FakeInspectorTree tree;
-  FakeInspectorTree detailsTree;
 
   env.afterNewSetup = () async {
     await ensureInspectorServiceDependencies();
@@ -41,220 +52,96 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
     }
 
     await inspectorService.inferPubRootDirectoryIfNeeded();
-
-    inspectorController = InspectorController(
-      inspectorTree: FakeInspectorTree(),
-      detailsTree: FakeInspectorTree(),
-      inspectorService: inspectorService,
-      treeType: FlutterTreeType.widget,
-    );
-    inspectorController.setVisibleToUser(true);
-    inspectorController.setActivate(true);
-
-    tree = inspectorController.inspectorTree;
-    detailsTree = inspectorController.details.inspectorTree;
-
-    // This is a bit fragile. It is somewhat arbitrary that the tree is updated
-    // twice after being initialized.
-    await tree.nextUiFrame;
-    await tree.nextUiFrame;
   };
 
   env.beforeEveryTearDown = () async {
-    inspectorController?.dispose();
-    inspectorController = null;
     inspectorService?.dispose();
     inspectorService = null;
   };
 
-  group('inspector controller tests', () {
+  group('screenshot tests', () {
     tearDownAll(() async {
       await env.tearDownEnvironment(force: true);
     });
 
-    test('initial state', () async {
+    testWidgetsWithWindowSize('navigation', windowSize,
+        (WidgetTester tester) async {
       await env.setupEnvironment();
+      expect(serviceManager.service, equals(env.service));
+      expect(serviceManager.isolateManager, isNotNull);
 
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center\n'
-          '      │     [T]Text\n'
-          '      └─▼[A]AppBar\n'
-          '          [T]Text\n',
-        ),
+      const screen = InspectorScreen();
+      await tester.pumpWidget(
+          wrapWithInspectorControllers(Builder(builder: screen.build)));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      final InspectorScreenBodyState state =
+          tester.state(find.byType(InspectorScreenBody));
+      final controller = state.inspectorController;
+      while (!controller.flutterAppFrameReady) {
+        await state.inspectorController.maybeLoadUI();
+        await tester.pumpAndSettle();
+      }
+      // Give time for the initial animation to complete.
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesGoldenFile('goldens/integration_inspector_initial_load.png'),
       );
 
-      expect(
-        tree.toStringDeep(includeTextStyles: true),
-        equalsGoldenIgnoringHashCodes(
-            'inspector_controller_initial_tree_with_styles.txt'),
-      );
-
-      expect(detailsTree.toStringDeep(), equalsIgnoringHashCodes('<empty>\n'));
-
-      await env.tearDownEnvironment();
-    });
-
-    // TODO(kenz): convert these tests to flutter unit or screenshot tests so
-    // that we are testing the actual rendered widgets instead of our fake
-    // implementation.
-    /*
-    test('select widget', () async {
-      await env.setupEnvironment();
-
-      // select row index 5.
-      simulateRowClick(tree, rowIndex: 5);
-      const textSelected = // Comment to make dartfmt behave.
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text <-- selected\n'
-          '      └─▼[A]AppBar\n'
-          '          [/icons/inspector/textArea.png]Text\n';
-
-      expect(tree.toStringDeep(), equalsIgnoringHashCodes(textSelected));
-      expect(
-        tree.toStringDeep(includeTextStyles: true),
-        equalsGoldenIgnoringHashCodes(
-            'inspector_controller_selection_with_styles.txt'),
-      );
-
-      await detailsTree.nextUiFrame;
-      expect(
-        detailsTree.toStringDeep(),
-        equalsGoldenIgnoringHashCodes(
-            'inspector_controller_text_details_tree.txt'),
-      );
-
-      expect(
-        detailsTree.toStringDeep(includeTextStyles: true),
-        equalsGoldenIgnoringHashCodes(
-            'inspector_controller_text_details_tree_with_styles.txt'),
+      // Click on the Center widget (row index #5)
+      await tester.tap(find.richText('Center'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesGoldenFile('goldens/integration_inspector_select_center.png'),
       );
 
       // Select the RichText row.
-      simulateRowClick(detailsTree, rowIndex: 10);
-      expect(
-        detailsTree.toStringDeep(),
-        equalsGoldenIgnoringHashCodes(
-            'inspector_controller_text_details_tree_richtext_selected.txt'),
+      await tester.tap(find.richText('RichText'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesGoldenFile(
+            'goldens/integration_inspector_richtext_selected.png'),
       );
 
       // Test hovering over the icon shown when a property has its default
       // value.
-      const int rowIndex = 2;
-      final double y = detailsTree.getRowY(rowIndex);
-      final textAlignRow = detailsTree.getRow(Offset(0, y));
-      final FakeInspectorTreeNode node = textAlignRow.node;
-      final FakePaintEntry lastIconEntry = node.renderObject.entries
-          .firstWhere((entry) => entry.icon == defaultIcon, orElse: () => null);
-      // If the entry doesn't have the defaultIcon then the tree has changed
-      // and the rest of this test case won't make sense.
-      expect(lastIconEntry.icon, equals(defaultIcon));
-      expect(tree.tooltip, isEmpty);
-      await tree.onHover(textAlignRow.node, lastIconEntry);
-      expect(tree.tooltip, equals('Default value'));
-      await tree.onHover(null, null);
-      expect(tree.tooltip, isEmpty);
-      // TODO(jacobr): add a test that covers hovering over an enum value
-      // and getting a tooltip containing all its values.
+      // TODO(jacobr): support tooltips in the Flutter version of the inspector.
+      // https://github.com/flutter/devtools/issues/2570.
+      // For example, verify that the tooltip hovering over the default value
+      // icons is "Default value".
+      // Test selecting a widget.
 
-      // make sure the main tree didn't change due to changing selection in the
-      // detail tree
-      expect(tree.toStringDeep(), equalsIgnoringHashCodes(textSelected));
-
-      // select row index 3.
-      simulateRowClick(tree, rowIndex: 3);
-
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold <-- selected\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▼[A]AppBar\n'
-          '          [/icons/inspector/textArea.png]Text\n',
-        ),
-      );
-
-      await detailsTree.nextUiFrame;
+      // select Scaffold widget in summary tree.
+      await tester.tap(find.richText('Scaffold'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
       // This tree is huge. If there is a change to package:flutter it may
-      // change. If this happens don't panic and rebaseline the content.
-      expect(
-        detailsTree.toStringDeep(),
-        equalsGoldenIgnoringHashCodes(
-            'inspector_controller_details_tree_scaffold.txt'),
+      // change. If this happens don't panic and rebaseline the golden.
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesGoldenFile(
+            'goldens/integration_inspector_scaffold_selected.png'),
       );
 
       // The important thing about this is that the details tree should scroll
       // instead of re-rooting as the selected row is already visible in the
       // details tree.
-      simulateRowClick(tree, rowIndex: 4);
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center <-- selected\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▼[A]AppBar\n'
-          '          [/icons/inspector/textArea.png]Text\n',
-        ),
+      await tester.tap(find.richText('AnimatedPhysicalModel'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesGoldenFile(
+            'goldens/integration_animated_physical_model_selected.png'),
       );
 
-      await detailsTree.nextUiFrame;
-      expect(
-        detailsTree.toStringDeep(hidePropertyLines: true),
-        equalsGoldenIgnoringHashCodes(
-            'inspector_controller_details_tree_scrolled_to_center.txt'),
-      );
+      await env.tearDownEnvironment();
+    }, skip: !Platform.isMacOS);
 
-      // Selecting the root node of the details tree should change selection
-      // in the main tree.
-      simulateRowClick(detailsTree, rowIndex: 0);
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold <-- selected\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▼[A]AppBar\n'
-          '          [/icons/inspector/textArea.png]Text\n',
-        ),
-      );
+    // TODO(jacobr): convert these tests to screenshot tests like the initial
+    // state test.
+    /*
 
-      // Verify that the details tree scrolled back as well.
-      // However, now more nodes are expanded.
-      expect(
-        detailsTree.toStringDeep(hidePropertyLines: true),
-        equalsGoldenIgnoringHashCodes(
-            'inspector_controller_details_tree_scaffold_expanded.txt'),
-      );
-
-      expect(
-        detailsTree.toStringDeep(
-            hidePropertyLines: true, includeTextStyles: true),
-        equalsGoldenIgnoringHashCodes(
-            'inspector_controller_details_tree_scaffold_with_styles.txt'),
-      );
-
-      // TODO(jacobr): add tests that verified that we scrolled the view to the
-      // correct points on selection.
 
       // Intentionally trigger multiple quick navigate action to ensure that
       // multiple quick navigation commands in a row do not trigger race
@@ -501,11 +388,5 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
       await env.tearDownEnvironment();
     });
 */
-  }, timeout: const Timeout.factor(8));
-}
-
-void simulateRowClick(FakeInspectorTree tree, {@required int rowIndex}) {
-  // The x coordinate does not matter as any tap in the row counts.
-  final rowOffset = Offset(0, tree.getRowY(rowIndex));
-  tree.selection = tree.getRow(rowOffset).node;
+  });
 }

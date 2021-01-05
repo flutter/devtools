@@ -82,6 +82,13 @@ Widget wrapWithControllers(
   );
 }
 
+Widget wrapWithInspectorControllers(Widget widget) {
+  return wrapWithControllers(
+    widget,
+    // TODO(jacobr): add inspector controllers.
+  );
+}
+
 /// Call [testWidgets], allowing the test to set specific values for app globals
 /// ([MessageBus], ...).
 @isTest
