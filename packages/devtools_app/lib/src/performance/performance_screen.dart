@@ -322,19 +322,23 @@ class TimelineConfigurationsDialog extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Advanced Recorded Timeline Streams'),
             ..._advancedStreams(theme),
-            const SizedBox(height: denseSpacing),
-            ...dialogSubHeader(theme, 'Additional Settings'),
-            Row(
-              children: [
-                NotifierCheckbox(notifier: controller.badgeTabForJankyFrames),
-                Text(
-                  'Badge Performance tab when Flutter UI jank is detected',
-                  // Specify font size to match style of other RichText widgets
-                  // in dialog.
-                  style: theme.regularTextStyle.copyWith(fontSize: 14.0),
-                ),
-              ],
-            ),
+            if (serviceManager.connectedApp.isFlutterAppNow) ...[
+              const SizedBox(height: denseSpacing),
+              ...dialogSubHeader(theme, 'Additional Settings'),
+              Row(
+                children: [
+                  NotifierCheckbox(notifier: controller.badgeTabForJankyFrames),
+                  RichText(
+                    overflow: TextOverflow.visible,
+                    text: TextSpan(
+                      text:
+                          'Badge Performance tab when Flutter UI jank is detected',
+                      style: theme.regularTextStyle,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

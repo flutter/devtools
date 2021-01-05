@@ -86,7 +86,7 @@ class PerformanceController
   final _httpTimelineLoggingEnabled = ValueNotifier<bool>(false);
 
   ValueListenable<bool> get badgeTabForJankyFrames => _badgeTabForJankyFrames;
-  final _badgeTabForJankyFrames = ValueNotifier<bool>(true);
+  final _badgeTabForJankyFrames = ValueNotifier<bool>(false);
 
   // TODO(kenz): switch to use VmFlagManager-like pattern once
   // https://github.com/dart-lang/sdk/issues/41822 is fixed.
@@ -139,6 +139,11 @@ class PerformanceController
 
   Future<void> _initHelper() async {
     await serviceManager.onServiceAvailable;
+
+    // Default to true for profile builds only.
+    _badgeTabForJankyFrames.value =
+        await serviceManager.connectedApp.isProfileBuild;
+
     unawaited(allowedError(
       _cpuProfilerService.setProfilePeriod(mediumProfilePeriod),
       logError: false,
