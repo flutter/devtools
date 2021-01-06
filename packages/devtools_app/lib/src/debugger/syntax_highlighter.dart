@@ -37,6 +37,9 @@ class SyntaxHighlighter {
 
   static Future<void> initialize() async {
     if (_grammar == null) {
+      // Ensure the framework is initialized before trying to load the syntax
+      // from the bundled assets.
+      WidgetsFlutterBinding.ensureInitialized();
       final grammarJson = json.decode(
         await rootBundle.loadString('assets/dart_syntax.json'),
       );
@@ -60,7 +63,7 @@ class SyntaxHighlighter {
   }
 
   /// Returns the [TextStyle] for the current span based on the current scopes.
-  /// 
+  ///
   /// If there are multiple scopes for a span, styling for each scope is
   /// applied in the order the scopes are listed (i.e., later scope styles take
   /// precidence).

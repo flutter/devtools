@@ -57,7 +57,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    SyntaxHighlighter.initialize().then((_) => _initScriptInfo());
+    _initScriptInfo();
     verticalController = LinkedScrollControllerGroup();
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
