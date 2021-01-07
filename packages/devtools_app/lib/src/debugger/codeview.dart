@@ -213,9 +213,13 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     final theme = Theme.of(context);
 
     final lines = <TextSpan>[];
+    final style = theme.textTheme.bodyText2.copyWith(
+      fontFamily: 'RobotoMono',
+    );
 
     // Ensure the syntax highlighter has been initialized.
-    if (highlighter != null) {
+    // TODO(bkonyi): process source for highlighting on a separate thread.
+    if (script.source.length < 500000 && highlighter != null) {
       final highlighted = highlighter.highlight(context);
 
       // Look for [TextSpan]s which only contain '\n' to manually break the
@@ -226,9 +230,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
         if (span.toPlainText() == '\n') {
           lines.add(
             TextSpan(
-              style: theme.textTheme.bodyText2.copyWith(
-                fontFamily: 'RobotoMono',
-              ),
+              style: style,
               children: currentLine,
             ),
           );
@@ -238,11 +240,19 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       });
       lines.add(
         TextSpan(
-          style: theme.textTheme.bodyText2.copyWith(
-            fontFamily: 'RobotoMono',
-          ),
+          style: style,
           children: currentLine,
         ),
+      );
+    } else {
+      lines.addAll(
+        [
+          for (final line in script.source.split('\n'))
+            TextSpan(
+              style: style,
+              text: line,
+            ),
+        ],
       );
     }
 
