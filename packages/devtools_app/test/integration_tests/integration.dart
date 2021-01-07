@@ -352,6 +352,7 @@ class WebBuildFixture {
     cliArgs.addAll([
       'build',
       'web',
+      '--pwa-strategy=none',
       '--dart-define=FLUTTER_WEB_USE_SKIA=true',
       '--no-tree-shake-icons'
     ]);
