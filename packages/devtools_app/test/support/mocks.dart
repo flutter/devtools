@@ -77,7 +77,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   Future<double> get queryDisplayRefreshRate async => 60;
 
   @override
-  bool hasConnection = false;
+  bool hasConnection;
 
   @override
   final IsolateManager isolateManager = FakeIsolateManager();
@@ -133,7 +133,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   StreamController<bool> stateChangeStream = StreamController.broadcast();
 
   void changeState(bool value) {
-    hasConnection = value;
+    hasConnection = value ?? false;
     stateChangeStream.add(value);
   }
 
