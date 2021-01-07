@@ -16,9 +16,9 @@ flutter pub get
 # as code size doesn't matter very much for us as minification makes some
 # crashes harder to debug. For example, https://github.com/flutter/devtools/issues/2125
 
-flutter build web --profile --dart-define=FLUTTER_WEB_USE_EXPERIMENTAL_CANVAS_TEXT=true --no-tree-shake-icons
+flutter build web --pwa-strategy=none --profile --dart-define=FLUTTER_WEB_USE_EXPERIMENTAL_CANVAS_TEXT=true --no-tree-shake-icons
 cp build/web/main.dart.js build/web/main_fallback.dart.js
-flutter build web --profile --dart-define=FLUTTER_WEB_USE_SKIA=true --no-tree-shake-icons
+flutter build web --pwa-strategy=none --profile --dart-define=FLUTTER_WEB_USE_SKIA=true --no-tree-shake-icons
 mv build/web ../devtools/build
 
 popd
