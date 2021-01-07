@@ -164,6 +164,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     if (vmServiceUri?.isEmpty ?? true) {
       return DevToolsScaffold.withChild(
         key: const Key('landing'),
+        title: 'DevTools for Flutter & Dart',
         child: LandingScreenBody(),
         ideTheme: ideTheme,
         analyticsProvider: widget.analyticsProvider,

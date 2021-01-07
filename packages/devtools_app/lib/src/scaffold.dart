@@ -36,6 +36,7 @@ class DevToolsScaffold extends StatefulWidget {
     Key key,
     @required this.tabs,
     @required this.analyticsProvider,
+    this.title,
     this.page,
     this.actions,
     this.embed = false,
@@ -48,12 +49,14 @@ class DevToolsScaffold extends StatefulWidget {
     @required Widget child,
     @required IdeTheme ideTheme,
     @required AnalyticsProvider analyticsProvider,
+    final String title,
     List<Widget> actions,
   }) : this(
           key: key,
           tabs: [SimpleScreen(child)],
           analyticsProvider: analyticsProvider,
           ideTheme: ideTheme,
+          title: title,
           actions: actions,
         );
 
@@ -89,6 +92,9 @@ class DevToolsScaffold extends StatefulWidget {
 
   /// IDE-supplied theming.
   final IdeTheme ideTheme;
+
+  /// Title of the app.
+  final String title;
 
   /// Actions that it's possible to perform in this Scaffold.
   ///
@@ -293,7 +299,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
     ];
 
-    final title = generateDevToolsTitle();
+    final title = widget.title ?? generateDevToolsTitle();
+    final theme = Theme.of(context);
     // TODO(issues/2547) - Remove.
     // ignore: deprecated_member_use
     return ValueListenableProvider.value(
@@ -304,7 +311,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           handleDrop: _importController.importData,
           child: Title(
             title: title,
-            color: Colors.blue,
+            // Color is a required parameter but the color only appears to
+            // matter on Android and we do not care about Android.
+            // Using theme.primaryColor matches the default behavior of the
+            // title used by [WidgetsApp].
+            color: theme.primaryColor,
             child: Scaffold(
               appBar: widget.embed ? null : _buildAppBar(title),
               body: TabBarView(
