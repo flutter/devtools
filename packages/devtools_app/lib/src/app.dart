@@ -286,7 +286,6 @@ class DevToolsAppState extends State<DevToolsApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Dart DevTools',
       debugShowCheckedModeBanner: false,
       theme: themeFor(isDarkTheme: isDarkThemeEnabled, ideTheme: ideTheme),
       builder: (context, child) => Notifications(child: child),

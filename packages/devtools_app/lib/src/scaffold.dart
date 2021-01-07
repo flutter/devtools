@@ -293,6 +293,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
     ];
 
+    final title = generateDevToolsTitle();
     // TODO(issues/2547) - Remove.
     // ignore: deprecated_member_use
     return ValueListenableProvider.value(
@@ -301,15 +302,19 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         create: (_) => BannerMessagesController(),
         child: DragAndDrop(
           handleDrop: _importController.importData,
-          child: Scaffold(
-            appBar: widget.embed ? null : _buildAppBar(),
-            body: TabBarView(
-              physics: defaultTabBarViewPhysics,
-              controller: _tabController,
-              children: tabBodies,
+          child: Title(
+            title: title,
+            color: Colors.blue,
+            child: Scaffold(
+              appBar: widget.embed ? null : _buildAppBar(title),
+              body: TabBarView(
+                physics: defaultTabBarViewPhysics,
+                controller: _tabController,
+                children: tabBodies,
+              ),
+              bottomNavigationBar:
+                  widget.embed ? null : _buildStatusLine(context),
             ),
-            bottomNavigationBar:
-                widget.embed ? null : _buildStatusLine(context),
           ),
         ),
       ),
@@ -318,9 +323,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// Builds an [AppBar] with the [TabBar] placed on the side or the bottom,
   /// depending on the screen width.
-  PreferredSizeWidget _buildAppBar() {
-    const title = Text('Dart DevTools');
-
+  Widget _buildAppBar(String title) {
     Widget flexibleSpace;
     Size preferredSize;
     TabBar tabBar;
@@ -365,7 +368,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final appBar = AppBar(
       // Turn off the appbar's back button.
       automaticallyImplyLeading: false,
-      title: title,
+      title: Text(title),
       actions: actions,
       flexibleSpace: flexibleSpace,
     );
