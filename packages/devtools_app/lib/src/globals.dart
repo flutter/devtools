@@ -33,9 +33,9 @@ PreferencesController get preferences => globals[PreferencesController];
 
 String generateDevToolsTitle() {
   if (!serviceManager.hasConnection) return '';
-  final connectedApp = serviceManager.connectedApp;
-  if (!connectedApp.appTypeKnown) return '';
-  return connectedApp.isFlutterAppNow ? 'Flutter DevTools' : 'Dart DevTools';
+  return serviceManager.connectedApp.isFlutterAppNow
+      ? 'Flutter DevTools'
+      : 'Dart DevTools';
 }
 
 void setGlobal(Type clazz, dynamic instance) {

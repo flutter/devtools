@@ -77,7 +77,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   Future<double> get queryDisplayRefreshRate async => 60;
 
   @override
-  bool hasConnection;
+  bool hasConnection = false;
 
   @override
   final IsolateManager isolateManager = FakeIsolateManager();
