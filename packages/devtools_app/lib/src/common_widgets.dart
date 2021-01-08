@@ -405,7 +405,7 @@ class BulletSpacer extends StatelessWidget {
 
   final bool useAccentColor;
 
-  static final width = DevToolsScaffold.actionWidgetSize / 2;
+  static const width = DevToolsScaffold.actionWidgetSize / 2;
 
   @override
   Widget build(BuildContext context) {
