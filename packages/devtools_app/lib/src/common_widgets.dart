@@ -405,6 +405,8 @@ class BulletSpacer extends StatelessWidget {
 
   final bool useAccentColor;
 
+  static const width = DevToolsScaffold.actionWidgetSize / 2;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -420,7 +422,7 @@ class BulletSpacer extends StatelessWidget {
     final mutedColor = textStyle?.color?.withAlpha(0x90);
 
     return Container(
-      width: DevToolsScaffold.actionWidgetSize / 2,
+      width: width,
       height: DevToolsScaffold.actionWidgetSize,
       alignment: Alignment.center,
       child: Text(
