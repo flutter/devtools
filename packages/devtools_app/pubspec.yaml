@@ -42,6 +42,7 @@ dependencies:
   url_launcher_web: ^0.1.1+6
   vm_service: ^5.4.0
   sse: ^3.1.2
+  string_scanner: ^1.1.0-nullsafety.3
   web_socket_channel: ^1.1.0
   flutter:
     sdk: flutter
