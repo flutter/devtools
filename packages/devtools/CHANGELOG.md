@@ -1,7 +1,6 @@
 ## 0.9.6
 * Remove use of Flutter service worker [#2586](https://github.com/flutter/devtools/pull/2586)
 * Badge performance tab when UI jank is detected and add a setting to enable/disable this functionality. [#2580](https://github.com/flutter/devtools/pull/2580)
-* Syntax highlighting in the debugger tab. [#2575](https://github.com/flutter/devtools/pull/2575)
 * Badge inspector tab for structured inspector errors (Flutter.error) [#2576](https://github.com/flutter/devtools/pull/2576)
 * Badge the Network tab when we receive failed network requests. [#2567](https://github.com/flutter/devtools/pull/2567)
 * Badge logging page with error counts from logs and stderr [#2566](https://github.com/flutter/devtools/pull/2566)
