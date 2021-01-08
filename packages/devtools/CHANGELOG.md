@@ -1,5 +1,15 @@
-## 0.9.6-dev
-* Support truncated frames with a corresponding `SHOW ALL` button.
+## 0.9.6
+* Remove use of Flutter service worker [#2586](https://github.com/flutter/devtools/pull/2586)
+* Badge performance tab when UI jank is detected and add a setting to enable/disable this functionality. [#2580](https://github.com/flutter/devtools/pull/2580)
+* Badge inspector tab for structured inspector errors (Flutter.error) [#2576](https://github.com/flutter/devtools/pull/2576)
+* Badge the Network tab when we receive failed network requests. [#2567](https://github.com/flutter/devtools/pull/2567)
+* Badge logging page with error counts from logs and stderr [#2566](https://github.com/flutter/devtools/pull/2566)
+* Add scrollbar to flutter frames chart [#2565](https://github.com/flutter/devtools/pull/2565)
+* Rename "Timeline" page to "Performance" and populate CPU profile on frame selection [#2563](https://github.com/flutter/devtools/pull/2563)
+* Rename "Performance" page to "CPU profiler" [#2562](https://github.com/flutter/devtools/pull/2562)
+* Support truncated frames with a corresponding `SHOW ALL` button for faster flutter web stepping [#2545](https://github.com/flutter/devtools/pull/2545)
+* Better x-axis labeling on the memory page [#2539](https://github.com/flutter/devtools/pull/2539)
+* Add VM Tools screen with initial VM and Isolate statistics tabs [#2499](https://github.com/flutter/devtools/pull/2499)
 
 ## 0.9.5
 * Add padding between columns and add minWidth for flexible columns. [#2526](https://github.com/flutter/devtools/pull/2526)
