@@ -654,26 +654,21 @@ class FilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return RoundedOutlinedBorder(
-      child: SizedBox(
-        height: defaultButtonHeight,
-        child: Tooltip(
-          message: 'Filter',
-          child: TextButton(
-            key: key,
-            onPressed: onPressed,
-            style: TextButton.styleFrom(
-              backgroundColor: isFilterActive
-                  ? theme.colorScheme.toggleButtonBackgroundColor
-                  : Colors.transparent,
-            ),
-            child: createIcon(
-              Icons.filter_list,
-              color: isFilterActive
-                  ? theme.colorScheme.toggleButtonForegroundColor
-                  : theme.colorScheme.contrastForeground,
-            ),
-          ),
+    return Tooltip(
+      message: 'Filter',
+      child: OutlinedButton(
+        key: key,
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          backgroundColor: isFilterActive
+              ? theme.colorScheme.toggleButtonBackgroundColor
+              : Colors.transparent,
+        ),
+        child: createIcon(
+          Icons.filter_list,
+          color: isFilterActive
+              ? theme.colorScheme.toggleButtonForegroundColor
+              : theme.colorScheme.contrastForeground,
         ),
       ),
     );

@@ -25,20 +25,30 @@ ThemeData themeFor({
 }
 
 ThemeData _darkTheme(IdeTheme ideTheme) {
+  final theme = ThemeData.dark();
+  final background = isValidDarkColor(ideTheme?.backgroundColor)
+      ? ideTheme?.backgroundColor
+      : theme.canvasColor;
   return _baseTheme(
-    theme: ThemeData.dark(),
+    theme: theme,
     ideTheme: ideTheme,
     primaryColor: devtoolsGrey[900],
+    backgroundColor: background,
     indicatorColor: devtoolsBlue[400],
     selectedRowColor: devtoolsGrey[600],
   );
 }
 
 ThemeData _lightTheme(IdeTheme ideTheme) {
+  final theme = ThemeData.light();
+  final background = isValidLightColor(ideTheme?.backgroundColor)
+      ? ideTheme?.backgroundColor
+      : theme.canvasColor;
   return _baseTheme(
-    theme: ThemeData.light(),
+    theme: theme,
     ideTheme: ideTheme,
     primaryColor: devtoolsBlue[600],
+    backgroundColor: background,
     indicatorColor: Colors.yellowAccent[400],
     selectedRowColor: devtoolsBlue[600],
   );
@@ -48,12 +58,10 @@ ThemeData _baseTheme({
   @required ThemeData theme,
   @required IdeTheme ideTheme,
   @required Color primaryColor,
+  @required Color backgroundColor,
   @required Color indicatorColor,
   @required Color selectedRowColor,
 }) {
-  final background = isValidLightColor(ideTheme?.backgroundColor)
-      ? ideTheme?.backgroundColor
-      : theme.canvasColor;
   return theme.copyWith(
     primaryColor: primaryColor,
     indicatorColor: indicatorColor,
@@ -64,9 +72,9 @@ ThemeData _baseTheme({
     accentColor: devtoolsBlue[400],
     backgroundColor: devtoolsGrey[600],
     toggleableActiveColor: devtoolsBlue[400],
-    canvasColor: background,
-    scaffoldBackgroundColor: background,
-    colorScheme: theme.colorScheme.copyWith(background: background),
+    canvasColor: backgroundColor,
+    scaffoldBackgroundColor: backgroundColor,
+    colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         primary: theme.colorScheme.contrastForeground,
