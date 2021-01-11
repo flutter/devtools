@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/ui/theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +17,7 @@ import '../service_registrations.dart';
 import '../theme.dart';
 import '../utils.dart';
 import 'label.dart';
+import 'theme.dart';
 
 /// Group of buttons where each button toggles the state of a VMService
 /// extension.
