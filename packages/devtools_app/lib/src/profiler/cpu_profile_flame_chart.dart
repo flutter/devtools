@@ -83,6 +83,30 @@ class _CpuProfileFlameChartState
   }
 
   @override
+  List<CustomPaint> buildCustomPaints(
+    BoxConstraints constraints,
+    BuildContext buildContext,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final zoom = zoomController.value;
+    return [
+      CustomPaint(
+        painter: TimelineGridPainter(
+          zoom: zoom,
+          constraints: constraints,
+          verticalController: verticalController,
+          horizontalController: horizontalController,
+          chartStartInset: widget.startInset,
+          chartEndInset: widget.endInset,
+          flameChartWidth: widthWithZoom,
+          duration: widget.time.duration,
+          colorScheme: colorScheme,
+        ),
+      ),
+    ];
+  }
+
+  @override
   bool isDataVerticallyInView(CpuStackFrame data) {
     final verticalScrollOffset = verticalController.offset;
     final stackFrameTopY = topYForData(data);

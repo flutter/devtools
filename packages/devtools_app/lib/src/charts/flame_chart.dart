@@ -25,7 +25,7 @@ const double rowHeight = 25.0;
 const double rowHeightWithPadding = rowHeight + rowPadding;
 const double sectionSpacing = 15.0;
 const double sideInset = 70.0;
-const double sideInsetSmall = 40.0;
+const double sideInsetSmall = 60.0;
 
 // TODO(kenz): add some indication that we are scrolled out of the relevant area
 // so that users don't get lost in the extra pixels at the end of the chart.
@@ -88,7 +88,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 // like implementation).
 abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
-  int get rowOffsetForTopPadding => 1;
+  int get rowOffsetForTopPadding => 2;
 
   // The "top" positional value for each flame chart node will be 0.0 because
   // each node is positioned inside its own list.
@@ -1144,4 +1144,160 @@ abstract class FlameChartPainter extends CustomPainter {
     }
     return true;
   }
+}
+
+class TimelineGridPainter extends FlameChartPainter {
+  TimelineGridPainter({
+    @required double zoom,
+    @required BoxConstraints constraints,
+    @required ScrollController verticalController,
+    @required LinkedScrollControllerGroup horizontalController,
+    @required double chartStartInset,
+    @required this.chartEndInset,
+    @required this.flameChartWidth,
+    @required this.duration,
+    @required ColorScheme colorScheme,
+  }) : super(
+          zoom: zoom,
+          constraints: constraints,
+          verticalController: verticalController,
+          horizontalController: horizontalController,
+          chartStartInset: chartStartInset,
+          colorScheme: colorScheme,
+        );
+
+  static const baseGridIntervalPx = 150.0;
+  static const timestampOffset = 6.0;
+
+  final double chartEndInset;
+
+  final double flameChartWidth;
+
+  final Duration duration;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Paint background for the section that will contain the timestamps. This
+    // section will appear sticky to the top of the viewport.
+    final visible = visibleRect;
+    canvas.drawRect(
+      Rect.fromLTWH(
+        0.0,
+        0.0,
+        constraints.maxWidth,
+        math.min(constraints.maxHeight, rowHeight),
+      ),
+      Paint()..color = colorScheme.defaultBackgroundColor,
+    );
+
+    // Paint the timeline grid lines and corresponding timestamps in the flame
+    // chart.
+    final intervalWidth = _intervalWidth();
+    final microsPerInterval = _microsPerInterval(intervalWidth);
+    int timestampMicros = _startingTimestamp(intervalWidth, microsPerInterval);
+    double lineX;
+    if (visible.left <= chartStartInset) {
+      lineX = chartStartInset - visible.left;
+    } else {
+      lineX =
+          intervalWidth - ((visible.left - chartStartInset) % intervalWidth);
+    }
+
+    while (lineX < constraints.maxWidth) {
+      _paintTimestamp(canvas, timestampMicros, intervalWidth, lineX);
+      _paintGridLine(canvas, lineX);
+      lineX += intervalWidth;
+      timestampMicros += microsPerInterval;
+    }
+  }
+
+  void _paintTimestamp(
+    Canvas canvas,
+    int timestampMicros,
+    double intervalWidth,
+    double lineX,
+  ) {
+    final timestampText = msText(
+      Duration(microseconds: timestampMicros),
+      fractionDigits: timestampMicros == 0 ? 1 : 3,
+    );
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: timestampText,
+        style: TextStyle(color: colorScheme.chartTextColor),
+      ),
+      textAlign: TextAlign.right,
+      textDirection: TextDirection.ltr,
+    )..layout(maxWidth: intervalWidth);
+
+    // TODO(kenz): figure out a way for the timestamps to scroll out of view
+    // smoothly instead of dropping off. Consider using a horizontal list view
+    // of text widgets for the timestamps instead of painting them.
+    final xOffset = lineX - textPainter.width - timestampOffset;
+    if (xOffset > 0) {
+      textPainter.paint(canvas, Offset(xOffset, 5.0));
+    }
+  }
+
+  void _paintGridLine(Canvas canvas, double lineX) {
+    canvas.drawLine(
+      Offset(lineX, 0.0),
+      Offset(lineX, constraints.maxHeight),
+      Paint()..color = colorScheme.chartAccentColor,
+    );
+  }
+
+  double _intervalWidth() {
+    final log2ZoomLevel = log2(zoom);
+
+    final gridZoomFactor = math.pow(2, log2ZoomLevel);
+    final gridIntervalPx = baseGridIntervalPx / gridZoomFactor;
+
+    /// The physical pixel width of the grid interval at [zoom].
+    return gridIntervalPx * zoom;
+  }
+
+  int _microsPerInterval(double intervalWidth) {
+    final contentWidth = flameChartWidth - chartStartInset - chartEndInset;
+    final numCompleteIntervals =
+        (flameChartWidth - chartStartInset - chartEndInset) ~/ intervalWidth;
+    final remainderContentWidth =
+        contentWidth - (numCompleteIntervals * intervalWidth);
+    final remainderMicros =
+        remainderContentWidth * duration.inMicroseconds / contentWidth;
+    return ((duration.inMicroseconds - remainderMicros) / numCompleteIntervals)
+        .round();
+  }
+
+  int _startingTimestamp(double intervalWidth, int microsPerInterval) {
+    final horizontalScrollOffset = horizontalController.offset;
+
+    final startingIntervalIndex = horizontalScrollOffset < chartStartInset
+        ? 0
+        : (horizontalScrollOffset - chartStartInset) ~/ intervalWidth + 1;
+    return startingIntervalIndex * microsPerInterval;
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => this != oldDelegate;
+
+  @override
+  bool operator ==(other) {
+    return zoom == other.zoom &&
+        constraints == other.constraints &&
+        flameChartWidth == other.flameChartWidth &&
+        horizontalController == other.horizontalController &&
+        duration == other.duration &&
+        colorScheme == other.colorScheme;
+  }
+
+  @override
+  int get hashCode => hashValues(
+        zoom,
+        constraints,
+        flameChartWidth,
+        horizontalController,
+        duration,
+        colorScheme,
+      );
 }
