@@ -103,7 +103,7 @@ class IconLabelButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlineButton(
+    return OutlinedButton(
       onPressed: onPressed,
       child: MaterialIconLabel(
         icon,
@@ -196,7 +196,7 @@ class RecordButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlineButton(
+    return OutlinedButton(
       onPressed: recording ? null : onPressed,
       child: MaterialIconLabel(
         Icons.fiber_manual_record,
@@ -229,7 +229,7 @@ class StopRecordingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlineButton(
+    return OutlinedButton(
       onPressed: !recording ? null : onPressed,
       child: MaterialIconLabel(
         Icons.stop,
@@ -387,7 +387,7 @@ class ExitOfflineButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlineButton(
+    return OutlinedButton(
       key: const Key('exit offline button'),
       onPressed: onPressed,
       child: const MaterialIconLabel(
@@ -487,7 +487,7 @@ class ActionButton extends StatelessWidget {
   }
 }
 
-/// A wrapper around a FlatButton, an Icon, and an optional Tooltip; used for
+/// A wrapper around a TextButton, an Icon, and an optional Tooltip; used for
 /// small toolbar actions.
 class ToolbarAction extends StatelessWidget {
   const ToolbarAction({
@@ -503,9 +503,11 @@ class ToolbarAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final button = FlatButton(
-      padding: EdgeInsets.zero,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    final button = TextButton(
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
       onPressed: onPressed,
       child: Icon(icon, size: actionsIconSize),
     );
@@ -626,7 +628,7 @@ class ExportButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlineButton(
+    return OutlinedButton(
       key: key,
       onPressed: onPressed,
       child: MaterialIconLabel(
@@ -657,12 +659,14 @@ class FilterButton extends StatelessWidget {
         height: defaultButtonHeight,
         child: Tooltip(
           message: 'Filter',
-          child: FlatButton(
+          child: TextButton(
             key: key,
             onPressed: onPressed,
-            color: isFilterActive
-                ? colorScheme.toggleButtonBackgroundColor
-                : Colors.transparent,
+            style: TextButton.styleFrom(
+              backgroundColor: isFilterActive
+                  ? colorScheme.toggleButtonBackgroundColor
+                  : Colors.transparent,
+            ),
             child: createIcon(
               Icons.filter_list,
               color: isFilterActive

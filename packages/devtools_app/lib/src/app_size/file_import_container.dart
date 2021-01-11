@@ -141,7 +141,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
 //    return Row(
 //      mainAxisAlignment: MainAxisAlignment.center,
 //      children: [
-//        OutlineButton(
+//        OutlinedButton(
 //          onPressed: () {},
 //          child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
 //        ),
@@ -157,7 +157,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            RaisedButton(
+            ElevatedButton(
               onPressed: importedFile != null
                   ? () => widget.onAction(importedFile)
                   : null,
@@ -277,7 +277,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            RaisedButton(
+            ElevatedButton(
               onPressed: firstImportedFile != null && secondImportedFile != null
                   ? () => widget.onAction(
                         firstImportedFile,

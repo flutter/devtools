@@ -176,7 +176,7 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   Widget _expandAllButton(Tab currentTab) {
-    return OutlineButton(
+    return OutlinedButton(
       key: CpuProfiler.expandButtonKey,
       onPressed: () {
         _performOnDataRoots((root) => root.expandCascading(), currentTab);
@@ -186,7 +186,7 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   Widget _collapseAllButton(Tab currentTab) {
-    return OutlineButton(
+    return OutlinedButton(
       key: CpuProfiler.collapseButtonKey,
       onPressed: () {
         _performOnDataRoots((root) => root.collapseCascading(), currentTab);
@@ -222,7 +222,7 @@ class CpuProfilerDisabled extends StatelessWidget {
           const Text('CPU profiler is disabled.'),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: RaisedButton(
+            child: ElevatedButton(
               child: const Text('Enable profiler'),
               onPressed: controller.enableCpuProfiler,
             ),

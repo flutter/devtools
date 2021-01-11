@@ -249,7 +249,7 @@ void main() {
     await tester.pump();
 
     final snapshotButton = tester
-        .widget<OutlineButton>(find.byKey(HeapTreeViewState.snapshotButtonKey));
+        .widget<OutlinedButton>(find.byKey(HeapTreeViewState.snapshotButtonKey));
 
     expect(snapshotButton.enabled, isFalse);
     await tester.pumpAndSettle(const Duration(seconds: 3));

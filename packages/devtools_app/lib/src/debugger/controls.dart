@@ -209,10 +209,12 @@ class DebuggerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ActionButton(
       tooltip: title,
-      child: OutlineButton(
+      child: OutlinedButton(
         autofocus: autofocus,
-        borderSide: BorderSide.none,
-        shape: const ContinuousRectangleBorder(),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide.none,
+          shape: const ContinuousRectangleBorder(),
+        ),
         onPressed: onPressed,
         child: MaterialIconLabel(
           icon,

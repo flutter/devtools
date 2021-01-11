@@ -56,7 +56,7 @@ class _CallStackState extends State<CallStack> {
           valueListenable: controller.hasTruncatedFrames,
           builder: (_, hasTruncatedFrames, __) {
             if (hasTruncatedFrames) {
-              return FlatButton(
+              return TextButton(
                 onPressed: () => controller.getFullStack(),
                 child: const Text('SHOW ALL'),
               );

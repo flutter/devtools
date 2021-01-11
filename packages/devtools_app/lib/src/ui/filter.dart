@@ -89,7 +89,7 @@ class _FilterDialogState extends State<FilterDialog> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         dialogTitleText(Theme.of(context), 'Filters'),
-        FlatButton(
+        TextButton(
           onPressed: queryTextFieldController.clear,
           child: const MaterialIconLabel(
             Icons.replay,

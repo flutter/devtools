@@ -78,7 +78,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
           _captionText('Load Dart AOT snapshots or app size analysis files to '
               'track down size issues in your app.'),
           const Padding(padding: EdgeInsets.only(top: 20.0)),
-          RaisedButton(
+          ElevatedButton(
             child: const Text('Open app size tool'),
             onPressed: () =>
                 DevToolsRouterDelegate.of(context).navigate(appSizePageId),
@@ -157,7 +157,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
         const Padding(
           padding: EdgeInsets.only(left: 20.0),
         ),
-        RaisedButton(
+        ElevatedButton(
           child: const Text('Connect'),
           onPressed: connectDebounce.invoke,
         ),
