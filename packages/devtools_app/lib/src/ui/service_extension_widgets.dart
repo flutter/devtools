@@ -111,7 +111,7 @@ class _ServiceExtensionButtonGroupState
     // widgets are available (not currently supported by ToggleButtons).
     final available = _extensionStates.any((e) => e.isAvailable);
     return SizedBox(
-      height: theme.buttonTheme.height,
+      height: defaultButtonHeight,
       child: ToggleButtons(
         // TODO(kenz): ensure border radius is set correctly for single child
         // groups once https://github.com/flutter/flutter/issues/73725 is fixed.

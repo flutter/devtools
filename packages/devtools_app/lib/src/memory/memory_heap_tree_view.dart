@@ -122,7 +122,7 @@ String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
 final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
 
 class HeapTreeViewState extends State<HeapTree>
-    with AutoDisposeMixin, SearchFieldMixin {
+    with AutoDisposeMixin, SearchFieldMixin<HeapTree> {
   @visibleForTesting
   static const snapshotButtonKey = Key('Snapshot Button');
   @visibleForTesting

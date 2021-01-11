@@ -656,7 +656,7 @@ class FilterButton extends StatelessWidget {
     final theme = Theme.of(context);
     return RoundedOutlinedBorder(
       child: SizedBox(
-        height: theme.buttonTheme.height,
+        height: defaultButtonHeight,
         child: Tooltip(
           message: 'Filter',
           child: TextButton(
@@ -726,6 +726,23 @@ class RoundedOutlinedBorder extends StatelessWidget {
         border: Border.all(color: Theme.of(context).focusColor),
         borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
+      child: child,
+    );
+  }
+}
+
+class LeftBorder extends StatelessWidget {
+  const LeftBorder({this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final leftBorder =
+        Border(left: BorderSide(color: Theme.of(context).focusColor));
+
+    return Container(
+      decoration: BoxDecoration(border: leftBorder),
       child: child,
     );
   }

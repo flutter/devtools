@@ -131,7 +131,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             ),
             const SizedBox(width: denseSpacing),
             Container(
-              height: Theme.of(context).buttonTheme.height,
+              height: defaultButtonHeight,
               child: OutlinedButton(
                 onPressed: _refreshInspector,
                 child: const MaterialIconLabel(

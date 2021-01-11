@@ -111,7 +111,7 @@ Example queries:
 }
 
 class _NetworkScreenBodyState extends State<NetworkScreenBody>
-    with AutoDisposeMixin, SearchFieldMixin {
+    with AutoDisposeMixin, SearchFieldMixin<NetworkScreenBody> {
   NetworkController _networkController;
 
   bool recording;

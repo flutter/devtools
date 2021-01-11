@@ -67,18 +67,16 @@ ThemeData _baseTheme({
     canvasColor: background,
     scaffoldBackgroundColor: background,
     colorScheme: theme.colorScheme.copyWith(background: background),
-    buttonTheme: theme.buttonTheme.copyWith(
-      minWidth: buttonMinWidth,
-      height: defaultButtonHeight,
-    ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         primary: theme.colorScheme.contrastForeground,
+        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         primary: theme.colorScheme.contrastForeground,
+        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
       ),
     ),
   );
