@@ -207,6 +207,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               ),
             ),
           ),
+          const SizedBox(width: denseSpacing),
           Flexible(
             child: OutlinedButton(
               onPressed: enableButtons ? _onResetClick : null,

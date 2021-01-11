@@ -105,6 +105,8 @@ class _FileImportContainerState extends State<FileImportContainer> {
             height: rowHeight,
             padding: const EdgeInsets.all(denseSpacing),
             decoration: BoxDecoration(
+              borderRadius:
+                  const BorderRadius.all(Radius.circular(defaultBorderRadius)),
               border: Border(
                 top: BorderSide(color: theme.focusColor),
                 bottom: BorderSide(color: theme.focusColor),
