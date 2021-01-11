@@ -61,19 +61,19 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.keyW, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(1.5));
-      expect(state.horizontalController.offset, equals(30.0));
+      expect(state.horizontalController.offset, equals(20.0));
 
       // Zoom in further.
       await tester.sendKeyEvent(LogicalKeyboardKey.keyW, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(2.25));
-      expect(state.horizontalController.offset, equals(75.0));
+      expect(state.horizontalController.offset, equals(50.0));
 
       // Zoom out.
       await tester.sendKeyEvent(LogicalKeyboardKey.keyS, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(1.5));
-      expect(state.horizontalController.offset, equals(30.0));
+      expect(state.horizontalController.offset, equals(20.0));
 
       // Zoom out further.
       await tester.sendKeyEvent(LogicalKeyboardKey.keyS, platform: 'macos');
@@ -116,37 +116,37 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.keyW, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(2.25));
-      expect(state.horizontalController.offset, equals(575.0));
+      expect(state.horizontalController.offset, equals(550.0));
 
       // Pan left. Pan unit should equal 1/4th of the original width (1000.0).
       await tester.sendKeyEvent(LogicalKeyboardKey.keyA, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(2.25));
-      expect(state.horizontalController.offset, equals(325.0));
+      expect(state.horizontalController.offset, equals(300.0));
 
       // Pan right. Pan unit should equal 1/4th of the original width (1000.0).
       await tester.sendKeyEvent(LogicalKeyboardKey.keyD, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(2.25));
-      expect(state.horizontalController.offset, equals(575.0));
+      expect(state.horizontalController.offset, equals(550.0));
 
       // Zoom in.
       await tester.sendKeyEvent(LogicalKeyboardKey.keyW, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(3.375));
-      expect(state.horizontalController.offset, equals(1092.5));
+      expect(state.horizontalController.offset, equals(1045.0));
 
       // Pan left. Pan unit should equal 1/4th of the original width (1000.0).
       await tester.sendKeyEvent(LogicalKeyboardKey.keyA, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(3.375));
-      expect(state.horizontalController.offset, equals(842.5));
+      expect(state.horizontalController.offset, equals(795.0));
 
       // Pan right. Pan unit should equal 1/4th of the original width (1000.0).
       await tester.sendKeyEvent(LogicalKeyboardKey.keyD, platform: 'macos');
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(3.375));
-      expect(state.horizontalController.offset, equals(1092.5));
+      expect(state.horizontalController.offset, equals(1045.0));
     });
   });
 
