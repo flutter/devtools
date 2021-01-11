@@ -10,6 +10,7 @@ import 'src/app.dart';
 import 'src/config_specific/framework_initialize/framework_initialize.dart';
 import 'src/config_specific/ide_theme/ide_theme.dart';
 import 'src/config_specific/load_fallback_app/load_fallback_app.dart';
+import 'src/debugger/syntax_highlighter.dart';
 import 'src/preferences.dart';
 
 void main() async {
@@ -60,6 +61,9 @@ void main() async {
   await preferences.init();
 
   await initializeFramework();
+
+  // Load the Dart syntax highlighting grammar.
+  await SyntaxHighlighter.initialize();
 
   // Now run the app.
   runApp(
