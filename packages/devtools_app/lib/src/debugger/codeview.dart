@@ -213,9 +213,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     final theme = Theme.of(context);
 
     final lines = <TextSpan>[];
-    final style = theme.textTheme.bodyText2.copyWith(
-      fontFamily: 'RobotoMono',
-    );
+    final style = fixedFontStyle(context);
 
     // Ensure the syntax highlighter has been initialized.
     // TODO(bkonyi): process source for highlighting on a separate thread.

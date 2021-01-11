@@ -14,9 +14,7 @@ import '../theme.dart';
 import 'span_parser.dart';
 
 class SyntaxHighlighter {
-  SyntaxHighlighter({
-    this.source,
-  });
+  SyntaxHighlighter({this.source});
 
   SyntaxHighlighter.withGrammar({
     Grammar grammar,
