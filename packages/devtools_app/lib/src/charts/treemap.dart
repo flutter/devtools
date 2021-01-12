@@ -598,10 +598,11 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
   Color get displayColor {
     if (!showDiff) return mainUiColor;
-    if (byteSize < 0)
+    if (byteSize < 0) {
       return treemapDecreaseColor;
-    else
+    } else {
       return treemapIncreaseColor;
+    }
   }
 
   String displayText({bool oneLine = true}) {

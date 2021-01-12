@@ -51,7 +51,7 @@ void main() {
     test('StatusColumn for http request', () {
       final column = StatusColumn();
       final httpRequests = requests
-          .where((r) => r is HttpRequestData)
+          .whereType<HttpRequestData>()
           .cast<HttpRequestData>()
           .toList();
       var request = httpRequests.first;
@@ -65,7 +65,7 @@ void main() {
     test('StatusColumn for web socket request', () {
       final column = StatusColumn();
       final webSockets =
-          requests.where((r) => r is WebSocket).cast<WebSocket>().toList();
+          requests.whereType<WebSocket>().cast<WebSocket>().toList();
       final request = webSockets.first;
       expect(column.getDisplayValue(request), '101');
     });
@@ -73,7 +73,7 @@ void main() {
     test('TypeColumn for http request', () {
       final column = TypeColumn();
       final httpRequests = requests
-          .where((r) => r is HttpRequestData)
+          .whereType<HttpRequestData>()
           .cast<HttpRequestData>()
           .toList();
       final request = httpRequests.first;
@@ -83,7 +83,7 @@ void main() {
     test('TypeColumn for web socket request', () {
       final column = TypeColumn();
       final webSockets =
-          requests.where((r) => r is WebSocket).cast<WebSocket>().toList();
+          requests.whereType<WebSocket>().cast<WebSocket>().toList();
       final request = webSockets.first;
       expect(column.getDisplayValue(request), 'ws');
     });
@@ -91,7 +91,7 @@ void main() {
     test('DurationColumn for http request', () {
       final column = DurationColumn();
       final httpRequests = requests
-          .where((r) => r is HttpRequestData)
+          .whereType<HttpRequestData>()
           .cast<HttpRequestData>()
           .toList();
       var request = httpRequests.first;
@@ -105,7 +105,7 @@ void main() {
     test('DurationColumn for web socket request', () {
       final column = DurationColumn();
       final webSockets =
-          requests.where((r) => r is WebSocket).cast<WebSocket>().toList();
+          requests.whereType<WebSocket>().cast<WebSocket>().toList();
       var request = webSockets.first;
 
       expect(column.getDisplayValue(request), '1000 ms');

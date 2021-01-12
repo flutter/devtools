@@ -227,7 +227,7 @@ class TreeTableData<T extends TreeNode<T>> extends TableData<T> {
   void addColumn(ColumnData<T> column) {
     // Avoid adding multiple TreeColumnData columns.
     assert(column is! TreeColumnData<T> ||
-        _columns.where((c) => c is TreeColumnData).isEmpty);
+        _columns.whereType<TreeColumnData>().isEmpty);
     super.addColumn(column);
   }
 

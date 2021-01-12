@@ -485,6 +485,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.3"
+  simple_lint_rules:
+    dependency: "direct dev"
+    description:
+      name: simple_lint_rules
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1+1"
   sky_engine:
     dependency: transitive
     description: flutter

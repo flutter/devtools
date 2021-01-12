@@ -212,10 +212,11 @@ class _DiffColumn extends ColumnData<TreemapNode> {
 
   @override
   Color getTextColor(TreemapNode dataObject) {
-    if (dataObject.byteSize < 0)
+    if (dataObject.byteSize < 0) {
       return tableDecreaseColor;
-    else
+    } else {
       return tableIncreaseColor;
+    }
   }
 }
 

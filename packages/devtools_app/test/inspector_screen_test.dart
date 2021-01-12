@@ -301,7 +301,9 @@ class TestInspectorController extends Fake implements InspectorController {
 
   @override
   void notifySelectionListeners() {
-    for (var listener in listeners) listener();
+    for (var listener in listeners) {
+      listener();
+    }
   }
 
   @override

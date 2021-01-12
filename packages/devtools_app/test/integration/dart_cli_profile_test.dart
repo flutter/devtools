@@ -250,7 +250,7 @@ class _DiskAssetBundle extends CachingAssetBundle {
         ...Directory('web/').listSync(recursive: true),
         ...Directory('assets/').listSync(recursive: true),
         ...Directory('fonts/').listSync(recursive: true),
-      ].where((fse) => fse is File);
+      ].whereType<File>();
 
       final manifest = <String, List<String>>{
         for (var file in files) file.path: [file.path]

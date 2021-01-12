@@ -907,8 +907,9 @@ class VmServiceWrapper implements VmService {
     String onUnavailable(String truncatedValue),
   }) async {
     if (stringRef == null) return null;
-    if (stringRef.valueAsStringIsTruncated != true)
+    if (stringRef.valueAsStringIsTruncated != true) {
       return stringRef.valueAsString;
+    }
 
     final result = await getObject(
       isolateId,

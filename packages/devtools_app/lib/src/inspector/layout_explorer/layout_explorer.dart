@@ -23,8 +23,9 @@ class _LayoutExplorerTabState extends State<LayoutExplorerTab>
   RemoteDiagnosticsNode previousSelection;
 
   Widget rootWidget(RemoteDiagnosticsNode node) {
-    if (FlexLayoutExplorerWidget.shouldDisplay(node))
+    if (FlexLayoutExplorerWidget.shouldDisplay(node)) {
       return FlexLayoutExplorerWidget(controller);
+    }
     return const Center(
       child: Text(
         'Currently, Layout Explorer only supports Flex-based widgets'

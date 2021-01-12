@@ -291,10 +291,11 @@ class MemoryController extends DisposableController
       : _selectedAndroidSample;
 
   void setSelectedSample(ChartType type, HeapSample sample) {
-    if (type == ChartType.DartHeaps)
+    if (type == ChartType.DartHeaps) {
       _selectedDartSample = sample;
-    else
+    } else {
       _selectedAndroidSample = sample;
+    }
   }
 
   static const liveFeed = 'Live Feed';

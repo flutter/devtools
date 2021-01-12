@@ -103,7 +103,7 @@ void main() {
       };
 
       final List<HttpRequestData> httpRequests = profile.requests
-          .where((r) => r is HttpRequestData)
+          .whereType<HttpRequestData>()
           .cast<HttpRequestData>()
           .toList();
       for (final request in httpRequests) {

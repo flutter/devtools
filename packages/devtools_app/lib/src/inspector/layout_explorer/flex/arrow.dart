@@ -208,8 +208,9 @@ class _ArrowPainter extends CustomPainter {
   final double headHeight;
 
   bool headIsGreaterThanConstraint(Size size) {
-    if (type == ArrowType.left || type == ArrowType.right)
+    if (type == ArrowType.left || type == ArrowType.right) {
       return headHeight >= (size.width);
+    }
     return headHeight >= (size.height);
   }
 

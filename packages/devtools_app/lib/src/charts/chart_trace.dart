@@ -215,17 +215,17 @@ class AxisScale {
     if (round) {
       niceFraction = fraction.roundToDouble();
     } else {
-      if (fraction <= 1)
+      if (fraction <= 1) {
         niceFraction = 1;
-      else if (fraction <= 2)
+      } else if (fraction <= 2) {
         niceFraction = 2;
-      else if (fraction <= 3)
+      } else if (fraction <= 3) {
         niceFraction = 3;
-      else if (fraction <= 5)
+      } else if (fraction <= 5) {
         niceFraction = 5;
-      else if (fraction <= 7)
+      } else if (fraction <= 7) {
         niceFraction = 7;
-      else if (fraction <= 10) niceFraction = 10;
+      } else if (fraction <= 10) niceFraction = 10;
     }
 
     return niceFraction * pow(10, exponent);
