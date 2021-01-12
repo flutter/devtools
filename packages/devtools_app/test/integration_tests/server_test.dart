@@ -37,6 +37,7 @@ final Map<String, String> registeredServices = {};
 final List<int> browserPids = [];
 
 void main() {
+  // ignore: unused_local_variable
   final bool testInReleaseMode =
       Platform.environment['WEBDEV_RELEASE'] == 'true';
 
