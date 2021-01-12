@@ -504,7 +504,7 @@ class _MultilineMatcher extends _Matcher {
 
 /// A [_Matcher] that corresponds to an `include` rule referenced in a
 /// `patterns` array. Allows for executing rules defined within a
-/// [Respository].
+/// [Repository].
 class _IncludeMatcher extends _Matcher {
   _IncludeMatcher(String include)
       : include = include.substring(1),
