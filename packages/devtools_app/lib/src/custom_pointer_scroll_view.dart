@@ -310,8 +310,9 @@ class CustomPointerScrollable extends StatefulWidget {
       scrollable = CustomPointerScrollable.of(context);
     }
 
-    if (futures.isEmpty || duration == Duration.zero)
+    if (futures.isEmpty || duration == Duration.zero) {
       return Future<void>.value();
+    }
     if (futures.length == 1) return futures.single;
     return Future.wait<void>(futures).then<void>((List<void> _) => null);
   }
@@ -411,8 +412,9 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
   @override
   @protected
   void setSemanticsActions(Set<SemanticsAction> actions) {
-    if (_gestureDetectorKey.currentState != null)
+    if (_gestureDetectorKey.currentState != null) {
       _gestureDetectorKey.currentState.replaceSemanticsActions(actions);
+    }
   }
 
   // GESTURE RECOGNITION AND POINTER IGNORING
@@ -483,9 +485,10 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
     }
     _lastCanDrag = canDrag;
     _lastAxisDirection = widget.axis;
-    if (_gestureDetectorKey.currentState != null)
+    if (_gestureDetectorKey.currentState != null) {
       _gestureDetectorKey.currentState
           .replaceGestureRecognizers(_gestureRecognizers);
+    }
   }
 
   @override
@@ -818,8 +821,9 @@ class _RenderScrollSemantics extends RenderProxyBox {
       if (child.isTagged(RenderViewport.excludeFromScrolling)) {
         excluded.add(child);
       } else {
-        if (!child.hasFlag(SemanticsFlag.isHidden))
+        if (!child.hasFlag(SemanticsFlag.isHidden)) {
           firstVisibleIndex ??= child.indexInParent;
+        }
         included.add(child);
       }
     }

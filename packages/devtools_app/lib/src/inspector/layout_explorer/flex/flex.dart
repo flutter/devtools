@@ -190,7 +190,7 @@ Widget dimensionDescription(
         : dimensionIndicatorTextStyle,
     overflow: TextOverflow.ellipsis,
   );
-  if (overflow)
+  if (overflow) {
     return Container(
       padding: const EdgeInsets.symmetric(
         vertical: minPadding,
@@ -202,6 +202,7 @@ Widget dimensionDescription(
       ),
       child: Center(child: text),
     );
+  }
   return text;
 }
 
@@ -622,8 +623,9 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
   }
 
   Widget _visualizeFlex(BuildContext context) {
-    if (!properties.hasChildren)
+    if (!properties.hasChildren) {
       return const Center(child: Text('No Children'));
+    }
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;

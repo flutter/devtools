@@ -247,9 +247,9 @@ class LayoutProperties {
   }
 
   static FlexFit deserializeFlexFit(String flexFit) {
-    if (flexFit == null)
+    if (flexFit == null) {
       return null;
-    else if (flexFit == 'tight') return FlexFit.tight;
+    } else if (flexFit == 'tight') return FlexFit.tight;
     return FlexFit.loose;
   }
 }
@@ -429,15 +429,17 @@ class FlexLayoutProperties extends LayoutProperties {
 
   @override
   bool get isOverflowWidth {
-    if (direction == Axis.horizontal)
+    if (direction == Axis.horizontal) {
       return width + overflowEpsilon < sum(childrenWidths);
+    }
     return width + overflowEpsilon < max(childrenWidths);
   }
 
   @override
   bool get isOverflowHeight {
-    if (direction == Axis.vertical)
+    if (direction == Axis.vertical) {
       return height + overflowEpsilon < sum(childrenHeights);
+    }
     return height + overflowEpsilon < max(childrenHeights);
   }
 
@@ -745,57 +747,63 @@ class RenderProperties {
   double get mainAxisDimension => axis == Axis.horizontal ? width : height;
 
   set mainAxisDimension(double dim) {
-    if (axis == Axis.horizontal)
+    if (axis == Axis.horizontal) {
       width = dim;
-    else
+    } else {
       height = dim;
+    }
   }
 
   double get crossAxisDimension => axis == Axis.horizontal ? height : width;
 
   set crossAxisDimension(double dim) {
-    if (axis == Axis.horizontal)
+    if (axis == Axis.horizontal) {
       height = dim;
-    else
+    } else {
       width = dim;
+    }
   }
 
   double get mainAxisOffset => axis == Axis.horizontal ? dx : dy;
 
   set mainAxisOffset(double offset) {
-    if (axis == Axis.horizontal)
+    if (axis == Axis.horizontal) {
       dx = offset;
-    else
+    } else {
       dy = offset;
+    }
   }
 
   double get crossAxisOffset => axis == Axis.horizontal ? dy : dx;
 
   set crossAxisOffset(double offset) {
-    if (axis == Axis.horizontal)
+    if (axis == Axis.horizontal) {
       dy = offset;
-    else
+    } else {
       dx = offset;
+    }
   }
 
   double get mainAxisRealDimension =>
       axis == Axis.horizontal ? realWidth : realHeight;
 
   set mainAxisRealDimension(double newVal) {
-    if (axis == Axis.horizontal)
+    if (axis == Axis.horizontal) {
       realWidth = newVal;
-    else
+    } else {
       realHeight = newVal;
+    }
   }
 
   double get crossAxisRealDimension =>
       axis == Axis.horizontal ? realHeight : realWidth;
 
   set crossAxisRealDimension(double newVal) {
-    if (axis == Axis.horizontal)
+    if (axis == Axis.horizontal) {
       realHeight = newVal;
-    else
+    } else {
       realWidth = newVal;
+    }
   }
 
   RenderProperties clone() {

@@ -231,12 +231,13 @@ void computeInboundRefs(
     }
 
     // call the build UI callback.
-    if (buildCallback != null)
+    if (buildCallback != null) {
       buildCallback(
         referenceName,
         owningAllocator,
         owningAllocatorIsAbstract,
       );
+    }
   }
 }
 

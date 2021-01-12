@@ -1440,8 +1440,9 @@ class _RetainedSizeColumn extends ColumnData<Reference> {
       // Return number of classes.
       final libraryReference = dataObject as LibraryReference;
       var sum = 0;
-      for (final actualClass in libraryReference.actualClasses)
+      for (final actualClass in libraryReference.actualClasses) {
         sum += actualClass.instancesTotalShallowSizes;
+      }
       return sum;
     } else if (dataObject.isClass) {
       final classReference = dataObject as ClassReference;
