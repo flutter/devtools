@@ -1,3 +1,6 @@
+# temporary home for canonical lints
+include: package:simple_lint_rules/analysis_options.yaml
+
 analyzer:
   #strong-mode:
     #implicit-casts: false # 367 issues

@@ -107,10 +107,11 @@ class LayoutProperties {
                 ?.map((child) =>
                     LayoutProperties(child, copyLevel: copyLevel - 1))
                 ?.toList(growable: false) {
-    if (children?.isNotEmpty ?? false)
+    if (children?.isNotEmpty ?? false) {
       for (var child in children) {
         child.parent = this;
       }
+    }
   }
 
   LayoutProperties.values({
@@ -640,7 +641,7 @@ class FlexLayoutProperties extends LayoutProperties {
         ..mainAxisDimension = renderLeadingSpace
         ..mainAxisRealDimension = actualLeadingSpace);
     }
-    if (actualBetweenSpace > 0.0)
+    if (actualBetweenSpace > 0.0) {
       for (var i = 0; i < childrenRenderProps.length - 1; ++i) {
         final child = childrenRenderProps[i];
         spaces.add(renderPropsWithFullCrossAxisDimension.clone()
@@ -648,6 +649,7 @@ class FlexLayoutProperties extends LayoutProperties {
           ..mainAxisRealDimension = actualBetweenSpace
           ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension);
       }
+    }
     if (actualLeadingSpace > 0.0 &&
         displayMainAxisAlignment != MainAxisAlignment.end) {
       spaces.add(renderPropsWithFullCrossAxisDimension.clone()
