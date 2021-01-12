@@ -6,9 +6,10 @@ import 'cpu_profile_model.dart';
 const _timeColumnWidthPx = 160.0;
 
 class SelfTimeColumn extends ColumnData<CpuStackFrame> {
-  SelfTimeColumn()
+  SelfTimeColumn({String titleTooltip})
       : super(
           'Self Time',
+          titleTooltip: titleTooltip,
           fixedWidthPx: _timeColumnWidthPx,
         );
 
@@ -36,9 +37,10 @@ class SelfTimeColumn extends ColumnData<CpuStackFrame> {
 }
 
 class TotalTimeColumn extends ColumnData<CpuStackFrame> {
-  TotalTimeColumn()
+  TotalTimeColumn({String titleTooltip})
       : super(
           'Total Time',
+          titleTooltip: titleTooltip,
           fixedWidthPx: _timeColumnWidthPx,
         );
 

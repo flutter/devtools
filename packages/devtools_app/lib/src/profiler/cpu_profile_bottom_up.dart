@@ -15,9 +15,9 @@ import 'cpu_profile_model.dart';
 class CpuBottomUpTable extends StatelessWidget {
   factory CpuBottomUpTable(List<CpuStackFrame> bottomUpRoots, {Key key}) {
     final treeColumn = MethodNameColumn();
-    final startingSortColumn = SelfTimeColumn();
+    final startingSortColumn = SelfTimeColumn(titleTooltip: selfTimeTooltip);
     final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
-      TotalTimeColumn(),
+      TotalTimeColumn(titleTooltip: totalTimeTooltip),
       startingSortColumn,
       treeColumn,
       // TODO(kenz): add source column for flutter apps once
@@ -45,6 +45,17 @@ class CpuBottomUpTable extends StatelessWidget {
   final ColumnData<CpuStackFrame> sortColumn;
   final List<ColumnData<CpuStackFrame>> columns;
   final List<CpuStackFrame> bottomUpRoots;
+
+  static const totalTimeTooltip =
+      'Time that a method spent executing its own code as well as the code for '
+      'the\nmethod that it called (which is displayed as an ancestor in the '
+      'bottom up tree).';
+
+  static const selfTimeTooltip =
+      'For top-level methods in the bottom-up tree (leaf stack frames in the '
+      'CPU profile),\nthis is the time the method spent executing only its own '
+      'code. For sub nodes (the\ncallers in the CPU profile), this is the self '
+      'time of the callee when being called by\nthe caller. ';
 
   @override
   Widget build(BuildContext context) {

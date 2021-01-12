@@ -15,10 +15,10 @@ import 'cpu_profile_model.dart';
 class CpuCallTreeTable extends StatelessWidget {
   factory CpuCallTreeTable(List<CpuStackFrame> dataRoots, {Key key}) {
     final treeColumn = MethodNameColumn();
-    final startingSortColumn = TotalTimeColumn();
+    final startingSortColumn = TotalTimeColumn(titleTooltip: totalTimeTooltip);
     final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
       startingSortColumn,
-      SelfTimeColumn(),
+      SelfTimeColumn(titleTooltip: selfTimeTooltip),
       treeColumn,
       // TODO(kenz): add source column for flutter apps once
       // https://github.com/dart-lang/sdk/issues/37553 is fixed.
@@ -40,6 +40,13 @@ class CpuCallTreeTable extends StatelessWidget {
     this.sortColumn,
     this.columns,
   ) : super(key: key);
+
+  static const totalTimeTooltip =
+      'Time that a method spent executing its own code\nas well as the code for '
+      'any methods it called.';
+
+  static const selfTimeTooltip =
+      'Time that a method spent executing only its own code.';
 
   final TreeColumnData<CpuStackFrame> treeColumn;
   final ColumnData<CpuStackFrame> sortColumn;
