@@ -184,7 +184,11 @@ Future<HttpServer> serveDevTools({
 
   HttpServer server;
   SocketException ex;
-  while (server == null && numPortsToTry > 0) {
+  while (server == null && numPortsToTry >= 0) {
+    // If we have tried [numPortsToTry] ports and still have not been able to
+    // connect, try port 0 to find a random available port.
+    if (numPortsToTry == 0) port = 0;
+
     try {
       server = await HttpMultiServer.bind(hostname, port);
     } on SocketException catch (e) {
