@@ -113,27 +113,27 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        RaisedButton(
-          child: const Text('No thanks.'),
+        ElevatedButton(
           onPressed: () {
             _provider.setDontAllowAnalytics();
             setState(() {
               _isVisible = false;
             });
           },
-          color: Colors.grey,
+          style: ElevatedButton.styleFrom(primary: Colors.grey),
+          child: const Text('No thanks.'),
         ),
         const Padding(
           padding: EdgeInsets.only(left: defaultSpacing),
         ),
-        RaisedButton(
-          child: const Text('Sounds good!'),
+        ElevatedButton(
           onPressed: () {
             _provider.setAllowAnalytics();
             setState(() {
               _isVisible = false;
             });
           },
+          child: const Text('Sounds good!'),
         ),
       ],
     );

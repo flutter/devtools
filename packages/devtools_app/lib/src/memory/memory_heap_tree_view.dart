@@ -122,7 +122,7 @@ String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
 final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
 
 class HeapTreeViewState extends State<HeapTree>
-    with AutoDisposeMixin, SearchFieldMixin {
+    with AutoDisposeMixin, SearchFieldMixin<HeapTree> {
   @visibleForTesting
   static const snapshotButtonKey = Key('Snapshot Button');
   @visibleForTesting
@@ -461,7 +461,7 @@ class HeapTreeViewState extends State<HeapTree>
       children: [
         ActionButton(
           tooltip: 'Take a memory profile snapshot',
-          child: OutlineButton(
+          child: OutlinedButton(
             key: snapshotButtonKey,
             onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
             child: const MaterialIconLabel(
@@ -477,7 +477,7 @@ class HeapTreeViewState extends State<HeapTree>
         // objects/fields. Maybe notion in table?
         ActionButton(
           tooltip: 'Collapse All',
-          child: OutlineButton(
+          child: OutlinedButton(
             key: collapseAllButtonKey,
             onPressed: snapshotDisplay is MemoryHeapTable
                 ? () {
@@ -500,7 +500,7 @@ class HeapTreeViewState extends State<HeapTree>
         ),
         ActionButton(
           tooltip: 'Expand All',
-          child: OutlineButton(
+          child: OutlinedButton(
             key: expandAllButtonKey,
             onPressed: snapshotDisplay is MemoryHeapTable
                 ? () {
@@ -520,7 +520,7 @@ class HeapTreeViewState extends State<HeapTree>
         const SizedBox(width: defaultSpacing),
         ActionButton(
           tooltip: 'Monitor Allocations',
-          child: OutlineButton(
+          child: OutlinedButton(
             key: allocationMonitorKey,
             onPressed: () async {
               await _allocationStart();
@@ -534,7 +534,7 @@ class HeapTreeViewState extends State<HeapTree>
         ),
         ActionButton(
           tooltip: 'Reset Accumulators',
-          child: OutlineButton(
+          child: OutlinedButton(
             key: allocationMonitorResetKey,
             onPressed: () async {
               await _allocationReset();
@@ -678,7 +678,7 @@ class HeapTreeViewState extends State<HeapTree>
         ),
         // TODO: Add these back in when _settings() is implemented.
 //        const SizedBox(width: denseSpacing),
-//        OutlineButton(
+//        OutlinedButton(
 //          key: settingsButtonKey,
 //          onPressed: _settings,
 //          child: const MaterialIconLabel(

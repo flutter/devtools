@@ -94,7 +94,7 @@ class DeviceDialog extends StatelessWidget {
   }
 
   Widget _connectToNewAppButton(BuildContext context) {
-    return RaisedButton(
+    return ElevatedButton(
       onPressed: () {
         DevToolsRouterDelegate.of(context).navigate(homePageId, {'uri': null});
         Navigator.of(context, rootNavigator: true).pop('dialog');
@@ -107,7 +107,7 @@ class DeviceDialog extends StatelessWidget {
 class _ViewVMFlagsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
+    return TextButton(
       onPressed: () {
         Navigator.of(context, rootNavigator: true).pop('dialog');
 

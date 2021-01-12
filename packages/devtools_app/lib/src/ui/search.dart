@@ -191,7 +191,7 @@ mixin SearchableMixin<T> {
   T activeSearchMatch;
 }
 
-mixin SearchFieldMixin {
+mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   FocusNode searchFieldFocusNode;
   TextEditingController searchTextFieldController;
   FocusNode rawKeyboardFocusNode;
@@ -297,6 +297,9 @@ mixin SearchFieldMixin {
       },
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.all(denseSpacing),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Theme.of(context).focusColor),
+        ),
         border: const OutlineInputBorder(),
         labelText: 'Search',
         suffix: _buildSearchFieldSuffix(

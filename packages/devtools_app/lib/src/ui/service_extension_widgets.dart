@@ -17,6 +17,7 @@ import '../service_registrations.dart';
 import '../theme.dart';
 import '../utils.dart';
 import 'label.dart';
+import 'theme.dart';
 
 /// Group of buttons where each button toggles the state of a VMService
 /// extension.
@@ -105,17 +106,26 @@ class _ServiceExtensionButtonGroupState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     // TODO(jacobr): respect _available better by displaying whether individual
     // widgets are available (not currently supported by ToggleButtons).
     final available = _extensionStates.any((e) => e.isAvailable);
-    return ToggleButtons(
-      constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
-      children: <Widget>[
-        for (var extensionState in _extensionStates)
-          _buildExtension(extensionState)
-      ],
-      isSelected: [for (var e in _extensionStates) e.isSelected],
-      onPressed: available ? _onPressed : null,
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: ToggleButtons(
+        // TODO(kenz): ensure border radius is set correctly for single child
+        // groups once https://github.com/flutter/flutter/issues/73725 is fixed.
+        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+        color: theme.colorScheme.contrastForeground,
+        textStyle: theme.textTheme.bodyText1,
+        constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+        children: <Widget>[
+          for (var extensionState in _extensionStates)
+            _buildExtension(extensionState)
+        ],
+        isSelected: [for (var e in _extensionStates) e.isSelected],
+        onPressed: available ? _onPressed : null,
+      ),
     );
   }
 

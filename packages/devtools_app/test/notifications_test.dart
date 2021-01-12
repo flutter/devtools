@@ -14,8 +14,9 @@ void main() {
         child: Notifications(
           child: Builder(
             builder: (context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () => Notifications.of(context).push(text),
+                child: const SizedBox(),
               );
             },
           ),
@@ -26,11 +27,11 @@ void main() {
     testWidgets('displays notifications', (WidgetTester tester) async {
       const notification = 'This is a notification!';
       await tester.pumpWidget(buildNotificationsWithButtonToPush(notification));
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text(notification), findsOneWidget);
 
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text(notification), findsNWidgets(2));
     });
@@ -38,7 +39,7 @@ void main() {
     testWidgets('notifications expire', (WidgetTester tester) async {
       const notification = 'This is a notification!';
       await tester.pumpWidget(buildNotificationsWithButtonToPush(notification));
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text(notification), findsOneWidget);
 
@@ -56,7 +57,7 @@ void main() {
           builder: (context, child) => Notifications(child: child),
           routes: {
             '/': (context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   if (timesPressed == 0) {
                     Notifications.of(context).push(notification);
@@ -65,6 +66,7 @@ void main() {
                   }
                   timesPressed++;
                 },
+                child: const SizedBox(),
               );
             },
             '/details': (context) {
@@ -78,13 +80,13 @@ void main() {
       expect(find.text(notification), findsNothing);
       expect(find.byKey(detailsKey), findsNothing);
       // The first tap of the button will show the notification.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text(notification), findsOneWidget);
       expect(find.byKey(detailsKey), findsNothing);
 
       // The second tap will navigate to /details.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text(notification), findsOneWidget);
       expect(find.byKey(detailsKey), findsOneWidget);

@@ -33,7 +33,7 @@ void main() {
     /// executed.
     Future<void> pumpTestFrame(WidgetTester tester) async {
       // Tap the raised Button in order to draw a frame.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
     }
 
@@ -50,8 +50,9 @@ void main() {
                     children: <Widget>[
                       // This is button is present so that we can tap it and
                       // simulate a frame being drawn.
-                      RaisedButton(
+                      ElevatedButton(
                         onPressed: () => {},
+                        child: const SizedBox(),
                       ),
                     ],
                   );

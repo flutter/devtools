@@ -131,8 +131,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             ),
             const SizedBox(width: denseSpacing),
             Container(
-              height: Theme.of(context).buttonTheme.height,
-              child: OutlineButton(
+              height: defaultButtonHeight,
+              child: OutlinedButton(
                 onPressed: _refreshInspector,
                 child: const MaterialIconLabel(
                   Icons.refresh,
@@ -199,7 +199,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(
-            child: OutlineButton(
+            child: OutlinedButton(
               onPressed: enableButtons ? _onExpandClick : null,
               child: const Text(
                 'Expand all',
@@ -207,8 +207,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               ),
             ),
           ),
+          const SizedBox(width: denseSpacing),
           Flexible(
-            child: OutlineButton(
+            child: OutlinedButton(
               onPressed: enableButtons ? _onResetClick : null,
               child: const Text(
                 'Collapse to selected',

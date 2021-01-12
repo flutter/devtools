@@ -317,11 +317,11 @@ class NotificationAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final labelText = Text(label);
     return isPrimary
-        ? RaisedButton(
+        ? ElevatedButton(
             onPressed: onAction,
             child: labelText,
           )
-        : OutlineButton(
+        : OutlinedButton(
             onPressed: onAction,
             child: labelText,
           );

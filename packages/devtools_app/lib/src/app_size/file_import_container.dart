@@ -105,6 +105,8 @@ class _FileImportContainerState extends State<FileImportContainer> {
             height: rowHeight,
             padding: const EdgeInsets.all(denseSpacing),
             decoration: BoxDecoration(
+              borderRadius:
+                  const BorderRadius.all(Radius.circular(defaultBorderRadius)),
               border: Border(
                 top: BorderSide(color: theme.focusColor),
                 bottom: BorderSide(color: theme.focusColor),
@@ -141,7 +143,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
 //    return Row(
 //      mainAxisAlignment: MainAxisAlignment.center,
 //      children: [
-//        OutlineButton(
+//        OutlinedButton(
 //          onPressed: () {},
 //          child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
 //        ),
@@ -157,7 +159,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            RaisedButton(
+            ElevatedButton(
               onPressed: importedFile != null
                   ? () => widget.onAction(importedFile)
                   : null,
@@ -277,7 +279,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            RaisedButton(
+            ElevatedButton(
               onPressed: firstImportedFile != null && secondImportedFile != null
                   ? () => widget.onAction(
                         firstImportedFile,

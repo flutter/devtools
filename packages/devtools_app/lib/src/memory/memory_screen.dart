@@ -382,7 +382,7 @@ class MemoryBodyState extends State<MemoryBody>
               onPressed: paused ? controller.resumeLiveFeed : null,
             ),
             const SizedBox(width: defaultSpacing),
-            OutlineButton(
+            OutlinedButton(
                 key: MemoryScreen.clearButtonKey,
                 // TODO(terry): Button needs to be Delete for offline data.
                 onPressed: controller.memorySource == MemoryController.liveFeed
@@ -401,8 +401,8 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
-  OutlineButton createToggleAdbMemoryButton() {
-    return OutlineButton(
+  OutlinedButton createToggleAdbMemoryButton() {
+    return OutlinedButton(
       key: androidChartButtonKey,
       onPressed: controller.isConnectedDeviceAndroid
           ? controller.toggleAndroidChartVisibility
@@ -422,7 +422,7 @@ class MemoryBodyState extends State<MemoryBody>
         const SizedBox(width: defaultSpacing),
         createToggleAdbMemoryButton(),
         const SizedBox(width: denseSpacing),
-        OutlineButton(
+        OutlinedButton(
           key: MemoryScreen.gcButtonKey,
           onPressed: controller.isGcing ? null : _gc,
           child: const MaterialIconLabel(
@@ -432,7 +432,7 @@ class MemoryBodyState extends State<MemoryBody>
           ),
         ),
         const SizedBox(width: defaultSpacing),
-        OutlineButton(
+        OutlinedButton(
           key: MemoryScreen.exportButtonKey,
           onPressed:
               controller.offline ? null : controller.memoryLog.exportMemory,
@@ -443,7 +443,7 @@ class MemoryBodyState extends State<MemoryBody>
           ),
         ),
         const SizedBox(width: defaultSpacing),
-        OutlineButton(
+        OutlinedButton(
           key: legendKey,
           onPressed: controller.toggleLegendVisibility,
           child: MaterialIconLabel(
