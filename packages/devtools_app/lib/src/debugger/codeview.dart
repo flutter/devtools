@@ -17,6 +17,7 @@ import 'breakpoints.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
+import 'syntax_highlighter.dart';
 
 // TODO(kenz): consider moving lines / pausedPositions calculations to the
 // controller.
@@ -42,12 +43,13 @@ class CodeView extends StatefulWidget {
 
 class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
   Script script;
-  List<String> lines = [];
+  int lineCount = 0;
   Set<int> executableLines = {};
 
   LinkedScrollControllerGroup verticalController;
   ScrollController gutterController;
   ScrollController textController;
+  SyntaxHighlighter highlighter;
 
   ScriptRef get scriptRef => widget.scriptRef;
 
@@ -56,7 +58,6 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     super.initState();
 
     _initScriptInfo();
-
     verticalController = LinkedScrollControllerGroup();
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
@@ -66,8 +67,10 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
   }
 
   void _parseScriptLines() {
-    // Parse the source into lines.
-    lines = script.source?.split('\n') ?? [];
+    // Create a new SyntaxHighlighter with the script's source in preparation
+    // for building the code view.
+    highlighter = SyntaxHighlighter(source: script?.source ?? '');
+    lineCount = script.source?.split('\n')?.length ?? 0;
 
     // Gather the data to display breakable lines.
     executableLines = {};
@@ -165,7 +168,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
 
     // TODO(devoncarew): Adjust this so we don't scroll if we're already in the
     // middle third of the screen.
-    if (lines.length * CodeView.rowHeight > extent) {
+    if (lineCount * CodeView.rowHeight > extent) {
       // Scroll to the middle of the screen.
       final lineIndex = location.line - 1;
       final scrollPosition =
@@ -188,7 +191,6 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(#1648): Implement syntax highlighting.
     final theme = Theme.of(context);
 
     if (scriptRef == null) {
@@ -209,6 +211,48 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
 
   Widget buildCodeArea(BuildContext context) {
     final theme = Theme.of(context);
+
+    final lines = <TextSpan>[];
+    final style = fixedFontStyle(context);
+
+    // Ensure the syntax highlighter has been initialized.
+    // TODO(bkonyi): process source for highlighting on a separate thread.
+    if (script.source.length < 500000 && highlighter != null) {
+      final highlighted = highlighter.highlight(context);
+
+      // Look for [TextSpan]s which only contain '\n' to manually break the
+      // output from the syntax highlighter into individual lines.
+      var currentLine = <TextSpan>[];
+      highlighted.visitChildren((span) {
+        currentLine.add(span);
+        if (span.toPlainText() == '\n') {
+          lines.add(
+            TextSpan(
+              style: style,
+              children: currentLine,
+            ),
+          );
+          currentLine = <TextSpan>[];
+        }
+        return true;
+      });
+      lines.add(
+        TextSpan(
+          style: style,
+          children: currentLine,
+        ),
+      );
+    } else {
+      lines.addAll(
+        [
+          for (final line in script.source.split('\n'))
+            TextSpan(
+              style: style,
+              text: line,
+            ),
+        ],
+      );
+    }
 
     // Apply the log change-of-base formula, then add 16dp padding for every
     // digit in the maximum number of lines.
@@ -481,7 +525,7 @@ class Lines extends StatelessWidget {
   }) : super(key: key);
 
   final ScrollController scrollController;
-  final List<String> lines;
+  final List<TextSpan> lines;
   final StackFrameAndSourcePosition pausedFrame;
 
   @override
@@ -510,7 +554,7 @@ class LineItem extends StatelessWidget {
     this.pausedFrame,
   }) : super(key: key);
 
-  final String lineContents;
+  final TextSpan lineContents;
   final StackFrameAndSourcePosition pausedFrame;
 
   @override
@@ -532,10 +576,13 @@ class LineItem extends StatelessWidget {
       const colBottomOffset = 13.0;
       const colIconRotate = -90 * math.pi / 180;
 
+      // TODO: We should use SelectableText.rich(...) to allow for selectable
+      // text, but we can only select single lines with our current approach
+      // of creating widgets for each line.
       child = Stack(
         children: [
-          Text(
-            lineContents,
+          RichText(
+            text: lineContents,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -558,8 +605,8 @@ class LineItem extends StatelessWidget {
         ],
       );
     } else {
-      child = Text(
-        lineContents,
+      child = RichText(
+        text: lineContents,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );

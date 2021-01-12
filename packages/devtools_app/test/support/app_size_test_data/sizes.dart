@@ -25160,8 +25160,8 @@ const instructionSizes = '''
     },
     {
       "l": "package:flutter/src/material/text_selection.dart",
-      "c": "FlatButton",
-      "n": "[Stub] Allocate FlatButton",
+      "c": "TextButton",
+      "n": "[Stub] Allocate TextButton",
       "s": 12
     },
     {
@@ -49354,7 +49354,7 @@ const instructionSizes = '''
     },
     {
       "l": "package:flutter/src/material/flat_button.dart",
-      "c": "FlatButton",
+      "c": "TextButton",
       "n": "[Optimized] build",
       "s": 612
     },

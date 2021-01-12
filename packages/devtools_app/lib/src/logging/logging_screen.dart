@@ -81,7 +81,7 @@ Example queries:
 }
 
 class _LoggingScreenState extends State<LoggingScreenBody>
-    with AutoDisposeMixin, SearchFieldMixin {
+    with AutoDisposeMixin, SearchFieldMixin<LoggingScreenBody> {
   LogData selected;
 
   LoggingController controller;

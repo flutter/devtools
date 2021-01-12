@@ -61,11 +61,11 @@ class DevToolsDialog extends StatelessWidget {
   }
 }
 
-/// A FlatButton used to close a containing dialog (Close).
+/// A TextButton used to close a containing dialog (Close).
 class DialogCloseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
+    return TextButton(
       onPressed: () {
         Navigator.of(context, rootNavigator: true).pop('dialog');
       },
@@ -74,11 +74,11 @@ class DialogCloseButton extends StatelessWidget {
   }
 }
 
-/// A FlatButton used to close a containing dialog (Cancel).
+/// A TextButton used to close a containing dialog (Cancel).
 class DialogCancelButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
+    return TextButton(
       onPressed: () {
         Navigator.of(context).pop(_dialogDefaultContext);
       },
@@ -87,7 +87,7 @@ class DialogCancelButton extends StatelessWidget {
   }
 }
 
-/// A FlatButton used to close a containing dialog (APPLY).
+/// A TextButton used to close a containing dialog (APPLY).
 class DialogApplyButton extends StatelessWidget {
   const DialogApplyButton({@required this.onPressed}) : super();
 
@@ -95,7 +95,7 @@ class DialogApplyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
+    return TextButton(
       onPressed: () {
         if (onPressed != null) onPressed();
         Navigator.of(context).pop(_dialogDefaultContext);

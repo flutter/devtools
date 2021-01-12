@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/search.dart';
 import 'cpu_profile_bottom_up.dart';
@@ -62,7 +63,10 @@ class CpuProfiler extends StatefulWidget {
 // TODO(kenz): preserve tab controller index when updating CpuProfiler with new
 // data. The state is being destroyed with every new cpu profile - investigate.
 class _CpuProfilerState extends State<CpuProfiler>
-    with SingleTickerProviderStateMixin, AutoDisposeMixin, SearchFieldMixin {
+    with
+        SingleTickerProviderStateMixin,
+        AutoDisposeMixin,
+        SearchFieldMixin<CpuProfiler> {
   TabController _tabController;
 
   @override
@@ -116,10 +120,17 @@ class _CpuProfilerState extends State<CpuProfiler>
                 ),
               ),
             if (currentTab.key != CpuProfiler.flameChartTab)
-              Row(children: [
-                _expandAllButton(currentTab),
-                _collapseAllButton(currentTab),
-              ]),
+              SizedBox(
+                height: defaultButtonHeight,
+                child: RoundedOutlinedBorder(
+                  child: Row(children: [
+                    _expandAllButton(currentTab),
+                    LeftBorder(
+                      child: _collapseAllButton(currentTab),
+                    ),
+                  ]),
+                ),
+              ),
           ],
         ),
         Expanded(
@@ -176,7 +187,7 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   Widget _expandAllButton(Tab currentTab) {
-    return OutlineButton(
+    return TextButton(
       key: CpuProfiler.expandButtonKey,
       onPressed: () {
         _performOnDataRoots((root) => root.expandCascading(), currentTab);
@@ -186,7 +197,7 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   Widget _collapseAllButton(Tab currentTab) {
-    return OutlineButton(
+    return TextButton(
       key: CpuProfiler.collapseButtonKey,
       onPressed: () {
         _performOnDataRoots((root) => root.collapseCascading(), currentTab);
@@ -222,7 +233,7 @@ class CpuProfilerDisabled extends StatelessWidget {
           const Text('CPU profiler is disabled.'),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: RaisedButton(
+            child: ElevatedButton(
               child: const Text('Enable profiler'),
               onPressed: controller.enableCpuProfiler,
             ),

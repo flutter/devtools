@@ -37,6 +37,7 @@ final Map<String, String> registeredServices = {};
 final List<int> browserPids = [];
 
 void main() {
+  // ignore: unused_local_variable
   final bool testInReleaseMode =
       Platform.environment['WEBDEV_RELEASE'] == 'true';
 
@@ -422,7 +423,9 @@ void main() {
             equals(appFixture.serviceUri.toString()));
       }, timeout: const Timeout.factor(10));
       // The API only works in release mode.
-    }, skip: !testInReleaseMode);
+      // TODO(kenz): enable integration tests.
+      // See https://github.com/flutter/devtools/issues/2595.
+    }, skip: true /*!testInReleaseMode*/);
   }
 }
 

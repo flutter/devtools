@@ -29,20 +29,13 @@ ThemeData _darkTheme(IdeTheme ideTheme) {
   final background = isValidDarkColor(ideTheme?.backgroundColor)
       ? ideTheme?.backgroundColor
       : theme.canvasColor;
-
-  return theme.copyWith(
+  return _baseTheme(
+    theme: theme,
+    ideTheme: ideTheme,
     primaryColor: devtoolsGrey[900],
-    primaryColorDark: devtoolsBlue[700],
-    primaryColorLight: devtoolsBlue[400],
+    backgroundColor: background,
     indicatorColor: devtoolsBlue[400],
-    accentColor: devtoolsBlue[400],
-    backgroundColor: devtoolsGrey[600],
-    canvasColor: background,
-    toggleableActiveColor: devtoolsBlue[400],
     selectedRowColor: devtoolsGrey[600],
-    buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
-    scaffoldBackgroundColor: background,
-    colorScheme: theme.colorScheme.copyWith(background: background),
   );
 }
 
@@ -51,19 +44,49 @@ ThemeData _lightTheme(IdeTheme ideTheme) {
   final background = isValidLightColor(ideTheme?.backgroundColor)
       ? ideTheme?.backgroundColor
       : theme.canvasColor;
-  return theme.copyWith(
+  return _baseTheme(
+    theme: theme,
+    ideTheme: ideTheme,
     primaryColor: devtoolsBlue[600],
+    backgroundColor: background,
+    indicatorColor: Colors.yellowAccent[400],
+    selectedRowColor: devtoolsBlue[600],
+  );
+}
+
+ThemeData _baseTheme({
+  @required ThemeData theme,
+  @required IdeTheme ideTheme,
+  @required Color primaryColor,
+  @required Color backgroundColor,
+  @required Color indicatorColor,
+  @required Color selectedRowColor,
+}) {
+  return theme.copyWith(
+    primaryColor: primaryColor,
+    indicatorColor: indicatorColor,
+    selectedRowColor: selectedRowColor,
+    // Same values for both light and dark themes.
     primaryColorDark: devtoolsBlue[700],
     primaryColorLight: devtoolsBlue[400],
-    indicatorColor: Colors.yellowAccent[400],
     accentColor: devtoolsBlue[400],
     backgroundColor: devtoolsGrey[600],
-    canvasColor: background,
     toggleableActiveColor: devtoolsBlue[400],
-    selectedRowColor: devtoolsBlue[600],
-    buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth),
-    scaffoldBackgroundColor: background,
-    colorScheme: theme.colorScheme.copyWith(background: background),
+    canvasColor: backgroundColor,
+    scaffoldBackgroundColor: backgroundColor,
+    colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        primary: theme.colorScheme.contrastForeground,
+        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        primary: theme.colorScheme.contrastForeground,
+        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
+      ),
+    ),
   );
 }
 
@@ -99,6 +122,8 @@ const defaultIconThemeSize = 24.0;
 const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
 const denseRowSpacing = 6.0;
+
+const defaultBorderRadius = 4.0;
 
 const borderPadding = 2.0;
 const densePadding = 4.0;
@@ -159,6 +184,23 @@ extension DevToolsColorScheme on ColorScheme {
       isLight ? const Color(0xFFE0EEFA) : const Color(0xFF2E3C48);
   // [toggleButtonForegroundColor] is the same for light and dark theme.
   Color get toggleButtonForegroundColor => const Color(0xFF2196F3);
+
+  Color get functionSyntaxColor =>
+      isLight ? const Color(0xFF795E26) : const Color(0xFFDCDCAA);
+  Color get declarationsSyntaxColor =>
+      isLight ? const Color(0xFF267f99) : const Color(0xFF4EC9B0);
+  Color get modifierSyntaxColor =>
+      isLight ? const Color(0xFF0000FF) : const Color(0xFF569CD6);
+  Color get controlFlowSyntaxColor =>
+      isLight ? const Color(0xFFAF00DB) : const Color(0xFFC586C0);
+  Color get variableSyntaxColor =>
+      isLight ? const Color(0xFF001080) : const Color(0xFF9CDCFE);
+  Color get commentSyntaxColor =>
+      isLight ? const Color(0xFF008000) : const Color(0xFF6A9955);
+  Color get stringSyntaxColor =>
+      isLight ? const Color(0xFFB20001) : const Color(0xFFD88E73);
+  Color get numericConstantSyntaxColor =>
+      isLight ? const Color(0xFF098658) : const Color(0xFFB5CEA8);
 }
 
 TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(

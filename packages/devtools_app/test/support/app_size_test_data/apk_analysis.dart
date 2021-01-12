@@ -20098,11 +20098,11 @@ const apkAnalysis = r'''
                                       "lastPathElement": true
                                     },
                                     {
-                                      "n": "FlatButton",
+                                      "n": "TextButton",
                                       "k": "p",
                                       "children": [
                                         {
-                                          "n": "Allocate FlatButton",
+                                          "n": "Allocate TextButton",
                                           "k": "s",
                                           "t": "T",
                                           "value": 12
@@ -76741,7 +76741,7 @@ const apkAnalysis = r'''
                           "lastPathElement": true
                         },
                         {
-                          "n": "flat_button.dart/FlatButton",
+                          "n": "flat_button.dart/TextButton",
                           "k": "p",
                           "children": [
                             {

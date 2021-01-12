@@ -46,7 +46,7 @@ class TimelineFlameChartContainer extends StatefulWidget {
 
 class _TimelineFlameChartContainerState
     extends State<TimelineFlameChartContainer>
-    with AutoDisposeMixin, SearchFieldMixin {
+    with AutoDisposeMixin, SearchFieldMixin<TimelineFlameChartContainer> {
   PerformanceController controller;
 
   @override

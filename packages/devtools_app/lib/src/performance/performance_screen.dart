@@ -245,7 +245,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         ),
         const SizedBox(width: defaultSpacing),
         ActionButton(
-          child: OutlineButton(
+          child: OutlinedButton(
             child: const Icon(
               Icons.settings,
               size: defaultIconSize,

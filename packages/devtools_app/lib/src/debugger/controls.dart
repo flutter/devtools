@@ -28,7 +28,7 @@ class DebuggingControls extends StatelessWidget {
             final canStep = isPaused && !resuming && controller.hasFrames.value;
 
             return SizedBox(
-              height: Theme.of(context).buttonTheme.height,
+              height: defaultButtonHeight,
               child: Row(
                 children: [
                   RoundedOutlinedBorder(
@@ -40,7 +40,7 @@ class DebuggingControls extends StatelessWidget {
                           autofocus: true,
                           onPressed: isPaused ? null : controller.pause,
                         ),
-                        _LeftBorder(
+                        LeftBorder(
                           child: DebuggerButton(
                             title: 'Resume',
                             icon: Icons.play_arrow,
@@ -61,14 +61,14 @@ class DebuggingControls extends StatelessWidget {
                           icon: Icons.keyboard_arrow_down,
                           onPressed: canStep ? controller.stepIn : null,
                         ),
-                        _LeftBorder(
+                        LeftBorder(
                           child: DebuggerButton(
                             title: 'Step Over',
                             icon: Icons.keyboard_arrow_right,
                             onPressed: canStep ? controller.stepOver : null,
                           ),
                         ),
-                        _LeftBorder(
+                        LeftBorder(
                           child: DebuggerButton(
                             title: 'Step Out',
                             icon: Icons.keyboard_arrow_up,
@@ -209,10 +209,12 @@ class DebuggerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ActionButton(
       tooltip: title,
-      child: OutlineButton(
+      child: OutlinedButton(
         autofocus: autofocus,
-        borderSide: BorderSide.none,
-        shape: const ContinuousRectangleBorder(),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide.none,
+          shape: const ContinuousRectangleBorder(),
+        ),
         onPressed: onPressed,
         child: MaterialIconLabel(
           icon,
@@ -220,23 +222,6 @@ class DebuggerButton extends StatelessWidget {
           includeTextWidth: mediumDeviceWidth,
         ),
       ),
-    );
-  }
-}
-
-class _LeftBorder extends StatelessWidget {
-  const _LeftBorder({this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final leftBorder =
-        Border(left: BorderSide(color: Theme.of(context).focusColor));
-
-    return Container(
-      decoration: BoxDecoration(border: leftBorder),
-      child: child,
     );
   }
 }
