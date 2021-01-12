@@ -327,6 +327,7 @@ class TreeTableData<T extends TreeNode<T>> extends TableData<T> {
 abstract class ColumnData<T> {
   ColumnData(
     this.title, {
+    this.titleTooltip,
     @required this.fixedWidthPx,
     this.alignment = ColumnAlignment.left,
   })  : assert(fixedWidthPx != null),
@@ -334,11 +335,14 @@ abstract class ColumnData<T> {
 
   ColumnData.wide(
     this.title, {
+    this.titleTooltip,
     this.minWidthPx,
     this.alignment = ColumnAlignment.left,
   }) : fixedWidthPx = null;
 
   final String title;
+
+  final String titleTooltip;
 
   /// Width of the column expressed as a fixed number of pixels.
   final double fixedWidthPx;

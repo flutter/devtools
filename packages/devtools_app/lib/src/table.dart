@@ -1260,6 +1260,11 @@ class _TableRowState<T> extends State<TableRow<T>>
       if (node == null) {
         final isSortColumn = column == widget.sortColumn;
 
+        final title = Text(
+          column.title,
+          overflow: TextOverflow.ellipsis,
+        );
+
         content = InkWell(
           canRequestFocus: false,
           onTap: () => _handleSortChange(column),
@@ -1277,10 +1282,15 @@ class _TableRowState<T> extends State<TableRow<T>>
               // TODO: This Flexible wrapper was added to get the
               // network_profiler_test.dart tests to pass.
               Flexible(
-                child: Text(
-                  column.title,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: column.titleTooltip != null
+                    ? Tooltip(
+                        message: column.titleTooltip,
+                        padding: const EdgeInsets.all(denseSpacing),
+                        waitDuration: tooltipWait,
+                        preferBelow: false,
+                        child: title,
+                      )
+                    : title,
               ),
             ],
           ),
