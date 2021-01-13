@@ -404,6 +404,10 @@ class JsonUtils {
   static bool hasJsonData(String data) {
     return data != null && data.isNotEmpty && data != 'null';
   }
+
+  /// Pretty print a JSON payload.
+  static String prettyPrint(Map<String, Object> json) =>
+      const JsonEncoder.withIndent('  ').convert(json);
 }
 
 typedef RateLimiterCallback = Future<Object> Function();
@@ -979,13 +983,23 @@ class DevToolsFile<T> {
   final T data;
 }
 
-/// Logging to debug console only in debug runs.
-void debugLogger(String message) {
+bool get isDebugging {
   // Debug only check.
+  var debug = false;
   assert(() {
-    logger.log('$message');
+    debug = true;
     return true;
   }());
+  return debug;
+}
+
+
+
+/// Logging to debug console only in debug runs.
+void debugLogger(String message) {
+  if (isDebugging) {
+    logger.log('$message');
+  }
 }
 
 final _lowercaseLookup = <String, String>{};

@@ -2,13 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
+import '../charts/chart_controller.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
@@ -17,12 +22,13 @@ import '../screen.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import '../utils.dart';
-import 'memory_android_chart.dart';
+
+import 'memory_android_chart.dart' as android;
 import 'memory_controller.dart';
-import 'memory_events_pane.dart';
+import 'memory_events_pane.dart' as events;
 import 'memory_heap_tree_view.dart';
 import 'memory_heap_treemap.dart';
-import 'memory_vm_chart.dart';
+import 'memory_vm_chart.dart' as vm;
 
 /// Width of application when memory buttons loose their text.
 const _primaryControlsMinVerboseWidth = 1100.0;
@@ -37,6 +43,7 @@ class MemoryScreen extends Screen {
         );
 
   static const legendKeyName = 'Legend Button';
+  static const hoverKeyName = 'Chart Hover';
 
   @visibleForTesting
   static const pauseButtonKey = Key('Pause Button');
@@ -93,13 +100,14 @@ class MemoryBodyState extends State<MemoryBody>
   @visibleForTesting
   static const androidChartButtonKey = Key('Android Chart');
 
-  EventChartController eventChartController;
-  VMChartController vmChartController;
-  AndroidChartController androidChartController;
+  events.EventChartController eventChartController;
+  vm.VMChartController vmChartController;
+  android.AndroidChartController androidChartController;
 
   MemoryController controller;
   TabController tabController;
 
+  OverlayEntry hoverOverlayEntry;
   OverlayEntry legendOverlayEntry;
 
   @override
@@ -125,10 +133,10 @@ class MemoryBodyState extends State<MemoryBody>
 
     controller = newController;
 
-    eventChartController = EventChartController(controller);
-    vmChartController = VMChartController(controller);
+    eventChartController = events.EventChartController(controller);
+    vmChartController = vm.VMChartController(controller);
     // Android Chart uses the VM Chart's computed labels.
-    androidChartController = AndroidChartController(
+    androidChartController = android.AndroidChartController(
       controller,
       sharedLabels: vmChartController.labelTimestamps,
     );
@@ -167,6 +175,76 @@ class MemoryBodyState extends State<MemoryBody>
       });
     });
 
+    addAutoDisposeListener(eventChartController.tapNotifier, () {
+      if (!eventChartController.tapNotifier.value.isEmpty &&
+          hoverOverlayEntry != null) {
+        hideHover();
+      }
+      if (eventChartController.tapNotifier.value.tapDownDetails != null) {
+        final tapData = eventChartController.tapNotifier.value;
+        final index = tapData.index;
+        final timestamp = tapData.timestamp;
+
+        final copied = TapNotifier.copy(eventChartController.tapNotifier.value);
+        vmChartController.setTapNotifier(copied);
+        androidChartController.setTapNotifier(copied);
+
+        final allValues = ChartsValues(this, index, timestamp);
+        if (isDebugging) {
+          print('Event Chart TapNotifier '
+              '${JsonUtils.prettyPrint(allValues.toJson())}');
+        }
+        showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+      }
+    });
+
+    addAutoDisposeListener(vmChartController.tapNotifier, () {
+      if (!vmChartController.tapNotifier.value.isEmpty &&
+          hoverOverlayEntry != null) {
+        hideHover();
+      }
+      if (vmChartController.tapNotifier.value.tapDownDetails != null) {
+        final tapData = vmChartController.tapNotifier.value;
+        final index = tapData.index;
+        final timestamp = tapData.timestamp;
+
+        final copied = TapNotifier.copy(vmChartController.tapNotifier.value);
+        eventChartController.setTapNotifier(copied);
+        androidChartController.setTapNotifier(copied);
+
+        final allValues = ChartsValues(this, index, timestamp);
+        if (isDebugging) {
+          print('VM Chart TapNotifier '
+              '${JsonUtils.prettyPrint(allValues.toJson())}');
+        }
+        showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+      }
+    });
+
+    addAutoDisposeListener(androidChartController.tapNotifier, () {
+      if (!androidChartController.tapNotifier.value.isEmpty &&
+          hoverOverlayEntry != null) {
+        hideHover();
+      }
+      if (androidChartController.tapNotifier.value.tapDownDetails != null) {
+        final tapData = androidChartController.tapNotifier.value;
+        final index = tapData.index;
+        final timestamp = tapData.timestamp;
+
+        final copied =
+            TapNotifier.copy(androidChartController.tapNotifier.value);
+        eventChartController.setTapNotifier(copied);
+        vmChartController.setTapNotifier(copied);
+
+        final allValues = ChartsValues(this, index, timestamp);
+        if (isDebugging) {
+          print('Android Chart TapNotifier '
+              '${JsonUtils.prettyPrint(allValues.toJson())}');
+        }
+        showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+      }
+    });
+
     _updateListeningState();
   }
 
@@ -181,53 +259,66 @@ class MemoryBodyState extends State<MemoryBody>
     controller.memorySourcePrefix = mediaWidth > verboseDropDownMinimumWidth
         ? MemoryScreen.memorySourceMenuItemPrefix
         : '';
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildPrimaryStateControls(textTheme),
-            const Expanded(child: SizedBox(width: denseSpacing)),
-            _buildMemoryControls(textTheme),
-          ],
-        ),
-        SizedBox(
-          height: 50,
-          child: MemoryEventsPane(eventChartController),
-        ),
-        SizedBox(
-          child: MemoryVMChart(vmChartController),
-        ),
-        controller.isAndroidChartVisible
-            ? SizedBox(
-                height: defaultChartHeight,
-                child: MemoryAndroidChart(androidChartController),
-              )
-            : const SizedBox(),
-        const SizedBox(height: defaultSpacing),
-        Row(
-          children: [
-            TabBar(
-              labelColor: textTheme.bodyText1.color,
-              isScrollable: true,
-              controller: tabController,
-              tabs: MemoryBody.memoryTabs,
-            ),
-            const Expanded(child: SizedBox()),
-          ],
-        ),
-        const SizedBox(width: defaultSpacing),
-        Expanded(
-          child: TabBarView(
-            physics: defaultTabBarViewPhysics,
-            controller: tabController,
+    return RawKeyboardListener(
+      focusNode: FocusNode(),
+      onKey: (RawKeyEvent event) {
+        if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+          eventChartController.setTapNotifier(TapNotifier.empty());
+          vmChartController.setTapNotifier(TapNotifier.empty());
+          androidChartController.setTapNotifier(TapNotifier.empty());
+          hideHover();
+        }
+      },
+      autofocus: true,
+      child: Column(
+        key: hoverKey,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              HeapTree(controller),
-              MemoryHeapTreemap(controller),
+              _buildPrimaryStateControls(textTheme),
+              const Expanded(child: SizedBox(width: denseSpacing)),
+              _buildMemoryControls(textTheme),
             ],
           ),
-        ),
-      ],
+          SizedBox(
+            height: 70,
+            child: events.MemoryEventsPane(eventChartController),
+          ),
+          SizedBox(
+            child: vm.MemoryVMChart(vmChartController),
+          ),
+          controller.isAndroidChartVisible
+              ? SizedBox(
+                  height: defaultChartHeight,
+                  child: android.MemoryAndroidChart(androidChartController),
+                )
+              : const SizedBox(),
+          const SizedBox(height: defaultSpacing),
+          Row(
+            children: [
+              TabBar(
+                labelColor: textTheme.bodyText1.color,
+                isScrollable: true,
+                controller: tabController,
+                tabs: MemoryBody.memoryTabs,
+              ),
+              const Expanded(child: SizedBox()),
+            ],
+          ),
+          const SizedBox(width: defaultSpacing),
+          Expanded(
+            child: TabBarView(
+              physics: defaultTabBarViewPhysics,
+              controller: tabController,
+              children: [
+                HeapTree(controller),
+                MemoryHeapTreemap(controller),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -464,6 +555,16 @@ class MemoryBodyState extends State<MemoryBody>
   static const legendHeight1Chart = 185.0;
   static const legendHeight2Charts = 340.0;
 
+  final hoverKey = GlobalKey(debugLabel: MemoryScreen.hoverKeyName);
+  static const hoverXOffset = 10;
+  static const hoverYOffset = 0.0;
+  static const hoverWidth = 240.0;
+  // TODO(terry): Compute below heights dynamically.
+  static const hoverHeight1Chart = 190.0;
+  static const hoverHeight1ChartEvents = 270.0;
+  static const hoverHeight2Charts = 330.0;
+  static const hoverHeight2ChartsEvents = 395.0;
+
   // TODO(terry): Consider custom painter?
   static const base = 'assets/img/legend/';
   static const snapshotManualLegend = '${base}snapshot_manual_glyph.png';
@@ -472,6 +573,8 @@ class MemoryBodyState extends State<MemoryBody>
   static const resetLegend = '${base}reset_glyph.png';
   static const gcManualLegend = '${base}gc_manual_glyph.png';
   static const gcVMLegend = '${base}gc_vm_glyph.png';
+  static const eventLegend = '${base}event_glyph.png';
+  static const eventsLegend = '${base}events_glyph.png';
   static const capacityLegend = '${base}capacity_glyph.png';
   static const usedLegend = '${base}used_glyph.png';
   static const externalLegend = '${base}external_glyph.png';
@@ -521,6 +624,351 @@ class MemoryBodyState extends State<MemoryBody>
         child: Row(
           children: rowChildren,
         ));
+  }
+
+  Widget hoverRow({
+    String name,
+    String image,
+    bool bold = true,
+    bool hasNumeric = false,
+  }) {
+    final hoverTitleEntry = Theme.of(context).colorScheme.hoverTextStyle;
+    final hoverValueEntry = Theme.of(context).colorScheme.hoverValueTextStyle;
+    final hoverSmallEntry =
+        Theme.of(context).colorScheme.hoverSmallValueTextStyle;
+
+    List<Widget> hoverPart(
+      String name,
+      String image, [
+      double leftEdge = 5.0,
+    ]) {
+      String displayName = name;
+      String displayValue = '';
+      if (hasNumeric) {
+        final lastSpaceBeforeValue = name.lastIndexOf(' ');
+        displayName = '${name.substring(0, lastSpaceBeforeValue)} = ';
+        displayValue = name.substring(lastSpaceBeforeValue + 1);
+      }
+      return [
+        image == null ? const SizedBox() : Image(image: AssetImage(image)),
+        const PaddedDivider(
+          padding: EdgeInsets.only(left: denseRowSpacing),
+        ),
+        Text(displayName, style: bold ? hoverTitleEntry : hoverSmallEntry),
+        Text(displayValue, style: hoverValueEntry)
+      ];
+    }
+
+    final rowChildren = <Widget>[];
+    rowChildren.addAll(hoverPart(name, image));
+    return Container(
+        padding: const EdgeInsets.fromLTRB(10, 0, 0, 2),
+        child: Row(
+          children: rowChildren,
+        ));
+  }
+
+  List<Widget> displayExtensionEventsInHover(ChartsValues chartsValues) {
+    final widgets = <Widget>[];
+    final eventsDisplayed = <String, String>{};
+
+    if (chartsValues.hasExtensionEvents) {
+      final eventLength = chartsValues.extensionEventsLength;
+      if (eventLength > 0) {
+        final displayKey = '$eventLength Event${eventLength == 1 ? "" : "s"}';
+        eventsDisplayed[displayKey] =
+            eventLength == 1 ? eventLegend : eventsLegend;
+      }
+    }
+
+    for (var entry in eventsDisplayed.entries) {
+      if (entry.key.endsWith(' Events')) {
+        widgets.add(Container(
+          height: 120,
+          child: ListView(
+            shrinkWrap: true,
+            primary: false,
+            children: [
+              listItem(
+                  events: chartsValues.extensionEvents,
+                  title: entry.key,
+                  icon: Icons.dashboard_rounded),
+            ],
+          ),
+        ));
+      } else {
+        widgets.add(hoverRow(name: entry.key, image: entry.value));
+
+        /// Pull out the event name, and custom values.
+        final output = displayEvent(null, chartsValues.extensionEvents.first);
+        widgets.add(hoverRow(name: output, bold: false));
+      }
+    }
+    return widgets;
+  }
+
+  List<Widget> displayEventsInHover(ChartsValues chartsValues) {
+    final results = <Widget>[];
+
+    final eventsDisplayed = <String, String>{};
+
+    if (chartsValues.hasSnapshot) {
+      eventsDisplayed['Snapshot'] = snapshotManualLegend;
+    } else if (chartsValues.hasAutoSnapshot) {
+      eventsDisplayed['Auto Snapshot'] = snapshotAutoLegend;
+    } else if (chartsValues.hasMonitorStart) {
+      eventsDisplayed['Monitor Start'] = monitorLegend;
+    } else if (chartsValues.hasMonitorReset) {
+      eventsDisplayed['Monitor Reset'] = resetLegend;
+    }
+
+    if (chartsValues.hasGc) {
+      eventsDisplayed['GC'] = gcVMLegend;
+    }
+
+    if (chartsValues.hasManualGc) {
+      eventsDisplayed['User GC'] = gcManualLegend;
+    }
+
+    for (var entry in eventsDisplayed.entries) {
+      Widget widget;
+
+      widget = hoverRow(name: entry.key, image: entry.value);
+      results.add(widget);
+    }
+
+    return results;
+  }
+
+  String displayEvent(int index, Map<String, Object> event) {
+    if (event['name'] == 'DevTools.Event' && event.containsKey('custom')) {
+      final Map custom = event['custom'];
+      final String eventName = custom['name'];
+      final Map data = custom['data'];
+      // TODO(terry): Data could be long need better mechanism for long data e.g.,:
+      //                const encoder = JsonEncoder.withIndent('  ');
+      //                final displayData = encoder.convert(data);
+      final output = StringBuffer();
+      output.writeln(index == null ? eventName : '[$index] $eventName');
+      for (var key in data.keys) {
+        output.write(' $key=');
+        var value = '';
+        if (data[key].length > 35) {
+          final longValue = data[key];
+          final firstPart = longValue.substring(0, 10);
+          final endPart = longValue.substring(longValue.length - 20);
+          value = '$firstPart...$endPart';
+        } else {
+          value = data[key];
+        }
+        output.writeln(value);
+      }
+      return output.toString();
+    } else {
+      final eventName = event['name'];
+      return index == null ? eventName : '[$index] $eventName';
+    }
+  }
+
+  Widget listItem({
+    List<Map<String, Object>> events,
+    int index,
+    String title,
+    IconData icon,
+  }) {
+    final widgets = <Widget>[];
+    var index = 1;
+    for (var event in events) {
+      final output = displayEvent(index, event);
+      widgets.add(cardWidget(output));
+      index++;
+    }
+
+    final hoverTitleEntry = Theme.of(context).colorScheme.hoverTextStyle;
+
+    return Material(
+      color: Colors.transparent,
+      child: Theme(
+        data: ThemeData(accentColor: Colors.black),
+        child: ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: EdgeInsets.zero,
+          leading: Image(
+            image: events.length > 1
+                ? const AssetImage(eventsLegend)
+                : const AssetImage(eventLegend),
+          ),
+          title: Text(title, style: hoverTitleEntry),
+          children: widgets,
+        ),
+      ),
+    );
+  }
+
+  Widget cardWidget(String value) {
+    final hoverValueEntry =
+        Theme.of(context).colorScheme.hoverSmallValueTextStyle;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        width: hoverWidth,
+        decoration: const BoxDecoration(
+          color: Colors.white30,
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 10),
+            Text(
+              value,
+              overflow: TextOverflow.ellipsis,
+              style: hoverValueEntry,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> displayVmDataInHover(ChartsValues chartsValues) {
+    final results = <Widget>[];
+
+    final vmDataDisplayed = <String, String>{};
+
+    final data = chartsValues.vmData;
+
+    final rssValueDisplay = nf.format(data['rSS']);
+    vmDataDisplayed['RSS $rssValueDisplay'] = rssLegend;
+
+    final capacityValueDisplay = nf.format(data['capacity']);
+    vmDataDisplayed['Capacity $capacityValueDisplay'] = capacityLegend;
+
+    final usedValueDisplay = nf.format(data['used']);
+    vmDataDisplayed['Used $usedValueDisplay'] = usedLegend;
+
+    final externalValueDisplay = nf.format(data['external']);
+    vmDataDisplayed['External $externalValueDisplay'] = externalLegend;
+
+    for (var entry in vmDataDisplayed.entries) {
+      results.add(hoverRow(
+        name: entry.key,
+        image: entry.value,
+        hasNumeric: true,
+      ));
+    }
+
+    return results;
+  }
+
+  List<Widget> displayAndroidDataInHover(ChartsValues chartsValues) {
+    final results = <Widget>[];
+
+    if (controller.isAndroidChartVisible) {
+      final androidDataDisplayed = <String, String>{};
+
+      final data = chartsValues.androidData;
+
+      final totalValueDisplay = nf.format(data['total']);
+      androidDataDisplayed['Total $totalValueDisplay'] = androidTotalLegend;
+
+      final otherValueDisplay = nf.format(data['other']);
+      androidDataDisplayed['Other $otherValueDisplay'] = androidOtherLegend;
+
+      final codeValueDisplay = nf.format(data['code']);
+      androidDataDisplayed['Code $codeValueDisplay'] = androidCodeLegend;
+
+      final nativeValueDisplay = nf.format(data['nativeHeap']);
+      androidDataDisplayed['Native $nativeValueDisplay'] = androidNativeLegend;
+
+      final javaValueDisplay = nf.format(data['javaHeap']);
+      androidDataDisplayed['Java $javaValueDisplay'] = androidJavaLegend;
+
+      final stackValueDisplay = nf.format(data['stack']);
+      androidDataDisplayed['Stack $stackValueDisplay'] = androidStackLegend;
+
+      final graphicsValueDisplay = nf.format(data['graphics']);
+      androidDataDisplayed['Graphics $graphicsValueDisplay'] =
+          androidGraphicsLegend;
+
+      for (var entry in androidDataDisplayed.entries) {
+        results.add(hoverRow(
+          name: entry.key,
+          image: entry.value,
+          hasNumeric: true,
+        ));
+      }
+    }
+
+    return results;
+  }
+
+  void showHover(
+    BuildContext context,
+    ChartsValues chartsValues,
+    Offset position,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final RenderBox box = hoverKey.currentContext.findRenderObject();
+    final renderBoxWidth = box.size.width;
+
+    // Display hover to left of right side of position.
+    double xPosition = position.dx + hoverXOffset;
+    if (xPosition + hoverWidth > renderBoxWidth) {
+      xPosition = position.dx - hoverWidth - hoverXOffset;
+    }
+
+    double totalHoverHeight;
+    if (controller.isAndroidChartVisible) {
+      totalHoverHeight = chartsValues.extensionEventsLength > 1
+          ? hoverHeight2ChartsEvents
+          : hoverHeight2Charts;
+    } else {
+      totalHoverHeight = chartsValues.extensionEventsLength > 1
+          ? hoverHeight1ChartEvents
+          : hoverHeight1Chart;
+    }
+
+    final displayTimestamp = prettyTimestamp(chartsValues.timestamp);
+
+    final hoverHeading = colorScheme.hoverTitleTextStyle;
+    final OverlayState overlayState = Overlay.of(context);
+    hoverOverlayEntry ??= OverlayEntry(
+      builder: (context) => Positioned(
+        top: position.dy + hoverYOffset,
+        left: xPosition,
+        height: totalHoverHeight,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(0, 5, 0, 8),
+          decoration: BoxDecoration(
+            color: colorScheme.hoverBackgroundColor,
+            border: Border.all(color: Colors.yellow),
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          width: hoverWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+                child: Text('Time $displayTimestamp', style: hoverHeading),
+              ),
+            ]
+              ..addAll(displayEventsInHover(chartsValues))
+              ..addAll(displayVmDataInHover(chartsValues))
+              ..addAll(displayAndroidDataInHover(chartsValues))
+              ..addAll(displayExtensionEventsInHover(chartsValues)),
+          ),
+        ),
+      ),
+    );
+
+    overlayState.insert(hoverOverlayEntry);
+  }
+
+  void hideHover() {
+    hoverOverlayEntry?.remove();
+    hoverOverlayEntry = null;
   }
 
   void showLegend(BuildContext context) {
@@ -648,6 +1096,143 @@ class MemoryBodyState extends State<MemoryBody>
     } catch (e) {
       // TODO(terry): Show toast?
       log('Unable to GC ${e.toString()}', LogLevel.error);
+    }
+  }
+}
+
+const String snapshotDisplayName = 'snapshot';
+const String autoSnapshotDisplayName = 'autoSnapshot';
+const String monitorStartDisplayName = 'monitorStart';
+const String monitorResetDisplayName = 'monitorReset';
+const String extensionEventsDisplayName = 'extensionEvents';
+const String manualGCDisplayName = 'manualGC';
+const String gcDisplayName = 'gc';
+
+/// Retrieve all data values of a given index (timestamp) of the collected data.
+class ChartsValues {
+  ChartsValues(this.memoryState, this.index, this.timestamp) {
+    _fetch();
+  }
+
+  final MemoryBodyState memoryState;
+
+  final int index;
+
+  final int timestamp;
+
+  final _event = <String, Object>{};
+
+  final _extensionEvents = <Map<String, Object>>[];
+
+  Map<String, Object> get vmData => _vm;
+
+  final _vm = <String, Object>{};
+
+  Map<String, Object> get androidData => _android;
+
+  final _android = <String, Object>{};
+
+  Map<String, Object> toJson() {
+    return {
+      'index': index,
+      'timestamp': timestamp,
+      'prettyTimestamp': prettyTimestamp(timestamp),
+      'event': _event,
+      'vm': _vm,
+      'android': _android,
+    };
+  }
+
+  bool get hasSnapshot => _event.containsKey(snapshotDisplayName);
+  bool get hasAutoSnapshot => _event.containsKey(autoSnapshotDisplayName);
+  bool get hasMonitorStart => _event.containsKey(monitorStartDisplayName);
+  bool get hasMonitorReset => _event.containsKey(monitorResetDisplayName);
+  bool get hasExtensionEvents => _event.containsKey(extensionEventsDisplayName);
+  bool get hasManualGc => _event.containsKey(manualGCDisplayName);
+  bool get hasGc => _vm.containsKey(gcDisplayName);
+
+  int get extensionEventsLength => hasExtensionEvents
+      ? (_event[extensionEventsDisplayName] as List).length
+      : 0;
+
+  List<Map<String, Object>> get extensionEvents {
+    if (_extensionEvents.isEmpty)
+      _extensionEvents.addAll(_event[extensionEventsDisplayName]);
+    return _extensionEvents;
+  }
+
+  void _fetch() {
+    _event.clear();
+    _vm.clear();
+    _android.clear();
+
+    _fetchEventData(_event);
+    _fetchData(memoryState.vmChartController, _vm);
+    _fetchData(memoryState.androidChartController, _android);
+  }
+
+  void _fetchEventData(Map<String, Object> results) {
+    // Use the detailed extension events data stored in the memoryTimeline.
+    final eventInfo =
+        memoryState.controller.memoryTimeline.data[index].memoryEventInfo;
+
+    if (eventInfo.isEmpty) return;
+
+    if (eventInfo.isEventGC) results[manualGCDisplayName] = true;
+    if (eventInfo.isEventSnapshot) results[snapshotDisplayName] = true;
+    if (eventInfo.isEventSnapshotAuto) results[autoSnapshotDisplayName] = true;
+    if (eventInfo.isEventAllocationAccumulator) {
+      if (eventInfo.allocationAccumulator.isStart) {
+        results[monitorStartDisplayName] = true;
+      }
+      if (eventInfo.allocationAccumulator.isReset) {
+        results[monitorResetDisplayName] = true;
+      }
+    }
+
+    if (eventInfo.hasExtensionEvents) {
+      final List<Map<String, Object>> events = [];
+      for (ExtensionEvent event in eventInfo.extensionEvents.theEvents) {
+        if (event.customEventName != null) {
+          events.add(
+            {
+              'name': event.eventKind,
+              'custom': {
+                'name': event.customEventName,
+                'data': event.data,
+              },
+            },
+          );
+        } else {
+          events.add(
+            {
+              'name': event.eventKind,
+            },
+          );
+        }
+      }
+      if (events.isNotEmpty) {
+        results[extensionEventsDisplayName] = events;
+      }
+    }
+  }
+
+  void _fetchData(
+    ChartController chartController,
+    Map<String, Object> results,
+  ) {
+    for (var trace in chartController.traces) {
+      final theData = trace.data[index];
+      final yValue = theData.y;
+
+      // Convert enum'd string e.g., 'TraceName.capacity' to Map key'capacity', etc.
+      results[trace.name.split('.').last] = yValue;
+    }
+
+    // VM GC.
+    if (chartController is vm.VMChartController &&
+        memoryState.controller.memoryTimeline.data[index].isGC) {
+      results[gcDisplayName] = true;
     }
   }
 }

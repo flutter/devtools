@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart';
 import '../config_specific/logger/logger.dart' as logger;
 import '../globals.dart';
 import '../service_manager.dart';
+import '../utils.dart';
 import '../version.dart';
 import '../vm_service_wrapper.dart';
 import 'memory_controller.dart';
@@ -248,6 +249,22 @@ class MemoryTracker {
     }
   }
 
+  /// Grab current EventSample, if any extensionEvents add those to this
+  /// EventSample and clear the outstanding extension events.
+  EventSample pullCloneClear(MemoryTimeline memoryTimeline, int time) {
+    final pulledEvent = memoryTimeline.pullEventSample();
+    final extensionEvents = memoryTimeline.extensionEvents;
+    final eventSample = pulledEvent.clone(
+      time,
+      extensionEvents: extensionEvents,
+    );
+    if (extensionEvents != null && extensionEvents.isNotEmpty) {
+      debugLogger('ExtensionEvents Received');
+    }
+
+    return eventSample;
+  }
+
   EventSample processEventSample(MemoryTimeline memoryTimeline, int time) {
     EventSample eventSample;
     if (memoryTimeline.anyEvents) {
@@ -262,8 +279,7 @@ class MemoryTracker {
       if (compared < 0) {
         if ((timeDuration + delay).compareTo(eventDuration) >= 0) {
           // Currently, events are all UI events so duration < _updateDelay
-          final pulledEvent = memoryTimeline.pullEventSample();
-          eventSample = pulledEvent.clone(time);
+          eventSample = pullCloneClear(memoryTimeline, time);
         } else {
           // Throw away event, missed attempt to attach to a HeapSample.
           final ignoreEvent = memoryTimeline.pullEventSample();
@@ -279,14 +295,27 @@ class MemoryTracker {
           if ((timeDuration - delay).compareTo(eventDuration) >= 0) {
             // Able to match event time to a heap sample. We will attach the
             // EventSample to this HeapSample.
-            final pulledEvent = memoryTimeline.pullEventSample();
-            eventSample = pulledEvent.clone(time);
+            eventSample = pullCloneClear(memoryTimeline, time);
           }
         } else {
           // The almost exact eventSample we have.
-          eventSample = memoryTimeline.pullEventSample();
+          eventSample = pullCloneClear(memoryTimeline, time);
         }
         // Keep the event, its time hasn't caught up to the HeapSample time yet.
+      }
+    } else if (memoryTimeline.anyPendingExtensionEvents) {
+      final extensionEvents = memoryTimeline.extensionEvents;
+      eventSample = EventSample.extensionEvent(time, extensionEvents);
+      if (extensionEvents != null && extensionEvents.isNotEmpty) {
+        debugLogger(
+          'Receieved Extension Events ${extensionEvents.theEvents.length}',
+        );
+        for (var e in extensionEvents.theEvents) {
+          final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp);
+          debugLogger(
+            '  ${e.eventKind}  ${e.customEventName} $dt ${e.data['param']}',
+          );
+        }
       }
     }
 

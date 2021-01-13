@@ -210,7 +210,7 @@ packages:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.6"
+    version: "0.9.6+1"
   devtools_testing:
     dependency: "direct dev"
     description:

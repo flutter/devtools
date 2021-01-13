@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 
 /// Monitor heap object allocations (in the VM).  The allocation monitor will
@@ -62,9 +64,95 @@ class AllocationAccumulator {
 
   @override
   String toString() => '[AllocationAccumulator '
-      'isStart: $isStart, '
-      'isContinues: $isContinues, '
-      'isReset: $isReset]';
+      '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
+}
+
+class ExtensionEvent {
+  ExtensionEvent(this.timestamp, this.eventKind, this.data)
+      : customEventName = null;
+
+  ExtensionEvent.custom(
+    this.timestamp,
+    this.eventKind,
+    this.customEventName,
+    this.data,
+  );
+
+  factory ExtensionEvent.fromJson(Map<String, dynamic> json) =>
+      ExtensionEvent.custom(
+        json['timestamp'] as int,
+        json['eventKind'] as String,
+        json['customEventName'] as String,
+        json['data'] as Map<String, Object>,
+      );
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'timestamp': timestamp,
+        'eventKind': eventKind,
+        'data': data,
+        'customEventName': customEventName,
+      };
+
+  static ExtensionEvent empty() =>
+      ExtensionEvent.custom(null, null, null, null);
+
+  bool get isEmpty =>
+      timestamp == null &&
+      eventKind == null &&
+      data == null &&
+      customEventName == null;
+
+  final int timestamp;
+
+  final String eventKind;
+
+  final Map<String, Object> data;
+
+  final String customEventName;
+
+  @override
+  String toString() => '[ExtensionEvent '
+      '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
+}
+
+class ExtensionEvents {
+  ExtensionEvents(List<ExtensionEvent> events) {
+    theEvents.addAll(events);
+  }
+
+  factory ExtensionEvents.fromJson(Map<String, Object> json) {
+    final List<ExtensionEvent> events = [];
+
+    json.forEach((key, value) {
+      final event = ExtensionEvent.fromJson(value);
+      events.add(event);
+    });
+
+    return ExtensionEvents(events);
+  }
+
+  final theEvents = <ExtensionEvent>[];
+
+  bool get isEmpty => theEvents.isEmpty;
+
+  bool get isNotEmpty => theEvents.isNotEmpty;
+
+  void clear() => theEvents.clear();
+
+  Map<String, dynamic> toJson() {
+    final eventsAsJson = <String, dynamic>{};
+    var index = 0;
+    for (var event in theEvents) {
+      eventsAsJson['$index'] = event.toJson();
+      index++;
+    }
+
+    return eventsAsJson;
+  }
+
+  @override
+  String toString() => '[ExtensionEvents = '
+      '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }
 
 class EventSample {
@@ -74,47 +162,70 @@ class EventSample {
     this.isEventSnapshot,
     this.isEventSnapshotAuto,
     this.allocationAccumulator,
+    this.extensionEvents,
   );
 
-  EventSample.gcEvent(this.timestamp)
+  EventSample.gcEvent(this.timestamp, {ExtensionEvents events})
       : isEventGC = true,
         isEventSnapshot = false,
         isEventSnapshotAuto = false,
-        allocationAccumulator = null;
+        allocationAccumulator = null,
+        extensionEvents = events;
 
-  EventSample.snapshotEvent(this.timestamp, {snapshotAuto = false})
-      : isEventGC = false,
+  EventSample.snapshotEvent(
+    this.timestamp, {
+    snapshotAuto = false,
+    ExtensionEvents events,
+  })  : isEventGC = false,
         isEventSnapshot = !snapshotAuto,
         isEventSnapshotAuto = snapshotAuto,
+        allocationAccumulator = null,
+        extensionEvents = events;
+
+  EventSample.accumulatorStart(
+    this.timestamp, {
+    ExtensionEvents events,
+  })  : isEventGC = false,
+        isEventSnapshot = false,
+        isEventSnapshotAuto = false,
+        allocationAccumulator = AllocationAccumulator.start(),
+        extensionEvents = events;
+
+  EventSample.accumulatorContinues(
+    this.timestamp, {
+    ExtensionEvents events,
+  })  : isEventGC = false,
+        isEventSnapshot = false,
+        isEventSnapshotAuto = false,
+        allocationAccumulator = AllocationAccumulator.continues(),
+        extensionEvents = events;
+
+  EventSample.accumulatorReset(
+    this.timestamp, {
+    ExtensionEvents events,
+  })  : isEventGC = false,
+        isEventSnapshot = false,
+        isEventSnapshotAuto = false,
+        allocationAccumulator = AllocationAccumulator.reset(),
+        extensionEvents = events;
+
+  EventSample.extensionEvent(this.timestamp, this.extensionEvents)
+      : isEventGC = false,
+        isEventSnapshot = false,
+        isEventSnapshotAuto = false,
         allocationAccumulator = null;
 
-  EventSample.accumulatorStart(this.timestamp)
-      : isEventGC = false,
-        isEventSnapshot = false,
-        isEventSnapshotAuto = false,
-        allocationAccumulator = AllocationAccumulator.start();
-
-  EventSample.accumulatorContinues(this.timestamp)
-      : isEventGC = false,
-        isEventSnapshot = false,
-        isEventSnapshotAuto = false,
-        allocationAccumulator = AllocationAccumulator.continues();
-
-  EventSample.accumulatorReset(this.timestamp)
-      : isEventGC = false,
-        isEventSnapshot = false,
-        isEventSnapshotAuto = false,
-        allocationAccumulator = AllocationAccumulator.reset();
-
   factory EventSample.fromJson(Map<String, dynamic> json) => EventSample(
-        json['timestamp'] as int,
-        json['gcEvent'] as bool,
-        json['snapshotEvent'] as bool,
-        json['snapshotAutoEvent'] as bool,
-        json['allocationAccumulatorEvent'] != null
-            ? AllocationAccumulator.fromJson(json['allocationAccumulatorEvent'])
-            : null,
-      );
+      json['timestamp'] as int,
+      json['gcEvent'] as bool,
+      json['snapshotEvent'] as bool,
+      json['snapshotAutoEvent'] as bool,
+      json['allocationAccumulatorEvent'] != null
+          ? AllocationAccumulator.fromJson(json['allocationAccumulatorEvent'])
+          : null,
+      json['extensionEvents'] != null
+          ? ExtensionEvents.fromJson(json['extensionEvent'])
+          : null);
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'timestamp': timestamp,
@@ -122,14 +233,17 @@ class EventSample {
         'snapshotEvent': isEventSnapshot,
         'snapshotAutoEvent': isEventSnapshotAuto,
         'allocationAccumulatorEvent': allocationAccumulator?.toJson(),
+        'extensionEvents': extensionEvents?.toJson(),
       };
 
-  EventSample clone(int timestamp) => EventSample(
+  EventSample clone(int timestamp, {ExtensionEvents extensionEvents}) =>
+      EventSample(
         timestamp,
         isEventGC,
         isEventSnapshot,
         isEventSnapshotAuto,
         allocationAccumulator,
+        extensionEvents,
       );
 
   /// Create an empty event (all values are nothing)
@@ -139,6 +253,7 @@ class EventSample {
         false,
         false,
         AllocationAccumulator.empty(),
+        null,
       );
 
   bool get isEmpty => timestamp == -1;
@@ -156,14 +271,15 @@ class EventSample {
 
   bool get isEventAllocationAccumulator => allocationAccumulator != null;
 
-  AllocationAccumulator allocationAccumulator;
+  bool get hasExtensionEvents => extensionEvents != null;
+
+  final AllocationAccumulator allocationAccumulator;
+
+  final ExtensionEvents extensionEvents;
 
   @override
-  String toString() => '[EventSample timestamp: $timestamp, '
-      'isEventGC: $isEventGC, '
-      'isEventSnapshot: $isEventSnapshot, '
-      'isEventSnapshotAuto: $isEventSnapshotAuto,'
-      'allocationAccumulator: \n   $allocationAccumulator]';
+  String toString() => '[EventSample timestamp: $timestamp = '
+      '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }
 
 /// Engine's Raster Cache estimates.
@@ -190,6 +306,6 @@ class RasterCache {
       };
 
   @override
-  String toString() =>
-      '[RasterCache layerBytes: $layerBytes, pictureBytes: $pictureBytes]';
+  String toString() => '[RasterCache '
+      '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }

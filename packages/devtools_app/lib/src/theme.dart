@@ -201,6 +201,45 @@ extension DevToolsColorScheme on ColorScheme {
       isLight ? const Color(0xFFB20001) : const Color(0xFFD88E73);
   Color get numericConstantSyntaxColor =>
       isLight ? const Color(0xFF098658) : const Color(0xFFB5CEA8);
+
+  // Light theme hover background is semi-transparent YellowAccent[100].
+  Color get hoverBackgroundColor => const Color.fromARGB(150, 255, 255, 141);
+
+  // Bar color for current selection (hover).
+  Color get hoverSelectionBarColor =>
+      isLight ? Colors.lime[600] : Colors.yellowAccent;
+
+  // Title of the hover card.
+  TextStyle get hoverTitleTextStyle => const TextStyle(
+        color: Colors.black,
+        fontWeight: FontWeight.w600,
+        fontSize: 16,
+        decoration: TextDecoration.none,
+      );
+
+  // Items in the hover vard.
+  TextStyle get hoverTextStyle => const TextStyle(
+        color: Colors.black,
+        fontWeight: FontWeight.w600,
+        fontSize: 11.5,
+        decoration: TextDecoration.none,
+      );
+
+  // Value of items in hover e.g., capacity, etc.
+  TextStyle get hoverValueTextStyle => const TextStyle(
+        color: Colors.black,
+        fontWeight: FontWeight.normal,
+        fontSize: 11.5,
+        decoration: TextDecoration.none,
+      );
+
+  // Used for custom extension event values.
+  TextStyle get hoverSmallValueTextStyle => const TextStyle(
+        color: Colors.black,
+        fontWeight: FontWeight.normal,
+        fontSize: 10,
+        decoration: TextDecoration.none,
+      );
 }
 
 TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(

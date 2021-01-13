@@ -208,6 +208,15 @@ class ChartController extends DisposableController
     _title = value;
   }
 
+  final ValueNotifier<TapNotifier> _tapNotifier =
+      ValueNotifier<TapNotifier>(TapNotifier.empty());
+
+  ValueNotifier<TapNotifier> get tapNotifier => _tapNotifier;
+
+  void setTapNotifier(TapNotifier tap) {
+    _tapNotifier.value = tap;
+  }
+
   /// zoomDuration values of:
   ///     null implies all
   ///     Duration() imples live (default)
@@ -545,7 +554,7 @@ class ChartController extends DisposableController
   /// Returns a 0 based X-coordinate, this coordinate is not yet translated
   /// to the coordinates of the rendered chart. Returns -1 if timestamp not
   /// visible.
-  double timestampXCanvasCoord(int timestamp) {
+  double timestampToXCanvasCoord(int timestamp) {
     final index = timestamps.indexOf(timestamp);
     if (index >= 0) {
       // Valid index.
@@ -556,4 +565,53 @@ class ChartController extends DisposableController
     }
     return -1;
   }
+
+  int xCoordToTimestamp(double xCoord) =>
+      timestamps[xCoordToTimestampIndex(xCoord)];
+
+  int xCoordToTimestampIndex(double xCoord) {
+    final firstVisibleIndex = leftVisibleIndex;
+    final index = (xCoord - leftPadding) ~/ tickWidth;
+
+    int timestampedIndex;
+
+    if (totalTimestampTicks < 0) {
+      // Not enough items plotted on x-axis.
+      timestampedIndex = index + totalTimestampTicks;
+    } else if (index >= firstVisibleIndex) {
+      timestampedIndex = index - firstVisibleIndex;
+    } else {
+      timestampedIndex = index + firstVisibleIndex;
+    }
+
+    // If index is left side, negative, that has yet to have any data
+    // return the first timestamp.
+    return timestampedIndex >= 0 ? timestampedIndex : 0;
+  }
+}
+
+/// When tap occurs in a chart compute the timestamp and index clicked.
+class TapNotifier {
+  TapNotifier(this.tapDownDetails, this.timestamp, this.index);
+
+  TapNotifier.empty()
+      : tapDownDetails = null,
+        timestamp = -1,
+        index = -1;
+
+  /// Copy of TapNotifier w/o the detail, implies not where tap occurred
+  /// but the multiple charts tied to the the same timeline should be hilighted
+  /// (selection point).
+  TapNotifier.copy(TapNotifier original)
+      : tapDownDetails = null,
+        timestamp = original.timestamp,
+        index = original.index;
+
+  final TapDownDetails tapDownDetails;
+
+  final int timestamp;
+
+  final int index;
+
+  bool get isEmpty => tapDownDetails == null && timestamp == -1 && index == -1;
 }

@@ -565,6 +565,32 @@ class MemoryController extends DisposableController
     _memoryTracker = MemoryTracker(serviceManager, this);
     _memoryTracker.start();
 
+    // Log Flutter extension events.
+    autoDispose(serviceManager.service.onExtensionEvent.listen((Event event) {
+      var extensionEventKind = event.extensionKind;
+      String customEventKind;
+      if (MemoryTimeline.isCustomEvent(event.extensionKind)) {
+        extensionEventKind = MemoryTimeline.devToolsExtensionEvent;
+        customEventKind = MemoryTimeline.customEventName(event.extensionKind);
+      }
+      final jsonData = event.extensionData.data;
+      // TODO(terry): Display events enabled in a settings page for now only these events.
+      switch (extensionEventKind) {
+        case 'Flutter.ImageSizesForFrame':
+          memoryTimeline.addExtensionEvent(
+              event.timestamp, event.extensionKind, jsonData);
+          break;
+        case MemoryTimeline.devToolsExtensionEvent:
+          memoryTimeline.addExtensionEvent(
+            event.timestamp,
+            MemoryTimeline.customDevToolsEvent,
+            jsonData,
+            customEventName: customEventKind,
+          );
+          break;
+      }
+    }));
+
     autoDispose(
       _memoryTracker.onChange.listen((_) {
         _memoryTrackerController.add(_memoryTracker);

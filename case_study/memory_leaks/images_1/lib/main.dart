@@ -48,7 +48,16 @@ class MyHomePageState extends State<MyHomePage>
     _tabController = TabController(length: tabs.length, vsync: this);
   }
 
+  void devToolsPostEvent(String eventName, Map<String, Object> eventData) {
+    developer.postEvent('DevTools.Event_$eventName', eventData);
+  }
+
   Widget recordLoadedImage(ImageChunkEvent imageChunkEvent, String imageUrl) {
+    devToolsPostEvent('CASE STUDY EVENT', {
+      'method': 'recordLoadedImage',
+      'param': imageUrl,
+    });
+
     if (imageChunkEvent == null) return null;
 
     final recordLoading = loadedImages.putIfAbsent(imageUrl, () {
