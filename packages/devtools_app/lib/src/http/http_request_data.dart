@@ -82,7 +82,9 @@ class HttpRequestData extends NetworkRequest {
     }
 
     try {
-      responseBody = utf8.decode(encodedData);
+      if (encodedData.isNotEmpty) {
+        responseBody = utf8.decode(encodedData);
+      }
     } on FormatException {
       // Non-UTF8 response.
     }
