@@ -69,16 +69,22 @@ class HttpRequestData extends NetworkRequest {
       }
     }
 
+    // Stitch together response as it may have been sent in multiple chunks.
+    final encodedData = <int>[];
     for (final event in responseEvents) {
       final traceEvent = TraceEvent(event);
       // TODO(kenz): do we need to do something with the other response events
       // (phases 'b' and 'e')?
       if (traceEvent.phase == TraceEvent.asyncInstantPhase &&
           traceEvent.name == 'Response body') {
-        final encodedData = (traceEvent.args['data'] as List).cast<int>();
-        responseBody = utf8.decode(encodedData);
-        break;
+        encodedData.addAll((traceEvent.args['data'] as List).cast<int>());
       }
+    }
+
+    try {
+      responseBody = utf8.decode(encodedData);
+    } on FormatException {
+      // Non-UTF8 response.
     }
 
     final data = HttpRequestData._(
