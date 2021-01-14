@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:file_selector/file_selector.dart';
 
 import '../common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
@@ -118,8 +121,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
             child: _buildImportedFileDisplay(),
           ),
         ),
-        // TODO(kenz): uncomment once file picker support is added
-        // _buildImportButton(),
+        if (_shouldShowImportButton) _buildImportButton(),
         // Horizontal spacer with flex value of 1.
         const Flexible(
           child: SizedBox(height: rowHeight),
@@ -138,18 +140,35 @@ class _FileImportContainerState extends State<FileImportContainer> {
     );
   }
 
-// TODO(kenz): uncomment once file picker support is added
-//  Widget _buildImportButton() {
-//    return Row(
-//      mainAxisAlignment: MainAxisAlignment.center,
-//      children: [
-//        OutlinedButton(
-//          onPressed: () {},
-//          child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
-//        ),
-//      ],
-//    );
-//  }
+  Widget _buildImportButton() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        OutlinedButton(
+          onPressed: () async {
+            final acceptedTypeGroups = [
+              XTypeGroup(extensions: ['.json']),
+            ];
+            final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
+            final json = jsonDecode(await file.readAsString());
+            final devToolsJsonFile = DevToolsJsonFile(
+              name: file.name,
+              lastModifiedTime: await file.lastModified(),
+              data: json,
+            );
+            _handleImportedFile(devToolsJsonFile);
+          },
+          child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
+        ),
+      ],
+    );
+  }
+
+  // Only show the import button in linux, macOS and web.
+  bool get _shouldShowImportButton =>
+      kIsWeb ||
+      defaultTargetPlatform == TargetPlatform.linux ||
+      defaultTargetPlatform == TargetPlatform.macOS;
 
   Widget _buildActionButton() {
     return Column(

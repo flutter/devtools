@@ -11,23 +11,26 @@ version: 0.9.6+2
 homepage: https://github.com/flutter/devtools
 
 environment:
-  sdk: '>=2.10.0 <3.0.0'
+  sdk: ">=2.10.0 <3.0.0"
   # The flutter desktop support interacts with build scripts on the Flutter
   # side that are not yet stable, so it requires a very recent version of
   # Flutter. This version will increase regularly as the build scripts change.
-  flutter: '>=1.10.0'
+  flutter: ">=1.10.0"
 
 dependencies:
-  ansi_up:
-    ^0.0.2
+  ansi_up: ^0.0.2
   #     path: ../../third_party/packages/ansi_up
   # Pin ansicolor to version before pre-NNBD version 1.1.0, should be ^1.0.5
-  # See https://github.com/flutter/devtools/issues/2530 
+  # See https://github.com/flutter/devtools/issues/2530
   ansicolor: 1.0.5
-  async: ^2.0.0 
+  async: ^2.0.0
   collection: ^1.15.0-nnbd
   devtools_shared: 0.9.6+2
   file: ^5.1.0
+  file_selector: ^0.7.0
+  file_selector_linux: ^0.0.1
+  file_selector_macos: ^0.0.1
+  file_selector_web: ^0.7.0
   flutter:
     sdk: flutter
   flutter_web_plugins:
@@ -59,8 +62,7 @@ dev_dependencies:
   # (temporary home for canonical lints)
   simple_lint_rules: ^1.0.0
   test: any # This version is pinned by Flutter so we don't need to set one explicitly.
-  webkit_inspection_protocol: '>=0.5.0 <0.8.0'
-
+  webkit_inspection_protocol: ">=0.5.0 <0.8.0"
 
 flutter:
   uses-material-design: true
@@ -113,12 +115,12 @@ flutter:
         - asset: fonts/Octicons.ttf
 
 dependency_overrides:
-# The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.
-# All overriden dependencies are published together so there is no harm
-# in treating them like they are part of a mono-repo while developing.
+  # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.
+  # All overriden dependencies are published together so there is no harm
+  # in treating them like they are part of a mono-repo while developing.
   devtools_server: #OVERRIDE_FOR_DEVELOPMENT
-    path: ../devtools_server  #OVERRIDE_FOR_DEVELOPMENT
-  devtools_shared:  #OVERRIDE_FOR_DEVELOPMENT
-    path: ../devtools_shared  #OVERRIDE_FOR_DEVELOPMENT
-  devtools_testing:  #OVERRIDE_FOR_DEVELOPMENT
-    path: ../devtools_testing  #OVERRIDE_FOR_DEVELOPMENT
+    path: ../devtools_server #OVERRIDE_FOR_DEVELOPMENT
+  devtools_shared: #OVERRIDE_FOR_DEVELOPMENT
+    path: ../devtools_shared #OVERRIDE_FOR_DEVELOPMENT
+  devtools_testing: #OVERRIDE_FOR_DEVELOPMENT
+    path: ../devtools_testing #OVERRIDE_FOR_DEVELOPMENT
