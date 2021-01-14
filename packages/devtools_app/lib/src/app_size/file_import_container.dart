@@ -147,7 +147,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
         OutlinedButton(
           onPressed: () async {
             final acceptedTypeGroups = [
-              XTypeGroup(extensions: ['.json']),
+              XTypeGroup(extensions: ['json']),
             ];
             final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
             final json = jsonDecode(await file.readAsString());
