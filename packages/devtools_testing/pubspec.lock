@@ -119,21 +119,21 @@ packages:
       path: "../devtools_app"
       relative: true
     source: path
-    version: "0.9.5"
+    version: "0.9.6"
   devtools_server:
     dependency: "direct overridden"
     description:
       path: "../devtools_server"
       relative: true
     source: path
-    version: "0.9.5"
+    version: "0.9.6"
   devtools_shared:
     dependency: "direct main"
     description:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.5+1"
+    version: "0.9.6+1"
   fake_async:
     dependency: transitive
     description:
@@ -197,7 +197,7 @@ packages:
       name: intl
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.17.0-nullsafety.2"
+    version: "0.16.1"
   io:
     dependency: transitive
     description:
@@ -316,7 +316,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.2+3"
+    version: "4.3.2+4"
   pub_semver:
     dependency: transitive
     description:
@@ -359,6 +359,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.3"
+  simple_lint_rules:
+    dependency: "direct dev"
+    description:
+      name: simple_lint_rules
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1+1"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -555,4 +562,4 @@ packages:
     version: "2.2.1"
 sdks:
   dart: ">=2.12.0-0.0 <3.0.0"
-  flutter: ">=1.22.0 <2.0.0"
+  flutter: ">=1.22.0"
