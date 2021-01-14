@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:file_selector/file_selector.dart';
 
 import '../common_widgets.dart';
@@ -121,7 +120,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
             child: _buildImportedFileDisplay(),
           ),
         ),
-        if (_shouldShowImportButton) _buildImportButton(),
+        _buildImportButton(),
         // Horizontal spacer with flex value of 1.
         const Flexible(
           child: SizedBox(height: rowHeight),
@@ -163,12 +162,6 @@ class _FileImportContainerState extends State<FileImportContainer> {
       ],
     );
   }
-
-  // Only show the import button in linux, macOS and web.
-  bool get _shouldShowImportButton =>
-      kIsWeb ||
-      defaultTargetPlatform == TargetPlatform.linux ||
-      defaultTargetPlatform == TargetPlatform.macOS;
 
   Widget _buildActionButton() {
     return Column(
