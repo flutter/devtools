@@ -140,20 +140,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         OutlinedButton(
-          onPressed: () async {
-            final acceptedTypeGroups = [
-              XTypeGroup(extensions: ['json'])
-            ];
-            final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
-            final data = jsonDecode(await file.readAsString());
-            final lastModifiedTime = await file.lastModified();
-            final devToolsJsonFile = DevToolsJsonFile(
-              data: data,
-              name: file.name,
-              lastModifiedTime: lastModifiedTime,
-            );
-            _handleImportedFile(devToolsJsonFile);
-          },
+          onPressed: _importFile,
           child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
         ),
       ],
@@ -181,6 +168,21 @@ class _FileImportContainerState extends State<FileImportContainer> {
         ),
       ],
     );
+  }
+
+  void _importFile() async {
+    final acceptedTypeGroups = [
+      XTypeGroup(extensions: ['json'])
+    ];
+    final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
+    final data = jsonDecode(await file.readAsString());
+    final lastModifiedTime = await file.lastModified();
+    final devToolsJsonFile = DevToolsJsonFile(
+      data: data,
+      name: file.name,
+      lastModifiedTime: lastModifiedTime,
+    );
+    _handleImportedFile(devToolsJsonFile);
   }
 
   // TODO(kenz): add error handling to ensure we only allow importing supported
