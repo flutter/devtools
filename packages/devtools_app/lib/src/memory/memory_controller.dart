@@ -23,6 +23,7 @@ import '../utils.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
+import 'memory_screen.dart';
 import 'memory_service.dart';
 import 'memory_snapshot_models.dart';
 import 'memory_timeline.dart';
@@ -1157,6 +1158,8 @@ class MemoryLog {
 
   /// Persist the the live memory data to a JSON file in the /tmp directory.
   void exportMemory() async {
+    MemoryScreen.gaActionForExport();
+
     final liveData = controller.memoryTimeline.liveData;
 
     bool pseudoData = false;

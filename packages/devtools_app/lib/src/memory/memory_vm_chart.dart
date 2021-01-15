@@ -260,7 +260,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
       trace.ChartType.line,
       trace.PaintCharacteristics(
         color: rasterLayerColor,
-        symbol: trace.ChartSymbol.disc,
+        symbol: trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
       name: TraceName.rasterLayer.toString(),
@@ -273,7 +273,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
       trace.ChartType.line,
       trace.PaintCharacteristics(
         color: rasterPictureColor,
-        symbol: trace.ChartSymbol.disc,
+        symbol: trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
       name: TraceName.rasterPicture.toString(),

@@ -993,8 +993,6 @@ bool get isDebugging {
   return debug;
 }
 
-
-
 /// Logging to debug console only in debug runs.
 void debugLogger(String message) {
   if (isDebugging) {
@@ -1038,3 +1036,8 @@ Map<String, String> devToolsQueryParams(String url) {
   final uri = Uri.parse(modifiedUri);
   return uri.queryParameters;
 }
+
+/// Helper function to return the name of a key. If widget has a key
+/// use the key's name to record the select e.g.,
+///   ga.select(MemoryScreen.id, ga.keyName(MemoryScreen.gcButtonKey));
+String keyName(Key key) => (key as ValueKey<String>)?.value;

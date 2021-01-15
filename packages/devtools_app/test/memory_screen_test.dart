@@ -102,12 +102,12 @@ void main() {
       expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);
 
       // Check memory sources available.
-      await tester.tap(find.byKey(MemoryScreen.dropdownSourceMenuButtonKey));
+      await tester.tap(find.byKey(MemoryScreen.sourcesDropdownKey));
       await tester.pump();
 
       // Should only be one source 'Live Feed' in the popup menu.
       final memorySources = tester.firstWidget(find.byKey(
-        MemoryScreen.memorySourcesKey,
+        MemoryScreen.sourcesKey,
       )) as Text;
 
       expect(
@@ -149,11 +149,11 @@ void main() {
       expect(controller.memorySource, MemoryController.liveFeed);
 
       // Export memory to a memory log file.
-      await tester.tap(find.byKey(MemoryScreen.dropdownSourceMenuButtonKey));
+      await tester.tap(find.byKey(MemoryScreen.sourcesDropdownKey));
       await tester.pump();
 
       // Last item in dropdown list of memory source should be memory log file.
-      await tester.tap(find.byKey(MemoryScreen.memorySourcesMenuItem).last);
+      await tester.tap(find.byKey(MemoryScreen.sourcesMenuItemKey).last);
       await tester.pump();
 
       expect(

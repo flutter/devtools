@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
+import 'dart:math';
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +42,8 @@ class MemoryScreen extends Screen {
           icon: Octicons.package,
         );
 
+  static const id = 'memory';
+
   static const legendKeyName = 'Legend Button';
   static const hoverKeyName = 'Chart Hover';
 
@@ -52,19 +54,18 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
-  static const dropdownIntervalMenuButtonKey =
-      Key('Dropdown Interval Menu Button');
+  static const intervalDropdownKey = Key('ChartInterval Dropdown');
   @visibleForTesting
-  static const intervalMenuItem = Key('Memory Interval Menu Item');
+  static const intervalMenuItem = Key('ChartInterval Menu Item');
   @visibleForTesting
-  static const intervalKey = Key('Memory Interval');
+  static const intervalKey = Key('ChartInterval');
 
   @visibleForTesting
-  static const dropdownSourceMenuButtonKey = Key('Dropdown Source Menu Button');
+  static const sourcesDropdownKey = Key('Sources Dropdown');
   @visibleForTesting
-  static const memorySourcesMenuItem = Key('Memory Sources Menu Item');
+  static const sourcesMenuItemKey = Key('Sources Menu Item');
   @visibleForTesting
-  static const memorySourcesKey = Key('Memory Sources');
+  static const sourcesKey = Key('Sources');
   @visibleForTesting
   static const exportButtonKey = Key('Export Button');
   @visibleForTesting
@@ -72,9 +73,22 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const legendButtonkey = Key(legendKeyName);
 
+  @visibleForTesting
+  static const androidChartButtonKey = Key('Android Memory');
+
   static const memorySourceMenuItemPrefix = 'Source: ';
 
-  static const id = 'memory';
+  static void gaAction({Key key, String name}) {
+    final recordName = key != null ? keyName(key) : name;
+    assert(recordName != null);
+    ga.select(MemoryScreen.id, recordName);
+  }
+
+  // Define here because exportButtonKey is @visibleForTesting and
+  // and can't be ref'd outside of file.
+  static void gaActionForExport() {
+    gaAction(key: exportButtonKey);
+  }
 
   @override
   String get docPageId => id;
@@ -97,9 +111,6 @@ class MemoryBody extends StatefulWidget {
 
 class MemoryBodyState extends State<MemoryBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  @visibleForTesting
-  static const androidChartButtonKey = Key('Android Chart');
-
   events.EventChartController eventChartController;
   vm.VMChartController vmChartController;
   android.AndroidChartController androidChartController;
@@ -161,12 +172,20 @@ class MemoryBodyState extends State<MemoryBody>
 
     addAutoDisposeListener(controller.legendVisibleNotifier, () {
       setState(() {
-        controller.isLegendVisible ? showLegend(context) : hideLegend();
+        if (controller.isLegendVisible) {
+          MemoryScreen.gaAction(key: MemoryScreen.legendButtonkey);
+          showLegend(context);
+        } else {
+          hideLegend();
+        }
       });
     });
 
     addAutoDisposeListener(controller.androidChartVisibleNotifier, () {
       setState(() {
+        if (controller.androidChartVisibleNotifier.value) {
+          MemoryScreen.gaAction(key: MemoryScreen.androidChartButtonKey);
+        }
         if (controller.isLegendVisible) {
           // Recompute the legend with the new traces now visible.
           hideLegend();
@@ -189,7 +208,7 @@ class MemoryBodyState extends State<MemoryBody>
         vmChartController.setTapNotifier(copied);
         androidChartController.setTapNotifier(copied);
 
-        final allValues = ChartsValues(this, index, timestamp);
+        final allValues = ChartsValues(controller, index, timestamp);
         if (isDebugging) {
           print('Event Chart TapNotifier '
               '${JsonUtils.prettyPrint(allValues.toJson())}');
@@ -212,7 +231,7 @@ class MemoryBodyState extends State<MemoryBody>
         eventChartController.setTapNotifier(copied);
         androidChartController.setTapNotifier(copied);
 
-        final allValues = ChartsValues(this, index, timestamp);
+        final allValues = ChartsValues(controller, index, timestamp);
         if (isDebugging) {
           print('VM Chart TapNotifier '
               '${JsonUtils.prettyPrint(allValues.toJson())}');
@@ -236,7 +255,7 @@ class MemoryBodyState extends State<MemoryBody>
         eventChartController.setTapNotifier(copied);
         vmChartController.setTapNotifier(copied);
 
-        final allValues = ChartsValues(this, index, timestamp);
+        final allValues = ChartsValues(controller, index, timestamp);
         if (isDebugging) {
           print('Android Chart TapNotifier '
               '${JsonUtils.prettyPrint(allValues.toJson())}');
@@ -374,11 +393,12 @@ class MemoryBodyState extends State<MemoryBody>
 
     return DropdownButtonHideUnderline(
       child: DropdownButton<String>(
-        key: MemoryScreen.dropdownIntervalMenuButtonKey,
+        key: MemoryScreen.intervalDropdownKey,
         style: textTheme.bodyText2,
         value: displayDuration(controller.displayInterval),
         onChanged: (String newValue) {
           setState(() {
+            MemoryScreen.gaAction(key: MemoryScreen.intervalDropdownKey);
             controller.displayInterval = chartInterval(newValue);
             final duration = chartDuration(controller.displayInterval);
 
@@ -411,22 +431,23 @@ class MemoryBodyState extends State<MemoryBody>
               ? value.substring(MemoryController.logFilenamePrefix.length)
               : value;
       return DropdownMenuItem<String>(
-        key: MemoryScreen.memorySourcesMenuItem,
+        key: MemoryScreen.sourcesMenuItemKey,
         value: value,
         child: Text(
           '${controller.memorySourcePrefix}$displayValue',
-          key: MemoryScreen.memorySourcesKey,
+          key: MemoryScreen.sourcesKey,
         ),
       );
     }).toList();
 
     return DropdownButtonHideUnderline(
       child: DropdownButton<String>(
-        key: MemoryScreen.dropdownSourceMenuButtonKey,
+        key: MemoryScreen.sourcesDropdownKey,
         style: textTheme.bodyText2,
         value: controller.memorySource,
         onChanged: (String newValue) {
           setState(() {
+            MemoryScreen.gaAction(key: MemoryScreen.sourcesDropdownKey);
             controller.memorySource = newValue;
           });
         },
@@ -494,13 +515,13 @@ class MemoryBodyState extends State<MemoryBody>
 
   OutlinedButton createToggleAdbMemoryButton() {
     return OutlinedButton(
-      key: androidChartButtonKey,
+      key: MemoryScreen.androidChartButtonKey,
       onPressed: controller.isConnectedDeviceAndroid
           ? controller.toggleAndroidChartVisibility
           : null,
       child: MaterialIconLabel(
         controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
-        'Android Memory',
+        keyName(MemoryScreen.androidChartButtonKey),
         includeTextWidth: 900,
       ),
     );
@@ -559,11 +580,26 @@ class MemoryBodyState extends State<MemoryBody>
   static const hoverXOffset = 10;
   static const hoverYOffset = 0.0;
   static const hoverWidth = 240.0;
+
   // TODO(terry): Compute below heights dynamically.
-  static const hoverHeight1Chart = 190.0;
-  static const hoverHeight1ChartEvents = 270.0;
-  static const hoverHeight2Charts = 330.0;
-  static const hoverHeight2ChartsEvents = 395.0;
+  static const hoverHeightMinimum = 40.0;
+  static const hoverItemHeight = 18.0;
+  static const hoverOneEventsHeight = 40.0; // One extension event to display.
+  static const hoverEventsHeight = 120.0; // Many extension events to display.
+
+  static double computeHoverHeight(
+    int eventsCount,
+    int tracesCount,
+    int extensionEventsCount,
+  ) =>
+      hoverHeightMinimum +
+      (eventsCount * hoverItemHeight) +
+      (tracesCount * hoverItemHeight) +
+      (extensionEventsCount > 0
+          ? (extensionEventsCount == 1
+              ? hoverOneEventsHeight
+              : hoverEventsHeight)
+          : 0);
 
   // TODO(terry): Consider custom painter?
   static const base = 'assets/img/legend/';
@@ -579,6 +615,9 @@ class MemoryBodyState extends State<MemoryBody>
   static const usedLegend = '${base}used_glyph.png';
   static const externalLegend = '${base}external_glyph.png';
   static const rssLegend = '${base}rss_glyph.png';
+  static const rasterLayerLegend = '${base}layer_glyph.png';
+  static const rasterPictureLegend = '${base}picture_glyph.png';
+
   static const androidTotalLegend = '${base}android_total_glyph.png';
   static const androidOtherLegend = '${base}android_other_glyph.png';
   static const androidCodeLegend = '${base}android_code_glyph.png';
@@ -668,6 +707,10 @@ class MemoryBodyState extends State<MemoryBody>
         ));
   }
 
+  /// Display name is either '1 Event' or 'n Events'
+  static const eventDisplayName = ' Event';
+  static const eventsDisplayName = ' Events';
+
   List<Widget> displayExtensionEventsInHover(ChartsValues chartsValues) {
     final widgets = <Widget>[];
     final eventsDisplayed = <String, String>{};
@@ -675,14 +718,15 @@ class MemoryBodyState extends State<MemoryBody>
     if (chartsValues.hasExtensionEvents) {
       final eventLength = chartsValues.extensionEventsLength;
       if (eventLength > 0) {
-        final displayKey = '$eventLength Event${eventLength == 1 ? "" : "s"}';
+        final displayKey = '$eventLength'
+            '${eventLength == 1 ? eventDisplayName : eventsDisplayName}';
         eventsDisplayed[displayKey] =
             eventLength == 1 ? eventLegend : eventsLegend;
       }
     }
 
     for (var entry in eventsDisplayed.entries) {
-      if (entry.key.endsWith(' Events')) {
+      if (entry.key.endsWith(eventsDisplayName)) {
         widgets.add(Container(
           height: 120,
           child: ListView(
@@ -741,10 +785,11 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   String displayEvent(int index, Map<String, Object> event) {
-    if (event['name'] == 'DevTools.Event' && event.containsKey('custom')) {
-      final Map custom = event['custom'];
-      final String eventName = custom['name'];
-      final Map data = custom['data'];
+    if (event[eventName] == 'DevTools.Event' &&
+        event.containsKey(customEvent)) {
+      final Map custom = event[customEvent];
+      final String eventName = custom[customEventName];
+      final Map data = custom[customEventData];
       // TODO(terry): Data could be long need better mechanism for long data e.g.,:
       //                const encoder = JsonEncoder.withIndent('  ');
       //                final displayData = encoder.convert(data);
@@ -765,8 +810,8 @@ class MemoryBodyState extends State<MemoryBody>
       }
       return output.toString();
     } else {
-      final eventName = event['name'];
-      return index == null ? eventName : '[$index] $eventName';
+      final name = event[eventName];
+      return index == null ? name : '[$index] $name';
     }
   }
 
@@ -793,10 +838,13 @@ class MemoryBodyState extends State<MemoryBody>
         child: ExpansionTile(
           tilePadding: EdgeInsets.zero,
           childrenPadding: EdgeInsets.zero,
-          leading: Image(
-            image: events.length > 1
-                ? const AssetImage(eventsLegend)
-                : const AssetImage(eventLegend),
+          leading: Container(
+            padding: const EdgeInsets.only(top: 4),
+            child: Image(
+              image: events.length > 1
+                  ? const AssetImage(eventsLegend)
+                  : const AssetImage(eventLegend),
+            ),
           ),
           title: Text(title, style: hoverTitleEntry),
           children: widgets,
@@ -831,23 +879,37 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   List<Widget> displayVmDataInHover(ChartsValues chartsValues) {
+    const rssDisplay = 'RSS';
+    const capacityDisplay = 'Capacity';
+    const usedDisplay = 'Used';
+    const externalDisplay = 'External';
+    const layerDisplay = 'Raster Layer';
+    const pictureDisplay = 'Raster Picture';
+
     final results = <Widget>[];
 
     final vmDataDisplayed = <String, String>{};
 
     final data = chartsValues.vmData;
 
-    final rssValueDisplay = nf.format(data['rSS']);
-    vmDataDisplayed['RSS $rssValueDisplay'] = rssLegend;
+    final rssValueDisplay = nf.format(data[rssJsonName]);
+    vmDataDisplayed['$rssDisplay $rssValueDisplay'] = rssLegend;
 
-    final capacityValueDisplay = nf.format(data['capacity']);
-    vmDataDisplayed['Capacity $capacityValueDisplay'] = capacityLegend;
+    final capacityValueDisplay = nf.format(data[capacityJsonName]);
+    vmDataDisplayed['$capacityDisplay $capacityValueDisplay'] = capacityLegend;
 
-    final usedValueDisplay = nf.format(data['used']);
-    vmDataDisplayed['Used $usedValueDisplay'] = usedLegend;
+    final usedValueDisplay = nf.format(data[usedJsonName]);
+    vmDataDisplayed['$usedDisplay $usedValueDisplay'] = usedLegend;
 
-    final externalValueDisplay = nf.format(data['external']);
-    vmDataDisplayed['External $externalValueDisplay'] = externalLegend;
+    final externalValueDisplay = nf.format(data[externalJsonName]);
+    vmDataDisplayed['$externalDisplay $externalValueDisplay'] = externalLegend;
+
+    final layerValueDisplay = nf.format(data[rasterLayerJsonName]);
+    vmDataDisplayed['$layerDisplay $layerValueDisplay'] = rasterLayerLegend;
+
+    final pictureValueDisplay = nf.format(data[rasterPictureJsonName]);
+    vmDataDisplayed['$pictureDisplay $pictureValueDisplay'] =
+        rasterPictureLegend;
 
     for (var entry in vmDataDisplayed.entries) {
       results.add(hoverRow(
@@ -861,6 +923,14 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   List<Widget> displayAndroidDataInHover(ChartsValues chartsValues) {
+    const totalDisplay = 'Total';
+    const otherDisplay = 'Other';
+    const codeDisplay = 'Code';
+    const nativeDisplay = 'Native';
+    const javaDisplay = 'Java';
+    const stackDisplay = 'Stack';
+    const graphicsDisplay = 'Graphics';
+
     final results = <Widget>[];
 
     if (controller.isAndroidChartVisible) {
@@ -868,26 +938,32 @@ class MemoryBodyState extends State<MemoryBody>
 
       final data = chartsValues.androidData;
 
-      final totalValueDisplay = nf.format(data['total']);
-      androidDataDisplayed['Total $totalValueDisplay'] = androidTotalLegend;
+      final totalValueDisplay = nf.format(data[adbTotalJsonName]);
+      androidDataDisplayed['$totalDisplay $totalValueDisplay'] =
+          androidTotalLegend;
 
-      final otherValueDisplay = nf.format(data['other']);
-      androidDataDisplayed['Other $otherValueDisplay'] = androidOtherLegend;
+      final otherValueDisplay = nf.format(data[adbOtherJsonName]);
+      androidDataDisplayed['$otherDisplay $otherValueDisplay'] =
+          androidOtherLegend;
 
-      final codeValueDisplay = nf.format(data['code']);
-      androidDataDisplayed['Code $codeValueDisplay'] = androidCodeLegend;
+      final codeValueDisplay = nf.format(data[adbCodeJsonName]);
+      androidDataDisplayed['$codeDisplay $codeValueDisplay'] =
+          androidCodeLegend;
 
-      final nativeValueDisplay = nf.format(data['nativeHeap']);
-      androidDataDisplayed['Native $nativeValueDisplay'] = androidNativeLegend;
+      final nativeValueDisplay = nf.format(data[adbNativeHeapJsonName]);
+      androidDataDisplayed['$nativeDisplay $nativeValueDisplay'] =
+          androidNativeLegend;
 
-      final javaValueDisplay = nf.format(data['javaHeap']);
-      androidDataDisplayed['Java $javaValueDisplay'] = androidJavaLegend;
+      final javaValueDisplay = nf.format(data[adbJavaHeapJsonName]);
+      androidDataDisplayed['$javaDisplay $javaValueDisplay'] =
+          androidJavaLegend;
 
-      final stackValueDisplay = nf.format(data['stack']);
-      androidDataDisplayed['Stack $stackValueDisplay'] = androidStackLegend;
+      final stackValueDisplay = nf.format(data[adbStackJsonName]);
+      androidDataDisplayed['$stackDisplay $stackValueDisplay'] =
+          androidStackLegend;
 
-      final graphicsValueDisplay = nf.format(data['graphics']);
-      androidDataDisplayed['Graphics $graphicsValueDisplay'] =
+      final graphicsValueDisplay = nf.format(data[adbGraphicsJsonName]);
+      androidDataDisplayed['$graphicsDisplay $graphicsValueDisplay'] =
           androidGraphicsLegend;
 
       for (var entry in androidDataDisplayed.entries) {
@@ -919,15 +995,20 @@ class MemoryBodyState extends State<MemoryBody>
     }
 
     double totalHoverHeight;
+    int totalTraces;
     if (controller.isAndroidChartVisible) {
-      totalHoverHeight = chartsValues.extensionEventsLength > 1
-          ? hoverHeight2ChartsEvents
-          : hoverHeight2Charts;
+      totalTraces = chartsValues.vmData.entries.length -
+          1 +
+          chartsValues.androidData.entries.length;
     } else {
-      totalHoverHeight = chartsValues.extensionEventsLength > 1
-          ? hoverHeight1ChartEvents
-          : hoverHeight1Chart;
+      totalTraces = chartsValues.vmData.entries.length - 1;
     }
+
+    totalHoverHeight = computeHoverHeight(
+      chartsValues.eventCount,
+      totalTraces,
+      chartsValues.extensionEventsLength,
+    );
 
     final displayTimestamp = prettyTimestamp(chartsValues.timestamp);
 
@@ -1065,6 +1146,8 @@ class MemoryBodyState extends State<MemoryBody>
   /// Callbacks for button actions:
 
   void _clearTimeline() {
+    MemoryScreen.gaAction(key: MemoryScreen.clearButtonKey);
+
     controller.memoryTimeline.reset();
 
     // Clear any current Allocation Profile collected.
@@ -1083,16 +1166,12 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Future<void> _gc() async {
-    // TODO(terry): Record GC in analytics.
     try {
-      debugLogger('User Initiated GC Start');
+      MemoryScreen.gaAction(key: MemoryScreen.gcButtonKey);
 
-      // TODO(terry): Only record GCs not when user initiated.
       controller.memoryTimeline.addGCEvent();
 
       await controller.gc();
-
-      debugLogger('User GC Complete');
     } catch (e) {
       // TODO(terry): Show toast?
       log('Unable to GC ${e.toString()}', LogLevel.error);
@@ -1100,21 +1179,51 @@ class MemoryBodyState extends State<MemoryBody>
   }
 }
 
-const String snapshotDisplayName = 'snapshot';
-const String autoSnapshotDisplayName = 'autoSnapshot';
-const String monitorStartDisplayName = 'monitorStart';
-const String monitorResetDisplayName = 'monitorReset';
-const String extensionEventsDisplayName = 'extensionEvents';
-const String manualGCDisplayName = 'manualGC';
-const String gcDisplayName = 'gc';
+const String indexPayloadJson = 'index';
+const String timestampPayloadJson = 'timestamp';
+const String prettyTimestampPayloadJson = 'prettyTimestamp';
+const String eventPayloadJson = 'event';
+const String vmPayloadJson = 'vm';
+const String androidPayloadJson = 'android';
+
+/// VM Data
+const String rssJsonName = 'rss';
+const String capacityJsonName = 'capacity';
+const String usedJsonName = 'used';
+const String externalJsonName = 'external';
+const String rasterPictureJsonName = 'rasterLayer';
+const String rasterLayerJsonName = 'rasterPicture';
+
+/// Android data
+const String adbTotalJsonName = 'total';
+const String adbOtherJsonName = 'other';
+const String adbCodeJsonName = 'code';
+const String adbNativeHeapJsonName = 'nativeHeap';
+const String adbJavaHeapJsonName = 'javaHeap';
+const String adbStackJsonName = 'stack';
+const String adbGraphicsJsonName = 'graphics';
+
+/// Events data
+const String snapshotJsonName = 'snapshot';
+const String autoSnapshotJsonName = 'autoSnapshot';
+const String monitorStartJsonName = 'monitorStart';
+const String monitorResetJsonName = 'monitorReset';
+const String extensionEventsJsonName = 'extensionEvents';
+const String manualGCJsonName = 'manualGC';
+const String gcJsonName = 'gc';
+
+const String eventName = 'name';
+const String customEvent = 'custom';
+const String customEventName = 'name';
+const String customEventData = 'data';
 
 /// Retrieve all data values of a given index (timestamp) of the collected data.
 class ChartsValues {
-  ChartsValues(this.memoryState, this.index, this.timestamp) {
+  ChartsValues(this.controller, this.index, this.timestamp) {
     _fetch();
   }
 
-  final MemoryBodyState memoryState;
+  final MemoryController controller;
 
   final int index;
 
@@ -1134,30 +1243,35 @@ class ChartsValues {
 
   Map<String, Object> toJson() {
     return {
-      'index': index,
-      'timestamp': timestamp,
-      'prettyTimestamp': prettyTimestamp(timestamp),
-      'event': _event,
-      'vm': _vm,
-      'android': _android,
+      indexPayloadJson: index,
+      timestampPayloadJson: timestamp,
+      prettyTimestampPayloadJson: prettyTimestamp(timestamp),
+      eventPayloadJson: _event,
+      vmPayloadJson: _vm,
+      androidPayloadJson: _android,
     };
   }
 
-  bool get hasSnapshot => _event.containsKey(snapshotDisplayName);
-  bool get hasAutoSnapshot => _event.containsKey(autoSnapshotDisplayName);
-  bool get hasMonitorStart => _event.containsKey(monitorStartDisplayName);
-  bool get hasMonitorReset => _event.containsKey(monitorResetDisplayName);
-  bool get hasExtensionEvents => _event.containsKey(extensionEventsDisplayName);
-  bool get hasManualGc => _event.containsKey(manualGCDisplayName);
-  bool get hasGc => _vm.containsKey(gcDisplayName);
+  int get eventCount =>
+      _event.entries.length -
+      (extensionEventsLength > 0 ? 1 : 0) +
+      (hasGc ? 1 : 0);
 
-  int get extensionEventsLength => hasExtensionEvents
-      ? (_event[extensionEventsDisplayName] as List).length
-      : 0;
+  bool get hasSnapshot => _event.containsKey(snapshotJsonName);
+  bool get hasAutoSnapshot => _event.containsKey(autoSnapshotJsonName);
+  bool get hasMonitorStart => _event.containsKey(monitorStartJsonName);
+  bool get hasMonitorReset => _event.containsKey(monitorResetJsonName);
+  bool get hasExtensionEvents => _event.containsKey(extensionEventsJsonName);
+  bool get hasManualGc => _event.containsKey(manualGCJsonName);
+  bool get hasGc => _vm[gcJsonName];
+
+  int get extensionEventsLength =>
+      hasExtensionEvents ? extensionEvents.length : 0;
 
   List<Map<String, Object>> get extensionEvents {
-    if (_extensionEvents.isEmpty)
-      _extensionEvents.addAll(_event[extensionEventsDisplayName]);
+    if (_extensionEvents.isEmpty) {
+      _extensionEvents.addAll(_event[extensionEventsJsonName]);
+    }
     return _extensionEvents;
   }
 
@@ -1167,26 +1281,28 @@ class ChartsValues {
     _android.clear();
 
     _fetchEventData(_event);
-    _fetchData(memoryState.vmChartController, _vm);
-    _fetchData(memoryState.androidChartController, _android);
+    _fetchVMData(controller.memoryTimeline.data[index], _vm);
+    _fetchAndroidData(
+      controller.memoryTimeline.data[index].adbMemoryInfo,
+      _android,
+    );
   }
 
   void _fetchEventData(Map<String, Object> results) {
     // Use the detailed extension events data stored in the memoryTimeline.
-    final eventInfo =
-        memoryState.controller.memoryTimeline.data[index].memoryEventInfo;
+    final eventInfo = controller.memoryTimeline.data[index].memoryEventInfo;
 
     if (eventInfo.isEmpty) return;
 
-    if (eventInfo.isEventGC) results[manualGCDisplayName] = true;
-    if (eventInfo.isEventSnapshot) results[snapshotDisplayName] = true;
-    if (eventInfo.isEventSnapshotAuto) results[autoSnapshotDisplayName] = true;
+    if (eventInfo.isEventGC) results[manualGCJsonName] = true;
+    if (eventInfo.isEventSnapshot) results[snapshotJsonName] = true;
+    if (eventInfo.isEventSnapshotAuto) results[autoSnapshotJsonName] = true;
     if (eventInfo.isEventAllocationAccumulator) {
       if (eventInfo.allocationAccumulator.isStart) {
-        results[monitorStartDisplayName] = true;
+        results[monitorStartJsonName] = true;
       }
       if (eventInfo.allocationAccumulator.isReset) {
-        results[monitorResetDisplayName] = true;
+        results[monitorResetJsonName] = true;
       }
     }
 
@@ -1196,43 +1312,47 @@ class ChartsValues {
         if (event.customEventName != null) {
           events.add(
             {
-              'name': event.eventKind,
-              'custom': {
-                'name': event.customEventName,
-                'data': event.data,
+              eventName: event.eventKind,
+              customEvent: {
+                customEventName: event.customEventName,
+                customEventData: event.data,
               },
             },
           );
         } else {
           events.add(
             {
-              'name': event.eventKind,
+              eventName: event.eventKind,
             },
           );
         }
       }
       if (events.isNotEmpty) {
-        results[extensionEventsDisplayName] = events;
+        results[extensionEventsJsonName] = events;
       }
     }
   }
 
-  void _fetchData(
-    ChartController chartController,
+  void _fetchVMData(HeapSample heapSample, Map<String, Object> results) {
+    results[rssJsonName] = heapSample.rss;
+    results[capacityJsonName] = heapSample.capacity;
+    results[usedJsonName] = heapSample.used;
+    results[externalJsonName] = heapSample.external;
+    results[gcJsonName] = heapSample.isGC;
+    results[rasterPictureJsonName] = heapSample.rasterCache.pictureBytes;
+    results[rasterLayerJsonName] = heapSample.rasterCache.layerBytes;
+  }
+
+  void _fetchAndroidData(
+    AdbMemoryInfo androidData,
     Map<String, Object> results,
   ) {
-    for (var trace in chartController.traces) {
-      final theData = trace.data[index];
-      final yValue = theData.y;
-
-      // Convert enum'd string e.g., 'TraceName.capacity' to Map key'capacity', etc.
-      results[trace.name.split('.').last] = yValue;
-    }
-
-    // VM GC.
-    if (chartController is vm.VMChartController &&
-        memoryState.controller.memoryTimeline.data[index].isGC) {
-      results[gcDisplayName] = true;
-    }
+    results[adbTotalJsonName] = androidData.total;
+    results[adbOtherJsonName] = androidData.other;
+    results[adbCodeJsonName] = androidData.code;
+    results[adbNativeHeapJsonName] = androidData.nativeHeap;
+    results[adbJavaHeapJsonName] = androidData.javaHeap;
+    results[adbStackJsonName] = androidData.stack;
+    results[adbGraphicsJsonName] = androidData.graphics;
   }
 }

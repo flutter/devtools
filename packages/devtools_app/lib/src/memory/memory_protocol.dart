@@ -28,7 +28,6 @@ class MemoryTracker {
 
   Timer _pollingTimer;
 
-  final List<HeapSample> samples = <HeapSample>[];
   final Map<String, MemoryUsage> isolateHeaps = <String, MemoryUsage>{};
 
   /// Polled VM current RSS.
@@ -44,12 +43,6 @@ class MemoryTracker {
 
   Stream<void> get onChange => _changeController.stream;
   final _changeController = StreamController<void>.broadcast();
-
-  int get currentCapacity => samples.last.capacity;
-
-  int get currentUsed => samples.last.used;
-
-  int get currentExternal => samples.last.external;
 
   StreamSubscription<Event> _gcStreamListener;
 
@@ -198,12 +191,12 @@ class MemoryTracker {
     // Removes any isolate that is a sentinal.
     isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
 
-    int time = DateTime.now().millisecondsSinceEpoch;
-    if (samples.isNotEmpty) {
-      time = math.max(time, samples.last.timestamp);
-    }
-
     final memoryTimeline = memoryController.memoryTimeline;
+
+    int time = DateTime.now().millisecondsSinceEpoch;
+    if (memoryTimeline.data.isNotEmpty) {
+      time = math.max(time, memoryTimeline.data.last.timestamp);
+    }
 
     // Process any memory events?
     final eventSample = processEventSample(memoryTimeline, time);
@@ -227,7 +220,7 @@ class MemoryTracker {
     final HeapSample sample = HeapSample(
       time,
       processRss,
-      capacity + external,
+      capacity + external,  // We're displaying capacity on top of stacked (used + external).
       used,
       external,
       fromGC,
@@ -236,8 +229,9 @@ class MemoryTracker {
       rasterCache,
     );
 
-    _addSample(sample);
     memoryTimeline.addSample(sample);
+
+    _changeController.add(null);
 
     // Signal continues events are to be emitted.  These events are hidden
     // until a reset event then the continuous events between last monitor
@@ -320,12 +314,6 @@ class MemoryTracker {
     }
 
     return eventSample;
-  }
-
-  void _addSample(HeapSample sample) {
-    samples.add(sample);
-
-    _changeController.add(null);
   }
 }
 
