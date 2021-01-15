@@ -131,6 +131,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
 
   Widget _buildImportedFileDisplay() => Text(
         importedFile?.path ?? 'No File Selected',
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(color: Theme.of(context).textTheme.headline1.color),
         textAlign: TextAlign.left,
       );
