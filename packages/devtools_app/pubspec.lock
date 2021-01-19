@@ -63,7 +63,7 @@ packages:
       name: build
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.0"
+    version: "1.6.1"
   build_config:
     dependency: transitive
     description:
@@ -77,28 +77,28 @@ packages:
       name: build_daemon
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.4"
+    version: "2.1.6"
   build_resolvers:
     dependency: transitive
     description:
       name: build_resolvers
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.1"
+    version: "1.5.2"
   build_runner:
     dependency: "direct dev"
     description:
       name: build_runner
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.10.11"
+    version: "1.10.13"
   build_runner_core:
     dependency: transitive
     description:
       name: build_runner_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.5"
+    version: "6.1.6"
   built_collection:
     dependency: transitive
     description:
@@ -154,7 +154,7 @@ packages:
       name: code_builder
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.5.0"
+    version: "3.6.0"
   collection:
     dependency: "direct main"
     description:
@@ -175,7 +175,7 @@ packages:
       name: coverage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.14.2"
+    version: "0.15.0"
   crypto:
     dependency: transitive
     description:
@@ -196,28 +196,28 @@ packages:
       path: "../devtools"
       relative: true
     source: path
-    version: "0.9.6"
+    version: "0.9.6+1"
   devtools_server:
     dependency: "direct overridden"
     description:
       path: "../devtools_server"
       relative: true
     source: path
-    version: "0.9.6"
+    version: "0.9.6+1"
   devtools_shared:
     dependency: "direct main"
     description:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.6"
+    version: "0.9.6+1"
   devtools_testing:
     dependency: "direct dev"
     description:
       path: "../devtools_testing"
       relative: true
     source: path
-    version: "0.9.6"
+    version: "0.9.6+1"
   fake_async:
     dependency: transitive
     description:
@@ -428,7 +428,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.2+3"
+    version: "4.3.3"
   pub_semver:
     dependency: transitive
     description:
@@ -547,7 +547,7 @@ packages:
     source: hosted
     version: "1.2.0"
   string_scanner:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: string_scanner
       url: "https://pub.dartlang.org"
@@ -566,7 +566,7 @@ packages:
       name: test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.16.0-nullsafety.13"
+    version: "1.16.0-nullsafety.15"
   test_api:
     dependency: transitive
     description:
@@ -580,7 +580,7 @@ packages:
       name: test_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.12-nullsafety.12"
+    version: "0.3.12-nullsafety.14"
   timing:
     dependency: transitive
     description:
@@ -702,4 +702,4 @@ packages:
     version: "2.2.1"
 sdks:
   dart: ">=2.12.0-0.0 <3.0.0"
-  flutter: ">=1.22.0 <2.0.0"
+  flutter: ">=1.22.0"
