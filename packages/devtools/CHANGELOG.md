@@ -1,5 +1,5 @@
 ## 0.9.6+1
-* Fallback to port 0 if we cannot connect the DevTools server to port 9100-9109 [#2600](https://github.com/flutter/devtools/pull/2600)
+* Fallback to port 0 if we cannot connect the DevTools server to ports 9100-9109 [#2600](https://github.com/flutter/devtools/pull/2600)
 
 ## 0.9.6
 * Remove use of Flutter service worker [#2586](https://github.com/flutter/devtools/pull/2586)
