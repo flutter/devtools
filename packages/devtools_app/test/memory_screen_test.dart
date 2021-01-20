@@ -74,6 +74,8 @@ void main() {
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       screen = const MemoryScreen();
+
+      expect(MemoryScreen.isDebugging, isFalse);
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {

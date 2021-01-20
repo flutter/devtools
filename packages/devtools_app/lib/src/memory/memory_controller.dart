@@ -993,6 +993,8 @@ class MemoryController extends DisposableController
   bool get isGcing => _gcing;
 
   Future<void> gc() async {
+
+    
     _gcing = true;
 
     try {

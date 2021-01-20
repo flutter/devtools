@@ -145,11 +145,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
     _memoryController = Provider.of<MemoryController>(context);
 
-    // TODO(jacobr): this is an ugly way to be using the theme. It would be
-    // better if the controllers weren't involved with the color scheme.
     colorScheme = Theme.of(context).colorScheme;
-
-    //_initController(colorScheme);
 
     cancel();
 

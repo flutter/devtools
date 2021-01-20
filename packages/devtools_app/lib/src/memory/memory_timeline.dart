@@ -95,7 +95,7 @@ class MemoryTimeline {
 
   ValueListenable<HeapSample> get sampleAddedNotifier => _sampleAddedNotifier;
 
-  /// List of events (DevTools) awaiting to be posted to HeapSample.
+  /// List of events awaiting to be posted to HeapSample.
   final _eventSamples = <EventSample>[];
 
   ContinuesState monitorContinuesState = ContinuesState.none;
@@ -187,7 +187,7 @@ class MemoryTimeline {
     return event != null ? event.timestamp : -1;
   }
 
-  /// Grab event to be posted.
+  /// Grab and remove the event to be posted.
   EventSample pullEventSample() {
     final result = _eventSamples.first;
     _eventSamples.removeAt(0);

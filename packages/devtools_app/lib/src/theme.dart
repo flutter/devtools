@@ -212,7 +212,7 @@ extension DevToolsColorScheme on ColorScheme {
   // Title of the hover card.
   TextStyle get hoverTitleTextStyle => const TextStyle(
         color: Colors.black,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.bold,
         fontSize: 16,
         decoration: TextDecoration.none,
       );
@@ -220,7 +220,7 @@ extension DevToolsColorScheme on ColorScheme {
   // Items in the hover vard.
   TextStyle get hoverTextStyle => const TextStyle(
         color: Colors.black,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.bold,
         fontSize: 11.5,
         decoration: TextDecoration.none,
       );

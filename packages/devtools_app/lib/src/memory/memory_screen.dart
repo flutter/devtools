@@ -42,6 +42,10 @@ class MemoryScreen extends Screen {
           icon: Octicons.package,
         );
 
+  /// Do not checkin with field set to true, only for local debugging.
+  @visibleForTesting
+  static const isDebugging = false;
+
   static const id = 'memory';
 
   static const legendKeyName = 'Legend Button';
@@ -194,73 +198,78 @@ class MemoryBodyState extends State<MemoryBody>
       });
     });
 
-    addAutoDisposeListener(eventChartController.tapNotifier, () {
-      if (!eventChartController.tapNotifier.value.isEmpty &&
-          hoverOverlayEntry != null) {
-        hideHover();
-      }
-      if (eventChartController.tapNotifier.value.tapDownDetails != null) {
-        final tapData = eventChartController.tapNotifier.value;
-        final index = tapData.index;
-        final timestamp = tapData.timestamp;
-
-        final copied = TapNotifier.copy(eventChartController.tapNotifier.value);
-        vmChartController.setTapNotifier(copied);
-        androidChartController.setTapNotifier(copied);
-
-        final allValues = ChartsValues(controller, index, timestamp);
-        if (isDebugging) {
-          print('Event Chart TapNotifier '
-              '${JsonUtils.prettyPrint(allValues.toJson())}');
+    addAutoDisposeListener(eventChartController.tapLocation, () {
+      if (eventChartController.tapLocation.value != null) {
+        if (hoverOverlayEntry != null) {
+          hideHover();
         }
-        showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+        final tapLocation = eventChartController.tapLocation.value;
+        if (tapLocation?.tapDownDetails != null) {
+          final tapData = tapLocation;
+          final index = tapData.index;
+          final timestamp = tapData.timestamp;
+
+          final copied = TapLocation.copy(tapLocation);
+          vmChartController.tapLocation.value = copied;
+          androidChartController.tapLocation.value = copied;
+
+          final allValues = ChartsValues(controller, index, timestamp);
+          if (MemoryScreen.isDebugging) {
+            debugLogger('Event Chart TapLocation '
+                '${allValues.toJson().prettyPrint()}');
+          }
+          showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+        }
       }
     });
 
-    addAutoDisposeListener(vmChartController.tapNotifier, () {
-      if (!vmChartController.tapNotifier.value.isEmpty &&
-          hoverOverlayEntry != null) {
-        hideHover();
-      }
-      if (vmChartController.tapNotifier.value.tapDownDetails != null) {
-        final tapData = vmChartController.tapNotifier.value;
-        final index = tapData.index;
-        final timestamp = tapData.timestamp;
-
-        final copied = TapNotifier.copy(vmChartController.tapNotifier.value);
-        eventChartController.setTapNotifier(copied);
-        androidChartController.setTapNotifier(copied);
-
-        final allValues = ChartsValues(controller, index, timestamp);
-        if (isDebugging) {
-          print('VM Chart TapNotifier '
-              '${JsonUtils.prettyPrint(allValues.toJson())}');
+    addAutoDisposeListener(vmChartController.tapLocation, () {
+      if (vmChartController.tapLocation.value != null) {
+        if (hoverOverlayEntry != null) {
+          hideHover();
         }
-        showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+        final tapLocation = vmChartController.tapLocation.value;
+        if (tapLocation?.tapDownDetails != null) {
+          final tapData = tapLocation;
+          final index = tapData.index;
+          final timestamp = tapData.timestamp;
+
+          final copied = TapLocation.copy(tapLocation);
+          eventChartController.tapLocation.value = copied;
+          androidChartController.tapLocation.value = copied;
+
+          final allValues = ChartsValues(controller, index, timestamp);
+          if (MemoryScreen.isDebugging) {
+            debugLogger('VM Chart TapLocation '
+                '${allValues.toJson().prettyPrint()}');
+          }
+          showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+        }
       }
     });
 
-    addAutoDisposeListener(androidChartController.tapNotifier, () {
-      if (!androidChartController.tapNotifier.value.isEmpty &&
-          hoverOverlayEntry != null) {
-        hideHover();
-      }
-      if (androidChartController.tapNotifier.value.tapDownDetails != null) {
-        final tapData = androidChartController.tapNotifier.value;
-        final index = tapData.index;
-        final timestamp = tapData.timestamp;
-
-        final copied =
-            TapNotifier.copy(androidChartController.tapNotifier.value);
-        eventChartController.setTapNotifier(copied);
-        vmChartController.setTapNotifier(copied);
-
-        final allValues = ChartsValues(controller, index, timestamp);
-        if (isDebugging) {
-          print('Android Chart TapNotifier '
-              '${JsonUtils.prettyPrint(allValues.toJson())}');
+    addAutoDisposeListener(androidChartController.tapLocation, () {
+      if (androidChartController.tapLocation.value != null) {
+        if (hoverOverlayEntry != null) {
+          hideHover();
         }
-        showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+        final tapLocation = androidChartController.tapLocation.value;
+        if (tapLocation?.tapDownDetails != null) {
+          final tapData = tapLocation;
+          final index = tapData.index;
+          final timestamp = tapData.timestamp;
+
+          final copied = TapLocation.copy(tapLocation);
+          eventChartController.tapLocation.value = copied;
+          vmChartController.tapLocation.value = copied;
+
+          final allValues = ChartsValues(controller, index, timestamp);
+          if (MemoryScreen.isDebugging) {
+            debugLogger('Android Chart TapLocation '
+                '${allValues.toJson().prettyPrint()}');
+          }
+          showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+        }
       }
     });
 
@@ -278,13 +287,12 @@ class MemoryBodyState extends State<MemoryBody>
     controller.memorySourcePrefix = mediaWidth > verboseDropDownMinimumWidth
         ? MemoryScreen.memorySourceMenuItemPrefix
         : '';
+
+    // TODO(terry): Can Flutter's focus system be used instead of listening to keyboard?
     return RawKeyboardListener(
       focusNode: FocusNode(),
       onKey: (RawKeyEvent event) {
         if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
-          eventChartController.setTapNotifier(TapNotifier.empty());
-          vmChartController.setTapNotifier(TapNotifier.empty());
-          androidChartController.setTapNotifier(TapNotifier.empty());
           hideHover();
         }
       },
@@ -584,7 +592,8 @@ class MemoryBodyState extends State<MemoryBody>
   // TODO(terry): Compute below heights dynamically.
   static const hoverHeightMinimum = 40.0;
   static const hoverItemHeight = 18.0;
-  static const hoverOneEventsHeight = 40.0; // One extension event to display.
+  static const hoverOneEventsHeight =
+      82.0; // One extension event to display (3 lines).
   static const hoverEventsHeight = 120.0; // Many extension events to display.
 
   static double computeHoverHeight(
@@ -784,35 +793,62 @@ class MemoryBodyState extends State<MemoryBody>
     return results;
   }
 
-  String displayEvent(int index, Map<String, Object> event) {
-    if (event[eventName] == 'DevTools.Event' &&
+  // TODO(terry): Data could be long need better mechanism for long data e.g.,:
+  //                const encoder = JsonEncoder.withIndent('  ');
+  //                final displayData = encoder.convert(data);
+  String longValueToShort(String longValue) {
+    var value = longValue;
+    if (longValue.length > 35) {
+      final firstPart = longValue.substring(0, 10);
+      final endPart = longValue.substring(longValue.length - 20);
+      value = '$firstPart...$endPart';
+    }
+    return value;
+  }
+
+  String decodeEventValues(Map<String, Object> event) {
+    final output = StringBuffer();
+    if (event[eventName] == imageSizesForFrameEvent) {
+      // TODO(terry): Need a more generic event displayer.
+      // Flutter event emit the event name and value.
+      final Map<String, Object> data = event[eventData];
+      final key = data.keys.first;
+      output.writeln(' ${longValueToShort(key)}');
+      final Map values = data[key];
+      final displaySize = values[displaySizeInBytesData];
+      final decodeSize = values[decodedSizeInBytesData];
+      output.writeln(' Display/Decode Size=$displaySize/$decodeSize');
+    } else if (event[eventName] == devToolsEvent &&
         event.containsKey(customEvent)) {
       final Map custom = event[customEvent];
-      final String eventName = custom[customEventName];
-      final Map data = custom[customEventData];
-      // TODO(terry): Data could be long need better mechanism for long data e.g.,:
-      //                const encoder = JsonEncoder.withIndent('  ');
-      //                final displayData = encoder.convert(data);
-      final output = StringBuffer();
-      output.writeln(index == null ? eventName : '[$index] $eventName');
+      final data = custom[customEventData];
       for (var key in data.keys) {
         output.write(' $key=');
-        var value = '';
-        if (data[key].length > 35) {
-          final longValue = data[key];
-          final firstPart = longValue.substring(0, 10);
-          final endPart = longValue.substring(longValue.length - 20);
-          value = '$firstPart...$endPart';
-        } else {
-          value = data[key];
-        }
-        output.writeln(value);
+        output.writeln(' ${longValueToShort(data[key])}');
       }
-      return output.toString();
     } else {
-      final name = event[eventName];
-      return index == null ? name : '[$index] $name';
+      output.writeln('Unknown Event ${event[eventName]}');
     }
+
+    return output.toString();
+  }
+
+  String displayEvent(int index, Map<String, Object> event) {
+    final output = StringBuffer();
+
+    String name;
+
+    if (event[eventName] == devToolsEvent && event.containsKey(customEvent)) {
+      final Map custom = event[customEvent];
+      name = custom[customEventName];
+    } else {
+      name = event[eventName];
+    }
+
+    output.writeln(index == null ? name : '[$index] $name');
+    output.writeln(decodeEventValues(event));
+
+    return output.toString();
   }
 
   Widget listItem({
@@ -1013,6 +1049,7 @@ class MemoryBodyState extends State<MemoryBody>
     final displayTimestamp = prettyTimestamp(chartsValues.timestamp);
 
     final hoverHeading = colorScheme.hoverTitleTextStyle;
+
     final OverlayState overlayState = Overlay.of(context);
     hoverOverlayEntry ??= OverlayEntry(
       builder: (context) => Positioned(
@@ -1048,8 +1085,14 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   void hideHover() {
-    hoverOverlayEntry?.remove();
-    hoverOverlayEntry = null;
+    if (hoverOverlayEntry != null) {
+      eventChartController.tapLocation.value = null;
+      vmChartController.tapLocation.value = null;
+      androidChartController.tapLocation.value = null;
+
+      hoverOverlayEntry?.remove();
+      hoverOverlayEntry = null;
+    }
   }
 
   void showLegend(BuildContext context) {
@@ -1179,6 +1222,18 @@ class MemoryBodyState extends State<MemoryBody>
   }
 }
 
+/// Event types handled for hover card.
+const devToolsEvent = 'DevTools.Event';
+const imageSizesForFrameEvent = 'Flutter.ImageSizesForFrame';
+const displaySizeInBytesData = 'displaySizeInBytes';
+const decodedSizeInBytesData = 'decodedSizeInBytes';
+
+const String eventName = 'name';
+const String eventData = 'data';
+const String customEvent = 'custom';
+const String customEventName = 'name';
+const String customEventData = 'data';
+
 const String indexPayloadJson = 'index';
 const String timestampPayloadJson = 'timestamp';
 const String prettyTimestampPayloadJson = 'prettyTimestamp';
@@ -1211,11 +1266,6 @@ const String monitorResetJsonName = 'monitorReset';
 const String extensionEventsJsonName = 'extensionEvents';
 const String manualGCJsonName = 'manualGC';
 const String gcJsonName = 'gc';
-
-const String eventName = 'name';
-const String customEvent = 'custom';
-const String customEventName = 'name';
-const String customEventData = 'data';
 
 /// Retrieve all data values of a given index (timestamp) of the collected data.
 class ChartsValues {
@@ -1307,7 +1357,7 @@ class ChartsValues {
     }
 
     if (eventInfo.hasExtensionEvents) {
-      final List<Map<String, Object>> events = [];
+      final events = <Map<String, Object>>[];
       for (ExtensionEvent event in eventInfo.extensionEvents.theEvents) {
         if (event.customEventName != null) {
           events.add(
@@ -1320,11 +1370,7 @@ class ChartsValues {
             },
           );
         } else {
-          events.add(
-            {
-              eventName: event.eventKind,
-            },
-          );
+          events.add({eventName: event.eventKind, eventData: event.data});
         }
       }
       if (events.isNotEmpty) {

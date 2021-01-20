@@ -130,11 +130,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
 
     _memoryController = Provider.of<MemoryController>(context);
 
-    // TODO(jacobr): this is an ugly way to be using the theme. It would be
-    // better if the controllers weren't involved with the color scheme.
     colorScheme = Theme.of(context).colorScheme;
-
-    //_initController(colorScheme);
 
     cancel();
 
@@ -166,6 +162,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   static final capacityColor = Colors.grey[400];
   static const usedColor = Color(0xff33b5e5);
   static const externalColor = Color(0xff4ddeff);
+  // TODO(terry): UX review of raster colors see https://github.com/flutter/devtools/issues/2616
   static const rasterLayerColor = Color(0xff99cc00);
   static const rasterPictureColor = Color(0xffff4444);
   static const rssColor = Color(0xffff9300);

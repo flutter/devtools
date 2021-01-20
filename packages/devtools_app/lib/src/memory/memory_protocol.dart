@@ -220,7 +220,8 @@ class MemoryTracker {
     final HeapSample sample = HeapSample(
       time,
       processRss,
-      capacity + external,  // We're displaying capacity on top of stacked (used + external).
+      // Displaying capacity dashed line on top of stacked (used + external).
+      capacity + external,
       used,
       external,
       fromGC,
@@ -243,9 +244,15 @@ class MemoryTracker {
     }
   }
 
-  /// Grab current EventSample, if any extensionEvents add those to this
-  /// EventSample and clear the outstanding extension events.
-  EventSample pullCloneClear(MemoryTimeline memoryTimeline, int time) {
+  /// Many extension events could arrive between memory collection ticks, those
+  /// events need to be associated with a particular memory tick (timestamp). This
+  /// routine collects those new events received that are closest to a tick
+  /// (time parameter)).
+  /// @returns copy of events to associate with an existing HeapSample tick
+  /// (contained in the EventSample). See [processEventSample] it computes the
+  /// events to aggregate to an existing HeapSample or delay associating those
+  /// events until the next HeapSample (tick) received see [_recalculate].
+  EventSample pullClone(MemoryTimeline memoryTimeline, int time) {
     final pulledEvent = memoryTimeline.pullEventSample();
     final extensionEvents = memoryTimeline.extensionEvents;
     final eventSample = pulledEvent.clone(
@@ -273,7 +280,7 @@ class MemoryTracker {
       if (compared < 0) {
         if ((timeDuration + delay).compareTo(eventDuration) >= 0) {
           // Currently, events are all UI events so duration < _updateDelay
-          eventSample = pullCloneClear(memoryTimeline, time);
+          eventSample = pullClone(memoryTimeline, time);
         } else {
           // Throw away event, missed attempt to attach to a HeapSample.
           final ignoreEvent = memoryTimeline.pullEventSample();
@@ -289,11 +296,11 @@ class MemoryTracker {
           if ((timeDuration - delay).compareTo(eventDuration) >= 0) {
             // Able to match event time to a heap sample. We will attach the
             // EventSample to this HeapSample.
-            eventSample = pullCloneClear(memoryTimeline, time);
+            eventSample = pullClone(memoryTimeline, time);
           }
         } else {
           // The almost exact eventSample we have.
-          eventSample = pullCloneClear(memoryTimeline, time);
+          eventSample = pullClone(memoryTimeline, time);
         }
         // Keep the event, its time hasn't caught up to the HeapSample time yet.
       }
@@ -301,14 +308,12 @@ class MemoryTracker {
       final extensionEvents = memoryTimeline.extensionEvents;
       eventSample = EventSample.extensionEvent(time, extensionEvents);
       if (extensionEvents != null && extensionEvents.isNotEmpty) {
-        debugLogger(
-          'Receieved Extension Events ${extensionEvents.theEvents.length}',
-        );
+        debugLogger('Receieved Extension Events '
+            '${extensionEvents.theEvents.length}');
         for (var e in extensionEvents.theEvents) {
           final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp);
-          debugLogger(
-            '  ${e.eventKind}  ${e.customEventName} $dt ${e.data['param']}',
-          );
+          debugLogger('  ${e.eventKind} ${e.customEventName} '
+              '$dt ${e.data['param']}');
         }
       }
     }

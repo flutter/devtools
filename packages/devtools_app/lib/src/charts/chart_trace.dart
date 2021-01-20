@@ -47,7 +47,9 @@ class PaintCharacteristics {
   /// Primary color.
   Color color;
 
-  /// Used for DataCount, if count > 1 use this color.
+  /// Color to use if count > 1.
+  ///
+  /// See [DataAggregate.count].
   Color colorAggregate;
 
   ChartSymbol symbol;

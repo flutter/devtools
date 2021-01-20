@@ -137,6 +137,20 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   /// Controller for managing memory collection.
   MemoryController _memoryController;
 
+  /// Note: The event pane is a fixed size chart (y-axis does not scale). The
+  ///       Y-axis fixed range is (visibleVmEvent to extensionEvent) e.g.,
+  /// 
+  ///                         ____________________
+  ///         extensionEvent -|            *  (3.7)
+  ///                         |         *  (2.4)
+  ///                         |      *  (1.4)
+  ///         visibleVmEvent -|   *  (0.4)   
+  ///                    0.0 _|___________________
+  /// 
+  ///       The *s in the above chart are plotted at each y position (3.7, 2.4, 1.4, 0.4).
+  ///       Their y-position is such that the symbols won't overlap.
+  /// TODO(terry): Consider a better solution e.g., % in the Y-axis.
+  
   /// Flutter events and user custom events.
   static const extensionEvent = 3.7;
 
@@ -170,8 +184,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
     _memoryController = Provider.of<MemoryController>(context);
 
-    // TODO(jacobr): this is an ugly way to be using the theme. It would be
-    // better if the controllers weren't involved with the color scheme.
     colorScheme = Theme.of(context).colorScheme;
 
     cancel();
@@ -188,7 +200,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
       // Monitor event fired.
       addAutoDisposeListener(_memoryTimeline.eventNotifier, () {
         setState(() {
-// TODO(terry): New event received.
+          // TODO(terry): New event received.
           //_processHeapSample(_memoryTimeline.eventNotifier.value);
         });
       });

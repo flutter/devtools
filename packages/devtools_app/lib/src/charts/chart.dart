@@ -102,11 +102,11 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
               final timestampIndex =
                   controller.xCoordToTimestampIndex(xLocalPosition);
               final timestamp = controller.xCoordToTimestamp(xLocalPosition);
-              controller.setTapNotifier(TapNotifier(
+              controller.tapLocation.value = TapLocation(
                 details,
                 timestamp,
                 timestampIndex,
-              ));
+              );
             },
             child: Container(
               width: constraints.widthConstraints().maxWidth,
@@ -321,9 +321,9 @@ class ChartPainter extends CustomPainter {
               );
             }
 
-            final tapNotifier = chartController.tapNotifier.value;
-            if (tapNotifier.index == xTickIndex ||
-                tapNotifier.timestamp == currentTimestamp) {
+            final tapLocation = chartController.tapLocation?.value;
+            if (tapLocation?.index == xTickIndex ||
+                tapLocation?.timestamp == currentTimestamp) {
               drawTranslate(
                 canvas,
                 xTranslation,
@@ -454,12 +454,12 @@ class ChartPainter extends CustomPainter {
     }
   }
 
-  void drawSelection(Canvas canvas, double x, y) {
+  void drawSelection(Canvas canvas, double x, double y) {
     final paint = Paint()
       ..strokeWidth = 2.0
       ..color = colorScheme.hoverSelectionBarColor;
 
-    // Draw the yellow vertical selection bar.
+    // Draw the vertical selection bar.
     canvas.drawLine(
       Offset(x, 0), // zero y-position of chart.
       Offset(x, -chartController.canvasChartHeight),
@@ -657,10 +657,9 @@ class ChartPainter extends CustomPainter {
         canvas.drawPath(path, paint);
         break;
       default:
-        logger.log(
-          'Unknown symbol ${characteristics.symbol}',
-          logger.LogLevel.error,
-        );
+        final message = 'Unknown symbol ${characteristics.symbol}';
+        assert(false, message);
+        logger.log(message, logger.LogLevel.error);
     }
   }
 

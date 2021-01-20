@@ -208,14 +208,7 @@ class ChartController extends DisposableController
     _title = value;
   }
 
-  final ValueNotifier<TapNotifier> _tapNotifier =
-      ValueNotifier<TapNotifier>(TapNotifier.empty());
-
-  ValueNotifier<TapNotifier> get tapNotifier => _tapNotifier;
-
-  void setTapNotifier(TapNotifier tap) {
-    _tapNotifier.value = tap;
-  }
+  final tapLocation = ValueNotifier<TapLocation>(null);
 
   /// zoomDuration values of:
   ///     null implies all
@@ -590,28 +583,25 @@ class ChartController extends DisposableController
   }
 }
 
-/// When tap occurs in a chart compute the timestamp and index clicked.
-class TapNotifier {
-  TapNotifier(this.tapDownDetails, this.timestamp, this.index);
+/// Location (index to the data & timestamp of the plotted values) where the user
+/// clicked in a chart.
+class TapLocation {
+  /// When tap occurs, in a chart, pass the timestamp and index to the clicked data.
+  TapLocation(this.tapDownDetails, this.timestamp, this.index);
 
-  TapNotifier.empty()
-      : tapDownDetails = null,
-        timestamp = -1,
-        index = -1;
-
-  /// Copy of TapNotifier w/o the detail, implies not where tap occurred
+  /// Copy of TapLocation w/o the detail, implies not where tap occurred
   /// but the multiple charts tied to the the same timeline should be hilighted
   /// (selection point).
-  TapNotifier.copy(TapNotifier original)
+  TapLocation.copy(TapLocation original)
       : tapDownDetails = null,
         timestamp = original.timestamp,
         index = original.index;
 
   final TapDownDetails tapDownDetails;
 
+  /// Timestamp of the closest item in the x-axis timeseries.
   final int timestamp;
 
+  /// Index of the data point in the timeseries.
   final int index;
-
-  bool get isEmpty => tapDownDetails == null && timestamp == -1 && index == -1;
 }
