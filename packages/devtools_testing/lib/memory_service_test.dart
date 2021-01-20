@@ -8,6 +8,7 @@
 @TestOn('vm')
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_protocol.dart';
+import 'package:devtools_app/src/memory/memory_timeline.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:test/test.dart';
 
@@ -22,8 +23,8 @@ int previousTimestamp = 0;
 
 bool firstSample = true;
 
-void validateHeapInfo(MemoryTracker data) {
-  for (final HeapSample sample in data.samples) {
+void validateHeapInfo(MemoryTimeline timeline) {
+  for (final HeapSample sample in timeline.data) {
     expect(sample.timestamp, greaterThan(0));
     expect(sample.timestamp, greaterThan(previousTimestamp));
 
@@ -49,7 +50,7 @@ void validateHeapInfo(MemoryTracker data) {
     previousTimestamp = sample.timestamp;
   }
 
-  data.samples.clear();
+  timeline.data.clear();
 
   memoryTrackersReceived++;
 }
@@ -90,7 +91,7 @@ Future<void> runMemoryServiceTests(FlutterTestEnvironment env) async {
           // VM Service connection has stopped - unexpected.
           fail('VM Service connection stoped unexpectantly.');
         } else {
-          validateHeapInfo(memoryTracker);
+          validateHeapInfo(memoryController.memoryTimeline);
         }
       });
 
