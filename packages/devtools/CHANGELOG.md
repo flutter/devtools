@@ -1,6 +1,9 @@
 ## 0.9.7
 * Support null safe `package:vm_service` version `>=6.x.x`. 
 
+## 0.9.6+1  
+* Fallback to port 0 if we cannot connect the DevTools server to ports 9100-9109 #2600 
+
 ## 0.9.6
 * Remove use of Flutter service worker [#2586](https://github.com/flutter/devtools/pull/2586)
 * Badge performance tab when UI jank is detected and add a setting to enable/disable this functionality. [#2580](https://github.com/flutter/devtools/pull/2580)
