@@ -422,10 +422,7 @@ void main() {
         expect(serverResponse['clients'][0]['vmServiceUri'],
             equals(appFixture.serviceUri.toString()));
       }, timeout: const Timeout.factor(10));
-      // The API only works in release mode.
-      // TODO(kenz): enable integration tests.
-      // See https://github.com/flutter/devtools/issues/2595.
-    }, skip: true /*!testInReleaseMode*/);
+    }, skip: !testInReleaseMode);
   }
 }
 
