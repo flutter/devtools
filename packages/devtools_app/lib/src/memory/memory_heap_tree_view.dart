@@ -26,9 +26,11 @@ import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_protocol.dart';
+import 'memory_screen.dart';
 import 'memory_snapshot_models.dart';
 
-final memorySearchFieldKey = GlobalKey(debugLabel: 'MemorySearchFieldKey');
+const memorySearchFieldKeyName = 'MemorySearchFieldKey';
+final memorySearchFieldKey = GlobalKey(debugLabel: memorySearchFieldKeyName);
 
 class HeapTree extends StatefulWidget {
   const HeapTree(
@@ -213,6 +215,7 @@ class HeapTreeViewState extends State<HeapTree>
     });
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
+      SnapshotFilterState.gaActionForSnapshotFilterDialog();
       setState(controller.autoCompleteOverlaySetState(
         searchFieldKey: memorySearchFieldKey,
         context: context,
@@ -411,9 +414,9 @@ class HeapTreeViewState extends State<HeapTree>
   @visibleForTesting
   static const groupByMenuButtonKey = Key('Group By Menu Button');
   @visibleForTesting
-  static const groupByMenuItem = Key('Filter Group By Menu Item');
+  static const groupByMenuItem = Key('Group By Menu Item');
   @visibleForTesting
-  static const groupByKey = Key('Filter Group By');
+  static const groupByKey = Key('Group By');
 
   Widget _groupByDropdown(TextTheme textTheme) {
     final _groupByTypes = [
@@ -443,6 +446,7 @@ class HeapTreeViewState extends State<HeapTree>
         onChanged: (String newValue) {
           setState(
             () {
+              MemoryScreen.gaAction(name: '${keyName(groupByKey)} $newValue');
               controller.selectedLeaf = null;
               controller.groupingBy.value = newValue;
               if (controller.snapshots.isNotEmpty) {
@@ -481,6 +485,7 @@ class HeapTreeViewState extends State<HeapTree>
             key: collapseAllButtonKey,
             onPressed: snapshotDisplay is MemoryHeapTable
                 ? () {
+                    MemoryScreen.gaAction(key: collapseAllButtonKey);
                     if (snapshotDisplay is MemoryHeapTable) {
                       controller.groupByTreeTable.dataRoots.every((element) {
                         element.collapseCascading();
@@ -504,6 +509,7 @@ class HeapTreeViewState extends State<HeapTree>
             key: expandAllButtonKey,
             onPressed: snapshotDisplay is MemoryHeapTable
                 ? () {
+                    MemoryScreen.gaAction(key: expandAllButtonKey);
                     if (snapshotDisplay is MemoryHeapTable) {
                       controller.groupByTreeTable.dataRoots.every((element) {
                         element.expandCascading();
@@ -523,6 +529,7 @@ class HeapTreeViewState extends State<HeapTree>
           child: OutlinedButton(
             key: allocationMonitorKey,
             onPressed: () async {
+              MemoryScreen.gaAction(key: allocationMonitorKey);
               await _allocationStart();
             },
             child: createImageIcon(
@@ -537,6 +544,7 @@ class HeapTreeViewState extends State<HeapTree>
           child: OutlinedButton(
             key: allocationMonitorResetKey,
             onPressed: () async {
+              MemoryScreen.gaAction(key: allocationMonitorResetKey);
               await _allocationReset();
             },
             child: createImageIcon(
@@ -640,6 +648,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   /// Match, found,  select it and process via ValueNotifiers.
   void selectTheMatch(String foundName) {
+    MemoryScreen.gaAction(name: memorySearchFieldKeyName);
     setState(() {
       if (snapshotDisplay is MemoryHeapTable) {
         controller.groupByTreeTable.dataRoots.every((element) {
@@ -694,6 +703,8 @@ class HeapTreeViewState extends State<HeapTree>
   // TODO: Much of the logic for _takeHeapSnapshot() might want to move into the
   // controller.
   void _takeHeapSnapshot({bool userGenerated = true}) async {
+    MemoryScreen.gaAction(key: snapshotButtonKey);
+
     // VmService not available (disconnected/crashed).
     if (serviceManager.service == null) return;
 
@@ -783,6 +794,7 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   void _filter() {
+    MemoryScreen.gaAction(name: 'SnapshotFilterDialog');
     showDialog(
       context: context,
       builder: (BuildContext context) => SnapshotFilterDialog(controller),

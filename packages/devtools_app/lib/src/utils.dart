@@ -406,6 +406,11 @@ class JsonUtils {
   }
 }
 
+/// Add pretty print for a JSON payload.
+extension JsonMap on Map<String, Object> {
+  String prettyPrint() => const JsonEncoder.withIndent('  ').convert(this);
+}
+
 typedef RateLimiterCallback = Future<Object> Function();
 
 /// Rate limiter that ensures a [callback] is run no more  than the
@@ -981,7 +986,6 @@ class DevToolsFile<T> {
 
 /// Logging to debug console only in debug runs.
 void debugLogger(String message) {
-  // Debug only check.
   assert(() {
     logger.log('$message');
     return true;
@@ -1024,3 +1028,8 @@ Map<String, String> devToolsQueryParams(String url) {
   final uri = Uri.parse(modifiedUri);
   return uri.queryParameters;
 }
+
+/// Helper function to return the name of a key. If widget has a key
+/// use the key's name to record the select e.g.,
+///   ga.select(MemoryScreen.id, ga.keyName(MemoryScreen.gcButtonKey));
+String keyName(Key key) => (key as ValueKey<String>)?.value;

@@ -208,6 +208,8 @@ class ChartController extends DisposableController
     _title = value;
   }
 
+  final tapLocation = ValueNotifier<TapLocation>(null);
+
   /// zoomDuration values of:
   ///     null implies all
   ///     Duration() imples live (default)
@@ -545,7 +547,7 @@ class ChartController extends DisposableController
   /// Returns a 0 based X-coordinate, this coordinate is not yet translated
   /// to the coordinates of the rendered chart. Returns -1 if timestamp not
   /// visible.
-  double timestampXCanvasCoord(int timestamp) {
+  double timestampToXCanvasCoord(int timestamp) {
     final index = timestamps.indexOf(timestamp);
     if (index >= 0) {
       // Valid index.
@@ -556,4 +558,50 @@ class ChartController extends DisposableController
     }
     return -1;
   }
+
+  int xCoordToTimestamp(double xCoord) =>
+      timestamps[xCoordToTimestampIndex(xCoord)];
+
+  int xCoordToTimestampIndex(double xCoord) {
+    final firstVisibleIndex = leftVisibleIndex;
+    final index = (xCoord - leftPadding) ~/ tickWidth;
+
+    int timestampedIndex;
+
+    if (totalTimestampTicks < 0) {
+      // Not enough items plotted on x-axis.
+      timestampedIndex = index + totalTimestampTicks;
+    } else if (index >= firstVisibleIndex) {
+      timestampedIndex = index - firstVisibleIndex;
+    } else {
+      timestampedIndex = index + firstVisibleIndex;
+    }
+
+    // If index is left side, negative, that has yet to have any data
+    // return the first timestamp.
+    return timestampedIndex >= 0 ? timestampedIndex : 0;
+  }
+}
+
+/// Location (index to the data & timestamp of the plotted values) where the user
+/// clicked in a chart.
+class TapLocation {
+  /// When tap occurs, in a chart, pass the timestamp and index to the clicked data.
+  TapLocation(this.tapDownDetails, this.timestamp, this.index);
+
+  /// Copy of TapLocation w/o the detail, implies not where tap occurred
+  /// but the multiple charts tied to the the same timeline should be hilighted
+  /// (selection point).
+  TapLocation.copy(TapLocation original)
+      : tapDownDetails = null,
+        timestamp = original.timestamp,
+        index = original.index;
+
+  final TapDownDetails tapDownDetails;
+
+  /// Timestamp of the closest item in the x-axis timeseries.
+  final int timestamp;
+
+  /// Index of the data point in the timeseries.
+  final int index;
 }

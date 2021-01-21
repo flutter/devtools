@@ -56,7 +56,7 @@ packages:
       name: browser_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.7"
+    version: "0.1.8"
   characters:
     dependency: transitive
     description:
@@ -316,7 +316,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.2+2"
+    version: "4.3.2+4"
   pub_semver:
     dependency: transitive
     description:
@@ -351,7 +351,7 @@ packages:
       name: shelf_static
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.8"
+    version: "0.2.9+1"
   shelf_web_socket:
     dependency: transitive
     description:

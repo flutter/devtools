@@ -15,12 +15,23 @@ class Data {
   final double y;
 }
 
+/// Stores the count of number of same points collected @ timestamp.  Used for
+/// ExtensionEvents to coallase multiple events to one plotted symbol.
+class DataAggregate extends Data {
+  DataAggregate(int timestamp, double y, this.count) : super(timestamp, y);
+
+  final int count;
+}
+
 class PaintCharacteristics {
   PaintCharacteristics({
     @required this.color,
+    this.colorAggregate,
     this.symbol = ChartSymbol.ring,
     this.strokeWidth = 1,
     this.diameter = 1,
+    this.width = 1,
+    this.height = 1,
     this.fixedMinY,
     this.fixedMaxY,
   });
@@ -33,13 +44,25 @@ class PaintCharacteristics {
   /// Will assert if new data point is more than max specified.
   double fixedMaxY;
 
+  /// Primary color.
   Color color;
+
+  /// Color to use if count > 1.
+  ///
+  /// See [DataAggregate.count].
+  Color colorAggregate;
 
   ChartSymbol symbol;
 
   double strokeWidth;
 
+  /// Used for disc or ring (circle).
   double diameter;
+
+  /// Height and Width used for square or triangle.
+  double height;
+
+  double width;
 }
 
 class Trace {
@@ -64,6 +87,32 @@ class Trace {
   double dataYMax = 0;
 
   final _data = <Data>[];
+
+  Path get symbolPath {
+    if (_symbolPath != null) return _symbolPath;
+
+    switch (characteristics.symbol) {
+      case ChartSymbol.filledSquare:
+      case ChartSymbol.square:
+        _symbolPath = _createSquare();
+        break;
+      case ChartSymbol.filledTriangle:
+      case ChartSymbol.triangle:
+        _symbolPath = _createTriangle();
+        break;
+      case ChartSymbol.filledTriangleDown:
+      case ChartSymbol.triangleDown:
+        _symbolPath = _createTriangleDown();
+        break;
+      default:
+        _symbolPath = null;
+    }
+
+    return _symbolPath;
+  }
+
+  /// Path to draw symbol.
+  Path _symbolPath;
 
   // TODO(terry): Consider UnmodifiableListView if data is loaded from offline file (not live).
   List<Data> get data => _data;
@@ -105,6 +154,85 @@ class Trace {
     // New data has arrived notify listeners this data needs to be plotted.
     controller.traceChanged.value = TraceNotifier(traceIndex, data.length - 1);
   }
+
+  /// Draw square centered on [x,y] point (*).
+  ///  0_____    .___.
+  ///            |   |
+  ///            | * |
+  ///            !___!
+  ///
+  Path _createSquare() {
+    if (_symbolPath == null) {
+      _symbolPath = Path();
+
+      _symbolPath.addRect(
+        Rect.fromLTWH(
+          0,
+          0,
+          characteristics.width,
+          characteristics.height,
+        ),
+      );
+
+      _symbolPath.close();
+    }
+
+    return _symbolPath;
+  }
+
+  /// Draw triangle centered on [x,y] point (*).
+  ///  0____    .
+  ///          / \
+  ///         / * \
+  ///       ./_____\.
+  ///
+  Path _createTriangle() {
+    if (_symbolPath == null) {
+      final width = characteristics.width;
+      final height = characteristics.height;
+
+      _symbolPath = Path();
+
+      // Top point.
+      _symbolPath.moveTo(width / 2, 0);
+      // Diagonal line from top point to bottom right-side.
+      _symbolPath.lineTo(width, height);
+      // Horizontal line from bottom right-side to bottom left-side.
+      _symbolPath.lineTo(0, height);
+
+      // Closing path finishes left-side diagonal line from bottom-left corner
+      // to top point.
+      _symbolPath.close();
+    }
+
+    return _symbolPath;
+  }
+
+  // Draw triangle centered on [x,y] point (*).
+  //  0 _____  ._______.
+  //            \     /
+  //             \ * /
+  //              \ /
+  //               `
+  Path _createTriangleDown() {
+    if (_symbolPath == null) {
+      final width = characteristics.width;
+      final height = characteristics.height;
+
+      _symbolPath = Path();
+
+      // Straight horizontal line to top-right corner (moveTo starts at 0,0).
+      _symbolPath.lineTo(width, 0);
+      // Diagonal right-side line to bottom tip point.
+      _symbolPath.lineTo(width / 2, height);
+
+      // Closing path finishes left-side diagonal line from bottom tip point to
+      // top-left corner.
+      _symbolPath.close();
+    }
+
+    return _symbolPath;
+  }
 }
 
 class TraceNotifier {
@@ -124,10 +252,15 @@ enum ChartType {
 }
 
 enum ChartSymbol {
-  ring,
-  disc,
-  square,
-  triangle,
+  ring, // Lined circle
+  disc, // Filled circle
+  square, // Lined square
+  filledSquare, // Filled square
+  triangle, // Lined triangle
+  filledTriangle,
+  triangleDown, // Lined triangle points down
+  filledTriangleDown,
+
   dashedLine,
 }
 

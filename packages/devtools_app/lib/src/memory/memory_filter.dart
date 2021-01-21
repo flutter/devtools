@@ -10,6 +10,7 @@ import '../dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../ui/utils.dart';
 import 'memory_controller.dart';
+import 'memory_screen.dart';
 import 'memory_snapshot_models.dart';
 
 /// First two libraries are special e.g., dart:* and package:flutter*
@@ -120,6 +121,15 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   LinkedScrollControllerGroup _controllers;
 
   ScrollController _letters;
+
+  @visibleForTesting
+  static const snapshotFilterDialogKey = Key('SnapshotFilterDialog');
+
+  // Define here because exportButtonKey is @visibleForTesting and
+  // and can't be ref'd outside of file.
+  static void gaActionForSnapshotFilterDialog() {
+    MemoryScreen.gaAction(key: snapshotFilterDialogKey);
+  }
 
   @override
   void initState() {
@@ -291,6 +301,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     // The listbox area is the area that grows to accommodate the list of known libraries.
     // TODO(devoncarew): Convert to a DevToolsDialog.
     return Dialog(
+      key: snapshotFilterDialogKey,
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           return Container(

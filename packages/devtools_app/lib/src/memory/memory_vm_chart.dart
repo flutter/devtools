@@ -87,7 +87,7 @@ class VMChartController extends ChartController {
 }
 
 class MemoryVMChart extends StatefulWidget {
-  const MemoryVMChart(this.chartController);
+  const MemoryVMChart(this.chartController, {Key key}) : super(key: key);
 
   final VMChartController chartController;
 
@@ -130,11 +130,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
 
     _memoryController = Provider.of<MemoryController>(context);
 
-    // TODO(jacobr): this is an ugly way to be using the theme. It would be
-    // better if the controllers weren't involved with the color scheme.
     colorScheme = Theme.of(context).colorScheme;
-
-    //_initController(colorScheme);
 
     cancel();
 
@@ -164,11 +160,12 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
 
   // TODO(terry): Move colors to theme?
   static final capacityColor = Colors.grey[400];
-  static final externalColor = Colors.blue[400];
-  static const rasterLayerColor = Color(0xff99cc00); // HoloGreenLight
-  static const rasterPictureColor = Color(0xffff4444); // HoloRedLight
-  static const rssColor = Color(0xffffbb33); // HoloOrangeLight
-  static const usedColor = Color(0xff33b5e5); // HoloBlue
+  static const usedColor = Color(0xff33b5e5);
+  static const externalColor = Color(0xff4ddeff);
+  // TODO(terry): UX review of raster colors see https://github.com/flutter/devtools/issues/2616
+  static const rasterLayerColor = Color(0xff99cc00);
+  static const rasterPictureColor = Color(0xffff4444);
+  static const rssColor = Color(0xffff9300);
 
   void setupTraces() {
     if (_chartController.traces.isNotEmpty) {
@@ -260,7 +257,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
       trace.ChartType.line,
       trace.PaintCharacteristics(
         color: rasterLayerColor,
-        symbol: trace.ChartSymbol.disc,
+        symbol: trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
       name: TraceName.rasterLayer.toString(),
@@ -273,7 +270,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
       trace.ChartType.line,
       trace.PaintCharacteristics(
         color: rasterPictureColor,
-        symbol: trace.ChartSymbol.disc,
+        symbol: trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
       name: TraceName.rasterPicture.toString(),

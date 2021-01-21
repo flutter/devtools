@@ -2,13 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
+import '../charts/chart_controller.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
@@ -17,12 +22,13 @@ import '../screen.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import '../utils.dart';
-import 'memory_android_chart.dart';
+
+import 'memory_android_chart.dart' as android;
 import 'memory_controller.dart';
-import 'memory_events_pane.dart';
+import 'memory_events_pane.dart' as events;
 import 'memory_heap_tree_view.dart';
 import 'memory_heap_treemap.dart';
-import 'memory_vm_chart.dart';
+import 'memory_vm_chart.dart' as vm;
 
 /// Width of application when memory buttons loose their text.
 const _primaryControlsMinVerboseWidth = 1100.0;
@@ -36,7 +42,16 @@ class MemoryScreen extends Screen {
           icon: Octicons.package,
         );
 
+  @visibleForTesting
+  static const isDebugging = isDebuggingEnabled;
+
+  /// Do not checkin with field set to true, only for local debugging.
+  static const isDebuggingEnabled = false;
+
+  static const id = 'memory';
+
   static const legendKeyName = 'Legend Button';
+  static const hoverKeyName = 'Chart Hover';
 
   @visibleForTesting
   static const pauseButtonKey = Key('Pause Button');
@@ -45,19 +60,18 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
-  static const dropdownIntervalMenuButtonKey =
-      Key('Dropdown Interval Menu Button');
+  static const intervalDropdownKey = Key('ChartInterval Dropdown');
   @visibleForTesting
-  static const intervalMenuItem = Key('Memory Interval Menu Item');
+  static const intervalMenuItem = Key('ChartInterval Menu Item');
   @visibleForTesting
-  static const intervalKey = Key('Memory Interval');
+  static const intervalKey = Key('ChartInterval');
 
   @visibleForTesting
-  static const dropdownSourceMenuButtonKey = Key('Dropdown Source Menu Button');
+  static const sourcesDropdownKey = Key('Sources Dropdown');
   @visibleForTesting
-  static const memorySourcesMenuItem = Key('Memory Sources Menu Item');
+  static const sourcesMenuItemKey = Key('Sources Menu Item');
   @visibleForTesting
-  static const memorySourcesKey = Key('Memory Sources');
+  static const sourcesKey = Key('Sources');
   @visibleForTesting
   static const exportButtonKey = Key('Export Button');
   @visibleForTesting
@@ -65,9 +79,29 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const legendButtonkey = Key(legendKeyName);
 
+  @visibleForTesting
+  static const eventChartKey = Key('EventPane');
+  @visibleForTesting
+  static const vmChartKey = Key('VMChart');
+  @visibleForTesting
+  static const androidChartKey = Key('AndroidChart');
+
+  @visibleForTesting
+  static const androidChartButtonKey = Key('Android Memory');
+
   static const memorySourceMenuItemPrefix = 'Source: ';
 
-  static const id = 'memory';
+  static void gaAction({Key key, String name}) {
+    final recordName = key != null ? keyName(key) : name;
+    assert(recordName != null);
+    ga.select(MemoryScreen.id, recordName);
+  }
+
+  // Define here because exportButtonKey is @visibleForTesting and
+  // and can't be ref'd outside of file.
+  static void gaActionForExport() {
+    gaAction(key: exportButtonKey);
+  }
 
   @override
   String get docPageId => id;
@@ -90,16 +124,14 @@ class MemoryBody extends StatefulWidget {
 
 class MemoryBodyState extends State<MemoryBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  @visibleForTesting
-  static const androidChartButtonKey = Key('Android Chart');
-
-  EventChartController eventChartController;
-  VMChartController vmChartController;
-  AndroidChartController androidChartController;
+  events.EventChartController eventChartController;
+  vm.VMChartController vmChartController;
+  android.AndroidChartController androidChartController;
 
   MemoryController controller;
   TabController tabController;
 
+  OverlayEntry hoverOverlayEntry;
   OverlayEntry legendOverlayEntry;
 
   @override
@@ -125,10 +157,10 @@ class MemoryBodyState extends State<MemoryBody>
 
     controller = newController;
 
-    eventChartController = EventChartController(controller);
-    vmChartController = VMChartController(controller);
+    eventChartController = events.EventChartController(controller);
+    vmChartController = vm.VMChartController(controller);
     // Android Chart uses the VM Chart's computed labels.
-    androidChartController = AndroidChartController(
+    androidChartController = android.AndroidChartController(
       controller,
       sharedLabels: vmChartController.labelTimestamps,
     );
@@ -153,18 +185,101 @@ class MemoryBodyState extends State<MemoryBody>
 
     addAutoDisposeListener(controller.legendVisibleNotifier, () {
       setState(() {
-        controller.isLegendVisible ? showLegend(context) : hideLegend();
+        if (controller.isLegendVisible) {
+          MemoryScreen.gaAction(key: MemoryScreen.legendButtonkey);
+          showLegend(context);
+        } else {
+          hideLegend();
+        }
       });
     });
 
     addAutoDisposeListener(controller.androidChartVisibleNotifier, () {
       setState(() {
+        if (controller.androidChartVisibleNotifier.value) {
+          MemoryScreen.gaAction(key: MemoryScreen.androidChartButtonKey);
+        }
         if (controller.isLegendVisible) {
           // Recompute the legend with the new traces now visible.
           hideLegend();
           showLegend(context);
         }
       });
+    });
+
+    addAutoDisposeListener(eventChartController.tapLocation, () {
+      if (eventChartController.tapLocation.value != null) {
+        if (hoverOverlayEntry != null) {
+          hideHover();
+        }
+        final tapLocation = eventChartController.tapLocation.value;
+        if (tapLocation?.tapDownDetails != null) {
+          final tapData = tapLocation;
+          final index = tapData.index;
+          final timestamp = tapData.timestamp;
+
+          final copied = TapLocation.copy(tapLocation);
+          vmChartController.tapLocation.value = copied;
+          androidChartController.tapLocation.value = copied;
+
+          final allValues = ChartsValues(controller, index, timestamp);
+          if (MemoryScreen.isDebuggingEnabled) {
+            debugLogger('Event Chart TapLocation '
+                '${allValues.toJson().prettyPrint()}');
+          }
+          showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+        }
+      }
+    });
+
+    addAutoDisposeListener(vmChartController.tapLocation, () {
+      if (vmChartController.tapLocation.value != null) {
+        if (hoverOverlayEntry != null) {
+          hideHover();
+        }
+        final tapLocation = vmChartController.tapLocation.value;
+        if (tapLocation?.tapDownDetails != null) {
+          final tapData = tapLocation;
+          final index = tapData.index;
+          final timestamp = tapData.timestamp;
+
+          final copied = TapLocation.copy(tapLocation);
+          eventChartController.tapLocation.value = copied;
+          androidChartController.tapLocation.value = copied;
+
+          final allValues = ChartsValues(controller, index, timestamp);
+          if (MemoryScreen.isDebuggingEnabled) {
+            debugLogger('VM Chart TapLocation '
+                '${allValues.toJson().prettyPrint()}');
+          }
+          showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+        }
+      }
+    });
+
+    addAutoDisposeListener(androidChartController.tapLocation, () {
+      if (androidChartController.tapLocation.value != null) {
+        if (hoverOverlayEntry != null) {
+          hideHover();
+        }
+        final tapLocation = androidChartController.tapLocation.value;
+        if (tapLocation?.tapDownDetails != null) {
+          final tapData = tapLocation;
+          final index = tapData.index;
+          final timestamp = tapData.timestamp;
+
+          final copied = TapLocation.copy(tapLocation);
+          eventChartController.tapLocation.value = copied;
+          vmChartController.tapLocation.value = copied;
+
+          final allValues = ChartsValues(controller, index, timestamp);
+          if (MemoryScreen.isDebuggingEnabled) {
+            debugLogger('Android Chart TapLocation '
+                '${allValues.toJson().prettyPrint()}');
+          }
+          showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+        }
+      }
     });
 
     _updateListeningState();
@@ -181,53 +296,74 @@ class MemoryBodyState extends State<MemoryBody>
     controller.memorySourcePrefix = mediaWidth > verboseDropDownMinimumWidth
         ? MemoryScreen.memorySourceMenuItemPrefix
         : '';
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildPrimaryStateControls(textTheme),
-            const Expanded(child: SizedBox(width: denseSpacing)),
-            _buildMemoryControls(textTheme),
-          ],
-        ),
-        SizedBox(
-          height: 50,
-          child: MemoryEventsPane(eventChartController),
-        ),
-        SizedBox(
-          child: MemoryVMChart(vmChartController),
-        ),
-        controller.isAndroidChartVisible
-            ? SizedBox(
-                height: defaultChartHeight,
-                child: MemoryAndroidChart(androidChartController),
-              )
-            : const SizedBox(),
-        const SizedBox(height: defaultSpacing),
-        Row(
-          children: [
-            TabBar(
-              labelColor: textTheme.bodyText1.color,
-              isScrollable: true,
-              controller: tabController,
-              tabs: MemoryBody.memoryTabs,
-            ),
-            const Expanded(child: SizedBox()),
-          ],
-        ),
-        const SizedBox(width: defaultSpacing),
-        Expanded(
-          child: TabBarView(
-            physics: defaultTabBarViewPhysics,
-            controller: tabController,
+
+    // TODO(terry): Can Flutter's focus system be used instead of listening to keyboard?
+    return RawKeyboardListener(
+      focusNode: FocusNode(),
+      onKey: (RawKeyEvent event) {
+        if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+          hideHover();
+        }
+      },
+      autofocus: true,
+      child: Column(
+        key: hoverKey,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              HeapTree(controller),
-              MemoryHeapTreemap(controller),
+              _buildPrimaryStateControls(textTheme),
+              const Expanded(child: SizedBox(width: denseSpacing)),
+              _buildMemoryControls(textTheme),
             ],
           ),
-        ),
-      ],
+          SizedBox(
+            height: 70,
+            child: events.MemoryEventsPane(
+              eventChartController,
+              key: MemoryScreen.eventChartKey,
+            ),
+          ),
+          SizedBox(
+            child: vm.MemoryVMChart(
+              vmChartController,
+              key: MemoryScreen.vmChartKey,
+            ),
+          ),
+          controller.isAndroidChartVisible
+              ? SizedBox(
+                  height: defaultChartHeight,
+                  child: android.MemoryAndroidChart(
+                    androidChartController,
+                    key: MemoryScreen.androidChartKey,
+                  ),
+                )
+              : const SizedBox(),
+          const SizedBox(height: defaultSpacing),
+          Row(
+            children: [
+              TabBar(
+                labelColor: textTheme.bodyText1.color,
+                isScrollable: true,
+                controller: tabController,
+                tabs: MemoryBody.memoryTabs,
+              ),
+              const Expanded(child: SizedBox()),
+            ],
+          ),
+          const SizedBox(width: defaultSpacing),
+          Expanded(
+            child: TabBarView(
+              physics: defaultTabBarViewPhysics,
+              controller: tabController,
+              children: [
+                HeapTree(controller),
+                MemoryHeapTreemap(controller),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -283,11 +419,12 @@ class MemoryBodyState extends State<MemoryBody>
 
     return DropdownButtonHideUnderline(
       child: DropdownButton<String>(
-        key: MemoryScreen.dropdownIntervalMenuButtonKey,
+        key: MemoryScreen.intervalDropdownKey,
         style: textTheme.bodyText2,
         value: displayDuration(controller.displayInterval),
         onChanged: (String newValue) {
           setState(() {
+            MemoryScreen.gaAction(key: MemoryScreen.intervalDropdownKey);
             controller.displayInterval = chartInterval(newValue);
             final duration = chartDuration(controller.displayInterval);
 
@@ -320,22 +457,23 @@ class MemoryBodyState extends State<MemoryBody>
               ? value.substring(MemoryController.logFilenamePrefix.length)
               : value;
       return DropdownMenuItem<String>(
-        key: MemoryScreen.memorySourcesMenuItem,
+        key: MemoryScreen.sourcesMenuItemKey,
         value: value,
         child: Text(
           '${controller.memorySourcePrefix}$displayValue',
-          key: MemoryScreen.memorySourcesKey,
+          key: MemoryScreen.sourcesKey,
         ),
       );
     }).toList();
 
     return DropdownButtonHideUnderline(
       child: DropdownButton<String>(
-        key: MemoryScreen.dropdownSourceMenuButtonKey,
+        key: MemoryScreen.sourcesDropdownKey,
         style: textTheme.bodyText2,
         value: controller.memorySource,
         onChanged: (String newValue) {
           setState(() {
+            MemoryScreen.gaAction(key: MemoryScreen.sourcesDropdownKey);
             controller.memorySource = newValue;
           });
         },
@@ -403,13 +541,13 @@ class MemoryBodyState extends State<MemoryBody>
 
   OutlinedButton createToggleAdbMemoryButton() {
     return OutlinedButton(
-      key: androidChartButtonKey,
+      key: MemoryScreen.androidChartButtonKey,
       onPressed: controller.isConnectedDeviceAndroid
           ? controller.toggleAndroidChartVisibility
           : null,
       child: MaterialIconLabel(
         controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
-        'Android Memory',
+        keyName(MemoryScreen.androidChartButtonKey),
         includeTextWidth: 900,
       ),
     );
@@ -464,6 +602,32 @@ class MemoryBodyState extends State<MemoryBody>
   static const legendHeight1Chart = 185.0;
   static const legendHeight2Charts = 340.0;
 
+  final hoverKey = GlobalKey(debugLabel: MemoryScreen.hoverKeyName);
+  static const hoverXOffset = 10;
+  static const hoverYOffset = 0.0;
+  static const hoverWidth = 240.0;
+
+  // TODO(terry): Compute below heights dynamically.
+  static const hoverHeightMinimum = 40.0;
+  static const hoverItemHeight = 18.0;
+  static const hoverOneEventsHeight =
+      82.0; // One extension event to display (3 lines).
+  static const hoverEventsHeight = 120.0; // Many extension events to display.
+
+  static double computeHoverHeight(
+    int eventsCount,
+    int tracesCount,
+    int extensionEventsCount,
+  ) =>
+      hoverHeightMinimum +
+      (eventsCount * hoverItemHeight) +
+      (tracesCount * hoverItemHeight) +
+      (extensionEventsCount > 0
+          ? (extensionEventsCount == 1
+              ? hoverOneEventsHeight
+              : hoverEventsHeight)
+          : 0);
+
   // TODO(terry): Consider custom painter?
   static const base = 'assets/img/legend/';
   static const snapshotManualLegend = '${base}snapshot_manual_glyph.png';
@@ -472,10 +636,15 @@ class MemoryBodyState extends State<MemoryBody>
   static const resetLegend = '${base}reset_glyph.png';
   static const gcManualLegend = '${base}gc_manual_glyph.png';
   static const gcVMLegend = '${base}gc_vm_glyph.png';
+  static const eventLegend = '${base}event_glyph.png';
+  static const eventsLegend = '${base}events_glyph.png';
   static const capacityLegend = '${base}capacity_glyph.png';
   static const usedLegend = '${base}used_glyph.png';
   static const externalLegend = '${base}external_glyph.png';
   static const rssLegend = '${base}rss_glyph.png';
+  static const rasterLayerLegend = '${base}layer_glyph.png';
+  static const rasterPictureLegend = '${base}picture_glyph.png';
+
   static const androidTotalLegend = '${base}android_total_glyph.png';
   static const androidOtherLegend = '${base}android_other_glyph.png';
   static const androidCodeLegend = '${base}android_code_glyph.png';
@@ -521,6 +690,427 @@ class MemoryBodyState extends State<MemoryBody>
         child: Row(
           children: rowChildren,
         ));
+  }
+
+  Widget hoverRow({
+    String name,
+    String image,
+    bool bold = true,
+    bool hasNumeric = false,
+  }) {
+    final hoverTitleEntry = Theme.of(context).colorScheme.hoverTextStyle;
+    final hoverValueEntry = Theme.of(context).colorScheme.hoverValueTextStyle;
+    final hoverSmallEntry =
+        Theme.of(context).colorScheme.hoverSmallValueTextStyle;
+
+    List<Widget> hoverPart(
+      String name,
+      String image, [
+      double leftEdge = 5.0,
+    ]) {
+      String displayName = name;
+      String displayValue = '';
+      if (hasNumeric) {
+        final lastSpaceBeforeValue = name.lastIndexOf(' ');
+        displayName = '${name.substring(0, lastSpaceBeforeValue)} = ';
+        displayValue = name.substring(lastSpaceBeforeValue + 1);
+      }
+      return [
+        image == null ? const SizedBox() : Image(image: AssetImage(image)),
+        const PaddedDivider(
+          padding: EdgeInsets.only(left: denseRowSpacing),
+        ),
+        Text(displayName, style: bold ? hoverTitleEntry : hoverSmallEntry),
+        Text(displayValue, style: hoverValueEntry)
+      ];
+    }
+
+    final rowChildren = <Widget>[];
+    rowChildren.addAll(hoverPart(name, image));
+    return Container(
+        padding: const EdgeInsets.fromLTRB(10, 0, 0, 2),
+        child: Row(
+          children: rowChildren,
+        ));
+  }
+
+  /// Display name is either '1 Event' or 'n Events'
+  static const eventDisplayName = ' Event';
+  static const eventsDisplayName = ' Events';
+
+  List<Widget> displayExtensionEventsInHover(ChartsValues chartsValues) {
+    final widgets = <Widget>[];
+    final eventsDisplayed = <String, String>{};
+
+    if (chartsValues.hasExtensionEvents) {
+      final eventLength = chartsValues.extensionEventsLength;
+      if (eventLength > 0) {
+        final displayKey = '$eventLength'
+            '${eventLength == 1 ? eventDisplayName : eventsDisplayName}';
+        eventsDisplayed[displayKey] =
+            eventLength == 1 ? eventLegend : eventsLegend;
+      }
+    }
+
+    for (var entry in eventsDisplayed.entries) {
+      if (entry.key.endsWith(eventsDisplayName)) {
+        widgets.add(Container(
+          height: 120,
+          child: ListView(
+            shrinkWrap: true,
+            primary: false,
+            children: [
+              listItem(
+                  events: chartsValues.extensionEvents,
+                  title: entry.key,
+                  icon: Icons.dashboard_rounded),
+            ],
+          ),
+        ));
+      } else {
+        widgets.add(hoverRow(name: entry.key, image: entry.value));
+
+        /// Pull out the event name, and custom values.
+        final output = displayEvent(null, chartsValues.extensionEvents.first);
+        widgets.add(hoverRow(name: output, bold: false));
+      }
+    }
+    return widgets;
+  }
+
+  List<Widget> displayEventsInHover(ChartsValues chartsValues) {
+    final results = <Widget>[];
+
+    final eventsDisplayed = <String, String>{};
+
+    if (chartsValues.hasSnapshot) {
+      eventsDisplayed['Snapshot'] = snapshotManualLegend;
+    } else if (chartsValues.hasAutoSnapshot) {
+      eventsDisplayed['Auto Snapshot'] = snapshotAutoLegend;
+    } else if (chartsValues.hasMonitorStart) {
+      eventsDisplayed['Monitor Start'] = monitorLegend;
+    } else if (chartsValues.hasMonitorReset) {
+      eventsDisplayed['Monitor Reset'] = resetLegend;
+    }
+
+    if (chartsValues.hasGc) {
+      eventsDisplayed['GC'] = gcVMLegend;
+    }
+
+    if (chartsValues.hasManualGc) {
+      eventsDisplayed['User GC'] = gcManualLegend;
+    }
+
+    for (var entry in eventsDisplayed.entries) {
+      Widget widget;
+
+      widget = hoverRow(name: entry.key, image: entry.value);
+      results.add(widget);
+    }
+
+    return results;
+  }
+
+  // TODO(terry): Data could be long need better mechanism for long data e.g.,:
+  //                const encoder = JsonEncoder.withIndent('  ');
+  //                final displayData = encoder.convert(data);
+  String longValueToShort(String longValue) {
+    var value = longValue;
+    if (longValue.length > 35) {
+      final firstPart = longValue.substring(0, 10);
+      final endPart = longValue.substring(longValue.length - 20);
+      value = '$firstPart...$endPart';
+    }
+    return value;
+  }
+
+  String decodeEventValues(Map<String, Object> event) {
+    final output = StringBuffer();
+    if (event[eventName] == imageSizesForFrameEvent) {
+      // TODO(terry): Need a more generic event displayer.
+      // Flutter event emit the event name and value.
+      final Map<String, Object> data = event[eventData];
+      final key = data.keys.first;
+      output.writeln(' ${longValueToShort(key)}');
+      final Map values = data[key];
+      final displaySize = values[displaySizeInBytesData];
+      final decodeSize = values[decodedSizeInBytesData];
+      output.writeln(' Display/Decode Size=$displaySize/$decodeSize');
+    } else if (event[eventName] == devToolsEvent &&
+        event.containsKey(customEvent)) {
+      final Map custom = event[customEvent];
+      final data = custom[customEventData];
+      for (var key in data.keys) {
+        output.write(' $key=');
+        output.writeln(' ${longValueToShort(data[key])}');
+      }
+    } else {
+      output.writeln('Unknown Event ${event[eventName]}');
+    }
+
+    return output.toString();
+  }
+
+  String displayEvent(int index, Map<String, Object> event) {
+    final output = StringBuffer();
+
+    String name;
+
+    if (event[eventName] == devToolsEvent && event.containsKey(customEvent)) {
+      final Map custom = event[customEvent];
+      name = custom[customEventName];
+    } else {
+      name = event[eventName];
+    }
+
+    output.writeln(index == null ? name : '[$index] $name');
+    output.writeln(decodeEventValues(event));
+
+    return output.toString();
+  }
+
+  Widget listItem({
+    List<Map<String, Object>> events,
+    int index,
+    String title,
+    IconData icon,
+  }) {
+    final widgets = <Widget>[];
+    var index = 1;
+    for (var event in events) {
+      final output = displayEvent(index, event);
+      widgets.add(cardWidget(output));
+      index++;
+    }
+
+    final hoverTitleEntry = Theme.of(context).colorScheme.hoverTextStyle;
+
+    return Material(
+      color: Colors.transparent,
+      child: Theme(
+        data: ThemeData(accentColor: Colors.black),
+        child: ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: EdgeInsets.zero,
+          leading: Container(
+            padding: const EdgeInsets.only(top: 4),
+            child: Image(
+              image: events.length > 1
+                  ? const AssetImage(eventsLegend)
+                  : const AssetImage(eventLegend),
+            ),
+          ),
+          title: Text(title, style: hoverTitleEntry),
+          children: widgets,
+        ),
+      ),
+    );
+  }
+
+  Widget cardWidget(String value) {
+    final hoverValueEntry =
+        Theme.of(context).colorScheme.hoverSmallValueTextStyle;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        width: hoverWidth,
+        decoration: const BoxDecoration(
+          color: Colors.white30,
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 10),
+            Text(
+              value,
+              overflow: TextOverflow.ellipsis,
+              style: hoverValueEntry,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> displayVmDataInHover(ChartsValues chartsValues) {
+    const rssDisplay = 'RSS';
+    const capacityDisplay = 'Capacity';
+    const usedDisplay = 'Used';
+    const externalDisplay = 'External';
+    const layerDisplay = 'Raster Layer';
+    const pictureDisplay = 'Raster Picture';
+
+    final results = <Widget>[];
+
+    final vmDataDisplayed = <String, String>{};
+
+    final data = chartsValues.vmData;
+
+    final rssValueDisplay = nf.format(data[rssJsonName]);
+    vmDataDisplayed['$rssDisplay $rssValueDisplay'] = rssLegend;
+
+    final capacityValueDisplay = nf.format(data[capacityJsonName]);
+    vmDataDisplayed['$capacityDisplay $capacityValueDisplay'] = capacityLegend;
+
+    final usedValueDisplay = nf.format(data[usedJsonName]);
+    vmDataDisplayed['$usedDisplay $usedValueDisplay'] = usedLegend;
+
+    final externalValueDisplay = nf.format(data[externalJsonName]);
+    vmDataDisplayed['$externalDisplay $externalValueDisplay'] = externalLegend;
+
+    final layerValueDisplay = nf.format(data[rasterLayerJsonName]);
+    vmDataDisplayed['$layerDisplay $layerValueDisplay'] = rasterLayerLegend;
+
+    final pictureValueDisplay = nf.format(data[rasterPictureJsonName]);
+    vmDataDisplayed['$pictureDisplay $pictureValueDisplay'] =
+        rasterPictureLegend;
+
+    for (var entry in vmDataDisplayed.entries) {
+      results.add(hoverRow(
+        name: entry.key,
+        image: entry.value,
+        hasNumeric: true,
+      ));
+    }
+
+    return results;
+  }
+
+  List<Widget> displayAndroidDataInHover(ChartsValues chartsValues) {
+    const totalDisplay = 'Total';
+    const otherDisplay = 'Other';
+    const codeDisplay = 'Code';
+    const nativeDisplay = 'Native';
+    const javaDisplay = 'Java';
+    const stackDisplay = 'Stack';
+    const graphicsDisplay = 'Graphics';
+
+    final results = <Widget>[];
+
+    if (controller.isAndroidChartVisible) {
+      final androidDataDisplayed = <String, String>{};
+
+      final data = chartsValues.androidData;
+
+      final totalValueDisplay = nf.format(data[adbTotalJsonName]);
+      androidDataDisplayed['$totalDisplay $totalValueDisplay'] =
+          androidTotalLegend;
+
+      final otherValueDisplay = nf.format(data[adbOtherJsonName]);
+      androidDataDisplayed['$otherDisplay $otherValueDisplay'] =
+          androidOtherLegend;
+
+      final codeValueDisplay = nf.format(data[adbCodeJsonName]);
+      androidDataDisplayed['$codeDisplay $codeValueDisplay'] =
+          androidCodeLegend;
+
+      final nativeValueDisplay = nf.format(data[adbNativeHeapJsonName]);
+      androidDataDisplayed['$nativeDisplay $nativeValueDisplay'] =
+          androidNativeLegend;
+
+      final javaValueDisplay = nf.format(data[adbJavaHeapJsonName]);
+      androidDataDisplayed['$javaDisplay $javaValueDisplay'] =
+          androidJavaLegend;
+
+      final stackValueDisplay = nf.format(data[adbStackJsonName]);
+      androidDataDisplayed['$stackDisplay $stackValueDisplay'] =
+          androidStackLegend;
+
+      final graphicsValueDisplay = nf.format(data[adbGraphicsJsonName]);
+      androidDataDisplayed['$graphicsDisplay $graphicsValueDisplay'] =
+          androidGraphicsLegend;
+
+      for (var entry in androidDataDisplayed.entries) {
+        results.add(hoverRow(
+          name: entry.key,
+          image: entry.value,
+          hasNumeric: true,
+        ));
+      }
+    }
+
+    return results;
+  }
+
+  void showHover(
+    BuildContext context,
+    ChartsValues chartsValues,
+    Offset position,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final RenderBox box = hoverKey.currentContext.findRenderObject();
+    final renderBoxWidth = box.size.width;
+
+    // Display hover to left of right side of position.
+    double xPosition = position.dx + hoverXOffset;
+    if (xPosition + hoverWidth > renderBoxWidth) {
+      xPosition = position.dx - hoverWidth - hoverXOffset;
+    }
+
+    double totalHoverHeight;
+    int totalTraces;
+    if (controller.isAndroidChartVisible) {
+      totalTraces = chartsValues.vmData.entries.length -
+          1 +
+          chartsValues.androidData.entries.length;
+    } else {
+      totalTraces = chartsValues.vmData.entries.length - 1;
+    }
+
+    totalHoverHeight = computeHoverHeight(
+      chartsValues.eventCount,
+      totalTraces,
+      chartsValues.extensionEventsLength,
+    );
+
+    final displayTimestamp = prettyTimestamp(chartsValues.timestamp);
+
+    final hoverHeading = colorScheme.hoverTitleTextStyle;
+
+    final OverlayState overlayState = Overlay.of(context);
+    hoverOverlayEntry ??= OverlayEntry(
+      builder: (context) => Positioned(
+        top: position.dy + hoverYOffset,
+        left: xPosition,
+        height: totalHoverHeight,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(0, 5, 0, 8),
+          decoration: BoxDecoration(
+            color: colorScheme.hoverBackgroundColor,
+            border: Border.all(color: Colors.yellow),
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          width: hoverWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+                child: Text('Time $displayTimestamp', style: hoverHeading),
+              ),
+            ]
+              ..addAll(displayEventsInHover(chartsValues))
+              ..addAll(displayVmDataInHover(chartsValues))
+              ..addAll(displayAndroidDataInHover(chartsValues))
+              ..addAll(displayExtensionEventsInHover(chartsValues)),
+          ),
+        ),
+      ),
+    );
+
+    overlayState.insert(hoverOverlayEntry);
+  }
+
+  void hideHover() {
+    if (hoverOverlayEntry != null) {
+      eventChartController.tapLocation.value = null;
+      vmChartController.tapLocation.value = null;
+      androidChartController.tapLocation.value = null;
+
+      hoverOverlayEntry?.remove();
+      hoverOverlayEntry = null;
+    }
   }
 
   void showLegend(BuildContext context) {
@@ -617,6 +1207,8 @@ class MemoryBodyState extends State<MemoryBody>
   /// Callbacks for button actions:
 
   void _clearTimeline() {
+    MemoryScreen.gaAction(key: MemoryScreen.clearButtonKey);
+
     controller.memoryTimeline.reset();
 
     // Clear any current Allocation Profile collected.
@@ -635,19 +1227,196 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Future<void> _gc() async {
-    // TODO(terry): Record GC in analytics.
     try {
-      debugLogger('User Initiated GC Start');
+      MemoryScreen.gaAction(key: MemoryScreen.gcButtonKey);
 
-      // TODO(terry): Only record GCs not when user initiated.
       controller.memoryTimeline.addGCEvent();
 
       await controller.gc();
-
-      debugLogger('User GC Complete');
     } catch (e) {
       // TODO(terry): Show toast?
       log('Unable to GC ${e.toString()}', LogLevel.error);
     }
+  }
+}
+
+/// Event types handled for hover card.
+const devToolsEvent = 'DevTools.Event';
+const imageSizesForFrameEvent = 'Flutter.ImageSizesForFrame';
+const displaySizeInBytesData = 'displaySizeInBytes';
+const decodedSizeInBytesData = 'decodedSizeInBytes';
+
+const String eventName = 'name';
+const String eventData = 'data';
+const String customEvent = 'custom';
+const String customEventName = 'name';
+const String customEventData = 'data';
+
+const String indexPayloadJson = 'index';
+const String timestampPayloadJson = 'timestamp';
+const String prettyTimestampPayloadJson = 'prettyTimestamp';
+const String eventPayloadJson = 'event';
+const String vmPayloadJson = 'vm';
+const String androidPayloadJson = 'android';
+
+/// VM Data
+const String rssJsonName = 'rss';
+const String capacityJsonName = 'capacity';
+const String usedJsonName = 'used';
+const String externalJsonName = 'external';
+const String rasterPictureJsonName = 'rasterLayer';
+const String rasterLayerJsonName = 'rasterPicture';
+
+/// Android data
+const String adbTotalJsonName = 'total';
+const String adbOtherJsonName = 'other';
+const String adbCodeJsonName = 'code';
+const String adbNativeHeapJsonName = 'nativeHeap';
+const String adbJavaHeapJsonName = 'javaHeap';
+const String adbStackJsonName = 'stack';
+const String adbGraphicsJsonName = 'graphics';
+
+/// Events data
+const String snapshotJsonName = 'snapshot';
+const String autoSnapshotJsonName = 'autoSnapshot';
+const String monitorStartJsonName = 'monitorStart';
+const String monitorResetJsonName = 'monitorReset';
+const String extensionEventsJsonName = 'extensionEvents';
+const String manualGCJsonName = 'manualGC';
+const String gcJsonName = 'gc';
+
+/// Retrieve all data values of a given index (timestamp) of the collected data.
+class ChartsValues {
+  ChartsValues(this.controller, this.index, this.timestamp) {
+    _fetch();
+  }
+
+  final MemoryController controller;
+
+  final int index;
+
+  final int timestamp;
+
+  final _event = <String, Object>{};
+
+  final _extensionEvents = <Map<String, Object>>[];
+
+  Map<String, Object> get vmData => _vm;
+
+  final _vm = <String, Object>{};
+
+  Map<String, Object> get androidData => _android;
+
+  final _android = <String, Object>{};
+
+  Map<String, Object> toJson() {
+    return {
+      indexPayloadJson: index,
+      timestampPayloadJson: timestamp,
+      prettyTimestampPayloadJson: prettyTimestamp(timestamp),
+      eventPayloadJson: _event,
+      vmPayloadJson: _vm,
+      androidPayloadJson: _android,
+    };
+  }
+
+  int get eventCount =>
+      _event.entries.length -
+      (extensionEventsLength > 0 ? 1 : 0) +
+      (hasGc ? 1 : 0);
+
+  bool get hasSnapshot => _event.containsKey(snapshotJsonName);
+  bool get hasAutoSnapshot => _event.containsKey(autoSnapshotJsonName);
+  bool get hasMonitorStart => _event.containsKey(monitorStartJsonName);
+  bool get hasMonitorReset => _event.containsKey(monitorResetJsonName);
+  bool get hasExtensionEvents => _event.containsKey(extensionEventsJsonName);
+  bool get hasManualGc => _event.containsKey(manualGCJsonName);
+  bool get hasGc => _vm[gcJsonName];
+
+  int get extensionEventsLength =>
+      hasExtensionEvents ? extensionEvents.length : 0;
+
+  List<Map<String, Object>> get extensionEvents {
+    if (_extensionEvents.isEmpty) {
+      _extensionEvents.addAll(_event[extensionEventsJsonName]);
+    }
+    return _extensionEvents;
+  }
+
+  void _fetch() {
+    _event.clear();
+    _vm.clear();
+    _android.clear();
+
+    _fetchEventData(_event);
+    _fetchVMData(controller.memoryTimeline.data[index], _vm);
+    _fetchAndroidData(
+      controller.memoryTimeline.data[index].adbMemoryInfo,
+      _android,
+    );
+  }
+
+  void _fetchEventData(Map<String, Object> results) {
+    // Use the detailed extension events data stored in the memoryTimeline.
+    final eventInfo = controller.memoryTimeline.data[index].memoryEventInfo;
+
+    if (eventInfo.isEmpty) return;
+
+    if (eventInfo.isEventGC) results[manualGCJsonName] = true;
+    if (eventInfo.isEventSnapshot) results[snapshotJsonName] = true;
+    if (eventInfo.isEventSnapshotAuto) results[autoSnapshotJsonName] = true;
+    if (eventInfo.isEventAllocationAccumulator) {
+      if (eventInfo.allocationAccumulator.isStart) {
+        results[monitorStartJsonName] = true;
+      }
+      if (eventInfo.allocationAccumulator.isReset) {
+        results[monitorResetJsonName] = true;
+      }
+    }
+
+    if (eventInfo.hasExtensionEvents) {
+      final events = <Map<String, Object>>[];
+      for (ExtensionEvent event in eventInfo.extensionEvents.theEvents) {
+        if (event.customEventName != null) {
+          events.add(
+            {
+              eventName: event.eventKind,
+              customEvent: {
+                customEventName: event.customEventName,
+                customEventData: event.data,
+              },
+            },
+          );
+        } else {
+          events.add({eventName: event.eventKind, eventData: event.data});
+        }
+      }
+      if (events.isNotEmpty) {
+        results[extensionEventsJsonName] = events;
+      }
+    }
+  }
+
+  void _fetchVMData(HeapSample heapSample, Map<String, Object> results) {
+    results[rssJsonName] = heapSample.rss;
+    results[capacityJsonName] = heapSample.capacity;
+    results[usedJsonName] = heapSample.used;
+    results[externalJsonName] = heapSample.external;
+    results[gcJsonName] = heapSample.isGC;
+    results[rasterPictureJsonName] = heapSample.rasterCache.pictureBytes;
+    results[rasterLayerJsonName] = heapSample.rasterCache.layerBytes;
+  }
+
+  void _fetchAndroidData(
+    AdbMemoryInfo androidData,
+    Map<String, Object> results,
+  ) {
+    results[adbTotalJsonName] = androidData.total;
+    results[adbOtherJsonName] = androidData.other;
+    results[adbCodeJsonName] = androidData.code;
+    results[adbNativeHeapJsonName] = androidData.nativeHeap;
+    results[adbJavaHeapJsonName] = androidData.javaHeap;
+    results[adbStackJsonName] = androidData.stack;
+    results[adbGraphicsJsonName] = androidData.graphics;
   }
 }

@@ -28,6 +28,7 @@ class _HomePage extends StatelessWidget {
       ),
       body: Center(
         child: TextButton(
+          style: TextButton.styleFrom(backgroundColor: Colors.green),
           onPressed: () {
             Navigator.push(
               context,
