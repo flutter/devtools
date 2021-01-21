@@ -109,7 +109,7 @@ class VmServiceWrapper implements VmService {
   Future<Response> callServiceExtension(
     String method, {
     String isolateId,
-    Map args,
+    Map<String, dynamic> args,
   }) {
     return trackFuture(
         'callServiceExtension $method',
@@ -1038,7 +1038,7 @@ extension VmServicePrivate on VmServiceWrapper {
     String method, {
     @required T Function(Map<String, dynamic>) parser,
     String isolateId,
-    Map args,
+    Map<String, dynamic> args,
   }) async {
     if (!enablePrivateRpcs) {
       throw StateError('Attempted to invoke private RPC');
