@@ -163,7 +163,7 @@ void main() {
       );
 
       await tester.pump();
-*/
+
       await tester.pump(const Duration(seconds: 2));
 
       await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -174,6 +174,7 @@ void main() {
       );
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
+*/
     });
 
     testWidgetsWithWindowSize('export current memory profile', windowSize,
