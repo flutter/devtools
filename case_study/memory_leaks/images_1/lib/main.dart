@@ -53,7 +53,7 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   Widget recordLoadedImage(ImageChunkEvent imageChunkEvent, String imageUrl) {
-    devToolsPostEvent('CASE STUDY EVENT', {
+    devToolsPostEvent('MyFirstApp', {
       'method': 'recordLoadedImage',
       'param': imageUrl,
     });

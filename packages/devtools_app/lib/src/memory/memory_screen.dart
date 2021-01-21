@@ -42,9 +42,11 @@ class MemoryScreen extends Screen {
           icon: Octicons.package,
         );
 
-  /// Do not checkin with field set to true, only for local debugging.
   @visibleForTesting
-  static const isDebugging = false;
+  static const isDebugging = isDebuggingEnabled;
+
+  /// Do not checkin with field set to true, only for local debugging.
+  static const isDebuggingEnabled = false;
 
   static const id = 'memory';
 
@@ -76,6 +78,13 @@ class MemoryScreen extends Screen {
   static const gcButtonKey = Key('GC Button');
   @visibleForTesting
   static const legendButtonkey = Key(legendKeyName);
+
+  @visibleForTesting
+  static const eventChartKey = Key('EventPane');
+  @visibleForTesting
+  static const vmChartKey = Key('VMChart');
+  @visibleForTesting
+  static const androidChartKey = Key('AndroidChart');
 
   @visibleForTesting
   static const androidChartButtonKey = Key('Android Memory');
@@ -214,7 +223,7 @@ class MemoryBodyState extends State<MemoryBody>
           androidChartController.tapLocation.value = copied;
 
           final allValues = ChartsValues(controller, index, timestamp);
-          if (MemoryScreen.isDebugging) {
+          if (MemoryScreen.isDebuggingEnabled) {
             debugLogger('Event Chart TapLocation '
                 '${allValues.toJson().prettyPrint()}');
           }
@@ -239,7 +248,7 @@ class MemoryBodyState extends State<MemoryBody>
           androidChartController.tapLocation.value = copied;
 
           final allValues = ChartsValues(controller, index, timestamp);
-          if (MemoryScreen.isDebugging) {
+          if (MemoryScreen.isDebuggingEnabled) {
             debugLogger('VM Chart TapLocation '
                 '${allValues.toJson().prettyPrint()}');
           }
@@ -264,7 +273,7 @@ class MemoryBodyState extends State<MemoryBody>
           vmChartController.tapLocation.value = copied;
 
           final allValues = ChartsValues(controller, index, timestamp);
-          if (MemoryScreen.isDebugging) {
+          if (MemoryScreen.isDebuggingEnabled) {
             debugLogger('Android Chart TapLocation '
                 '${allValues.toJson().prettyPrint()}');
           }
@@ -310,15 +319,24 @@ class MemoryBodyState extends State<MemoryBody>
           ),
           SizedBox(
             height: 70,
-            child: events.MemoryEventsPane(eventChartController),
+            child: events.MemoryEventsPane(
+              eventChartController,
+              key: MemoryScreen.eventChartKey,
+            ),
           ),
           SizedBox(
-            child: vm.MemoryVMChart(vmChartController),
+            child: vm.MemoryVMChart(
+              vmChartController,
+              key: MemoryScreen.vmChartKey,
+            ),
           ),
           controller.isAndroidChartVisible
               ? SizedBox(
                   height: defaultChartHeight,
-                  child: android.MemoryAndroidChart(androidChartController),
+                  child: android.MemoryAndroidChart(
+                    androidChartController,
+                    key: MemoryScreen.androidChartKey,
+                  ),
                 )
               : const SizedBox(),
           const SizedBox(height: defaultSpacing),

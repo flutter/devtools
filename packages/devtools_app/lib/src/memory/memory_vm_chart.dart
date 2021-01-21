@@ -87,7 +87,7 @@ class VMChartController extends ChartController {
 }
 
 class MemoryVMChart extends StatefulWidget {
-  const MemoryVMChart(this.chartController);
+  const MemoryVMChart(this.chartController, {Key key}) : super(key: key);
 
   final VMChartController chartController;
 

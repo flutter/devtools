@@ -15,6 +15,7 @@ import '../utils.dart';
 import '../version.dart';
 import '../vm_service_wrapper.dart';
 import 'memory_controller.dart';
+import 'memory_screen.dart';
 import 'memory_timeline.dart';
 
 class MemoryTracker {
@@ -116,7 +117,11 @@ class MemoryTracker {
     rasterCache = await _fetchRasterCacheInfo();
 
     // Polls for current RSS size.
-    _update(await service.getVM(), isolateMemory);
+    final vm = await service.getVM();
+    _update(vm, isolateMemory);
+
+    // TODO(terry): Is there a better way to detect an integration test running?
+    if (vm.json.containsKey('_FAKE_VM')) return;
 
     _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
   }
@@ -307,7 +312,9 @@ class MemoryTracker {
     } else if (memoryTimeline.anyPendingExtensionEvents) {
       final extensionEvents = memoryTimeline.extensionEvents;
       eventSample = EventSample.extensionEvent(time, extensionEvents);
-      if (extensionEvents != null && extensionEvents.isNotEmpty) {
+      if (MemoryScreen.isDebuggingEnabled &&
+          extensionEvents != null &&
+          extensionEvents.isNotEmpty) {
         debugLogger('Receieved Extension Events '
             '${extensionEvents.theEvents.length}');
         for (var e in extensionEvents.theEvents) {

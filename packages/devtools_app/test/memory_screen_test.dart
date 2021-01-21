@@ -118,6 +118,64 @@ void main() {
       );
     });
 
+    testWidgetsWithWindowSize('Chart Select Hover Test', windowSize,
+        (WidgetTester tester) async {
+      await pumpMemoryScreen(tester);
+
+      // Should be collecting live feed.
+      expect(controller.offline, isFalse);
+
+      // Verify default event pane and vm chart exists.
+      expect(find.byKey(MemoryScreen.eventChartKey), findsOneWidget);
+      expect(find.byKey(MemoryScreen.vmChartKey), findsOneWidget);
+
+      expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
+      expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);
+
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      // Load canned data.
+      _setUpServiceManagerForMemory();
+
+      expect(controller.memoryTimeline.data.isNotEmpty, isTrue);
+
+      final data = controller.memoryTimeline.data;
+
+      // Total number of collected HeapSamples.
+      expect(data.length, 104);
+
+      // TODO(terry): Need to fix Flutter detecting UX overflow of hover.
+      //              Also, the Chart is not resized (visible) in golden.
+/*
+      final vmChartFinder = find.byKey(MemoryScreen.vmChartKey);
+      final vmChart = tester.firstWidget(vmChartFinder) as MemoryVMChart;
+
+      final globalPosition = tester.getCenter(vmChartFinder);
+      final newOffset = Offset(globalPosition.dx - 100, globalPosition.dy);
+
+      vmChart.chartController.tapLocation.value = TapLocation(
+        TapDownDetails(
+          globalPosition: newOffset,
+          kind: PointerDeviceKind.touch,
+        ),
+        controller.memoryTimeline.data[2].timestamp,
+        2,
+      );
+
+      await tester.pump();
+*/
+      await tester.pump(const Duration(seconds: 2));
+
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      await expectLater(
+        find.byKey(MemoryScreen.vmChartKey),
+        matchesGoldenFile('goldens/memory_hover_card.png'),
+      );
+      // Await delay for golden comparison.
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+    });
+
     testWidgetsWithWindowSize('export current memory profile', windowSize,
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);
@@ -198,41 +256,41 @@ void main() {
     final data = controller.memoryTimeline.data;
 
     // Total number of collected HeapSamples.
-    expect(data.length, 292);
+    expect(data.length, 104);
 
     // Number of VM GCs
     final totalGCEvents = data.where((element) => element.isGC);
-    expect(totalGCEvents.length, 70);
+    expect(totalGCEvents.length, 46);
 
     // User initiated GCs
     final totalUserGCEvents =
         data.where((element) => element.memoryEventInfo.isEventGC);
-    expect(totalUserGCEvents.length, 2);
+    expect(totalUserGCEvents.length, 3);
 
     // User initiated Snapshots
     final totalSnapshotEvents =
         data.where((element) => element.memoryEventInfo.isEventSnapshot);
-    expect(totalSnapshotEvents.length, 2);
+    expect(totalSnapshotEvents.length, 1);
 
     // Number of auto-Snapshots
     final totalSnapshotAutoEvents =
         data.where((element) => element.memoryEventInfo.isEventSnapshotAuto);
-    expect(totalSnapshotAutoEvents.length, 3);
+    expect(totalSnapshotAutoEvents.length, 2);
 
     // Total Allocation Monitor events (many are empty).
     final totalAllocationMonitorEvents = data.where(
         (element) => element.memoryEventInfo.isEventAllocationAccumulator);
-    expect(totalAllocationMonitorEvents.length, 285);
+    expect(totalAllocationMonitorEvents.length, 81);
 
     // Number of user initiated allocation monitors
     final startMonitors = totalAllocationMonitorEvents.where(
         (element) => element.memoryEventInfo.allocationAccumulator.isStart);
-    expect(startMonitors.length, 3);
+    expect(startMonitors.length, 2);
 
     // Number of accumulator resets
     final resetMonitors = totalAllocationMonitorEvents.where(
         (element) => element.memoryEventInfo.allocationAccumulator.isReset);
-    expect(resetMonitors.length, 2);
+    expect(resetMonitors.length, 1);
 
     final interval1Min = MemoryController.displayIntervalToIntervalDurationInMs(
       ChartInterval.OneMinute,
@@ -250,8 +308,8 @@ void main() {
     await tester.tap(find.byKey(HeapTreeViewState.snapshotButtonKey));
     await tester.pump();
 
-    final snapshotButton = tester
-        .widget<OutlinedButton>(find.byKey(HeapTreeViewState.snapshotButtonKey));
+    final snapshotButton = tester.widget<OutlinedButton>(
+        find.byKey(HeapTreeViewState.snapshotButtonKey));
 
     expect(snapshotButton.enabled, isFalse);
     await tester.pumpAndSettle(const Duration(seconds: 3));

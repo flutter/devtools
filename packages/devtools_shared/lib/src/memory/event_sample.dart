@@ -224,7 +224,7 @@ class EventSample {
           ? AllocationAccumulator.fromJson(json['allocationAccumulatorEvent'])
           : null,
       json['extensionEvents'] != null
-          ? ExtensionEvents.fromJson(json['extensionEvent'])
+          ? ExtensionEvents.fromJson(json['extensionEvents'])
           : null);
 
   Map<String, dynamic> toJson() => <String, dynamic>{

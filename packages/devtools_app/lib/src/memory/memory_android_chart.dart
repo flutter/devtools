@@ -99,7 +99,7 @@ class AndroidChartController extends ChartController {
 }
 
 class MemoryAndroidChart extends StatefulWidget {
-  const MemoryAndroidChart(this.chartController);
+  const MemoryAndroidChart(this.chartController, {Key key}) : super(key: key);
 
   final AndroidChartController chartController;
 
@@ -162,7 +162,9 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     if (_chartController != null) {
       if (_chartController.timestamps.isNotEmpty) {
         return Container(
-            child: Chart(_chartController), height: defaultChartHeight);
+          child: Chart(_chartController),
+          height: defaultChartHeight,
+        );
       }
     }
 
