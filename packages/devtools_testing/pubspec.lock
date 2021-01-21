@@ -105,7 +105,7 @@ packages:
       name: coverage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.14.2"
+    version: "0.15.1"
   crypto:
     dependency: transitive
     description:
@@ -119,21 +119,21 @@ packages:
       path: "../devtools_app"
       relative: true
     source: path
-    version: "0.9.5"
+    version: "0.9.6+2"
   devtools_server:
     dependency: "direct overridden"
     description:
       path: "../devtools_server"
       relative: true
     source: path
-    version: "0.9.5"
+    version: "0.9.6+2"
   devtools_shared:
     dependency: "direct main"
     description:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.5"
+    version: "0.9.6+2"
   fake_async:
     dependency: transitive
     description:
@@ -197,7 +197,7 @@ packages:
       name: intl
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.17.0-nullsafety.2"
+    version: "0.16.1"
   io:
     dependency: transitive
     description:
@@ -359,6 +359,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.3"
+  simple_lint_rules:
+    dependency: "direct dev"
+    description:
+      name: simple_lint_rules
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1+1"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -426,7 +433,7 @@ packages:
       name: test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.16.0-nullsafety.12"
+    version: "1.16.0-nullsafety.16"
   test_api:
     dependency: transitive
     description:
@@ -440,7 +447,7 @@ packages:
       name: test_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.12-nullsafety.11"
+    version: "0.3.12-nullsafety.15"
   typed_data:
     dependency: transitive
     description:
@@ -517,7 +524,7 @@ packages:
       name: vm_service
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.5.0"
+    version: "6.0.0-nullsafety.1"
   vm_snapshot_analysis:
     dependency: transitive
     description:
@@ -555,4 +562,4 @@ packages:
     version: "2.2.1"
 sdks:
   dart: ">=2.12.0-0.0 <3.0.0"
-  flutter: ">=1.22.0 <2.0.0"
+  flutter: ">=1.22.0"

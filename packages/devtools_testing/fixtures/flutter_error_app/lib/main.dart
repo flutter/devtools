@@ -70,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
           width: 50.0,
         ),
         const Icon(Icons.star),
-        FlatButton(
+        TextButton(
           child: Text(title),
           onPressed: navigateToDemo,
         ),

@@ -40,7 +40,7 @@ class _ExampleWidgetState extends State<ExampleWidget> {
             hintText: 'Type something',
           ),
         ),
-        RaisedButton(
+        ElevatedButton(
           onPressed: () {
             showDialog(
               context: context,

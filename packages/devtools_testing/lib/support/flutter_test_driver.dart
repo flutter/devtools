@@ -398,7 +398,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   Future<int> detach() async {
     if (vmService != null) {
       debugPrint('Closing VM service');
-      vmService.dispose();
+      await vmService.dispose();
     }
     if (_currentRunningAppId != null) {
       debugPrint('Detaching from app');
@@ -423,7 +423,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   Future<int> stop() async {
     if (vmService != null) {
       debugPrint('Closing VM service');
-      vmService.dispose();
+      await vmService.dispose();
     }
     if (_currentRunningAppId != null) {
       debugPrint('Stopping app');
