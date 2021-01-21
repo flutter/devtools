@@ -56,14 +56,14 @@ packages:
       path: "../devtools_server"
       relative: true
     source: path
-    version: "0.9.7"
+    version: "0.9.6+2"
   devtools_shared:
     dependency: "direct main"
     description:
       path: "../devtools_shared"
       relative: true
     source: path
-    version: "0.9.7"
+    version: "0.9.6+2"
   http:
     dependency: "direct main"
     description:

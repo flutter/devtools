@@ -1,4 +1,4 @@
-## 0.9.7
+## 0.9.6+2
 * Support null safe `package:vm_service` version `>=6.x.x`. 
 
 ## 0.9.6+1  
