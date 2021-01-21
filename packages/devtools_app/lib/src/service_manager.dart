@@ -214,10 +214,6 @@ class ServiceConnectionManager {
 
     _stateController.add(true);
 
-    print(vm);
-    print(vm.toJson());
-    print(vm.isolates);
-
     await _isolateManager._initIsolates(vm.isolates);
 
     final streamIds = [
