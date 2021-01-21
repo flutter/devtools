@@ -27,7 +27,7 @@ class _HomePage extends StatelessWidget {
         title: const Text(platformChannelTitle),
       ),
       body: Center(
-        child: FlatButton(
+        child: TextButton(
           color: Colors.green,
           onPressed: () {
             Navigator.push(
