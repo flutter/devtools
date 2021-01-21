@@ -11,9 +11,11 @@ import 'package:vm_service/vm_service.dart';
 import '../config_specific/logger/logger.dart' as logger;
 import '../globals.dart';
 import '../service_manager.dart';
+import '../utils.dart';
 import '../version.dart';
 import '../vm_service_wrapper.dart';
 import 'memory_controller.dart';
+import 'memory_screen.dart';
 import 'memory_timeline.dart';
 
 class MemoryTracker {
@@ -27,7 +29,6 @@ class MemoryTracker {
 
   Timer _pollingTimer;
 
-  final List<HeapSample> samples = <HeapSample>[];
   final Map<String, MemoryUsage> isolateHeaps = <String, MemoryUsage>{};
 
   /// Polled VM current RSS.
@@ -43,12 +44,6 @@ class MemoryTracker {
 
   Stream<void> get onChange => _changeController.stream;
   final _changeController = StreamController<void>.broadcast();
-
-  int get currentCapacity => samples.last.capacity;
-
-  int get currentUsed => samples.last.used;
-
-  int get currentExternal => samples.last.external;
 
   StreamSubscription<Event> _gcStreamListener;
 
@@ -122,7 +117,11 @@ class MemoryTracker {
     rasterCache = await _fetchRasterCacheInfo();
 
     // Polls for current RSS size.
-    _update(await service.getVM(), isolateMemory);
+    final vm = await service.getVM();
+    _update(vm, isolateMemory);
+
+    // TODO(terry): Is there a better way to detect an integration test running?
+    if (vm.json.containsKey('_FAKE_VM')) return;
 
     _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
   }
@@ -197,12 +196,12 @@ class MemoryTracker {
     // Removes any isolate that is a sentinal.
     isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
 
-    int time = DateTime.now().millisecondsSinceEpoch;
-    if (samples.isNotEmpty) {
-      time = math.max(time, samples.last.timestamp);
-    }
-
     final memoryTimeline = memoryController.memoryTimeline;
+
+    int time = DateTime.now().millisecondsSinceEpoch;
+    if (memoryTimeline.data.isNotEmpty) {
+      time = math.max(time, memoryTimeline.data.last.timestamp);
+    }
 
     // Process any memory events?
     final eventSample = processEventSample(memoryTimeline, time);
@@ -226,6 +225,7 @@ class MemoryTracker {
     final HeapSample sample = HeapSample(
       time,
       processRss,
+      // Displaying capacity dashed line on top of stacked (used + external).
       capacity + external,
       used,
       external,
@@ -235,8 +235,9 @@ class MemoryTracker {
       rasterCache,
     );
 
-    _addSample(sample);
     memoryTimeline.addSample(sample);
+
+    _changeController.add(null);
 
     // Signal continues events are to be emitted.  These events are hidden
     // until a reset event then the continuous events between last monitor
@@ -246,6 +247,28 @@ class MemoryTracker {
         eventSample.allocationAccumulator.isStart) {
       memoryTimeline.monitorContinuesState = ContinuesState.next;
     }
+  }
+
+  /// Many extension events could arrive between memory collection ticks, those
+  /// events need to be associated with a particular memory tick (timestamp). This
+  /// routine collects those new events received that are closest to a tick
+  /// (time parameter)).
+  /// @returns copy of events to associate with an existing HeapSample tick
+  /// (contained in the EventSample). See [processEventSample] it computes the
+  /// events to aggregate to an existing HeapSample or delay associating those
+  /// events until the next HeapSample (tick) received see [_recalculate].
+  EventSample pullClone(MemoryTimeline memoryTimeline, int time) {
+    final pulledEvent = memoryTimeline.pullEventSample();
+    final extensionEvents = memoryTimeline.extensionEvents;
+    final eventSample = pulledEvent.clone(
+      time,
+      extensionEvents: extensionEvents,
+    );
+    if (extensionEvents != null && extensionEvents.isNotEmpty) {
+      debugLogger('ExtensionEvents Received');
+    }
+
+    return eventSample;
   }
 
   EventSample processEventSample(MemoryTimeline memoryTimeline, int time) {
@@ -262,8 +285,7 @@ class MemoryTracker {
       if (compared < 0) {
         if ((timeDuration + delay).compareTo(eventDuration) >= 0) {
           // Currently, events are all UI events so duration < _updateDelay
-          final pulledEvent = memoryTimeline.pullEventSample();
-          eventSample = pulledEvent.clone(time);
+          eventSample = pullClone(memoryTimeline, time);
         } else {
           // Throw away event, missed attempt to attach to a HeapSample.
           final ignoreEvent = memoryTimeline.pullEventSample();
@@ -279,24 +301,31 @@ class MemoryTracker {
           if ((timeDuration - delay).compareTo(eventDuration) >= 0) {
             // Able to match event time to a heap sample. We will attach the
             // EventSample to this HeapSample.
-            final pulledEvent = memoryTimeline.pullEventSample();
-            eventSample = pulledEvent.clone(time);
+            eventSample = pullClone(memoryTimeline, time);
           }
         } else {
           // The almost exact eventSample we have.
-          eventSample = memoryTimeline.pullEventSample();
+          eventSample = pullClone(memoryTimeline, time);
         }
         // Keep the event, its time hasn't caught up to the HeapSample time yet.
+      }
+    } else if (memoryTimeline.anyPendingExtensionEvents) {
+      final extensionEvents = memoryTimeline.extensionEvents;
+      eventSample = EventSample.extensionEvent(time, extensionEvents);
+      if (MemoryScreen.isDebuggingEnabled &&
+          extensionEvents != null &&
+          extensionEvents.isNotEmpty) {
+        debugLogger('Receieved Extension Events '
+            '${extensionEvents.theEvents.length}');
+        for (var e in extensionEvents.theEvents) {
+          final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp);
+          debugLogger('  ${e.eventKind} ${e.customEventName} '
+              '$dt ${e.data['param']}');
+        }
       }
     }
 
     return eventSample;
-  }
-
-  void _addSample(HeapSample sample) {
-    samples.add(sample);
-
-    _changeController.add(null);
   }
 }
 

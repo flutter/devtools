@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:math';
-import 'dart:ui' as dart_ui;
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
 import '../utils.dart';
@@ -85,6 +85,11 @@ class MemoryTimeline {
   /// Start index of offlineData plotted for MPChartData/MPEngineChartData sets.
   int offlineStartingIndex = 0;
 
+  /// Extension Events.
+  final _eventFiredNotifier = ValueNotifier<Event>(null);
+
+  ValueListenable<Event> get eventNotifier => _eventFiredNotifier;
+
   /// Notifies that a new Heap sample has been added to the timeline.
   final _sampleAddedNotifier = ValueNotifier<HeapSample>(null);
 
@@ -121,17 +126,24 @@ class MemoryTimeline {
     postEventSample(EventSample.snapshotEvent(
       DateTime.now().millisecondsSinceEpoch,
       snapshotAuto: auto,
+      events: extensionEvents,
     ));
   }
 
   void addGCEvent() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    postEventSample(EventSample.gcEvent(timestamp));
+    postEventSample(EventSample.gcEvent(
+      timestamp,
+      events: extensionEvents,
+    ));
   }
 
   void addMonitorStartEvent() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    postEventSample(EventSample.accumulatorStart(timestamp));
+    postEventSample(EventSample.accumulatorStart(
+      timestamp,
+      events: extensionEvents,
+    ));
   }
 
   void addMonitorResetEvent() {
@@ -139,7 +151,10 @@ class MemoryTimeline {
     // TODO(terry): Enable to make continuous events visible?
     // displayContinousEvents();
 
-    postEventSample(EventSample.accumulatorReset(timestamp));
+    postEventSample(EventSample.accumulatorReset(
+      timestamp,
+      events: extensionEvents,
+    ));
   }
 
   void displayContinousEvents() {
@@ -172,7 +187,7 @@ class MemoryTimeline {
     return event != null ? event.timestamp : -1;
   }
 
-  /// Grab event to be posted.
+  /// Grab and remove the event to be posted.
   EventSample pullEventSample() {
     final result = _eventSamples.first;
     _eventSamples.removeAt(0);
@@ -208,18 +223,6 @@ class MemoryTimeline {
 
   void hideMarkers() {
     _markerHiddenNotifier.value = !_markerHiddenNotifier.value;
-  }
-
-  /// dart_ui.Image Image asset displayed for each entry plotted in a chart.
-  // TODO: Resolve this unused field.
-  // ignore: unused_field
-  dart_ui.Image _img;
-
-  // TODO(terry): Look at using _img for each data point (at least last N).
-  static dart_ui.Image get dataPointImage => null;
-
-  set image(dart_ui.Image img) {
-    _img = img;
   }
 
   void reset() {
@@ -282,5 +285,42 @@ class MemoryTimeline {
       _sampleAddedNotifier.value = sample;
       sampleEventNotifier.value++;
     }
+  }
+
+  static const customDevToolsEvent = 'DevTools.Event';
+  static const devToolsExtensionEvent = '${customDevToolsEvent}_';
+
+  static bool isCustomEvent(String extensionEvent) =>
+      extensionEvent.startsWith(devToolsExtensionEvent);
+
+  static String customEventName(String extensionEventKind) =>
+      extensionEventKind.substring(
+        MemoryTimeline.devToolsExtensionEvent.length,
+      );
+
+  final _extensionEvents = <ExtensionEvent>[];
+
+  bool get anyPendingExtensionEvents => _extensionEvents.isNotEmpty;
+
+  ExtensionEvents get extensionEvents {
+    if (_extensionEvents.isNotEmpty) {
+      final eventsToProcess = ExtensionEvents(_extensionEvents.toList());
+      _extensionEvents.clear();
+      return eventsToProcess;
+    }
+    return null;
+  }
+
+  void addExtensionEvent(
+    int timestamp,
+    String eventKind,
+    Map<String, Object> json, {
+    String customEventName,
+  }) {
+    final extensionEvent = customEventName == null
+        ? ExtensionEvent(timestamp, eventKind, json)
+        : ExtensionEvent.custom(timestamp, eventKind, customEventName, json);
+
+    _extensionEvents.add(extensionEvent);
   }
 }

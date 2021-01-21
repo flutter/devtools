@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'adb_memory_info.dart';
 import 'event_sample.dart';
 
@@ -80,13 +82,6 @@ class HeapSample {
   }
 
   @override
-  String toString() => '[HeapSample timestamp: $timestamp, '
-      'rss: $rss, '
-      'capacity: $capacity, '
-      'used: $used, '
-      'external: $external, '
-      'isGC: $isGC, '
-      'AdbMemoryInfo: $adbMemoryInfo, '
-      'MemoryEventInfo: $memoryEventInfo, '
-      'RasterCache: $rasterCache]';
+    String toString() => '[HeapSample timestamp: $timestamp, '
+      '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }

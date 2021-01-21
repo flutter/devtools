@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Column(
               children: [
-                RaisedButton(
+                ElevatedButton(
                   child: const Text('Encrypt'),
                   onPressed: () {
                     setState(() {

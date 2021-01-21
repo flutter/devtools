@@ -58,6 +58,15 @@ class EventChartController extends ChartController {
       );
     }
     final events = sample.memoryEventInfo;
+    if (events.hasExtensionEvents) {
+      final data = trace.DataAggregate(
+        sample.timestamp,
+        MemoryEventsPaneState.extensionEvent,
+        events.extensionEvents.theEvents.length,
+      );
+      addDataToTrace(TraceName.extensionEvents.index, data);
+    }
+
     // User events snapshot, auto-snapshot, manual GC, are plotted on the top-line
     // of the event pane (visible Events).
     final data = trace.Data(
@@ -100,7 +109,7 @@ class EventChartController extends ChartController {
 }
 
 class MemoryEventsPane extends StatefulWidget {
-  const MemoryEventsPane(this.chartController);
+  const MemoryEventsPane(this.chartController, {Key key}) : super(key: key);
 
   final EventChartController chartController;
 
@@ -111,6 +120,7 @@ class MemoryEventsPane extends StatefulWidget {
 /// Name of each trace being charted, index order is the trace index
 /// too (order of trace creation top-down order).
 enum TraceName {
+  extensionEvents,
   snapshot,
   autoSnapshot,
   manualGC,
@@ -126,6 +136,23 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
   /// Controller for managing memory collection.
   MemoryController _memoryController;
+
+  /// Note: The event pane is a fixed size chart (y-axis does not scale). The
+  ///       Y-axis fixed range is (visibleVmEvent to extensionEvent) e.g.,
+  ///
+  ///                         ____________________
+  ///         extensionEvent -|            *  (3.7)
+  ///                         |         *  (2.4)
+  ///                         |      *  (1.4)
+  ///         visibleVmEvent -|   *  (0.4)
+  ///                    0.0 _|___________________
+  ///
+  ///       The *s in the above chart are plotted at each y position (3.7, 2.4, 1.4, 0.4).
+  ///       Their y-position is such that the symbols won't overlap.
+  /// TODO(terry): Consider a better solution e.g., % in the Y-axis.
+
+  /// Flutter events and user custom events.
+  static const extensionEvent = 3.7;
 
   /// Event to display in the event pane (User initiated GC, snapshot,
   /// automatic snapshot, etc.)
@@ -146,7 +173,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     super.initState();
 
     // Line chart fixed Y range.
-    _chartController.setFixedYRange(visibleVmEvent, visibleEvent);
+    _chartController.setFixedYRange(visibleVmEvent, extensionEvent);
 
     setupTraces();
   }
@@ -157,8 +184,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
     _memoryController = Provider.of<MemoryController>(context);
 
-    // TODO(jacobr): this is an ugly way to be using the theme. It would be
-    // better if the controllers weren't involved with the color scheme.
     colorScheme = Theme.of(context).colorScheme;
 
     cancel();
@@ -166,9 +191,18 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     setupTraces();
     _chartController.setupData();
 
+    // Monitor heap samples.
     addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
       setState(() {
         _processHeapSample(_memoryTimeline.sampleAddedNotifier.value);
+      });
+
+      // Monitor event fired.
+      addAutoDisposeListener(_memoryTimeline.eventNotifier, () {
+        setState(() {
+          // TODO(terry): New event received.
+          //_processHeapSample(_memoryTimeline.eventNotifier.value);
+        });
       });
     });
   }
@@ -187,6 +221,10 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   void setupTraces() {
     if (_chartController.traces.isNotEmpty) {
       assert(_chartController.traces.length == TraceName.values.length);
+
+      final extensionEventsIndex = TraceName.extensionEvents.index;
+      assert(_chartController.trace(extensionEventsIndex).name ==
+          TraceName.values[extensionEventsIndex].toString());
 
       final snapshotIndex = TraceName.snapshot.index;
       assert(_chartController.trace(snapshotIndex).name ==
@@ -215,14 +253,31 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
       return;
     }
 
+    final extensionEventsIndex = _chartController.createTrace(
+      trace.ChartType.symbol,
+      trace.PaintCharacteristics(
+        color: Colors.purpleAccent[100],
+        colorAggregate: Colors.purpleAccent[400],
+        symbol: trace.ChartSymbol.filledTriangle,
+        height: 20,
+        width: 20,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: extensionEvent,
+      ),
+      name: TraceName.extensionEvents.toString(),
+    );
+    assert(extensionEventsIndex == TraceName.extensionEvents.index);
+    assert(_chartController.trace(extensionEventsIndex).name ==
+        TraceName.values[extensionEventsIndex].toString());
+
     final snapshotIndex = _chartController.createTrace(
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.green,
-        strokeWidth: 4,
+        strokeWidth: 3,
         diameter: 6,
         fixedMinY: visibleVmEvent,
-        fixedMaxY: visibleEvent,
+        fixedMaxY: extensionEvent,
       ),
       name: TraceName.snapshot.toString(),
     );
@@ -235,10 +290,10 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.red,
-        strokeWidth: 4,
+        strokeWidth: 3,
         diameter: 6,
         fixedMinY: visibleVmEvent,
-        fixedMaxY: visibleEvent,
+        fixedMaxY: extensionEvent,
       ),
       name: TraceName.autoSnapshot.toString(),
     );
@@ -251,10 +306,10 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.blue,
-        strokeWidth: 4,
+        strokeWidth: 3,
         diameter: 6,
         fixedMinY: visibleVmEvent,
-        fixedMaxY: visibleEvent,
+        fixedMaxY: extensionEvent,
       ),
       name: TraceName.manualGC.toString(),
     );
@@ -266,11 +321,11 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     final monitorIndex = _chartController.createTrace(
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
-        color: Colors.yellow,
-        strokeWidth: 4,
+        color: Colors.yellowAccent,
+        strokeWidth: 3,
         diameter: 6,
         fixedMinY: visibleVmEvent,
-        fixedMaxY: visibleEvent,
+        fixedMaxY: extensionEvent,
       ),
       name: TraceName.monitor.toString(),
     );
@@ -282,10 +337,10 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.yellowAccent,
-        strokeWidth: 4,
+        strokeWidth: 3,
         diameter: 6,
         fixedMinY: visibleVmEvent,
-        fixedMaxY: visibleEvent,
+        fixedMaxY: extensionEvent,
       ),
       name: TraceName.monitorReset.toString(),
     );
@@ -301,7 +356,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
         symbol: trace.ChartSymbol.disc,
         diameter: 4,
         fixedMinY: visibleVmEvent,
-        fixedMaxY: visibleEvent,
+        fixedMaxY: extensionEvent,
       ),
       name: TraceName.gc.toString(),
     );

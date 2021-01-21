@@ -23,6 +23,7 @@ import '../utils.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
+import 'memory_screen.dart';
 import 'memory_service.dart';
 import 'memory_snapshot_models.dart';
 import 'memory_timeline.dart';
@@ -565,6 +566,32 @@ class MemoryController extends DisposableController
     _memoryTracker = MemoryTracker(serviceManager, this);
     _memoryTracker.start();
 
+    // Log Flutter extension events.
+    autoDispose(serviceManager.service.onExtensionEvent.listen((Event event) {
+      var extensionEventKind = event.extensionKind;
+      String customEventKind;
+      if (MemoryTimeline.isCustomEvent(event.extensionKind)) {
+        extensionEventKind = MemoryTimeline.devToolsExtensionEvent;
+        customEventKind = MemoryTimeline.customEventName(event.extensionKind);
+      }
+      final jsonData = event.extensionData.data;
+      // TODO(terry): Display events enabled in a settings page for now only these events.
+      switch (extensionEventKind) {
+        case 'Flutter.ImageSizesForFrame':
+          memoryTimeline.addExtensionEvent(
+              event.timestamp, event.extensionKind, jsonData);
+          break;
+        case MemoryTimeline.devToolsExtensionEvent:
+          memoryTimeline.addExtensionEvent(
+            event.timestamp,
+            MemoryTimeline.customDevToolsEvent,
+            jsonData,
+            customEventName: customEventKind,
+          );
+          break;
+      }
+    }));
+
     autoDispose(
       _memoryTracker.onChange.listen((_) {
         _memoryTrackerController.add(_memoryTracker);
@@ -966,6 +993,8 @@ class MemoryController extends DisposableController
   bool get isGcing => _gcing;
 
   Future<void> gc() async {
+
+    
     _gcing = true;
 
     try {
@@ -1131,6 +1160,8 @@ class MemoryLog {
 
   /// Persist the the live memory data to a JSON file in the /tmp directory.
   void exportMemory() async {
+    MemoryScreen.gaActionForExport();
+
     final liveData = controller.memoryTimeline.liveData;
 
     bool pseudoData = false;

@@ -99,6 +99,12 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
       FakeServiceExtensionManager();
 
   @override
+  Future<Response> get rasterCacheMetrics => Future.value(Response.parse({
+        'layerBytes': 0,
+        'pictureBytes': 0,
+      }));
+
+  @override
   ValueListenable<bool> registeredServiceListenable(String name) {
     if (availableServices.contains(name)) {
       return ImmediateValueNotifier(true);
@@ -139,6 +145,16 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   ValueListenable<bool> get deviceBusy => ValueNotifier(false);
+}
+
+class FakeVM extends Fake implements VM {
+  FakeVM();
+
+  @override
+  Map<String, dynamic> json = {
+    '_FAKE_VM': true,
+    '_currentRSS': 0,
+  };
 }
 
 class FakeVmService extends Fake implements VmServiceWrapper {
@@ -278,6 +294,9 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   };
 
   @override
+  Future<FakeVM> getVM() => Future.value(FakeVM());
+
+  @override
   Future<Success> setVMTimelineFlags(List<String> recordedStreams) async {
     _vmTimelineFlags['recordedStreams'] = recordedStreams;
     return Future.value(Success());
@@ -399,6 +418,9 @@ class FakeIsolateManager extends Fake implements IsolateManager {
   @override
   Completer<bool> get selectedIsolateAvailable =>
       Completer<bool>()..complete(true);
+
+  @override
+  List<IsolateRef> get isolates => [];
 }
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {}
