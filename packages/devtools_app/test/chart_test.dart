@@ -21,7 +21,7 @@ void main() {
         // Load canned data testHeapSampleData.
         memoryJson ??= MemoryJson.decode(argJsonString: testHeapSampleData);
 
-        expect(memoryJson.data.length, equals(292));
+        expect(memoryJson.data.length, equals(104));
       }
 
       ///////////////////////////////////////////////////////////////////////////
@@ -200,7 +200,7 @@ void main() {
       void validateScaledYLabels(ChartController controller) {
         // Validate the labels displayed on the y-axis.
         final yScale = controller.yScale;
-        expect(yScale.labelTicks, equals(7));
+        expect(yScale.labelTicks, equals(10));
         for (var labelIndex = yScale.labelTicks;
             labelIndex >= 0;
             labelIndex--) {
@@ -219,6 +219,9 @@ void main() {
             '500M',
             '600M',
             '700M',
+            '800M',
+            '900M',
+            '1000M',
           ];
           expect(labelName, expectedLabels[labelIndex.toInt()]);
         }
@@ -253,69 +256,59 @@ void main() {
 
           // Validate the Y axis after data added to all traces.
           expect(controller.yScale.computedMin, equals(0.0));
-          expect(controller.yScale.computedMax, equals(685185185.1851852));
-          expect(controller.yScale.labelTicks, equals(7.0));
+          expect(controller.yScale.computedMax, equals(719576719.5767195));
+          expect(controller.yScale.labelTicks, equals(10.0));
           expect(controller.yScale.labelUnitExponent, 8.0);
-          expect(controller.yScale.tickSpacing, equals(3703703.703703704));
-          expect(controller.yScale.maxPoint, equals(684801744.0));
+          expect(controller.yScale.tickSpacing, equals(5291005.291005291));
+          expect(controller.yScale.maxPoint, equals(717799424.0));
           expect(controller.yScale.maxTicks, equals(190.0));
 
           final externalTrace = controller.trace(externalTraceIndex);
-          expect(externalTrace.dataYMax, equals(633719952.0));
+          expect(externalTrace.dataYMax, equals(357446512.0));
           expect(externalTrace.data.length, equals(_rawExternal.length));
 
           final usedTrace = controller.trace(usedTraceIndex);
-          expect(usedTrace.dataYMax, equals(675253768.0));
+          expect(usedTrace.dataYMax, equals(409913568.0));
           expect(usedTrace.data.length, equals(_rawUsed.length));
 
           final capacityTrace = controller.trace(capacityTraceIndex);
-          expect(capacityTrace.dataYMax, equals(684801744.0));
+          expect(capacityTrace.dataYMax, equals(422794096.0));
           expect(capacityTrace.data.length, equals(_rawCapacity.length));
 
           final rssTrace = controller.trace(rssTraceIndex);
-          expect(rssTrace.dataYMax, equals(571727872.0));
+          expect(rssTrace.dataYMax, equals(717799424.0));
           expect(rssTrace.data.length, equals(_rawRSS.length));
 
-          expect(controller.timestampsLength, equals(292));
+          expect(controller.timestampsLength, equals(104));
 
           validateScaledYLabels(controller);
 
           // Validate the x-axis labels.
-          expect(controller.labelTimestamps.length, equals(3));
-          expect(controller.labelTimestamps[0], equals(1595682513450));
-          expect(controller.labelTimestamps[1], equals(1595682533744));
-          expect(controller.labelTimestamps[2], equals(1595682553811));
+          expect(controller.labelTimestamps.length, equals(2));
+          expect(controller.labelTimestamps[0], equals(1611247510202));
+          expect(controller.labelTimestamps[1], equals(1611247530281));
 
           // Validate using UTC timezone.
           expect(
             prettyTimestamp(controller.labelTimestamps[0], isUtc: true),
-            equals('13:08:33'),
+            equals('16:45:10'),
           );
           expect(
             prettyTimestamp(controller.labelTimestamps[1], isUtc: true),
-            equals('13:08:53'),
-          );
-          expect(
-            prettyTimestamp(controller.labelTimestamps[2], isUtc: true),
-            equals('13:09:13'),
+            equals('16:45:30'),
           );
         },
       );
 
       void checkScaledXAxis2Labels(ChartController controller) {
         // Validate the x-axis labels.
-        expect(controller.labelTimestamps.length, equals(2));
-        expect(controller.labelTimestamps[0], equals(1595682492441));
-        expect(controller.labelTimestamps[1], equals(1595682552535));
+        expect(controller.labelTimestamps.length, equals(1));
+        expect(controller.labelTimestamps[0], equals(1611247510202));
 
         // Validate using UTC timezone.
         expect(
           prettyTimestamp(controller.labelTimestamps[0], isUtc: true),
-          equals('13:08:12'),
-        );
-        expect(
-          prettyTimestamp(controller.labelTimestamps[1], isUtc: true),
-          equals('13:09:12'),
+          equals('16:45:10'),
         );
       }
 
@@ -338,7 +331,7 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         // Validate the X axis after data added to all traces.
-        expect(controller.visibleTicks, equals(292));
+        expect(controller.visibleTicks, equals(104));
         expect(controller.xCanvasChart, equals(50.0));
         expect(controller.xPaddingRight, equals(0.0));
         expect(controller.displayXLabels, true);
@@ -346,11 +339,11 @@ void main() {
 
         // Validate the Y axis after data added to all traces.
         expect(controller.yScale.computedMin, equals(0.0));
-        expect(controller.yScale.computedMax, equals(685185185.1851852));
-        expect(controller.yScale.labelTicks, equals(7.0));
+        expect(controller.yScale.computedMax, equals(719576719.5767195));
+        expect(controller.yScale.labelTicks, equals(10.0));
         expect(controller.yScale.labelUnitExponent, 8.0);
-        expect(controller.yScale.tickSpacing, equals(3703703.703703704));
-        expect(controller.yScale.maxPoint, equals(684801744.0));
+        expect(controller.yScale.tickSpacing, equals(5291005.291005291));
+        expect(controller.yScale.maxPoint, equals(717799424.0));
         expect(controller.yScale.maxTicks, equals(190.0));
 
         validateScaledYLabels(controller);
@@ -377,19 +370,19 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         // Validate the X axis after data added to all traces.
-        expect(controller.visibleTicks, equals(996));
+        expect(controller.visibleTicks, equals(1704));
         expect(controller.xCanvasChart, equals(50.0));
-        expect(controller.xPaddingRight, equals(1.461999999999989));
+        expect(controller.xPaddingRight, equals(0.6880000000001019));
         expect(controller.displayXLabels, true);
-        expect(controller.canvasChartWidth, equals(2148.538));
+        expect(controller.canvasChartWidth, equals(2149.312));
 
         // Validate the Y axis after data added to all traces.
         expect(controller.yScale.computedMin, equals(0.0));
-        expect(controller.yScale.computedMax, equals(685185185.1851852));
-        expect(controller.yScale.labelTicks, equals(7.0));
+        expect(controller.yScale.computedMax, equals(719576719.5767195));
+        expect(controller.yScale.labelTicks, equals(10.0));
         expect(controller.yScale.labelUnitExponent, 8.0);
-        expect(controller.yScale.tickSpacing, equals(3703703.703703704));
-        expect(controller.yScale.maxPoint, equals(684801744.0));
+        expect(controller.yScale.tickSpacing, equals(5291005.291005291));
+        expect(controller.yScale.maxPoint, equals(717799424.0));
         expect(controller.yScale.maxTicks, equals(190.0));
 
         validateScaledYLabels(controller);
@@ -616,22 +609,22 @@ void main() {
 
           // Rest of data is out of view because we're live view max is now 1.4
           // and only 2 labels visible.
-          expect(controller.yScale.computedMax, equals(1.4157303370786516));
-          expect(controller.yScale.labelTicks, equals(2.0));
+          expect(controller.yScale.computedMax, equals(2.426966292134831));
+          expect(controller.yScale.labelTicks, equals(3.0));
 
           expect(controller.yScale.labelUnitExponent, 0.0);
-          expect(controller.yScale.tickSpacing, equals(0.02247191011235955));
+          expect(controller.yScale.tickSpacing, equals(0.033707865168539325));
           // Max live view max is 1.4 other data is not in the visible view.
-          expect(controller.yScale.maxPoint, equals(1.4));
+          expect(controller.yScale.maxPoint, equals(2.4));
           expect(controller.yScale.maxTicks, equals(90.0));
 
           final snapshotTrace = controller.trace(snapshotTraceIndex);
           expect(snapshotTrace.dataYMax, equals(0.0));
-          expect(snapshotTrace.data.length, equals(2));
+          expect(snapshotTrace.data.length, equals(1));
 
           final autoSnapshotTrace = controller.trace(autoSnapshotTraceIndex);
           expect(autoSnapshotTrace.dataYMax, equals(0.0));
-          expect(autoSnapshotTrace.data.length, equals(2));
+          expect(autoSnapshotTrace.data.length, equals(0));
 
           final manualGCTrace = controller.trace(manualGCTraceIndex);
           expect(manualGCTrace.dataYMax, equals(0.0));
@@ -639,21 +632,21 @@ void main() {
 
           final monitorTrace = controller.trace(monitorTraceIndex);
           expect(monitorTrace.dataYMax, equals(0.0));
-          expect(monitorTrace.data.length, equals(3));
+          expect(monitorTrace.data.length, equals(2));
 
           final monitorResetTrace = controller.trace(monitorResetTraceIndex);
           expect(monitorResetTrace.dataYMax, equals(0.0));
-          expect(monitorResetTrace.data.length, equals(2));
+          expect(monitorResetTrace.data.length, equals(1));
 
           final gcTrace = controller.trace(gcTraceIndex);
           expect(gcTrace.dataYMax, equals(0.0));
-          expect(gcTrace.data.length, equals(70));
+          expect(gcTrace.data.length, equals(46));
 
-          expect(controller.timestampsLength, equals(292));
+          expect(controller.timestampsLength, equals(104));
 
           // Validate the labels displayed on the y-axis.
           final yScale = controller.yScale;
-          expect(yScale.labelTicks, equals(2));
+          expect(yScale.labelTicks, equals(3.0));
           for (var labelIndex = yScale.labelTicks;
               labelIndex >= 0;
               labelIndex--) {
@@ -662,46 +655,36 @@ void main() {
               yScale.labelUnitExponent.toInt(),
             );
 
-            final expectedLabels = ['0', '1', '2'];
+            final expectedLabels = ['0', '1', '2', '3'];
             expect(labelName, expectedLabels[labelIndex.toInt()]);
           }
 
           // Validate the x-axis labels.
-          expect(controller.labelTimestamps.length, equals(3));
-          expect(controller.labelTimestamps[0], equals(1595682513450));
-          expect(controller.labelTimestamps[1], equals(1595682533744));
-          expect(controller.labelTimestamps[2], equals(1595682553811));
+          expect(controller.labelTimestamps.length, equals(2));
+          expect(controller.labelTimestamps[0], equals(1611247510202));
+          expect(controller.labelTimestamps[1], equals(1611247530281));
 
           // Validate using UTC timezone.
           expect(
             prettyTimestamp(controller.labelTimestamps[0], isUtc: true),
-            equals('13:08:33'),
+            equals('16:45:10'),
           );
           expect(
             prettyTimestamp(controller.labelTimestamps[1], isUtc: true),
-            equals('13:08:53'),
-          );
-          expect(
-            prettyTimestamp(controller.labelTimestamps[2], isUtc: true),
-            equals('13:09:13'),
+            equals('16:45:30'),
           );
         },
       );
 
       void checkFixedXAxis2Labels(ChartController controller) {
         // Validate the x-axis labels.
-        expect(controller.labelTimestamps.length, equals(2));
-        expect(controller.labelTimestamps[0], equals(1595682492441));
-        expect(controller.labelTimestamps[1], equals(1595682552535));
+        expect(controller.labelTimestamps.length, equals(1));
+        expect(controller.labelTimestamps[0], equals(1611247510202));
 
         // Validate using UTC timezone.
         expect(
           prettyTimestamp(controller.labelTimestamps[0], isUtc: true),
-          equals('13:08:12'),
-        );
-        expect(
-          prettyTimestamp(controller.labelTimestamps[1], isUtc: true),
-          equals('13:09:12'),
+          equals('16:45:10'),
         );
       }
 
@@ -724,7 +707,7 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         // Validate the X axis after data added to all traces.
-        expect(controller.visibleTicks, equals(292));
+        expect(controller.visibleTicks, equals(104));
         expect(controller.xCanvasChart, equals(50.0));
         expect(controller.xPaddingRight, equals(0.0));
         expect(controller.displayXLabels, true);
@@ -776,11 +759,11 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         // Validate the X axis after data added to all traces.
-        expect(controller.visibleTicks, equals(996));
+        expect(controller.visibleTicks, equals(1704));
         expect(controller.xCanvasChart, equals(50.0));
-        expect(controller.xPaddingRight, equals(1.461999999999989));
+        expect(controller.xPaddingRight, equals(0.6880000000001019));
         expect(controller.displayXLabels, true);
-        expect(controller.canvasChartWidth, equals(2148.538));
+        expect(controller.canvasChartWidth, equals(2149.312));
 
         // Validate the Y axis after data added to all traces.
         expect(controller.yScale.computedMin, equals(0.0));
