@@ -99,7 +99,8 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Response> callMethod(String method, {String isolateId, Map args}) {
+  Future<Response> callMethod(String method,
+      {String isolateId, Map<String, dynamic> args}) {
     return trackFuture('callMethod $method',
         _vmService.callMethod(method, isolateId: isolateId, args: args));
   }
@@ -108,7 +109,7 @@ class VmServiceWrapper implements VmService {
   Future<Response> callServiceExtension(
     String method, {
     String isolateId,
-    Map args,
+    Map<String, dynamic> args,
   }) {
     return trackFuture(
         'callServiceExtension $method',
@@ -152,7 +153,7 @@ class VmServiceWrapper implements VmService {
   Future get onDone => _vmService.onDone;
 
   @override
-  void dispose() => _vmService.dispose();
+  Future<void> dispose() => _vmService.dispose();
 
   @override
   Future<Response> evaluate(
@@ -1037,7 +1038,7 @@ extension VmServicePrivate on VmServiceWrapper {
     String method, {
     @required T Function(Map<String, dynamic>) parser,
     String isolateId,
-    Map args,
+    Map<String, dynamic> args,
   }) async {
     if (!enablePrivateRpcs) {
       throw StateError('Attempted to invoke private RPC');
