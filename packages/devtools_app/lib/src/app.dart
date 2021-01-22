@@ -487,6 +487,11 @@ class SettingsDialog extends StatelessWidget {
             listenable: preferences.vmDeveloperModeEnabled,
             toggle: preferences.toggleVmDeveloperMode,
           ),
+          _buildOption(
+            label: const Text('Enable Android Memory Collection'),
+            listenable: preferences.androidCollectionEnabled,
+            toggle: preferences.toggleAndroidMemoryCollection,
+          ),
         ],
       ),
       actions: [

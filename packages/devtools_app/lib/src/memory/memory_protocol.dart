@@ -106,7 +106,9 @@ class MemoryTracker {
 
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-    if (hasConnection && serviceManager.vm.operatingSystem == 'android') {
+    if (hasConnection &&
+        serviceManager.vm.operatingSystem == 'android' &&
+        preferences.androidCollectionEnabled.value) {
       adbMemoryInfo = await _fetchAdbInfo();
     } else {
       // TODO(terry): TBD alternative for iOS memory info - all values zero.
@@ -378,6 +380,7 @@ class ClassHeapDetailStats {
 
   final Map<String, dynamic> json;
 
+  bool isStacktraced = false;
   int instancesCurrent = 0;
   int instancesDelta = 0;
   int bytesCurrent = 0;

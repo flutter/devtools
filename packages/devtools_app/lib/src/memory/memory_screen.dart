@@ -165,6 +165,15 @@ class MemoryBodyState extends State<MemoryBody>
       sharedLabels: vmChartController.labelTimestamps,
     );
 
+    addAutoDisposeListener(preferences.androidCollectionEnabled, () {
+      setState(() {
+        if (!preferences.androidCollectionEnabled.value &&
+            controller.isAndroidChartVisible) {
+          controller.toggleAndroidChartVisibility();
+        }
+      });
+    });
+
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
@@ -542,7 +551,8 @@ class MemoryBodyState extends State<MemoryBody>
   OutlinedButton createToggleAdbMemoryButton() {
     return OutlinedButton(
       key: MemoryScreen.androidChartButtonKey,
-      onPressed: controller.isConnectedDeviceAndroid
+      onPressed: controller.isConnectedDeviceAndroid &&
+              preferences.androidCollectionEnabled.value
           ? controller.toggleAndroidChartVisibility
           : null,
       child: MaterialIconLabel(

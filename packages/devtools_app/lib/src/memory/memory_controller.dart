@@ -126,6 +126,14 @@ class MemoryController extends DisposableController
   static const libraryRootNode = '___LIBRARY___';
   static const classRootNode = '___CLASSES___';
 
+  final _updateClassStackTraces = ValueNotifier(0);
+
+  ValueListenable<int> get updateClassStackTraces => _updateClassStackTraces;
+
+  void changeStackTraces() {
+    _updateClassStackTraces.value += 1;
+  }
+
   /// Notifies that the source of the memory feed has changed.
   ValueListenable<DateTime> get selectedSnapshotNotifier =>
       _selectedSnapshotNotifier;
@@ -993,8 +1001,6 @@ class MemoryController extends DisposableController
   bool get isGcing => _gcing;
 
   Future<void> gc() async {
-
-    
     _gcing = true;
 
     try {
