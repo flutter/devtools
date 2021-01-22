@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:file_selector/file_selector.dart';
 
 import '../common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
@@ -19,6 +21,7 @@ class FileImportContainer extends StatefulWidget {
     this.onAction,
     this.onFileSelected,
     this.onError,
+    this.extensions = const ['json'],
     Key key,
   }) : super(key: key);
 
@@ -34,6 +37,9 @@ class FileImportContainer extends StatefulWidget {
   final DevToolsJsonFileHandler onFileSelected;
 
   final void Function(String error) onError;
+
+  /// The file's extensions where we are going to get the data from.
+  final List<String> extensions;
 
   @override
   _FileImportContainerState createState() => _FileImportContainerState();
@@ -118,8 +124,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
             child: _buildImportedFileDisplay(),
           ),
         ),
-        // TODO(kenz): uncomment once file picker support is added
-        // _buildImportButton(),
+        _buildImportButton(),
         // Horizontal spacer with flex value of 1.
         const Flexible(
           child: SizedBox(height: rowHeight),
@@ -131,6 +136,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
   Widget _buildImportedFileDisplay() {
     return Text(
       importedFile?.path ?? 'No File Selected',
+      overflow: TextOverflow.ellipsis,
       style: TextStyle(
         color: Theme.of(context).textTheme.headline1.color,
       ),
@@ -138,18 +144,17 @@ class _FileImportContainerState extends State<FileImportContainer> {
     );
   }
 
-// TODO(kenz): uncomment once file picker support is added
-//  Widget _buildImportButton() {
-//    return Row(
-//      mainAxisAlignment: MainAxisAlignment.center,
-//      children: [
-//        OutlinedButton(
-//          onPressed: () {},
-//          child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
-//        ),
-//      ],
-//    );
-//  }
+  Widget _buildImportButton() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        OutlinedButton(
+          onPressed: _importFile,
+          child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
+        ),
+      ],
+    );
+  }
 
   Widget _buildActionButton() {
     return Column(
@@ -172,6 +177,19 @@ class _FileImportContainerState extends State<FileImportContainer> {
         ),
       ],
     );
+  }
+
+  void _importFile() async {
+    final acceptedTypeGroups = [XTypeGroup(extensions: widget.extensions)];
+    final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
+    final data = jsonDecode(await file.readAsString());
+    final lastModifiedTime = await file.lastModified();
+    final devToolsJsonFile = DevToolsJsonFile(
+      data: data,
+      name: file.name,
+      lastModifiedTime: lastModifiedTime,
+    );
+    _handleImportedFile(devToolsJsonFile);
   }
 
   // TODO(kenz): add error handling to ensure we only allow importing supported
