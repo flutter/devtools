@@ -9,6 +9,7 @@ import 'package:devtools_app/src/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/memory/memory_vm_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/memory_test_data.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,14 @@ void main() {
   MemoryScreen screen;
   MemoryController controller;
   FakeServiceManager fakeServiceManager;
+
+  PreferencesController preferencesController;
+
+  void enableAndroidCollection() {
+    preferencesController = PreferencesController();
+    preferencesController.toggleAndroidMemoryCollection(true);
+    setGlobal(PreferencesController, preferencesController);
+  }
 
   void _setUpServiceManagerForMemory() {
     // Load canned data testHeapSampleData.
@@ -62,6 +71,7 @@ void main() {
 
   group('MemoryScreen', () {
     setUp(() async {
+      enableAndroidCollection();
       await ensureInspectorDependencies();
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
