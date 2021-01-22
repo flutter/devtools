@@ -1,3 +1,6 @@
+## 0.9.6+3
+* Support null safe `package:intl` version `>=0.17.x`. 
+
 ## 0.9.6+2
 * Support null safe `package:vm_service` version `>=6.x.x`.
 
