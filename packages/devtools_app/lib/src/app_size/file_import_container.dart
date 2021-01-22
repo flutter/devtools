@@ -21,6 +21,7 @@ class FileImportContainer extends StatefulWidget {
     this.onAction,
     this.onFileSelected,
     this.onError,
+    this.extensions = const ['json'],
     Key key,
   }) : super(key: key);
 
@@ -36,6 +37,9 @@ class FileImportContainer extends StatefulWidget {
   final DevToolsJsonFileHandler onFileSelected;
 
   final void Function(String error) onError;
+
+  // The file's extensions where we are going to get the data from.
+  final List<String> extensions;
 
   @override
   _FileImportContainerState createState() => _FileImportContainerState();
@@ -176,9 +180,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
   }
 
   void _importFile() async {
-    final acceptedTypeGroups = [
-      XTypeGroup(extensions: ['json'])
-    ];
+    final acceptedTypeGroups = [XTypeGroup(extensions: widget.extensions)];
     final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
     final data = jsonDecode(await file.readAsString());
     final lastModifiedTime = await file.lastModified();
