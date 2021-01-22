@@ -38,7 +38,7 @@ class FileImportContainer extends StatefulWidget {
 
   final void Function(String error) onError;
 
-  // The file's extensions where we are going to get the data from.
+  /// The file's extensions where we are going to get the data from.
   final List<String> extensions;
 
   @override
