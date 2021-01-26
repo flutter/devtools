@@ -258,21 +258,21 @@ class LoggingController extends DisposableController
     // Log stdout events.
     final _StdoutEventHandler stdoutHandler =
         _StdoutEventHandler(this, 'stdout');
-    autoDispose(service.onStdoutEvent.listen(stdoutHandler.handle));
+    autoDispose(service.onStdoutEventWithHistory.listen(stdoutHandler.handle));
 
     // Log stderr events.
     final _StdoutEventHandler stderrHandler =
         _StdoutEventHandler(this, 'stderr', isError: true);
-    autoDispose(service.onStderrEvent.listen(stderrHandler.handle));
+    autoDispose(service.onStderrEventWithHistory.listen(stderrHandler.handle));
 
     // Log GC events.
     autoDispose(service.onGCEvent.listen(_handleGCEvent));
 
     // Log `dart:developer` `log` events.
-    autoDispose(service.onLoggingEvent.listen(_handleDeveloperLogEvent));
+    autoDispose(service.onLoggingEventWithHistory.listen(_handleDeveloperLogEvent));
 
     // Log Flutter extension events.
-    autoDispose(service.onExtensionEvent.listen(_handleExtensionEvent));
+    autoDispose(service.onExtensionEventWithHistory.listen(_handleExtensionEvent));
 
     if (inspectorService == null) {
       await ensureInspectorServiceDependencies();

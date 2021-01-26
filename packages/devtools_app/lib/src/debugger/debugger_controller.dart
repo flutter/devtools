@@ -16,6 +16,7 @@ import '../auto_dispose.dart';
 import '../core/message_bus.dart';
 import '../globals.dart';
 import '../utils.dart';
+import '../vm_service_wrapper.dart';
 import 'debugger_model.dart';
 
 // TODO(devoncarew): Add some delayed resume value notifiers (to be used to
@@ -38,7 +39,9 @@ class DebuggerController extends DisposableController
         .listen(switchToIsolate));
     autoDispose(_service.onDebugEvent.listen(_handleDebugEvent));
     autoDispose(_service.onIsolateEvent.listen(_handleIsolateEvent));
+    // TODO(kenz): do we want to listen with event history here?
     autoDispose(_service.onStdoutEvent.listen(_handleStdoutEvent));
+    // TODO(kenz): do we want to listen with event history here?
     autoDispose(_service.onStderrEvent.listen(_handleStderrEvent));
 
     _scriptHistoryListener = () {
@@ -47,7 +50,7 @@ class DebuggerController extends DisposableController
     scriptsHistory.addListener(_scriptHistoryListener);
   }
 
-  VmService get _service => serviceManager.service;
+  VmServiceWrapper get _service => serviceManager.service;
 
   final ScriptCache _scriptCache = ScriptCache();
 

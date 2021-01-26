@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dds/vm_service_extensions.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -613,6 +614,8 @@ class VmServiceWrapper implements VmService {
   @override
   Stream<Event> get onExtensionEvent => _vmService.onExtensionEvent;
 
+  Stream<Event> get onExtensionEventWithHistory => _vmService.onExtensionEventWithHistory;
+
   @override
   Stream<Event> get onGCEvent => _vmService.onGCEvent;
 
@@ -621,6 +624,8 @@ class VmServiceWrapper implements VmService {
 
   @override
   Stream<Event> get onLoggingEvent => _vmService.onLoggingEvent;
+
+  Stream<Event> get onLoggingEventWithHistory => _vmService.onLoggingEventWithHistory;
 
   @override
   Stream<Event> get onTimelineEvent => _vmService.onTimelineEvent;
@@ -637,8 +642,12 @@ class VmServiceWrapper implements VmService {
   @override
   Stream<Event> get onStderrEvent => _vmService.onStderrEvent;
 
+  Stream<Event> get onStderrEventWithHistory => _vmService.onStderrEventWithHistory;
+
   @override
   Stream<Event> get onStdoutEvent => _vmService.onStdoutEvent;
+
+  Stream<Event> get onStdoutEventWithHistory => _vmService.onStdoutEventWithHistory;
 
   @override
   Stream<Event> get onVMEvent => _vmService.onVMEvent;

@@ -567,6 +567,7 @@ class MemoryController extends DisposableController
     _memoryTracker.start();
 
     // Log Flutter extension events.
+    // TODO(kenz): do we want to listen with event history here?
     autoDispose(serviceManager.service.onExtensionEvent.listen((Event event) {
       var extensionEventKind = event.extensionKind;
       String customEventKind;

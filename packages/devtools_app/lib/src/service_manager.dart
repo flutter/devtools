@@ -1092,6 +1092,7 @@ class ServiceExtensionManager extends Disposer {
     cancel();
     _connectedApp = connectedApp;
     _service = service;
+    // TODO(kenz): do we want to listen with event history here?
     autoDispose(service.onExtensionEvent.listen(_handleExtensionEvent));
     addAutoDisposeListener(
       hasServiceExtension(extensions.didSendFirstFrameEvent),
