@@ -156,6 +156,8 @@ class ServiceConnectionManager {
     @required Future<void> onClosed,
   }) async {
     this.service = service;
+    await service.initServiceVersions();
+
     connectedApp = ConnectedApp();
     // It is critical we call vmServiceOpened on each manager class before
     // performing any async operations. Otherwise, we may get end up with
