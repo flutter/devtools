@@ -156,6 +156,8 @@ class ServiceConnectionManager {
     @required Future<void> onClosed,
   }) async {
     this.service = service;
+    await service.initServiceVersions();
+
     connectedApp = ConnectedApp();
     // It is critical we call vmServiceOpened on each manager class before
     // performing any async operations. Otherwise, we may get end up with
@@ -1092,6 +1094,7 @@ class ServiceExtensionManager extends Disposer {
     cancel();
     _connectedApp = connectedApp;
     _service = service;
+    // TODO(kenz): do we want to listen with event history here?
     autoDispose(service.onExtensionEvent.listen(_handleExtensionEvent));
     addAutoDisposeListener(
       hasServiceExtension(extensions.didSendFirstFrameEvent),

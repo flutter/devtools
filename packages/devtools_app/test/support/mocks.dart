@@ -390,7 +390,13 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Stream<Event> get onStdoutEvent => const Stream.empty();
 
   @override
+  Stream<Event> get onStdoutEventWithHistory => const Stream.empty();
+
+  @override
   Stream<Event> get onStderrEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onStderrEventWithHistory => const Stream.empty();
 
   @override
   Stream<Event> get onGCEvent => const Stream.empty();
@@ -402,7 +408,13 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Stream<Event> get onLoggingEvent => const Stream.empty();
 
   @override
+  Stream<Event> get onLoggingEventWithHistory => const Stream.empty();
+
+  @override
   Stream<Event> get onExtensionEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onExtensionEventWithHistory => const Stream.empty();
 
   @override
   Stream<Event> get onDebugEvent => const Stream.empty();

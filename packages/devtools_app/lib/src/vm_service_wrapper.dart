@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dds/vm_service_extensions.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -36,6 +37,16 @@ class VmServiceWrapper implements VmService {
   VmService _vmService;
   Version _protocolVersion;
   Version _dartIoVersion;
+  Version _ddsVersion;
+
+  Future<void> initServiceVersions() async {
+    // Note: We cannot init [_dartIoVersion] here because it requires an
+    // isolate. This is fine because there are not reasons for us to need
+    // [_dartIoVersion] in a synchronous context, like there are for
+    // [_protocolVersion] and [_ddsVersion].
+    _protocolVersion = await getVersion();
+    _ddsVersion = await getDartDevelopmentServiceVersion();
+  }
 
   Uri get connectedUri => _connectedUri;
   final Uri _connectedUri;
@@ -613,6 +624,14 @@ class VmServiceWrapper implements VmService {
   @override
   Stream<Event> get onExtensionEvent => _vmService.onExtensionEvent;
 
+  Stream<Event> get onExtensionEventWithHistory {
+    if (_isDdsVersionSupportedNow(
+        supportedVersion: SemanticVersion(major: 1, minor: 2))) {
+      return _vmService.onExtensionEventWithHistory;
+    }
+    return onExtensionEvent;
+  }
+
   @override
   Stream<Event> get onGCEvent => _vmService.onGCEvent;
 
@@ -621,6 +640,14 @@ class VmServiceWrapper implements VmService {
 
   @override
   Stream<Event> get onLoggingEvent => _vmService.onLoggingEvent;
+
+  Stream<Event> get onLoggingEventWithHistory {
+    if (_isDdsVersionSupportedNow(
+        supportedVersion: SemanticVersion(major: 1, minor: 2))) {
+      return _vmService.onLoggingEventWithHistory;
+    }
+    return onLoggingEvent;
+  }
 
   @override
   Stream<Event> get onTimelineEvent => _vmService.onTimelineEvent;
@@ -637,8 +664,24 @@ class VmServiceWrapper implements VmService {
   @override
   Stream<Event> get onStderrEvent => _vmService.onStderrEvent;
 
+  Stream<Event> get onStderrEventWithHistory {
+    if (_isDdsVersionSupportedNow(
+        supportedVersion: SemanticVersion(major: 1, minor: 2))) {
+      return _vmService.onStderrEventWithHistory;
+    }
+    return onStderrEvent;
+  }
+
   @override
   Stream<Event> get onStdoutEvent => _vmService.onStdoutEvent;
+
+  Stream<Event> get onStdoutEventWithHistory {
+    if (_isDdsVersionSupportedNow(
+        supportedVersion: SemanticVersion(major: 1, minor: 2))) {
+      return _vmService.onStdoutEventWithHistory;
+    }
+    return onStdoutEvent;
+  }
 
   @override
   Stream<Event> get onVMEvent => _vmService.onVMEvent;
@@ -890,6 +933,14 @@ class VmServiceWrapper implements VmService {
     _dartIoVersion ??= await getDartIOVersion(isolateId);
     return _versionSupported(
       version: _dartIoVersion,
+      supportedVersion: supportedVersion,
+    );
+  }
+
+  bool _isDdsVersionSupportedNow({@required SemanticVersion supportedVersion}) {
+    assert(_ddsVersion != null);
+    return _versionSupported(
+      version: _ddsVersion,
       supportedVersion: supportedVersion,
     );
   }

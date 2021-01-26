@@ -567,6 +567,8 @@ class MemoryController extends DisposableController
     _memoryTracker.start();
 
     // Log Flutter extension events.
+    // Note: We do not need to listen to event history here because we do not
+    // have matching historical data about total memory usage.
     autoDispose(serviceManager.service.onExtensionEvent.listen((Event event) {
       var extensionEventKind = event.extensionKind;
       String customEventKind;
@@ -993,8 +995,6 @@ class MemoryController extends DisposableController
   bool get isGcing => _gcing;
 
   Future<void> gc() async {
-
-    
     _gcing = true;
 
     try {
