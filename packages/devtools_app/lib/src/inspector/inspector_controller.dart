@@ -335,16 +335,19 @@ class InspectorController extends DisposableController
   }
 
   @override
-  Future<void> onForceRefresh() {
+  Future<void> onForceRefresh() async {
     assert(!_disposed);
     if (!visibleToUser || _disposed) {
       return Future.value();
     }
-    recomputeTreeRoot(null, null, false);
+    // TODO(dantup): Is it safe to add this await here?
+    await recomputeTreeRoot(null, null, false);
 
-    // TODO(kenz): recalculate inspector badge count based on whether or not
-    // widgets with errors are still in the tree.
-    serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
+    final validInspectorRefs =
+        await _collectValidInspectorRefs(inspectorTree.root.diagnostic).toSet();
+
+    serviceManager.errorBadgeManager
+        .filterInspectorErrors(validInspectorRefs.contains);
 
     return getPendingUpdateDone();
   }
@@ -382,7 +385,13 @@ class InspectorController extends DisposableController
       _rootDirectories = await inspectorService.inferPubRootDirectoryIfNeeded();
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
-      await updateSelectionFromService(firstFrame: true);
+
+      final queryParams = loadQueryParams();
+      final inspectorRef = queryParams.containsKey(inspectorRefQueryParam)
+          ? queryParams[inspectorRefQueryParam]
+          : null;
+      await updateSelectionFromService(
+          firstFrame: true, inspectorRef: inspectorRef);
     } else {
       final ready = await inspectorService.isWidgetTreeReady();
       flutterAppFrameReady = ready;
@@ -583,7 +592,8 @@ class InspectorController extends DisposableController
     updateSelectionFromService(firstFrame: false);
   }
 
-  Future<void> updateSelectionFromService({@required bool firstFrame}) async {
+  Future<void> updateSelectionFromService(
+      {@required bool firstFrame, String inspectorRef}) async {
     if (parent != null) {
       // If we have a parent controller we should wait for the parent to update
       // our selection rather than updating it our self.
@@ -598,14 +608,11 @@ class InspectorController extends DisposableController
 
     final group = _selectionGroups.next;
 
-    if (firstFrame) {
-      final queryParams = loadQueryParams();
-      if (queryParams.containsKey(inspectorRefQueryParam)) {
-        await group.setSelectionInspector(
-          InspectorInstanceRef(queryParams[inspectorRefQueryParam]),
-          false,
-        );
-      }
+    if (inspectorRef != null) {
+      await group.setSelectionInspector(
+        InspectorInstanceRef(inspectorRef),
+        false,
+      );
     }
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
@@ -918,5 +925,18 @@ class InspectorController extends DisposableController
       SemanticVersion(major: 1, minor: 13, patch: 1),
       onLayoutExplorerSupported,
     );
+  }
+
+  Stream<String> _collectValidInspectorRefs(
+      RemoteDiagnosticsNode diagnostic) async* {
+    if (diagnostic?.json?.containsKey('valueId') ?? false) {
+      yield diagnostic.json['valueId'] as String;
+    }
+    final children = await diagnostic?.children;
+    if (children != null) {
+      for (final child in children) {
+        yield* _collectValidInspectorRefs(child);
+      }
+    }
   }
 }

@@ -12,6 +12,7 @@ import '../auto_dispose_mixin.dart';
 import '../blocking_action_mixin.dart';
 import '../common_widgets.dart';
 import '../connected_app.dart';
+import '../error_badge_manager.dart';
 import '../globals.dart';
 import '../octicons.dart';
 import '../screen.dart';
@@ -93,6 +94,46 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     blockWhileInProgress(inspectorController.collapseDetailsToSelected);
   }
 
+  Widget _buildErrorList(
+    BuildContext context,
+    List<InspectableWidgetError> errors,
+  ) {
+    return ListView(
+      padding: const EdgeInsets.all(8),
+      children: <Widget>[
+        for (final error in errors)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            // TODO(dantup): How to make the cursor a hand pointer?
+            child: GestureDetector(
+              onTap: () => inspectorController.updateSelectionFromService(
+                  firstFrame: false, inspectorRef: error.inspectorRef),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(0xff, 0xF4, 0x43, 0x36),
+                        borderRadius: BorderRadius.circular(3.0),
+                      ),
+                      child: const Text(
+                        'error',
+                        overflow: TextOverflow.ellipsis,
+                        // style: textStyle,
+                      ),
+                    ),
+                  ),
+                  Text(error.errorMessage),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final summaryTree = Container(
@@ -104,6 +145,26 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         isSummaryTree: true,
       ),
     );
+
+    final treeColumn = ValueListenableBuilder<List<InspectableWidgetError>>(
+      valueListenable: serviceManager.errorBadgeManager.erroredWidgetNotifier(),
+      builder: (context, errors, _) => errors.isEmpty
+          ? summaryTree
+          : Split(
+              axis: Axis.vertical,
+              initialFractions: const [0.8, 0.2],
+              children: [
+                summaryTree,
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Theme.of(context).focusColor),
+                  ),
+                  child: _buildErrorList(context, errors),
+                )
+              ],
+            ),
+    );
+
     final detailsTree = InspectorTree(
       controller: detailsTreeController,
     );
@@ -146,7 +207,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             axis: splitAxis,
             initialFractions: const [0.33, 0.67],
             children: [
-              summaryTree,
+              treeColumn,
               InspectorDetailsTabController(
                 detailsTree: detailsTree,
                 controller: inspectorController,
