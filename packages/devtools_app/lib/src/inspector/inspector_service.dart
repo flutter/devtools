@@ -68,7 +68,8 @@ class InspectorService extends DisposableController
     this.inspectorLibrary,
     this.supportedServiceMethods,
   ) : clients = {} {
-    // TODO(kenz): do we want to listen with event history here?
+    // Note: We do not need to listen to event history here because the
+    // inspector uses a separate API to get the current inspector selection.
     autoDispose(
         vmService.onExtensionEvent.listen(onExtensionVmServiceRecieved));
     autoDispose(vmService.onDebugEvent.listen(onDebugVmServiceReceived));
