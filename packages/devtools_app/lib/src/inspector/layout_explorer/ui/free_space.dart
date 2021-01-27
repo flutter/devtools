@@ -150,8 +150,8 @@ class PaddingVisualizerWidget extends StatelessWidget {
       top: renderProperties.offset.dy,
       left: renderProperties.offset.dx,
       child: Container(
-        width: renderProperties.width,
-        height: renderProperties.height,
+        width: safeDouble(renderProperties.width),
+        height: safeDouble(renderProperties.height),
         child: horizontal ? widthWidget : heightWidget,
       ),
     );
