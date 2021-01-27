@@ -145,6 +145,25 @@ String addServiceExtensions() {
                             includeProperties: true,
                           ),
                         ) as Object;
+
+                final renderParent = renderObject.parent;
+                if (renderParent is RenderObject && subtreeDepth > 0) {
+                  final parentCreator = renderParent.debugCreator;
+                  if (parentCreator is DebugCreator) {
+                    additionalJson['parentRenderElement'] =
+                        parentCreator.element.toDiagnosticsNode().toJsonMap(
+                              delegate.copyWith(
+                                subtreeDepth: 0,
+                                includeProperties: true,
+                              ),
+                            ) as Object;
+                    // TODO(jacobr): also describe the path back up the tree to
+                    // the RenderParentElement from the current element. It
+                    // could be a surprising distance up the tree if a lot of
+                    // elements don't have their own RenderObjects.
+                  }
+                }
+
                 try {
                   final constraints = renderObject.constraints;
                   final constraintsProperty = <String, Object>{
@@ -163,19 +182,36 @@ String addServiceExtensions() {
                 } catch (e) {
                   // Not laid out yet.
                 }
-                if (renderObject is RenderBox) {
-                  additionalJson['size'] = <String, Object>{
-                    'width': renderObject.size.width.toString(),
-                    'height': renderObject.size.height.toString(),
-                  };
 
-                  final ParentData parentData =
-                      renderObject.parentData as ParentData;
-                  if (parentData is FlexParentData) {
-                    additionalJson['flexFactor'] = parentData.flex as int;
-                    additionalJson['flexFit'] =
-                        describeEnum(parentData.fit ?? FlexFit.tight);
+                try {
+                  if (renderObject is RenderBox) {
+                    additionalJson['isBox'] = true;
+                    additionalJson['size'] = <String, Object>{
+                      'width': renderObject.size.width.toString(),
+                      'height': renderObject.size.height.toString(),
+                    };
+
+                    final ParentData parentData =
+                        renderObject.parentData as ParentData;
+                    if (parentData is FlexParentData) {
+                      additionalJson['flexFactor'] = parentData.flex as int;
+                      additionalJson['flexFit'] =
+                          describeEnum(parentData.fit ?? FlexFit.tight);
+                    } else if (parentData is BoxParentData) {
+                      final offset = parentData.offset;
+                      additionalJson['parentData'] = {
+                        'offsetX': offset.dx.toString(),
+                        'offsetY': offset.dy.toString(),
+                      };
+                    }
+                  } else if (renderObject is RenderView) {
+                    additionalJson['size'] = <String, Object>{
+                      'width': renderObject.size.width.toString(),
+                      'height': renderObject.size.height.toString(),
+                    };
                   }
+                } catch (e) {
+                  // Not laid out yet.
                 }
               }
             }

@@ -17,11 +17,13 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
     @required this.properties,
     this.arrowHeadSize = defaultIconSize,
     @required this.child,
+    this.warnIfUnconstrained = true,
   });
 
   final Widget child;
   final LayoutProperties properties;
   final double arrowHeadSize;
+  final bool warnIfUnconstrained;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,8 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
     const rightWidth = heightAndConstraintIndicatorSize;
     final colorScheme = Theme.of(context).colorScheme;
 
+    final showOverflowHeight =
+        properties is FlexLayoutProperties && properties.isOverflowHeight;
     final heightDescription = RotatedBox(
       quarterTurns: 1,
       child: dimensionDescription(
@@ -39,17 +43,17 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
               TextSpan(
                 text: '${properties.describeHeight()}',
               ),
-              if (properties is! FlexLayoutProperties ||
-                  !properties.isOverflowHeight)
-                const TextSpan(text: '\n'),
-              TextSpan(
-                text: ' (${properties.describeHeightConstraints()})',
-                style: properties.constraints.hasBoundedHeight
-                    ? null
-                    : TextStyle(color: colorScheme.unconstrainedColor),
-              ),
-              if (properties is FlexLayoutProperties &&
-                  properties.isOverflowHeight)
+              if (properties.constraints != null) ...[
+                if (!showOverflowHeight) const TextSpan(text: '\n'),
+                TextSpan(
+                  text: ' (${properties.describeHeightConstraints()})',
+                  style: properties.constraints.hasBoundedHeight ||
+                          !warnIfUnconstrained
+                      ? null
+                      : TextStyle(color: colorScheme.unconstrainedColor),
+                )
+              ],
+              if (showOverflowHeight)
                 TextSpan(
                   text: '\nchildren take: '
                       '${toStringAsFixed(sum(properties.childrenHeights))}',
@@ -97,13 +101,16 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
       TextSpan(
         children: [
           TextSpan(text: '${properties.describeWidth()}; '),
-          if (!showChildrenWidthsSum) const TextSpan(text: '\n'),
-          TextSpan(
-            text: '(${properties.describeWidthConstraints()})',
-            style: properties.constraints.hasBoundedWidth
-                ? null
-                : TextStyle(color: colorScheme.unconstrainedColor),
-          ),
+          if (properties.constraints != null) ...[
+            if (!showChildrenWidthsSum) const TextSpan(text: '\n'),
+            TextSpan(
+              text: '(${properties.describeWidthConstraints()})',
+              style:
+                  properties.constraints.hasBoundedWidth || !warnIfUnconstrained
+                      ? null
+                      : TextStyle(color: colorScheme.unconstrainedColor),
+            )
+          ],
           if (showChildrenWidthsSum)
             TextSpan(
               text: '\nchildren take '

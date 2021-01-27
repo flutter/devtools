@@ -109,12 +109,29 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   FlexFit get flexFit => deserializeFlexFit(json['flexFit']);
 
-  Map<String, Object> get renderObject => json['renderObject'];
+  RemoteDiagnosticsNode get renderObject {
+    if (_renderObject != null) return _renderObject;
+    final data = json['renderObject'];
+    if (data == null) return null;
+    _renderObject = RemoteDiagnosticsNode(data, inspectorService, false, null);
+    return _renderObject;
+  }
+
+  RemoteDiagnosticsNode _renderObject;
+
+  RemoteDiagnosticsNode get parentRenderElement {
+    final data = json['parentRenderElement'];
+    if (data == null) return null;
+    _parentRenderElement =
+        RemoteDiagnosticsNode(data, inspectorService, false, null);
+    return _parentRenderElement;
+  }
+
+  RemoteDiagnosticsNode _parentRenderElement;
 
   BoxConstraints get constraints => deserializeConstraints(json['constraints']);
 
   BoxParentData get parentData => deserializeParentData(json['parentData']);
-  Size get parentSize => deserializeSize(json['parentSize']);
 
   Size get size => deserializeSize(json['size']);
 

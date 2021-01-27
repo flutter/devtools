@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -156,4 +158,9 @@ class PaddingVisualizerWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+double safeDouble(double value) {
+  if (value.isNaN) return 0.0;
+  return math.max(value, 0.0);
 }

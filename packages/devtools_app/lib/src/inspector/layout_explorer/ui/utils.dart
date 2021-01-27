@@ -129,6 +129,7 @@ class WidgetVisualizer extends StatelessWidget {
     @required this.layoutProperties,
     this.child,
     this.overflowSide,
+    this.largeTitle = false,
   })  : assert(title != null),
         super(key: key);
 
@@ -137,6 +138,7 @@ class WidgetVisualizer extends StatelessWidget {
   final Widget child;
   final Widget hint;
   final bool isSelected;
+  final bool largeTitle;
 
   final OverflowSide overflowSide;
 
@@ -190,9 +192,11 @@ class WidgetVisualizer extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Container(
-                          constraints: const BoxConstraints(
-                              maxWidth: minRenderWidth *
-                                  widgetTitleMaxWidthPercentage),
+                          constraints: BoxConstraints(
+                              maxWidth: largeTitle
+                                  ? defaultMaxRenderWidth
+                                  : minRenderWidth *
+                                      widgetTitleMaxWidthPercentage),
                           child: Center(
                             child: Text(
                               title,
