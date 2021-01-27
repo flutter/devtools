@@ -104,7 +104,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         for (final error in errors)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            // TODO(dantup): How to make the cursor a hand pointer?
             child: InkWell(
               onTap: () => inspectorController.updateSelectionFromService(
                   firstFrame: false, inspectorRef: error.inspectorRef),

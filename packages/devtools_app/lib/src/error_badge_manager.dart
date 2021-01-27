@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 import 'auto_dispose.dart';
 import 'globals.dart';
+import 'inspector/diagnostics_node.dart';
 import 'inspector/inspector_screen.dart';
 import 'listenable.dart';
 import 'logging/logging_screen.dart';
@@ -56,28 +57,28 @@ class ErrorBadgeManager extends DisposableController
   }
 
   InspectableWidgetError _extractInspectableError(Event error) {
-    final json = error.extensionData.data;
+    final node =
+        RemoteDiagnosticsNode(error.extensionData.data, null, false, null);
 
-    // TODO(dantup): Is there a better way to get the inspectorRef we need?
-    final properties = json['properties'] as List<dynamic>;
-
-    final errorSummaryNode = properties
-        ?.firstWhere((p) => p['type'] == 'ErrorSummary', orElse: () => null);
-    final errorMessage = errorSummaryNode != null
-        ? errorSummaryNode['description'] as String
-        : null;
+    final errorSummaryNode = node.inlineProperties
+        ?.firstWhere((p) => p.type == 'ErrorSummary', orElse: () => null);
+    final errorMessage = errorSummaryNode?.description;
     if (errorMessage == null) {
       return null;
     }
 
-    final devToolsUrlNode = properties?.firstWhere(
-        (p) => p['type'] == 'DevToolsDeepLinkProperty' && p['value'] != null,
-        orElse: () => null);
+    final devToolsUrlNode = node.inlineProperties?.firstWhere(
+      (p) =>
+          p.type == 'DevToolsDeepLinkProperty' &&
+          p.getStringMember('value') != null,
+      orElse: () => null,
+    );
     if (devToolsUrlNode == null) {
       return null;
     }
 
-    final queryParams = devToolsQueryParams(devToolsUrlNode['value'] as String);
+    final queryParams =
+        devToolsQueryParams(devToolsUrlNode.getStringMember('value'));
     final inspectorRef =
         queryParams != null ? queryParams['inspectorRef'] : null;
 

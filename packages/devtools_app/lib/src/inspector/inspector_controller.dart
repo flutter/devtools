@@ -343,11 +343,14 @@ class InspectorController extends DisposableController
     // TODO(dantup): Is it safe to add this await here?
     await recomputeTreeRoot(null, null, false);
 
-    final validInspectorRefs =
-        await _collectValidInspectorRefs(inspectorTree.root.diagnostic).toSet();
+    if (isSummaryTree) {
+      final validInspectorRefs =
+          await _collectValidInspectorRefs(inspectorTree.root.diagnostic)
+              .toSet();
 
-    serviceManager.errorBadgeManager
-        .filterErrors(InspectorScreen.id, validInspectorRefs.contains);
+      serviceManager.errorBadgeManager
+          .filterErrors(InspectorScreen.id, validInspectorRefs.contains);
+    }
 
     return getPendingUpdateDone();
   }
