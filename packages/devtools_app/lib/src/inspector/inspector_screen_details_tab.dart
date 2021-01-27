@@ -56,13 +56,13 @@ class _InspectorDetailsTabControllerState
   @override
   Widget build(BuildContext context) {
     final tabs = <Tab>[
-      _buildTab('Details Tree'),
       if (widget.layoutExplorerSupported) _buildTab('Layout Explorer'),
+      _buildTab('Details Tree'),
     ];
     final tabViews = <Widget>[
-      widget.detailsTree,
       if (widget.layoutExplorerSupported)
         LayoutExplorerTab(controller: widget.controller),
+      widget.detailsTree,
     ];
     final _tabController = widget.layoutExplorerSupported
         ? _tabControllerWithLayoutExplorer
