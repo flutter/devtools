@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../enum_utils.dart';
+import '../math_utils.dart';
 import '../utils.dart';
 import 'diagnostics_node.dart';
 import 'layout_explorer/flex/utils.dart';
@@ -96,11 +97,11 @@ List<double> computeRenderSizes({
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
       : description = node?.description,
-        size = deserializeSize(node?.size),
-        constraints = deserializeConstraints(node?.constraints),
+        size = node?.size,
+        constraints = node?.constraints,
         isFlex = node?.isFlex,
         flexFactor = node?.flexFactor,
-        flexFit = deserializeFlexFit(node?.flexFit),
+        flexFit = node?.flexFit,
         children = copyLevel == 0
             ? []
             : node?.childrenNow
@@ -195,35 +196,19 @@ class LayoutProperties {
 
   String describeHeight() => 'h=${toStringAsFixed(size.height)}';
 
+  // TODO(jacobr): need to also consider offset from parent.
   bool get isOverflowWidth {
-    return width > parent.width + overflowEpsilon;
+    return parent != null && width > parent.width + overflowEpsilon;
   }
 
+  // TODO(jacobr): need to also consider offset from parent.
   bool get isOverflowHeight {
-    return height > parent.height + overflowEpsilon;
+    return parent != null && height > parent.height + overflowEpsilon;
   }
 
   static String describeAxis(double min, double max, String axis) {
     if (min == max) return '$axis=${min.toStringAsFixed(1)}';
     return '${min.toStringAsFixed(1)}<=$axis<=${max.toStringAsFixed(1)}';
-  }
-
-  static BoxConstraints deserializeConstraints(Map<String, Object> json) {
-    if (json == null) return null;
-    return BoxConstraints(
-      minWidth: double.parse(json['minWidth'] ?? '0.0'),
-      maxWidth: double.parse(json['maxWidth'] ?? 'Infinity'),
-      minHeight: double.parse(json['minHeight'] ?? '0.0'),
-      maxHeight: double.parse(json['maxHeight'] ?? 'Infinity'),
-    );
-  }
-
-  static Size deserializeSize(Map<String, Object> json) {
-    if (json == null) return null;
-    return Size(
-      double.parse(json['width']),
-      double.parse(json['height']),
-    );
   }
 
   LayoutProperties copyWith({
@@ -246,12 +231,23 @@ class LayoutProperties {
       flexFit: flexFit ?? this.flexFit,
     );
   }
+}
 
-  static FlexFit deserializeFlexFit(String flexFit) {
-    if (flexFit == null) {
-      return null;
-    } else if (flexFit == 'tight') return FlexFit.tight;
-    return FlexFit.loose;
+/// Enum object to represent which side of the widget is overflowing.
+///
+/// See also:
+/// * [OverflowIndicatorPainter]
+enum OverflowSide {
+  right,
+  bottom,
+}
+
+// TODO(jacobr): it is possible to overflow on multiple sides.
+extension LayoutPropertiesExtension on LayoutProperties {
+  OverflowSide get overflowSide {
+    if (isOverflowWidth) return OverflowSide.right;
+    if (isOverflowHeight) return OverflowSide.bottom;
+    return null;
   }
 }
 
