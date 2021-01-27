@@ -96,7 +96,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   Widget _buildErrorList(
     BuildContext context,
-    List<InspectableWidgetError> errors,
+    Iterable<InspectableWidgetError> errors,
   ) {
     return ListView(
       padding: const EdgeInsets.all(8),
@@ -105,7 +105,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             // TODO(dantup): How to make the cursor a hand pointer?
-            child: GestureDetector(
+            child: InkWell(
               onTap: () => inspectorController.updateSelectionFromService(
                   firstFrame: false, inspectorRef: error.inspectorRef),
               child: Row(
@@ -146,8 +146,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       ),
     );
 
-    final treeColumn = ValueListenableBuilder<List<InspectableWidgetError>>(
-      valueListenable: serviceManager.errorBadgeManager.erroredWidgetNotifier(),
+    final treeColumn = ValueListenableBuilder<Map<String, DevToolsError>>(
+      valueListenable: serviceManager.errorBadgeManager
+          .erroredWidgetNotifier(InspectorScreen.id),
       builder: (context, errors, _) => errors.isEmpty
           ? summaryTree
           : Split(
@@ -159,7 +160,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                   decoration: BoxDecoration(
                     border: Border.all(color: Theme.of(context).focusColor),
                   ),
-                  child: _buildErrorList(context, errors),
+                  child: _buildErrorList(
+                      context, errors.values.cast<InspectableWidgetError>()),
                 )
               ],
             ),

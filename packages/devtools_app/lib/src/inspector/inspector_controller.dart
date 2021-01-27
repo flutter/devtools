@@ -347,7 +347,7 @@ class InspectorController extends DisposableController
         await _collectValidInspectorRefs(inspectorTree.root.diagnostic).toSet();
 
     serviceManager.errorBadgeManager
-        .filterInspectorErrors(validInspectorRefs.contains);
+        .filterErrors(InspectorScreen.id, validInspectorRefs.contains);
 
     return getPendingUpdateDone();
   }

@@ -13,6 +13,7 @@ import 'logging/logging_screen.dart';
 import 'network/network_screen.dart';
 import 'performance/performance_screen.dart';
 import 'service_extensions.dart' as extensions;
+import 'utils.dart';
 import 'vm_service_wrapper.dart';
 
 class ErrorBadgeManager extends DisposableController
@@ -23,7 +24,9 @@ class ErrorBadgeManager extends DisposableController
     NetworkScreen.id: ValueNotifier<int>(0),
     LoggingScreen.id: ValueNotifier<int>(0),
   };
-  final _activeErroredWidgets = ValueNotifier<List<InspectableWidgetError>>([]);
+  final _activeErrors = <String, ValueNotifier<Map<String, DevToolsError>>>{
+    InspectorScreen.id: ValueNotifier<Map<String, DevToolsError>>({}),
+  };
 
   void vmServiceOpened(VmServiceWrapper service) {
     // Ensure structured errors are enabled.
@@ -47,7 +50,7 @@ class ErrorBadgeManager extends DisposableController
 
       final inspectableError = _extractInspectableError(e);
       if (inspectableError != null) {
-        appendInspectorErroredWidget(inspectableError);
+        appendError(InspectorScreen.id, inspectableError);
       }
     }
   }
@@ -74,19 +77,9 @@ class ErrorBadgeManager extends DisposableController
       return null;
     }
 
-    var inspectWidgetUrl = Uri.tryParse(devToolsUrlNode['value'] as String);
-    if (inspectWidgetUrl == null) {
-      return null;
-    }
-
-    // Handle when querystring is in the fragement.
-    if (inspectWidgetUrl.queryParameters.isEmpty &&
-        inspectWidgetUrl.fragment.isNotEmpty) {
-      inspectWidgetUrl = Uri.tryParse(inspectWidgetUrl.fragment);
-    }
-    final inspectorRef = inspectWidgetUrl != null
-        ? inspectWidgetUrl.queryParameters['inspectorRef']
-        : null;
+    final queryParams = devToolsQueryParams(devToolsUrlNode['value'] as String);
+    final inspectorRef =
+        queryParams != null ? queryParams['inspectorRef'] : null;
 
     return InspectableWidgetError(errorMessage, inspectorRef);
   }
@@ -103,12 +96,19 @@ class ErrorBadgeManager extends DisposableController
     notifier.value = currentCount + 1;
   }
 
-  void appendInspectorErroredWidget(InspectableWidgetError error) {
-    var currentErrors = _activeErroredWidgets.value;
-    if (!currentErrors.any((e) => e.inspectorRef == error.inspectorRef)) {
-      currentErrors = [...currentErrors, error];
-      _activeErroredWidgets.value = currentErrors;
-      _errorCountNotifier(InspectorScreen.id).value = currentErrors.length;
+  void appendError(String screenId, DevToolsError error) {
+    final currentErrors = _activeErrors[screenId];
+    if (currentErrors == null) return;
+
+    if (!currentErrors.value.containsKey(error.id)) {
+      // Build a new map with the new error. Adding to the existing map
+      // won't cause the ValueNotifier to fire (and it's not permitted to call
+      // notifyListeners() directly).
+      currentErrors.value = {
+        ...currentErrors.value,
+        error.id: error,
+      };
+      _errorCountNotifier(screenId).value = currentErrors.value.length;
     }
   }
 
@@ -116,8 +116,10 @@ class ErrorBadgeManager extends DisposableController
     return _errorCountNotifier(screenId) ?? const FixedValueListenable<int>(0);
   }
 
-  ValueListenable<List<InspectableWidgetError>> erroredWidgetNotifier() {
-    return _activeErroredWidgets;
+  ValueListenable<Map<String, DevToolsError>> erroredWidgetNotifier(
+      String screenId) {
+    return _activeErrors[screenId] ??
+        const FixedValueListenable<List<DevToolsError>>([]);
   }
 
   ValueNotifier<int> _errorCountNotifier(String screenId) {
@@ -128,18 +130,24 @@ class ErrorBadgeManager extends DisposableController
     _activeErrorCounts[screenId]?.value = 0;
   }
 
-  void filterInspectorErrors(bool Function(String value) isValid) {
-    _activeErroredWidgets.value = _activeErroredWidgets.value
-        .where((e) => isValid(e.inspectorRef))
-        .toList();
-    _errorCountNotifier(InspectorScreen.id).value =
-        _activeErroredWidgets.value.length;
+  void filterErrors(String screenId, bool Function(String value) isValid) {
+    final activeErrors = _activeErrors[screenId];
+    activeErrors.value = Map.fromEntries(
+        activeErrors.value.entries.where((e) => isValid(e.key)));
+    _errorCountNotifier(screenId).value = activeErrors.value.length;
   }
 }
 
-class InspectableWidgetError {
-  InspectableWidgetError(this.errorMessage, this.inspectorRef);
+class DevToolsError {
+  DevToolsError(this.errorMessage, this.id);
 
   final String errorMessage;
-  final String inspectorRef;
+  final String id;
+}
+
+class InspectableWidgetError extends DevToolsError {
+  InspectableWidgetError(String errorMessage, String id)
+      : super(errorMessage, id);
+
+  String get inspectorRef => id;
 }
