@@ -2,14 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 
-/// Enum object to represent which side of the widget is overflowing.
-///
-/// See also:
-/// * [OverflowIndicatorPainter]
-enum OverflowSide {
-  right,
-  bottom,
-}
+import '../../inspector_data_models.dart';
 
 /// CustomPainter for drawing [DebugOverflowIndicatorMixin]'s patterned background.
 /// Draws overflow pattern on the [OverflowSide] of the widget.

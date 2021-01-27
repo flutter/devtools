@@ -8,6 +8,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../enum_utils.dart';
@@ -47,6 +48,40 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   static final CustomIconMaker iconMaker = CustomIconMaker();
 
+  static BoxConstraints deserializeConstraints(Map<String, Object> json) {
+    if (json == null) return null;
+    return BoxConstraints(
+      minWidth: double.parse(json['minWidth'] ?? '0.0'),
+      maxWidth: double.parse(json['maxWidth'] ?? 'Infinity'),
+      minHeight: double.parse(json['minHeight'] ?? '0.0'),
+      maxHeight: double.parse(json['maxHeight'] ?? 'Infinity'),
+    );
+  }
+
+  static BoxParentData deserializeParentData(Map<String, Object> json) {
+    if (json == null) return null;
+    return BoxParentData()
+      ..offset = Offset(
+        double.parse(json['offsetX'] ?? '0.0'),
+        double.parse(json['offsetY'] ?? '0.0'),
+      );
+  }
+
+  static Size deserializeSize(Map<String, Object> json) {
+    if (json == null) return null;
+    return Size(
+      double.parse(json['width']),
+      double.parse(json['height']),
+    );
+  }
+
+  static FlexFit deserializeFlexFit(String flexFit) {
+    if (flexFit == null) {
+      return null;
+    } else if (flexFit == 'tight') return FlexFit.tight;
+    return FlexFit.loose;
+  }
+
   /// This node's parent (if it's been set).
   RemoteDiagnosticsNode parent;
 
@@ -68,15 +103,20 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   // TODO(albertusangga): Refactor to cleaner/more robust solution
   bool get isFlex => ['Row', 'Column', 'Flex'].contains(widgetRuntimeType);
 
+  bool get isBox => json['isBox'] == true;
+
   int get flexFactor => json['flexFactor'];
 
-  String get flexFit => json['flexFit'];
+  FlexFit get flexFit => deserializeFlexFit(json['flexFit']);
 
   Map<String, Object> get renderObject => json['renderObject'];
 
-  Map<String, Object> get constraints => json['constraints'];
+  BoxConstraints get constraints => deserializeConstraints(json['constraints']);
 
-  Map<String, Object> get size => json['size'];
+  BoxParentData get parentData => deserializeParentData(json['parentData']);
+  Size get parentSize => deserializeSize(json['parentSize']);
+
+  Size get size => deserializeSize(json['size']);
 
   bool get isLocalClass {
     final objectGroup = inspectorService;
