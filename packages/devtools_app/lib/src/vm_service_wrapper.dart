@@ -220,7 +220,7 @@ class VmServiceWrapper implements VmService {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 18))) {
       return trackFuture(
-        'getAllocationProfile',
+        '_getAllocationProfile',
         _vmService.getAllocationProfile(isolateId, reset: reset, gc: gc),
       );
     } else {
@@ -237,6 +237,44 @@ class VmServiceWrapper implements VmService {
       );
       return AllocationProfile.parse(response.json);
     }
+  }
+
+  //{ "_setTraceClassAllocation", SetTraceClassAllocation,
+  Future<Success> setTraceClassAllocation(
+    String isolateId, {
+    String classId,
+    bool enable,
+  }) async {
+    final Map<String, dynamic> args = {};
+    if (classId != null) {
+      args['classId'] = classId;
+    }
+    if (enable != null) {
+      args['enable'] = enable ? true : false;
+    }
+
+    final response = await trackFuture(
+      '_setTraceClassAllocation',
+      callMethod('_setTraceClassAllocation', isolateId: isolateId, args: args),
+    );
+
+    return response as Success;
+  }
+
+  Future<CpuSamples> getAllocationSamples(
+    String isolateId, {
+    String classId,
+  }) async {
+    final Map<String, dynamic> args = {};
+    if (classId != null) {
+      args['classId'] = classId;
+    }
+    final response = await trackFuture(
+      '_getAllocationSamples',
+      callMethod('_getAllocationSamples', isolateId: isolateId, args: args),
+    );
+
+    return CpuSamples.parse(response.json);
   }
 
   @override

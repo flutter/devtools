@@ -65,7 +65,7 @@ class VMChartController extends ChartController {
       trace.Data(timestamp, capacityValue),
     );
 
-    final rssValue = sample.rss.toDouble();
+    final rssValue = sample.rss?.toDouble();
     addDataToTrace(TraceName.rSS.index, trace.Data(timestamp, rssValue));
 
     final rasterLayerValue = sample.rasterCache.layerBytes.toDouble();

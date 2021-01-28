@@ -36,6 +36,20 @@ class MyHomePage extends StatefulWidget {
   MyHomePageState createState() => MyHomePageState();
 }
 
+int globalObjectId = 0;
+
+class Tracker {
+  Tracker()
+      : now = DateTime.now(),
+        trackerId = globalObjectId++;
+
+  DateTime now = DateTime.now();
+  int trackerId = globalObjectId++;
+
+  @override
+  String toString() => 'Collected @ ${now}, id=$trackerId';
+}
+
 class MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   TabController _tabController;
@@ -48,8 +62,12 @@ class MyHomePageState extends State<MyHomePage>
     _tabController = TabController(length: tabs.length, vsync: this);
   }
 
+  final trackers = <Tracker>[];
+
   void devToolsPostEvent(String eventName, Map<String, Object> eventData) {
     developer.postEvent('DevTools.Event_$eventName', eventData);
+
+    trackers.add(Tracker());
   }
 
   Widget recordLoadedImage(ImageChunkEvent imageChunkEvent, String imageUrl) {

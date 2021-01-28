@@ -380,6 +380,7 @@ class ClassHeapDetailStats {
 
   final Map<String, dynamic> json;
 
+  bool isStacktraced = false;
   int instancesCurrent = 0;
   int instancesDelta = 0;
   int bytesCurrent = 0;

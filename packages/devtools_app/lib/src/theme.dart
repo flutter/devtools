@@ -335,3 +335,11 @@ TextStyle fixedFontStyle(BuildContext context) {
       .bodyText2
       .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
 }
+
+TextStyle smallerFixedFontStyle(BuildContext context) {
+  return Theme.of(context)
+      .textTheme
+      .bodyText2
+      .copyWith(fontFamily: 'RobotoMono', fontSize: 10.0);
+}
+

@@ -9,6 +9,28 @@ import 'memory_protocol.dart';
 
 const defaultNumberFieldWidth = 100.0;
 
+class FieldTrace extends ColumnData<ClassHeapDetailStats> {
+  FieldTrace() : super('✔', fixedWidthPx: 50.0);
+
+  @override
+  int getValue(ClassHeapDetailStats dataObject) =>
+      dataObject.isStacktraced ? 1 : 0;
+
+  @override
+  String getDisplayValue(ClassHeapDetailStats dataObject) =>
+        dataObject.isStacktraced ? '✔' : ' '; // U+2714 ✔ HEAVY CHECK MARK
+
+  @override
+  bool get supportsSorting => true;
+
+  @override
+  int compare(ClassHeapDetailStats a, ClassHeapDetailStats b) {
+    final Comparable valueA = getValue(a);
+    final Comparable valueB = getValue(b);
+    return valueA.compareTo(valueB);
+  }
+}
+
 class FieldClassName extends ColumnData<ClassHeapDetailStats> {
   FieldClassName() : super('Class', fixedWidthPx: 200.0);
 

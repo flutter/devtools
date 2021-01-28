@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -649,11 +650,79 @@ class HeapTreeViewState extends State<HeapTree>
     selectFromSearchField(controller, foundName);
   }
 
+  Widget trackerWidget(MemoryController controller) {
+    String trackingName;
+    // First class that matches not exact match until editing is completed.
+    ClassHeapDetailStats firstMatchClass;
+
+    final textController = TextEditingController();
+
+    return controller.monitorAllocations.isNotEmpty
+        ? Container(
+            width: defaultSearchTextWidth,
+            height: defaultTextFieldHeight,
+            child: TextField(
+              controller: textController,
+              inputFormatters: [
+                // Valid Dart class name.
+                FilteringTextInputFormatter.allow(
+                  RegExp(r'^[a-zA-Z_$][a-zA-Z_$0-9]*$'),
+                )
+              ],
+              onChanged: (text) {
+                firstMatchClass = controller.monitorAllocations.firstWhere(
+                  (element) => element.classRef.name.startsWith(text),
+                  orElse: () => null,
+                );
+                // TODO(terry): Use search auto-complete.
+                trackingName = text;
+              },
+              onEditingComplete: () {
+                if (firstMatchClass == null) {
+                  // TODO(terry): Use search auto-complete.
+                  debugLogger('Class $trackingName not found');
+                } else {
+                  final foundClass = controller.monitorAllocations.firstWhere(
+                    (element) => element.classRef.name == trackingName,
+                    orElse: () => null,
+                  );
+                  foundClass.isStacktraced = true;
+                  controller
+                      .setTracking(
+                        foundClass.classRef,
+                        true,
+                      )
+                      .then((success) => true)
+                      .catchError((e) => debugLogger('ERROR: ${e.message}'))
+                      .whenComplete(
+                    () {
+                      controller.changeStackTraces();
+                      textController.clear();
+                      controller.treeChanged();
+                    },
+                  );
+                }
+              },
+              decoration: InputDecoration(
+                icon: const Icon(Icons.track_changes),
+                hintText: 'Class to Track',
+                suffixIcon: IconButton(
+                  onPressed: () => textController.clear(),
+                  icon: const Icon(Icons.clear),
+                ),
+              ),
+            ),
+          )
+        : const SizedBox(width: denseSpacing);
+  }
+
   Widget _buildSearchFilterControls() {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        trackerWidget(controller),
+        const SizedBox(width: denseSpacing),
         Container(
           // TODO(terry): Use a more adaptive layout than forcing to 300.0
           width: defaultSearchTextWidth,
