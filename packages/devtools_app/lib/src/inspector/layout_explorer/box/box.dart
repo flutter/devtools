@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../math_utils.dart';
-import '../../diagnostics.dart';
 import '../../../theme.dart';
 import '../../../utils.dart';
 import '../../diagnostics_node.dart';
