@@ -82,6 +82,6 @@ class HeapSample {
   }
 
   @override
-    String toString() => '[HeapSample timestamp: $timestamp, '
+  String toString() => '[HeapSample timestamp: $timestamp, '
       '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }
