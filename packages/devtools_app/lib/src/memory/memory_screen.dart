@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:devtools_app/src/ui/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,7 @@ import '../banner_messages.dart';
 import '../charts/chart_controller.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
+import '../dialogs.dart';
 import '../globals.dart';
 import '../octicons.dart';
 import '../screen.dart';
@@ -78,6 +80,8 @@ class MemoryScreen extends Screen {
   static const gcButtonKey = Key('GC Button');
   @visibleForTesting
   static const legendButtonkey = Key(legendKeyName);
+  @visibleForTesting
+  static const settingsButtonKey = Key('Memory Configuration');
 
   @visibleForTesting
   static const eventChartKey = Key('EventPane');
@@ -280,6 +284,15 @@ class MemoryBodyState extends State<MemoryBody>
           showHover(context, allValues, tapData.tapDownDetails.globalPosition);
         }
       }
+    });
+
+    addAutoDisposeListener(controller.androidCollectionEnabled, () {
+      setState(() {
+        if (!controller.androidCollectionEnabled.value &&
+            controller.isAndroidChartVisible) {
+          controller.toggleAndroidChartVisibility();
+        }
+      });
     });
 
     _updateListeningState();
@@ -542,7 +555,8 @@ class MemoryBodyState extends State<MemoryBody>
   OutlinedButton createToggleAdbMemoryButton() {
     return OutlinedButton(
       key: MemoryScreen.androidChartButtonKey,
-      onPressed: controller.isConnectedDeviceAndroid
+      onPressed: controller.isConnectedDeviceAndroid &&
+              controller.androidCollectionEnabled.value
           ? controller.toggleAndroidChartVisibility
           : null,
       child: MaterialIconLabel(
@@ -590,7 +604,26 @@ class MemoryBodyState extends State<MemoryBody>
             includeTextWidth: _primaryControlsMinVerboseWidth,
           ),
         ),
+        const SizedBox(width: denseSpacing),
+        ActionButton(
+          child: OutlinedButton(
+            key: MemoryScreen.settingsButtonKey,
+            onPressed: _openSettingsDialog,
+            child: const Icon(
+              Icons.settings,
+              size: defaultIconSize,
+            ),
+          ),
+          tooltip: 'Memory Configuration',
+        ),
       ],
+    );
+  }
+
+  void _openSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => MemoryConfigurationsDialog(controller),
     );
   }
 
@@ -1418,5 +1451,48 @@ class ChartsValues {
     results[adbJavaHeapJsonName] = androidData.javaHeap;
     results[adbStackJsonName] = androidData.stack;
     results[adbGraphicsJsonName] = androidData.graphics;
+  }
+}
+
+class MemoryConfigurationsDialog extends StatelessWidget {
+  const MemoryConfigurationsDialog(this.controller);
+
+  static const dialogWidth = 700.0;
+
+  final MemoryController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return DevToolsDialog(
+      title: dialogTitleText(theme, 'Memory Settings'),
+      includeDivider: false,
+      content: Container(
+        width: dialogWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...dialogSubHeader(theme, 'Android'),
+            Row(
+              children: [
+                NotifierCheckbox(notifier: controller.androidCollectionEnabled),
+                RichText(
+                  overflow: TextOverflow.visible,
+                  text: TextSpan(
+                    text: 'Collect Android Memory Statistics using ADB',
+                    style: theme.regularTextStyle,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        DialogCloseButton(),
+      ],
+    );
   }
 }

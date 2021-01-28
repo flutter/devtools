@@ -117,6 +117,9 @@ class MemoryController extends DisposableController
 
   static const logFilenamePrefix = 'memory_log_';
 
+  ValueListenable<bool> get androidCollectionEnabled => _androidCollectionEnabled;
+  final _androidCollectionEnabled = ValueNotifier<bool>(true);
+
   final List<Snapshot> snapshots = [];
 
   Snapshot get lastSnapshot => snapshots.safeLast;
