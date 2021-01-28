@@ -4,7 +4,6 @@
 
 import 'dart:math';
 
-import 'package:devtools_app/src/ui/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -287,9 +286,9 @@ class MemoryBodyState extends State<MemoryBody>
     });
 
     addAutoDisposeListener(controller.androidCollectionEnabled, () {
+      final isAndroidCollection = controller.androidCollectionEnabled.value;
       setState(() {
-        if (!controller.androidCollectionEnabled.value &&
-            controller.isAndroidChartVisible) {
+        if (!isAndroidCollection && controller.isAndroidChartVisible) {
           controller.toggleAndroidChartVisibility();
         }
       });
@@ -1457,8 +1456,6 @@ class ChartsValues {
 class MemoryConfigurationsDialog extends StatelessWidget {
   const MemoryConfigurationsDialog(this.controller);
 
-  static const dialogWidth = 700.0;
-
   final MemoryController controller;
 
   @override
@@ -1469,7 +1466,7 @@ class MemoryConfigurationsDialog extends StatelessWidget {
       title: dialogTitleText(theme, 'Memory Settings'),
       includeDivider: false,
       content: Container(
-        width: dialogWidth,
+        width: dialogSettingsWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

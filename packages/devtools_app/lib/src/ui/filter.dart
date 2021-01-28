@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../common_widgets.dart';
 import '../dialogs.dart';
 import '../theme.dart';
+import '../utils.dart';
 import 'label.dart';
 
 mixin FilterControllerMixin<T> {
@@ -38,8 +39,6 @@ class FilterDialog<FilterControllerMixin> extends StatefulWidget {
 }
 
 class _FilterDialogState extends State<FilterDialog> {
-  static const dialogWidth = 500.0;
-
   TextEditingController queryTextFieldController;
 
   @override
@@ -63,7 +62,7 @@ class _FilterDialogState extends State<FilterDialog> {
         padding: const EdgeInsets.symmetric(
           horizontal: defaultSpacing,
         ),
-        width: dialogWidth,
+        width: dialogSettingsWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

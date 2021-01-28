@@ -1038,3 +1038,6 @@ double safePositiveDouble(double value) {
   if (value.isNaN) return 0.0;
   return max(value, 0.0);
 }
+
+/// Width of all settings dialogs.
+const dialogSettingsWidth = 700.0;
