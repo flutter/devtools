@@ -687,20 +687,8 @@ class HeapTreeViewState extends State<HeapTree>
                     orElse: () => null,
                   );
                   foundClass.isStacktraced = true;
-                  controller
-                      .setTracking(
-                        foundClass.classRef,
-                        true,
-                      )
-                      .then((success) => true)
-                      .catchError((e) => debugLogger('ERROR: ${e.message}'))
-                      .whenComplete(
-                    () {
-                      controller.changeStackTraces();
-                      textController.clear();
-                      controller.treeChanged();
-                    },
-                  );
+                  controller.setTracking(foundClass.classRef, true);
+                  textController.clear();
                 }
               },
               decoration: InputDecoration(

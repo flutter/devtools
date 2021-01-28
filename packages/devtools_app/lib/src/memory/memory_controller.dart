@@ -557,8 +557,33 @@ class MemoryController extends DisposableController
   /// Format key is Class name and value is ClassRef.
   final trackAllocations = <String, ClassRef>{};
 
+  /// Set up the class to be tracked.
+  void setTracking(ClassRef classRef, bool enable) {
+    final foundClass = monitorAllocations.firstWhere(
+      (element) => element.classRef == classRef,
+      orElse: () => null,
+    );
+
+    if (foundClass != null) {
+      foundClass.isStacktraced = true;
+
+      _setTracking(
+        foundClass.classRef,
+        true,
+      )
+          .then((success) => true)
+          .catchError((e) => debugLogger('ERROR: ${e.message}'))
+          .whenComplete(
+        () {
+          changeStackTraces();
+          treeChanged();
+        },
+      );
+    }
+  }
+
   /// Track where/when a particular class is allocated (constructor new'd).
-  Future<void> setTracking(ClassRef ref, bool enable) async {
+  Future<void> _setTracking(ClassRef ref, bool enable) async {
     if (!await isIsolateLive(_isolateId)) return;
 
     final Success returnObject =
@@ -883,11 +908,7 @@ class MemoryController extends DisposableController
 
       if (trackedClass != null) {
         monitorAllocation.isStacktraced = true;
-
-        setTracking(trackedClass.value, true)
-            .then((success) => true)
-            .catchError((e) => debugLogger('ERROR: ${e.message}'))
-            .whenComplete(() => changeStackTraces());
+        setTracking(trackedClass.value, true);
       }
     }
   }

@@ -203,14 +203,7 @@ class AllocationTableViewState extends State<AllocationTableView>
         final isTraced = !ref.isStacktraced;
         ref.isStacktraced = isTraced;
 
-        controller
-            .setTracking(
-              ref.classRef,
-              isTraced,
-            )
-            .then((success) => true)
-            .catchError((e) => debugLogger('ERROR: ${e.message}'))
-            .whenComplete(() => controller.changeStackTraces());
+        controller.setTracking(ref.classRef, isTraced);
       },
       sortColumn: controller.sortedMonitorColumn,
       sortDirection: controller.sortedMonitorDirection,
