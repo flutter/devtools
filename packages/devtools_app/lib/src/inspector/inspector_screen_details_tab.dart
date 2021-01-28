@@ -56,13 +56,13 @@ class _InspectorDetailsTabControllerState
   @override
   Widget build(BuildContext context) {
     final tabs = <Tab>[
-      if (widget.layoutExplorerSupported) _buildTab('Layout Explorer'),
       _buildTab('Details Tree'),
+      if (widget.layoutExplorerSupported) _buildTab('Layout Explorer'),
     ];
     final tabViews = <Widget>[
+      widget.detailsTree,
       if (widget.layoutExplorerSupported)
         LayoutExplorerTab(controller: widget.controller),
-      widget.detailsTree,
     ];
     final _tabController = widget.layoutExplorerSupported
         ? _tabControllerWithLayoutExplorer
@@ -81,8 +81,6 @@ class _InspectorDetailsTabControllerState
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
-              if (widget.layoutExplorerSupported)
-                LayoutExplorerTab(controller: widget.controller),
               Container(
                 color: focusColor,
                 child: TabBar(
