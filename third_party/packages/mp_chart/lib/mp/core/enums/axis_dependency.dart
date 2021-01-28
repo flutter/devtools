@@ -1,1 +1,0 @@
-enum AxisDependency { LEFT, RIGHT }
