@@ -181,12 +181,14 @@ class LayoutProperties {
   List<double> get childrenHeights => childrenDimensions(Axis.vertical);
 
   String describeWidthConstraints() {
+    if (constraints == null) return '';
     return constraints.hasBoundedWidth
         ? describeAxis(constraints.minWidth, constraints.maxWidth, 'w')
         : 'width is unconstrained';
   }
 
   String describeHeightConstraints() {
+    if (constraints == null) return '';
     return constraints.hasBoundedHeight
         ? describeAxis(constraints.minHeight, constraints.maxHeight, 'h')
         : 'height is unconstrained';
@@ -196,14 +198,28 @@ class LayoutProperties {
 
   String describeHeight() => 'h=${toStringAsFixed(size.height)}';
 
-  // TODO(jacobr): need to also consider offset from parent.
   bool get isOverflowWidth {
-    return parent != null && width > parent.width + overflowEpsilon;
+    final parentWidth = parent?.width;
+    if (parentWidth == null) return false;
+    final parentData = node.parentData;
+    double widthUsed = width;
+    if (parentData != null) {
+      widthUsed += parentData.offset.dx;
+    }
+    // TODO(jacobr): certain widgets may allow overflow so this may false
+    // positive a bit for cases like Stack.
+    return widthUsed > parentWidth + overflowEpsilon;
   }
 
-  // TODO(jacobr): need to also consider offset from parent.
   bool get isOverflowHeight {
-    return parent != null && height > parent.height + overflowEpsilon;
+    final parentHeight = parent?.height;
+    if (parentHeight == null) return false;
+    final parentData = node.parentData;
+    double heightUsed = height;
+    if (parentData != null) {
+      heightUsed += parentData.offset.dy;
+    }
+    return heightUsed > parentHeight + overflowEpsilon;
   }
 
   static String describeAxis(double min, double max, String axis) {
@@ -242,7 +258,10 @@ enum OverflowSide {
   bottom,
 }
 
-// TODO(jacobr): it is possible to overflow on multiple sides.
+// TODO(jacobr): is it possible to overflow on multiple sides?
+// TODO(jacobr): do we need to worry about overflowing on the left side in RTL
+// layouts? We need to audit the Flutter semantics for determining overflow to
+// make sure we are consistent.
 extension LayoutPropertiesExtension on LayoutProperties {
   OverflowSide get overflowSide {
     if (isOverflowWidth) return OverflowSide.right;
@@ -351,7 +370,7 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
-    final Map<String, Object> renderObjectJson = node?.renderObject;
+    final Map<String, Object> renderObjectJson = node?.renderObject?.json;
     if (renderObjectJson == null) return null;
     final List<dynamic> properties = renderObjectJson['properties'];
     final Map<String, Object> data = Map<String, Object>.fromIterable(

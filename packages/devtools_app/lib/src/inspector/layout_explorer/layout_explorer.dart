@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
+import 'box/box.dart';
 import 'flex/flex.dart';
 
 /// Tab that acts as a proxy to decide which widget to be displayed
@@ -26,10 +27,12 @@ class _LayoutExplorerTabState extends State<LayoutExplorerTab>
     if (FlexLayoutExplorerWidget.shouldDisplay(node)) {
       return FlexLayoutExplorerWidget(controller);
     }
+    if (BoxLayoutExplorerWidget.shouldDisplay(node)) {
+      return BoxLayoutExplorerWidget(controller);
+    }
     return const Center(
       child: Text(
-        'Currently, Layout Explorer only supports Flex-based widgets'
-        ' (e.g., Row, Column, Flex) or their direct children.',
+        'Currently, Layout Explorer only supports Box and Flex-based widgets.',
         textAlign: TextAlign.center,
         overflow: TextOverflow.clip,
       ),

@@ -1033,3 +1033,8 @@ Map<String, String> devToolsQueryParams(String url) {
 /// use the key's name to record the select e.g.,
 ///   ga.select(MemoryScreen.id, ga.keyName(MemoryScreen.gcButtonKey));
 String keyName(Key key) => (key as ValueKey<String>)?.value;
+
+double safePositiveDouble(double value) {
+  if (value.isNaN) return 0.0;
+  return max(value, 0.0);
+}
