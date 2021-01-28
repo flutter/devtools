@@ -10,6 +10,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../math_utils.dart';
+import '../../diagnostics.dart';
+import '../../../theme.dart';
+import '../../../utils.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
@@ -29,7 +32,9 @@ class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
     // Pretend this layout explorer is always available. This layout explorer
     // will gracefully fall back to an error message if the required properties
     // are not needed.
-    // TODO(jacobr) this method could be made asynchronous we could
+    // TODO(jacobr) pass a RemoteDiagnosticsNode to this method that contains
+    // the layout explorer related supplemental properties so that we can
+    // accurately determine whether the widget uses box layout.
     return true;
   }
 
@@ -53,7 +58,8 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
   @override
   AnimatedLayoutProperties computeAnimatedProperties(
-      LayoutProperties nextProperties) {
+    LayoutProperties nextProperties,
+  ) {
     return AnimatedLayoutProperties(
       // If an animation is in progress, freeze it and start animating from there, else start a fresh animation from widget.properties.
       animatedProperties?.copyWith() ?? properties,
@@ -105,13 +111,13 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   /// On the other hand, a non-null size indicates that the minFractions
   /// constraints should be obeyed. This is needed to ensure that negative sizes
   /// are visualized reasonably.
-  // The minFractions aren't exactly obeyed but they are approximated in a way
-  // that keeps this algorithm simple and has the nice property that an initial
-  // value much smaller than the minSize results in a slightly smaller value
-  // than a value that is almost minSize.
-  // In the most extreme case an item will get not minFraction but will instead
-  // get the slightly smaller value of minFraction / (1 + minFraction)
-  // which is close enough for the simple values we need this for.
+  /// The minFractions aren't exactly obeyed but they are approximated in a way
+  /// that keeps this algorithm simple and has the nice property that an initial
+  /// value much smaller than the minSize results in a slightly smaller value
+  /// than a value that is almost minSize.
+  /// In the most extreme case an item will get not minFraction but will instead
+  /// get the slightly smaller value of minFraction / (1 + minFraction)
+  /// which is close enough for the simple values we need this for.
   static List<double> minFractionLayout({
     @required double availableSize,
     @required List<double> sizes,
@@ -119,8 +125,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }) {
     assert(sizes.length == minFractions.length);
     final length = sizes.length;
-    double total = 0.0;
-    total += 1.0; // Add a tiny amount to avoid divide by zero bugs.
+    double total = 1.0; // This isn't set to zero to avoid divide by zero bugs.
     final fractions = minFractions.toList();
     for (var size in sizes) {
       if (size != null) {
@@ -191,11 +196,13 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               ? parentSize.height - (properties.size.height + offset.offset.dy)
               : 0.0),
         ];
+        // 3 element array with [left padding, widget width, right padding].
         final displayWidths = minFractionLayout(
           availableSize: availableWidth,
           sizes: widths,
           minFractions: minFractions,
         );
+        // 3 element array with [top padding, widget height, bottom padding].
         final displayHeights = minFractionLayout(
           availableSize: availableHeight,
           sizes: heights,
@@ -317,7 +324,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
           properties: parentProperties,
           warnIfUnconstrained: false,
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(denseSpacing),
             child: widget,
           ),
         ),
@@ -398,8 +405,8 @@ class BoxChildVisualizer extends StatelessWidget {
         onDoubleTap: () => state.onDoubleTap(properties),
         onLongPress: () => state.onDoubleTap(properties),
         child: SizedBox(
-          width: safeDouble(renderSize.width),
-          height: safeDouble(renderSize.height),
+          width: safePositiveDouble(renderSize.width),
+          height: safePositiveDouble(renderSize.height),
           child: AnimatedBuilder(
             animation: state.entranceController,
             builder: buildEntranceAnimation,

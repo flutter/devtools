@@ -50,7 +50,9 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
                   style: properties.constraints.hasBoundedHeight ||
                           !warnIfUnconstrained
                       ? null
-                      : TextStyle(color: colorScheme.unconstrainedColor),
+                      : TextStyle(
+                          color: colorScheme.unconstrainedColor,
+                        ),
                 )
               ],
               if (showOverflowHeight)

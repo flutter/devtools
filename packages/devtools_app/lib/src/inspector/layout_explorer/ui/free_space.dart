@@ -152,15 +152,10 @@ class PaddingVisualizerWidget extends StatelessWidget {
       top: renderProperties.offset.dy,
       left: renderProperties.offset.dx,
       child: Container(
-        width: safeDouble(renderProperties.width),
-        height: safeDouble(renderProperties.height),
+        width: safePositiveDouble(renderProperties.width),
+        height: safePositiveDouble(renderProperties.height),
         child: horizontal ? widthWidget : heightWidget,
       ),
     );
   }
-}
-
-double safeDouble(double value) {
-  if (value.isNaN) return 0.0;
-  return math.max(value, 0.0);
 }
