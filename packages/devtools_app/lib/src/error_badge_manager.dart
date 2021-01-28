@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -25,8 +27,10 @@ class ErrorBadgeManager extends DisposableController
     NetworkScreen.id: ValueNotifier<int>(0),
     LoggingScreen.id: ValueNotifier<int>(0),
   };
-  final _activeErrors = <String, ValueNotifier<Map<String, DevToolsError>>>{
-    InspectorScreen.id: ValueNotifier<Map<String, DevToolsError>>({}),
+  final _activeErrors =
+      <String, ValueNotifier<LinkedHashMap<String, DevToolsError>>>{
+    InspectorScreen.id: ValueNotifier<LinkedHashMap<String, DevToolsError>>(
+        LinkedHashMap<String, DevToolsError>()),
   };
 
   void vmServiceOpened(VmServiceWrapper service) {
@@ -101,26 +105,25 @@ class ErrorBadgeManager extends DisposableController
     final currentErrors = _activeErrors[screenId];
     if (currentErrors == null) return;
 
-    if (!currentErrors.value.containsKey(error.id)) {
-      // Build a new map with the new error. Adding to the existing map
-      // won't cause the ValueNotifier to fire (and it's not permitted to call
-      // notifyListeners() directly).
-      currentErrors.value = {
-        ...currentErrors.value,
-        error.id: error,
-      };
-      _errorCountNotifier(screenId).value = currentErrors.value.length;
-    }
+    // Build a new map with the new error. Adding to the existing map
+    // won't cause the ValueNotifier to fire (and it's not permitted to call
+    // notifyListeners() directly).
+    final newValue =
+        LinkedHashMap<String, DevToolsError>.from(currentErrors.value);
+    newValue[error.id] = error;
+    currentErrors.value = newValue;
+    _errorCountNotifier(screenId).value = currentErrors.value.length;
   }
 
   ValueListenable<int> errorCountNotifier(String screenId) {
     return _errorCountNotifier(screenId) ?? const FixedValueListenable<int>(0);
   }
 
-  ValueListenable<Map<String, DevToolsError>> erroredWidgetNotifier(
+  ValueListenable<LinkedHashMap<String, DevToolsError>> erroredWidgetNotifier(
       String screenId) {
     return _activeErrors[screenId] ??
-        const FixedValueListenable<List<DevToolsError>>([]);
+        FixedValueListenable<LinkedHashMap<String, DevToolsError>>(
+            LinkedHashMap<String, DevToolsError>());
   }
 
   ValueNotifier<int> _errorCountNotifier(String screenId) {

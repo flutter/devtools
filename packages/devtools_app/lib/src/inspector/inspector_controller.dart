@@ -932,8 +932,8 @@ class InspectorController extends DisposableController
 
   Stream<String> _collectValidInspectorRefs(
       RemoteDiagnosticsNode diagnostic) async* {
-    if (diagnostic?.json?.containsKey('valueId') ?? false) {
-      yield diagnostic.json['valueId'] as String;
+    if (diagnostic.valueRef?.id != null) {
+      yield diagnostic.valueRef?.id;
     }
     final children = await diagnostic?.children;
     if (children != null) {

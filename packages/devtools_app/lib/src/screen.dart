@@ -124,7 +124,7 @@ abstract class Screen {
 
         if (count > 0) {
           // Calculate the width of the title text so that we can provide an accurate
-          // size for the [TabBadgePainter]
+          // size for the [BadgePainter]
           final painter = TextPainter(
             text: TextSpan(
               text: title,
@@ -139,7 +139,7 @@ abstract class Screen {
                 children: [
                   CustomPaint(
                     size: Size(defaultIconSize + denseSpacing + titleWidth, 0),
-                    painter: TabBadgePainter(count: count),
+                    painter: BadgePainter(number: count),
                   ),
                   tab,
                 ],
@@ -215,21 +215,20 @@ bool shouldShowScreen(Screen screen) {
   return true;
 }
 
-class TabBadgePainter extends CustomPainter {
-  TabBadgePainter({@required this.count});
+class BadgePainter extends CustomPainter {
+  BadgePainter({@required this.number});
 
-  final int count;
+  final int number;
 
   @override
   void paint(Canvas canvas, Size size) {
-    print(size.width);
     final paint = Paint()
       ..color = devtoolsError
       ..style = PaintingStyle.fill;
 
     final countPainter = TextPainter(
       text: TextSpan(
-        text: '$count',
+        text: '$number',
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
@@ -255,8 +254,8 @@ class TabBadgePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    if (oldDelegate is TabBadgePainter) {
-      return count != oldDelegate.count;
+    if (oldDelegate is BadgePainter) {
+      return number != oldDelegate.number;
     }
     return true;
   }

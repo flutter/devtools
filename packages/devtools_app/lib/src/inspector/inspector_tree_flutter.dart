@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -12,6 +13,8 @@ import 'package:pedantic/pedantic.dart';
 import '../auto_dispose_mixin.dart';
 import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
+import '../error_badge_manager.dart';
+import '../screen.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/theme.dart';
@@ -27,12 +30,17 @@ class _InspectorTreeRowWidget extends StatefulWidget {
     @required Key key,
     @required this.row,
     @required this.inspectorTreeState,
+    this.errorNumber,
   }) : super(key: key);
 
   final _InspectorTreeState inspectorTreeState;
 
   InspectorTreeNode get node => row.node;
   final InspectorTreeRow row;
+
+  /// If this row has an error, this is the number of the error in the error
+  /// list (otherwise null).
+  final int errorNumber;
 
   @override
   _InspectorTreeRowState createState() => _InspectorTreeRowState();
@@ -46,6 +54,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
       height: rowHeight,
       child: InspectorRowContent(
         row: widget.row,
+        errorNumber: widget.errorNumber,
         expandArrowAnimation: expandArrowAnimation,
         controller: widget.inspectorTreeState.controller,
         onToggle: () {
@@ -169,10 +178,12 @@ class InspectorTree extends StatefulWidget {
     Key key,
     @required this.controller,
     this.isSummaryTree = false,
+    this.widgetErrors,
   }) : super(key: key);
 
   final InspectorTreeController controller;
   final bool isSummaryTree;
+  final LinkedHashMap<String, InspectableWidgetError> widgetErrors;
 
   @override
   State<InspectorTree> createState() => _InspectorTreeState();
@@ -396,6 +407,12 @@ class _InspectorTreeState extends State<InspectorTree>
       return const CenteredCircularProgressIndicator();
     }
 
+    final inspectorRefsWithErrors =
+        widget.widgetErrors?.keys?.toList() ?? const [];
+    final errorNumberForInspectorRef = inspectorRefsWithErrors
+        .asMap()
+        .map((index, ref) => MapEntry(ref, index + 1));
+
     return Scrollbar(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -415,10 +432,12 @@ class _InspectorTreeState extends State<InspectorTree>
                     (context, index) {
                       final InspectorTreeRow row =
                           controller.root?.getRow(index);
+                      final inspectorRef = row.node.diagnostic?.valueRef?.id;
                       return _InspectorTreeRowWidget(
                         key: PageStorageKey(row?.node),
                         inspectorTreeState: this,
                         row: row,
+                        errorNumber: errorNumberForInspectorRef[inspectorRef],
                       );
                     },
                     childCount: controller.numRows,
@@ -520,12 +539,17 @@ class InspectorRowContent extends StatelessWidget {
     @required this.controller,
     @required this.onToggle,
     @required this.expandArrowAnimation,
+    this.errorNumber,
   });
 
   final InspectorTreeRow row;
   final InspectorTreeControllerFlutter controller;
   final VoidCallback onToggle;
   final Animation<double> expandArrowAnimation;
+
+  /// If this row has an error, this is the number of the error in the error
+  /// list (otherwise null).
+  final int errorNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -536,60 +560,77 @@ class InspectorRowContent extends StatelessWidget {
       return const SizedBox();
     }
     Color backgroundColor;
-    if (row.isSelected || row.node == controller.hover) {
-      backgroundColor = row.isSelected
-          ? colorScheme.selectedRowBackgroundColor
-          : colorScheme.hoverColor;
+    if (row.isSelected) {
+      backgroundColor = errorNumber != null
+          ? devtoolsError
+          : colorScheme.selectedRowBackgroundColor;
+    } else if (row.node == controller.hover) {
+      backgroundColor = colorScheme.hoverColor;
     }
 
     final node = row.node;
-    return CustomPaint(
-      painter: _RowPainter(row, controller, colorScheme),
-      size: Size(currentX, rowHeight),
-      child: Padding(
-        padding: EdgeInsets.only(left: currentX),
-        child: ClipRect(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              node.showExpandCollapse
-                  ? InkWell(
-                      onTap: onToggle,
-                      child: RotationTransition(
-                        turns: expandArrowAnimation,
-                        child: const Icon(
-                          Icons.expand_more,
-                          size: defaultIconSize,
+    return Stack(
+      children: [
+        CustomPaint(
+          painter: _RowPainter(row, controller, colorScheme),
+          size: Size(currentX, rowHeight),
+          child: Padding(
+            padding: EdgeInsets.only(left: currentX),
+            child: ClipRect(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  node.showExpandCollapse
+                      ? InkWell(
+                          onTap: onToggle,
+                          child: RotationTransition(
+                            turns: expandArrowAnimation,
+                            child: const Icon(
+                              Icons.expand_more,
+                              size: defaultIconSize,
+                            ),
+                          ),
+                        )
+                      : const SizedBox(
+                          width: defaultSpacing, height: defaultSpacing),
+                  Expanded(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: backgroundColor,
+                        border: errorNumber != null
+                            ? Border.all(color: devtoolsError)
+                            : null,
+                      ),
+                      child: InkWell(
+                        onTap: () {
+                          controller.onSelectRow(row);
+                          // TODO(gmoothart): It may be possible to capture the tap
+                          // and request focus directly from the InspectorTree. Then
+                          // we wouldn't need this.
+                          controller.requestFocus();
+                        },
+                        child: Container(
+                          height: rowHeight,
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: DiagnosticsNodeDescription(node.diagnostic),
                         ),
                       ),
-                    )
-                  : const SizedBox(
-                      width: defaultSpacing, height: defaultSpacing),
-              Expanded(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      controller.onSelectRow(row);
-                      // TODO(gmoothart): It may be possible to capture the tap
-                      // and request focus directly from the InspectorTree. Then
-                      // we wouldn't need this.
-                      controller.requestFocus();
-                    },
-                    child: Container(
-                      height: rowHeight,
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: DiagnosticsNodeDescription(node.diagnostic),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
+        if (errorNumber != null)
+          Padding(
+            padding: const EdgeInsets.all((rowHeight - defaultIconSize) / 2),
+            child: CustomPaint(
+              size: Size(currentX - rowHeight * 2, 0),
+              painter: BadgePainter(number: errorNumber),
+            ),
+          ),
+      ],
     );
   }
 }
