@@ -47,7 +47,7 @@ class Tracker {
   int trackerId = globalObjectId++;
 
   @override
-  String toString() => 'Collected @ ${now}, id=$trackerId';
+  String toString() => 'Collected @ $now, id=$trackerId';
 }
 
 class MyHomePageState extends State<MyHomePage>
