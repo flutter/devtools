@@ -567,13 +567,11 @@ class MemoryController extends DisposableController
     if (foundClass != null) {
       foundClass.isStacktraced = true;
 
-      _setTracking(
-        foundClass.classRef,
-        true,
-      )
+      _setTracking(foundClass.classRef, true)
           .then((success) => true)
-          .catchError((e) => debugLogger('ERROR: ${e.message}'))
-          .whenComplete(
+          .catchError((e) {
+        debugLogger('ERROR: ${e.message}');
+      }).whenComplete(
         () {
           changeStackTraces();
           treeChanged();
