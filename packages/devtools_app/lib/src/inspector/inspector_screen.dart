@@ -25,7 +25,6 @@ import '../ui/service_extension_widgets.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
 import 'inspector_service.dart';
-import 'inspector_tree.dart';
 import 'inspector_tree_flutter.dart';
 
 class InspectorScreen extends Screen {
@@ -102,67 +101,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final treeColumn = ValueListenableBuilder<
-            LinkedHashMap<String, DevToolsError>>(
-        valueListenable: serviceManager.errorBadgeManager
-            .erroredWidgetNotifier(InspectorScreen.id),
-        builder: (context, _errors, _) {
-          final errors = _errors.map(
-              (key, value) => MapEntry(key, value as InspectableWidgetError));
-          final errorList = errors.values.toList();
-
-          final _selectError = (int index) => setState(() {
-                _selectedErrorIndex = index;
-                inspectorController.updateSelectionFromService(
-                    firstFrame: false,
-                    inspectorRef: errorList[index].inspectorRef);
-              });
-
-          final summaryTree = Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).focusColor),
-            ),
-            child: Stack(
-              children: [
-                InspectorTree(
-                  controller: summaryTreeController,
-                  isSummaryTree: true,
-                  widgetErrors: errors,
-                ),
-                if (errors.isNotEmpty)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: _ErrorOverlay(
-                      selectedErrorIndex: _selectedErrorIndex,
-                      errors: errorList,
-                      onSelectedErrorIndexChanged: _selectError,
-                    ),
-                  ),
-              ],
-            ),
-          );
-
-          return errors.isEmpty
-              ? summaryTree
-              : Split(
-                  axis: Axis.vertical,
-                  initialFractions: const [0.8, 0.2],
-                  children: [
-                    summaryTree,
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Theme.of(context).focusColor),
-                      ),
-                      child: _ErrorList(
-                        selectedErrorIndex: _selectedErrorIndex,
-                        errors: errorList,
-                        onSelectedErrorIndexChanged: _selectError,
-                      ),
-                    )
-                  ],
-                );
-        });
+    final summaryTree = _buildSummaryTreeColumn();
 
     final detailsTree = InspectorTree(
       controller: detailsTreeController,
@@ -206,7 +145,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             axis: splitAxis,
             initialFractions: const [0.33, 0.67],
             children: [
-              treeColumn,
+              summaryTree,
               InspectorDetailsTabController(
                 detailsTree: detailsTree,
                 controller: inspectorController,
@@ -218,6 +157,48 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         ),
       ],
     );
+  }
+
+  ValueListenableBuilder<LinkedHashMap<String, DevToolsError>>
+      _buildSummaryTreeColumn() {
+    return ValueListenableBuilder<LinkedHashMap<String, DevToolsError>>(
+        valueListenable: serviceManager.errorBadgeManager
+            .erroredWidgetNotifier(InspectorScreen.id),
+        builder: (context, _errors, _) {
+          final errors = _errors.map(
+              (key, value) => MapEntry(key, value as InspectableWidgetError));
+          final errorList = errors.values.toList();
+
+          return Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).focusColor),
+            ),
+            child: Stack(
+              children: [
+                InspectorTree(
+                  controller: summaryTreeController,
+                  isSummaryTree: true,
+                  widgetErrors: errors,
+                ),
+                if (errors.isNotEmpty)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: _ErrorNavigator(
+                      selectedErrorIndex: _selectedErrorIndex,
+                      errors: errorList,
+                      onSelectedErrorIndexChanged: (index) => setState(() {
+                        _selectedErrorIndex = index;
+                        inspectorController.updateSelectionFromService(
+                            firstFrame: false,
+                            inspectorRef: errorList[index].inspectorRef);
+                      }),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        });
   }
 
   List<Widget> getServiceExtensionWidgets() {
@@ -357,8 +338,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 }
 
-class _ErrorOverlay extends StatelessWidget {
-  const _ErrorOverlay(
+class _ErrorNavigator extends StatelessWidget {
+  const _ErrorNavigator(
       {Key key,
       @required this.selectedErrorIndex,
       @required this.errors,
@@ -416,66 +397,5 @@ class _ErrorOverlay extends StatelessWidget {
             ? 0
             : (selectedErrorIndex + 1) % errors.length;
     onSelectedErrorIndexChanged(newIndex);
-  }
-}
-
-class _ErrorList extends StatelessWidget {
-  const _ErrorList(
-      {Key key,
-      @required this.errors,
-      @required this.selectedErrorIndex,
-      @required this.onSelectedErrorIndexChanged})
-      : super(key: key);
-
-  final int selectedErrorIndex;
-  final List<InspectableWidgetError> errors;
-  final void Function(int) onSelectedErrorIndexChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(8),
-      itemCount: errors.length,
-      itemBuilder: (context, index) {
-        final error = errors[index];
-        return Container(
-          color: index == selectedErrorIndex
-              ? colorScheme.selectedRowBackgroundColor
-              : null,
-          child: Padding(
-            padding: const EdgeInsets.all((rowHeight - defaultIconSize) / 2),
-            child: InkWell(
-              onTap: () => onSelectedErrorIndexChanged(index),
-              child: Row(
-                children: [
-                  CustomPaint(
-                    size: const Size(0, defaultIconSize),
-                    painter: BadgePainter(number: index + 1),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: rowHeight, right: 8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                      decoration: BoxDecoration(
-                        color: devtoolsError,
-                        borderRadius: BorderRadius.circular(3.0),
-                      ),
-                      child: const Text(
-                        'error',
-                        overflow: TextOverflow.ellipsis,
-                        // style: textStyle,
-                      ),
-                    ),
-                  ),
-                  Text(error.errorMessage)
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 }

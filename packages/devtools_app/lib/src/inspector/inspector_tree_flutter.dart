@@ -14,7 +14,6 @@ import '../auto_dispose_mixin.dart';
 import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
 import '../error_badge_manager.dart';
-import '../screen.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/theme.dart';
@@ -30,7 +29,7 @@ class _InspectorTreeRowWidget extends StatefulWidget {
     @required Key key,
     @required this.row,
     @required this.inspectorTreeState,
-    this.errorNumber,
+    this.errorText,
   }) : super(key: key);
 
   final _InspectorTreeState inspectorTreeState;
@@ -38,9 +37,8 @@ class _InspectorTreeRowWidget extends StatefulWidget {
   InspectorTreeNode get node => row.node;
   final InspectorTreeRow row;
 
-  /// If this row has an error, this is the number of the error in the error
-  /// list (otherwise null).
-  final int errorNumber;
+  /// A description of any error for this row. null if there is no error.
+  final String errorText;
 
   @override
   _InspectorTreeRowState createState() => _InspectorTreeRowState();
@@ -54,7 +52,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
       height: rowHeight,
       child: InspectorRowContent(
         row: widget.row,
-        errorNumber: widget.errorNumber,
+        errorText: widget.errorText,
         expandArrowAnimation: expandArrowAnimation,
         controller: widget.inspectorTreeState.controller,
         onToggle: () {
@@ -407,12 +405,6 @@ class _InspectorTreeState extends State<InspectorTree>
       return const CenteredCircularProgressIndicator();
     }
 
-    final inspectorRefsWithErrors =
-        widget.widgetErrors?.keys?.toList() ?? const [];
-    final errorNumberForInspectorRef = inspectorRefsWithErrors
-        .asMap()
-        .map((index, ref) => MapEntry(ref, index + 1));
-
     return Scrollbar(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -437,7 +429,9 @@ class _InspectorTreeState extends State<InspectorTree>
                         key: PageStorageKey(row?.node),
                         inspectorTreeState: this,
                         row: row,
-                        errorNumber: errorNumberForInspectorRef[inspectorRef],
+                        errorText: widget.widgetErrors != null
+                            ? widget.widgetErrors[inspectorRef]?.errorMessage
+                            : null,
                       );
                     },
                     childCount: controller.numRows,
@@ -539,7 +533,7 @@ class InspectorRowContent extends StatelessWidget {
     @required this.controller,
     @required this.onToggle,
     @required this.expandArrowAnimation,
-    this.errorNumber,
+    this.errorText,
   });
 
   final InspectorTreeRow row;
@@ -547,9 +541,8 @@ class InspectorRowContent extends StatelessWidget {
   final VoidCallback onToggle;
   final Animation<double> expandArrowAnimation;
 
-  /// If this row has an error, this is the number of the error in the error
-  /// list (otherwise null).
-  final int errorNumber;
+  /// A description of any error for this row. null if there is no error.
+  final String errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -561,7 +554,7 @@ class InspectorRowContent extends StatelessWidget {
     }
     Color backgroundColor;
     if (row.isSelected) {
-      backgroundColor = errorNumber != null
+      backgroundColor = errorText != null
           ? devtoolsError
           : colorScheme.selectedRowBackgroundColor;
     } else if (row.node == controller.hover) {
@@ -569,68 +562,84 @@ class InspectorRowContent extends StatelessWidget {
     }
 
     final node = row.node;
-    return Stack(
-      children: [
-        CustomPaint(
-          painter: _RowPainter(row, controller, colorScheme),
-          size: Size(currentX, rowHeight),
-          child: Padding(
-            padding: EdgeInsets.only(left: currentX),
-            child: ClipRect(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  node.showExpandCollapse
-                      ? InkWell(
-                          onTap: onToggle,
-                          child: RotationTransition(
-                            turns: expandArrowAnimation,
-                            child: const Icon(
-                              Icons.expand_more,
-                              size: defaultIconSize,
-                            ),
-                          ),
-                        )
-                      : const SizedBox(
-                          width: defaultSpacing, height: defaultSpacing),
-                  Expanded(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: backgroundColor,
-                        border: errorNumber != null
-                            ? Border.all(color: devtoolsError)
-                            : null,
-                      ),
-                      child: InkWell(
-                        onTap: () {
-                          controller.onSelectRow(row);
-                          // TODO(gmoothart): It may be possible to capture the tap
-                          // and request focus directly from the InspectorTree. Then
-                          // we wouldn't need this.
-                          controller.requestFocus();
-                        },
-                        child: Container(
-                          height: rowHeight,
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: DiagnosticsNodeDescription(node.diagnostic),
+    final rowWidget = CustomPaint(
+      painter: _RowPainter(row, controller, colorScheme),
+      size: Size(currentX, rowHeight),
+      child: Padding(
+        padding: EdgeInsets.only(left: currentX),
+        child: ClipRect(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              node.showExpandCollapse
+                  ? InkWell(
+                      onTap: onToggle,
+                      child: RotationTransition(
+                        turns: expandArrowAnimation,
+                        child: const Icon(
+                          Icons.expand_more,
+                          size: defaultIconSize,
                         ),
+                      ),
+                    )
+                  : const SizedBox(
+                      width: defaultSpacing, height: defaultSpacing),
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    border: errorText != null
+                        ? Border.all(color: devtoolsError)
+                        : null,
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      controller.onSelectRow(row);
+                      // TODO(gmoothart): It may be possible to capture the tap
+                      // and request focus directly from the InspectorTree. Then
+                      // we wouldn't need this.
+                      controller.requestFocus();
+                    },
+                    child: Container(
+                      height: rowHeight,
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: DiagnosticsNodeDescription(node.diagnostic),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Wrap with error tooltip/marker if there is an error for this node's widget.
+    return errorText == null
+        ? rowWidget
+        : Stack(
+            children: [
+              rowWidget,
+              Tooltip(
+                message: errorText,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: currentX - rowHeight * 2,
+                    top: (rowHeight - defaultIconSize) / 2,
+                  ),
+                  child: SizedBox(
+                    width: defaultIconSize,
+                    height: defaultIconSize,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: devtoolsError,
+                        shape: BoxShape.circle,
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ),
-        if (errorNumber != null)
-          Padding(
-            padding: const EdgeInsets.all((rowHeight - defaultIconSize) / 2),
-            child: CustomPaint(
-              size: Size(currentX - rowHeight * 2, 0),
-              painter: BadgePainter(number: errorNumber),
-            ),
-          ),
-      ],
-    );
+            ],
+          );
   }
 }
