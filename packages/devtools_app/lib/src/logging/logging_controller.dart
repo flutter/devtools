@@ -269,10 +269,12 @@ class LoggingController extends DisposableController
     autoDispose(service.onGCEvent.listen(_handleGCEvent));
 
     // Log `dart:developer` `log` events.
-    autoDispose(service.onLoggingEventWithHistory.listen(_handleDeveloperLogEvent));
+    autoDispose(
+        service.onLoggingEventWithHistory.listen(_handleDeveloperLogEvent));
 
     // Log Flutter extension events.
-    autoDispose(service.onExtensionEventWithHistory.listen(_handleExtensionEvent));
+    autoDispose(
+        service.onExtensionEventWithHistory.listen(_handleExtensionEvent));
 
     if (inspectorService == null) {
       await ensureInspectorServiceDependencies();
