@@ -141,6 +141,8 @@ class HeapTreeViewState extends State<HeapTree>
   @visibleForTesting
   static const allocationMonitorResetKey = Key('Accumulators Reset Button');
   @visibleForTesting
+  static const trackAllocationKey = Key('Track Class');
+  @visibleForTesting
   static const searchButtonKey = Key('Snapshot Search');
   @visibleForTesting
   static const filterButtonKey = Key('Snapshot Filter');
@@ -662,6 +664,7 @@ class HeapTreeViewState extends State<HeapTree>
             width: defaultSearchTextWidth,
             height: defaultTextFieldHeight,
             child: TextField(
+              key: trackAllocationKey,
               controller: textController,
               inputFormatters: [
                 // Valid Dart class name.
