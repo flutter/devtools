@@ -121,15 +121,14 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
   Widget _buildConnectInput() {
     final CallbackDwell connectDebounce = CallbackDwell(_connect);
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          width: 350.0,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
+        Row(
+          children: [
+            SizedBox(
+              width: 350.0,
+              child: TextField(
                 onSubmitted: (str) => connectDebounce.invoke(),
                 autofocus: true,
                 decoration: const InputDecoration(
@@ -143,24 +142,20 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
                 ),
                 controller: connectDialogController,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text(
-                  '(e.g., http://127.0.0.1:12345/auth_code=...)',
-                  textAlign: TextAlign.start,
-                  style: Theme.of(context).textTheme.caption,
-                ),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(width: defaultSpacing),
+            FixedHeightElevatedButton(
+              child: const Text('Connect'),
+              onPressed: connectDebounce.invoke,
+            ),
+          ],
         ),
-        const SizedBox(width: defaultSpacing),
         Padding(
-          // Padding to center the connect button with the `TextField`.
-          padding: const EdgeInsets.only(top: 3.0),
-          child: FixedHeightElevatedButton(
-            child: const Text('Connect'),
-            onPressed: connectDebounce.invoke,
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            '(e.g., http://127.0.0.1:12345/auth_code=...)',
+            textAlign: TextAlign.start,
+            style: Theme.of(context).textTheme.caption,
           ),
         ),
       ],

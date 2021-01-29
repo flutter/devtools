@@ -108,17 +108,18 @@ class DialogApplyButton extends StatelessWidget {
 class DialogTextButton extends StatelessWidget {
   const DialogTextButton({this.onPressed, this.child});
 
-  final void Function() onPressed;
+  final VoidCallback onPressed;
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        height: defaultButtonHeight,
-        child: TextButton(
-          onPressed: onPressed,
-          child: child,
-        ));
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: TextButton(
+        onPressed: onPressed,
+        child: child,
+      ),
+    );
   }
 }

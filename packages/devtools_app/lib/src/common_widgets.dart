@@ -242,7 +242,7 @@ class SettingsOutlinedButton extends StatelessWidget {
     @required this.tooltip,
   });
 
-  final void Function() onPressed;
+  final VoidCallback onPressed;
 
   final String tooltip;
 
@@ -273,7 +273,7 @@ class FixedHeightOutlinedButton extends StatelessWidget {
     this.tooltip,
   }) : super(key: key);
 
-  final void Function() onPressed;
+  final VoidCallback onPressed;
 
   final Widget child;
 
@@ -287,7 +287,7 @@ class FixedHeightOutlinedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final button = Container(
+    final button = SizedBox(
       height: defaultButtonHeight,
       width: width,
       child: OutlinedButton(
@@ -320,13 +320,13 @@ class FixedHeightElevatedButton extends StatelessWidget {
 
   final Widget child;
 
-  final void Function() onPressed;
+  final VoidCallback onPressed;
 
   final ButtonStyle style;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: defaultButtonHeight,
       child: ElevatedButton(
         style: style,
