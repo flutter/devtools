@@ -16,11 +16,13 @@ import '../banner_messages.dart';
 import '../charts/chart_controller.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
+import '../dialogs.dart';
 import '../globals.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../theme.dart';
 import '../ui/label.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 
 import 'memory_android_chart.dart' as android;
@@ -78,6 +80,8 @@ class MemoryScreen extends Screen {
   static const gcButtonKey = Key('GC Button');
   @visibleForTesting
   static const legendButtonkey = Key(legendKeyName);
+  @visibleForTesting
+  static const settingsButtonKey = Key('Memory Configuration');
 
   @visibleForTesting
   static const eventChartKey = Key('EventPane');
@@ -133,6 +137,9 @@ class MemoryBodyState extends State<MemoryBody>
 
   OverlayEntry hoverOverlayEntry;
   OverlayEntry legendOverlayEntry;
+
+  /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
+  bool isAndroidCollection = MemoryController.androidADBDefault;
 
   @override
   void initState() {
@@ -280,6 +287,17 @@ class MemoryBodyState extends State<MemoryBody>
           showHover(context, allValues, tapData.tapDownDetails.globalPosition);
         }
       }
+    });
+
+    addAutoDisposeListener(controller.androidCollectionEnabled, () {
+      isAndroidCollection = controller.androidCollectionEnabled.value;
+      setState(() {
+        if (!isAndroidCollection && controller.isAndroidChartVisible) {
+          // If we're no longer collecting android stats then hide the
+          // chart and disable the Android Memory button.
+          controller.toggleAndroidChartVisibility();
+        }
+      });
     });
 
     _updateListeningState();
@@ -542,7 +560,7 @@ class MemoryBodyState extends State<MemoryBody>
   OutlinedButton createToggleAdbMemoryButton() {
     return OutlinedButton(
       key: MemoryScreen.androidChartButtonKey,
-      onPressed: controller.isConnectedDeviceAndroid
+      onPressed: controller.isConnectedDeviceAndroid && isAndroidCollection
           ? controller.toggleAndroidChartVisibility
           : null,
       child: MaterialIconLabel(
@@ -590,7 +608,26 @@ class MemoryBodyState extends State<MemoryBody>
             includeTextWidth: _primaryControlsMinVerboseWidth,
           ),
         ),
+        const SizedBox(width: denseSpacing),
+        ActionButton(
+          child: OutlinedButton(
+            key: MemoryScreen.settingsButtonKey,
+            onPressed: _openSettingsDialog,
+            child: const Icon(
+              Icons.settings,
+              size: defaultIconSize,
+            ),
+          ),
+          tooltip: 'Memory Configuration',
+        ),
       ],
+    );
+  }
+
+  void _openSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => MemoryConfigurationsDialog(controller),
     );
   }
 
@@ -1418,5 +1455,46 @@ class ChartsValues {
     results[adbJavaHeapJsonName] = androidData.javaHeap;
     results[adbStackJsonName] = androidData.stack;
     results[adbGraphicsJsonName] = androidData.graphics;
+  }
+}
+
+class MemoryConfigurationsDialog extends StatelessWidget {
+  const MemoryConfigurationsDialog(this.controller);
+
+  final MemoryController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return DevToolsDialog(
+      title: dialogTitleText(theme, 'Memory Settings'),
+      includeDivider: false,
+      content: Container(
+        width: dialogSettingsWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...dialogSubHeader(theme, 'Android'),
+            Row(
+              children: [
+                NotifierCheckbox(notifier: controller.androidCollectionEnabled),
+                RichText(
+                  overflow: TextOverflow.visible,
+                  text: TextSpan(
+                    text: 'Collect Android Memory Statistics using ADB',
+                    style: theme.regularTextStyle,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        DialogCloseButton(),
+      ],
+    );
   }
 }

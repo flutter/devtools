@@ -143,8 +143,6 @@ class HeapTreeViewState extends State<HeapTree>
   static const searchButtonKey = Key('Snapshot Search');
   @visibleForTesting
   static const filterButtonKey = Key('Snapshot Filter');
-  @visibleForTesting
-  static const settingsButtonKey = Key('Snapshot Settings');
 
   MemoryController controller;
 
@@ -685,17 +683,6 @@ class HeapTreeViewState extends State<HeapTree>
           // TODO(kenz): implement isFilterActive
           isFilterActive: false,
         ),
-        // TODO: Add these back in when _settings() is implemented.
-//        const SizedBox(width: denseSpacing),
-//        OutlinedButton(
-//          key: settingsButtonKey,
-//          onPressed: _settings,
-//          child: const MaterialIconLabel(
-//            Icons.tune,
-//            'Settings',
-//            includeTextWidth: 200,
-//          ),
-//        ),
       ],
     );
   }

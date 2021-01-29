@@ -117,6 +117,14 @@ class MemoryController extends DisposableController
 
   static const logFilenamePrefix = 'memory_log_';
 
+  // Default state of Android ADB collection.
+  static const androidADBDefault = true;
+
+  ValueListenable<bool> get androidCollectionEnabled =>
+      _androidCollectionEnabled;
+
+  final _androidCollectionEnabled = ValueNotifier<bool>(androidADBDefault);
+
   final List<Snapshot> snapshots = [];
 
   Snapshot get lastSnapshot => snapshots.safeLast;

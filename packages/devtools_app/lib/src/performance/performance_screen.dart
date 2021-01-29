@@ -25,6 +25,7 @@ import '../theme.dart';
 import '../ui/service_extension_widgets.dart';
 import '../ui/utils.dart';
 import '../ui/vm_flag_widgets.dart';
+import '../utils.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
 import 'performance_controller.dart';
@@ -300,8 +301,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 class TimelineConfigurationsDialog extends StatelessWidget {
   const TimelineConfigurationsDialog(this.controller);
 
-  static const dialogWidth = 700.0;
-
   final PerformanceController controller;
 
   @override
@@ -312,7 +311,7 @@ class TimelineConfigurationsDialog extends StatelessWidget {
       title: dialogTitleText(theme, 'Performance Settings'),
       includeDivider: false,
       content: Container(
-        width: dialogWidth,
+        width: dialogSettingsWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
