@@ -21,6 +21,7 @@ class CpuProfiler extends StatefulWidget {
     @required this.data,
     @required this.controller,
     this.searchFieldKey,
+    this.standaloneProfiler = true,
   })  : callTreeRoots = data != null ? [data.cpuProfileRoot.deepCopy()] : [],
         bottomUpRoots = data != null
             ? BottomUpProfileTransformer.processData(data.cpuProfileRoot)
@@ -35,6 +36,8 @@ class CpuProfiler extends StatefulWidget {
   final List<CpuStackFrame> bottomUpRoots;
 
   final Key searchFieldKey;
+
+  final bool standaloneProfiler;
 
   static const Key expandButtonKey = Key('CpuProfiler - Expand Button');
   static const Key collapseButtonKey = Key('CpuProfiler - Collapse Button');
@@ -120,17 +123,15 @@ class _CpuProfilerState extends State<CpuProfiler>
                 ),
               ),
             if (currentTab.key != CpuProfiler.flameChartTab)
-              SizedBox(
-                height: defaultButtonHeight,
-                child: RoundedOutlinedBorder(
-                  child: Row(children: [
-                    _expandAllButton(currentTab),
-                    LeftBorder(
-                      child: _collapseAllButton(currentTab),
-                    ),
-                  ]),
-                ),
-              ),
+              Row(children: [
+                _expandAllButton(currentTab),
+                const SizedBox(width: denseSpacing),
+                _collapseAllButton(currentTab),
+                // The standaloneProfiler does not need padding because it is
+                // not wrapped in a bordered container.
+                if (!widget.standaloneProfiler)
+                  const SizedBox(width: denseSpacing),
+              ]),
           ],
         ),
         Expanded(
@@ -187,7 +188,7 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   Widget _expandAllButton(Tab currentTab) {
-    return TextButton(
+    return FixedHeightOutlinedButton(
       key: CpuProfiler.expandButtonKey,
       onPressed: () {
         _performOnDataRoots((root) => root.expandCascading(), currentTab);
@@ -197,7 +198,7 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   Widget _collapseAllButton(Tab currentTab) {
-    return TextButton(
+    return FixedHeightOutlinedButton(
       key: CpuProfiler.collapseButtonKey,
       onPressed: () {
         _performOnDataRoots((root) => root.collapseCascading(), currentTab);

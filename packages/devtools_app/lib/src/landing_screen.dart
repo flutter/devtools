@@ -77,8 +77,8 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
           const SizedBox(height: denseRowSpacing),
           _captionText('Load Dart AOT snapshots or app size analysis files to '
               'track down size issues in your app.'),
-          const Padding(padding: EdgeInsets.only(top: 20.0)),
-          ElevatedButton(
+          const SizedBox(height: defaultSpacing),
+          FixedHeightElevatedButton(
             child: const Text('Open app size tool'),
             onPressed: () =>
                 DevToolsRouterDelegate.of(context).navigate(appSizePageId),
@@ -154,12 +154,14 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
             ],
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.only(left: 20.0),
-        ),
-        ElevatedButton(
-          child: const Text('Connect'),
-          onPressed: connectDebounce.invoke,
+        const SizedBox(width: defaultSpacing),
+        Padding(
+          // Padding to center the connect button with the `TextField`.
+          padding: const EdgeInsets.only(top: 3.0),
+          child: FixedHeightElevatedButton(
+            child: const Text('Connect'),
+            onPressed: connectDebounce.invoke,
+          ),
         ),
       ],
     );

@@ -103,7 +103,7 @@ class IconLabelButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return FixedHeightOutlinedButton(
       onPressed: onPressed,
       child: MaterialIconLabel(
         icon,
@@ -196,13 +196,11 @@ class RecordButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return IconLabelButton(
       onPressed: recording ? null : onPressed,
-      child: MaterialIconLabel(
-        Icons.fiber_manual_record,
-        labelOverride ?? 'Record',
-        includeTextWidth: includeTextWidth,
-      ),
+      icon: Icons.fiber_manual_record,
+      label: labelOverride ?? 'Record',
+      includeTextWidth: includeTextWidth,
     );
   }
 }
@@ -229,12 +227,111 @@ class StopRecordingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return IconLabelButton(
       onPressed: !recording ? null : onPressed,
-      child: MaterialIconLabel(
-        Icons.stop,
-        'Stop',
-        includeTextWidth: includeTextWidth,
+      icon: Icons.stop,
+      label: 'Stop',
+      includeTextWidth: includeTextWidth,
+    );
+  }
+}
+
+class SettingsOutlinedButton extends StatelessWidget {
+  const SettingsOutlinedButton({
+    @required this.onPressed,
+    @required this.tooltip,
+  });
+
+  final void Function() onPressed;
+
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return FixedHeightOutlinedButton(
+      width: defaultButtonHeight, // This will result in a square button.
+      onPressed: onPressed,
+      tooltip: tooltip,
+      child: const Icon(
+        Icons.settings,
+        size: defaultIconSize,
+      ),
+    );
+  }
+}
+
+// TODO(kenz): remove use of this class once we can specify a fixed button
+// height in the theme. See https://github.com/flutter/flutter/issues/73741.
+class FixedHeightOutlinedButton extends StatelessWidget {
+  const FixedHeightOutlinedButton({
+    Key key,
+    @required this.onPressed,
+    @required this.child,
+    this.autofocus = false,
+    this.style,
+    this.width,
+    this.tooltip,
+  }) : super(key: key);
+
+  final void Function() onPressed;
+
+  final Widget child;
+
+  final bool autofocus;
+
+  final ButtonStyle style;
+
+  final double width;
+
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final button = Container(
+      height: defaultButtonHeight,
+      width: width,
+      child: OutlinedButton(
+        style: style,
+        autofocus: autofocus,
+        onPressed: onPressed,
+        child: child,
+      ),
+    );
+    if (tooltip != null) {
+      return Tooltip(
+        message: tooltip,
+        preferBelow: false,
+        waitDuration: tooltipWait,
+        child: button,
+      );
+    }
+    return button;
+  }
+}
+
+// TODO(kenz): remove use of this class once we can specify a fixed button
+// height in the theme. See https://github.com/flutter/flutter/issues/73741.
+class FixedHeightElevatedButton extends StatelessWidget {
+  const FixedHeightElevatedButton({
+    @required this.child,
+    @required this.onPressed,
+    this.style,
+  });
+
+  final Widget child;
+
+  final void Function() onPressed;
+
+  final ButtonStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: defaultButtonHeight,
+      child: ElevatedButton(
+        style: style,
+        onPressed: onPressed,
+        child: child,
       ),
     );
   }
@@ -387,7 +484,7 @@ class ExitOfflineButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return FixedHeightOutlinedButton(
       key: const Key('exit offline button'),
       onPressed: onPressed,
       child: const MaterialIconLabel(
@@ -628,14 +725,12 @@ class ExportButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return IconLabelButton(
       key: key,
       onPressed: onPressed,
-      child: MaterialIconLabel(
-        Icons.file_download,
-        'Export',
-        includeTextWidth: includeTextWidth,
-      ),
+      icon: Icons.file_download,
+      label: 'Export',
+      includeTextWidth: includeTextWidth,
     );
   }
 }
@@ -654,22 +749,20 @@ class FilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Tooltip(
-      message: 'Filter',
-      child: OutlinedButton(
-        key: key,
-        onPressed: onPressed,
-        style: TextButton.styleFrom(
-          backgroundColor: isFilterActive
-              ? theme.colorScheme.toggleButtonBackgroundColor
-              : Colors.transparent,
-        ),
-        child: createIcon(
-          Icons.filter_list,
-          color: isFilterActive
-              ? theme.colorScheme.toggleButtonForegroundColor
-              : theme.colorScheme.contrastForeground,
-        ),
+    return FixedHeightOutlinedButton(
+      key: key,
+      tooltip: 'Filter',
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        backgroundColor: isFilterActive
+            ? theme.colorScheme.toggleButtonBackgroundColor
+            : Colors.transparent,
+      ),
+      child: createIcon(
+        Icons.filter_list,
+        color: isFilterActive
+            ? theme.colorScheme.toggleButtonForegroundColor
+            : theme.colorScheme.contrastForeground,
       ),
     );
   }

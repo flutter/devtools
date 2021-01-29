@@ -5,6 +5,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../common_widgets.dart';
 import '../theme.dart';
 import '../utils.dart';
 import 'provider.dart';
@@ -113,7 +114,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        ElevatedButton(
+        FixedHeightElevatedButton(
           onPressed: () {
             _provider.setDontAllowAnalytics();
             setState(() {
@@ -126,7 +127,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
         const Padding(
           padding: EdgeInsets.only(left: defaultSpacing),
         ),
-        ElevatedButton(
+        FixedHeightElevatedButton(
           onPressed: () {
             _provider.setAllowAnalytics();
             setState(() {

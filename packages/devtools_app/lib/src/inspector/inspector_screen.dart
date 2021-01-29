@@ -10,6 +10,7 @@ import '../analytics/analytics_stub.dart'
 import '../analytics/constants.dart';
 import '../auto_dispose_mixin.dart';
 import '../blocking_action_mixin.dart';
+import '../common_widgets.dart';
 import '../connected_app.dart';
 import '../globals.dart';
 import '../octicons.dart';
@@ -17,7 +18,6 @@ import '../screen.dart';
 import '../service_extensions.dart' as extensions;
 import '../split.dart';
 import '../theme.dart';
-import '../ui/label.dart';
 import '../ui/service_extension_widgets.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
@@ -130,16 +130,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               },
             ),
             const SizedBox(width: denseSpacing),
-            Container(
-              height: defaultButtonHeight,
-              child: OutlinedButton(
-                onPressed: _refreshInspector,
-                child: const MaterialIconLabel(
-                  Icons.refresh,
-                  'Refresh Tree',
-                  includeTextWidth: 750,
-                ),
-              ),
+            IconLabelButton(
+              onPressed: _refreshInspector,
+              icon: Icons.refresh,
+              label: 'Refresh Tree',
+              includeTextWidth: 750,
             ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
@@ -193,13 +188,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     if (!_expandCollapseSupported) return null;
 
     return Align(
-      alignment: Alignment.topRight,
+      alignment: Alignment.centerRight,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(
-            child: OutlinedButton(
+            child: FixedHeightOutlinedButton(
               onPressed: enableButtons ? _onExpandClick : null,
               child: const Text(
                 'Expand all',
@@ -209,7 +204,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           ),
           const SizedBox(width: denseSpacing),
           Flexible(
-            child: OutlinedButton(
+            child: FixedHeightOutlinedButton(
               onPressed: enableButtons ? _onResetClick : null,
               child: const Text(
                 'Collapse to selected',
