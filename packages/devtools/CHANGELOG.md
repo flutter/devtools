@@ -1,3 +1,17 @@
+## 0.9.7
+* Button cleanup and polish [#2645](https://github.com/flutter/devtools/pull/2645)
+* Make layout explorer the default tab in the inspector [#2644](https://github.com/flutter/devtools/pull/2644)
+* Added settings dialog for memory page [#2637](https://github.com/flutter/devtools/pull/2637)
+* Bundle canvaskit with the release binary so that DevTools can be used without internet [#2634](https://github.com/flutter/devtools/pull/2634)
+* Add support for visualizing fixed layouts in the layout explorer [#2633](https://github.com/flutter/devtools/pull/2633)
+* Listen for logs with event history in logging page and error badge manager [#2629](https://github.com/flutter/devtools/pull/2629)
+* Add app events, extension events, and chart selection hover card to live memory view [#2605](https://github.com/flutter/devtools/pull/2605) 
+* Correctly process large HTTP responses in network profiler [#2602](https://github.com/flutter/devtools/pull/2602)
+* Fallback to port 0 if we cannot connect the DevTools server to ports 9100+ [#2600](https://github.com/flutter/devtools/pull/2600)
+* Add tooltips to CPU profiler column titles [#2599](https://github.com/flutter/devtools/pull/2599)
+* Add timeline grid to CPU Profiler flame chart [#2593](https://github.com/flutter/devtools/pull/2593)
+* Migrate to new material buttons [#2592](https://github.com/flutter/devtools/pull/2592)
+
 ## 0.9.6+3
 * Support null safe `package:intl` version `>=0.17.x`. 
 
