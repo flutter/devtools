@@ -34,7 +34,7 @@ class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
     // TODO(jacobr) pass a RemoteDiagnosticsNode to this method that contains
     // the layout explorer related supplemental properties so that we can
     // accurately determine whether the widget uses box layout.
-    return true;
+    return node != null;
   }
 
   @override

@@ -149,22 +149,6 @@ class InspectorController extends DisposableController
     }
   }
 
-  final List<VoidCallback> _selectionListeners = [];
-
-  void addSelectionListener(VoidCallback listener) {
-    _selectionListeners.add(listener);
-  }
-
-  void removeSelectionListener(VoidCallback listener) {
-    _selectionListeners.remove(listener);
-  }
-
-  void notifySelectionListeners() {
-    for (var notifyListener in _selectionListeners) {
-      notifyListener();
-    }
-  }
-
   int _clientCount = 0;
 
   /// Maximum frame rate to refresh the inspector at to avoid taxing the
@@ -224,7 +208,8 @@ class InspectorController extends DisposableController
 
   bool programaticSelectionChangeInProgress = false;
 
-  InspectorTreeNode selectedNode;
+  ValueListenable<InspectorTreeNode> get selectedNode => _selectedNode;
+  final ValueNotifier<InspectorTreeNode> _selectedNode = ValueNotifier(null);
 
   InspectorTreeNode lastExpanded;
 
@@ -241,7 +226,8 @@ class InspectorController extends DisposableController
 
   bool get detailsSubtree => parent != null;
 
-  RemoteDiagnosticsNode get selectedDiagnostic => selectedNode?.diagnostic;
+  RemoteDiagnosticsNode get selectedDiagnostic =>
+      selectedNode.value?.diagnostic;
 
   FlutterTreeType getTreeType() {
     return treeType;
@@ -331,10 +317,9 @@ class InspectorController extends DisposableController
     _selectionGroups?.clear(isolateStopped);
 
     currentShowNode = null;
-    selectedNode = null;
+    _selectedNode.value = null;
     lastExpanded = null;
 
-    selectedNode = null;
     subtreeRoot = null;
 
     inspectorTree?.root = inspectorTree?.createNode();
@@ -519,10 +504,10 @@ class InspectorController extends DisposableController
 
   void syncTreeSelection() {
     programaticSelectionChangeInProgress = true;
-    inspectorTree.selection = selectedNode;
-    inspectorTree.expandPath(selectedNode);
+    inspectorTree.selection = selectedNode.value;
+    inspectorTree.expandPath(selectedNode.value);
     programaticSelectionChangeInProgress = false;
-    animateTo(selectedNode);
+    animateTo(selectedNode.value);
   }
 
   void selectAndShowNode(RemoteDiagnosticsNode node) {
@@ -713,11 +698,11 @@ class InspectorController extends DisposableController
   }
 
   void setSelectedNode(InspectorTreeNode newSelection) {
-    if (newSelection == selectedNode) {
+    if (newSelection == selectedNode.value) {
       return;
     }
 
-    selectedNode = newSelection;
+    _selectedNode.value = newSelection;
 
     lastExpanded = null; // New selected node takes precedence.
     endShowNode();
@@ -727,9 +712,7 @@ class InspectorController extends DisposableController
       parent.endShowNode();
     }
 
-    animateTo(selectedNode);
-
-    notifySelectionListeners();
+    animateTo(selectedNode.value);
   }
 
   void _onExpand(InspectorTreeNode node) {
@@ -766,7 +749,8 @@ class InspectorController extends DisposableController
         if (isSummaryTree && details != null) {
           details.selectAndShowNode(selectedDiagnostic);
         } else if (parent != null) {
-          parent.selectAndShowNode(firstAncestorInParentTree(selectedNode));
+          parent
+              .selectAndShowNode(firstAncestorInParentTree(selectedNode.value));
         }
       }
     }
@@ -799,7 +783,7 @@ class InspectorController extends DisposableController
     }
     if (detailsSubtree || details == null) {
       if (selection != null) {
-        var toSelect = selectedNode;
+        var toSelect = selectedNode.value;
 
         while (toSelect != null && toSelect.diagnostic.isProperty) {
           toSelect = toSelect.parent;

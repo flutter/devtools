@@ -58,7 +58,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   L get properties => _previousProperties ?? _animatedProperties ?? _properties;
 
   RemoteDiagnosticsNode get selectedNode =>
-      inspectorController?.selectedNode?.diagnostic;
+      inspectorController?.selectedNode?.value?.diagnostic;
 
   InspectorController get inspectorController => widget.inspectorController;
 
@@ -123,12 +123,13 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   String id(RemoteDiagnosticsNode node) => node?.dartDiagnosticRef?.id;
 
   void _registerInspectorControllerService() {
-    inspectorController?.addSelectionListener(_onSelectionChangedCallback);
+    inspectorController?.selectedNode?.addListener(_onSelectionChangedCallback);
     inspectorService?.addClient(this);
   }
 
   void _unregisterInspectorControllerService() {
-    inspectorController?.removeSelectionListener(_onSelectionChangedCallback);
+    inspectorController?.selectedNode
+        ?.removeListener(_onSelectionChangedCallback);
     inspectorService?.removeClient(this);
   }
 

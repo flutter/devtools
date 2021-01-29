@@ -755,21 +755,15 @@ class ServiceExtensionManager extends Disposer {
           // Isolate has changed again.
           return;
         }
-        for (String extension in isolate.extensionRPCs) {
-          await _maybeAddServiceExtension(extension);
-          if (isolateRef != _mainIsolate.value) {
-            // Isolate has changed again.
-            return;
-          }
-        }
+        await Future.wait([
+          for (String extension in isolate.extensionRPCs)
+            _maybeAddServiceExtension(extension)
+        ]);
       } else {
-        for (String extension in isolate.extensionRPCs) {
-          await _addServiceExtension(extension);
-          if (isolateRef != _mainIsolate.value) {
-            // Isolate has changed again.
-            return;
-          }
-        }
+        await Future.wait([
+          for (String extension in isolate.extensionRPCs)
+            _addServiceExtension(extension)
+        ]);
       }
     }
   }

@@ -676,9 +676,25 @@ class ObjectGroup {
     Map<String, String> parameters,
   ) async {
     final name = extension.name;
+    final fullName = 'ext.flutter.inspector.$name';
     if (!serviceManager.serviceExtensionManager
-        .isServiceExtensionAvailable('ext.flutter.inspector.$name')) {
-      await invokeInspectorPolyfill(this);
+        .isServiceExtensionAvailable(fullName)) {
+      // Wait until a service extension we know will be eventually available for
+      // a Flutter app is loaded to avoid attempting to apply the polyfill
+      // while the list of Flutter service extensions is really just being
+      // registered on the device. This prevents pew in the app console about
+      // trying to register service extensions multiple times.
+      final regularExtensionsRegistered = await serviceManager
+          .serviceExtensionManager
+          .waitForServiceExtensionAvailable(
+              'ext.flutter.inspector.isWidgetCreationTracked');
+      if (disposed) return null;
+      assert(regularExtensionsRegistered);
+      if (!serviceManager.serviceExtensionManager
+          .isServiceExtensionAvailable(fullName)) {
+        await invokeInspectorPolyfill(this);
+      }
+      if (disposed) return null;
     }
     return invokeServiceMethodDaemonParams(name, parameters);
   }
