@@ -134,7 +134,7 @@ String addServiceExtensions() {
           service: instance,
           addAdditionalPropertiesCallback: (node, delegate) {
             final Map<String, Object> additionalJson = <String, Object>{};
-            final Object value = node.value as Object;
+            final value = node.value;
             if (value is Element) {
               final renderObject = value.renderObject;
               if (renderObject != null) {
@@ -191,8 +191,7 @@ String addServiceExtensions() {
                       'height': renderObject.size.height.toString(),
                     };
 
-                    final ParentData parentData =
-                        renderObject.parentData as ParentData;
+                    final parentData = renderObject.parentData;
                     if (parentData is FlexParentData) {
                       additionalJson['flexFactor'] = parentData.flex as int;
                       additionalJson['flexFit'] =
