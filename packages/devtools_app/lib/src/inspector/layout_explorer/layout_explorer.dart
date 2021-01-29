@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../../auto_dispose_mixin.dart';
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
 import 'box/box.dart';
@@ -16,10 +17,11 @@ class LayoutExplorerTab extends StatefulWidget {
 }
 
 class _LayoutExplorerTabState extends State<LayoutExplorerTab>
-    with AutomaticKeepAliveClientMixin<LayoutExplorerTab> {
+    with AutomaticKeepAliveClientMixin<LayoutExplorerTab>, AutoDisposeMixin {
   InspectorController get controller => widget.controller;
 
-  RemoteDiagnosticsNode get selected => controller?.selectedNode?.diagnostic;
+  RemoteDiagnosticsNode get selected =>
+      controller?.selectedNode?.value?.diagnostic;
 
   RemoteDiagnosticsNode previousSelection;
 
@@ -30,9 +32,11 @@ class _LayoutExplorerTabState extends State<LayoutExplorerTab>
     if (BoxLayoutExplorerWidget.shouldDisplay(node)) {
       return BoxLayoutExplorerWidget(controller);
     }
-    return const Center(
+    return Center(
       child: Text(
-        'Currently, Layout Explorer only supports Box and Flex-based widgets.',
+        node != null
+            ? 'Currently, Layout Explorer only supports Box and Flex-based widgets.'
+            : 'Select a widget to view its layout.',
         textAlign: TextAlign.center,
         overflow: TextOverflow.clip,
       ),
@@ -49,13 +53,7 @@ class _LayoutExplorerTabState extends State<LayoutExplorerTab>
   @override
   void initState() {
     super.initState();
-    controller.addSelectionListener(onSelectionChanged);
-  }
-
-  @override
-  void dispose() {
-    controller.removeSelectionListener(onSelectionChanged);
-    super.dispose();
+    addAutoDisposeListener(controller.selectedNode, onSelectionChanged);
   }
 
   @override

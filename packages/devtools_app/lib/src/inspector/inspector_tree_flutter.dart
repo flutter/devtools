@@ -77,17 +77,20 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
 class InspectorTreeControllerFlutter extends Object
     with InspectorTreeController, InspectorTreeFixedRowHeightController {
   /// Client the controller notifies to trigger changes to the UI.
-  InspectorControllerClient get client => _client;
-  InspectorControllerClient _client;
+  final Set<InspectorControllerClient> _clients = {};
 
-  set client(InspectorControllerClient value) {
-    if (_client == value) return;
-    // Do not set a new client if there is still an old client.
-    assert(value == null || _client == null);
-    _client = value;
+  void addClient(InspectorControllerClient value) {
+    final firstClient = _clients.isEmpty;
+    _clients.add(value);
+    if (firstClient) {
+      config.onClientActiveChange(true);
+    }
+  }
 
-    if (config.onClientActiveChange != null) {
-      config.onClientActiveChange(value != null);
+  void removeClient(InspectorControllerClient value) {
+    _clients.remove(value);
+    if (_clients.isEmpty) {
+      config.onClientActiveChange(false);
     }
   }
 
@@ -110,13 +113,17 @@ class InspectorTreeControllerFlutter extends Object
 
   @override
   void scrollToRect(Rect targetRect) {
-    client?.scrollToRect(targetRect);
+    for (var client in _clients) {
+      client.scrollToRect(targetRect);
+    }
   }
 
   @override
   void setState(VoidCallback fn) {
     fn();
-    client?.onChanged();
+    for (var client in _clients) {
+      client.onChanged();
+    }
   }
 
   /// Width each row in the tree should have ignoring its indent.
@@ -143,7 +150,9 @@ class InspectorTreeControllerFlutter extends Object
   }
 
   void requestFocus() {
-    client?.requestFocus();
+    for (var client in _clients) {
+      client.requestFocus();
+    }
   }
 }
 
@@ -206,7 +215,7 @@ class _InspectorTreeState extends State<InspectorTree>
   void didUpdateWidget(InspectorTree oldWidget) {
     if (oldWidget.controller != widget.controller) {
       final InspectorTreeControllerFlutter oldController = oldWidget.controller;
-      oldController?.client = null;
+      oldController?.removeClient(this);
       cancel();
 
       _bindToController();
@@ -217,7 +226,7 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   void dispose() {
     super.dispose();
-    controller?.client = null;
+    controller?.removeClient(this);
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
     constraintDisplayController?.dispose();
@@ -371,7 +380,7 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   void _bindToController() {
-    controller?.client = this;
+    controller?.addClient(this);
   }
 
   @override

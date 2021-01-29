@@ -14,6 +14,7 @@ import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/layout_explorer.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -285,36 +286,14 @@ class MockInspectorTreeController extends Mock
 
 class TestInspectorController extends Fake implements InspectorController {
   InspectorService service = MockInspectorService();
-  InspectorTreeNode node;
-  List<Function> listeners = [];
 
   @override
-  InspectorTreeNode get selectedNode => node;
-
-  @override
-  set selectedNode(InspectorTreeNode newNode) => node = newNode;
-
-  @override
-  void addSelectionListener(Function listener) {
-    listeners.add(listener);
-  }
-
-  @override
-  void notifySelectionListeners() {
-    for (var listener in listeners) {
-      listener();
-    }
-  }
-
-  @override
-  void removeSelectionListener(Function listener) {
-    listeners.remove(listener);
-  }
+  ValueListenable<InspectorTreeNode> get selectedNode => _selectedNode;
+  final ValueNotifier<InspectorTreeNode> _selectedNode = ValueNotifier(null);
 
   @override
   void setSelectedNode(InspectorTreeNode newSelection) {
-    selectedNode = newSelection;
-    notifySelectionListeners();
+    _selectedNode.value = newSelection;
   }
 
   @override
