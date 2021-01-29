@@ -264,14 +264,16 @@ class SettingsOutlinedButton extends StatelessWidget {
 // height in the theme. See https://github.com/flutter/flutter/issues/73741.
 class FixedHeightOutlinedButton extends StatelessWidget {
   const FixedHeightOutlinedButton({
-    Key key,
+    this.buttonKey,
     @required this.onPressed,
     @required this.child,
     this.autofocus = false,
     this.style,
     this.width,
     this.tooltip,
-  }) : super(key: key);
+  });
+
+  final Key buttonKey;
 
   final VoidCallback onPressed;
 
@@ -291,6 +293,7 @@ class FixedHeightOutlinedButton extends StatelessWidget {
       height: defaultButtonHeight,
       width: width,
       child: OutlinedButton(
+        key: buttonKey,
         style: style,
         autofocus: autofocus,
         onPressed: onPressed,
@@ -485,7 +488,7 @@ class ExitOfflineButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FixedHeightOutlinedButton(
-      key: const Key('exit offline button'),
+      buttonKey: const Key('exit offline button'),
       onPressed: onPressed,
       child: const MaterialIconLabel(
         Icons.clear,
@@ -750,7 +753,7 @@ class FilterButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return FixedHeightOutlinedButton(
-      key: key,
+      buttonKey: key,
       tooltip: 'Filter',
       onPressed: onPressed,
       style: TextButton.styleFrom(

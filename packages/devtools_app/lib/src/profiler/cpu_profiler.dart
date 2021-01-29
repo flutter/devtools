@@ -189,7 +189,7 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   Widget _expandAllButton(Tab currentTab) {
     return FixedHeightOutlinedButton(
-      key: CpuProfiler.expandButtonKey,
+      buttonKey: CpuProfiler.expandButtonKey,
       onPressed: () {
         _performOnDataRoots((root) => root.expandCascading(), currentTab);
       },
@@ -199,7 +199,7 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   Widget _collapseAllButton(Tab currentTab) {
     return FixedHeightOutlinedButton(
-      key: CpuProfiler.collapseButtonKey,
+      buttonKey: CpuProfiler.collapseButtonKey,
       onPressed: () {
         _performOnDataRoots((root) => root.collapseCascading(), currentTab);
       },

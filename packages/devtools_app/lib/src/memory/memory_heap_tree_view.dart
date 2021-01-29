@@ -462,7 +462,7 @@ class HeapTreeViewState extends State<HeapTree>
     return Row(
       children: [
         FixedHeightOutlinedButton(
-          key: snapshotButtonKey,
+          buttonKey: snapshotButtonKey,
           tooltip: 'Take a memory profile snapshot',
           onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
           child: const MaterialIconLabel(
@@ -476,7 +476,7 @@ class HeapTreeViewState extends State<HeapTree>
         // TODO(terry): Mechanism to handle expand/collapse on both tables
         // objects/fields. Maybe notion in table?
         FixedHeightOutlinedButton(
-          key: collapseAllButtonKey,
+          buttonKey: collapseAllButtonKey,
           tooltip: 'Collapse All',
           onPressed: snapshotDisplay is MemoryHeapTable
               ? () {
@@ -498,7 +498,7 @@ class HeapTreeViewState extends State<HeapTree>
           child: createIcon(Icons.vertical_align_top),
         ),
         FixedHeightOutlinedButton(
-          key: expandAllButtonKey,
+          buttonKey: expandAllButtonKey,
           tooltip: 'Expand All',
           onPressed: snapshotDisplay is MemoryHeapTable
               ? () {
@@ -517,7 +517,7 @@ class HeapTreeViewState extends State<HeapTree>
         ),
         const SizedBox(width: defaultSpacing),
         FixedHeightOutlinedButton(
-          key: allocationMonitorKey,
+          buttonKey: allocationMonitorKey,
           tooltip: 'Monitor Allocations',
           onPressed: () async {
             MemoryScreen.gaAction(key: allocationMonitorKey);
@@ -530,7 +530,7 @@ class HeapTreeViewState extends State<HeapTree>
           ),
         ),
         FixedHeightOutlinedButton(
-          key: allocationMonitorResetKey,
+          buttonKey: allocationMonitorResetKey,
           tooltip: 'Reset Accumulators',
           onPressed: () async {
             MemoryScreen.gaAction(key: allocationMonitorResetKey);
