@@ -22,6 +22,7 @@ import '../octicons.dart';
 import '../screen.dart';
 import '../theme.dart';
 import '../ui/label.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 
 import 'memory_android_chart.dart' as android;
@@ -136,6 +137,9 @@ class MemoryBodyState extends State<MemoryBody>
 
   OverlayEntry hoverOverlayEntry;
   OverlayEntry legendOverlayEntry;
+
+  /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
+  bool isAndroidCollection = MemoryController.androidADBDefault;
 
   @override
   void initState() {
@@ -286,9 +290,11 @@ class MemoryBodyState extends State<MemoryBody>
     });
 
     addAutoDisposeListener(controller.androidCollectionEnabled, () {
-      final isAndroidCollection = controller.androidCollectionEnabled.value;
+      isAndroidCollection = controller.androidCollectionEnabled.value;
       setState(() {
         if (!isAndroidCollection && controller.isAndroidChartVisible) {
+          // If we're no longer collecting android stats then hide the
+          // chart and disable the Android Memory button.
           controller.toggleAndroidChartVisibility();
         }
       });
@@ -554,8 +560,7 @@ class MemoryBodyState extends State<MemoryBody>
   OutlinedButton createToggleAdbMemoryButton() {
     return OutlinedButton(
       key: MemoryScreen.androidChartButtonKey,
-      onPressed: controller.isConnectedDeviceAndroid &&
-              controller.androidCollectionEnabled.value
+      onPressed: controller.isConnectedDeviceAndroid && isAndroidCollection
           ? controller.toggleAndroidChartVisibility
           : null,
       child: MaterialIconLabel(
