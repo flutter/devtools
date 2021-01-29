@@ -245,14 +245,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
           includeTextWidth: _secondaryControlsMinIncludeTextWidth,
         ),
         const SizedBox(width: defaultSpacing),
-        ActionButton(
-          child: OutlinedButton(
-            child: const Icon(
-              Icons.settings,
-              size: defaultIconSize,
-            ),
-            onPressed: _openSettingsDialog,
-          ),
+        SettingsOutlinedButton(
+          onPressed: _openSettingsDialog,
           tooltip: 'Timeline Configuration',
         ),
       ],

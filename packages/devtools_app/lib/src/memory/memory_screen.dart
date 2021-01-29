@@ -21,7 +21,6 @@ import '../globals.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../theme.dart';
-import '../ui/label.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
 
@@ -538,17 +537,14 @@ class MemoryBodyState extends State<MemoryBody>
               onPressed: paused ? controller.resumeLiveFeed : null,
             ),
             const SizedBox(width: defaultSpacing),
-            OutlinedButton(
-                key: MemoryScreen.clearButtonKey,
-                // TODO(terry): Button needs to be Delete for offline data.
-                onPressed: controller.memorySource == MemoryController.liveFeed
-                    ? _clearTimeline
-                    : null,
-                child: const MaterialIconLabel(
-                  Icons.block,
-                  'Clear',
-                  includeTextWidth: _primaryControlsMinVerboseWidth,
-                )),
+            ClearButton(
+              key: MemoryScreen.clearButtonKey,
+              // TODO(terry): Button needs to be Delete for offline data.
+              onPressed: controller.memorySource == MemoryController.liveFeed
+                  ? _clearTimeline
+                  : null,
+              includeTextWidth: _primaryControlsMinVerboseWidth,
+            ),
             const SizedBox(width: defaultSpacing),
             _intervalDropdown(textTheme),
           ],
@@ -557,17 +553,15 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
-  OutlinedButton createToggleAdbMemoryButton() {
-    return OutlinedButton(
+  Widget createToggleAdbMemoryButton() {
+    return IconLabelButton(
       key: MemoryScreen.androidChartButtonKey,
+      icon: controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
+      label: keyName(MemoryScreen.androidChartButtonKey),
       onPressed: controller.isConnectedDeviceAndroid && isAndroidCollection
           ? controller.toggleAndroidChartVisibility
           : null,
-      child: MaterialIconLabel(
-        controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
-        keyName(MemoryScreen.androidChartButtonKey),
-        includeTextWidth: 900,
-      ),
+      includeTextWidth: 900,
     );
   }
 
@@ -578,46 +572,33 @@ class MemoryBodyState extends State<MemoryBody>
         const SizedBox(width: defaultSpacing),
         createToggleAdbMemoryButton(),
         const SizedBox(width: denseSpacing),
-        OutlinedButton(
+        IconLabelButton(
           key: MemoryScreen.gcButtonKey,
           onPressed: controller.isGcing ? null : _gc,
-          child: const MaterialIconLabel(
-            Icons.delete,
-            'GC',
-            includeTextWidth: _primaryControlsMinVerboseWidth,
-          ),
+          icon: Icons.delete,
+          label: 'GC',
+          includeTextWidth: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: defaultSpacing),
-        OutlinedButton(
+        IconLabelButton(
           key: MemoryScreen.exportButtonKey,
           onPressed:
               controller.offline ? null : controller.memoryLog.exportMemory,
-          child: const MaterialIconLabel(
-            Icons.file_download,
-            'Export',
-            includeTextWidth: _primaryControlsMinVerboseWidth,
-          ),
+          icon: Icons.file_download,
+          label: 'Export',
+          includeTextWidth: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: defaultSpacing),
-        OutlinedButton(
+        IconLabelButton(
           key: legendKey,
           onPressed: controller.toggleLegendVisibility,
-          child: MaterialIconLabel(
-            legendOverlayEntry == null ? Icons.storage : Icons.close,
-            'Legend',
-            includeTextWidth: _primaryControlsMinVerboseWidth,
-          ),
+          icon: legendOverlayEntry == null ? Icons.storage : Icons.close,
+          label: 'Legend',
+          includeTextWidth: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
-        ActionButton(
-          child: OutlinedButton(
-            key: MemoryScreen.settingsButtonKey,
-            onPressed: _openSettingsDialog,
-            child: const Icon(
-              Icons.settings,
-              size: defaultIconSize,
-            ),
-          ),
+        SettingsOutlinedButton(
+          onPressed: _openSettingsDialog,
           tooltip: 'Memory Configuration',
         ),
       ],

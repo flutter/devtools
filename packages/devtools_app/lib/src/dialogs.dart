@@ -65,7 +65,7 @@ class DevToolsDialog extends StatelessWidget {
 class DialogCloseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return TextButton(
+    return DialogTextButton(
       onPressed: () {
         Navigator.of(context, rootNavigator: true).pop('dialog');
       },
@@ -78,7 +78,7 @@ class DialogCloseButton extends StatelessWidget {
 class DialogCancelButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return TextButton(
+    return DialogTextButton(
       onPressed: () {
         Navigator.of(context).pop(_dialogDefaultContext);
       },
@@ -95,12 +95,31 @@ class DialogApplyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
+    return DialogTextButton(
       onPressed: () {
         if (onPressed != null) onPressed();
         Navigator.of(context).pop(_dialogDefaultContext);
       },
       child: const Text('APPLY'),
+    );
+  }
+}
+
+class DialogTextButton extends StatelessWidget {
+  const DialogTextButton({this.onPressed, this.child});
+
+  final VoidCallback onPressed;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: TextButton(
+        onPressed: onPressed,
+        child: child,
+      ),
     );
   }
 }

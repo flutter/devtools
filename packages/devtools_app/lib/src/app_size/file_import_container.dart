@@ -124,6 +124,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
             child: _buildImportedFileDisplay(),
           ),
         ),
+        const SizedBox(width: denseSpacing),
         _buildImportButton(),
         // Horizontal spacer with flex value of 1.
         const Flexible(
@@ -145,14 +146,10 @@ class _FileImportContainerState extends State<FileImportContainer> {
   }
 
   Widget _buildImportButton() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        OutlinedButton(
-          onPressed: _importFile,
-          child: const MaterialIconLabel(Icons.file_upload, 'Import File'),
-        ),
-      ],
+    return IconLabelButton(
+      onPressed: _importFile,
+      icon: Icons.file_upload,
+      label: 'Import File',
     );
   }
 
@@ -164,7 +161,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
+            FixedHeightElevatedButton(
               onPressed: importedFile != null
                   ? () => widget.onAction(importedFile)
                   : null,
@@ -297,7 +294,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
+            FixedHeightElevatedButton(
               onPressed: firstImportedFile != null && secondImportedFile != null
                   ? () => widget.onAction(
                         firstImportedFile,

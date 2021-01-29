@@ -77,8 +77,8 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
           const SizedBox(height: denseRowSpacing),
           _captionText('Load Dart AOT snapshots or app size analysis files to '
               'track down size issues in your app.'),
-          const Padding(padding: EdgeInsets.only(top: 20.0)),
-          ElevatedButton(
+          const SizedBox(height: defaultSpacing),
+          FixedHeightElevatedButton(
             child: const Text('Open app size tool'),
             onPressed: () =>
                 DevToolsRouterDelegate.of(context).navigate(appSizePageId),
@@ -121,15 +121,14 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
   Widget _buildConnectInput() {
     final CallbackDwell connectDebounce = CallbackDwell(_connect);
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          width: 350.0,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
+        Row(
+          children: [
+            SizedBox(
+              width: 350.0,
+              child: TextField(
                 onSubmitted: (str) => connectDebounce.invoke(),
                 autofocus: true,
                 decoration: const InputDecoration(
@@ -143,23 +142,21 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
                 ),
                 controller: connectDialogController,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text(
-                  '(e.g., http://127.0.0.1:12345/auth_code=...)',
-                  textAlign: TextAlign.start,
-                  style: Theme.of(context).textTheme.caption,
-                ),
-              ),
-            ],
+            ),
+            const SizedBox(width: defaultSpacing),
+            FixedHeightElevatedButton(
+              child: const Text('Connect'),
+              onPressed: connectDebounce.invoke,
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            '(e.g., http://127.0.0.1:12345/auth_code=...)',
+            textAlign: TextAlign.start,
+            style: Theme.of(context).textTheme.caption,
           ),
-        ),
-        const Padding(
-          padding: EdgeInsets.only(left: 20.0),
-        ),
-        ElevatedButton(
-          child: const Text('Connect'),
-          onPressed: connectDebounce.invoke,
         ),
       ],
     );
