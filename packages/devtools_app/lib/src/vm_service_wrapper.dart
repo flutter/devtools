@@ -8,7 +8,6 @@ import 'package:dds/vm_service_extensions.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'package:vm_service/vm_service.dart';
 import 'profiler/cpu_profile_model.dart';
 import 'version.dart';
 
