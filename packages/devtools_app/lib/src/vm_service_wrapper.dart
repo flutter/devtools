@@ -8,6 +8,7 @@ import 'package:dds/vm_service_extensions.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'package:vm_service/vm_service.dart';
 import 'profiler/cpu_profile_model.dart';
 import 'version.dart';
 
@@ -45,7 +46,14 @@ class VmServiceWrapper implements VmService {
     // [_dartIoVersion] in a synchronous context, like there are for
     // [_protocolVersion] and [_ddsVersion].
     _protocolVersion = await getVersion();
-    _ddsVersion = await getDartDevelopmentServiceVersion();
+    try {
+      // If DDS is not present, this will throw.
+      _ddsVersion = await getDartDevelopmentServiceVersion();
+    } on RPCError catch (e) {
+      if (e.code != RPCError.kMethodNotFound) {
+        rethrow;
+      }
+    }
   }
 
   Uri get connectedUri => _connectedUri;
@@ -938,11 +946,11 @@ class VmServiceWrapper implements VmService {
   }
 
   bool _isDdsVersionSupportedNow({@required SemanticVersion supportedVersion}) {
-    assert(_ddsVersion != null);
-    return _versionSupported(
-      version: _ddsVersion,
-      supportedVersion: supportedVersion,
-    );
+    return _ddsVersion != null &&
+        _versionSupported(
+          version: _ddsVersion,
+          supportedVersion: supportedVersion,
+        );
   }
 
   /// Retrieves the full string value of a [stringRef].
