@@ -1,3 +1,6 @@
+## 0.9.7+1
+* Fix issue where DevTools would fail to connect to an application with no DDS instance [#2649](https://github.com/flutter/devtools/issues/2649)
+
 ## 0.9.7
 * Button cleanup and polish [#2645](https://github.com/flutter/devtools/pull/2645)
 * Make layout explorer the default tab in the inspector [#2644](https://github.com/flutter/devtools/pull/2644)
