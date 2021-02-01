@@ -343,14 +343,8 @@ class InspectorController extends DisposableController
     await recomputeTreeRoot(null, null, false);
 
     if (isSummaryTree) {
-      // TODO(dantup): This needs to not walk the tree asynchronously, and
-      // may need to consider inspector refs that only occur in the details tree.
-      final validInspectorRefs =
-          await _collectValidInspectorRefs(inspectorTree.root.diagnostic)
-              .toSet();
-
       serviceManager.errorBadgeManager
-          .filterErrors(InspectorScreen.id, validInspectorRefs.contains);
+          .filterErrors(InspectorScreen.id, hasDiagnosticsValue);
     }
 
     return getPendingUpdateDone();
@@ -929,18 +923,5 @@ class InspectorController extends DisposableController
       SemanticVersion(major: 1, minor: 13, patch: 1),
       onLayoutExplorerSupported,
     );
-  }
-
-  Stream<InspectorInstanceRef> _collectValidInspectorRefs(
-      RemoteDiagnosticsNode diagnostic) async* {
-    if (diagnostic.valueRef != null) {
-      yield diagnostic.valueRef;
-    }
-    final children = await diagnostic?.children;
-    if (children != null) {
-      for (final child in children) {
-        yield* _collectValidInspectorRefs(child);
-      }
-    }
   }
 }
