@@ -340,7 +340,6 @@ class InspectorController extends DisposableController
     if (!visibleToUser || _disposed) {
       return Future.value();
     }
-    // TODO(dantup): Is it safe to add this await here?
     await recomputeTreeRoot(null, null, false);
 
     if (isSummaryTree) {
