@@ -68,7 +68,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   bool get enableButtons =>
       actionInProgress == false && connectionInProgress == false;
 
-  // The index of the current selected error, or null if no error is selected.
+  LinkedHashMap<InspectorInstanceRef, DevToolsError> _errors =
+      LinkedHashMap<InspectorInstanceRef, DevToolsError>();
   int _selectedErrorIndex;
 
   @override
@@ -80,6 +81,14 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     if (serviceManager.hasConnection) {
       _handleConnectionStart(serviceManager.service);
     }
+    _errors = serviceManager.errorBadgeManager
+        .erroredWidgetNotifier(InspectorScreen.id)
+        .value;
+    addAutoDisposeListener(
+      serviceManager.errorBadgeManager
+          .erroredWidgetNotifier(InspectorScreen.id),
+      _errorsChanged,
+    );
     autoDispose(
         serviceManager.onConnectionClosed.listen(_handleConnectionStop));
   }
@@ -159,47 +168,40 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     );
   }
 
-  ValueListenableBuilder<LinkedHashMap<InspectorInstanceRef, DevToolsError>>
-      _buildSummaryTreeColumn() {
-    return ValueListenableBuilder<
-            LinkedHashMap<InspectorInstanceRef, DevToolsError>>(
-        valueListenable: serviceManager.errorBadgeManager
-            .erroredWidgetNotifier(InspectorScreen.id),
-        builder: (context, _errors, _) {
-          final errors = _errors.map(
-              (key, value) => MapEntry(key, value as InspectableWidgetError));
-          final errorList = errors.values.toList();
+  Widget _buildSummaryTreeColumn() {
+    final errors = _errors
+        ?.map((key, value) => MapEntry(key, value as InspectableWidgetError));
+    final errorList = errors?.values?.toList() ?? [];
 
-          return Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).focusColor),
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).focusColor),
+      ),
+      child: Stack(
+        children: [
+          InspectorTree(
+            controller: summaryTreeController,
+            isSummaryTree: true,
+            widgetErrors: errors,
+          ),
+          if (errors.isNotEmpty)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: _ErrorNavigator(
+                selectedErrorIndex: _selectedErrorIndex,
+                errors: errorList,
+                onSelectedErrorIndexChanged: (index) => setState(() {
+                  _selectedErrorIndex = index;
+                  inspectorController.updateSelectionFromService(
+                      firstFrame: false,
+                      inspectorRef: errorList[index].inspectorRef);
+                }),
+              ),
             ),
-            child: Stack(
-              children: [
-                InspectorTree(
-                  controller: summaryTreeController,
-                  isSummaryTree: true,
-                  widgetErrors: errors,
-                ),
-                if (errors.isNotEmpty)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: _ErrorNavigator(
-                      selectedErrorIndex: _selectedErrorIndex,
-                      errors: errorList,
-                      onSelectedErrorIndexChanged: (index) => setState(() {
-                        _selectedErrorIndex = index;
-                        inspectorController.updateSelectionFromService(
-                            firstFrame: false,
-                            inspectorRef: errorList[index].inspectorRef);
-                      }),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        });
+        ],
+      ),
+    );
   }
 
   List<Widget> getServiceExtensionWidgets() {
@@ -320,6 +322,33 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           //);
         });
       }
+
+      addAutoDisposeListener(
+          inspectorController.selectedNode, _selectedNodeChanged);
+    });
+  }
+
+  void _selectedNodeChanged() {
+    final node = inspectorController.selectedNode.value;
+    final inspectorRef = node?.diagnostic?.valueRef;
+    // Check whether the node that was just selected has any errors associated
+    // with it.
+    var errorIndex = inspectorRef != null
+        ? _errors.keys.toList().indexOf(inspectorRef)
+        : null;
+    if (errorIndex == -1) {
+      errorIndex = null;
+    }
+    if (_selectedErrorIndex != errorIndex) {
+      setState(() => _selectedErrorIndex = errorIndex);
+    }
+  }
+
+  void _errorsChanged() {
+    setState(() {
+      _errors = serviceManager.errorBadgeManager
+          .erroredWidgetNotifier(InspectorScreen.id)
+          .value;
     });
   }
 
@@ -354,22 +383,29 @@ class _ErrorNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = selectedErrorIndex != null
-        ? 'Errors: ${selectedErrorIndex + 1}/${errors.length}'
+        ? 'Error ${selectedErrorIndex + 1}/${errors.length}'
         : 'Errors: ${errors.length}';
     return Container(
       color: devtoolsError,
       child: Padding(
-        padding: const EdgeInsets.only(left: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Row(
           children: [
-            Text(label),
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: Text(label),
+            ),
             IconButton(
-              padding: const EdgeInsets.all(0.0),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              splashRadius: Material.defaultSplashRadius / 2,
               icon: const Icon(Icons.chevron_left),
               onPressed: _previousError,
             ),
             IconButton(
-              padding: const EdgeInsets.all(0.0),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              splashRadius: Material.defaultSplashRadius / 2,
               icon: const Icon(Icons.chevron_right),
               onPressed: _nextError,
             ),
