@@ -343,6 +343,8 @@ class InspectorController extends DisposableController
     await recomputeTreeRoot(null, null, false);
 
     if (isSummaryTree) {
+      // TODO(dantup): This needs to not walk the tree asynchronously, and
+      // may need to consider inspector refs that only occur in the details tree.
       final validInspectorRefs =
           await _collectValidInspectorRefs(inspectorTree.root.diagnostic)
               .toSet();
