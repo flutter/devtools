@@ -207,18 +207,20 @@ class DebuggerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FixedHeightOutlinedButton(
-      autofocus: autofocus,
+    return TooltippedButton(
       tooltip: title,
-      style: OutlinedButton.styleFrom(
-        side: BorderSide.none,
-        shape: const ContinuousRectangleBorder(),
-      ),
-      onPressed: onPressed,
-      child: MaterialIconLabel(
-        icon,
-        title,
-        includeTextWidth: mediumDeviceWidth,
+      child: OutlinedButton(
+        autofocus: autofocus,
+        style: OutlinedButton.styleFrom(
+          side: BorderSide.none,
+          shape: const ContinuousRectangleBorder(),
+        ),
+        onPressed: onPressed,
+        child: MaterialIconLabel(
+          icon,
+          title,
+          includeTextWidth: mediumDeviceWidth,
+        ),
       ),
     );
   }

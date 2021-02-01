@@ -256,7 +256,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       builder: (context, breakpoints, _) {
         return Row(children: [
           BreakpointsCountBadge(breakpoints: breakpoints),
-          ActionButton(
+          TooltippedButton(
             child: ToolbarAction(
               icon: Icons.delete,
               onPressed:

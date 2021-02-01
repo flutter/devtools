@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 
 import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/search.dart';
 import 'cpu_profile_bottom_up.dart';
@@ -188,8 +187,8 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   Widget _expandAllButton(Tab currentTab) {
-    return FixedHeightOutlinedButton(
-      buttonKey: CpuProfiler.expandButtonKey,
+    return OutlinedButton(
+      key: CpuProfiler.expandButtonKey,
       onPressed: () {
         _performOnDataRoots((root) => root.expandCascading(), currentTab);
       },
@@ -198,8 +197,8 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   Widget _collapseAllButton(Tab currentTab) {
-    return FixedHeightOutlinedButton(
-      buttonKey: CpuProfiler.collapseButtonKey,
+    return OutlinedButton(
+      key: CpuProfiler.collapseButtonKey,
       onPressed: () {
         _performOnDataRoots((root) => root.collapseCascading(), currentTab);
       },

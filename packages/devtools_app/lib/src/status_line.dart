@@ -211,7 +211,7 @@ class StatusLine extends StatelessWidget {
                 },
               ),
               const SizedBox(width: denseSpacing),
-              ActionButton(
+              TooltippedButton(
                 tooltip: 'Device Info',
                 child: InkWell(
                   onTap: () async {

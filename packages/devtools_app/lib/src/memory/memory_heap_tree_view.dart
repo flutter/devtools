@@ -461,13 +461,15 @@ class HeapTreeViewState extends State<HeapTree>
   Widget _buildSnapshotControls(TextTheme textTheme) {
     return Row(
       children: [
-        FixedHeightOutlinedButton(
-          buttonKey: snapshotButtonKey,
+        TooltippedButton(
           tooltip: 'Take a memory profile snapshot',
-          onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
-          child: const MaterialIconLabel(
-            Icons.camera,
-            'Take Heap Snapshot',
+          child: OutlinedButton(
+            key: snapshotButtonKey,
+            onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
+            child: const MaterialIconLabel(
+              Icons.camera,
+              'Take Heap Snapshot',
+            ),
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -475,71 +477,79 @@ class HeapTreeViewState extends State<HeapTree>
         const SizedBox(width: defaultSpacing),
         // TODO(terry): Mechanism to handle expand/collapse on both tables
         // objects/fields. Maybe notion in table?
-        FixedHeightOutlinedButton(
-          buttonKey: collapseAllButtonKey,
+        TooltippedButton(
           tooltip: 'Collapse All',
-          onPressed: snapshotDisplay is MemoryHeapTable
-              ? () {
-                  MemoryScreen.gaAction(key: collapseAllButtonKey);
-                  if (snapshotDisplay is MemoryHeapTable) {
-                    controller.groupByTreeTable.dataRoots.every((element) {
-                      element.collapseCascading();
-                      return true;
-                    });
-                    if (controller.instanceFieldsTreeTable != null) {
-                      // We're collapsing close the fields table.
-                      controller.selectedLeaf = null;
+          child: OutlinedButton(
+            key: collapseAllButtonKey,
+            onPressed: snapshotDisplay is MemoryHeapTable
+                ? () {
+                    MemoryScreen.gaAction(key: collapseAllButtonKey);
+                    if (snapshotDisplay is MemoryHeapTable) {
+                      controller.groupByTreeTable.dataRoots.every((element) {
+                        element.collapseCascading();
+                        return true;
+                      });
+                      if (controller.instanceFieldsTreeTable != null) {
+                        // We're collapsing close the fields table.
+                        controller.selectedLeaf = null;
+                      }
+                      // All nodes collapsed - signal tree state changed.
+                      controller.treeChanged();
                     }
-                    // All nodes collapsed - signal tree state changed.
-                    controller.treeChanged();
                   }
-                }
-              : null,
-          child: createIcon(Icons.vertical_align_top),
-        ),
-        FixedHeightOutlinedButton(
-          buttonKey: expandAllButtonKey,
-          tooltip: 'Expand All',
-          onPressed: snapshotDisplay is MemoryHeapTable
-              ? () {
-                  MemoryScreen.gaAction(key: expandAllButtonKey);
-                  if (snapshotDisplay is MemoryHeapTable) {
-                    controller.groupByTreeTable.dataRoots.every((element) {
-                      element.expandCascading();
-                      return true;
-                    });
-                  }
-                  // All nodes expanded - signal tree state  changed.
-                  controller.treeChanged();
-                }
-              : null,
-          child: createIcon(Icons.vertical_align_bottom),
-        ),
-        const SizedBox(width: defaultSpacing),
-        FixedHeightOutlinedButton(
-          buttonKey: allocationMonitorKey,
-          tooltip: 'Monitor Allocations',
-          onPressed: () async {
-            MemoryScreen.gaAction(key: allocationMonitorKey);
-            await _allocationStart();
-          },
-          child: createImageIcon(
-            // TODO(terry): Could we use a canned material icon check w/ Youyang?
-            'icons/memory/communities_white@2x.png',
-            size: defaultIconThemeSize,
+                : null,
+            child: createIcon(Icons.vertical_align_top),
           ),
         ),
-        FixedHeightOutlinedButton(
-          buttonKey: allocationMonitorResetKey,
+        TooltippedButton(
+          tooltip: 'Expand All',
+          child: OutlinedButton(
+            key: expandAllButtonKey,
+            onPressed: snapshotDisplay is MemoryHeapTable
+                ? () {
+                    MemoryScreen.gaAction(key: expandAllButtonKey);
+                    if (snapshotDisplay is MemoryHeapTable) {
+                      controller.groupByTreeTable.dataRoots.every((element) {
+                        element.expandCascading();
+                        return true;
+                      });
+                    }
+                    // All nodes expanded - signal tree state  changed.
+                    controller.treeChanged();
+                  }
+                : null,
+            child: createIcon(Icons.vertical_align_bottom),
+          ),
+        ),
+        const SizedBox(width: defaultSpacing),
+        TooltippedButton(
+          tooltip: 'Monitor Allocations',
+          child: OutlinedButton(
+            key: allocationMonitorKey,
+            onPressed: () async {
+              MemoryScreen.gaAction(key: allocationMonitorKey);
+              await _allocationStart();
+            },
+            child: createImageIcon(
+              // TODO(terry): Could we use a canned material icon check w/ Youyang?
+              'icons/memory/communities_white@2x.png',
+              size: defaultIconThemeSize,
+            ),
+          ),
+        ),
+        TooltippedButton(
           tooltip: 'Reset Accumulators',
-          onPressed: () async {
-            MemoryScreen.gaAction(key: allocationMonitorResetKey);
-            await _allocationReset();
-          },
-          child: createImageIcon(
-            // TODO(terry): Could we use a canned material icon check w/ Youyang?
-            'icons/memory/reset_icon_white@2x.png',
-            size: defaultIconThemeSize,
+          child: OutlinedButton(
+            key: allocationMonitorResetKey,
+            onPressed: () async {
+              MemoryScreen.gaAction(key: allocationMonitorResetKey);
+              await _allocationReset();
+            },
+            child: createImageIcon(
+              // TODO(terry): Could we use a canned material icon check w/ Youyang?
+              'icons/memory/reset_icon_white@2x.png',
+              size: defaultIconThemeSize,
+            ),
           ),
         ),
       ],
