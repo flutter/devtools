@@ -19,6 +19,7 @@ import '../ui/colors.dart';
 import '../ui/theme.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
+import 'inspector_service.dart';
 import 'inspector_tree.dart';
 
 /// Presents a [TreeNode].
@@ -181,7 +182,8 @@ class InspectorTree extends StatefulWidget {
 
   final InspectorTreeController controller;
   final bool isSummaryTree;
-  final LinkedHashMap<String, InspectableWidgetError> widgetErrors;
+  final LinkedHashMap<InspectorInstanceRef, InspectableWidgetError>
+      widgetErrors;
 
   @override
   State<InspectorTree> createState() => _InspectorTreeState();
@@ -424,7 +426,7 @@ class _InspectorTreeState extends State<InspectorTree>
                     (context, index) {
                       final InspectorTreeRow row =
                           controller.root?.getRow(index);
-                      final inspectorRef = row.node.diagnostic?.valueRef?.id;
+                      final inspectorRef = row.node.diagnostic?.valueRef;
                       return _InspectorTreeRowWidget(
                         key: PageStorageKey(row?.node),
                         inspectorTreeState: this,

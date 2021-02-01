@@ -930,10 +930,10 @@ class InspectorController extends DisposableController
     );
   }
 
-  Stream<String> _collectValidInspectorRefs(
+  Stream<InspectorInstanceRef> _collectValidInspectorRefs(
       RemoteDiagnosticsNode diagnostic) async* {
-    if (diagnostic.valueRef?.id != null) {
-      yield diagnostic.valueRef?.id;
+    if (diagnostic.valueRef != null) {
+      yield diagnostic.valueRef;
     }
     final children = await diagnostic?.children;
     if (children != null) {

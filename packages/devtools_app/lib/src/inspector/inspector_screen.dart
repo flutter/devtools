@@ -159,9 +159,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     );
   }
 
-  ValueListenableBuilder<LinkedHashMap<String, DevToolsError>>
+  ValueListenableBuilder<LinkedHashMap<InspectorInstanceRef, DevToolsError>>
       _buildSummaryTreeColumn() {
-    return ValueListenableBuilder<LinkedHashMap<String, DevToolsError>>(
+    return ValueListenableBuilder<
+            LinkedHashMap<InspectorInstanceRef, DevToolsError>>(
         valueListenable: serviceManager.errorBadgeManager
             .erroredWidgetNotifier(InspectorScreen.id),
         builder: (context, _errors, _) {
