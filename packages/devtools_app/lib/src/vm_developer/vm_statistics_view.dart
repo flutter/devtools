@@ -19,7 +19,7 @@ class VMStatisticsView extends VMDeveloperView {
       : super(
           id,
           title: 'VM',
-          icon: Icons.devices_sharp,
+          icon: Icons.devices,
         );
   static const id = 'vm-statistics';
 

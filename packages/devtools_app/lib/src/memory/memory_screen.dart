@@ -779,9 +779,10 @@ class MemoryBodyState extends State<MemoryBody>
             primary: false,
             children: [
               listItem(
-                  events: chartsValues.extensionEvents,
-                  title: entry.key,
-                  icon: Icons.dashboard_rounded),
+                events: chartsValues.extensionEvents,
+                title: entry.key,
+                icon: Icons.dashboard,
+              ),
             ],
           ),
         ));
