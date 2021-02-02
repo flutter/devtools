@@ -74,3 +74,38 @@ class _NotifierCheckboxState extends State<NotifierCheckbox>
     );
   }
 }
+
+/// Returns a [TextSpan] that only includes the first [length] characters of
+/// [span].
+TextSpan truncateTextSpan(TextSpan span, int length) {
+  int available = length;
+  TextSpan truncateHelper(TextSpan span) {
+    var text = span.text;
+    List<TextSpan> children;
+    if (text != null) {
+      if (text.length > available) {
+        text = text.substring(0, available);
+      }
+      available -= text.length;
+    }
+    if (span.children != null) {
+      children = <TextSpan>[];
+      for (var child in span.children) {
+        if (available <= 0) break;
+        children.add(truncateHelper(child));
+      }
+      if (children.isEmpty) {
+        children = null;
+      }
+    }
+    return TextSpan(
+      text: text,
+      children: children,
+      style: span.style,
+      recognizer: span.recognizer,
+      semanticsLabel: span.semanticsLabel,
+    );
+  }
+
+  return truncateHelper(span);
+}

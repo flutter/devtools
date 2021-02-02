@@ -78,4 +78,119 @@ void main() {
       expect(findCheckboxValue(), isTrue);
     });
   });
+
+  group('truncateTextSpan', () {
+    testWidgets('simple', (WidgetTester tester) async {
+      const span = TextSpan(text: 'abcdefghijklmn');
+      expect(
+        truncateTextSpan(span, 0).toStringDeep(),
+        equalsIgnoringHashCodes(
+          'TextSpan:\n'
+          '  ""\n',
+        ),
+      );
+      expect(
+        truncateTextSpan(span, 3).toStringDeep(),
+        equalsIgnoringHashCodes(
+          'TextSpan:\n'
+          '  "abc"\n',
+        ),
+      );
+      expect(
+        truncateTextSpan(span, 4000).toStringDeep(),
+        equalsIgnoringHashCodes(
+          'TextSpan:\n'
+          '  "abcdefghijklmn"\n',
+        ),
+      );
+    });
+
+    testWidgets('children', (WidgetTester tester) async {
+      const span = TextSpan(
+        text: 'parent',
+        children: [
+          TextSpan(text: 'foo'),
+          TextSpan(text: 'bar'),
+          TextSpan(text: 'baz'),
+        ],
+      );
+      expect(
+        truncateTextSpan(span, 0).toStringDeep(),
+        equalsIgnoringHashCodes(
+          'TextSpan:\n'
+          '  ""\n',
+        ),
+      );
+      expect(
+        truncateTextSpan(span, 3).toStringDeep(),
+        equalsIgnoringHashCodes(
+          'TextSpan:\n'
+          '  "par"\n',
+        ),
+      );
+      expect(
+        truncateTextSpan(span, 6).toStringDeep(),
+        equalsIgnoringHashCodes(
+          'TextSpan:\n'
+          '  "parent"\n',
+        ),
+      );
+      expect(
+        truncateTextSpan(span, 7).toStringDeep(),
+        equalsIgnoringHashCodes(
+          'TextSpan:\n'
+          '  "parent"\n'
+          '  TextSpan:\n'
+          '    "f"\n',
+        ),
+      );
+
+      expect(
+        truncateTextSpan(span, 4000).toStringDeep(),
+        equalsIgnoringHashCodes(
+          'TextSpan:\n'
+          '  "parent"\n'
+          '  TextSpan:\n'
+          '    "foo"\n'
+          '  TextSpan:\n'
+          '    "bar"\n'
+          '  TextSpan:\n'
+          '    "baz"\n',
+        ),
+      );
+    });
+
+    testWidgets('retainProperties', (WidgetTester tester) async {
+      const span = TextSpan(
+        text: 'parent',
+        style: TextStyle(color: Colors.red),
+        children: [
+          TextSpan(text: 'foo', style: TextStyle(color: Colors.blue)),
+          TextSpan(text: 'bar', style: TextStyle(color: Colors.green)),
+          TextSpan(text: 'baz', style: TextStyle(color: Colors.yellow)),
+        ],
+      );
+      expect(
+        truncateTextSpan(span, 13).toStringDeep(),
+        equalsIgnoringHashCodes(
+          'TextSpan:\n'
+          '  inherit: true\n'
+          '  color: MaterialColor(primary value: Color(0xfff44336))\n'
+          '  "parent"\n'
+          '  TextSpan:\n'
+          '    inherit: true\n'
+          '    color: MaterialColor(primary value: Color(0xff2196f3))\n'
+          '    "foo"\n'
+          '  TextSpan:\n'
+          '    inherit: true\n'
+          '    color: MaterialColor(primary value: Color(0xff4caf50))\n'
+          '    "bar"\n'
+          '  TextSpan:\n'
+          '    inherit: true\n'
+          '    color: MaterialColor(primary value: Color(0xffffeb3b))\n'
+          '    "b"\n',
+        ),
+      );
+    });
+  });
 }
