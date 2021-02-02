@@ -107,8 +107,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField> {
 
       // Display the response to the user.
       if (response is InstanceRef) {
-        final value = await _getBestStringValue(response);
-        _emitToConsole(value);
+        _emitRefToConsole(response);
       } else {
         var value = response.toString();
 
@@ -128,6 +127,10 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField> {
 
   void _emitToConsole(String text) {
     widget.controller.appendStdio('  ${text.replaceAll('\n', '\n  ')}\n');
+  }
+
+  void _emitRefToConsole(InstanceRef ref) {
+    widget.controller.appendInstanceRef(ref);
   }
 
   @override
@@ -170,55 +173,4 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField> {
       );
     });
   }
-
-  Future<String> _getBestStringValue(InstanceRef response) async {
-    // Return the string value iff present and not truncated.
-    // Note: [valueAsStringIsTruncated] is actually a tri-state:
-    // string value is not truncated iff [valueAsStringIsTruncated]
-    // is null or [valueAsStringIsTruncated] is false.
-    if (response.valueAsString != null &&
-        response.valueAsStringIsTruncated != true) {
-      return response.valueAsString;
-    }
-
-    // Call `toString()` on the error object and display that.
-    final dynamic toStringResult =
-        await widget.controller.invokeToString(response);
-
-    if (toStringResult is ErrorRef) {
-      return _valueAsString(response);
-    } else if (toStringResult is InstanceRef) {
-      final str =
-          await _retrieveFullStringValue(widget.controller, toStringResult);
-      return response.kind == 'String' ? "'$str'" : str;
-    } else {
-      return toStringResult.toString();
-    }
-  }
-}
-
-String _valueAsString(InstanceRef ref) {
-  if (ref == null) {
-    return null;
-  }
-
-  if (ref.valueAsString == null) {
-    return ref.valueAsString;
-  }
-
-  if (ref.valueAsStringIsTruncated == true) {
-    return '${ref.valueAsString}...';
-  } else {
-    return ref.valueAsString;
-  }
-}
-
-Future<String> _retrieveFullStringValue(
-  DebuggerController controller,
-  InstanceRef stringRef,
-) {
-  return controller.retrieveFullStringValue(
-    stringRef,
-    onUnavailable: (truncatedValue) => '${stringRef.valueAsString}...',
-  );
 }

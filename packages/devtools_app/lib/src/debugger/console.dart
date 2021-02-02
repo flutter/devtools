@@ -30,7 +30,7 @@ class DebuggerConsole extends StatefulWidget {
 }
 
 class _DebuggerConsoleState extends State<DebuggerConsole> {
-  var _lines = <String>[];
+  var _lines = <ConsoleLine>[];
 
   @override
   void initState() {

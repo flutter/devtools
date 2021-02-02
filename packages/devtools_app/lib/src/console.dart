@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
-import 'debugger/codeview.dart';
+import 'debugger/debugger_controller.dart';
+import 'debugger/variables.dart';
 import 'theme.dart';
 import 'utils.dart';
 
@@ -25,7 +26,7 @@ class Console extends StatelessWidget {
 
   final Widget title;
   final List<Widget> controls;
-  final List<String> lines;
+  final List<ConsoleLine> lines;
 
   @visibleForTesting
   String get textContent => lines.join('\n');
@@ -84,7 +85,7 @@ class _ConsoleOutput extends StatefulWidget {
     this.lines,
   }) : super(key: key);
 
-  final List<String> lines;
+  final List<ConsoleLine> lines;
 
   @override
   _ConsoleOutputState createState() => _ConsoleOutputState();
@@ -114,18 +115,27 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
       child: ListView.builder(
         padding: const EdgeInsets.all(denseSpacing),
         itemCount: widget.lines?.length ?? 0,
-        itemExtent: CodeView.rowHeight,
         controller: _scroll,
         itemBuilder: (context, index) {
-          return RichText(
-            text: TextSpan(
-              children: processAnsiTerminalCodes(
-                widget.lines[index],
-                textStyle,
+          final line = widget.lines[index];
+          if (line is TextConsoleLine) {
+            return SelectableText.rich(
+              TextSpan(
+                // TODO(jacobr): consider caching the processed ansi terminal
+                // codes.
+                children: processAnsiTerminalCodes(
+                  line.text,
+                  textStyle,
+                ),
               ),
-            ),
-            maxLines: 1,
-          );
+            );
+          } else if (line is VariableConsoleLine) {
+            return ExpandableVariable(variable: ValueNotifier(line.variable));
+          } else {
+            assert(false,
+                'ConsoleLine of unsupported type ${line.runtimeType} encountered');
+            return const SizedBox();
+          }
         },
       ),
     );

@@ -13,9 +13,26 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     this.dataRoots,
     this.dataDisplayProvider,
     this.onItemPressed,
+    this.shrinkWrap = false,
   });
 
   final List<T> dataRoots;
+
+  /// Whether the extent of the scroll view in the [scrollDirection] should be
+  /// determined by the contents being viewed.
+  ///
+  /// If the scroll view does not shrink wrap, then the scroll view will expand
+  /// to the maximum allowed size in the [scrollDirection]. If the scroll view
+  /// has unbounded constraints in the [scrollDirection], then [shrinkWrap] must
+  /// be true.
+  ///
+  /// Shrink wrapping the content of the scroll view is significantly more
+  /// expensive than expanding to the maximum allowed size because the content
+  /// can expand and contract during scrolling, which means the size of the
+  /// scroll view needs to be recomputed whenever the scroll position changes.
+  ///
+  /// Defaults to false.
+  final bool shrinkWrap;
 
   final Widget Function(T) dataDisplayProvider;
 
@@ -53,6 +70,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
     return ListView.builder(
       itemCount: items.length,
       itemExtent: defaultListItemHeight,
+      shrinkWrap: widget.shrinkWrap,
+      physics: widget.shrinkWrap ? const ClampingScrollPhysics() : null,
       itemBuilder: (context, index) {
         final item = items[index];
         return TreeViewItem<T>(

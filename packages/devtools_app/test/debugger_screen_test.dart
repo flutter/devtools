@@ -63,7 +63,8 @@ void main() {
           .thenReturn(ValueNotifier(null));
       when(debuggerController.hasTruncatedFrames)
           .thenReturn(ValueNotifier(false));
-      when(debuggerController.stdio).thenReturn(ValueNotifier(['']));
+      when(debuggerController.stdio)
+          .thenReturn(ValueNotifier([ConsoleLine.text('')]));
       when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
       when(debuggerController.exceptionPauseMode)
           .thenReturn(ValueNotifier('Unhandled'));
@@ -76,7 +77,8 @@ void main() {
     });
 
     testWidgets('has Console / stdio area', (WidgetTester tester) async {
-      when(debuggerController.stdio).thenReturn(ValueNotifier(['test stdio']));
+      when(debuggerController.stdio)
+          .thenReturn(ValueNotifier([ConsoleLine.text('test stdio')]));
 
       await pumpDebuggerScreen(tester, debuggerController);
 
@@ -89,7 +91,7 @@ void main() {
     testWidgets('Console area shows processed ansi text',
         (WidgetTester tester) async {
       when(debuggerController.stdio)
-          .thenReturn(ValueNotifier([_ansiCodesOutput()]));
+          .thenReturn(ValueNotifier([ConsoleLine.text(_ansiCodesOutput())]));
 
       await pumpDebuggerScreen(tester, debuggerController);
 
@@ -131,7 +133,7 @@ void main() {
       testWidgets('Tapping the Console Clear button clears stdio.',
           (WidgetTester tester) async {
         when(debuggerController.stdio)
-            .thenReturn(ValueNotifier([_ansiCodesOutput()]));
+            .thenReturn(ValueNotifier([ConsoleLine.text(_ansiCodesOutput())]));
 
         await pumpDebuggerScreen(tester, debuggerController);
 
@@ -145,7 +147,9 @@ void main() {
 
       group('Clipboard', () {
         var _clipboardContents = '';
-        final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
+        final _stdio = ['First line', _ansiCodesOutput(), 'Third line']
+            .map((text) => ConsoleLine.text(text))
+            .toList();
         final _expected = _stdio.join('\n');
 
         setUp(() {
