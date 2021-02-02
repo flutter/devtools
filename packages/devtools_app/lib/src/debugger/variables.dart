@@ -18,6 +18,7 @@ class Variables extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DebuggerController>(context);
+
     return ValueListenableBuilder<List<Variable>>(
       valueListenable: controller.variables,
       builder: (context, variables, _) {
@@ -111,7 +112,7 @@ Widget displayProvider(BuildContext context, Variable variable) {
       TextSpan(
         children: processAnsiTerminalCodes(
           variable.text,
-          theme.regularTextStyle,
+          theme.consoleText,
         ),
       ),
     );
@@ -124,11 +125,11 @@ Widget displayProvider(BuildContext context, Variable variable) {
         text: variable.boundVar.name.isNotEmpty ?? false
             ? '${variable.boundVar.name}: '
             : null,
-        style: theme.regularTextStyle,
+        style: theme.consoleText,
         children: [
           TextSpan(
             text: variable.displayValue,
-            style: theme.subtleTextStyle,
+            style: theme.subtleConsoleText,
           ),
         ],
       ),

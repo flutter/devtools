@@ -984,6 +984,14 @@ extension ThemeDataExtension on ThemeData {
 
   TextStyle get selectedTextStyle =>
       TextStyle(color: textSelectionTheme.selectionColor);
+
+  TextStyle get consoleText {
+    return textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
+  }
+
+  TextStyle get subtleConsoleText {
+    return consoleText.copyWith(color: unselectedWidgetColor);
+  }
 }
 
 /// Gets an alternating color to use for indexed UI elements.

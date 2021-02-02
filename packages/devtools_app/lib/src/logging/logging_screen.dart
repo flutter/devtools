@@ -364,10 +364,7 @@ class _KindColumn extends ColumnData<LogData>
     }
 
     // Use a font color that contrasts with the colored backgrounds.
-    final textStyle = Theme.of(context)
-        .primaryTextTheme
-        .bodyText2
-        .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
+    final textStyle = Theme.of(context).consoleText;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 3.0),

@@ -108,8 +108,6 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textStyle =
-        theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
 
     return Scrollbar(
       child: ListView.builder(
@@ -125,12 +123,14 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
                 // codes.
                 children: processAnsiTerminalCodes(
                   line.text,
-                  textStyle,
+                  theme.consoleText,
                 ),
               ),
             );
           } else if (line is VariableConsoleLine) {
-            return ExpandableVariable(variable: ValueNotifier(line.variable));
+            return ExpandableVariable(
+              variable: ValueNotifier(line.variable),
+            );
           } else {
             assert(false,
                 'ConsoleLine of unsupported type ${line.runtimeType} encountered');

@@ -269,7 +269,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
         children: [
           buildCodeviewTitle(theme),
           DefaultTextStyle(
-            style: theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono'),
+            style: theme.consoleText,
             child: Expanded(
               child: Scrollbar(
                 child: ValueListenableBuilder<StackFrameAndSourcePosition>(

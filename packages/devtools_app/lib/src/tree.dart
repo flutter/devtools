@@ -18,18 +18,10 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
 
   final List<T> dataRoots;
 
-  /// Whether the extent of the scroll view in the [scrollDirection] should be
-  /// determined by the contents being viewed.
+  /// Use [shrinkWrap] iff you need to place a TreeView inside a ListView or
+  /// other container with unconstrained height.
   ///
-  /// If the scroll view does not shrink wrap, then the scroll view will expand
-  /// to the maximum allowed size in the [scrollDirection]. If the scroll view
-  /// has unbounded constraints in the [scrollDirection], then [shrinkWrap] must
-  /// be true.
-  ///
-  /// Shrink wrapping the content of the scroll view is significantly more
-  /// expensive than expanding to the maximum allowed size because the content
-  /// can expand and contract during scrolling, which means the size of the
-  /// scroll view needs to be recomputed whenever the scroll position changes.
+  /// Enabling shrinkWrap impacts performance.
   ///
   /// Defaults to false.
   final bool shrinkWrap;
