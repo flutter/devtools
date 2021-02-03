@@ -611,6 +611,7 @@ class LineItem extends StatelessWidget {
           ),
           SelectableText.rich(
             lineContents,
+            scrollPhysics: const NeverScrollableScrollPhysics(),
             maxLines: 1,
           ),
         ],
@@ -618,6 +619,7 @@ class LineItem extends StatelessWidget {
     } else {
       child = SelectableText.rich(
         lineContents,
+        scrollPhysics: const NeverScrollableScrollPhysics(),
         maxLines: 1,
       );
     }
