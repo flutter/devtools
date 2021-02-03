@@ -11,9 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
-import 'package:path/path.dart' as path;
 
 import 'network_test_data.dart';
 
@@ -122,6 +122,14 @@ extension RichTextChecking on CommonFinders {
   Finder richText(String text) {
     return find.byWidgetPredicate(
         (widget) => widget is RichText && widget.text.toPlainText() == text);
+  }
+}
+
+extension SelectableTextChecking on CommonFinders {
+  Finder selectableText(String text) {
+    return find.byWidgetPredicate((widget) =>
+        widget is SelectableText &&
+        (widget.data == text || widget.textSpan?.toPlainText() == text));
   }
 }
 

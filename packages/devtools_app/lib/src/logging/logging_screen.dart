@@ -13,7 +13,6 @@ import '../analytics/analytics_stub.dart'
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../console.dart';
-import '../debugger/debugger_controller.dart';
 import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -249,10 +248,13 @@ class LogDetails extends StatefulWidget {
 
 class _LogDetailsState extends State<LogDetails>
     with SingleTickerProviderStateMixin {
+  String _lastDetails;
+  ScrollController scrollController;
+
   @override
   void initState() {
     super.initState();
-
+    scrollController = ScrollController();
     _computeLogDetails();
   }
 
@@ -294,8 +296,17 @@ class _LogDetailsState extends State<LogDetails>
   Widget _buildSimpleLog(BuildContext context, LogData log) {
     final disabled = log?.details == null || log.details.isEmpty;
 
+    final details = log?.details;
+    if (details != _lastDetails) {
+      if (scrollController.hasClients) {
+        // Make sure we change the scroll if the log details shown have changed.
+        scrollController.jumpTo(0);
+      }
+      _lastDetails = details;
+    }
+
     return OutlineDecoration(
-      child: Console(
+      child: ConsoleFrame(
         title: areaPaneHeader(
           context,
           title: 'Details',
@@ -307,11 +318,17 @@ class _LogDetailsState extends State<LogDetails>
             ),
           ],
         ),
-        lines: log?.prettyPrinted
-                ?.split('\n')
-                ?.map((text) => ConsoleLine.text(text))
-                ?.toList() ??
-            [],
+        child: Padding(
+          padding: const EdgeInsets.all(denseSpacing),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: SelectableText(
+              log?.prettyPrinted ?? '',
+              textAlign: TextAlign.left,
+              style: Theme.of(context).consoleText,
+            ),
+          ),
+        ),
       ),
     );
   }

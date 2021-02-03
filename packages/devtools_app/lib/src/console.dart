@@ -33,14 +33,36 @@ class Console extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ConsoleFrame(
+      controls: controls,
+      title: title,
+      child: _ConsoleOutput(lines: lines),
+    );
+  }
+}
+
+class ConsoleFrame extends StatelessWidget {
+  const ConsoleFrame({
+    this.controls,
+    @required this.child,
+    this.title,
+  }) : super();
+
+  final Widget title;
+  final Widget child;
+  final List<Widget> controls;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (title != null) title,
         Expanded(
           child: Material(
             child: Stack(
               children: [
-                _ConsoleOutput(lines: lines),
+                child,
                 if (controls != null && controls.isNotEmpty)
                   _ConsoleControls(
                     controls: controls,
