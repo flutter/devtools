@@ -26,7 +26,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   /// Defaults to false.
   final bool shrinkWrap;
 
-  final Widget Function(T) dataDisplayProvider;
+  final Widget Function(T, VoidCallback) dataDisplayProvider;
 
   final void Function(T) onItemPressed;
 
@@ -68,7 +68,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
         final item = items[index];
         return TreeViewItem<T>(
           item,
-          display: widget.dataDisplayProvider(item),
+          buildDisplay: (onPressed) =>
+              widget.dataDisplayProvider(item, onPressed),
           onItemPressed: _onItemPressed,
         );
       },
@@ -95,11 +96,11 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 }
 
 class TreeViewItem<T extends TreeNode<T>> extends StatefulWidget {
-  const TreeViewItem(this.data, {this.display, this.onItemPressed});
+  const TreeViewItem(this.data, {this.buildDisplay, this.onItemPressed});
 
   final T data;
 
-  final Widget display;
+  final Widget Function(VoidCallback onPressed) buildDisplay;
 
   final void Function(T) onItemPressed;
 
@@ -111,25 +112,25 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
     with TickerProviderStateMixin, CollapsibleAnimationMixin {
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: _onPressed,
-      child: Padding(
-        padding: EdgeInsets.only(left: nodeIndent(widget.data)),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            widget.data.isExpandable
-                ? RotationTransition(
+    return Padding(
+      padding: EdgeInsets.only(left: nodeIndent(widget.data)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          widget.data.isExpandable
+              ? InkWell(
+                  onTap: _onPressed,
+                  child: RotationTransition(
                     turns: expandArrowAnimation,
                     child: const Icon(
                       Icons.arrow_drop_down,
                       size: defaultIconSize,
                     ),
-                  )
-                : const SizedBox(width: defaultIconSize),
-            Expanded(child: widget.display),
-          ],
-        ),
+                  ),
+                )
+              : const SizedBox(width: defaultIconSize),
+          Expanded(child: widget.buildDisplay(_onPressed)),
+        ],
       ),
     );
   }

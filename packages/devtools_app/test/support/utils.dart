@@ -123,6 +123,11 @@ extension RichTextChecking on CommonFinders {
     return find.byWidgetPredicate(
         (widget) => widget is RichText && widget.text.toPlainText() == text);
   }
+
+  Finder richTextContaining(String text) {
+    return find.byWidgetPredicate((widget) =>
+        widget is RichText && widget.text.toPlainText().contains(text));
+  }
 }
 
 extension SelectableTextChecking on CommonFinders {
@@ -130,6 +135,13 @@ extension SelectableTextChecking on CommonFinders {
     return find.byWidgetPredicate((widget) =>
         widget is SelectableText &&
         (widget.data == text || widget.textSpan?.toPlainText() == text));
+  }
+
+  Finder selectableTextContaining(String text) {
+    return find.byWidgetPredicate((widget) =>
+        widget is SelectableText &&
+        ((widget.data?.contains(text) ?? false) ||
+            (widget.textSpan?.toPlainText()?.contains(text) ?? false)));
   }
 }
 

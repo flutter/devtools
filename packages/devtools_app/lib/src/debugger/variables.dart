@@ -27,7 +27,8 @@ class Variables extends StatelessWidget {
         // on stepping.
         return TreeView<Variable>(
           dataRoots: variables,
-          dataDisplayProvider: (variable) => displayProvider(context, variable),
+          dataDisplayProvider: (variable, onPressed) =>
+              displayProvider(context, variable, onPressed),
           onItemPressed: (variable) => onItemPressed(variable, controller),
         );
       },
@@ -55,7 +56,8 @@ class VariablesList extends StatelessWidget {
     // on stepping.
     return TreeView<Variable>(
       dataRoots: lines,
-      dataDisplayProvider: (variable) => displayProvider(context, variable),
+      dataDisplayProvider: (variable, onPressed) =>
+          displayProvider(context, variable, onPressed),
       onItemPressed: (variable) => onItemPressed(variable, controller),
     );
   }
@@ -85,7 +87,8 @@ class ExpandableVariable extends StatelessWidget {
         return TreeView<Variable>(
           dataRoots: [variable],
           shrinkWrap: true,
-          dataDisplayProvider: (variable) => displayProvider(context, variable),
+          dataDisplayProvider: (variable, onPressed) =>
+              displayProvider(context, variable, onPressed),
           onItemPressed: (variable) => onItemPressed(variable, controller),
         );
       },
@@ -100,7 +103,11 @@ class ExpandableVariable extends StatelessWidget {
   }
 }
 
-Widget displayProvider(BuildContext context, Variable variable) {
+Widget displayProvider(
+  BuildContext context,
+  Variable variable,
+  VoidCallback onTap,
+) {
   final theme = Theme.of(context);
 
   // TODO(devoncarew): Here, we want to wait until the tooltip wants to show,
@@ -115,6 +122,7 @@ Widget displayProvider(BuildContext context, Variable variable) {
           theme.consoleText,
         ),
       ),
+      onTap: onTap,
     );
   }
   return Tooltip(
@@ -133,6 +141,7 @@ Widget displayProvider(BuildContext context, Variable variable) {
           ),
         ],
       ),
+      onTap: onTap,
       maxLines: 1,
     ),
   );

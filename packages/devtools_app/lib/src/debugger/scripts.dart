@@ -114,7 +114,8 @@ class ScriptPickerState extends State<ScriptPicker> {
             Expanded(
               child: TreeView<FileNode>(
                 dataRoots: _rootScriptNodes,
-                dataDisplayProvider: (item) => _displayProvider(context, item),
+                dataDisplayProvider: (item, onTap) =>
+                    _displayProvider(context, item, onTap),
               ),
             ),
         ],
@@ -122,7 +123,11 @@ class ScriptPickerState extends State<ScriptPicker> {
     );
   }
 
-  Widget _displayProvider(BuildContext context, FileNode node) {
+  Widget _displayProvider(
+    BuildContext context,
+    FileNode node,
+    VoidCallback onTap,
+  ) {
     return Tooltip(
       waitDuration: tooltipWait,
       preferBelow: false,
@@ -133,6 +138,7 @@ class ScriptPickerState extends State<ScriptPicker> {
             if (node.hasScript) {
               _handleSelected(node.scriptRef);
             }
+            onTap();
           },
           child: Row(
             children: [

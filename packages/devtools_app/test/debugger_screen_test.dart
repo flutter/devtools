@@ -85,7 +85,7 @@ void main() {
       expect(find.text('Console'), findsOneWidget);
 
       // test for stdio output.
-      expect(find.richText('test stdio'), findsOneWidget);
+      expect(find.selectableText('test stdio'), findsOneWidget);
     });
 
     testWidgets('Console area shows processed ansi text',
@@ -95,11 +95,12 @@ void main() {
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final finder = find.richText('Ansi color codes processed for console');
+      final finder =
+          find.selectableText('Ansi color codes processed for console');
       expect(finder, findsOneWidget);
       finder.evaluate().forEach((element) {
-        final richText = element.widget as RichText;
-        final textSpan = richText.text as TextSpan;
+        final selectableText = element.widget as SelectableText;
+        final textSpan = selectableText.textSpan;
         final secondSpan = textSpan.children[1] as TextSpan;
         expect(
           secondSpan.text,
@@ -416,15 +417,7 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Variables'), findsOneWidget);
 
-      final listFinder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText &&
-          widget.text
-              .toPlainText()
-              .contains('Root 1: _GrowableList (2 items)'));
-      final listChild1Finder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText && widget.text.toPlainText().contains('0: 3'));
-      final listChild2Finder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText && widget.text.toPlainText().contains('1: 4'));
+      final listFinder = find.selectableText('Root 1: _GrowableList (2 items)');
 
       // expect a tooltip for the list value
       expect(
@@ -432,40 +425,29 @@ void main() {
         findsOneWidget,
       );
 
-      final mapFinder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText &&
-          widget.text
-              .toPlainText()
-              .contains('Root 2: _InternalLinkedHashmap (2 items)'));
-      final mapElement1Finder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText &&
-          widget.text.toPlainText().contains("['key1']: 1.0"));
-      final mapElement2Finder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText &&
-          widget.text.toPlainText().contains("['key2']: 1.1"));
+      final mapFinder = find
+          .selectableTextContaining('Root 2: _InternalLinkedHashmap (2 items)');
+      final mapElement1Finder = find.selectableTextContaining("['key1']: 1.0");
+      final mapElement2Finder = find.selectableTextContaining("['key2']: 1.1");
 
       expect(listFinder, findsOneWidget);
       expect(mapFinder, findsOneWidget);
       expect(
-        find.byWidgetPredicate((Widget widget) =>
-            widget is RichText &&
-            widget.text.toPlainText().contains("Root 3: 'test str...'")),
+        find.selectableTextContaining("Root 3: 'test str...'"),
         findsOneWidget,
       );
       expect(
-        find.byWidgetPredicate((Widget widget) =>
-            widget is RichText &&
-            widget.text.toPlainText().contains('Root 4: true')),
+        find.selectableTextContaining('Root 4: true'),
         findsOneWidget,
       );
 
       // Expand list.
-      expect(listChild1Finder, findsNothing);
-      expect(listChild2Finder, findsNothing);
+      expect(find.selectableTextContaining('0: 3'), findsNothing);
+      expect(find.selectableTextContaining('1: 4'), findsNothing);
       await tester.tap(listFinder);
       await tester.pumpAndSettle();
-      expect(listChild1Finder, findsOneWidget);
-      expect(listChild2Finder, findsOneWidget);
+      expect(find.selectableTextContaining('0: 3'), findsOneWidget);
+      expect(find.selectableTextContaining('1: 4'), findsOneWidget);
 
       // Expand map.
       expect(mapElement1Finder, findsNothing);
