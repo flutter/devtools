@@ -8,7 +8,6 @@ import 'dart:ui';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/common_widgets.dart';
-import 'package:devtools_app/src/console.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/logging/logging_screen.dart';
@@ -147,10 +146,15 @@ void main() {
         await tester.tap(find.byKey(ValueKey(fakeLogData[6])));
         await tester.pumpAndSettle();
         expect(
-          find.richText('log event 6'),
-          findsNWidgets(2),
-          reason: 'The log details should be visible both in the table and the '
-              'details section.',
+          find.selectableText('log event 6'),
+          findsOneWidget,
+          reason:
+              'The log details should be visible both in the details section.',
+        );
+        expect(
+          find.selectableText('log event 6'),
+          findsOneWidget,
+          reason: 'The log details should be visible both in the table.',
         );
       });
 
@@ -225,7 +229,7 @@ void main() {
         await tester.tap(find.byKey(ValueKey(log)));
         await tester.pump();
         expect(
-          find.richText(nonJsonOutput),
+          find.selectableText(nonJsonOutput),
           findsNothing,
           reason:
               "The details of the log haven't computed yet, so they shouldn't "
@@ -233,15 +237,15 @@ void main() {
         );
 
         await tester.pumpAndSettle();
-        expect(find.richText(nonJsonOutput), findsOneWidget);
+        expect(find.selectableText(nonJsonOutput), findsOneWidget);
       });
 
       testWidgetsWithWindowSize('can show details of json log data', windowSize,
           (WidgetTester tester) async {
         const index = 9;
         bool containsJson(Widget widget) {
-          if (widget is! Console) return false;
-          final content = (widget as Console).textContent.trim();
+          if (widget is! SelectableText) return false;
+          final content = (widget as SelectableText).data.trim();
           return content.startsWith('{') && content.endsWith('}');
         }
 
@@ -273,11 +277,21 @@ void main() {
         await tester.tap(find.byKey(ValueKey(fakeLogData[5])));
         await tester.pumpAndSettle();
 
-        final finder = find.richText('Ansi color codes processed for log 5');
+        // Entry in tree.
+        expect(
+          find.richText('Ansi color codes processed for log 5'),
+          findsOneWidget,
+          reason: 'Processed text without ansi codes should exist in logs and '
+              'details sections.',
+        );
+
+        // Entry in details panel.
+        final finder =
+            find.selectableText('Ansi color codes processed for log 5');
 
         expect(
-          finder,
-          findsNWidgets(2),
+          find.richText('Ansi color codes processed for log 5'),
+          findsOneWidget,
           reason: 'Processed text without ansi codes should exist in logs and '
               'details sections.',
         );

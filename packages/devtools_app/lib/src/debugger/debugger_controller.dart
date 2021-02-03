@@ -25,6 +25,37 @@ import 'debugger_model.dart';
 // Make sure this a checked in with `mute: true`.
 final _log = DebugTimingLogger('debugger', mute: true);
 
+/// A line in the console.
+///
+/// TODO(jacobr): support console lines that are structured error messages as
+/// well.
+class ConsoleLine {
+  factory ConsoleLine.text(String text) => TextConsoleLine(text);
+  factory ConsoleLine.variable(Variable variable) =>
+      VariableConsoleLine(variable);
+  ConsoleLine._();
+}
+
+class TextConsoleLine extends ConsoleLine {
+  TextConsoleLine(this.text) : super._();
+  final String text;
+
+  @override
+  String toString() {
+    return text;
+  }
+}
+
+class VariableConsoleLine extends ConsoleLine {
+  VariableConsoleLine(this.variable) : super._();
+  final Variable variable;
+
+  @override
+  String toString() {
+    return variable.toString();
+  }
+}
+
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
@@ -154,13 +185,13 @@ class DebuggerController extends DisposableController
     _librariesVisible.value = !_librariesVisible.value;
   }
 
-  final _stdio = ValueNotifier<List<String>>([]);
+  final _stdio = ValueNotifier<List<ConsoleLine>>([]);
   bool _stdioTrailingNewline = false;
 
   /// Return the stdout and stderr emitted from the application.
   ///
   /// Note that this output might be truncated after significant output.
-  ValueListenable<List<String>> get stdio => _stdio;
+  ValueListenable<List<ConsoleLine>> get stdio => _stdio;
 
   IsolateRef isolateRef;
 
@@ -169,28 +200,41 @@ class DebuggerController extends DisposableController
     _stdio.value = [];
   }
 
+  void appendInstanceRef(InstanceRef ref) {
+    _stdioTrailingNewline = false;
+    // TODO(jacobr): this is O(n) in the number of lines. Use a custom ValueListenable that notiifies on list appends instead.
+    final lines = _stdio.value.toList();
+    final variable = Variable.fromRef(ref);
+    buildVariablesTree(variable);
+    lines.add(ConsoleLine.variable(variable));
+    _stdio.value = lines;
+  }
+
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {
     const int kMaxLogItemsLowerBound = 5000;
     const int kMaxLogItemsUpperBound = 5500;
 
     // Parse out the new lines and append to the end of the existing lines.
+
+    // TODO(jacobr): this is O(n) in the number of lines. Use a custom ValueListenable that notiifies on list appends instead.
     var lines = _stdio.value.toList();
     final newLines = text.split('\n');
 
-    if (lines.isNotEmpty && !_stdioTrailingNewline) {
-      lines[lines.length - 1] = '${lines[lines.length - 1]}${newLines.first}';
+    final last = lines.safeLast;
+    if (lines.isNotEmpty && !_stdioTrailingNewline && last is TextConsoleLine) {
+      lines.last = ConsoleLine.text('${last.text}${newLines.first}');
       if (newLines.length > 1) {
-        lines.addAll(newLines.sublist(1));
+        lines.addAll(newLines.sublist(1).map((text) => ConsoleLine.text(text)));
       }
     } else {
-      lines.addAll(newLines);
+      lines.addAll(newLines.map((text) => ConsoleLine.text(text)));
     }
 
     _stdioTrailingNewline = text.endsWith('\n');
 
     // Don't report trailing blank lines.
-    if (lines.isNotEmpty && lines.last.isEmpty) {
+    if (lines.isNotEmpty && (last is TextConsoleLine && last.text.isEmpty)) {
       lines = lines.sublist(0, lines.length - 1);
     }
 

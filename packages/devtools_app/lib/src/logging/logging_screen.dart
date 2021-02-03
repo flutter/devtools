@@ -248,10 +248,13 @@ class LogDetails extends StatefulWidget {
 
 class _LogDetailsState extends State<LogDetails>
     with SingleTickerProviderStateMixin {
+  String _lastDetails;
+  ScrollController scrollController;
+
   @override
   void initState() {
     super.initState();
-
+    scrollController = ScrollController();
     _computeLogDetails();
   }
 
@@ -293,8 +296,17 @@ class _LogDetailsState extends State<LogDetails>
   Widget _buildSimpleLog(BuildContext context, LogData log) {
     final disabled = log?.details == null || log.details.isEmpty;
 
+    final details = log?.details;
+    if (details != _lastDetails) {
+      if (scrollController.hasClients) {
+        // Make sure we change the scroll if the log details shown have changed.
+        scrollController.jumpTo(0);
+      }
+      _lastDetails = details;
+    }
+
     return OutlineDecoration(
-      child: Console(
+      child: ConsoleFrame(
         title: areaPaneHeader(
           context,
           title: 'Details',
@@ -306,7 +318,17 @@ class _LogDetailsState extends State<LogDetails>
             ),
           ],
         ),
-        lines: log?.prettyPrinted?.split('\n') ?? [],
+        child: Padding(
+          padding: const EdgeInsets.all(denseSpacing),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: SelectableText(
+              log?.prettyPrinted ?? '',
+              textAlign: TextAlign.left,
+              style: Theme.of(context).consoleText,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -364,10 +386,7 @@ class _KindColumn extends ColumnData<LogData>
     }
 
     // Use a font color that contrasts with the colored backgrounds.
-    final textStyle = Theme.of(context)
-        .primaryTextTheme
-        .bodyText2
-        .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
+    final textStyle = Theme.of(context).consoleText;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 3.0),
