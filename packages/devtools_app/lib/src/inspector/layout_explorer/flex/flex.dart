@@ -162,27 +162,32 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
           for (var renderProperties in [...mainAxisSpaces, ...crossAxisSpaces])
             FreeSpaceVisualizerWidget(renderProperties),
         ];
-        return SingleChildScrollView(
-          scrollDirection: properties.direction,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minWidth: maxWidth,
-              minHeight: maxHeight,
-              maxWidth: direction == Axis.horizontal
-                  ? sum(childrenAndMainAxisSpacesRenderProps
-                      .map((renderSize) => renderSize.width))
-                  : maxWidth,
-              maxHeight: direction == Axis.vertical
-                  ? sum(childrenAndMainAxisSpacesRenderProps
-                      .map((renderSize) => renderSize.height))
-                  : maxHeight,
-            ).normalize(),
-            child: Stack(
-              children: [
-                LayoutExplorerBackground(colorScheme: colorScheme),
-                ...freeSpacesWidgets,
-                ...childrenRenderWidgets,
-              ],
+        // TODO(https://github.com/flutter/flutter/issues/75352): horizontal
+        // scrollbar is not draggable nor visible on first frame.
+        return Scrollbar(
+          isAlwaysShown: true,
+          child: SingleChildScrollView(
+            scrollDirection: properties.direction,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: maxWidth,
+                minHeight: maxHeight,
+                maxWidth: direction == Axis.horizontal
+                    ? sum(childrenAndMainAxisSpacesRenderProps
+                        .map((renderSize) => renderSize.width))
+                    : maxWidth,
+                maxHeight: direction == Axis.vertical
+                    ? sum(childrenAndMainAxisSpacesRenderProps
+                        .map((renderSize) => renderSize.height))
+                    : maxHeight,
+              ).normalize(),
+              child: Stack(
+                children: [
+                  LayoutExplorerBackground(colorScheme: colorScheme),
+                  ...freeSpacesWidgets,
+                  ...childrenRenderWidgets,
+                ],
+              ),
             ),
           ),
         );

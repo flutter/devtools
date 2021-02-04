@@ -397,12 +397,20 @@ class _InspectorTreeState extends State<InspectorTree>
     }
 
     return Scrollbar(
+      isAlwaysShown: true,
+      controller: _scrollControllerX,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         controller: _scrollControllerX,
         child: SizedBox(
           width: controller.rowWidth + controller.maxRowIndent,
+          // TODO(kenz): this scrollbar needs to be sticky to the right side of
+          // the visible container - right now it is lined up to the right of
+          // the widest row (which is likely not visible). This may require some
+          // refactoring.
           child: Scrollbar(
+            isAlwaysShown: true,
+            controller: _scrollControllerY,
             child: GestureDetector(
               onTap: _focusNode.requestFocus,
               child: Focus(
