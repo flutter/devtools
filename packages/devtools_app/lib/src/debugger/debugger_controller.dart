@@ -271,7 +271,6 @@ class DebuggerController extends DisposableController
     if (isolate.pauseEvent != null &&
         isolate.pauseEvent.kind != EventKind.kResume) {
       _lastEvent = isolate.pauseEvent;
-      print('pausing from switchToIsolate');
       await _pause(true, pauseEvent: isolate.pauseEvent);
     }
 
@@ -439,7 +438,6 @@ class DebuggerController extends DisposableController
         // Any event we receive here indicates that any resume/step request has been
         // processed.
         _resuming.value = false;
-        print('pausing from kPause debug event');
         _pause(true, pauseEvent: event);
         break;
       // TODO(djshuckerow): switch the _breakpoints notifier to a 'ListNotifier'
