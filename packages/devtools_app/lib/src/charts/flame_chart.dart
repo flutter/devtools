@@ -248,19 +248,25 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       child: RawKeyboardListener(
         focusNode: focusNode,
         onKey: (event) => _handleKeyEvent(event),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final customPaints = buildCustomPaints(constraints, context);
-            final flameChart = _buildFlameChart(constraints);
-            return customPaints.isNotEmpty
-                ? Stack(
-                    children: [
-                      flameChart,
-                      ...customPaints,
-                    ],
-                  )
-                : flameChart;
-          },
+        // Scrollbar needs to wrap [LayoutBuilder] so that the scroll bar is
+        // rendered on top of the custom painters defined in [buildCustomPaints]
+        child: Scrollbar(
+          controller: verticalController,
+          isAlwaysShown: true,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final customPaints = buildCustomPaints(constraints, context);
+              final flameChart = _buildFlameChart(constraints);
+              return customPaints.isNotEmpty
+                  ? Stack(
+                      children: [
+                        flameChart,
+                        ...customPaints,
+                      ],
+                    )
+                  : flameChart;
+            },
+          ),
         ),
       ),
     );
