@@ -622,26 +622,45 @@ class InspectorRowContent extends StatelessWidget {
         : Stack(
             children: [
               rowWidget,
-              Tooltip(
-                message: errorText,
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: currentX - rowHeight * 2,
-                    top: (rowHeight - defaultIconSize) / 2,
-                  ),
-                  child: SizedBox(
-                    width: defaultIconSize,
-                    height: defaultIconSize,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: devtoolsError,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ),
+              ErrorIndicator(
+                errorText: errorText,
+                indent: currentX - rowHeight * 2,
               ),
             ],
           );
+  }
+}
+
+class ErrorIndicator extends StatelessWidget {
+  const ErrorIndicator({
+    Key key,
+    @required this.errorText,
+    @required this.indent,
+  }) : super(key: key);
+
+  final String errorText;
+  final double indent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: errorText,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: indent,
+          top: (rowHeight - defaultIconSize) / 2,
+        ),
+        child: SizedBox(
+          width: defaultIconSize,
+          height: defaultIconSize,
+          child: Container(
+            decoration: const BoxDecoration(
+              color: devtoolsError,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

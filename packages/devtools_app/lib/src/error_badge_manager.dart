@@ -104,17 +104,25 @@ class ErrorBadgeManager extends DisposableController
   }
 
   void appendError(String screenId, DevToolsError error) {
-    final currentErrors = _activeErrors[screenId];
-    if (currentErrors == null) return;
+    final errors = _activeErrors[screenId];
+    if (errors == null) return;
 
     // Build a new map with the new error. Adding to the existing map
     // won't cause the ValueNotifier to fire (and it's not permitted to call
     // notifyListeners() directly).
-    final newValue = LinkedHashMap<InspectorInstanceRef, DevToolsError>.from(
-        currentErrors.value);
+    final newValue =
+        LinkedHashMap<InspectorInstanceRef, DevToolsError>.from(errors.value);
     newValue[InspectorInstanceRef(error.id)] = error;
-    currentErrors.value = newValue;
-    _errorCountNotifier(screenId).value = currentErrors.value.length;
+    errors.value = newValue;
+    _updateErrorCount(screenId);
+  }
+
+  /// Update the error count to include only "unread" errors.
+  void _updateErrorCount(String screenId) {
+    final errors = _activeErrors[screenId]?.value ??
+        const <InspectorInstanceRef, DevToolsError>{};
+    _errorCountNotifier(screenId).value =
+        errors.values.where((err) => !err.read).length;
   }
 
   ValueListenable<int> errorCountNotifier(String screenId) {
@@ -139,23 +147,44 @@ class ErrorBadgeManager extends DisposableController
 
   void filterErrors(
       String screenId, bool Function(InspectorInstanceRef value) isValid) {
-    final activeErrors = _activeErrors[screenId];
-    activeErrors.value = Map.fromEntries(
-        activeErrors.value.entries.where((e) => isValid(e.key)));
-    _errorCountNotifier(screenId).value = activeErrors.value.length;
+    final errors = _activeErrors[screenId];
+    if (errors == null) return;
+    errors.value =
+        Map.fromEntries(errors.value.entries.where((e) => isValid(e.key)));
+    _updateErrorCount(screenId);
+  }
+
+  void markErrorAsRead(String screenId, DevToolsError error) {
+    final errors = _activeErrors[screenId];
+    if (errors == null) return;
+
+    errors.value =
+        LinkedHashMap<InspectorInstanceRef, DevToolsError>.fromEntries(
+            errors.value.entries.map(
+      // Replace the matching item with a "read" version of itself.
+      (e) => MapEntry(e.key, e.value == error ? e.value.asRead() : e),
+    ));
+    _updateErrorCount(screenId);
   }
 }
 
 class DevToolsError {
-  DevToolsError(this.errorMessage, this.id);
+  DevToolsError(this.errorMessage, this.id, {this.read = false});
 
   final String errorMessage;
   final String id;
+  final bool read;
+
+  DevToolsError asRead() => DevToolsError(errorMessage, id, read: true);
 }
 
 class InspectableWidgetError extends DevToolsError {
-  InspectableWidgetError(String errorMessage, String id)
-      : super(errorMessage, id);
+  InspectableWidgetError(String errorMessage, String id, {bool read = false})
+      : super(errorMessage, id, read: read);
 
   String get inspectorRef => id;
+
+  @override
+  InspectableWidgetError asRead() =>
+      InspectableWidgetError(errorMessage, id, read: true);
 }

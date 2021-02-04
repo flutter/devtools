@@ -188,9 +188,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             Positioned(
               top: 0,
               right: 0,
-              child: _ErrorNavigator(
+              child: ErrorNavigator(
                 selectedErrorIndex: _selectedErrorIndex,
-                errors: errorList,
+                errorCount: errorList.length,
                 onSelectedErrorIndexChanged: (index) => setState(() {
                   _selectedErrorIndex = index;
                   inspectorController.updateSelectionFromService(
@@ -339,8 +339,15 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     if (errorIndex == -1) {
       errorIndex = null;
     }
+    // Update the selected index for the error navigator.
     if (_selectedErrorIndex != errorIndex) {
       setState(() => _selectedErrorIndex = errorIndex);
+    }
+    // Additionally, mark this error as "read" so that it isn't counted by the badge
+    // (but is still highlighted as an error).
+    if (errorIndex != null) {
+      serviceManager.errorBadgeManager
+          .markErrorAsRead(InspectorScreen.id, _errors[inspectorRef]);
     }
   }
 
@@ -368,23 +375,23 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 }
 
-class _ErrorNavigator extends StatelessWidget {
-  const _ErrorNavigator(
+class ErrorNavigator extends StatelessWidget {
+  const ErrorNavigator(
       {Key key,
       @required this.selectedErrorIndex,
-      @required this.errors,
+      @required this.errorCount,
       @required this.onSelectedErrorIndexChanged})
       : super(key: key);
 
   final int selectedErrorIndex;
-  final List<InspectableWidgetError> errors;
+  final int errorCount;
   final void Function(int) onSelectedErrorIndexChanged;
 
   @override
   Widget build(BuildContext context) {
     final label = selectedErrorIndex != null
-        ? 'Error ${selectedErrorIndex + 1}/${errors.length}'
-        : 'Errors: ${errors.length}';
+        ? 'Error ${selectedErrorIndex + 1}/$errorCount'
+        : 'Errors: $errorCount';
     return Container(
       color: devtoolsError,
       child: Padding(
@@ -416,23 +423,23 @@ class _ErrorNavigator extends StatelessWidget {
   }
 
   void _previousError() {
-    var newIndex = errors.isEmpty
+    var newIndex = errorCount == 0
         ? null
         : selectedErrorIndex == null
-            ? errors.length - 1
+            ? errorCount - 1
             : selectedErrorIndex - 1;
     while (newIndex < 0) {
-      newIndex += errors.length;
+      newIndex += errorCount;
     }
     onSelectedErrorIndexChanged(newIndex);
   }
 
   void _nextError() {
-    final newIndex = errors.isEmpty
+    final newIndex = errorCount == 0
         ? null
         : selectedErrorIndex == null
             ? 0
-            : (selectedErrorIndex + 1) % errors.length;
+            : (selectedErrorIndex + 1) % errorCount;
     onSelectedErrorIndexChanged(newIndex);
   }
 }
