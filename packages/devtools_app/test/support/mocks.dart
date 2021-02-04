@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/error_badge_manager.dart';
+import 'package:devtools_app/src/inspector/inspector_service.dart';
+import 'package:devtools_app/src/listenable.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart'
     as flutter_memory;
@@ -35,6 +38,10 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
     _flagManager.vmServiceOpened(this.service);
+
+    when(errorBadgeManager.erroredWidgetNotifier(any)).thenReturn(
+        FixedValueListenable(
+            LinkedHashMap<InspectorInstanceRef, DevToolsError>()));
   }
 
   static FakeVmService createFakeService({
