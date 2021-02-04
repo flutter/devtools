@@ -535,14 +535,11 @@ void main() {
 
     testWidgets('display as expected', (WidgetTester tester) async {
       await pumpControls(tester);
-      expect(find.byKey(FloatingDebuggerControls.debuggerControlsKey),
-          findsOneWidget);
+      expect(find.byType(OutlinedRowGroup), findsOneWidget);
       expect(
           find.text('Main isolate is paused in the debugger'), findsOneWidget);
-      expect(find.byKey(FloatingDebuggerControls.debuggerControlsResumeKey),
-          findsOneWidget);
-      expect(find.byKey(FloatingDebuggerControls.debuggerControlsStepKey),
-          findsOneWidget);
+      expect(find.byTooltip('Resume'), findsOneWidget);
+      expect(find.byTooltip('Step over'), findsOneWidget);
     });
 
     testWidgets('can resume', (WidgetTester tester) async {
@@ -555,8 +552,7 @@ void main() {
       when(debuggerController.resume()).thenAnswer((_) => resume());
       await pumpControls(tester);
       expect(didResume, isFalse);
-      await tester
-          .tap(find.byKey(FloatingDebuggerControls.debuggerControlsResumeKey));
+      await tester.tap(find.byTooltip('Resume'));
       await tester.pumpAndSettle();
       expect(didResume, isTrue);
     });
@@ -571,8 +567,7 @@ void main() {
       when(debuggerController.stepOver()).thenAnswer((_) => stepOver());
       await pumpControls(tester);
       expect(didStep, isFalse);
-      await tester
-          .tap(find.byKey(FloatingDebuggerControls.debuggerControlsStepKey));
+      await tester.tap(find.byTooltip('Step over'));
       await tester.pumpAndSettle();
       expect(didStep, isTrue);
     });
@@ -581,8 +576,7 @@ void main() {
         (WidgetTester tester) async {
       when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(false));
       await pumpControls(tester);
-      expect(find.byKey(FloatingDebuggerControls.debuggerControlsKey),
-          findsNothing);
+      expect(find.byType(OutlinedRowGroup), findsNothing);
     });
   });
 }

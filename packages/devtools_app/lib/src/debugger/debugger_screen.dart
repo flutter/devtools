@@ -372,15 +372,6 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
 }
 
 class FloatingDebuggerControls extends StatelessWidget {
-  @visibleForTesting
-  static const debuggerControlsKey = Key('debugger controls');
-
-  @visibleForTesting
-  static const debuggerControlsResumeKey = Key('debugger controls - resume');
-
-  @visibleForTesting
-  static const debuggerControlsStepKey = Key('debugger controls - step');
-
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DebuggerController>(context);
@@ -389,7 +380,6 @@ class FloatingDebuggerControls extends StatelessWidget {
       builder: (context, paused, _) {
         if (!paused) return const SizedBox();
         return Container(
-          key: debuggerControlsKey,
           color: devtoolsWarning,
           height: defaultButtonHeight,
           child: OutlinedRowGroup(
@@ -412,7 +402,6 @@ class FloatingDebuggerControls extends StatelessWidget {
               DevToolsTooltip(
                 tooltip: 'Resume',
                 child: TextButton(
-                  key: debuggerControlsResumeKey,
                   onPressed: controller.resume,
                   child: const Icon(
                     Icons.play_arrow,
@@ -424,7 +413,6 @@ class FloatingDebuggerControls extends StatelessWidget {
               DevToolsTooltip(
                 tooltip: 'Step over',
                 child: TextButton(
-                  key: debuggerControlsStepKey,
                   onPressed: controller.stepOver,
                   child: const Icon(
                     Icons.keyboard_arrow_right,
