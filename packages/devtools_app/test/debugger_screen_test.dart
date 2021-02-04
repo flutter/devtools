@@ -409,6 +409,7 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('SHOW ALL'), findsNothing);
     });
+
     testWidgetsWithWindowSize(
         'Variables shows items', const Size(1000.0, 4000.0),
         (WidgetTester tester) async {
@@ -515,6 +516,73 @@ void main() {
         debugger: debuggerController,
       ));
       expect(find.text('Ignore'), findsOneWidget);
+    });
+  });
+
+  group('FloatingDebuggerControls', () {
+    setUp(() {
+      debuggerController = MockDebuggerController();
+      when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
+    });
+
+    Future<void> pumpControls(WidgetTester tester) async {
+      await tester.pumpWidget(wrapWithControllers(
+        FloatingDebuggerControls(),
+        debugger: debuggerController,
+      ));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('display as expected', (WidgetTester tester) async {
+      await pumpControls(tester);
+      expect(find.byKey(FloatingDebuggerControls.debuggerControlsKey),
+          findsOneWidget);
+      expect(
+          find.text('Main isolate is paused in the debugger'), findsOneWidget);
+      expect(find.byKey(FloatingDebuggerControls.debuggerControlsResumeKey),
+          findsOneWidget);
+      expect(find.byKey(FloatingDebuggerControls.debuggerControlsStepKey),
+          findsOneWidget);
+    });
+
+    testWidgets('can resume', (WidgetTester tester) async {
+      bool didResume = false;
+      Future<Success> resume() {
+        didResume = true;
+        return Future.value(Success());
+      }
+
+      when(debuggerController.resume()).thenAnswer((_) => resume());
+      await pumpControls(tester);
+      expect(didResume, isFalse);
+      await tester
+          .tap(find.byKey(FloatingDebuggerControls.debuggerControlsResumeKey));
+      await tester.pumpAndSettle();
+      expect(didResume, isTrue);
+    });
+
+    testWidgets('can step over', (WidgetTester tester) async {
+      bool didStep = false;
+      Future<Success> stepOver() {
+        didStep = true;
+        return Future.value(Success());
+      }
+
+      when(debuggerController.stepOver()).thenAnswer((_) => stepOver());
+      await pumpControls(tester);
+      expect(didStep, isFalse);
+      await tester
+          .tap(find.byKey(FloatingDebuggerControls.debuggerControlsStepKey));
+      await tester.pumpAndSettle();
+      expect(didStep, isTrue);
+    });
+
+    testWidgets('are hidden when app is not paused',
+        (WidgetTester tester) async {
+      when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(false));
+      await pumpControls(tester);
+      expect(find.byKey(FloatingDebuggerControls.debuggerControlsKey),
+          findsNothing);
     });
   });
 }

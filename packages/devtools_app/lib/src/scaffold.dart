@@ -17,6 +17,7 @@ import 'common_widgets.dart';
 import 'config_specific/drag_and_drop/drag_and_drop.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'config_specific/import_export/import_export.dart';
+import 'debugger/debugger_screen.dart';
 import 'framework_controller.dart';
 import 'globals.dart';
 import 'notifications.dart';
@@ -119,7 +120,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// coordinate their animation when the tab selection changes.
   TabController _tabController;
 
-  final ValueNotifier<Screen> _currentScreen = ValueNotifier(null);
+  Screen _currentScreen;
 
   ImportController _importController;
 
@@ -182,7 +183,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   @override
   void dispose() {
     _tabController?.dispose();
-    _currentScreen?.dispose();
     _connectVmSubscription?.cancel();
     _showPageSubscription?.cancel();
 
@@ -201,12 +201,14 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       }
     }
 
-    _currentScreen.value = widget.tabs[_tabController.index];
+    _currentScreen = widget.tabs[_tabController.index];
     _tabController.addListener(() {
       final screen = widget.tabs[_tabController.index];
 
-      if (_currentScreen.value != screen) {
-        _currentScreen.value = screen;
+      if (_currentScreen != screen) {
+        setState(() {
+          _currentScreen = screen;
+        });
 
         // Send the page change info to the framework controller (it can then
         // send it on to the devtools server, if one is connected).
@@ -231,7 +233,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     // Broadcast the initial page.
     frameworkController.notifyPageChange(
-      PageChangeEvent(_currentScreen.value.screenId, widget.embed),
+      PageChangeEvent(_currentScreen.screenId, widget.embed),
     );
   }
 
@@ -301,31 +303,35 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     final title = widget.title ?? generateDevToolsTitle();
     final theme = Theme.of(context);
-    // TODO(issues/2547) - Remove.
-    // ignore: deprecated_member_use
-    return ValueListenableProvider.value(
-      value: _currentScreen,
-      child: Provider<BannerMessagesController>(
-        create: (_) => BannerMessagesController(),
-        child: DragAndDrop(
-          handleDrop: _importController.importData,
-          child: Title(
-            title: title,
-            // Color is a required parameter but the color only appears to
-            // matter on Android and we do not care about Android.
-            // Using theme.primaryColor matches the default behavior of the
-            // title used by [WidgetsApp].
-            color: theme.primaryColor,
-            child: Scaffold(
-              appBar: widget.embed ? null : _buildAppBar(title),
-              body: TabBarView(
-                physics: defaultTabBarViewPhysics,
-                controller: _tabController,
-                children: tabBodies,
-              ),
-              bottomNavigationBar:
-                  widget.embed ? null : _buildStatusLine(context),
+    return Provider<BannerMessagesController>(
+      create: (_) => BannerMessagesController(),
+      child: DragAndDrop(
+        handleDrop: _importController.importData,
+        child: Title(
+          title: title,
+          // Color is a required parameter but the color only appears to
+          // matter on Android and we do not care about Android.
+          // Using theme.primaryColor matches the default behavior of the
+          // title used by [WidgetsApp].
+          color: theme.primaryColor,
+          child: Scaffold(
+            appBar: widget.embed ? null : _buildAppBar(title),
+            body: Stack(
+              children: [
+                TabBarView(
+                  physics: defaultTabBarViewPhysics,
+                  controller: _tabController,
+                  children: tabBodies,
+                ),
+                if (serviceManager.hasConnection &&
+                    _currentScreen.screenId != DebuggerScreen.id)
+                  Container(
+                    alignment: Alignment.topCenter,
+                    child: FloatingDebuggerControls(),
+                  ),
+              ],
             ),
+            bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
           ),
         ),
       ),
@@ -400,7 +406,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     );
   }
 
-  Widget _buildStatusLine(BuildContext context) {
+  Widget _buildStatusLine() {
     const appPadding = DevToolsScaffold.appPadding;
 
     return Container(
@@ -415,7 +421,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               right: appPadding.right,
               bottom: appPadding.bottom,
             ),
-            child: StatusLine(),
+            child: StatusLine(_currentScreen),
           ),
         ],
       ),

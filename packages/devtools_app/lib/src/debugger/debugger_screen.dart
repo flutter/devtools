@@ -256,7 +256,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       builder: (context, breakpoints, _) {
         return Row(children: [
           BreakpointsCountBadge(breakpoints: breakpoints),
-          ActionButton(
+          DevToolsTooltip(
             child: ToolbarAction(
               icon: Icons.delete,
               onPressed:
@@ -368,5 +368,75 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
         widget.controller.calculatePosition(script, frame.location.tokenPos);
 
     return 'paused$reason$fileName $pos';
+  }
+}
+
+class FloatingDebuggerControls extends StatelessWidget {
+  @visibleForTesting
+  static const debuggerControlsKey = Key('debugger controls');
+
+  @visibleForTesting
+  static const debuggerControlsResumeKey = Key('debugger controls - resume');
+
+  @visibleForTesting
+  static const debuggerControlsStepKey = Key('debugger controls - step');
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Provider.of<DebuggerController>(context);
+    return ValueListenableBuilder<bool>(
+      valueListenable: controller.isPaused,
+      builder: (context, paused, _) {
+        if (!paused) return const SizedBox();
+        return Container(
+          key: debuggerControlsKey,
+          color: devtoolsWarning,
+          height: defaultButtonHeight,
+          child: OutlinedRowGroup(
+            // Default focus color for the light theme - since the background
+            // color of the controls [devtoolsWarning] is the same for both
+            // themes, we will use the same border color.
+            borderColor: Colors.black.withOpacity(0.12),
+            children: [
+              Container(
+                height: defaultButtonHeight,
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: defaultSpacing,
+                ),
+                child: const Text(
+                  'Main isolate is paused in the debugger',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+              DevToolsTooltip(
+                tooltip: 'Resume',
+                child: TextButton(
+                  key: debuggerControlsResumeKey,
+                  onPressed: controller.resume,
+                  child: const Icon(
+                    Icons.play_arrow,
+                    color: Colors.green,
+                    size: defaultIconSize,
+                  ),
+                ),
+              ),
+              DevToolsTooltip(
+                tooltip: 'Step over',
+                child: TextButton(
+                  key: debuggerControlsStepKey,
+                  onPressed: controller.stepOver,
+                  child: const Icon(
+                    Icons.keyboard_arrow_right,
+                    color: Colors.black,
+                    size: defaultIconSize,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
