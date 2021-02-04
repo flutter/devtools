@@ -535,7 +535,11 @@ void main() {
 
     testWidgets('display as expected', (WidgetTester tester) async {
       await pumpControls(tester);
-      expect(find.byType(OutlinedRowGroup), findsOneWidget);
+      final animatedOpacityFinder = find.byType(AnimatedOpacity);
+      expect(animatedOpacityFinder, findsOneWidget);
+      final AnimatedOpacity animatedOpacity =
+          animatedOpacityFinder.evaluate().first.widget;
+      expect(animatedOpacity.opacity, equals(1.0));
       expect(
           find.text('Main isolate is paused in the debugger'), findsOneWidget);
       expect(find.byTooltip('Resume'), findsOneWidget);
@@ -576,7 +580,11 @@ void main() {
         (WidgetTester tester) async {
       when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(false));
       await pumpControls(tester);
-      expect(find.byType(OutlinedRowGroup), findsNothing);
+      final animatedOpacityFinder = find.byType(AnimatedOpacity);
+      expect(animatedOpacityFinder, findsOneWidget);
+      final AnimatedOpacity animatedOpacity =
+          animatedOpacityFinder.evaluate().first.widget;
+      expect(animatedOpacity.opacity, equals(0.0));
     });
   });
 }
