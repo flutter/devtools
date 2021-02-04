@@ -1,3 +1,6 @@
+## 0.9.7+3
+* Fix issue where DevTools would cause IDEs to change what source code was selected on startup [#5231](https://github.com/flutter/flutter-intellij/issues/5231)
+
 ## 0.9.7+1
 * Fix issue where DevTools would fail to connect to an application with no DDS instance [#2649](https://github.com/flutter/devtools/issues/2649)
 
