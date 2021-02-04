@@ -568,8 +568,8 @@ class Badge extends StatelessWidget {
 
 /// A widget, commonly used for icon buttons, that provides a tooltip with a
 /// common delay before the tooltip is shown.
-class ActionButton extends StatelessWidget {
-  const ActionButton({
+class DevToolsTooltip extends StatelessWidget {
+  const DevToolsTooltip({
     @required this.tooltip,
     @required this.child,
   });
@@ -787,6 +787,39 @@ Widget inputDecorationSuffixButton(IconData icon, VoidCallback onPressed) {
       icon: Icon(icon),
     ),
   );
+}
+
+class OutlinedRowGroup extends StatelessWidget {
+  const OutlinedRowGroup({@required this.children, this.borderColor});
+
+  final List<Widget> children;
+
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = borderColor ?? Theme.of(context).focusColor;
+    final childrenWithOutlines = <Widget>[];
+    for (int i = 0; i < children.length; i++) {
+      childrenWithOutlines.addAll([
+        Container(
+          decoration: BoxDecoration(
+            border: Border(
+              left: i == 0 ? BorderSide(color: color) : BorderSide.none,
+              right: BorderSide(color: color),
+              top: BorderSide(color: color),
+              bottom: BorderSide(color: color),
+            ),
+          ),
+          child: children[i],
+        ),
+      ]);
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: childrenWithOutlines,
+    );
+  }
 }
 
 class OutlineDecoration extends StatelessWidget {
