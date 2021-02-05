@@ -173,10 +173,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         ?.map((key, value) => MapEntry(key, value as InspectableWidgetError));
     final errorList = errors?.values?.toList() ?? [];
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).focusColor),
-      ),
+    return OutlineDecoration(
       child: Stack(
         children: [
           InspectorTree(
