@@ -141,6 +141,9 @@ const defaultListItemHeight = 28.0;
 
 const defaultChartHeight = 150.0;
 
+/// Width of all settings dialogs.
+const dialogSettingsWidth = 700.0;
+
 const defaultScrollBarOffset = 10.0;
 
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();

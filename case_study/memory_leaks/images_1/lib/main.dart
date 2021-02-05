@@ -38,16 +38,16 @@ class MyHomePage extends StatefulWidget {
 
 int globalObjectId = 0;
 
-class Tracker {
-  Tracker()
+class ObjectWithUniqueId {
+  ObjectWithUniqueId()
       : now = DateTime.now(),
-        trackerId = globalObjectId++;
+        uniqueId = globalObjectId++;
 
   DateTime now = DateTime.now();
-  int trackerId = globalObjectId++;
+  int uniqueId = globalObjectId++;
 
   @override
-  String toString() => 'Collected @ $now, id=$trackerId';
+  String toString() => 'Collected @ $now, id=$uniqueId';
 }
 
 class MyHomePageState extends State<MyHomePage>
@@ -62,12 +62,12 @@ class MyHomePageState extends State<MyHomePage>
     _tabController = TabController(length: tabs.length, vsync: this);
   }
 
-  final trackers = <Tracker>[];
+  final objects = <ObjectWithUniqueId>[];
 
   void devToolsPostEvent(String eventName, Map<String, Object> eventData) {
     developer.postEvent('DevTools.Event_$eventName', eventData);
 
-    trackers.add(Tracker());
+    objects.add(ObjectWithUniqueId());
   }
 
   Widget recordLoadedImage(ImageChunkEvent imageChunkEvent, String imageUrl) {

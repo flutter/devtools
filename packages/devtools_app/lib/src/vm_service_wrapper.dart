@@ -220,7 +220,7 @@ class VmServiceWrapper implements VmService {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 18))) {
       return trackFuture(
-        '_getAllocationProfile',
+        'getAllocationProfile',
         _vmService.getAllocationProfile(isolateId, reset: reset, gc: gc),
       );
     } else {

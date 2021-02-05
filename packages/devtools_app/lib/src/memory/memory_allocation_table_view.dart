@@ -15,6 +15,7 @@ import '../utils.dart';
 import 'memory_allocation_table_data.dart';
 import 'memory_controller.dart';
 import 'memory_protocol.dart';
+import 'memory_tracker_model.dart';
 
 class AllocationTableView extends StatefulWidget {
   @override
@@ -30,13 +31,15 @@ class AllocationTableViewState extends State<AllocationTableView>
 
   var samplesProcessed = <ClassRef, CpuSamples>{};
 
+  final trackerData = TreeTracker();
+
   @override
   void initState() {
     super.initState();
 
     // Setup the columns.
     columns.addAll([
-      FieldTrace(),
+      FieldTrack(),
       FieldClassName(),
       FieldInstanceCountColumn(),
       FieldInstanceDeltaColumn(),
@@ -66,7 +69,12 @@ class AllocationTableViewState extends State<AllocationTableView>
     });
 
     addAutoDisposeListener(controller.updateClassStackTraces, () {
-      setState(() {});
+      setState(() {
+        trackerData.createTrackerTree(
+          controller.trackAllocations,
+          controller.allocationSamples,
+        );
+      });
     });
 
     addAutoDisposeListener(controller.treeChangedNotifier, () {
@@ -74,113 +82,11 @@ class AllocationTableViewState extends State<AllocationTableView>
         setState(() {});
       }
     });
-  }
 
-  /// Construct all objects tracked and their stacktraces.
-  List<Widget> allTrackedCreations(ClassRef classRef) {
-    final fixFontStyle = fixedFontStyle(context);
-
-    final allocationSample = controller.allocationSamples.singleWhere(
-      (element) => element.classRef.id == classRef.id,
-      orElse: () => null,
-    );
-
-    // Nothing tracked.
-    if (allocationSample == null) {
-      return [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 5),
-          child: Text('empty', style: fixFontStyle),
-        )
-      ];
-    }
-
-    final smallerFixedFont = smallerFixedFontStyle(context);
-
-    final subTitles = <ExpansionTile>[];
-
-    for (var stacktrace in allocationSample.stacktraces) {
-      final callStackEntries = <Widget>[];
-
-      callStackEntries.add(Text(
-        '${stacktrace.stacktraceDisplay(maxLines: stacktrace.showFullStacktrace ? -1 : 4)}',
-        style: smallerFixedFont,
-      ));
-      if (stacktrace.stackDepth > 4 && !stacktrace.showFullStacktrace) {
-        callStackEntries.add(
-          InkWell(
-            onTap: () {
-              stacktrace.showFullStacktrace = true;
-              // TODO(terry): Use a value notifier.
-              setState(() {});
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Text('More ...', style: smallerFixedFont),
-            ),
-          ),
-        );
-      }
-
-      final stackTraceWidget = Container(
-        padding: const EdgeInsets.symmetric(horizontal: 80),
-        alignment: Alignment.topLeft,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: callStackEntries,
-        ),
-      );
-
-      subTitles.add(
-        ExpansionTile(
-          tilePadding: const EdgeInsets.only(left: 80, right: 20),
-          childrenPadding: EdgeInsets.zero,
-          title: Text(
-            '${allocationSample.classRef.name} '
-            '@${prettyTimestamp(stacktrace.timestamp)}',
-            style: fixFontStyle,
-          ),
-          children: [stackTraceWidget],
-        ),
-      );
-    }
-
-    return subTitles;
-  }
-
-  ExpansionTile _createExpansionTile(int index) {
-    final fixFontStyle = fixedFontStyle(context);
-
-    if (controller.trackAllocations.isNotEmpty) {
-      // Show what is to be tracked.
-      final trackingClasses = controller.trackAllocations.keys.toList();
-      final className = trackingClasses[index];
-      final classRef = controller.trackAllocations[className];
-      final childWidgets = allTrackedCreations(classRef);
-      return ExpansionTile(
-        leading: const Icon(Icons.track_changes),
-        tilePadding: const EdgeInsets.symmetric(horizontal: 20),
-        childrenPadding: EdgeInsets.zero,
-        title: Text(className, style: fixFontStyle),
-        children: childWidgets,
-      );
-    } else {
-      return null;
-    }
-  }
-
-  Widget trackedClassesList() {
-    return controller.trackAllocations.isEmpty
-        ? const Padding(
-            padding: EdgeInsets.only(top: 15),
-            child: Text('No classes tracked.', textAlign: TextAlign.center),
-          )
-        : ListView.builder(
-            padding: const EdgeInsets.all(0),
-            itemCount: controller.trackAllocations.length,
-            itemBuilder: (BuildContext context, int index) =>
-                _createExpansionTile(index),
-          );
+    addAutoDisposeListener(trackerData.selectionNotifier, () {
+      final Tracker item = trackerData.selectionNotifier.value.node;
+      if (item is TrackerMore) trackerData.expandCallStack(item);
+    });
   }
 
   @override
@@ -195,16 +101,13 @@ class AllocationTableViewState extends State<AllocationTableView>
       return const SizedBox(height: defaultSpacing);
     }
 
+    controller.searchMatchMonitorAllocationsNotifier.value = null;
+
     controller.allocationsFieldsTable = FlatTable<ClassHeapDetailStats>(
       columns: columns,
       data: controller.monitorAllocations,
       keyFactory: (d) => Key(d.classRef.name),
-      onItemSelected: (ref) {
-        final isTraced = !ref.isStacktraced;
-        ref.isStacktraced = isTraced;
-
-        controller.setTracking(ref.classRef, isTraced);
-      },
+      onItemSelected: (ref) {},
       sortColumn: controller.sortedMonitorColumn,
       sortDirection: controller.sortedMonitorDirection,
       onSortChanged: (
@@ -214,6 +117,7 @@ class AllocationTableViewState extends State<AllocationTableView>
         controller.sortedMonitorColumn = column;
         controller.sortedMonitorDirection = direction;
       },
+      activeSearchMatchNotifier: controller.searchMatchMonitorAllocationsNotifier,
     );
 
     return Split(
@@ -222,7 +126,7 @@ class AllocationTableViewState extends State<AllocationTableView>
       axis: Axis.vertical,
       children: [
         controller.allocationsFieldsTable,
-        trackedClassesList(),
+        trackerData.createTrackingTable(controller),
       ],
     );
   }

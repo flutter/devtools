@@ -1039,9 +1039,6 @@ double safePositiveDouble(double value) {
   return max(value, 0.0);
 }
 
-/// Width of all settings dialogs.
-const dialogSettingsWidth = 700.0;
-
 /// Displays timestamp using locale's timezone HH:MM:SS, if isUtc is false.
 /// @param isUTC - if true for testing, the UTC locale is used (instead of
 /// the user's locale). Tests will then pass when run in any timezone. All

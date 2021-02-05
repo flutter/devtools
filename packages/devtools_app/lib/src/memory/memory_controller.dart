@@ -103,7 +103,7 @@ ChartInterval chartInterval(String displayName) {
 
 class AllocationStackTrace {
   AllocationStackTrace(CpuSample sample, {List<ProfileFunction> functions}) {
-    _computeStacktrace(sample, functions: functions);
+    computeStacktrace(sample, functions: functions);
   }
 
   int timestamp;
@@ -147,7 +147,7 @@ class AllocationStackTrace {
 
   String get sourcesDisplay => sources.join('\r');
 
-  void _computeStacktrace(CpuSample cpuSample,
+  void computeStacktrace(CpuSample cpuSample,
       {List<ProfileFunction> functions}) {
     if (cpuSample.stack.isNotEmpty) {
       final stackLength = cpuSample.stack.length;
@@ -202,7 +202,7 @@ class AllocationSamples {
 
   final stacktraces = <AllocationStackTrace>[];
 
-  int get totalStacktraces => stacktraces.length;
+  int get totalStacktraces => stacktraces?.length;
 
   void _computeCpuSamples(CpuSamples cpuSamples) {
     final samplesLength = cpuSamples.samples.length;
@@ -252,14 +252,6 @@ class MemoryController extends DisposableController
   /// group by library or group by class.
   static const libraryRootNode = '___LIBRARY___';
   static const classRootNode = '___CLASSES___';
-
-  final _updateClassStackTraces = ValueNotifier(0);
-
-  ValueListenable<int> get updateClassStackTraces => _updateClassStackTraces;
-
-  void changeStackTraces() {
-    _updateClassStackTraces.value += 1;
-  }
 
   /// Notifies that the source of the memory feed has changed.
   ValueListenable<DateTime> get selectedSnapshotNotifier =>
@@ -366,7 +358,7 @@ class MemoryController extends DisposableController
     if (snapshots.isEmpty) return null;
 
     // Is a selected table row under a snapshot.
-    final nodeSelected = selectionNotifier.value.node;
+    final nodeSelected = selectionSnapshotNotifier.value.node;
     final snapshot = getSnapshot(nodeSelected);
     if (snapshot != null) {
       // Has the snapshot (with a selected row) been analyzed?
@@ -541,7 +533,7 @@ class MemoryController extends DisposableController
 
   final SettingsModel settings = SettingsModel();
 
-  final selectionNotifier =
+  final selectionSnapshotNotifier =
       ValueNotifier<Selection<Reference>>(Selection<Reference>());
 
   /// Tree to view Libary/Class/Instance (grouped by)
@@ -552,6 +544,14 @@ class MemoryController extends DisposableController
 
   /// Tree to view fields of an analysis.
   TreeTable<AnalysisField> analysisFieldsTreeTable;
+
+  final _updateClassStackTraces = ValueNotifier(0);
+
+  ValueListenable<int> get updateClassStackTraces => _updateClassStackTraces;
+
+  void changeStackTraces() {
+    _updateClassStackTraces.value += 1;
+  }
 
   /// Tracking memory allocation of classes.
   /// Format key is Class name and value is ClassRef.
@@ -565,9 +565,9 @@ class MemoryController extends DisposableController
     );
 
     if (foundClass != null) {
-      foundClass.isStacktraced = true;
+      foundClass.isStacktraced = enable;
 
-      _setTracking(foundClass.classRef, true).catchError((e) {
+      _setTracking(foundClass.classRef, enable).catchError((e) {
         debugLogger('ERROR: ${e.message}');
       }).whenComplete(
         () {
@@ -649,13 +649,13 @@ class MemoryController extends DisposableController
 
   /// All known libraries of the selected snapshot.
   LibraryReference get libraryRoot {
-    if (selectionNotifier.value == null) {
+    if (selectionSnapshotNotifier.value == null) {
       // No selectied snapshot use last snapshot.
       return snapshots.safeLast.libraryRoot;
     }
 
     // Find the selected snapshot's libraryRoot.
-    final snapshot = getSnapshot(selectionNotifier.value.node);
+    final snapshot = getSnapshot(selectionSnapshotNotifier.value.node);
     if (snapshot != null) return snapshot.libraryRoot;
 
     return null;
@@ -671,7 +671,7 @@ class MemoryController extends DisposableController
     }
 
     // Find the selected snapshot's libraryRoot.
-    snapshot ??= getSnapshot(selectionNotifier.value.node);
+    snapshot ??= getSnapshot(selectionSnapshotNotifier.value.node);
     snapshot?.libraryRoot = newRoot;
   }
 
@@ -679,7 +679,7 @@ class MemoryController extends DisposableController
   SnapshotReference get activeSnapshot {
     for (final topLevel in groupByTreeTable.dataRoots) {
       if (topLevel is SnapshotReference) {
-        final nodeSelected = selectionNotifier.value.node;
+        final nodeSelected = selectionSnapshotNotifier.value.node;
         final snapshot = getSnapshot(nodeSelected);
         final SnapshotReference snapshotRef = topLevel;
         if (snapshot != null &&
@@ -882,6 +882,10 @@ class MemoryController extends DisposableController
 
   DateTime monitorTimestamp;
 
+  /// Used for searching in monitor allocation table.
+  final searchMatchMonitorAllocationsNotifier =
+      ValueNotifier<ClassHeapDetailStats>(null);
+
   var _monitorAllocations = <ClassHeapDetailStats>[];
 
   List<ClassHeapDetailStats> get monitorAllocations => _monitorAllocations;
@@ -938,7 +942,7 @@ class MemoryController extends DisposableController
     }).toList();
 
     if (!reset) {
-      // Any classes being tracked?
+      // AllocationStart again, any classes being tracked?
       final allSamples = await computeAllAllocationSamples();
       final allClassRefTracked = allSamples.keys;
       allocationSamples.clear();

@@ -4,21 +4,29 @@
 
 import 'dart:math';
 
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../table.dart';
 import '../table_data.dart';
+import 'memory_controller.dart';
 import 'memory_protocol.dart';
 
 const defaultNumberFieldWidth = 100.0;
 
-class FieldTrace extends ColumnData<ClassHeapDetailStats> {
-  FieldTrace() : super('✔', fixedWidthPx: 50.0);
+class FieldTrack extends ColumnData<ClassHeapDetailStats>
+    implements ColumnRenderer<ClassHeapDetailStats> {
+  FieldTrack()
+      : super(
+          'Track',
+          titleTooltip: 'Track Class Allocations',
+          fixedWidthPx: 55.0,
+          alignment: ColumnAlignment.left,
+        );
 
   @override
   int getValue(ClassHeapDetailStats dataObject) =>
       dataObject.isStacktraced ? 1 : 0;
-
-  @override
-  String getDisplayValue(ClassHeapDetailStats dataObject) =>
-        dataObject.isStacktraced ? '✔' : ' '; // U+2714 ✔ HEAVY CHECK MARK
 
   @override
   bool get supportsSorting => true;
@@ -28,6 +36,24 @@ class FieldTrace extends ColumnData<ClassHeapDetailStats> {
     final Comparable valueA = getValue(a);
     final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
+  }
+
+  @override
+  Widget build(
+    BuildContext context,
+    ClassHeapDetailStats item, {
+    bool isRowSelected = false,
+  }) {
+    final controller = Provider.of<MemoryController>(context);
+
+    return Checkbox(
+      value: item.isStacktraced,
+      onChanged: (value) {
+        item.isStacktraced = value;
+        controller.setTracking(item.classRef, value);
+        controller.changeStackTraces();
+      },
+    );
   }
 }
 
