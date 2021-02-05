@@ -158,8 +158,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 
   @override
   void dispose() {
-    _networkController?.stopRecording();
     super.dispose();
+    _networkController?.stopRecording();
   }
 
   /// Builds the row of buttons that control the Network profiler (e.g., record,
