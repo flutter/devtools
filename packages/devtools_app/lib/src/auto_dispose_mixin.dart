@@ -22,9 +22,9 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   final Disposer _delegate = Disposer();
 
   @override
-  void dispose() {
+  void deactivate() {
     cancel();
-    super.dispose();
+    super.deactivate();
   }
 
   void _refresh() => setState(() {});
