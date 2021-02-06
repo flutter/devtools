@@ -11,7 +11,6 @@ import 'auto_dispose.dart';
 import 'globals.dart';
 import 'inspector/diagnostics_node.dart';
 import 'inspector/inspector_screen.dart';
-import 'inspector/inspector_service.dart';
 import 'listenable.dart';
 import 'logging/logging_screen.dart';
 import 'network/network_screen.dart';
@@ -28,11 +27,10 @@ class ErrorBadgeManager extends DisposableController
     NetworkScreen.id: ValueNotifier<int>(0),
     LoggingScreen.id: ValueNotifier<int>(0),
   };
-  final _activeErrors = <String,
-      ValueNotifier<LinkedHashMap<InspectorInstanceRef, DevToolsError>>>{
-    InspectorScreen.id:
-        ValueNotifier<LinkedHashMap<InspectorInstanceRef, DevToolsError>>(
-            LinkedHashMap<InspectorInstanceRef, DevToolsError>()),
+  final _activeErrors =
+      <String, ValueNotifier<LinkedHashMap<String, DevToolsError>>>{
+    InspectorScreen.id: ValueNotifier<LinkedHashMap<String, DevToolsError>>(
+        LinkedHashMap<String, DevToolsError>()),
   };
 
   void vmServiceOpened(VmServiceWrapper service) {
@@ -110,17 +108,16 @@ class ErrorBadgeManager extends DisposableController
     // Build a new map with the new error. Adding to the existing map
     // won't cause the ValueNotifier to fire (and it's not permitted to call
     // notifyListeners() directly).
-    final newValue =
-        LinkedHashMap<InspectorInstanceRef, DevToolsError>.from(errors.value);
-    newValue[InspectorInstanceRef(error.id)] = error;
+    final newValue = LinkedHashMap<String, DevToolsError>.from(errors.value);
+    newValue[error.id] = error;
     errors.value = newValue;
     _updateErrorCount(screenId);
   }
 
   /// Update the error count to include only "unread" errors.
   void _updateErrorCount(String screenId) {
-    final errors = _activeErrors[screenId]?.value ??
-        const <InspectorInstanceRef, DevToolsError>{};
+    final errors =
+        _activeErrors[screenId]?.value ?? const <String, DevToolsError>{};
     _errorCountNotifier(screenId).value =
         errors.values.where((err) => !err.read).length;
   }
@@ -129,12 +126,11 @@ class ErrorBadgeManager extends DisposableController
     return _errorCountNotifier(screenId) ?? const FixedValueListenable<int>(0);
   }
 
-  ValueListenable<LinkedHashMap<InspectorInstanceRef, DevToolsError>>
-      erroredWidgetNotifier(String screenId) {
+  ValueListenable<LinkedHashMap<String, DevToolsError>> erroredWidgetNotifier(
+      String screenId) {
     return _activeErrors[screenId] ??
-        FixedValueListenable<
-                LinkedHashMap<InspectorInstanceRef, DevToolsError>>(
-            LinkedHashMap<InspectorInstanceRef, DevToolsError>());
+        FixedValueListenable<LinkedHashMap<String, DevToolsError>>(
+            LinkedHashMap<String, DevToolsError>());
   }
 
   ValueNotifier<int> _errorCountNotifier(String screenId) {
@@ -145,8 +141,7 @@ class ErrorBadgeManager extends DisposableController
     _activeErrorCounts[screenId]?.value = 0;
   }
 
-  void filterErrors(
-      String screenId, bool Function(InspectorInstanceRef value) isValid) {
+  void filterErrors(String screenId, bool Function(String id) isValid) {
     final errors = _activeErrors[screenId];
     if (errors == null) return;
     errors.value =
@@ -158,9 +153,8 @@ class ErrorBadgeManager extends DisposableController
     final errors = _activeErrors[screenId];
     if (errors == null) return;
 
-    errors.value =
-        LinkedHashMap<InspectorInstanceRef, DevToolsError>.fromEntries(
-            errors.value.entries.map(
+    errors.value = LinkedHashMap<String, DevToolsError>.fromEntries(
+        errors.value.entries.map(
       // Replace the matching item with a "read" version of itself.
       (e) => MapEntry(e.key, e.value == error ? e.value.asRead() : e),
     ));

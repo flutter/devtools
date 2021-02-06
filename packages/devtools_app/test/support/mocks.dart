@@ -9,18 +9,17 @@ import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/error_badge_manager.dart';
-import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/listenable.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart'
     as flutter_memory;
 import 'package:devtools_app/src/memory/memory_controller.dart';
-import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
+import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
+import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/vm_service_wrapper.dart';
@@ -40,8 +39,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     _flagManager.vmServiceOpened(this.service);
 
     when(errorBadgeManager.erroredWidgetNotifier(any)).thenReturn(
-        FixedValueListenable(
-            LinkedHashMap<InspectorInstanceRef, DevToolsError>()));
+        FixedValueListenable(LinkedHashMap<String, DevToolsError>()));
   }
 
   static FakeVmService createFakeService({

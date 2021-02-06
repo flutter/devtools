@@ -343,8 +343,8 @@ class InspectorController extends DisposableController
     await recomputeTreeRoot(null, null, false);
 
     if (isSummaryTree) {
-      serviceManager.errorBadgeManager
-          .filterErrors(InspectorScreen.id, hasDiagnosticsValue);
+      serviceManager.errorBadgeManager.filterErrors(InspectorScreen.id,
+          (id) => hasDiagnosticsValue(InspectorInstanceRef(id)));
     }
 
     return getPendingUpdateDone();

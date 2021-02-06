@@ -68,8 +68,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   bool get enableButtons =>
       actionInProgress == false && connectionInProgress == false;
 
-  LinkedHashMap<InspectorInstanceRef, DevToolsError> _errors =
-      LinkedHashMap<InspectorInstanceRef, DevToolsError>();
+  LinkedHashMap<String, DevToolsError> _errors =
+      LinkedHashMap<String, DevToolsError>();
   int _selectedErrorIndex;
 
   @override
@@ -327,7 +327,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   void _selectedNodeChanged() {
     final node = inspectorController.selectedNode.value;
-    final inspectorRef = node?.diagnostic?.valueRef;
+    final inspectorRef = node?.diagnostic?.valueRef?.id;
     // Check whether the node that was just selected has any errors associated
     // with it.
     var errorIndex = inspectorRef != null

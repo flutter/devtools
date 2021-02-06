@@ -78,12 +78,8 @@ void main() {
     });
 
     group('Widget Errors', () {
-      final sampleInspectorErrors =
-          LinkedHashMap<InspectorInstanceRef, DevToolsError>.of(
-        {
-          const InspectorInstanceRef('test-ref'):
-              InspectableWidgetError('Error', 'test-ref')
-        },
+      final sampleInspectorErrors = LinkedHashMap<String, DevToolsError>.of(
+        {'test-ref': InspectableWidgetError('Error', 'test-ref')},
       );
 
       testWidgetsWithWindowSize('renders error navigator if errors', windowSize,
