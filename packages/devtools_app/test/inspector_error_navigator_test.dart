@@ -10,11 +10,13 @@ import 'support/wrappers.dart';
 
 void main() {
   group('Inspector Error Navigator', () {
-    Future<void> testNavigate(WidgetTester tester,
-        {IconData tapIcon,
-        int errorCount,
-        int startIndex,
-        int expectedIndex}) async {
+    Future<void> testNavigate(
+      WidgetTester tester, {
+      IconData tapIcon,
+      int errorCount,
+      int startIndex,
+      int expectedIndex,
+    }) async {
       var index = startIndex;
       final navigator = ErrorNavigator(
         selectedErrorIndex: startIndex,
@@ -57,7 +59,7 @@ void main() {
     testWidgets(
         'can navigate backwards',
         (WidgetTester tester) => testNavigate(tester,
-            tapIcon: Icons.chevron_left,
+            tapIcon: Icons.keyboard_arrow_up,
             errorCount: 10,
             startIndex: 5,
             expectedIndex: 4));
@@ -65,7 +67,7 @@ void main() {
     testWidgets(
         'wraps forwards',
         (WidgetTester tester) => testNavigate(tester,
-            tapIcon: Icons.chevron_right,
+            tapIcon: Icons.keyboard_arrow_down,
             errorCount: 10,
             startIndex: 9,
             expectedIndex: 0));

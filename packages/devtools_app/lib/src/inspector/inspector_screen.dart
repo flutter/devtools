@@ -180,7 +180,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             isSummaryTree: true,
             widgetErrors: errors,
           ),
-          if (errors.isNotEmpty)
+          if (errorList.isNotEmpty)
             Positioned(
               top: 0,
               right: 0,
@@ -372,12 +372,12 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 }
 
 class ErrorNavigator extends StatelessWidget {
-  const ErrorNavigator(
-      {Key key,
-      @required this.selectedErrorIndex,
-      @required this.errorCount,
-      @required this.onSelectedErrorIndexChanged})
-      : super(key: key);
+  const ErrorNavigator({
+    Key key,
+    @required this.selectedErrorIndex,
+    @required this.errorCount,
+    @required this.onSelectedErrorIndexChanged,
+  }) : super(key: key);
 
   final int selectedErrorIndex;
   final int errorCount;
@@ -391,25 +391,26 @@ class ErrorNavigator extends StatelessWidget {
     return Container(
       color: devtoolsError,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(
+            horizontal: defaultSpacing, vertical: denseSpacing),
         child: Row(
           children: [
             Padding(
-              padding: const EdgeInsets.only(right: 6),
+              padding: const EdgeInsets.only(right: denseSpacing),
               child: Text(label),
             ),
             IconButton(
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
-              splashRadius: Material.defaultSplashRadius / 2,
-              icon: const Icon(Icons.chevron_left),
+              splashRadius: defaultIconSize,
+              icon: const Icon(Icons.keyboard_arrow_up),
               onPressed: _previousError,
             ),
             IconButton(
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
-              splashRadius: Material.defaultSplashRadius / 2,
-              icon: const Icon(Icons.chevron_right),
+              splashRadius: defaultIconSize,
+              icon: const Icon(Icons.keyboard_arrow_down),
               onPressed: _nextError,
             ),
           ],
@@ -419,11 +420,8 @@ class ErrorNavigator extends StatelessWidget {
   }
 
   void _previousError() {
-    var newIndex = errorCount == 0
-        ? null
-        : selectedErrorIndex == null
-            ? errorCount - 1
-            : selectedErrorIndex - 1;
+    var newIndex =
+        selectedErrorIndex == null ? errorCount - 1 : selectedErrorIndex - 1;
     while (newIndex < 0) {
       newIndex += errorCount;
     }
@@ -431,11 +429,8 @@ class ErrorNavigator extends StatelessWidget {
   }
 
   void _nextError() {
-    final newIndex = errorCount == 0
-        ? null
-        : selectedErrorIndex == null
-            ? 0
-            : (selectedErrorIndex + 1) % errorCount;
+    final newIndex =
+        selectedErrorIndex == null ? 0 : (selectedErrorIndex + 1) % errorCount;
     onSelectedErrorIndexChanged(newIndex);
   }
 }

@@ -29,7 +29,7 @@ class _InspectorTreeRowWidget extends StatefulWidget {
     @required Key key,
     @required this.row,
     @required this.inspectorTreeState,
-    this.errorText,
+    this.errorDescription,
   }) : super(key: key);
 
   final _InspectorTreeState inspectorTreeState;
@@ -37,8 +37,10 @@ class _InspectorTreeRowWidget extends StatefulWidget {
   InspectorTreeNode get node => row.node;
   final InspectorTreeRow row;
 
-  /// A description of any error for this row. null if there is no error.
-  final String errorText;
+  /// A description of any error for this row.
+  ///
+  /// This will be null if there is no error for this row.
+  final String errorDescription;
 
   @override
   _InspectorTreeRowState createState() => _InspectorTreeRowState();
@@ -52,7 +54,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
       height: rowHeight,
       child: InspectorRowContent(
         row: widget.row,
-        errorText: widget.errorText,
+        errorDescription: widget.errorDescription,
         expandArrowAnimation: expandArrowAnimation,
         controller: widget.inspectorTreeState.controller,
         onToggle: () {
@@ -429,7 +431,8 @@ class _InspectorTreeState extends State<InspectorTree>
                         key: PageStorageKey(row?.node),
                         inspectorTreeState: this,
                         row: row,
-                        errorText: widget.widgetErrors != null
+                        errorDescription: widget.widgetErrors != null &&
+                                inspectorRef != null
                             ? widget.widgetErrors[inspectorRef]?.errorMessage
                             : null,
                       );
@@ -533,7 +536,7 @@ class InspectorRowContent extends StatelessWidget {
     @required this.controller,
     @required this.onToggle,
     @required this.expandArrowAnimation,
-    this.errorText,
+    this.errorDescription,
   });
 
   final InspectorTreeRow row;
@@ -541,8 +544,13 @@ class InspectorRowContent extends StatelessWidget {
   final VoidCallback onToggle;
   final Animation<double> expandArrowAnimation;
 
-  /// A description of any error for this row. null if there is no error.
-  final String errorText;
+  /// A description of any error for this row.
+  ///
+  /// This will be null if there is no error for this row.
+  final String errorDescription;
+
+  /// Whether this row has any error.
+  bool get hasError => errorDescription != null;
 
   @override
   Widget build(BuildContext context) {
@@ -554,9 +562,8 @@ class InspectorRowContent extends StatelessWidget {
     }
     Color backgroundColor;
     if (row.isSelected) {
-      backgroundColor = errorText != null
-          ? devtoolsError
-          : colorScheme.selectedRowBackgroundColor;
+      backgroundColor =
+          hasError ? devtoolsError : colorScheme.selectedRowBackgroundColor;
     } else if (row.node == controller.hover) {
       backgroundColor = colorScheme.hoverColor;
     }
@@ -588,9 +595,7 @@ class InspectorRowContent extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: backgroundColor,
-                    border: errorText != null
-                        ? Border.all(color: devtoolsError)
-                        : null,
+                    border: hasError ? Border.all(color: devtoolsError) : null,
                   ),
                   child: InkWell(
                     onTap: () {
@@ -615,14 +620,14 @@ class InspectorRowContent extends StatelessWidget {
     );
 
     // Wrap with error tooltip/marker if there is an error for this node's widget.
-    return errorText == null
+    return errorDescription == null
         ? rowWidget
         : Stack(
             children: [
               rowWidget,
               ErrorIndicator(
-                errorText: errorText,
-                indent: currentX - rowHeight * 2,
+                errorText: errorDescription,
+                indent: currentX,
               ),
             ],
           );
@@ -639,23 +644,26 @@ class ErrorIndicator extends StatelessWidget {
   final String errorText;
   final double indent;
 
+  /// [indent] is where the row content starts, so the indicator should be
+  /// offset some to the left to avoid overlapping with the guidelines and
+  /// expand/collapse widgets (plus to account for its own width).
+  static const double indicatorOffset = -(defaultIconSize * 2 + denseSpacing);
+
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: errorText,
       child: Padding(
         padding: EdgeInsets.only(
-          left: indent,
+          left: indent + indicatorOffset,
           top: (rowHeight - defaultIconSize) / 2,
         ),
-        child: SizedBox(
+        child: Container(
           width: defaultIconSize,
           height: defaultIconSize,
-          child: Container(
-            decoration: const BoxDecoration(
-              color: devtoolsError,
-              shape: BoxShape.circle,
-            ),
+          decoration: const BoxDecoration(
+            color: devtoolsError,
+            shape: BoxShape.circle,
           ),
         ),
       ),

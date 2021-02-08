@@ -156,7 +156,7 @@ class ErrorBadgeManager extends DisposableController
     errors.value = LinkedHashMap<String, DevToolsError>.fromEntries(
         errors.value.entries.map(
       // Replace the matching item with a "read" version of itself.
-      (e) => MapEntry(e.key, e.value == error ? e.value.asRead() : e),
+      (e) => MapEntry(e.key, e.value == error ? e.value.asRead() : e.value),
     ));
     _updateErrorCount(screenId);
   }
