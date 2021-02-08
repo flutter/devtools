@@ -122,7 +122,7 @@ bool isValidLightColor(Color color) {
 const defaultButtonHeight = 36.0;
 const buttonMinWidth = 36.0;
 
-const defaultIconSize = 16.0;
+const defaultIconSize = 18.0;
 const actionsIconSize = 20.0;
 const defaultIconThemeSize = 24.0;
 
@@ -144,6 +144,8 @@ const defaultChartHeight = 150.0;
 const defaultScrollBarOffset = 10.0;
 
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
+
+const defaultDialogWidth = 700.0;
 
 /// Branded grey color.
 ///
@@ -249,6 +251,27 @@ extension DevToolsColorScheme on ColorScheme {
       );
 }
 
+/// Utility extension methods to the [ThemeData] class.
+extension ThemeDataExtension on ThemeData {
+  /// Returns whether we are currently using a dark theme.
+  bool get isDarkTheme => brightness == Brightness.dark;
+
+  TextStyle get regularTextStyle => TextStyle(color: textTheme.bodyText2.color);
+
+  TextStyle get subtleTextStyle => TextStyle(color: unselectedWidgetColor);
+
+  TextStyle get selectedTextStyle =>
+      TextStyle(color: textSelectionTheme.selectionColor);
+
+  TextStyle get fixedFontStyle {
+    return textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
+  }
+
+  TextStyle get subtleConsoleText {
+    return fixedFontStyle.copyWith(color: unselectedWidgetColor);
+  }
+}
+
 TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
       color: colorScheme.devtoolsLink,
       decoration: TextDecoration.underline,
@@ -327,11 +350,3 @@ Color titleSolidBackgroundColor(ThemeData theme) {
 const chartFontSizeSmall = 12.0;
 
 const lightSelection = Color(0xFFD4D7DA);
-
-/// Return the fixed font style for DevTools.
-TextStyle fixedFontStyle(BuildContext context) {
-  return Theme.of(context)
-      .textTheme
-      .bodyText2
-      .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
-}

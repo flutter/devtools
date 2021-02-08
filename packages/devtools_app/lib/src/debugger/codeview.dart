@@ -214,7 +214,6 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     final theme = Theme.of(context);
 
     final lines = <TextSpan>[];
-    final style = fixedFontStyle(context);
 
     // Ensure the syntax highlighter has been initialized.
     // TODO(bkonyi): process source for highlighting on a separate thread.
@@ -229,7 +228,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
         if (span.toPlainText() == '\n') {
           lines.add(
             TextSpan(
-              style: style,
+              style: theme.fixedFontStyle,
               children: currentLine,
             ),
           );
@@ -239,7 +238,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       });
       lines.add(
         TextSpan(
-          style: style,
+          style: theme.fixedFontStyle,
           children: currentLine,
         ),
       );
@@ -248,7 +247,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
         [
           for (final line in script.source.split('\n'))
             TextSpan(
-              style: style,
+              style: theme.fixedFontStyle,
               text: line,
             ),
         ],
@@ -269,7 +268,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
         children: [
           buildCodeviewTitle(theme),
           DefaultTextStyle(
-            style: theme.consoleText,
+            style: theme.fixedFontStyle,
             child: Expanded(
               child: Scrollbar(
                 child: ValueListenableBuilder<StackFrameAndSourcePosition>(

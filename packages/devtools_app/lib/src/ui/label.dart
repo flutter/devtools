@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme.dart';
+
 /// Label including an image icon and optional text.
 class ImageIconLabel extends StatelessWidget {
   const ImageIconLabel(this.icon, this.text, {this.minIncludeTextWidth});
@@ -58,6 +60,6 @@ bool _showLabelText(BuildContext context, double includeTextWidth) {
 
 Icon createIcon(IconData iconData, {Color color}) => Icon(
       iconData,
-      size: 18.0,
+      size: defaultIconSize,
       color: color,
     );

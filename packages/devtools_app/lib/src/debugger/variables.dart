@@ -7,6 +7,7 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 
 import '../common_widgets.dart';
+import '../theme.dart';
 import '../tree.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
@@ -119,7 +120,7 @@ Widget displayProvider(
       TextSpan(
         children: processAnsiTerminalCodes(
           variable.text,
-          theme.consoleText,
+          theme.fixedFontStyle,
         ),
       ),
       onTap: onTap,
@@ -133,7 +134,7 @@ Widget displayProvider(
         text: variable.boundVar.name.isNotEmpty ?? false
             ? '${variable.boundVar.name}: '
             : null,
-        style: theme.consoleText,
+        style: theme.fixedFontStyle,
         children: [
           TextSpan(
             text: variable.displayValue,
