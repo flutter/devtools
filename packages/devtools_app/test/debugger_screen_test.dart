@@ -47,7 +47,6 @@ void main() {
       debuggerController = MockDebuggerController();
       when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
       when(debuggerController.resuming).thenReturn(ValueNotifier(false));
-      when(debuggerController.hasFrames).thenReturn(ValueNotifier(false));
       when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
       when(debuggerController.breakpointsWithLocation)
           .thenReturn(ValueNotifier([]));
@@ -489,7 +488,26 @@ void main() {
 
     testWidgets('debugger controls paused', (WidgetTester tester) async {
       when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
-      when(debuggerController.hasFrames).thenReturn(ValueNotifier(true));
+      when(debuggerController.stackFramesWithLocation)
+          .thenReturn(ValueNotifier([
+        StackFrameAndSourcePosition(
+          Frame(
+            index: 0,
+            code: CodeRef(
+                name: 'testCodeRef', id: 'testCodeRef', kind: CodeKind.kDart),
+            location: SourceLocation(
+              script:
+                  ScriptRef(uri: 'package:test/script.dart', id: 'script.dart'),
+              tokenPos: 10,
+            ),
+            kind: FrameKind.kRegular,
+          ),
+          position: SourcePosition(
+            line: 1,
+            column: 10,
+          ),
+        )
+      ]));
 
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
