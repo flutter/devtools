@@ -38,7 +38,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }) : service = service ?? createFakeService() {
     _flagManager.vmServiceOpened(this.service);
 
-    when(errorBadgeManager.erroredWidgetNotifier(any)).thenReturn(
+    when(errorBadgeManager.erroredItemsForPage(any)).thenReturn(
         FixedValueListenable(LinkedHashMap<String, DevToolsError>()));
   }
 

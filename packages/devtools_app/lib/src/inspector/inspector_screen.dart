@@ -82,11 +82,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       _handleConnectionStart(serviceManager.service);
     }
     _errors = serviceManager.errorBadgeManager
-        .erroredWidgetNotifier(InspectorScreen.id)
+        .erroredItemsForPage(InspectorScreen.id)
         .value;
     addAutoDisposeListener(
-      serviceManager.errorBadgeManager
-          .erroredWidgetNotifier(InspectorScreen.id),
+      serviceManager.errorBadgeManager.erroredItemsForPage(InspectorScreen.id),
       _errorsChanged,
     );
     autoDispose(
@@ -351,7 +350,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   void _errorsChanged() {
     setState(() {
       _errors = serviceManager.errorBadgeManager
-          .erroredWidgetNotifier(InspectorScreen.id)
+          .erroredItemsForPage(InspectorScreen.id)
           .value;
     });
   }

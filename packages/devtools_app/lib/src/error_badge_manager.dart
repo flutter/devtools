@@ -126,7 +126,7 @@ class ErrorBadgeManager extends DisposableController
     return _errorCountNotifier(screenId) ?? const FixedValueListenable<int>(0);
   }
 
-  ValueListenable<LinkedHashMap<String, DevToolsError>> erroredWidgetNotifier(
+  ValueListenable<LinkedHashMap<String, DevToolsError>> erroredItemsForPage(
       String screenId) {
     return _activeErrors[screenId] ??
         FixedValueListenable<LinkedHashMap<String, DevToolsError>>(

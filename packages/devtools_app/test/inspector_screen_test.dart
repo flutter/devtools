@@ -90,7 +90,7 @@ void main() {
 
       testWidgetsWithWindowSize('renders error navigator if errors', windowSize,
           (WidgetTester tester) async {
-        when(fakeServiceManager.errorBadgeManager.erroredWidgetNotifier(any))
+        when(fakeServiceManager.errorBadgeManager.erroredItemsForPage(any))
             .thenReturn(FixedValueListenable(sampleInspectorErrors));
 
         await tester.pumpWidget(wrap(Builder(builder: screen.build)));
