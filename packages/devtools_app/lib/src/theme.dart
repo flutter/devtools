@@ -141,6 +141,9 @@ const defaultListItemHeight = 28.0;
 
 const defaultChartHeight = 150.0;
 
+/// Width of all settings dialogs.
+const dialogSettingsWidth = 700.0;
+
 const defaultScrollBarOffset = 10.0;
 
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
@@ -263,11 +266,10 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get selectedTextStyle =>
       TextStyle(color: textSelectionTheme.selectionColor);
 
-  TextStyle get fixedFontStyle {
-    return textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
-  }
+  TextStyle get fixedFontStyle =>
+      textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
 
-  TextStyle get subtleConsoleText {
+  TextStyle get subtleFixedFontStyle {
     return fixedFontStyle.copyWith(color: unselectedWidgetColor);
   }
 }

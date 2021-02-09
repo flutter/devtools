@@ -138,7 +138,7 @@ Widget displayProvider(
         children: [
           TextSpan(
             text: variable.displayValue,
-            style: theme.subtleConsoleText,
+            style: theme.subtleFixedFontStyle,
           ),
         ],
       ),

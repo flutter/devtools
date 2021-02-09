@@ -140,6 +140,8 @@ class HeapTreeViewState extends State<HeapTree>
   @visibleForTesting
   static const allocationMonitorResetKey = Key('Accumulators Reset Button');
   @visibleForTesting
+  static const trackAllocationKey = Key('Track Class');
+  @visibleForTesting
   static const searchButtonKey = Key('Snapshot Search');
   @visibleForTesting
   static const filterButtonKey = Key('Snapshot Filter');
@@ -182,7 +184,7 @@ class HeapTreeViewState extends State<HeapTree>
       });
     });
 
-    addAutoDisposeListener(controller.selectionNotifier, () {
+    addAutoDisposeListener(controller.selectionSnapshotNotifier, () {
       setState(() {
         controller.computeAllLibraries(rebuild: true);
       });
@@ -611,8 +613,9 @@ class HeapTreeViewState extends State<HeapTree>
       }
 
       // Insure all entries from previous and current were looked at.
-      assert(previousLength == previousIndex);
-      assert(currentLength == currentIndex);
+      assert(
+          previousLength == previousIndex, '$previousLength == $previousIndex');
+      assert(currentLength == currentIndex, '$currentLength == $currentIndex');
     }
 
     controller.monitorTimestamp = allocationtimestamp;
@@ -649,6 +652,10 @@ class HeapTreeViewState extends State<HeapTree>
     selectFromSearchField(controller, foundName);
   }
 
+  bool get _isSearchable =>
+      controller.snapshots.isNotEmpty ||
+      controller.isAllocationMonitorLeafSelected;
+
   Widget _buildSearchFilterControls() {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -661,8 +668,8 @@ class HeapTreeViewState extends State<HeapTree>
           child: buildAutoCompleteSearchField(
             controller: controller,
             searchFieldKey: memorySearchFieldKey,
-            searchFieldEnabled: controller.snapshots.isNotEmpty,
-            shouldRequestFocus: controller.snapshots.isNotEmpty,
+            searchFieldEnabled: _isSearchable,
+            shouldRequestFocus: _isSearchable,
             onSelection: selectTheMatch,
           ),
         ),
@@ -835,7 +842,7 @@ class HeapTreeViewState extends State<HeapTree>
     }
 
     // Select the snapshot just analyzed.
-    controller.selectionNotifier.value = Selection(
+    controller.selectionSnapshotNotifier.value = Selection(
       node: analyzeSnapshot,
       nodeIndex: analyzeSnapshot.index,
       scrollIntoView: true,
@@ -924,6 +931,72 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
     });
   }
 
+  List<String> _allocationMatches(String searchingValue) {
+    final matches = <String>[];
+
+    // Matches that start with searchingValue, most relevant.
+    final startMatches = <String>[];
+
+    for (var allocation in controller.monitorAllocations) {
+      final knownName = allocation.classRef.name;
+      if (knownName.startsWith(searchingValue)) {
+        startMatches.add(knownName);
+      } else if (knownName.contains(searchingValue.toLowerCase())) {
+        matches.add(knownName);
+      }
+    }
+
+    matches.insertAll(0, startMatches);
+    return matches;
+  }
+
+  List<String> _snapshotMatches(String searchingValue) {
+    final matches = <String>[];
+
+    final externalMatches = <String>[];
+    final filteredMatches = <String>[];
+
+    switch (controller.groupingBy.value) {
+      case MemoryController.groupByLibrary:
+        final searchRoot = controller.activeSnapshot;
+        for (final reference in searchRoot.children) {
+          if (reference.isLibrary) {
+            matches.addAll(matchesInLibrary(reference, searchingValue));
+          } else if (reference.isExternals) {
+            final ExternalReferences refs = reference;
+            for (final ExternalReference ext in refs.children) {
+              final match = matchSearch(ext, searchingValue);
+              if (match != null) {
+                externalMatches.add(match);
+              }
+            }
+          } else if (reference.isFiltered) {
+            // Matches in the filtered nodes.
+            final FilteredReference filteredReference = reference;
+            for (final library in filteredReference.children) {
+              filteredMatches.addAll(matchesInLibrary(
+                library,
+                searchingValue,
+              ));
+            }
+          }
+        }
+        break;
+      case MemoryController.groupByClass:
+        matches.addAll(matchClasses(
+            controller.groupByTreeTable.dataRoots, searchingValue));
+        break;
+      case MemoryController.groupByInstance:
+        // TODO(terry): TBD
+        break;
+    }
+
+    // Ordered in importance (matches, external, filtered).
+    matches.addAll(externalMatches);
+    matches.addAll(filteredMatches);
+    return matches;
+  }
+
   bool _trySelectItem() {
     final searchingValue = controller.search;
     if (searchingValue.isNotEmpty) {
@@ -938,48 +1011,9 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
       // No exact match, return the list of possible matches.
       controller.clearSearchAutoComplete();
 
-      final externalMatches = <String>[];
-      final filteredMatches = <String>[];
-      final matches = <String>[];
-
-      switch (controller.groupingBy.value) {
-        case MemoryController.groupByLibrary:
-          final searchRoot = controller.activeSnapshot;
-          for (final reference in searchRoot.children) {
-            if (reference.isLibrary) {
-              matches.addAll(matchesInLibrary(reference, searchingValue));
-            } else if (reference.isExternals) {
-              final ExternalReferences refs = reference;
-              for (final ExternalReference ext in refs.children) {
-                final match = matchSearch(ext, searchingValue);
-                if (match != null) {
-                  externalMatches.add(match);
-                }
-              }
-            } else if (reference.isFiltered) {
-              // Matches in the filtered nodes.
-              final FilteredReference filteredReference = reference;
-              for (final library in filteredReference.children) {
-                filteredMatches.addAll(matchesInLibrary(
-                  library,
-                  searchingValue,
-                ));
-              }
-            }
-          }
-          break;
-        case MemoryController.groupByClass:
-          matches.addAll(matchClasses(
-              controller.groupByTreeTable.dataRoots, searchingValue));
-          break;
-        case MemoryController.groupByInstance:
-          // TODO(terry): TBD
-          break;
-      }
-
-      // Ordered in importance (matches, external, filtered).
-      matches.addAll(externalMatches);
-      matches.addAll(filteredMatches);
+      final matches = controller.isAllocationMonitorLeafSelected
+          ? _allocationMatches(searchingValue)
+          : _snapshotMatches(searchingValue);
 
       // Remove duplicates and sort the matches.
       final normalizedMatches = matches.toSet().toList()..sort();
@@ -1045,61 +1079,87 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
   /// This finds and selects an exact match in the tree.
   /// Returns `true` if [searchingValue] is found in the tree.
   bool selectItemInTree(String searchingValue) {
-    switch (controller.groupingBy.value) {
-      case MemoryController.groupByLibrary:
-        final searchRoot = controller.activeSnapshot;
-        if (controller.selectionNotifier.value.node == null) {
-          // No selected node, then select the snapshot we're searching.
-          controller.selectionNotifier.value = Selection(
-            node: searchRoot,
-            nodeIndex: searchRoot.index,
-            scrollIntoView: true,
-          );
+    if (controller.isAllocationMonitorLeafSelected) {
+      // Search the allocation table.
+      for (final reference in controller.monitorAllocations) {
+        final foundIt = _selectAllocationItemInTable(reference, searchingValue);
+        if (foundIt) {
+          return true;
         }
-        for (final reference in searchRoot.children) {
-          if (reference.isLibrary) {
-            final foundIt = _selectItemInTree(reference, searchingValue);
-            if (foundIt) {
-              return true;
-            }
-          } else if (reference.isFiltered) {
-            // Matches in the filtered nodes.
-            final FilteredReference filteredReference = reference;
-            for (final library in filteredReference.children) {
-              final foundIt = _selectItemInTree(library, searchingValue);
+      }
+    } else {
+      // Search the snapshots.
+      switch (controller.groupingBy.value) {
+        case MemoryController.groupByLibrary:
+          final searchRoot = controller.activeSnapshot;
+          if (controller.selectionSnapshotNotifier.value.node == null) {
+            // No selected node, then select the snapshot we're searching.
+            controller.selectionSnapshotNotifier.value = Selection(
+              node: searchRoot,
+              nodeIndex: searchRoot.index,
+              scrollIntoView: true,
+            );
+          }
+          for (final reference in searchRoot.children) {
+            if (reference.isLibrary) {
+              final foundIt = _selectItemInTree(reference, searchingValue);
               if (foundIt) {
                 return true;
               }
-            }
-          } else if (reference.isExternals) {
-            final ExternalReferences refs = reference;
-            for (final ExternalReference external in refs.children) {
-              final foundIt = _selectItemInTree(external, searchingValue);
-              if (foundIt) {
-                return true;
+            } else if (reference.isFiltered) {
+              // Matches in the filtered nodes.
+              final FilteredReference filteredReference = reference;
+              for (final library in filteredReference.children) {
+                final foundIt = _selectItemInTree(library, searchingValue);
+                if (foundIt) {
+                  return true;
+                }
+              }
+            } else if (reference.isExternals) {
+              final ExternalReferences refs = reference;
+              for (final ExternalReference external in refs.children) {
+                final foundIt = _selectItemInTree(external, searchingValue);
+                if (foundIt) {
+                  return true;
+                }
               }
             }
           }
-        }
-        break;
-      case MemoryController.groupByClass:
-        for (final reference in controller.groupByTreeTable.dataRoots) {
-          if (reference.isClass) {
-            return _selecteClassInTree(reference, searchingValue);
+          break;
+        case MemoryController.groupByClass:
+          for (final reference in controller.groupByTreeTable.dataRoots) {
+            if (reference.isClass) {
+              return _selecteClassInTree(reference, searchingValue);
+            }
           }
-        }
-        break;
-      case MemoryController.groupByInstance:
-        // TODO(terry): TBD
-        break;
+          break;
+        case MemoryController.groupByInstance:
+          // TODO(terry): TBD
+          break;
+      }
     }
 
     return false;
   }
 
+  bool _selectAllocationInTable(ClassHeapDetailStats reference, search) {
+    if (reference.classRef.name == search) {
+      controller.searchMatchMonitorAllocationsNotifier.value = reference;
+      controller.clearSearchAutoComplete();
+      return true;
+    }
+    return false;
+  }
+
+  bool _selectAllocationItemInTable(
+      ClassHeapDetailStats reference, String searchingValue) {
+    if (_selectAllocationInTable(reference, searchingValue)) return true;
+    return false;
+  }
+
   bool _selectInTree(Reference reference, search) {
     if (reference.name == search) {
-      controller.selectionNotifier.value = Selection(
+      controller.selectionSnapshotNotifier.value = Selection(
         node: reference,
         nodeIndex: reference.index,
         scrollIntoView: true,
@@ -1141,7 +1201,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
         keyFactory: (libRef) => PageStorageKey<String>(libRef.name),
         sortColumn: columns[0],
         sortDirection: SortDirection.ascending,
-        selectionNotifier: controller.selectionNotifier,
+        selectionNotifier: controller.selectionSnapshotNotifier,
       );
 
       return controller.groupByTreeTable;

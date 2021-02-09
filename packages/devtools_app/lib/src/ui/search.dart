@@ -129,8 +129,8 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
         ListTile(
           title: Text(matchedName),
           onTap: () {
-            selectTheSearch = true;
             search = matchedName;
+            selectTheSearch = true;
           },
         ),
       );
