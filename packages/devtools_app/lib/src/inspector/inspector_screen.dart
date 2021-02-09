@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
@@ -25,6 +26,7 @@ import '../ui/service_extension_widgets.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
 import 'inspector_service.dart';
+import 'inspector_tree.dart';
 import 'inspector_tree_flutter.dart';
 
 class InspectorScreen extends Screen {
@@ -70,7 +72,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   LinkedHashMap<String, DevToolsError> _errors =
       LinkedHashMap<String, DevToolsError>();
-  int _selectedErrorIndex;
 
   @override
   void initState() {
@@ -169,8 +170,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   Widget _buildSummaryTreeColumn() {
     final errors = _errors
-        ?.map((key, value) => MapEntry(key, value as InspectableWidgetError));
-    final errorList = errors?.values?.toList() ?? [];
+        .map((key, value) => MapEntry(key, value as InspectableWidgetError));
 
     return OutlineDecoration(
       child: Stack(
@@ -180,18 +180,17 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             isSummaryTree: true,
             widgetErrors: errors,
           ),
-          if (errorList.isNotEmpty)
+          if (errors.isNotEmpty)
             Positioned(
               top: 0,
               right: 0,
               child: ErrorNavigator(
-                selectedErrorIndex: _selectedErrorIndex,
-                errorCount: errorList.length,
+                errors: errors,
+                selectedNode: inspectorController.selectedNode,
                 onSelectedErrorIndexChanged: (index) => setState(() {
-                  _selectedErrorIndex = index;
                   inspectorController.updateSelectionFromService(
                       firstFrame: false,
-                      inspectorRef: errorList[index].inspectorRef);
+                      inspectorRef: errors.keys.elementAt(index));
                 }),
               ),
             ),
@@ -318,32 +317,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           //);
         });
       }
-
-      addAutoDisposeListener(
-          inspectorController.selectedNode, _selectedNodeChanged);
     });
-  }
-
-  void _selectedNodeChanged() {
-    final node = inspectorController.selectedNode.value;
-    final inspectorRef = node?.diagnostic?.valueRef?.id;
-    // Check whether the node that was just selected has any errors associated
-    // with it.
-    var errorIndex = inspectorRef != null
-        ? _errors.keys.toList().indexOf(inspectorRef)
-        : null;
-    if (errorIndex == -1) {
-      errorIndex = null;
-    }
-    // Update the selected index for the error navigator.
-    if (_selectedErrorIndex != errorIndex) {
-      setState(() => _selectedErrorIndex = errorIndex);
-    }
-    // Additionally, mark this error as "read".
-    if (errorIndex != null) {
-      serviceManager.errorBadgeManager
-          .markErrorAsRead(InspectorScreen.id, _errors[inspectorRef]);
-    }
   }
 
   void _errorsChanged() {
@@ -370,23 +344,65 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 }
 
-class ErrorNavigator extends StatelessWidget {
+class ErrorNavigator extends StatefulWidget {
   const ErrorNavigator({
     Key key,
-    @required this.selectedErrorIndex,
-    @required this.errorCount,
+    @required this.errors,
+    @required this.selectedNode,
     @required this.onSelectedErrorIndexChanged,
+    this.initialSelectedIndex,
   }) : super(key: key);
 
-  final int selectedErrorIndex;
-  final int errorCount;
+  final LinkedHashMap<String, InspectableWidgetError> errors;
+  final ValueListenable<InspectorTreeNode> selectedNode;
   final void Function(int) onSelectedErrorIndexChanged;
+  final int initialSelectedIndex;
+
+  @override
+  _ErrorNavigatorState createState() =>
+      _ErrorNavigatorState(initialSelectedIndex);
+}
+
+class _ErrorNavigatorState extends State<ErrorNavigator> with AutoDisposeMixin {
+  _ErrorNavigatorState(this._selectedErrorIndex);
+
+  int _selectedErrorIndex;
+
+  @override
+  void initState() {
+    super.initState();
+
+    addAutoDisposeListener(widget.selectedNode, _selectedNodeChanged);
+  }
+
+  void _selectedNodeChanged() {
+    final node = widget.selectedNode.value;
+    final inspectorRef = node?.diagnostic?.valueRef?.id;
+    // Check whether the node that was just selected has any errors associated
+    // with it.
+    var errorIndex = inspectorRef != null
+        ? widget.errors.keys.toList().indexOf(inspectorRef)
+        : null;
+    if (errorIndex == -1) {
+      errorIndex = null;
+    }
+    // Update the selected index for the error navigator.
+    if (_selectedErrorIndex != errorIndex) {
+      setState(() => _selectedErrorIndex = errorIndex);
+    }
+    // Additionally, mark this error as "read" and clear the badge.
+    if (errorIndex != null) {
+      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
+      serviceManager.errorBadgeManager
+          .markErrorAsRead(InspectorScreen.id, widget.errors[inspectorRef]);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final label = selectedErrorIndex != null
-        ? 'Error ${selectedErrorIndex + 1}/$errorCount'
-        : 'Errors: $errorCount';
+    final label = _selectedErrorIndex != null
+        ? 'Error ${_selectedErrorIndex + 1}/${widget.errors.length}'
+        : 'Errors: ${widget.errors.length}';
     return Container(
       color: devtoolsError,
       child: Padding(
@@ -419,17 +435,19 @@ class ErrorNavigator extends StatelessWidget {
   }
 
   void _previousError() {
-    var newIndex =
-        selectedErrorIndex == null ? errorCount - 1 : selectedErrorIndex - 1;
-    while (newIndex < 0) {
-      newIndex += errorCount;
+    _selectedErrorIndex = _selectedErrorIndex == null
+        ? widget.errors.length - 1
+        : _selectedErrorIndex - 1;
+    while (_selectedErrorIndex < 0) {
+      _selectedErrorIndex += widget.errors.length;
     }
-    onSelectedErrorIndexChanged(newIndex);
+    widget.onSelectedErrorIndexChanged(_selectedErrorIndex);
   }
 
   void _nextError() {
-    final newIndex =
-        selectedErrorIndex == null ? 0 : (selectedErrorIndex + 1) % errorCount;
-    onSelectedErrorIndexChanged(newIndex);
+    _selectedErrorIndex = _selectedErrorIndex == null
+        ? 0
+        : (_selectedErrorIndex + 1) % widget.errors.length;
+    widget.onSelectedErrorIndexChanged(_selectedErrorIndex);
   }
 }
