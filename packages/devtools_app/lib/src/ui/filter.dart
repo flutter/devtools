@@ -61,7 +61,7 @@ class _FilterDialogState extends State<FilterDialog> {
         padding: const EdgeInsets.symmetric(
           horizontal: defaultSpacing,
         ),
-        width: dialogSettingsWidth,
+        width: defaultDialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

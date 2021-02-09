@@ -325,7 +325,7 @@ class _LogDetailsState extends State<LogDetails>
             child: SelectableText(
               log?.prettyPrinted ?? '',
               textAlign: TextAlign.left,
-              style: Theme.of(context).consoleText,
+              style: Theme.of(context).fixedFontStyle,
             ),
           ),
         ),
@@ -386,7 +386,7 @@ class _KindColumn extends ColumnData<LogData>
     }
 
     // Use a font color that contrasts with the colored backgrounds.
-    final textStyle = Theme.of(context).consoleText;
+    final textStyle = Theme.of(context).fixedFontStyle;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 3.0),
@@ -420,7 +420,7 @@ class _MessageColumn extends ColumnData<LogData>
     LogData data, {
     bool isRowSelected = false,
   }) {
-    TextStyle textStyle = fixedFontStyle(context);
+    TextStyle textStyle = Theme.of(context).fixedFontStyle;
     if (isRowSelected) {
       textStyle = textStyle.copyWith(color: defaultSelectionForegroundColor);
     }

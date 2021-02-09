@@ -246,7 +246,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         const SizedBox(width: defaultSpacing),
         SettingsOutlinedButton(
           onPressed: _openSettingsDialog,
-          tooltip: 'Timeline Configuration',
+          tooltip: 'Performance Settings',
         ),
       ],
     );
@@ -255,7 +255,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   void _openSettingsDialog() {
     showDialog(
       context: context,
-      builder: (context) => TimelineConfigurationsDialog(controller),
+      builder: (context) => PerformanceSettingsDialog(controller),
     );
   }
 
@@ -291,20 +291,19 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   }
 }
 
-class TimelineConfigurationsDialog extends StatelessWidget {
-  const TimelineConfigurationsDialog(this.controller);
+class PerformanceSettingsDialog extends StatelessWidget {
+  const PerformanceSettingsDialog(this.controller);
 
   final PerformanceController controller;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return DevToolsDialog(
       title: dialogTitleText(theme, 'Performance Settings'),
       includeDivider: false,
       content: Container(
-        width: dialogSettingsWidth,
+        width: defaultDialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

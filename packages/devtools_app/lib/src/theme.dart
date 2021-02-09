@@ -148,6 +148,8 @@ const defaultScrollBarOffset = 10.0;
 
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 
+const defaultDialogWidth = 700.0;
+
 /// Branded grey color.
 ///
 /// Source: https://drive.google.com/open?id=1QBhMJqXyRt-CpRsHR6yw2LAfQtiNat4g
@@ -252,6 +254,26 @@ extension DevToolsColorScheme on ColorScheme {
       );
 }
 
+/// Utility extension methods to the [ThemeData] class.
+extension ThemeDataExtension on ThemeData {
+  /// Returns whether we are currently using a dark theme.
+  bool get isDarkTheme => brightness == Brightness.dark;
+
+  TextStyle get regularTextStyle => TextStyle(color: textTheme.bodyText2.color);
+
+  TextStyle get subtleTextStyle => TextStyle(color: unselectedWidgetColor);
+
+  TextStyle get selectedTextStyle =>
+      TextStyle(color: textSelectionTheme.selectionColor);
+
+  TextStyle get fixedFontStyle =>
+      textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
+
+  TextStyle get subtleFixedFontStyle {
+    return fixedFontStyle.copyWith(color: unselectedWidgetColor);
+  }
+}
+
 TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
       color: colorScheme.devtoolsLink,
       decoration: TextDecoration.underline,
@@ -330,19 +352,3 @@ Color titleSolidBackgroundColor(ThemeData theme) {
 const chartFontSizeSmall = 12.0;
 
 const lightSelection = Color(0xFFD4D7DA);
-
-/// Return the fixed font style for DevTools.
-TextStyle fixedFontStyle(BuildContext context) {
-  return Theme.of(context)
-      .textTheme
-      .bodyText2
-      .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
-}
-
-TextStyle smallerFixedFontStyle(BuildContext context) {
-  return Theme.of(context)
-      .textTheme
-      .bodyText2
-      .copyWith(fontFamily: 'RobotoMono', fontSize: 10.0);
-}
-

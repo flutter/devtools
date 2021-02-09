@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
+import '../dialogs.dart';
 import '../extent_delegate_list.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../theme.dart';
@@ -1306,4 +1307,141 @@ class TimelineGridPainter extends FlameChartPainter {
         duration,
         colorScheme,
       );
+}
+
+class FlameChartHelpButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return HelpButton(
+      onPressed: () => showDialog(
+        context: context,
+        builder: (context) => _FlameChartHelpDialog(),
+      ),
+    );
+  }
+}
+
+class _FlameChartHelpDialog extends StatelessWidget {
+  /// A fixed width for the first column in the help dialog to ensure that the
+  /// subsections are aligned.
+  static const firstColumnWidth = 190.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DevToolsDialog(
+      title: dialogTitleText(theme, 'Flame Chart Help'),
+      includeDivider: false,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...dialogSubHeader(theme, 'Navigation'),
+          _buildNavigationInstructions(theme),
+          const SizedBox(height: denseSpacing),
+          ...dialogSubHeader(theme, 'Zoom'),
+          _buildZoomInstructions(theme),
+        ],
+      ),
+      actions: [
+        DialogCloseButton(),
+      ],
+    );
+  }
+
+  Widget _buildNavigationInstructions(ThemeData theme) {
+    return Row(
+      children: [
+        SizedBox(
+          width: firstColumnWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'click + drag • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'click + fling • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'alt/option + scroll • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'scroll left / right • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'a / d • ',
+                style: theme.fixedFontStyle,
+              ),
+            ],
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Pan chart up / down / left / right',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              'Fling chart up / down / left / right',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              'Pan chart up / down',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              'Pan chart left / right',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              'Pan chart left / right',
+              style: theme.subtleTextStyle,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildZoomInstructions(ThemeData theme) {
+    return Row(
+      children: [
+        SizedBox(
+          width: firstColumnWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'scroll up / down • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'w / s • ',
+                style: theme.fixedFontStyle,
+              ),
+            ],
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'zoom in / out',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              'zoom in / out',
+              style: theme.subtleTextStyle,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 }

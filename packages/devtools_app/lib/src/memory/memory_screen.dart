@@ -1456,7 +1456,7 @@ class MemoryConfigurationsDialog extends StatelessWidget {
       title: dialogTitleText(theme, 'Memory Settings'),
       includeDivider: false,
       content: Container(
-        width: dialogSettingsWidth,
+        width: defaultDialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

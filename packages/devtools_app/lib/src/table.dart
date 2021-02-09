@@ -1372,7 +1372,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final textColor = widget.isSelected
         ? defaultSelectionForegroundColor
         : column.getTextColor(widget.node);
-    final fontStyle = fixedFontStyle(context);
+    final fontStyle = Theme.of(context).fixedFontStyle;
     return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
   }
 
