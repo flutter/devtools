@@ -82,7 +82,8 @@ void main() {
         {'test-ref': InspectableWidgetError('Error', 'test-ref')},
       );
 
-      testWidgetsWithWindowSize('renders error navigator if errors', windowSize,
+      testWidgetsWithWindowSize(
+          'renders error navigator if no errors', windowSize,
           (WidgetTester tester) async {
         await tester.pumpWidget(wrap(Builder(builder: screen.build)));
         expect(find.byType(ErrorNavigator), findsNothing);

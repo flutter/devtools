@@ -190,13 +190,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             isSummaryTree: true,
             widgetErrors: errors,
           ),
-          if (errors.isNotEmpty && inspectorController != null)
+          if (errors.isNotEmpty)
             Positioned(
               top: 0,
               right: 0,
               child: ErrorNavigator(
                 errors: errors,
-                selectedNode: inspectorController.selectedNode,
+                selectedNode: inspectorController?.selectedNode,
                 selectedErrorIndex: _selectedErrorIndex,
               ),
             ),
@@ -370,8 +370,22 @@ class _ErrorNavigatorState extends State<ErrorNavigator> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
+    widget.selectedNode?.addListener(_selectedNodeChanged);
+  }
 
-    addAutoDisposeListener(widget.selectedNode, _selectedNodeChanged);
+  @override
+  void didUpdateWidget(covariant ErrorNavigator oldWidget) {
+    if (oldWidget.selectedNode != widget.selectedNode) {
+      oldWidget.selectedNode?.removeListener(_selectedNodeChanged);
+      widget.selectedNode?.addListener(_selectedNodeChanged);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    widget.selectedNode?.removeListener(_selectedNodeChanged);
   }
 
   void _selectedNodeChanged() {

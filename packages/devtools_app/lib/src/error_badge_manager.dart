@@ -138,8 +138,13 @@ class ErrorBadgeManager extends DisposableController
   void filterErrors(String screenId, bool Function(String id) isValid) {
     final errors = _activeErrors[screenId];
     if (errors == null) return;
-    errors.value =
+
+    final oldCount = errors.value.length;
+    final newValue =
         Map.fromEntries(errors.value.entries.where((e) => isValid(e.key)));
+    if (newValue.length != oldCount) {
+      errors.value = newValue;
+    }
   }
 
   void markErrorAsRead(String screenId, DevToolsError error) {
