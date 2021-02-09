@@ -33,7 +33,7 @@ class InspectorDetailsTabController extends StatefulWidget {
 class _InspectorDetailsTabControllerState
     extends State<InspectorDetailsTabController>
     with TickerProviderStateMixin, AutoDisposeMixin {
-  static const _detailsTreeTabIndex = 0;
+  static const _detailsTreeTabIndex = 1;
   static const _tabsLengthWithLayoutExplorer = 2;
   static const _tabsLengthWithoutLayoutExplorer = 1;
 
