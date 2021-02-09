@@ -567,12 +567,14 @@ class MemoryController extends DisposableController
     if (foundClass != null) {
       foundClass.isStacktraced = enable;
 
-      _setTracking(foundClass.classRef, enable).catchError((e) {
+      final classRef = foundClass.classRef;
+      _setTracking(classRef, enable).catchError((e) {
         debugLogger('ERROR: ${e.message}');
       }).whenComplete(
         () {
           changeStackTraces();
           treeChanged();
+          // TODO(terry): Add a toast popup.
         },
       );
     }

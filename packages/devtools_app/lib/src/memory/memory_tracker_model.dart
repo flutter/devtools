@@ -83,8 +83,8 @@ class _TrackerClassColumn extends TreeColumnData<Tracker> {
     Comparable valueB = getValue(b);
     if (a is TrackerCall) {
       // Sort is always by child index for the stacktrace, call stack should not reorder.
-      valueA = a.children.indexOf(a);
-      valueB = b.children.indexOf(a);
+      valueA = a.parent.children.indexOf(a);
+      valueB = b.parent.children.indexOf(b);
     }
     return valueA.compareTo(valueB);
   }
@@ -195,43 +195,6 @@ class TreeTracker {
       allocation.addChild(TrackerCall(item.stacktrace[index]));
     }
     allocation.expandCascading();
-  }
-
-  void createTrackerTreeSample() {
-    treeColumn = _TrackerClassColumn();
-    tree1 = TrackerClass('_ROOT_tracking');
-
-    var classEntry = TrackerClass('Foo');
-    tree1.addChild(classEntry);
-
-    var allocation = TrackerAllocation(1);
-    classEntry.addChild(allocation);
-    allocation.addChild(TrackerCall('foo.call1a()'));
-    allocation.addChild(TrackerCall('foo.call2a()'));
-    allocation.addChild(TrackerCall('parent.call0a()'));
-
-    allocation = TrackerAllocation(2);
-    classEntry.addChild(allocation);
-    allocation.addChild(TrackerCall('foo.call1b()'));
-    allocation.addChild(TrackerCall('foo.call2b()'));
-    allocation.addChild(TrackerCall('parent.call0b()'));
-
-    classEntry = TrackerClass('Bar');
-    tree1.addChild(classEntry);
-
-    allocation = TrackerAllocation(3);
-    classEntry.addChild(allocation);
-    allocation.addChild(TrackerCall('bar.call1a()'));
-    allocation.addChild(TrackerCall('xyzzy.call2a()'));
-    allocation.addChild(TrackerCall('xyzzy.call0a()'));
-
-    allocation = TrackerAllocation(4);
-    classEntry.addChild(allocation);
-    allocation.addChild(TrackerCall('bar.call1b()'));
-    allocation.addChild(TrackerCall('xyzzy.call2b()'));
-    allocation.addChild(TrackerCall('xyzzy.call0b()'));
-
-//      ..expandCascading();
   }
 
   Widget createTrackingTable(MemoryController controller) {

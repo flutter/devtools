@@ -78,9 +78,7 @@ class AllocationTableViewState extends State<AllocationTableView>
     });
 
     addAutoDisposeListener(controller.treeChangedNotifier, () {
-      if (controller.isTreeChanged) {
-        setState(() {});
-      }
+      setState(() {});
     });
 
     addAutoDisposeListener(trackerData.selectionNotifier, () {
@@ -117,7 +115,8 @@ class AllocationTableViewState extends State<AllocationTableView>
         controller.sortedMonitorColumn = column;
         controller.sortedMonitorDirection = direction;
       },
-      activeSearchMatchNotifier: controller.searchMatchMonitorAllocationsNotifier,
+      activeSearchMatchNotifier:
+          controller.searchMatchMonitorAllocationsNotifier,
     );
 
     return Split(
