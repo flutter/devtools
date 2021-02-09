@@ -214,8 +214,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           PageChangeEvent(screen?.screenId, widget.embed),
         );
 
-        // Mark errors for this screen as seen.
-        serviceManager.errorBadgeManager.markErrorsAsRead(screen?.screenId);
+        // Clear error count when navigating to a screen.
+        serviceManager.errorBadgeManager.clearErrors(screen?.screenId);
 
         // If the tab index is 0 and the current route has no page ID (eg. we're
         // at the URL /?uri= with no page ID), those are equivalent pages but

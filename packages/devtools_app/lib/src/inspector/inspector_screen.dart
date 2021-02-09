@@ -339,6 +339,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     if (_selectedErrorIndex != errorIndex) {
       setState(() => _selectedErrorIndex = errorIndex);
     }
+    // Additionally, mark this error as "read".
+    if (errorIndex != null) {
+      serviceManager.errorBadgeManager
+          .markErrorAsRead(InspectorScreen.id, _errors[inspectorRef]);
+    }
   }
 
   void _errorsChanged() {

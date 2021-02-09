@@ -29,7 +29,7 @@ class _InspectorTreeRowWidget extends StatefulWidget {
     @required Key key,
     @required this.row,
     @required this.inspectorTreeState,
-    this.errorDescription,
+    this.error,
   }) : super(key: key);
 
   final _InspectorTreeState inspectorTreeState;
@@ -37,10 +37,10 @@ class _InspectorTreeRowWidget extends StatefulWidget {
   InspectorTreeNode get node => row.node;
   final InspectorTreeRow row;
 
-  /// A description of any error for this row.
+  /// A [DevToolsError] that applies to the widget in this row.
   ///
   /// This will be null if there is no error for this row.
-  final String errorDescription;
+  final DevToolsError error;
 
   @override
   _InspectorTreeRowState createState() => _InspectorTreeRowState();
@@ -54,7 +54,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
       height: rowHeight,
       child: InspectorRowContent(
         row: widget.row,
-        errorDescription: widget.errorDescription,
+        error: widget.error,
         expandArrowAnimation: expandArrowAnimation,
         controller: widget.inspectorTreeState.controller,
         onToggle: () {
@@ -431,10 +431,10 @@ class _InspectorTreeState extends State<InspectorTree>
                         key: PageStorageKey(row?.node),
                         inspectorTreeState: this,
                         row: row,
-                        errorDescription: widget.widgetErrors != null &&
-                                inspectorRef != null
-                            ? widget.widgetErrors[inspectorRef]?.errorMessage
-                            : null,
+                        error:
+                            widget.widgetErrors != null && inspectorRef != null
+                                ? widget.widgetErrors[inspectorRef]
+                                : null,
                       );
                     },
                     childCount: controller.numRows,
@@ -536,7 +536,7 @@ class InspectorRowContent extends StatelessWidget {
     @required this.controller,
     @required this.onToggle,
     @required this.expandArrowAnimation,
-    this.errorDescription,
+    this.error,
   });
 
   final InspectorTreeRow row;
@@ -544,13 +544,13 @@ class InspectorRowContent extends StatelessWidget {
   final VoidCallback onToggle;
   final Animation<double> expandArrowAnimation;
 
-  /// A description of any error for this row.
+  /// A [DevToolsError] that applies to the widget in this row.
   ///
   /// This will be null if there is no error for this row.
-  final String errorDescription;
+  final DevToolsError error;
 
   /// Whether this row has any error.
-  bool get hasError => errorDescription != null;
+  bool get hasError => error != null;
 
   @override
   Widget build(BuildContext context) {
@@ -620,28 +620,28 @@ class InspectorRowContent extends StatelessWidget {
     );
 
     // Wrap with error tooltip/marker if there is an error for this node's widget.
-    return errorDescription == null
-        ? rowWidget
-        : Stack(
+    return hasError
+        ? Stack(
             children: [
               rowWidget,
               ErrorIndicator(
-                errorText: errorDescription,
+                error: error,
                 indent: currentX,
               ),
             ],
-          );
+          )
+        : rowWidget;
   }
 }
 
 class ErrorIndicator extends StatelessWidget {
   const ErrorIndicator({
     Key key,
-    @required this.errorText,
+    @required this.error,
     @required this.indent,
   }) : super(key: key);
 
-  final String errorText;
+  final DevToolsError error;
   final double indent;
 
   /// [indent] is where the row content starts, so the indicator should be
@@ -652,7 +652,7 @@ class ErrorIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: errorText,
+      message: error.errorMessage,
       child: Padding(
         padding: EdgeInsets.only(
           left: indent + indicatorOffset,
@@ -661,9 +661,10 @@ class ErrorIndicator extends StatelessWidget {
         child: Container(
           width: defaultIconSize,
           height: defaultIconSize,
-          decoration: const BoxDecoration(
-            color: devtoolsError,
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
+            color: error.read ? null : devtoolsError,
+            border: error.read ? Border.all(color: devtoolsError) : null,
           ),
         ),
       ),

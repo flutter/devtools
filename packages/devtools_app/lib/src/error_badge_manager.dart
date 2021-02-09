@@ -55,6 +55,7 @@ class ErrorBadgeManager extends DisposableController
 
       final inspectableError = _extractInspectableError(e);
       if (inspectableError != null) {
+        incrementBadgeCount(InspectorScreen.id);
         appendError(InspectorScreen.id, inspectableError);
       }
     }
@@ -113,15 +114,6 @@ class ErrorBadgeManager extends DisposableController
     final newValue = LinkedHashMap<String, DevToolsError>.from(errors.value);
     newValue[error.id] = error;
     errors.value = newValue;
-    _updateErrorCount(screenId);
-  }
-
-  /// Update the error count to include only "unread" errors.
-  void _updateErrorCount(String screenId) {
-    final errors =
-        _activeErrors[screenId]?.value ?? const <String, DevToolsError>{};
-    _errorCountNotifier(screenId).value =
-        errors.values.where((err) => !err.read).length;
   }
 
   ValueListenable<int> errorCountNotifier(String screenId) {
@@ -148,29 +140,25 @@ class ErrorBadgeManager extends DisposableController
     if (errors == null) return;
     errors.value =
         Map.fromEntries(errors.value.entries.where((e) => isValid(e.key)));
-    _updateErrorCount(screenId);
   }
 
-  void markErrorsAsRead(String screenId) {
+  void markErrorAsRead(String screenId, DevToolsError error) {
     final errors = _activeErrors[screenId];
     if (errors == null) return;
 
-    // As an optimisation because the new map will always appear changed even if
-    // the contents are the same, track whether any items are actually marked as
-    // read and skip setting the value if not.
-    var didChange = false;
-    final newValue = LinkedHashMap<String, DevToolsError>.fromEntries(
+    // If this error doesn't exist anymore or is already read, nothing to do.
+    if (errors.value[error.id]?.read ?? true) {
+      return;
+    }
+
+    // Otherwise, replace the map with a new one that has the error marked
+    // as read.
+    errors.value = LinkedHashMap<String, DevToolsError>.fromEntries(
       errors.value.entries.map((e) {
-        // If already read, just return the same entry.
-        if (e.value.read) return e;
-        didChange = true;
+        if (e.value != error) return e;
         return MapEntry(e.key, e.value.asRead());
       }),
     );
-    if (didChange) {
-      errors.value = newValue;
-      _updateErrorCount(screenId);
-    }
   }
 }
 
