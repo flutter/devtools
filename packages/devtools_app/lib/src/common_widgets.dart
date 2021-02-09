@@ -782,8 +782,9 @@ class FilterButton extends StatelessWidget {
             ? theme.colorScheme.toggleButtonBackgroundColor
             : Colors.transparent,
       ),
-      child: createIcon(
+      child: Icon(
         Icons.filter_list,
+        size: defaultIconSize,
         color: isFilterActive
             ? theme.colorScheme.toggleButtonForegroundColor
             : theme.colorScheme.contrastForeground,

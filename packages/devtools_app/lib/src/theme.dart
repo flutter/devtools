@@ -122,7 +122,7 @@ bool isValidLightColor(Color color) {
 const defaultButtonHeight = 36.0;
 const buttonMinWidth = 36.0;
 
-const defaultIconSize = 18.0;
+const defaultIconSize = 16.0;
 const actionsIconSize = 20.0;
 const defaultIconThemeSize = 24.0;
 

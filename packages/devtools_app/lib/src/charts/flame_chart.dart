@@ -1322,6 +1322,10 @@ class FlameChartHelpButton extends StatelessWidget {
 }
 
 class _FlameChartHelpDialog extends StatelessWidget {
+  /// A fixed width for the first column in the help dialog to ensure that the
+  /// subsections are aligned.
+  static const firstColumnWidth = 190.0;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1348,30 +1352,33 @@ class _FlameChartHelpDialog extends StatelessWidget {
   Widget _buildNavigationInstructions(ThemeData theme) {
     return Row(
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              'click + drag • ',
-              style: theme.fixedFontStyle,
-            ),
-            Text(
-              'click + fling • ',
-              style: theme.fixedFontStyle,
-            ),
-            Text(
-              'alt/option + scroll • ',
-              style: theme.fixedFontStyle,
-            ),
-            Text(
-              'scroll left / right • ',
-              style: theme.fixedFontStyle,
-            ),
-            Text(
-              'a / d • ',
-              style: theme.fixedFontStyle,
-            ),
-          ],
+        SizedBox(
+          width: firstColumnWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'click + drag • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'click + fling • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'alt/option + scroll • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'scroll left / right • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'a / d • ',
+                style: theme.fixedFontStyle,
+              ),
+            ],
+          ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1405,18 +1412,21 @@ class _FlameChartHelpDialog extends StatelessWidget {
   Widget _buildZoomInstructions(ThemeData theme) {
     return Row(
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              'scroll up / down • ',
-              style: theme.fixedFontStyle,
-            ),
-            Text(
-              'w / s • ',
-              style: theme.fixedFontStyle,
-            ),
-          ],
+        SizedBox(
+          width: firstColumnWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'scroll up / down • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'w / s • ',
+                style: theme.fixedFontStyle,
+              ),
+            ],
+          ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,

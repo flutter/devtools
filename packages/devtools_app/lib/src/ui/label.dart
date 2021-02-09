@@ -41,7 +41,10 @@ class MaterialIconLabel extends StatelessWidget {
     // when the text is not shown.
     return Row(
       children: [
-        createIcon(iconData),
+        Icon(
+          iconData,
+          size: defaultIconSize,
+        ),
         // TODO(jacobr): animate showing and hiding the text.
         if (_showLabelText(context, includeTextWidth))
           Padding(
@@ -57,9 +60,3 @@ bool _showLabelText(BuildContext context, double includeTextWidth) {
   return includeTextWidth == null ||
       MediaQuery.of(context).size.width > includeTextWidth;
 }
-
-Icon createIcon(IconData iconData, {Color color}) => Icon(
-      iconData,
-      size: defaultIconSize,
-      color: color,
-    );

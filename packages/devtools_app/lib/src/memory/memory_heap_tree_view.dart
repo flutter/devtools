@@ -497,7 +497,10 @@ class HeapTreeViewState extends State<HeapTree>
                   }
                 }
               : null,
-          child: createIcon(Icons.vertical_align_top),
+          child: const Icon(
+            Icons.vertical_align_top,
+            size: defaultIconSize,
+          ),
         ),
         FixedHeightOutlinedButton(
           buttonKey: expandAllButtonKey,
@@ -515,7 +518,10 @@ class HeapTreeViewState extends State<HeapTree>
                   controller.treeChanged();
                 }
               : null,
-          child: createIcon(Icons.vertical_align_bottom),
+          child: const Icon(
+            Icons.vertical_align_bottom,
+            size: defaultIconSize,
+          ),
         ),
         const SizedBox(width: defaultSpacing),
         FixedHeightOutlinedButton(
