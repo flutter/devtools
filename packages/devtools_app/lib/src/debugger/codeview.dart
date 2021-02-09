@@ -112,13 +112,11 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
 
   @override
   void dispose() {
-    super.dispose();
-
     gutterController.dispose();
     textController.dispose();
-
     widget.controller.scriptLocation
         .removeListener(_handleScriptLocationChanged);
+    super.dispose();
   }
 
   void _initScriptInfo() {

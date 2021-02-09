@@ -3,114 +3,138 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart' hide Stack;
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import 'debugger_controller.dart';
 import 'scripts.dart';
 
-class DebuggingControls extends StatelessWidget {
-  const DebuggingControls({Key key, @required this.controller})
-      : super(key: key);
+class DebuggingControls extends StatefulWidget {
+  const DebuggingControls({Key key}) : super(key: key);
 
-  final DebuggerController controller;
+  @override
+  _DebuggingControlsState createState() => _DebuggingControlsState();
+}
+
+class _DebuggingControlsState extends State<DebuggingControls>
+    with AutoDisposeMixin {
+  DebuggerController controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller = Provider.of<DebuggerController>(context);
+    addAutoDisposeListener(controller.isPaused);
+    addAutoDisposeListener(controller.resuming);
+    addAutoDisposeListener(controller.stackFramesWithLocation);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: controller.isPaused,
-      builder: (context, isPaused, _) {
-        return ValueListenableBuilder(
-          valueListenable: controller.resuming,
-          builder: (context, resuming, Widget _) {
-            final canStep = isPaused && !resuming && controller.hasFrames.value;
+    final isPaused = controller.isPaused.value;
+    final resuming = controller.resuming.value;
+    final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
+    final canStep = isPaused && !resuming && hasStackFrames;
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: Row(
+        children: [
+          _pauseAndResumeButtons(isPaused: isPaused, resuming: resuming),
+          const SizedBox(width: denseSpacing),
+          _stepButtons(canStep: canStep),
+          const SizedBox(width: denseSpacing),
+          _breakOnExceptionsControl(),
+          const Expanded(child: SizedBox(width: denseSpacing)),
+          _librariesButton(),
+        ],
+      ),
+    );
+  }
 
-            return SizedBox(
-              height: defaultButtonHeight,
-              child: Row(
-                children: [
-                  RoundedOutlinedBorder(
-                    child: Row(
-                      children: [
-                        DebuggerButton(
-                          title: 'Pause',
-                          icon: Icons.pause,
-                          autofocus: true,
-                          onPressed: isPaused ? null : controller.pause,
-                        ),
-                        LeftBorder(
-                          child: DebuggerButton(
-                            title: 'Resume',
-                            icon: Icons.play_arrow,
-                            onPressed: (isPaused && !resuming)
-                                ? controller.resume
-                                : null,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: denseSpacing),
-                  RoundedOutlinedBorder(
-                    child: Row(
-                      children: [
-                        DebuggerButton(
-                          title: 'Step In',
-                          icon: Icons.keyboard_arrow_down,
-                          onPressed: canStep ? controller.stepIn : null,
-                        ),
-                        LeftBorder(
-                          child: DebuggerButton(
-                            title: 'Step Over',
-                            icon: Icons.keyboard_arrow_right,
-                            onPressed: canStep ? controller.stepOver : null,
-                          ),
-                        ),
-                        LeftBorder(
-                          child: DebuggerButton(
-                            title: 'Step Out',
-                            icon: Icons.keyboard_arrow_up,
-                            onPressed: canStep ? controller.stepOut : null,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: denseSpacing),
-                  RoundedOutlinedBorder(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          left: defaultSpacing,
-                          right: borderPadding,
-                        ),
-                        child: BreakOnExceptionsControl(controller: controller),
-                      ),
-                    ),
-                  ),
-                  const Expanded(child: SizedBox(width: denseSpacing)),
-                  ValueListenableBuilder(
-                    valueListenable: controller.librariesVisible,
-                    builder: (context, visible, _) {
-                      return RoundedOutlinedBorder(
-                        child: Container(
-                          color:
-                              visible ? Theme.of(context).highlightColor : null,
-                          child: DebuggerButton(
-                            title: 'Libraries',
-                            icon: libraryIcon,
-                            onPressed: controller.toggleLibrariesVisible,
-                          ),
-                        ),
-                      );
-                    },
-                  )
-                ],
-              ),
-            );
-          },
+  Widget _pauseAndResumeButtons({
+    @required bool isPaused,
+    @required bool resuming,
+  }) {
+    return RoundedOutlinedBorder(
+      child: Row(
+        children: [
+          DebuggerButton(
+            title: 'Pause',
+            icon: Icons.pause,
+            autofocus: true,
+            onPressed: isPaused ? null : controller.pause,
+          ),
+          LeftBorder(
+            child: DebuggerButton(
+              title: 'Resume',
+              icon: Icons.play_arrow,
+              onPressed: (isPaused && !resuming) ? controller.resume : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepButtons({@required bool canStep}) {
+    return RoundedOutlinedBorder(
+      child: Row(
+        children: [
+          DebuggerButton(
+            title: 'Step In',
+            icon: Icons.keyboard_arrow_down,
+            onPressed: canStep ? controller.stepIn : null,
+          ),
+          LeftBorder(
+            child: DebuggerButton(
+              title: 'Step Over',
+              icon: Icons.keyboard_arrow_right,
+              onPressed: canStep ? controller.stepOver : null,
+            ),
+          ),
+          LeftBorder(
+            child: DebuggerButton(
+              title: 'Step Out',
+              icon: Icons.keyboard_arrow_up,
+              onPressed: canStep ? controller.stepOut : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _breakOnExceptionsControl() {
+    return RoundedOutlinedBorder(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.only(
+            left: defaultSpacing,
+            right: borderPadding,
+          ),
+          child: BreakOnExceptionsControl(controller: controller),
+        ),
+      ),
+    );
+  }
+
+  Widget _librariesButton() {
+    return ValueListenableBuilder(
+      valueListenable: controller.librariesVisible,
+      builder: (context, visible, _) {
+        return RoundedOutlinedBorder(
+          child: Container(
+            color: visible ? Theme.of(context).highlightColor : null,
+            child: DebuggerButton(
+              title: 'Libraries',
+              icon: libraryIcon,
+              onPressed: controller.toggleLibrariesVisible,
+            ),
+          ),
         );
       },
     );

@@ -187,7 +187,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             OutlineDecoration(child: debuggerPanes()),
             Column(
               children: [
-                DebuggingControls(controller: controller),
+                const DebuggingControls(),
                 const SizedBox(height: denseRowSpacing),
                 Expanded(
                   child: Split(
