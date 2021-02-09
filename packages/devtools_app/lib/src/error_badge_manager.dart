@@ -61,6 +61,8 @@ class ErrorBadgeManager extends DisposableController
   }
 
   InspectableWidgetError _extractInspectableError(Event error) {
+    // TODO(dantup): Switch to using the inspectorService from the serviceManager
+    //  once Jacob's change to add it lands.
     final node =
         RemoteDiagnosticsNode(error.extensionData.data, null, false, null);
 
