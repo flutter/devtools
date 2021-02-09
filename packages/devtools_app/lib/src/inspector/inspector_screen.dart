@@ -339,12 +339,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     if (_selectedErrorIndex != errorIndex) {
       setState(() => _selectedErrorIndex = errorIndex);
     }
-    // Additionally, mark this error as "read" so that it isn't counted by the badge
-    // (but is still highlighted as an error).
-    if (errorIndex != null) {
-      serviceManager.errorBadgeManager
-          .markErrorAsRead(InspectorScreen.id, _errors[inspectorRef]);
-    }
   }
 
   void _errorsChanged() {

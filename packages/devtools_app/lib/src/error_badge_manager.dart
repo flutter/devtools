@@ -151,16 +151,26 @@ class ErrorBadgeManager extends DisposableController
     _updateErrorCount(screenId);
   }
 
-  void markErrorAsRead(String screenId, DevToolsError error) {
+  void markErrorsAsRead(String screenId) {
     final errors = _activeErrors[screenId];
     if (errors == null) return;
 
-    errors.value = LinkedHashMap<String, DevToolsError>.fromEntries(
-        errors.value.entries.map(
-      // Replace the matching item with a "read" version of itself.
-      (e) => MapEntry(e.key, e.value == error ? e.value.asRead() : e.value),
-    ));
-    _updateErrorCount(screenId);
+    // As an optimisation because the new map will always appear changed even if
+    // the contents are the same, track whether any items are actually marked as
+    // read and skip setting the value if not.
+    var didChange = false;
+    final newValue = LinkedHashMap<String, DevToolsError>.fromEntries(
+      errors.value.entries.map((e) {
+        // If already read, just return the same entry.
+        if (e.value.read) return e;
+        didChange = true;
+        return MapEntry(e.key, e.value.asRead());
+      }),
+    );
+    if (didChange) {
+      errors.value = newValue;
+      _updateErrorCount(screenId);
+    }
   }
 }
 
