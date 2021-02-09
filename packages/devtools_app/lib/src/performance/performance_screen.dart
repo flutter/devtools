@@ -25,7 +25,6 @@ import '../theme.dart';
 import '../ui/service_extension_widgets.dart';
 import '../ui/utils.dart';
 import '../ui/vm_flag_widgets.dart';
-import '../utils.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
 import 'performance_controller.dart';

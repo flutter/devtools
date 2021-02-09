@@ -1,6 +1,7 @@
 import 'package:devtools_app/src/charts/chart_controller.dart';
 import 'package:devtools_app/src/charts/chart_trace.dart';
 import 'package:devtools_app/src/charts/chart.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/memory_test_data.dart';
 import 'package:flutter/material.dart';

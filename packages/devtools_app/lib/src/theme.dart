@@ -141,6 +141,9 @@ const defaultListItemHeight = 28.0;
 
 const defaultChartHeight = 150.0;
 
+/// Width of all settings dialogs.
+const dialogSettingsWidth = 700.0;
+
 const defaultScrollBarOffset = 10.0;
 
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
@@ -335,3 +338,11 @@ TextStyle fixedFontStyle(BuildContext context) {
       .bodyText2
       .copyWith(fontFamily: 'RobotoMono', fontSize: 13.0);
 }
+
+TextStyle smallerFixedFontStyle(BuildContext context) {
+  return Theme.of(context)
+      .textTheme
+      .bodyText2
+      .copyWith(fontFamily: 'RobotoMono', fontSize: 10.0);
+}
+

@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import '../auto_dispose_mixin.dart';
 import '../config_specific/logger/logger.dart' as logger;
 import '../theme.dart';
+import '../utils.dart';
 import 'chart_controller.dart';
 import 'chart_trace.dart';
 

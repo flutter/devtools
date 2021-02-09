@@ -239,6 +239,44 @@ class VmServiceWrapper implements VmService {
     }
   }
 
+  //{ "_setTraceClassAllocation", SetTraceClassAllocation,
+  Future<Success> setTraceClassAllocation(
+    String isolateId, {
+    String classId,
+    bool enable,
+  }) async {
+    final Map<String, dynamic> args = {};
+    if (classId != null) {
+      args['classId'] = classId;
+    }
+    if (enable != null) {
+      args['enable'] = enable ? true : false;
+    }
+
+    final response = await trackFuture(
+      '_setTraceClassAllocation',
+      callMethod('_setTraceClassAllocation', isolateId: isolateId, args: args),
+    );
+
+    return response as Success;
+  }
+
+  Future<CpuSamples> getAllocationSamples(
+    String isolateId, {
+    String classId,
+  }) async {
+    final Map<String, dynamic> args = {};
+    if (classId != null) {
+      args['classId'] = classId;
+    }
+    final response = await trackFuture(
+      '_getAllocationSamples',
+      callMethod('_getAllocationSamples', isolateId: isolateId, args: args),
+    );
+
+    return CpuSamples.parse(response.json);
+  }
+
   @override
   Future<CpuSamples> getCpuSamples(
       String isolateId, int timeOriginMicros, int timeExtentMicros) async {
