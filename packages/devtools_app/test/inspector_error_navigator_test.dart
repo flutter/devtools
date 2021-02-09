@@ -8,6 +8,7 @@ import 'package:devtools_app/src/error_badge_manager.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/listenable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -22,35 +23,33 @@ void main() {
       int startIndex,
       int expectedIndex,
     }) async {
-      var index = startIndex;
+      final index = ValueNotifier<int>(startIndex);
       final navigator = ErrorNavigator(
-        initialSelectedIndex: startIndex,
+        selectedErrorIndex: index,
         errors: _generateErrors(errorCount),
         selectedNode: const FixedValueListenable<InspectorTreeNode>(null),
-        onSelectedErrorIndexChanged: (newIndex) => index = newIndex,
       );
 
       await tester.pumpWidget(wrap(navigator));
       await tester.tap(find.byIcon(tapIcon));
 
-      expect(index, equals(expectedIndex));
+      expect(index.value, equals(expectedIndex));
     }
 
     testWidgets('shows count when no selection', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(ErrorNavigator(
+        selectedErrorIndex: ValueNotifier<int>(null),
         errors: _generateErrors(10),
         selectedNode: const FixedValueListenable<InspectorTreeNode>(null),
-        onSelectedErrorIndexChanged: null,
       )));
       expect(find.text('Errors: 10'), findsOneWidget);
     });
 
     testWidgets('shows x/y when selected error', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(ErrorNavigator(
-        initialSelectedIndex: 0,
+        selectedErrorIndex: ValueNotifier<int>(0),
         errors: _generateErrors(10),
         selectedNode: const FixedValueListenable<InspectorTreeNode>(null),
-        onSelectedErrorIndexChanged: null,
       )));
       expect(find.text('Error 1/10'), findsOneWidget);
     });
