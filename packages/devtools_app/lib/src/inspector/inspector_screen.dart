@@ -349,7 +349,9 @@ class ErrorNavigator extends StatelessWidget {
       color: devtoolsError,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-            horizontal: defaultSpacing, vertical: denseSpacing),
+          horizontal: defaultSpacing,
+          vertical: denseSpacing,
+        ),
         child: Row(
           children: [
             Padding(
