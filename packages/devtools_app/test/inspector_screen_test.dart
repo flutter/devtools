@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
 import 'dart:convert';
 
-import 'package:devtools_app/src/error_badge_manager.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/inspector_controller.dart';
@@ -14,7 +12,6 @@ import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/layout_explorer.dart';
-import 'package:devtools_app/src/listenable.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/foundation.dart';
@@ -78,42 +75,15 @@ void main() {
     });
 
     group('Widget Errors', () {
-      final sampleInspectorErrors = LinkedHashMap<String, DevToolsError>.of(
-        {'test-ref': InspectableWidgetError('Error', 'test-ref')},
-      );
+      // Display of error navigator/indicators is tested by a golden in
+      // inspector_integration_test.dart
 
       testWidgetsWithWindowSize(
-          'renders error navigator if no errors', windowSize,
+          'does not render error navigator if no errors', windowSize,
           (WidgetTester tester) async {
         await tester.pumpWidget(wrap(Builder(builder: screen.build)));
         expect(find.byType(ErrorNavigator), findsNothing);
       });
-
-      testWidgetsWithWindowSize('renders error navigator if errors', windowSize,
-          (WidgetTester tester) async {
-        when(fakeServiceManager.errorBadgeManager.erroredItemsForPage(any))
-            .thenReturn(FixedValueListenable(sampleInspectorErrors));
-
-        await tester.pumpWidget(wrap(Builder(builder: screen.build)));
-        expect(find.byType(ErrorNavigator), findsOneWidget);
-      });
-
-      // TODO(dantup): Need to render the tree to ensure error indicators are shown.
-      // testWidgetsWithWindowSize(
-      //     'renders error indicators if errors', windowSize,
-      //     (WidgetTester tester) async {
-      //   when(fakeServiceManager.errorBadgeManager.erroredWidgetNotifier(any))
-      //       .thenReturn(FixedValueListenable(sampleInspectorErrors));
-
-      //   await tester.pumpWidget(wrap(Builder(builder: screen.build)));
-      //   expect(find.byType(ErrorIndicator), findsOneWidget);
-      // });
-
-      // testWidgetsWithWindowSize(
-      //     'visiting an error removes it from the badge count', windowSize,
-      //     (WidgetTester tester) async {
-
-      // });
     });
 
     testWidgetsWithWindowSize('builds with no data', windowSize,
