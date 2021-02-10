@@ -335,7 +335,9 @@ class ErrorNavigator extends StatelessWidget {
   }) : super(key: key);
 
   final LinkedHashMap<String, InspectableWidgetError> errors;
+
   final int errorIndex;
+
   final Function(int) onSelectError;
 
   @override
