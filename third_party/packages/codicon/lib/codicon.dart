@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// This members for this class were generated from the data at
+// The members for this class were generated from the data at
 // https://github.com/microsoft/vscode-codicons/blob/master/src/template/mapping.json.
 
 class Codicons {
