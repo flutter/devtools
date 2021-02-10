@@ -18,9 +18,9 @@ import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../dialogs.dart';
 import '../globals.dart';
-import '../octicons.dart';
 import '../screen.dart';
 import '../theme.dart';
+import '../ui/icons.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
 
@@ -1229,7 +1229,6 @@ class MemoryBodyState extends State<MemoryBody>
     MemoryScreen.gaAction(key: MemoryScreen.clearButtonKey);
 
     controller.memoryTimeline.reset();
-
 
     // Clear any current Allocation Profile collected.
     controller.monitorAllocations = [];

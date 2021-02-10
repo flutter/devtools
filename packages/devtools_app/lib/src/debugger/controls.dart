@@ -9,6 +9,7 @@ import 'package:vm_service/vm_service.dart';
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../theme.dart';
+import '../ui/icons.dart';
 import '../ui/label.dart';
 import 'debugger_controller.dart';
 import 'scripts.dart';
@@ -64,14 +65,14 @@ class _DebuggingControlsState extends State<DebuggingControls>
         children: [
           DebuggerButton(
             title: 'Pause',
-            icon: Icons.pause,
+            icon: Codicons.pause,
             autofocus: true,
             onPressed: isPaused ? null : controller.pause,
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Resume',
-              icon: Icons.play_arrow,
+              icon: Codicons.resume,
               onPressed: (isPaused && !resuming) ? controller.resume : null,
             ),
           ),
@@ -86,20 +87,20 @@ class _DebuggingControlsState extends State<DebuggingControls>
         children: [
           DebuggerButton(
             title: 'Step In',
-            icon: Icons.keyboard_arrow_down,
+            icon: Codicons.stepIn,
             onPressed: canStep ? controller.stepIn : null,
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Step Over',
-              icon: Icons.keyboard_arrow_right,
+              icon: Codicons.stepOver,
               onPressed: canStep ? controller.stepOver : null,
             ),
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Step Out',
-              icon: Icons.keyboard_arrow_up,
+              icon: Codicons.stepOut,
               onPressed: canStep ? controller.stepOut : null,
             ),
           ),

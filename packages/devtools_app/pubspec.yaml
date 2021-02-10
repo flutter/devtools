@@ -117,6 +117,9 @@ flutter:
     - family: Octicons
       fonts:
         - asset: fonts/Octicons.ttf
+    - family: Codicon
+      fonts:
+        - asset: fonts/Codicon/codicon.ttf
 
 dependency_overrides:
 # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.

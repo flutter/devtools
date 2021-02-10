@@ -15,10 +15,10 @@ import '../common_widgets.dart';
 import '../config_specific/host_platform/host_platform.dart';
 import '../flex_split_column.dart';
 import '../listenable.dart';
-import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
+import '../ui/icons.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
@@ -425,7 +425,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               child: TextButton(
                 onPressed: controller.resume,
                 child: const Icon(
-                  Icons.play_arrow,
+                  Codicons.resume,
                   color: Colors.green,
                   size: defaultIconSize,
                 ),
@@ -436,7 +436,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               child: TextButton(
                 onPressed: controller.stepOver,
                 child: const Icon(
-                  Icons.keyboard_arrow_right,
+                  Codicons.stepOver,
                   color: Colors.black,
                   size: defaultIconSize,
                 ),
