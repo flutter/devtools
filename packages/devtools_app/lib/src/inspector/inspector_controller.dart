@@ -229,6 +229,10 @@ class InspectorController extends DisposableController
   RemoteDiagnosticsNode get selectedDiagnostic =>
       selectedNode.value?.diagnostic;
 
+  final ValueNotifier<int> _selectedErrorIndex = ValueNotifier<int>(null);
+
+  ValueListenable<int> get selectedErrorIndex => _selectedErrorIndex;
+
   FlutterTreeType getTreeType() {
     return treeType;
   }
@@ -737,7 +741,50 @@ class InspectorController extends DisposableController
       parent.endShowNode();
     }
 
+    _updateSelectedErrorFromNode(_selectedNode.value);
     animateTo(selectedNode.value);
+  }
+
+  /// Update the index of the selected error based on a node that has been
+  /// selected in the tree.
+  void _updateSelectedErrorFromNode(InspectorTreeNode node) {
+    final inspectorRef = node?.diagnostic?.valueRef?.id;
+
+    final errors = serviceManager.errorBadgeManager
+        .erroredItemsForPage(InspectorScreen.id)
+        .value;
+
+    // Check whether the node that was just selected has any errors associated
+    // with it.
+    var errorIndex = inspectorRef != null
+        ? errors.keys.toList().indexOf(inspectorRef)
+        : null;
+    if (errorIndex == -1) {
+      errorIndex = null;
+    }
+
+    _selectedErrorIndex.value = errorIndex;
+
+    // Additionally, mark this error as "read" and clear the badge.
+    if (errorIndex != null) {
+      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
+      serviceManager.errorBadgeManager
+          .markErrorAsRead(InspectorScreen.id, errors[inspectorRef]);
+    }
+  }
+
+  /// Updates the index of the selected error and selects its node in the tree.
+  void selectErrorByIndex(int index) {
+    _selectedErrorIndex.value = index;
+
+    if (index == null) return;
+
+    final errors = serviceManager.errorBadgeManager
+        .erroredItemsForPage(InspectorScreen.id)
+        .value;
+
+    updateSelectionFromService(
+        firstFrame: false, inspectorRef: errors.keys.elementAt(index));
   }
 
   void _onExpand(InspectorTreeNode node) {

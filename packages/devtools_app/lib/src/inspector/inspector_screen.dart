@@ -26,7 +26,6 @@ import '../ui/service_extension_widgets.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
 import 'inspector_service.dart';
-import 'inspector_tree.dart';
 import 'inspector_tree_flutter.dart';
 
 class InspectorScreen extends Screen {
@@ -70,10 +69,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   bool get enableButtons =>
       actionInProgress == false && connectionInProgress == false;
 
-  LinkedHashMap<String, DevToolsError> _errors =
-      LinkedHashMap<String, DevToolsError>();
-  final ValueNotifier<int> _selectedErrorIndex = ValueNotifier<int>(null);
-
   @override
   void initState() {
     super.initState();
@@ -83,16 +78,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     if (serviceManager.hasConnection) {
       _handleConnectionStart(serviceManager.service);
     }
-    _errors = serviceManager.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
-    addAutoDisposeListener(
-      serviceManager.errorBadgeManager.erroredItemsForPage(InspectorScreen.id),
-      _errorsChanged,
-    );
     autoDispose(
         serviceManager.onConnectionClosed.listen(_handleConnectionStop));
-    addAutoDisposeListener(_selectedErrorIndex, _onSelectedErrorIndexChanged);
   }
 
   @override
@@ -108,14 +95,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   void _onResetClick() {
     blockWhileInProgress(inspectorController.collapseDetailsToSelected);
-  }
-
-  void _onSelectedErrorIndexChanged() {
-    final index = _selectedErrorIndex.value;
-    if (index == null) return;
-
-    inspectorController.updateSelectionFromService(
-        firstFrame: false, inspectorRef: _errors.keys.elementAt(index));
   }
 
   @override
@@ -178,32 +157,37 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     );
   }
 
-  Widget _buildSummaryTreeColumn() {
-    final errors = _errors
-        .map((key, value) => MapEntry(key, value as InspectableWidgetError));
-
-    return OutlineDecoration(
-      child: Stack(
-        children: [
-          InspectorTree(
-            controller: summaryTreeController,
-            isSummaryTree: true,
-            widgetErrors: errors,
-          ),
-          if (errors.isNotEmpty)
-            Positioned(
-              top: 0,
-              right: 0,
-              child: ErrorNavigator(
-                errors: errors,
-                selectedNode: inspectorController?.selectedNode,
-                selectedErrorIndex: _selectedErrorIndex,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+  Widget _buildSummaryTreeColumn() => OutlineDecoration(
+        child: ValueListenableBuilder(
+            valueListenable: serviceManager.errorBadgeManager
+                .erroredItemsForPage(InspectorScreen.id),
+            builder: (_, LinkedHashMap<String, DevToolsError> errors, __) {
+              final inspectableErrors = errors.map((key, value) =>
+                  MapEntry(key, value as InspectableWidgetError));
+              return Stack(
+                children: [
+                  InspectorTree(
+                    controller: summaryTreeController,
+                    isSummaryTree: true,
+                    widgetErrors: inspectableErrors,
+                  ),
+                  if (errors.isNotEmpty && inspectorController != null)
+                    ValueListenableBuilder(
+                      valueListenable: inspectorController.selectedErrorIndex,
+                      builder: (_, selectedErrorIndex, __) => Positioned(
+                        top: 0,
+                        right: 0,
+                        child: ErrorNavigator(
+                          errors: inspectableErrors,
+                          errorIndex: selectedErrorIndex,
+                          onSelectError: inspectorController.selectErrorByIndex,
+                        ),
+                      ),
+                    )
+                ],
+              );
+            }),
+      );
 
   List<Widget> getServiceExtensionWidgets() {
     return [
@@ -326,14 +310,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     });
   }
 
-  void _errorsChanged() {
-    setState(() {
-      _errors = serviceManager.errorBadgeManager
-          .erroredItemsForPage(InspectorScreen.id)
-          .value;
-    });
-  }
-
   void _handleConnectionStop(dynamic event) {
     inspectorController?.setActivate(false);
     inspectorController?.dispose();
@@ -350,72 +326,23 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 }
 
-class ErrorNavigator extends StatefulWidget {
+class ErrorNavigator extends StatelessWidget {
   const ErrorNavigator({
     Key key,
     @required this.errors,
-    @required this.selectedNode,
-    @required this.selectedErrorIndex,
+    @required this.errorIndex,
+    @required this.onSelectError,
   }) : super(key: key);
 
   final LinkedHashMap<String, InspectableWidgetError> errors;
-  final ValueListenable<InspectorTreeNode> selectedNode;
-  final ValueNotifier<int> selectedErrorIndex;
-
-  @override
-  _ErrorNavigatorState createState() => _ErrorNavigatorState();
-}
-
-class _ErrorNavigatorState extends State<ErrorNavigator> with AutoDisposeMixin {
-  @override
-  void initState() {
-    super.initState();
-    widget.selectedNode?.addListener(_selectedNodeChanged);
-  }
-
-  @override
-  void didUpdateWidget(covariant ErrorNavigator oldWidget) {
-    if (oldWidget.selectedNode != widget.selectedNode) {
-      oldWidget.selectedNode?.removeListener(_selectedNodeChanged);
-      widget.selectedNode?.addListener(_selectedNodeChanged);
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    widget.selectedNode?.removeListener(_selectedNodeChanged);
-  }
-
-  void _selectedNodeChanged() {
-    final node = widget.selectedNode.value;
-    final inspectorRef = node?.diagnostic?.valueRef?.id;
-    // Check whether the node that was just selected has any errors associated
-    // with it.
-    var errorIndex = inspectorRef != null
-        ? widget.errors.keys.toList().indexOf(inspectorRef)
-        : null;
-    if (errorIndex == -1) {
-      errorIndex = null;
-    }
-
-    setState(() => widget.selectedErrorIndex.value = errorIndex);
-
-    // Additionally, mark this error as "read" and clear the badge.
-    if (errorIndex != null) {
-      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
-      serviceManager.errorBadgeManager
-          .markErrorAsRead(InspectorScreen.id, widget.errors[inspectorRef]);
-    }
-  }
+  final int errorIndex;
+  final Function(int) onSelectError;
 
   @override
   Widget build(BuildContext context) {
-    final errorIndex = widget.selectedErrorIndex.value;
     final label = errorIndex != null
-        ? 'Error ${errorIndex + 1}/${widget.errors.length}'
-        : 'Errors: ${widget.errors.length}';
+        ? 'Error ${errorIndex + 1}/${errors.length}'
+        : 'Errors: ${errors.length}';
     return Container(
       color: devtoolsError,
       child: Padding(
@@ -448,21 +375,17 @@ class _ErrorNavigatorState extends State<ErrorNavigator> with AutoDisposeMixin {
   }
 
   void _previousError() {
-    final errorIndex = widget.selectedErrorIndex.value;
-    var newIndex =
-        errorIndex == null ? widget.errors.length - 1 : errorIndex - 1;
+    var newIndex = errorIndex == null ? errors.length - 1 : errorIndex - 1;
     while (newIndex < 0) {
-      newIndex += widget.errors.length;
+      newIndex += errors.length;
     }
 
-    setState(() => widget.selectedErrorIndex.value = newIndex);
+    onSelectError(newIndex);
   }
 
   void _nextError() {
-    final errorIndex = widget.selectedErrorIndex.value;
-    final newIndex =
-        errorIndex == null ? 0 : (errorIndex + 1) % widget.errors.length;
+    final newIndex = errorIndex == null ? 0 : (errorIndex + 1) % errors.length;
 
-    setState(() => widget.selectedErrorIndex.value = newIndex);
+    onSelectError(newIndex);
   }
 }
