@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:codicon/codicon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
@@ -425,7 +426,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               child: TextButton(
                 onPressed: controller.resume,
                 child: const Icon(
-                  Codicons.resume,
+                  Codicons.debugContinue,
                   color: Colors.green,
                   size: defaultIconSize,
                 ),
@@ -436,7 +437,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               child: TextButton(
                 onPressed: controller.stepOver,
                 child: const Icon(
-                  Codicons.stepOver,
+                  Codicons.debugStepOver,
                   color: Colors.black,
                   size: defaultIconSize,
                 ),

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:codicon/codicon.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
@@ -65,14 +66,14 @@ class _DebuggingControlsState extends State<DebuggingControls>
         children: [
           DebuggerButton(
             title: 'Pause',
-            icon: Codicons.pause,
+            icon: Codicons.debugPause,
             autofocus: true,
             onPressed: isPaused ? null : controller.pause,
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Resume',
-              icon: Codicons.resume,
+              icon: Codicons.debugContinue,
               onPressed: (isPaused && !resuming) ? controller.resume : null,
             ),
           ),
@@ -87,20 +88,20 @@ class _DebuggingControlsState extends State<DebuggingControls>
         children: [
           DebuggerButton(
             title: 'Step In',
-            icon: Codicons.stepIn,
+            icon: Codicons.debugStepInto,
             onPressed: canStep ? controller.stepIn : null,
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Step Over',
-              icon: Codicons.stepOver,
+              icon: Codicons.debugStepOver,
               onPressed: canStep ? controller.stepOver : null,
             ),
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Step Out',
-              icon: Codicons.stepOut,
+              icon: Codicons.debugStepOut,
               onPressed: canStep ? controller.stepOut : null,
             ),
           ),

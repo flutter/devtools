@@ -24,7 +24,9 @@ dependencies:
   # Pin ansicolor to version before pre-NNBD version 1.1.0, should be ^1.0.5
   # See https://github.com/flutter/devtools/issues/2530 
   ansicolor: 1.0.5
-  async: ^2.0.0 
+  async: ^2.0.0
+  codicon:
+    path: ../../third_party/packages/codicon
   collection: ^1.15.0-nnbd
   dds: ^1.7.4
   devtools_shared: 0.9.8-dev.1

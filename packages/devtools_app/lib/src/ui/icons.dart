@@ -262,12 +262,3 @@ class Octicons {
   static const IconData dashboard = IconData(61733, fontFamily: 'Octicons');
   static const IconData pulse = IconData(61823, fontFamily: 'Octicons');
 }
-
-// Unicode values can be looked up from https://github.com/microsoft/vscode-codicons/blob/master/src/template/mapping.json.
-class Codicons {
-  static const IconData resume = IconData(60111, fontFamily: 'Codicon');
-  static const IconData pause = IconData(60113, fontFamily: 'Codicon');
-  static const IconData stepIn = IconData(60116, fontFamily: 'Codicon');
-  static const IconData stepOut = IconData(60117, fontFamily: 'Codicon');
-  static const IconData stepOver = IconData(60118, fontFamily: 'Codicon');
-}
