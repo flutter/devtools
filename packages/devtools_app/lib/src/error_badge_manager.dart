@@ -148,7 +148,6 @@ class ErrorBadgeManager extends DisposableController
   }
 
   void markErrorAsRead(String screenId, DevToolsError error) {
-    clearErrors(screenId);
     final errors = _activeErrors[screenId];
     if (errors == null) return;
 
