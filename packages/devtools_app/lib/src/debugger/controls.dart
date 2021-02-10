@@ -10,7 +10,6 @@ import 'package:vm_service/vm_service.dart';
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../theme.dart';
-import '../ui/icons.dart';
 import '../ui/label.dart';
 import 'debugger_controller.dart';
 import 'scripts.dart';
