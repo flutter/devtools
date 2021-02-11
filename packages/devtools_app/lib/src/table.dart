@@ -652,10 +652,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     // get the index of the first item fully visible in the viewport
     final firstItemIndex = (scrollController.offset / defaultRowHeight).ceil();
 
-    // '-1' in the following calculations is needed because the header row
-    // occupies space in the viewport so we must subtract it out.
+    // '-2' in the following calculations is needed because the header row
+    // occupies space in the viewport so we must subtract 1 for that, and we
+    // subtract 1 to account for the fact that a partial row could be displayed
+    // at the top and bottom of the view.
     final minCompleteItemsInView =
-        (viewportHeight / defaultRowHeight).floor() - 1;
+        (viewportHeight / defaultRowHeight).floor() - 2;
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
     int newSelectedNodeIndex;
 
@@ -696,10 +698,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
 
     setState(() {
+      // We do not need to scroll into view here because we have manually
+      // managed the scrolling in the above checks for `isBelowViewport` and
+      // `isAboveViewport`.
       selectionNotifier.value = Selection(
         node: newSelectedNode,
         nodeIndex: newSelectedNodeIndex,
-        scrollIntoView: true,
       );
     });
   }
