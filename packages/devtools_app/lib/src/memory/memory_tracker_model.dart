@@ -187,7 +187,7 @@ class TreeTracker {
     final leafNodesCount = allocation.children.length;
 
     assert(allocation.children.last is TrackerMore);
-    allocation.removeLastChild();   // Remove "More ..."
+    allocation.removeLastChild(); // Remove "More ..."
 
     // Add the entire call stack as leaf nodes.
     final totalCallStack = item.stacktrace.length;
