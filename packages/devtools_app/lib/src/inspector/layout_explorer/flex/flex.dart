@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../math_utils.dart';
+import '../../../theme.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
@@ -38,6 +39,8 @@ class FlexLayoutExplorerWidget extends LayoutExplorerWidget {
 
 class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     FlexLayoutExplorerWidget, FlexLayoutProperties> {
+  final scrollController = ScrollController();
+
   Axis get direction => properties.direction;
 
   Color horizontalColor(ColorScheme colorScheme) =>
@@ -99,104 +102,6 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         if (idx != -1) highlighted = newProperties.children[idx];
       }
     });
-  }
-
-  Widget _visualizeFlex(BuildContext context) {
-    // TODO(jacobr): make this a widget?
-    if (!properties.hasChildren) {
-      return const Center(child: Text('No Children'));
-    }
-
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    final widget = Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: theme.primaryColorLight,
-        ),
-      ),
-      margin: const EdgeInsets.only(top: margin, left: margin),
-      child: LayoutBuilder(builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth;
-        final maxHeight = constraints.maxHeight;
-
-        double maxSizeAvailable(Axis axis) {
-          return axis == Axis.horizontal ? maxWidth : maxHeight;
-        }
-
-        final childrenAndMainAxisSpacesRenderProps =
-            properties.childrenRenderProperties(
-          smallestRenderWidth: minRenderWidth,
-          largestRenderWidth: defaultMaxRenderWidth,
-          smallestRenderHeight: minRenderHeight,
-          largestRenderHeight: defaultMaxRenderHeight,
-          maxSizeAvailable: maxSizeAvailable,
-        );
-
-        final renderProperties = childrenAndMainAxisSpacesRenderProps
-            .where((renderProps) => !renderProps.isFreeSpace)
-            .toList();
-        final mainAxisSpaces = childrenAndMainAxisSpacesRenderProps
-            .where((renderProps) => renderProps.isFreeSpace)
-            .toList();
-        final crossAxisSpaces = properties.crossAxisSpaces(
-          childrenRenderProperties: renderProperties,
-          maxSizeAvailable: maxSizeAvailable,
-        );
-
-        final childrenRenderWidgets = <Widget>[];
-        for (var i = 0; i < children.length; i++) {
-          final child = children[i];
-          final isSelected = highlighted == child;
-
-          childrenRenderWidgets.add(FlexChildVisualizer(
-            state: this,
-            layoutProperties: child,
-            isSelected: isSelected,
-            renderProperties: renderProperties[i],
-          ));
-        }
-
-        final freeSpacesWidgets = [
-          for (var renderProperties in [...mainAxisSpaces, ...crossAxisSpaces])
-            FreeSpaceVisualizerWidget(renderProperties),
-        ];
-        // TODO(https://github.com/flutter/flutter/issues/75352): horizontal
-        // scrollbar is not draggable nor visible on first frame.
-        return Scrollbar(
-          isAlwaysShown: true,
-          child: SingleChildScrollView(
-            scrollDirection: properties.direction,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: maxWidth,
-                minHeight: maxHeight,
-                maxWidth: direction == Axis.horizontal
-                    ? sum(childrenAndMainAxisSpacesRenderProps
-                        .map((renderSize) => renderSize.width))
-                    : maxWidth,
-                maxHeight: direction == Axis.vertical
-                    ? sum(childrenAndMainAxisSpacesRenderProps
-                        .map((renderSize) => renderSize.height))
-                    : maxHeight,
-              ).normalize(),
-              child: Stack(
-                children: [
-                  LayoutExplorerBackground(colorScheme: colorScheme),
-                  ...freeSpacesWidgets,
-                  ...childrenRenderWidgets,
-                ],
-              ),
-            ),
-          ),
-        );
-      }),
-    );
-    return VisualizeWidthAndHeightWithConstraints(
-      child: widget,
-      properties: properties,
-    );
   }
 
   Widget _buildAxisAlignmentDropdown(Axis axis, ColorScheme colorScheme) {
@@ -363,7 +268,14 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            child: _visualizeFlex(context),
+            child: VisualizeFlexChildren(
+              state: this,
+              properties: properties,
+              children: children,
+              highlighted: highlighted,
+              scrollController: scrollController,
+              direction: direction,
+            ),
           ),
         ),
       ),
@@ -448,6 +360,149 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
           horizontalAxisDescription,
         ],
       ),
+    );
+  }
+}
+
+class VisualizeFlexChildren extends StatefulWidget {
+  const VisualizeFlexChildren({
+    Key key,
+    @required this.state,
+    @required this.properties,
+    @required this.children,
+    @required this.highlighted,
+    @required this.scrollController,
+    @required this.direction,
+  }) : super(key: key);
+
+  final FlexLayoutProperties properties;
+  final List<LayoutProperties> children;
+  final LayoutProperties highlighted;
+  final ScrollController scrollController;
+  final Axis direction;
+  final _FlexLayoutExplorerWidgetState state;
+
+  @override
+  _VisualizeFlexChildrenState createState() => _VisualizeFlexChildrenState();
+}
+
+class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
+  LayoutProperties lastHighlighted;
+  static final selectedChildKey = GlobalKey(debugLabel: 'selectedChild');
+
+  @override
+  Widget build(BuildContext context) {
+    if (lastHighlighted != widget.highlighted) {
+      lastHighlighted = widget.highlighted;
+      if (widget.highlighted != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final selectedRenderObject =
+              selectedChildKey.currentContext?.findRenderObject();
+          if (selectedRenderObject != null &&
+              widget.scrollController.hasClients) {
+            widget.scrollController.position.ensureVisible(
+              selectedRenderObject,
+              alignment: 0.5,
+              duration: defaultDuration,
+            );
+          }
+        });
+      }
+    }
+    if (!widget.properties.hasChildren) {
+      return const Center(child: Text('No Children'));
+    }
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final contents = Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: theme.primaryColorLight,
+        ),
+      ),
+      margin: const EdgeInsets.only(top: margin, left: margin),
+      child: LayoutBuilder(builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+        final maxHeight = constraints.maxHeight;
+
+        double maxSizeAvailable(Axis axis) {
+          return axis == Axis.horizontal ? maxWidth : maxHeight;
+        }
+
+        final childrenAndMainAxisSpacesRenderProps =
+            widget.properties.childrenRenderProperties(
+          smallestRenderWidth: minRenderWidth,
+          largestRenderWidth: defaultMaxRenderWidth,
+          smallestRenderHeight: minRenderHeight,
+          largestRenderHeight: defaultMaxRenderHeight,
+          maxSizeAvailable: maxSizeAvailable,
+        );
+
+        final renderProperties = childrenAndMainAxisSpacesRenderProps
+            .where((renderProps) => !renderProps.isFreeSpace)
+            .toList();
+        final mainAxisSpaces = childrenAndMainAxisSpacesRenderProps
+            .where((renderProps) => renderProps.isFreeSpace)
+            .toList();
+        final crossAxisSpaces = widget.properties.crossAxisSpaces(
+          childrenRenderProperties: renderProperties,
+          maxSizeAvailable: maxSizeAvailable,
+        );
+
+        final childrenRenderWidgets = <Widget>[];
+        for (var i = 0; i < widget.children.length; i++) {
+          final child = widget.children[i];
+          final isSelected = widget.highlighted == child;
+
+          childrenRenderWidgets.add(FlexChildVisualizer(
+            key: isSelected ? selectedChildKey : null,
+            state: widget.state,
+            layoutProperties: child,
+            isSelected: isSelected,
+            renderProperties: renderProperties[i],
+          ));
+        }
+
+        final freeSpacesWidgets = [
+          for (var renderProperties in [...mainAxisSpaces, ...crossAxisSpaces])
+            FreeSpaceVisualizerWidget(renderProperties),
+        ];
+        return Scrollbar(
+          isAlwaysShown: true,
+          controller: widget.scrollController,
+          child: SingleChildScrollView(
+            scrollDirection: widget.properties.direction,
+            controller: widget.scrollController,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: maxWidth,
+                minHeight: maxHeight,
+                maxWidth: widget.direction == Axis.horizontal
+                    ? sum(childrenAndMainAxisSpacesRenderProps
+                        .map((renderSize) => renderSize.width))
+                    : maxWidth,
+                maxHeight: widget.direction == Axis.vertical
+                    ? sum(childrenAndMainAxisSpacesRenderProps
+                        .map((renderSize) => renderSize.height))
+                    : maxHeight,
+              ).normalize(),
+              child: Stack(
+                children: [
+                  LayoutExplorerBackground(colorScheme: colorScheme),
+                  ...freeSpacesWidgets,
+                  ...childrenRenderWidgets,
+                ],
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+    return VisualizeWidthAndHeightWithConstraints(
+      child: contents,
+      properties: widget.properties,
     );
   }
 }
