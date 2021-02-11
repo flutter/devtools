@@ -462,7 +462,8 @@ class _MultilineMatcher extends _Matcher {
             (captures ?? endCaptures ?? beginCaptures) == null) {
           assert(beginSpans.length == 1);
           beginSpans.first._end = scanner.position;
-        } else {
+        } else if (endSpans != null) {
+          // endSpans can be null if we reach EOF and haven't completed a match.
           results.addAll(endSpans);
         }
         return results;
