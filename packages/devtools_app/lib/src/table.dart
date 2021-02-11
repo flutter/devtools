@@ -657,7 +657,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     // subtract 1 to account for the fact that a partial row could be displayed
     // at the top and bottom of the view.
     final minCompleteItemsInView =
-        (viewportHeight / defaultRowHeight).floor() - 2;
+        max((viewportHeight / defaultRowHeight).floor() - 2, 0);
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
     int newSelectedNodeIndex;
 
