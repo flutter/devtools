@@ -765,11 +765,16 @@ class InspectorController extends DisposableController
 
     _selectedErrorIndex.value = errorIndex;
 
-    // Additionally, mark this error as "read" and clear the badge.
     if (errorIndex != null) {
-      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
+      // Mark the error as "seen" as this will render slightly differently
+      // so the user can track which errored nodes they've viewed.
       serviceManager.errorBadgeManager
           .markErrorAsRead(InspectorScreen.id, errors[inspectorRef]);
+      // Also clear the error badge since new errors may have arrived while
+      // the inspector was visible (normally they're cleared when visiting
+      // the screen) and visiting an errored node seems an appropriate
+      // acknowledgement of the errors.
+      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
     }
   }
 

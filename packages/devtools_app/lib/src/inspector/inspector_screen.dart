@@ -159,34 +159,35 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   Widget _buildSummaryTreeColumn() => OutlineDecoration(
         child: ValueListenableBuilder(
-            valueListenable: serviceManager.errorBadgeManager
-                .erroredItemsForPage(InspectorScreen.id),
-            builder: (_, LinkedHashMap<String, DevToolsError> errors, __) {
-              final inspectableErrors = errors.map((key, value) =>
-                  MapEntry(key, value as InspectableWidgetError));
-              return Stack(
-                children: [
-                  InspectorTree(
-                    controller: summaryTreeController,
-                    isSummaryTree: true,
-                    widgetErrors: inspectableErrors,
-                  ),
-                  if (errors.isNotEmpty && inspectorController != null)
-                    ValueListenableBuilder(
-                      valueListenable: inspectorController.selectedErrorIndex,
-                      builder: (_, selectedErrorIndex, __) => Positioned(
-                        top: 0,
-                        right: 0,
-                        child: ErrorNavigator(
-                          errors: inspectableErrors,
-                          errorIndex: selectedErrorIndex,
-                          onSelectError: inspectorController.selectErrorByIndex,
-                        ),
+          valueListenable: serviceManager.errorBadgeManager
+              .erroredItemsForPage(InspectorScreen.id),
+          builder: (_, LinkedHashMap<String, DevToolsError> errors, __) {
+            final inspectableErrors = errors.map(
+                (key, value) => MapEntry(key, value as InspectableWidgetError));
+            return Stack(
+              children: [
+                InspectorTree(
+                  controller: summaryTreeController,
+                  isSummaryTree: true,
+                  widgetErrors: inspectableErrors,
+                ),
+                if (errors.isNotEmpty && inspectorController != null)
+                  ValueListenableBuilder(
+                    valueListenable: inspectorController.selectedErrorIndex,
+                    builder: (_, selectedErrorIndex, __) => Positioned(
+                      top: 0,
+                      right: 0,
+                      child: ErrorNavigator(
+                        errors: inspectableErrors,
+                        errorIndex: selectedErrorIndex,
+                        onSelectError: inspectorController.selectErrorByIndex,
                       ),
-                    )
-                ],
-              );
-            }),
+                    ),
+                  )
+              ],
+            );
+          },
+        ),
       );
 
   List<Widget> getServiceExtensionWidgets() {
