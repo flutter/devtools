@@ -123,6 +123,7 @@ class EvalOnDartLibrary {
         libraryRef.id,
         expression,
         scope: scope,
+        disableBreakpoints: true,
       );
       if (result is Sentinel) {
         return null;
