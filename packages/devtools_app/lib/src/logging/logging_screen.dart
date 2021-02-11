@@ -13,7 +13,6 @@ import '../analytics/analytics_stub.dart'
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../console.dart';
-import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../table.dart';
@@ -21,6 +20,7 @@ import '../table_data.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/filter.dart';
+import '../ui/icons.dart';
 import '../ui/search.dart';
 import '../ui/service_extension_widgets.dart';
 import '../utils.dart';
