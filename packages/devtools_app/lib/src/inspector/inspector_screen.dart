@@ -69,6 +69,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   bool get enableButtons =>
       actionInProgress == false && connectionInProgress == false;
 
+  static const summaryTreeKey = Key('Summary Tree');
+  static const detailsTreeKey = Key('Details Tree');
+
   @override
   void initState() {
     super.initState();
@@ -102,6 +105,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     final summaryTree = _buildSummaryTreeColumn();
 
     final detailsTree = InspectorTree(
+      key: detailsTreeKey,
       controller: detailsTreeController,
     );
 
@@ -167,6 +171,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             return Stack(
               children: [
                 InspectorTree(
+                  key: summaryTreeKey,
                   controller: summaryTreeController,
                   isSummaryTree: true,
                   widgetErrors: inspectableErrors,
