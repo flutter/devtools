@@ -346,12 +346,16 @@ class InspectorController extends DisposableController
     }
     await recomputeTreeRoot(null, null, false);
 
+    filterErrors();
+
+    return getPendingUpdateDone();
+  }
+
+  void filterErrors() {
     if (isSummaryTree) {
       serviceManager.errorBadgeManager.filterErrors(InspectorScreen.id,
           (id) => hasDiagnosticsValue(InspectorInstanceRef(id)));
     }
-
-    return getPendingUpdateDone();
   }
 
   void setActivate(bool enabled) {
