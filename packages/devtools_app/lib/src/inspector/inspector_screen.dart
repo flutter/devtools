@@ -292,6 +292,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         onLayoutExplorerSupported: _onLayoutExplorerSupported,
       );
 
+      // Clear any existing badge for older errors that were collected.
+      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
+
       // TODO(jacobr): move this notice display to once a day.
       if (!displayedWidgetTrackingNotice) {
         // ignore: unawaited_futures
