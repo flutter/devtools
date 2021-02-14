@@ -28,7 +28,7 @@ dependencies:
   codicon: ^0.0.2
   collection: ^1.15.0-nnbd
   dds: ^1.7.4
-  devtools_shared: 0.9.8-dev.1
+  devtools_shared: 0.9.8-dev.2
   file: ^5.1.0
   file_selector: ^0.7.0
   file_selector_linux: ^0.0.1

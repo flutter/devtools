@@ -580,7 +580,7 @@ class MemoryController extends DisposableController
     }
   }
 
-  /// Track where/when a particular class is allocated (constructor new'd).
+  /// Track when/where a class allocated (constructor new'd).
   Future<void> _setTracking(ClassRef ref, bool enable) async {
     if (!await isIsolateLive(_isolateId)) return;
 
@@ -938,7 +938,7 @@ class MemoryController extends DisposableController
     }
 
     final allocations = allocationProfile.members
-        .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
+        .map((ClassHeapStats stats) => parseJsonClassHeapStats(stats.json))
         .where((ClassHeapDetailStats stats) {
       return stats.instancesCurrent > 0 || stats.instancesDelta > 0;
     }).toList();
@@ -1433,12 +1433,12 @@ class MemoryLog {
       ));
     }
 
-    final jsonPayload = MemoryJson.encodeHeapSamples(liveData);
+    final jsonPayload = SamplesMemoryJson.encodeList(liveData);
     if (kDebugMode) {
       // TODO(terry): Remove this check add a unit test instead.
       // Reload the file just created and validate that the saved data matches
       // the live data.
-      final memoryJson = MemoryJson.decode(argJsonString: jsonPayload);
+      final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
       assert(memoryJson.isMatchedVersion);
       assert(memoryJson.isMemoryPayload);
       assert(memoryJson.data.length == liveData.length);
@@ -1465,7 +1465,7 @@ class MemoryLog {
   /// Load the memory profile data from a saved memory log file.
   void loadOffline(String filename) async {
     final jsonPayload = _fs.readStringFromFile(filename);
-    final memoryJson = MemoryJson.decode(argJsonString: jsonPayload);
+    final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
 
     // TODO(terry): Display notification JSON file isn't version isn't
     // supported or if the payload isn't an exported memory file.
