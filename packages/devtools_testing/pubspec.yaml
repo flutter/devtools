@@ -11,7 +11,7 @@ environment:
 
 dependencies:
   devtools_app: 0.9.8-dev.1
-  devtools_shared: 0.9.8-dev.1
+  devtools_shared: 0.9.8-dev.2
   flutter:
     sdk: flutter
   flutter_test:
