@@ -580,7 +580,7 @@ class MemoryController extends DisposableController
     }
   }
 
-  /// Track when/where a class allocated (constructor new'd).
+  /// Track where/when a class is allocated (constructor new'd).
   Future<void> _setTracking(ClassRef ref, bool enable) async {
     if (!await isIsolateLive(_isolateId)) return;
 
