@@ -13,10 +13,6 @@ import 'src/config_specific/load_fallback_app/load_fallback_app.dart';
 import 'src/debugger/syntax_highlighter.dart';
 import 'src/preferences.dart';
 
-class Foo {
-  var count = ValueNotifier(0);
-}
-
 void main() async {
   final defaultOnError = FlutterError.onError;
   var numErrors = 0;
