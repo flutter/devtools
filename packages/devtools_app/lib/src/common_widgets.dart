@@ -260,6 +260,27 @@ class SettingsOutlinedButton extends StatelessWidget {
   }
 }
 
+class HelpButton extends StatelessWidget {
+  const HelpButton({@required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: onPressed,
+      child: Container(
+        height: defaultButtonHeight,
+        width: defaultButtonHeight,
+        child: const Icon(
+          Icons.help_outline,
+          size: defaultIconSize,
+        ),
+      ),
+    );
+  }
+}
+
 // TODO(kenz): remove use of this class once we can specify a fixed button
 // height in the theme. See https://github.com/flutter/flutter/issues/73741.
 class FixedHeightOutlinedButton extends StatelessWidget {
@@ -568,8 +589,8 @@ class Badge extends StatelessWidget {
 
 /// A widget, commonly used for icon buttons, that provides a tooltip with a
 /// common delay before the tooltip is shown.
-class ActionButton extends StatelessWidget {
-  const ActionButton({
+class DevToolsTooltip extends StatelessWidget {
+  const DevToolsTooltip({
     @required this.tooltip,
     @required this.child,
   });
@@ -761,8 +782,9 @@ class FilterButton extends StatelessWidget {
             ? theme.colorScheme.toggleButtonBackgroundColor
             : Colors.transparent,
       ),
-      child: createIcon(
+      child: Icon(
         Icons.filter_list,
+        size: defaultIconSize,
         color: isFilterActive
             ? theme.colorScheme.toggleButtonForegroundColor
             : theme.colorScheme.contrastForeground,
@@ -787,6 +809,39 @@ Widget inputDecorationSuffixButton(IconData icon, VoidCallback onPressed) {
       icon: Icon(icon),
     ),
   );
+}
+
+class OutlinedRowGroup extends StatelessWidget {
+  const OutlinedRowGroup({@required this.children, this.borderColor});
+
+  final List<Widget> children;
+
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = borderColor ?? Theme.of(context).focusColor;
+    final childrenWithOutlines = <Widget>[];
+    for (int i = 0; i < children.length; i++) {
+      childrenWithOutlines.addAll([
+        Container(
+          decoration: BoxDecoration(
+            border: Border(
+              left: i == 0 ? BorderSide(color: color) : BorderSide.none,
+              right: BorderSide(color: color),
+              top: BorderSide(color: color),
+              bottom: BorderSide(color: color),
+            ),
+          ),
+          child: children[i],
+        ),
+      ]);
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: childrenWithOutlines,
+    );
+  }
 }
 
 class OutlineDecoration extends StatelessWidget {
@@ -973,19 +1028,6 @@ extension ColorExtension on Color {
   }
 }
 
-/// Utility extension methods to the [ThemeData] class.
-extension ThemeDataExtension on ThemeData {
-  /// Returns whether we are currently using a dark theme.
-  bool get isDarkTheme => brightness == Brightness.dark;
-
-  TextStyle get regularTextStyle => TextStyle(color: textTheme.bodyText2.color);
-
-  TextStyle get subtleTextStyle => TextStyle(color: unselectedWidgetColor);
-
-  TextStyle get selectedTextStyle =>
-      TextStyle(color: textSelectionTheme.selectionColor);
-}
-
 /// Gets an alternating color to use for indexed UI elements.
 Color alternatingColorForIndexWithContext(int index, BuildContext context) {
   final theme = Theme.of(context);
@@ -1154,7 +1196,7 @@ class FormattedJson extends StatelessWidget {
     final formattedArgs = encoder.convert(json);
     return Text(
       formattedArgs,
-      style: fixedFontStyle(context),
+      style: Theme.of(context).fixedFontStyle,
     );
   }
 }

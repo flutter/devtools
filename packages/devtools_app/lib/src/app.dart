@@ -165,6 +165,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     if (vmServiceUri?.isEmpty ?? true) {
       return DevToolsScaffold.withChild(
         key: const Key('landing'),
+        title: 'DevTools for Flutter & Dart',
         child: LandingScreenBody(),
         ideTheme: ideTheme,
         analyticsProvider: widget.analyticsProvider,
@@ -287,7 +288,6 @@ class DevToolsAppState extends State<DevToolsApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Dart DevTools',
       debugShowCheckedModeBanner: false,
       theme: themeFor(isDarkTheme: isDarkThemeEnabled, ideTheme: ideTheme),
       builder: (context, child) => Notifications(child: child),
@@ -365,7 +365,7 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
 class OpenAboutAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ActionButton(
+    return DevToolsTooltip(
       tooltip: 'About DevTools',
       child: InkWell(
         onTap: () async {
@@ -391,7 +391,7 @@ class OpenAboutAction extends StatelessWidget {
 class OpenSettingsAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ActionButton(
+    return DevToolsTooltip(
       tooltip: 'Settings',
       child: InkWell(
         onTap: () async {

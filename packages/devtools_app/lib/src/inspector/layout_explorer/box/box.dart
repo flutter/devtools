@@ -179,7 +179,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         final availableHeight = constraints.maxHeight - 2;
         final availableWidth = constraints.maxWidth - 2;
 
-        final minFractions = [0.2, 0.3, 0.2];
+        final minFractions = [0.2, 0.5, 0.2];
         double nullOutZero(double value) => value != 0.0 ? value : null;
         final widths = [
           nullOutZero(offset.offset.dx),

@@ -178,7 +178,7 @@ class HotReloadButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
 
-    return ActionButton(
+    return DevToolsTooltip(
       tooltip: 'Hot reload',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotReload,
@@ -200,7 +200,7 @@ class HotRestartButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
 
-    return ActionButton(
+    return DevToolsTooltip(
       tooltip: 'Hot restart',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotRestart,

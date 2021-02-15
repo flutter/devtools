@@ -114,8 +114,6 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     with AutoDisposeMixin, SearchFieldMixin<NetworkScreenBody> {
   NetworkController _networkController;
 
-  bool recording;
-
   NetworkRequests requests;
 
   List<NetworkRequest> filteredRequests;
@@ -142,12 +140,6 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
         requests = _networkController.requests.value;
       });
     });
-    recording = _networkController.recordingNotifier.value;
-    addAutoDisposeListener(_networkController.recordingNotifier, () {
-      setState(() {
-        recording = _networkController.recordingNotifier.value;
-      });
-    });
     filteredRequests = _networkController.filteredData.value;
     addAutoDisposeListener(_networkController.filteredData, () {
       setState(() {
@@ -158,53 +150,63 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 
   @override
   void dispose() {
+    // TODO(kenz): this won't work well if we eventually have multiple clients
+    // that want to listen to network data.
     _networkController?.stopRecording();
     super.dispose();
   }
 
   /// Builds the row of buttons that control the Network profiler (e.g., record,
   /// pause, etc.)
-  Row _buildProfilerControls() {
+  Widget _buildProfilerControls() {
     const double includeTextWidth = 600;
     final hasRequests = filteredRequests.isNotEmpty;
-    return Row(
-      children: [
-        PauseButton(
-          includeTextWidth: includeTextWidth,
-          onPressed:
-              recording ? () => _networkController.togglePolling(false) : null,
-        ),
-        const SizedBox(width: denseSpacing),
-        ResumeButton(
-          includeTextWidth: includeTextWidth,
-          onPressed:
-              recording ? null : () => _networkController.togglePolling(true),
-        ),
-        const SizedBox(width: denseSpacing),
-        ClearButton(
-          onPressed: () {
-            _networkController.clear();
-          },
-        ),
-        const Expanded(child: SizedBox()),
-        // TODO(kenz): fix focus issue when state is refreshed
-        Container(
-          width: wideSearchTextWidth,
-          height: defaultTextFieldHeight,
-          child: buildSearchField(
-            controller: _networkController,
-            searchFieldKey: networkSearchFieldKey,
-            searchFieldEnabled: hasRequests,
-            shouldRequestFocus: false,
-            supportsNavigation: true,
-          ),
-        ),
-        const SizedBox(width: denseSpacing),
-        FilterButton(
-          onPressed: _showFilterDialog,
-          isFilterActive: filteredRequests.length != requests.requests.length,
-        ),
-      ],
+    return ValueListenableBuilder(
+      valueListenable: _networkController.recordingNotifier,
+      builder: (context, recording, _) {
+        return Row(
+          children: [
+            PauseButton(
+              includeTextWidth: includeTextWidth,
+              onPressed: recording
+                  ? () => _networkController.togglePolling(false)
+                  : null,
+            ),
+            const SizedBox(width: denseSpacing),
+            ResumeButton(
+              includeTextWidth: includeTextWidth,
+              onPressed: recording
+                  ? null
+                  : () => _networkController.togglePolling(true),
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              onPressed: () {
+                _networkController.clear();
+              },
+            ),
+            const Expanded(child: SizedBox()),
+            // TODO(kenz): fix focus issue when state is refreshed
+            Container(
+              width: wideSearchTextWidth,
+              height: defaultTextFieldHeight,
+              child: buildSearchField(
+                controller: _networkController,
+                searchFieldKey: networkSearchFieldKey,
+                searchFieldEnabled: hasRequests,
+                shouldRequestFocus: false,
+                supportsNavigation: true,
+              ),
+            ),
+            const SizedBox(width: denseSpacing),
+            FilterButton(
+              onPressed: _showFilterDialog,
+              isFilterActive:
+                  filteredRequests.length != requests.requests.length,
+            ),
+          ],
+        );
+      },
     );
   }
 

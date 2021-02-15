@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
-import 'debugger/codeview.dart';
+import 'debugger/debugger_controller.dart';
+import 'debugger/variables.dart';
 import 'theme.dart';
 import 'utils.dart';
 
@@ -25,21 +26,43 @@ class Console extends StatelessWidget {
 
   final Widget title;
   final List<Widget> controls;
-  final List<String> lines;
+  final List<ConsoleLine> lines;
 
   @visibleForTesting
   String get textContent => lines.join('\n');
 
   @override
   Widget build(BuildContext context) {
+    return ConsoleFrame(
+      controls: controls,
+      title: title,
+      child: _ConsoleOutput(lines: lines),
+    );
+  }
+}
+
+class ConsoleFrame extends StatelessWidget {
+  const ConsoleFrame({
+    this.controls,
+    @required this.child,
+    this.title,
+  }) : super();
+
+  final Widget title;
+  final Widget child;
+  final List<Widget> controls;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (title != null) title,
         Expanded(
           child: Material(
             child: Stack(
               children: [
-                _ConsoleOutput(lines: lines),
+                child,
                 if (controls != null && controls.isNotEmpty)
                   _ConsoleControls(
                     controls: controls,
@@ -84,7 +107,7 @@ class _ConsoleOutput extends StatefulWidget {
     this.lines,
   }) : super(key: key);
 
-  final List<String> lines;
+  final List<ConsoleLine> lines;
 
   @override
   _ConsoleOutputState createState() => _ConsoleOutputState();
@@ -107,25 +130,34 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textStyle =
-        theme.textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
 
     return Scrollbar(
       child: ListView.builder(
         padding: const EdgeInsets.all(denseSpacing),
         itemCount: widget.lines?.length ?? 0,
-        itemExtent: CodeView.rowHeight,
         controller: _scroll,
         itemBuilder: (context, index) {
-          return RichText(
-            text: TextSpan(
-              children: processAnsiTerminalCodes(
-                widget.lines[index],
-                textStyle,
+          final line = widget.lines[index];
+          if (line is TextConsoleLine) {
+            return SelectableText.rich(
+              TextSpan(
+                // TODO(jacobr): consider caching the processed ansi terminal
+                // codes.
+                children: processAnsiTerminalCodes(
+                  line.text,
+                  theme.fixedFontStyle,
+                ),
               ),
-            ),
-            maxLines: 1,
-          );
+            );
+          } else if (line is VariableConsoleLine) {
+            return ExpandableVariable(
+              variable: ValueNotifier(line.variable),
+            );
+          } else {
+            assert(false,
+                'ConsoleLine of unsupported type ${line.runtimeType} encountered');
+            return const SizedBox();
+          }
         },
       ),
     );

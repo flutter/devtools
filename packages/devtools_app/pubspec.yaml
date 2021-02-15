@@ -6,7 +6,7 @@ description: Web-based performance tooling for Dart and Flutter.
 # When publishing new versions of this package be sure to publish a new version
 # of package:devtools as well. package:devtools contains a compiled snapshot of
 # this package.
-version: 0.9.7
+version: 0.9.8-dev.1
 
 homepage: https://github.com/flutter/devtools
 
@@ -24,10 +24,11 @@ dependencies:
   # Pin ansicolor to version before pre-NNBD version 1.1.0, should be ^1.0.5
   # See https://github.com/flutter/devtools/issues/2530 
   ansicolor: 1.0.5
-  async: ^2.0.0 
+  async: ^2.0.0
+  codicon: ^0.0.2
   collection: ^1.15.0-nnbd
   dds: ^1.7.4
-  devtools_shared: 0.9.7
+  devtools_shared: 0.9.8-dev.1
   file: ^5.1.0
   file_selector: ^0.7.0
   file_selector_linux: ^0.0.1
@@ -49,7 +50,7 @@ dependencies:
   pedantic: ^1.7.0
   provider:
     path: ../../../rrousselGit/provider
-  sse: ^3.1.2
+  sse: ^3.7.0
   string_scanner: ^1.1.0-nullsafety.3
   url_launcher: ^5.0.0
   url_launcher_web: ^0.1.1+6
@@ -62,7 +63,7 @@ dev_dependencies:
   freezed: ^0.12.0
   devtools: #^0.1.7
     path: ../devtools
-  devtools_testing: # 0.9.7
+  devtools_testing: # 0.9.8-dev.1
     path: ../devtools_testing
   flutter_test:
     sdk: flutter
@@ -122,6 +123,9 @@ flutter:
     - family: Octicons
       fonts:
         - asset: fonts/Octicons.ttf
+    - family: Codicon
+      fonts:
+        - asset: packages/codicon/font/codicon.ttf
 
 dependency_overrides:
 # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.

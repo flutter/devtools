@@ -47,7 +47,6 @@ void main() {
       debuggerController = MockDebuggerController();
       when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
       when(debuggerController.resuming).thenReturn(ValueNotifier(false));
-      when(debuggerController.hasFrames).thenReturn(ValueNotifier(false));
       when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
       when(debuggerController.breakpointsWithLocation)
           .thenReturn(ValueNotifier([]));
@@ -63,7 +62,8 @@ void main() {
           .thenReturn(ValueNotifier(null));
       when(debuggerController.hasTruncatedFrames)
           .thenReturn(ValueNotifier(false));
-      when(debuggerController.stdio).thenReturn(ValueNotifier(['']));
+      when(debuggerController.stdio)
+          .thenReturn(ValueNotifier([ConsoleLine.text('')]));
       when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
       when(debuggerController.exceptionPauseMode)
           .thenReturn(ValueNotifier('Unhandled'));
@@ -76,28 +76,30 @@ void main() {
     });
 
     testWidgets('has Console / stdio area', (WidgetTester tester) async {
-      when(debuggerController.stdio).thenReturn(ValueNotifier(['test stdio']));
+      when(debuggerController.stdio)
+          .thenReturn(ValueNotifier([ConsoleLine.text('test stdio')]));
 
       await pumpDebuggerScreen(tester, debuggerController);
 
       expect(find.text('Console'), findsOneWidget);
 
       // test for stdio output.
-      expect(find.richText('test stdio'), findsOneWidget);
+      expect(find.selectableText('test stdio'), findsOneWidget);
     });
 
     testWidgets('Console area shows processed ansi text',
         (WidgetTester tester) async {
       when(debuggerController.stdio)
-          .thenReturn(ValueNotifier([_ansiCodesOutput()]));
+          .thenReturn(ValueNotifier([ConsoleLine.text(_ansiCodesOutput())]));
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final finder = find.richText('Ansi color codes processed for console');
+      final finder =
+          find.selectableText('Ansi color codes processed for console');
       expect(finder, findsOneWidget);
       finder.evaluate().forEach((element) {
-        final richText = element.widget as RichText;
-        final textSpan = richText.text as TextSpan;
+        final selectableText = element.widget as SelectableText;
+        final textSpan = selectableText.textSpan;
         final secondSpan = textSpan.children[1] as TextSpan;
         expect(
           secondSpan.text,
@@ -131,7 +133,7 @@ void main() {
       testWidgets('Tapping the Console Clear button clears stdio.',
           (WidgetTester tester) async {
         when(debuggerController.stdio)
-            .thenReturn(ValueNotifier([_ansiCodesOutput()]));
+            .thenReturn(ValueNotifier([ConsoleLine.text(_ansiCodesOutput())]));
 
         await pumpDebuggerScreen(tester, debuggerController);
 
@@ -145,7 +147,9 @@ void main() {
 
       group('Clipboard', () {
         var _clipboardContents = '';
-        final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
+        final _stdio = ['First line', _ansiCodesOutput(), 'Third line']
+            .map((text) => ConsoleLine.text(text))
+            .toList();
         final _expected = _stdio.join('\n');
 
         setUp(() {
@@ -404,6 +408,7 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('SHOW ALL'), findsNothing);
     });
+
     testWidgetsWithWindowSize(
         'Variables shows items', const Size(1000.0, 4000.0),
         (WidgetTester tester) async {
@@ -412,15 +417,7 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Variables'), findsOneWidget);
 
-      final listFinder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText &&
-          widget.text
-              .toPlainText()
-              .contains('Root 1: _GrowableList (2 items)'));
-      final listChild1Finder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText && widget.text.toPlainText().contains('0: 3'));
-      final listChild2Finder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText && widget.text.toPlainText().contains('1: 4'));
+      final listFinder = find.selectableText('Root 1: _GrowableList (2 items)');
 
       // expect a tooltip for the list value
       expect(
@@ -428,40 +425,29 @@ void main() {
         findsOneWidget,
       );
 
-      final mapFinder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText &&
-          widget.text
-              .toPlainText()
-              .contains('Root 2: _InternalLinkedHashmap (2 items)'));
-      final mapElement1Finder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText &&
-          widget.text.toPlainText().contains("['key1']: 1.0"));
-      final mapElement2Finder = find.byWidgetPredicate((Widget widget) =>
-          widget is RichText &&
-          widget.text.toPlainText().contains("['key2']: 1.1"));
+      final mapFinder = find
+          .selectableTextContaining('Root 2: _InternalLinkedHashmap (2 items)');
+      final mapElement1Finder = find.selectableTextContaining("['key1']: 1.0");
+      final mapElement2Finder = find.selectableTextContaining("['key2']: 1.1");
 
       expect(listFinder, findsOneWidget);
       expect(mapFinder, findsOneWidget);
       expect(
-        find.byWidgetPredicate((Widget widget) =>
-            widget is RichText &&
-            widget.text.toPlainText().contains("Root 3: 'test str...'")),
+        find.selectableTextContaining("Root 3: 'test str...'"),
         findsOneWidget,
       );
       expect(
-        find.byWidgetPredicate((Widget widget) =>
-            widget is RichText &&
-            widget.text.toPlainText().contains('Root 4: true')),
+        find.selectableTextContaining('Root 4: true'),
         findsOneWidget,
       );
 
       // Expand list.
-      expect(listChild1Finder, findsNothing);
-      expect(listChild2Finder, findsNothing);
+      expect(find.selectableTextContaining('0: 3'), findsNothing);
+      expect(find.selectableTextContaining('1: 4'), findsNothing);
       await tester.tap(listFinder);
       await tester.pumpAndSettle();
-      expect(listChild1Finder, findsOneWidget);
-      expect(listChild2Finder, findsOneWidget);
+      expect(find.selectableTextContaining('0: 3'), findsOneWidget);
+      expect(find.selectableTextContaining('1: 4'), findsOneWidget);
 
       // Expand map.
       expect(mapElement1Finder, findsNothing);
@@ -502,7 +488,26 @@ void main() {
 
     testWidgets('debugger controls paused', (WidgetTester tester) async {
       when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
-      when(debuggerController.hasFrames).thenReturn(ValueNotifier(true));
+      when(debuggerController.stackFramesWithLocation)
+          .thenReturn(ValueNotifier([
+        StackFrameAndSourcePosition(
+          Frame(
+            index: 0,
+            code: CodeRef(
+                name: 'testCodeRef', id: 'testCodeRef', kind: CodeKind.kDart),
+            location: SourceLocation(
+              script:
+                  ScriptRef(uri: 'package:test/script.dart', id: 'script.dart'),
+              tokenPos: 10,
+            ),
+            kind: FrameKind.kRegular,
+          ),
+          position: SourcePosition(
+            line: 1,
+            column: 10,
+          ),
+        )
+      ]));
 
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
@@ -529,6 +534,75 @@ void main() {
         debugger: debuggerController,
       ));
       expect(find.text('Ignore'), findsOneWidget);
+    });
+  });
+
+  group('FloatingDebuggerControls', () {
+    setUp(() {
+      debuggerController = MockDebuggerController();
+      when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
+    });
+
+    Future<void> pumpControls(WidgetTester tester) async {
+      await tester.pumpWidget(wrapWithControllers(
+        FloatingDebuggerControls(),
+        debugger: debuggerController,
+      ));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('display as expected', (WidgetTester tester) async {
+      await pumpControls(tester);
+      final animatedOpacityFinder = find.byType(AnimatedOpacity);
+      expect(animatedOpacityFinder, findsOneWidget);
+      final AnimatedOpacity animatedOpacity =
+          animatedOpacityFinder.evaluate().first.widget;
+      expect(animatedOpacity.opacity, equals(1.0));
+      expect(
+          find.text('Main isolate is paused in the debugger'), findsOneWidget);
+      expect(find.byTooltip('Resume'), findsOneWidget);
+      expect(find.byTooltip('Step over'), findsOneWidget);
+    });
+
+    testWidgets('can resume', (WidgetTester tester) async {
+      bool didResume = false;
+      Future<Success> resume() {
+        didResume = true;
+        return Future.value(Success());
+      }
+
+      when(debuggerController.resume()).thenAnswer((_) => resume());
+      await pumpControls(tester);
+      expect(didResume, isFalse);
+      await tester.tap(find.byTooltip('Resume'));
+      await tester.pumpAndSettle();
+      expect(didResume, isTrue);
+    });
+
+    testWidgets('can step over', (WidgetTester tester) async {
+      bool didStep = false;
+      Future<Success> stepOver() {
+        didStep = true;
+        return Future.value(Success());
+      }
+
+      when(debuggerController.stepOver()).thenAnswer((_) => stepOver());
+      await pumpControls(tester);
+      expect(didStep, isFalse);
+      await tester.tap(find.byTooltip('Step over'));
+      await tester.pumpAndSettle();
+      expect(didStep, isTrue);
+    });
+
+    testWidgets('are hidden when app is not paused',
+        (WidgetTester tester) async {
+      when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(false));
+      await pumpControls(tester);
+      final animatedOpacityFinder = find.byType(AnimatedOpacity);
+      expect(animatedOpacityFinder, findsOneWidget);
+      final AnimatedOpacity animatedOpacity =
+          animatedOpacityFinder.evaluate().first.widget;
+      expect(animatedOpacity.opacity, equals(0.0));
     });
   });
 }

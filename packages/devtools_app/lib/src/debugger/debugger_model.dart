@@ -183,12 +183,30 @@ class StackFrameAndSourcePosition {
 }
 
 class Variable extends TreeNode<Variable> {
-  Variable._(this.boundVar);
+  Variable._(this.boundVar, this.text);
 
-  factory Variable.create(BoundVariable variable) {
-    return Variable._(variable);
+  factory Variable.fromRef(InstanceRef value) {
+    return Variable._(
+      BoundVariable(
+        name: '',
+        value: value,
+        declarationTokenPos: -1,
+        scopeStartTokenPos: -1,
+        scopeEndTokenPos: -1,
+      ),
+      null,
+    );
   }
 
+  factory Variable.create(BoundVariable variable) {
+    return Variable._(variable, null);
+  }
+
+  factory Variable.text(String text) {
+    return Variable._(null, text);
+  }
+
+  final String text;
   BoundVariable boundVar;
 
   bool treeInitialized = false;
@@ -203,6 +221,9 @@ class Variable extends TreeNode<Variable> {
 
   // TODO(kenz): add custom display for lists with more than 100 elements
   String get displayValue {
+    if (text != null) {
+      return text;
+    }
     final value = this.value;
 
     String valueStr;
@@ -246,6 +267,8 @@ class Variable extends TreeNode<Variable> {
 
   @override
   String toString() {
+    if (text != null) return text;
+
     final value = boundVar.value is InstanceRef
         ? (boundVar.value as InstanceRef).valueAsString
         : boundVar.value;

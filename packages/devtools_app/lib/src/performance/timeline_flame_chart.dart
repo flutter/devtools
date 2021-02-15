@@ -102,18 +102,10 @@ class _TimelineFlameChartContainerState
             title: 'Timeline Events',
             tall: true,
             needsTopBorder: false,
+            rightPadding: 0.0,
             actions: [
-              Container(
-                width: wideSearchTextWidth,
-                height: defaultTextFieldHeight,
-                child: buildSearchField(
-                  controller: controller,
-                  searchFieldKey: timelineSearchFieldKey,
-                  searchFieldEnabled: searchFieldEnabled,
-                  shouldRequestFocus: searchFieldEnabled,
-                  supportsNavigation: true,
-                ),
-              ),
+              _buildSearchField(searchFieldEnabled),
+              FlameChartHelpButton(),
             ],
           ),
           Expanded(
@@ -123,6 +115,20 @@ class _TimelineFlameChartContainerState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSearchField(bool searchFieldEnabled) {
+    return Container(
+      width: wideSearchTextWidth,
+      height: defaultTextFieldHeight,
+      child: buildSearchField(
+        controller: controller,
+        searchFieldKey: timelineSearchFieldKey,
+        searchFieldEnabled: searchFieldEnabled,
+        shouldRequestFocus: searchFieldEnabled,
+        supportsNavigation: true,
       ),
     );
   }

@@ -45,7 +45,14 @@ class VmServiceWrapper implements VmService {
     // [_dartIoVersion] in a synchronous context, like there are for
     // [_protocolVersion] and [_ddsVersion].
     _protocolVersion = await getVersion();
-    _ddsVersion = await getDartDevelopmentServiceVersion();
+    try {
+      // If DDS is not present, this will throw.
+      _ddsVersion = await getDartDevelopmentServiceVersion();
+    } on RPCError catch (e) {
+      if (e.code != RPCError.kMethodNotFound) {
+        rethrow;
+      }
+    }
   }
 
   Uri get connectedUri => _connectedUri;
@@ -230,6 +237,44 @@ class VmServiceWrapper implements VmService {
       );
       return AllocationProfile.parse(response.json);
     }
+  }
+
+  //{ "_setTraceClassAllocation", SetTraceClassAllocation,
+  Future<Success> setTraceClassAllocation(
+    String isolateId, {
+    String classId,
+    bool enable,
+  }) async {
+    final Map<String, dynamic> args = {};
+    if (classId != null) {
+      args['classId'] = classId;
+    }
+    if (enable != null) {
+      args['enable'] = enable ? true : false;
+    }
+
+    final response = await trackFuture(
+      '_setTraceClassAllocation',
+      callMethod('_setTraceClassAllocation', isolateId: isolateId, args: args),
+    );
+
+    return response as Success;
+  }
+
+  Future<CpuSamples> getAllocationSamples(
+    String isolateId, {
+    String classId,
+  }) async {
+    final Map<String, dynamic> args = {};
+    if (classId != null) {
+      args['classId'] = classId;
+    }
+    final response = await trackFuture(
+      '_getAllocationSamples',
+      callMethod('_getAllocationSamples', isolateId: isolateId, args: args),
+    );
+
+    return CpuSamples.parse(response.json);
   }
 
   @override
@@ -938,11 +983,11 @@ class VmServiceWrapper implements VmService {
   }
 
   bool _isDdsVersionSupportedNow({@required SemanticVersion supportedVersion}) {
-    assert(_ddsVersion != null);
-    return _versionSupported(
-      version: _ddsVersion,
-      supportedVersion: supportedVersion,
-    );
+    return _ddsVersion != null &&
+        _versionSupported(
+          version: _ddsVersion,
+          supportedVersion: supportedVersion,
+        );
   }
 
   /// Retrieves the full string value of a [stringRef].

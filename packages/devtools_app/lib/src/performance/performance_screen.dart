@@ -17,15 +17,14 @@ import '../config_specific/import_export/import_export.dart';
 import '../dialogs.dart';
 import '../globals.dart';
 import '../notifications.dart';
-import '../octicons.dart';
 import '../screen.dart';
 import '../service_extensions.dart';
 import '../split.dart';
 import '../theme.dart';
+import '../ui/icons.dart';
 import '../ui/service_extension_widgets.dart';
 import '../ui/utils.dart';
 import '../ui/vm_flag_widgets.dart';
-import '../utils.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
 import 'performance_controller.dart';
@@ -247,7 +246,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         const SizedBox(width: defaultSpacing),
         SettingsOutlinedButton(
           onPressed: _openSettingsDialog,
-          tooltip: 'Timeline Configuration',
+          tooltip: 'Performance Settings',
         ),
       ],
     );
@@ -256,7 +255,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   void _openSettingsDialog() {
     showDialog(
       context: context,
-      builder: (context) => TimelineConfigurationsDialog(controller),
+      builder: (context) => PerformanceSettingsDialog(controller),
     );
   }
 
@@ -292,20 +291,19 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   }
 }
 
-class TimelineConfigurationsDialog extends StatelessWidget {
-  const TimelineConfigurationsDialog(this.controller);
+class PerformanceSettingsDialog extends StatelessWidget {
+  const PerformanceSettingsDialog(this.controller);
 
   final PerformanceController controller;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return DevToolsDialog(
       title: dialogTitleText(theme, 'Performance Settings'),
       includeDivider: false,
       content: Container(
-        width: dialogSettingsWidth,
+        width: defaultDialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -14,7 +14,5 @@ class SseClient {
 
   Stream get stream => null;
 
-  Stream get onOpen => null;
-
   StreamSink get sink => null;
 }

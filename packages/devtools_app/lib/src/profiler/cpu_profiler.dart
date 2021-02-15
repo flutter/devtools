@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../charts/flame_chart.dart';
 import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/search.dart';
@@ -111,16 +112,11 @@ class _CpuProfilerState extends State<CpuProfiler>
             // well. This will require implementing search for tree tables.
             if (currentTab.key == CpuProfiler.flameChartTab &&
                 widget.searchFieldKey != null)
-              Container(
-                width: wideSearchTextWidth,
-                height: defaultTextFieldHeight,
-                child: buildSearchField(
-                  controller: widget.controller,
-                  searchFieldKey: widget.searchFieldKey,
-                  searchFieldEnabled: hasData,
-                  shouldRequestFocus: false,
-                  supportsNavigation: true,
-                ),
+              Row(
+                children: [
+                  _buildSearchField(hasData),
+                  FlameChartHelpButton(),
+                ],
               ),
             if (currentTab.key != CpuProfiler.flameChartTab)
               Row(children: [
@@ -138,6 +134,20 @@ class _CpuProfilerState extends State<CpuProfiler>
           child: _buildCpuProfileDataView(),
         ),
       ],
+    );
+  }
+
+  Widget _buildSearchField(bool hasData) {
+    return Container(
+      width: wideSearchTextWidth,
+      height: defaultTextFieldHeight,
+      child: buildSearchField(
+        controller: widget.controller,
+        searchFieldKey: widget.searchFieldKey,
+        searchFieldEnabled: hasData,
+        shouldRequestFocus: false,
+        supportsNavigation: true,
+      ),
     );
   }
 

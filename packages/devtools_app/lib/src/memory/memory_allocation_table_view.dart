@@ -4,14 +4,18 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
+import '../theme.dart';
 import '../utils.dart';
 import 'memory_allocation_table_data.dart';
 import 'memory_controller.dart';
 import 'memory_protocol.dart';
+import 'memory_tracker_model.dart';
 
 class AllocationTableView extends StatefulWidget {
   @override
@@ -25,12 +29,17 @@ class AllocationTableViewState extends State<AllocationTableView>
 
   final List<ColumnData<ClassHeapDetailStats>> columns = [];
 
+  var samplesProcessed = <ClassRef, CpuSamples>{};
+
+  final trackerData = TreeTracker();
+
   @override
   void initState() {
     super.initState();
 
     // Setup the columns.
     columns.addAll([
+      FieldTrack(),
       FieldClassName(),
       FieldInstanceCountColumn(),
       FieldInstanceDeltaColumn(),
@@ -58,14 +67,39 @@ class AllocationTableViewState extends State<AllocationTableView>
         controller.computeAllLibraries(rebuild: true);
       });
     });
+
+    addAutoDisposeListener(controller.updateClassStackTraces, () {
+      setState(() {
+        trackerData.createTrackerTree(
+          controller.trackAllocations,
+          controller.allocationSamples,
+        );
+      });
+    });
+
+    addAutoDisposeListener(controller.treeChangedNotifier, () {
+      setState(() {});
+    });
+
+    addAutoDisposeListener(trackerData.selectionNotifier, () {
+      final Tracker item = trackerData.selectionNotifier.value.node;
+      if (item is TrackerMore) trackerData.expandCallStack(item);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     if (controller.allocationsFieldsTable == null) {
-      controller.sortedMonitorColumn = columns[0];
+      // Sort by class name.
+      controller.sortedMonitorColumn = columns[1];
       controller.sortedMonitorDirection = SortDirection.ascending;
     }
+
+    if (controller.monitorAllocations.isEmpty) {
+      return const SizedBox(height: defaultSpacing);
+    }
+
+    controller.searchMatchMonitorAllocationsNotifier.value = null;
 
     controller.allocationsFieldsTable = FlatTable<ClassHeapDetailStats>(
       columns: columns,
@@ -74,12 +108,25 @@ class AllocationTableViewState extends State<AllocationTableView>
       onItemSelected: (ref) {},
       sortColumn: controller.sortedMonitorColumn,
       sortDirection: controller.sortedMonitorDirection,
-      onSortChanged: (column, direction) {
+      onSortChanged: (
+        column,
+        direction,
+      ) {
         controller.sortedMonitorColumn = column;
         controller.sortedMonitorDirection = direction;
       },
+      activeSearchMatchNotifier:
+          controller.searchMatchMonitorAllocationsNotifier,
     );
 
-    return controller.allocationsFieldsTable;
+    return Split(
+      initialFractions: const [0.9, 0.1],
+      minSizes: const [200, 0],
+      axis: Axis.vertical,
+      children: [
+        controller.allocationsFieldsTable,
+        trackerData.createTrackingTable(controller),
+      ],
+    );
   }
 }
