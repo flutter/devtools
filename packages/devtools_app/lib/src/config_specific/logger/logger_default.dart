@@ -4,7 +4,7 @@
 
 import 'logger.dart';
 
-void log(String message, [LogLevel level = LogLevel.debug]) {
+void log(Object message, [LogLevel level = LogLevel.debug]) {
   switch (level) {
     case LogLevel.debug:
       print(message);

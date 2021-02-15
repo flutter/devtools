@@ -47,6 +47,7 @@ class EvalOnDartLibrary {
     }
   }
 
+  bool get disposed => _disposed;
   bool _disposed = false;
 
   void dispose() {
@@ -56,14 +57,16 @@ class EvalOnDartLibrary {
 
   final Set<String> _candidateLibraryNames;
   final VmServiceWrapper service;
-  Completer<LibraryRef> _libraryRef;
   Future<void> _initializeComplete;
   StreamSubscription selectedIsolateStreamSubscription;
 
   String get isolateId => _isolateId;
   String _isolateId;
 
+  Completer<LibraryRef> _libraryRef;
   Future<LibraryRef> get libraryRef => _libraryRef.future;
+  Completer<LibraryRef> get libraryRefCompleter => _libraryRef;
+
   Completer allPendingRequestsDone;
 
   Isolate get isolate => _isolate;
@@ -89,13 +92,13 @@ class EvalOnDartLibrary {
       assert(!_libraryRef.isCompleted);
       _libraryRef.completeError(LibraryNotFound(_candidateLibraryNames));
     } catch (e, stack) {
-      _handleError(e, stack);
+      handleError(e, stack);
     }
   }
 
   Future<InstanceRef> eval(
     String expression, {
-    @required ObjectGroup isAlive,
+    @required Disposable isAlive,
     Map<String, String> scope,
   }) {
     return addRequest(isAlive, () => _eval(expression, scope: scope));
@@ -117,7 +120,6 @@ class EvalOnDartLibrary {
           break;
         }
       }
-      if (libraryRef == null) return null;
       final result = await service.evaluate(
         _isolateId,
         libraryRef.id,
@@ -132,12 +134,12 @@ class EvalOnDartLibrary {
       }
       return result;
     } catch (e, stack) {
-      _handleError('$e - $expression', stack);
+      handleError('$e - $expression', stack);
     }
     return null;
   }
 
-  void _handleError(dynamic e, StackTrace stack) {
+  void handleError(dynamic e, StackTrace stack) {
     if (_disposed) return;
 
     switch (e.runtimeType) {
@@ -155,23 +157,50 @@ class EvalOnDartLibrary {
     }
   }
 
-  Future<Library> getLibrary(LibraryRef instance, ObjectGroup isAlive) {
+  Future<Library> getLibrary(LibraryRef instance, Disposable isAlive) {
     return getObjHelper(instance, isAlive);
   }
 
-  Future<Class> getClass(ClassRef instance, ObjectGroup isAlive) {
+  Future<Library> getLibraryById(String id, Disposable isAlive) {
+    return getObjByIdHelper(id, isAlive);
+  }
+
+  Future<Class> getClass(ClassRef instance, Disposable isAlive) {
     return getObjHelper(instance, isAlive);
   }
 
-  Future<Func> getFunc(FuncRef instance, ObjectGroup isAlive) {
+  Future<Func> getFunc(FuncRef instance, Disposable isAlive) {
     return getObjHelper(instance, isAlive);
   }
 
   Future<Instance> getInstance(
     FutureOr<InstanceRef> instanceRefFuture,
-    ObjectGroup isAlive,
+    Disposable isAlive,
   ) async {
     return await getObjHelper(await instanceRefFuture, isAlive);
+  }
+
+  Future<Instance> getInstanceById(
+    String id,
+    Disposable isAlive,
+  ) {
+    return getObjByIdHelper(id, isAlive);
+  }
+
+  Future<String> getInstanceHashCode(
+    InstanceRef instance, {
+    @required Disposable isAlive,
+  }) async {
+    final hash = await getInstance(
+      eval(
+        'ProviderBinding.shortHash(instance)',
+        isAlive: isAlive,
+        scope: {'instance': instance.id},
+      ),
+      isAlive,
+    );
+
+    return hash.valueAsString;
   }
 
   /// Public so that other related classes such as InspectorService can ensure
@@ -191,7 +220,7 @@ class EvalOnDartLibrary {
   /// for the Inspector so that it does not overload the service with stale requests.
   /// Stale requests will be generated if the user is quickly navigating through the
   /// UI to view specific details subtrees.
-  Future<T> addRequest<T>(ObjectGroup isAlive, Future<T> request()) async {
+  Future<T> addRequest<T>(Disposable isAlive, Future<T> request()) async {
     if (isAlive != null && isAlive.disposed) return null;
 
     // Future that completes when the request has finished.
@@ -244,14 +273,36 @@ class EvalOnDartLibrary {
 
   Future<T> getObjHelper<T extends Obj>(
     ObjRef instance,
-    ObjectGroup isAlive, {
+    Disposable isAlive, {
+    int offset,
+    int count,
+  }) async {
+    if (instance == null) {
+      // instance can be null when writing `getInstance(eval(...))`
+      throw ArgumentError.notNull('instance');
+    }
+
+    return addRequest<T>(isAlive, () async {
+      final T value = await service.getObject(
+        _isolateId,
+        instance.id,
+        offset: offset,
+        count: count,
+      );
+      return value;
+    });
+  }
+
+  Future<T> getObjByIdHelper<T extends Obj>(
+    String id,
+    Disposable isAlive, {
     int offset,
     int count,
   }) {
     return addRequest<T>(isAlive, () async {
       final T value = await service.getObject(
         _isolateId,
-        instance.id,
+        id,
         offset: offset,
         count: count,
       );

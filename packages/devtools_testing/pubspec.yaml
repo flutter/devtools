@@ -14,6 +14,7 @@ dependencies:
   devtools_shared: 0.9.7
   flutter:
     sdk: flutter
+  flutter_riverpod: ^0.12.4
   flutter_test:
     sdk: flutter
   matcher: ^0.12.3

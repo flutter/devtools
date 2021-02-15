@@ -164,7 +164,7 @@ class VmServiceWrapper implements VmService {
   Future get onDone => _vmService.onDone;
 
   @override
-  Future<void> dispose() => _vmService.dispose();
+  Future<void> dispose() async => _vmService.dispose();
 
   @override
   Future<Response> evaluate(

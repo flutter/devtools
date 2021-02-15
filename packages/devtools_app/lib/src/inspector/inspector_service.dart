@@ -556,12 +556,18 @@ class InspectorService extends DisposableController
   }
 }
 
+abstract class Disposable {
+  bool get disposed;
+
+  void dispose();
+}
+
 /// Class managing a group of inspector objects that can be freed by
 /// a single call to dispose().
 /// After dispose is called, all pending requests made with the ObjectGroup
 /// will be skipped. This means that clients should not have to write any
 /// special logic to handle orphaned requests.
-class ObjectGroup {
+class ObjectGroup implements Disposable {
   ObjectGroup(
     String debugName,
     this.inspectorService,
@@ -572,6 +578,7 @@ class ObjectGroup {
   /// Object group all objects in this arena are allocated with.
   final String groupName;
   final InspectorService inspectorService;
+  @override
   bool disposed = false;
 
   EvalOnDartLibrary get inspectorLibrary => inspectorService.inspectorLibrary;
@@ -585,6 +592,7 @@ class ObjectGroup {
   /// group but sometimes due to chained futures that can be difficult to avoid
   /// and it is simpler return an empty result that will be ignored anyway than to
   /// attempt carefully cancel futures.
+  @override
   Future<void> dispose() {
     final disposeComplete = invokeVoidServiceMethod('disposeGroup', groupName);
     disposed = true;
