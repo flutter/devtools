@@ -145,7 +145,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
                 // codes.
                 children: processAnsiTerminalCodes(
                   line.text,
-                  theme.consoleText,
+                  theme.fixedFontStyle,
                 ),
               ),
             );

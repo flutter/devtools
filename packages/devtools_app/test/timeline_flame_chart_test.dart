@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
@@ -57,6 +58,29 @@ void main() {
     }
 
     const windowSize = Size(2225.0, 1000.0);
+
+    testWidgetsWithWindowSize('builds header content', windowSize,
+        (WidgetTester tester) async {
+      _setUpServiceManagerWithTimeline({});
+      await pumpTimelineBody(tester, PerformanceController());
+      await tester.pumpAndSettle();
+      expect(find.text('Timeline Events'), findsOneWidget);
+      expect(find.byKey(timelineSearchFieldKey), findsOneWidget);
+      expect(find.byType(FlameChartHelpButton), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize('can show help dialog', windowSize,
+        (WidgetTester tester) async {
+      _setUpServiceManagerWithTimeline({});
+      await pumpTimelineBody(tester, PerformanceController());
+      await tester.pumpAndSettle();
+
+      final helpButtonFinder = find.byType(FlameChartHelpButton);
+      expect(helpButtonFinder, findsOneWidget);
+      await tester.tap(helpButtonFinder);
+      await tester.pumpAndSettle();
+      expect(find.text('Flame Chart Help'), findsOneWidget);
+    });
 
     testWidgetsWithWindowSize('builds flame chart with data', windowSize,
         (WidgetTester tester) async {

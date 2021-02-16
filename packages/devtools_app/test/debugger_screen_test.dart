@@ -47,7 +47,6 @@ void main() {
       debuggerController = MockDebuggerController();
       when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
       when(debuggerController.resuming).thenReturn(ValueNotifier(false));
-      when(debuggerController.hasFrames).thenReturn(ValueNotifier(false));
       when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
       when(debuggerController.breakpointsWithLocation)
           .thenReturn(ValueNotifier([]));
@@ -409,6 +408,7 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('SHOW ALL'), findsNothing);
     });
+
     testWidgetsWithWindowSize(
         'Variables shows items', const Size(1000.0, 4000.0),
         (WidgetTester tester) async {
@@ -488,7 +488,26 @@ void main() {
 
     testWidgets('debugger controls paused', (WidgetTester tester) async {
       when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
-      when(debuggerController.hasFrames).thenReturn(ValueNotifier(true));
+      when(debuggerController.stackFramesWithLocation)
+          .thenReturn(ValueNotifier([
+        StackFrameAndSourcePosition(
+          Frame(
+            index: 0,
+            code: CodeRef(
+                name: 'testCodeRef', id: 'testCodeRef', kind: CodeKind.kDart),
+            location: SourceLocation(
+              script:
+                  ScriptRef(uri: 'package:test/script.dart', id: 'script.dart'),
+              tokenPos: 10,
+            ),
+            kind: FrameKind.kRegular,
+          ),
+          position: SourcePosition(
+            line: 1,
+            column: 10,
+          ),
+        )
+      ]));
 
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
@@ -515,6 +534,75 @@ void main() {
         debugger: debuggerController,
       ));
       expect(find.text('Ignore'), findsOneWidget);
+    });
+  });
+
+  group('FloatingDebuggerControls', () {
+    setUp(() {
+      debuggerController = MockDebuggerController();
+      when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
+    });
+
+    Future<void> pumpControls(WidgetTester tester) async {
+      await tester.pumpWidget(wrapWithControllers(
+        FloatingDebuggerControls(),
+        debugger: debuggerController,
+      ));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('display as expected', (WidgetTester tester) async {
+      await pumpControls(tester);
+      final animatedOpacityFinder = find.byType(AnimatedOpacity);
+      expect(animatedOpacityFinder, findsOneWidget);
+      final AnimatedOpacity animatedOpacity =
+          animatedOpacityFinder.evaluate().first.widget;
+      expect(animatedOpacity.opacity, equals(1.0));
+      expect(
+          find.text('Main isolate is paused in the debugger'), findsOneWidget);
+      expect(find.byTooltip('Resume'), findsOneWidget);
+      expect(find.byTooltip('Step over'), findsOneWidget);
+    });
+
+    testWidgets('can resume', (WidgetTester tester) async {
+      bool didResume = false;
+      Future<Success> resume() {
+        didResume = true;
+        return Future.value(Success());
+      }
+
+      when(debuggerController.resume()).thenAnswer((_) => resume());
+      await pumpControls(tester);
+      expect(didResume, isFalse);
+      await tester.tap(find.byTooltip('Resume'));
+      await tester.pumpAndSettle();
+      expect(didResume, isTrue);
+    });
+
+    testWidgets('can step over', (WidgetTester tester) async {
+      bool didStep = false;
+      Future<Success> stepOver() {
+        didStep = true;
+        return Future.value(Success());
+      }
+
+      when(debuggerController.stepOver()).thenAnswer((_) => stepOver());
+      await pumpControls(tester);
+      expect(didStep, isFalse);
+      await tester.tap(find.byTooltip('Step over'));
+      await tester.pumpAndSettle();
+      expect(didStep, isTrue);
+    });
+
+    testWidgets('are hidden when app is not paused',
+        (WidgetTester tester) async {
+      when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(false));
+      await pumpControls(tester);
+      final animatedOpacityFinder = find.byType(AnimatedOpacity);
+      expect(animatedOpacityFinder, findsOneWidget);
+      final AnimatedOpacity animatedOpacity =
+          animatedOpacityFinder.evaluate().first.widget;
+      expect(animatedOpacity.opacity, equals(0.0));
     });
   });
 }

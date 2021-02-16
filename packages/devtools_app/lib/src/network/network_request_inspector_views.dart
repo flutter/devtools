@@ -146,7 +146,7 @@ class HttpResponseView extends StatelessWidget {
     return SingleChildScrollView(
       child: Text(
         data.responseBody,
-        style: fixedFontStyle(context),
+        style: Theme.of(context).fixedFontStyle,
       ),
     );
   }

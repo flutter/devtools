@@ -4,26 +4,10 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' as intl;
 
 import '../auto_dispose.dart';
 
 import 'chart_trace.dart';
-
-/// Displays timestamp using locale's timezone HH:MM:SS, if isUtc is false.
-/// @param isUTC - if true for testing, the UTC locale is used (instead of
-/// the user's locale). Tests will then pass when run in any timezone. All
-/// formatted timestamps are displayed using the UTC locale.
-String prettyTimestamp(
-  int timestamp, {
-  bool isUtc = false,
-}) {
-  final timestampDT = DateTime.fromMillisecondsSinceEpoch(
-    timestamp,
-    isUtc: isUtc,
-  );
-  return intl.DateFormat.Hms().format(timestampDT); // HH:mm:ss
-}
 
 ///_____________________________________________________________________
 ///

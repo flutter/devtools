@@ -633,26 +633,6 @@ class InspectorController extends DisposableController
     try {
       final RemoteDiagnosticsNode newSelection = await pendingSelectionFuture;
       if (group.disposed) return;
-      if (newSelection == null && firstFrame) {
-        // If no node is selected, select the first node other than the
-        // boilerplate root widget. This is typically the first widget defined
-        // by the user.
-        // TODO(jacobr): we could precisely determine the first widget defined
-        // by the user.
-        var mainWidget = await group.getRootWidget();
-        mainWidget = mainWidget?.childrenNow?.safeFirst;
-        if (group.disposed) return;
-        if (mainWidget != null) {
-          await group.setSelectionInspector(
-            mainWidget.valueRef,
-            false,
-          );
-          if (group.disposed) return;
-          await updateSelectionFromService(firstFrame: false);
-          return;
-        }
-        return;
-      }
       RemoteDiagnosticsNode detailsSelection;
 
       if (pendingDetailsFuture != null) {

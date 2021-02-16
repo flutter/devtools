@@ -53,6 +53,7 @@ class VMInfoList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         areaPaneHeader(
@@ -70,13 +71,13 @@ class VMInfoList extends StatelessWidget {
                   children: [
                     SelectableText(
                       '${row.key.toString()}:',
-                      style: fixedFontStyle(context),
+                      style: theme.fixedFontStyle,
                     ),
                     const SizedBox(width: denseSpacing),
                     Flexible(
                       child: SelectableText(
                         row?.value?.toString() ?? '--',
-                        style: fixedFontStyle(context),
+                        style: theme.fixedFontStyle,
                       ),
                     ),
                   ],

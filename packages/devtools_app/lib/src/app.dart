@@ -364,7 +364,7 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
 class OpenAboutAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ActionButton(
+    return DevToolsTooltip(
       tooltip: 'About DevTools',
       child: InkWell(
         onTap: () async {
@@ -390,7 +390,7 @@ class OpenAboutAction extends StatelessWidget {
 class OpenSettingsAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ActionButton(
+    return DevToolsTooltip(
       tooltip: 'Settings',
       child: InkWell(
         onTap: () async {

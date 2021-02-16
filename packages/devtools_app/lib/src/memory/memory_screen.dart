@@ -18,9 +18,9 @@ import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../dialogs.dart';
 import '../globals.dart';
-import '../octicons.dart';
 import '../screen.dart';
 import '../theme.dart';
+import '../ui/icons.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
 
@@ -1232,6 +1232,8 @@ class MemoryBodyState extends State<MemoryBody>
 
     // Clear any current Allocation Profile collected.
     controller.monitorAllocations = [];
+    controller.trackAllocations.clear();
+    controller.allocationSamples.clear();
 
     // Clear all analysis and snapshots collected too.
     controller.clearAllSnapshots();
@@ -1453,7 +1455,7 @@ class MemoryConfigurationsDialog extends StatelessWidget {
       title: dialogTitleText(theme, 'Memory Settings'),
       includeDivider: false,
       content: Container(
-        width: dialogSettingsWidth,
+        width: defaultDialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

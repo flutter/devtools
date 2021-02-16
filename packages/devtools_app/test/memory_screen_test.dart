@@ -242,10 +242,7 @@ void main() {
     await pumpMemoryScreen(tester);
 
     expect(find.byKey(HeapTreeViewState.snapshotButtonKey), findsOneWidget);
-    expect(
-      find.byKey(HeapTreeViewState.allocationMonitorResetKey),
-      findsOneWidget,
-    );
+    expect(find.byKey(HeapTreeViewState.allocationMonitorKey), findsOneWidget);
     expect(
       find.byKey(HeapTreeViewState.allocationMonitorResetKey),
       findsOneWidget,
@@ -319,5 +316,22 @@ void main() {
       controller.selectedSnapshotTimestamp.millisecondsSinceEpoch,
       lessThan(DateTime.now().millisecondsSinceEpoch),
     );
+  });
+
+  testWidgetsWithWindowSize('allocation monitor/class tracking', windowSize,
+      (WidgetTester tester) async {
+    await pumpMemoryScreen(tester);
+
+    expect(find.byKey(HeapTreeViewState.allocationMonitorKey), findsOneWidget);
+
+    // TODO(terry): Need to mock up allocation data (ClassHeapStats) and CpuSamples for
+    //              further tracking tests.
+/*
+    await tester.tap(find.byKey(HeapTreeViewState.allocationMonitorKey));
+    await tester.pump();
+
+    // Tracker TextField should now exist.
+    expect(find.byKey(HeapTreeViewState.trackAllocationKey), findsOneWidget);
+*/
   });
 }

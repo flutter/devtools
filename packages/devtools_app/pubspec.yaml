@@ -24,7 +24,8 @@ dependencies:
   # Pin ansicolor to version before pre-NNBD version 1.1.0, should be ^1.0.5
   # See https://github.com/flutter/devtools/issues/2530 
   ansicolor: 1.0.5
-  async: ^2.0.0 
+  async: ^2.0.0
+  codicon: ^0.0.2
   collection: ^1.15.0-nnbd
   dds: ^1.7.4
   devtools_shared: 0.9.8-dev.1
@@ -46,7 +47,7 @@ dependencies:
   path: ^1.6.0
   pedantic: ^1.7.0
   provider: ^4.0.0
-  sse: ^3.1.2
+  sse: ^3.7.0
   string_scanner: ^1.1.0-nullsafety.3
   url_launcher: ^5.0.0
   url_launcher_web: ^0.1.1+6
@@ -117,6 +118,9 @@ flutter:
     - family: Octicons
       fonts:
         - asset: fonts/Octicons.ttf
+    - family: Codicon
+      fonts:
+        - asset: packages/codicon/font/codicon.ttf
 
 dependency_overrides:
 # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.

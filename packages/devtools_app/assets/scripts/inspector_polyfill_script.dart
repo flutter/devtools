@@ -165,22 +165,25 @@ String addServiceExtensions() {
                 }
 
                 try {
-                  final constraints = renderObject.constraints;
-                  final constraintsProperty = <String, Object>{
-                    'type': constraints.runtimeType.toString(),
-                    'description': constraints.toString(),
-                  };
-                  if (constraints is BoxConstraints) {
-                    constraintsProperty.addAll(<String, Object>{
-                      'minWidth': constraints.minWidth.toString(),
-                      'minHeight': constraints.minHeight.toString(),
-                      'maxWidth': constraints.maxWidth.toString(),
-                      'maxHeight': constraints.maxHeight.toString(),
-                    });
+                  if (!renderObject.debugNeedsLayout) {
+                    final constraints = renderObject.constraints;
+                    final constraintsProperty = <String, Object>{
+                      'type': constraints.runtimeType.toString(),
+                      'description': constraints.toString(),
+                    };
+                    if (constraints is BoxConstraints) {
+                      constraintsProperty.addAll(<String, Object>{
+                        'minWidth': constraints.minWidth.toString(),
+                        'minHeight': constraints.minHeight.toString(),
+                        'maxWidth': constraints.maxWidth.toString(),
+                        'maxHeight': constraints.maxHeight.toString(),
+                      });
+                    }
+                    additionalJson['constraints'] = constraintsProperty;
                   }
-                  additionalJson['constraints'] = constraintsProperty;
                 } catch (e) {
-                  // Not laid out yet.
+                  // Constraints are sometimes unavailable even though
+                  // debugNeedsLayout is false.
                 }
 
                 try {

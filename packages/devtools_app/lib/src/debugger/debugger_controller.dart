@@ -98,10 +98,6 @@ class DebuggerController extends DisposableController
   /// VM, but haven't yet received the 'resumed' isolate event.
   ValueListenable<bool> get resuming => _resuming;
 
-  final _hasFrames = ValueNotifier<bool>(false);
-
-  ValueNotifier get hasFrames => _hasFrames;
-
   Event _lastEvent;
 
   Event get lastEvent => _lastEvent;
@@ -422,7 +418,6 @@ class DebuggerController extends DisposableController
 
     if (event.isolate.id != isolateRef?.id) return;
 
-    _hasFrames.value = event.topFrame != null;
     _lastEvent = event;
 
     switch (event.kind) {

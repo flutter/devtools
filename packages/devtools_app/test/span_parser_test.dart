@@ -168,6 +168,13 @@ void
 var
 ''';
 
+const openCodeBlock = '''
+/// This is an open code block:
+/// ```dart
+///
+/// This should not cause parsing to fail.
+''';
+
 void spanTester({
   @required ScopeSpan span,
   @required List<String> scopes,
@@ -1313,6 +1320,28 @@ void main() {
         line: 3,
         column: 1,
         length: 1,
+      );
+    });
+
+    test('handles malformed input', () {
+      final spans = SpanParser.parse(grammar, openCodeBlock);
+      expect(spans.length, 2);
+      spanTester(
+          span: spans[0],
+          scopes: ['comment.block.documentation.dart'],
+          line: 1,
+          column: 1,
+          length: 91,
+      );
+      spanTester(
+        span: spans[1],
+        scopes: [
+          'comment.block.documentation.dart',
+          'variable.other.source.dart',
+        ],
+        line: 2,
+        column: 12,
+        length: 48,
       );
     });
   });
