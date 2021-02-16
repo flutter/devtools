@@ -389,4 +389,55 @@ void main() async {
     });
 */
   });
+
+  group('widget errors', () {
+    tearDownAll(() async {
+      await env.tearDownEnvironment(force: true);
+    });
+
+    testWidgetsWithWindowSize('show navigator and error indicators', windowSize,
+        (WidgetTester tester) async {
+      await env.setupEnvironment(
+          config: const FlutterRunConfiguration(
+        withDebugger: true,
+        entryScript: 'lib/overflow_errors.dart',
+      ));
+      expect(serviceManager.service, equals(env.service));
+      expect(serviceManager.isolateManager, isNotNull);
+
+      const screen = InspectorScreen();
+      await tester.pumpWidget(
+          wrapWithInspectorControllers(Builder(builder: screen.build)));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      final InspectorScreenBodyState state =
+          tester.state(find.byType(InspectorScreenBody));
+      final controller = state.inspectorController;
+      while (!controller.flutterAppFrameReady) {
+        await state.inspectorController.maybeLoadUI();
+        await tester.pumpAndSettle();
+      }
+      await env.flutter.hotReload();
+      // Give time for the initial animation to complete.
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesGoldenFile(
+            'goldens/integration_inspector_errors_1_initial_load.png'),
+      );
+
+      // Mark the first 3 errors as read by tapping on the "next" icon to check
+      // that they've been marked as seen and the middle one is selected.
+      for (var i = 0; i < 3; i++) {
+        await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+      }
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesGoldenFile(
+            'goldens/integration_inspector_errors_2_half_seen.png'),
+      );
+
+      await env.tearDownEnvironment();
+    }, skip: !Platform.isMacOS);
+  });
 }

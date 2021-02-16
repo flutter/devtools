@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'auto_dispose.dart';
 import 'globals.dart';
+import 'inspector/diagnostics_node.dart';
 import 'inspector/inspector_screen.dart';
 import 'listenable.dart';
 import 'logging/logging_screen.dart';
 import 'network/network_screen.dart';
 import 'performance/performance_screen.dart';
 import 'service_extensions.dart' as extensions;
+import 'utils.dart';
 import 'vm_service_wrapper.dart';
 
 class ErrorBadgeManager extends DisposableController
@@ -22,6 +26,11 @@ class ErrorBadgeManager extends DisposableController
     PerformanceScreen.id: ValueNotifier<int>(0),
     NetworkScreen.id: ValueNotifier<int>(0),
     LoggingScreen.id: ValueNotifier<int>(0),
+  };
+  final _activeErrors =
+      <String, ValueNotifier<LinkedHashMap<String, DevToolsError>>>{
+    InspectorScreen.id: ValueNotifier<LinkedHashMap<String, DevToolsError>>(
+        LinkedHashMap<String, DevToolsError>()),
   };
 
   void vmServiceOpened(VmServiceWrapper service) {
@@ -44,14 +53,43 @@ class ErrorBadgeManager extends DisposableController
     if (e.extensionKind == 'Flutter.Error') {
       incrementBadgeCount(LoggingScreen.id);
 
-      final json = e.extensionData.data;
-      final objectId = json['objectId'] as String;
-      // TODO(kenz): verify that the object id is referring to an element or
-      // widget.
-      if (objectId?.contains('inspector-') ?? false) {
+      final inspectableError = _extractInspectableError(e);
+      if (inspectableError != null) {
         incrementBadgeCount(InspectorScreen.id);
+        appendError(InspectorScreen.id, inspectableError);
       }
     }
+  }
+
+  InspectableWidgetError _extractInspectableError(Event error) {
+    // TODO(dantup): Switch to using the inspectorService from the serviceManager
+    //  once Jacob's change to add it lands.
+    final node =
+        RemoteDiagnosticsNode(error.extensionData.data, null, false, null);
+
+    final errorSummaryNode = node.inlineProperties
+        ?.firstWhere((p) => p.type == 'ErrorSummary', orElse: () => null);
+    final errorMessage = errorSummaryNode?.description;
+    if (errorMessage == null) {
+      return null;
+    }
+
+    final devToolsUrlNode = node.inlineProperties?.firstWhere(
+      (p) =>
+          p.type == 'DevToolsDeepLinkProperty' &&
+          p.getStringMember('value') != null,
+      orElse: () => null,
+    );
+    if (devToolsUrlNode == null) {
+      return null;
+    }
+
+    final queryParams =
+        devToolsQueryParams(devToolsUrlNode.getStringMember('value'));
+    final inspectorRef =
+        queryParams != null ? queryParams['inspectorRef'] : null;
+
+    return InspectableWidgetError(errorMessage, inspectorRef);
   }
 
   void _handleStdErr(Event e) {
@@ -66,8 +104,27 @@ class ErrorBadgeManager extends DisposableController
     notifier.value = currentCount + 1;
   }
 
+  void appendError(String screenId, DevToolsError error) {
+    final errors = _activeErrors[screenId];
+    if (errors == null) return;
+
+    // Build a new map with the new error. Adding to the existing map
+    // won't cause the ValueNotifier to fire (and it's not permitted to call
+    // notifyListeners() directly).
+    final newValue = LinkedHashMap<String, DevToolsError>.from(errors.value);
+    newValue[error.id] = error;
+    errors.value = newValue;
+  }
+
   ValueListenable<int> errorCountNotifier(String screenId) {
     return _errorCountNotifier(screenId) ?? const FixedValueListenable<int>(0);
+  }
+
+  ValueListenable<LinkedHashMap<String, DevToolsError>> erroredItemsForPage(
+      String screenId) {
+    return _activeErrors[screenId] ??
+        FixedValueListenable<LinkedHashMap<String, DevToolsError>>(
+            LinkedHashMap<String, DevToolsError>());
   }
 
   ValueNotifier<int> _errorCountNotifier(String screenId) {
@@ -77,4 +134,56 @@ class ErrorBadgeManager extends DisposableController
   void clearErrors(String screenId) {
     _activeErrorCounts[screenId]?.value = 0;
   }
+
+  void filterErrors(String screenId, bool Function(String id) isValid) {
+    final errors = _activeErrors[screenId];
+    if (errors == null) return;
+
+    final oldCount = errors.value.length;
+    final newValue =
+        Map.fromEntries(errors.value.entries.where((e) => isValid(e.key)));
+    if (newValue.length != oldCount) {
+      errors.value = newValue;
+    }
+  }
+
+  void markErrorAsRead(String screenId, DevToolsError error) {
+    final errors = _activeErrors[screenId];
+    if (errors == null) return;
+
+    // If this error doesn't exist anymore or is already read, nothing to do.
+    if (errors.value[error.id]?.read ?? true) {
+      return;
+    }
+
+    // Otherwise, replace the map with a new one that has the error marked
+    // as read.
+    errors.value = LinkedHashMap<String, DevToolsError>.fromEntries(
+      errors.value.entries.map((e) {
+        if (e.value != error) return e;
+        return MapEntry(e.key, e.value.asRead());
+      }),
+    );
+  }
+}
+
+class DevToolsError {
+  DevToolsError(this.errorMessage, this.id, {this.read = false});
+
+  final String errorMessage;
+  final String id;
+  final bool read;
+
+  DevToolsError asRead() => DevToolsError(errorMessage, id, read: true);
+}
+
+class InspectableWidgetError extends DevToolsError {
+  InspectableWidgetError(String errorMessage, String id, {bool read = false})
+      : super(errorMessage, id, read: read);
+
+  String get inspectorRef => id;
+
+  @override
+  InspectableWidgetError asRead() =>
+      InspectableWidgetError(errorMessage, id, read: true);
 }

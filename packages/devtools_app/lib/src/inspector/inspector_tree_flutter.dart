@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -12,6 +13,7 @@ import 'package:pedantic/pedantic.dart';
 import '../auto_dispose_mixin.dart';
 import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
+import '../error_badge_manager.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/theme.dart';
@@ -27,12 +29,18 @@ class _InspectorTreeRowWidget extends StatefulWidget {
     @required Key key,
     @required this.row,
     @required this.inspectorTreeState,
+    this.error,
   }) : super(key: key);
 
   final _InspectorTreeState inspectorTreeState;
 
   InspectorTreeNode get node => row.node;
   final InspectorTreeRow row;
+
+  /// A [DevToolsError] that applies to the widget in this row.
+  ///
+  /// This will be null if there is no error for this row.
+  final DevToolsError error;
 
   @override
   _InspectorTreeRowState createState() => _InspectorTreeRowState();
@@ -46,6 +54,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
       height: rowHeight,
       child: InspectorRowContent(
         row: widget.row,
+        error: widget.error,
         expandArrowAnimation: expandArrowAnimation,
         controller: widget.inspectorTreeState.controller,
         onToggle: () {
@@ -169,10 +178,12 @@ class InspectorTree extends StatefulWidget {
     Key key,
     @required this.controller,
     this.isSummaryTree = false,
+    this.widgetErrors,
   }) : super(key: key);
 
   final InspectorTreeController controller;
   final bool isSummaryTree;
+  final LinkedHashMap<String, InspectableWidgetError> widgetErrors;
 
   @override
   State<InspectorTree> createState() => _InspectorTreeState();
@@ -423,10 +434,15 @@ class _InspectorTreeState extends State<InspectorTree>
                     (context, index) {
                       final InspectorTreeRow row =
                           controller.root?.getRow(index);
+                      final inspectorRef = row.node.diagnostic?.valueRef?.id;
                       return _InspectorTreeRowWidget(
                         key: PageStorageKey(row?.node),
                         inspectorTreeState: this,
                         row: row,
+                        error:
+                            widget.widgetErrors != null && inspectorRef != null
+                                ? widget.widgetErrors[inspectorRef]
+                                : null,
                       );
                     },
                     childCount: controller.numRows,
@@ -528,12 +544,21 @@ class InspectorRowContent extends StatelessWidget {
     @required this.controller,
     @required this.onToggle,
     @required this.expandArrowAnimation,
+    this.error,
   });
 
   final InspectorTreeRow row;
   final InspectorTreeControllerFlutter controller;
   final VoidCallback onToggle;
   final Animation<double> expandArrowAnimation;
+
+  /// A [DevToolsError] that applies to the widget in this row.
+  ///
+  /// This will be null if there is no error for this row.
+  final DevToolsError error;
+
+  /// Whether this row has any error.
+  bool get hasError => error != null;
 
   @override
   Widget build(BuildContext context) {
@@ -544,14 +569,15 @@ class InspectorRowContent extends StatelessWidget {
       return const SizedBox();
     }
     Color backgroundColor;
-    if (row.isSelected || row.node == controller.hover) {
-      backgroundColor = row.isSelected
-          ? colorScheme.selectedRowBackgroundColor
-          : colorScheme.hoverColor;
+    if (row.isSelected) {
+      backgroundColor =
+          hasError ? devtoolsError : colorScheme.selectedRowBackgroundColor;
+    } else if (row.node == controller.hover) {
+      backgroundColor = colorScheme.hoverColor;
     }
 
     final node = row.node;
-    return CustomPaint(
+    final rowWidget = CustomPaint(
       painter: _RowPainter(row, controller, colorScheme),
       size: Size(currentX, rowHeight),
       child: Padding(
@@ -577,6 +603,7 @@ class InspectorRowContent extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: backgroundColor,
+                    border: hasError ? Border.all(color: devtoolsError) : null,
                   ),
                   child: InkWell(
                     onTap: () {
@@ -595,6 +622,57 @@ class InspectorRowContent extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+
+    // Wrap with error tooltip/marker if there is an error for this node's widget.
+    return hasError
+        ? Stack(
+            children: [
+              rowWidget,
+              ErrorIndicator(
+                error: error,
+                indent: currentX,
+              ),
+            ],
+          )
+        : rowWidget;
+  }
+}
+
+class ErrorIndicator extends StatelessWidget {
+  const ErrorIndicator({
+    Key key,
+    @required this.error,
+    @required this.indent,
+  }) : super(key: key);
+
+  final DevToolsError error;
+  final double indent;
+
+  /// [indent] is where the row content starts, so the indicator should be
+  /// offset some to the left to avoid overlapping with the guidelines and
+  /// expand/collapse widgets (plus to account for its own width).
+  static const double indicatorOffset = -(defaultIconSize * 2 + denseSpacing);
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: error.errorMessage,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: indent + indicatorOffset,
+          top: (rowHeight - defaultIconSize) / 2,
+        ),
+        child: Container(
+          width: defaultIconSize,
+          height: defaultIconSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: error.read ? null : devtoolsError,
+            border: error.read ? Border.all(color: devtoolsError) : null,
           ),
         ),
       ),

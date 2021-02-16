@@ -74,6 +74,18 @@ void main() {
       expect(find.text('Flutter Inspector'), findsOneWidget);
     });
 
+    group('Widget Errors', () {
+      // Display of error navigator/indicators is tested by a golden in
+      // inspector_integration_test.dart
+
+      testWidgetsWithWindowSize(
+          'does not render error navigator if no errors', windowSize,
+          (WidgetTester tester) async {
+        await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+        expect(find.byType(ErrorNavigator), findsNothing);
+      });
+    });
+
     testWidgetsWithWindowSize('builds with no data', windowSize,
         (WidgetTester tester) async {
       // Make sure the window is wide enough to display description text.
