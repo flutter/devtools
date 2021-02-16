@@ -239,7 +239,8 @@ void main() {
       expect(controller.offline, isFalse);
     });
 
-    testWidgetsWithWindowSize('switch from live feed and load exported file', windowSize,
+    testWidgetsWithWindowSize(
+        'switch from live feed and load exported file', windowSize,
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);
 
@@ -612,14 +613,68 @@ void main() {
 
     // OneClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneClass'));
+    await pumpAndSettleOneSecond();
+
+    // Show's auto-complete dropdown with the 2nd item highlighted.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile(
+          'goldens/allocation_dropdown_hilight_line_2_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
+
     // OneMoreClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneMoreClass'));
+    await pumpAndSettleOneSecond();
+
+    // Show's auto-complete dropdown with the 3rd item highlighted.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile(
+          'goldens/allocation_dropdown_hilight_line_3_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
+
     // SecondClass hilighted.
     await downArrow(autoCompletes4.indexOf('SecondClass'));
+    await pumpAndSettleOneSecond();
+
+    // Show's auto-complete dropdown with the 4th item highlighted.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile(
+          'goldens/allocation_dropdown_hilight_line_4_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
+
     // AnotherClass hilighted.
     await downArrow(autoCompletes4.indexOf('AnotherClass'));
+    await pumpAndSettleOneSecond();
+
+    // Show's auto-complete dropdown with the last item highlighted.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile(
+          'goldens/allocation_dropdown_hilight_line_1_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
+
     // OneClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneClass'));
+    await pumpAndSettleOneSecond();
+
+    // Show's auto-complete dropdown with the 2nd item highlighted.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile(
+          'goldens/allocation_dropdown_hilight_line_2_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
 
     // Select last hilighted entry.
     await simulateKeyDownEvent(LogicalKeyboardKey.enter);

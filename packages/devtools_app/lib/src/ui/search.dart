@@ -118,8 +118,11 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   int currentDefaultIndex;
 
   OverlayEntry createAutoCompleteOverlay({
+    @required BuildContext context,
     @required GlobalKey searchFieldKey,
   }) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     // TODO(kenz): investigate whether we actually need the global key for this.
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField.
@@ -129,16 +132,12 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     final count = searchAutoComplete.value.length;
     for (var index = 0; index < count; index++) {
       final matchedName = searchAutoComplete.value[index];
-      Color activeColor;
-      if (currentDefaultIndex == index) {
-        activeColor = Colors.grey[700];
-      } else {
-        activeColor = Colors.grey[850];
-      }
       autoCompleteTiles.add(
         ListTile(
           title: Text(matchedName),
-          tileColor: activeColor,
+          tileColor: currentDefaultIndex == index
+              ? colorScheme.autoCompleteHighlightColor
+              : colorScheme.defaultBackgroundColor,
           onTap: () {
             search = matchedName;
             selectTheSearch = true;
@@ -180,8 +179,8 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   ///      setState(autoCompleteOverlaySetState(controller, context));
   ///     });
   VoidCallback autoCompleteOverlaySetState({
-    @required GlobalKey searchFieldKey,
     @required BuildContext context,
+    @required GlobalKey searchFieldKey,
   }) {
     return () {
       if (autoCompleteOverlay != null) {
@@ -189,6 +188,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
       }
 
       autoCompleteOverlay = createAutoCompleteOverlay(
+        context: context,
         searchFieldKey: searchFieldKey,
       );
 

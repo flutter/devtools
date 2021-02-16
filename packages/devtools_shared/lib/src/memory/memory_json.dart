@@ -66,7 +66,7 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
 
   /// If data is empty check isMatchedVersion and isMemoryPayload to ensure the
   /// JSON file loaded is a memory file.
-  final List<T> data = [];
+  final data = <T>[];
 
   static const String jsonDevToolsScreenField = 'dartDevToolsScreen';
   // TODO(terry): Expose Timeline.

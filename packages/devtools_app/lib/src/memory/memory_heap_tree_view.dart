@@ -216,8 +216,8 @@ class HeapTreeViewState extends State<HeapTree>
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
       SnapshotFilterState.gaActionForSnapshotFilterDialog();
       setState(controller.autoCompleteOverlaySetState(
-        searchFieldKey: memorySearchFieldKey,
         context: context,
+        searchFieldKey: memorySearchFieldKey,
       ));
     });
 
@@ -643,19 +643,21 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   void highlightDropdown(bool directionDown) {
-    final maxItems = controller.searchAutoComplete.value.length;
+    final numItems = controller.searchAutoComplete.value.length - 1;
     var indexToSelect = controller.currentDefaultIndex;
     if (directionDown) {
       // Select next item in auto-complete overlay.
-      if (++indexToSelect >= maxItems) {
+      ++indexToSelect;
+      if (indexToSelect > numItems) {
         // Greater than max go back to top list item.
         indexToSelect = 0;
       }
     } else {
       // Select previous item item in auto-complete overlay.
-      if (--indexToSelect < 0) {
+      --indexToSelect;
+      if (indexToSelect < 0) {
         // Less than first go back to bottom list item.
-        indexToSelect = maxItems - 1;
+        indexToSelect = numItems;
       }
     }
 
