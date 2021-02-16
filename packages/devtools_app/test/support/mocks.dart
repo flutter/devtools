@@ -21,6 +21,7 @@ import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_app/src/version.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -45,13 +46,15 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   static FakeVmService createFakeService({
     Timeline timelineData,
     SocketProfile socketProfile,
-    MemoryJson memoryData,
+    SamplesMemoryJson memoryData,
+    AllocationMemoryJson allocationData,
   }) =>
       FakeVmService(
         _flagManager,
         timelineData,
         socketProfile,
         memoryData,
+        allocationData,
       );
 
   final List<String> availableServices;
@@ -168,6 +171,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._timelineData,
     this._socketProfile,
     this._memoryData,
+    this._allocationData,
   ) : _startingSockets = _socketProfile?.sockets ?? [];
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
@@ -180,7 +184,8 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   final Timeline _timelineData;
   SocketProfile _socketProfile;
   final List<SocketStatistic> _startingSockets;
-  final MemoryJson _memoryData;
+  final SamplesMemoryJson _memoryData;
+  final AllocationMemoryJson _allocationData;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -228,6 +233,45 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       );
 
   @override
+  Future<AllocationProfile> getAllocationProfile(
+    String isolateId, {
+    bool reset,
+    bool gc,
+  }) async {
+    final memberStats = <ClassHeapStats>[];
+    for (var data in _allocationData.data) {
+      final stats = ClassHeapStats(
+        classRef: data.classRef,
+        accumulatedSize: data.bytesDelta,
+        bytesCurrent: data.bytesCurrent,
+        instancesAccumulated: data.instancesDelta,
+        instancesCurrent: data.instancesCurrent,
+      );
+      stats.json = stats.toJson();
+      memberStats.add(stats);
+    }
+    final allocationProfile = AllocationProfile(
+      members: memberStats,
+      memoryUsage: MemoryUsage(
+        externalUsage: 10000000,
+        heapCapacity: 20000000,
+        heapUsage: 7777777,
+      ),
+    );
+
+    allocationProfile.json = allocationProfile.toJson();
+    return allocationProfile;
+  }
+
+  @override
+  Future<Success> setTraceClassAllocation(
+    String isolateId, {
+    String classId,
+    bool enable,
+  }) async =>
+      Future.value(Success());
+
+  @override
   Future<HeapSnapshotGraph> getHeapSnapshotGraph(IsolateRef isolateRef) async {
     // Simulate a snapshot that takes .5 seconds.
     await Future.delayed(const Duration(milliseconds: 500));
@@ -261,6 +305,13 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   @override
   Future<Stack> getStack(String isolateId, {int limit}) {
     return Future.value(Stack(frames: [], messages: [], truncated: false));
+  }
+
+  @override
+  bool isProtocolVersionSupportedNow({
+    @required SemanticVersion supportedVersion,
+  }) {
+    return true;
   }
 
   @override

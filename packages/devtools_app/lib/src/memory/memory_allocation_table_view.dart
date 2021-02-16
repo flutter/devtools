@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
@@ -14,10 +15,14 @@ import '../theme.dart';
 import '../utils.dart';
 import 'memory_allocation_table_data.dart';
 import 'memory_controller.dart';
-import 'memory_protocol.dart';
 import 'memory_tracker_model.dart';
 
 class AllocationTableView extends StatefulWidget {
+  const AllocationTableView() : super(key: allocationTableKey);
+
+  @visibleForTesting
+  static const allocationTableKey = Key('Allocation Table');
+
   @override
   AllocationTableViewState createState() => AllocationTableViewState();
 }
@@ -25,6 +30,8 @@ class AllocationTableView extends StatefulWidget {
 /// Table of the fields of an instance (type, name and value).
 class AllocationTableViewState extends State<AllocationTableView>
     with AutoDisposeMixin {
+  AllocationTableViewState() : super();
+
   MemoryController controller;
 
   final List<ColumnData<ClassHeapDetailStats>> columns = [];
@@ -120,7 +127,7 @@ class AllocationTableViewState extends State<AllocationTableView>
     );
 
     return Split(
-      initialFractions: const [0.9, 0.1],
+      initialFractions: const [0.8, 0.2],
       minSizes: const [200, 0],
       axis: Axis.vertical,
       children: [

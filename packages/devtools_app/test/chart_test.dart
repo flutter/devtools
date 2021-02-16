@@ -20,7 +20,7 @@ void main() {
 
       void loadData() {
         // Load canned data testHeapSampleData.
-        memoryJson ??= MemoryJson.decode(argJsonString: testHeapSampleData);
+        memoryJson ??= SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
 
         expect(memoryJson.data.length, equals(104));
       }

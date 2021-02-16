@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +26,6 @@ import 'memory_controller.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_instance_tree_view.dart';
-import 'memory_protocol.dart';
 import 'memory_screen.dart';
 import 'memory_snapshot_models.dart';
 
@@ -140,8 +140,6 @@ class HeapTreeViewState extends State<HeapTree>
   @visibleForTesting
   static const allocationMonitorResetKey = Key('Accumulators Reset Button');
   @visibleForTesting
-  static const trackAllocationKey = Key('Track Class');
-  @visibleForTesting
   static const searchButtonKey = Key('Snapshot Search');
   @visibleForTesting
   static const filterButtonKey = Key('Snapshot Filter');
@@ -211,14 +209,15 @@ class HeapTreeViewState extends State<HeapTree>
     addAutoDisposeListener(controller.searchNotifier, () {
       setState(() {
         controller.closeAutoCompleteOverlay();
+        controller.currentDefaultIndex = 0;
       });
     });
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
       SnapshotFilterState.gaActionForSnapshotFilterDialog();
       setState(controller.autoCompleteOverlaySetState(
-        searchFieldKey: memorySearchFieldKey,
         context: context,
+        searchFieldKey: memorySearchFieldKey,
       ));
     });
 
@@ -395,7 +394,7 @@ class HeapTreeViewState extends State<HeapTree>
         : controller.isAnalysisLeafSelected
             ? Expanded(child: AnalysisInstanceViewTable())
             : controller.isAllocationMonitorLeafSelected
-                ? Expanded(child: AllocationTableView())
+                ? const Expanded(child: AllocationTableView())
                 : const SizedBox();
 
     return Row(
@@ -643,6 +642,32 @@ class HeapTreeViewState extends State<HeapTree>
     controller.monitorAllocations = currentAllocations;
   }
 
+  void highlightDropdown(bool directionDown) {
+    final numItems = controller.searchAutoComplete.value.length - 1;
+    var indexToSelect = controller.currentDefaultIndex;
+    if (directionDown) {
+      // Select next item in auto-complete overlay.
+      ++indexToSelect;
+      if (indexToSelect > numItems) {
+        // Greater than max go back to top list item.
+        indexToSelect = 0;
+      }
+    } else {
+      // Select previous item item in auto-complete overlay.
+      --indexToSelect;
+      if (indexToSelect < 0) {
+        // Less than first go back to bottom list item.
+        indexToSelect = numItems;
+      }
+    }
+
+    controller.currentDefaultIndex = indexToSelect;
+
+    // Cause the auto-complete list to update, list is small 10 items max.
+    controller.searchAutoComplete.value =
+        controller.searchAutoComplete.value.toList();
+  }
+
   /// Match, found,  select it and process via ValueNotifiers.
   void selectTheMatch(String foundName) {
     MemoryScreen.gaAction(name: memorySearchFieldKeyName);
@@ -656,6 +681,7 @@ class HeapTreeViewState extends State<HeapTree>
     });
 
     selectFromSearchField(controller, foundName);
+    clearSearchField(controller);
   }
 
   bool get _isSearchable =>
@@ -677,6 +703,7 @@ class HeapTreeViewState extends State<HeapTree>
             searchFieldEnabled: _isSearchable,
             shouldRequestFocus: _isSearchable,
             onSelection: selectTheMatch,
+            onHighlightDropdown: highlightDropdown,
           ),
         ),
         const SizedBox(width: denseSpacing),

@@ -221,6 +221,10 @@ extension DevToolsColorScheme on ColorScheme {
   Color get hoverSelectionBarColor =>
       isLight ? Colors.lime[600] : Colors.yellowAccent;
 
+  // Highlight color for an selected item in the autocomplete dropdown list.
+  Color get autoCompleteHighlightColor =>
+      isLight ? Colors.grey[300] : Colors.grey[700];
+
   // Title of the hover card.
   TextStyle get hoverTitleTextStyle => const TextStyle(
         color: Colors.black,

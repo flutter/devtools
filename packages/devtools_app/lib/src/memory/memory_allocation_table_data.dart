@@ -4,13 +4,13 @@
 
 import 'dart:math';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../table.dart';
 import '../table_data.dart';
 import 'memory_controller.dart';
-import 'memory_protocol.dart';
 
 const defaultNumberFieldWidth = 100.0;
 

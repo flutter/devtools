@@ -12,3 +12,4 @@ environment:
 
 dependencies:
   meta: ^1.1.0
+  vm_service: ^6.0.1-nullsafety.0
