@@ -25,7 +25,6 @@ class ErrorBadgeManager extends DisposableController
     InspectorScreen.id: ValueNotifier<int>(0),
     PerformanceScreen.id: ValueNotifier<int>(0),
     NetworkScreen.id: ValueNotifier<int>(0),
-    LoggingScreen.id: ValueNotifier<int>(0),
   };
   final _activeErrors =
       <String, ValueNotifier<LinkedHashMap<String, DevToolsError>>>{
