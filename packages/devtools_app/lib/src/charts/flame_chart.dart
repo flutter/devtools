@@ -247,6 +247,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       onExit: _handleMouseExit,
       onHover: _handleMouseHover,
       child: RawKeyboardListener(
+        autofocus: true,
         focusNode: focusNode,
         onKey: (event) => _handleKeyEvent(event),
         // Scrollbar needs to wrap [LayoutBuilder] so that the scroll bar is
