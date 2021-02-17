@@ -36,8 +36,7 @@ class _CallStackState extends State<CallStack> {
     return ValueListenableBuilder<List<StackFrameAndSourcePosition>>(
       valueListenable: controller.stackFramesWithLocation,
       builder: (context, stackFrames, _) {
-        return Expanded(
-            child: ValueListenableBuilder<StackFrameAndSourcePosition>(
+        return ValueListenableBuilder<StackFrameAndSourcePosition>(
           valueListenable: controller.selectedStackFrame,
           builder: (context, selectedFrame, _) {
             return ListView.builder(
@@ -49,7 +48,7 @@ class _CallStackState extends State<CallStack> {
               },
             );
           },
-        ));
+        );
       },
     );
   }
