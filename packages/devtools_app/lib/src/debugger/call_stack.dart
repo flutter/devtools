@@ -8,7 +8,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../common_widgets.dart';
 import '../theme.dart';
-import '../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
@@ -28,42 +27,31 @@ class _CallStackState extends State<CallStack> {
 
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
+
     controller = newController;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      ValueListenableBuilder<List<StackFrameAndSourcePosition>>(
-          valueListenable: controller.stackFramesWithLocation,
-          builder: (context, stackFrames, _) {
-            return Expanded(
-                child: ValueListenableBuilder<StackFrameAndSourcePosition>(
-              valueListenable: controller.selectedStackFrame,
-              builder: (context, selectedFrame, _) {
-                return ListView.builder(
-                  itemCount: stackFrames.length,
-                  itemExtent: defaultListItemHeight,
-                  itemBuilder: (_, index) {
-                    final frame = stackFrames[index];
-                    return _buildStackFrame(frame, frame == selectedFrame);
-                  },
-                );
+    return ValueListenableBuilder<List<StackFrameAndSourcePosition>>(
+      valueListenable: controller.stackFramesWithLocation,
+      builder: (context, stackFrames, _) {
+        return Expanded(
+            child: ValueListenableBuilder<StackFrameAndSourcePosition>(
+          valueListenable: controller.selectedStackFrame,
+          builder: (context, selectedFrame, _) {
+            return ListView.builder(
+              itemCount: stackFrames.length,
+              itemExtent: defaultListItemHeight,
+              itemBuilder: (_, index) {
+                final frame = stackFrames[index];
+                return _buildStackFrame(frame, frame == selectedFrame);
               },
-            ));
-          }),
-      ValueListenableBuilder<bool>(
-          valueListenable: controller.hasTruncatedFrames,
-          builder: (_, hasTruncatedFrames, __) {
-            if (hasTruncatedFrames) {
-              return TextButton(
-                onPressed: () => controller.getFullStack(),
-                child: const Text('SHOW ALL'),
-              );
-            }
-            return const SizedBox(height: 0, width: 0);
-          })
-    ]);
+            );
+          },
+        ));
+      },
+    );
   }
 
   Widget _buildStackFrame(
@@ -175,16 +163,5 @@ class _CallStackState extends State<CallStack> {
     }
     final file = uri.split('/').last;
     return frame.line == null ? file : '$file ${frame.line}';
-  }
-}
-
-class CallStackCountBadge extends StatelessWidget {
-  const CallStackCountBadge({@required this.stackFrames});
-
-  final List<StackFrameAndSourcePosition> stackFrames;
-
-  @override
-  Widget build(BuildContext context) {
-    return Badge('${nf.format(stackFrames.length)}');
   }
 }
