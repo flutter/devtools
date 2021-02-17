@@ -938,7 +938,7 @@ class AsyncTimelineEvent extends TimelineEvent {
   /// The return value will be used to stop the recursion early.
   bool endAsyncEvent(TraceEventWrapper eventWrapper) {
     assert(
-      parentId == null ? asyncId == eventWrapper.event.id : true,
+      parentId != null || asyncId == eventWrapper.event.id,
       'asyncId = $asyncId, but endEventId = ${eventWrapper.event.id}',
     );
     if (endTraceEventJson != null) {
