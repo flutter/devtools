@@ -1029,6 +1029,81 @@ final durationEventsWithDuplicateTraces = [
   endGpuRasterizerDrawTrace,
 ];
 
+final asyncEventsWithChildrenWithDifferentIds = [
+  testTraceEventWrapper({
+    'name': 'PipelineItem',
+    'cat': 'Embedder',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294235082,
+    'ph': 'b',
+    'id': '1',
+    'args': {'isolateId': 'isolates/677008524697083'}
+  }),
+  testTraceEventWrapper({
+    'name': 'PipelineProduce',
+    'cat': 'Embedder',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294235082,
+    'ph': 'b',
+    'id': '1',
+    'args': {'isolateId': 'isolates/677008524697083'}
+  }),
+  testTraceEventWrapper({
+    'name': 'PipelineProduce',
+    'cat': 'Embedder',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294236800,
+    'ph': 'e',
+    'id': '1',
+    'args': {'isolateId': 'isolates/677008524697083'}
+  }),
+  // Child of PipelineItem with id '1'
+  testTraceEventWrapper({
+    'name': 'ImageCache.putIfAbsent',
+    'cat': 'Dart',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294246630,
+    'ph': 'b',
+    'id': '1',
+    'args': {'isolateId': 'isolates/677008524697083'}
+  }),
+  // Child of PipelineItem with id '2' (parent manually specified)
+  testTraceEventWrapper({
+    'name': 'listener',
+    'cat': 'Dart',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294251242,
+    'ph': 'b',
+    'id': '2',
+    'args': {'parentId': '1'}
+  }),
+  testTraceEventWrapper({
+    'name': 'listener',
+    'cat': 'Dart',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294272684,
+    'ph': 'e',
+    'id': '2',
+    'args': {'isolateId': 'isolates/677008524697083'}
+  }),
+  testTraceEventWrapper({
+    'name': 'ImageCache.putIfAbsent',
+    'cat': 'Dart',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294272706,
+    'ph': 'e',
+    'id': '1',
+    'args': {'isolateId': 'isolates/677008524697083'}
+  }),
+];
+
 final testTimelineJson = {
   'type': 'Timeline',
   'traceEvents': [

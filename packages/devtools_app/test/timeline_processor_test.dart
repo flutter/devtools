@@ -244,6 +244,14 @@ void main() {
       );
     });
 
+    test(
+        'processes trace with children with different ids does not throw assert',
+        () async {
+      // This test should complete without throwing an assert from
+      // `AsyncTimelineEvent.endAsyncEvent`.
+      await processor.processTimeline(asyncEventsWithChildrenWithDifferentIds);
+    });
+
     test('inferEventType', () {
       expect(
         processor.inferEventType(asyncStartATrace.event),

@@ -932,23 +932,29 @@ class AsyncTimelineEvent extends TimelineEvent {
     }
   }
 
-  void endAsyncEvent(TraceEventWrapper eventWrapper) {
+  /// End the async event with [eventWrapper] and return whether or not the
+  /// end event was successfully added.
+  ///
+  /// The return value will be used to stop the recursion early.
+  bool endAsyncEvent(TraceEventWrapper eventWrapper) {
     assert(
-      asyncId == eventWrapper.event.id,
+      parentId == null ? asyncId == eventWrapper.event.id : true,
       'asyncId = $asyncId, but endEventId = ${eventWrapper.event.id}',
     );
     if (endTraceEventJson != null) {
       // This event has already ended and [eventWrapper] is a duplicate trace
       // event.
-      return;
+      return false;
     }
     if (name == eventWrapper.event.name) {
       addEndEvent(eventWrapper);
-      return;
+      return true;
     }
 
     for (AsyncTimelineEvent child in children) {
-      child.endAsyncEvent(eventWrapper);
+      final added = child.endAsyncEvent(eventWrapper);
+      if (added) return true;
     }
+    return false;
   }
 }
