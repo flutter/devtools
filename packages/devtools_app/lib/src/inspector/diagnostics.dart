@@ -211,19 +211,21 @@ class DiagnosticsNodeDescription extends StatelessWidget {
             textStyle.merge(inspector_text_styles.regularBold(colorScheme));
       }
 
-      children.add(Flexible(
+      children.add(Expanded(
         child: buildDescription(
           diagnostic.description,
           textStyle,
           colorScheme,
           isProperty: false,
         ),
-        fit: FlexFit.tight,
       ));
 
       if (errorText != null) {
         children.add(
-          Flexible(
+          Expanded(
+            // Errors tend to be longer than widget classes, so allow them
+            // to take up a larger proportion of the space.
+            flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
               child: Text(
