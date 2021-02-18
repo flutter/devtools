@@ -17,6 +17,7 @@ import '../error_badge_manager.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/theme.dart';
+import '../ui/utils.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
 import 'inspector_tree.dart';
@@ -30,12 +31,16 @@ class _InspectorTreeRowWidget extends StatefulWidget {
     @required this.row,
     @required this.inspectorTreeState,
     this.error,
+    @required this.scrollControllerX,
+    @required this.viewportWidth,
   }) : super(key: key);
 
   final _InspectorTreeState inspectorTreeState;
 
   InspectorTreeNode get node => row.node;
   final InspectorTreeRow row;
+  final ScrollController scrollControllerX;
+  final double viewportWidth;
 
   /// A [DevToolsError] that applies to the widget in this row.
   ///
@@ -57,6 +62,8 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
         error: widget.error,
         expandArrowAnimation: expandArrowAnimation,
         controller: widget.inspectorTreeState.controller,
+        scrollControllerX: widget.scrollControllerX,
+        viewportWidth: widget.viewportWidth,
         onToggle: () {
           setExpanded(!isExpanded);
         },
@@ -283,7 +290,7 @@ class _InspectorTreeState extends State<InspectorTree>
     if (rowIndex == controller.numRows) {
       return 0;
     }
-    final endY = y += _scrollControllerY.position.viewportDimension;
+    final endY = y += safeViewportHeight;
     for (int i = rowIndex; i < controller.numRows; i++) {
       final rowY = controller.getRowY(i);
       if (rowY >= endY) break;
@@ -311,25 +318,32 @@ class _InspectorTreeState extends State<InspectorTree>
     }
     currentAnimateTarget = rect;
     final targetY = _computeTargetOffsetY(
-      _scrollControllerY,
       rect.top,
       rect.bottom,
     );
-    currentAnimateY = _scrollControllerY.animateTo(
-      targetY,
-      duration: longDuration,
-      curve: defaultCurve,
-    );
+    if (_scrollControllerY.hasClients) {
+      currentAnimateY = _scrollControllerY.animateTo(
+        targetY,
+        duration: longDuration,
+        curve: defaultCurve,
+      );
+    } else {
+      currentAnimateY = null;
+      _scrollControllerY = ScrollController(initialScrollOffset: targetY);
+    }
 
     // Determine a target X coordinate consistent with the target Y coordinate
     // we will end up as so we get a smooth animation to the final destination.
     final targetX = _computeTargetX(targetY);
-
-    unawaited(_scrollControllerX.animateTo(
-      targetX,
-      duration: longDuration,
-      curve: defaultCurve,
-    ));
+    if (_scrollControllerX.hasClients) {
+      unawaited(_scrollControllerX.animateTo(
+        targetX,
+        duration: longDuration,
+        curve: defaultCurve,
+      ));
+    } else {
+      _scrollControllerX = ScrollController(initialScrollOffset: targetX);
+    }
 
     try {
       await currentAnimateY;
@@ -340,22 +354,34 @@ class _InspectorTreeState extends State<InspectorTree>
     currentAnimateTarget = null;
   }
 
+  // TODO(jacobr): resolve cases where we need to know the viewport height
+  // before it is available so we don't need this approximation.
+  /// Placeholder viewport height to use if we don't yet know the real
+  /// viewport height.
+  static const _placeholderViewportHeight = 1000.0;
+
+  double get safeViewportHeight {
+    return _scrollControllerY.hasClients
+        ? _scrollControllerY.position.viewportDimension
+        : _placeholderViewportHeight;
+  }
+
   /// Animate so that the entire range minOffset to maxOffset is within view.
   double _computeTargetOffsetY(
-    ScrollController controller,
     double minOffset,
     double maxOffset,
   ) {
-    final currentOffset = controller.offset;
-    final viewportDimension = _scrollControllerY.position.viewportDimension;
+    final currentOffset = _scrollControllerY.hasClients
+        ? _scrollControllerY.offset
+        : _scrollControllerY.initialScrollOffset;
+    final viewportDimension = safeViewportHeight;
     final currentEndOffset = viewportDimension + currentOffset;
 
     // If the requested range is larger than what the viewport can show at once,
     // prioritize showing the start of the range.
     maxOffset = min(viewportDimension + minOffset, maxOffset);
     if (currentOffset <= minOffset && currentEndOffset >= maxOffset) {
-      return controller
-          .offset; // Nothing to do. The whole range is already in view.
+      return currentOffset; // Nothing to do. The whole range is already in view.
     }
     if (currentOffset > minOffset) {
       // Need to scroll so the minOffset is in view.
@@ -406,54 +432,71 @@ class _InspectorTreeState extends State<InspectorTree>
       // Indicate the tree is loading.
       return const CenteredCircularProgressIndicator();
     }
+    if (controller.numRows == 0) {
+      // This works around a bug when Scrollbars are present on a short lived
+      // widget.
+      return const SizedBox();
+    }
 
-    return Scrollbar(
-      isAlwaysShown: true,
-      controller: _scrollControllerX,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        controller: _scrollControllerX,
-        child: SizedBox(
-          width: controller.rowWidth + controller.maxRowIndent,
-          // TODO(kenz): this scrollbar needs to be sticky to the right side of
-          // the visible container - right now it is lined up to the right of
-          // the widest row (which is likely not visible). This may require some
-          // refactoring.
-          child: Scrollbar(
-            isAlwaysShown: true,
-            controller: _scrollControllerY,
-            child: GestureDetector(
-              onTap: _focusNode.requestFocus,
-              child: Focus(
-                onKey: _handleKeyEvent,
-                autofocus: widget.isSummaryTree,
-                focusNode: _focusNode,
-                child: ListView.custom(
-                  itemExtent: rowHeight,
-                  childrenDelegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final InspectorTreeRow row =
-                          controller.root?.getRow(index);
-                      final inspectorRef = row.node.diagnostic?.valueRef?.id;
-                      return _InspectorTreeRowWidget(
-                        key: PageStorageKey(row?.node),
-                        inspectorTreeState: this,
-                        row: row,
-                        error:
-                            widget.widgetErrors != null && inspectorRef != null
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final viewportWidth = constraints.maxWidth;
+        return Scrollbar(
+          isAlwaysShown: true,
+          controller: _scrollControllerX,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: _scrollControllerX,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxWidth: controller.rowWidth + controller.maxRowIndent),
+              // TODO(kenz): this scrollbar needs to be sticky to the right side of
+              // the visible container - right now it is lined up to the right of
+              // the widest row (which is likely not visible). This may require some
+              // refactoring.
+              child: GestureDetector(
+                onTap: _focusNode.requestFocus,
+                child: Focus(
+                  onKey: _handleKeyEvent,
+                  autofocus: widget.isSummaryTree,
+                  focusNode: _focusNode,
+                  child: OffsetScrollbar(
+                    isAlwaysShown: true,
+                    axis: Axis.vertical,
+                    controller: _scrollControllerY,
+                    offsetController: _scrollControllerX,
+                    offsetControllerViewportDimension: viewportWidth,
+                    child: ListView.custom(
+                      itemExtent: rowHeight,
+                      childrenDelegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final InspectorTreeRow row =
+                              controller.root?.getRow(index);
+                          final inspectorRef =
+                              row.node.diagnostic?.valueRef?.id;
+                          return _InspectorTreeRowWidget(
+                            key: PageStorageKey(row?.node),
+                            inspectorTreeState: this,
+                            row: row,
+                            scrollControllerX: _scrollControllerX,
+                            viewportWidth: viewportWidth,
+                            error: widget.widgetErrors != null &&
+                                    inspectorRef != null
                                 ? widget.widgetErrors[inspectorRef]
                                 : null,
-                      );
-                    },
-                    childCount: controller.numRows,
+                          );
+                        },
+                        childCount: controller.numRows,
+                      ),
+                      controller: _scrollControllerY,
+                    ),
                   ),
-                  controller: _scrollControllerY,
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -545,12 +588,16 @@ class InspectorRowContent extends StatelessWidget {
     @required this.onToggle,
     @required this.expandArrowAnimation,
     this.error,
+    @required this.scrollControllerX,
+    @required this.viewportWidth,
   });
 
   final InspectorTreeRow row;
   final InspectorTreeControllerFlutter controller;
   final VoidCallback onToggle;
   final Animation<double> expandArrowAnimation;
+  final ScrollController scrollControllerX;
+  final double viewportWidth;
 
   /// A [DevToolsError] that applies to the widget in this row.
   ///
@@ -577,68 +624,82 @@ class InspectorRowContent extends StatelessWidget {
     }
 
     final node = row.node;
-    final rowWidget = CustomPaint(
-      painter: _RowPainter(row, controller, colorScheme),
-      size: Size(currentX, rowHeight),
-      child: Padding(
-        padding: EdgeInsets.only(left: currentX),
-        child: ClipRect(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              node.showExpandCollapse
-                  ? InkWell(
-                      onTap: onToggle,
-                      child: RotationTransition(
-                        turns: expandArrowAnimation,
-                        child: const Icon(
-                          Icons.expand_more,
-                          size: defaultIconSize,
-                        ),
-                      ),
-                    )
-                  : const SizedBox(
-                      width: defaultSpacing, height: defaultSpacing),
-              Expanded(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                    border: hasError ? Border.all(color: devtoolsError) : null,
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      controller.onSelectRow(row);
-                      // TODO(gmoothart): It may be possible to capture the tap
-                      // and request focus directly from the InspectorTree. Then
-                      // we wouldn't need this.
-                      controller.requestFocus();
-                    },
-                    child: Container(
-                      height: rowHeight,
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: DiagnosticsNodeDescription(node.diagnostic),
+
+    Widget rowWidget = Padding(
+      padding: EdgeInsets.only(left: currentX),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          node.showExpandCollapse
+              ? InkWell(
+                  onTap: onToggle,
+                  child: RotationTransition(
+                    turns: expandArrowAnimation,
+                    child: const Icon(
+                      Icons.expand_more,
+                      size: defaultIconSize,
                     ),
                   ),
+                )
+              : const SizedBox(width: defaultSpacing, height: defaultSpacing),
+          Expanded(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                border: hasError ? Border.all(color: devtoolsError) : null,
+              ),
+              child: InkWell(
+                onTap: () {
+                  controller.onSelectRow(row);
+                  // TODO(gmoothart): It may be possible to capture the tap
+                  // and request focus directly from the InspectorTree. Then
+                  // we wouldn't need this.
+                  controller.requestFocus();
+                },
+                child: Container(
+                  height: rowHeight,
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: DiagnosticsNodeDescription(node.diagnostic),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
 
     // Wrap with error tooltip/marker if there is an error for this node's widget.
-    return hasError
-        ? Stack(
-            children: [
-              rowWidget,
-              ErrorIndicator(
-                error: error,
-                indent: currentX,
-              ),
-            ],
-          )
-        : rowWidget;
+    if (hasError) {
+      rowWidget = Stack(
+        children: [
+          rowWidget,
+          ErrorIndicator(
+            error: error,
+            indent: currentX,
+          ),
+        ],
+      );
+    }
+
+    return CustomPaint(
+      painter: _RowPainter(row, controller, colorScheme),
+      size: Size(currentX, rowHeight),
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: AnimatedBuilder(
+          animation: scrollControllerX,
+          builder: (context, child) {
+            final rowWidth =
+                scrollControllerX.offset + viewportWidth - defaultSpacing;
+            return SizedBox(
+              width: max(rowWidth, currentX + 100),
+              child: rowWidth > currentX ? child : const SizedBox(),
+            );
+          },
+          child: rowWidget,
+        ),
+      ),
+    );
   }
 }
 

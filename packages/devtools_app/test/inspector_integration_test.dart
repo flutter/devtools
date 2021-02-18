@@ -96,6 +96,16 @@ void main() async {
         matchesGoldenFile('goldens/integration_inspector_select_center.png'),
       );
 
+      // Select the details tree.
+      await tester.tap(find.text('Details Tree'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesGoldenFile(
+          'goldens/integration_inspector_select_center_details_tree.png',
+        ),
+      );
+
       // Select the RichText row.
       await tester.tap(find.richText('RichText'));
       await tester.pumpAndSettle(inspectorChangeSettleTime);

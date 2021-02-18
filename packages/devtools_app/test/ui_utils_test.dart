@@ -193,4 +193,53 @@ void main() {
       );
     });
   });
+
+  testWidgetsWithWindowSize('OffsetScrollbar goldens', const Size(300, 300),
+      (WidgetTester tester) async {
+    const root = Key('root');
+    final _scrollControllerX = ScrollController();
+    final _scrollControllerY = ScrollController();
+    await tester.pumpWidget(
+      wrap(
+        Scrollbar(
+          isAlwaysShown: true,
+          key: root,
+          controller: _scrollControllerX,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: _scrollControllerX,
+            child: OffsetScrollbar(
+              axis: Axis.vertical,
+              isAlwaysShown: true,
+              offsetControllerViewportDimension:
+                  300, // Matches the extent of the outer ScrollView.
+              controller: _scrollControllerY,
+              offsetController: _scrollControllerX,
+              child: SingleChildScrollView(
+                controller: _scrollControllerY,
+                child:
+                    Container(width: 2000, height: 1000, color: Colors.green),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Screenshot should show both vertical and horizontal scrollbars.
+    await expectLater(
+      find.byKey(root),
+      matchesGoldenFile('goldens/offset_scrollbar_startup.png'),
+    );
+
+    _scrollControllerX.jumpTo(500);
+    await tester.pumpAndSettle();
+    // Screenshot should show horizontal scrollbar scrolled while vertical
+    // scrollbar is at its initial offset.
+    await expectLater(
+      find.byKey(root),
+      matchesGoldenFile('goldens/offset_scrollbar_scrolled.png'),
+    );
+  });
 }
