@@ -624,7 +624,7 @@ class MemoryBodyState extends State<MemoryBody>
   static const hoverXOffset = 10;
   static const hoverYOffset = 0.0;
   static const hoverWidth = 203.0;
-  static const hover_card_border_width = 2;
+  static const hover_card_border_width = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
   static const hoverHeightMinimum = 40.0;
