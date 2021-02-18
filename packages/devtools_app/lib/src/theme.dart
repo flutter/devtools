@@ -214,9 +214,6 @@ extension DevToolsColorScheme on ColorScheme {
   Color get numericConstantSyntaxColor =>
       isLight ? const Color(0xFF098658) : const Color(0xFFB5CEA8);
 
-  // Light theme hover background is semi-transparent YellowAccent[100].
-  Color get hoverBackgroundColor => const Color.fromARGB(150, 255, 255, 141);
-
   // Bar color for current selection (hover).
   Color get hoverSelectionBarColor =>
       isLight ? Colors.lime[600] : Colors.yellowAccent;
@@ -226,35 +223,52 @@ extension DevToolsColorScheme on ColorScheme {
       isLight ? Colors.grey[300] : Colors.grey[700];
 
   // Title of the hover card.
-  TextStyle get hoverTitleTextStyle => const TextStyle(
-        color: Colors.black,
-        fontWeight: FontWeight.bold,
-        fontSize: 16,
+  TextStyle get hoverTitleTextStyle => TextStyle(
+        color: isLight ? Colors.black87 : Colors.white54,
+        fontWeight: FontWeight.normal,
+        fontSize: 15,
         decoration: TextDecoration.none,
       );
 
-  // Items in the hover vard.
-  TextStyle get hoverTextStyle => const TextStyle(
-        color: Colors.black,
-        fontWeight: FontWeight.bold,
+  // Items in the hover card.
+  TextStyle get hoverTextStyle => TextStyle(
+        color: isLight ? Colors.black87 : Colors.white54,
+        fontWeight: FontWeight.normal,
         fontSize: 11.5,
         decoration: TextDecoration.none,
       );
 
   // Value of items in hover e.g., capacity, etc.
-  TextStyle get hoverValueTextStyle => const TextStyle(
-        color: Colors.black,
+  TextStyle get hoverValueTextStyle => TextStyle(
+        color: isLight ? Colors.black87 : Colors.white30,
         fontWeight: FontWeight.normal,
         fontSize: 11.5,
         decoration: TextDecoration.none,
       );
 
   // Used for custom extension event values.
-  TextStyle get hoverSmallValueTextStyle => const TextStyle(
-        color: Colors.black,
+  TextStyle get hoverSmallValueTextStyle => TextStyle(
+        color: isLight ? Colors.black87 : Colors.white30,
         fontWeight: FontWeight.normal,
         fontSize: 10,
         decoration: TextDecoration.none,
+      );
+
+  // Used for ExpansionTile collapsed trailing icon color.
+  Color get unselectedColor => isLight ? Colors.black : Colors.white;
+
+  Color get expandedColor => isLight ? Colors.grey[200] : Colors.grey[800];
+
+  Color get expandedTopContentColor =>
+      isLight ? Colors.grey[50] : Colors.grey[850];
+  Color get expandedBottomContentColor =>
+      isLight ? Colors.grey[200] : Colors.grey[800];
+
+  Gradient get verticalGradient => LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [expandedTopContentColor, expandedBottomContentColor],
+        tileMode: TileMode.repeated,
       );
 }
 
