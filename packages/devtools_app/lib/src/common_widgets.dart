@@ -13,7 +13,6 @@ import 'package:flutter/scheduler.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'ui/label.dart';
-import 'ui/theme.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 const tooltipWaitLong = Duration(milliseconds: 1000);

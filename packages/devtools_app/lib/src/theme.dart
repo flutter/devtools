@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/ui/colors.dart';
 import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
-import 'ui/theme.dart';
+
+const _contrastForegroundWhite = Color.fromARGB(255, 240, 240, 240);
+
+const contrastForegroundWhite = _contrastForegroundWhite;
 
 /// Constructs the light or dark theme for the app taking into account
 /// IDE-supplied theming.
@@ -181,6 +185,35 @@ const devtoolsError = Color(0xFFAF4054);
 const devtoolsWarning = Color(0xFFFDFAD5);
 
 extension DevToolsColorScheme on ColorScheme {
+  bool get isLight => brightness == Brightness.light;
+  bool get isDark => brightness == Brightness.dark;
+
+  // Commonly used themed colors.
+  Color get defaultBackground => isLight ? Colors.white : Colors.black;
+
+  Color get defaultForeground =>
+      isLight ? Colors.black : const Color.fromARGB(255, 187, 187, 187);
+
+  /// Text color [defaultForeground] is too gray, making it hard to read the text
+  /// in dark theme. We should use a more white color for dark theme, but not
+  /// jarring white #FFFFFF.
+  Color get contrastForegroundWhite => _contrastForegroundWhite;
+
+  Color get contrastForeground =>
+      isLight ? Colors.black : _contrastForegroundWhite;
+
+  Color get grey => isLight
+      ? const Color.fromARGB(255, 128, 128, 128)
+      : const Color.fromARGB(255, 128, 128, 128);
+
+  /// Background colors for charts.
+  Color get chartBackground => isLight ? Colors.white : const Color(0xFF2D2E31);
+
+  Color get defaultButtonIconColor =>
+      isLight ? const Color(0xFF24292E) : const Color(0xFF89B5F8);
+
+  Color get defaultPrimaryButtonIconColor => defaultBackground;
+
   Color get devtoolsLink =>
       isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
   // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
@@ -224,7 +257,7 @@ extension DevToolsColorScheme on ColorScheme {
 
   // Title of the hover card.
   TextStyle get hoverTitleTextStyle => TextStyle(
-        color: isLight ? Colors.black87 : Colors.white54,
+        color: defaultForeground,
         fontWeight: FontWeight.normal,
         fontSize: 15,
         decoration: TextDecoration.none,
@@ -232,7 +265,7 @@ extension DevToolsColorScheme on ColorScheme {
 
   // Items in the hover card.
   TextStyle get hoverTextStyle => TextStyle(
-        color: isLight ? Colors.black87 : Colors.white54,
+        color: defaultForeground,
         fontWeight: FontWeight.normal,
         fontSize: 11.5,
         decoration: TextDecoration.none,
@@ -240,7 +273,7 @@ extension DevToolsColorScheme on ColorScheme {
 
   // Value of items in hover e.g., capacity, etc.
   TextStyle get hoverValueTextStyle => TextStyle(
-        color: isLight ? Colors.black87 : Colors.white30,
+        color: contrastForeground,
         fontWeight: FontWeight.normal,
         fontSize: 11.5,
         decoration: TextDecoration.none,
@@ -248,14 +281,11 @@ extension DevToolsColorScheme on ColorScheme {
 
   // Used for custom extension event values.
   TextStyle get hoverSmallValueTextStyle => TextStyle(
-        color: isLight ? Colors.black87 : Colors.white30,
+        color: defaultForeground,
         fontWeight: FontWeight.normal,
         fontSize: 10,
         decoration: TextDecoration.none,
       );
-
-  // Used for ExpansionTile collapsed trailing icon color.
-  Color get unselectedColor => isLight ? Colors.black : Colors.white;
 
   Color get expandedColor => isLight ? Colors.grey[200] : Colors.grey[800];
 

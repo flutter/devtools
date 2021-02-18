@@ -919,13 +919,13 @@ class MemoryBodyState extends State<MemoryBody>
 
     final colorScheme = Theme.of(context).colorScheme;
     final hoverTextStyle = colorScheme.hoverTextStyle;
-    final unselectedColor = colorScheme.unselectedColor;
+    final contrastForeground = colorScheme.contrastForeground;
     final collapsedColor = colorScheme.defaultBackgroundColor;
 
     return Material(
       color: Colors.transparent,
       child: Theme(
-        data: ThemeData(unselectedWidgetColor: unselectedColor),
+        data: ThemeData(unselectedWidgetColor: contrastForeground),
         child: ExpansionTile(
           tilePadding: EdgeInsets.zero,
           childrenPadding: EdgeInsets.zero,
@@ -947,9 +947,9 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget cardWidget(String value) {
-    final coloreScheme = Theme.of(context).colorScheme;
-    final hoverValueEntry = coloreScheme.hoverSmallValueTextStyle;
-    final expandedGradient = coloreScheme.verticalGradient;
+    final colorScheme = Theme.of(context).colorScheme;
+    final hoverValueEntry = colorScheme.hoverSmallValueTextStyle;
+    final expandedGradient = colorScheme.verticalGradient;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -1083,6 +1083,7 @@ class MemoryBodyState extends State<MemoryBody>
     ChartsValues chartsValues,
     Offset position,
   ) {
+    final focusColor = Theme.of(context).focusColor;
     final colorScheme = Theme.of(context).colorScheme;
 
     final RenderBox box = hoverKey.currentContext.findRenderObject();
@@ -1125,7 +1126,9 @@ class MemoryBodyState extends State<MemoryBody>
           decoration: BoxDecoration(
             color: colorScheme.defaultBackgroundColor,
             border: Border.all(
-                color: Colors.grey[400], width: hover_card_border_width),
+              color: focusColor,
+              width: hover_card_border_width,
+            ),
             borderRadius: BorderRadius.circular(10.0),
           ),
           width: hoverWidth,
