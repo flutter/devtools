@@ -354,10 +354,16 @@ class _InspectorTreeState extends State<InspectorTree>
     currentAnimateTarget = null;
   }
 
+  // TODO(jacobr): resolve cases where we need to know the viewport height
+  // before it is available so we don't need this approximation.
+  /// Placeholder viewport height to use if we don't yet know the real
+  /// viewport height.
+  static const _placeholderViewportHeight = 1000.0;
+
   double get safeViewportHeight {
     return _scrollControllerY.hasClients
         ? _scrollControllerY.position.viewportDimension
-        : 1000.0;
+        : _placeholderViewportHeight;
   }
 
   /// Animate so that the entire range minOffset to maxOffset is within view.

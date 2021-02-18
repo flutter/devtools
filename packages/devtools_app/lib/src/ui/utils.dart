@@ -170,7 +170,11 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
     return AnimatedBuilder(
       animation: widget.offsetController,
       builder: (context, child) {
-        // Compute a delta so that
+        // Compute a delta to move the scrollbar from where it is by default to
+        // where it should be given the viewport dimension of the
+        // offsetController not the viewport that is the entire scroll extent
+        // of the offsetController because this controller is nested within the
+        // offset controller.
         double delta = 0.0;
         if (widget.offsetController.position.hasContentDimensions) {
           delta = widget.offsetController.offset -
@@ -191,12 +195,13 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
         return Transform.translate(
           offset: offset,
           child: Scrollbar(
-              isAlwaysShown: widget.isAlwaysShown,
-              controller: widget.controller,
-              child: Transform.translate(
-                offset: -offset,
-                child: child,
-              )),
+            isAlwaysShown: widget.isAlwaysShown,
+            controller: widget.controller,
+            child: Transform.translate(
+              offset: -offset,
+              child: child,
+            ),
+          ),
         );
       },
       child: widget.child,
