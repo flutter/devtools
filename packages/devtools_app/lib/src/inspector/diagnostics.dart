@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../common_widgets.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
 import 'diagnostics_node.dart';
@@ -27,9 +28,10 @@ const bool _showRenderObjectPropertiesAsLinks = false;
 /// * [InspectorTree], which uses this class to display each node in the in
 ///   inspector tree.
 class DiagnosticsNodeDescription extends StatelessWidget {
-  const DiagnosticsNodeDescription(this.diagnostic);
+  const DiagnosticsNodeDescription(this.diagnostic, this.errorText);
 
   final RemoteDiagnosticsNode diagnostic;
+  final String errorText;
 
   Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -216,7 +218,24 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           colorScheme,
           isProperty: false,
         ),
+        fit: FlexFit.tight,
       ));
+
+      if (errorText != null) {
+        children.add(
+          Flexible(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                errorText,
+                textAlign: TextAlign.right,
+                overflow: TextOverflow.ellipsis,
+                style: inspector_text_styles.error(colorScheme),
+              ),
+            ),
+          ),
+        );
+      }
     }
 
     return Row(mainAxisSize: MainAxisSize.min, children: children);
