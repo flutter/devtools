@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../common_widgets.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
 import 'diagnostics_node.dart';
@@ -28,9 +27,14 @@ const bool _showRenderObjectPropertiesAsLinks = false;
 /// * [InspectorTree], which uses this class to display each node in the in
 ///   inspector tree.
 class DiagnosticsNodeDescription extends StatelessWidget {
-  const DiagnosticsNodeDescription(this.diagnostic, this.errorText);
+  const DiagnosticsNodeDescription(
+    this.diagnostic, {
+    this.isSelected,
+    this.errorText,
+  });
 
   final RemoteDiagnosticsNode diagnostic;
+  final bool isSelected;
   final String errorText;
 
   Widget _paddedIcon(Widget icon) {
@@ -232,7 +236,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
                 errorText,
                 textAlign: TextAlign.right,
                 overflow: TextOverflow.ellipsis,
-                style: inspector_text_styles.error(colorScheme),
+                // When the node is selected, the backgorund will be an error
+                // color so don't render the text the same color.
+                style: isSelected
+                    ? inspector_text_styles.regular
+                    : inspector_text_styles.error(colorScheme),
               ),
             ),
           ),

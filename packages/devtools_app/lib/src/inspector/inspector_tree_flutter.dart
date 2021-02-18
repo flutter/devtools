@@ -661,7 +661,8 @@ class InspectorRowContent extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: DiagnosticsNodeDescription(
                     node.diagnostic,
-                    error?.errorMessage,
+                    isSelected: row.isSelected,
+                    errorText: error?.errorMessage,
                   ),
                 ),
               ),
