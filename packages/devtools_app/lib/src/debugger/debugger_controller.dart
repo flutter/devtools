@@ -633,8 +633,11 @@ class DebuggerController extends DisposableController
 
     // We populate the first 12 frames; this ~roughly corresponds to the number
     // of visible stack frames.
-    _getStackOperation =
-        CancelableOperation.fromFuture(_getStackInfo(limit: 12));
+    const initialFrameRequestCount = 12;
+
+    _getStackOperation = CancelableOperation.fromFuture(_getStackInfo(
+      limit: initialFrameRequestCount,
+    ));
     final stackInfo = await _getStackOperation.value;
     _populateFrameInfo(
       stackInfo.frames,
