@@ -894,11 +894,6 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    final itemDelegate = SliverChildBuilderDelegate(
-      _buildItem,
-      childCount: widget.data.length,
-    );
-
     // If we're at the end already, scroll to expose the new content.
     if (widget.autoScrollContent) {
       if (scrollController.hasClients && scrollController.atScrollBottom) {
@@ -942,9 +937,10 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                           )
                         : false,
                     focusNode: widget.focusNode,
-                    child: ListView.custom(
+                    child: ListView.builder(
                       controller: scrollController,
-                      childrenDelegate: itemDelegate,
+                      itemCount: widget.data.length,
+                      itemBuilder: _buildItem,
                     ),
                   ),
                 ),
