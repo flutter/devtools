@@ -71,7 +71,7 @@ String prettyPrintBytes(
   int mbFractionDigits = 1,
   int gbFractionDigits = 1,
   bool includeUnit = false,
-  num roundingPoint = 0.0,
+  num roundingPoint = 1.0,
 }) {
   if (bytes == null) {
     return null;
