@@ -90,9 +90,9 @@ String prettyPrintBytes(
   final sizeInMB = sizeInKB / 1024.0;
   final sizeInGB = sizeInMB / 1024.0;
 
-  if (sizeInGB > roundingPoint) {
+  if (sizeInGB >= roundingPoint) {
     return '${printGB(bytes, fractionDigits: gbFractionDigits, includeUnit: includeUnit)}';
-  } else if (sizeInMB > roundingPoint) {
+  } else if (sizeInMB >= roundingPoint) {
     return '${printMB(bytes, fractionDigits: mbFractionDigits, includeUnit: includeUnit)}';
   } else {
     return '${printKB(bytes, fractionDigits: kbFractionDigits, includeUnit: includeUnit)}';
