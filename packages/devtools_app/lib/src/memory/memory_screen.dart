@@ -718,6 +718,7 @@ class MemoryBodyState extends State<MemoryBody>
     String image,
     bool bold = true,
     bool hasNumeric = false,
+    bool hasUnit = false,
     bool scaleImage = false,
     double leftPadding = 5.0,
   }) {
@@ -734,9 +735,16 @@ class MemoryBodyState extends State<MemoryBody>
       String displayName = name;
       String displayValue = '';
       if (hasNumeric) {
-        final lastSpaceBeforeValue = name.lastIndexOf(' ');
-        displayName = '${name.substring(0, lastSpaceBeforeValue)} ';
-        displayValue = name.substring(lastSpaceBeforeValue + 1);
+        int startOfNumber = name.lastIndexOf(' ');
+        if (hasUnit) {
+          final unitOrValue = name.substring(startOfNumber + 1);
+          if (int.tryParse(unitOrValue) == null) {
+            // Got a unit.
+            startOfNumber = name.lastIndexOf(' ', startOfNumber - 1);
+          }
+        }
+        displayName = '${name.substring(0, startOfNumber)} ';
+        displayValue = name.substring(startOfNumber + 1);
       }
       return [
         image == null
@@ -972,6 +980,16 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
+  String formatNumeric(num number) => controller.unitDisplayed.value
+      ? prettyPrintBytes(
+          number,
+          kbFractionDigits: 1,
+          mbFractionDigits: 2,
+          includeUnit: true,
+          roundingPoint: 0.7,
+        )
+      : nf.format(number);
+
   List<Widget> displayVmDataInHover(ChartsValues chartsValues) {
     const rssDisplay = 'RSS';
     const capacityDisplay = 'Capacity';
@@ -986,22 +1004,22 @@ class MemoryBodyState extends State<MemoryBody>
 
     final data = chartsValues.vmData;
 
-    final rssValueDisplay = nf.format(data[rssJsonName]);
+    final rssValueDisplay = formatNumeric(data[rssJsonName]);
     vmDataDisplayed['$rssDisplay $rssValueDisplay'] = rssLegend;
 
-    final capacityValueDisplay = nf.format(data[capacityJsonName]);
+    final capacityValueDisplay = formatNumeric(data[capacityJsonName]);
     vmDataDisplayed['$capacityDisplay $capacityValueDisplay'] = capacityLegend;
 
-    final usedValueDisplay = nf.format(data[usedJsonName]);
+    final usedValueDisplay = formatNumeric(data[usedJsonName]);
     vmDataDisplayed['$usedDisplay $usedValueDisplay'] = usedLegend;
 
-    final externalValueDisplay = nf.format(data[externalJsonName]);
+    final externalValueDisplay = formatNumeric(data[externalJsonName]);
     vmDataDisplayed['$externalDisplay $externalValueDisplay'] = externalLegend;
 
-    final layerValueDisplay = nf.format(data[rasterLayerJsonName]);
+    final layerValueDisplay = formatNumeric(data[rasterLayerJsonName]);
     vmDataDisplayed['$layerDisplay $layerValueDisplay'] = rasterLayerLegend;
 
-    final pictureValueDisplay = nf.format(data[rasterPictureJsonName]);
+    final pictureValueDisplay = formatNumeric(data[rasterPictureJsonName]);
     vmDataDisplayed['$pictureDisplay $pictureValueDisplay'] =
         rasterPictureLegend;
 
@@ -1011,6 +1029,7 @@ class MemoryBodyState extends State<MemoryBody>
           name: entry.key,
           image: entry.value,
           hasNumeric: true,
+          hasUnit: controller.unitDisplayed.value,
           scaleImage: true,
         ),
       );
@@ -1035,31 +1054,31 @@ class MemoryBodyState extends State<MemoryBody>
 
       final data = chartsValues.androidData;
 
-      final totalValueDisplay = nf.format(data[adbTotalJsonName]);
+      final totalValueDisplay = formatNumeric(data[adbTotalJsonName]);
       androidDataDisplayed['$totalDisplay $totalValueDisplay'] =
           androidTotalLegend;
 
-      final otherValueDisplay = nf.format(data[adbOtherJsonName]);
+      final otherValueDisplay = formatNumeric(data[adbOtherJsonName]);
       androidDataDisplayed['$otherDisplay $otherValueDisplay'] =
           androidOtherLegend;
 
-      final codeValueDisplay = nf.format(data[adbCodeJsonName]);
+      final codeValueDisplay = formatNumeric(data[adbCodeJsonName]);
       androidDataDisplayed['$codeDisplay $codeValueDisplay'] =
           androidCodeLegend;
 
-      final nativeValueDisplay = nf.format(data[adbNativeHeapJsonName]);
+      final nativeValueDisplay = formatNumeric(data[adbNativeHeapJsonName]);
       androidDataDisplayed['$nativeDisplay $nativeValueDisplay'] =
           androidNativeLegend;
 
-      final javaValueDisplay = nf.format(data[adbJavaHeapJsonName]);
+      final javaValueDisplay = formatNumeric(data[adbJavaHeapJsonName]);
       androidDataDisplayed['$javaDisplay $javaValueDisplay'] =
           androidJavaLegend;
 
-      final stackValueDisplay = nf.format(data[adbStackJsonName]);
+      final stackValueDisplay = formatNumeric(data[adbStackJsonName]);
       androidDataDisplayed['$stackDisplay $stackValueDisplay'] =
           androidStackLegend;
 
-      final graphicsValueDisplay = nf.format(data[adbGraphicsJsonName]);
+      final graphicsValueDisplay = formatNumeric(data[adbGraphicsJsonName]);
       androidDataDisplayed['$graphicsDisplay $graphicsValueDisplay'] =
           androidGraphicsLegend;
 
@@ -1069,6 +1088,7 @@ class MemoryBodyState extends State<MemoryBody>
             name: entry.key,
             image: entry.value,
             hasNumeric: true,
+            hasUnit: controller.unitDisplayed.value,
             scaleImage: true,
           ),
         );
@@ -1497,15 +1517,32 @@ class MemoryConfigurationsDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ...dialogSubHeader(theme, 'Android'),
-            Row(
+            Column(
               children: [
-                NotifierCheckbox(notifier: controller.androidCollectionEnabled),
-                RichText(
-                  overflow: TextOverflow.visible,
-                  text: TextSpan(
-                    text: 'Collect Android Memory Statistics using ADB',
-                    style: theme.regularTextStyle,
-                  ),
+                Row(
+                  children: [
+                    NotifierCheckbox(
+                        notifier: controller.androidCollectionEnabled),
+                    RichText(
+                      overflow: TextOverflow.visible,
+                      text: TextSpan(
+                        text: 'Collect Android Memory Statistics using ADB',
+                        style: theme.regularTextStyle,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    NotifierCheckbox(notifier: controller.unitDisplayed),
+                    RichText(
+                      overflow: TextOverflow.visible,
+                      text: TextSpan(
+                        text: 'Display Data In Units (B, KB, MB, and GB)',
+                        style: theme.regularTextStyle,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
