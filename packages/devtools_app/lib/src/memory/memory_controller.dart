@@ -587,8 +587,8 @@ class MemoryController extends DisposableController
     final Success returnObject =
         await serviceManager.service.setTraceClassAllocation(
       _isolateId,
-      classId: ref.id,
-      enable: enable,
+      ref.id,
+      enable,
     );
 
     if (returnObject.type != 'Success') {
