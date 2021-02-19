@@ -18,7 +18,6 @@ import '../geometry.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
-import '../ui/theme.dart';
 import '../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';

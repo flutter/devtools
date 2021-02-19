@@ -244,6 +244,14 @@ class MemoryController extends DisposableController
 
   final _androidCollectionEnabled = ValueNotifier<bool>(androidADBDefault);
 
+  // Memory statistics displayed as raw numbers or units (KB, MB, GB).
+  static const unitDisplayedDefault = true;
+
+  ValueListenable<bool> get unitDisplayed =>
+      _unitDisplayed;
+
+  final _unitDisplayed = ValueNotifier<bool>(unitDisplayedDefault);
+
   final List<Snapshot> snapshots = [];
 
   Snapshot get lastSnapshot => snapshots.safeLast;

@@ -69,7 +69,9 @@ String prettyPrintBytes(
   num bytes, {
   int kbFractionDigits = 0,
   int mbFractionDigits = 1,
+  int gbFractionDigits = 1,
   bool includeUnit = false,
+  num roundingPoint = 1.0,
 }) {
   if (bytes == null) {
     return null;
@@ -85,10 +87,15 @@ String prettyPrintBytes(
     return output;
   }
   final sizeInKB = bytes.abs() / 1024.0;
-  if (sizeInKB < 1024.0) {
-    return '${printKB(bytes, fractionDigits: kbFractionDigits, includeUnit: includeUnit)}';
-  } else {
+  final sizeInMB = sizeInKB / 1024.0;
+  final sizeInGB = sizeInMB / 1024.0;
+
+  if (sizeInGB >= roundingPoint) {
+    return '${printGB(bytes, fractionDigits: gbFractionDigits, includeUnit: includeUnit)}';
+  } else if (sizeInMB >= roundingPoint) {
     return '${printMB(bytes, fractionDigits: mbFractionDigits, includeUnit: includeUnit)}';
+  } else {
+    return '${printKB(bytes, fractionDigits: kbFractionDigits, includeUnit: includeUnit)}';
   }
 }
 
@@ -111,6 +118,14 @@ String printMB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
   var output = (bytes / (1024 * 1024.0)).toStringAsFixed(fractionDigits);
   if (includeUnit) {
     output += ' MB';
+  }
+  return output;
+}
+
+String printGB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
+  var output = (bytes / (1024 * 1024.0 * 1024.0)).toStringAsFixed(fractionDigits);
+  if (includeUnit) {
+    output += ' GB';
   }
   return output;
 }

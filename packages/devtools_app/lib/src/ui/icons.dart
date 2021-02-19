@@ -17,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import '../theme.dart';
-import 'theme.dart';
 
 class CustomIcon extends StatelessWidget {
   const CustomIcon({
