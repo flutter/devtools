@@ -405,7 +405,7 @@ void main() async {
       await env.tearDownEnvironment(force: true);
     });
 
-    testWidgetsWithWindowSize('show navigator and error indicators', windowSize,
+    testWidgetsWithWindowSize('show navigator and error labels', windowSize,
         (WidgetTester tester) async {
       await env.setupEnvironment(
           config: const FlutterRunConfiguration(
@@ -435,16 +435,15 @@ void main() async {
             'goldens/integration_inspector_errors_1_initial_load.png'),
       );
 
-      // Mark the first 3 errors as read by tapping on the "next" icon to check
-      // that they've been marked as seen and the middle one is selected.
-      for (var i = 0; i < 3; i++) {
+      // Navigate so one f the errors is selected.
+      for (var i = 0; i < 2; i++) {
         await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
         await tester.pumpAndSettle(inspectorChangeSettleTime);
       }
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesGoldenFile(
-            'goldens/integration_inspector_errors_2_half_seen.png'),
+            'goldens/integration_inspector_errors_2_error_selected.png'),
       );
 
       await env.tearDownEnvironment();
