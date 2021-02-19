@@ -565,11 +565,11 @@ class HeapTreeViewState extends State<HeapTree>
     final currentAllocations = await controller.getAllocationProfile();
 
     if (controller.monitorAllocations.isNotEmpty) {
-      final previousLength = controller.monitorAllocations.length;
+      final previousSize = controller.monitorAllocations.length;
       int previousIndex = 0;
-      final currentLength = currentAllocations.length;
+      final currentSize = currentAllocations.length;
       int currentIndex = 0;
-      while (currentIndex < currentLength && previousIndex < previousLength) {
+      while (currentIndex < currentSize && previousIndex < previousSize) {
         final previousAllocation = controller.monitorAllocations[previousIndex];
         final currentAllocation = currentAllocations[currentIndex];
 
@@ -617,10 +617,9 @@ class HeapTreeViewState extends State<HeapTree>
         }
       }
 
-      // Insure all entries from previous and current were looked at.
-      assert(
-          previousLength == previousIndex, '$previousLength == $previousIndex');
-      assert(currentLength == currentIndex, '$currentLength == $currentIndex');
+      // Insure all entries from previous and current monitors were looked at.
+      assert(previousSize == previousIndex, '$previousSize == $previousIndex');
+      assert(currentSize == currentIndex, '$currentSize == $currentIndex');
     }
 
     controller.monitorTimestamp = allocationtimestamp;
