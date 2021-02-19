@@ -215,39 +215,43 @@ class DiagnosticsNodeDescription extends StatelessWidget {
             textStyle.merge(inspector_text_styles.regularBold(colorScheme));
       }
 
-      children.add(Expanded(
-        child: buildDescription(
-          diagnostic.description,
-          textStyle,
-          colorScheme,
-          isProperty: false,
-        ),
-      ));
+      var diagnosticDescription = buildDescription(
+        diagnostic.description,
+        textStyle,
+        colorScheme,
+        isProperty: false,
+      );
 
       if (errorText != null) {
-        children.add(
-          Expanded(
-            // Errors tend to be longer than widget classes, so allow them
-            // to take up a larger proportion of the space.
-            flex: 2,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                errorText,
-                textAlign: TextAlign.right,
-                overflow: TextOverflow.ellipsis,
-                // When the node is selected, the backgorund will be an error
-                // color so don't render the text the same color.
-                style: isSelected
-                    ? inspector_text_styles.regular
-                    : inspector_text_styles.error(colorScheme),
-              ),
-            ),
-          ),
+        diagnosticDescription = Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            diagnosticDescription,
+            _buildErrorText(colorScheme),
+          ],
         );
       }
+
+      children.add(Expanded(child: diagnosticDescription));
     }
 
     return Row(mainAxisSize: MainAxisSize.min, children: children);
+  }
+
+  Flexible _buildErrorText(ColorScheme colorScheme) {
+    return Flexible(
+      child: RichText(
+        textAlign: TextAlign.right,
+        overflow: TextOverflow.ellipsis,
+        text: TextSpan(
+          text: errorText,
+          // When the node is selected, the background will be an error
+          // color so don't render the text the same color.
+          style: isSelected
+              ? inspector_text_styles.regular
+              : inspector_text_styles.error(colorScheme),
+        ),
+      ),
+    );
   }
 }
