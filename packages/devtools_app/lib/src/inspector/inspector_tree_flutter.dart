@@ -658,7 +658,11 @@ class InspectorRowContent extends StatelessWidget {
                 child: Container(
                   height: rowHeight,
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: DiagnosticsNodeDescription(node.diagnostic),
+                  child: DiagnosticsNodeDescription(
+                    node.diagnostic,
+                    isSelected: row.isSelected,
+                    errorText: error?.errorMessage,
+                  ),
                 ),
               ),
             ),
@@ -667,17 +671,10 @@ class InspectorRowContent extends StatelessWidget {
       ),
     );
 
-    // Wrap with error tooltip/marker if there is an error for this node's widget.
+    // Wrap with tooltip if there is an error for this node's widget.
     if (hasError) {
-      rowWidget = Stack(
-        children: [
-          rowWidget,
-          ErrorIndicator(
-            error: error,
-            indent: currentX,
-          ),
-        ],
-      );
+      rowWidget =
+          DevToolsTooltip(child: rowWidget, tooltip: error.errorMessage);
     }
 
     return CustomPaint(
@@ -696,44 +693,6 @@ class InspectorRowContent extends StatelessWidget {
             );
           },
           child: rowWidget,
-        ),
-      ),
-    );
-  }
-}
-
-class ErrorIndicator extends StatelessWidget {
-  const ErrorIndicator({
-    Key key,
-    @required this.error,
-    @required this.indent,
-  }) : super(key: key);
-
-  final DevToolsError error;
-  final double indent;
-
-  /// [indent] is where the row content starts, so the indicator should be
-  /// offset some to the left to avoid overlapping with the guidelines and
-  /// expand/collapse widgets (plus to account for its own width).
-  static const double indicatorOffset = -(defaultIconSize * 2 + denseSpacing);
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: error.errorMessage,
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: indent + indicatorOffset,
-          top: (rowHeight - defaultIconSize) / 2,
-        ),
-        child: Container(
-          width: defaultIconSize,
-          height: defaultIconSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: error.read ? null : devtoolsError,
-            border: error.read ? Border.all(color: devtoolsError) : null,
-          ),
         ),
       ),
     );
