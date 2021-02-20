@@ -223,6 +223,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       );
 
       if (errorText != null) {
+        // TODO(dantup): Find if there's a way to achieve this without
+        //  the nested row.
         diagnosticDescription = Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

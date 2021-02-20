@@ -435,7 +435,7 @@ void main() async {
             'goldens/integration_inspector_errors_1_initial_load.png'),
       );
 
-      // Navigate so one f the errors is selected.
+      // Navigate so one of the errors is selected.
       for (var i = 0; i < 2; i++) {
         await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
         await tester.pumpAndSettle(inspectorChangeSettleTime);
