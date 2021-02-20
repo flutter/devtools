@@ -623,7 +623,8 @@ class MemoryBodyState extends State<MemoryBody>
   final hoverKey = GlobalKey(debugLabel: MemoryScreen.hoverKeyName);
   static const hoverXOffset = 10;
   static const hoverYOffset = 0.0;
-  static const hoverWidth = 240.0;
+  static const hoverWidth = 203.0;
+  static const hover_card_border_width = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
   static const hoverHeightMinimum = 40.0;
@@ -639,6 +640,7 @@ class MemoryBodyState extends State<MemoryBody>
   ) =>
       hoverHeightMinimum +
       (eventsCount * hoverItemHeight) +
+      hover_card_border_width +
       (tracesCount * hoverItemHeight) +
       (extensionEventsCount > 0
           ? (extensionEventsCount == 1
@@ -656,6 +658,7 @@ class MemoryBodyState extends State<MemoryBody>
   static const gcVMLegend = '${base}gc_vm_glyph.png';
   static const eventLegend = '${base}event_glyph.png';
   static const eventsLegend = '${base}events_glyph.png';
+
   static const capacityLegend = '${base}capacity_glyph.png';
   static const usedLegend = '${base}used_glyph.png';
   static const externalLegend = '${base}external_glyph.png';
@@ -715,6 +718,9 @@ class MemoryBodyState extends State<MemoryBody>
     String image,
     bool bold = true,
     bool hasNumeric = false,
+    bool hasUnit = false,
+    bool scaleImage = false,
+    double leftPadding = 5.0,
   }) {
     final hoverTitleEntry = Theme.of(context).colorScheme.hoverTextStyle;
     final hoverValueEntry = Theme.of(context).colorScheme.hoverValueTextStyle;
@@ -729,12 +735,23 @@ class MemoryBodyState extends State<MemoryBody>
       String displayName = name;
       String displayValue = '';
       if (hasNumeric) {
-        final lastSpaceBeforeValue = name.lastIndexOf(' ');
-        displayName = '${name.substring(0, lastSpaceBeforeValue)} = ';
-        displayValue = name.substring(lastSpaceBeforeValue + 1);
+        int startOfNumber = name.lastIndexOf(' ');
+        if (hasUnit) {
+          final unitOrValue = name.substring(startOfNumber + 1);
+          if (int.tryParse(unitOrValue) == null) {
+            // Got a unit.
+            startOfNumber = name.lastIndexOf(' ', startOfNumber - 1);
+          }
+        }
+        displayName = '${name.substring(0, startOfNumber)} ';
+        displayValue = name.substring(startOfNumber + 1);
       }
       return [
-        image == null ? const SizedBox() : Image(image: AssetImage(image)),
+        image == null
+            ? const SizedBox()
+            : scaleImage
+                ? Image(image: AssetImage(image), width: 20, height: 10)
+                : Image(image: AssetImage(image)),
         const PaddedDivider(
           padding: EdgeInsets.only(left: denseRowSpacing),
         ),
@@ -744,9 +761,9 @@ class MemoryBodyState extends State<MemoryBody>
     }
 
     final rowChildren = <Widget>[];
-    rowChildren.addAll(hoverPart(name, image));
+    rowChildren.addAll(hoverPart(name, image, leftPadding));
     return Container(
-        padding: const EdgeInsets.fromLTRB(10, 0, 0, 2),
+        padding: const EdgeInsets.fromLTRB(5, 0, 0, 2),
         child: Row(
           children: rowChildren,
         ));
@@ -791,7 +808,7 @@ class MemoryBodyState extends State<MemoryBody>
 
         /// Pull out the event name, and custom values.
         final output = displayEvent(null, chartsValues.extensionEvents.first);
-        widgets.add(hoverRow(name: output, bold: false));
+        widgets.add(hoverRow(name: output, bold: false, leftPadding: 0.0));
       }
     }
     return widgets;
@@ -850,18 +867,24 @@ class MemoryBodyState extends State<MemoryBody>
       // Flutter event emit the event name and value.
       final Map<String, Object> data = event[eventData];
       final key = data.keys.first;
-      output.writeln(' ${longValueToShort(key)}');
+      output.writeln('${longValueToShort(key)}');
       final Map values = data[key];
       final displaySize = values[displaySizeInBytesData];
       final decodeSize = values[decodedSizeInBytesData];
-      output.writeln(' Display/Decode Size=$displaySize/$decodeSize');
+      final outputSizes = '$displaySize/$decodeSize';
+      if (outputSizes.length > 10) {
+        output.writeln('Display/Decode Size=');
+        output.writeln('    $outputSizes');
+      } else {
+        output.writeln('Display/Decode Size=$outputSizes');
+      }
     } else if (event[eventName] == devToolsEvent &&
         event.containsKey(customEvent)) {
       final Map custom = event[customEvent];
       final data = custom[customEventData];
       for (var key in data.keys) {
-        output.write(' $key=');
-        output.writeln(' ${longValueToShort(data[key])}');
+        output.write('$key=');
+        output.writeln('${longValueToShort(data[key])}');
       }
     } else {
       output.writeln('Unknown Event ${event[eventName]}');
@@ -882,7 +905,7 @@ class MemoryBodyState extends State<MemoryBody>
       name = event[eventName];
     }
 
-    output.writeln(index == null ? name : '[$index] $name');
+    output.writeln(index == null ? name : '$index. $name');
     output.writeln(decodeEventValues(event));
 
     return output.toString();
@@ -902,24 +925,29 @@ class MemoryBodyState extends State<MemoryBody>
       index++;
     }
 
-    final hoverTitleEntry = Theme.of(context).colorScheme.hoverTextStyle;
+    final colorScheme = Theme.of(context).colorScheme;
+    final hoverTextStyle = colorScheme.hoverTextStyle;
+    final contrastForeground = colorScheme.contrastForeground;
+    final collapsedColor = colorScheme.defaultBackgroundColor;
 
     return Material(
       color: Colors.transparent,
       child: Theme(
-        data: ThemeData(accentColor: Colors.black),
+        data: ThemeData(unselectedWidgetColor: contrastForeground),
         child: ExpansionTile(
           tilePadding: EdgeInsets.zero,
           childrenPadding: EdgeInsets.zero,
           leading: Container(
-            padding: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.fromLTRB(5, 4, 0, 0),
             child: Image(
               image: events.length > 1
                   ? const AssetImage(eventsLegend)
                   : const AssetImage(eventLegend),
             ),
           ),
-          title: Text(title, style: hoverTitleEntry),
+          backgroundColor: collapsedColor,
+          collapsedBackgroundColor: collapsedColor,
+          title: Text(title, style: hoverTextStyle),
           children: widgets,
         ),
       ),
@@ -927,15 +955,16 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget cardWidget(String value) {
-    final hoverValueEntry =
-        Theme.of(context).colorScheme.hoverSmallValueTextStyle;
+    final colorScheme = Theme.of(context).colorScheme;
+    final hoverValueEntry = colorScheme.hoverSmallValueTextStyle;
+    final expandedGradient = colorScheme.verticalGradient;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Container(
         width: hoverWidth,
-        decoration: const BoxDecoration(
-          color: Colors.white30,
+        decoration: BoxDecoration(
+          gradient: expandedGradient,
         ),
         child: Row(
           children: [
@@ -951,6 +980,16 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
+  String formatNumeric(num number) => controller.unitDisplayed.value
+      ? prettyPrintBytes(
+          number,
+          kbFractionDigits: 1,
+          mbFractionDigits: 2,
+          includeUnit: true,
+          roundingPoint: 0.7,
+        )
+      : nf.format(number);
+
   List<Widget> displayVmDataInHover(ChartsValues chartsValues) {
     const rssDisplay = 'RSS';
     const capacityDisplay = 'Capacity';
@@ -965,31 +1004,35 @@ class MemoryBodyState extends State<MemoryBody>
 
     final data = chartsValues.vmData;
 
-    final rssValueDisplay = nf.format(data[rssJsonName]);
+    final rssValueDisplay = formatNumeric(data[rssJsonName]);
     vmDataDisplayed['$rssDisplay $rssValueDisplay'] = rssLegend;
 
-    final capacityValueDisplay = nf.format(data[capacityJsonName]);
+    final capacityValueDisplay = formatNumeric(data[capacityJsonName]);
     vmDataDisplayed['$capacityDisplay $capacityValueDisplay'] = capacityLegend;
 
-    final usedValueDisplay = nf.format(data[usedJsonName]);
+    final usedValueDisplay = formatNumeric(data[usedJsonName]);
     vmDataDisplayed['$usedDisplay $usedValueDisplay'] = usedLegend;
 
-    final externalValueDisplay = nf.format(data[externalJsonName]);
+    final externalValueDisplay = formatNumeric(data[externalJsonName]);
     vmDataDisplayed['$externalDisplay $externalValueDisplay'] = externalLegend;
 
-    final layerValueDisplay = nf.format(data[rasterLayerJsonName]);
+    final layerValueDisplay = formatNumeric(data[rasterLayerJsonName]);
     vmDataDisplayed['$layerDisplay $layerValueDisplay'] = rasterLayerLegend;
 
-    final pictureValueDisplay = nf.format(data[rasterPictureJsonName]);
+    final pictureValueDisplay = formatNumeric(data[rasterPictureJsonName]);
     vmDataDisplayed['$pictureDisplay $pictureValueDisplay'] =
         rasterPictureLegend;
 
     for (var entry in vmDataDisplayed.entries) {
-      results.add(hoverRow(
-        name: entry.key,
-        image: entry.value,
-        hasNumeric: true,
-      ));
+      results.add(
+        hoverRow(
+          name: entry.key,
+          image: entry.value,
+          hasNumeric: true,
+          hasUnit: controller.unitDisplayed.value,
+          scaleImage: true,
+        ),
+      );
     }
 
     return results;
@@ -1011,40 +1054,44 @@ class MemoryBodyState extends State<MemoryBody>
 
       final data = chartsValues.androidData;
 
-      final totalValueDisplay = nf.format(data[adbTotalJsonName]);
+      final totalValueDisplay = formatNumeric(data[adbTotalJsonName]);
       androidDataDisplayed['$totalDisplay $totalValueDisplay'] =
           androidTotalLegend;
 
-      final otherValueDisplay = nf.format(data[adbOtherJsonName]);
+      final otherValueDisplay = formatNumeric(data[adbOtherJsonName]);
       androidDataDisplayed['$otherDisplay $otherValueDisplay'] =
           androidOtherLegend;
 
-      final codeValueDisplay = nf.format(data[adbCodeJsonName]);
+      final codeValueDisplay = formatNumeric(data[adbCodeJsonName]);
       androidDataDisplayed['$codeDisplay $codeValueDisplay'] =
           androidCodeLegend;
 
-      final nativeValueDisplay = nf.format(data[adbNativeHeapJsonName]);
+      final nativeValueDisplay = formatNumeric(data[adbNativeHeapJsonName]);
       androidDataDisplayed['$nativeDisplay $nativeValueDisplay'] =
           androidNativeLegend;
 
-      final javaValueDisplay = nf.format(data[adbJavaHeapJsonName]);
+      final javaValueDisplay = formatNumeric(data[adbJavaHeapJsonName]);
       androidDataDisplayed['$javaDisplay $javaValueDisplay'] =
           androidJavaLegend;
 
-      final stackValueDisplay = nf.format(data[adbStackJsonName]);
+      final stackValueDisplay = formatNumeric(data[adbStackJsonName]);
       androidDataDisplayed['$stackDisplay $stackValueDisplay'] =
           androidStackLegend;
 
-      final graphicsValueDisplay = nf.format(data[adbGraphicsJsonName]);
+      final graphicsValueDisplay = formatNumeric(data[adbGraphicsJsonName]);
       androidDataDisplayed['$graphicsDisplay $graphicsValueDisplay'] =
           androidGraphicsLegend;
 
       for (var entry in androidDataDisplayed.entries) {
-        results.add(hoverRow(
-          name: entry.key,
-          image: entry.value,
-          hasNumeric: true,
-        ));
+        results.add(
+          hoverRow(
+            name: entry.key,
+            image: entry.value,
+            hasNumeric: true,
+            hasUnit: controller.unitDisplayed.value,
+            scaleImage: true,
+          ),
+        );
       }
     }
 
@@ -1056,6 +1103,7 @@ class MemoryBodyState extends State<MemoryBody>
     ChartsValues chartsValues,
     Offset position,
   ) {
+    final focusColor = Theme.of(context).focusColor;
     final colorScheme = Theme.of(context).colorScheme;
 
     final RenderBox box = hoverKey.currentContext.findRenderObject();
@@ -1096,8 +1144,11 @@ class MemoryBodyState extends State<MemoryBody>
         child: Container(
           padding: const EdgeInsets.fromLTRB(0, 5, 0, 8),
           decoration: BoxDecoration(
-            color: colorScheme.hoverBackgroundColor,
-            border: Border.all(color: Colors.yellow),
+            color: colorScheme.defaultBackgroundColor,
+            border: Border.all(
+              color: focusColor,
+              width: hover_card_border_width,
+            ),
             borderRadius: BorderRadius.circular(10.0),
           ),
           width: hoverWidth,
@@ -1105,8 +1156,13 @@ class MemoryBodyState extends State<MemoryBody>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
-                child: Text('Time $displayTimestamp', style: hoverHeading),
+                width: hoverWidth,
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  'Time $displayTimestamp',
+                  style: hoverHeading,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ]
               ..addAll(displayEventsInHover(chartsValues))
@@ -1461,15 +1517,32 @@ class MemoryConfigurationsDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ...dialogSubHeader(theme, 'Android'),
-            Row(
+            Column(
               children: [
-                NotifierCheckbox(notifier: controller.androidCollectionEnabled),
-                RichText(
-                  overflow: TextOverflow.visible,
-                  text: TextSpan(
-                    text: 'Collect Android Memory Statistics using ADB',
-                    style: theme.regularTextStyle,
-                  ),
+                Row(
+                  children: [
+                    NotifierCheckbox(
+                        notifier: controller.androidCollectionEnabled),
+                    RichText(
+                      overflow: TextOverflow.visible,
+                      text: TextSpan(
+                        text: 'Collect Android Memory Statistics using ADB',
+                        style: theme.regularTextStyle,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    NotifierCheckbox(notifier: controller.unitDisplayed),
+                    RichText(
+                      overflow: TextOverflow.visible,
+                      text: TextSpan(
+                        text: 'Display Data In Units (B, KB, MB, and GB)',
+                        style: theme.regularTextStyle,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

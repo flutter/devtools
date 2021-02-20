@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'theme.dart';
+import '../theme.dart';
 
 /// This file holds color constants that are used throughout DevTools.
 // TODO(kenz): move colors from other pages to this file for consistency.

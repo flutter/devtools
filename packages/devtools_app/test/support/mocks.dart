@@ -265,10 +265,10 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> setTraceClassAllocation(
-    String isolateId, {
+    String isolateId,
     String classId,
     bool enable,
-  }) async =>
+  ) async =>
       Future.value(Success());
 
   @override

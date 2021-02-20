@@ -17,7 +17,6 @@ import '../service_registrations.dart';
 import '../theme.dart';
 import '../utils.dart';
 import 'label.dart';
-import 'theme.dart';
 
 /// Group of buttons where each button toggles the state of a VMService
 /// extension.

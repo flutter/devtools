@@ -16,7 +16,6 @@ import '../common_widgets.dart';
 import '../error_badge_manager.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
-import '../ui/theme.dart';
 import '../ui/utils.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';

@@ -244,6 +244,14 @@ class MemoryController extends DisposableController
 
   final _androidCollectionEnabled = ValueNotifier<bool>(androidADBDefault);
 
+  // Memory statistics displayed as raw numbers or units (KB, MB, GB).
+  static const unitDisplayedDefault = true;
+
+  ValueListenable<bool> get unitDisplayed =>
+      _unitDisplayed;
+
+  final _unitDisplayed = ValueNotifier<bool>(unitDisplayedDefault);
+
   final List<Snapshot> snapshots = [];
 
   Snapshot get lastSnapshot => snapshots.safeLast;
@@ -587,8 +595,8 @@ class MemoryController extends DisposableController
     final Success returnObject =
         await serviceManager.service.setTraceClassAllocation(
       _isolateId,
-      classId: ref.id,
-      enable: enable,
+      ref.id,
+      enable,
     );
 
     if (returnObject.type != 'Success') {
@@ -612,9 +620,9 @@ class MemoryController extends DisposableController
   }
 
   /// Track where/when a particular class is allocated (constructor new'd).
-  Future<CpuSamples> getAllocationSamples(ClassRef ref) async {
+  Future<CpuSamples> getAllocationTraces(ClassRef ref) async {
     if (!await isIsolateLive(_isolateId)) return null;
-    final returnObject = await serviceManager.service.getAllocationSamples(
+    final returnObject = await serviceManager.service.getAllocationTraces(
       _isolateId,
       classId: ref.id,
     );
@@ -633,7 +641,7 @@ class MemoryController extends DisposableController
     final keys = trackAllocations.keys;
     for (var key in keys) {
       // TODO(terry): Need to process output.
-      final samples = await getAllocationSamples(trackAllocations[key]);
+      final samples = await getAllocationTraces(trackAllocations[key]);
       if (samples != null) {
         _allAllocationSamples[trackAllocations[key]] = samples;
       }
