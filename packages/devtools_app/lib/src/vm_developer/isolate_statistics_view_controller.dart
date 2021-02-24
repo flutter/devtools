@@ -46,9 +46,6 @@ class IsolateStatisticsViewController extends DisposableController
       UnmodifiableListView(_serviceExtensions);
   List<String> _serviceExtensions = [];
 
-  int get zoneCapacityHighWatermark => _zoneCapacityHighWatermark;
-  int _zoneCapacityHighWatermark = 0;
-
   Future<void> refresh() async => await switchToIsolate(isolate);
 
   Future<void> switchToIsolate(IsolateRef isolateRef) async {
@@ -57,7 +54,6 @@ class IsolateStatisticsViewController extends DisposableController
     // Retrieve updated isolate information and refresh the page.
     _isolate = await _service.getIsolate(isolateRef.id);
     _updateTagCounters(isolate);
-    _updateZoneUsageData(isolate);
     _ports = (await _service.getPorts(_isolate.id)).ports;
     _serviceExtensions = isolate.extensionRPCs ?? [];
     _serviceExtensions.sort();
@@ -85,14 +81,6 @@ class IsolateStatisticsViewController extends DisposableController
         for (final name in percentages.keys)
           VMTag(name, percentages[name] / totalTickCount),
       ];
-    }
-  }
-
-  void _updateZoneUsageData(Isolate isolate) {
-    final currentWatermark =
-        isolate.threads.fold(0, (p, t) => p + t.zoneHighWatermark);
-    if (currentWatermark > _zoneCapacityHighWatermark) {
-      _zoneCapacityHighWatermark = currentWatermark;
     }
   }
 }

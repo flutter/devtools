@@ -22,13 +22,6 @@ extension VMPrivateViewExtension on VM {
 
 /// An extension on [Isolate] which allows for access to VM internal fields.
 extension IsolatePrivateViewExtension on Isolate {
-  List<Thread> get threads {
-    return (json['_threads'].cast<Map<String, dynamic>>())
-        .map((e) => Thread.parse(e))
-        .toList()
-        .cast<Thread>();
-  }
-
   Map<String, dynamic> get tagCounters => json['_tagCounters'];
 
   int get dartHeapSize => newSpaceUsage + oldSpaceUsage;
@@ -39,31 +32,4 @@ extension IsolatePrivateViewExtension on Isolate {
 
   int get newSpaceCapacity => json['_heaps']['new']['capacity'];
   int get oldSpaceCapacity => json['_heaps']['old']['capacity'];
-
-  int get zoneHandleCount => json['_numZoneHandles'];
-  int get scopedHandleCount => json['_numScopedHandles'];
-}
-
-/// An internal representation of a thread running within an isolate.
-class Thread {
-  const Thread({
-    @required this.id,
-    @required this.kind,
-    @required this.zoneHighWatermark,
-    @required this.zoneCapacity,
-  });
-
-  factory Thread.parse(Map<String, dynamic> json) {
-    return Thread(
-      id: json['id'],
-      kind: json['kind'],
-      zoneHighWatermark: int.parse(json['_zoneHighWatermark']),
-      zoneCapacity: int.parse(json['_zoneCapacity']),
-    );
-  }
-
-  final String id;
-  final String kind;
-  final int zoneHighWatermark;
-  final int zoneCapacity;
 }
