@@ -25,8 +25,8 @@ void main() {
       mockServiceManager = MockServiceManager();
       when(mockServiceManager.service).thenReturn(null);
       when(mockServiceManager.hasConnection).thenReturn(false);
-      when(mockServiceManager.onStateChange)
-          .thenAnswer((_) => const Stream<bool>.empty());
+      when(mockServiceManager.connectedState).thenReturn(
+          ValueNotifier<ConnectedState>(const ConnectedState(false)));
 
       final mockErrorBadgeManager = MockErrorBadgeManager();
       when(mockServiceManager.errorBadgeManager)

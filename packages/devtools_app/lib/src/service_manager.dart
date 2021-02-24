@@ -95,8 +95,10 @@ class ServiceConnectionManager {
   bool get hasConnection =>
       service != null && connectedApp != null && connectedApp.appTypeKnown;
 
-  Stream<bool> get onStateChange => _stateController.stream;
-  final _stateController = StreamController<bool>.broadcast();
+  ValueListenable<ConnectedState> get connectedState => _connectedState;
+
+  final ValueNotifier<ConnectedState> _connectedState =
+      ValueNotifier(const ConnectedState(false));
 
   Stream<VmServiceWrapper> get onConnectionAvailable =>
       _connectionAvailableController.stream;
@@ -214,7 +216,7 @@ class ServiceConnectionManager {
 
     service.onEvent(serviceStreamName).listen(handleServiceEvent);
 
-    _stateController.add(true);
+    _connectedState.value = const ConnectedState(true);
 
     await _isolateManager._initIsolates(vm.isolates);
 
@@ -257,7 +259,16 @@ class ServiceConnectionManager {
     _connectionAvailableController.add(service);
   }
 
-  void vmServiceClosed() {
+  void manuallyDisconnect() {
+    vmServiceClosed(
+      connectionState:
+          const ConnectedState(false, userInitiatedConnectionState: true),
+    );
+  }
+
+  void vmServiceClosed({
+    ConnectedState connectionState = const ConnectedState(false),
+  }) {
     _serviceAvailable = Completer();
 
     service = null;
@@ -272,7 +283,7 @@ class ServiceConnectionManager {
     _isolateManager._handleVmServiceClosed();
     setDeviceBusy(false);
 
-    _stateController.add(false);
+    _connectedState.value = connectionState;
     _connectionClosedController.add(null);
   }
 
@@ -1190,4 +1201,16 @@ class VmServiceCapabilities {
 
   bool get supportsGetScripts =>
       version.major > 3 || (version.major == 3 && version.minor >= 12);
+}
+
+class ConnectedState {
+  const ConnectedState(
+    this.connected, {
+    this.userInitiatedConnectionState = false,
+  });
+
+  final bool connected;
+
+  /// Whether this [ConnectedState] was manually initiated by the user.
+  final bool userInitiatedConnectionState;
 }
