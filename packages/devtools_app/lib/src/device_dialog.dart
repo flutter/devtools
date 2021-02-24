@@ -31,6 +31,8 @@ class DeviceDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!serviceManager.connectedState.value.connected) return const SizedBox();
+
     const boldText = TextStyle(fontWeight: FontWeight.bold);
     final theme = Theme.of(context);
 
@@ -96,6 +98,7 @@ class DeviceDialog extends StatelessWidget {
   Widget _connectToNewAppButton(BuildContext context) {
     return FixedHeightElevatedButton(
       onPressed: () {
+        serviceManager.manuallyDisconnect();
         DevToolsRouterDelegate.of(context).navigate(homePageId, {'uri': null});
         Navigator.of(context, rootNavigator: true).pop('dialog');
       },
