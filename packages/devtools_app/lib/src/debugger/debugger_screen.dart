@@ -30,10 +30,6 @@ import 'debugger_model.dart';
 import 'scripts.dart';
 import 'variables.dart';
 
-// This is currently a dev-time flag as the overall call depth may not be that
-// interesting to users.
-const bool debugShowCallStackCount = false;
-
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
       : super.conditional(
@@ -220,7 +216,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               context,
               title: callStackTitle,
               needsTopBorder: false,
-              actions: debugShowCallStackCount ? [_callStackRightChild()] : [],
             ),
             areaPaneHeader(context, title: variablesTitle),
             areaPaneHeader(
@@ -238,15 +233,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             Breakpoints(),
           ],
         );
-      },
-    );
-  }
-
-  Widget _callStackRightChild() {
-    return ValueListenableBuilder(
-      valueListenable: controller.stackFramesWithLocation,
-      builder: (context, stackFrames, _) {
-        return CallStackCountBadge(stackFrames: stackFrames);
       },
     );
   }
