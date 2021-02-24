@@ -68,7 +68,8 @@ class _InitializerState extends State<Initializer>
     // attempt to reconnect.
     addAutoDisposeListener(serviceManager.connectedState, () {
       final connectionState = serviceManager.connectedState.value;
-      if (!connectionState.connected && !connectionState.manual) {
+      if (!connectionState.connected &&
+          !connectionState.userInitiatedConnectionState) {
         // Try to reconnect (otherwise, will fall back to showing the
         // disconnected overlay).
         _attemptUrlConnection();

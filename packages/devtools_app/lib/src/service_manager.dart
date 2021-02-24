@@ -261,7 +261,8 @@ class ServiceConnectionManager {
 
   void manuallyDisconnect() {
     vmServiceClosed(
-      connectionState: const ConnectedState(false, manual: true),
+      connectionState:
+          const ConnectedState(false, userInitiatedConnectionState: true),
     );
   }
 
@@ -1203,9 +1204,13 @@ class VmServiceCapabilities {
 }
 
 class ConnectedState {
-  const ConnectedState(this.connected, {this.manual = false});
+  const ConnectedState(
+    this.connected, {
+    this.userInitiatedConnectionState = false,
+  });
 
   final bool connected;
 
-  final bool manual;
+  /// Whether this [ConnectedState] was manually initiated by the user.
+  final bool userInitiatedConnectionState;
 }

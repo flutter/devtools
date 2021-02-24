@@ -149,7 +149,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   void changeState(bool value, {bool manual = false}) {
     hasConnection = value ?? false;
-    _connectedState.value = ConnectedState(value, manual: manual);
+    _connectedState.value =
+        ConnectedState(value, userInitiatedConnectionState: manual);
   }
 
   @override
