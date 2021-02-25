@@ -162,8 +162,6 @@ class DevToolsAppState extends State<DevToolsApp> {
 
     // Always return the landing screen if there's no VM service URI.
     if (vmServiceUri?.isEmpty ?? true) {
-      // Ensure we disconnect from any previously connected apps.
-      serviceManager.manuallyDisconnect();
       return DevToolsScaffold.withChild(
         key: const Key('landing'),
         title: 'DevTools for Flutter & Dart',
