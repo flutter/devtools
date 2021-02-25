@@ -15,12 +15,14 @@ import 'src/preferences.dart';
 void main() async {
   final ideTheme = getIdeTheme();
 
+  // Initialize the framework before we do anything else, otherwise the
+  // StorageController won't be initialized and preferences won't be loaded.
+  await initializeFramework();
+
   final preferences = PreferencesController();
   // Wait for preferences to load before rendering the app to avoid a flash of
   // content with the incorrect theme.
   await preferences.init();
-
-  await initializeFramework();
 
   // Load the Dart syntax highlighting grammar.
   await SyntaxHighlighter.initialize();
