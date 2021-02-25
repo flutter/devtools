@@ -147,14 +147,18 @@ class HeapTreeViewState extends State<HeapTree>
   static const searchButtonKey = Key('Snapshot Search');
   @visibleForTesting
   static const filterButtonKey = Key('Snapshot Filter');
+  @visibleForTesting
+  static const dartHeapAnalysisTabKey = Key('Dart Heap Analysis Tab');
+  @visibleForTesting
+  static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
   static const int analysisTabIndex = 0;
   static const int allocationsTabIndex = 1;
 
   static const List<Tab> DartHeapTabs = [
-    Tab(text: 'Analysis'),
-    Tab(text: 'Allocations'),
+    Tab(key: dartHeapAnalysisTabKey, text: 'Analysis'),
+    Tab(key: dartHeapAllocationsTabKey, text: 'Allocations'),
   ];
 
   MemoryController controller;
@@ -185,9 +189,7 @@ class HeapTreeViewState extends State<HeapTree>
     super.initState();
 
     tabController = TabController(length: DartHeapTabs.length, vsync: this);
-    addAutoDisposeListener(tabController, () {
-      print("tabController listening...");
-    });
+    addAutoDisposeListener(tabController);
   }
 
   @override
@@ -1228,21 +1230,6 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
         break;
     }
 
-    return false;
-  }
-
-  bool _selectAllocationInTable(ClassHeapDetailStats reference, search) {
-    if (reference.classRef.name == search) {
-      controller.searchMatchMonitorAllocationsNotifier.value = reference;
-      controller.clearSearchAutoComplete();
-      return true;
-    }
-    return false;
-  }
-
-  bool _selectAllocationItemInTable(
-      ClassHeapDetailStats reference, String searchingValue) {
-    if (_selectAllocationInTable(reference, searchingValue)) return true;
     return false;
   }
 
