@@ -397,6 +397,7 @@ class HeapTreeViewState extends State<HeapTree>
         children: [
           const SizedBox(height: defaultSpacing),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TabBar(
                 labelColor: themeData.textTheme.bodyText1.color,
@@ -404,7 +405,6 @@ class HeapTreeViewState extends State<HeapTree>
                 controller: tabController,
                 tabs: HeapTreeViewState.DartHeapTabs,
               ),
-              const Expanded(child: SizedBox()),
               _buildSearchFilterControls(),
             ],
           ),
@@ -430,7 +430,6 @@ class HeapTreeViewState extends State<HeapTree>
                 Column(
                   children: [
                     _buildAllocationsControls(themeData),
-                    const SizedBox(height: denseSpacing),
                     Expanded(
                       child: OutlineDecoration(
                         child: buildAllocationTables(),
@@ -520,83 +519,96 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   Widget _buildSnapshotControls(TextTheme textTheme) {
-    return Row(children: [
-      FixedHeightOutlinedButton(
-        buttonKey: snapshotButtonKey,
-        tooltip: 'Take a memory profile snapshot',
-        onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
-        child: const MaterialIconLabel(
-          Icons.camera,
-          'Take Heap Snapshot',
+    return Row(
+      children: [
+        FixedHeightOutlinedButton(
+          buttonKey: snapshotButtonKey,
+          tooltip: 'Take a memory profile snapshot',
+          onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
+          child: const MaterialIconLabel(
+            Icons.camera,
+            'Take Heap Snapshot',
+          ),
         ),
-      ),
-      const SizedBox(width: defaultSpacing),
-      _groupByDropdown(textTheme),
-      const SizedBox(width: defaultSpacing),
-      // TODO(terry): Mechanism to handle expand/collapse on both tables
-      // objects/fields. Maybe notion in table?
-      FixedHeightOutlinedButton(
-        buttonKey: collapseAllButtonKey,
-        tooltip: 'Collapse All',
-        onPressed: snapshotDisplay is MemoryHeapTable
-            ? () {
-                MemoryScreen.gaAction(key: collapseAllButtonKey);
-                if (snapshotDisplay is MemoryHeapTable) {
-                  controller.groupByTreeTable.dataRoots.every((element) {
-                    element.collapseCascading();
-                    return true;
-                  });
-                  if (controller.instanceFieldsTreeTable != null) {
-                    // We're collapsing close the fields table.
-                    controller.selectedLeaf = null;
-                  }
-                  // All nodes collapsed - signal tree state changed.
-                  controller.treeChanged();
-                }
-              }
-            : null,
-        child: const Icon(
-          Icons.vertical_align_top,
-          size: defaultIconSize,
+        const SizedBox(width: defaultSpacing),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Treemap'),
+            // TODO(terry): Wrap in a ValueListenableBuilder to avoid calling setState.
+            Switch(
+              value: controller.treeMapVisible.value,
+              onChanged: controller.snapshotByLibraryData != null
+                  ? (value) {
+                      setState(() {
+                        controller.treeMapVisible.value = value;
+                      });
+                    }
+                  : null,
+            ),
+          ],
         ),
-      ),
-      FixedHeightOutlinedButton(
-        buttonKey: expandAllButtonKey,
-        tooltip: 'Expand All',
-        onPressed: snapshotDisplay is MemoryHeapTable
-            ? () {
-                MemoryScreen.gaAction(key: expandAllButtonKey);
-                if (snapshotDisplay is MemoryHeapTable) {
-                  controller.groupByTreeTable.dataRoots.every((element) {
-                    element.expandCascading();
-                    return true;
-                  });
-                }
-                // All nodes expanded - signal tree state  changed.
-                controller.treeChanged();
-              }
-            : null,
-        child: const Icon(
-          Icons.vertical_align_bottom,
-          size: defaultIconSize,
-        ),
-      ),
-      const SizedBox(width: defaultSpacing),
-      Container(
-        width: 170,
-        child: SwitchListTile(
-          title: const Text('Treemap'),
-          value: controller.treeMapVisible.value,
-          onChanged: controller.snapshotByLibraryData != null
-              ? (value) {
-                  setState(() {
-                    controller.treeMapVisible.value = value;
-                  });
-                }
-              : null,
-        ),
-      ),
-    ]);
+        const SizedBox(width: defaultSpacing),
+        controller.treeMapVisible.value
+            ? const SizedBox(width: denseSpacing)
+            : _groupByDropdown(textTheme),
+        const SizedBox(width: defaultSpacing),
+        // TODO(terry): Mechanism to handle expand/collapse on both tables
+        // objects/fields. Maybe notion in table?
+        controller.treeMapVisible.value
+            ? const SizedBox(width: denseSpacing)
+            : FixedHeightOutlinedButton(
+                buttonKey: collapseAllButtonKey,
+                tooltip: 'Collapse All',
+                onPressed: snapshotDisplay is MemoryHeapTable
+                    ? () {
+                        MemoryScreen.gaAction(key: collapseAllButtonKey);
+                        if (snapshotDisplay is MemoryHeapTable) {
+                          controller.groupByTreeTable.dataRoots
+                              .every((element) {
+                            element.collapseCascading();
+                            return true;
+                          });
+                          if (controller.instanceFieldsTreeTable != null) {
+                            // We're collapsing close the fields table.
+                            controller.selectedLeaf = null;
+                          }
+                          // All nodes collapsed - signal tree state changed.
+                          controller.treeChanged();
+                        }
+                      }
+                    : null,
+                child: const Icon(
+                  Icons.vertical_align_top,
+                  size: defaultIconSize,
+                ),
+              ),
+        controller.treeMapVisible.value
+            ? const SizedBox(width: denseSpacing)
+            : FixedHeightOutlinedButton(
+                buttonKey: expandAllButtonKey,
+                tooltip: 'Expand All',
+                onPressed: snapshotDisplay is MemoryHeapTable
+                    ? () {
+                        MemoryScreen.gaAction(key: expandAllButtonKey);
+                        if (snapshotDisplay is MemoryHeapTable) {
+                          controller.groupByTreeTable.dataRoots
+                              .every((element) {
+                            element.expandCascading();
+                            return true;
+                          });
+                        }
+                        // All nodes expanded - signal tree state  changed.
+                        controller.treeChanged();
+                      }
+                    : null,
+                child: const Icon(
+                  Icons.vertical_align_bottom,
+                  size: defaultIconSize,
+                ),
+              ),
+      ],
+    );
   }
 
   // TODO(terry): Change material icon label to accept a Widget for icon instead of IconData.
