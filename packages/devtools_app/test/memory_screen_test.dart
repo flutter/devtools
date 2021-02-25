@@ -429,16 +429,6 @@ void main() {
     expect(classDetails.instancesCurrent, 55);
     expect(classDetails.instancesDelta, 0);
 
-/*
-    controller.topNode.expandCascading();
-    controller.treeChanged();
-    await pumpAndSettleOneSecond();
-
-    final allTRs =
-        find.byWidgetPredicate((widget) => widget is dev_table.TableRow);
-    expect(allTRs, findsNWidgets(3));
-*/
-
     // Screenshot should display left-side tree table fully expanded and the monitor
     // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
     // all allocations in a flat table, no items checked (tracked), search should
