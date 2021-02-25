@@ -286,6 +286,15 @@ extension DevToolsColorScheme on ColorScheme {
         decoration: TextDecoration.none,
       );
 
+  // Last allocation timestamp displayed.
+  TextStyle get italicTextStyle => TextStyle(
+        color: defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: 14,
+        fontStyle: FontStyle.italic,
+        decoration: TextDecoration.none,
+      );
+
   Color get expandedColor => isLight ? Colors.grey[200] : Colors.grey[800];
 
   Color get expandedTopContentColor =>

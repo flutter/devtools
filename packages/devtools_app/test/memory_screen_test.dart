@@ -5,8 +5,6 @@
 @TestOn('vm')
 
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/memory/memory_snapshot_models.dart';
-import 'package:devtools_app/src/table.dart' as dev_table;
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
@@ -280,11 +278,6 @@ void main() {
     await pumpMemoryScreen(tester);
 
     expect(find.byKey(HeapTreeViewState.snapshotButtonKey), findsOneWidget);
-    expect(find.byKey(HeapTreeViewState.allocationMonitorKey), findsOneWidget);
-    expect(
-      find.byKey(HeapTreeViewState.allocationMonitorResetKey),
-      findsOneWidget,
-    );
 
     // Load canned data.
     _setUpServiceManagerForMemory();
@@ -377,7 +370,20 @@ void main() {
 
     await pumpMemoryScreen(tester);
 
+    expect(
+        find.byKey(HeapTreeViewState.dartHeapAnalysisTabKey), findsOneWidget);
+
+    final allocationsKey =
+        find.byKey(HeapTreeViewState.dartHeapAllocationsTabKey);
+    await tester.tap(allocationsKey);
+
+    await pumpAndSettleTwoSeconds();
+
     expect(find.byKey(HeapTreeViewState.allocationMonitorKey), findsOneWidget);
+    expect(
+      find.byKey(HeapTreeViewState.allocationMonitorResetKey),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(HeapTreeViewState.allocationMonitorKey));
 
@@ -420,22 +426,6 @@ void main() {
     expect(classDetails.bytesDelta, 0);
     expect(classDetails.instancesCurrent, 55);
     expect(classDetails.instancesDelta, 0);
-
-    controller.topNode.expandCascading();
-    controller.treeChanged();
-    await pumpAndSettleOneSecond();
-
-    final allTRs =
-        find.byWidgetPredicate((widget) => widget is dev_table.TableRow);
-    expect(allTRs, findsNWidgets(3));
-
-    expect(tester.widget(allTRs.last), isA<dev_table.TableRow<Reference>>());
-    final dev_table.TableRow<Reference> reference = tester.widget(allTRs.last);
-    final AllocationMonitorReference node = reference.node;
-    expect(node.name.startsWith('Monitor '), isTrue);
-
-    await tester.tap(allTRs.last);
-    await pumpAndSettleTwoSeconds();
 
     // Screenshot should display left-side tree table fully expanded and the monitor
     // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
@@ -584,7 +574,6 @@ void main() {
     expect(autoCompletesDisplayed.single, 'ZClass');
     expect(controller.currentDefaultIndex, 0); // ZClass hilighted.
     await simulateKeyDownEvent(LogicalKeyboardKey.enter);
-    await pumpAndSettleOneSecond();
 
     choosenAutoComplete =
         controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
