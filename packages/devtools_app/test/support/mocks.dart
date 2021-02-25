@@ -142,6 +142,11 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
+  void manuallyDisconnect() {
+    changeState(false, manual: true);
+  }
+
+  @override
   ValueListenable<ConnectedState> get connectedState => _connectedState;
 
   final ValueNotifier<ConnectedState> _connectedState =

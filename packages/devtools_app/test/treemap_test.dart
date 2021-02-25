@@ -5,6 +5,8 @@
 import 'dart:io';
 
 import 'package:devtools_app/src/charts/treemap.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
@@ -13,6 +15,7 @@ import 'support/app_size_test_data/apk_analysis.dart';
 import 'support/app_size_test_data/new_v8.dart';
 import 'support/app_size_test_data/sizes.dart';
 import 'support/app_size_test_data/small_sizes.dart';
+import 'support/mocks.dart';
 import 'support/utils.dart';
 import 'support/wrappers.dart';
 
@@ -42,6 +45,10 @@ void main() {
   }
 
   const windowSize = Size(2225.0, 1000.0);
+
+  setUp(() {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+  });
 
   group('TreemapNode', () {
     final child1 = TreemapNode(name: 'package:child1');

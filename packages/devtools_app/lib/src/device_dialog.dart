@@ -98,7 +98,6 @@ class DeviceDialog extends StatelessWidget {
   Widget _connectToNewAppButton(BuildContext context) {
     return FixedHeightElevatedButton(
       onPressed: () {
-        serviceManager.manuallyDisconnect();
         DevToolsRouterDelegate.of(context).navigate(homePageId, {'uri': null});
         Navigator.of(context, rootNavigator: true).pop('dialog');
       },

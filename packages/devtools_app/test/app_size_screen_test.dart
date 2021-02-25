@@ -27,6 +27,10 @@ import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
+  setUp(() {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+  });
+
   final lastModifiedTime = DateTime.parse('2020-07-28 13:29:00');
 
   final oldV8JsonFile = DevToolsJsonFile(
