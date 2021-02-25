@@ -2,14 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
+  setUp(() {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+  });
+
   // Note: tester by default has a window size of 800x600.
   group('Split', () {
     group('builds horizontal layout', () {
