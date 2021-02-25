@@ -13,6 +13,7 @@ import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart' as logger;
 import '../globals.dart';
+import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
@@ -386,25 +387,22 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   Widget buildSnapshotTables(Widget snapshotDisplay) {
-    final hasDetails =
-        controller.isLeafSelected || controller.isAnalysisLeafSelected;
-
     final rightSideTable = controller.isLeafSelected
-        ? Expanded(child: InstanceTreeView())
+        ? InstanceTreeView()
         : controller.isAnalysisLeafSelected
-            ? Expanded(child: AnalysisInstanceViewTable())
+            ? AnalysisInstanceViewTable()
             : controller.isAllocationMonitorLeafSelected
-                ? const Expanded(child: AllocationTableView())
+                ? const AllocationTableView()
                 : const SizedBox();
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.end,
+    return Split(
+      initialFractions: const [0.5, 0.5],
+      minSizes: const [300, 300],
+      axis: Axis.horizontal,
       children: [
-        Expanded(child: snapshotDisplay),
-        if (hasDetails) const SizedBox(width: defaultSpacing),
         // TODO(terry): Need better focus handling between 2 tables & up/down
         //              arrows in the right-side field instance view table.
+        snapshotDisplay,
         rightSideTable,
       ],
     );

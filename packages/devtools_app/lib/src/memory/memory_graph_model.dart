@@ -69,6 +69,7 @@ Map<LibraryClass, Predefined> predefinedClasses = {
   predefinedList: const Predefined('List', false),
   predefinedMap: const Predefined('Map', false),
   predefinedHashMap: const Predefined('HashMap', false),
+  predefinedNull: const Predefined('Null', true),
 };
 
 // TODO(terry): Investigate if class implements the Map interface?
@@ -160,15 +161,18 @@ HeapGraph convertHeapGraph(
   for (int i = 0; i < graph.objects.length; i++) {
     final HeapSnapshotObject o = graph.objects[i];
     final HeapGraphElementLive converted = elements[i];
+
+    // New style snapshot class index is zero based.
     if (o.classId == 0) {
-      // classId of zero is a sentinel.
+      // classId of 0 is a sentinel.
       converted.theClass = HeapGraph.classSentinel;
     } else {
-      // Allows finding and debugging a class in the snapshot.
-      // classIds in the object are 1 based need to make zero based.
-      monitorClass(classId: o.classId - 1);
-
-      converted.theClass = classes[o.classId - 1];
+      // Support for new snapshot class index is zero based (starts at
+      // zero) and the previous snapshot classId is 1-based index.
+      final classId =
+          controller.newSnapshotSemantics ? o.classId : o.classId - 1;
+      monitorClass(classId: classId);
+      converted.theClass = classes[classId];
     }
 
     // Lazily compute the references.
@@ -178,7 +182,7 @@ HeapGraph convertHeapGraph(
         if (refId == 0) {
           ref = HeapGraph.elementSentinel;
         } else {
-          ref = elements[refId - 1];
+          ref = elements[controller.newSnapshotSemantics ? refId : refId - 1];
         }
         converted.references.add(ref);
       }

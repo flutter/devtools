@@ -675,19 +675,28 @@ class ObjectFieldReference extends FieldReference {
     if (objFields.isNotEmpty) {
       final computedFields = <FieldReference>[];
       for (final ref in objFields) {
-        if (ref is ObjectFieldReference) {
-          computedFields.add(ref);
-        } else if (ref is FieldReference) {
-          final FieldReference fieldRef = ref;
-          final HeapGraphElementLive live = fieldRef.instance;
-          final HeapGraphClassLive theClass = live.theClass;
-          final predefined = predefinedClasses[theClass.fullQualifiedName];
-          if (predefined != null && predefined.isScalar) {
-            computedFields.add(createScalar(
-              controller,
-              fieldRef.name,
-              fieldRef.instance,
-            ));
+        // Check if aready computed/expanded then skip.
+        final exist = objectFieldReference.children.singleWhere(
+          (element) => element.name == ref.name,
+          orElse: () => null,
+        );
+        if (exist == null) {
+          // Doesn't exist so add field.
+          if (ref is ObjectFieldReference && !ref.isNull) {
+            computedFields.add(ref);
+          } else if (ref is FieldReference) {
+            final FieldReference fieldRef = ref;
+            final HeapGraphElementLive live = fieldRef.instance;
+            final HeapGraphClassLive theClass = live.theClass;
+            final predefined = predefinedClasses[theClass.fullQualifiedName];
+            if (predefined != null && predefined.isScalar) {
+              final scalarValue = createScalar(
+                controller,
+                fieldRef.name,
+                fieldRef.instance,
+              );
+              computedFields.add(scalarValue);
+            }
           }
         }
       }
@@ -753,8 +762,12 @@ FieldReference fieldToFieldReference(
   // Debugging a particular field displayed use fieldElement.key (field name)
   // to break.
 
-  final int indexIntoClass = actual.origin.classId; // One based Index.
-  if (!controller.heapGraph.builtInClasses.containsValue(indexIntoClass - 1)) {
+  // Handle change in VM service to use 0 based vs/ 1 based indexing. Need to
+  // support old semantics for old VMs.
+  final classId = actual.origin.classId;
+  final int indexIntoClass =
+      controller.newSnapshotSemantics ? classId : classId - 1;
+  if (!controller.heapGraph.builtInClasses.containsValue(indexIntoClass)) {
     return objectToFieldReference(
       controller,
       theGraph,
@@ -771,7 +784,7 @@ FieldReference fieldToFieldReference(
           actual,
           fieldElement.key,
           data.length,
-          isHashMap: isAMap, // TODO(terry): Just a test. &&&&&
+          isHashMap: isAMap,
         );
       }
     } else if (isBuiltInHashMap(theClass)) {
@@ -813,16 +826,18 @@ FieldReference createScalar(
       dataValue = 'Object No Data';
       break;
     case HeapSnapshotObjectNullData:
-      dataValue = 'null';
+      dataValue = '';
+      dataType = 'Null';
       break;
     case HeapSnapshotObjectLengthData:
-//      assert(false, 'Unexpected object - expected scalar.');
       dataValue = data.length.toString();
       break;
     default:
+      final originClassId = actual.origin.classId;
+      final classId =
+          controller.newSnapshotSemantics ? originClassId : originClassId - 1;
       dataValue = data.toString();
-      final dataTypeClass =
-          controller.heapGraph.classes[actual.origin.classId - 1];
+      final dataTypeClass = controller.heapGraph.classes[classId];
       final predefined = predefinedClasses[dataTypeClass.fullQualifiedName];
       dataType = predefined.prettyName;
   }
@@ -978,15 +993,22 @@ FieldReference listToFieldEntries(
                 if (!value.isSentinel && !dataIsNull(value)) {
                   final HeapGraphElementLive live = value;
                   final HeapGraphClassLive theClass = live.theClass;
-                  final keyObjectRef = ObjectFieldReference(
-                    controller,
-                    live,
-                    theClass.name,
-                    '$key',
-                  );
+                  final className = theClass.fullQualifiedName;
+                  final predefined = predefinedClasses[className];
+                  if (predefined != null && predefined.isScalar) {
+                    final scalarEntry = createScalar(controller, key, live);
+                    listEntry.addChild(scalarEntry);
+                  } else {
+                    final keyObjectRef = ObjectFieldReference(
+                      controller,
+                      live,
+                      theClass.name,
+                      '$key',
+                    );
 
-                  keyObjectRef.addChild(FieldReference.empty);
-                  listEntry.addChild(keyObjectRef);
+                    keyObjectRef.addChild(FieldReference.empty);
+                    listEntry.addChild(keyObjectRef);
+                  }
                 }
               }
             }

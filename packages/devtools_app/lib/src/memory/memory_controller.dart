@@ -20,6 +20,7 @@ import '../table.dart';
 import '../table_data.dart';
 import '../ui/search.dart';
 import '../utils.dart';
+import '../version.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
@@ -232,7 +233,15 @@ class MemoryController extends DisposableController
   MemoryController() {
     memoryTimeline = MemoryTimeline(this);
     memoryLog = MemoryLog(this);
+
+    /// package:vm_service version 6.1.0+1 updated the VM Service protocol version
+    /// to 3.43.0. This changed snapshot indexes for classes, instances and
+    /// sentinels.  Primarily classes are indexed by a 0 based index not (1-based).
+    newSnapshotSemantics = serviceManager.service.isProtocolVersionSupportedNow(
+        supportedVersion: SemanticVersion(major: 3, minor: 43));
   }
+
+  bool newSnapshotSemantics;
 
   static const logFilenamePrefix = 'memory_log_';
 
@@ -247,8 +256,7 @@ class MemoryController extends DisposableController
   // Memory statistics displayed as raw numbers or units (KB, MB, GB).
   static const unitDisplayedDefault = true;
 
-  ValueListenable<bool> get unitDisplayed =>
-      _unitDisplayed;
+  ValueListenable<bool> get unitDisplayed => _unitDisplayed;
 
   final _unitDisplayed = ValueNotifier<bool>(unitDisplayedDefault);
 

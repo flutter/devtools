@@ -130,7 +130,7 @@ class _FieldValueColumn extends ColumnData<FieldReference> {
   _FieldValueColumn()
       : super(
           'Value',
-          fixedWidthPx: 250.0,
+          fixedWidthPx: 350.0,
         );
 
   @override
