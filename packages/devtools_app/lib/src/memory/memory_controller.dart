@@ -314,26 +314,6 @@ class MemoryController extends DisposableController
   List<FieldReference> _instanceRoot;
 
   List<FieldReference> get instanceRoot => _instanceRoot;
-/*
-  /// Leaf node of allocation monitor selected?  If selected then the Allocation Profile of all
-  /// classes is displayed (class name, instance count, accumulator, byte size, accumulator).
-  final _leafAllocationMonitorSelectedNotifier =
-      ValueNotifier<AllocationMonitorReference>(null);
-
-  ValueListenable<AllocationMonitorReference>
-      get leafAllocationMonitorSelectedNotifier =>
-          _leafAllocationMonitorSelectedNotifier;
-
-  AllocationMonitorReference get selectedAllocationMonitorLeaf =>
-      _leafAllocationMonitorSelectedNotifier.value;
-
-  set selectedAllocationMonitorLeaf(AllocationMonitorReference selected) {
-    _leafAllocationMonitorSelectedNotifier.value = selected;
-  }
-
-  bool get isAllocationMonitorLeafSelected =>
-      selectedAllocationMonitorLeaf != null;
-*/
 
   /// Leaf node of analysis selected?  If selected then the field
   /// view is displayed to view an abbreviated fields of an instance.
