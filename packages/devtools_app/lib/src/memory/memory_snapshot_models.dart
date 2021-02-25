@@ -257,49 +257,22 @@ class Reference extends TreeNode<Reference> {
   void leaf() {
     if (isObject) {
       final objectReference = this as ObjectReference;
-      if (controller.selectedAnalysisLeaf != null ||
-          controller.selectedAllocationMonitorLeaf != null) {
+      if (controller.selectedAnalysisLeaf != null) {
         controller.selectedAnalysisLeaf = null;
-        controller.selectedAllocationMonitorLeaf = null;
       }
       controller.selectedLeaf = objectReference.instance;
     } else if (isAnalysis && this is AnalysisInstance) {
       final AnalysisInstance analysisInstance = this as AnalysisInstance;
-      if (controller.selectedLeaf != null ||
-          controller.selectedAllocationMonitorLeaf != null) {
+      if (controller.selectedLeaf != null) {
         controller.selectedLeaf = null;
-        controller.selectedAllocationMonitorLeaf = null;
       }
       controller.selectedAnalysisLeaf = analysisInstance;
-    } else if (isAllocation) {
-      final AllocationMonitorReference monitor =
-          this as AllocationMonitorReference;
-      if (controller.selectedAllocationMonitorLeaf != null) {
-        controller.selectedLeaf = null;
-        controller.selectedAnalysisLeaf = null;
-      }
-      controller.selectedAllocationMonitorLeaf = monitor;
     }
 
     if (onLeaf != null) onLeaf(this);
 
     super.leaf();
   }
-}
-
-class AllocationsMonitorReference extends Reference {
-  AllocationsMonitorReference()
-      : super.allocationsMonitor('Allocation Monitors');
-}
-
-class AllocationMonitorReference extends Reference {
-  AllocationMonitorReference(MemoryController controller, this.dateTime)
-      : super.allocationMonitor(
-          controller,
-          'Monitor ${MemoryController.formattedTimestamp(dateTime)}',
-        );
-
-  DateTime dateTime;
 }
 
 /// Container of all snapshot analyses processed.

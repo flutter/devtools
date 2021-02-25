@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +14,9 @@ import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
+import '../ui/search.dart';
 import '../utils.dart';
+
 import 'memory_allocation_table_data.dart';
 import 'memory_controller.dart';
 import 'memory_tracker_model.dart';
@@ -92,6 +96,72 @@ class AllocationTableViewState extends State<AllocationTableView>
       final Tracker item = trackerData.selectionNotifier.value.node;
       if (item is TrackerMore) trackerData.expandCallStack(item);
     });
+
+    addAutoDisposeListener(controller.selectTheSearchNotifier, () {
+      if (_trySelectItem()) {
+        setState(() {
+          controller.closeAutoCompleteOverlay();
+        });
+      }
+    });
+
+    addAutoDisposeListener(controller.searchNotifier, () {
+      if (_trySelectItem()) {
+        setState(() {
+          controller.closeAutoCompleteOverlay();
+        });
+      }
+    });
+  }
+
+  /// Search the allocation data for a match (auto-complete).
+  List<String> _allocationMatches(String searchingValue) {
+    final matches = <String>[];
+
+    // Matches that start with searchingValue, most relevant.
+    final startMatches = <String>[];
+
+    for (var allocation in controller.monitorAllocations) {
+      final knownName = allocation.classRef.name;
+      if (knownName.startsWith(searchingValue)) {
+        startMatches.add(knownName);
+      } else if (knownName.contains(searchingValue.toLowerCase())) {
+        matches.add(knownName);
+      }
+    }
+
+    matches.insertAll(0, startMatches);
+    return matches;
+  }
+
+  bool _trySelectItem() {
+    final searchingValue = controller.search;
+    if (searchingValue.isNotEmpty) {
+      if (controller.selectTheSearch) {
+        // Found an exact match.
+        controller.selectItemInAllocationTable(searchingValue);
+        controller.selectTheSearch = false;
+        controller.resetSearch();
+        return true;
+      }
+
+      // No exact match, return the list of possible matches.
+      controller.clearSearchAutoComplete();
+
+      final matches = _allocationMatches(searchingValue);
+
+      // Remove duplicates and sort the matches.
+      final normalizedMatches = matches.toSet().toList()..sort();
+      // Use the top 10 matches:
+      controller.searchAutoComplete.value = normalizedMatches.sublist(
+          0,
+          min(
+            topMatchesLimit,
+            normalizedMatches.length,
+          ));
+    }
+
+    return false;
   }
 
   @override
