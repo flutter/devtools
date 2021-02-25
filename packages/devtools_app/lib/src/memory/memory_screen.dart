@@ -384,6 +384,12 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
+  @override
+  void dispose() {
+    hideHover(); // hover will leak if not hide
+    super.dispose();
+  }
+
   void _refreshCharts() {
     // Remove history of all plotted data in all charts.
     eventChartController?.reset();
