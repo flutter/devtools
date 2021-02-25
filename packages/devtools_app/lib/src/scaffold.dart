@@ -326,6 +326,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                   controller: _tabController,
                   children: tabBodies,
                 ),
+                // TODO(kenz): see if we can stop bugging the router to findout
+                // if we are on the snapshot screen
                 if (serviceManager.hasConnection &&
                     DevToolsRouterDelegate.of(context)
                             .currentConfiguration
