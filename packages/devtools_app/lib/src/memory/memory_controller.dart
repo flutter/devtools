@@ -388,6 +388,10 @@ class MemoryController extends DisposableController
     return null;
   }
 
+  final treeMapVisible = ValueNotifier<bool>(false);
+
+  ValueListenable get treeMapVisibleNotifier => treeMapVisible;
+
   bool isAnalyzeButtonEnabled() => computeSnapshotToAnalyze != null;
 
   ValueListenable get legendVisibleNotifier => _legendVisibleNotifier;
@@ -882,12 +886,13 @@ class MemoryController extends DisposableController
   DateTime monitorTimestamp;
 
   /// Used for Allocations table search auto-complete.
+
   /// This finds and selects an exact match in the tree.
   /// Returns `true` if [searchingValue] is found in the tree.
   bool selectItemInAllocationTable(String searchingValue) {
     // Search the allocation table.
     for (final reference in monitorAllocations) {
-      final foundIt = _selectAllocationItemInTable(reference, searchingValue);
+      final foundIt = _selectItemInTable(reference, searchingValue);
       if (foundIt) {
         return true;
       }
@@ -904,11 +909,8 @@ class MemoryController extends DisposableController
     return false;
   }
 
-  bool _selectAllocationItemInTable(
-      ClassHeapDetailStats reference, String searchingValue) {
-    if (_selectAllocationInTable(reference, searchingValue)) return true;
-    return false;
-  }
+  bool _selectItemInTable(ClassHeapDetailStats reference, String search) =>
+      _selectAllocationInTable(reference, search);
 
   /// Used for searching in monitor allocation table.
   final searchMatchMonitorAllocationsNotifier =

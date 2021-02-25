@@ -287,7 +287,7 @@ extension DevToolsColorScheme on ColorScheme {
       );
 
   // Last allocation timestamp displayed.
-  TextStyle get trackTimestampTextStyle => TextStyle(
+  TextStyle get italicTextStyle => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
         fontSize: 14,

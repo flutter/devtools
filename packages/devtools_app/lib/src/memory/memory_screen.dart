@@ -117,8 +117,8 @@ class MemoryBody extends StatefulWidget {
   const MemoryBody();
 
   static const List<Tab> memoryTabs = [
-    Tab(text: 'Dart Heap'),
-    Tab(text: 'Heap Treemap'),
+    Tab(text: 'Analysis'),
+    Tab(text: 'Allocations'),
   ];
 
   @override
@@ -145,12 +145,13 @@ class MemoryBodyState extends State<MemoryBody>
     super.initState();
 
     ga.screen(MemoryScreen.id);
-
+/*
     tabController = TabController(
       length: MemoryBody.memoryTabs.length,
       vsync: this,
     );
     addAutoDisposeListener(tabController);
+*/
   }
 
   @override
@@ -356,6 +357,12 @@ class MemoryBodyState extends State<MemoryBody>
                   ),
                 )
               : const SizedBox(),
+          const SizedBox(width: defaultSpacing),
+          Expanded(
+            child: HeapTree(controller),
+          ),
+
+/*
           const SizedBox(height: defaultSpacing),
           Row(
             children: [
@@ -379,6 +386,7 @@ class MemoryBodyState extends State<MemoryBody>
               ],
             ),
           ),
+*/
         ],
       ),
     );
