@@ -4,8 +4,11 @@
 
 import 'package:devtools_app/devtools.dart' as devtools;
 import 'package:devtools_app/src/app.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/mocks.dart';
 import 'support/utils.dart';
 import 'support/wrappers.dart';
 
@@ -15,6 +18,7 @@ void main() {
   group('About Dialog', () {
     setUp(() {
       aboutDialog = DevToolsAboutDialog();
+      setGlobal(ServiceConnectionManager, FakeServiceManager());
     });
 
     testWidgets('builds dialog', (WidgetTester tester) async {

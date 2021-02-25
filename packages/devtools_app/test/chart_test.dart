@@ -1,6 +1,8 @@
 import 'package:devtools_app/src/charts/chart_controller.dart';
 import 'package:devtools_app/src/charts/chart_trace.dart';
 import 'package:devtools_app/src/charts/chart.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/memory_test_data.dart';
@@ -8,10 +10,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
   const windowSize = Size(2225.0, 1000.0);
+
+  setUp(() {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+  });
 
   group(
     'Chart Timeseries',
@@ -20,7 +27,8 @@ void main() {
 
       void loadData() {
         // Load canned data testHeapSampleData.
-        memoryJson ??= SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
+        memoryJson ??=
+            SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
 
         expect(memoryJson.data.length, equals(104));
       }
