@@ -315,25 +315,6 @@ class MemoryController extends DisposableController
 
   List<FieldReference> get instanceRoot => _instanceRoot;
 
-  /// Leaf node of allocation monitor selected?  If selected then the Allocation Profile of all
-  /// classes is displayed (class name, instance count, accumulator, byte size, accumulator).
-  final _leafAllocationMonitorSelectedNotifier =
-      ValueNotifier<AllocationMonitorReference>(null);
-
-  ValueListenable<AllocationMonitorReference>
-      get leafAllocationMonitorSelectedNotifier =>
-          _leafAllocationMonitorSelectedNotifier;
-
-  AllocationMonitorReference get selectedAllocationMonitorLeaf =>
-      _leafAllocationMonitorSelectedNotifier.value;
-
-  set selectedAllocationMonitorLeaf(AllocationMonitorReference selected) {
-    _leafAllocationMonitorSelectedNotifier.value = selected;
-  }
-
-  bool get isAllocationMonitorLeafSelected =>
-      selectedAllocationMonitorLeaf != null;
-
   /// Leaf node of analysis selected?  If selected then the field
   /// view is displayed to view an abbreviated fields of an instance.
   final _leafAnalysisSelectedNotifier = ValueNotifier<AnalysisInstance>(null);
@@ -406,6 +387,10 @@ class MemoryController extends DisposableController
 
     return null;
   }
+
+  final treeMapVisible = ValueNotifier<bool>(false);
+
+  ValueListenable get treeMapVisibleNotifier => treeMapVisible;
 
   bool isAnalyzeButtonEnabled() => computeSnapshotToAnalyze != null;
 
@@ -900,6 +885,33 @@ class MemoryController extends DisposableController
 
   DateTime monitorTimestamp;
 
+  /// Used for Allocations table search auto-complete.
+
+  /// This finds and selects an exact match in the tree.
+  /// Returns `true` if [searchingValue] is found in the tree.
+  bool selectItemInAllocationTable(String searchingValue) {
+    // Search the allocation table.
+    for (final reference in monitorAllocations) {
+      final foundIt = _selectItemInTable(reference, searchingValue);
+      if (foundIt) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool _selectAllocationInTable(ClassHeapDetailStats reference, search) {
+    if (reference.classRef.name == search) {
+      searchMatchMonitorAllocationsNotifier.value = reference;
+      clearSearchAutoComplete();
+      return true;
+    }
+    return false;
+  }
+
+  bool _selectItemInTable(ClassHeapDetailStats reference, String search) =>
+      _selectAllocationInTable(reference, search);
+
   /// Used for searching in monitor allocation table.
   final searchMatchMonitorAllocationsNotifier =
       ValueNotifier<ClassHeapDetailStats>(null);
@@ -1199,52 +1211,17 @@ class MemoryController extends DisposableController
       topNode.addAllChildren(oldChildren);
     }
 
-    AllocationsMonitorReference monitorRoot;
-    var anyAnalyses = false;
-    for (final reference in topNode.children) {
-      if (reference is AllocationsMonitorReference) {
-        monitorRoot = reference;
-      }
-      anyAnalyses |= reference is AnalysesReference;
-    }
+    final anyAnalyses = topNode.children.firstWhere(
+          (reference) => reference is AnalysesReference,
+          orElse: () => null,
+        ) !=
+        null;
 
     if (snapshots.isNotEmpty && !anyAnalyses) {
       // Create Analysis entry.
       final analysesRoot = AnalysesReference();
       analysesRoot.addChild(AnalysisReference(''));
       topNode.addChild(analysesRoot);
-    }
-
-    if (monitorAllocations.isNotEmpty) {
-      var createRoot = false;
-      var createChild = false;
-
-      if (monitorRoot != null) {
-        // Only show the latest active allocation monitor.  If a new monitor
-        // exist (newer timestamp).  Remove the old node and signal a new node,
-        // with the latest timestamp, needs to be created.
-        final AllocationMonitorReference monitor = monitorRoot.children.first;
-        if (monitor.dateTime != monitorTimestamp) {
-          monitorRoot.removeLastChild();
-          // Reconstruct child new allocation profile.
-          createChild = true;
-        }
-      } else {
-        // Create Monitor Allocations entry - first time.
-        monitorRoot = AllocationsMonitorReference();
-        createRoot = true;
-        createChild = true;
-      }
-
-      if (createChild) {
-        monitorRoot.addChild(AllocationMonitorReference(
-          this,
-          monitorTimestamp,
-        ));
-      }
-      if (createRoot) {
-        topNode.addChild(monitorRoot);
-      }
     }
 
     createSnapshotEntries(topNode);

@@ -240,8 +240,10 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
               }
             }
             // Nothing found, pick item selected in dropdown.
-            if (foundExact == null) {
-              final autoCompleteList = controller.searchAutoComplete.value;
+            final autoCompleteList = controller.searchAutoComplete.value;
+            if (foundExact == null ||
+                autoCompleteList[controller.currentDefaultIndex] !=
+                    foundExact) {
               if (autoCompleteList.isNotEmpty) {
                 foundExact = autoCompleteList[controller.currentDefaultIndex];
               }

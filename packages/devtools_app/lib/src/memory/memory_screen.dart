@@ -28,7 +28,6 @@ import 'memory_android_chart.dart' as android;
 import 'memory_controller.dart';
 import 'memory_events_pane.dart' as events;
 import 'memory_heap_tree_view.dart';
-import 'memory_heap_treemap.dart';
 import 'memory_vm_chart.dart' as vm;
 
 /// Width of application when memory buttons loose their text.
@@ -117,8 +116,8 @@ class MemoryBody extends StatefulWidget {
   const MemoryBody();
 
   static const List<Tab> memoryTabs = [
-    Tab(text: 'Dart Heap'),
-    Tab(text: 'Heap Treemap'),
+    Tab(text: 'Analysis'),
+    Tab(text: 'Allocations'),
   ];
 
   @override
@@ -132,7 +131,6 @@ class MemoryBodyState extends State<MemoryBody>
   android.AndroidChartController androidChartController;
 
   MemoryController controller;
-  TabController tabController;
 
   OverlayEntry hoverOverlayEntry;
   OverlayEntry legendOverlayEntry;
@@ -143,14 +141,7 @@ class MemoryBodyState extends State<MemoryBody>
   @override
   void initState() {
     super.initState();
-
     ga.screen(MemoryScreen.id);
-
-    tabController = TabController(
-      length: MemoryBody.memoryTabs.length,
-      vsync: this,
-    );
-    addAutoDisposeListener(tabController);
   }
 
   @override
@@ -356,28 +347,9 @@ class MemoryBodyState extends State<MemoryBody>
                   ),
                 )
               : const SizedBox(),
-          const SizedBox(height: defaultSpacing),
-          Row(
-            children: [
-              TabBar(
-                labelColor: textTheme.bodyText1.color,
-                isScrollable: true,
-                controller: tabController,
-                tabs: MemoryBody.memoryTabs,
-              ),
-              const Expanded(child: SizedBox()),
-            ],
-          ),
           const SizedBox(width: defaultSpacing),
           Expanded(
-            child: TabBarView(
-              physics: defaultTabBarViewPhysics,
-              controller: tabController,
-              children: [
-                HeapTree(controller),
-                MemoryHeapTreemap(controller),
-              ],
-            ),
+            child: HeapTree(controller),
           ),
         ],
       ),
