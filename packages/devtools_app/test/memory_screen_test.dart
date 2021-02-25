@@ -5,8 +5,6 @@
 @TestOn('vm')
 
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/memory/memory_snapshot_models.dart';
-import 'package:devtools_app/src/table.dart' as dev_table;
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
