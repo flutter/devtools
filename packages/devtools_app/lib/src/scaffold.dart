@@ -327,6 +327,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                   children: tabBodies,
                 ),
                 if (serviceManager.hasConnection &&
+                    DevToolsRouterDelegate.of(context)
+                            .currentConfiguration
+                            .page !=
+                        snapshotPageId &&
                     _currentScreen.screenId != DebuggerScreen.id)
                   Container(
                     alignment: Alignment.topCenter,

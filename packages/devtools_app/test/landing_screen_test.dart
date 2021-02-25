@@ -2,12 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/landing_screen.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
+  setUp(() {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+  });
+
   testWidgets('Landing screen displays without error',
       (WidgetTester tester) async {
     // Build our app and trigger a frame.
