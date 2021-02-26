@@ -540,19 +540,17 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     List<double> columnWidths,
   ) {
     Widget rowForNode(T node) {
-      final isNodeSelected = selectionNotifier.value.node == node;
       node.index = index;
       return TableRow<T>(
         key: widget.keyFactory(node),
         linkedScrollControllerGroup: linkedScrollControllerGroup,
         node: node,
         onPressed: (item) => _onItemPressed(item, index),
-        backgroundColor: isNodeSelected
-            ? Theme.of(context).selectedRowColor
-            : alternatingColorForIndexWithContext(index, context),
+        backgroundColor: alternatingColorForIndexWithContext(index, context),
         columns: widget.columns,
         columnWidths: columnWidths,
         expandableColumn: widget.treeColumn,
+        isSelected: selectionNotifier.value.node == node,
         isExpanded: node.isExpanded,
         isExpandable: node.isExpandable,
         isShown: node.shouldShow(),
@@ -1217,7 +1215,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final backgroundColor =
         widget.backgroundColor ?? titleSolidBackgroundColor(Theme.of(context));
     if (widget.isSelected) {
-      return defaultSelectionColor;
+      return Theme.of(context).selectedRowColor;
     }
     final searchAwareBackgroundColor = isSearchMatch
         ? Color.alphaBlend(
@@ -1319,8 +1317,11 @@ class _TableRowState<T> extends State<TableRow<T>>
           final expandIndicator = widget.isExpandable
               ? RotationTransition(
                   turns: expandArrowAnimation,
-                  child: const Icon(
+                  child: Icon(
                     Icons.expand_more,
+                    color: widget.isSelected
+                        ? defaultSelectionForegroundColor
+                        : null,
                     size: defaultIconSize,
                   ),
                 )
