@@ -192,6 +192,7 @@ class AllocationTableViewState extends State<AllocationTableView>
     }
 
     if (controller.monitorAllocations.isEmpty) {
+      // Display help text on how to monitor classes constructed.
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -200,7 +201,10 @@ class AllocationTableViewState extends State<AllocationTableView>
             children: [
               const Text('Click the track button '),
               trackImage(context),
-              const Text(' to begin monitoring changes in memory objects.'),
+              const Text(
+                ' to begin monitoring changes in '
+                'memory instances (classes constructed).',
+              ),
             ],
           ),
         ],

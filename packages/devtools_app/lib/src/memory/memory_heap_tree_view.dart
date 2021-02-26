@@ -394,7 +394,6 @@ class HeapTreeViewState extends State<HeapTree>
       snapshotDisplay =
           treeMapVisible ? MemoryHeapTreemap(controller) : MemoryHeapTable();
     } else {
-      // TODO: Have some help text about how to take a snapshot.
       snapshotDisplay = null;
     }
 
@@ -456,6 +455,7 @@ class HeapTreeViewState extends State<HeapTree>
     final themeData = Theme.of(context);
 
     if (snapshotDisplay == null) {
+      // Display help text about how to collect data.
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
