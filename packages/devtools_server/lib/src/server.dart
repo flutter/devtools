@@ -188,7 +188,7 @@ Future<HttpServer> serveDevTools({
 
   handler ??= await defaultHandler(
     clients,
-    customBuildDir: customDevToolsPath,
+    customDevToolsPath: customDevToolsPath,
     debugMode: debugMode,
   );
 
