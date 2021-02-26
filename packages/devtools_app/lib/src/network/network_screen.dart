@@ -300,6 +300,7 @@ class NetworkRequestsTable extends StatelessWidget {
         onItemSelected: (item) {
           networkController.selectRequest(item);
         },
+        selectionNotifier: networkController.selectedRequest,
         autoScrollContent: true,
         sortColumn: timestampColumn,
         sortDirection: SortDirection.ascending,
