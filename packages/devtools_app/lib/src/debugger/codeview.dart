@@ -414,8 +414,9 @@ class Gutter extends StatelessWidget {
   Widget build(BuildContext context) {
     final bpLineSet = Set.from(breakpoints.map((bp) => bp.line));
 
-    return SizedBox(
+    return Container(
       width: gutterWidth,
+      color: titleSolidBackgroundColor(Theme.of(context)),
       child: ListView.builder(
         controller: scrollController,
         itemExtent: CodeView.rowHeight,
@@ -473,7 +474,6 @@ class GutterItem extends StatelessWidget {
       child: Container(
         height: CodeView.rowHeight,
         padding: const EdgeInsets.only(right: 4.0),
-        decoration: BoxDecoration(color: titleSolidBackgroundColor(theme)),
         child: Stack(
           alignment: AlignmentDirectional.centerStart,
           fit: StackFit.expand,
