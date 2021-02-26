@@ -325,6 +325,7 @@ class MemoryBodyState extends State<MemoryBody>
               _buildMemoryControls(textTheme),
             ],
           ),
+          const SizedBox(height: denseRowSpacing),
           SizedBox(
             height: 70,
             child: events.MemoryEventsPane(
@@ -1274,6 +1275,7 @@ class MemoryBodyState extends State<MemoryBody>
     controller.classRoot = null;
     controller.topNode = null;
     controller.selectedSnapshotTimestamp = null;
+    controller.selectedLeaf = null;
 
     // Remove history of all plotted data in all charts.
     eventChartController?.reset();
