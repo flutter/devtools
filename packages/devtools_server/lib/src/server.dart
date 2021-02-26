@@ -145,7 +145,12 @@ Future<void> _serveDevToolsWithArgs(
 ///
 /// `handler` is the [shelf.Handler] that the server will use for all requests.
 /// If null, [defaultHandler] will be used. Defaults to null.
-// Note: this method is used by the Flutter CLI and by package:dwds.
+///
+/// `customDevToolsPath` is a path to a directory containing a pre-built
+/// DevTools application. If not provided, the pre-built DevTools application
+/// shipped via pub will be used.
+///
+// Note: this method is used by the Dart CLI, Flutter CLI, and by package:dwds.
 Future<HttpServer> serveDevTools({
   bool enableStdinCommands = true,
   bool machineMode = false,
@@ -156,6 +161,7 @@ Future<HttpServer> serveDevTools({
   bool headlessMode = false,
   bool verboseMode = false,
   String hostname,
+  String customDevToolsPath,
   int port = 0,
   int numPortsToTry = defaultTryPorts,
   shelf.Handler handler,
@@ -180,7 +186,11 @@ Future<HttpServer> serveDevTools({
 
   clients = ClientManager(enableNotifications);
 
-  handler ??= await defaultHandler(clients, debugMode: debugMode);
+  handler ??= await defaultHandler(
+    clients,
+    customBuildDir: customDevToolsPath,
+    debugMode: debugMode,
+  );
 
   HttpServer server;
   SocketException ex;
