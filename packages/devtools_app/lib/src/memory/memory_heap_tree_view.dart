@@ -615,8 +615,8 @@ class HeapTreeViewState extends State<HeapTree>
             imageIcon: createImageIcon(
               // TODO(terry): Match shape in event pane.
               themeData.isDarkTheme
-                  ? 'icons/memory/communities_white@2x.png'
-                  : 'icons/memory/communities_black@2x.png',
+                  ? 'icons/memory/communities_white.png'
+                  : 'icons/memory/communities_black.png',
             ),
           ),
         ),
@@ -633,8 +633,8 @@ class HeapTreeViewState extends State<HeapTree>
             imageIcon: createImageIcon(
               // TODO(terry): Match shape in event pane.
               themeData.isDarkTheme
-                  ? 'icons/memory/reset_icon_white@2x.png'
-                  : 'icons/memory/reset_icon_black@2x.png',
+                  ? 'icons/memory/reset_icon_white.png'
+                  : 'icons/memory/reset_icon_black.png',
             ),
           ),
         ),
