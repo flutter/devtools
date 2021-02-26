@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:devtools_app/src/debugger/variables.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
@@ -23,6 +22,7 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'hover.dart';
 import 'syntax_highlighter.dart';
+import 'variables.dart';
 
 // TODO(kenz): consider moving lines / pausedPositions calculations to the
 // controller.
