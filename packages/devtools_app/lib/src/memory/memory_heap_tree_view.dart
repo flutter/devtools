@@ -185,6 +185,8 @@ class HeapTreeViewState extends State<HeapTree>
   /// Total memory that caused last snapshot.
   int lastSnapshotMemoryTotal = 0;
 
+  bool treeMapVisible;
+
   @override
   void initState() {
     super.initState();
@@ -257,6 +259,13 @@ class HeapTreeViewState extends State<HeapTree>
 
     addAutoDisposeListener(controller.memoryTimeline.sampleAddedNotifier, () {
       autoSnapshot();
+    });
+
+    treeMapVisible = controller.treeMapVisible.value;
+    addAutoDisposeListener(controller.treeMapVisible, () {
+      setState(() {
+        treeMapVisible = controller.treeMapVisible.value;
+      });
     });
   }
 
@@ -383,9 +392,8 @@ class HeapTreeViewState extends State<HeapTree>
         ],
       );
     } else if (controller.snapshotByLibraryData != null) {
-      snapshotDisplay = controller.treeMapVisible.value
-          ? MemoryHeapTreemap(controller)
-          : MemoryHeapTable();
+      snapshotDisplay =
+          treeMapVisible ? MemoryHeapTreemap(controller) : MemoryHeapTable();
     } else {
       // TODO: Have some help text about how to take a snapshot.
       snapshotDisplay = const SizedBox();
@@ -408,7 +416,7 @@ class HeapTreeViewState extends State<HeapTree>
               _buildSearchFilterControls(),
             ],
           ),
-          const SizedBox(height: defaultSpacing),
+          const SizedBox(height: densePadding),
           Expanded(
             child: TabBarView(
               physics: defaultTabBarViewPhysics,
@@ -418,6 +426,7 @@ class HeapTreeViewState extends State<HeapTree>
                 Column(
                   children: [
                     _buildSnapshotControls(themeData.textTheme),
+                    const SizedBox(height: denseRowSpacing),
                     Expanded(
                       child: OutlineDecoration(
                         child: buildSnapshotTables(snapshotDisplay),
@@ -430,9 +439,10 @@ class HeapTreeViewState extends State<HeapTree>
                 Column(
                   children: [
                     _buildAllocationsControls(themeData),
-                    Expanded(
+                    const SizedBox(height: denseRowSpacing),
+                    const Expanded(
                       child: OutlineDecoration(
-                        child: buildAllocationTables(),
+                        child: AllocationTableView(),
                       ),
                     ),
                   ],
@@ -452,7 +462,7 @@ class HeapTreeViewState extends State<HeapTree>
             ? Expanded(child: AnalysisInstanceViewTable())
             : const SizedBox();
 
-    return controller.treeMapVisible.value
+    return treeMapVisible
         ? snapshotDisplay
         : Split(
             initialFractions: const [0.5, 0.5],
@@ -466,8 +476,6 @@ class HeapTreeViewState extends State<HeapTree>
             ],
           );
   }
-
-  Widget buildAllocationTables() => const AllocationTableView();
 
   @visibleForTesting
   static const groupByMenuButtonKey = Key('Group By Menu Button');
@@ -519,101 +527,79 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   Widget _buildSnapshotControls(TextTheme textTheme) {
-    return Row(
-      children: [
-        FixedHeightOutlinedButton(
-          buttonKey: snapshotButtonKey,
-          tooltip: 'Take a memory profile snapshot',
-          onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
-          child: const MaterialIconLabel(
-            Icons.camera,
-            'Take Heap Snapshot',
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: Row(
+        children: [
+          FixedHeightOutlinedButton(
+            buttonKey: snapshotButtonKey,
+            tooltip: 'Take a memory profile snapshot',
+            onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
+            child: const MaterialIconLabel(
+              label: 'Take Heap Snapshot',
+              iconData: Icons.camera,
+            ),
           ),
-        ),
-        const SizedBox(width: defaultSpacing),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Treemap'),
-            // TODO(terry): Wrap in a ValueListenableBuilder to avoid calling setState.
-            Switch(
-              value: controller.treeMapVisible.value,
-              onChanged: controller.snapshotByLibraryData != null
-                  ? (value) {
-                      setState(() {
-                        controller.treeMapVisible.value = value;
-                      });
-                    }
-                  : null,
+          const SizedBox(width: defaultSpacing),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Treemap'),
+              Switch(
+                value: treeMapVisible,
+                onChanged: controller.snapshotByLibraryData != null
+                    ? (value) {
+                        controller.toggleTreeMapVisible(value);
+                      }
+                    : null,
+              ),
+            ],
+          ),
+          if (!treeMapVisible) ...[
+            const SizedBox(width: defaultSpacing),
+            _groupByDropdown(textTheme),
+            const SizedBox(width: defaultSpacing),
+            // TODO(terry): Mechanism to handle expand/collapse on both tables
+            // objects/fields. Maybe notion in table?
+            ExpandAllButton(
+              key: expandAllButtonKey,
+              onPressed: () {
+                MemoryScreen.gaAction(key: expandAllButtonKey);
+                if (snapshotDisplay is MemoryHeapTable) {
+                  controller.groupByTreeTable.dataRoots.every((element) {
+                    element.expandCascading();
+                    return true;
+                  });
+                }
+                // All nodes expanded - signal tree state  changed.
+                controller.treeChanged();
+              },
+            ),
+            const SizedBox(width: denseSpacing),
+            CollapseAllButton(
+              key: collapseAllButtonKey,
+              onPressed: () {
+                MemoryScreen.gaAction(key: collapseAllButtonKey);
+                if (snapshotDisplay is MemoryHeapTable) {
+                  controller.groupByTreeTable.dataRoots.every((element) {
+                    element.collapseCascading();
+                    return true;
+                  });
+                  if (controller.instanceFieldsTreeTable != null) {
+                    // We're collapsing close the fields table.
+                    controller.selectedLeaf = null;
+                  }
+                  // All nodes collapsed - signal tree state changed.
+                  controller.treeChanged();
+                }
+              },
             ),
           ],
-        ),
-        const SizedBox(width: defaultSpacing),
-        controller.treeMapVisible.value
-            ? const SizedBox(width: denseSpacing)
-            : _groupByDropdown(textTheme),
-        const SizedBox(width: defaultSpacing),
-        // TODO(terry): Mechanism to handle expand/collapse on both tables
-        // objects/fields. Maybe notion in table?
-        controller.treeMapVisible.value
-            ? const SizedBox(width: denseSpacing)
-            : FixedHeightOutlinedButton(
-                buttonKey: collapseAllButtonKey,
-                tooltip: 'Collapse All',
-                onPressed: snapshotDisplay is MemoryHeapTable
-                    ? () {
-                        MemoryScreen.gaAction(key: collapseAllButtonKey);
-                        if (snapshotDisplay is MemoryHeapTable) {
-                          controller.groupByTreeTable.dataRoots
-                              .every((element) {
-                            element.collapseCascading();
-                            return true;
-                          });
-                          if (controller.instanceFieldsTreeTable != null) {
-                            // We're collapsing close the fields table.
-                            controller.selectedLeaf = null;
-                          }
-                          // All nodes collapsed - signal tree state changed.
-                          controller.treeChanged();
-                        }
-                      }
-                    : null,
-                child: const Icon(
-                  Icons.vertical_align_top,
-                  size: defaultIconSize,
-                ),
-              ),
-        controller.treeMapVisible.value
-            ? const SizedBox(width: denseSpacing)
-            : FixedHeightOutlinedButton(
-                buttonKey: expandAllButtonKey,
-                tooltip: 'Expand All',
-                onPressed: snapshotDisplay is MemoryHeapTable
-                    ? () {
-                        MemoryScreen.gaAction(key: expandAllButtonKey);
-                        if (snapshotDisplay is MemoryHeapTable) {
-                          controller.groupByTreeTable.dataRoots
-                              .every((element) {
-                            element.expandCascading();
-                            return true;
-                          });
-                        }
-                        // All nodes expanded - signal tree state  changed.
-                        controller.treeChanged();
-                      }
-                    : null,
-                child: const Icon(
-                  Icons.vertical_align_bottom,
-                  size: defaultIconSize,
-                ),
-              ),
-      ],
+        ],
+      ),
     );
   }
 
-  // TODO(terry): Change material icon label to accept a Widget for icon instead of IconData.
-  //              Use as child of FixedHeightOutlinedButton instead of creating a Row.
-  //              Consistency with buttons in DevTools icon size and label padding
   Widget _buildAllocationsControls(ThemeData themeData) {
     return Row(
       children: [
@@ -624,18 +610,14 @@ class HeapTreeViewState extends State<HeapTree>
             MemoryScreen.gaAction(key: allocationMonitorKey);
             await _allocationStart();
           },
-          child: Row(
-            children: [
-              createImageIcon(
-                // TODO(terry): Match shape in event pane.
-                themeData.isDarkTheme
-                    ? 'icons/memory/communities_white@2x.png'
-                    : 'icons/memory/communities_black@2x.png',
-                size: defaultIconThemeSize,
-              ),
-              const SizedBox(width: denseSpacing),
-              const Text('Track')
-            ],
+          child: MaterialIconLabel(
+            label: 'Track',
+            imageIcon: createImageIcon(
+              // TODO(terry): Match shape in event pane.
+              themeData.isDarkTheme
+                  ? 'icons/memory/communities_white@2x.png'
+                  : 'icons/memory/communities_black@2x.png',
+            ),
           ),
         ),
         const SizedBox(width: denseSpacing),
@@ -646,21 +628,17 @@ class HeapTreeViewState extends State<HeapTree>
             MemoryScreen.gaAction(key: allocationMonitorResetKey);
             await _allocationReset();
           },
-          child: Row(
-            children: [
-              createImageIcon(
-                // TODO(terry): Match shape in event pane.
-                themeData.isDarkTheme
-                    ? 'icons/memory/reset_icon_white@2x.png'
-                    : 'icons/memory/reset_icon_black@2x.png',
-                size: defaultIconThemeSize,
-              ),
-              const SizedBox(width: denseSpacing),
-              const Text('Reset')
-            ],
+          child: MaterialIconLabel(
+            label: 'Reset',
+            imageIcon: createImageIcon(
+              // TODO(terry): Match shape in event pane.
+              themeData.isDarkTheme
+                  ? 'icons/memory/reset_icon_white@2x.png'
+                  : 'icons/memory/reset_icon_black@2x.png',
+            ),
           ),
         ),
-        const SizedBox(width: 50),
+        const Spacer(),
         Text(
           controller.monitorTimestamp == null
               ? 'No allocations tracked'
@@ -806,8 +784,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   bool get _isSearchable {
     // Analysis tab and Snapshot exist or 'Allocations' tab allocations are monitored.
-    return (tabController.index == analysisTabIndex &&
-            !controller.treeMapVisible.value) ||
+    return (tabController.index == analysisTabIndex && !treeMapVisible) ||
         (tabController.index == allocationsTabIndex &&
             controller.monitorAllocations.isNotEmpty);
   }

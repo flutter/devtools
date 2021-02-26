@@ -388,9 +388,13 @@ class MemoryController extends DisposableController
     return null;
   }
 
-  final treeMapVisible = ValueNotifier<bool>(false);
+  ValueListenable get treeMapVisible => _treeMapVisible;
 
-  ValueListenable get treeMapVisibleNotifier => treeMapVisible;
+  final _treeMapVisible = ValueNotifier<bool>(false);
+
+  void toggleTreeMapVisible(bool value) {
+    _treeMapVisible.value = value;
+  }
 
   bool isAnalyzeButtonEnabled() => computeSnapshotToAnalyze != null;
 
@@ -941,6 +945,12 @@ class MemoryController extends DisposableController
         setTracking(trackedClass.value, true);
       }
     }
+  }
+
+  void toggleAllocationTracking(ClassHeapDetailStats item, bool isStacktraced) {
+    item.isStacktraced = isStacktraced;
+    setTracking(item.classRef, isStacktraced);
+    changeStackTraces();
   }
 
   Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>

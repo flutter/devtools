@@ -105,8 +105,8 @@ class IconLabelButton extends StatelessWidget {
     return FixedHeightOutlinedButton(
       onPressed: onPressed,
       child: MaterialIconLabel(
-        icon,
-        label,
+        label: label,
+        iconData: icon,
         includeTextWidth: includeTextWidth,
       ),
     );
@@ -276,6 +276,35 @@ class HelpButton extends StatelessWidget {
           size: defaultIconSize,
         ),
       ),
+    );
+  }
+}
+
+class ExpandAllButton extends StatelessWidget {
+  const ExpandAllButton({Key key, @required this.onPressed}) : super(key: key);
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FixedHeightOutlinedButton(
+      onPressed: onPressed,
+      child: const Text('Expand All'),
+    );
+  }
+}
+
+class CollapseAllButton extends StatelessWidget {
+  const CollapseAllButton({Key key, @required this.onPressed})
+      : super(key: key);
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FixedHeightOutlinedButton(
+      onPressed: onPressed,
+      child: const Text('Collapse All'),
     );
   }
 }
@@ -511,8 +540,8 @@ class ExitOfflineButton extends StatelessWidget {
       buttonKey: const Key('exit offline button'),
       onPressed: onPressed,
       child: const MaterialIconLabel(
-        Icons.clear,
-        'Exit offline mode',
+        label: 'Exit offline mode',
+        iconData: Icons.clear,
       ),
     );
   }
@@ -722,8 +751,8 @@ class ToggleButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
         child: MaterialIconLabel(
-          icon,
-          text,
+          label: text,
+          iconData: icon,
           includeTextWidth: includeTextWidth,
         ),
       ),

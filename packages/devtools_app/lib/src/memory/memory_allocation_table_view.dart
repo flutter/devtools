@@ -178,7 +178,8 @@ class AllocationTableViewState extends State<AllocationTableView>
       columns: columns,
       data: controller.monitorAllocations,
       keyFactory: (d) => Key(d.classRef.name),
-      onItemSelected: (ref) {},
+      onItemSelected: (ref) =>
+          controller.toggleAllocationTracking(ref, !ref.isStacktraced),
       sortColumn: controller.sortedMonitorColumn,
       sortDirection: controller.sortedMonitorDirection,
       onSortChanged: (
