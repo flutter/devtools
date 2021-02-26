@@ -67,8 +67,8 @@ int _hoverIndex(double dx, TextSpan line, TextStyle textStyle) {
   return -1;
 }
 
-const _hoverXOffset = 10;
 const _hoverCardBorderWidth = 2.0;
+const _hoverYOffset = 10;
 
 /// A card to display content while hovering over a widget.
 ///
@@ -90,15 +90,11 @@ class HoverCard {
     final hoverHeading = colorScheme.hoverTitleTextStyle;
 
     final position = event.position;
-    double xPosition = position.dx + _hoverXOffset;
-    if (xPosition + width > MediaQuery.of(context).size.width) {
-      xPosition = position.dx - width - _hoverXOffset;
-    }
 
     _overlayEntry = OverlayEntry(builder: (context) {
       return Positioned(
-          left: xPosition,
-          top: position.dy,
+          left: position.dx - (width / 2.0),
+          top: position.dy + _hoverYOffset,
           child: MouseRegion(
               onExit: (_) {
                 remove();
