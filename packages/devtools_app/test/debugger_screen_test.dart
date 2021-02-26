@@ -392,22 +392,6 @@ void main() {
       // Stack frame 4
       expect(find.text('<async break>'), findsOneWidget);
     });
-    testWidgetsWithWindowSize('Call Stack displays "SHOW ALL" when truncated',
-        const Size(1000.0, 4000.0), (WidgetTester tester) async {
-      when(debuggerController.hasTruncatedFrames)
-          .thenReturn(ValueNotifier(true));
-      await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('SHOW ALL'), findsOneWidget);
-    });
-
-    testWidgetsWithWindowSize(
-        'Call Stack does not display "SHOW ALL" when not truncated',
-        const Size(1000.0, 4000.0), (WidgetTester tester) async {
-      when(debuggerController.hasTruncatedFrames)
-          .thenReturn(ValueNotifier(false));
-      await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('SHOW ALL'), findsNothing);
-    });
 
     testWidgetsWithWindowSize(
         'Variables shows items', const Size(1000.0, 4000.0),

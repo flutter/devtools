@@ -7,6 +7,8 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'globals.dart';
+
 /// The page ID (used in routing) for the standalone app-size page.
 ///
 /// This must be different to the AppSizeScreen ID which is also used in routing when
@@ -33,6 +35,14 @@ class DevToolsRouteInformationParser
   Future<DevToolsRouteConfiguration> parseRouteInformation(
       RouteInformation routeInformation) {
     final uri = Uri.parse(routeInformation.location);
+
+    // If the uri has been modified and we do not have a vm service uri as a
+    // query parameter, ensure we manually disconnect from any previously
+    // connected applications.
+    if (uri.queryParameters['uri'] == null) {
+      serviceManager.manuallyDisconnect();
+    }
+
     // routeInformation.path comes from the address bar and (when not empty) is
     // prefixed with a leading slash. Internally we use "page IDs" that do not
     // start with slashes but match the screenId for each screen.
@@ -125,6 +135,13 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   /// overwritten by [argUpdates].
   void navigate(String page, [Map<String, String> argUpdates]) {
     final newArgs = {...currentConfiguration.args, ...?argUpdates};
+
+    // Ensure we disconnect from any previously connected applications if we do
+    // not have a vm service uri as a query parameter.
+    if (newArgs['uri'] == null) {
+      serviceManager.manuallyDisconnect();
+    }
+
     _replaceStack(DevToolsRouteConfiguration(page, newArgs));
     notifyListeners();
   }

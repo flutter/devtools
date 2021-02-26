@@ -106,7 +106,7 @@ void main() {
       expect(find.byType(EventDetails), findsOneWidget);
 
       await tester.tap(find.byType(ClearButton));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(controller.allTraceEvents, isEmpty);
       expect(find.byType(FlutterFramesChart), findsOneWidget);
       expect(find.byType(TimelineFlameChart), findsNothing);

@@ -31,8 +31,10 @@ final _log = DebugTimingLogger('debugger', mute: true);
 /// well.
 class ConsoleLine {
   factory ConsoleLine.text(String text) => TextConsoleLine(text);
+
   factory ConsoleLine.variable(Variable variable) =>
       VariableConsoleLine(variable);
+
   ConsoleLine._();
 }
 
@@ -258,7 +260,7 @@ class DebuggerController extends DisposableController
       _breakpoints.value = [];
       _breakpointsWithLocation.value = [];
       await _getStackOperation?.cancel();
-      _populateFrameInfo([]);
+      _populateFrameInfo([], truncated: false);
       return;
     }
 
@@ -612,6 +614,7 @@ class DebuggerController extends DisposableController
   }
 
   final _hasTruncatedFrames = ValueNotifier<bool>(false);
+
   ValueListenable<bool> get hasTruncatedFrames => _hasTruncatedFrames;
 
   CancelableOperation<_StackInfo> _getStackOperation;
@@ -624,31 +627,27 @@ class DebuggerController extends DisposableController
 
     // Perform an early exit if we're not paused.
     if (!paused) {
-      _populateFrameInfo([]);
+      _populateFrameInfo([], truncated: false);
       return;
     }
 
-    // First, notify based on the single 'pauseEvent.topFrame' frame.
-    if (pauseEvent?.topFrame != null) {
-      final tempFrames = _framesForCallStack(
-        [pauseEvent.topFrame],
-        reportedException: pauseEvent?.exception,
-      );
-      _populateFrameInfo(
-        [await _createStackFrameWithLocation(tempFrames.first)],
-        truncated: true,
-      );
-      _log.log('created first frame');
-    }
+    // We populate the first 12 frames; this ~roughly corresponds to the number
+    // of visible stack frames.
+    const initialFrameRequestCount = 12;
 
-    // We populate the first 10 frames to match the behavior in VS Code.
-    _getStackOperation =
-        CancelableOperation.fromFuture(_getStackInfo(limit: 10));
+    _getStackOperation = CancelableOperation.fromFuture(_getStackInfo(
+      limit: initialFrameRequestCount,
+    ));
     final stackInfo = await _getStackOperation.value;
     _populateFrameInfo(
       stackInfo.frames,
       truncated: stackInfo.truncated ?? false,
     );
+
+    // In the background, populate the rest of the frames.
+    if (stackInfo.truncated) {
+      unawaited(_getFullStack());
+    }
   }
 
   Future<_StackInfo> _getStackInfo({int limit}) async {
@@ -670,9 +669,8 @@ class DebuggerController extends DisposableController
 
   void _populateFrameInfo(
     List<StackFrameAndSourcePosition> frames, {
-    bool truncated,
+    @required final bool truncated,
   }) {
-    truncated ??= false;
     _log.log('populated frame info');
     _stackFramesWithLocation.value = frames;
     _hasTruncatedFrames.value = truncated;
@@ -683,7 +681,7 @@ class DebuggerController extends DisposableController
     }
   }
 
-  Future<void> getFullStack() async {
+  Future<void> _getFullStack() async {
     await _getStackOperation?.cancel();
     _getStackOperation = CancelableOperation.fromFuture(_getStackInfo());
     final stackInfo = await _getStackOperation.value;
@@ -1226,6 +1224,7 @@ class EvalHistory {
 
 class _StackInfo {
   _StackInfo(this.frames, this.truncated);
+
   final List<StackFrameAndSourcePosition> frames;
   final bool truncated;
 }

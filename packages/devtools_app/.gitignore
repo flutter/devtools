@@ -11,3 +11,7 @@ ios/
 lib/generated_plugin_registrant.dart
 macos/Runner/
 macos/Flutter/
+
+# This should only be present as a byproduct of running the publish
+# script. It should not be committed.
+fonts/codicon.ttf

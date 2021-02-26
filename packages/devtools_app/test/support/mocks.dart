@@ -142,13 +142,20 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
-  Stream<bool> get onStateChange => stateChangeStream.stream;
+  void manuallyDisconnect() {
+    changeState(false, manual: true);
+  }
 
-  StreamController<bool> stateChangeStream = StreamController.broadcast();
+  @override
+  ValueListenable<ConnectedState> get connectedState => _connectedState;
 
-  void changeState(bool value) {
+  final ValueNotifier<ConnectedState> _connectedState =
+      ValueNotifier(const ConnectedState(false));
+
+  void changeState(bool value, {bool manual = false}) {
     hasConnection = value ?? false;
-    stateChangeStream.add(value);
+    _connectedState.value =
+        ConnectedState(value, userInitiatedConnectionState: manual);
   }
 
   @override

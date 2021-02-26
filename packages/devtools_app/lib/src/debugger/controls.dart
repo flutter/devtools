@@ -241,8 +241,8 @@ class DebuggerButton extends StatelessWidget {
       ),
       onPressed: onPressed,
       child: MaterialIconLabel(
-        icon,
-        title,
+        label: title,
+        iconData: icon,
         includeTextWidth: mediumDeviceWidth,
       ),
     );

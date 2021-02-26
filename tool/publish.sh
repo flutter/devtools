@@ -11,6 +11,9 @@ pushd packages/devtools_app
 flutter pub get
 popd
 
+cp third_party/packages/codicon/lib/font/codicon.ttf packages/devtools_app/fonts/codicon.ttf
+perl -pi -e 's/packages\/codicon\/font\/codicon.ttf/fonts\/codicon.ttf/g' packages/devtools_app/pubspec.yaml
+
 tool/build_release.sh
 
 pushd packages/devtools
