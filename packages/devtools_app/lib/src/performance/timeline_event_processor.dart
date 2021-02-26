@@ -124,6 +124,8 @@ class TimelineEventProcessor {
 //        .map((e) => TraceEventWrapper(
 //            TraceEvent(e), DateTime.now().microsecondsSinceEpoch))
 //        .toList();
+    const sixteenHoursMicros = 57600000000;
+    int firstTimestampMicros;
     final _traceEvents = (traceEvents.where((event) {
       // Throw out 'MessageLoop::FlushTasks' events. A single
       // 'MessageLoop::FlushTasks' event can parent multiple Flutter frame event
@@ -134,7 +136,20 @@ class TimelineEventProcessor {
       // (e.g. thread_name events) as well as events from before we started
       // recording.
       final ts = event.event.timestampMicros;
-      return ts != null && !isMessageLoopFlushTasks;
+      final shouldProcess = ts != null && !isMessageLoopFlushTasks;
+
+      // TODO(kenz): remove this code once
+      // https://github.com/flutter/flutter/issues/76875 is resolved. We are
+      // getting extreme outlier events with timestamps ~1 day after the
+      // expected time range. Using sixteen hours as a threshold is arbitrary,
+      // but should catch the outliers without triggering false positives.
+      if (shouldProcess) {
+        firstTimestampMicros ??= ts;
+        if ((ts - firstTimestampMicros).abs() > sixteenHoursMicros) {
+          return false;
+        }
+      }
+      return shouldProcess;
     }).toList())
       // Events need to be in increasing timestamp order.
       ..sort()
