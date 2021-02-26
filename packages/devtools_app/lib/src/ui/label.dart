@@ -29,10 +29,16 @@ class ImageIconLabel extends StatelessWidget {
 }
 
 class MaterialIconLabel extends StatelessWidget {
-  const MaterialIconLabel(this.iconData, this.text, {this.includeTextWidth});
+  const MaterialIconLabel({
+    @required this.label,
+    this.iconData,
+    this.imageIcon,
+    this.includeTextWidth,
+  }) : assert((iconData == null) != (imageIcon == null));
 
   final IconData iconData;
-  final String text;
+  final Image imageIcon;
+  final String label;
   final double includeTextWidth;
 
   @override
@@ -41,15 +47,17 @@ class MaterialIconLabel extends StatelessWidget {
     // when the text is not shown.
     return Row(
       children: [
-        Icon(
-          iconData,
-          size: defaultIconSize,
-        ),
+        iconData != null
+            ? Icon(
+                iconData,
+                size: defaultIconSize,
+              )
+            : imageIcon,
         // TODO(jacobr): animate showing and hiding the text.
         if (_showLabelText(context, includeTextWidth))
           Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(text),
+            padding: const EdgeInsets.only(left: denseSpacing),
+            child: Text(label),
           ),
       ],
     );

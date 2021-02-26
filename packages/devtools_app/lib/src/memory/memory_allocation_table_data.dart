@@ -49,9 +49,7 @@ class FieldTrack extends ColumnData<ClassHeapDetailStats>
     return Checkbox(
       value: item.isStacktraced,
       onChanged: (value) {
-        item.isStacktraced = value;
-        controller.setTracking(item.classRef, value);
-        controller.changeStackTraces();
+        controller.toggleAllocationTracking(item, value);
       },
     );
   }

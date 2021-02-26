@@ -166,8 +166,8 @@ class _FileImportContainerState extends State<FileImportContainer> {
                   ? () => widget.onAction(importedFile)
                   : null,
               child: MaterialIconLabel(
-                Icons.highlight,
-                widget.actionText,
+                label: widget.actionText,
+                iconData: Icons.highlight,
               ),
             ),
           ],
@@ -303,8 +303,8 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
                       )
                   : null,
               child: MaterialIconLabel(
-                Icons.highlight,
-                widget.actionText,
+                label: widget.actionText,
+                iconData: Icons.highlight,
               ),
             ),
           ],
