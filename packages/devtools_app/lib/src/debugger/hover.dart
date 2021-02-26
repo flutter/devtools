@@ -88,7 +88,6 @@ class HoverCard {
     final colorScheme = Theme.of(context).colorScheme;
     final focusColor = Theme.of(context).focusColor;
     final hoverHeading = colorScheme.hoverTitleTextStyle;
-
     final position = event.position;
 
     _overlayEntry = OverlayEntry(builder: (context) {
