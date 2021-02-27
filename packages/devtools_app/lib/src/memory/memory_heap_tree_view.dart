@@ -17,7 +17,6 @@ import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
-import '../ui/icons.dart';
 import '../ui/label.dart';
 import '../ui/search.dart';
 import '../utils.dart';
@@ -395,8 +394,7 @@ class HeapTreeViewState extends State<HeapTree>
       snapshotDisplay =
           treeMapVisible ? MemoryHeapTreemap(controller) : MemoryHeapTable();
     } else {
-      // TODO: Have some help text about how to take a snapshot.
-      snapshotDisplay = const SizedBox();
+      snapshotDisplay = null;
     }
 
     return Padding(
@@ -441,9 +439,7 @@ class HeapTreeViewState extends State<HeapTree>
                     _buildAllocationsControls(themeData),
                     const SizedBox(height: denseRowSpacing),
                     const Expanded(
-                      child: OutlineDecoration(
-                        child: AllocationTableView(),
-                      ),
+                      child: AllocationTableView(),
                     ),
                   ],
                 ),
@@ -456,11 +452,25 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   Widget buildSnapshotTables(Widget snapshotDisplay) {
+    if (snapshotDisplay == null) {
+      // Display help text about how to collect data.
+      return Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Text('Click the take heap snapshot button '),
+            Icon(Icons.camera),
+            Text(' to collect a graph of memory objects.'),
+          ],
+        ),
+      );
+    }
+
     final rightSideTable = controller.isLeafSelected
         ? InstanceTreeView()
         : controller.isAnalysisLeafSelected
             ? Expanded(child: AnalysisInstanceViewTable())
-            : const SizedBox();
+            : helpScreen();
 
     return treeMapVisible
         ? snapshotDisplay
@@ -475,6 +485,36 @@ class HeapTreeViewState extends State<HeapTree>
               rightSideTable,
             ],
           );
+  }
+
+  Widget tableExample(IconData iconData, String entry) {
+    final themeData = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        iconData == null
+            ? Text(' ', style: themeData.fixedFontStyle)
+            : Icon(iconData),
+        Text(entry, style: themeData.fixedFontStyle),
+      ],
+    );
+  }
+
+  Widget helpScreen() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'Click a leaf node instance of a class to\n'
+          'inspect the fields of that instance e.g.,',
+        ),
+        const SizedBox(height: defaultSpacing),
+        tableExample(Icons.expand_more, 'dart:collection'),
+        tableExample(Icons.expand_more, 'SplayTreeMap'),
+        const SizedBox(height: denseRowSpacing),
+        tableExample(null, 'Instance 0'),
+      ],
+    );
   }
 
   @visibleForTesting
@@ -612,12 +652,7 @@ class HeapTreeViewState extends State<HeapTree>
           },
           child: MaterialIconLabel(
             label: 'Track',
-            imageIcon: createImageIcon(
-              // TODO(terry): Match shape in event pane.
-              themeData.isDarkTheme
-                  ? 'icons/memory/communities_white.png'
-                  : 'icons/memory/communities_black.png',
-            ),
+            imageIcon: trackImage(context),
           ),
         ),
         const SizedBox(width: denseSpacing),
@@ -630,12 +665,7 @@ class HeapTreeViewState extends State<HeapTree>
           },
           child: MaterialIconLabel(
             label: 'Reset',
-            imageIcon: createImageIcon(
-              // TODO(terry): Match shape in event pane.
-              themeData.isDarkTheme
-                  ? 'icons/memory/reset_icon_white.png'
-                  : 'icons/memory/reset_icon_black.png',
-            ),
+            imageIcon: resetImage(context),
           ),
         ),
         const Spacer(),
