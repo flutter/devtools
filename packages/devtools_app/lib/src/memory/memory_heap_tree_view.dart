@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:devtools_app/src/inspector/diagnostics.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -478,19 +479,44 @@ class HeapTreeViewState extends State<HeapTree>
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
+                  const Text('Click a leaf node instance of a class,'),
+                  const Text('to inspect the fields of that instance e.g.,'),
+                  const SizedBox(height: defaultSpacing),
+                  Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        'Click a leaf node instance of a class,'
-                        ' to inspect the fields of the instance e.g.,',
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.expand_more),
+                          Text(
+                            'dart:collection',
+                            style: themeData.fixedFontStyle,
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.expand_more),
+                          Text(
+                            'SplayTreeMap',
+                            style: themeData.fixedFontStyle,
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: defaultRowHeight),
+                          Text(
+                            ' Instance 0',
+                            style: themeData.fixedFontStyle,
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: defaultSpacing),
-                  Text('> dart:collection', style: themeData.fixedFontStyle),
-                  Text('  > SplayTreeMap', style: themeData.fixedFontStyle),
-                  Text('      Instance 0', style: themeData.fixedFontStyle),
                 ],
               );
 

@@ -114,6 +114,10 @@ class AllocationTableViewState extends State<AllocationTableView>
       setState(() {});
     });
 
+    addAutoDisposeListener(controller.monitorAllocationsNotifier, () {
+      setState(() {});
+    });
+
     addAutoDisposeListener(trackerData.selectionNotifier, () {
       final Tracker item = trackerData.selectionNotifier.value.node;
       if (item is TrackerMore) trackerData.expandCallStack(item);
