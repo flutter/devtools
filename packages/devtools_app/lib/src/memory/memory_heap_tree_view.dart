@@ -461,10 +461,10 @@ class HeapTreeViewState extends State<HeapTree>
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Click the take heap snapshot button '),
-              const Icon(Icons.camera),
-              const Text(' to collect a graph of memory objects.'),
+            children: const [
+              Text('Click the take heap snapshot button '),
+              Icon(Icons.camera),
+              Text(' to collect a graph of memory objects.'),
             ],
           ),
         ],
@@ -480,8 +480,8 @@ class HeapTreeViewState extends State<HeapTree>
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
+                    children: const [
+                      Text(
                         'Click a leaf node instance of a class,'
                         ' to inspect the fields of the instance e.g.,',
                       ),
