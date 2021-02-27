@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:devtools_app/src/inspector/diagnostics.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
