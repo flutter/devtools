@@ -114,10 +114,6 @@ class AllocationTableViewState extends State<AllocationTableView>
 
     addAutoDisposeListener(controller.monitorAllocationsNotifier);
 
-    addAutoDisposeListener(controller.monitorAllocationsNotifier, () {
-      setState(() {});
-    });
-
     addAutoDisposeListener(trackerData.selectionNotifier, () {
       final Tracker item = trackerData.selectionNotifier.value.node;
       if (item is TrackerMore) trackerData.expandCallStack(item);
@@ -197,21 +193,18 @@ class AllocationTableViewState extends State<AllocationTableView>
 
     if (controller.monitorAllocations.isEmpty) {
       // Display help text on how to monitor classes constructed.
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Click the track button '),
-              trackImage(context),
-              const Text(
-                ' to begin monitoring changes in '
-                'memory instances (classes constructed).',
-              ),
-            ],
-          ),
-        ],
+      return Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Click the track button '),
+            trackImage(context),
+            const Text(
+              ' to begin monitoring changes in '
+              'memory instances (classes constructed).',
+            ),
+          ],
+        ),
       );
     }
 
