@@ -452,22 +452,17 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   Widget buildSnapshotTables(Widget snapshotDisplay) {
-    final themeData = Theme.of(context);
-
     if (snapshotDisplay == null) {
       // Display help text about how to collect data.
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Text('Click the take heap snapshot button '),
-              Icon(Icons.camera),
-              Text(' to collect a graph of memory objects.'),
-            ],
-          ),
-        ],
+      return Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Text('Click the take heap snapshot button '),
+            Icon(Icons.camera),
+            Text(' to collect a graph of memory objects.'),
+          ],
+        ),
       );
     }
 
@@ -475,49 +470,7 @@ class HeapTreeViewState extends State<HeapTree>
         ? InstanceTreeView()
         : controller.isAnalysisLeafSelected
             ? Expanded(child: AnalysisInstanceViewTable())
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Click a leaf node instance of a class,'),
-                  const Text('to inspect the fields of that instance e.g.,'),
-                  const SizedBox(height: defaultSpacing),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.expand_more),
-                          Text(
-                            'dart:collection',
-                            style: themeData.fixedFontStyle,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.expand_more),
-                          Text(
-                            'SplayTreeMap',
-                            style: themeData.fixedFontStyle,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: defaultRowHeight),
-                          Text(
-                            ' Instance 0',
-                            style: themeData.fixedFontStyle,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              );
+            : helpScreen();
 
     return treeMapVisible
         ? snapshotDisplay
@@ -532,6 +485,36 @@ class HeapTreeViewState extends State<HeapTree>
               rightSideTable,
             ],
           );
+  }
+
+  Widget tableExample(IconData iconData, String entry) {
+    final themeData = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        iconData == null
+            ? Text(' ', style: themeData.fixedFontStyle)
+            : Icon(iconData),
+        Text(entry, style: themeData.fixedFontStyle),
+      ],
+    );
+  }
+
+  Widget helpScreen() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'Click a leaf node instance of a class to\n'
+          'inspect the fields of that instance e.g.,',
+        ),
+        const SizedBox(height: defaultSpacing),
+        tableExample(Icons.expand_more, 'dart:collection'),
+        tableExample(Icons.expand_more, 'SplayTreeMap'),
+        const SizedBox(height: denseRowSpacing),
+        tableExample(null, 'Instance 0'),
+      ],
+    );
   }
 
   @visibleForTesting
