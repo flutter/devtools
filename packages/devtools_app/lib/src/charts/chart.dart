@@ -603,26 +603,31 @@ class ChartPainter extends CustomPainter {
     bool aggregateEvents,
     Path symbolPathToDraw,
   ) {
-    PaintingStyle style;
+    PaintingStyle firstStyle;
+    PaintingStyle secondStyle;
     switch (characteristics.symbol) {
       case ChartSymbol.disc:
       case ChartSymbol.filledSquare:
       case ChartSymbol.filledTriangle:
       case ChartSymbol.filledTriangleDown:
-        style = PaintingStyle.fill;
+        firstStyle = PaintingStyle.fill;
         break;
       case ChartSymbol.ring:
       case ChartSymbol.square:
       case ChartSymbol.triangle:
       case ChartSymbol.triangleDown:
-        style = PaintingStyle.stroke;
+        firstStyle = PaintingStyle.stroke;
+        break;
+      case ChartSymbol.concentric:
+        firstStyle = PaintingStyle.stroke;
+        secondStyle = PaintingStyle.fill;
         break;
       case ChartSymbol.dashedLine:
         break;
     }
 
-    final paint = Paint()
-      ..style = style
+    final paintFirst = Paint()
+      ..style = firstStyle
       ..strokeWidth = characteristics.strokeWidth
       ..color = aggregateEvents
           ? characteristics.colorAggregate
@@ -640,7 +645,25 @@ class ChartPainter extends CustomPainter {
         break;
       case ChartSymbol.disc:
       case ChartSymbol.ring:
-        canvas.drawCircle(Offset(x, y), characteristics.diameter, paint);
+        canvas.drawCircle(Offset(x, y), characteristics.diameter, paintFirst);
+        break;
+      case ChartSymbol.concentric:
+        // Outer ring.
+        canvas.drawCircle(Offset(x, y), characteristics.diameter, paintFirst);
+
+        // Inner disc.
+        final paintSecond = Paint()
+          ..style = secondStyle
+          ..strokeWidth = 0
+          // TODO(terry): Aggregate for concentric maybe needed someday.
+          ..color = aggregateEvents
+              ? characteristics.colorAggregate
+              : characteristics.concentricCenterColor;
+        canvas.drawCircle(
+          Offset(x, y),
+          characteristics.concentricCenterDiameter,
+          paintSecond,
+        ); // Circle
         break;
       case ChartSymbol.filledSquare:
       case ChartSymbol.filledTriangle:
@@ -655,7 +678,7 @@ class ChartPainter extends CustomPainter {
             y - characteristics.height / 2,
           ),
         );
-        canvas.drawPath(path, paint);
+        canvas.drawPath(path, paintFirst);
         break;
       default:
         final message = 'Unknown symbol ${characteristics.symbol}';

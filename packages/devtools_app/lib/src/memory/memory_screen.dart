@@ -1268,6 +1268,7 @@ class MemoryBodyState extends State<MemoryBody>
     // Clear any current Allocation Profile collected.
     controller.monitorAllocations = [];
     controller.monitorTimestamp = null;
+    controller.lastMonitorTimestamp.value = null;
     controller.trackAllocations.clear();
     controller.allocationSamples.clear();
 

@@ -335,12 +335,14 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
     final monitorResetIndex = _chartController.createTrace(
       trace.ChartType.symbol,
-      trace.PaintCharacteristics(
-        color: Colors.yellowAccent,
-        strokeWidth: 3,
+      trace.PaintCharacteristics.concentric(
+        color: Colors.grey[600],
+        strokeWidth: 4,
         diameter: 6,
         fixedMinY: visibleVmEvent,
         fixedMaxY: extensionEvent,
+        concentricCenterColor: Colors.yellowAccent,
+        concentricCenterDiameter: 4,
       ),
       name: TraceName.monitorReset.toString(),
     );
