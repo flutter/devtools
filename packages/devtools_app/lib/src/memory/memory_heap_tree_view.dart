@@ -676,8 +676,6 @@ class HeapTreeViewState extends State<HeapTree>
   Timer removeUpdateBubble;
 
   Widget displayTimestampUpdateBubble() {
-    final themeData = Theme.of(context);
-
     // Build the bubble to show data has changed (new allocation data).
     final bubble = AnimatedBuilder(
       animation: _animation,
@@ -701,7 +699,7 @@ class HeapTreeViewState extends State<HeapTree>
           controller.monitorTimestamp == null
               ? 'No allocations tracked'
               : 'Allocations Tracked at ${MemoryController.formattedTimestamp(controller.monitorTimestamp)}',
-          style: themeData.colorScheme.italicTextStyle,
+          style: Theme.of(context).colorScheme.italicTextStyle,
           size: controller.lastMonitorTimestamp.value ==
                   controller.monitorTimestamp
               ? 0
@@ -786,11 +784,16 @@ class HeapTreeViewState extends State<HeapTree>
     );
   }
 
+  static const maxWidth = 800.0;
+
   double textWidgetWidth(String message, {TextStyle style}) {
-    // self-defined constraint
+    // Longest message must fit in this width.
     const constraints = BoxConstraints(
-      maxWidth: 800.0, // maxwidth calculated
+      maxWidth: maxWidth,
     );
+
+    // TODO(terry): Is there a better (less heavyweight) way of computing text
+    //              width then using the widget pipeline?
     final richTextWidget = Text.rich(TextSpan(text: message), style: style)
         .build(context) as RichText;
     final renderObject = richTextWidget.createRenderObject(context);
@@ -800,7 +803,19 @@ class HeapTreeViewState extends State<HeapTree>
           baseOffset: 0,
           extentOffset: TextSpan(text: message).toPlainText().length),
     );
-    return boxes.last.right;
+
+    final textWidth = boxes.last.right;
+
+    if (textWidth > maxWidth) {
+      // TODO(terry): If message > 800 pixels in width (not possible
+      //              today) but could be more robust.
+      logger.log(
+        'Computed text width > $maxWidth ($textWidth)\nmessage=$message.',
+        logger.LogLevel.warning,
+      );
+    }
+
+    return textWidth;
   }
 
   // WARNING: Do not checkin the debug flag set to true.
