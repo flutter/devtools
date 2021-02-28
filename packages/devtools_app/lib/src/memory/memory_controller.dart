@@ -889,6 +889,10 @@ class MemoryController extends DisposableController
 
   DateTime monitorTimestamp;
 
+  ValueListenable<DateTime> get lastMonitorTimestampNotifier => lastMonitorTimestamp;
+  
+  final lastMonitorTimestamp = ValueNotifier<DateTime>(null);
+
   /// Used for Allocations table search auto-complete.
 
   /// This finds and selects an exact match in the tree.

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:devtools_shared/devtools_shared.dart';
@@ -128,7 +129,7 @@ class HeapTreeViewState extends State<HeapTree>
     with
         AutoDisposeMixin,
         SearchFieldMixin<HeapTree>,
-        SingleTickerProviderStateMixin {
+        TickerProviderStateMixin {
   @visibleForTesting
   static const snapshotButtonKey = Key('Snapshot Button');
   @visibleForTesting
@@ -186,12 +187,16 @@ class HeapTreeViewState extends State<HeapTree>
 
   bool treeMapVisible;
 
+  AnimationController _animation;
+
   @override
   void initState() {
     super.initState();
 
     tabController = TabController(length: DartHeapTabs.length, vsync: this);
     addAutoDisposeListener(tabController);
+
+    _animation = _setupBubbleAnimationController();
   }
 
   @override
@@ -266,6 +271,8 @@ class HeapTreeViewState extends State<HeapTree>
         treeMapVisible = controller.treeMapVisible.value;
       });
     });
+
+    addAutoDisposeListener(controller.lastMonitorTimestamp);
   }
 
   @override
@@ -275,6 +282,8 @@ class HeapTreeViewState extends State<HeapTree>
     searchFieldFocusNode.dispose();
 
     rawKeyboardFocusNode.dispose();
+
+    _animation.dispose();
 
     super.dispose();
   }
@@ -436,7 +445,7 @@ class HeapTreeViewState extends State<HeapTree>
                 // Allocations Tab
                 Column(
                   children: [
-                    _buildAllocationsControls(themeData),
+                    _buildAllocationsControls(),
                     const SizedBox(height: denseRowSpacing),
                     const Expanded(
                       child: AllocationTableView(),
@@ -640,7 +649,76 @@ class HeapTreeViewState extends State<HeapTree>
     );
   }
 
-  Widget _buildAllocationsControls(ThemeData themeData) {
+  AnimationController _setupBubbleAnimationController() {
+    // Setup animation controller to handle the update bubble.
+    const animationDuration = Duration(milliseconds: 500);
+    final bubbleAnimation = AnimationController(
+      duration: animationDuration,
+      reverseDuration: animationDuration,
+      upperBound: 15.0,
+      vsync: this,
+    );
+
+    bubbleAnimation.addStatusListener(_animationStatusListener);
+
+    return bubbleAnimation;
+  }
+
+  void _animationStatusListener(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      // Reverse from larger bubble back to normal bubble radius.
+      _animation.reverse();
+    }
+  }
+
+  static const _updateCircleRadius = 8.0;
+
+  Timer removeUpdateBubble;
+
+  Widget displayTimestampUpdateBubble() {
+    // Build the bubble to show data has changed (new allocation data).
+    final bubble = AnimatedBuilder(
+      animation: _animation,
+      builder: (context, widget) {
+        double circleSize = _animation.value;
+        if (_animation.status == AnimationStatus.reverse &&
+            _animation.value < _updateCircleRadius) {
+          circleSize = _updateCircleRadius;
+          _animation.stop();
+
+          // Keep the bubble displayed for a few seconds.
+          if (removeUpdateBubble != null) {
+            removeUpdateBubble.cancel();
+          }
+          removeUpdateBubble = Timer(const Duration(seconds: 5), () {
+            controller.lastMonitorTimestamp.value = controller.monitorTimestamp;
+            removeUpdateBubble = null;
+          });
+        }
+        final circleWidget = textWidgetWithUpdateCircle(
+          controller.monitorTimestamp == null
+              ? 'No allocations tracked'
+              : 'Allocations Tracked at ${MemoryController.formattedTimestamp(controller.monitorTimestamp)}',
+          style: Theme.of(context).colorScheme.italicTextStyle,
+          size: controller.lastMonitorTimestamp.value ==
+                  controller.monitorTimestamp
+              ? 0
+              : circleSize,
+        );
+
+        return circleWidget;
+      },
+    );
+
+    // Start the animation running again, wobbly bubble.
+    _animation.forward();
+
+    return bubble;
+  }
+
+  Widget _buildAllocationsControls() {
+    final updateCircle = displayTimestampUpdateBubble();
+
     return Row(
       children: [
         FixedHeightOutlinedButton(
@@ -669,14 +747,75 @@ class HeapTreeViewState extends State<HeapTree>
           ),
         ),
         const Spacer(),
-        Text(
-          controller.monitorTimestamp == null
-              ? 'No allocations tracked'
-              : 'Allocations Tracked at ${MemoryController.formattedTimestamp(controller.monitorTimestamp)}',
-          style: themeData.colorScheme.italicTextStyle,
+        updateCircle,
+      ],
+    );
+  }
+
+  Widget textWidgetWithUpdateCircle(
+    String text, {
+    TextStyle style,
+    double size,
+  }) {
+    final textWidth = textWidgetWidth(text, style: style);
+
+    return Stack(
+      children: [
+        Positioned(
+          child: Container(
+            child: Text(text, style: style),
+            width: textWidth + 10,
+          ),
+        ),
+        Positioned(
+          right: 0,
+          child: Container(
+            alignment: Alignment.topRight,
+            width: size,
+            height: size,
+            child: const Icon(Icons.circle, size: 0),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.blue[400],
+            ),
+          ),
         ),
       ],
     );
+  }
+
+  static const maxWidth = 800.0;
+
+  double textWidgetWidth(String message, {TextStyle style}) {
+    // Longest message must fit in this width.
+    const constraints = BoxConstraints(
+      maxWidth: maxWidth,
+    );
+
+    // TODO(terry): Is there a better (less heavyweight) way of computing text
+    //              width than using the widget pipeline?
+    final richTextWidget = Text.rich(TextSpan(text: message), style: style)
+        .build(context) as RichText;
+    final renderObject = richTextWidget.createRenderObject(context);
+    renderObject.layout(constraints);
+    final boxes = renderObject.getBoxesForSelection(
+      TextSelection(
+          baseOffset: 0,
+          extentOffset: TextSpan(text: message).toPlainText().length),
+    );
+
+    final textWidth = boxes.last.right;
+
+    if (textWidth > maxWidth) {
+      // TODO(terry): If message > 800 pixels in width (not possible
+      //              today) but could be more robust.
+      logger.log(
+        'Computed text width > $maxWidth ($textWidth)\nmessage=$message.',
+        logger.LogLevel.warning,
+      );
+    }
+
+    return textWidth;
   }
 
   // WARNING: Do not checkin the debug flag set to true.

@@ -469,12 +469,14 @@ void main() {
 
         monitorResetTraceIndex = controller.createTrace(
           ChartType.symbol,
-          PaintCharacteristics(
-            color: Colors.yellowAccent,
+          PaintCharacteristics.concentric(
+            color: Colors.grey[600],
             strokeWidth: 4,
             diameter: 6,
             fixedMinY: 0.4,
             fixedMaxY: 2.4,
+            concentricCenterColor: Colors.yellowAccent,
+            concentricCenterDiameter: 4,
           ),
           name: 'Monitor Reset',
         );
