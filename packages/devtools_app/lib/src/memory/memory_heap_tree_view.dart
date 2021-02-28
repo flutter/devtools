@@ -793,7 +793,7 @@ class HeapTreeViewState extends State<HeapTree>
     );
 
     // TODO(terry): Is there a better (less heavyweight) way of computing text
-    //              width then using the widget pipeline?
+    //              width than using the widget pipeline?
     final richTextWidget = Text.rich(TextSpan(text: message), style: style)
         .build(context) as RichText;
     final renderObject = richTextWidget.createRenderObject(context);
