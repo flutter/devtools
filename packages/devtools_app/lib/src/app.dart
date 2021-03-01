@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/provider/provider_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
@@ -38,6 +37,8 @@ import 'performance/performance_controller.dart';
 import 'performance/performance_screen.dart';
 import 'profiler/profiler_screen.dart';
 import 'profiler/profiler_screen_controller.dart';
+import 'provider/provider_screen.dart';
+import 'riverpod/riverpod_screen.dart';
 import 'routing.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -569,6 +570,10 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
       ),
       DevToolsScreen<void>(
         const ProviderScreen(),
+        createController: () {},
+      ),
+      DevToolsScreen<void>(
+        const RiverpodScreen(),
         createController: () {},
       ),
 // Uncomment to see a sample implementation of a conditional screen.

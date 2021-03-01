@@ -5,16 +5,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider show Provider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pedantic/pedantic.dart';
 
-import '../banner_messages.dart';
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
 import '../instance_viewer/eval.dart';
 import '../instance_viewer/instance_providers.dart';
 import '../instance_viewer/instance_viewer.dart';
+import '../riverpod_error_logger_observer.dart';
 import '../screen.dart';
 import '../split.dart';
 import 'provider_list.dart';
@@ -22,12 +21,13 @@ import 'provider_list.dart';
 final _selectedProviderEvalProvider =
     AutoDisposeFutureProvider<EvalOnDartLibrary>((ref) async {
   final isAlive = IsAlive();
+  FocusManager.instance.primaryFocus.unfocus();
   ref.onDispose(isAlive.dispose);
 
   final selectedProviderId = ref.watch(selectedProviderIdProvider).state;
 
   final instanceDetails = await ref.watch(
-    instanceProvider(InstancePath.fromProviderId(selectedProviderId)).future,
+    instanceProvider(InstancePath.fromRiverpodId(selectedProviderId)).future,
   );
 
   return instanceDetails.maybeMap(
@@ -36,40 +36,26 @@ final _selectedProviderEvalProvider =
   );
 });
 
-final _hasErrorProvider = Provider.autoDispose<bool>((ref) {
-  if (ref.watch(providerIdsProvider) is AsyncError) return true;
-
-  final selectedProviderId = ref.watch(selectedProviderIdProvider).state;
-
-  if (selectedProviderId == null) return false;
-
-  final instance = ref.watch(
-    instanceProvider(InstancePath.fromProviderId(selectedProviderId)),
-  );
-
-  return instance is AsyncError;
-});
-
-class ProviderScreen extends Screen {
-  const ProviderScreen()
+class RiverpodScreen extends Screen {
+  const RiverpodScreen()
       : super.conditional(
           id: id,
-          requiresLibrary: 'package:provider/',
-          title: 'Provider',
+          requiresLibrary: 'package:riverpod/',
+          title: 'Riverpod',
           requiresDebugBuild: true,
           icon: Icons.palette,
         );
 
-  static const id = 'provider';
+  static const id = 'riverpod';
 
   @override
   Widget build(BuildContext context) {
-    return const ProviderScreenBody();
+    return const _RiverpodScreenBody();
   }
 }
 
-class ProviderScreenBody extends ConsumerWidget {
-  const ProviderScreenBody({Key key}) : super(key: key);
+class _RiverpodScreenBody extends ConsumerWidget {
+  const _RiverpodScreenBody({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
@@ -79,48 +65,32 @@ class ProviderScreenBody extends ConsumerWidget {
     // A provider will automatically be selected as soon as one is detected
     final selectedProviderId = watch(selectedProviderIdProvider).state;
 
-    return ProviderListener<bool>(
-      provider: _hasErrorProvider,
-      onChange: (context, hasError) {
-        if (hasError) showProviderErrorBanner(context);
-      },
-      child: Split(
-        axis: splitAxis,
-        initialFractions: const [0.33, 0.67],
-        children: [
-          const _SplitBorder(child: ProviderList()),
+    return Split(
+      axis: splitAxis,
+      initialFractions: const [0.33, 0.67],
+      children: [
+        const _SplitBorder(child: ProviderList()),
+        if (selectedProviderId != null)
           Column(
             children: [
-              if (selectedProviderId != null) ...[
-                Expanded(
-                  child: _SplitBorder(
-                    child: InstanceViewer(
-                      rootPath: InstancePath.fromProviderId(selectedProviderId),
-                    ),
+              Expanded(
+                child: _SplitBorder(
+                  child: InstanceViewer(
+                    rootPath: InstancePath.fromRiverpodId(selectedProviderId),
                   ),
                 ),
-                const SizedBox(height: 10),
-                const _SplitBorder(child: _ProviderEvaluation()),
-              ] else
-                const Expanded(
-                  child: _SplitBorder(child: SizedBox.expand()),
-                )
+              ),
+              const SizedBox(height: 10),
+              const _SplitBorder(child: _ProviderEvaluation()),
             ],
-          ),
-        ],
-      ),
+          )
+        else
+          const Expanded(
+            child: _SplitBorder(child: SizedBox.expand()),
+          )
+      ],
     );
   }
-}
-
-void showProviderErrorBanner(BuildContext context) {
-  provider.Provider.of<BannerMessagesController>(
-    context,
-    listen: false,
-  ).addMessage(
-    const ProviderUnknownErrorBanner(screenId: ProviderScreen.id)
-        .build(context),
-  );
 }
 
 class _ProviderEvaluation extends StatefulWidget {
@@ -148,7 +118,7 @@ class _ProviderEvaluationState extends State<_ProviderEvaluation> {
 
       final selectedProviderId = context.read(selectedProviderIdProvider).state;
       final providerInstance = await context.read(
-        instanceProvider(InstancePath.fromProviderId(selectedProviderId))
+        instanceProvider(InstancePath.fromRiverpodId(selectedProviderId))
             .future,
       );
 
@@ -162,7 +132,7 @@ class _ProviderEvaluationState extends State<_ProviderEvaluation> {
 
       unawaited(
         context.refresh(
-          instanceProvider(InstancePath.fromProviderId(selectedProviderId)),
+          instanceProvider(InstancePath.fromRiverpodId(selectedProviderId)),
         ),
       );
 

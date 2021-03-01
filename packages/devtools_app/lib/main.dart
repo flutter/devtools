@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'src/analytics/stub_provider.dart'
     if (dart.library.html) 'src/analytics/remote_provider.dart';
@@ -12,6 +13,7 @@ import 'src/config_specific/ide_theme/ide_theme.dart';
 import 'src/config_specific/load_fallback_app/load_fallback_app.dart';
 import 'src/debugger/syntax_highlighter.dart';
 import 'src/preferences.dart';
+import 'src/riverpod_error_logger_observer.dart';
 
 void main() async {
   final defaultOnError = FlutterError.onError;
@@ -67,6 +69,9 @@ void main() async {
 
   // Now run the app.
   runApp(
-    DevToolsApp(defaultScreens, ideTheme, await analyticsProvider),
+    ProviderScope(
+      observers: const [ErrorLoggerObserver()],
+      child: DevToolsApp(defaultScreens, ideTheme, await analyticsProvider),
+    ),
   );
 }

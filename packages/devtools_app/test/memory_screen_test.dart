@@ -47,7 +47,6 @@ void main() {
     WidgetTester tester, {
     MemoryController memoryController,
   }) async {
-    // Set a wide enough screen width that we do not run into overflow.
     await tester.pumpWidget(wrapWithControllers(
       const MemoryBody(),
       memory: controller = memoryController ?? MemoryController(),
@@ -58,6 +57,7 @@ void main() {
     expect(find.byType(MemoryBody), findsOneWidget);
   }
 
+  // Set a wide enough screen width that we do not run into overflow.
   const windowSize = Size(2225.0, 1000.0);
 
   group('MemoryScreen', () {

@@ -1,11 +1,12 @@
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, non_constant_identifier_names
 
-import 'package:devtools_app/src/provider/provider_state_controller.dart';
+import 'package:devtools_app/src/instance_viewer/instance_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:devtools_app/src/eval_on_dart_library.dart';
-import 'package:devtools_app/src/provider/eval.dart';
+import 'package:devtools_app/src/provider/provider_list.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:vm_service/vm_service.dart' hide SentinelException;
 
 import '../support/flutter_test_environment.dart';
 
@@ -106,42 +107,85 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
 
         final counterFuture = container
             .listen(
-              instanceProvider(const InstancePath.fromProvider('0')).future,
+              instanceProvider(const InstancePath.fromProviderId('0')).future,
             )
             .read();
 
-        final complexFuture = await container
-            .listen(
-              instanceProvider(
-                const InstancePath.fromProvider(
-                  '0',
-                  pathToProperty: ['complex'],
-                ),
-              ).future,
-            )
-            .read();
+        const complexPath = InstancePath.fromProviderId(
+          '0',
+          pathToProperty: [
+            PathToProperty.objectProperty(
+              name: 'complex',
+              ownerUri: 'package:provider_app/main.dart',
+              ownerName: 'Counter',
+            ),
+          ],
+        );
 
-        final complexProperties = Future.wait([
-          for (final fieldName in (complexFuture as ObjectInstance).fieldsName)
+        final complexFuture =
+            await container.listen(instanceProvider(complexPath).future).read();
+
+        final complexPropertiesFuture = Future.wait<MapEntry<String, Object>>([
+          for (final field in (complexFuture as ObjectInstance).fields)
             container
                 .listen(
                   instanceProvider(
-                    InstancePath.fromProvider(
-                      '0',
-                      pathToProperty: ['complex', fieldName],
+                    complexPath.pathForChild(
+                      PathToProperty.objectProperty(
+                        name: field.name,
+                        ownerUri: 'package:provider_app/main.dart',
+                        ownerName: 'ComplexObject',
+                      ),
+                    ),
+                  ).future,
+                )
+                .read()
+                .then(
+                  (value) => MapEntry(field.name, value),
+                  onError: (Object err) => MapEntry(field.name, err),
+                )
+        ]);
+
+        final mapPath = complexPath.pathForChild(
+          const PathToProperty.objectProperty(
+            name: 'map',
+            ownerUri: 'package:provider_app/main.dart',
+            ownerName: 'ComplexObject',
+          ),
+        );
+
+        final mapKeys = await container
+            .listen(instanceProvider(mapPath).future)
+            .read()
+            .then((value) => value as MapInstance);
+
+        final mapItems = Future.wait([
+          for (final key in mapKeys.keys)
+            container
+                .listen(
+                  instanceProvider(
+                    mapPath.pathForChild(
+                      PathToProperty.mapKey(ref: key.instanceRefId),
                     ),
                   ).future,
                 )
                 .read()
         ]);
 
+        final listPath = complexPath.pathForChild(
+          const PathToProperty.objectProperty(
+            name: 'list',
+            ownerUri: 'package:provider_app/main.dart',
+            ownerName: 'ComplexObject',
+          ),
+        );
+
         final listItems = Future.wait([
           for (var i = 0; i < 6; i++)
             container
                 .listen(
                   instanceProvider(
-                    InstancePath.fromProvider('0',
-                        pathToProperty: ['complex', 'list', '$i']),
+                    listPath.pathForChild(PathToProperty.listIndex(i)),
                   ).future,
                 )
                 .read()
@@ -151,10 +195,15 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         final list4valueFuture = container
             .listen(
               instanceProvider(
-                const InstancePath.fromProvider(
-                  '0',
-                  pathToProperty: ['complex', 'list', '4', 'value'],
-                ),
+                listPath
+                    .pathForChild(const PathToProperty.listIndex(4))
+                    .pathForChild(
+                      const PathToProperty.objectProperty(
+                        name: 'value',
+                        ownerUri: 'package:provider_app/main.dart',
+                        ownerName: '_SubObject',
+                      ),
+                    ),
               ).future,
             )
             .read();
@@ -163,10 +212,21 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         final plainInstanceValueFuture = container
             .listen(
               instanceProvider(
-                const InstancePath.fromProvider(
-                  '0',
-                  pathToProperty: ['complex', 'plainInstance', 'value'],
-                ),
+                complexPath
+                    .pathForChild(
+                      const PathToProperty.objectProperty(
+                        name: 'plainInstance',
+                        ownerUri: 'package:provider_app/main.dart',
+                        ownerName: 'ComplexObject',
+                      ),
+                    )
+                    .pathForChild(
+                      const PathToProperty.objectProperty(
+                        name: 'value',
+                        ownerUri: 'package:provider_app/main.dart',
+                        ownerName: '_SubObject',
+                      ),
+                    ),
               ).future,
             )
             .read();
@@ -177,7 +237,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
             isA<ObjectInstance>()
                 .having((e) => e.type, 'type', 'Counter')
                 .having((e) => e.hash, 'hash', '0002a')
-                .having((e) => e.fieldsName, 'fields',
+                .having((e) => e.fields.map((e) => e.name), 'fields name',
                     ['complex', '_count', '_listeners']),
           ),
         );
@@ -187,47 +247,144 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           isA<ObjectInstance>()
               .having((e) => e.type, 'type', 'ComplexObject')
               .having((e) => e.hash, 'hash', '00015')
-              .having((e) => e.fieldsName, 'fields', [
-            'boolean',
-            'enumeration',
-            'float',
-            'integer',
-            'list',
-            'map',
-            'nill',
-            'plainInstance',
-            'string',
-            'type',
+              .having((e) => e.fields, 'fields', [
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'boolean')
+                .having((e) => e.isFinal, 'isFinal', false),
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'enumeration')
+                .having((e) => e.isFinal, 'isFinal', false),
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'finalVar')
+                .having((e) => e.isFinal, 'isFinal', true),
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'float')
+                .having((e) => e.isFinal, 'isFinal', false),
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'integer')
+                .having((e) => e.isFinal, 'isFinal', false),
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'lateWithInitializer')
+                .having((e) => e.isFinal, 'isFinal', false),
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'list')
+                .having((e) => e.isFinal, 'isFinal', false),
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'map')
+                .having((e) => e.isFinal, 'isFinal', false),
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'nill')
+                .having((e) => e.isFinal, 'isFinal', false),
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'plainInstance')
+                .having((e) => e.isFinal, 'isFinal', false),
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'string')
+                .having((e) => e.isFinal, 'isFinal', false),
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'uninitializedLate')
+                .having((e) => e.isFinal, 'isFinal', false),
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', '_getterAndSetter')
+                .having((e) => e.isFinal, 'isFinal', false),
           ]),
         );
 
-        await expectLater(
-          complexProperties,
-          completion([
-            isA<BoolInstance>()
-                .having((e) => e.displayString, 'displayString', 'false'),
-            isA<EnumInstance>()
-                .having((e) => e.type, 'displayString', 'Enum')
-                .having((e) => e.value, 'displayString', 'a'),
-            isA<NumInstance>()
-                .having((e) => e.displayString, 'displayString', '0.42'),
-            isA<NumInstance>()
-                .having((e) => e.displayString, 'displayString', '0'),
-            isA<ListInstance>()
-                .having((e) => e.hash, 'hash', isNotEmpty)
-                .having((e) => e.length, 'length', 6),
-            isA<MapInstance>()
-                .having((e) => e.hash, 'hash', isNotEmpty)
-                .having((e) => e.keys.length, 'keys.length', 8),
-            isA<NullInstance>(),
-            isA<ObjectInstance>()
-                .having((e) => e.type, 'type', '_SubObject')
-                .having((e) => e.fieldsName, 'fields', ['value']),
-            isA<StringInstance>()
-                .having((e) => e.displayString, 'displayString', 'hello world'),
-            // TODO(rrousselGit) figure out why `type` resolves with a SentinelKind.collected
-            anything,
-          ]),
+        final complexProperties =
+            Map.fromEntries(await complexPropertiesFuture);
+
+        expect(
+          complexProperties['boolean'],
+          isA<BoolInstance>()
+              .having((e) => e.displayString, 'displayString', 'false')
+              .having((e) => e.setter, 'setter', isNotNull),
+        );
+
+        expect(
+          complexProperties['enumeration'],
+          isA<EnumInstance>()
+              .having((e) => e.type, 'displayString', 'Enum')
+              .having((e) => e.value, 'displayString', 'a')
+              .having((e) => e.setter, 'setter', isNotNull),
+        );
+
+        expect(
+          complexProperties['finalVar'],
+          isA<NumInstance>()
+              .having((e) => e.displayString, 'displayString', '42')
+              .having((e) => e.setter, 'setter', isNull),
+        );
+
+        expect(
+          complexProperties['float'],
+          isA<NumInstance>()
+              .having((e) => e.displayString, 'displayString', '0.42')
+              .having((e) => e.setter, 'setter', isNotNull),
+        );
+
+        expect(
+          complexProperties['integer'],
+          isA<NumInstance>()
+              .having((e) => e.displayString, 'displayString', '0')
+              .having((e) => e.setter, 'setter', isNotNull),
+        );
+
+        expect(
+          complexProperties['lateWithInitializer'],
+          isA<SentinelException>().having((e) => e.sentinel.kind,
+              'sentinel.kind', SentinelKind.kNotInitialized),
+        );
+
+        expect(
+          complexProperties['list'],
+          isA<ListInstance>()
+              .having((e) => e.hash, 'hash', isNotEmpty)
+              .having((e) => e.length, 'length', 6)
+              .having((e) => e.setter, 'setter', isNotNull),
+        );
+
+        expect(
+          complexProperties['map'],
+          isA<MapInstance>()
+              .having((e) => e.hash, 'hash', isNotEmpty)
+              .having((e) => e.keys.length, 'keys.length', 8)
+              .having((e) => e.setter, 'setter', isNotNull),
+        );
+
+        expect(
+          complexProperties['nill'],
+          isA<NullInstance>(),
+        );
+
+        expect(
+          complexProperties['plainInstance'],
+          isA<ObjectInstance>()
+              .having((e) => e.type, 'type', '_SubObject')
+              .having((e) => e.fields, 'fields', [
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'value')
+                .having((e) => e.isFinal, 'isFinal', true)
+          ]).having((e) => e.setter, 'setter', isNotNull),
+        );
+
+        expect(
+          complexProperties['string'],
+          isA<StringInstance>()
+              .having((e) => e.displayString, 'displayString', 'hello world')
+              .having((e) => e.setter, 'setter', isNotNull),
+        );
+
+        expect(
+          complexProperties['_getterAndSetter'],
+          isA<NumInstance>()
+              .having((e) => e.displayString, 'displayString', '0')
+              .having((e) => e.setter, 'setter', isNotNull),
+        );
+
+        expect(
+          complexProperties['uninitializedLate'],
+          isA<SentinelException>().having((e) => e.sentinel.kind,
+              'sentinel.kind', SentinelKind.kNotInitialized),
         );
 
         await expectLater(
@@ -241,7 +398,11 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
             isA<MapInstance>().having((e) => e.keys, 'value', isEmpty),
             isA<ObjectInstance>()
                 .having((e) => e.type, 'type', '_SubObject')
-                .having((e) => e.fieldsName, 'fields', ['value']),
+                .having((e) => e.fields, 'fields', [
+              isA<ObjectField>()
+                  .having((e) => e.name, 'name', 'value')
+                  .having((e) => e.isFinal, 'isFinal', true)
+            ]),
             isA<NullInstance>()
           ]),
         );
@@ -268,7 +429,73 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           ),
         );
 
-        // TODO(rrousselGit) test map rendering
+        await expectLater(mapKeys.keys, [
+          isA<StringInstance>()
+              .having((e) => e.displayString, 'displayString', 'list')
+              .having((e) => e.setter, 'setter', null),
+          isA<StringInstance>()
+              .having((e) => e.displayString, 'displayString', 'string')
+              .having((e) => e.setter, 'setter', null),
+          isA<NumInstance>()
+              .having((e) => e.displayString, 'displayString', '42')
+              .having((e) => e.setter, 'setter', null),
+          isA<BoolInstance>()
+              .having((e) => e.displayString, 'displayString', 'true')
+              .having((e) => e.setter, 'setter', null),
+          isA<NullInstance>().having((e) => e.setter, 'setter', null),
+          isA<ObjectInstance>()
+              .having((e) => e.type, 'type', '_SubObject')
+              .having((e) => e.setter, 'setter', null)
+              .having((e) => e.fields, 'fields', [
+            isA<ObjectField>()
+                .having((e) => e.name, 'name', 'value')
+                .having((e) => e.isFinal, 'isFinal', true)
+          ]),
+          isA<ObjectInstance>()
+              .having((e) => e.type, 'type', 'Object')
+              .having((e) => e.setter, 'setter', null),
+          isA<StringInstance>()
+              .having((e) => e.displayString, 'displayString', 'nested_map')
+              .having((e) => e.setter, 'setter', null),
+        ]);
+
+        await expectLater(
+          mapItems,
+          completion([
+            isA<ListInstance>()
+                .having((e) => e.length, 'length', 1)
+                .having((e) => e.setter, 'setter', isNotNull),
+            isA<StringInstance>()
+                .having((e) => e.displayString, 'displayString', 'string')
+                .having((e) => e.setter, 'setter', isNotNull),
+            isA<StringInstance>()
+                .having((e) => e.displayString, 'displayString', 'number_key')
+                .having((e) => e.setter, 'setter', isNotNull),
+            isA<StringInstance>()
+                .having((e) => e.displayString, 'displayString', 'bool_key')
+                .having((e) => e.setter, 'setter', isNotNull),
+            isA<NullInstance>().having((e) => e.setter, 'setter', isNotNull),
+            isA<ObjectInstance>()
+                .having((e) => e.type, 'type', '_SubObject')
+                .having((e) => e.setter, 'setter', isNotNull)
+                .having((e) => e.fields, 'fields', [
+              isA<ObjectField>()
+                  .having((e) => e.name, 'name', 'value')
+                  .having((e) => e.isFinal, 'isFinal', true)
+            ]),
+            isA<StringInstance>()
+                .having(
+                    (e) => e.displayString, 'displayString', 'non-constant key')
+                .having((e) => e.setter, 'setter', isNotNull),
+            isA<MapInstance>()
+                .having((e) => e.setter, 'setter', isNotNull)
+                .having((e) => e.keys, 'keys', [
+              isA<StringInstance>()
+                  .having((e) => e.displayString, 'displayString', 'key')
+                  .having((e) => e.setter, 'setter', null),
+            ]),
+          ]),
+        );
       });
 
       test('listens to updates from the application side', () async {
@@ -278,9 +505,15 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         // Counter._count
         final counter_countSub = container.listen(
           instanceProvider(
-            const InstancePath.fromProvider(
+            const InstancePath.fromProviderId(
               '0',
-              pathToProperty: ['_count'],
+              pathToProperty: [
+                PathToProperty.objectProperty(
+                  name: '_count',
+                  ownerUri: 'package:provider_app/main.dart',
+                  ownerName: 'Counter',
+                ),
+              ],
             ),
           ).future,
         );
@@ -306,6 +539,80 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           ),
         );
       });
+    });
+  });
+
+  const countPath = InstancePath.fromProviderId('0', pathToProperty: [
+    PathToProperty.objectProperty(
+      name: '_count',
+      ownerUri: 'package:provider_app/main.dart',
+      ownerName: 'Counter',
+    )
+  ]);
+
+  // final countFinder = find.byKey(const ObjectKey(countPath));
+
+  testWidgets('supports edits', (tester) async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    // TODO(rrousselGit) alter the test so that it does not print in the console
+    // (eval logs the errors in the console)
+    await tester.runAsync(() async {
+      await expectLater(
+        evalOnDartLibrary.safeEval(
+          "find.text('0').evaluate().first",
+          isAlive: isAlive,
+        ),
+        completes,
+      );
+      await expectLater(
+        evalOnDartLibrary.safeEval(
+          "find.text('42').evaluate().first",
+          isAlive: isAlive,
+        ),
+        throwsA(anything),
+      );
+
+      // wait for the list of providers to be obtained
+      await container.listen(providerIdsProvider.last).read();
+
+      final countSub = container.listen(instanceProvider(countPath).future);
+
+      final instance = await countSub.read();
+
+      expect(
+        instance,
+        isA<NumInstance>()
+            .having((e) => e.displayString, 'displayString', '0')
+            .having((e) => e.setter, 'setter', isNotNull),
+      );
+
+      await instance.setter('42');
+
+      await expectLater(
+        countSub.read(),
+        completion(
+          isA<NumInstance>()
+              .having((e) => e.displayString, 'displayString', '42'),
+        ),
+      );
+
+      // verify that the UI updated
+      await expectLater(
+        evalOnDartLibrary.safeEval(
+          "find.text('0').evaluate().first",
+          isAlive: isAlive,
+        ),
+        throwsA(anything),
+      );
+      await expectLater(
+        evalOnDartLibrary.safeEval(
+          "find.text('42').evaluate().first",
+          isAlive: isAlive,
+        ),
+        completes,
+      );
     });
   });
 }

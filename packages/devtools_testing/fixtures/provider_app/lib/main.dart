@@ -1,5 +1,9 @@
+// ignore: unused_import, allows the tests to use functions from tester.dart
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 
 // ignore: unused_import, allows the tests to use functions from tester.dart
 import 'tester.dart';
@@ -14,7 +18,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  var _providers = <Widget>[];
+  var _providers = <SingleChildWidget>[];
   var _totalProvidersAdded = 0;
 
   @override
@@ -99,27 +103,39 @@ class ComplexObject {
   int integer = 0;
   double float = .42;
   String string = 'hello world';
-  Type type = Counter;
   Object plainInstance = const _SubObject('hello world');
 
-  var map = <Object, Object>{
+  late int lateWithInitializer = 21;
+  late int uninitializedLate;
+
+  final int finalVar = 42;
+
+  int get getter => 42;
+
+  int _getterAndSetter = 0;
+  // ignore: unnecessary_getters_setters
+  int get getterAndSetter => _getterAndSetter;
+  // ignore: unnecessary_getters_setters
+  set getterAndSetter(int value) => _getterAndSetter = value;
+
+  var map = <Object?, Object?>{
     'list': [42],
     'string': 'string',
     42: 'number_key',
-    true: 'number_key',
+    true: 'bool_key',
     null: null,
     const _SubObject('complex-key'): const _SubObject('complex-value'),
     _token: 'non-constant key',
-    'nested_map': <Object, Object>{
+    'nested_map': <Object?, Object?>{
       'key': 'value',
     }
   };
 
-  var list = <Object>[
+  var list = <Object?>[
     42,
     'string',
     [],
-    <Object, Object>{},
+    <Object?, Object?>{},
     const _SubObject('complex-value'),
     null,
   ];

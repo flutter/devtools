@@ -254,6 +254,30 @@ Relaunch your application with the '--profile' argument, or ''',
   }
 }
 
+class ProviderUnknownErrorBanner {
+  const ProviderUnknownErrorBanner({
+    @required this.screenId,
+  });
+
+  final String screenId;
+
+  BannerMessage build(BuildContext context) {
+    return _BannerError(
+      key: Key('ProviderUnknownErrorBanner - $screenId'),
+      screenId: screenId,
+      textSpans: const [
+        TextSpan(
+          text: '''
+The devtool failed to connect with package:provider.
+
+This could be caused by an outdated version of package:provider. Make sure that you are using a version >=5.0.0.''',
+          style: TextStyle(color: _BannerError.foreground),
+        ),
+      ],
+    );
+  }
+}
+
 class HighProfileGranularityMessage {
   HighProfileGranularityMessage(this.screenId)
       : key = Key('HighProfileGranularityMessage - $screenId');

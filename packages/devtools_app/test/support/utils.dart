@@ -201,3 +201,49 @@ void _mockFlutterAssets() {
     return Future<ByteData>.value(encoded.buffer.asByteData());
   });
 }
+
+/// Load fonts used by the devtool for golden-tests to use them
+Future<void> loadFonts() async {
+  // source: https://medium.com/swlh/test-your-flutter-widgets-using-golden-files-b533ac0de469
+
+  //https://github.com/flutter/flutter/issues/20907
+  if (Directory.current.path.endsWith('/test')) {
+    Directory.current = Directory.current.parent;
+  }
+
+  const fonts = {
+    'Roboto': [
+      'fonts/Roboto/Roboto-Thin.ttf',
+      'fonts/Roboto/Roboto-Light.ttf',
+      'fonts/Roboto/Roboto-Regular.ttf',
+      'fonts/Roboto/Roboto-Medium.ttf',
+      'fonts/Roboto/Roboto-Bold.ttf',
+      'fonts/Roboto/Roboto-Black.ttf',
+    ],
+    'RobotoMono': [
+      'fonts/Roboto_Mono/RobotoMono-Thin.ttf',
+      'fonts/Roboto_Mono/RobotoMono-Light.ttf',
+      'fonts/Roboto_Mono/RobotoMono-Regular.ttf',
+      'fonts/Roboto_Mono/RobotoMono-Medium.ttf',
+      'fonts/Roboto_Mono/RobotoMono-Bold.ttf',
+    ],
+    'Octicons': ['fonts/Octicons.ttf'],
+    // 'Codicon': ['packages/codicon/font/codicon.ttf']
+  };
+
+  final loadFontsFuture = fonts.entries.map((entry) async {
+    final loader = FontLoader(entry.key);
+
+    for (final path in entry.value) {
+      final fontData = File(path).readAsBytes().then((bytes) {
+        return ByteData.view(Uint8List.fromList(bytes).buffer);
+      });
+
+      loader.addFont(fontData);
+    }
+
+    await loader.load();
+  });
+
+  await Future.wait(loadFontsFuture);
+}

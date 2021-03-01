@@ -14,7 +14,7 @@ class _$ResultTearOff {
   const _$ResultTearOff();
 
 // ignore: unused_element
-  _ResultData<T> data<T>(T value) {
+  _ResultData<T> data<T>(@nullable T value) {
     return _ResultData<T>(
       value,
     );
@@ -37,12 +37,12 @@ const $Result = _$ResultTearOff();
 mixin _$Result<T> {
   @optionalTypeArgs
   TResult when<TResult extends Object>({
-    @required TResult data(T value),
+    @required TResult data(@nullable T value),
     @required TResult error(Object error, StackTrace stackTrace),
   });
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object>({
-    TResult data(T value),
+    TResult data(@nullable T value),
     TResult error(Object error, StackTrace stackTrace),
     @required TResult orElse(),
   });
@@ -79,7 +79,7 @@ abstract class _$ResultDataCopyWith<T, $Res> {
   factory _$ResultDataCopyWith(
           _ResultData<T> value, $Res Function(_ResultData<T>) then) =
       __$ResultDataCopyWithImpl<T, $Res>;
-  $Res call({T value});
+  $Res call({@nullable T value});
 }
 
 /// @nodoc
@@ -104,11 +104,10 @@ class __$ResultDataCopyWithImpl<T, $Res> extends _$ResultCopyWithImpl<T, $Res>
 
 /// @nodoc
 class _$_ResultData<T> extends _ResultData<T> {
-  _$_ResultData(this.value)
-      : assert(value != null),
-        super._();
+  _$_ResultData(@nullable this.value) : super._();
 
   @override
+  @nullable
   final T value;
 
   @override
@@ -136,7 +135,7 @@ class _$_ResultData<T> extends _ResultData<T> {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object>({
-    @required TResult data(T value),
+    @required TResult data(@nullable T value),
     @required TResult error(Object error, StackTrace stackTrace),
   }) {
     assert(data != null);
@@ -147,7 +146,7 @@ class _$_ResultData<T> extends _ResultData<T> {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object>({
-    TResult data(T value),
+    TResult data(@nullable T value),
     TResult error(Object error, StackTrace stackTrace),
     @required TResult orElse(),
   }) {
@@ -186,8 +185,9 @@ class _$_ResultData<T> extends _ResultData<T> {
 
 abstract class _ResultData<T> extends Result<T> {
   _ResultData._() : super._();
-  factory _ResultData(T value) = _$_ResultData<T>;
+  factory _ResultData(@nullable T value) = _$_ResultData<T>;
 
+  @nullable
   T get value;
   @JsonKey(ignore: true)
   _$ResultDataCopyWith<T, _ResultData<T>> get copyWith;
@@ -264,7 +264,7 @@ class _$_ResultError<T> extends _ResultError<T> {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object>({
-    @required TResult data(T value),
+    @required TResult data(@nullable T value),
     @required TResult error(Object error, StackTrace stackTrace),
   }) {
     assert(data != null);
@@ -275,7 +275,7 @@ class _$_ResultError<T> extends _ResultError<T> {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object>({
-    TResult data(T value),
+    TResult data(@nullable T value),
     TResult error(Object error, StackTrace stackTrace),
     @required TResult orElse(),
   }) {

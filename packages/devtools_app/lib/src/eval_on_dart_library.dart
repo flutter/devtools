@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart';
 import 'config_specific/logger/logger.dart';
 import 'globals.dart';
 import 'inspector/inspector_service.dart';
+import 'result.dart';
 import 'vm_service_wrapper.dart';
 
 class EvalOnDartLibrary {
@@ -162,10 +163,6 @@ class EvalOnDartLibrary {
     return getObjHelper(instance, isAlive);
   }
 
-  Future<Library> getLibraryById(String id, Disposable isAlive) {
-    return getObjByIdHelper(id, isAlive);
-  }
-
   Future<Class> getClass(ClassRef instance, Disposable isAlive) {
     return getObjHelper(instance, isAlive);
   }
@@ -181,27 +178,155 @@ class EvalOnDartLibrary {
     return await getObjHelper(await instanceRefFuture, isAlive);
   }
 
-  Future<Instance> getInstanceById(
-    String id,
-    Disposable isAlive,
-  ) {
-    return getObjByIdHelper(id, isAlive);
-  }
-
   Future<String> getInstanceHashCode(
     InstanceRef instance, {
     @required Disposable isAlive,
   }) async {
-    final hash = await getInstance(
-      eval(
-        'ProviderBinding.shortHash(instance)',
-        isAlive: isAlive,
-        scope: {'instance': instance.id},
-      ),
-      isAlive,
+    // TODO(rrousselGit) figure out why sometimes this returns null
+    final hash = await evalInstance(
+      'instance.hashCode.toUnsigned(20).toRadixString(16).padLeft(5, "0")',
+      isAlive: isAlive,
+      scope: {'instance': instance.id},
     );
 
     return hash.valueAsString;
+  }
+
+  Future<Instance> evalInstance(
+    String expression, {
+    @required Disposable isAlive,
+    Map<String, String> scope,
+  }) async {
+    final ref = await safeEval(expression, isAlive: isAlive, scope: scope);
+
+    if (ref == null) return null;
+
+    return getInstance(ref, isAlive);
+  }
+
+  static int _nextId = 0;
+
+  /// a [safeEval] variant that does not complete until the Future evaluated completes
+  ///
+  /// The expression **must** return a [FutureOr].
+  ///
+  /// Works only if the evaluated library includes the following code:
+  ///
+  /// ```dart
+  /// Future<T> $await<T>(Future<T> future, String id) async {
+  ///   try {
+  ///     return await future;
+  ///   } finally {
+  ///     postEvent('future_completed', {'id': id});
+  ///   }
+  /// }
+  /// ```
+  Future<InstanceRef> awaitEval(
+    String expression, {
+    @required Disposable isAlive,
+    Map<String, String> scope,
+  }) async {
+    final id = _nextId++;
+
+    // start awaiting the event before starting the evaluation, in case the
+    // event is received before the eval function completes.
+    final future = serviceManager.service.onExtensionEvent.firstWhere((event) {
+      return event.extensionKind == 'future_completed' &&
+          event.extensionData.data['id'] == id;
+    });
+
+    final result = await safeEval(
+      '''
+() async { try { return await $expression; } finally { postEvent('future_completed', {'id': $id}); } }()
+''',
+      isAlive: isAlive,
+      scope: scope,
+    );
+
+    await future;
+
+    return result;
+  }
+
+  /// An [eval] that does not return `null` when a [Sentinel] or an error occurs
+  Future<InstanceRef> safeEval(
+    String expression, {
+    @required Disposable isAlive,
+    Map<String, String> scope,
+  }) async {
+    try {
+      final result = await addRequest(
+        isAlive,
+        () => _safeEval(expression, scope: scope),
+      );
+      if (isAlive.disposed) {
+        throw StateError(
+          '`isAlive` was disposed while `safeEval` was processing, aborting',
+        );
+      }
+
+      return result;
+    } catch (err, stack) {
+      handleError(err, stack);
+      rethrow;
+    }
+  }
+
+  Future<InstanceRef> _safeEval(
+    String expression, {
+    Map<String, String> scope,
+  }) async {
+    if (disposed) {
+      throw StateError(
+        'Called `safeEval` on a disposed `EvalOnDartLibrary` instance',
+      );
+    }
+
+    // copied from `_eval`
+    String libraryRefId;
+    while (true) {
+      final libraryRef = await this.libraryRef;
+      if (libraryRefCompleter.isCompleted) {
+        libraryRefId = libraryRef.id;
+        // Avoid race condition where a new isolate loaded
+        // while we were waiting for the library ref.
+        break;
+      }
+    }
+
+    final result = await service.evaluate(
+      isolateId,
+      libraryRefId,
+      expression,
+      scope: scope,
+    );
+    // end copy
+
+    if (result == null) return null;
+
+    if (result is! InstanceRef) {
+      if (result is ErrorRef) {
+        throw EvalErrorException(
+          expression: expression,
+          scope: scope,
+          errorRef: result,
+        );
+      }
+      if (result is Sentinel) {
+        throw EvalSentinelException(
+          expression: expression,
+          scope: scope,
+          sentinel: result,
+        );
+      }
+      throw UnknownEvalException(
+        expression: expression,
+        scope: scope,
+        exception: result,
+      );
+    }
+
+    return result;
   }
 
   /// Public so that other related classes such as InspectorService can ensure
@@ -294,23 +419,6 @@ class EvalOnDartLibrary {
     });
   }
 
-  Future<T> getObjByIdHelper<T extends Obj>(
-    String id,
-    Disposable isAlive, {
-    int offset,
-    int count,
-  }) {
-    return addRequest<T>(isAlive, () async {
-      final T value = await service.getObject(
-        _isolateId,
-        id,
-        offset: offset,
-        count: count,
-      );
-      return value;
-    });
-  }
-
   Future<String> retrieveFullValueAsString(InstanceRef stringRef) {
     return service.retrieveFullStringValue(_isolateId, stringRef);
   }
@@ -322,4 +430,84 @@ class LibraryNotFound implements Exception {
   Iterable<String> candidateNames;
 
   String get message => 'Library matchining one of $candidateNames not found';
+}
+
+Result<T> parseSentinel<T>(Object value) {
+  // TODO(rrousselGit) remove when NNBD lands
+  if (value == null) return Result.data(null);
+
+  if (value is T) {
+    return Result.data(value);
+  } else if (value is Sentinel) {
+    return Result.error(
+      SentinelException(value),
+      StackTrace.current,
+    );
+  } else {
+    return Result.error(
+      UnsupportedError('unkown type ${value.runtimeType}'),
+      StackTrace.current,
+    );
+  }
+}
+
+class UnknownEvalException implements Exception {
+  UnknownEvalException({
+    @required this.expression,
+    @required this.scope,
+    @required this.exception,
+  });
+
+  final String expression;
+  final Object exception;
+  final Map<String, String> scope;
+
+  @override
+  String toString() {
+    return 'Unknown error during the evaluation of `$expression`: $exception';
+  }
+}
+
+class SentinelException implements Exception {
+  SentinelException(this.sentinel);
+
+  final Sentinel sentinel;
+
+  @override
+  String toString() {
+    return 'SentinelException(sentinel: $sentinel)';
+  }
+}
+
+class EvalSentinelException extends SentinelException {
+  EvalSentinelException({
+    @required this.expression,
+    @required this.scope,
+    @required Sentinel sentinel,
+  }) : super(sentinel);
+
+  final String expression;
+  final Map<String, String> scope;
+
+  @override
+  String toString() {
+    return 'Evaluation `$expression` returned the Sentinel $sentinel';
+  }
+}
+
+class EvalErrorException implements Exception {
+  EvalErrorException({
+    @required this.expression,
+    @required this.scope,
+    @required this.errorRef,
+  });
+
+  final ErrorRef errorRef;
+  final String expression;
+  final Map<String, String> scope;
+
+  @override
+  String toString() {
+    return 'Evaluation `$expression` failed with $errorRef';
+  }
 }
