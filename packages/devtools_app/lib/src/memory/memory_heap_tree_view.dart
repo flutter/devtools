@@ -1185,7 +1185,9 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
       treeColumn,
       _ClassOrInstanceCountColumn(),
       _ShallowSizeColumn(),
-      _RetainedSizeColumn(),
+      // TODO(terry): Don't display until dominator is implemented
+      //              Issue https://github.com/flutter/devtools/issues/2688
+      // _RetainedSizeColumn(),
     ]);
   }
 
@@ -1726,6 +1728,8 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
   }
 }
 
+// TODO(terry): Remove ignore when dominator is implemented.
+// ignore: unused_element
 class _RetainedSizeColumn extends ColumnData<Reference> {
   _RetainedSizeColumn()
       : super(
@@ -1771,11 +1775,8 @@ class _RetainedSizeColumn extends ColumnData<Reference> {
 
   @override
   String getDisplayValue(Reference dataObject) {
-    return '--';
-    // TODO(terry): Don't display retained size, its same as shallow.
-    //              See https://github.com/flutter/devtools/issues/2688
-    //    final value = getValue(dataObject);
-    //    return '$value';
+    final value = getValue(dataObject);
+    return '$value';
   }
 
   @override
