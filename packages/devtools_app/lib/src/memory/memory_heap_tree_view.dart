@@ -1081,9 +1081,14 @@ class HeapTreeViewState extends State<HeapTree>
 
   void _filter() {
     MemoryScreen.gaAction(name: 'SnapshotFilterDialog');
+    // TODO(terry): Remove barrierDismissble and make clicking outside
+    //              dialog same as cancel.
+    // Dialog isn't dismissed by clicking outside the dialog (modal).
+    // Pressing either the Apply or Cancel button will dismiss.
     showDialog(
       context: context,
       builder: (BuildContext context) => SnapshotFilterDialog(controller),
+      barrierDismissible: false,
     );
   }
 
@@ -1180,7 +1185,9 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
       treeColumn,
       _ClassOrInstanceCountColumn(),
       _ShallowSizeColumn(),
-      _RetainedSizeColumn(),
+      // TODO(terry): Don't display until dominator is implemented
+      //              Issue https://github.com/flutter/devtools/issues/2688
+      // _RetainedSizeColumn(),
     ]);
   }
 
@@ -1721,6 +1728,8 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
   }
 }
 
+// TODO(terry): Remove ignore when dominator is implemented.
+// ignore: unused_element
 class _RetainedSizeColumn extends ColumnData<Reference> {
   _RetainedSizeColumn()
       : super(

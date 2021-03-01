@@ -621,16 +621,19 @@ class DevToolsTooltip extends StatelessWidget {
   const DevToolsTooltip({
     @required this.tooltip,
     @required this.child,
+    this.preferBelow = true,
   });
 
   final String tooltip;
   final Widget child;
+  final bool preferBelow;
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: tooltip,
       waitDuration: tooltipWait,
+      preferBelow: preferBelow,
       child: child,
     );
   }
