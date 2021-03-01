@@ -9,6 +9,7 @@ import '../table.dart';
 import '../table_data.dart';
 import '../trees.dart';
 import '../utils.dart';
+import 'memory_allocation_table_view.dart';
 import 'memory_controller.dart';
 
 class Tracker extends TreeNode<Tracker> {
@@ -197,11 +198,28 @@ class TreeTracker {
     allocation.expandCascading();
   }
 
-  Widget createTrackingTable(MemoryController controller) {
+  Widget createTrackingTable(
+      BuildContext context, MemoryController controller) {
     final widget = controller.trackAllocations.isEmpty
-        ? const Padding(
-            padding: EdgeInsets.only(top: 15),
-            child: Text('No classes tracked.', textAlign: TextAlign.center),
+        ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                  'No classes being tracked. To track allocations enable the track '
+                  'checkbox for any classes in the above table.\n'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Interact with your app then click the track button ',
+                  ),
+                  trackImage(context),
+                  const Text(
+                    ' to view the collected stack traces of constructor calls.',
+                  ),
+                ],
+              ),
+            ],
           )
         : TreeTable<Tracker>(
             columns: [
