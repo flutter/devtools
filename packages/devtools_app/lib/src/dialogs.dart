@@ -76,10 +76,15 @@ class DialogCloseButton extends StatelessWidget {
 
 /// A TextButton used to close a containing dialog (Cancel).
 class DialogCancelButton extends StatelessWidget {
+  const DialogCancelButton({this.cancelAction}) : super();
+
+  final VoidCallback cancelAction;
+
   @override
   Widget build(BuildContext context) {
     return DialogTextButton(
       onPressed: () {
+        if (cancelAction != null) cancelAction();
         Navigator.of(context).pop(_dialogDefaultContext);
       },
       child: const Text('CANCEL'),

@@ -1766,8 +1766,11 @@ class _RetainedSizeColumn extends ColumnData<Reference> {
 
   @override
   String getDisplayValue(Reference dataObject) {
-    final value = getValue(dataObject);
-    return '$value';
+    return '--';
+    // TODO(terry): Don't display retained size, its same as shallow.
+    //              See https://github.com/flutter/devtools/issues/2688
+    //    final value = getValue(dataObject);
+    //    return '$value';
   }
 
   @override
