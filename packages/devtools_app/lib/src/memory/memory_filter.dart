@@ -252,8 +252,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   Widget createLibraryListBox(BoxConstraints constraints) {
     final allLibraries =
         controller.filteredLibrariesByGroupName.keys.map((String key) {
-      print(
-          'key = $key, hide = ${controller.filteredLibrariesByGroupName[key].first?.hide}');
       return CheckboxListTile(
         title: Text(key),
         dense: true,
