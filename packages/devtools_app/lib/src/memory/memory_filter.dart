@@ -268,8 +268,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
 
     // TODO(terry): Need to change all of this to use flex, not the below computation.
     return SizedBox(
-      height: constraints.maxHeight /
-          (controller.filteredLibrariesByGroupName.length - 1),
+      height: constraints.maxHeight / 4,
       child: ListView(controller: _letters, children: allLibraries),
     );
   }
