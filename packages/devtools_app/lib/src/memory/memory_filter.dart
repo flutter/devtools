@@ -246,7 +246,8 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
 
   Widget createLibraryListBox(BoxConstraints constraints) {
     return SizedBox(
-      height: constraints.maxHeight / 4,
+      height: constraints.maxHeight /
+          (controller.filteredLibrariesByGroupName.length - .5),
       child: ListView(
         controller: _letters,
         children:
@@ -339,7 +340,8 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     );
 
     return DevToolsDialog(
-      title: dialogTitleText(Theme.of(context), 'Flame Chart Help'),
+      title: dialogTitleText(
+          Theme.of(context), 'Memory Filter Libraries and Classes'),
       includeDivider: false,
       content: Container(
         width: defaultDialogWidth,
@@ -380,15 +382,14 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                       const Text('Hide Library with No Instances'),
                     ],
                   ),
+                  const SizedBox(height: defaultSpacing),
                   Row(
                     children: [
-                      const Padding(padding: EdgeInsets.only(top: 30)),
                       Text('Hide Libraries or Packages '
                           '(${controller.filteredLibrariesByGroupName.length}):'),
                     ],
                   ),
                   createLibraryListBox(constraints),
-                  const Padding(padding: EdgeInsets.only(top: 40)),
                   applyAndCancelButton(),
                 ],
               ),
