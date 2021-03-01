@@ -339,6 +339,14 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
       maxHeight: MediaQuery.of(context).size.height,
     );
 
+    Widget subTitle(String title) => TextField(
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            isDense: true,
+            labelText: title,
+          ),
+        );
+
     return DevToolsDialog(
       title: dialogTitleText(
           Theme.of(context), 'Memory Filter Libraries and Classes'),
@@ -352,18 +360,18 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
             children: [
               Column(
                 children: [
-                  const TextField(
-                    decoration: InputDecoration(
-                        border: InputBorder.none,
-                        isDense: true,
-                        labelText: 'Filter Snapshot'),
-                  ),
+                  subTitle('Filter the Snapshot:'),
                   Row(
                     children: [
                       NotifierCheckbox(
                         notifier: controller.filterPrivateClasses,
                       ),
-                      const Text('Hide Private Class e.g.,_className'),
+                      const Tooltip(
+                        preferBelow: false,
+                        message: 'Hide class names beginning with '
+                            'an underscore e.g., _className',
+                        child: Text('Hide Private Classes'),
+                      ),
                     ],
                   ),
                   Row(
@@ -383,11 +391,9 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                     ],
                   ),
                   const SizedBox(height: defaultSpacing),
-                  Row(
-                    children: [
-                      Text('Hide Libraries or Packages '
-                          '(${controller.filteredLibrariesByGroupName.length}):'),
-                    ],
+                  subTitle(
+                    'Hide Libraries or Packages '
+                    '(${controller.filteredLibrariesByGroupName.length}):',
                   ),
                   createLibraryListBox(constraints),
                   applyAndCancelButton(),
