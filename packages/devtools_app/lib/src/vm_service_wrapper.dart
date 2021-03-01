@@ -875,7 +875,10 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Success> setTraceClassAllocation(
-      String isolateId, String classId, bool enable) async {
+    String isolateId,
+    String classId,
+    bool enable,
+  ) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 43))) {
       return trackFuture('setTraceClassAllocation',

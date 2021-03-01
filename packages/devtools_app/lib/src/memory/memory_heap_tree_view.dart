@@ -1081,6 +1081,8 @@ class HeapTreeViewState extends State<HeapTree>
 
   void _filter() {
     MemoryScreen.gaAction(name: 'SnapshotFilterDialog');
+    // TODO(terry): Remove barrierDismissble and make clicking outside
+    //              dialog same as cancel.
     // Dialog isn't dismissed by clicking outside the dialog (modal).
     // Pressing either the Apply or Cancel button will dismiss.
     showDialog(

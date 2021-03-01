@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../common_widgets.dart';
 import '../dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../theme.dart';
@@ -124,7 +125,9 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   ScrollController _letters;
 
   bool oldFilterPrivateClassesValue;
+
   bool oldFilterZeroInstancesValue;
+
   bool oldFilterLibraryNoInstancesValue;
 
   final oldFilteredLibraries = <String, bool>{};
@@ -154,6 +157,8 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     if (controller == widget.controller) return;
 
     controller = widget.controller;
+
+    buildFilters();
 
     oldFilterPrivateClassesValue = controller.filterPrivateClasses.value;
     oldFilterZeroInstancesValue = controller.filterZeroInstances.value;
@@ -245,28 +250,29 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   }
 
   Widget createLibraryListBox(BoxConstraints constraints) {
+    final allLibraries =
+        controller.filteredLibrariesByGroupName.keys.map((String key) {
+      print(
+          'key = $key, hide = ${controller.filteredLibrariesByGroupName[key].first?.hide}');
+      return CheckboxListTile(
+        title: Text(key),
+        dense: true,
+        value: controller.filteredLibrariesByGroupName[key].first?.hide,
+        onChanged: (bool value) {
+          setState(() {
+            for (var filter in controller.filteredLibrariesByGroupName[key]) {
+              filter.hide = value;
+            }
+          });
+        },
+      );
+    }).toList();
+
+    // TODO(terry): Need to change all of this to use flex, not the below computation.
     return SizedBox(
       height: constraints.maxHeight /
           (controller.filteredLibrariesByGroupName.length - .5),
-      child: ListView(
-        controller: _letters,
-        children:
-            controller.filteredLibrariesByGroupName.keys.map((String key) {
-          return CheckboxListTile(
-            title: Text(key),
-            dense: true,
-            value: controller.filteredLibrariesByGroupName[key].first.hide,
-            onChanged: (bool value) {
-              setState(() {
-                for (var filter
-                    in controller.filteredLibrariesByGroupName[key]) {
-                  filter.hide = value;
-                }
-              });
-            },
-          );
-        }).toList(),
-      ),
+      child: ListView(controller: _letters, children: allLibraries),
     );
   }
 
@@ -302,6 +308,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
             controller.updateFilter();
           },
         ),
+        const SizedBox(width: defaultSpacing),
         DialogCancelButton(
           cancelAction: () {
             controller.filterPrivateClasses.value =
@@ -325,8 +332,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
 
   @override
   Widget build(BuildContext context) {
-    buildFilters();
-
     // Dialog has three main vertical sections:
     //      - three checkboxes
     //      - one list of libraries with at least 5 entries
@@ -339,17 +344,10 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
       maxHeight: MediaQuery.of(context).size.height,
     );
 
-    Widget subTitle(String title) => TextField(
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            isDense: true,
-            labelText: title,
-          ),
-        );
+    final theme = Theme.of(context);
 
     return DevToolsDialog(
-      title: dialogTitleText(
-          Theme.of(context), 'Memory Filter Libraries and Classes'),
+      title: dialogTitleText(theme, 'Memory Filter Libraries and Classes'),
       includeDivider: false,
       content: Container(
         width: defaultDialogWidth,
@@ -359,16 +357,17 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  subTitle('Filter the Snapshot:'),
+                  ...dialogSubHeader(theme, 'Snapshot Filters'),
                   Row(
                     children: [
                       NotifierCheckbox(
                         notifier: controller.filterPrivateClasses,
                       ),
-                      const Tooltip(
+                      const DevToolsTooltip(
                         preferBelow: false,
-                        message: 'Hide class names beginning with '
+                        tooltip: 'Hide class names beginning with '
                             'an underscore e.g., _className',
                         child: Text('Hide Private Classes'),
                       ),
@@ -391,9 +390,10 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                     ],
                   ),
                   const SizedBox(height: defaultSpacing),
-                  subTitle(
+                  ...dialogSubHeader(
+                    theme,
                     'Hide Libraries or Packages '
-                    '(${controller.filteredLibrariesByGroupName.length}):',
+                    '(${controller.filteredLibrariesByGroupName.length})',
                   ),
                   createLibraryListBox(constraints),
                   applyAndCancelButton(),
