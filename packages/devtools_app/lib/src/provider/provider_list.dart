@@ -1,3 +1,7 @@
+// Copyright 2021 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -12,7 +16,7 @@ import '../instance_viewer/eval.dart';
 import '../instance_viewer/instance_providers.dart';
 import '../theme.dart';
 
-const _tilePadding = const EdgeInsets.only(
+const _tilePadding = EdgeInsets.only(
   left: defaultSpacing,
   right: densePadding,
   top: densePadding,

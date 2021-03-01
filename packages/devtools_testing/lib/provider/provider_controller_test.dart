@@ -1,3 +1,7 @@
+// Copyright 2021 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, non_constant_identifier_names
 
 import 'package:devtools_app/src/instance_viewer/instance_providers.dart';

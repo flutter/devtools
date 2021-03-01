@@ -1,3 +1,7 @@
+// Copyright 2021 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -6,7 +10,6 @@ import 'package:vm_service/vm_service.dart' hide SentinelException;
 
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
-import '../inspector/inspector_service.dart';
 import '../result.dart';
 import 'eval.dart';
 
