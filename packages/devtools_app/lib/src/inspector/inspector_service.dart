@@ -556,12 +556,6 @@ class InspectorService extends DisposableController
   }
 }
 
-abstract class Disposable {
-  bool get disposed;
-
-  void dispose();
-}
-
 /// Class managing a group of inspector objects that can be freed by
 /// a single call to dispose().
 /// After dispose is called, all pending requests made with the ObjectGroup

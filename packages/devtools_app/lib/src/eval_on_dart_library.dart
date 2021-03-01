@@ -11,9 +11,14 @@ import 'package:vm_service/vm_service.dart';
 
 import 'config_specific/logger/logger.dart';
 import 'globals.dart';
-import 'inspector/inspector_service.dart';
 import 'result.dart';
 import 'vm_service_wrapper.dart';
+
+abstract class Disposable {
+  bool get disposed;
+
+  void dispose();
+}
 
 class EvalOnDartLibrary {
   EvalOnDartLibrary(
