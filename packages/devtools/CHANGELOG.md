@@ -52,7 +52,7 @@
 * Support selection within the TextView and fix bug showing pause location [#2665](https://github.com/flutter/devtools/pull/2665)
 * Stop using rounded and sharp icons [#2659](https://github.com/flutter/devtools/pull/2659)
 
-## 0.9.7+1
+## 0.9.7+2
 * Fix issue where DevTools would fail to connect to an application with no DDS instance [#2650](https://github.com/flutter/devtools/pull/2650)
 
 ## 0.9.7
