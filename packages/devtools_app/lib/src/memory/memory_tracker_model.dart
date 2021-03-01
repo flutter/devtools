@@ -204,21 +204,18 @@ class TreeTracker {
         ? Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                  'No classes being tracked. To track allocations enable the track '
-                  'checkbox for any classes in the above table.\n'),
+              const Text('To track allocations for a class, enable the '
+                  'checkbox for that class in the table above.\n'),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Interact with your app then click the track button ',
-                  ),
+                  const Text('After interacting with your app, come '
+                      'back to this tool and click the track button '),
                   trackImage(context),
-                  const Text(
-                    ' to view the collected stack traces of constructor calls.',
-                  ),
                 ],
               ),
+              const Text('to view the collected stack '
+                  'traces of constructor calls.'),
             ],
           )
         : TreeTable<Tracker>(
