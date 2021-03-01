@@ -205,7 +205,7 @@ class TreeTracker {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text('To track allocations for a class, enable the '
-                  'checkbox for that class in the table above.\n'),
+                  'checkbox for that class in the table above.'),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
