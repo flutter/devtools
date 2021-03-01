@@ -77,7 +77,7 @@ class _FilterDialogState extends State<FilterDialog> {
           onPressed: () =>
               widget.onApplyFilter(queryTextFieldController.value.text),
         ),
-        DialogCancelButton(),
+        const DialogCancelButton(),
       ],
     );
   }
