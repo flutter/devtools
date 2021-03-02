@@ -92,48 +92,53 @@ class HoverCard {
 
     _overlayEntry = OverlayEntry(builder: (context) {
       return Positioned(
-          left: position.dx - (width / 2.0),
-          top: position.dy + _hoverYOffset,
-          child: MouseRegion(
-              onExit: (_) {
-                remove();
-              },
-              onEnter: (_) {
-                _hasMouseEntered = true;
-              },
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-                decoration: BoxDecoration(
-                  color: colorScheme.defaultBackgroundColor,
-                  border: Border.all(
-                    color: focusColor,
-                    width: _hoverCardBorderWidth,
+        left: position.dx - (width / 2.0),
+        top: position.dy + _hoverYOffset,
+        child: MouseRegion(
+          onExit: (_) {
+            remove();
+          },
+          onEnter: (_) {
+            _hasMouseEntered = true;
+          },
+          child: Container(
+            padding: const EdgeInsets.all(denseSpacing),
+            decoration: BoxDecoration(
+              color: colorScheme.defaultBackgroundColor,
+              border: Border.all(
+                color: focusColor,
+                width: _hoverCardBorderWidth,
+              ),
+              borderRadius: BorderRadius.circular(defaultBorderRadius),
+            ),
+            width: width,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: width,
+                  child: Text(
+                    title,
+                    overflow: TextOverflow.ellipsis,
+                    style: hoverHeading,
+                    textAlign: TextAlign.center,
                   ),
-                  borderRadius: BorderRadius.circular(10.0),
                 ),
-                width: width,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: width,
-                      child: Text(
-                        title,
-                        style: hoverHeading,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    Divider(color: colorScheme.hoverTextStyle.color),
-                    contents,
-                  ],
-                ),
-              )));
+                Divider(color: colorScheme.hoverTextStyle.color),
+                contents,
+              ],
+            ),
+          ),
+        ),
+      );
     });
     overlayState.insert(_overlayEntry);
   }
 
   OverlayEntry _overlayEntry;
+
   bool _isRemoved = false;
+
   bool _hasMouseEntered = false;
 
   /// Attempts to remove the HoverCard from the screen.

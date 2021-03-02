@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../auto_dispose_mixin.dart';
@@ -43,14 +44,10 @@ class CodeView extends StatefulWidget {
   final void Function(ScriptRef scriptRef, int line) onSelected;
 
   @override
-  _CodeViewState createState() => _CodeViewState(controller);
+  _CodeViewState createState() => _CodeViewState();
 }
 
 class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
-  _CodeViewState(this.debuggerController);
-
-  final DebuggerController debuggerController;
-
   Script script;
   int lineCount = 0;
   Set<int> executableLines = {};
@@ -309,7 +306,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                           child: Lines(
                             scrollController: textController,
                             lines: lines,
-                            debuggerController: debuggerController,
+                            debuggerController:
+                                Provider.of<DebuggerController>(context),
                             pausedFrame: pausedFrame,
                           ),
                         ),
@@ -549,7 +547,6 @@ class Lines extends StatelessWidget {
         final lineNum = index + 1;
         return LineItem(
           lineContents: lines[index],
-          debuggerController: debuggerController,
           pausedFrame: pausedLine == lineNum ? pausedFrame : null,
         );
       },
@@ -561,14 +558,13 @@ class LineItem extends StatefulWidget {
   const LineItem({
     Key key,
     @required this.lineContents,
-    @required this.debuggerController,
     this.pausedFrame,
   }) : super(key: key);
 
   static const _hoverDelay = Duration(milliseconds: 500);
+  static const _hoverWidth = 250.0;
 
   final TextSpan lineContents;
-  final DebuggerController debuggerController;
   final StackFrameAndSourcePosition pausedFrame;
 
   @override
@@ -595,7 +591,8 @@ class _LineItemState extends State<LineItem> {
   void _onHover(PointerHoverEvent event, BuildContext context) {
     _showTimer?.cancel();
     _removeTimer?.cancel();
-    if (!widget.debuggerController.isPaused.value) return;
+    final debuggerController = Provider.of<DebuggerController>(context);
+    if (!debuggerController.isPaused.value) return;
     _showTimer = Timer(LineItem._hoverDelay, () async {
       final theme = Theme.of(context);
       _hoverCard?.remove();
@@ -603,19 +600,21 @@ class _LineItemState extends State<LineItem> {
           event.localPosition.dx, widget.lineContents, theme.fixedFontStyle);
       if (word != '') {
         try {
-          final response =
-              await widget.debuggerController.evalAtCurrentFrame(word);
+          final response = await debuggerController.evalAtCurrentFrame(word);
           final variable = Variable.fromRef(response);
-          await widget.debuggerController.buildVariablesTree(variable);
+          await debuggerController.buildVariablesTree(variable);
           _hoverCard = HoverCard(
-              contents: Material(
-                  child: ExpandableVariable(
-                      debuggerController: widget.debuggerController,
-                      variable: ValueNotifier(variable))),
-              event: event,
-              width: 250,
-              title: word,
-              context: context);
+            contents: Material(
+              child: ExpandableVariable(
+                debuggerController: debuggerController,
+                variable: ValueNotifier(variable),
+              ),
+            ),
+            event: event,
+            width: LineItem._hoverWidth,
+            title: word,
+            context: context,
+          );
         } catch (_) {
           // Silently fail and don't display a HoverCard.
         }
@@ -667,7 +666,8 @@ class _LineItemState extends State<LineItem> {
               Opacity(
                 opacity: 0,
                 child: RichText(
-                    text: truncateTextSpan(widget.lineContents, column - 1)),
+                  text: truncateTextSpan(widget.lineContents, column - 1),
+                ),
               ),
               Transform.translate(
                 offset: const Offset(colLeftOffset, colBottomOffset),
@@ -682,25 +682,11 @@ class _LineItemState extends State<LineItem> {
               )
             ],
           ),
-          MouseRegion(
-              onExit: (_) => _onHoverExit(),
-              onHover: (e) => _onHover(e, context),
-              child: SelectableText.rich(
-                widget.lineContents,
-                scrollPhysics: const NeverScrollableScrollPhysics(),
-                maxLines: 1,
-              )),
+          _hoverableLine(),
         ],
       );
     } else {
-      child = MouseRegion(
-          onExit: (_) => _onHoverExit(),
-          onHover: (e) => _onHover(e, context),
-          child: SelectableText.rich(
-            widget.lineContents,
-            scrollPhysics: const NeverScrollableScrollPhysics(),
-            maxLines: 1,
-          ));
+      child = _hoverableLine();
     }
 
     final backgroundColor = widget.pausedFrame != null
@@ -716,4 +702,14 @@ class _LineItemState extends State<LineItem> {
       child: child,
     );
   }
+
+  Widget _hoverableLine() => MouseRegion(
+        onExit: (_) => _onHoverExit(),
+        onHover: (e) => _onHover(e, context),
+        child: SelectableText.rich(
+          widget.lineContents,
+          scrollPhysics: const NeverScrollableScrollPhysics(),
+          maxLines: 1,
+        ),
+      );
 }
