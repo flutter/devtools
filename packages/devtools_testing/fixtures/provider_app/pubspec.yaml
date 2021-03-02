@@ -10,7 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   provider:
-    path: ../../../../../rrousselGit/provider
+    git:
+      url: https://github.com/rrousselGit/provider
+      ref: state-devtool
   flutter_test:
     sdk: flutter
 
