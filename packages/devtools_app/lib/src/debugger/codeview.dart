@@ -306,8 +306,6 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                           child: Lines(
                             scrollController: textController,
                             lines: lines,
-                            debuggerController:
-                                Provider.of<DebuggerController>(context),
                             pausedFrame: pausedFrame,
                           ),
                         ),
@@ -527,13 +525,11 @@ class Lines extends StatelessWidget {
     @required this.scrollController,
     @required this.lines,
     @required this.pausedFrame,
-    @required this.debuggerController,
   }) : super(key: key);
 
   final ScrollController scrollController;
   final List<TextSpan> lines;
   final StackFrameAndSourcePosition pausedFrame;
-  final DebuggerController debuggerController;
 
   @override
   Widget build(BuildContext context) {
@@ -581,6 +577,8 @@ class _LineItemState extends State<LineItem> {
   /// Displays the evaluation result of a source code item.
   HoverCard _hoverCard;
 
+  DebuggerController _debuggerController;
+
   void _onHoverExit() {
     _showTimer?.cancel();
     _removeTimer = Timer(LineItem._hoverDelay, () {
@@ -591,8 +589,7 @@ class _LineItemState extends State<LineItem> {
   void _onHover(PointerHoverEvent event, BuildContext context) {
     _showTimer?.cancel();
     _removeTimer?.cancel();
-    final debuggerController = Provider.of<DebuggerController>(context);
-    if (!debuggerController.isPaused.value) return;
+    if (!_debuggerController.isPaused.value) return;
     _showTimer = Timer(LineItem._hoverDelay, () async {
       final theme = Theme.of(context);
       _hoverCard?.remove();
@@ -600,13 +597,13 @@ class _LineItemState extends State<LineItem> {
           event.localPosition.dx, widget.lineContents, theme.fixedFontStyle);
       if (word != '') {
         try {
-          final response = await debuggerController.evalAtCurrentFrame(word);
+          final response = await _debuggerController.evalAtCurrentFrame(word);
           final variable = Variable.fromRef(response);
-          await debuggerController.buildVariablesTree(variable);
+          await _debuggerController.buildVariablesTree(variable);
           _hoverCard = HoverCard(
             contents: Material(
               child: ExpandableVariable(
-                debuggerController: debuggerController,
+                debuggerController: _debuggerController,
                 variable: ValueNotifier(variable),
               ),
             ),
@@ -634,6 +631,7 @@ class _LineItemState extends State<LineItem> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final darkTheme = theme.brightness == Brightness.dark;
+    _debuggerController = Provider.of<DebuggerController>(context);
 
     Widget child;
     if (widget.pausedFrame != null) {

@@ -31,7 +31,8 @@ void main() {
   });
 
   test('wordForHover merges words linked with `.`', () {
-    expect(wordForHover(150, _textSpan, _defaultStyle), 'foo.bar.baz');
-    expect(wordForHover(200, _textSpan, _defaultStyle), 'foo.bar.baz');
+    expect(wordForHover(150, _textSpan, _defaultStyle), 'foo');
+    expect(wordForHover(200, _textSpan, _defaultStyle), 'foo.bar');
+    expect(wordForHover(255, _textSpan, _defaultStyle), 'foo.bar.baz');
   });
 }

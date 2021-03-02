@@ -22,7 +22,7 @@ String wordForHover(double dx, TextSpan line, TextStyle textStyle) {
 /// Merges words linked by a `.`.
 ///
 /// For example, hovering over `bar` in `foo.bar.baz` would return
-/// `foo.bar.baz`.
+/// `foo.bar`.
 String _mergedLinkedWords(String word, int index, TextSpan line) {
   var left = index - 1;
   while (left > 1) {
@@ -31,17 +31,6 @@ String _mergedLinkedWords(String word, int index, TextSpan line) {
     if (prev == '.') {
       word = '$prevprev$prev$word';
       left -= 2;
-    } else {
-      break;
-    }
-  }
-  var right = index + 1;
-  while (right < line.children.length - 1) {
-    final next = line.children[right].toPlainText();
-    final nextnext = line.children[right + 1].toPlainText();
-    if (next == '.') {
-      word = '$word$next$nextnext';
-      right += 2;
     } else {
       break;
     }
