@@ -594,7 +594,10 @@ class _LineItemState extends State<LineItem> {
       final theme = Theme.of(context);
       _hoverCard?.remove();
       final word = wordForHover(
-          event.localPosition.dx, widget.lineContents, theme.fixedFontStyle);
+        event.localPosition.dx,
+        widget.lineContents,
+        theme.fixedFontStyle,
+      );
       if (word != '') {
         try {
           final response = await _debuggerController.evalAtCurrentFrame(word);
