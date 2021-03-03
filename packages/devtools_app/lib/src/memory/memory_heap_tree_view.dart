@@ -773,7 +773,7 @@ class HeapTreeViewState extends State<HeapTree>
             alignment: Alignment.topRight,
             width: size,
             height: size,
-            child: const Icon(Icons.circle, size: 0),
+            child: const Icon(Icons.fiber_manual_record, size: 0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.blue[400],
