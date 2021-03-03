@@ -72,16 +72,19 @@ class VariablesList extends StatelessWidget {
 }
 
 class ExpandableVariable extends StatelessWidget {
-  const ExpandableVariable({Key key, this.variable}) : super(key: key);
+  const ExpandableVariable({Key key, this.variable, this.debuggerController})
+      : super(key: key);
 
   final ValueListenable<Variable> variable;
+  final DebuggerController debuggerController;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Variable>(
       valueListenable: variable,
       builder: (context, variable, _) {
-        final controller = Provider.of<DebuggerController>(context);
+        final controller =
+            debuggerController ?? Provider.of<DebuggerController>(context);
         if (variable == null) return const SizedBox();
         // TODO(kenz): preserve expanded state of tree on switching frames and
         // on stepping.
