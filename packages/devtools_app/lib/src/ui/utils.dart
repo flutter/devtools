@@ -145,7 +145,7 @@ class OffsetScrollbar extends StatefulWidget {
   /// that the known correct viewport dimension is passed into this class.
   ///
   /// This is a workaround because we use an AnimatedBuilder to listen for
-  /// changes to the offsetControler rather than displaying the scrollbar at
+  /// changes to the offsetController rather than displaying the scrollbar at
   /// paint time which would be more difficult.
   final double offsetControllerViewportDimension;
 
