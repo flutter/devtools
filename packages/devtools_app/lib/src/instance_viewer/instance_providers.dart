@@ -590,7 +590,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
       final evalForInstance =
           ref.watch(libraryEvalProvider(classInstance.library.uri));
 
-      final mainLibUri = Uri.parse(eval.isolate.rootLib.uri);
+      final appName = tryParsePackageName(eval.isolate.rootLib.uri);
 
       final fields = await _parseFields(
         ref,
@@ -598,7 +598,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
         instance,
         classInstance,
         isAlive: isAlive,
-        mainLibUri: mainLibUri,
+        appName: appName,
       );
 
       return InstanceDetails.object(
@@ -612,18 +612,26 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
   }
 });
 
+final _packageNameExp = RegExp(
+  r'package:(.+?)/',
+);
+
+String tryParsePackageName(String uri) {
+  return _packageNameExp.firstMatch(uri)?.group(1);
+}
+
 Future<List<ObjectField>> _parseFields(
   AutoDisposeProviderReference ref,
   EvalOnDartLibrary eval,
   Instance instance,
   Class classInstance, {
   @required IsAlive isAlive,
-  @required Uri mainLibUri,
+  @required String appName,
 }) async {
   final fields = instance.fields.map((field) async {
     final owner = await eval.getClass(field.decl.owner, isAlive);
 
-    final ownerUri = Uri.parse(owner.library.uri);
+    final ownerPackageName = tryParsePackageName(owner.library.uri);
 
     return ObjectField(
       name: field.decl.name,
@@ -632,7 +640,7 @@ Future<List<ObjectField>> _parseFields(
       ownerName: owner.name,
       ownerUri: owner.library.uri,
       eval: ref.watch(libraryEvalProvider(owner.library.uri)),
-      isDefinedByDependency: ownerUri.host == mainLibUri.host,
+      isDefinedByDependency: ownerPackageName == appName,
     );
   }).toList();
 

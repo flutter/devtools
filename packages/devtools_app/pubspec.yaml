@@ -47,7 +47,7 @@ dependencies:
   mime: ^0.9.7
   path: ^1.6.0
   pedantic: ^1.7.0
-  provider: ^4.3.0
+  provider: ^5.0.0
   sse: ^3.7.0
   string_scanner: ^1.1.0-nullsafety.3
   url_launcher: ^5.0.0
