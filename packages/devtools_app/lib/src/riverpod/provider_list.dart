@@ -11,8 +11,16 @@ import '../globals.dart';
 import '../inspector/inspector_tree.dart';
 import '../instance_viewer/eval.dart';
 import '../instance_viewer/instance_providers.dart';
+import '../theme.dart';
 
 part 'provider_list.freezed.dart';
+
+const _tilePadding = EdgeInsets.only(
+  left: defaultSpacing,
+  right: densePadding,
+  top: densePadding,
+  bottom: densePadding,
+);
 
 final _containerListChanged = AutoDisposeStreamProvider<void>((ref) {
   return serviceManager.service.onExtensionEvent.where((event) {
@@ -181,7 +189,10 @@ class ProviderList extends ConsumerWidget {
 
     return state.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => const Text('<unknown error>'),
+      error: (err, stack) => const Padding(
+        padding: _tilePadding,
+        child: Text('<unknown error>'),
+      ),
       data: (providerNodes) {
         return Scrollbar(
           child: ListView.builder(
@@ -223,7 +234,7 @@ class ProviderNodeItem extends ConsumerWidget {
       onTap: () => context.read(selectedProviderIdProvider).state = providerId,
       child: Container(
         color: backgroundColor,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: _tilePadding,
         child: state.when(
           loading: () => const CenteredCircularProgressIndicator(),
           error: (err, stack) => Text('<Failed to load> $err\n\n$stack'),

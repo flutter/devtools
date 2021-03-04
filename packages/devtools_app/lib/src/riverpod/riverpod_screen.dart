@@ -17,6 +17,7 @@ import '../instance_viewer/instance_viewer.dart';
 import '../provider/provider_screen.dart';
 import '../screen.dart';
 import '../split.dart';
+import '../theme.dart';
 import 'provider_list.dart';
 
 final hasErrorProvider = Provider.autoDispose<bool>((ref) {
@@ -100,7 +101,7 @@ class RiverpodScreenBody extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: denseSpacing),
                 const _SplitBorder(child: ProviderEvaluation()),
               ],
             )

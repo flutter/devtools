@@ -4,13 +4,13 @@
 
 import 'dart:math' as math;
 
-import 'package:devtools_app/src/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../eval_on_dart_library.dart';
 import '../inspector/inspector_text_styles.dart';
 import '../sliver_iterable_child_delegate.dart';
+import '../theme.dart';
 import 'instance_providers.dart';
 
 const typeColor = Color.fromARGB(255, 78, 201, 176);
@@ -21,7 +21,6 @@ const stringColor = Color.fromARGB(255, 206, 145, 120);
 const propertyColor = Color.fromARGB(255, 206, 145, 120);
 
 const double rowHeight = 20.0;
-const double horizontalSpacing = 15;
 
 final isExpandedProvider = StateProviderFamily<bool, InstancePath>((ref, path) {
   // TODO refreshing the provider (after evaluating an expression) should not reset the expansion state
@@ -282,7 +281,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
       var isFirstItem = true;
       for (final child in value) {
         yield Padding(
-          padding: const EdgeInsets.only(left: horizontalSpacing),
+          padding: const EdgeInsets.only(left: defaultSpacing),
           child: isFirstItem
               ? Row(
                   children: [
@@ -319,7 +318,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
       for (final child in children) {
         yield Padding(
-          padding: const EdgeInsets.only(left: horizontalSpacing),
+          padding: const EdgeInsets.only(left: defaultSpacing),
           child: child,
         );
       }
@@ -359,7 +358,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
         }
 
         yield Padding(
-          padding: const EdgeInsets.only(left: horizontalSpacing),
+          padding: const EdgeInsets.only(left: defaultSpacing),
           child: rowItem,
         );
       }
@@ -378,8 +377,8 @@ class _InstanceViewerState extends State<InstanceViewer> {
             // TODO: item height should be based on font size
             itemExtent: rowHeight,
             padding: const EdgeInsets.symmetric(
-              vertical: 10,
-              horizontal: horizontalSpacing,
+              vertical: denseSpacing,
+              horizontal: defaultSpacing,
             ),
             childrenDelegate: SliverIterableChildDelegate(
               _buildListViewItems(
@@ -494,7 +493,7 @@ class _EditableFieldState extends State<_EditableField> {
         }
       },
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+        contentPadding: const EdgeInsets.symmetric(horizontal: densePadding),
         isDense: true,
         border: OutlineInputBorder(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
@@ -514,7 +513,9 @@ class _EditableFieldState extends State<_EditableField> {
             right: -5,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(5)),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(defaultBorderRadius),
+                ),
                 border: Border.all(color: colorScheme.surface),
               ),
             ),
@@ -581,7 +582,7 @@ class _Expandable extends StatelessWidget {
         children: [
           TweenAnimationBuilder<double>(
             tween: Tween(end: isExpanded.state ? 0 : -math.pi / 2),
-            duration: const Duration(milliseconds: 200),
+            duration: defaultDuration,
             builder: (context, angle, _) {
               return Transform.rotate(
                 angle: angle,

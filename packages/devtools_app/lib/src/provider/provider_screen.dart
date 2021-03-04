@@ -18,6 +18,7 @@ import '../instance_viewer/instance_viewer.dart';
 import '../riverpod/riverpod_screen.dart';
 import '../screen.dart';
 import '../split.dart';
+import '../theme.dart';
 import 'provider_list.dart';
 
 final _selectedProviderEvalProvider =
@@ -185,7 +186,7 @@ class _ProviderEvaluationState extends State<_ProviderEvaluation> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(densePadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
