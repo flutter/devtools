@@ -4,9 +4,9 @@
 
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/instance_viewer/instance_providers.dart';
-import 'package:devtools_app/src/provider/provider_list.dart';
+import 'package:devtools_app/src/riverpod/provider_list.dart';
 @TestOn('vm')
-import 'package:devtools_app/src/provider/provider_screen.dart';
+import 'package:devtools_app/src/riverpod/riverpod_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +14,20 @@ import 'package:pedantic/pedantic.dart';
 
 import '../support/utils.dart';
 import '../support/wrappers.dart';
+
+Future<void> awaitForHasError(ProviderContainer container) async {
+  await container.read(providerIdsProvider.last).catchError((_) {});
+  final selectedProviderId = container.read(selectedProviderIdProvider).state;
+
+  if (selectedProviderId == null) return false;
+
+  await container
+      .read(
+        instanceProvider(InstancePath.fromRiverpodId(selectedProviderId))
+            .future,
+      )
+      .catchError((_) {});
+}
 
 void main() {
   // Set a wide enough screen width that we do not run into overflow.
@@ -32,16 +46,16 @@ void main() {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: wrapWithControllers(
-          const BannerMessages(screen: ProviderScreen()),
+          const BannerMessages(screen: RiverpodScreen()),
           bannerMessages: bannerMessagesController,
         ),
       ),
     );
   });
 
-  group('ProviderScreen', () {
+  group('RiverpodScreen', () {
     testWidgetsWithWindowSize(
-        'shows ProviderUnknownErrorBanner if the devtool failed to fetch the list of providers',
+        'shows RiverpodUnknownErrorBanner if the devtool failed to fetch the list of providers',
         windowSize, (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -58,8 +72,8 @@ void main() {
       await tester.pumpAndSettle();
 
       await expectLater(
-        find.byType(ProviderScreenBody),
-        matchesGoldenFile('../goldens/provider_screen/list_error_banner.png'),
+        find.byType(RiverpodScreenBody),
+        matchesGoldenFile('../goldens/riverpod_screen/list_error_banner.png'),
       );
     });
   });
@@ -79,14 +93,20 @@ void main() {
 
       container.updateOverrides([
         providerIdsProvider.overrideWithValue(
-          const AsyncValue.data(['0', '1']),
+          const AsyncValue.data([
+            ProviderId(containerId: '0', providerId: '0'),
+            ProviderId(containerId: '0', providerId: '1'),
+          ]),
         ),
       ]);
 
       // wait for the event loop to complete once
       await Future.value();
 
-      expect(sub.read().state, '0');
+      expect(
+        sub.read().state,
+        const ProviderId(containerId: '0', providerId: '0'),
+      );
     });
 
     test('selects the first provider available after an error', () async {
@@ -100,20 +120,26 @@ void main() {
       final sub = container.listen(selectedProviderIdProvider);
 
       // wait for the error to be handled
-      await Future.value();
+      await awaitForHasError(container);
 
       expect(sub.read().state, isNull);
 
       container.updateOverrides([
         providerIdsProvider.overrideWithValue(
-          const AsyncValue.data(['0', '1']),
+          const AsyncValue.data([
+            ProviderId(containerId: '0', providerId: '0'),
+            ProviderId(containerId: '0', providerId: '1'),
+          ]),
         ),
       ]);
 
       // wait for the ids update to be handled
-      await Future.value();
+      await awaitForHasError(container);
 
-      expect(sub.read().state, '0');
+      expect(
+        sub.read().state,
+        const ProviderId(containerId: '0', providerId: '0'),
+      );
     });
 
     test(
@@ -121,7 +147,9 @@ void main() {
         () async {
       final container = ProviderContainer(overrides: [
         providerIdsProvider.overrideWithValue(
-          const AsyncValue.data(['0']),
+          const AsyncValue.data([
+            ProviderId(containerId: '0', providerId: '0'),
+          ]),
         ),
       ]);
       addTearDown(container.dispose);
@@ -131,24 +159,34 @@ void main() {
       // wait for the first provider to be selected
       await Future.value();
 
-      expect(sub.read().state, '0');
+      expect(
+        sub.read().state,
+        const ProviderId(containerId: '0', providerId: '0'),
+      );
 
       container.updateOverrides([
         providerIdsProvider.overrideWithValue(
-          const AsyncValue.data(['1']),
+          const AsyncValue.data([
+            ProviderId(containerId: '0', providerId: '1'),
+          ]),
         ),
       ]);
 
       // wait for the update to be handled
       await Future.value();
 
-      expect(sub.read().state, '1');
+      expect(
+        sub.read().state,
+        const ProviderId(containerId: '0', providerId: '1'),
+      );
     });
 
     test('Once a provider is selected, further updates are no-op', () async {
       final container = ProviderContainer(overrides: [
         providerIdsProvider.overrideWithValue(
-          const AsyncValue.data(['0']),
+          const AsyncValue.data([
+            ProviderId(containerId: '0', providerId: '0'),
+          ]),
         ),
       ]);
       addTearDown(container.dispose);
@@ -158,19 +196,28 @@ void main() {
       // wait for the first provider to be selected
       await Future.value();
 
-      expect(sub.read().state, '0');
+      expect(
+        sub.read().state,
+        const ProviderId(containerId: '0', providerId: '0'),
+      );
 
       container.updateOverrides([
         providerIdsProvider.overrideWithValue(
           // '0' is no-longer the first provider on purpose
-          const AsyncValue.data(['1', '0']),
+          const AsyncValue.data([
+            ProviderId(containerId: '0', providerId: '1'),
+            ProviderId(containerId: '0', providerId: '0'),
+          ]),
         ),
       ]);
 
       // wait for the update to be handled
       await Future.value();
 
-      expect(sub.read().state, '0');
+      expect(
+        sub.read().state,
+        const ProviderId(containerId: '0', providerId: '0'),
+      );
     });
 
     test(
@@ -179,7 +226,9 @@ void main() {
         () async {
       final container = ProviderContainer(overrides: [
         providerIdsProvider.overrideWithValue(
-          const AsyncValue.data(['0']),
+          const AsyncValue.data([
+            ProviderId(containerId: '0', providerId: '0'),
+          ]),
         ),
       ]);
       addTearDown(container.dispose);
@@ -189,7 +238,10 @@ void main() {
       // wait for the first provider to be selected
       await Future.value();
 
-      expect(sub.read().state, '0');
+      expect(
+        sub.read().state,
+        const ProviderId(containerId: '0', providerId: '0'),
+      );
 
       container.updateOverrides([
         providerIdsProvider.overrideWithValue(
@@ -204,40 +256,73 @@ void main() {
 
       container.updateOverrides([
         providerIdsProvider.overrideWithValue(
-          const AsyncValue.data(['1']),
+          const AsyncValue.data([
+            ProviderId(containerId: '0', providerId: '1'),
+          ]),
         ),
       ]);
 
       // wait for the ids update to be handled
       await Future.value();
 
-      expect(sub.read().state, '1');
+      expect(
+        sub.read().state,
+        const ProviderId(containerId: '0', providerId: '1'),
+      );
     });
   });
 
   group('ProviderList', () {
     List<Override> getOverrides() {
       return [
-        providerNodeProvider('0').overrideWithValue(
+        providerNodeProvider(
+          const ProviderId(
+            containerId: '0',
+            providerId: '0',
+          ),
+        ).overrideWithValue(
           const AsyncValue.data(
-            ProviderNode(id: '0', type: 'Provider0'),
+            ProviderNode(
+              containerId: '0',
+              providerId: '0',
+              type: 'Provider0',
+              paramDisplayString: null,
+            ),
           ),
         ),
-        providerNodeProvider('1').overrideWithValue(
+        providerNodeProvider(
+          const ProviderId(
+            containerId: '0',
+            providerId: '1',
+          ),
+        ).overrideWithValue(
           const AsyncValue.data(
-            ProviderNode(id: '1', type: 'ChangeNotifierProvider1'),
+            ProviderNode(
+              containerId: '0',
+              providerId: '1',
+              type: 'ChangeNotifierProvider1',
+              paramDisplayString: null,
+            ),
           ),
         ),
-        instanceProvider(const InstancePath.fromProviderId('0'))
-            .overrideWithValue(AsyncValue.data(
-          InstanceDetails.string(
-            'Value0',
-            instanceRefId: 'string/0',
-            setter: null,
+        instanceProvider(const InstancePath.fromRiverpodId(
+          ProviderId(
+            containerId: '0',
+            providerId: '0',
           ),
-        ))
+        )).overrideWithValue(
+          AsyncValue.data(
+            InstanceDetails.string(
+              'Value0',
+              instanceRefId: 'string/0',
+              setter: null,
+            ),
+          ),
+        ),
       ];
     }
+
+    // TODO renders family parameters
 
     testWidgetsWithWindowSize(
         'selects the first provider the first time a provider is received',
@@ -252,22 +337,25 @@ void main() {
         ),
       );
 
-      final context = tester.element(find.byType(ProviderScreenBody));
+      final context = tester.element(find.byType(RiverpodScreenBody));
 
       expect(context.read(selectedProviderIdProvider).state, isNull);
       expect(find.byType(ProviderNodeItem), findsNothing);
 
       await expectLater(
-        find.byType(ProviderScreenBody),
+        find.byType(RiverpodScreenBody),
         matchesGoldenFile(
-            '../goldens/provider_screen/no_selected_provider.png'),
+            '../goldens/riverpod_screen/no_selected_provider.png'),
       );
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             providerIdsProvider.overrideWithValue(
-              const AsyncValue.data(['0', '1']),
+              const AsyncValue.data([
+                ProviderId(containerId: '0', providerId: '0'),
+                ProviderId(containerId: '0', providerId: '1'),
+              ]),
             ),
             ...getOverrides(),
           ],
@@ -278,40 +366,47 @@ void main() {
       // wait for selectedProviderIdProvider to select the first provider
       await tester.pumpAndSettle();
 
-      expect(context.read(selectedProviderIdProvider).state, '0');
+      expect(
+        context.read(selectedProviderIdProvider).state,
+        const ProviderId(containerId: '0', providerId: '0'),
+      );
       expect(find.byType(ProviderNodeItem), findsNWidgets(2));
       expect(
         find.descendant(
-          of: find.byKey(const Key('provider-0')),
+          of: find.byKey(const Key('riverpod-0-0')),
           matching: find.text('Provider0()'),
         ),
         findsOneWidget,
       );
       expect(
         find.descendant(
-          of: find.byKey(const Key('provider-1')),
+          of: find.byKey(const Key('riverpod-0-1')),
           matching: find.text('ChangeNotifierProvider1()'),
         ),
         findsOneWidget,
       );
 
       await expectLater(
-        find.byType(ProviderScreenBody),
-        matchesGoldenFile('../goldens/provider_screen/selected_provider.png'),
+        find.byType(RiverpodScreenBody),
+        matchesGoldenFile('../goldens/riverpod_screen/selected_provider.png'),
       );
     });
 
     testWidgetsWithWindowSize(
-        'shows ProviderUnknownErrorBanner if the devtool failed to fetch the selected provider',
+        'shows RiverpodUnknownErrorBanner if the devtool failed to fetch the selected provider',
         windowSize, (tester) async {
       final container = ProviderContainer(
         overrides: [
           providerIdsProvider.overrideWithValue(
-            const AsyncValue.data(['0', '1']),
+            const AsyncValue.data([
+              ProviderId(containerId: '0', providerId: '0'),
+              ProviderId(containerId: '0', providerId: '1'),
+            ]),
           ),
           ...getOverrides(),
-          instanceProvider(const InstancePath.fromProviderId('0'))
-              .overrideWithValue(AsyncValue.error(Error()))
+          instanceProvider(const InstancePath.fromRiverpodId(
+            ProviderId(containerId: '0', providerId: '0'),
+          )).overrideWithValue(AsyncValue.error(Error()))
         ],
       );
       addTearDown(container.dispose);
@@ -320,7 +415,9 @@ void main() {
       // workaround to the test incorrectly thinking the error is uncaught
       unawaited(container
           .listen(
-            instanceProvider(const InstancePath.fromProviderId('0')).future,
+            instanceProvider(const InstancePath.fromRiverpodId(
+              ProviderId(containerId: '0', providerId: '0'),
+            )).future,
           )
           .read()
           .catchError((err) {}));
@@ -336,9 +433,9 @@ void main() {
       await tester.pumpAndSettle();
 
       await expectLater(
-        find.byType(ProviderScreenBody),
+        find.byType(RiverpodScreenBody),
         matchesGoldenFile(
-            '../goldens/provider_screen/selected_provider_error_banner.png'),
+            '../goldens/riverpod_screen/selected_provider_error_banner.png'),
       );
     });
   });

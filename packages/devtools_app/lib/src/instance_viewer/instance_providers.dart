@@ -19,8 +19,7 @@ part 'instance_providers.freezed.dart';
 abstract class ProviderId with _$ProviderId {
   const factory ProviderId({
     @required String containerId,
-    // TODO(rrousselGit) should use a generated unique ID instead of InstanceRef.id
-    @required String providerRefId,
+    @required String providerId,
   }) = _ProviderId;
 }
 
@@ -217,15 +216,15 @@ Future<InstanceRef> _resolveInstanceRefForPath(
       fromRiverpodId: (path) async {
         // cause the instances to be re-evaluated when the devtool is notified
         // that a provider changed
-        // TODO
-        // ref.watch(_providerChanged(path.riverpodId));
+        ref.watch(_riverpodChanged(path.riverpodId));
 
         final eval = ref.watch(riverpodEvalProvider);
 
         return eval.safeEval(
-          'RiverpodBinding.debugInstance.containers["${path.riverpodId.containerId}"]!.debugProviderValues[provider]',
+          'RiverpodBinding.debugInstance.containers["${path.riverpodId.containerId}"]'
+          '!.debugProviderElements.firstWhere((p) => p.provider.debugId == "${path.riverpodId.providerId}")'
+          '.getExposedValue()',
           isAlive: isAlive,
-          scope: {'provider': path.riverpodId.providerRefId},
         );
       },
       fromProviderId: (path) {
@@ -314,10 +313,9 @@ Future<void> _mutate(
   @required IsAlive isAlive,
   @required InstanceDetails parent,
 }) async {
-  final eval = ref.watch(evalProvider);
-
   await parent.maybeMap(
     list: (parent) {
+      final eval = ref.watch(evalProvider);
       final indexPath = path.pathToProperty.last as _ListIndexPath;
       return eval.safeEval(
         'parent[${indexPath.index}] = $newValueExpression',
@@ -328,6 +326,7 @@ Future<void> _mutate(
       );
     },
     map: (parent) {
+      final eval = ref.watch(evalProvider);
       final keyPath = path.pathToProperty.last as _MapKeyPath;
       final keyRefVar = keyPath.ref == null ? 'null' : 'key';
 
@@ -344,7 +343,10 @@ Future<void> _mutate(
     object: (parent) {
       final propertyPath = path.pathToProperty.last as _PropertyPath;
 
-      return parent.evalForInstance.safeEval(
+      final field =
+          parent.fields.firstWhere((f) => f.name == propertyPath.name);
+
+      return field.eval.safeEval(
         'parent.${propertyPath.name} = $newValueExpression',
         isAlive: isAlive,
         scope: {
@@ -353,6 +355,20 @@ Future<void> _mutate(
       );
     },
     orElse: () => throw StateError('Can only mutate lists/maps/objects'),
+  );
+
+  await path.map(
+    fromInstanceId: (_) async {},
+    fromProviderId: (_) async {},
+    fromRiverpodId: (path) async {
+      final eval = ref.watch(riverpodEvalProvider);
+      await eval.safeEval(
+        'RiverpodBinding.debugInstance.containers["${path.riverpodId.containerId}"]'
+        '!.debugProviderElements.firstWhere((p) => p.provider.debugId == "${path.riverpodId.providerId}")'
+        '.markDidChange()',
+        isAlive: isAlive,
+      );
+    },
   );
 
   // Since the same object can be used in multiple locations at once, we need
@@ -458,6 +474,7 @@ Setter _parseSetter({
       // Mutate properties by name as we can't mutate them from a reference.
       // This may edit the wrong property when an object has two properties with
       // with the same name.
+      // TODO use ownerUri
       final field =
           parent.fields.firstWhere((field) => field.name == keyPath.name);
 
@@ -627,6 +644,15 @@ final _providerChanged =
   return serviceManager.service.onExtensionEvent.where((event) {
     return event.extensionKind == 'provider:provider_changed' &&
         event.extensionData.data['id'] == id;
+  });
+});
+
+final _riverpodChanged =
+    AutoDisposeStreamProviderFamily<void, ProviderId>((ref, id) {
+  return serviceManager.service.onExtensionEvent.where((event) {
+    return event.extensionKind == 'riverpod:provider_changed' &&
+        event.extensionData.data['provider_id'] == id.providerId &&
+        event.extensionData.data['container_id'] == id.containerId;
   });
 });
 

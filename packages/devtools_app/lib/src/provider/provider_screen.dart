@@ -5,9 +5,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider show Provider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:provider/provider.dart' as provider show Provider;
 
 import '../banner_messages.dart';
 import '../eval_on_dart_library.dart';
@@ -15,6 +15,7 @@ import '../globals.dart';
 import '../instance_viewer/eval.dart';
 import '../instance_viewer/instance_providers.dart';
 import '../instance_viewer/instance_viewer.dart';
+import '../riverpod/riverpod_screen.dart';
 import '../screen.dart';
 import '../split.dart';
 import 'provider_list.dart';
@@ -75,7 +76,6 @@ class ProviderScreenBody extends ConsumerWidget {
   Widget build(BuildContext context, ScopedReader watch) {
     final splitAxis = Split.axisFor(context, 0.85);
 
-    // TODO(rrousselGit) test selected provider being unmounted should select the next provider (or nothing)
     // A provider will automatically be selected as soon as one is detected
     final selectedProviderId = watch(selectedProviderIdProvider).state;
 
@@ -119,6 +119,16 @@ void showProviderErrorBanner(BuildContext context) {
     listen: false,
   ).addMessage(
     const ProviderUnknownErrorBanner(screenId: ProviderScreen.id)
+        .build(context),
+  );
+}
+
+void showRiverpodErrorBanner(BuildContext context) {
+  provider.Provider.of<BannerMessagesController>(
+    context,
+    listen: false,
+  ).addMessage(
+    const RiverpodUnknownErrorBanner(screenId: RiverpodScreen.id)
         .build(context),
   );
 }

@@ -16,12 +16,14 @@ class _$ProviderNodeTearOff {
 // ignore: unused_element
   _ProviderNode call(
       {@required String containerId,
-      @required String providerRefId,
-      @required String type}) {
+      @required String providerId,
+      @required String type,
+      @required @nullable String paramDisplayString}) {
     return _ProviderNode(
       containerId: containerId,
-      providerRefId: providerRefId,
+      providerId: providerId,
       type: type,
+      paramDisplayString: paramDisplayString,
     );
   }
 }
@@ -33,8 +35,10 @@ const $ProviderNode = _$ProviderNodeTearOff();
 /// @nodoc
 mixin _$ProviderNode {
   String get containerId;
-  String get providerRefId;
+  String get providerId;
   String get type;
+  @nullable
+  String get paramDisplayString;
 
   @JsonKey(ignore: true)
   $ProviderNodeCopyWith<ProviderNode> get copyWith;
@@ -45,7 +49,11 @@ abstract class $ProviderNodeCopyWith<$Res> {
   factory $ProviderNodeCopyWith(
           ProviderNode value, $Res Function(ProviderNode) then) =
       _$ProviderNodeCopyWithImpl<$Res>;
-  $Res call({String containerId, String providerRefId, String type});
+  $Res call(
+      {String containerId,
+      String providerId,
+      String type,
+      @nullable String paramDisplayString});
 }
 
 /// @nodoc
@@ -59,16 +67,19 @@ class _$ProviderNodeCopyWithImpl<$Res> implements $ProviderNodeCopyWith<$Res> {
   @override
   $Res call({
     Object containerId = freezed,
-    Object providerRefId = freezed,
+    Object providerId = freezed,
     Object type = freezed,
+    Object paramDisplayString = freezed,
   }) {
     return _then(_value.copyWith(
       containerId:
           containerId == freezed ? _value.containerId : containerId as String,
-      providerRefId: providerRefId == freezed
-          ? _value.providerRefId
-          : providerRefId as String,
+      providerId:
+          providerId == freezed ? _value.providerId : providerId as String,
       type: type == freezed ? _value.type : type as String,
+      paramDisplayString: paramDisplayString == freezed
+          ? _value.paramDisplayString
+          : paramDisplayString as String,
     ));
   }
 }
@@ -80,7 +91,11 @@ abstract class _$ProviderNodeCopyWith<$Res>
           _ProviderNode value, $Res Function(_ProviderNode) then) =
       __$ProviderNodeCopyWithImpl<$Res>;
   @override
-  $Res call({String containerId, String providerRefId, String type});
+  $Res call(
+      {String containerId,
+      String providerId,
+      String type,
+      @nullable String paramDisplayString});
 }
 
 /// @nodoc
@@ -96,16 +111,19 @@ class __$ProviderNodeCopyWithImpl<$Res> extends _$ProviderNodeCopyWithImpl<$Res>
   @override
   $Res call({
     Object containerId = freezed,
-    Object providerRefId = freezed,
+    Object providerId = freezed,
     Object type = freezed,
+    Object paramDisplayString = freezed,
   }) {
     return _then(_ProviderNode(
       containerId:
           containerId == freezed ? _value.containerId : containerId as String,
-      providerRefId: providerRefId == freezed
-          ? _value.providerRefId
-          : providerRefId as String,
+      providerId:
+          providerId == freezed ? _value.providerId : providerId as String,
       type: type == freezed ? _value.type : type as String,
+      paramDisplayString: paramDisplayString == freezed
+          ? _value.paramDisplayString
+          : paramDisplayString as String,
     ));
   }
 }
@@ -114,22 +132,26 @@ class __$ProviderNodeCopyWithImpl<$Res> extends _$ProviderNodeCopyWithImpl<$Res>
 class _$_ProviderNode implements _ProviderNode {
   const _$_ProviderNode(
       {@required this.containerId,
-      @required this.providerRefId,
-      @required this.type})
+      @required this.providerId,
+      @required this.type,
+      @required @nullable this.paramDisplayString})
       : assert(containerId != null),
-        assert(providerRefId != null),
+        assert(providerId != null),
         assert(type != null);
 
   @override
   final String containerId;
   @override
-  final String providerRefId;
+  final String providerId;
   @override
   final String type;
+  @override
+  @nullable
+  final String paramDisplayString;
 
   @override
   String toString() {
-    return 'ProviderNode(containerId: $containerId, providerRefId: $providerRefId, type: $type)';
+    return 'ProviderNode(containerId: $containerId, providerId: $providerId, type: $type, paramDisplayString: $paramDisplayString)';
   }
 
   @override
@@ -139,19 +161,23 @@ class _$_ProviderNode implements _ProviderNode {
             (identical(other.containerId, containerId) ||
                 const DeepCollectionEquality()
                     .equals(other.containerId, containerId)) &&
-            (identical(other.providerRefId, providerRefId) ||
+            (identical(other.providerId, providerId) ||
                 const DeepCollectionEquality()
-                    .equals(other.providerRefId, providerRefId)) &&
+                    .equals(other.providerId, providerId)) &&
             (identical(other.type, type) ||
-                const DeepCollectionEquality().equals(other.type, type)));
+                const DeepCollectionEquality().equals(other.type, type)) &&
+            (identical(other.paramDisplayString, paramDisplayString) ||
+                const DeepCollectionEquality()
+                    .equals(other.paramDisplayString, paramDisplayString)));
   }
 
   @override
   int get hashCode =>
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(containerId) ^
-      const DeepCollectionEquality().hash(providerRefId) ^
-      const DeepCollectionEquality().hash(type);
+      const DeepCollectionEquality().hash(providerId) ^
+      const DeepCollectionEquality().hash(type) ^
+      const DeepCollectionEquality().hash(paramDisplayString);
 
   @JsonKey(ignore: true)
   @override
@@ -162,15 +188,19 @@ class _$_ProviderNode implements _ProviderNode {
 abstract class _ProviderNode implements ProviderNode {
   const factory _ProviderNode(
       {@required String containerId,
-      @required String providerRefId,
-      @required String type}) = _$_ProviderNode;
+      @required String providerId,
+      @required String type,
+      @required @nullable String paramDisplayString}) = _$_ProviderNode;
 
   @override
   String get containerId;
   @override
-  String get providerRefId;
+  String get providerId;
   @override
   String get type;
+  @override
+  @nullable
+  String get paramDisplayString;
   @override
   @JsonKey(ignore: true)
   _$ProviderNodeCopyWith<_ProviderNode> get copyWith;

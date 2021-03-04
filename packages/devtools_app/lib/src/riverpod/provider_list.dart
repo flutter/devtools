@@ -20,7 +20,7 @@ final _containerListChanged = AutoDisposeStreamProvider<void>((ref) {
   });
 });
 
-final _containerIdsProvider =
+final containerIdsProvider =
     AutoDisposeFutureProvider<List<String>>((ref) async {
   final isAlive = IsAlive();
   ref.onDispose(isAlive.dispose);
@@ -58,21 +58,21 @@ final _providerListChanged =
 abstract class ProviderNode with _$ProviderNode {
   const factory ProviderNode({
     @required String containerId,
-    @required String providerRefId,
+    @required String providerId,
     @required String type,
+    @required @nullable String paramDisplayString,
   }) = _ProviderNode;
 }
 
 final providerIdsProvider =
-    AutoDisposeFutureProvider<List<ProviderId>>((ref) async {
+    AutoDisposeStreamProvider<List<ProviderId>>((ref) async* {
   final isAlive = IsAlive();
   ref.onDispose(isAlive.dispose);
   final eval = ref.watch(riverpodEvalProvider);
 
-  final providerIds = <ProviderId>[];
-  final containerIds = await ref.watch(_containerIdsProvider.future);
+  final containerIds = await ref.watch(containerIdsProvider.future);
 
-  for (final containerId in containerIds) {
+  final idsPerContainerFuture = containerIds.map((containerId) async {
     // cause the list of ids to be re-evaluated when providers are added/removed on a container
     ref.watch(_providerListChanged(containerId));
 
@@ -83,17 +83,27 @@ final providerIdsProvider =
 
     final instance = await eval.getInstance(providerRefs, isAlive);
 
-    for (final providerRef in instance.elements.cast<InstanceRef>()) {
-      providerIds.add(
-        ProviderId(
-          containerId: containerId,
-          providerRefId: providerRef.id,
-        ),
+    final idsFuture =
+        instance.elements.cast<InstanceRef>().map((providerRef) async {
+      final debugId = await eval.evalInstance(
+        'provider.debugId',
+        isAlive: isAlive,
+        scope: {'provider': providerRef.id},
       );
-    }
-  }
 
-  return providerIds;
+      return ProviderId(
+        containerId: containerId,
+        providerId: debugId.valueAsString,
+      );
+    });
+
+    return Future.wait(idsFuture);
+  });
+
+  final idsPerContainer = await Future.wait(idsPerContainerFuture);
+
+  yield idsPerContainer
+      .fold<List<ProviderId>>([], (acc, element) => acc..addAll(element));
 });
 
 final providerNodeProvider =
@@ -102,16 +112,29 @@ final providerNodeProvider =
   ref.onDispose(isAlive.dispose);
   final eval = ref.watch(riverpodEvalProvider);
 
-  final type = await eval.evalInstance(
+  final providerRef = await eval.safeEval(
+    'RiverpodBinding.debugInstance.containers["${id.containerId}"]'
+    '!.debugProviderElements.firstWhere((p) => p.provider.debugId == "${id.providerId}").provider',
+    isAlive: isAlive,
+  );
+
+  final type = await eval.safeEval(
     'provider.runtimeType.toString()',
     isAlive: isAlive,
-    scope: {'provider': id.providerRefId},
+    scope: {'provider': providerRef.id},
+  );
+
+  final param = await eval.safeEval(
+    'provider.argument',
+    isAlive: isAlive,
+    scope: {'provider': providerRef.id},
   );
 
   return ProviderNode(
     containerId: id.containerId,
-    providerRefId: id.providerRefId,
+    providerId: id.providerId,
     type: type.valueAsString,
+    paramDisplayString: param?.valueAsString,
   );
 });
 
@@ -123,11 +146,28 @@ final _isSelectedProvider = ScopedProvider<bool>((watch) {
 
 final AutoDisposeStateProvider<ProviderId> selectedProviderIdProvider =
     AutoDisposeStateProvider<ProviderId>((ref) {
-  // TODO test that going from 0 to 1 provider selects it
-  // TODO test that going from 1 > 0 > 1 providers selects it
-  ref.watch(providerIdsProvider.future).then((ids) {
-    if (ids.isNotEmpty) ref.read(selectedProviderIdProvider).state = ids.first;
+  final providerIdsStream = ref.watch(providerIdsProvider.stream);
+
+  StreamSubscription<void> sub;
+  sub = providerIdsStream.listen((ids) {
+    final controller = ref.read(selectedProviderIdProvider);
+
+    if (controller.state == null) {
+      if (ids.isNotEmpty) controller.state = ids.first;
+      return;
+    }
+
+    if (ids.isEmpty) {
+      controller.state = null;
+    } else if (!ids.contains(controller.state)) {
+      controller.state = ids.first;
+    }
+  }, onError: (err) {
+    // nothing to do here, but passing onError prevents tests from failing when
+    // testing scenarios where providerIdsStream emits an error
   });
+
+  ref.onDispose(sub.cancel);
 
   return null;
 });
@@ -141,15 +181,16 @@ class ProviderList extends ConsumerWidget {
 
     return state.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Center(
-        child: Text('Error $err\n\n$stack'),
-      ),
+      error: (err, stack) => const Text('<unknown error>'),
       data: (providerNodes) {
         return Scrollbar(
           child: ListView.builder(
             itemCount: providerNodes.length,
             itemBuilder: (context, index) {
               return ProviderScope(
+                key: Key(
+                  'riverpod-${providerNodes[index].containerId}-${providerNodes[index].providerId}',
+                ),
                 overrides: [
                   _providerIdProvider.overrideWithValue(providerNodes[index])
                 ],
@@ -187,7 +228,11 @@ class ProviderNodeItem extends ConsumerWidget {
           loading: () => const CenteredCircularProgressIndicator(),
           error: (err, stack) => Text('<Failed to load> $err\n\n$stack'),
           data: (node) {
-            return Text('${node.type}()');
+            final param = node.paramDisplayString != null
+                ? '(param: ${node.paramDisplayString})'
+                : '()';
+
+            return Text('${node.type}$param');
           },
         ),
       ),

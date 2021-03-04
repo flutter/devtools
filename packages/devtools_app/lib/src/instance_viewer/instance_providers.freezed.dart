@@ -15,10 +15,10 @@ class _$ProviderIdTearOff {
 
 // ignore: unused_element
   _ProviderId call(
-      {@required String containerId, @required String providerRefId}) {
+      {@required String containerId, @required String providerId}) {
     return _ProviderId(
       containerId: containerId,
-      providerRefId: providerRefId,
+      providerId: providerId,
     );
   }
 }
@@ -30,7 +30,7 @@ const $ProviderId = _$ProviderIdTearOff();
 /// @nodoc
 mixin _$ProviderId {
   String get containerId;
-  String get providerRefId;
+  String get providerId;
 
   @JsonKey(ignore: true)
   $ProviderIdCopyWith<ProviderId> get copyWith;
@@ -41,7 +41,7 @@ abstract class $ProviderIdCopyWith<$Res> {
   factory $ProviderIdCopyWith(
           ProviderId value, $Res Function(ProviderId) then) =
       _$ProviderIdCopyWithImpl<$Res>;
-  $Res call({String containerId, String providerRefId});
+  $Res call({String containerId, String providerId});
 }
 
 /// @nodoc
@@ -55,14 +55,13 @@ class _$ProviderIdCopyWithImpl<$Res> implements $ProviderIdCopyWith<$Res> {
   @override
   $Res call({
     Object containerId = freezed,
-    Object providerRefId = freezed,
+    Object providerId = freezed,
   }) {
     return _then(_value.copyWith(
       containerId:
           containerId == freezed ? _value.containerId : containerId as String,
-      providerRefId: providerRefId == freezed
-          ? _value.providerRefId
-          : providerRefId as String,
+      providerId:
+          providerId == freezed ? _value.providerId : providerId as String,
     ));
   }
 }
@@ -73,7 +72,7 @@ abstract class _$ProviderIdCopyWith<$Res> implements $ProviderIdCopyWith<$Res> {
           _ProviderId value, $Res Function(_ProviderId) then) =
       __$ProviderIdCopyWithImpl<$Res>;
   @override
-  $Res call({String containerId, String providerRefId});
+  $Res call({String containerId, String providerId});
 }
 
 /// @nodoc
@@ -89,33 +88,31 @@ class __$ProviderIdCopyWithImpl<$Res> extends _$ProviderIdCopyWithImpl<$Res>
   @override
   $Res call({
     Object containerId = freezed,
-    Object providerRefId = freezed,
+    Object providerId = freezed,
   }) {
     return _then(_ProviderId(
       containerId:
           containerId == freezed ? _value.containerId : containerId as String,
-      providerRefId: providerRefId == freezed
-          ? _value.providerRefId
-          : providerRefId as String,
+      providerId:
+          providerId == freezed ? _value.providerId : providerId as String,
     ));
   }
 }
 
 /// @nodoc
 class _$_ProviderId with DiagnosticableTreeMixin implements _ProviderId {
-  const _$_ProviderId(
-      {@required this.containerId, @required this.providerRefId})
+  const _$_ProviderId({@required this.containerId, @required this.providerId})
       : assert(containerId != null),
-        assert(providerRefId != null);
+        assert(providerId != null);
 
   @override
   final String containerId;
   @override
-  final String providerRefId;
+  final String providerId;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'ProviderId(containerId: $containerId, providerRefId: $providerRefId)';
+    return 'ProviderId(containerId: $containerId, providerId: $providerId)';
   }
 
   @override
@@ -124,7 +121,7 @@ class _$_ProviderId with DiagnosticableTreeMixin implements _ProviderId {
     properties
       ..add(DiagnosticsProperty('type', 'ProviderId'))
       ..add(DiagnosticsProperty('containerId', containerId))
-      ..add(DiagnosticsProperty('providerRefId', providerRefId));
+      ..add(DiagnosticsProperty('providerId', providerId));
   }
 
   @override
@@ -134,16 +131,16 @@ class _$_ProviderId with DiagnosticableTreeMixin implements _ProviderId {
             (identical(other.containerId, containerId) ||
                 const DeepCollectionEquality()
                     .equals(other.containerId, containerId)) &&
-            (identical(other.providerRefId, providerRefId) ||
+            (identical(other.providerId, providerId) ||
                 const DeepCollectionEquality()
-                    .equals(other.providerRefId, providerRefId)));
+                    .equals(other.providerId, providerId)));
   }
 
   @override
   int get hashCode =>
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(containerId) ^
-      const DeepCollectionEquality().hash(providerRefId);
+      const DeepCollectionEquality().hash(providerId);
 
   @JsonKey(ignore: true)
   @override
@@ -154,12 +151,12 @@ class _$_ProviderId with DiagnosticableTreeMixin implements _ProviderId {
 abstract class _ProviderId implements ProviderId {
   const factory _ProviderId(
       {@required String containerId,
-      @required String providerRefId}) = _$_ProviderId;
+      @required String providerId}) = _$_ProviderId;
 
   @override
   String get containerId;
   @override
-  String get providerRefId;
+  String get providerId;
   @override
   @JsonKey(ignore: true)
   _$ProviderIdCopyWith<_ProviderId> get copyWith;

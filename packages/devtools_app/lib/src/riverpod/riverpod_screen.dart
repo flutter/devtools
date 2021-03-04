@@ -8,15 +8,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pedantic/pedantic.dart';
 
+import '../config_specific/logger/logger.dart';
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
 import '../instance_viewer/eval.dart';
 import '../instance_viewer/instance_providers.dart';
 import '../instance_viewer/instance_viewer.dart';
-import '../riverpod_error_logger_observer.dart';
+import '../provider/provider_screen.dart';
 import '../screen.dart';
 import '../split.dart';
 import 'provider_list.dart';
+
+final hasErrorProvider = Provider.autoDispose<bool>((ref) {
+  if (ref.watch(providerIdsProvider) is AsyncError) return true;
+
+  final selectedProviderId = ref.watch(selectedProviderIdProvider).state;
+
+  if (selectedProviderId == null) return false;
+
+  final instance = ref.watch(
+    instanceProvider(InstancePath.fromRiverpodId(selectedProviderId)),
+  );
+
+  return instance is AsyncError;
+});
 
 final _selectedProviderEvalProvider =
     AutoDisposeFutureProvider<EvalOnDartLibrary>((ref) async {
@@ -50,12 +65,12 @@ class RiverpodScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return const _RiverpodScreenBody();
+    return const RiverpodScreenBody();
   }
 }
 
-class _RiverpodScreenBody extends ConsumerWidget {
-  const _RiverpodScreenBody({Key key}) : super(key: key);
+class RiverpodScreenBody extends ConsumerWidget {
+  const RiverpodScreenBody({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
@@ -65,42 +80,46 @@ class _RiverpodScreenBody extends ConsumerWidget {
     // A provider will automatically be selected as soon as one is detected
     final selectedProviderId = watch(selectedProviderIdProvider).state;
 
-    return Split(
-      axis: splitAxis,
-      initialFractions: const [0.33, 0.67],
-      children: [
-        const _SplitBorder(child: ProviderList()),
-        if (selectedProviderId != null)
-          Column(
-            children: [
-              Expanded(
-                child: _SplitBorder(
-                  child: InstanceViewer(
-                    rootPath: InstancePath.fromRiverpodId(selectedProviderId),
+    return ProviderListener<bool>(
+      provider: hasErrorProvider,
+      onChange: (context, hasError) {
+        if (hasError) showRiverpodErrorBanner(context);
+      },
+      child: Split(
+        axis: splitAxis,
+        initialFractions: const [0.33, 0.67],
+        children: [
+          const _SplitBorder(child: ProviderList()),
+          if (selectedProviderId != null)
+            Column(
+              children: [
+                Expanded(
+                  child: _SplitBorder(
+                    child: InstanceViewer(
+                      rootPath: InstancePath.fromRiverpodId(selectedProviderId),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              const _SplitBorder(child: _ProviderEvaluation()),
-            ],
-          )
-        else
-          const Expanded(
-            child: _SplitBorder(child: SizedBox.expand()),
-          )
-      ],
+                const SizedBox(height: 10),
+                const _SplitBorder(child: ProviderEvaluation()),
+              ],
+            )
+          else
+            const _SplitBorder(child: SizedBox.expand())
+        ],
+      ),
     );
   }
 }
 
-class _ProviderEvaluation extends StatefulWidget {
-  const _ProviderEvaluation({Key key}) : super(key: key);
+class ProviderEvaluation extends StatefulWidget {
+  const ProviderEvaluation({Key key}) : super(key: key);
 
   @override
   _ProviderEvaluationState createState() => _ProviderEvaluationState();
 }
 
-class _ProviderEvaluationState extends State<_ProviderEvaluation> {
+class _ProviderEvaluationState extends State<ProviderEvaluation> {
   final isAlive = IsAlive();
 
   @override
@@ -137,7 +156,10 @@ class _ProviderEvaluationState extends State<_ProviderEvaluation> {
       );
 
       await serviceManager.performHotReload();
-    } catch (err) {
+    } catch (err, stack) {
+      log(err, LogLevel.error);
+      log(stack);
+
       showErrorSnackBar(context, err);
     }
   }

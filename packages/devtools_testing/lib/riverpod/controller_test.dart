@@ -98,7 +98,7 @@ Future<void> runRiverpodControllerTests(FlutterTestEnvironment env) async {
               .having((e) => e.displayString, 'displayString', '1'),
         ),
       );
-    });
+    }, timeout: const Timeout.factor(8));
 
     test('shows the provider name and their family parameter (if any)',
         () async {
@@ -147,7 +147,7 @@ Future<void> runRiverpodControllerTests(FlutterTestEnvironment env) async {
               .having((e) => e.type, 'type', 'Provider<int>'),
         ]),
       );
-    });
+    }, timeout: const Timeout.factor(8));
 
     test('list of provider updates when providers are added/removed', () async {
       final container = ProviderContainer();
@@ -184,6 +184,6 @@ Future<void> runRiverpodControllerTests(FlutterTestEnvironment env) async {
         providerIds.read(),
         completion(hasLength(2)),
       );
-    });
+    }, timeout: const Timeout.factor(8));
   });
 }

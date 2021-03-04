@@ -978,7 +978,7 @@ void main() {
         container
             .read(
               isExpandedProvider(const InstancePath.fromRiverpodId(
-                ProviderId(containerId: '0', providerRefId: 'ref/0'),
+                ProviderId(containerId: '0', providerId: 'ref/0'),
               )),
             )
             .state,
@@ -1013,7 +1013,7 @@ void main() {
         container
             .read(
               isExpandedProvider(const InstancePath.fromRiverpodId(
-                ProviderId(containerId: '0', providerRefId: 'ref/0'),
+                ProviderId(containerId: '0', providerId: 'ref/0'),
                 pathToProperty: [PathToProperty.listIndex(0)],
               )),
             )

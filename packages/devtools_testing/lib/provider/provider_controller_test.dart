@@ -69,7 +69,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         sub.read(),
         completion(['0']),
       );
-    });
+    }, timeout: const Timeout.factor(8));
 
     test('providerNodeProvider', () async {
       final container = ProviderContainer();
@@ -101,7 +101,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
               .having((e) => e.type, 'type', 'Provider<int>'),
         ),
       );
-    });
+    }, timeout: const Timeout.factor(8));
 
     group('instanceProvider', () {
       test('deeply parse complex objects', () async {
@@ -499,7 +499,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
             ]),
           ]),
         );
-      });
+      }, timeout: const Timeout.factor(8));
 
       test('listens to updates from the application side', () async {
         final container = ProviderContainer();
@@ -541,7 +541,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                 .having((e) => e.displayString, 'displayString', '1'),
           ),
         );
-      });
+      }, timeout: const Timeout.factor(8));
     });
   });
 
@@ -615,5 +615,5 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         completes,
       );
     });
-  });
+  }, timeout: const Timeout.factor(8));
 }
