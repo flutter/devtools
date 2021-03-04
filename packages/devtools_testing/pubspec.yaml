@@ -30,7 +30,6 @@ dev_dependencies:
   simple_lint_rules: ^1.0.0
 
 dependency_overrides:
-  freezed_annotation: ^0.12.0
 # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.
 # All overriden dependencies are published together so there is no harm
 # in treating them like they are part of a mono-repo while developing.
@@ -40,3 +39,4 @@ dependency_overrides:
     path: ../devtools_server  #OVERRIDE_FOR_DEVELOPMENT
   devtools_shared:  #OVERRIDE_FOR_DEVELOPMENT
     path: ../devtools_shared  #OVERRIDE_FOR_DEVELOPMENT
+  freezed_annotation: ^0.12.0
