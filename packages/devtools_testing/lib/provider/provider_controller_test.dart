@@ -104,7 +104,6 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
     });
 
     group('instanceProvider', () {
-      // TODO(rrousselGit) test `late final property = value`
       test('deeply parse complex objects', () async {
         final container = ProviderContainer();
         addTearDown(container.dispose);
@@ -553,8 +552,6 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
       ownerName: 'Counter',
     )
   ]);
-
-  // final countFinder = find.byKey(const ObjectKey(countPath));
 
   testWidgets('supports edits', (tester) async {
     final container = ProviderContainer();
