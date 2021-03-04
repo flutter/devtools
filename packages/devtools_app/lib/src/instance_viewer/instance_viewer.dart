@@ -12,12 +12,12 @@ import '../inspector/inspector_text_styles.dart';
 import '../sliver_iterable_child_delegate.dart';
 import 'instance_providers.dart';
 
-const kTypeColor = Color.fromARGB(255, 78, 201, 176);
-const kBoolColor = Color.fromARGB(255, 86, 156, 214);
-const kNullColor = kBoolColor;
-const kNumColor = Color.fromARGB(255, 181, 206, 168);
-const kStringColor = Color.fromARGB(255, 206, 145, 120);
-const kPropertyColor = Color.fromARGB(255, 206, 145, 120);
+const typeColor = Color.fromARGB(255, 78, 201, 176);
+const boolColor = Color.fromARGB(255, 86, 156, 214);
+const nullColor = boolColor;
+const numColor = Color.fromARGB(255, 181, 206, 168);
+const stringColor = Color.fromARGB(255, 206, 145, 120);
+const propertyColor = Color.fromARGB(255, 206, 145, 120);
 
 const double rowHeight = 20.0;
 const double horizontalSpacing = 15;
@@ -185,7 +185,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
               children: [
                 TextSpan(
                   text: instance.type,
-                  style: const TextStyle(color: kTypeColor),
+                  style: const TextStyle(color: typeColor),
                 ),
                 TextSpan(text: '.${instance.value}'),
               ],
@@ -195,7 +195,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
         nill: (instance) => _EditableField(
           setter: instance.setter,
           initialEditString: 'null',
-          child: const Text('null', style: TextStyle(color: kNullColor)),
+          child: const Text('null', style: TextStyle(color: nullColor)),
         ),
         string: (instance) => _EditableField(
           setter: instance.setter,
@@ -206,7 +206,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
                 const TextSpan(text: '"'),
                 TextSpan(
                   text: instance.displayString,
-                  style: const TextStyle(color: kStringColor),
+                  style: const TextStyle(color: stringColor),
                 ),
                 const TextSpan(text: '"'),
               ],
@@ -218,7 +218,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
           initialEditString: instance.displayString,
           child: Text(
             instance.displayString,
-            style: const TextStyle(color: kNumColor),
+            style: const TextStyle(color: numColor),
           ),
         ),
         boolean: (instance) => _EditableField(
@@ -226,7 +226,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
           initialEditString: instance.displayString,
           child: Text(
             instance.displayString,
-            style: const TextStyle(color: kBoolColor),
+            style: const TextStyle(color: boolColor),
           ),
         ),
         map: (instance) => _ObjectHeader(
@@ -424,7 +424,7 @@ class _ObjectHeader extends StatelessWidget {
           if (type != null)
             TextSpan(
               text: type,
-              style: const TextStyle(color: kTypeColor),
+              style: const TextStyle(color: typeColor),
             ),
           TextSpan(
             text: '#$hash',
