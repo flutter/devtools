@@ -4,9 +4,12 @@
 
 import 'package:devtools_app/src/analytics/prompt.dart';
 import 'package:devtools_app/src/analytics/provider.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 class FakeProvider implements AnalyticsProvider {
@@ -40,6 +43,10 @@ class FakeProvider implements AnalyticsProvider {
 }
 
 void main() {
+  setUp(() {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+  });
+
   group('AnalyticsPrompt', () {
     group('with gtags enabled', () {
       testWidgets('displays prompt if provider indicates to do so',

@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -12,10 +14,10 @@ import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart' as logger;
 import '../globals.dart';
+import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
-import '../ui/icons.dart';
 import '../ui/label.dart';
 import '../ui/search.dart';
 import '../utils.dart';
@@ -24,8 +26,8 @@ import 'memory_analyzer.dart';
 import 'memory_controller.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
+import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
-import 'memory_protocol.dart';
 import 'memory_screen.dart';
 import 'memory_snapshot_models.dart';
 
@@ -124,7 +126,10 @@ String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
 final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
 
 class HeapTreeViewState extends State<HeapTree>
-    with AutoDisposeMixin, SearchFieldMixin<HeapTree> {
+    with
+        AutoDisposeMixin,
+        SearchFieldMixin<HeapTree>,
+        TickerProviderStateMixin {
   @visibleForTesting
   static const snapshotButtonKey = Key('Snapshot Button');
   @visibleForTesting
@@ -143,8 +148,23 @@ class HeapTreeViewState extends State<HeapTree>
   static const searchButtonKey = Key('Snapshot Search');
   @visibleForTesting
   static const filterButtonKey = Key('Snapshot Filter');
+  @visibleForTesting
+  static const dartHeapAnalysisTabKey = Key('Dart Heap Analysis Tab');
+  @visibleForTesting
+  static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
+
+  /// Below constants should match index for Tab index in DartHeapTabs.
+  static const int analysisTabIndex = 0;
+  static const int allocationsTabIndex = 1;
+
+  static const List<Tab> DartHeapTabs = [
+    Tab(key: dartHeapAnalysisTabKey, text: 'Analysis'),
+    Tab(key: dartHeapAllocationsTabKey, text: 'Allocations'),
+  ];
 
   MemoryController controller;
+
+  TabController tabController;
 
   Widget snapshotDisplay;
 
@@ -165,6 +185,20 @@ class HeapTreeViewState extends State<HeapTree>
   /// Total memory that caused last snapshot.
   int lastSnapshotMemoryTotal = 0;
 
+  bool treeMapVisible;
+
+  AnimationController _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    tabController = TabController(length: DartHeapTabs.length, vsync: this);
+    addAutoDisposeListener(tabController);
+
+    _animation = _setupBubbleAnimationController();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -182,7 +216,7 @@ class HeapTreeViewState extends State<HeapTree>
       });
     });
 
-    addAutoDisposeListener(controller.selectionNotifier, () {
+    addAutoDisposeListener(controller.selectionSnapshotNotifier, () {
       setState(() {
         controller.computeAllLibraries(rebuild: true);
       });
@@ -209,14 +243,15 @@ class HeapTreeViewState extends State<HeapTree>
     addAutoDisposeListener(controller.searchNotifier, () {
       setState(() {
         controller.closeAutoCompleteOverlay();
+        controller.currentDefaultIndex = 0;
       });
     });
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
       SnapshotFilterState.gaActionForSnapshotFilterDialog();
       setState(controller.autoCompleteOverlaySetState(
-        searchFieldKey: memorySearchFieldKey,
         context: context,
+        searchFieldKey: memorySearchFieldKey,
       ));
     });
 
@@ -229,6 +264,15 @@ class HeapTreeViewState extends State<HeapTree>
     addAutoDisposeListener(controller.memoryTimeline.sampleAddedNotifier, () {
       autoSnapshot();
     });
+
+    treeMapVisible = controller.treeMapVisible.value;
+    addAutoDisposeListener(controller.treeMapVisible, () {
+      setState(() {
+        treeMapVisible = controller.treeMapVisible.value;
+      });
+    });
+
+    addAutoDisposeListener(controller.lastMonitorTimestamp);
   }
 
   @override
@@ -238,6 +282,8 @@ class HeapTreeViewState extends State<HeapTree>
     searchFieldFocusNode.dispose();
 
     rawKeyboardFocusNode.dispose();
+
+    _animation.dispose();
 
     super.dispose();
   }
@@ -332,7 +378,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final themeData = Theme.of(context);
 
     if (_isSnapshotRunning) {
       snapshotDisplay = Column(
@@ -353,30 +399,60 @@ class HeapTreeViewState extends State<HeapTree>
           ),
         ],
       );
-    } else if (controller.snapshotByLibraryData != null ||
-        controller.monitorAllocations.isNotEmpty) {
-      snapshotDisplay = MemoryHeapTable();
+    } else if (controller.snapshotByLibraryData != null) {
+      snapshotDisplay =
+          treeMapVisible ? MemoryHeapTreemap(controller) : MemoryHeapTable();
     } else {
-      // TODO: Have some help text about how to take a snapshot.
-      snapshotDisplay = const SizedBox();
+      snapshotDisplay = null;
     }
 
     return Padding(
       padding: const EdgeInsets.only(top: denseRowSpacing),
       child: Column(
         children: [
+          const SizedBox(height: defaultSpacing),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildSnapshotControls(textTheme),
-              const Expanded(child: SizedBox(width: defaultSpacing)),
-              // TODO(peterdjlee): Implement filter and search functionality for treemap.
+              TabBar(
+                labelColor: themeData.textTheme.bodyText1.color,
+                isScrollable: true,
+                controller: tabController,
+                tabs: HeapTreeViewState.DartHeapTabs,
+              ),
               _buildSearchFilterControls(),
             ],
           ),
-          const SizedBox(height: denseRowSpacing),
+          const SizedBox(height: densePadding),
           Expanded(
-            child: OutlineDecoration(
-              child: buildSnapshotTables(snapshotDisplay),
+            child: TabBarView(
+              physics: defaultTabBarViewPhysics,
+              controller: tabController,
+              children: [
+                // Analysis Tab
+                Column(
+                  children: [
+                    _buildSnapshotControls(themeData.textTheme),
+                    const SizedBox(height: denseRowSpacing),
+                    Expanded(
+                      child: OutlineDecoration(
+                        child: buildSnapshotTables(snapshotDisplay),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Allocations Tab
+                Column(
+                  children: [
+                    _buildAllocationsControls(),
+                    const SizedBox(height: denseRowSpacing),
+                    const Expanded(
+                      child: AllocationTableView(),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -385,26 +461,67 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   Widget buildSnapshotTables(Widget snapshotDisplay) {
-    final hasDetails =
-        controller.isLeafSelected || controller.isAnalysisLeafSelected;
+    if (snapshotDisplay == null) {
+      // Display help text about how to collect data.
+      return Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Text('Click the take heap snapshot button '),
+            Icon(Icons.camera),
+            Text(' to collect a graph of memory objects.'),
+          ],
+        ),
+      );
+    }
 
     final rightSideTable = controller.isLeafSelected
-        ? Expanded(child: InstanceTreeView())
+        ? InstanceTreeView()
         : controller.isAnalysisLeafSelected
             ? Expanded(child: AnalysisInstanceViewTable())
-            : controller.isAllocationMonitorLeafSelected
-                ? Expanded(child: AllocationTableView())
-                : const SizedBox();
+            : helpScreen();
 
+    return treeMapVisible
+        ? snapshotDisplay
+        : Split(
+            initialFractions: const [0.5, 0.5],
+            minSizes: const [300, 300],
+            axis: Axis.horizontal,
+            children: [
+              // TODO(terry): Need better focus handling between 2 tables & up/down
+              //              arrows in the right-side field instance view table.
+              snapshotDisplay,
+              rightSideTable,
+            ],
+          );
+  }
+
+  Widget tableExample(IconData iconData, String entry) {
+    final themeData = Theme.of(context);
     return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Expanded(child: snapshotDisplay),
-        if (hasDetails) const SizedBox(width: defaultSpacing),
-        // TODO(terry): Need better focus handling between 2 tables & up/down
-        //              arrows in the right-side field instance view table.
-        rightSideTable,
+        iconData == null
+            ? Text(' ', style: themeData.fixedFontStyle)
+            : Icon(iconData),
+        Text(entry, style: themeData.fixedFontStyle),
+      ],
+    );
+  }
+
+  Widget helpScreen() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'Click a leaf node instance of a class to\n'
+          'inspect the fields of that instance e.g.,',
+        ),
+        const SizedBox(height: defaultSpacing),
+        tableExample(Icons.expand_more, 'dart:collection'),
+        tableExample(Icons.expand_more, 'SplayTreeMap'),
+        const SizedBox(height: denseRowSpacing),
+        tableExample(null, 'Instance 0'),
       ],
     );
   }
@@ -459,101 +576,252 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   Widget _buildSnapshotControls(TextTheme textTheme) {
-    return Row(
-      children: [
-        TooltippedButton(
-          tooltip: 'Take a memory profile snapshot',
-          child: OutlinedButton(
-            key: snapshotButtonKey,
-            onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
-            child: const MaterialIconLabel(
-              Icons.camera,
-              'Take Heap Snapshot',
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: Row(
+        children: [
+          DevToolsTooltip(
+            tooltip: 'Take a memory profile snapshot',
+            child: OutlinedButton(
+              key: snapshotButtonKey,
+              onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
+              child: const MaterialIconLabel(
+                label: 'Take Heap Snapshot',
+                iconData: Icons.camera,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: defaultSpacing),
-        _groupByDropdown(textTheme),
-        const SizedBox(width: defaultSpacing),
-        // TODO(terry): Mechanism to handle expand/collapse on both tables
-        // objects/fields. Maybe notion in table?
-        TooltippedButton(
-          tooltip: 'Collapse All',
-          child: OutlinedButton(
-            key: collapseAllButtonKey,
-            onPressed: snapshotDisplay is MemoryHeapTable
-                ? () {
-                    MemoryScreen.gaAction(key: collapseAllButtonKey);
-                    if (snapshotDisplay is MemoryHeapTable) {
-                      controller.groupByTreeTable.dataRoots.every((element) {
-                        element.collapseCascading();
-                        return true;
-                      });
-                      if (controller.instanceFieldsTreeTable != null) {
-                        // We're collapsing close the fields table.
-                        controller.selectedLeaf = null;
+          const SizedBox(width: defaultSpacing),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Treemap'),
+              Switch(
+                value: treeMapVisible,
+                onChanged: controller.snapshotByLibraryData != null
+                    ? (value) {
+                        controller.toggleTreeMapVisible(value);
                       }
-                      // All nodes collapsed - signal tree state changed.
-                      controller.treeChanged();
-                    }
-                  }
-                : null,
-            child: createIcon(Icons.vertical_align_top),
+                    : null,
+              ),
+            ],
           ),
-        ),
-        TooltippedButton(
-          tooltip: 'Expand All',
-          child: OutlinedButton(
-            key: expandAllButtonKey,
-            onPressed: snapshotDisplay is MemoryHeapTable
-                ? () {
-                    MemoryScreen.gaAction(key: expandAllButtonKey);
-                    if (snapshotDisplay is MemoryHeapTable) {
-                      controller.groupByTreeTable.dataRoots.every((element) {
-                        element.expandCascading();
-                        return true;
-                      });
-                    }
-                    // All nodes expanded - signal tree state  changed.
-                    controller.treeChanged();
+          if (!treeMapVisible) ...[
+            const SizedBox(width: defaultSpacing),
+            _groupByDropdown(textTheme),
+            const SizedBox(width: defaultSpacing),
+            // TODO(terry): Mechanism to handle expand/collapse on both tables
+            // objects/fields. Maybe notion in table?
+            ExpandAllButton(
+              key: expandAllButtonKey,
+              onPressed: () {
+                MemoryScreen.gaAction(key: expandAllButtonKey);
+                if (snapshotDisplay is MemoryHeapTable) {
+                  controller.groupByTreeTable.dataRoots.every((element) {
+                    element.expandCascading();
+                    return true;
+                  });
+                }
+                // All nodes expanded - signal tree state  changed.
+                controller.treeChanged();
+              },
+            ),
+            const SizedBox(width: denseSpacing),
+            CollapseAllButton(
+              key: collapseAllButtonKey,
+              onPressed: () {
+                MemoryScreen.gaAction(key: collapseAllButtonKey);
+                if (snapshotDisplay is MemoryHeapTable) {
+                  controller.groupByTreeTable.dataRoots.every((element) {
+                    element.collapseCascading();
+                    return true;
+                  });
+                  if (controller.instanceFieldsTreeTable != null) {
+                    // We're collapsing close the fields table.
+                    controller.selectedLeaf = null;
                   }
-                : null,
-            child: createIcon(Icons.vertical_align_bottom),
-          ),
-        ),
-        const SizedBox(width: defaultSpacing),
-        TooltippedButton(
-          tooltip: 'Monitor Allocations',
+                  // All nodes collapsed - signal tree state changed.
+                  controller.treeChanged();
+                }
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  AnimationController _setupBubbleAnimationController() {
+    // Setup animation controller to handle the update bubble.
+    const animationDuration = Duration(milliseconds: 500);
+    final bubbleAnimation = AnimationController(
+      duration: animationDuration,
+      reverseDuration: animationDuration,
+      upperBound: 15.0,
+      vsync: this,
+    );
+
+    bubbleAnimation.addStatusListener(_animationStatusListener);
+
+    return bubbleAnimation;
+  }
+
+  void _animationStatusListener(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      // Reverse from larger bubble back to normal bubble radius.
+      _animation.reverse();
+    }
+  }
+
+  static const _updateCircleRadius = 8.0;
+
+  Timer removeUpdateBubble;
+
+  Widget displayTimestampUpdateBubble() {
+    // Build the bubble to show data has changed (new allocation data).
+    final bubble = AnimatedBuilder(
+      animation: _animation,
+      builder: (context, widget) {
+        double circleSize = _animation.value;
+        if (_animation.status == AnimationStatus.reverse &&
+            _animation.value < _updateCircleRadius) {
+          circleSize = _updateCircleRadius;
+          _animation.stop();
+
+          // Keep the bubble displayed for a few seconds.
+          if (removeUpdateBubble != null) {
+            removeUpdateBubble.cancel();
+          }
+          removeUpdateBubble = Timer(const Duration(seconds: 5), () {
+            controller.lastMonitorTimestamp.value = controller.monitorTimestamp;
+            removeUpdateBubble = null;
+          });
+        }
+        final circleWidget = textWidgetWithUpdateCircle(
+          controller.monitorTimestamp == null
+              ? 'No allocations tracked'
+              : 'Allocations Tracked at ${MemoryController.formattedTimestamp(controller.monitorTimestamp)}',
+          style: Theme.of(context).colorScheme.italicTextStyle,
+          size: controller.lastMonitorTimestamp.value ==
+                  controller.monitorTimestamp
+              ? 0
+              : circleSize,
+        );
+
+        return circleWidget;
+      },
+    );
+
+    // Start the animation running again, wobbly bubble.
+    _animation.forward();
+
+    return bubble;
+  }
+
+  Widget _buildAllocationsControls() {
+    final updateCircle = displayTimestampUpdateBubble();
+
+    return Row(
+      children: [
+        DevToolsTooltip(
+          tooltip: 'Collect Allocation Statistics',
           child: OutlinedButton(
             key: allocationMonitorKey,
             onPressed: () async {
               MemoryScreen.gaAction(key: allocationMonitorKey);
               await _allocationStart();
             },
-            child: createImageIcon(
-              // TODO(terry): Could we use a canned material icon check w/ Youyang?
-              'icons/memory/communities_white@2x.png',
-              size: defaultIconThemeSize,
+            child: MaterialIconLabel(
+              label: 'Track',
+              imageIcon: trackImage(context),
             ),
           ),
         ),
-        TooltippedButton(
-          tooltip: 'Reset Accumulators',
+        const SizedBox(width: denseSpacing),
+        DevToolsTooltip(
+          tooltip: 'Reset all accumulators',
           child: OutlinedButton(
             key: allocationMonitorResetKey,
             onPressed: () async {
               MemoryScreen.gaAction(key: allocationMonitorResetKey);
               await _allocationReset();
             },
-            child: createImageIcon(
-              // TODO(terry): Could we use a canned material icon check w/ Youyang?
-              'icons/memory/reset_icon_white@2x.png',
-              size: defaultIconThemeSize,
+            child: MaterialIconLabel(
+              label: 'Reset',
+              imageIcon: resetImage(context),
+            ),
+          ),
+        ),
+        const Spacer(),
+        updateCircle,
+      ],
+    );
+  }
+
+  Widget textWidgetWithUpdateCircle(
+    String text, {
+    TextStyle style,
+    double size,
+  }) {
+    final textWidth = textWidgetWidth(text, style: style);
+
+    return Stack(
+      children: [
+        Positioned(
+          child: Container(
+            child: Text(text, style: style),
+            width: textWidth + 10,
+          ),
+        ),
+        Positioned(
+          right: 0,
+          child: Container(
+            alignment: Alignment.topRight,
+            width: size,
+            height: size,
+            child: const Icon(Icons.fiber_manual_record, size: 0),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.blue[400],
             ),
           ),
         ),
       ],
     );
+  }
+
+  static const maxWidth = 800.0;
+
+  double textWidgetWidth(String message, {TextStyle style}) {
+    // Longest message must fit in this width.
+    const constraints = BoxConstraints(
+      maxWidth: maxWidth,
+    );
+
+    // TODO(terry): Is there a better (less heavyweight) way of computing text
+    //              width than using the widget pipeline?
+    final richTextWidget = Text.rich(TextSpan(text: message), style: style)
+        .build(context) as RichText;
+    final renderObject = richTextWidget.createRenderObject(context);
+    renderObject.layout(constraints);
+    final boxes = renderObject.getBoxesForSelection(
+      TextSelection(
+          baseOffset: 0,
+          extentOffset: TextSpan(text: message).toPlainText().length),
+    );
+
+    final textWidth = boxes.last.right;
+
+    if (textWidth > maxWidth) {
+      // TODO(terry): If message > 800 pixels in width (not possible
+      //              today) but could be more robust.
+      logger.log(
+        'Computed text width > $maxWidth ($textWidth)\nmessage=$message.',
+        logger.LogLevel.warning,
+      );
+    }
+
+    return textWidth;
   }
 
   // WARNING: Do not checkin the debug flag set to true.
@@ -568,11 +836,11 @@ class HeapTreeViewState extends State<HeapTree>
     final currentAllocations = await controller.getAllocationProfile();
 
     if (controller.monitorAllocations.isNotEmpty) {
-      final previousLength = controller.monitorAllocations.length;
+      final previousSize = controller.monitorAllocations.length;
       int previousIndex = 0;
-      final currentLength = currentAllocations.length;
+      final currentSize = currentAllocations.length;
       int currentIndex = 0;
-      while (currentIndex < currentLength && previousIndex < previousLength) {
+      while (currentIndex < currentSize && previousIndex < previousSize) {
         final previousAllocation = controller.monitorAllocations[previousIndex];
         final currentAllocation = currentAllocations[currentIndex];
 
@@ -620,9 +888,9 @@ class HeapTreeViewState extends State<HeapTree>
         }
       }
 
-      // Insure all entries from previous and current were looked at.
-      assert(previousLength == previousIndex);
-      assert(currentLength == currentIndex);
+      // Insure all entries from previous and current monitors were looked at.
+      assert(previousSize == previousIndex, '$previousSize == $previousIndex');
+      assert(currentSize == currentIndex, '$currentSize == $currentIndex');
     }
 
     controller.monitorTimestamp = allocationtimestamp;
@@ -644,11 +912,40 @@ class HeapTreeViewState extends State<HeapTree>
     controller.monitorAllocations = currentAllocations;
   }
 
+  void highlightDropdown(bool directionDown) {
+    final numItems = controller.searchAutoComplete.value.length - 1;
+    var indexToSelect = controller.currentDefaultIndex;
+    if (directionDown) {
+      // Select next item in auto-complete overlay.
+      ++indexToSelect;
+      if (indexToSelect > numItems) {
+        // Greater than max go back to top list item.
+        indexToSelect = 0;
+      }
+    } else {
+      // Select previous item item in auto-complete overlay.
+      --indexToSelect;
+      if (indexToSelect < 0) {
+        // Less than first go back to bottom list item.
+        indexToSelect = numItems;
+      }
+    }
+
+    controller.currentDefaultIndex = indexToSelect;
+
+    // Cause the auto-complete list to update, list is small 10 items max.
+    controller.searchAutoComplete.value =
+        controller.searchAutoComplete.value.toList();
+  }
+
   /// Match, found,  select it and process via ValueNotifiers.
   void selectTheMatch(String foundName) {
     MemoryScreen.gaAction(name: memorySearchFieldKeyName);
     setState(() {
-      if (snapshotDisplay is MemoryHeapTable) {
+      if (tabController.index == allocationsTabIndex) {
+        controller.selectItemInAllocationTable(foundName);
+      } else if (tabController.index == analysisTabIndex &&
+          snapshotDisplay is MemoryHeapTable) {
         controller.groupByTreeTable.dataRoots.every((element) {
           element.collapseCascading();
           return true;
@@ -657,35 +954,43 @@ class HeapTreeViewState extends State<HeapTree>
     });
 
     selectFromSearchField(controller, foundName);
+    clearSearchField(controller);
   }
 
-  Widget _buildSearchFilterControls() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Container(
-          // TODO(terry): Use a more adaptive layout than forcing to 300.0
-          width: defaultSearchTextWidth,
-          height: defaultTextFieldHeight,
-          child: buildAutoCompleteSearchField(
-            controller: controller,
-            searchFieldKey: memorySearchFieldKey,
-            searchFieldEnabled: controller.snapshots.isNotEmpty,
-            shouldRequestFocus: controller.snapshots.isNotEmpty,
-            onSelection: selectTheMatch,
-          ),
-        ),
-        const SizedBox(width: denseSpacing),
-        FilterButton(
-          key: filterButtonKey,
-          onPressed: _filter,
-          // TODO(kenz): implement isFilterActive
-          isFilterActive: false,
-        ),
-      ],
-    );
+  bool get _isSearchable {
+    // Analysis tab and Snapshot exist or 'Allocations' tab allocations are monitored.
+    return (tabController.index == analysisTabIndex && !treeMapVisible) ||
+        (tabController.index == allocationsTabIndex &&
+            controller.monitorAllocations.isNotEmpty);
   }
+
+  Widget _buildSearchWidget(GlobalKey<State<StatefulWidget>> key) => Container(
+        width: wideSearchTextWidth,
+        height: defaultTextFieldHeight,
+        child: buildAutoCompleteSearchField(
+          controller: controller,
+          searchFieldKey: key,
+          searchFieldEnabled: _isSearchable,
+          shouldRequestFocus: _isSearchable,
+          onSelection: selectTheMatch,
+          onHighlightDropdown: highlightDropdown,
+        ),
+      );
+
+  Widget _buildSearchFilterControls() => Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          _buildSearchWidget(memorySearchFieldKey),
+          const SizedBox(width: denseSpacing),
+          FilterButton(
+            key: filterButtonKey,
+            onPressed: _filter,
+            // TODO(kenz): implement isFilterActive
+            isFilterActive: false,
+          ),
+        ],
+      );
 
   // TODO: Much of the logic for _takeHeapSnapshot() might want to move into the
   // controller.
@@ -782,9 +1087,14 @@ class HeapTreeViewState extends State<HeapTree>
 
   void _filter() {
     MemoryScreen.gaAction(name: 'SnapshotFilterDialog');
+    // TODO(terry): Remove barrierDismissble and make clicking outside
+    //              dialog same as cancel.
+    // Dialog isn't dismissed by clicking outside the dialog (modal).
+    // Pressing either the Apply or Cancel button will dismiss.
     showDialog(
       context: context,
       builder: (BuildContext context) => SnapshotFilterDialog(controller),
+      barrierDismissible: false,
     );
   }
 
@@ -845,7 +1155,7 @@ class HeapTreeViewState extends State<HeapTree>
     }
 
     // Select the snapshot just analyzed.
-    controller.selectionNotifier.value = Selection(
+    controller.selectionSnapshotNotifier.value = Selection(
       node: analyzeSnapshot,
       nodeIndex: analyzeSnapshot.index,
       scrollIntoView: true,
@@ -881,7 +1191,9 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
       treeColumn,
       _ClassOrInstanceCountColumn(),
       _ShallowSizeColumn(),
-      _RetainedSizeColumn(),
+      // TODO(terry): Don't display until dominator is implemented
+      //              Issue https://github.com/flutter/devtools/issues/2688
+      // _RetainedSizeColumn(),
     ]);
   }
 
@@ -917,21 +1229,64 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier);
 
-    addAutoDisposeListener(controller.selectTheSearchNotifier, () {
-      if (_trySelectItem()) {
-        setState(() {
-          controller.closeAutoCompleteOverlay();
-        });
-      }
-    });
+    addAutoDisposeListener(controller.selectTheSearchNotifier, _handleSearch);
 
-    addAutoDisposeListener(controller.searchNotifier, () {
-      if (_trySelectItem()) {
-        setState(() {
-          controller.closeAutoCompleteOverlay();
-        });
-      }
-    });
+    addAutoDisposeListener(controller.searchNotifier, _handleSearch);
+  }
+
+  void _handleSearch() {
+    if (_trySelectItem()) {
+      setState(() {
+        controller.closeAutoCompleteOverlay();
+      });
+    }
+  }
+
+  List<String> _snapshotMatches(String searchingValue) {
+    final matches = <String>[];
+
+    final externalMatches = <String>[];
+    final filteredMatches = <String>[];
+
+    switch (controller.groupingBy.value) {
+      case MemoryController.groupByLibrary:
+        final searchRoot = controller.activeSnapshot;
+        for (final reference in searchRoot.children) {
+          if (reference.isLibrary) {
+            matches.addAll(matchesInLibrary(reference, searchingValue));
+          } else if (reference.isExternals) {
+            final ExternalReferences refs = reference;
+            for (final ExternalReference ext in refs.children) {
+              final match = matchSearch(ext, searchingValue);
+              if (match != null) {
+                externalMatches.add(match);
+              }
+            }
+          } else if (reference.isFiltered) {
+            // Matches in the filtered nodes.
+            final FilteredReference filteredReference = reference;
+            for (final library in filteredReference.children) {
+              filteredMatches.addAll(matchesInLibrary(
+                library,
+                searchingValue,
+              ));
+            }
+          }
+        }
+        break;
+      case MemoryController.groupByClass:
+        matches.addAll(matchClasses(
+            controller.groupByTreeTable.dataRoots, searchingValue));
+        break;
+      case MemoryController.groupByInstance:
+        // TODO(terry): TBD
+        break;
+    }
+
+    // Ordered in importance (matches, external, filtered).
+    matches.addAll(externalMatches);
+    matches.addAll(filteredMatches);
+    return matches;
   }
 
   bool _trySelectItem() {
@@ -948,48 +1303,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
       // No exact match, return the list of possible matches.
       controller.clearSearchAutoComplete();
 
-      final externalMatches = <String>[];
-      final filteredMatches = <String>[];
-      final matches = <String>[];
-
-      switch (controller.groupingBy.value) {
-        case MemoryController.groupByLibrary:
-          final searchRoot = controller.activeSnapshot;
-          for (final reference in searchRoot.children) {
-            if (reference.isLibrary) {
-              matches.addAll(matchesInLibrary(reference, searchingValue));
-            } else if (reference.isExternals) {
-              final ExternalReferences refs = reference;
-              for (final ExternalReference ext in refs.children) {
-                final match = matchSearch(ext, searchingValue);
-                if (match != null) {
-                  externalMatches.add(match);
-                }
-              }
-            } else if (reference.isFiltered) {
-              // Matches in the filtered nodes.
-              final FilteredReference filteredReference = reference;
-              for (final library in filteredReference.children) {
-                filteredMatches.addAll(matchesInLibrary(
-                  library,
-                  searchingValue,
-                ));
-              }
-            }
-          }
-          break;
-        case MemoryController.groupByClass:
-          matches.addAll(matchClasses(
-              controller.groupByTreeTable.dataRoots, searchingValue));
-          break;
-        case MemoryController.groupByInstance:
-          // TODO(terry): TBD
-          break;
-      }
-
-      // Ordered in importance (matches, external, filtered).
-      matches.addAll(externalMatches);
-      matches.addAll(filteredMatches);
+      final matches = _snapshotMatches(searchingValue);
 
       // Remove duplicates and sort the matches.
       final normalizedMatches = matches.toSet().toList()..sort();
@@ -1055,12 +1369,13 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
   /// This finds and selects an exact match in the tree.
   /// Returns `true` if [searchingValue] is found in the tree.
   bool selectItemInTree(String searchingValue) {
+    // Search the snapshots.
     switch (controller.groupingBy.value) {
       case MemoryController.groupByLibrary:
         final searchRoot = controller.activeSnapshot;
-        if (controller.selectionNotifier.value.node == null) {
+        if (controller.selectionSnapshotNotifier.value.node == null) {
           // No selected node, then select the snapshot we're searching.
-          controller.selectionNotifier.value = Selection(
+          controller.selectionSnapshotNotifier.value = Selection(
             node: searchRoot,
             nodeIndex: searchRoot.index,
             scrollIntoView: true,
@@ -1109,7 +1424,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
 
   bool _selectInTree(Reference reference, search) {
     if (reference.name == search) {
-      controller.selectionNotifier.value = Selection(
+      controller.selectionSnapshotNotifier.value = Selection(
         node: reference,
         nodeIndex: reference.index,
         scrollIntoView: true,
@@ -1142,7 +1457,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
   Widget build(BuildContext context) {
     final root = controller.buildTreeFromAllData();
 
-    if (root != null) {
+    if (root != null && root.children.isNotEmpty) {
       // Snapshots and analyses exists display the trees.
       controller.groupByTreeTable = TreeTable<Reference>(
         dataRoots: root.children,
@@ -1151,7 +1466,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
         keyFactory: (libRef) => PageStorageKey<String>(libRef.name),
         sortColumn: columns[0],
         sortDirection: SortDirection.ascending,
-        selectionNotifier: controller.selectionNotifier,
+        selectionNotifier: controller.selectionSnapshotNotifier,
       );
 
       return controller.groupByTreeTable;
@@ -1419,6 +1734,8 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
   }
 }
 
+// TODO(terry): Remove ignore when dominator is implemented.
+// ignore: unused_element
 class _RetainedSizeColumn extends ColumnData<Reference> {
   _RetainedSizeColumn()
       : super(

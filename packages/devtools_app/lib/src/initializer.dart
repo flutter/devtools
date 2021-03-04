@@ -12,6 +12,7 @@ import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'notifications.dart';
 import 'routing.dart';
+import 'theme.dart';
 import 'url_utils.dart';
 
 /// Widget that requires business logic to be loaded before building its
@@ -58,20 +59,23 @@ class _InitializerState extends State<Initializer>
   bool _checkLoaded() => serviceManager.hasConnection;
 
   OverlayEntry currentDisconnectedOverlay;
-  StreamSubscription<bool> disconnectedOverlayReconnectSubscription;
 
   @override
   void initState() {
     super.initState();
 
-    // If we become disconnected, attempt to reconnect.
-    autoDispose(
-      serviceManager.onStateChange.where((connected) => !connected).listen((_) {
-        // Try to reconnect (otherwise, will fall back to showing the disconnected
-        // overlay).
+    // If we become disconnected by means other than a manual disconnect action,
+    // attempt to reconnect.
+    addAutoDisposeListener(serviceManager.connectedState, () {
+      final connectionState = serviceManager.connectedState.value;
+      if (!connectionState.connected &&
+          !connectionState.userInitiatedConnectionState) {
+        // Try to reconnect (otherwise, will fall back to showing the
+        // disconnected overlay).
         _attemptUrlConnection();
-      }),
-    );
+      }
+    });
+
     // Trigger a rebuild when the connection becomes available. This is done
     // by onConnectionAvailable and not onStateChange because we also need
     // to have queried what type of app this is before we load the UI.
@@ -119,11 +123,13 @@ class _InitializerState extends State<Initializer>
           currentDisconnectedOverlay == null) {
         Overlay.of(context).insert(_createDisconnectedOverlay());
 
-        // Set up a subscription to hide the overlay if we become reconnected.
-        disconnectedOverlayReconnectSubscription = serviceManager.onStateChange
-            .where((connected) => connected)
-            .listen((_) => hideDisconnectedOverlay());
-        autoDispose(disconnectedOverlayReconnectSubscription);
+        addAutoDisposeListener(serviceManager.connectedState, () {
+          final connectedState = serviceManager.connectedState.value;
+          if (connectedState.connected) {
+            // Hide the overlay if we become reconnected.
+            hideDisconnectedOverlay();
+          }
+        });
       }
     });
   }
@@ -131,8 +137,6 @@ class _InitializerState extends State<Initializer>
   void hideDisconnectedOverlay() {
     currentDisconnectedOverlay?.remove();
     currentDisconnectedOverlay = null;
-    disconnectedOverlayReconnectSubscription?.cancel();
-    disconnectedOverlayReconnectSubscription = null;
   }
 
   OverlayEntry _createDisconnectedOverlay() {
@@ -146,6 +150,7 @@ class _InitializerState extends State<Initializer>
             children: [
               const Spacer(),
               Text('Disconnected', style: theme.textTheme.headline3),
+              const SizedBox(height: defaultSpacing),
               if (widget.allowConnectionScreenOnDisconnect)
                 ElevatedButton(
                     onPressed: () {
@@ -164,6 +169,7 @@ class _InitializerState extends State<Initializer>
                 onPressed: hideDisconnectedOverlay,
                 child: const Text('Review History'),
               ),
+              const SizedBox(height: defaultSpacing),
             ],
           ),
         ),
@@ -176,8 +182,10 @@ class _InitializerState extends State<Initializer>
   Widget build(BuildContext context) {
     return _checkLoaded()
         ? widget.builder(context)
-        : const Scaffold(
-            body: CenteredCircularProgressIndicator(),
+        : Scaffold(
+            body: currentDisconnectedOverlay != null
+                ? const SizedBox()
+                : const CenteredCircularProgressIndicator(),
           );
   }
 }

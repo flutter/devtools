@@ -354,40 +354,23 @@ class MemoryTracker {
 //   instancesAccumulated: 3892
 //   instancesCurrent: 3892
 // }
-class ClassHeapDetailStats {
-  ClassHeapDetailStats(this.json) {
-    classRef = ClassRef.parse(json['class']);
-    if (serviceManager.service.isProtocolVersionSupportedNow(
-        supportedVersion: SemanticVersion(major: 3, minor: 18))) {
-      instancesCurrent = json['instancesCurrent'];
-      instancesDelta = json['instancesAccumulated'];
-      bytesCurrent = json['bytesCurrent'];
-      bytesDelta = json['accumulatedSize'];
-    } else {
-      _update(json['new']);
-      _update(json['old']);
-    }
-  }
 
-  static const int ALLOCATED_BEFORE_GC = 0;
-  static const int ALLOCATED_BEFORE_GC_SIZE = 1;
-  static const int LIVE_AFTER_GC = 2;
-  static const int LIVE_AFTER_GC_SIZE = 3;
-  static const int ALLOCATED_SINCE_GC = 4;
-  static const int ALLOCATED_SINCE_GC_SIZE = 5;
-  static const int ACCUMULATED = 6;
-  static const int ACCUMULATED_SIZE = 7;
+const int ALLOCATED_BEFORE_GC = 0;
+const int ALLOCATED_BEFORE_GC_SIZE = 1;
+const int LIVE_AFTER_GC = 2;
+const int LIVE_AFTER_GC_SIZE = 3;
+const int ALLOCATED_SINCE_GC = 4;
+const int ALLOCATED_SINCE_GC_SIZE = 5;
+const int ACCUMULATED = 6;
+const int ACCUMULATED_SIZE = 7;
 
-  final Map<String, dynamic> json;
-
+ClassHeapDetailStats parseJsonClassHeapStats(Map<String, dynamic> json) {
   int instancesCurrent = 0;
   int instancesDelta = 0;
   int bytesCurrent = 0;
   int bytesDelta = 0;
 
   ClassRef classRef;
-
-  String get type => json['type'];
 
   void _update(List<dynamic> stats) {
     instancesDelta += stats[ACCUMULATED];
@@ -396,9 +379,25 @@ class ClassHeapDetailStats {
     bytesCurrent += stats[LIVE_AFTER_GC_SIZE] + stats[ALLOCATED_SINCE_GC_SIZE];
   }
 
-  @override
-  String toString() => '[ClassHeapStats type: $type, class: ${classRef.name}, '
-      'count: $instancesCurrent, bytes: $bytesCurrent]';
+  classRef = ClassRef.parse(json['class']);
+  if (serviceManager.service.isProtocolVersionSupportedNow(
+      supportedVersion: SemanticVersion(major: 3, minor: 18))) {
+    instancesCurrent = json['instancesCurrent'];
+    instancesDelta = json['instancesAccumulated'];
+    bytesCurrent = json['bytesCurrent'];
+    bytesDelta = json['accumulatedSize'];
+  } else {
+    _update(json['new']);
+    _update(json['old']);
+  }
+
+  return ClassHeapDetailStats(
+    classRef,
+    bytes: bytesCurrent,
+    deltaBytes: bytesDelta,
+    instances: instancesCurrent,
+    deltaInstances: instancesDelta,
+  );
 }
 
 class InstanceSummary {

@@ -540,19 +540,17 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     List<double> columnWidths,
   ) {
     Widget rowForNode(T node) {
-      final isNodeSelected = selectionNotifier.value.node == node;
       node.index = index;
       return TableRow<T>(
         key: widget.keyFactory(node),
         linkedScrollControllerGroup: linkedScrollControllerGroup,
         node: node,
         onPressed: (item) => _onItemPressed(item, index),
-        backgroundColor: isNodeSelected
-            ? Theme.of(context).selectedRowColor
-            : alternatingColorForIndexWithContext(index, context),
+        backgroundColor: alternatingColorForIndexWithContext(index, context),
         columns: widget.columns,
         columnWidths: columnWidths,
         expandableColumn: widget.treeColumn,
+        isSelected: selectionNotifier.value.node == node,
         isExpanded: node.isExpanded,
         isExpandable: node.isExpandable,
         isShown: node.shouldShow(),
@@ -652,10 +650,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     // get the index of the first item fully visible in the viewport
     final firstItemIndex = (scrollController.offset / defaultRowHeight).ceil();
 
-    // '-1' in the following calculations is needed because the header row
-    // occupies space in the viewport so we must subtract it out.
+    // '-2' in the following calculations is needed because the header row
+    // occupies space in the viewport so we must subtract 1 for that, and we
+    // subtract 1 to account for the fact that a partial row could be displayed
+    // at the top and bottom of the view.
     final minCompleteItemsInView =
-        (viewportHeight / defaultRowHeight).floor() - 1;
+        max((viewportHeight / defaultRowHeight).floor() - 2, 0);
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
     int newSelectedNodeIndex;
 
@@ -696,10 +696,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
 
     setState(() {
+      // We do not need to scroll into view here because we have manually
+      // managed the scrolling in the above checks for `isBelowViewport` and
+      // `isAboveViewport`.
       selectionNotifier.value = Selection(
         node: newSelectedNode,
         nodeIndex: newSelectedNodeIndex,
-        scrollIntoView: true,
       );
     });
   }
@@ -890,11 +892,6 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    final itemDelegate = SliverChildBuilderDelegate(
-      _buildItem,
-      childCount: widget.data.length,
-    );
-
     // If we're at the end already, scroll to expose the new content.
     if (widget.autoScrollContent) {
       if (scrollController.hasClients && scrollController.atScrollBottom) {
@@ -923,6 +920,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
             ),
             Expanded(
               child: Scrollbar(
+                isAlwaysShown: true,
+                controller: scrollController,
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   onTapDown: (a) => widget.focusNode?.requestFocus(),
@@ -936,9 +935,10 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                           )
                         : false,
                     focusNode: widget.focusNode,
-                    child: ListView.custom(
+                    child: ListView.builder(
                       controller: scrollController,
-                      childrenDelegate: itemDelegate,
+                      itemCount: widget.data.length,
+                      itemBuilder: _buildItem,
                     ),
                   ),
                 ),
@@ -1215,7 +1215,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final backgroundColor =
         widget.backgroundColor ?? titleSolidBackgroundColor(Theme.of(context));
     if (widget.isSelected) {
-      return defaultSelectionColor;
+      return Theme.of(context).selectedRowColor;
     }
     final searchAwareBackgroundColor = isSearchMatch
         ? Color.alphaBlend(
@@ -1317,8 +1317,11 @@ class _TableRowState<T> extends State<TableRow<T>>
           final expandIndicator = widget.isExpandable
               ? RotationTransition(
                   turns: expandArrowAnimation,
-                  child: const Icon(
+                  child: Icon(
                     Icons.expand_more,
+                    color: widget.isSelected
+                        ? defaultSelectionForegroundColor
+                        : null,
                     size: defaultIconSize,
                   ),
                 )
@@ -1372,7 +1375,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final textColor = widget.isSelected
         ? defaultSelectionForegroundColor
         : column.getTextColor(widget.node);
-    final fontStyle = fixedFontStyle(context);
+    final fontStyle = Theme.of(context).fixedFontStyle;
     return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
   }
 

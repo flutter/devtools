@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/common_widgets.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 // TODO(kenz): add tests for other widgets in common_widgets.dart
@@ -17,6 +20,10 @@ void main() {
   const windowSize = Size(1000.0, 1000.0);
 
   group('Common widgets', () {
+    setUp(() {
+      setGlobal(ServiceConnectionManager, FakeServiceManager());
+    });
+
     testWidgetsWithWindowSize('recordingInfo builds info for pause', windowSize,
         (WidgetTester tester) async {
       await tester.pumpWidget(wrap(const RecordingInfo(

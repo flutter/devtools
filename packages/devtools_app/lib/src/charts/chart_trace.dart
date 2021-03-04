@@ -30,6 +30,22 @@ class PaintCharacteristics {
     this.symbol = ChartSymbol.ring,
     this.strokeWidth = 1,
     this.diameter = 1,
+    this.concentricCenterColor = Colors.black,
+    this.concentricCenterDiameter = 1,
+    this.width = 1,
+    this.height = 1,
+    this.fixedMinY,
+    this.fixedMaxY,
+  });
+
+  PaintCharacteristics.concentric({
+    @required this.color,
+    this.colorAggregate,
+    this.symbol = ChartSymbol.concentric,
+    this.strokeWidth = 1,
+    this.diameter = 1,
+    this.concentricCenterColor = Colors.black,
+    this.concentricCenterDiameter = 1,
     this.width = 1,
     this.height = 1,
     this.fixedMinY,
@@ -46,6 +62,12 @@ class PaintCharacteristics {
 
   /// Primary color.
   Color color;
+
+  /// Center circle color.
+  Color concentricCenterColor;
+
+  /// Center circle size.
+  double concentricCenterDiameter;
 
   /// Color to use if count > 1.
   ///
@@ -254,6 +276,7 @@ enum ChartType {
 enum ChartSymbol {
   ring, // Lined circle
   disc, // Filled circle
+  concentric, // outer ring and inner disc
   square, // Lined square
   filledSquare, // Filled square
   triangle, // Lined triangle

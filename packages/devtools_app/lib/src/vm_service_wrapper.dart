@@ -863,6 +863,46 @@ class VmServiceWrapper implements VmService {
           _vmService.getRetainingPath(isolateId, targetId, limit));
 
   @override
+  Future<CpuSamples> getAllocationTraces(String isolateId,
+      {int timeOriginMicros, int timeExtentMicros, String classId}) {
+    return trackFuture(
+        'getAllocationTraces',
+        _vmService.getAllocationTraces(isolateId,
+            timeOriginMicros: timeOriginMicros,
+            timeExtentMicros: timeExtentMicros,
+            classId: classId));
+  }
+
+  @override
+  Future<Success> setTraceClassAllocation(
+    String isolateId,
+    String classId,
+    bool enable,
+  ) async {
+    if (await isProtocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 3, minor: 43))) {
+      return trackFuture('setTraceClassAllocation',
+          _vmService.setTraceClassAllocation(isolateId, classId, enable));
+    } else {
+      final Map<String, dynamic> args = {};
+      if (classId != null) {
+        args['classId'] = classId;
+      }
+      if (enable != null) {
+        args['enable'] = enable ? true : false;
+      }
+
+      final response = await trackFuture(
+        '_setTraceClassAllocation',
+        callMethod('_setTraceClassAllocation',
+            isolateId: isolateId, args: args),
+      );
+
+      return response as Success;
+    }
+  }
+
+  @override
   Future<ProcessMemoryUsage> getProcessMemoryUsage() {
     return trackFuture(
         'getProcessMemoryUsage', _vmService.getProcessMemoryUsage());

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
@@ -12,12 +15,13 @@ import '../auto_dispose_mixin.dart';
 import '../blocking_action_mixin.dart';
 import '../common_widgets.dart';
 import '../connected_app.dart';
+import '../error_badge_manager.dart';
 import '../globals.dart';
-import '../octicons.dart';
 import '../screen.dart';
 import '../service_extensions.dart' as extensions;
 import '../split.dart';
 import '../theme.dart';
+import '../ui/icons.dart';
 import '../ui/service_extension_widgets.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
@@ -65,6 +69,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   bool get enableButtons =>
       actionInProgress == false && connectionInProgress == false;
 
+  static const summaryTreeKey = Key('Summary Tree');
+  static const detailsTreeKey = Key('Details Tree');
+
   @override
   void initState() {
     super.initState();
@@ -95,16 +102,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final summaryTree = Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).focusColor),
-      ),
-      child: InspectorTree(
-        controller: summaryTreeController,
-        isSummaryTree: true,
-      ),
-    );
+    final summaryTree = _buildSummaryTreeColumn();
+
     final detailsTree = InspectorTree(
+      key: detailsTreeKey,
       controller: detailsTreeController,
     );
 
@@ -159,6 +160,40 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       ],
     );
   }
+
+  Widget _buildSummaryTreeColumn() => OutlineDecoration(
+        child: ValueListenableBuilder(
+          valueListenable: serviceManager.errorBadgeManager
+              .erroredItemsForPage(InspectorScreen.id),
+          builder: (_, LinkedHashMap<String, DevToolsError> errors, __) {
+            final inspectableErrors = errors.map(
+                (key, value) => MapEntry(key, value as InspectableWidgetError));
+            return Stack(
+              children: [
+                InspectorTree(
+                  key: summaryTreeKey,
+                  controller: summaryTreeController,
+                  isSummaryTree: true,
+                  widgetErrors: inspectableErrors,
+                ),
+                if (errors.isNotEmpty && inspectorController != null)
+                  ValueListenableBuilder(
+                    valueListenable: inspectorController.selectedErrorIndex,
+                    builder: (_, selectedErrorIndex, __) => Positioned(
+                      top: 0,
+                      right: 0,
+                      child: ErrorNavigator(
+                        errors: inspectableErrors,
+                        errorIndex: selectedErrorIndex,
+                        onSelectError: inspectorController.selectErrorByIndex,
+                      ),
+                    ),
+                  )
+              ],
+            );
+          },
+        ),
+      );
 
   List<Widget> getServiceExtensionWidgets() {
     return [
@@ -262,6 +297,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         onLayoutExplorerSupported: _onLayoutExplorerSupported,
       );
 
+      // Clear any existing badge/errors for older errors that were collected.
+      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
+      inspectorController.filterErrors();
+
       // TODO(jacobr): move this notice display to once a day.
       if (!displayedWidgetTrackingNotice) {
         // ignore: unawaited_futures
@@ -294,5 +333,73 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     blockWhileInProgress(() async {
       await inspectorController?.onForceRefresh();
     });
+  }
+}
+
+class ErrorNavigator extends StatelessWidget {
+  const ErrorNavigator({
+    Key key,
+    @required this.errors,
+    @required this.errorIndex,
+    @required this.onSelectError,
+  }) : super(key: key);
+
+  final LinkedHashMap<String, InspectableWidgetError> errors;
+
+  final int errorIndex;
+
+  final Function(int) onSelectError;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = errorIndex != null
+        ? 'Error ${errorIndex + 1}/${errors.length}'
+        : 'Errors: ${errors.length}';
+    return Container(
+      color: devtoolsError,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: defaultSpacing,
+          vertical: denseSpacing,
+        ),
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: denseSpacing),
+              child: Text(label),
+            ),
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              splashRadius: defaultIconSize,
+              icon: const Icon(Icons.keyboard_arrow_up),
+              onPressed: _previousError,
+            ),
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              splashRadius: defaultIconSize,
+              icon: const Icon(Icons.keyboard_arrow_down),
+              onPressed: _nextError,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _previousError() {
+    var newIndex = errorIndex == null ? errors.length - 1 : errorIndex - 1;
+    while (newIndex < 0) {
+      newIndex += errors.length;
+    }
+
+    onSelectError(newIndex);
+  }
+
+  void _nextError() {
+    final newIndex = errorIndex == null ? 0 : (errorIndex + 1) % errors.length;
+
+    onSelectError(newIndex);
   }
 }

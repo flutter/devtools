@@ -25,6 +25,39 @@ import 'debugger_model.dart';
 // Make sure this a checked in with `mute: true`.
 final _log = DebugTimingLogger('debugger', mute: true);
 
+/// A line in the console.
+///
+/// TODO(jacobr): support console lines that are structured error messages as
+/// well.
+class ConsoleLine {
+  factory ConsoleLine.text(String text) => TextConsoleLine(text);
+
+  factory ConsoleLine.variable(Variable variable) =>
+      VariableConsoleLine(variable);
+
+  ConsoleLine._();
+}
+
+class TextConsoleLine extends ConsoleLine {
+  TextConsoleLine(this.text) : super._();
+  final String text;
+
+  @override
+  String toString() {
+    return text;
+  }
+}
+
+class VariableConsoleLine extends ConsoleLine {
+  VariableConsoleLine(this.variable) : super._();
+  final Variable variable;
+
+  @override
+  String toString() {
+    return variable.toString();
+  }
+}
+
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
@@ -66,10 +99,6 @@ class DebuggerController extends DisposableController
   /// This indicates that we've requested a resume (or step) operation from the
   /// VM, but haven't yet received the 'resumed' isolate event.
   ValueListenable<bool> get resuming => _resuming;
-
-  final _hasFrames = ValueNotifier<bool>(false);
-
-  ValueNotifier get hasFrames => _hasFrames;
 
   Event _lastEvent;
 
@@ -154,13 +183,13 @@ class DebuggerController extends DisposableController
     _librariesVisible.value = !_librariesVisible.value;
   }
 
-  final _stdio = ValueNotifier<List<String>>([]);
+  final _stdio = ValueNotifier<List<ConsoleLine>>([]);
   bool _stdioTrailingNewline = false;
 
   /// Return the stdout and stderr emitted from the application.
   ///
   /// Note that this output might be truncated after significant output.
-  ValueListenable<List<String>> get stdio => _stdio;
+  ValueListenable<List<ConsoleLine>> get stdio => _stdio;
 
   IsolateRef isolateRef;
 
@@ -169,28 +198,41 @@ class DebuggerController extends DisposableController
     _stdio.value = [];
   }
 
+  void appendInstanceRef(InstanceRef ref) {
+    _stdioTrailingNewline = false;
+    // TODO(jacobr): this is O(n) in the number of lines. Use a custom ValueListenable that notiifies on list appends instead.
+    final lines = _stdio.value.toList();
+    final variable = Variable.fromRef(ref);
+    buildVariablesTree(variable);
+    lines.add(ConsoleLine.variable(variable));
+    _stdio.value = lines;
+  }
+
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {
     const int kMaxLogItemsLowerBound = 5000;
     const int kMaxLogItemsUpperBound = 5500;
 
     // Parse out the new lines and append to the end of the existing lines.
+
+    // TODO(jacobr): this is O(n) in the number of lines. Use a custom ValueListenable that notiifies on list appends instead.
     var lines = _stdio.value.toList();
     final newLines = text.split('\n');
 
-    if (lines.isNotEmpty && !_stdioTrailingNewline) {
-      lines[lines.length - 1] = '${lines[lines.length - 1]}${newLines.first}';
+    final last = lines.safeLast;
+    if (lines.isNotEmpty && !_stdioTrailingNewline && last is TextConsoleLine) {
+      lines.last = ConsoleLine.text('${last.text}${newLines.first}');
       if (newLines.length > 1) {
-        lines.addAll(newLines.sublist(1));
+        lines.addAll(newLines.sublist(1).map((text) => ConsoleLine.text(text)));
       }
     } else {
-      lines.addAll(newLines);
+      lines.addAll(newLines.map((text) => ConsoleLine.text(text)));
     }
 
     _stdioTrailingNewline = text.endsWith('\n');
 
     // Don't report trailing blank lines.
-    if (lines.isNotEmpty && lines.last.isEmpty) {
+    if (lines.isNotEmpty && (last is TextConsoleLine && last.text.isEmpty)) {
       lines = lines.sublist(0, lines.length - 1);
     }
 
@@ -218,7 +260,7 @@ class DebuggerController extends DisposableController
       _breakpoints.value = [];
       _breakpointsWithLocation.value = [];
       await _getStackOperation?.cancel();
-      _populateFrameInfo([]);
+      _populateFrameInfo([], truncated: false);
       return;
     }
 
@@ -378,7 +420,6 @@ class DebuggerController extends DisposableController
 
     if (event.isolate.id != isolateRef?.id) return;
 
-    _hasFrames.value = event.topFrame != null;
     _lastEvent = event;
 
     switch (event.kind) {
@@ -573,6 +614,7 @@ class DebuggerController extends DisposableController
   }
 
   final _hasTruncatedFrames = ValueNotifier<bool>(false);
+
   ValueListenable<bool> get hasTruncatedFrames => _hasTruncatedFrames;
 
   CancelableOperation<_StackInfo> _getStackOperation;
@@ -585,31 +627,27 @@ class DebuggerController extends DisposableController
 
     // Perform an early exit if we're not paused.
     if (!paused) {
-      _populateFrameInfo([]);
+      _populateFrameInfo([], truncated: false);
       return;
     }
 
-    // First, notify based on the single 'pauseEvent.topFrame' frame.
-    if (pauseEvent?.topFrame != null) {
-      final tempFrames = _framesForCallStack(
-        [pauseEvent.topFrame],
-        reportedException: pauseEvent?.exception,
-      );
-      _populateFrameInfo(
-        [await _createStackFrameWithLocation(tempFrames.first)],
-        truncated: true,
-      );
-      _log.log('created first frame');
-    }
+    // We populate the first 12 frames; this ~roughly corresponds to the number
+    // of visible stack frames.
+    const initialFrameRequestCount = 12;
 
-    // We populate the first 10 frames to match the behavior in VS Code.
-    _getStackOperation =
-        CancelableOperation.fromFuture(_getStackInfo(limit: 10));
+    _getStackOperation = CancelableOperation.fromFuture(_getStackInfo(
+      limit: initialFrameRequestCount,
+    ));
     final stackInfo = await _getStackOperation.value;
     _populateFrameInfo(
       stackInfo.frames,
       truncated: stackInfo.truncated ?? false,
     );
+
+    // In the background, populate the rest of the frames.
+    if (stackInfo.truncated) {
+      unawaited(_getFullStack());
+    }
   }
 
   Future<_StackInfo> _getStackInfo({int limit}) async {
@@ -631,9 +669,8 @@ class DebuggerController extends DisposableController
 
   void _populateFrameInfo(
     List<StackFrameAndSourcePosition> frames, {
-    bool truncated,
+    @required final bool truncated,
   }) {
-    truncated ??= false;
     _log.log('populated frame info');
     _stackFramesWithLocation.value = frames;
     _hasTruncatedFrames.value = truncated;
@@ -644,7 +681,7 @@ class DebuggerController extends DisposableController
     }
   }
 
-  Future<void> getFullStack() async {
+  Future<void> _getFullStack() async {
     await _getStackOperation?.cancel();
     _getStackOperation = CancelableOperation.fromFuture(_getStackInfo());
     final stackInfo = await _getStackOperation.value;
@@ -1187,6 +1224,7 @@ class EvalHistory {
 
 class _StackInfo {
   _StackInfo(this.frames, this.truncated);
+
   final List<StackFrameAndSourcePosition> frames;
   final bool truncated;
 }

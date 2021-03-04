@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'theme.dart';
+import '../theme.dart';
 
 /// This file holds color constants that are used throughout DevTools.
 // TODO(kenz): move colors from other pages to this file for consistency.
@@ -37,7 +37,7 @@ extension FlameChartColorScheme on ColorScheme {
       isLight ? Colors.black54 : const Color.fromARGB(255, 200, 200, 200);
 }
 
-const defaultSelectionForegroundColor = Colors.black;
+const defaultSelectionForegroundColor = Colors.white;
 const defaultSelectionColor = Color(0xFF36C6F4);
 
 const searchMatchColor = Colors.yellow;

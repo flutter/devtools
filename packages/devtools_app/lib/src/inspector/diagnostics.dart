@@ -27,9 +27,15 @@ const bool _showRenderObjectPropertiesAsLinks = false;
 /// * [InspectorTree], which uses this class to display each node in the in
 ///   inspector tree.
 class DiagnosticsNodeDescription extends StatelessWidget {
-  const DiagnosticsNodeDescription(this.diagnostic);
+  const DiagnosticsNodeDescription(
+    this.diagnostic, {
+    this.isSelected,
+    this.errorText,
+  });
 
   final RemoteDiagnosticsNode diagnostic;
+  final bool isSelected;
+  final String errorText;
 
   Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -209,16 +215,45 @@ class DiagnosticsNodeDescription extends StatelessWidget {
             textStyle.merge(inspector_text_styles.regularBold(colorScheme));
       }
 
-      children.add(Flexible(
-        child: buildDescription(
-          diagnostic.description,
-          textStyle,
-          colorScheme,
-          isProperty: false,
-        ),
-      ));
+      var diagnosticDescription = buildDescription(
+        diagnostic.description,
+        textStyle,
+        colorScheme,
+        isProperty: false,
+      );
+
+      if (errorText != null) {
+        // TODO(dantup): Find if there's a way to achieve this without
+        //  the nested row.
+        diagnosticDescription = Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            diagnosticDescription,
+            _buildErrorText(colorScheme),
+          ],
+        );
+      }
+
+      children.add(Expanded(child: diagnosticDescription));
     }
 
     return Row(mainAxisSize: MainAxisSize.min, children: children);
+  }
+
+  Flexible _buildErrorText(ColorScheme colorScheme) {
+    return Flexible(
+      child: RichText(
+        textAlign: TextAlign.right,
+        overflow: TextOverflow.ellipsis,
+        text: TextSpan(
+          text: errorText,
+          // When the node is selected, the background will be an error
+          // color so don't render the text the same color.
+          style: isSelected
+              ? inspector_text_styles.regular
+              : inspector_text_styles.error(colorScheme),
+        ),
+      ),
+    );
   }
 }

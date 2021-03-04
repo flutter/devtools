@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
+import '../dialogs.dart';
 import '../extent_delegate_list.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../theme.dart';
@@ -246,21 +247,28 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       onExit: _handleMouseExit,
       onHover: _handleMouseHover,
       child: RawKeyboardListener(
+        autofocus: true,
         focusNode: focusNode,
         onKey: (event) => _handleKeyEvent(event),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final customPaints = buildCustomPaints(constraints, context);
-            final flameChart = _buildFlameChart(constraints);
-            return customPaints.isNotEmpty
-                ? Stack(
-                    children: [
-                      flameChart,
-                      ...customPaints,
-                    ],
-                  )
-                : flameChart;
-          },
+        // Scrollbar needs to wrap [LayoutBuilder] so that the scroll bar is
+        // rendered on top of the custom painters defined in [buildCustomPaints]
+        child: Scrollbar(
+          controller: verticalController,
+          isAlwaysShown: true,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final customPaints = buildCustomPaints(constraints, context);
+              final flameChart = _buildFlameChart(constraints);
+              return customPaints.isNotEmpty
+                  ? Stack(
+                      children: [
+                        flameChart,
+                        ...customPaints,
+                      ],
+                    )
+                  : flameChart;
+            },
+          ),
         ),
       ),
     );
@@ -268,6 +276,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   Widget _buildFlameChart(BoxConstraints constraints) {
     return ExtentDelegateListView(
+      physics: const ClampingScrollPhysics(),
       controller: verticalController,
       extentDelegate: verticalExtentDelegate,
       customPointerSignalHandler: _handlePointerSignal,
@@ -353,7 +362,13 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       double deltaY = event.scrollDelta.dy;
       if (deltaY.abs() >= deltaX.abs()) {
         if (_altKeyPressed) {
-          verticalController.jumpTo(verticalController.offset + deltaY);
+          verticalController.jumpTo(math.max(
+            math.min(
+              verticalController.offset + deltaY,
+              verticalController.position.maxScrollExtent,
+            ),
+            0.0,
+          ));
         } else {
           deltaY = deltaY.clamp(
             -FlameChart.maxScrollWheelDelta,
@@ -1300,4 +1315,141 @@ class TimelineGridPainter extends FlameChartPainter {
         duration,
         colorScheme,
       );
+}
+
+class FlameChartHelpButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return HelpButton(
+      onPressed: () => showDialog(
+        context: context,
+        builder: (context) => _FlameChartHelpDialog(),
+      ),
+    );
+  }
+}
+
+class _FlameChartHelpDialog extends StatelessWidget {
+  /// A fixed width for the first column in the help dialog to ensure that the
+  /// subsections are aligned.
+  static const firstColumnWidth = 190.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DevToolsDialog(
+      title: dialogTitleText(theme, 'Flame Chart Help'),
+      includeDivider: false,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...dialogSubHeader(theme, 'Navigation'),
+          _buildNavigationInstructions(theme),
+          const SizedBox(height: denseSpacing),
+          ...dialogSubHeader(theme, 'Zoom'),
+          _buildZoomInstructions(theme),
+        ],
+      ),
+      actions: [
+        DialogCloseButton(),
+      ],
+    );
+  }
+
+  Widget _buildNavigationInstructions(ThemeData theme) {
+    return Row(
+      children: [
+        SizedBox(
+          width: firstColumnWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'click + drag • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'click + fling • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'alt/option + scroll • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'scroll left / right • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'a / d • ',
+                style: theme.fixedFontStyle,
+              ),
+            ],
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Pan chart up / down / left / right',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              'Fling chart up / down / left / right',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              'Pan chart up / down',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              'Pan chart left / right',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              'Pan chart left / right',
+              style: theme.subtleTextStyle,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildZoomInstructions(ThemeData theme) {
+    return Row(
+      children: [
+        SizedBox(
+          width: firstColumnWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'scroll up / down • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
+                'w / s • ',
+                style: theme.fixedFontStyle,
+              ),
+            ],
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'zoom in / out',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              'zoom in / out',
+              style: theme.subtleTextStyle,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 }

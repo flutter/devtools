@@ -20,6 +20,7 @@ import '../table.dart';
 import '../table_data.dart';
 import '../ui/search.dart';
 import '../utils.dart';
+import '../version.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
@@ -101,6 +102,125 @@ ChartInterval chartInterval(String displayName) {
   }
 }
 
+class AllocationStackTrace {
+  AllocationStackTrace(CpuSample sample, {List<ProfileFunction> functions}) {
+    computeStacktrace(sample, functions: functions);
+  }
+
+  int timestamp;
+
+  var showFullStacktrace = false;
+
+  final stacktrace = <String>[];
+
+  final sources = <String>[];
+
+  int get stackDepth => stacktrace.length;
+
+  static const NoClasses = 0;
+  static const DartClasses = 1;
+  static const FlutterClasses = 2;
+
+  static const DartFlutterClasses = DartClasses | FlutterClasses;
+
+  bool hideDartClasses(int hideClasses) =>
+      hideClasses & DartClasses == DartClasses;
+  bool hideFlutterClasses(int hideClasses) =>
+      hideClasses & FlutterClasses == FlutterClasses;
+
+  /// Display stacktrace format is:
+  ///    [className.functionName]
+  /// [maxLines] default is 4, if -1 then display all lines
+  String stacktraceDisplay({
+    int maxLines = 4,
+    int hideClasses = DartFlutterClasses,
+  }) {
+    final buffer = StringBuffer();
+    var lines = 0;
+    for (var stackEntry in stacktrace) {
+      if (maxLines == -1 || lines++ < maxLines) {
+        buffer.writeln('- $stackEntry');
+      }
+    }
+
+    return buffer.toString();
+  }
+
+  String get sourcesDisplay => sources.join('\r');
+
+  void computeStacktrace(CpuSample cpuSample,
+      {List<ProfileFunction> functions}) {
+    if (cpuSample.stack.isNotEmpty) {
+      final stackLength = cpuSample.stack.length;
+      for (var stackIndex = 0; stackIndex < stackLength; stackIndex++) {
+        final functionId = cpuSample.stack[stackIndex];
+        final ProfileFunction profileFunc = functions[functionId];
+        String ownerName;
+        String functionName;
+        if (profileFunc.function is FuncRef) {
+          final FuncRef funcRef = profileFunc.function;
+          if (funcRef.owner is ClassRef) {
+            final ClassRef classRef = funcRef.owner;
+            ownerName = classRef.name;
+          } else if (funcRef.owner is LibraryRef) {
+            final LibraryRef libraryRef = funcRef.owner;
+            ownerName = libraryRef.name;
+          } else {
+            assert(funcRef.owner is FuncRef);
+            final FuncRef fRef = funcRef.owner;
+            ownerName = '${fRef.name}.';
+          }
+          functionName = funcRef.name;
+        } else {
+          final NativeFunction nativeFunction = profileFunc.function;
+          ownerName = '';
+          functionName = nativeFunction.name;
+        }
+
+        // Skip any internal binding names e.g.,
+        // _WidgetsFlutterBinding&BindingBase&GestureBinding&SchedulerBinding...
+        if (!ownerName.contains('&')) {
+          timestamp = cpuSample.timestamp;
+          if (ownerName == '<anonymous closure>.' &&
+              functionName == '<anonymous closure>') {
+            stacktrace.add(functionName);
+          } else {
+            stacktrace.add('$ownerName.$functionName');
+          }
+          sources.add(profileFunc.resolvedUrl);
+        }
+      }
+    }
+  }
+}
+
+class AllocationSamples {
+  AllocationSamples(this.classRef, CpuSamples cpuSamples) {
+    _computeCpuSamples(cpuSamples);
+  }
+
+  final ClassRef classRef;
+
+  final stacktraces = <AllocationStackTrace>[];
+
+  int get totalStacktraces => stacktraces?.length;
+
+  void _computeCpuSamples(CpuSamples cpuSamples) {
+    final samplesLength = cpuSamples.samples.length;
+    for (var index = 0; index < samplesLength; index++) {
+      final cpuSample = cpuSamples.samples[index];
+      if (cpuSample.stack.isNotEmpty) {
+        stacktraces.add(
+          AllocationStackTrace(
+            cpuSample,
+            functions: cpuSamples.functions,
+          ),
+        );
+      }
+    }
+  }
+}
+
 /// This class contains the business logic for [memory.dart].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
@@ -113,7 +233,15 @@ class MemoryController extends DisposableController
   MemoryController() {
     memoryTimeline = MemoryTimeline(this);
     memoryLog = MemoryLog(this);
+
+    /// package:vm_service version 6.1.0+1 updated the VM Service protocol version
+    /// to 3.43.0. This changed snapshot indexes for classes, instances and
+    /// sentinels.  Primarily classes are indexed by a 0 based index not (1-based).
+    newSnapshotSemantics = serviceManager.service.isProtocolVersionSupportedNow(
+        supportedVersion: SemanticVersion(major: 3, minor: 43));
   }
+
+  bool newSnapshotSemantics;
 
   static const logFilenamePrefix = 'memory_log_';
 
@@ -124,6 +252,13 @@ class MemoryController extends DisposableController
       _androidCollectionEnabled;
 
   final _androidCollectionEnabled = ValueNotifier<bool>(androidADBDefault);
+
+  // Memory statistics displayed as raw numbers or units (KB, MB, GB).
+  static const unitDisplayedDefault = true;
+
+  ValueListenable<bool> get unitDisplayed => _unitDisplayed;
+
+  final _unitDisplayed = ValueNotifier<bool>(unitDisplayedDefault);
 
   final List<Snapshot> snapshots = [];
 
@@ -180,25 +315,6 @@ class MemoryController extends DisposableController
 
   List<FieldReference> get instanceRoot => _instanceRoot;
 
-  /// Leaf node of allocation monitor selected?  If selected then the Allocation Profile of all
-  /// classes is displayed (class name, instance count, accumulator, byte size, accumulator).
-  final _leafAllocationMonitorSelectedNotifier =
-      ValueNotifier<AllocationMonitorReference>(null);
-
-  ValueListenable<AllocationMonitorReference>
-      get leafAllocationMonitorSelectedNotifier =>
-          _leafAllocationMonitorSelectedNotifier;
-
-  AllocationMonitorReference get selectedAllocationMonitorLeaf =>
-      _leafAllocationMonitorSelectedNotifier.value;
-
-  set selectedAllocationMonitorLeaf(AllocationMonitorReference selected) {
-    _leafAllocationMonitorSelectedNotifier.value = selected;
-  }
-
-  bool get isAllocationMonitorLeafSelected =>
-      selectedAllocationMonitorLeaf != null;
-
   /// Leaf node of analysis selected?  If selected then the field
   /// view is displayed to view an abbreviated fields of an instance.
   final _leafAnalysisSelectedNotifier = ValueNotifier<AnalysisInstance>(null);
@@ -239,7 +355,7 @@ class MemoryController extends DisposableController
     if (snapshots.isEmpty) return null;
 
     // Is a selected table row under a snapshot.
-    final nodeSelected = selectionNotifier.value.node;
+    final nodeSelected = selectionSnapshotNotifier.value.node;
     final snapshot = getSnapshot(nodeSelected);
     if (snapshot != null) {
       // Has the snapshot (with a selected row) been analyzed?
@@ -270,6 +386,14 @@ class MemoryController extends DisposableController
     if (foundMatch.isEmpty) return snapshot;
 
     return null;
+  }
+
+  ValueListenable get treeMapVisible => _treeMapVisible;
+
+  final _treeMapVisible = ValueNotifier<bool>(false);
+
+  void toggleTreeMapVisible(bool value) {
+    _treeMapVisible.value = value;
   }
 
   bool isAnalyzeButtonEnabled() => computeSnapshotToAnalyze != null;
@@ -414,7 +538,7 @@ class MemoryController extends DisposableController
 
   final SettingsModel settings = SettingsModel();
 
-  final selectionNotifier =
+  final selectionSnapshotNotifier =
       ValueNotifier<Selection<Reference>>(Selection<Reference>());
 
   /// Tree to view Libary/Class/Instance (grouped by)
@@ -426,6 +550,103 @@ class MemoryController extends DisposableController
   /// Tree to view fields of an analysis.
   TreeTable<AnalysisField> analysisFieldsTreeTable;
 
+  final _updateClassStackTraces = ValueNotifier(0);
+
+  ValueListenable<int> get updateClassStackTraces => _updateClassStackTraces;
+
+  void changeStackTraces() {
+    _updateClassStackTraces.value += 1;
+  }
+
+  /// Tracking memory allocation of classes.
+  /// Format key is Class name and value is ClassRef.
+  final trackAllocations = <String, ClassRef>{};
+
+  /// Set up the class to be tracked.
+  void setTracking(ClassRef classRef, bool enable) {
+    final foundClass = monitorAllocations.firstWhere(
+      (element) => element.classRef == classRef,
+      orElse: () => null,
+    );
+
+    if (foundClass != null) {
+      foundClass.isStacktraced = enable;
+
+      final classRef = foundClass.classRef;
+      _setTracking(classRef, enable).catchError((e) {
+        debugLogger('ERROR: ${e.message}');
+      }).whenComplete(
+        () {
+          changeStackTraces();
+          treeChanged();
+          // TODO(terry): Add a toast popup.
+        },
+      );
+    }
+  }
+
+  /// Track where/when a class is allocated (constructor new'd).
+  Future<void> _setTracking(ClassRef ref, bool enable) async {
+    if (!await isIsolateLive(_isolateId)) return;
+
+    final Success returnObject =
+        await serviceManager.service.setTraceClassAllocation(
+      _isolateId,
+      ref.id,
+      enable,
+    );
+
+    if (returnObject.type != 'Success') {
+      debugLogger('Failed setTraceClassAllocation ${ref.name}');
+      return;
+    }
+
+    if (enable) {
+      if (trackAllocations.containsKey(ref.name)) {
+        // Somehow, already enabled don't enable again.
+        assert(trackAllocations[ref.name] == ref);
+        return;
+      }
+      // Add to tracking list.
+      trackAllocations[ref.name] = ref;
+    } else {
+      // Remove from tracking list.
+      assert(trackAllocations.containsKey(ref.name));
+      trackAllocations.remove(ref.name);
+    }
+  }
+
+  /// Track where/when a particular class is allocated (constructor new'd).
+  Future<CpuSamples> getAllocationTraces(ClassRef ref) async {
+    if (!await isIsolateLive(_isolateId)) return null;
+    final returnObject = await serviceManager.service.getAllocationTraces(
+      _isolateId,
+      classId: ref.id,
+    );
+
+    return returnObject;
+  }
+
+  final _allAllocationSamples = <ClassRef, CpuSamples>{};
+
+  List<AllocationSamples> allocationSamples = [];
+
+  /// Any new allocations being tracked.
+  Future<Map<ClassRef, CpuSamples>> computeAllAllocationSamples() async {
+    _allAllocationSamples.clear();
+
+    final keys = trackAllocations.keys;
+    for (var key in keys) {
+      // TODO(terry): Need to process output.
+      final samples = await getAllocationTraces(trackAllocations[key]);
+      if (samples != null) {
+        _allAllocationSamples[trackAllocations[key]] = samples;
+      }
+    }
+
+    return _allAllocationSamples;
+  }
+
   /// Table to view fields of an Allocation Profile.
   FlatTable<ClassHeapDetailStats> allocationsFieldsTable;
 
@@ -435,13 +656,13 @@ class MemoryController extends DisposableController
 
   /// All known libraries of the selected snapshot.
   LibraryReference get libraryRoot {
-    if (selectionNotifier.value == null) {
+    if (selectionSnapshotNotifier.value == null) {
       // No selectied snapshot use last snapshot.
       return snapshots.safeLast.libraryRoot;
     }
 
     // Find the selected snapshot's libraryRoot.
-    final snapshot = getSnapshot(selectionNotifier.value.node);
+    final snapshot = getSnapshot(selectionSnapshotNotifier.value.node);
     if (snapshot != null) return snapshot.libraryRoot;
 
     return null;
@@ -457,7 +678,7 @@ class MemoryController extends DisposableController
     }
 
     // Find the selected snapshot's libraryRoot.
-    snapshot ??= getSnapshot(selectionNotifier.value.node);
+    snapshot ??= getSnapshot(selectionSnapshotNotifier.value.node);
     snapshot?.libraryRoot = newRoot;
   }
 
@@ -465,7 +686,7 @@ class MemoryController extends DisposableController
   SnapshotReference get activeSnapshot {
     for (final topLevel in groupByTreeTable.dataRoots) {
       if (topLevel is SnapshotReference) {
-        final nodeSelected = selectionNotifier.value.node;
+        final nodeSelected = selectionSnapshotNotifier.value.node;
         final snapshot = getSnapshot(nodeSelected);
         final SnapshotReference snapshotRef = topLevel;
         if (snapshot != null &&
@@ -668,6 +889,41 @@ class MemoryController extends DisposableController
 
   DateTime monitorTimestamp;
 
+  ValueListenable<DateTime> get lastMonitorTimestampNotifier => lastMonitorTimestamp;
+  
+  final lastMonitorTimestamp = ValueNotifier<DateTime>(null);
+
+  /// Used for Allocations table search auto-complete.
+
+  /// This finds and selects an exact match in the tree.
+  /// Returns `true` if [searchingValue] is found in the tree.
+  bool selectItemInAllocationTable(String searchingValue) {
+    // Search the allocation table.
+    for (final reference in monitorAllocations) {
+      final foundIt = _selectItemInTable(reference, searchingValue);
+      if (foundIt) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool _selectAllocationInTable(ClassHeapDetailStats reference, search) {
+    if (reference.classRef.name == search) {
+      searchMatchMonitorAllocationsNotifier.value = reference;
+      clearSearchAutoComplete();
+      return true;
+    }
+    return false;
+  }
+
+  bool _selectItemInTable(ClassHeapDetailStats reference, String search) =>
+      _selectAllocationInTable(reference, search);
+
+  /// Used for searching in monitor allocation table.
+  final searchMatchMonitorAllocationsNotifier =
+      ValueNotifier<ClassHeapDetailStats>(null);
+
   var _monitorAllocations = <ClassHeapDetailStats>[];
 
   List<ClassHeapDetailStats> get monitorAllocations => _monitorAllocations;
@@ -680,6 +936,25 @@ class MemoryController extends DisposableController
     } else {
       _monitorAllocationsNotifier.value++;
     }
+
+    // Update the tracking (stacktrace) state of the newly fetched monitored allocations.
+    for (var monitorAllocation in _monitorAllocations) {
+      final trackedClass = trackAllocations.entries.firstWhere(
+        (trackRef) => monitorAllocation.classRef.id == trackRef.value.id,
+        orElse: () => null,
+      );
+
+      if (trackedClass != null) {
+        monitorAllocation.isStacktraced = true;
+        setTracking(trackedClass.value, true);
+      }
+    }
+  }
+
+  void toggleAllocationTracking(ClassHeapDetailStats item, bool isStacktraced) {
+    item.isStacktraced = isStacktraced;
+    setTracking(item.classRef, isStacktraced);
+    changeStackTraces();
   }
 
   Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>
@@ -705,10 +980,21 @@ class MemoryController extends DisposableController
     }
 
     final allocations = allocationProfile.members
-        .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
+        .map((ClassHeapStats stats) => parseJsonClassHeapStats(stats.json))
         .where((ClassHeapDetailStats stats) {
       return stats.instancesCurrent > 0 || stats.instancesDelta > 0;
     }).toList();
+
+    if (!reset) {
+      // AllocationStart again, any classes being tracked?
+      final allSamples = await computeAllAllocationSamples();
+      final allClassRefTracked = allSamples.keys;
+      allocationSamples.clear();
+      for (var classRef in allClassRefTracked) {
+        final cpuSamples = allSamples[classRef];
+        allocationSamples.add(AllocationSamples(classRef, cpuSamples));
+      }
+    }
 
     return allocations;
   }
@@ -939,52 +1225,17 @@ class MemoryController extends DisposableController
       topNode.addAllChildren(oldChildren);
     }
 
-    AllocationsMonitorReference monitorRoot;
-    var anyAnalyses = false;
-    for (final reference in topNode.children) {
-      if (reference is AllocationsMonitorReference) {
-        monitorRoot = reference;
-      }
-      anyAnalyses |= reference is AnalysesReference;
-    }
+    final anyAnalyses = topNode.children.firstWhere(
+          (reference) => reference is AnalysesReference,
+          orElse: () => null,
+        ) !=
+        null;
 
     if (snapshots.isNotEmpty && !anyAnalyses) {
       // Create Analysis entry.
       final analysesRoot = AnalysesReference();
       analysesRoot.addChild(AnalysisReference(''));
       topNode.addChild(analysesRoot);
-    }
-
-    if (monitorAllocations.isNotEmpty) {
-      var createRoot = false;
-      var createChild = false;
-
-      if (monitorRoot != null) {
-        // Only show the latest active allocation monitor.  If a new monitor
-        // exist (newer timestamp).  Remove the old node and signal a new node,
-        // with the latest timestamp, needs to be created.
-        final AllocationMonitorReference monitor = monitorRoot.children.first;
-        if (monitor.dateTime != monitorTimestamp) {
-          monitorRoot.removeLastChild();
-          // Reconstruct child new allocation profile.
-          createChild = true;
-        }
-      } else {
-        // Create Monitor Allocations entry - first time.
-        monitorRoot = AllocationsMonitorReference();
-        createRoot = true;
-        createChild = true;
-      }
-
-      if (createChild) {
-        monitorRoot.addChild(AllocationMonitorReference(
-          this,
-          monitorTimestamp,
-        ));
-      }
-      if (createRoot) {
-        topNode.addChild(monitorRoot);
-      }
     }
 
     createSnapshotEntries(topNode);
@@ -1189,12 +1440,12 @@ class MemoryLog {
       ));
     }
 
-    final jsonPayload = MemoryJson.encodeHeapSamples(liveData);
+    final jsonPayload = SamplesMemoryJson.encodeList(liveData);
     if (kDebugMode) {
       // TODO(terry): Remove this check add a unit test instead.
       // Reload the file just created and validate that the saved data matches
       // the live data.
-      final memoryJson = MemoryJson.decode(argJsonString: jsonPayload);
+      final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
       assert(memoryJson.isMatchedVersion);
       assert(memoryJson.isMemoryPayload);
       assert(memoryJson.data.length == liveData.length);
@@ -1221,7 +1472,7 @@ class MemoryLog {
   /// Load the memory profile data from a saved memory log file.
   void loadOffline(String filename) async {
     final jsonPayload = _fs.readStringFromFile(filename);
-    final memoryJson = MemoryJson.decode(argJsonString: jsonPayload);
+    final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
 
     // TODO(terry): Display notification JSON file isn't version isn't
     // supported or if the payload isn't an exported memory file.

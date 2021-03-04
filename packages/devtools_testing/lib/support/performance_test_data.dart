@@ -21,7 +21,7 @@ final frameStartEvent = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039650806,
+  'ts': 193938741080,
   'ph': 's',
   'id': 'f1',
   'args': {}
@@ -32,7 +32,7 @@ final frameEndEvent = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testRasterThreadId,
   'pid': 94955,
-  'ts': 118039679872,
+  'ts': 193938770146,
   'ph': 'f',
   'bp': 'e',
   'id': 'f1',
@@ -79,39 +79,39 @@ final engineBeginFrameEvent = testSyncTimelineEvent(engineBeginFrameTrace)
   ..addEndEvent(endEngineBeginFrameTrace);
 
 final frameEvent = testSyncTimelineEvent(frameTrace)
-  ..time.end = const Duration(microseconds: 118039652334)
+  ..time.end = const Duration(microseconds: 193938742608)
   ..type = TimelineEventType.ui;
 
 final animateEvent = testSyncTimelineEvent(animateTrace)
-  ..time.end = const Duration(microseconds: 118039650871)
+  ..time.end = const Duration(microseconds: 193938741145)
   ..type = TimelineEventType.ui;
 
 final layoutEvent = testSyncTimelineEvent(layoutTrace)
-  ..time.end = const Duration(microseconds: 118039651087)
+  ..time.end = const Duration(microseconds: 193938741361)
   ..type = TimelineEventType.ui;
 
 final buildEvent = testSyncTimelineEvent(buildTrace)
-  ..time.end = const Duration(microseconds: 118039651017)
+  ..time.end = const Duration(microseconds: 193938741291)
   ..type = TimelineEventType.ui;
 
 final compositingBitsEvent = testSyncTimelineEvent(compositingBitsTrace)
-  ..time.end = const Duration(microseconds: 118039651090)
+  ..time.end = const Duration(microseconds: 193938741364)
   ..type = TimelineEventType.ui;
 
 final paintEvent = testSyncTimelineEvent(paintTrace)
-  ..time.end = const Duration(microseconds: 118039651165)
+  ..time.end = const Duration(microseconds: 193938741439)
   ..type = TimelineEventType.ui;
 
 final compositingEvent = testSyncTimelineEvent(compositingTrace)
-  ..time.end = const Duration(microseconds: 118039651460)
+  ..time.end = const Duration(microseconds: 193938741734)
   ..type = TimelineEventType.ui;
 
 final semanticsEvent = testSyncTimelineEvent(semanticsTrace)
-  ..time.end = const Duration(microseconds: 118039652210)
+  ..time.end = const Duration(microseconds: 193938742484)
   ..type = TimelineEventType.ui;
 
 final finalizeTreeEvent = testSyncTimelineEvent(finalizeTreeTrace)
-  ..time.end = const Duration(microseconds: 118039652308)
+  ..time.end = const Duration(microseconds: 193938742582)
   ..type = TimelineEventType.ui;
 
 final goldenUiTimelineEvent = vsyncEvent
@@ -143,19 +143,19 @@ final goldenUiTimelineEvent = vsyncEvent
       ]),
   ]);
 
-const goldenUiString = '  VSYNC [118039650802 μs - 118039652422 μs]\n'
-    '    Animator::BeginFrame [118039650803 μs - 118039652421 μs]\n'
-    '      Framework Workload [118039650807 μs - 118039652412 μs]\n'
-    '        Engine::BeginFrame [118039650809 μs - 118039652411 μs]\n'
-    '          Frame [118039650834 μs - 118039652334 μs]\n'
-    '            Animate [118039650838 μs - 118039650871 μs]\n'
-    '            Layout [118039650876 μs - 118039651087 μs]\n'
-    '              Build [118039650984 μs - 118039651017 μs]\n'
-    '            Compositing bits [118039651088 μs - 118039651090 μs]\n'
-    '            Paint [118039651091 μs - 118039651165 μs]\n'
-    '            Compositing [118039651166 μs - 118039651460 μs]\n'
-    '            Semantics [118039651462 μs - 118039652210 μs]\n'
-    '            Finalize tree [118039652219 μs - 118039652308 μs]\n';
+const goldenUiString = '  VSYNC [193938741076 μs - 193938742696 μs]\n'
+    '    Animator::BeginFrame [193938741077 μs - 193938742695 μs]\n'
+    '      Framework Workload [193938741081 μs - 193938742686 μs]\n'
+    '        Engine::BeginFrame [193938741083 μs - 193938742685 μs]\n'
+    '          Frame [193938741108 μs - 193938742608 μs]\n'
+    '            Animate [193938741112 μs - 193938741145 μs]\n'
+    '            Layout [193938741150 μs - 193938741361 μs]\n'
+    '              Build [193938741258 μs - 193938741291 μs]\n'
+    '            Compositing bits [193938741362 μs - 193938741364 μs]\n'
+    '            Paint [193938741365 μs - 193938741439 μs]\n'
+    '            Compositing [193938741440 μs - 193938741734 μs]\n'
+    '            Semantics [193938741736 μs - 193938742484 μs]\n'
+    '            Finalize tree [193938742493 μs - 193938742582 μs]\n';
 
 final goldenUiTraceEvents = [
   vsyncTrace,
@@ -238,7 +238,7 @@ final vsyncTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039650802,
+  'ts': 193938741076,
   'ph': 'B',
   'args': {}
 });
@@ -247,7 +247,7 @@ final animatorBeginFrameTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039650803,
+  'ts': 193938741077,
   'ph': 'B',
   'args': {}
 });
@@ -256,7 +256,7 @@ final frameworkWorkloadTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039650807,
+  'ts': 193938741081,
   'ph': 'B',
   'args': {'mode': 'basic', 'frame': 'odd'}
 });
@@ -265,7 +265,7 @@ final engineBeginFrameTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039650809,
+  'ts': 193938741083,
   'ph': 'B',
   'args': {}
 });
@@ -274,7 +274,7 @@ final animateTrace = testTraceEventWrapper({
   'cat': 'Dart',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039650838,
+  'ts': 193938741112,
   'ph': 'X',
   'dur': 33,
   'args': {'mode': 'basic', 'isolateNumber': '993728060'}
@@ -284,7 +284,7 @@ final buildTrace = testTraceEventWrapper({
   'cat': 'Dart',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039650984,
+  'ts': 193938741258,
   'ph': 'X',
   'dur': 33,
   'args': {'mode': 'basic', 'isolateNumber': '993728060'}
@@ -294,7 +294,7 @@ final layoutTrace = testTraceEventWrapper({
   'cat': 'Dart',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039650876,
+  'ts': 193938741150,
   'ph': 'X',
   'dur': 211,
   'args': {'mode': 'basic', 'isolateNumber': '993728060'}
@@ -304,7 +304,7 @@ final compositingBitsTrace = testTraceEventWrapper({
   'cat': 'Dart',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039651088,
+  'ts': 193938741362,
   'ph': 'X',
   'dur': 2,
   'args': {'isolateNumber': '993728060'}
@@ -314,7 +314,7 @@ final paintTrace = testTraceEventWrapper({
   'cat': 'Dart',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039651091,
+  'ts': 193938741365,
   'ph': 'X',
   'dur': 74,
   'args': {'mode': 'basic', 'isolateNumber': '993728060'}
@@ -324,7 +324,7 @@ final compositingTrace = testTraceEventWrapper({
   'cat': 'Dart',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039651166,
+  'ts': 193938741440,
   'ph': 'X',
   'dur': 294,
   'args': {'mode': 'basic', 'isolateNumber': '993728060'}
@@ -334,7 +334,7 @@ final semanticsTrace = testTraceEventWrapper({
   'cat': 'Dart',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039651462,
+  'ts': 193938741736,
   'ph': 'X',
   'dur': 748,
   'args': {'isolateNumber': '993728060'}
@@ -344,7 +344,7 @@ final finalizeTreeTrace = testTraceEventWrapper({
   'cat': 'Dart',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039652219,
+  'ts': 193938742493,
   'ph': 'X',
   'dur': 89,
   'args': {'mode': 'basic', 'isolateNumber': '993728060'}
@@ -355,7 +355,7 @@ final frameTrace = testTraceEventWrapper({
   'cat': 'Dart',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039650834,
+  'ts': 193938741108,
   'ph': 'X',
   'dur': 1500,
   'args': {'mode': 'basic', 'isolateNumber': '993728060'}
@@ -365,7 +365,7 @@ final endVsyncTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039652422,
+  'ts': 193938742696,
   'ph': 'E',
   'args': {}
 });
@@ -374,7 +374,7 @@ final endAnimatorBeginFrameTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039652421,
+  'ts': 193938742695,
   'ph': 'E',
   'args': {}
 });
@@ -383,7 +383,7 @@ final endFrameworkWorkloadTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039652412,
+  'ts': 193938742686,
   'ph': 'E',
   'args': {}
 });
@@ -392,7 +392,7 @@ final endEngineBeginFrameTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 118039652411,
+  'ts': 193938742685,
   'ph': 'E',
   'args': {}
 });
@@ -413,8 +413,8 @@ final goldenRasterTimelineEvent = gpuRasterizerDrawEvent
   ..addChild(pipelineConsumeEvent);
 
 const goldenRasterString =
-    '  GPURasterizer::Draw [118039651469 μs - 118039679873 μs]\n'
-    '    PipelineConsume [118039651470 μs - 118039679870 μs]\n';
+    '  GPURasterizer::Draw [193938741743 μs - 193938770147 μs]\n'
+    '    PipelineConsume [193938741744 μs - 193938770144 μs]\n';
 
 final goldenRasterTraceEvents = [
   gpuRasterizerDrawTrace,
@@ -428,7 +428,7 @@ final gpuRasterizerDrawTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testRasterThreadId,
   'pid': 94955,
-  'ts': 118039651469,
+  'ts': 193938741743,
   'ph': 'B',
   'args': {
     'isolateId': 'id_001',
@@ -439,7 +439,7 @@ final pipelineConsumeTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testRasterThreadId,
   'pid': 94955,
-  'ts': 118039651470,
+  'ts': 193938741744,
   'ph': 'B',
   'args': {}
 });
@@ -448,7 +448,7 @@ final endPipelineConsumeTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testRasterThreadId,
   'pid': 94955,
-  'ts': 118039679870,
+  'ts': 193938770144,
   'ph': 'E',
   'args': {}
 });
@@ -457,7 +457,7 @@ final endGpuRasterizerDrawTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testRasterThreadId,
   'pid': 94955,
-  'ts': 118039679873,
+  'ts': 193938770147,
   'ph': 'E',
   'args': {}
 });
@@ -469,7 +469,7 @@ final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
     'cat': 'Embedder',
     'tid': 19333,
     'pid': 94955,
-    'ts': 118039650806,
+    'ts': 193938741080,
     'ph': 's',
     'id': 'f1',
     'args': {
@@ -485,7 +485,7 @@ final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
       'cat': 'Embedder',
       'tid': 19334,
       'pid': 94955,
-      'ts': 118039679872,
+      'ts': 193938770146,
       'ph': 'f',
       'bp': 'e',
       'id': 'f1',
@@ -506,7 +506,7 @@ final instantAsync1 = AsyncTimelineEvent(TraceEventWrapper(
     'cat': 'Dart',
     'tid': 19333,
     'pid': 94955,
-    'ts': 118039660806,
+    'ts': 193938751080,
     'ph': 'n',
     'id': 'f1',
     'args': {
@@ -522,7 +522,7 @@ final instantAsync2 = AsyncTimelineEvent(TraceEventWrapper(
     'cat': 'Dart',
     'tid': 19334,
     'pid': 94955,
-    'ts': 118039665806,
+    'ts': 193938756080,
     'ph': 'n',
     'id': 'f1',
     'args': {
@@ -538,7 +538,7 @@ final instantAsync3 = AsyncTimelineEvent(TraceEventWrapper(
     'cat': 'Dart',
     'tid': 19334,
     'pid': 94955,
-    'ts': 118039670806,
+    'ts': 193938761080,
     'ph': 'n',
     'id': 'f1',
     'args': {
@@ -1029,6 +1029,81 @@ final durationEventsWithDuplicateTraces = [
   endGpuRasterizerDrawTrace,
 ];
 
+final asyncEventsWithChildrenWithDifferentIds = [
+  testTraceEventWrapper({
+    'name': 'PipelineItem',
+    'cat': 'Embedder',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294235082,
+    'ph': 'b',
+    'id': '1',
+    'args': {'isolateId': 'isolates/677008524697083'}
+  }),
+  testTraceEventWrapper({
+    'name': 'PipelineProduce',
+    'cat': 'Embedder',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294235082,
+    'ph': 'b',
+    'id': '1',
+    'args': {'isolateId': 'isolates/677008524697083'}
+  }),
+  testTraceEventWrapper({
+    'name': 'PipelineProduce',
+    'cat': 'Embedder',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294236800,
+    'ph': 'e',
+    'id': '1',
+    'args': {'isolateId': 'isolates/677008524697083'}
+  }),
+  // Child of PipelineItem with id '1'
+  testTraceEventWrapper({
+    'name': 'ImageCache.putIfAbsent',
+    'cat': 'Dart',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294246630,
+    'ph': 'b',
+    'id': '1',
+    'args': {'isolateId': 'isolates/677008524697083'}
+  }),
+  // Child of PipelineItem with id '2' (parent manually specified)
+  testTraceEventWrapper({
+    'name': 'listener',
+    'cat': 'Dart',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294251242,
+    'ph': 'b',
+    'id': '2',
+    'args': {'parentId': '1'}
+  }),
+  testTraceEventWrapper({
+    'name': 'listener',
+    'cat': 'Dart',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294272684,
+    'ph': 'e',
+    'id': '2',
+    'args': {'isolateId': 'isolates/677008524697083'}
+  }),
+  testTraceEventWrapper({
+    'name': 'ImageCache.putIfAbsent',
+    'cat': 'Dart',
+    'tid': 22019,
+    'pid': 18510,
+    'ts': 5294272706,
+    'ph': 'e',
+    'id': '1',
+    'args': {'isolateId': 'isolates/677008524697083'}
+  }),
+];
+
 final testTimelineJson = {
   'type': 'Timeline',
   'traceEvents': [
@@ -1046,8 +1121,8 @@ final testTimelineJson = {
     ...goldenTraceEventsJson,
     frameEndEvent.json,
   ],
-  'timeOriginMicros': 118039650802,
-  'timeExtentMicros': 118039679873 - 118039650802,
+  'timeOriginMicros': 193938741076,
+  'timeExtentMicros': 193938770147 - 193938741076,
 };
 
 final gcEventStartTrace = testTraceEventWrapper({

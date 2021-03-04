@@ -1,3 +1,5 @@
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/table.dart';
 import 'package:devtools_app/src/table_data.dart';
 import 'package:devtools_app/src/trees.dart';
@@ -6,9 +8,14 @@ import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
+  setUp(() {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+  });
+
   group('FlatTable view', () {
     List<TestData> flatData;
     ColumnData<TestData> flatNameColumn;
@@ -826,7 +833,7 @@ void main() {
       // Expected values returned through accessing Color.value property.
       const color1Value = 4293848814;
       const color2Value = 4294638330;
-      const rowSelectedColorValue = 4278285762;
+      const rowSelectedColorValue = 4294638330;
 
       await tester.pumpWidget(wrap(table));
       await tester.pumpAndSettle();

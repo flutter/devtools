@@ -483,13 +483,13 @@ class PerformanceController
   Future<void> clearData({bool clearVmTimeline = true}) async {
     if (clearVmTimeline && serviceManager.hasConnection) {
       await serviceManager.service.clearVMTimeline();
-      _emptyTimeline.value = true;
     }
     allTraceEvents.clear();
     offlinePerformanceData = null;
     cpuProfilerController.reset();
     data?.clear();
     processor?.reset();
+    _emptyTimeline.value = true;
     _flutterFrames.value = [];
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;

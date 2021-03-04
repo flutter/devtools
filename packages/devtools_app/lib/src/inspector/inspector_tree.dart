@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import '../config_specific/logger/logger.dart';
-import '../ui/theme.dart';
+import '../theme.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 

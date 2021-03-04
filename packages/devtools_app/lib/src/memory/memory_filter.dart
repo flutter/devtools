@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../common_widgets.dart';
 import '../dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
+import '../theme.dart';
 import '../ui/utils.dart';
 import 'memory_controller.dart';
 import 'memory_screen.dart';
@@ -122,6 +124,14 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
 
   ScrollController _letters;
 
+  bool oldFilterPrivateClassesValue;
+
+  bool oldFilterZeroInstancesValue;
+
+  bool oldFilterLibraryNoInstancesValue;
+
+  final oldFilteredLibraries = <String, bool>{};
+
   @visibleForTesting
   static const snapshotFilterDialogKey = Key('SnapshotFilterDialog');
 
@@ -147,6 +157,18 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     if (controller == widget.controller) return;
 
     controller = widget.controller;
+
+    buildFilters();
+
+    oldFilterPrivateClassesValue = controller.filterPrivateClasses.value;
+    oldFilterZeroInstancesValue = controller.filterZeroInstances.value;
+    oldFilterLibraryNoInstancesValue =
+        controller.filterLibraryNoInstances.value;
+
+    final oldFiltered = controller.filteredLibrariesByGroupName;
+    for (var key in oldFiltered.keys) {
+      oldFilteredLibraries[key] = oldFiltered[key].first.hide;
+    }
 
     cancel();
   }
@@ -228,31 +250,30 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   }
 
   Widget createLibraryListBox(BoxConstraints constraints) {
+    final allLibraries =
+        controller.filteredLibrariesByGroupName.keys.map((String key) {
+      return CheckboxListTile(
+        title: Text(key),
+        dense: true,
+        value: controller.filteredLibrariesByGroupName[key].first?.hide,
+        onChanged: (bool value) {
+          setState(() {
+            for (var filter in controller.filteredLibrariesByGroupName[key]) {
+              filter.hide = value;
+            }
+          });
+        },
+      );
+    }).toList();
+
+    // TODO(terry): Need to change all of this to use flex, not the below computation.
     return SizedBox(
       height: constraints.maxHeight / 4,
-      child: ListView(
-        controller: _letters,
-        children:
-            controller.filteredLibrariesByGroupName.keys.map((String key) {
-          return CheckboxListTile(
-            title: Text(key),
-            dense: true,
-            value: controller.filteredLibrariesByGroupName[key].first.hide,
-            onChanged: (bool value) {
-              setState(() {
-                for (var filter
-                    in controller.filteredLibrariesByGroupName[key]) {
-                  filter.hide = value;
-                }
-              });
-            },
-          );
-        }).toList(),
-      ),
+      child: ListView(controller: _letters, children: allLibraries),
     );
   }
 
-  Widget okCancelButtons() {
+  Widget applyAndCancelButton() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -284,82 +305,100 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
             controller.updateFilter();
           },
         ),
-        DialogCancelButton(),
+        const SizedBox(width: defaultSpacing),
+        DialogCancelButton(
+          cancelAction: () {
+            controller.filterPrivateClasses.value =
+                oldFilterPrivateClassesValue;
+            controller.filterZeroInstances.value = oldFilterZeroInstancesValue;
+            controller.filterLibraryNoInstances.value =
+                oldFilterLibraryNoInstancesValue;
+
+            // Restore hide state.
+            controller.filteredLibrariesByGroupName.forEach((key, values) {
+              final oldHide = oldFilteredLibraries[key];
+              for (var value in values) {
+                value.hide = oldHide;
+              }
+            });
+          },
+        ),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    buildFilters();
-
     // Dialog has three main vertical sections:
     //      - three checkboxes
     //      - one list of libraries with at least 5 entries
     //      - one row of buttons Ok/Cancel
     // For very tall app keep the dialog at a reasonable height w/o too much vertical whitespace.
     // The listbox area is the area that grows to accommodate the list of known libraries.
-    // TODO(devoncarew): Convert to a DevToolsDialog.
-    return Dialog(
-      key: snapshotFilterDialogKey,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return Container(
-            width: MediaQuery.of(context).size.width / 3,
-            height: constraints.maxHeight < 400
-                ? constraints.maxHeight
-                : constraints.maxHeight * .3 + (400 * .7),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 15),
-              child: Column(
+
+    final constraints = BoxConstraints(
+      maxWidth: defaultDialogWidth,
+      maxHeight: MediaQuery.of(context).size.height,
+    );
+
+    final theme = Theme.of(context);
+
+    return DevToolsDialog(
+      title: dialogTitleText(theme, 'Memory Filter Libraries and Classes'),
+      includeDivider: false,
+      content: Container(
+        width: defaultDialogWidth,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
+                  ...dialogSubHeader(theme, 'Snapshot Filters'),
+                  Row(
                     children: [
-                      const TextField(
-                        decoration: InputDecoration(
-                            border: InputBorder.none,
-                            isDense: true,
-                            labelText: 'Filter Snapshot'),
+                      NotifierCheckbox(
+                        notifier: controller.filterPrivateClasses,
                       ),
-                      Row(
-                        children: [
-                          NotifierCheckbox(
-                              notifier: controller.filterPrivateClasses),
-                          const Text('Hide Private Class e.g.,_className'),
-                        ],
+                      const DevToolsTooltip(
+                        preferBelow: false,
+                        tooltip: 'Hide class names beginning with '
+                            'an underscore e.g., _className',
+                        child: Text('Hide Private Classes'),
                       ),
-                      Row(
-                        children: [
-                          NotifierCheckbox(
-                              notifier: controller.filterZeroInstances),
-                          const Text('Hide Classes with No Instances'),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          NotifierCheckbox(
-                              notifier: controller.filterLibraryNoInstances),
-                          const Text('Hide Library with No Instances'),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Padding(padding: EdgeInsets.only(top: 30)),
-                          Text('Hide Libraries or Packages '
-                              '(${controller.filteredLibrariesByGroupName.length}):'),
-                        ],
-                      ),
-                      createLibraryListBox(constraints),
-                      const Padding(padding: EdgeInsets.only(top: 40)),
-                      okCancelButtons(),
                     ],
                   ),
+                  Row(
+                    children: [
+                      NotifierCheckbox(
+                        notifier: controller.filterZeroInstances,
+                      ),
+                      const Text('Hide Classes with No Instances'),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      NotifierCheckbox(
+                        notifier: controller.filterLibraryNoInstances,
+                      ),
+                      const Text('Hide Library with No Instances'),
+                    ],
+                  ),
+                  const SizedBox(height: defaultSpacing),
+                  ...dialogSubHeader(
+                    theme,
+                    'Hide Libraries or Packages '
+                    '(${controller.filteredLibrariesByGroupName.length})',
+                  ),
+                  createLibraryListBox(constraints),
+                  applyAndCancelButton(),
                 ],
               ),
-            ),
-          );
-        },
+            ],
+          ),
+        ),
       ),
     );
   }

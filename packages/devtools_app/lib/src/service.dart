@@ -23,19 +23,17 @@ Future<VmServiceWrapper> _connectWithSse(
       : uri.replace(scheme: 'https');
   final client = SseClient('$uri');
   final Stream<String> stream = client.stream?.asBroadcastStream();
-  client.onOpen?.listen((_) {
-    final service = VmServiceWrapper.fromNewVmService(
-      stream,
-      client.sink.add,
-      uri,
-    );
+  final service = VmServiceWrapper.fromNewVmService(
+    stream,
+    client.sink.add,
+    uri,
+  );
 
-    client.sink?.done?.whenComplete(() {
-      finishedCompleter.complete();
-      service.dispose();
-    });
-    serviceCompleter.complete(service);
-  });
+  unawaited(client.sink?.done?.whenComplete(() {
+    finishedCompleter.complete();
+    service.dispose();
+  }));
+  serviceCompleter.complete(service);
 
   unawaited(stream?.drain()?.catchError(onError));
   return serviceCompleter.future;

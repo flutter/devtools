@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/analytics/stub_provider.dart';
+import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/framework_controller.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/scaffold.dart';
@@ -24,8 +25,8 @@ void main() {
       mockServiceManager = MockServiceManager();
       when(mockServiceManager.service).thenReturn(null);
       when(mockServiceManager.hasConnection).thenReturn(false);
-      when(mockServiceManager.onStateChange)
-          .thenAnswer((_) => const Stream<bool>.empty());
+      when(mockServiceManager.connectedState).thenReturn(
+          ValueNotifier<ConnectedState>(const ConnectedState(false)));
 
       final mockErrorBadgeManager = MockErrorBadgeManager();
       when(mockServiceManager.errorBadgeManager)
@@ -120,13 +121,101 @@ void main() {
       expect(find.byKey(k1), findsNothing);
       expect(find.byKey(k2), findsOneWidget);
     });
+
+    testWidgets('displays floating debugger controls',
+        (WidgetTester tester) async {
+      final mockConnectedApp = MockConnectedApp();
+      when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
+      when(mockServiceManager.hasConnection).thenReturn(true);
+      when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      final mockDebuggerController = MockDebuggerController();
+      when(mockDebuggerController.isPaused)
+          .thenReturn(ValueNotifier<bool>(false));
+
+      await tester.pumpWidget(wrapWithControllers(
+        DevToolsScaffold(
+          tabs: const [screen1, screen2],
+          ideTheme: null,
+          analyticsProvider: await analyticsProvider,
+        ),
+        debugger: mockDebuggerController,
+      ));
+      expect(find.byKey(k1), findsOneWidget);
+      expect(find.byKey(k2), findsNothing);
+      expect(find.byType(FloatingDebuggerControls), findsOneWidget);
+    });
+
+    testWidgets(
+        'does not display floating debugger controls when debugger screen is showing',
+        (WidgetTester tester) async {
+      final mockConnectedApp = MockConnectedApp();
+      when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
+      when(mockServiceManager.hasConnection).thenReturn(true);
+      when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      final mockDebuggerController = MockDebuggerController();
+      when(mockDebuggerController.isPaused)
+          .thenReturn(ValueNotifier<bool>(false));
+
+      const debuggerScreenKey = Key('debugger screen');
+      const debuggerTabKey = Key('debugger tab');
+      await tester.pumpWidget(wrapWithControllers(
+        DevToolsScaffold(
+          tabs: const [
+            _TestScreen(
+              DebuggerScreen.id,
+              debuggerScreenKey,
+              tabKey: debuggerTabKey,
+            ),
+            screen2,
+          ],
+          ideTheme: null,
+          analyticsProvider: await analyticsProvider,
+        ),
+        debugger: mockDebuggerController,
+      ));
+      expect(find.byKey(debuggerScreenKey), findsOneWidget);
+      expect(find.byKey(k2), findsNothing);
+      expect(find.byType(FloatingDebuggerControls), findsNothing);
+
+      // Tap on the tab for screen 2 and verify the controls are present.
+      await tester.tap(find.byKey(t2));
+      await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
+      expect(find.byKey(debuggerScreenKey), findsNothing);
+      expect(find.byKey(k2), findsOneWidget);
+      expect(find.byType(FloatingDebuggerControls), findsOneWidget);
+
+      // Return to the debugger screen and verify the controls are gone.
+      await tester.tap(find.byKey(debuggerTabKey));
+      await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
+      expect(find.byKey(debuggerScreenKey), findsOneWidget);
+      expect(find.byKey(k2), findsNothing);
+      expect(find.byType(FloatingDebuggerControls), findsNothing);
+    });
+
+    testWidgets(
+        'does not display floating debugger tab controls when no app is connected',
+        (WidgetTester tester) async {
+      when(mockServiceManager.hasConnection).thenReturn(false);
+      await tester.pumpWidget(wrap(
+        DevToolsScaffold(
+          tabs: const [screen1, screen2],
+          ideTheme: null,
+          analyticsProvider: await analyticsProvider,
+        ),
+      ));
+      expect(find.byKey(k1), findsOneWidget);
+      expect(find.byKey(k2), findsNothing);
+      expect(find.byType(FloatingDebuggerControls), findsNothing);
+    });
   });
 }
 
 class _TestScreen extends Screen {
   const _TestScreen(this.name, this.key, {Key tabKey})
       : super(
-          'testScreen$name',
+          name,
           title: name,
           icon: Icons.computer,
           tabKey: tabKey,

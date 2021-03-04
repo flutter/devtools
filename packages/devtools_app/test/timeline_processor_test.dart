@@ -214,19 +214,19 @@ void main() {
       );
       expect(
         processor.timelineController.data.timelineEvents[0].toString(),
-        equals(goldenUiString),
-      );
-      expect(
-        processor.timelineController.data.timelineEvents[1].toString(),
-        equals(goldenRasterString),
-      );
-      expect(
-        processor.timelineController.data.timelineEvents[2].toString(),
         equals(goldenAsyncString),
       );
       expect(
-        processor.timelineController.data.timelineEvents[3].toString(),
+        processor.timelineController.data.timelineEvents[1].toString(),
         equals('  D [193937061035 μs - 193938741076 μs]\n'),
+      );
+      expect(
+        processor.timelineController.data.timelineEvents[2].toString(),
+        equals(goldenUiString),
+      );
+      expect(
+        processor.timelineController.data.timelineEvents[3].toString(),
+        equals(goldenRasterString),
       );
     });
 
@@ -242,6 +242,14 @@ void main() {
         processor.timelineController.data.timelineEvents.length,
         equals(1),
       );
+    });
+
+    test(
+        'processes trace with children with different ids does not throw assert',
+        () async {
+      // This test should complete without throwing an assert from
+      // `AsyncTimelineEvent.endAsyncEvent`.
+      await processor.processTimeline(asyncEventsWithChildrenWithDifferentIds);
     });
 
     test('inferEventType', () {

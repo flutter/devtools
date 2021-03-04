@@ -17,7 +17,6 @@ import '../service_registrations.dart';
 import '../theme.dart';
 import '../utils.dart';
 import 'label.dart';
-import 'theme.dart';
 
 /// Group of buttons where each button toggles the state of a VMService
 /// extension.
@@ -178,7 +177,7 @@ class HotReloadButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
 
-    return TooltippedButton(
+    return DevToolsTooltip(
       tooltip: 'Hot reload',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotReload,
@@ -200,7 +199,7 @@ class HotRestartButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
 
-    return TooltippedButton(
+    return DevToolsTooltip(
       tooltip: 'Hot restart',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotRestart,

@@ -115,22 +115,32 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
 
   OverlayEntry autoCompleteOverlay;
 
+  int currentDefaultIndex;
+
   OverlayEntry createAutoCompleteOverlay({
+    @required BuildContext context,
     @required GlobalKey searchFieldKey,
   }) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     // TODO(kenz): investigate whether we actually need the global key for this.
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField.
     final RenderBox box = searchFieldKey.currentContext.findRenderObject();
 
     final autoCompleteTiles = <ListTile>[];
-    for (final matchedName in searchAutoComplete.value) {
+    final count = searchAutoComplete.value.length;
+    for (var index = 0; index < count; index++) {
+      final matchedName = searchAutoComplete.value[index];
       autoCompleteTiles.add(
         ListTile(
           title: Text(matchedName),
+          tileColor: currentDefaultIndex == index
+              ? colorScheme.autoCompleteHighlightColor
+              : colorScheme.defaultBackgroundColor,
           onTap: () {
-            selectTheSearch = true;
             search = matchedName;
+            selectTheSearch = true;
           },
         ),
       );
@@ -169,8 +179,8 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   ///      setState(autoCompleteOverlaySetState(controller, context));
   ///     });
   VoidCallback autoCompleteOverlaySetState({
-    @required GlobalKey searchFieldKey,
     @required BuildContext context,
+    @required GlobalKey searchFieldKey,
   }) {
     return () {
       if (autoCompleteOverlay != null) {
@@ -178,8 +188,10 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
       }
 
       autoCompleteOverlay = createAutoCompleteOverlay(
+        context: context,
         searchFieldKey: searchFieldKey,
       );
+
       Overlay.of(context).insert(autoCompleteOverlay);
     };
   }
@@ -202,6 +214,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     @required bool searchFieldEnabled,
     @required bool shouldRequestFocus,
     @required Function(String selection) onSelection,
+    @required Function(bool directionDown) onHighlightDropdown,
   }) {
     rawKeyboardFocusNode = FocusNode();
     return RawKeyboardListener(
@@ -212,24 +225,41 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
             // TODO(kenz): Enable this once we find a way around the navigation
             // this causes. This triggers a "back" navigation.
             // ESCAPE key pressed clear search TextField.
-            // clearSearchField(controller);
+            clearSearchField(controller);
           } else if (event.logicalKey.keyId == LogicalKeyboardKey.enter.keyId) {
             // ENTER pressed.
-            var foundExact = false;
+            String foundExact;
+
+            // What the user has typed in so far.
+            final searchToMatch = controller.search.toLowerCase();
             // Find exact match in autocomplete list - use that as our search value.
             for (final autoEntry in controller.searchAutoComplete.value) {
-              if (controller.search.toLowerCase() == autoEntry.toLowerCase()) {
-                foundExact = true;
-                onSelection(autoEntry);
+              if (searchToMatch == autoEntry.toLowerCase()) {
+                foundExact = autoEntry;
+                break;
               }
             }
-            // Nothing found, pick first line in dropdown.
-            if (!foundExact) {
-              final autoCompleteList = controller.searchAutoComplete.value;
+            // Nothing found, pick item selected in dropdown.
+            final autoCompleteList = controller.searchAutoComplete.value;
+            if (foundExact == null ||
+                autoCompleteList[controller.currentDefaultIndex] !=
+                    foundExact) {
               if (autoCompleteList.isNotEmpty) {
-                onSelection(autoCompleteList.first);
+                foundExact = autoCompleteList[controller.currentDefaultIndex];
               }
             }
+
+            if (foundExact != null) {
+              onSelection(foundExact);
+              controller.search = foundExact;
+              controller.selectTheSearch = true;
+            }
+          } else if (event.logicalKey.keyId ==
+              LogicalKeyboardKey.arrowDown.keyId) {
+            onHighlightDropdown(true);
+          } else if (event.logicalKey.keyId ==
+              LogicalKeyboardKey.arrowUp.keyId) {
+            onHighlightDropdown(false);
           }
         }
       },

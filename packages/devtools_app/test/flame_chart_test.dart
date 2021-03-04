@@ -36,10 +36,15 @@ void main() {
     );
 
     Future<void> pumpFlameChart(WidgetTester tester) async {
-      await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: flameChart,
-      ));
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(size: Size(1000.0, 1000.0)),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: flameChart,
+          ),
+        ),
+      );
     }
 
     testWidgets('WASD keys zoom and update scroll position',

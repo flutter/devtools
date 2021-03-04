@@ -61,8 +61,9 @@ class FrameworkController {
   Stream get onDisconnected => _disconnectedController.stream;
 
   void _init() {
-    serviceManager.onStateChange.listen((connected) {
-      if (connected) {
+    serviceManager.connectedState.addListener(() {
+      final connectionState = serviceManager.connectedState.value;
+      if (connectionState.connected) {
         _connectedController.add(serviceManager.service.connectedUri);
       } else {
         _disconnectedController.add(null);

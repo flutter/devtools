@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../common_widgets.dart';
 import '../dialogs.dart';
 import '../theme.dart';
-import '../utils.dart';
 import 'label.dart';
 
 mixin FilterControllerMixin<T> {
@@ -62,7 +61,7 @@ class _FilterDialogState extends State<FilterDialog> {
         padding: const EdgeInsets.symmetric(
           horizontal: defaultSpacing,
         ),
-        width: dialogSettingsWidth,
+        width: defaultDialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +77,7 @@ class _FilterDialogState extends State<FilterDialog> {
           onPressed: () =>
               widget.onApplyFilter(queryTextFieldController.value.text),
         ),
-        DialogCancelButton(),
+        const DialogCancelButton(),
       ],
     );
   }
@@ -91,8 +90,8 @@ class _FilterDialogState extends State<FilterDialog> {
         TextButton(
           onPressed: queryTextFieldController.clear,
           child: const MaterialIconLabel(
-            Icons.replay,
-            'Reset to default',
+            label: 'Reset to default',
+            iconData: Icons.replay,
           ),
         ),
       ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme.dart';
+
 /// Label including an image icon and optional text.
 class ImageIconLabel extends StatelessWidget {
   const ImageIconLabel(this.icon, this.text, {this.minIncludeTextWidth});
@@ -27,10 +29,16 @@ class ImageIconLabel extends StatelessWidget {
 }
 
 class MaterialIconLabel extends StatelessWidget {
-  const MaterialIconLabel(this.iconData, this.text, {this.includeTextWidth});
+  const MaterialIconLabel({
+    @required this.label,
+    this.iconData,
+    this.imageIcon,
+    this.includeTextWidth,
+  }) : assert((iconData == null) != (imageIcon == null));
 
   final IconData iconData;
-  final String text;
+  final Image imageIcon;
+  final String label;
   final double includeTextWidth;
 
   @override
@@ -39,12 +47,17 @@ class MaterialIconLabel extends StatelessWidget {
     // when the text is not shown.
     return Row(
       children: [
-        createIcon(iconData),
+        iconData != null
+            ? Icon(
+                iconData,
+                size: defaultIconSize,
+              )
+            : imageIcon,
         // TODO(jacobr): animate showing and hiding the text.
         if (_showLabelText(context, includeTextWidth))
           Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(text),
+            padding: const EdgeInsets.only(left: denseSpacing),
+            child: Text(label),
           ),
       ],
     );
@@ -55,9 +68,3 @@ bool _showLabelText(BuildContext context, double includeTextWidth) {
   return includeTextWidth == null ||
       MediaQuery.of(context).size.width > includeTextWidth;
 }
-
-Icon createIcon(IconData iconData, {Color color}) => Icon(
-      iconData,
-      size: 18.0,
-      color: color,
-    );

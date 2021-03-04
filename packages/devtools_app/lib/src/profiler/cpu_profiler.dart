@@ -4,6 +4,8 @@
 import 'package:flutter/material.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../charts/flame_chart.dart';
+import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/search.dart';
 import 'cpu_profile_bottom_up.dart';
@@ -110,22 +112,33 @@ class _CpuProfilerState extends State<CpuProfiler>
             // well. This will require implementing search for tree tables.
             if (currentTab.key == CpuProfiler.flameChartTab &&
                 widget.searchFieldKey != null)
-              Container(
-                width: wideSearchTextWidth,
-                height: defaultTextFieldHeight,
-                child: buildSearchField(
-                  controller: widget.controller,
-                  searchFieldKey: widget.searchFieldKey,
-                  searchFieldEnabled: hasData,
-                  shouldRequestFocus: false,
-                  supportsNavigation: true,
-                ),
+              Row(
+                children: [
+                  _buildSearchField(hasData),
+                  FlameChartHelpButton(),
+                ],
               ),
             if (currentTab.key != CpuProfiler.flameChartTab)
               Row(children: [
-                _expandAllButton(currentTab),
+                ExpandAllButton(
+                  key: CpuProfiler.expandButtonKey,
+                  onPressed: () {
+                    _performOnDataRoots(
+                      (root) => root.expandCascading(),
+                      currentTab,
+                    );
+                  },
+                ),
                 const SizedBox(width: denseSpacing),
-                _collapseAllButton(currentTab),
+                CollapseAllButton(
+                  key: CpuProfiler.collapseButtonKey,
+                  onPressed: () {
+                    _performOnDataRoots(
+                      (root) => root.collapseCascading(),
+                      currentTab,
+                    );
+                  },
+                ),
                 // The standaloneProfiler does not need padding because it is
                 // not wrapped in a bordered container.
                 if (!widget.standaloneProfiler)
@@ -137,6 +150,20 @@ class _CpuProfilerState extends State<CpuProfiler>
           child: _buildCpuProfileDataView(),
         ),
       ],
+    );
+  }
+
+  Widget _buildSearchField(bool hasData) {
+    return Container(
+      width: wideSearchTextWidth,
+      height: defaultTextFieldHeight,
+      child: buildSearchField(
+        controller: widget.controller,
+        searchFieldKey: widget.searchFieldKey,
+        searchFieldEnabled: hasData,
+        shouldRequestFocus: false,
+        supportsNavigation: true,
+      ),
     );
   }
 
@@ -184,26 +211,6 @@ class _CpuProfilerState extends State<CpuProfiler>
     );
     // TODO(kenz): make this order configurable.
     return [bottomUp, callTree, cpuFlameChart];
-  }
-
-  Widget _expandAllButton(Tab currentTab) {
-    return OutlinedButton(
-      key: CpuProfiler.expandButtonKey,
-      onPressed: () {
-        _performOnDataRoots((root) => root.expandCascading(), currentTab);
-      },
-      child: const Text('Expand All'),
-    );
-  }
-
-  Widget _collapseAllButton(Tab currentTab) {
-    return OutlinedButton(
-      key: CpuProfiler.collapseButtonKey,
-      onPressed: () {
-        _performOnDataRoots((root) => root.collapseCascading(), currentTab);
-      },
-      child: const Text('Collapse All'),
-    );
   }
 
   void _performOnDataRoots(

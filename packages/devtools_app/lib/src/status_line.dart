@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../devtools.dart' as devtools;
@@ -26,11 +25,13 @@ const statusLineHeight = 24.0;
 /// This displays information global to the application, as well as gives pages
 /// a mechanism to display page-specific information.
 class StatusLine extends StatelessWidget {
+  const StatusLine(this.currentScreen);
+
+  final Screen currentScreen;
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-
-    final Screen currentScreen = Provider.of<Screen>(context);
 
     final List<Widget> children = [];
 
@@ -174,11 +175,10 @@ class StatusLine extends StatelessWidget {
   }
 
   Widget buildConnectionStatus(TextTheme textTheme) {
-    return StreamBuilder(
-      initialData: serviceManager.service != null,
-      stream: serviceManager.onStateChange,
-      builder: (context, AsyncSnapshot<bool> connectedSnapshot) {
-        if (connectedSnapshot.data) {
+    return ValueListenableBuilder<ConnectedState>(
+      valueListenable: serviceManager.connectedState,
+      builder: (context, ConnectedState connectedState, _) {
+        if (connectedState.connected) {
           final app = serviceManager.connectedApp;
 
           String description;
@@ -211,7 +211,7 @@ class StatusLine extends StatelessWidget {
                 },
               ),
               const SizedBox(width: denseSpacing),
-              TooltippedButton(
+              DevToolsTooltip(
                 tooltip: 'Device Info',
                 child: InkWell(
                   onTap: () async {

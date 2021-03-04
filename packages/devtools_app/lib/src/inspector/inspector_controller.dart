@@ -229,6 +229,10 @@ class InspectorController extends DisposableController
   RemoteDiagnosticsNode get selectedDiagnostic =>
       selectedNode.value?.diagnostic;
 
+  final ValueNotifier<int> _selectedErrorIndex = ValueNotifier<int>(null);
+
+  ValueListenable<int> get selectedErrorIndex => _selectedErrorIndex;
+
   FlutterTreeType getTreeType() {
     return treeType;
   }
@@ -335,18 +339,23 @@ class InspectorController extends DisposableController
   }
 
   @override
-  Future<void> onForceRefresh() {
+  Future<void> onForceRefresh() async {
     assert(!_disposed);
     if (!visibleToUser || _disposed) {
       return Future.value();
     }
-    recomputeTreeRoot(null, null, false);
+    await recomputeTreeRoot(null, null, false);
 
-    // TODO(kenz): recalculate inspector badge count based on whether or not
-    // widgets with errors are still in the tree.
-    serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
+    filterErrors();
 
     return getPendingUpdateDone();
+  }
+
+  void filterErrors() {
+    if (isSummaryTree) {
+      serviceManager.errorBadgeManager.filterErrors(InspectorScreen.id,
+          (id) => hasDiagnosticsValue(InspectorInstanceRef(id)));
+    }
   }
 
   void setActivate(bool enabled) {
@@ -382,7 +391,13 @@ class InspectorController extends DisposableController
       _rootDirectories = await inspectorService.inferPubRootDirectoryIfNeeded();
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
-      await updateSelectionFromService(firstFrame: true);
+
+      final queryParams = loadQueryParams();
+      final inspectorRef = queryParams.containsKey(inspectorRefQueryParam)
+          ? queryParams[inspectorRefQueryParam]
+          : null;
+      await updateSelectionFromService(
+          firstFrame: true, inspectorRef: inspectorRef);
     } else {
       final ready = await inspectorService.isWidgetTreeReady();
       flutterAppFrameReady = ready;
@@ -583,7 +598,8 @@ class InspectorController extends DisposableController
     updateSelectionFromService(firstFrame: false);
   }
 
-  Future<void> updateSelectionFromService({@required bool firstFrame}) async {
+  Future<void> updateSelectionFromService(
+      {@required bool firstFrame, String inspectorRef}) async {
     if (parent != null) {
       // If we have a parent controller we should wait for the parent to update
       // our selection rather than updating it our self.
@@ -598,14 +614,11 @@ class InspectorController extends DisposableController
 
     final group = _selectionGroups.next;
 
-    if (firstFrame) {
-      final queryParams = loadQueryParams();
-      if (queryParams.containsKey(inspectorRefQueryParam)) {
-        await group.setSelectionInspector(
-          InspectorInstanceRef(queryParams[inspectorRefQueryParam]),
-          false,
-        );
-      }
+    if (inspectorRef != null) {
+      await group.setSelectionInspector(
+        InspectorInstanceRef(inspectorRef),
+        false,
+      );
     }
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
@@ -620,26 +633,6 @@ class InspectorController extends DisposableController
     try {
       final RemoteDiagnosticsNode newSelection = await pendingSelectionFuture;
       if (group.disposed) return;
-      if (newSelection == null && firstFrame) {
-        // If no node is selected, select the first node other than the
-        // boilerplate root widget. This is typically the first widget defined
-        // by the user.
-        // TODO(jacobr): we could precisely determine the first widget defined
-        // by the user.
-        var mainWidget = await group.getRootWidget();
-        mainWidget = mainWidget?.childrenNow?.safeFirst;
-        if (group.disposed) return;
-        if (mainWidget != null) {
-          await group.setSelectionInspector(
-            mainWidget.valueRef,
-            false,
-          );
-          if (group.disposed) return;
-          await updateSelectionFromService(firstFrame: false);
-          return;
-        }
-        return;
-      }
       RemoteDiagnosticsNode detailsSelection;
 
       if (pendingDetailsFuture != null) {
@@ -732,7 +725,55 @@ class InspectorController extends DisposableController
       parent.endShowNode();
     }
 
+    _updateSelectedErrorFromNode(_selectedNode.value);
     animateTo(selectedNode.value);
+  }
+
+  /// Update the index of the selected error based on a node that has been
+  /// selected in the tree.
+  void _updateSelectedErrorFromNode(InspectorTreeNode node) {
+    final inspectorRef = node?.diagnostic?.valueRef?.id;
+
+    final errors = serviceManager.errorBadgeManager
+        .erroredItemsForPage(InspectorScreen.id)
+        .value;
+
+    // Check whether the node that was just selected has any errors associated
+    // with it.
+    var errorIndex = inspectorRef != null
+        ? errors.keys.toList().indexOf(inspectorRef)
+        : null;
+    if (errorIndex == -1) {
+      errorIndex = null;
+    }
+
+    _selectedErrorIndex.value = errorIndex;
+
+    if (errorIndex != null) {
+      // Mark the error as "seen" as this will render slightly differently
+      // so the user can track which errored nodes they've viewed.
+      serviceManager.errorBadgeManager
+          .markErrorAsRead(InspectorScreen.id, errors[inspectorRef]);
+      // Also clear the error badge since new errors may have arrived while
+      // the inspector was visible (normally they're cleared when visiting
+      // the screen) and visiting an errored node seems an appropriate
+      // acknowledgement of the errors.
+      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
+    }
+  }
+
+  /// Updates the index of the selected error and selects its node in the tree.
+  void selectErrorByIndex(int index) {
+    _selectedErrorIndex.value = index;
+
+    if (index == null) return;
+
+    final errors = serviceManager.errorBadgeManager
+        .erroredItemsForPage(InspectorScreen.id)
+        .value;
+
+    updateSelectionFromService(
+        firstFrame: false, inspectorRef: errors.keys.elementAt(index));
   }
 
   void _onExpand(InspectorTreeNode node) {

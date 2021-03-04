@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_heap_tree_view.dart';
@@ -10,10 +11,13 @@ import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/memory/memory_vm_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:devtools_testing/support/memory_test_allocation_data.dart';
 import 'package:devtools_testing/support/memory_test_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'support/mocks.dart';
 import 'support/wrappers.dart';
@@ -23,11 +27,42 @@ void main() {
   MemoryController controller;
   FakeServiceManager fakeServiceManager;
 
+  /// Classes to track while testing.
+  final classesToTrack = <ClassRef>[];
+
+  void setupTracking(List<ClassHeapDetailStats> classesDetail) {
+    for (var classDetail in classesDetail) {
+      final tracking = classesToTrack.singleWhere(
+        (element) => element.name == classDetail.classRef.name,
+        orElse: () => null,
+      );
+      if (tracking != null) {
+        controller.setTracking(classDetail.classRef, true);
+      }
+    }
+  }
+
   void _setUpServiceManagerForMemory() {
     // Load canned data testHeapSampleData.
-    final memoryJson = MemoryJson.decode(argJsonString: testHeapSampleData);
+    final memoryJson =
+        SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
+    final allocationJson =
+        AllocationMemoryJson.decode(argJsonString: testAllocationData);
+
+    // Use later in the class tracking test.
+    if (classesToTrack.isEmpty) {
+      for (var classDetails in allocationJson.data) {
+        if (classDetails.isStacktraced) {
+          classesToTrack.add(classDetails.classRef);
+        }
+      }
+    }
+
     fakeServiceManager = FakeServiceManager(
-      service: FakeServiceManager.createFakeService(memoryData: memoryJson),
+      service: FakeServiceManager.createFakeService(
+        memoryData: memoryJson,
+        allocationData: allocationJson,
+      ),
     );
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
@@ -202,7 +237,8 @@ void main() {
       expect(controller.offline, isFalse);
     });
 
-    testWidgetsWithWindowSize('export current memory profile', windowSize,
+    testWidgetsWithWindowSize(
+        'switch from live feed and load exported file', windowSize,
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);
 
@@ -242,14 +278,6 @@ void main() {
     await pumpMemoryScreen(tester);
 
     expect(find.byKey(HeapTreeViewState.snapshotButtonKey), findsOneWidget);
-    expect(
-      find.byKey(HeapTreeViewState.allocationMonitorResetKey),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(HeapTreeViewState.allocationMonitorResetKey),
-      findsOneWidget,
-    );
 
     // Load canned data.
     _setUpServiceManagerForMemory();
@@ -319,5 +347,330 @@ void main() {
       controller.selectedSnapshotTimestamp.millisecondsSinceEpoch,
       lessThan(DateTime.now().millisecondsSinceEpoch),
     );
+  });
+
+  testWidgetsWithWindowSize(
+      'allocation monitor, class tracking and search auto-complete', windowSize,
+      (WidgetTester tester) async {
+    // Load canned data.
+    _setUpServiceManagerForMemory();
+
+    const _oneSecond = Duration(seconds: 1);
+    const _twoSeconds = Duration(seconds: 2);
+
+    Future<void> pumpAndSettleOneSecond() async {
+      await tester.pumpAndSettle(_oneSecond);
+    }
+
+    Future<void> pumpAndSettleTwoSeconds() async {
+      await tester.pumpAndSettle(_twoSeconds);
+    }
+
+    await pumpAndSettleTwoSeconds();
+
+    await pumpMemoryScreen(tester);
+
+    expect(
+        find.byKey(HeapTreeViewState.dartHeapAnalysisTabKey), findsOneWidget);
+
+    final allocationsKey =
+        find.byKey(HeapTreeViewState.dartHeapAllocationsTabKey);
+    await tester.tap(allocationsKey);
+
+    await pumpAndSettleTwoSeconds();
+
+    expect(find.byKey(HeapTreeViewState.allocationMonitorKey), findsOneWidget);
+    expect(
+      find.byKey(HeapTreeViewState.allocationMonitorResetKey),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(HeapTreeViewState.allocationMonitorKey));
+
+    await pumpAndSettleTwoSeconds();
+
+    final data = controller.monitorAllocations;
+
+    // Total number of collected Allocations (ClassHeapDetailStats).
+    expect(data.length, 31);
+
+    ClassHeapDetailStats classDetails = data.first;
+    expect(classDetails.classRef.name, 'AClass');
+    expect(classDetails.classRef.id, 'classes/1');
+    expect(classDetails.bytesCurrent, 10000);
+    expect(classDetails.bytesDelta, 100);
+    expect(classDetails.instancesCurrent, 10);
+    expect(classDetails.instancesDelta, 10);
+    //expect(classDetails.isStacktraced, isTrue);
+
+    classDetails = data[9];
+    expect(classDetails.classRef.name, 'JClass');
+    expect(classDetails.classRef.id, 'classes/10');
+    expect(classDetails.bytesCurrent, 100000);
+    expect(classDetails.bytesDelta, 1000);
+    expect(classDetails.instancesCurrent, 5);
+    expect(classDetails.instancesDelta, 2);
+
+    classDetails = data[19];
+    expect(classDetails.classRef.name, 'TClass');
+    expect(classDetails.classRef.id, 'classes/20');
+    expect(classDetails.bytesCurrent, 10);
+    expect(classDetails.bytesDelta, 0);
+    expect(classDetails.instancesCurrent, 5);
+    expect(classDetails.instancesDelta, 1);
+
+    classDetails = data.last;
+    expect(classDetails.classRef.name, 'LastClass');
+    expect(classDetails.classRef.id, 'classes/30');
+    expect(classDetails.bytesCurrent, 222);
+    expect(classDetails.bytesDelta, 0);
+    expect(classDetails.instancesCurrent, 55);
+    expect(classDetails.instancesDelta, 0);
+
+    // Screenshot should display left-side tree table fully expanded and the monitor
+    // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
+    // all allocations in a flat table, no items checked (tracked), search should
+    // be enabled with focus. No tree table displayed on the bottom only empty message.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile('goldens/allocation_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
+
+    // Enable classes to track.
+    setupTracking(data);
+    await pumpAndSettleOneSecond();
+
+    // Validate the classes being tracked is accurate (should be classes tracked).
+    expect(controller.trackAllocations, hasLength(classesToTrack.length));
+    expect(
+      controller.trackAllocations.values.join(','),
+      classesToTrack.join(','),
+    );
+
+    // Screenshot should display left-side tree table fully expanded and the monitor
+    // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
+    // all allocations in a flat table, with two items checked (tracked), search should
+    // be enabled with focus. The tree table displayed on the bottom right-side below
+    // the flat table should display 2 tracked classes.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile('goldens/allocation_two_track_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
+
+    // Turn off one class being tracked.
+    expect(data[0].classRef.name, 'AClass');
+    expect(data[0].isStacktraced, isTrue);
+    controller.setTracking(data[0].classRef, false);
+    await pumpAndSettleOneSecond();
+
+    // Validate that track is off.
+    expect(data[0].isStacktraced, isFalse);
+
+    // Validate only one class is tracked now.
+    expect(controller.trackAllocations.length, 1);
+    expect(controller.trackAllocations.values.single, classesToTrack.last);
+    await pumpAndSettleOneSecond();
+
+    // Screenshot should display left-side tree table fully expanded and the monitor
+    // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
+    // all allocations in a flat table, with one class checked (tracked), search should
+    // be enabled with focus. The tree table displayed on the bottom right-side below
+    // the flat table should display one tracked class.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile('goldens/allocation_one_track_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
+
+    // Exercise search and auto-complete.
+    final searchField = find.byKey(memorySearchFieldKey);
+    await tester.tap(searchField);
+    await pumpAndSettleOneSecond();
+
+    final TextField textField = tester.widget(searchField) as TextField;
+    expect(textField.enabled, isTrue);
+
+    final textController = textField.controller;
+    expect(textController.text, isEmpty);
+    expect(controller.searchAutoComplete.value, isEmpty);
+
+    Future<void> _upDownArrow(int hilightedIndex, {downArrow = true}) async {
+      await simulateKeyDownEvent(downArrow
+          ? LogicalKeyboardKey.arrowDown
+          : LogicalKeyboardKey.arrowUp);
+      expect(controller.currentDefaultIndex, hilightedIndex);
+    }
+
+    Future<void> downArrow(int hilightedIndex) async {
+      await _upDownArrow(hilightedIndex);
+    }
+
+    Future<void> upArrow(int hilightedIndex) async {
+      await _upDownArrow(hilightedIndex, downArrow: false);
+    }
+
+    // Test for 10 items found in auto-complete
+    const autoCompletes = [
+      'AClass',
+      'AnotherClass',
+      'BClass',
+      'CClass',
+      'DClass',
+      'EClass',
+      'FClass',
+      'GClass',
+      'HClass',
+      'IClass',
+    ];
+    final autoCompletesAsString = autoCompletes.join(',');
+
+    await tester.enterText(searchField, 'A');
+    await pumpAndSettleOneSecond();
+
+    var autoCompletesDisplayed = controller.searchAutoComplete.value;
+    expect(autoCompletesDisplayed, hasLength(autoCompletes.length));
+    expect(autoCompletesDisplayed.join(','), autoCompletesAsString);
+
+    // Check that up arrow circles around to bottom item in drop-down list.
+    await upArrow(autoCompletes.indexOf('IClass'));
+    expect(
+      controller.currentDefaultIndex,
+      autoCompletes.indexOf('IClass'),
+    ); // IClass hilighted.
+    await simulateKeyDownEvent(LogicalKeyboardKey.enter);
+
+    var choosenAutoComplete =
+        controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
+    expect(choosenAutoComplete.classRef.name, 'IClass'); // IClass selected.
+
+    // Test for 2 items found in auto-complete.
+    final autoCompletes2 = [
+      'AnotherClass',
+      'LastClass',
+    ];
+    final autoCompletes2AsString = autoCompletes2.join(',');
+
+    await tester.enterText(searchField, 't');
+    autoCompletesDisplayed = controller.searchAutoComplete.value;
+    expect(autoCompletesDisplayed, hasLength(autoCompletes2.length));
+    expect(autoCompletesDisplayed.join(','), autoCompletes2AsString);
+    await downArrow(
+        autoCompletes2.indexOf('LastClass')); // LastClass hilighted.
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.enter);
+    choosenAutoComplete =
+        controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
+    expect(choosenAutoComplete.classRef.name, autoCompletes2.last);
+
+    // Test for 1 item found in auto-complete.
+    await tester.enterText(searchField, 'Z');
+    autoCompletesDisplayed = controller.searchAutoComplete.value;
+    expect(autoCompletesDisplayed, hasLength(1));
+    expect(autoCompletesDisplayed.single, 'ZClass');
+    expect(controller.currentDefaultIndex, 0); // ZClass hilighted.
+    await simulateKeyDownEvent(LogicalKeyboardKey.enter);
+
+    choosenAutoComplete =
+        controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
+    expect(choosenAutoComplete.classRef.name, 'ZClass'); // ZClass selected.
+
+    // Test for 4 items found in auto-complete.
+    final autoCompletes4 = [
+      'AnotherClass',
+      'OneClass',
+      'OneMoreClass',
+      'SecondClass',
+    ];
+    final autoCompletes4AsString = autoCompletes4.join(',');
+
+    await tester.enterText(searchField, 'n');
+    autoCompletesDisplayed = controller.searchAutoComplete.value;
+    expect(autoCompletesDisplayed, hasLength(autoCompletes4.length));
+    expect(autoCompletesDisplayed.join(','), autoCompletes4AsString);
+
+    expect(
+      controller.currentDefaultIndex,
+      autoCompletes4.indexOf('AnotherClass'),
+    ); // AnotherClass hilighted.
+
+    // Cycle around hilighting each entry.
+
+    // OneClass hilighted.
+    await downArrow(autoCompletes4.indexOf('OneClass'));
+    await pumpAndSettleOneSecond();
+
+    // Show's auto-complete dropdown with the 2nd item highlighted.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile(
+          'goldens/allocation_dropdown_hilight_line_2_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
+
+    // OneMoreClass hilighted.
+    await downArrow(autoCompletes4.indexOf('OneMoreClass'));
+    await pumpAndSettleOneSecond();
+
+    // Show's auto-complete dropdown with the 3rd item highlighted.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile(
+          'goldens/allocation_dropdown_hilight_line_3_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
+
+    // SecondClass hilighted.
+    await downArrow(autoCompletes4.indexOf('SecondClass'));
+    await pumpAndSettleOneSecond();
+
+    // Show's auto-complete dropdown with the 4th item highlighted.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile(
+          'goldens/allocation_dropdown_hilight_line_4_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
+
+    // AnotherClass hilighted.
+    await downArrow(autoCompletes4.indexOf('AnotherClass'));
+    await pumpAndSettleOneSecond();
+
+    // Show's auto-complete dropdown with the last item highlighted.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile(
+          'goldens/allocation_dropdown_hilight_line_1_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
+
+    // OneClass hilighted.
+    await downArrow(autoCompletes4.indexOf('OneClass'));
+    await pumpAndSettleOneSecond();
+
+    // Show's auto-complete dropdown with the 2nd item highlighted.
+    await expectLater(
+      find.byType(MemoryBody),
+      matchesGoldenFile(
+          'goldens/allocation_dropdown_hilight_line_2_golden.png'),
+    );
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
+
+    // Select last hilighted entry.
+    await simulateKeyDownEvent(LogicalKeyboardKey.enter);
+
+    choosenAutoComplete =
+        controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
+    // OneClass selected.
+    expect(choosenAutoComplete.classRef.name, autoCompletes4[1]);
   });
 }

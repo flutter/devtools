@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:codicon/codicon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
@@ -15,10 +16,10 @@ import '../common_widgets.dart';
 import '../config_specific/host_platform/host_platform.dart';
 import '../flex_split_column.dart';
 import '../listenable.dart';
-import '../octicons.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
+import '../ui/icons.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
@@ -28,10 +29,6 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'scripts.dart';
 import 'variables.dart';
-
-// This is currently a dev-time flag as the overall call depth may not be that
-// interesting to users.
-const bool debugShowCallStackCount = false;
 
 class DebuggerScreen extends Screen {
   const DebuggerScreen()
@@ -187,7 +184,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             OutlineDecoration(child: debuggerPanes()),
             Column(
               children: [
-                DebuggingControls(controller: controller),
+                const DebuggingControls(),
                 const SizedBox(height: denseRowSpacing),
                 Expanded(
                   child: Split(
@@ -219,7 +216,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               context,
               title: callStackTitle,
               needsTopBorder: false,
-              actions: debugShowCallStackCount ? [_callStackRightChild()] : [],
             ),
             areaPaneHeader(context, title: variablesTitle),
             areaPaneHeader(
@@ -241,22 +237,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     );
   }
 
-  Widget _callStackRightChild() {
-    return ValueListenableBuilder(
-      valueListenable: controller.stackFramesWithLocation,
-      builder: (context, stackFrames, _) {
-        return CallStackCountBadge(stackFrames: stackFrames);
-      },
-    );
-  }
-
   Widget _breakpointsRightChild() {
     return ValueListenableBuilder(
       valueListenable: controller.breakpointsWithLocation,
       builder: (context, breakpoints, _) {
         return Row(children: [
           BreakpointsCountBadge(breakpoints: breakpoints),
-          TooltippedButton(
+          DevToolsTooltip(
             child: ToolbarAction(
               icon: Icons.delete,
               onPressed:
@@ -368,5 +355,83 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
         widget.controller.calculatePosition(script, frame.location.tokenPos);
 
     return 'paused$reason$fileName $pos';
+  }
+}
+
+class FloatingDebuggerControls extends StatefulWidget {
+  @override
+  _FloatingDebuggerControlsState createState() =>
+      _FloatingDebuggerControlsState();
+}
+
+class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
+    with AutoDisposeMixin {
+  DebuggerController controller;
+
+  bool paused;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller = Provider.of<DebuggerController>(context);
+    paused = controller.isPaused.value;
+    addAutoDisposeListener(controller.isPaused, () {
+      setState(() {
+        paused = controller.isPaused.value;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: paused ? 1.0 : 0.0,
+      duration: longDuration,
+      child: Container(
+        color: devtoolsWarning,
+        height: defaultButtonHeight,
+        child: OutlinedRowGroup(
+          // Default focus color for the light theme - since the background
+          // color of the controls [devtoolsWarning] is the same for both
+          // themes, we will use the same border color.
+          borderColor: Colors.black.withOpacity(0.12),
+          children: [
+            Container(
+              height: defaultButtonHeight,
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(
+                horizontal: defaultSpacing,
+              ),
+              child: const Text(
+                'Main isolate is paused in the debugger',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            DevToolsTooltip(
+              tooltip: 'Resume',
+              child: TextButton(
+                onPressed: controller.resume,
+                child: const Icon(
+                  Codicons.debugContinue,
+                  color: Colors.green,
+                  size: defaultIconSize,
+                ),
+              ),
+            ),
+            DevToolsTooltip(
+              tooltip: 'Step over',
+              child: TextButton(
+                onPressed: controller.stepOver,
+                child: const Icon(
+                  Codicons.debugStepOver,
+                  color: Colors.black,
+                  size: defaultIconSize,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

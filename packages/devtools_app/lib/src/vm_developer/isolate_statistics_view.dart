@@ -24,7 +24,7 @@ class IsolateStatisticsView extends VMDeveloperView {
       : super(
           id,
           title: 'Isolates',
-          icon: Icons.bar_chart_sharp,
+          icon: Icons.bar_chart,
         );
   static const id = 'isolate-statistics';
 
@@ -59,7 +59,9 @@ class IsolateStatisticsViewBody extends StatelessWidget {
                     child: _buildTopRow(),
                   ),
                   Flexible(
-                    child: _buildBottomRow(),
+                    child: IsolatePortsWidget(
+                      controller: controller,
+                    ),
                   ),
                 ],
               ),
@@ -74,8 +76,19 @@ class IsolateStatisticsViewBody extends StatelessWidget {
     return Row(
       children: [
         Flexible(
-          child: GeneralIsolateStatisticsWidget(
-            controller: controller,
+          child: Column(
+            children: [
+              Flexible(
+                child: GeneralIsolateStatisticsWidget(
+                  controller: controller,
+                ),
+              ),
+              Flexible(
+                child: IsolateMemoryStatisticsWidget(
+                  controller: controller,
+                ),
+              ),
+            ],
           ),
         ),
         Flexible(
@@ -85,24 +98,6 @@ class IsolateStatisticsViewBody extends StatelessWidget {
         ),
         Flexible(
           child: ServiceExtensionsWidget(
-            controller: controller,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBottomRow() {
-    return Row(
-      children: [
-        Flexible(
-          child: IsolateMemoryStatisticsWidget(
-            controller: controller,
-          ),
-        ),
-        Flexible(
-          flex: 2,
-          child: IsolatePortsWidget(
             controller: controller,
           ),
         ),
@@ -166,8 +161,6 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
 /// Displays memory statistics for the isolate, including:
 ///   - Total Dart heap size
 ///   - New + Old space capacity and usage
-///   - Handle counts (zone + scoped)
-///   - Per-thread zone memory usage
 class IsolateMemoryStatisticsWidget extends StatelessWidget {
   const IsolateMemoryStatisticsWidget({@required this.controller});
 
@@ -211,21 +204,7 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
                   isolate?.oldSpaceCapacity,
                 ),
               ),
-              MapEntry(
-                'Max Zone Capacity',
-                prettyPrintBytes(
-                  controller.zoneCapacityHighWatermark,
-                  includeUnit: true,
-                ),
-              ),
-              MapEntry('# of Zone Handles', isolate?.zoneHandleCount),
-              MapEntry('# of Scoped Handles', isolate?.scopedHandleCount),
             ],
-            table: Flexible(
-              child: ThreadMemoryTable(
-                controller: controller,
-              ),
-            ),
           ),
         ),
       ],
@@ -282,88 +261,6 @@ class _PercentageColumn extends ColumnData<VMTag> {
 
   @override
   String getDisplayValue(VMTag dataObject) => percent2(dataObject.percentage);
-}
-
-/// Displays a table of threads associated with a given isolate with the
-/// following information:
-///   - Thread kind (e.g., mutator, background compiler, etc.)
-///   - Maximum zone capacity (aka "high watermark")
-///   - Current zone capacity
-class ThreadMemoryTable extends StatelessWidget {
-  ThreadMemoryTable({@required this.controller});
-
-  final id = _IDColumn();
-  final kind = _KindColumn();
-  final watermark = _HighWatermarkColumn();
-  final capacity = _ZoneCapacityColumn();
-
-  List<ColumnData<Thread>> get columns => [
-        id,
-        kind,
-        watermark,
-        capacity,
-      ];
-  final IsolateStatisticsViewController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final threads = controller.isolate?.threads ?? [];
-    return Column(
-      children: [
-        areaPaneHeader(context, title: 'Threads (${threads.length})'),
-        Expanded(
-          child: FlatTable<Thread>(
-            columns: columns,
-            data: threads,
-            keyFactory: (Thread thread) => ValueKey<String>(thread.id),
-            sortColumn: id,
-            sortDirection: SortDirection.ascending,
-            onItemSelected: (_) => null,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _IDColumn extends ColumnData<Thread> {
-  _IDColumn() : super.wide('ID');
-
-  @override
-  String getValue(Thread thread) => thread.id;
-}
-
-class _KindColumn extends ColumnData<Thread> {
-  _KindColumn() : super.wide('Kind');
-
-  @override
-  String getValue(Thread thread) => thread.kind;
-}
-
-class _HighWatermarkColumn extends ColumnData<Thread> {
-  _HighWatermarkColumn() : super.wide('Max Zone Capacity');
-
-  @override
-  int getValue(Thread thread) => thread.zoneHighWatermark;
-
-  @override
-  String getDisplayValue(Thread thread) => prettyPrintBytes(
-        thread.zoneHighWatermark,
-        includeUnit: true,
-      );
-}
-
-class _ZoneCapacityColumn extends ColumnData<Thread> {
-  _ZoneCapacityColumn() : super.wide('Current Zone Capacity');
-
-  @override
-  int getValue(Thread thread) => thread.zoneCapacity;
-
-  @override
-  String getDisplayValue(Thread thread) => prettyPrintBytes(
-        thread.zoneCapacity,
-        includeUnit: true,
-      );
 }
 
 class _PortIDColumn extends ColumnData<InstanceRef> {
