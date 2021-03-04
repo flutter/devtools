@@ -9,14 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod:
-    path: ../../../../../rrousselGit/river_pod/packages/flutter_riverpod
+  flutter_riverpod: ^0.13.0
   flutter_test:
     sdk: flutter
-
-dependency_overrides:
-  riverpod:
-    path: ../../../../../rrousselGit/river_pod/packages/riverpod
 
 flutter:
   uses-material-design: true

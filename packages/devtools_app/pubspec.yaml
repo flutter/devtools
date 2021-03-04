@@ -36,7 +36,7 @@ dependencies:
   file_selector_windows: ^0.0.1
   flutter:
     sdk: flutter
-  flutter_riverpod: ^0.12.4
+  flutter_riverpod: ^0.13.0
   flutter_web_plugins:
     sdk: flutter
   freezed_annotation: ^0.12.0
@@ -124,6 +124,7 @@ flutter:
         - asset: packages/codicon/font/codicon.ttf
 
 dependency_overrides:
+  freezed_annotation: ^0.12.0
   # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.
   # All overriden dependencies are published together so there is no harm
   # in treating them like they are part of a mono-repo while developing.

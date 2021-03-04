@@ -9,12 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  provider:
-    git:
-      url: https://github.com/rrousselGit/provider
-      ref: state-devtool
   flutter_test:
     sdk: flutter
+  provider: ^5.0.0
 
 flutter:
   uses-material-design: true

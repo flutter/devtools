@@ -14,7 +14,7 @@ dependencies:
   devtools_shared: 0.9.8-dev.1
   flutter:
     sdk: flutter
-  flutter_riverpod: ^0.12.4
+  flutter_riverpod: ^0.13.0
   flutter_test:
     sdk: flutter
   matcher: ^0.12.3
@@ -22,7 +22,7 @@ dependencies:
   package_resolver: ^1.0.0
   pedantic: ^1.7.0
   test: any # This version is pinned by Flutter so we don't need to set one explicitly.
-  vm_service: '>=5.0.0+1 < 7.0.0'
+  vm_service: '>=5.0.0+1 <7.0.0'
 
 
 dev_dependencies:
@@ -30,6 +30,7 @@ dev_dependencies:
   simple_lint_rules: ^1.0.0
 
 dependency_overrides:
+  freezed_annotation: ^0.12.0
 # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.
 # All overriden dependencies are published together so there is no harm
 # in treating them like they are part of a mono-repo while developing.
