@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:devtools_app/src/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,7 +22,6 @@ const propertyColor = Color.fromARGB(255, 206, 145, 120);
 
 const double rowHeight = 20.0;
 const double horizontalSpacing = 15;
-const double expandIconSize = 20;
 
 final isExpandedProvider = StateProviderFamily<bool, InstancePath>((ref, path) {
   // TODO refreshing the provider (after evaluating an expression) should not reset the expansion state
@@ -587,7 +587,7 @@ class _Expandable extends StatelessWidget {
                 angle: angle,
                 child: const Icon(
                   Icons.expand_more,
-                  size: expandIconSize,
+                  size: defaultIconSize,
                 ),
               );
             },
