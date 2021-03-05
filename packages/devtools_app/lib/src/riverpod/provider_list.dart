@@ -13,6 +13,7 @@ import '../instance_viewer/eval.dart';
 import '../instance_viewer/instance_providers.dart';
 import '../theme.dart';
 
+// run `flutter pub run build_runner build --delete-conflicting-outputs` to re-generate
 part 'provider_list.freezed.dart';
 
 const _tilePadding = EdgeInsets.only(

@@ -15,6 +15,7 @@ import '../globals.dart';
 import '../result.dart';
 import 'eval.dart';
 
+// run `flutter pub run build_runner build --delete-conflicting-outputs` to re-generate
 part 'instance_providers.freezed.dart';
 
 @freezed

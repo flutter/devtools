@@ -123,6 +123,16 @@ critical that the devtools_server is released first and the version numbers in
 `packages/devtools/pubspec.yaml` and `packages/devtools_app/pubspec.yaml` are updated.
  Please make sure this is clear on any PRs you open.
 
+## Updating generated files
+
+Some parts of the devtool relies on code-generation. If you want to update the generated code,
+you can run the following command in your terminal:
+
+```sh
+cd packages/devtool_app
+flutter pub run build_runner build --delete-conflicting-outputs
+```
+
 ## Testing
 
 ### Running tests

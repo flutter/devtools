@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+// run `flutter pub run build_runner build --delete-conflicting-outputs` to re-generate
 part 'result.freezed.dart';
 
 @freezed
