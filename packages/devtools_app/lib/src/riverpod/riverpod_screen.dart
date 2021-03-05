@@ -43,7 +43,7 @@ final _selectedProviderEvalProvider =
   final selectedProviderId = ref.watch(selectedProviderIdProvider).state;
 
   final instanceDetails = await ref.watch(
-    instanceProvider(InstancePath.fromRiverpodId(selectedProviderId)).future,
+    rawInstanceProvider(InstancePath.fromRiverpodId(selectedProviderId)).future,
   );
 
   return instanceDetails.maybeMap(
@@ -138,7 +138,7 @@ class _ProviderEvaluationState extends State<ProviderEvaluation> {
 
       final selectedProviderId = context.read(selectedProviderIdProvider).state;
       final providerInstance = await context.read(
-        instanceProvider(InstancePath.fromRiverpodId(selectedProviderId))
+        rawInstanceProvider(InstancePath.fromRiverpodId(selectedProviderId))
             .future,
       );
 
@@ -152,7 +152,7 @@ class _ProviderEvaluationState extends State<ProviderEvaluation> {
 
       unawaited(
         context.refresh(
-          instanceProvider(InstancePath.fromRiverpodId(selectedProviderId)),
+          rawInstanceProvider(InstancePath.fromRiverpodId(selectedProviderId)),
         ),
       );
 

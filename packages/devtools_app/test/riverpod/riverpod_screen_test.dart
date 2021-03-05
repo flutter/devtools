@@ -23,7 +23,7 @@ Future<void> awaitForHasError(ProviderContainer container) async {
 
   await container
       .read(
-        instanceProvider(InstancePath.fromRiverpodId(selectedProviderId))
+        rawInstanceProvider(InstancePath.fromRiverpodId(selectedProviderId))
             .future,
       )
       .catchError((_) {});
@@ -305,7 +305,7 @@ void main() {
             ),
           ),
         ),
-        instanceProvider(const InstancePath.fromRiverpodId(
+        rawInstanceProvider(const InstancePath.fromRiverpodId(
           ProviderId(
             containerId: '0',
             providerId: '0',
@@ -404,23 +404,12 @@ void main() {
             ]),
           ),
           ...getOverrides(),
-          instanceProvider(const InstancePath.fromRiverpodId(
+          rawInstanceProvider(const InstancePath.fromRiverpodId(
             ProviderId(containerId: '0', providerId: '0'),
           )).overrideWithValue(AsyncValue.error(Error()))
         ],
       );
       addTearDown(container.dispose);
-
-      // TODO(rrousselGit) remove when https://github.com/rrousselGit/river_pod/issues/355 is fixed
-      // workaround to the test incorrectly thinking the error is uncaught
-      unawaited(container
-          .listen(
-            instanceProvider(const InstancePath.fromRiverpodId(
-              ProviderId(containerId: '0', providerId: '0'),
-            )).future,
-          )
-          .read()
-          .catchError((err) {}));
 
       await tester.pumpWidget(
         UncontrolledProviderScope(

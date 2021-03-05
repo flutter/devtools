@@ -103,14 +103,15 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
       );
     }, timeout: const Timeout.factor(8));
 
-    group('instanceProvider', () {
+    group('rawInstanceProvider', () {
       test('deeply parse complex objects', () async {
         final container = ProviderContainer();
         addTearDown(container.dispose);
 
         final counterFuture = container
             .listen(
-              instanceProvider(const InstancePath.fromProviderId('0')).future,
+              rawInstanceProvider(const InstancePath.fromProviderId('0'))
+                  .future,
             )
             .read();
 
@@ -125,14 +126,15 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           ],
         );
 
-        final complexFuture =
-            await container.listen(instanceProvider(complexPath).future).read();
+        final complexFuture = await container
+            .listen(rawInstanceProvider(complexPath).future)
+            .read();
 
         final complexPropertiesFuture = Future.wait<MapEntry<String, Object>>([
           for (final field in (complexFuture as ObjectInstance).fields)
             container
                 .listen(
-                  instanceProvider(
+                  rawInstanceProvider(
                     complexPath.pathForChild(
                       PathToProperty.objectProperty(
                         name: field.name,
@@ -158,7 +160,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         );
 
         final mapKeys = await container
-            .listen(instanceProvider(mapPath).future)
+            .listen(rawInstanceProvider(mapPath).future)
             .read()
             .then((value) => value as MapInstance);
 
@@ -166,7 +168,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           for (final key in mapKeys.keys)
             container
                 .listen(
-                  instanceProvider(
+                  rawInstanceProvider(
                     mapPath.pathForChild(
                       PathToProperty.mapKey(ref: key.instanceRefId),
                     ),
@@ -187,7 +189,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           for (var i = 0; i < 6; i++)
             container
                 .listen(
-                  instanceProvider(
+                  rawInstanceProvider(
                     listPath.pathForChild(PathToProperty.listIndex(i)),
                   ).future,
                 )
@@ -197,7 +199,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         // Counter.complex.list[4].value
         final list4valueFuture = container
             .listen(
-              instanceProvider(
+              rawInstanceProvider(
                 listPath
                     .pathForChild(const PathToProperty.listIndex(4))
                     .pathForChild(
@@ -214,7 +216,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         // Counter.complex.plainInstance.value
         final plainInstanceValueFuture = container
             .listen(
-              instanceProvider(
+              rawInstanceProvider(
                 complexPath
                     .pathForChild(
                       const PathToProperty.objectProperty(
@@ -570,7 +572,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
 
         // Counter._count
         final counter_countSub = container.listen(
-          instanceProvider(
+          rawInstanceProvider(
             const InstancePath.fromProviderId(
               '0',
               pathToProperty: [
@@ -641,7 +643,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
       // wait for the list of providers to be obtained
       await container.listen(providerIdsProvider.last).read();
 
-      final countSub = container.listen(instanceProvider(countPath).future);
+      final countSub = container.listen(rawInstanceProvider(countPath).future);
 
       final instance = await countSub.read();
 

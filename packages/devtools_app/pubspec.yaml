@@ -36,7 +36,7 @@ dependencies:
   file_selector_windows: ^0.0.1
   flutter:
     sdk: flutter
-  flutter_riverpod: ^0.13.0
+  flutter_riverpod: ^0.13.1
   flutter_web_plugins:
     sdk: flutter
   freezed_annotation: ^0.12.0

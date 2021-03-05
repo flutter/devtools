@@ -23,13 +23,10 @@ import 'provider_list.dart';
 
 final _selectedProviderEvalProvider =
     AutoDisposeFutureProvider<EvalOnDartLibrary>((ref) async {
-  final isAlive = IsAlive();
-  ref.onDispose(isAlive.dispose);
-
   final selectedProviderId = ref.watch(selectedProviderIdProvider).state;
 
   final instanceDetails = await ref.watch(
-    instanceProvider(InstancePath.fromProviderId(selectedProviderId)).future,
+    rawInstanceProvider(InstancePath.fromProviderId(selectedProviderId)).future,
   );
 
   return instanceDetails.maybeMap(
@@ -46,7 +43,7 @@ final _hasErrorProvider = Provider.autoDispose<bool>((ref) {
   if (selectedProviderId == null) return false;
 
   final instance = ref.watch(
-    instanceProvider(InstancePath.fromProviderId(selectedProviderId)),
+    rawInstanceProvider(InstancePath.fromProviderId(selectedProviderId)),
   );
 
   return instance is AsyncError;
@@ -159,7 +156,7 @@ class _ProviderEvaluationState extends State<_ProviderEvaluation> {
 
       final selectedProviderId = context.read(selectedProviderIdProvider).state;
       final providerInstance = await context.read(
-        instanceProvider(InstancePath.fromProviderId(selectedProviderId))
+        rawInstanceProvider(InstancePath.fromProviderId(selectedProviderId))
             .future,
       );
 
@@ -173,7 +170,7 @@ class _ProviderEvaluationState extends State<_ProviderEvaluation> {
 
       unawaited(
         context.refresh(
-          instanceProvider(InstancePath.fromProviderId(selectedProviderId)),
+          rawInstanceProvider(InstancePath.fromProviderId(selectedProviderId)),
         ),
       );
 

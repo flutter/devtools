@@ -228,7 +228,7 @@ void main() {
             ProviderNode(id: '1', type: 'ChangeNotifierProvider1'),
           ),
         ),
-        instanceProvider(const InstancePath.fromProviderId('0'))
+        rawInstanceProvider(const InstancePath.fromProviderId('0'))
             .overrideWithValue(AsyncValue.data(
           InstanceDetails.string(
             'Value0',
@@ -310,20 +310,11 @@ void main() {
             const AsyncValue.data(['0', '1']),
           ),
           ...getOverrides(),
-          instanceProvider(const InstancePath.fromProviderId('0'))
+          rawInstanceProvider(const InstancePath.fromProviderId('0'))
               .overrideWithValue(AsyncValue.error(Error()))
         ],
       );
       addTearDown(container.dispose);
-
-      // TODO(rrousselGit) remove when https://github.com/rrousselGit/river_pod/issues/355 is fixed
-      // workaround to the test incorrectly thinking the error is uncaught
-      unawaited(container
-          .listen(
-            instanceProvider(const InstancePath.fromProviderId('0')).future,
-          )
-          .read()
-          .catchError((err) {}));
 
       await tester.pumpWidget(
         UncontrolledProviderScope(

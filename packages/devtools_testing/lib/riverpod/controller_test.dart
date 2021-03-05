@@ -75,7 +75,8 @@ Future<void> runRiverpodControllerTests(FlutterTestEnvironment env) async {
       expect(providerIds.length, 2);
 
       final counterStateSub = container.listen(
-        instanceProvider(InstancePath.fromRiverpodId(providerIds.last)).future,
+        rawInstanceProvider(InstancePath.fromRiverpodId(providerIds.last))
+            .future,
       );
 
       await expectLater(

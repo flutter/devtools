@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -373,7 +375,7 @@ Future<void> _mutate(
 
   // Since the same object can be used in multiple locations at once, we need
   // to refresh the entire tree instead of just the node that was modified.
-  unawaited(ref.container.refresh(instanceProvider(path.root)));
+  unawaited(ref.container.refresh(rawInstanceProvider(path.root)));
 
   // Forces the UI to rebuild after the state change
   await serviceManager.performHotReload();
@@ -384,7 +386,7 @@ Future<InstanceDetails> _resolveParent(
   InstancePath path,
 ) async {
   return path.pathToProperty.isNotEmpty
-      ? await ref.watch(instanceProvider(path.parent).future)
+      ? await ref.watch(rawInstanceProvider(path.parent).future)
       : null;
 }
 
@@ -485,8 +487,11 @@ Setter _parseSetter({
   );
 }
 
+/// Fetches informations related to an instance/provider at a given path
+///
+/// The UI should not be used directly. Instead, use [instanceProvider].
 final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
-    instanceProvider =
+    rawInstanceProvider =
     AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>(
         (ref, path) async {
   final eval = ref.watch(evalProvider);
@@ -549,7 +554,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
       final keysFuture = Future.wait<InstanceDetails>([
         for (final keyRef in keysRef)
           ref.watch(
-            instanceProvider(InstancePath.fromInstanceId(keyRef?.id)).future,
+            rawInstanceProvider(InstancePath.fromInstanceId(keyRef?.id)).future,
           )
       ]);
 
@@ -610,6 +615,50 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
         setter: setter,
       );
   }
+});
+
+final _instanceCacheProvider = AutoDisposeStateNotifierProviderFamily<
+    StateController<AsyncValue<InstanceDetails>>, InstancePath>((ref, path) {
+  final controller = StateController<AsyncValue<InstanceDetails>>(
+    // It is safe to use `read` here because the provider is immediately listened after
+    ref.read(rawInstanceProvider(path)),
+  );
+
+  Timer timer;
+  ref.onDispose(() => timer?.cancel());
+
+  // TODO(rrousselGit): refactor to use `ref.listen` when available
+  final sub = ref.container.listen<AsyncValue<InstanceDetails>>(
+    rawInstanceProvider(path),
+    mayHaveChanged: (sub) => Future(sub.flush),
+    didChange: (sub) {
+      timer?.cancel();
+
+      sub.read().map(
+            data: (instance) => controller.state = instance,
+            error: (instance) => controller.state = instance,
+            loading: (instance) {
+              timer = Timer(const Duration(seconds: 1), () {
+                controller.state = instance;
+              });
+            },
+          );
+    },
+  );
+
+  ref.onDispose(sub.close);
+
+  return controller;
+});
+
+/// [rawInstanceProvider] but the loading state is debounced for one second.
+///
+/// This avoids flickers when a state is refreshed
+final instanceProvider =
+    AutoDisposeProviderFamily<AsyncValue<InstanceDetails>, InstancePath>(
+        (ref, path) {
+  // Hide the StateController as it is an implementation detail
+  return ref.watch(_instanceCacheProvider(path).state);
 });
 
 final _packageNameExp = RegExp(
