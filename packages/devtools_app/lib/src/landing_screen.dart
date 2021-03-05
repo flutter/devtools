@@ -4,13 +4,17 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'common_widgets.dart';
+import 'config_specific/import_export/import_export.dart';
+import 'file_import.dart';
 import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'notifications.dart';
 import 'routing.dart';
 import 'theme.dart';
+import 'ui/label.dart';
 import 'url_utils.dart';
 import 'utils.dart';
 
@@ -46,6 +50,8 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
       children: [
         _buildConnectDialog(),
         const SizedBox(height: defaultSpacing),
+        _buildImportInstructions(),
+        const SizedBox(height: defaultSpacing),
         _buildAppSizeInstructions(),
       ],
     );
@@ -65,6 +71,39 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
         ],
       ),
     );
+  }
+
+  Widget _buildImportInstructions() {
+    return _buildSection(
+      title: 'Load DevTools Data',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _subtitleText(
+              'Import a data file to use DevTools without an app connection.'),
+          const SizedBox(height: denseRowSpacing),
+          _captionText(
+              'At this time, DevTools only supports importing files that were originally'
+              ' exported from DevTools.'),
+          const SizedBox(height: defaultSpacing),
+          FixedHeightElevatedButton(
+            onPressed: _importFile,
+            child: const MaterialIconLabel(
+              label: 'Import File',
+              iconData: Icons.file_upload,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _importFile() async {
+    final importedFile = await importFileFromPicker(
+      acceptedTypes: ['json'],
+    );
+    Provider.of<ImportController>(context, listen: false)
+        .importData(importedFile);
   }
 
   Widget _buildAppSizeInstructions() {

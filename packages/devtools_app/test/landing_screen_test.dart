@@ -5,6 +5,7 @@
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/landing_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/mocks.dart';
@@ -15,7 +16,8 @@ void main() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
   });
 
-  testWidgets('Landing screen displays without error',
+  testWidgetsWithWindowSize(
+      'Landing screen displays without error', const Size(2000.0, 2000.0),
       (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(wrap(LandingScreenBody()));
