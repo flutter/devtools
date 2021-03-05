@@ -293,7 +293,7 @@ class OfflinePerformanceData extends PerformanceData {
                 .cast<String, dynamic>())
         : null;
 
-    final num displayRefreshRate =
+    final displayRefreshRate =
         json[PerformanceData.displayRefreshRateKey] ?? defaultRefreshRate;
 
     return OfflinePerformanceData._(
