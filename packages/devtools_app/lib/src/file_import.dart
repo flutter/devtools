@@ -169,10 +169,9 @@ class _FileImportContainerState extends State<FileImportContainer> {
   }
 
   Future<void> _importFile() async {
-    await importFileFromPicker(
-      acceptedTypes: widget.extensions,
-      importHandler: _handleImportedFile,
-    );
+    final importedFile =
+        await importFileFromPicker(acceptedTypes: widget.extensions);
+    _handleImportedFile(importedFile);
   }
 
   // TODO(kenz): add error handling to ensure we only allow importing supported
@@ -190,20 +189,20 @@ class _FileImportContainerState extends State<FileImportContainer> {
   }
 }
 
-Future<void> importFileFromPicker({
+Future<DevToolsJsonFile> importFileFromPicker({
   @required List<String> acceptedTypes,
-  @required void Function(DevToolsJsonFile) importHandler,
 }) async {
   final acceptedTypeGroups = [XTypeGroup(extensions: acceptedTypes)];
   final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
   final data = jsonDecode(await file.readAsString());
   final lastModifiedTime = await file.lastModified();
-  final devToolsJsonFile = DevToolsJsonFile(
+  // TODO(kenz): this will need to be modified if we need to support other file
+  // extensions than .json. We will need to return a more generic file type.
+  return DevToolsJsonFile(
     data: data,
     name: file.name,
     lastModifiedTime: lastModifiedTime,
   );
-  importHandler(devToolsJsonFile);
 }
 
 class FileImportButton extends StatelessWidget {

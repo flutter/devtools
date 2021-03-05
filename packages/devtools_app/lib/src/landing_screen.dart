@@ -99,11 +99,11 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
   }
 
   Future<void> _importFile() async {
-    await importFileFromPicker(
+    final importedFile = await importFileFromPicker(
       acceptedTypes: ['json'],
-      importHandler:
-          Provider.of<ImportController>(context, listen: false).importData,
     );
+    Provider.of<ImportController>(context, listen: false)
+        .importData(importedFile);
   }
 
   Widget _buildAppSizeInstructions() {
