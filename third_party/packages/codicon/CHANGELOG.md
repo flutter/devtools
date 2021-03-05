@@ -1,3 +1,6 @@
+# 0.0.3
+Add Creative Commons LICENSE
+
 # 0.0.2
 Restructure package directories.
 
