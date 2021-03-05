@@ -22,7 +22,8 @@ class CpuBottomUpTable extends StatelessWidget {
       treeColumn,
       // TODO(kenz): add source column for flutter apps once
       // https://github.com/dart-lang/sdk/issues/37553 is fixed.
-      if (serviceManager.connectedApp.isDartCliAppNow) SourceColumn(),
+      if (!offlineMode && serviceManager.connectedApp.isDartCliAppNow)
+        SourceColumn(),
     ]);
     return CpuBottomUpTable._(
       key,

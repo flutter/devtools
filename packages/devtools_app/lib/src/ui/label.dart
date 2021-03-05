@@ -46,6 +46,7 @@ class MaterialIconLabel extends StatelessWidget {
     // TODO(jacobr): display the label as a tooltip for the icon particularly
     // when the text is not shown.
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         iconData != null
             ? Icon(

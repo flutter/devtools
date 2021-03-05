@@ -90,6 +90,7 @@ class IconLabelButton extends StatelessWidget {
     @required this.label,
     @required this.onPressed,
     this.includeTextWidth,
+    this.elevatedButton = false,
   }) : super(key: key);
 
   final IconData icon;
@@ -100,15 +101,25 @@ class IconLabelButton extends StatelessWidget {
 
   final VoidCallback onPressed;
 
+  /// Whether this icon label button should use an elevated button style.
+  final bool elevatedButton;
+
   @override
   Widget build(BuildContext context) {
+    final iconLabel = MaterialIconLabel(
+      label: label,
+      iconData: icon,
+      includeTextWidth: includeTextWidth,
+    );
+    if (elevatedButton) {
+      return FixedHeightElevatedButton(
+        onPressed: onPressed,
+        child: iconLabel,
+      );
+    }
     return FixedHeightOutlinedButton(
       onPressed: onPressed,
-      child: MaterialIconLabel(
-        label: label,
-        iconData: icon,
-        includeTextWidth: includeTextWidth,
-      ),
+      child: iconLabel,
     );
   }
 }

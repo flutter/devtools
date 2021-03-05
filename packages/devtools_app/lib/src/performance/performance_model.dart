@@ -293,14 +293,14 @@ class OfflinePerformanceData extends PerformanceData {
                 .cast<String, dynamic>())
         : null;
 
-    final double displayRefreshRate =
+    final num displayRefreshRate =
         json[PerformanceData.displayRefreshRateKey] ?? defaultRefreshRate;
 
     return OfflinePerformanceData._(
       traceEvents: traceEvents,
       selectedFrameId: selectedFrameId,
       selectedEvent: selectedEvent,
-      displayRefreshRate: displayRefreshRate,
+      displayRefreshRate: displayRefreshRate.toDouble(),
       cpuProfileData: cpuProfileData,
     );
   }
