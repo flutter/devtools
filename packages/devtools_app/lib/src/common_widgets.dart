@@ -438,13 +438,12 @@ class RecordingInfo extends StatelessWidget {
         processedObject: recordedObject,
       );
     } else if (recording) {
-      child = _recordingStatus(
-        context,
+      child = RecordingStatus(
         key: recordingStatusKey,
         recordedObject: recordedObject,
       );
     } else {
-      child = _recordingInstructions(
+      child = RecordingInstructions(
         key: instructionsKey,
         recordedObject: recordedObject,
         isPause: isPause,
@@ -454,28 +453,60 @@ class RecordingInfo extends StatelessWidget {
       child: child,
     );
   }
+}
 
-  Widget _recordingInstructions({
+class RecordingStatus extends StatelessWidget {
+  const RecordingStatus({
+    Key key, @required
+    this.recordedObject,
+  }) : super(key: key);
+
+  final String recordedObject;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Recording $recordedObject',
+          style: Theme.of(context).subtleTextStyle,
+        ),
+        const SizedBox(height: defaultSpacing),
+        const CircularProgressIndicator(),
+      ],
+    );
+  }
+}
+
+class RecordingInstructions extends StatelessWidget {
+  const RecordingInstructions({
     Key key,
-    String recordedObject,
-    bool isPause,
-  }) {
+    @required this.isPause,
+    @required this.recordedObject,
+  }) : super(key: key);
+
+  final String recordedObject;
+
+  final bool isPause;
+
+  @override
+  Widget build(BuildContext context) {
     final stopOrPauseRow = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: isPause
           ? const [
-              Text('Click the pause button '),
-              Icon(Icons.pause),
-              Text(' to pause the recording.'),
-            ]
+        Text('Click the pause button '),
+        Icon(Icons.pause),
+        Text(' to pause the recording.'),
+      ]
           : const [
-              Text('Click the stop button '),
-              Icon(Icons.stop),
-              Text(' to end the recording.'),
-            ],
+        Text('Click the stop button '),
+        Icon(Icons.stop),
+        Text(' to end the recording.'),
+      ],
     );
     return Column(
-      key: key,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Row(
@@ -490,26 +521,8 @@ class RecordingInfo extends StatelessWidget {
       ],
     );
   }
-
-  Widget _recordingStatus(
-    BuildContext context, {
-    Key key,
-   String recordedObject,
-  }) {
-    return Column(
-      key: key,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Recording $recordedObject',
-          style: Theme.of(context).subtleTextStyle,
-        ),
-        const SizedBox(height: defaultSpacing),
-        const CircularProgressIndicator(),
-      ],
-    );
-  }
 }
+
 
 class ProcessingInfo extends StatelessWidget {
   const ProcessingInfo({
