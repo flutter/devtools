@@ -439,6 +439,7 @@ class RecordingInfo extends StatelessWidget {
       );
     } else if (recording) {
       child = _recordingStatus(
+        context,
         key: recordingStatusKey,
         recordedObject: recordedObject,
       );
@@ -454,8 +455,11 @@ class RecordingInfo extends StatelessWidget {
     );
   }
 
-  Widget _recordingInstructions(
-      {Key key, String recordedObject, bool isPause}) {
+  Widget _recordingInstructions({
+    Key key,
+    String recordedObject,
+    bool isPause,
+  }) {
     final stopOrPauseRow = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: isPause
@@ -487,12 +491,19 @@ class RecordingInfo extends StatelessWidget {
     );
   }
 
-  Widget _recordingStatus({Key key, String recordedObject}) {
+  Widget _recordingStatus(
+    BuildContext context, {
+    Key key,
+   String recordedObject,
+  }) {
     return Column(
       key: key,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Recording $recordedObject'),
+        Text(
+          'Recording $recordedObject',
+          style: Theme.of(context).subtleTextStyle,
+        ),
         const SizedBox(height: defaultSpacing),
         const CircularProgressIndicator(),
       ],
@@ -517,7 +528,10 @@ class ProcessingInfo extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Processing $processedObject'),
+          Text(
+            'Processing $processedObject',
+            style: Theme.of(context).subtleTextStyle,
+          ),
           const SizedBox(height: defaultSpacing),
           SizedBox(
             width: 200.0,
