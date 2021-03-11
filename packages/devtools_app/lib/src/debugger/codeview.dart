@@ -396,7 +396,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
               scriptRef.uri,
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
-              style: const TextStyle(fontSize: 14.0, color: Colors.grey),
+              style: Theme.of(context).subtleTextStyle,
             ),
           ],
         ),
