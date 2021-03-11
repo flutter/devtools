@@ -150,35 +150,29 @@ class ScriptPickerState extends State<ScriptPicker> {
               ),
               const SizedBox(width: densePadding),
               Expanded(
-                child: Row(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (!node.hasScript)
-                            Text(
-                              node.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          if (node.hasScript) ...[
-                            Text(
-                              node.fileName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              node.scriptRef.uri,
-                              style: const TextStyle(color: Colors.grey),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ]
-                        ],
+                    if (!node.hasScript)
+                      Text(
+                        node.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    else ...[
+                      Text(
+                        node.fileName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
+                      Text(
+                        node.scriptRef.uri,
+                        style: const TextStyle(color: Colors.grey),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ]
                   ],
                 ),
               ),
