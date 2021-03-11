@@ -14,6 +14,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     this.dataDisplayProvider,
     this.onItemPressed,
     this.shrinkWrap = false,
+    this.itemExtent = defaultListItemHeight,
   });
 
   final List<T> dataRoots;
@@ -29,6 +30,8 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   final Widget Function(T, VoidCallback) dataDisplayProvider;
 
   final void Function(T) onItemPressed;
+
+  final double itemExtent;
 
   @override
   _TreeViewState<T> createState() => _TreeViewState<T>();
@@ -61,7 +64,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
     if (items.isEmpty) return const SizedBox();
     return ListView.builder(
       itemCount: items.length,
-      itemExtent: defaultListItemHeight,
+      itemExtent: widget.itemExtent,
       shrinkWrap: widget.shrinkWrap,
       physics: widget.shrinkWrap ? const ClampingScrollPhysics() : null,
       itemBuilder: (context, index) {
