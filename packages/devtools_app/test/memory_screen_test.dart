@@ -131,7 +131,9 @@ void main() {
 
       expect(controller.memorySource, MemoryController.liveFeed);
 
-      expect(find.byKey(MemoryScreen.gcButtonKey), findsOneWidget);
+      controller.isAdvancedSettingsVisible == false
+          ? expect(find.byKey(MemoryScreen.gcButtonKey), findsNothing)
+          : expect(find.byKey(MemoryScreen.gcButtonKey), findsOneWidget);
 
       expect(find.byType(MemoryVMChart), findsOneWidget);
 

@@ -1548,7 +1548,7 @@ class MemoryConfigurationsDialog extends StatelessWidget {
                 Row(
                   children: [
                     NotifierCheckbox(
-                        notifier: controller.advancedSettingsEnabled),
+                        notifier: controller.advancedSettingsEnabled,),
                     RichText(
                       overflow: TextOverflow.visible,
                       text: TextSpan(
