@@ -253,7 +253,9 @@ class _SplitState extends State<Split> {
         ),
         if (i < widget.children.length - 1)
           MouseRegion(
-            cursor: SystemMouseCursors.grab,
+            cursor: isHorizontal
+                ? SystemMouseCursors.resizeColumn
+                : SystemMouseCursors.resizeRow,
             child: GestureDetector(
               key: widget.dividerKey(i),
               behavior: HitTestBehavior.translucent,

@@ -133,6 +133,8 @@ class MemoryBodyState extends State<MemoryBody>
   OverlayEntry hoverOverlayEntry;
   OverlayEntry legendOverlayEntry;
 
+  bool isAdvancedSettingsEnabled = false;
+
   /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
   bool isAndroidCollection = MemoryController.androidADBDefault;
 
@@ -284,6 +286,16 @@ class MemoryBodyState extends State<MemoryBody>
           // If we're no longer collecting android stats then hide the
           // chart and disable the Android Memory button.
           controller.toggleAndroidChartVisibility();
+        }
+      });
+    });
+
+    addAutoDisposeListener(controller.advancedSettingsEnabled, () {
+      isAdvancedSettingsEnabled = controller.advancedSettingsEnabled.value;
+      setState(() {
+        if (!isAdvancedSettingsEnabled &&
+            controller.isAdvancedSettingsVisible) {
+          controller.toggleAdvancedSettingsVisibility();
         }
       });
     });
@@ -549,14 +561,20 @@ class MemoryBodyState extends State<MemoryBody>
         const SizedBox(width: defaultSpacing),
         createToggleAdbMemoryButton(),
         const SizedBox(width: denseSpacing),
-        IconLabelButton(
-          key: MemoryScreen.gcButtonKey,
-          onPressed: controller.isGcing ? null : _gc,
-          icon: Icons.delete,
-          label: 'GC',
-          includeTextWidth: _primaryControlsMinVerboseWidth,
-        ),
-        const SizedBox(width: defaultSpacing),
+        isAdvancedSettingsEnabled
+            ? Row(
+                children: [
+                  IconLabelButton(
+                    key: MemoryScreen.gcButtonKey,
+                    onPressed: controller.isGcing ? null : _gc,
+                    icon: Icons.delete,
+                    label: 'GC',
+                    includeTextWidth: _primaryControlsMinVerboseWidth,
+                  ),
+                  const SizedBox(width: denseSpacing),
+                ],
+              )
+            : const SizedBox(),
         IconLabelButton(
           key: MemoryScreen.exportButtonKey,
           onPressed:
@@ -565,7 +583,7 @@ class MemoryBodyState extends State<MemoryBody>
           label: 'Export',
           includeTextWidth: _primaryControlsMinVerboseWidth,
         ),
-        const SizedBox(width: defaultSpacing),
+        const SizedBox(width: denseSpacing),
         IconLabelButton(
           key: legendKey,
           onPressed: controller.toggleLegendVisibility,
@@ -1383,11 +1401,17 @@ class ChartsValues {
       (hasGc ? 1 : 0);
 
   bool get hasSnapshot => _event.containsKey(snapshotJsonName);
+
   bool get hasAutoSnapshot => _event.containsKey(autoSnapshotJsonName);
+
   bool get hasMonitorStart => _event.containsKey(monitorStartJsonName);
+
   bool get hasMonitorReset => _event.containsKey(monitorResetJsonName);
+
   bool get hasExtensionEvents => _event.containsKey(extensionEventsJsonName);
+
   bool get hasManualGc => _event.containsKey(manualGCJsonName);
+
   bool get hasGc => _vm[gcJsonName];
 
   int get extensionEventsLength =>
@@ -1519,6 +1543,28 @@ class MemoryConfigurationsDialog extends StatelessWidget {
                       overflow: TextOverflow.visible,
                       text: TextSpan(
                         text: 'Display Data In Units (B, KB, MB, and GB)',
+                        style: theme.regularTextStyle,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: defaultSpacing,
+            ),
+            ...dialogSubHeader(theme, 'General'),
+            Column(
+              children: [
+                Row(
+                  children: [
+                    NotifierCheckbox(
+                      notifier: controller.advancedSettingsEnabled,
+                    ),
+                    RichText(
+                      overflow: TextOverflow.visible,
+                      text: TextSpan(
+                        text: 'Enable advanced memory settings',
                         style: theme.regularTextStyle,
                       ),
                     ),
