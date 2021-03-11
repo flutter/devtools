@@ -383,11 +383,22 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
         .map((scriptRef) {
       return PopupMenuItem(
         value: scriptRef,
-        child: Text(
-          scriptRef.uri,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-          style: const TextStyle(fontSize: 14.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              ScriptRefUtils.fileName(scriptRef),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              scriptRef.uri,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: const TextStyle(fontSize: 14.0, color: Colors.grey),
+            ),
+          ],
         ),
       );
     }).toList();

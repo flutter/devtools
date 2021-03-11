@@ -353,6 +353,9 @@ class FileNode extends TreeNode<FileNode> {
 }
 
 class ScriptRefUtils {
+  static String fileName(ScriptRef scriptRef) =>
+      Uri.parse(scriptRef.uri).path.split('/').last;
+
   /// Return the Uri for the given ScriptRef split into path segments.
   ///
   /// This is useful for converting a flat list of scripts into a directory tree
