@@ -267,7 +267,7 @@ void main() {
 
       expect(filename, startsWith(MemoryController.logFilenamePrefix));
 
-      controller.memoryLog.loadOffline(filename);
+      await controller.memoryLog.loadOffline(filename);
 
       expect(controller.offline, isTrue);
 
