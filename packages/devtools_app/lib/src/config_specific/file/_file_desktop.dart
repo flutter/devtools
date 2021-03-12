@@ -18,20 +18,9 @@ FileSystemDesktop createFileSystem() {
 class FileSystemDesktop implements FileIO {
   final _fs = const LocalFileSystem();
 
-  Directory exportDirectory() {
-    // TODO(terry): macOS returns /var/folders/xxx/yyy for temporary. Where
-    // xxx & yyy are generated names hard to locate the json file.
-    if (_fs.systemTempDirectory.dirname.startsWith('/var/')) {
-      // TODO(terry): For now export the file to the user's Downloads.
-      final dirPath = _fs.currentDirectory.dirname.split('/');
-      // check length prevent Memory tab crash in macos
-      if (dirPath.length > 2) {
-        final downloadsPath = '/${dirPath[1]}/${dirPath[2]}/Downloads';
-        return _fs.directory(downloadsPath);
-      }
-    }
-    return _fs.systemTempDirectory;
-  }
+  /// Flutter Desktop MacOS systemTempDirectory is $TMPDIR
+  /// Flutter Desktop Linux systemTempDirectory is \tmp
+  Directory exportDirectory() => _fs.systemTempDirectory;
 
   @override
   void writeStringToFile(String filename, String contents) {

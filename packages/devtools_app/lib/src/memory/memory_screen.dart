@@ -16,6 +16,7 @@ import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../dialogs.dart';
 import '../globals.dart';
+import '../notifications.dart';
 import '../screen.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
@@ -173,10 +174,17 @@ class MemoryBodyState extends State<MemoryBody>
     });
 
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller.memorySourceNotifier, () {
+    addAutoDisposeListener(controller.memorySourceNotifier, () async {
+      String errorMessage;
+      await controller.updatedMemorySource().catchError((e) {
+        errorMessage = '$e';
+        controller.memorySource = MemoryController.liveFeed;
+      });
+
       setState(() {
-        controller.updatedMemorySource();
-        _refreshCharts();
+        errorMessage == null
+            ? _refreshCharts()
+            : Notifications.of(context).push(errorMessage);
       });
     });
 

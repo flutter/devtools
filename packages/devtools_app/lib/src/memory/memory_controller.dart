@@ -102,6 +102,15 @@ ChartInterval chartInterval(String displayName) {
   }
 }
 
+class OfflineFileException implements Exception {
+  OfflineFileException(this.message) : super();
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 class AllocationStackTrace {
   AllocationStackTrace(CpuSample sample, {List<ProfileFunction> functions}) {
     computeStacktrace(sample, functions: functions);
@@ -504,7 +513,9 @@ class MemoryController extends DisposableController
       displayIntervalToIntervalDurationInMs(displayInterval);
 
   /// MemorySource has changed update the view.
-  void updatedMemorySource() {
+  /// Return value of null implies offline file loaded.
+  /// Return value of String is an error message.
+  Future<void> updatedMemorySource() async {
     if (memorySource == MemoryController.liveFeed) {
       if (offline) {
         // User is switching back to 'Live Feed'.
@@ -516,7 +527,9 @@ class MemoryController extends DisposableController
       }
     } else {
       // Switching to an offline memory log (JSON file in /tmp).
-      memoryLog.loadOffline(memorySource);
+      await memoryLog.loadOffline(memorySource).catchError((e) {
+        throw OfflineFileException(e.toString());
+      });
     }
   }
 
@@ -1484,13 +1497,17 @@ class MemoryLog {
   }
 
   /// Load the memory profile data from a saved memory log file.
-  void loadOffline(String filename) async {
+  Future<void> loadOffline(String filename) async {
     final jsonPayload = _fs.readStringFromFile(filename);
+
     final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
 
-    // TODO(terry): Display notification JSON file isn't version isn't
-    // supported or if the payload isn't an exported memory file.
-    assert(memoryJson.isMatchedVersion);
+    if (!memoryJson.isMatchedVersion) {
+      final e = 'Error loading file $filename version ${memoryJson.payloadVersion}';
+      log(e, LogLevel.warning);
+      throw OfflineFileException(e);
+    }
+
     assert(memoryJson.isMemoryPayload);
 
     controller.offline = true;
