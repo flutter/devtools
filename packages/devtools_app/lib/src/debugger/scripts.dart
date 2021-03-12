@@ -168,7 +168,7 @@ class ScriptPickerState extends State<ScriptPicker> {
                       ),
                       Text(
                         node.scriptRef.uri,
-                        style: const TextStyle(color: Colors.grey),
+                        style: Theme.of(context).subtleTextStyle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
