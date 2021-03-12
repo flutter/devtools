@@ -382,6 +382,7 @@ class HeapTreeViewState extends State<HeapTree>
 
     if (_isSnapshotRunning) {
       snapshotDisplay = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 50.0),
           snapshotDisplay = const CircularProgressIndicator(),
