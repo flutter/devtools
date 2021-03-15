@@ -182,9 +182,18 @@ class MemoryBodyState extends State<MemoryBody>
       });
 
       setState(() {
-        errorMessage == null
-            ? _refreshCharts()
-            : Notifications.of(context).push(errorMessage);
+        if (errorMessage == null) {
+          _refreshCharts();
+        } else {
+          // Display toast, unable to load the saved memory JSON payload.
+          final notificationsState = Notifications.of(context);
+          if (notificationsState != null) {
+            notificationsState.push(errorMessage);
+          } else {
+            // Running in test harness, unexpected error.
+            throw OfflineFileException(errorMessage);
+          }
+        }
       });
     });
 

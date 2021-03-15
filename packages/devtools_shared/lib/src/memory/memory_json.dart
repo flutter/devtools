@@ -38,7 +38,9 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
     if (payloadVersion != version) {
       // TODO(terry): Convert Payload TBD - only one version today.
       // TODO(terry): Notify user the file is being converted.
-      print('ERROR: Unable to convert JSON memory file payload version=$payloadVersion.');
+      // TODO(terry): Consider moving config_specific/logger/ into shared to
+      //              use logger instead of print.
+      print('WARNING: Unable to convert JSON memory file payload version=$payloadVersion.');
       // TODO(terry): After conversion update payloadVersion to version;
     }
 
