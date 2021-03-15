@@ -441,9 +441,23 @@ class FlutterFrame {
     type ??= event?.type;
     if (type == TimelineEventType.ui) {
       time.start = event?.time?.start;
+      if (rasterEventFlow != null) {
+        time.end = event?.time?.end;
+      }
     }
     if (type == TimelineEventType.raster) {
-      time.end = event?.time?.end;
+      // If there is not a [uiEventFlow] for this frame, there will either never
+      // be one (if the UI events are not present in the available timeline
+      // events), or the [uiEventFlow] has not completed yet and it will set
+      // the end time for this frame.
+      if (uiEventFlow != null) {
+        time.end = Duration(
+          microseconds: math.max(
+            uiEventFlow.time.end.inMicroseconds,
+            event?.time?.end?.inMicroseconds ?? 0,
+          ),
+        );
+      }
     }
     eventFlows[type.index] = event;
     event?.frameId = id;
