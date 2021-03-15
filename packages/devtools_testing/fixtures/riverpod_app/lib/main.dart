@@ -30,13 +30,13 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Counter'),
+          title: const Text('Counter'),
         ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('You clicked this many times on the button:'),
+              const Text('You clicked this many times on the button:'),
               Text(
                 watch(counterProvider.state).toString(),
                 style: Theme.of(context).textTheme.headline4,
