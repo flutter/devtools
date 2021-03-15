@@ -672,5 +672,5 @@ void main() {
         controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
     // OneClass selected.
     expect(choosenAutoComplete.classRef.name, autoCompletes4[1]);
-  }, skip: kIsWeb || Platform.isMacOS);
+  }, skip: kIsWeb || Platform.isMacOS || Platform.isLinux);
 }
