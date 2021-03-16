@@ -9,12 +9,15 @@ import 'package:test/test.dart';
 const _defaultStyle = TextStyle();
 const _textSpan = TextSpan(children: [
   TextSpan(text: 'hello'),
+  TextSpan(text: ' '),
   TextSpan(text: 'world'),
+  TextSpan(text: ' '),
   TextSpan(text: 'foo'),
   TextSpan(text: '.'),
   TextSpan(text: 'bar'),
   TextSpan(text: '.'),
   TextSpan(text: 'baz'),
+  TextSpan(text: ' '),
   TextSpan(text: 'blah'),
 ]);
 
@@ -31,8 +34,8 @@ void main() {
   });
 
   test('wordForHover merges words linked with `.`', () {
-    expect(wordForHover(150, _textSpan, _defaultStyle), 'foo');
-    expect(wordForHover(200, _textSpan, _defaultStyle), 'foo.bar');
-    expect(wordForHover(255, _textSpan, _defaultStyle), 'foo.bar.baz');
+    expect(wordForHover(200, _textSpan, _defaultStyle), 'foo');
+    expect(wordForHover(250, _textSpan, _defaultStyle), 'foo.bar');
+    expect(wordForHover(300, _textSpan, _defaultStyle), 'foo.bar.baz');
   });
 }
