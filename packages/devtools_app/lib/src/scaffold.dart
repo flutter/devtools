@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'analytics/prompt.dart';
 import 'analytics/provider.dart';
 import 'app.dart';
+import 'auto_dispose_mixin.dart';
 import 'banner_messages.dart';
 import 'common_widgets.dart';
 import 'config_specific/drag_and_drop/drag_and_drop.dart';
@@ -25,6 +26,7 @@ import 'routing.dart';
 import 'screen.dart';
 import 'status_line.dart';
 import 'theme.dart';
+import 'title.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
 ///
@@ -37,7 +39,6 @@ class DevToolsScaffold extends StatefulWidget {
     Key key,
     @required this.tabs,
     @required this.analyticsProvider,
-    this.title = 'DevTools for Flutter & Dart',
     this.page,
     this.actions,
     this.embed = false,
@@ -50,14 +51,12 @@ class DevToolsScaffold extends StatefulWidget {
     @required Widget child,
     @required IdeTheme ideTheme,
     @required AnalyticsProvider analyticsProvider,
-    String title = 'DevTools for Flutter & Dart',
     List<Widget> actions,
   }) : this(
           key: key,
           tabs: [SimpleScreen(child)],
           analyticsProvider: analyticsProvider,
           ideTheme: ideTheme,
-          title: title,
           actions: actions,
         );
 
@@ -94,9 +93,6 @@ class DevToolsScaffold extends StatefulWidget {
   /// IDE-supplied theming.
   final IdeTheme ideTheme;
 
-  /// Title of the app.
-  final String title;
-
   /// Actions that it's possible to perform in this Scaffold.
   ///
   /// These will generally be [RegisteredServiceExtensionButton]s.
@@ -109,7 +105,7 @@ class DevToolsScaffold extends StatefulWidget {
 }
 
 class DevToolsScaffoldState extends State<DevToolsScaffold>
-    with TickerProviderStateMixin {
+    with AutoDisposeMixin, TickerProviderStateMixin {
   /// A tag used for [Hero] widgets to keep the [AppBar] in the same place
   /// across route transitions.
   static const Object _appBarTag = 'DevTools AppBar';
@@ -127,6 +123,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   StreamSubscription<ConnectVmEvent> _connectVmSubscription;
   StreamSubscription<String> _showPageSubscription;
 
+  String scaffoldTitle;
+
   @override
   void initState() {
     super.initState();
@@ -137,6 +135,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         frameworkController.onConnectVmEvent.listen(_connectVm);
     _showPageSubscription =
         frameworkController.onShowPageId.listen(_showPageById);
+
+    cancel();
+    _initTitle();
   }
 
   @override
@@ -187,6 +188,15 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     _showPageSubscription?.cancel();
 
     super.dispose();
+  }
+
+  void _initTitle() {
+    scaffoldTitle = devToolsTitle.value;
+    addAutoDisposeListener(devToolsTitle, () {
+      setState(() {
+        scaffoldTitle = devToolsTitle.value;
+      });
+    });
   }
 
   void _setupTabController() {
@@ -304,7 +314,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
     ];
 
-    final title = widget.title ?? generateDevToolsTitle();
     final theme = Theme.of(context);
     return Provider<BannerMessagesController>(
       create: (_) => BannerMessagesController(),
@@ -314,14 +323,14 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           return DragAndDrop(
             handleDrop: _importController.importData,
             child: Title(
-              title: title,
+              title: scaffoldTitle,
               // Color is a required parameter but the color only appears to
               // matter on Android and we do not care about Android.
               // Using theme.primaryColor matches the default behavior of the
               // title used by [WidgetsApp].
               color: theme.primaryColor,
               child: Scaffold(
-                appBar: widget.embed ? null : _buildAppBar(title),
+                appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
                 body: Stack(
                   children: [
                     TabBarView(

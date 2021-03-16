@@ -23,6 +23,7 @@ import 'logging/vm_service_logger.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_extensions.dart';
 import 'service_registrations.dart' as registrations;
+import 'title.dart';
 import 'utils.dart';
 import 'version.dart';
 import 'vm_service_wrapper.dart';
@@ -275,6 +276,8 @@ class ServiceConnectionManager {
     vm = null;
     sdkVersion = null;
     connectedApp = null;
+    generateDevToolsTitle();
+
     vmFlagManager.vmServiceClosed();
     serviceExtensionManager.vmServiceClosed();
 
