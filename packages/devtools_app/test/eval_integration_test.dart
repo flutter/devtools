@@ -33,7 +33,7 @@ void main() {
 
       await expectLater(
         eval.getHashCode(instance, isAlive: isAlive),
-        42,
+        completion(42),
       );
     });
 
