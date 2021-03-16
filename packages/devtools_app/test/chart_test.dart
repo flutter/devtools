@@ -57,7 +57,7 @@ void main() {
             symbol: ChartSymbol.disc,
             diameter: 1.5,
           ),
-          name: 'External',
+          name: 'Flutter engine/rendering',
         );
 
         // Used Heap
@@ -68,7 +68,7 @@ void main() {
             symbol: ChartSymbol.disc,
             diameter: 1.5,
           ),
-          name: 'Used',
+          name: 'Dart/Flutter',
         );
 
         // Heap Capacity
@@ -79,7 +79,7 @@ void main() {
             diameter: 0.0,
             symbol: ChartSymbol.dashedLine,
           ),
-          name: 'Capacity',
+          name: 'Allocated',
         );
 
         // RSS
@@ -98,15 +98,15 @@ void main() {
           switch (index) {
             case 0:
               expect(externalTraceIndex, equals(0));
-              expect(controller.traces[index].name, 'External');
+              expect(controller.traces[index].name, 'Flutter engine/rendering');
               break;
             case 1:
               expect(usedTraceIndex, equals(1));
-              expect(controller.traces[index].name, 'Used');
+              expect(controller.traces[index].name, 'Dart/Flutter');
               break;
             case 2:
               expect(capacityTraceIndex, equals(2));
-              expect(controller.traces[index].name, 'Capacity');
+              expect(controller.traces[index].name, 'Allocated');
               break;
             case 3:
               expect(rssTraceIndex, equals(3));

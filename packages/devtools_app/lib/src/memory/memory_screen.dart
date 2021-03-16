@@ -600,7 +600,7 @@ class MemoryBodyState extends State<MemoryBody>
   final hoverKey = GlobalKey(debugLabel: MemoryScreen.hoverKeyName);
   static const hoverXOffset = 10;
   static const hoverYOffset = 0.0;
-  static const hoverWidth = 203.0;
+  static const hoverWidth = 210.0;
   static const hover_card_border_width = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
@@ -662,10 +662,12 @@ class MemoryBodyState extends State<MemoryBody>
       final rightSide = <Widget>[];
       if (name != null && image != null) {
         rightSide.addAll([
-          Container(
-            padding: EdgeInsets.fromLTRB(leftEdge, 0, 0, 2),
-            width: legendTextWidth + leftEdge,
-            child: Text(name, style: legendEntry),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.fromLTRB(leftEdge, 0, 0, 2),
+              width: legendTextWidth + leftEdge,
+              child: Text(name, style: legendEntry),
+            ),
           ),
           const PaddedDivider(
             padding: EdgeInsets.only(left: denseRowSpacing),
@@ -683,11 +685,14 @@ class MemoryBodyState extends State<MemoryBody>
       rowChildren.addAll(legendPart(name2, image2, 20.0));
     }
 
-    return Container(
-        padding: const EdgeInsets.fromLTRB(10, 0, 0, 2),
-        child: Row(
-          children: rowChildren,
-        ));
+    return Expanded(
+      child: Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 0, 2),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: rowChildren,
+          )),
+    );
   }
 
   Widget hoverRow({
@@ -969,9 +974,9 @@ class MemoryBodyState extends State<MemoryBody>
 
   List<Widget> displayVmDataInHover(ChartsValues chartsValues) {
     const rssDisplay = 'RSS';
-    const capacityDisplay = 'Capacity';
-    const usedDisplay = 'Used';
-    const externalDisplay = 'External';
+    const capacityDisplay = 'Allocated';
+    const usedDisplay = 'Dart/Flutter';
+    const externalDisplay = 'Flutter engine/rendering';
     const layerDisplay = 'Raster Layer';
     const pictureDisplay = 'Raster Picture';
 
@@ -1217,9 +1222,9 @@ class MemoryBodyState extends State<MemoryBody>
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
                 child: Text('Memory Legend', style: legendHeading),
               ),
-              legendRow(name1: 'Capacity', image1: capacityLegend),
-              legendRow(name1: 'Used', image1: usedLegend),
-              legendRow(name1: 'External', image1: externalLegend),
+              legendRow(name1: 'Allocated', image1: capacityLegend),
+              legendRow(name1: 'Dart/Flutter', image1: usedLegend),
+              legendRow(name1: 'Flutter engine/rendering', image1: externalLegend),
               legendRow(name1: 'RSS', image1: rssLegend),
               if (controller.isAndroidChartVisible)
                 const Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 9)),
