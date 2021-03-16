@@ -96,6 +96,16 @@ void main() async {
         matchesGoldenFile('goldens/integration_inspector_select_center.png'),
       );
 
+      // Select the details tree.
+      await tester.tap(find.text('Details Tree'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesGoldenFile(
+          'goldens/integration_inspector_select_center_details_tree.png',
+        ),
+      );
+
       // Select the RichText row.
       await tester.tap(find.richText('RichText'));
       await tester.pumpAndSettle(inspectorChangeSettleTime);
@@ -388,5 +398,55 @@ void main() async {
       await env.tearDownEnvironment();
     });
 */
+  });
+
+  group('widget errors', () {
+    tearDownAll(() async {
+      await env.tearDownEnvironment(force: true);
+    });
+
+    testWidgetsWithWindowSize('show navigator and error labels', windowSize,
+        (WidgetTester tester) async {
+      await env.setupEnvironment(
+          config: const FlutterRunConfiguration(
+        withDebugger: true,
+        entryScript: 'lib/overflow_errors.dart',
+      ));
+      expect(serviceManager.service, equals(env.service));
+      expect(serviceManager.isolateManager, isNotNull);
+
+      const screen = InspectorScreen();
+      await tester.pumpWidget(
+          wrapWithInspectorControllers(Builder(builder: screen.build)));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      final InspectorScreenBodyState state =
+          tester.state(find.byType(InspectorScreenBody));
+      final controller = state.inspectorController;
+      while (!controller.flutterAppFrameReady) {
+        await state.inspectorController.maybeLoadUI();
+        await tester.pumpAndSettle();
+      }
+      await env.flutter.hotReload();
+      // Give time for the initial animation to complete.
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesGoldenFile(
+            'goldens/integration_inspector_errors_1_initial_load.png'),
+      );
+
+      // Navigate so one of the errors is selected.
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+      }
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesGoldenFile(
+            'goldens/integration_inspector_errors_2_error_selected.png'),
+      );
+
+      await env.tearDownEnvironment();
+    }, skip: !Platform.isMacOS);
   });
 }

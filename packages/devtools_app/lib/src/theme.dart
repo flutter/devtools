@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
-import 'ui/theme.dart';
+
+const _contrastForegroundWhite = Color.fromARGB(255, 240, 240, 240);
+
+const contrastForegroundWhite = _contrastForegroundWhite;
 
 /// Constructs the light or dark theme for the app taking into account
 /// IDE-supplied theming.
@@ -181,6 +184,35 @@ const devtoolsError = Color(0xFFAF4054);
 const devtoolsWarning = Color(0xFFFDFAD5);
 
 extension DevToolsColorScheme on ColorScheme {
+  bool get isLight => brightness == Brightness.light;
+  bool get isDark => brightness == Brightness.dark;
+
+  // Commonly used themed colors.
+  Color get defaultBackground => isLight ? Colors.white : Colors.black;
+
+  Color get defaultForeground =>
+      isLight ? Colors.black : const Color.fromARGB(255, 187, 187, 187);
+
+  /// Text color [defaultForeground] is too gray, making it hard to read the text
+  /// in dark theme. We should use a more white color for dark theme, but not
+  /// jarring white #FFFFFF.
+  Color get contrastForegroundWhite => _contrastForegroundWhite;
+
+  Color get contrastForeground =>
+      isLight ? Colors.black : _contrastForegroundWhite;
+
+  Color get grey => isLight
+      ? const Color.fromARGB(255, 128, 128, 128)
+      : const Color.fromARGB(255, 128, 128, 128);
+
+  /// Background colors for charts.
+  Color get chartBackground => isLight ? Colors.white : const Color(0xFF2D2E31);
+
+  Color get defaultButtonIconColor =>
+      isLight ? const Color(0xFF24292E) : const Color(0xFF89B5F8);
+
+  Color get defaultPrimaryButtonIconColor => defaultBackground;
+
   Color get devtoolsLink =>
       isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
   // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
@@ -214,43 +246,67 @@ extension DevToolsColorScheme on ColorScheme {
   Color get numericConstantSyntaxColor =>
       isLight ? const Color(0xFF098658) : const Color(0xFFB5CEA8);
 
-  // Light theme hover background is semi-transparent YellowAccent[100].
-  Color get hoverBackgroundColor => const Color.fromARGB(150, 255, 255, 141);
-
   // Bar color for current selection (hover).
   Color get hoverSelectionBarColor =>
       isLight ? Colors.lime[600] : Colors.yellowAccent;
 
+  // Highlight color for an selected item in the autocomplete dropdown list.
+  Color get autoCompleteHighlightColor =>
+      isLight ? Colors.grey[300] : Colors.grey[700];
+
   // Title of the hover card.
-  TextStyle get hoverTitleTextStyle => const TextStyle(
-        color: Colors.black,
-        fontWeight: FontWeight.bold,
-        fontSize: 16,
+  TextStyle get hoverTitleTextStyle => TextStyle(
+        color: defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: 15,
         decoration: TextDecoration.none,
       );
 
-  // Items in the hover vard.
-  TextStyle get hoverTextStyle => const TextStyle(
-        color: Colors.black,
-        fontWeight: FontWeight.bold,
+  // Items in the hover card.
+  TextStyle get hoverTextStyle => TextStyle(
+        color: defaultForeground,
+        fontWeight: FontWeight.normal,
         fontSize: 11.5,
         decoration: TextDecoration.none,
       );
 
   // Value of items in hover e.g., capacity, etc.
-  TextStyle get hoverValueTextStyle => const TextStyle(
-        color: Colors.black,
+  TextStyle get hoverValueTextStyle => TextStyle(
+        color: contrastForeground,
         fontWeight: FontWeight.normal,
         fontSize: 11.5,
         decoration: TextDecoration.none,
       );
 
   // Used for custom extension event values.
-  TextStyle get hoverSmallValueTextStyle => const TextStyle(
-        color: Colors.black,
+  TextStyle get hoverSmallValueTextStyle => TextStyle(
+        color: defaultForeground,
         fontWeight: FontWeight.normal,
         fontSize: 10,
         decoration: TextDecoration.none,
+      );
+
+  // Last allocation timestamp displayed.
+  TextStyle get italicTextStyle => TextStyle(
+        color: defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: 14,
+        fontStyle: FontStyle.italic,
+        decoration: TextDecoration.none,
+      );
+
+  Color get expandedColor => isLight ? Colors.grey[200] : Colors.grey[800];
+
+  Color get expandedTopContentColor =>
+      isLight ? Colors.grey[50] : Colors.grey[850];
+  Color get expandedBottomContentColor =>
+      isLight ? Colors.grey[200] : Colors.grey[800];
+
+  Gradient get verticalGradient => LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [expandedTopContentColor, expandedBottomContentColor],
+        tileMode: TileMode.repeated,
       );
 }
 

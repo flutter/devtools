@@ -4,11 +4,10 @@
 
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/widgets.dart';
 
 import '../theme.dart';
 import 'span_parser.dart';

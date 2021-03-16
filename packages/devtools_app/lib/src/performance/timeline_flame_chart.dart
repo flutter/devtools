@@ -18,7 +18,6 @@ import '../geometry.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
-import '../ui/theme.dart';
 import '../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
@@ -68,9 +67,12 @@ class _TimelineFlameChartContainerState
         valueListenable: controller.emptyTimeline,
         builder: (context, emptyRecording, _) {
           return emptyRecording
-              ? const Center(
+              ? Center(
                   key: TimelineFlameChartContainer.emptyTimelineKey,
-                  child: Text('No timeline events'),
+                  child: Text(
+                    'No timeline events',
+                    style: Theme.of(context).subtleTextStyle,
+                  ),
                 )
               : _buildProcessingInfo();
         },

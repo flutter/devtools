@@ -174,8 +174,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
     // Line chart fixed Y range.
     _chartController.setFixedYRange(visibleVmEvent, extensionEvent);
-
-    setupTraces();
   }
 
   @override
@@ -184,11 +182,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
     _memoryController = Provider.of<MemoryController>(context);
 
-    colorScheme = Theme.of(context).colorScheme;
+    final themeData = Theme.of(context);
+    colorScheme = themeData.colorScheme;
 
     cancel();
 
-    setupTraces();
+    setupTraces(isDarkMode: themeData.isDarkTheme);
     _chartController.setupData();
 
     // Monitor heap samples.
@@ -218,7 +217,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     return const SizedBox(width: denseSpacing);
   }
 
-  void setupTraces() {
+  void setupTraces({bool isDarkMode = true}) {
     if (_chartController.traces.isNotEmpty) {
       assert(_chartController.traces.length == TraceName.values.length);
 
@@ -317,11 +316,14 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     assert(_chartController.trace(manualGCIndex).name ==
         TraceName.values[manualGCIndex].toString());
 
+    final mainMonitorColor =
+        isDarkMode ? Colors.yellowAccent : Colors.yellowAccent.shade400;
+
     // Monitor
     final monitorIndex = _chartController.createTrace(
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
-        color: Colors.yellowAccent,
+        color: mainMonitorColor,
         strokeWidth: 3,
         diameter: 6,
         fixedMinY: visibleVmEvent,
@@ -335,12 +337,14 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
     final monitorResetIndex = _chartController.createTrace(
       trace.ChartType.symbol,
-      trace.PaintCharacteristics(
-        color: Colors.yellowAccent,
-        strokeWidth: 3,
+      trace.PaintCharacteristics.concentric(
+        color: Colors.grey[600],
+        strokeWidth: 4,
         diameter: 6,
         fixedMinY: visibleVmEvent,
         fixedMaxY: extensionEvent,
+        concentricCenterColor: mainMonitorColor,
+        concentricCenterDiameter: 4,
       ),
       name: TraceName.monitorReset.toString(),
     );

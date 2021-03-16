@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../auto_dispose_mixin.dart';
@@ -18,7 +21,9 @@ import 'breakpoints.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
+import 'hover.dart';
 import 'syntax_highlighter.dart';
+import 'variables.dart';
 
 // TODO(kenz): consider moving lines / pausedPositions calculations to the
 // controller.
@@ -378,11 +383,22 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
         .map((scriptRef) {
       return PopupMenuItem(
         value: scriptRef,
-        child: Text(
-          scriptRef.uri,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-          style: const TextStyle(fontSize: 14.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              ScriptRefUtils.fileName(scriptRef),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              scriptRef.uri,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: Theme.of(context).subtleTextStyle,
+            ),
+          ],
         ),
       );
     }).toList();
@@ -414,8 +430,9 @@ class Gutter extends StatelessWidget {
   Widget build(BuildContext context) {
     final bpLineSet = Set.from(breakpoints.map((bp) => bp.line));
 
-    return SizedBox(
+    return Container(
       width: gutterWidth,
+      color: titleSolidBackgroundColor(Theme.of(context)),
       child: ListView.builder(
         controller: scrollController,
         itemExtent: CodeView.rowHeight,
@@ -473,7 +490,6 @@ class GutterItem extends StatelessWidget {
       child: Container(
         height: CodeView.rowHeight,
         padding: const EdgeInsets.only(right: 4.0),
-        decoration: BoxDecoration(color: titleSolidBackgroundColor(theme)),
         child: Stack(
           alignment: AlignmentDirectional.centerStart,
           fit: StackFit.expand,
@@ -545,24 +561,95 @@ class Lines extends StatelessWidget {
   }
 }
 
-class LineItem extends StatelessWidget {
+class LineItem extends StatefulWidget {
   const LineItem({
     Key key,
     @required this.lineContents,
     this.pausedFrame,
   }) : super(key: key);
 
+  static const _hoverDelay = Duration(milliseconds: 500);
+  static const _hoverWidth = 250.0;
+
   final TextSpan lineContents;
   final StackFrameAndSourcePosition pausedFrame;
+
+  @override
+  _LineItemState createState() => _LineItemState();
+}
+
+class _LineItemState extends State<LineItem> {
+  /// A timer that shows a [HoverCard] with an evaluation result when completed.
+  Timer _showTimer;
+
+  /// A timer that removes a [HoverCard] when completed.
+  Timer _removeTimer;
+
+  /// Displays the evaluation result of a source code item.
+  HoverCard _hoverCard;
+
+  DebuggerController _debuggerController;
+
+  void _onHoverExit() {
+    _showTimer?.cancel();
+    _removeTimer = Timer(LineItem._hoverDelay, () {
+      _hoverCard?.maybeRemove();
+    });
+  }
+
+  void _onHover(PointerHoverEvent event, BuildContext context) {
+    _showTimer?.cancel();
+    _removeTimer?.cancel();
+    if (!_debuggerController.isPaused.value) return;
+    _showTimer = Timer(LineItem._hoverDelay, () async {
+      final theme = Theme.of(context);
+      _hoverCard?.remove();
+      final word = wordForHover(
+        event.localPosition.dx,
+        widget.lineContents,
+        theme.fixedFontStyle,
+      );
+      if (word != '') {
+        try {
+          final response = await _debuggerController.evalAtCurrentFrame(word);
+          final variable = Variable.fromRef(response);
+          await _debuggerController.buildVariablesTree(variable);
+          _hoverCard = HoverCard(
+            contents: Material(
+              child: ExpandableVariable(
+                debuggerController: _debuggerController,
+                variable: ValueNotifier(variable),
+              ),
+            ),
+            event: event,
+            width: LineItem._hoverWidth,
+            title: word,
+            context: context,
+          );
+        } catch (_) {
+          // Silently fail and don't display a HoverCard.
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _showTimer?.cancel();
+    _removeTimer?.cancel();
+    _hoverCard?.remove();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final darkTheme = theme.brightness == Brightness.dark;
+    _debuggerController = Provider.of<DebuggerController>(context);
 
     Widget child;
-    if (pausedFrame != null) {
-      final column = pausedFrame.column;
+    if (widget.pausedFrame != null) {
+      final column = widget.pausedFrame.column;
 
       final foregroundColor =
           darkTheme ? theme.textTheme.bodyText2.color : theme.primaryColor;
@@ -590,8 +677,9 @@ class LineItem extends StatelessWidget {
               // functionality exists to render the selection handles properly.
               Opacity(
                 opacity: 0,
-                child:
-                    RichText(text: truncateTextSpan(lineContents, column - 1)),
+                child: RichText(
+                  text: truncateTextSpan(widget.lineContents, column - 1),
+                ),
               ),
               Transform.translate(
                 offset: const Offset(colLeftOffset, colBottomOffset),
@@ -606,22 +694,14 @@ class LineItem extends StatelessWidget {
               )
             ],
           ),
-          SelectableText.rich(
-            lineContents,
-            scrollPhysics: const NeverScrollableScrollPhysics(),
-            maxLines: 1,
-          ),
+          _hoverableLine(),
         ],
       );
     } else {
-      child = SelectableText.rich(
-        lineContents,
-        scrollPhysics: const NeverScrollableScrollPhysics(),
-        maxLines: 1,
-      );
+      child = _hoverableLine();
     }
 
-    final backgroundColor = pausedFrame != null
+    final backgroundColor = widget.pausedFrame != null
         ? (darkTheme
             ? theme.canvasColor.brighten()
             : theme.canvasColor.darken())
@@ -634,4 +714,14 @@ class LineItem extends StatelessWidget {
       child: child,
     );
   }
+
+  Widget _hoverableLine() => MouseRegion(
+        onExit: (_) => _onHoverExit(),
+        onHover: (e) => _onHover(e, context),
+        child: SelectableText.rich(
+          widget.lineContents,
+          scrollPhysics: const NeverScrollableScrollPhysics(),
+          maxLines: 1,
+        ),
+      );
 }

@@ -36,6 +36,8 @@ class DeviceDialog extends StatelessWidget {
 
     final vm = serviceManager.vm;
 
+    if (vm == null) return const SizedBox();
+
     var version = vm.version;
     // Convert '2.9.0-13.0.dev (dev) (Fri May ... +0200) on "macos_x64"' to
     // '2.9.0-13.0.dev'.

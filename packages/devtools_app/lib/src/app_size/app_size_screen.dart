@@ -14,6 +14,7 @@ import '../common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
+import '../file_import.dart';
 import '../notifications.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -23,7 +24,6 @@ import '../utils.dart';
 import 'app_size_controller.dart';
 import 'app_size_table.dart';
 import 'code_size_attribution.dart';
-import 'file_import_container.dart';
 
 const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;

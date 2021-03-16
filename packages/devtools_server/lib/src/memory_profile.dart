@@ -349,7 +349,7 @@ class MemoryJsonFile {
 
   void _populateJsonHeader() {
     assert(_raFile != null);
-    final payload = '${MemoryJson.header}${MemoryJson.trailer}';
+    final payload = '${SamplesMemoryJson.header}${MemoryJson.trailer}';
     _raFile.writeStringSync(payload);
     _raFile.flushSync();
   }
@@ -365,9 +365,9 @@ class MemoryJsonFile {
 
     String encodedSample;
     if (_multipleSamples) {
-      encodedSample = MemoryJson.encodeAnotherHeapSample(sample);
+      encodedSample = SamplesMemoryJson().encodeAnother(sample);
     } else {
-      encodedSample = MemoryJson.encodeHeapSample(sample);
+      encodedSample = SamplesMemoryJson().encode(sample);
     }
 
     _raFile.writeStringSync('$encodedSample${MemoryJson.trailer}');

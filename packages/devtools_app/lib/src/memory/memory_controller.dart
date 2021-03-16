@@ -20,6 +20,7 @@ import '../table.dart';
 import '../table_data.dart';
 import '../ui/search.dart';
 import '../utils.dart';
+import '../version.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
@@ -232,7 +233,15 @@ class MemoryController extends DisposableController
   MemoryController() {
     memoryTimeline = MemoryTimeline(this);
     memoryLog = MemoryLog(this);
+
+    /// package:vm_service version 6.1.0+1 updated the VM Service protocol version
+    /// to 3.43.0. This changed snapshot indexes for classes, instances and
+    /// sentinels.  Primarily classes are indexed by a 0 based index not (1-based).
+    newSnapshotSemantics = serviceManager.service.isProtocolVersionSupportedNow(
+        supportedVersion: SemanticVersion(major: 3, minor: 43));
   }
+
+  bool newSnapshotSemantics;
 
   static const logFilenamePrefix = 'memory_log_';
 
@@ -243,6 +252,21 @@ class MemoryController extends DisposableController
       _androidCollectionEnabled;
 
   final _androidCollectionEnabled = ValueNotifier<bool>(androidADBDefault);
+
+  // Default state of advanced settings enabled.
+  static const advancedSettingsEnabledDefault = false;
+
+  ValueListenable<bool> get advancedSettingsEnabled =>
+      _advancedSettingsEnabled;
+
+  final _advancedSettingsEnabled = ValueNotifier<bool>(advancedSettingsEnabledDefault);
+
+  // Memory statistics displayed as raw numbers or units (KB, MB, GB).
+  static const unitDisplayedDefault = true;
+
+  ValueListenable<bool> get unitDisplayed => _unitDisplayed;
+
+  final _unitDisplayed = ValueNotifier<bool>(unitDisplayedDefault);
 
   final List<Snapshot> snapshots = [];
 
@@ -298,25 +322,6 @@ class MemoryController extends DisposableController
   List<FieldReference> _instanceRoot;
 
   List<FieldReference> get instanceRoot => _instanceRoot;
-
-  /// Leaf node of allocation monitor selected?  If selected then the Allocation Profile of all
-  /// classes is displayed (class name, instance count, accumulator, byte size, accumulator).
-  final _leafAllocationMonitorSelectedNotifier =
-      ValueNotifier<AllocationMonitorReference>(null);
-
-  ValueListenable<AllocationMonitorReference>
-      get leafAllocationMonitorSelectedNotifier =>
-          _leafAllocationMonitorSelectedNotifier;
-
-  AllocationMonitorReference get selectedAllocationMonitorLeaf =>
-      _leafAllocationMonitorSelectedNotifier.value;
-
-  set selectedAllocationMonitorLeaf(AllocationMonitorReference selected) {
-    _leafAllocationMonitorSelectedNotifier.value = selected;
-  }
-
-  bool get isAllocationMonitorLeafSelected =>
-      selectedAllocationMonitorLeaf != null;
 
   /// Leaf node of analysis selected?  If selected then the field
   /// view is displayed to view an abbreviated fields of an instance.
@@ -389,6 +394,14 @@ class MemoryController extends DisposableController
     if (foundMatch.isEmpty) return snapshot;
 
     return null;
+  }
+
+  ValueListenable get treeMapVisible => _treeMapVisible;
+
+  final _treeMapVisible = ValueNotifier<bool>(false);
+
+  void toggleTreeMapVisible(bool value) {
+    _treeMapVisible.value = value;
   }
 
   bool isAnalyzeButtonEnabled() => computeSnapshotToAnalyze != null;
@@ -531,6 +544,11 @@ class MemoryController extends DisposableController
   bool toggleAndroidChartVisibility() =>
       _androidChartVisibleNotifier.value = !_androidChartVisibleNotifier.value;
 
+  bool get isAdvancedSettingsVisible => _advancedSettingsEnabled.value;
+
+  bool toggleAdvancedSettingsVisibility() =>
+      _advancedSettingsEnabled.value = !_advancedSettingsEnabled.value;
+
   final SettingsModel settings = SettingsModel();
 
   final selectionSnapshotNotifier =
@@ -580,15 +598,15 @@ class MemoryController extends DisposableController
     }
   }
 
-  /// Track where/when a particular class is allocated (constructor new'd).
+  /// Track where/when a class is allocated (constructor new'd).
   Future<void> _setTracking(ClassRef ref, bool enable) async {
     if (!await isIsolateLive(_isolateId)) return;
 
     final Success returnObject =
         await serviceManager.service.setTraceClassAllocation(
       _isolateId,
-      classId: ref.id,
-      enable: enable,
+      ref.id,
+      enable,
     );
 
     if (returnObject.type != 'Success') {
@@ -612,9 +630,9 @@ class MemoryController extends DisposableController
   }
 
   /// Track where/when a particular class is allocated (constructor new'd).
-  Future<CpuSamples> getAllocationSamples(ClassRef ref) async {
+  Future<CpuSamples> getAllocationTraces(ClassRef ref) async {
     if (!await isIsolateLive(_isolateId)) return null;
-    final returnObject = await serviceManager.service.getAllocationSamples(
+    final returnObject = await serviceManager.service.getAllocationTraces(
       _isolateId,
       classId: ref.id,
     );
@@ -633,7 +651,7 @@ class MemoryController extends DisposableController
     final keys = trackAllocations.keys;
     for (var key in keys) {
       // TODO(terry): Need to process output.
-      final samples = await getAllocationSamples(trackAllocations[key]);
+      final samples = await getAllocationTraces(trackAllocations[key]);
       if (samples != null) {
         _allAllocationSamples[trackAllocations[key]] = samples;
       }
@@ -884,6 +902,37 @@ class MemoryController extends DisposableController
 
   DateTime monitorTimestamp;
 
+  ValueListenable<DateTime> get lastMonitorTimestampNotifier => lastMonitorTimestamp;
+  
+  final lastMonitorTimestamp = ValueNotifier<DateTime>(null);
+
+  /// Used for Allocations table search auto-complete.
+
+  /// This finds and selects an exact match in the tree.
+  /// Returns `true` if [searchingValue] is found in the tree.
+  bool selectItemInAllocationTable(String searchingValue) {
+    // Search the allocation table.
+    for (final reference in monitorAllocations) {
+      final foundIt = _selectItemInTable(reference, searchingValue);
+      if (foundIt) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool _selectAllocationInTable(ClassHeapDetailStats reference, search) {
+    if (reference.classRef.name == search) {
+      searchMatchMonitorAllocationsNotifier.value = reference;
+      clearSearchAutoComplete();
+      return true;
+    }
+    return false;
+  }
+
+  bool _selectItemInTable(ClassHeapDetailStats reference, String search) =>
+      _selectAllocationInTable(reference, search);
+
   /// Used for searching in monitor allocation table.
   final searchMatchMonitorAllocationsNotifier =
       ValueNotifier<ClassHeapDetailStats>(null);
@@ -915,6 +964,12 @@ class MemoryController extends DisposableController
     }
   }
 
+  void toggleAllocationTracking(ClassHeapDetailStats item, bool isStacktraced) {
+    item.isStacktraced = isStacktraced;
+    setTracking(item.classRef, isStacktraced);
+    changeStackTraces();
+  }
+
   Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>
       getAllocationProfile(reset: true);
 
@@ -938,7 +993,7 @@ class MemoryController extends DisposableController
     }
 
     final allocations = allocationProfile.members
-        .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
+        .map((ClassHeapStats stats) => parseJsonClassHeapStats(stats.json))
         .where((ClassHeapDetailStats stats) {
       return stats.instancesCurrent > 0 || stats.instancesDelta > 0;
     }).toList();
@@ -1183,52 +1238,17 @@ class MemoryController extends DisposableController
       topNode.addAllChildren(oldChildren);
     }
 
-    AllocationsMonitorReference monitorRoot;
-    var anyAnalyses = false;
-    for (final reference in topNode.children) {
-      if (reference is AllocationsMonitorReference) {
-        monitorRoot = reference;
-      }
-      anyAnalyses |= reference is AnalysesReference;
-    }
+    final anyAnalyses = topNode.children.firstWhere(
+          (reference) => reference is AnalysesReference,
+          orElse: () => null,
+        ) !=
+        null;
 
     if (snapshots.isNotEmpty && !anyAnalyses) {
       // Create Analysis entry.
       final analysesRoot = AnalysesReference();
       analysesRoot.addChild(AnalysisReference(''));
       topNode.addChild(analysesRoot);
-    }
-
-    if (monitorAllocations.isNotEmpty) {
-      var createRoot = false;
-      var createChild = false;
-
-      if (monitorRoot != null) {
-        // Only show the latest active allocation monitor.  If a new monitor
-        // exist (newer timestamp).  Remove the old node and signal a new node,
-        // with the latest timestamp, needs to be created.
-        final AllocationMonitorReference monitor = monitorRoot.children.first;
-        if (monitor.dateTime != monitorTimestamp) {
-          monitorRoot.removeLastChild();
-          // Reconstruct child new allocation profile.
-          createChild = true;
-        }
-      } else {
-        // Create Monitor Allocations entry - first time.
-        monitorRoot = AllocationsMonitorReference();
-        createRoot = true;
-        createChild = true;
-      }
-
-      if (createChild) {
-        monitorRoot.addChild(AllocationMonitorReference(
-          this,
-          monitorTimestamp,
-        ));
-      }
-      if (createRoot) {
-        topNode.addChild(monitorRoot);
-      }
     }
 
     createSnapshotEntries(topNode);
@@ -1433,12 +1453,12 @@ class MemoryLog {
       ));
     }
 
-    final jsonPayload = MemoryJson.encodeHeapSamples(liveData);
+    final jsonPayload = SamplesMemoryJson.encodeList(liveData);
     if (kDebugMode) {
       // TODO(terry): Remove this check add a unit test instead.
       // Reload the file just created and validate that the saved data matches
       // the live data.
-      final memoryJson = MemoryJson.decode(argJsonString: jsonPayload);
+      final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
       assert(memoryJson.isMatchedVersion);
       assert(memoryJson.isMemoryPayload);
       assert(memoryJson.data.length == liveData.length);
@@ -1465,7 +1485,7 @@ class MemoryLog {
   /// Load the memory profile data from a saved memory log file.
   void loadOffline(String filename) async {
     final jsonPayload = _fs.readStringFromFile(filename);
-    final memoryJson = MemoryJson.decode(argJsonString: jsonPayload);
+    final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
 
     // TODO(terry): Display notification JSON file isn't version isn't
     // supported or if the payload isn't an exported memory file.

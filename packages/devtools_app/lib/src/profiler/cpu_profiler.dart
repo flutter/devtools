@@ -120,9 +120,25 @@ class _CpuProfilerState extends State<CpuProfiler>
               ),
             if (currentTab.key != CpuProfiler.flameChartTab)
               Row(children: [
-                _expandAllButton(currentTab),
+                ExpandAllButton(
+                  key: CpuProfiler.expandButtonKey,
+                  onPressed: () {
+                    _performOnDataRoots(
+                      (root) => root.expandCascading(),
+                      currentTab,
+                    );
+                  },
+                ),
                 const SizedBox(width: denseSpacing),
-                _collapseAllButton(currentTab),
+                CollapseAllButton(
+                  key: CpuProfiler.collapseButtonKey,
+                  onPressed: () {
+                    _performOnDataRoots(
+                      (root) => root.collapseCascading(),
+                      currentTab,
+                    );
+                  },
+                ),
                 // The standaloneProfiler does not need padding because it is
                 // not wrapped in a bordered container.
                 if (!widget.standaloneProfiler)
@@ -171,7 +187,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     return Center(
       child: Text(
         CpuProfiler.emptyCpuProfile,
-        style: Theme.of(context).textTheme.subtitle1,
+        style: Theme.of(context).subtleTextStyle,
       ),
     );
   }
@@ -195,26 +211,6 @@ class _CpuProfilerState extends State<CpuProfiler>
     );
     // TODO(kenz): make this order configurable.
     return [bottomUp, callTree, cpuFlameChart];
-  }
-
-  Widget _expandAllButton(Tab currentTab) {
-    return FixedHeightOutlinedButton(
-      buttonKey: CpuProfiler.expandButtonKey,
-      onPressed: () {
-        _performOnDataRoots((root) => root.expandCascading(), currentTab);
-      },
-      child: const Text('Expand All'),
-    );
-  }
-
-  Widget _collapseAllButton(Tab currentTab) {
-    return FixedHeightOutlinedButton(
-      buttonKey: CpuProfiler.collapseButtonKey,
-      onPressed: () {
-        _performOnDataRoots((root) => root.collapseCascading(), currentTab);
-      },
-      child: const Text('Collapse All'),
-    );
   }
 
   void _performOnDataRoots(

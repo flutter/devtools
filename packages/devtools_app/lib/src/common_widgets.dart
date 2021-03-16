@@ -13,7 +13,6 @@ import 'package:flutter/scheduler.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'ui/label.dart';
-import 'ui/theme.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 const tooltipWaitLong = Duration(milliseconds: 1000);
@@ -91,6 +90,7 @@ class IconLabelButton extends StatelessWidget {
     @required this.label,
     @required this.onPressed,
     this.includeTextWidth,
+    this.elevatedButton = false,
   }) : super(key: key);
 
   final IconData icon;
@@ -101,15 +101,25 @@ class IconLabelButton extends StatelessWidget {
 
   final VoidCallback onPressed;
 
+  /// Whether this icon label button should use an elevated button style.
+  final bool elevatedButton;
+
   @override
   Widget build(BuildContext context) {
+    final iconLabel = MaterialIconLabel(
+      label: label,
+      iconData: icon,
+      includeTextWidth: includeTextWidth,
+    );
+    if (elevatedButton) {
+      return FixedHeightElevatedButton(
+        onPressed: onPressed,
+        child: iconLabel,
+      );
+    }
     return FixedHeightOutlinedButton(
       onPressed: onPressed,
-      child: MaterialIconLabel(
-        icon,
-        label,
-        includeTextWidth: includeTextWidth,
-      ),
+      child: iconLabel,
     );
   }
 }
@@ -281,6 +291,35 @@ class HelpButton extends StatelessWidget {
   }
 }
 
+class ExpandAllButton extends StatelessWidget {
+  const ExpandAllButton({Key key, @required this.onPressed}) : super(key: key);
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FixedHeightOutlinedButton(
+      onPressed: onPressed,
+      child: const Text('Expand All'),
+    );
+  }
+}
+
+class CollapseAllButton extends StatelessWidget {
+  const CollapseAllButton({Key key, @required this.onPressed})
+      : super(key: key);
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FixedHeightOutlinedButton(
+      onPressed: onPressed,
+      child: const Text('Collapse All'),
+    );
+  }
+}
+
 // TODO(kenz): remove use of this class once we can specify a fixed button
 // height in the theme. See https://github.com/flutter/flutter/issues/73741.
 class FixedHeightOutlinedButton extends StatelessWidget {
@@ -399,12 +438,12 @@ class RecordingInfo extends StatelessWidget {
         processedObject: recordedObject,
       );
     } else if (recording) {
-      child = _recordingStatus(
+      child = RecordingStatus(
         key: recordingStatusKey,
         recordedObject: recordedObject,
       );
     } else {
-      child = _recordingInstructions(
+      child = RecordingInstructions(
         key: instructionsKey,
         recordedObject: recordedObject,
         isPause: isPause,
@@ -414,25 +453,60 @@ class RecordingInfo extends StatelessWidget {
       child: child,
     );
   }
+}
 
-  Widget _recordingInstructions(
-      {Key key, String recordedObject, bool isPause}) {
+class RecordingStatus extends StatelessWidget {
+  const RecordingStatus({
+    Key key, @required
+    this.recordedObject,
+  }) : super(key: key);
+
+  final String recordedObject;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Recording $recordedObject',
+          style: Theme.of(context).subtleTextStyle,
+        ),
+        const SizedBox(height: defaultSpacing),
+        const CircularProgressIndicator(),
+      ],
+    );
+  }
+}
+
+class RecordingInstructions extends StatelessWidget {
+  const RecordingInstructions({
+    Key key,
+    @required this.isPause,
+    @required this.recordedObject,
+  }) : super(key: key);
+
+  final String recordedObject;
+
+  final bool isPause;
+
+  @override
+  Widget build(BuildContext context) {
     final stopOrPauseRow = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: isPause
           ? const [
-              Text('Click the pause button '),
-              Icon(Icons.pause),
-              Text(' to pause the recording.'),
-            ]
+        Text('Click the pause button '),
+        Icon(Icons.pause),
+        Text(' to pause the recording.'),
+      ]
           : const [
-              Text('Click the stop button '),
-              Icon(Icons.stop),
-              Text(' to end the recording.'),
-            ],
+        Text('Click the stop button '),
+        Icon(Icons.stop),
+        Text(' to end the recording.'),
+      ],
     );
     return Column(
-      key: key,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Row(
@@ -447,19 +521,8 @@ class RecordingInfo extends StatelessWidget {
       ],
     );
   }
-
-  Widget _recordingStatus({Key key, String recordedObject}) {
-    return Column(
-      key: key,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('Recording $recordedObject'),
-        const SizedBox(height: defaultSpacing),
-        const CircularProgressIndicator(),
-      ],
-    );
-  }
 }
+
 
 class ProcessingInfo extends StatelessWidget {
   const ProcessingInfo({
@@ -478,7 +541,10 @@ class ProcessingInfo extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Processing $processedObject'),
+          Text(
+            'Processing $processedObject',
+            style: Theme.of(context).subtleTextStyle,
+          ),
           const SizedBox(height: defaultSpacing),
           SizedBox(
             width: 200.0,
@@ -512,8 +578,8 @@ class ExitOfflineButton extends StatelessWidget {
       buttonKey: const Key('exit offline button'),
       onPressed: onPressed,
       child: const MaterialIconLabel(
-        Icons.clear,
-        'Exit offline mode',
+        label: 'Exit offline mode',
+        iconData: Icons.clear,
       ),
     );
   }
@@ -593,16 +659,19 @@ class DevToolsTooltip extends StatelessWidget {
   const DevToolsTooltip({
     @required this.tooltip,
     @required this.child,
+    this.preferBelow = true,
   });
 
   final String tooltip;
   final Widget child;
+  final bool preferBelow;
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: tooltip,
       waitDuration: tooltipWait,
+      preferBelow: preferBelow,
       child: child,
     );
   }
@@ -723,8 +792,8 @@ class ToggleButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
         child: MaterialIconLabel(
-          icon,
-          text,
+          label: text,
+          iconData: icon,
           includeTextWidth: includeTextWidth,
         ),
       ),

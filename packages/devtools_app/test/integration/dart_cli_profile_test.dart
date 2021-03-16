@@ -147,7 +147,7 @@ void validateJSONFile(List<Verbose> values) {
   final file = File('${Directory.current.path}/${ParseStdout.jsonFilename}');
   final contents = file.readAsStringSync();
 
-  final memoryJson = MemoryJson.decode(argJsonString: contents);
+  final memoryJson = SamplesMemoryJson.decode(argJsonString: contents);
   expect(memoryJson.isMatchedVersion, isTrue);
   expect(memoryJson.isMemoryPayload, isTrue);
 

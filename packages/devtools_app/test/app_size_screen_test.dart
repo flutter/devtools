@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:devtools_app/src/app_size/app_size_screen.dart';
 import 'package:devtools_app/src/app_size/app_size_controller.dart';
 import 'package:devtools_app/src/app_size/app_size_table.dart';
-import 'package:devtools_app/src/app_size/file_import_container.dart';
+import 'package:devtools_app/src/file_import.dart';
 import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/notifications.dart';
@@ -27,6 +27,10 @@ import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
+  setUp(() {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+  });
+
   final lastModifiedTime = DateTime.parse('2020-07-28 13:29:00');
 
   final oldV8JsonFile = DevToolsJsonFile(

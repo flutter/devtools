@@ -4,13 +4,13 @@
 
 import 'dart:math';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../table.dart';
 import '../table_data.dart';
 import 'memory_controller.dart';
-import 'memory_protocol.dart';
 
 const defaultNumberFieldWidth = 100.0;
 
@@ -49,9 +49,7 @@ class FieldTrack extends ColumnData<ClassHeapDetailStats>
     return Checkbox(
       value: item.isStacktraced,
       onChanged: (value) {
-        item.isStacktraced = value;
-        controller.setTracking(item.classRef, value);
-        controller.changeStackTraces();
+        controller.toggleAllocationTracking(item, value);
       },
     );
   }

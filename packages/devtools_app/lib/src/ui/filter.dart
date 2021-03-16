@@ -77,7 +77,7 @@ class _FilterDialogState extends State<FilterDialog> {
           onPressed: () =>
               widget.onApplyFilter(queryTextFieldController.value.text),
         ),
-        DialogCancelButton(),
+        const DialogCancelButton(),
       ],
     );
   }
@@ -90,8 +90,8 @@ class _FilterDialogState extends State<FilterDialog> {
         TextButton(
           onPressed: queryTextFieldController.clear,
           child: const MaterialIconLabel(
-            Icons.replay,
-            'Reset to default',
+            label: 'Reset to default',
+            iconData: Icons.replay,
           ),
         ),
       ],

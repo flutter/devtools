@@ -175,11 +175,10 @@ class StatusLine extends StatelessWidget {
   }
 
   Widget buildConnectionStatus(TextTheme textTheme) {
-    return StreamBuilder(
-      initialData: serviceManager.service != null,
-      stream: serviceManager.onStateChange,
-      builder: (context, AsyncSnapshot<bool> connectedSnapshot) {
-        if (connectedSnapshot.data) {
+    return ValueListenableBuilder<ConnectedState>(
+      valueListenable: serviceManager.connectedState,
+      builder: (context, ConnectedState connectedState, _) {
+        if (connectedState.connected) {
           final app = serviceManager.connectedApp;
 
           String description;

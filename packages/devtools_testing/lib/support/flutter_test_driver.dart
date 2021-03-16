@@ -272,6 +272,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     if (runConfig.trackWidgetCreation) {
       args.add('--track-widget-creation');
     }
+    if (runConfig.entryScript != null) {
+      args.addAll(['-t', runConfig.entryScript]);
+    }
     args.addAll(['-d', 'flutter-tester']);
     await setupProcess(
       args,
@@ -493,9 +496,11 @@ class FlutterRunConfiguration {
     this.withDebugger = false,
     this.pauseOnExceptions = false,
     this.trackWidgetCreation = true,
+    this.entryScript,
   });
 
   final bool withDebugger;
   final bool pauseOnExceptions;
   final bool trackWidgetCreation;
+  final String entryScript;
 }

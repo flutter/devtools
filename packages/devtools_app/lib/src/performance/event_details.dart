@@ -11,6 +11,7 @@ import '../globals.dart';
 import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profiler.dart';
+import '../theme.dart';
 import '../trace_event.dart';
 import '../utils.dart';
 import 'performance_controller.dart';
@@ -32,7 +33,7 @@ class EventDetails extends StatelessWidget {
     // unavailable for snapshots and provide link to return to offline profile
     // (see html_event_details.dart).
     final controller = Provider.of<PerformanceController>(context);
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
     return OutlineDecoration(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,7 +46,7 @@ class EventDetails extends StatelessWidget {
           Expanded(
             child: selectedEvent != null
                 ? _buildDetails(controller)
-                : _buildInstructions(textTheme),
+                : _buildInstructions(theme),
           ),
         ],
       ),
@@ -106,11 +107,11 @@ class EventDetails extends StatelessWidget {
     );
   }
 
-  Widget _buildInstructions(TextTheme textTheme) {
+  Widget _buildInstructions(ThemeData theme) {
     return Center(
       child: Text(
         instructions,
-        style: textTheme.subtitle1,
+        style: theme.subtleTextStyle,
       ),
     );
   }

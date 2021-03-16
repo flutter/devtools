@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'ui/theme.dart';
+import 'theme.dart';
 
 /// Returns [routeName] with [queryParameters] appended as [Uri] query
 /// parameters.

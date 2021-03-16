@@ -27,18 +27,23 @@ import 'server_api.dart';
 /// DevTools project.
 Future<shelf.Handler> defaultHandler(
   ClientManager clients, {
+  String customDevToolsPath,
   bool debugMode = false,
 }) async {
-  final resourceUri = await Isolate.resolvePackageUri(
-      Uri(scheme: 'package', path: 'devtools/devtools.dart'));
+  String buildDir = customDevToolsPath;
+  if (buildDir == null) {
+    final resourceUri = await Isolate.resolvePackageUri(
+        Uri(scheme: 'package', path: 'devtools/devtools.dart'));
 
-  final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
+    final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
+    buildDir = path.join(packageDir, 'build');
+  }
 
   // Default static handler for all non-package requests.
   Handler buildDirHandler;
   if (!debugMode) {
     buildDirHandler = createStaticHandler(
-      path.join(packageDir, 'build'),
+      buildDir,
       defaultDocument: 'index.html',
     );
   }

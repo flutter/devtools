@@ -17,7 +17,6 @@ const supportedScreenIds = [
   InspectorScreen.id,
   PerformanceScreen.id,
   NetworkScreen.id,
-  LoggingScreen.id,
 ];
 
 const allScreenIds = [

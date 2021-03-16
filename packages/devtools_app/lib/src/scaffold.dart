@@ -37,7 +37,7 @@ class DevToolsScaffold extends StatefulWidget {
     Key key,
     @required this.tabs,
     @required this.analyticsProvider,
-    this.title,
+    this.title = 'DevTools for Flutter & Dart',
     this.page,
     this.actions,
     this.embed = false,
@@ -50,7 +50,7 @@ class DevToolsScaffold extends StatefulWidget {
     @required Widget child,
     @required IdeTheme ideTheme,
     @required AnalyticsProvider analyticsProvider,
-    final String title,
+    String title = 'DevTools for Flutter & Dart',
     List<Widget> actions,
   }) : this(
           key: key,
@@ -216,6 +216,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           PageChangeEvent(screen?.screenId, widget.embed),
         );
 
+        // Clear error count when navigating to a screen.
+        serviceManager.errorBadgeManager.clearErrors(screen?.screenId);
+
         // If the tab index is 0 and the current route has no page ID (eg. we're
         // at the URL /?uri= with no page ID), those are equivalent pages but
         // navigateIfNotCurrent does not know that and will try to navigate, so
@@ -305,35 +308,41 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final theme = Theme.of(context);
     return Provider<BannerMessagesController>(
       create: (_) => BannerMessagesController(),
-      child: DragAndDrop(
-        handleDrop: _importController.importData,
-        child: Title(
-          title: title,
-          // Color is a required parameter but the color only appears to
-          // matter on Android and we do not care about Android.
-          // Using theme.primaryColor matches the default behavior of the
-          // title used by [WidgetsApp].
-          color: theme.primaryColor,
-          child: Scaffold(
-            appBar: widget.embed ? null : _buildAppBar(title),
-            body: Stack(
-              children: [
-                TabBarView(
-                  physics: defaultTabBarViewPhysics,
-                  controller: _tabController,
-                  children: tabBodies,
+      child: Provider<ImportController>.value(
+        value: _importController,
+        builder: (context, _) {
+          return DragAndDrop(
+            handleDrop: _importController.importData,
+            child: Title(
+              title: title,
+              // Color is a required parameter but the color only appears to
+              // matter on Android and we do not care about Android.
+              // Using theme.primaryColor matches the default behavior of the
+              // title used by [WidgetsApp].
+              color: theme.primaryColor,
+              child: Scaffold(
+                appBar: widget.embed ? null : _buildAppBar(title),
+                body: Stack(
+                  children: [
+                    TabBarView(
+                      physics: defaultTabBarViewPhysics,
+                      controller: _tabController,
+                      children: tabBodies,
+                    ),
+                    if (serviceManager.hasConnection &&
+                        !offlineMode &&
+                        _currentScreen.screenId != DebuggerScreen.id)
+                      Container(
+                        alignment: Alignment.topCenter,
+                        child: FloatingDebuggerControls(),
+                      ),
+                  ],
                 ),
-                if (serviceManager.hasConnection &&
-                    _currentScreen.screenId != DebuggerScreen.id)
-                  Container(
-                    alignment: Alignment.topCenter,
-                    child: FloatingDebuggerControls(),
-                  ),
-              ],
+                bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
+              ),
             ),
-            bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -386,6 +395,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       // Turn off the appbar's back button.
       automaticallyImplyLeading: false,
       title: Text(title),
+      centerTitle: false,
       actions: actions,
       flexibleSpace: flexibleSpace,
     );

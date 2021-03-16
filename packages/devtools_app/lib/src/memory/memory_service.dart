@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
-import 'memory_protocol.dart';
 
 // TODO(terry): This file prints out fatal errors.  Unable to use ga.error
 // TODO(terry): because of dart:js usage.  Look at abstracting errors to a log

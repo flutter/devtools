@@ -1,3 +1,7 @@
+// Copyright 2021 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // ignore: unused_import, allows the tests to use functions from tester.dart
 import 'dart:developer';
 
@@ -26,13 +30,13 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Counter'),
+          title: const Text('Counter'),
         ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('You clicked this many times on the button:'),
+              const Text('You clicked this many times on the button:'),
               Text(
                 watch(counterProvider.state).toString(),
                 style: Theme.of(context).textTheme.headline4,

@@ -7,7 +7,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../common_widgets.dart';
-import '../../../ui/theme.dart';
+import '../../../theme.dart';
 import '../../../utils.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_data_models.dart';

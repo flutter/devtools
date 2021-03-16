@@ -247,6 +247,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       onExit: _handleMouseExit,
       onHover: _handleMouseHover,
       child: RawKeyboardListener(
+        autofocus: true,
         focusNode: focusNode,
         onKey: (event) => _handleKeyEvent(event),
         // Scrollbar needs to wrap [LayoutBuilder] so that the scroll bar is
@@ -275,6 +276,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   Widget _buildFlameChart(BoxConstraints constraints) {
     return ExtentDelegateListView(
+      physics: const ClampingScrollPhysics(),
       controller: verticalController,
       extentDelegate: verticalExtentDelegate,
       customPointerSignalHandler: _handlePointerSignal,
@@ -360,7 +362,13 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       double deltaY = event.scrollDelta.dy;
       if (deltaY.abs() >= deltaX.abs()) {
         if (_altKeyPressed) {
-          verticalController.jumpTo(verticalController.offset + deltaY);
+          verticalController.jumpTo(math.max(
+            math.min(
+              verticalController.offset + deltaY,
+              verticalController.position.maxScrollExtent,
+            ),
+            0.0,
+          ));
         } else {
           deltaY = deltaY.clamp(
             -FlameChart.maxScrollWheelDelta,

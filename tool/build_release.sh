@@ -14,7 +14,7 @@ set -ex #echo on
 # (https://github.com/flutter/flutter/issues/74936), or to read this from a manifest 
 # provided (https://github.com/flutter/flutter/issues/74934).
 function download_canvaskit() {
-  local canvaskit_url=https://unpkg.com/canvaskit-wasm@0.22.0/bin
+  local canvaskit_url=https://unpkg.com/canvaskit-wasm@0.24.0/bin
 
   local flutter_bin=$(which flutter)
   local canvaskit_dart_file=$(dirname $flutter_bin)/cache/flutter_web_sdk/lib/_engine/engine/canvaskit/initialization.dart
