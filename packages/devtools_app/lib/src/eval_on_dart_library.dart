@@ -62,6 +62,8 @@ class EvalOnDartLibrary {
   bool _disposed = false;
 
   void dispose() {
+    _dartDeveloperEvalCache?.dispose();
+    _widgetInspectorEvalCache?.dispose();
     selectedIsolateStreamSubscription.cancel();
     _disposed = true;
   }
