@@ -67,9 +67,12 @@ class _TimelineFlameChartContainerState
         valueListenable: controller.emptyTimeline,
         builder: (context, emptyRecording, _) {
           return emptyRecording
-              ? const Center(
+              ? Center(
                   key: TimelineFlameChartContainer.emptyTimelineKey,
-                  child: Text('No timeline events'),
+                  child: Text(
+                    'No timeline events',
+                    style: Theme.of(context).subtleTextStyle,
+                  ),
                 )
               : _buildProcessingInfo();
         },

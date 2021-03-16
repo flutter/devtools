@@ -187,7 +187,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     return Center(
       child: Text(
         CpuProfiler.emptyCpuProfile,
-        style: Theme.of(context).textTheme.subtitle1,
+        style: Theme.of(context).subtleTextStyle,
       ),
     );
   }

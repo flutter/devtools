@@ -46,14 +46,16 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildConnectDialog(),
-        const SizedBox(height: defaultSpacing),
-        _buildImportInstructions(),
-        const SizedBox(height: defaultSpacing),
-        _buildAppSizeInstructions(),
-      ],
+    return Scrollbar(
+      child: ListView(
+        children: [
+          _buildConnectDialog(),
+          const SizedBox(height: defaultSpacing),
+          _buildImportInstructions(),
+          const SizedBox(height: defaultSpacing),
+          _buildAppSizeInstructions(),
+        ],
+      ),
     );
   }
 
