@@ -111,9 +111,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   LinkedScrollControllerGroup horizontalController;
 
-  double get maxScrollOffset =>
-      widget.containerWidth * (zoomController.value - 1);
-
   /// Animation controller for animating flame chart zoom changes.
   AnimationController zoomController;
 
@@ -384,6 +381,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
             FlameChart.maxZoomLevel,
           );
           await zoomTo(newZoomLevel, jump: true);
+          if (newZoomLevel == FlameChart.minZoomLevel &&
+              horizontalController.offset != 0.0) {
+            await scrollToX(0.0);
+          }
         }
       }
     }
@@ -415,8 +416,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       // to call this that guarantees the scroll controller offsets will be
       // updated for the new zoom level and layout size
       // https://github.com/flutter/devtools/issues/2012.
-      horizontalController.jumpTo(
-          newScrollOffset.clamp(FlameChart.minScrollOffset, maxScrollOffset));
+      scrollToX(newScrollOffset, jump: true);
     });
   }
 
@@ -438,7 +438,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     double offset, {
     bool jump = false,
   }) async {
-    final target = offset.clamp(FlameChart.minScrollOffset, maxScrollOffset);
+    final target = offset.clamp(
+      FlameChart.minScrollOffset,
+      horizontalController.position.maxScrollExtent,
+    );
     if (jump) {
       horizontalController.jumpTo(target);
     } else {
@@ -453,8 +456,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   Future<void> scrollVerticallyToData(V data) async {
     await verticalController.animateTo(
       // Subtract [2 * rowHeightWithPadding] to give the target scroll event top padding.
-      (topYForData(data) - 2 * rowHeightWithPadding)
-          .clamp(0.0, verticalController.position.maxScrollExtent),
+      (topYForData(data) - 2 * rowHeightWithPadding).clamp(
+        FlameChart.minScrollOffset,
+        verticalController.position.maxScrollExtent,
+      ),
       duration: shortDuration,
       curve: defaultCurve,
     );
