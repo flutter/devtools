@@ -6,6 +6,7 @@
 // If you add a method to this class you should also add it to EvalOnDartLibrary.java
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
@@ -196,26 +197,26 @@ class EvalOnDartLibrary {
     return await getObjHelper(await instanceRefFuture, isAlive);
   }
 
-  Future<String> getInstanceHashCode(
+  Future<int> getHashCode(
     InstanceRef instance, {
     @required Disposable isAlive,
   }) async {
     final hash = await evalInstance(
-      'instance.hashCode.toUnsigned(20).toRadixString(16).padLeft(5, "0")',
+      'instance.hashCode',
       isAlive: isAlive,
       scope: {'instance': instance.id},
     );
 
-    return hash.valueAsString;
+    return int.parse(hash.valueAsString);
   }
 
+  /// Eval an expression and immediately obtain its [Instance].
   Future<Instance> evalInstance(
     String expression, {
     @required Disposable isAlive,
     Map<String, String> scope,
   }) async {
     final ref = await safeEval(expression, isAlive: isAlive, scope: scope);
-
     if (ref == null) return null;
 
     return getInstance(ref, isAlive);

@@ -25,15 +25,15 @@ void main() {
   });
 
   group('EvalOnDartLibrary', () {
-    test('getInstanceHashCode', () async {
+    test('getHashCode', () async {
       await env.setupEnvironment();
       final eval = EvalOnDartLibrary(['dart:core'], serviceManager.service);
 
       final instance = await eval.safeEval('42', isAlive: isAlive);
 
       await expectLater(
-        eval.getInstanceHashCode(instance, isAlive: isAlive),
-        completion('0002a'),
+        eval.getHashCode(instance, isAlive: isAlive),
+        42,
       );
     });
 
