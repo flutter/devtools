@@ -16,7 +16,7 @@ void main() {
   Disposable isAlive;
 
   setUp(() {
-    isAlive = IsAlive();
+    isAlive = Disposable();
   });
 
   tearDown(() async {

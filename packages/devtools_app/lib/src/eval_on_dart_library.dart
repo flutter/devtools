@@ -16,17 +16,10 @@ import 'globals.dart';
 import 'inspector/inspector_service.dart';
 import 'vm_service_wrapper.dart';
 
-abstract class Disposable {
-  bool get disposed;
-
-  void dispose();
-}
-
-class IsAlive extends Disposable {
-  @override
+class Disposable {
   bool disposed = false;
 
-  @override
+  @mustCallSuper
   void dispose() {
     disposed = true;
   }
