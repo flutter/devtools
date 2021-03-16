@@ -136,7 +136,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     _showPageSubscription =
         frameworkController.onShowPageId.listen(_showPageById);
 
-    cancel();
     _initTitle();
   }
 
