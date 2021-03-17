@@ -619,13 +619,15 @@ void main() {
 
     // OneClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneClass'));
-    await pumpAndSettleTwoSeconds();
 
     // Show's auto-complete dropdown with the 2nd item highlighted.
     await checkGolden(
       'goldens/allocation_dropdown_hilight_line_2_golden.png',
       key: searchAutoCompleteKey,
     );
+
+    // OneMoreClass hilighted.
+    await downArrow(autoCompletes4.indexOf('OneMoreClass'));
 
     // OneMoreClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneMoreClass'));
