@@ -1445,15 +1445,13 @@ class MemoryLog {
   MemoryController controller;
 
   /// Persist the the live memory data to a JSON file in the /tmp directory.
-  void exportMemory() async {
+  List<String> exportMemory() {
     MemoryScreen.gaActionForExport();
 
     final liveData = controller.memoryTimeline.liveData;
 
-    bool pseudoData = false;
     if (liveData.isEmpty) {
       // Used to create empty memory log for test.
-      pseudoData = true;
       liveData.add(HeapSample(
         DateTime.now().millisecondsSinceEpoch,
         0,
@@ -1478,19 +1476,21 @@ class MemoryLog {
       assert(memoryJson.data.length == liveData.length);
     }
 
-    _fs.writeStringToFile(_memoryLogFilename, jsonPayload);
+    _fs.writeStringToFile(_memoryLogFilename, jsonPayload, isMemory: true);
 
-    // TODO(terry): Display filename created in a toast.
-
-    if (pseudoData) liveData.clear();
+    return [_fs.exportDirectoryName(isMemory: true), _memoryLogFilename];
   }
 
   /// Return a list of offline memory logs filenames in the /tmp directory
   /// that are available to open.
   List<String> offlineFiles() {
-    final memoryLogs = _fs.list(prefix: MemoryController.logFilenamePrefix);
+    final memoryLogs = _fs.list(
+      prefix: MemoryController.logFilenamePrefix,
+      isMemory: true,
+    );
 
     // Sort by newest file top-most (DateTime is in the filename).
+
     memoryLogs.sort((a, b) => b.compareTo(a));
 
     return memoryLogs;
@@ -1498,12 +1498,13 @@ class MemoryLog {
 
   /// Load the memory profile data from a saved memory log file.
   Future<void> loadOffline(String filename) async {
-    final jsonPayload = _fs.readStringFromFile(filename);
+    final jsonPayload = _fs.readStringFromFile(filename, isMemory: true);
 
     final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
 
     if (!memoryJson.isMatchedVersion) {
-      final e = 'Error loading file $filename version ${memoryJson.payloadVersion}';
+      final e =
+          'Error loading file $filename version ${memoryJson.payloadVersion}';
       log(e, LogLevel.warning);
       throw OfflineFileException(e);
     }
@@ -1516,5 +1517,6 @@ class MemoryLog {
   }
 
   @visibleForTesting
-  bool removeOfflineFile(String filename) => _fs.deleteFile(filename);
+  bool removeOfflineFile(String filename) =>
+      _fs.deleteFile(filename, isMemory: true);
 }

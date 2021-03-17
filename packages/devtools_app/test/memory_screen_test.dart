@@ -4,8 +4,6 @@
 
 @TestOn('vm')
 
-import 'dart:io';
-
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_heap_tree_view.dart';
@@ -672,5 +670,5 @@ void main() {
         controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
     // OneClass selected.
     expect(choosenAutoComplete.classRef.name, autoCompletes4[1]);
-  }, skip: kIsWeb || Platform.isMacOS || Platform.isLinux);
+  });
 }

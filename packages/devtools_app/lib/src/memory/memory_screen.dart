@@ -594,8 +594,7 @@ class MemoryBodyState extends State<MemoryBody>
             : const SizedBox(),
         IconLabelButton(
           key: MemoryScreen.exportButtonKey,
-          onPressed:
-              controller.offline ? null : controller.memoryLog.exportMemory,
+          onPressed: controller.offline ? null : _exportToFile,
           icon: Icons.file_download,
           label: 'Export',
           includeTextWidth: _primaryControlsMinVerboseWidth,
@@ -615,6 +614,16 @@ class MemoryBodyState extends State<MemoryBody>
         ),
       ],
     );
+  }
+
+  void _exportToFile() {
+    final outputPath = controller.memoryLog.exportMemory();
+    final notificationsState = Notifications.of(context);
+    if (notificationsState != null) {
+      notificationsState.push(
+        'Successfully exported file ${outputPath.last} to ${outputPath.first} directory',
+      );
+    }
   }
 
   void _openSettingsDialog() {
