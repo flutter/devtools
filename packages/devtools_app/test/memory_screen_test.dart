@@ -373,7 +373,7 @@ void main() {
 
     Future<void> checkGolden(String goldenFilename) async {
       // Await delay for golden comparison.
-      await tester.pumpAndSettle(const Duration(seconds: 4));
+      await tester.pumpAndSettle(const Duration(seconds: 2));
 
       // Screenshot should display left-side tree table fully expanded and the monitor
       // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
@@ -646,5 +646,5 @@ void main() {
         controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
     // OneClass selected.
     expect(choosenAutoComplete.classRef.name, autoCompletes4[1]);
-  }, skip: !Platform.isMacOS);
+  }/*, skip: !Platform.isMacOS*/);
 }
