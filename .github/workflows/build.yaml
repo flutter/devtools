@@ -63,6 +63,7 @@ jobs:
     steps:
       - name: git clone
         uses: actions/checkout@v2
+
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
@@ -74,8 +75,8 @@ jobs:
         if: always() # Always run (whether fail or success)
         with:
           name: test-image-failures-${{ matrix.os }} # Name for the artifact
-          path: /home/runner/work/devtools/devtools/packages/devtools_app/test/failures # Path to upload
-          
+          path: packages/devtools_app/test/failures # Path to upload
+
   integration:
     name: integration ${{ matrix.bot }}
     runs-on: ubuntu-latest
