@@ -6,7 +6,6 @@ import 'package:devtools_app/src/debugger/hover.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
-const _defaultStyle = TextStyle();
 const _textSpan = TextSpan(children: [
   TextSpan(text: 'hello'),
   TextSpan(text: ' '),
@@ -23,19 +22,19 @@ const _textSpan = TextSpan(children: [
 
 void main() {
   test('wordForHover returns the correct word given the provided x offset', () {
-    expect(wordForHover(10, _textSpan, _defaultStyle), 'hello');
-    expect(wordForHover(100, _textSpan, _defaultStyle), 'world');
-    expect(wordForHover(5000, _textSpan, _defaultStyle), '');
+    expect(wordForHover(10, _textSpan), 'hello');
+    expect(wordForHover(100, _textSpan), 'world');
+    expect(wordForHover(5000, _textSpan), '');
   });
 
   test('wordForHover returns an empty string if there is no underlying word',
       () {
-    expect(wordForHover(5000, _textSpan, _defaultStyle), '');
+    expect(wordForHover(5000, _textSpan), '');
   });
 
   test('wordForHover merges words linked with `.`', () {
-    expect(wordForHover(200, _textSpan, _defaultStyle), 'foo');
-    expect(wordForHover(250, _textSpan, _defaultStyle), 'foo.bar');
-    expect(wordForHover(300, _textSpan, _defaultStyle), 'foo.bar.baz');
+    expect(wordForHover(200, _textSpan), 'foo');
+    expect(wordForHover(250, _textSpan), 'foo.bar');
+    expect(wordForHover(300, _textSpan), 'foo.bar.baz');
   });
 }

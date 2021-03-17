@@ -7,33 +7,27 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import '../ui/utils.dart';
 
 /// Regex for valid Dart identifiers.
 final _identifier = RegExp(r'^[a-zA-Z0-9]|_|\$');
 
 /// Returns the word in the [line] for the provided hover [dx] offset given
 /// the [line]'s [textStyle].
-String wordForHover(double dx, TextSpan line, TextStyle textStyle) {
-  final painter = TextPainter(
-    text: TextSpan(children: [line], style: textStyle),
-    textDirection: TextDirection.ltr,
-  )..layout();
+String wordForHover(double dx, TextSpan line) {
+  String word = '';
+  final hoverIndex = _hoverIndexFor(dx, line);
   final lineText = line.toPlainText();
-  final hoverIndex = ((dx / painter.width) * (lineText.length - 1)).round();
-
-  // Use a psuedo StringBuffer for performance.
-  final word = <String>[];
-
   if (hoverIndex >= 0 && hoverIndex < lineText.length) {
     final hoverChar = lineText[hoverIndex];
-    word.add(hoverChar);
+    word = '$word$hoverChar';
     if (_identifier.hasMatch(hoverChar) || hoverChar == '.') {
       // Merge trailing valid identifiers.
       int charIndex = hoverIndex + 1;
       while (charIndex < lineText.length) {
         final character = lineText[charIndex];
         if (_identifier.hasMatch(character)) {
-          word.add(character);
+          word = '$word$character';
         } else {
           break;
         }
@@ -45,7 +39,7 @@ String wordForHover(double dx, TextSpan line, TextStyle textStyle) {
       while (charIndex >= 0) {
         final character = lineText[charIndex];
         if (_identifier.hasMatch(character) || character == '.') {
-          word.insert(0, character);
+          word = '$character$word';
         } else {
           break;
         }
@@ -54,7 +48,24 @@ String wordForHover(double dx, TextSpan line, TextStyle textStyle) {
     }
   }
 
-  return word.join();
+  return word;
+}
+
+/// Returns the index in the Textspan's plainText for which the hover offset is
+/// located.
+int _hoverIndexFor(double dx, TextSpan line) {
+  int hoverIndex = -1;
+  for (var i = 0; i < line.toPlainText().length; i++) {
+    final painter = TextPainter(
+      text: truncateTextSpan(line, i + 1),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    if (dx <= painter.width) {
+      hoverIndex = i;
+      break;
+    }
+  }
+  return hoverIndex;
 }
 
 const _hoverCardBorderWidth = 2.0;
