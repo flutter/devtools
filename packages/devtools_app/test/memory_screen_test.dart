@@ -429,6 +429,8 @@ void main() {
     expect(classDetails.instancesCurrent, 55);
     expect(classDetails.instancesDelta, 0);
 
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
     // Screenshot should display left-side tree table fully expanded and the monitor
     // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
     // all allocations in a flat table, no items checked (tracked), search should
@@ -437,8 +439,6 @@ void main() {
       find.byType(MemoryBody),
       matchesGoldenFile('goldens/allocation_golden.png'),
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // Enable classes to track.
     setupTracking(data);
@@ -451,8 +451,8 @@ void main() {
       classesToTrack.join(','),
     );
 
-    print('DO NOT CHECKIN...');
-
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
     // Screenshot should display left-side tree table fully expanded and the monitor
     // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
     // all allocations in a flat table, with two items checked (tracked), search should
@@ -462,8 +462,6 @@ void main() {
       find.byType(MemoryBody),
       matchesGoldenFile('goldens/allocation_two_track_golden.png'),
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // Turn off one class being tracked.
     expect(data[0].classRef.name, 'AClass');
@@ -479,6 +477,8 @@ void main() {
     expect(controller.trackAllocations.values.single, classesToTrack.last);
     await pumpAndSettleOneSecond();
 
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
     // Screenshot should display left-side tree table fully expanded and the monitor
     // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
     // all allocations in a flat table, with one class checked (tracked), search should
@@ -488,8 +488,6 @@ void main() {
       find.byType(MemoryBody),
       matchesGoldenFile('goldens/allocation_one_track_golden.png'),
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // Exercise search and auto-complete.
     final searchField = find.byKey(memorySearchFieldKey);
@@ -608,66 +606,66 @@ void main() {
     await downArrow(autoCompletes4.indexOf('OneClass'));
     await pumpAndSettleOneSecond();
 
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
     // Show's auto-complete dropdown with the 2nd item highlighted.
     await expectLater(
       find.byType(MemoryBody),
       matchesGoldenFile(
           'goldens/allocation_dropdown_hilight_line_2_golden.png'),
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // OneMoreClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneMoreClass'));
     await pumpAndSettleOneSecond();
 
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
     // Show's auto-complete dropdown with the 3rd item highlighted.
     await expectLater(
       find.byType(MemoryBody),
       matchesGoldenFile(
           'goldens/allocation_dropdown_hilight_line_3_golden.png'),
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // SecondClass hilighted.
     await downArrow(autoCompletes4.indexOf('SecondClass'));
     await pumpAndSettleOneSecond();
 
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
     // Show's auto-complete dropdown with the 4th item highlighted.
     await expectLater(
       find.byType(MemoryBody),
       matchesGoldenFile(
           'goldens/allocation_dropdown_hilight_line_4_golden.png'),
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // AnotherClass hilighted.
     await downArrow(autoCompletes4.indexOf('AnotherClass'));
     await pumpAndSettleOneSecond();
 
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
     // Show's auto-complete dropdown with the last item highlighted.
     await expectLater(
       find.byType(MemoryBody),
       matchesGoldenFile(
           'goldens/allocation_dropdown_hilight_line_1_golden.png'),
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // OneClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneClass'));
     await pumpAndSettleOneSecond();
 
+    // Await delay for golden comparison.
+    await pumpAndSettleTwoSeconds();
     // Show's auto-complete dropdown with the 2nd item highlighted.
     await expectLater(
       find.byType(MemoryBody),
       matchesGoldenFile(
           'goldens/allocation_dropdown_hilight_line_2_golden.png'),
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // Select last hilighted entry.
     await simulateKeyDownEvent(LogicalKeyboardKey.enter);
