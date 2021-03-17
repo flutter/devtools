@@ -69,12 +69,12 @@ jobs:
           PLATFORM: vm
         run: ./tool/bots.sh
       
-      - name: image failures
-        uses: actions/upload-artifact@v1
-        if: always() # Always run (whether fail or success)
-        with:
-          name: test-image-failures-${{ matrix.os }} # Name for the artifact
-          path: failures # Path to upload
+#      - name: image failures
+#        uses: actions/upload-artifact@v1
+#        if: always() # Always run (whether fail or success)
+#        with:
+#          name: test-image-failures-${{ matrix.os }} # Name for the artifact
+#          path: failures # Path to upload
           
   integration:
     name: integration ${{ matrix.bot }}
