@@ -4,8 +4,6 @@
 
 @TestOn('vm')
 
-import 'dart:io';
-
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_heap_tree_view.dart';
