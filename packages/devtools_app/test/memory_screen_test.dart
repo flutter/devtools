@@ -451,6 +451,8 @@ void main() {
       classesToTrack.join(','),
     );
 
+    print("Checking...");
+
     // Screenshot should display left-side tree table fully expanded and the monitor
     // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
     // all allocations in a flat table, with two items checked (tracked), search should
