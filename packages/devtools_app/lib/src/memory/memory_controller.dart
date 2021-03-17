@@ -1450,8 +1450,10 @@ class MemoryLog {
 
     final liveData = controller.memoryTimeline.liveData;
 
+    bool pseudoData = false;
     if (liveData.isEmpty) {
       // Used to create empty memory log for test.
+      pseudoData = true;
       liveData.add(HeapSample(
         DateTime.now().millisecondsSinceEpoch,
         0,
@@ -1477,6 +1479,8 @@ class MemoryLog {
     }
 
     _fs.writeStringToFile(_memoryLogFilename, jsonPayload, isMemory: true);
+
+    if (pseudoData) liveData.clear();
 
     return [_fs.exportDirectoryName(isMemory: true), _memoryLogFilename];
   }
