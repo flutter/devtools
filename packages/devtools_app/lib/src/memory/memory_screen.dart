@@ -691,7 +691,8 @@ class MemoryBodyState extends State<MemoryBody>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: rowChildren,
-          )),
+          ),
+        ),
     );
   }
 
