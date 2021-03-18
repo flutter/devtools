@@ -15,8 +15,9 @@ class FileSystemWeb implements FileIO {
   /// Key is filename and value is content of the file.
   final Map<String, String> _files = {};
 
-  @override
   /// In memory file system.
+
+  @override
   String exportDirectoryName({bool isMemory = false}) => 'LocalStorage';
 
   @override
