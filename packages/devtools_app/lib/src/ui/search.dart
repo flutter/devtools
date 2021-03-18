@@ -331,6 +331,9 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       onEditingComplete: () {
         searchFieldFocusNode.requestFocus();
       },
+      // Guarantee that the TextField on all platforms renders in the same
+      // color for border, label text, and cursor. Primarly, so golden screen
+      // snapshots will compare with the exact color.
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.all(denseSpacing),
         focusedBorder: OutlineInputBorder(borderSide: searchFocusBorderColor),

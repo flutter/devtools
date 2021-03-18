@@ -340,7 +340,10 @@ const defaultSearchTextWidth = 200.0;
 const defaultTextFieldHeight = 36.0;
 
 /// Default color of cursor and color used by search's TextField.
-Color searchColor = Colors.lightBlueAccent[400];
+/// Guarantee that the Search TextField on all platforms renders in the same
+/// color for border, label text, and cursor. Primarly, so golden screen
+/// snapshots will compare successfully using the exact color.
+Color searchColor = Colors.blue;
 
 /// Default Border of search's TextField.
 BorderSide searchFocusBorderColor = BorderSide(color: searchColor, width: 2);

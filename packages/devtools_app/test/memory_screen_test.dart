@@ -372,9 +372,10 @@ void main() {
 
     Future<void> checkGolden(String goldenFilename, {Key key}) async {
       // Await delay for golden comparison.
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await pumpAndSettleTwoSeconds();
 
       final finder = key == null ? find.byType(MemoryBody) : find.byKey(key);
+      expect(finder, findsOneWidget);
 
       // Screenshot should display left-side tree table fully expanded and the monitor
       // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
@@ -495,7 +496,6 @@ void main() {
     // Validate only one class is tracked now.
     expect(controller.trackAllocations.length, 1);
     expect(controller.trackAllocations.values.single, classesToTrack.last);
-    await pumpAndSettleOneSecond();
 
     // Screenshot should display left-side tree table fully expanded and the monitor
     // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
@@ -629,7 +629,6 @@ void main() {
 
     // OneMoreClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneMoreClass'));
-    await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the 3rd item highlighted.
     await checkGolden(
@@ -639,7 +638,6 @@ void main() {
 
     // SecondClass hilighted.
     await downArrow(autoCompletes4.indexOf('SecondClass'));
-    await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the 4th item highlighted.
     await checkGolden(
@@ -649,7 +647,6 @@ void main() {
 
     // AnotherClass hilighted.
     await downArrow(autoCompletes4.indexOf('AnotherClass'));
-    await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the last item highlighted.
     await checkGolden(
@@ -659,7 +656,6 @@ void main() {
 
     // OneClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneClass'));
-    await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the 2nd item highlighted.
     await checkGolden(
