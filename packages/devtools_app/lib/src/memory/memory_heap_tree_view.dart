@@ -32,6 +32,8 @@ import 'memory_screen.dart';
 import 'memory_snapshot_models.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
+
+@visibleForTesting
 final memorySearchFieldKey = GlobalKey(debugLabel: memorySearchFieldKeyName);
 
 class HeapTree extends StatefulWidget {
