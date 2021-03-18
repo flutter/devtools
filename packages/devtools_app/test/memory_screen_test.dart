@@ -389,7 +389,7 @@ void main() {
 
     // Any exported memory files in the /tmp or $TMPDIR or /var/folders/Downloads will cause
     // the memory page's drop-down widget width to be wider than normal (longest exported file
-    // name).  For goldens don't generate snapshots as they we be slightly different on the bots. 
+    // name). For goldens don't generate snapshots as they we be slightly different on the bots.
     expect(
       controller.memoryLog.offlineFiles().isEmpty,
       isTrue,
