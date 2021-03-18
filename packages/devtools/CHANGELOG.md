@@ -1,3 +1,6 @@
+## 2.0.0+1
+* Upgrade dependencies for `args`, `meta`, `path`, and `pedantic` [#2817](https://github.com/flutter/devtools/pull/2817)
+
 ## 2.0.0
 * Add support for older VMs, cleanup memory filter dialog and retained size [#2752](https://github.com/flutter/devtools/pull/2752)
 * Add memory allocations tracked indicator and polish event icons for track and reset [#2751](https://github.com/flutter/devtools/pull/2751)
