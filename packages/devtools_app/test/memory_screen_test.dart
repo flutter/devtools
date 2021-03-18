@@ -370,18 +370,6 @@ void main() {
       await tester.pumpAndSettle(_twoSeconds);
     }
 
-    Future<void> enableSearch() async {
-      // Disable Search.
-//      controller.setSearchAutoCompleteEnabled = true;
-//      await pumpAndSettleTwoSeconds();
-    }
-
-    Future<void> disableSearch() async {
-      // Disable Search.
-//      controller.setSearchAutoCompleteEnabled = false;
-//      await pumpAndSettleTwoSeconds();
-    }
-
     Future<void> checkGolden(String goldenFilename, {Key key}) async {
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -456,10 +444,6 @@ void main() {
     expect(classDetails.instancesCurrent, 55);
     expect(classDetails.instancesDelta, 0);
 
-    // Need to disable search the colors don't match on the bot.
-    // TODO(terry): Consider a custom theme for search for DevTools.
-    await disableSearch();
-
     // Screenshot should display left-side tree table fully expanded and the monitor
     // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
     // all allocations in a flat table, no items checked (tracked), search should
@@ -504,9 +488,6 @@ void main() {
     // be enabled with focus. The tree table displayed on the bottom right-side below
     // the flat table should display one tracked class.
     await checkGolden('goldens/allocation_one_track_golden.png');
-
-    // Re-enable auto-complete search so we can test search.
-    await enableSearch();
 
     // Exercise search and auto-complete.
     final searchField = find.byKey(memorySearchFieldKey);
@@ -625,8 +606,6 @@ void main() {
     await downArrow(autoCompletes4.indexOf('OneClass'));
     await pumpAndSettleTwoSeconds();
 
-    await disableSearch();
-
     // Show's auto-complete dropdown with the 2nd item highlighted.
     await checkGolden(
       'goldens/allocation_dropdown_hilight_line_2_golden.png',
@@ -636,8 +615,6 @@ void main() {
     // OneMoreClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneMoreClass'));
     await pumpAndSettleOneSecond();
-
-    await disableSearch();
 
     // Show's auto-complete dropdown with the 3rd item highlighted.
     await checkGolden(
@@ -649,8 +626,6 @@ void main() {
     await downArrow(autoCompletes4.indexOf('SecondClass'));
     await pumpAndSettleOneSecond();
 
-    await disableSearch();
-
     // Show's auto-complete dropdown with the 4th item highlighted.
     await checkGolden(
       'goldens/allocation_dropdown_hilight_line_4_golden.png',
@@ -661,8 +636,6 @@ void main() {
     await downArrow(autoCompletes4.indexOf('AnotherClass'));
     await pumpAndSettleOneSecond();
 
-    await disableSearch();
-
     // Show's auto-complete dropdown with the last item highlighted.
     await checkGolden(
       'goldens/allocation_dropdown_hilight_line_1_golden.png',
@@ -672,8 +645,6 @@ void main() {
     // OneClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneClass'));
     await pumpAndSettleOneSecond();
-
-    await disableSearch();
 
     // Show's auto-complete dropdown with the 2nd item highlighted.
     await checkGolden(
