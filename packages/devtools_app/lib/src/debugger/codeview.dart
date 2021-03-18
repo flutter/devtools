@@ -602,12 +602,10 @@ class _LineItemState extends State<LineItem> {
     _removeTimer?.cancel();
     if (!_debuggerController.isPaused.value) return;
     _showTimer = Timer(LineItem._hoverDelay, () async {
-      final theme = Theme.of(context);
       _hoverCard?.remove();
       final word = wordForHover(
         event.localPosition.dx,
         widget.lineContents,
-        theme.fixedFontStyle,
       );
       if (word != '') {
         try {
