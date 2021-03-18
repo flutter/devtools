@@ -19,7 +19,7 @@ dependencies:
   path: ^1.8.0
   sse: ^3.1.2
   shelf: ^0.7.4
-  shelf_proxy: ^0.1.0
+  shelf_proxy: ^1.0.0
   shelf_static: ^0.2.8
   http_multi_server: ^2.2.0
   usage: ^3.4.1
