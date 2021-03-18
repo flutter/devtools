@@ -70,8 +70,9 @@ jobs:
           PLATFORM: vm
         run: ./tool/bots.sh
 
-      - name: image failures # Only creates artifacts if failures directory
+      - name: image failures
         uses: actions/upload-artifact@v1
+        if: failure() # Only if failure then failures directory exists.
         with:
           name: test-image-failures-${{ matrix.os }} # Name for the artifact
           path: packages/devtools_app/test/failures # Path to upload
