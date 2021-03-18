@@ -387,8 +387,23 @@ void main() {
 
     await pumpMemoryScreen(tester);
 
+    // Any exported memory files in the /tmp or $TMPDIR or /var/folders/Downloads will cause
+    // the memory page's drop-down widget width to be wider than normal (longest exported file
+    // name).  For goldens don't generate snapshots as they we be slightly different on the bots. 
     expect(
-        find.byKey(HeapTreeViewState.dartHeapAnalysisTabKey), findsOneWidget);
+      controller.memoryLog.offlineFiles().isEmpty,
+      isTrue,
+      reason:
+          '\n\n=========================================================================\n'
+          'WARNING: Exported memory files in /tmp/memory_log_YYYYMMDD_HH_MM exist.\n'
+          'The switch --update-goldens shouldn\'t be used until export files removed.\n'
+          '=========================================================================',
+    );
+
+    expect(
+      find.byKey(HeapTreeViewState.dartHeapAnalysisTabKey),
+      findsOneWidget,
+    );
 
     final allocationsKey =
         find.byKey(HeapTreeViewState.dartHeapAllocationsTabKey);
