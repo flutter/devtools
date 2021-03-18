@@ -31,13 +31,6 @@ SurveyService get surveyService => globals[SurveyService];
 
 PreferencesController get preferences => globals[PreferencesController];
 
-String generateDevToolsTitle() {
-  if (!serviceManager.hasConnection) return '';
-  return serviceManager.connectedApp.isFlutterAppNow
-      ? 'Flutter DevTools'
-      : 'Dart DevTools';
-}
-
 void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;
 }

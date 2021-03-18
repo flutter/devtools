@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
+import 'title.dart';
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const dartHtmlLibraryUri = 'dart:html';
@@ -93,5 +94,6 @@ class ConnectedApp {
 
   Future<void> initializeValues() async {
     await Future.wait([isFlutterApp, isProfileBuild, isDartWebApp]);
+    generateDevToolsTitle();
   }
 }
