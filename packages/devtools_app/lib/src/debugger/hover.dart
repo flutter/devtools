@@ -55,7 +55,8 @@ String wordForHover(double dx, TextSpan line) {
 /// located.
 int _hoverIndexFor(double dx, TextSpan line) {
   int hoverIndex = -1;
-  for (var i = 0; i < line.toPlainText().length; i++) {
+  final length = line.toPlainText().length;
+  for (var i = 0; i < length; i++) {
     final painter = TextPainter(
       text: truncateTextSpan(line, i + 1),
       textDirection: TextDirection.ltr,
