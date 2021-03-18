@@ -333,9 +333,9 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       },
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.all(denseSpacing),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Theme.of(context).focusColor),
-        ),
+        focusedBorder: OutlineInputBorder(borderSide: searchFocusBorderColor),
+        enabledBorder: OutlineInputBorder(borderSide: searchFocusBorderColor),
+        labelStyle: TextStyle(color: searchColor),
         border: const OutlineInputBorder(),
         labelText: 'Search',
         suffix: _buildSearchFieldSuffix(
@@ -343,6 +343,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
           supportsNavigation: supportsNavigation,
         ),
       ),
+      cursorColor: searchColor,
     );
 
     if (shouldRequestFocus) {

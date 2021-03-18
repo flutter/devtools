@@ -339,6 +339,12 @@ const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
 const defaultTextFieldHeight = 36.0;
 
+/// Default color of cursor and color used by search's TextField.
+Color searchColor = Colors.lightBlueAccent[400];
+
+/// Default Border of search's TextField.
+BorderSide searchFocusBorderColor = BorderSide(color: searchColor, width: 2);
+
 /// A short duration to use for animations.
 ///
 /// Use this when you want less emphasis on the animation and more on the

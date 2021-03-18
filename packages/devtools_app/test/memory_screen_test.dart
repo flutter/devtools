@@ -372,14 +372,14 @@ void main() {
 
     Future<void> enableSearch() async {
       // Disable Search.
-      controller.setSearchAutoCompleteEnabled = true;
-      await pumpAndSettleTwoSeconds();
+//      controller.setSearchAutoCompleteEnabled = true;
+//      await pumpAndSettleTwoSeconds();
     }
 
     Future<void> disableSearch() async {
       // Disable Search.
-      controller.setSearchAutoCompleteEnabled = false;
-      await pumpAndSettleTwoSeconds();
+//      controller.setSearchAutoCompleteEnabled = false;
+//      await pumpAndSettleTwoSeconds();
     }
 
     Future<void> checkGolden(String goldenFilename, {Key key}) async {
