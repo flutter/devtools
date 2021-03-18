@@ -256,10 +256,10 @@ class MemoryController extends DisposableController
   // Default state of advanced settings enabled.
   static const advancedSettingsEnabledDefault = false;
 
-  ValueListenable<bool> get advancedSettingsEnabled =>
-      _advancedSettingsEnabled;
+  ValueListenable<bool> get advancedSettingsEnabled => _advancedSettingsEnabled;
 
-  final _advancedSettingsEnabled = ValueNotifier<bool>(advancedSettingsEnabledDefault);
+  final _advancedSettingsEnabled =
+      ValueNotifier<bool>(advancedSettingsEnabledDefault);
 
   // Memory statistics displayed as raw numbers or units (KB, MB, GB).
   static const unitDisplayedDefault = true;
@@ -902,8 +902,9 @@ class MemoryController extends DisposableController
 
   DateTime monitorTimestamp;
 
-  ValueListenable<DateTime> get lastMonitorTimestampNotifier => lastMonitorTimestamp;
-  
+  ValueListenable<DateTime> get lastMonitorTimestampNotifier =>
+      lastMonitorTimestamp;
+
   final lastMonitorTimestamp = ValueNotifier<DateTime>(null);
 
   /// Used for Allocations table search auto-complete.
