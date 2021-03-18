@@ -1327,11 +1327,11 @@ void main() {
       final spans = SpanParser.parse(grammar, openCodeBlock);
       expect(spans.length, 2);
       spanTester(
-          span: spans[0],
-          scopes: ['comment.block.documentation.dart'],
-          line: 1,
-          column: 1,
-          length: 91,
+        span: spans[0],
+        scopes: ['comment.block.documentation.dart'],
+        line: 1,
+        column: 1,
+        length: 91,
       );
       spanTester(
         span: spans[1],

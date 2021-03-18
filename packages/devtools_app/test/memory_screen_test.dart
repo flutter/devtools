@@ -644,5 +644,5 @@ void main() {
         controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
     // OneClass selected.
     expect(choosenAutoComplete.classRef.name, autoCompletes4[1]);
-  }/*, skip: !Platform.isMacOS*/);
+  });
 }
