@@ -629,9 +629,6 @@ void main() {
     // OneMoreClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneMoreClass'));
 
-    // OneMoreClass hilighted.
-    await downArrow(autoCompletes4.indexOf('OneMoreClass'));
-
     // Show's auto-complete dropdown with the 3rd item highlighted.
     await checkGolden(
       'goldens/allocation_dropdown_hilight_line_3_golden.png',
