@@ -245,6 +245,16 @@ class MemoryController extends DisposableController
 
   static const logFilenamePrefix = 'memory_log_';
 
+  /// Used for testing only to disable and enable search auto-complete.
+  final _searchAutoCompleteEnabled = ValueNotifier<bool>(true);
+
+  ValueListenable<bool> get searchAutoCompleteEnabled =>
+      _searchAutoCompleteEnabled;
+
+  set setSearchAutoCompleteEnabled(bool value) {
+    _searchAutoCompleteEnabled.value = value;
+  }
+
   // Default state of Android ADB collection.
   static const androidADBDefault = true;
 

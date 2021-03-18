@@ -32,6 +32,8 @@ import 'memory_screen.dart';
 import 'memory_snapshot_models.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
+
+@visibleForTesting
 final memorySearchFieldKey = GlobalKey(debugLabel: memorySearchFieldKeyName);
 
 class HeapTree extends StatefulWidget {
@@ -271,6 +273,8 @@ class HeapTreeViewState extends State<HeapTree>
         treeMapVisible = controller.treeMapVisible.value;
       });
     });
+
+    addAutoDisposeListener(controller.searchAutoCompleteEnabled);
 
     addAutoDisposeListener(controller.lastMonitorTimestamp);
   }
@@ -952,6 +956,11 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   bool get _isSearchable {
+    // Only while testing - disable the auto-complete text field.
+    if (!controller.searchAutoCompleteEnabled.value) {
+      return false;
+    }
+
     // Analysis tab and Snapshot exist or 'Allocations' tab allocations are monitored.
     return (tabController.index == analysisTabIndex && !treeMapVisible) ||
         (tabController.index == allocationsTabIndex &&

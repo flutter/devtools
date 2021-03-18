@@ -90,6 +90,11 @@ mixin SearchControllerMixin<T> {
   }
 }
 
+const searchAutoCompleteKeyName = 'SearchAutoComplete';
+
+@visibleForTesting
+final searchAutoCompleteKey = GlobalKey(debugLabel: searchAutoCompleteKeyName);
+
 mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   final selectTheSearchNotifier = ValueNotifier<bool>(false);
 
@@ -149,6 +154,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     return OverlayEntry(
       builder: (context) {
         return Positioned(
+          key: searchAutoCompleteKey,
           width: box.size.width,
           child: CompositedTransformFollower(
             link: autoCompleteLayerLink,

@@ -10,6 +10,7 @@ import 'package:devtools_app/src/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/memory/memory_vm_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/memory_test_allocation_data.dart';
 import 'package:devtools_testing/support/memory_test_data.dart';
@@ -369,18 +370,17 @@ void main() {
       await tester.pumpAndSettle(_twoSeconds);
     }
 
-    Future<void> checkGolden(String goldenFilename) async {
+    Future<void> checkGolden(String goldenFilename, {Key key}) async {
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      final finder = key == null ? find.byType(MemoryBody) : find.byKey(key);
 
       // Screenshot should display left-side tree table fully expanded and the monitor
       // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
       // all allocations in a flat table, no items checked (tracked), search should
       // be enabled with focus. No tree table displayed on the bottom only empty message.
-      await expectLater(
-        find.byType(MemoryBody),
-        matchesGoldenFile(goldenFilename),
-      );
+      await expectLater(finder, matchesGoldenFile(goldenFilename));
     }
 
     await pumpAndSettleTwoSeconds();
@@ -444,6 +444,10 @@ void main() {
     expect(classDetails.instancesCurrent, 55);
     expect(classDetails.instancesDelta, 0);
 
+    // Disable Search.
+    controller.setSearchAutoCompleteEnabled = false;
+    await pumpAndSettleTwoSeconds();
+
     // Screenshot should display left-side tree table fully expanded and the monitor
     // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
     // all allocations in a flat table, no items checked (tracked), search should
@@ -488,6 +492,10 @@ void main() {
     // be enabled with focus. The tree table displayed on the bottom right-side below
     // the flat table should display one tracked class.
     await checkGolden('goldens/allocation_one_track_golden.png');
+
+    // Enable Search.
+    controller.setSearchAutoCompleteEnabled = true;
+    await pumpAndSettleTwoSeconds();
 
     // Exercise search and auto-complete.
     final searchField = find.byKey(memorySearchFieldKey);
@@ -604,38 +612,53 @@ void main() {
 
     // OneClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneClass'));
-    await pumpAndSettleOneSecond();
+    await pumpAndSettleTwoSeconds();
 
     // Show's auto-complete dropdown with the 2nd item highlighted.
-    await checkGolden('goldens/allocation_dropdown_hilight_line_2_golden.png');
+    await checkGolden(
+      'goldens/allocation_dropdown_hilight_line_2_golden.png',
+      key: searchAutoCompleteKey,
+    );
 
     // OneMoreClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneMoreClass'));
     await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the 3rd item highlighted.
-    await checkGolden('goldens/allocation_dropdown_hilight_line_3_golden.png');
+    await checkGolden(
+      'goldens/allocation_dropdown_hilight_line_3_golden.png',
+      key: searchAutoCompleteKey,
+    );
 
     // SecondClass hilighted.
     await downArrow(autoCompletes4.indexOf('SecondClass'));
     await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the 4th item highlighted.
-    await checkGolden('goldens/allocation_dropdown_hilight_line_4_golden.png');
+    await checkGolden(
+      'goldens/allocation_dropdown_hilight_line_4_golden.png',
+      key: searchAutoCompleteKey,
+    );
 
     // AnotherClass hilighted.
     await downArrow(autoCompletes4.indexOf('AnotherClass'));
     await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the last item highlighted.
-    await checkGolden('goldens/allocation_dropdown_hilight_line_1_golden.png');
+    await checkGolden(
+      'goldens/allocation_dropdown_hilight_line_1_golden.png',
+      key: searchAutoCompleteKey,
+    );
 
     // OneClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneClass'));
     await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the 2nd item highlighted.
-    await checkGolden('goldens/allocation_dropdown_hilight_line_2_golden.png');
+    await checkGolden(
+      'goldens/allocation_dropdown_hilight_line_2_golden.png',
+      key: searchAutoCompleteKey,
+    );
 
     // Select last hilighted entry.
     await simulateKeyDownEvent(LogicalKeyboardKey.enter);
