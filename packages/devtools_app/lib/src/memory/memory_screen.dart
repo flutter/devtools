@@ -16,6 +16,7 @@ import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../dialogs.dart';
 import '../globals.dart';
+import '../notifications.dart';
 import '../screen.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
@@ -173,10 +174,26 @@ class MemoryBodyState extends State<MemoryBody>
     });
 
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller.memorySourceNotifier, () {
+    addAutoDisposeListener(controller.memorySourceNotifier, () async {
+      String errorMessage;
+      await controller.updatedMemorySource().catchError((e) {
+        errorMessage = '$e';
+        controller.memorySource = MemoryController.liveFeed;
+      });
+
       setState(() {
-        controller.updatedMemorySource();
-        _refreshCharts();
+        if (errorMessage == null) {
+          _refreshCharts();
+        } else {
+          // Display toast, unable to load the saved memory JSON payload.
+          final notificationsState = Notifications.of(context);
+          if (notificationsState != null) {
+            notificationsState.push(errorMessage);
+          } else {
+            // Running in test harness, unexpected error.
+            throw OfflineFileException(errorMessage);
+          }
+        }
       });
     });
 
@@ -577,8 +594,7 @@ class MemoryBodyState extends State<MemoryBody>
             : const SizedBox(),
         IconLabelButton(
           key: MemoryScreen.exportButtonKey,
-          onPressed:
-              controller.offline ? null : controller.memoryLog.exportMemory,
+          onPressed: controller.offline ? null : _exportToFile,
           icon: Icons.file_download,
           label: 'Export',
           includeTextWidth: _primaryControlsMinVerboseWidth,
@@ -598,6 +614,16 @@ class MemoryBodyState extends State<MemoryBody>
         ),
       ],
     );
+  }
+
+  void _exportToFile() {
+    final outputPath = controller.memoryLog.exportMemory();
+    final notificationsState = Notifications.of(context);
+    if (notificationsState != null) {
+      notificationsState.push(
+        'Successfully exported file ${outputPath.last} to ${outputPath.first} directory',
+      );
+    }
   }
 
   void _openSettingsDialog() {

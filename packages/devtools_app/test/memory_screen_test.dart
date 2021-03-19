@@ -267,7 +267,7 @@ void main() {
 
       expect(filename, startsWith(MemoryController.logFilenamePrefix));
 
-      controller.memoryLog.loadOffline(filename);
+      await controller.memoryLog.loadOffline(filename);
 
       expect(controller.offline, isTrue);
 
@@ -619,7 +619,6 @@ void main() {
 
     // OneClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneClass'));
-    await pumpAndSettleTwoSeconds();
 
     // Show's auto-complete dropdown with the 2nd item highlighted.
     await checkGolden(
