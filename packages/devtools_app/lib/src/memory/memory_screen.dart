@@ -564,7 +564,7 @@ class MemoryBodyState extends State<MemoryBody>
       key: MemoryScreen.androidChartButtonKey,
       icon: controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
       label: keyName(MemoryScreen.androidChartButtonKey),
-      onPressed: controller.isConnectedDeviceAndroid && isAndroidCollection
+      onPressed: isAndroidCollection
           ? controller.toggleAndroidChartVisibility
           : null,
       includeTextWidth: 900,
@@ -576,7 +576,7 @@ class MemoryBodyState extends State<MemoryBody>
       children: [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
-        createToggleAdbMemoryButton(),
+        controller.isConnectedDeviceAndroid ? createToggleAdbMemoryButton() : const SizedBox(),
         const SizedBox(width: denseSpacing),
         isAdvancedSettingsEnabled
             ? Row(
