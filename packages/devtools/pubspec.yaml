@@ -18,7 +18,7 @@ environment:
 dependencies:
   devtools_server: 2.0.0+1
   devtools_shared: 2.0.0+1
-  http: ^0.12.0+1
+  http: ^0.13.0
 
 dependency_overrides:
 # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.

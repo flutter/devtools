@@ -22,7 +22,7 @@ dependencies:
     ^0.0.2
   #     path: ../../third_party/packages/ansi_up
   # Pin ansicolor to version before pre-NNBD version 1.1.0, should be ^1.0.5
-  # See https://github.com/flutter/devtools/issues/2530 
+  # See https://github.com/flutter/devtools/issues/2530
   ansicolor: 1.0.5
   async: ^2.0.0
   codicon: ^0.0.3

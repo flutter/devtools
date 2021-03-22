@@ -21,7 +21,7 @@ dependencies:
   package_resolver: ^1.0.0
   pedantic: ^1.11.0
   test: any # This version is pinned by Flutter so we don't need to set one explicitly.
-  vm_service: '>=5.0.0+1 < 7.0.0'
+  vm_service: '>=5.0.0+1 <7.0.0'
 
 
 dev_dependencies:
