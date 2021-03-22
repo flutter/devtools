@@ -17,7 +17,8 @@ import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mockito/mockito.dart' hide Fake;
+import 'package:test/fake.dart';
 
 import 'support/mocks.dart';
 import 'support/wrappers.dart';
