@@ -5,6 +5,7 @@
 // This code is directly based on src/io/flutter/inspector/EvalOnDartLibrary.java
 // If you add a method to this class you should also add it to EvalOnDartLibrary.java
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,8 @@ class EvalOnDartLibrary {
     Iterable<String> candidateLibraryNames,
     this.service, {
     String isolateId,
-  }) : _candidateLibraryNames = Set.from(candidateLibraryNames) {
+  })  : _candidateLibraryNames = Set.from(candidateLibraryNames),
+        _clientId = (Random.secure().nextDouble() * 10000).toInt() {
     _libraryRef = Completer<LibraryRef>();
 
     // For evals in tests, we will pass the isolateId into the constructor.
@@ -57,6 +59,10 @@ class EvalOnDartLibrary {
       _initializeComplete = _initialize(isolateId);
     }
   }
+
+  /// An ID unique to this instance, so that [asyncEval] keeps working even if
+  /// the devtool is opened on multiple tabs at the same time.
+  final int _clientId;
 
   bool get disposed => _disposed;
   bool _disposed = false;
@@ -121,6 +127,7 @@ class EvalOnDartLibrary {
       if (_libraryRef.isCompleted) {
         // Avoid race condition where a new isolate loaded
         // while we were waiting for the library ref.
+        // TODO(jacobr): checking the isolateRef matches the isolateRef when the method started.
         return libraryRef;
       }
     }
@@ -255,16 +262,19 @@ class EvalOnDartLibrary {
     @required Disposable isAlive,
     Map<String, String> scope,
   }) async {
-    final id = _nextAsyncEvalId++;
+    final futureId = _nextAsyncEvalId++;
 
     // start awaiting the event before starting the evaluation, in case the
     // event is received before the eval function completes.
     final future = serviceManager.service.onExtensionEvent.firstWhere((event) {
       return event.extensionKind == 'future_completed' &&
-          event.extensionData.data['id'] == id;
+          event.extensionData.data['future_id'] == futureId &&
+          // Using `_clientId` here as if two chrome tabs open the devtool, it is
+          // possible to have conflicts on `future_id`
+          event.extensionData.data['client_id'] == _clientId;
     });
 
-    final readerGroup = 'asyncEval-$id';
+    final readerGroup = 'asyncEval-$futureId';
 
     /// Workaround to not being able to import libraries directly from an evaluation
     final postEventRef = await _dartDeveloperEval.safeEval(
@@ -294,7 +304,7 @@ class EvalOnDartLibrary {
       '    reader.add(err);'
       '    reader.add(stack);'
       '  } finally {'
-      '    postEvent("future_completed", {"id": $id});'
+      '    postEvent("future_completed", {"future_id": $futureId, "client_id": $_clientId});'
       '  }'
       '}()',
       isAlive: isAlive,
