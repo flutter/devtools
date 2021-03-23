@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:package_resolver/package_resolver.dart';
 import 'package:test/test.dart';
 
 /// Finds the path to a given package.
@@ -26,24 +25,20 @@ import 'package:test/test.dart';
 /// [compensateForFlutterTestDirectoryBug].
 Future<String> resolvePackagePath(String package) async {
   String path;
-  try {
-    path = await (PackageResolver.current).packagePath(package);
-  } on UnsupportedError catch (_) {
-    // PackageResolver makes calls to Isolate, which isn't accessible from a
-    // flutter test run. Flutter test runs in the test directory of the app,
-    // so the packages directory is the current directory's grandparent.
-    // TODO(https://github.com/flutter/flutter/issues/20907): Remove the workaround here.
-    String packagesPath;
-    if (io.Directory.current.path.endsWith('test')) {
-      packagesPath = io.Directory.current.parent.parent.path;
-    } else {
-      packagesPath = io.Directory.current.parent.path;
-    }
+  // PackageResolver makes calls to Isolate, which isn't accessible from a
+  // flutter test run. Flutter test runs in the test directory of the app,
+  // so the packages directory is the current directory's grandparent.
+  // TODO(https://github.com/flutter/flutter/issues/20907): Remove the workaround here.
+  String packagesPath;
+  if (io.Directory.current.path.endsWith('test')) {
+    packagesPath = io.Directory.current.parent.parent.path;
+  } else {
+    packagesPath = io.Directory.current.parent.path;
+  }
 
-    path = '$packagesPath/$package';
-    if (!io.Directory(path).existsSync()) {
-      fail('Unable to locate package:$package at $path');
-    }
+  path = '$packagesPath/$package';
+  if (!io.Directory(path).existsSync()) {
+    fail('Unable to locate package:$package at $path');
   }
   return path;
 }
