@@ -1,3 +1,4 @@
+import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import './config_specific/logger/logger.dart';
@@ -17,6 +18,7 @@ class ErrorLoggerObserver extends ProviderObserver {
 
   void _maybeLogError(ProviderBase provider, Object value) {
     if (value is AsyncError) {
+      if (value.error is SentinelException) return;
       log('Provider $provider failed with "${value.error}"', LogLevel.error);
 
       if (value.stackTrace != null) {

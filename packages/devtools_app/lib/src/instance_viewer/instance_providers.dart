@@ -299,7 +299,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
       // objects to have multiple properties with the same name
       return eval.getInstance(ref, isAlive);
     },
-    orElse: () => throw StateError('Cannot mutate $path'),
+    orElse: () => throw FallThroughError(),
   );
 }
 
@@ -678,6 +678,9 @@ Future<List<ObjectField>> _parseFields(
   @required IsAlive isAlive,
   @required String appName,
 }) async {
+  if (instance.fields == null) {
+    print('fields null $instance');
+  }
   final fields = instance.fields.map((field) async {
     final owner = await eval.getClass(field.decl.owner, isAlive);
 
