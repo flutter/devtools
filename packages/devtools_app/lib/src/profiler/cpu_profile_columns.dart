@@ -3,7 +3,7 @@ import '../url_utils.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
 
-const _timeColumnWidthPx = 160.0;
+const _timeColumnWidthPx = 180.0;
 
 class SelfTimeColumn extends ColumnData<CpuStackFrame> {
   SelfTimeColumn({String titleTooltip})

@@ -10,9 +10,11 @@ import 'package:devtools_app/src/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/memory/memory_vm_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/memory_test_allocation_data.dart';
 import 'package:devtools_testing/support/memory_test_data.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -265,7 +267,7 @@ void main() {
 
       expect(filename, startsWith(MemoryController.logFilenamePrefix));
 
-      controller.memoryLog.loadOffline(filename);
+      await controller.memoryLog.loadOffline(filename);
 
       expect(controller.offline, isTrue);
 
@@ -368,12 +370,41 @@ void main() {
       await tester.pumpAndSettle(_twoSeconds);
     }
 
+    Future<void> checkGolden(String goldenFilename, {Key key}) async {
+      // Await delay for golden comparison.
+      await pumpAndSettleTwoSeconds();
+
+      final finder = key == null ? find.byType(MemoryBody) : find.byKey(key);
+      expect(finder, findsOneWidget);
+
+      // Screenshot should display left-side tree table fully expanded and the monitor
+      // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
+      // all allocations in a flat table, no items checked (tracked), search should
+      // be enabled with focus. No tree table displayed on the bottom only empty message.
+      await expectLater(finder, matchesGoldenFile(goldenFilename));
+    }
+
     await pumpAndSettleTwoSeconds();
 
     await pumpMemoryScreen(tester);
 
+    // Any exported memory files in the /tmp or $TMPDIR or /var/folders/Downloads will cause
+    // the memory page's drop-down widget width to be wider than normal (longest exported file
+    // name). For goldens don't generate snapshots as they we be slightly different on the bots.
     expect(
-        find.byKey(HeapTreeViewState.dartHeapAnalysisTabKey), findsOneWidget);
+      controller.memoryLog.offlineFiles().isEmpty,
+      isTrue,
+      reason:
+          '\n\n=========================================================================\n'
+          'WARNING: Exported memory files in /tmp/memory_log_YYYYMMDD_HH_MM exist.\n'
+          'The switch --update-goldens shouldn\'t be used until export files removed.\n'
+          '=========================================================================',
+    );
+
+    expect(
+      find.byKey(HeapTreeViewState.dartHeapAnalysisTabKey),
+      findsOneWidget,
+    );
 
     final allocationsKey =
         find.byKey(HeapTreeViewState.dartHeapAllocationsTabKey);
@@ -433,12 +464,7 @@ void main() {
     // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
     // all allocations in a flat table, no items checked (tracked), search should
     // be enabled with focus. No tree table displayed on the bottom only empty message.
-    await expectLater(
-      find.byType(MemoryBody),
-      matchesGoldenFile('goldens/allocation_golden.png'),
-    );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
+    await checkGolden('goldens/allocation_golden.png');
 
     // Enable classes to track.
     setupTracking(data);
@@ -456,12 +482,7 @@ void main() {
     // all allocations in a flat table, with two items checked (tracked), search should
     // be enabled with focus. The tree table displayed on the bottom right-side below
     // the flat table should display 2 tracked classes.
-    await expectLater(
-      find.byType(MemoryBody),
-      matchesGoldenFile('goldens/allocation_two_track_golden.png'),
-    );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
+    await checkGolden('goldens/allocation_two_track_golden.png');
 
     // Turn off one class being tracked.
     expect(data[0].classRef.name, 'AClass');
@@ -475,19 +496,13 @@ void main() {
     // Validate only one class is tracked now.
     expect(controller.trackAllocations.length, 1);
     expect(controller.trackAllocations.values.single, classesToTrack.last);
-    await pumpAndSettleOneSecond();
 
     // Screenshot should display left-side tree table fully expanded and the monitor
     // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
     // all allocations in a flat table, with one class checked (tracked), search should
     // be enabled with focus. The tree table displayed on the bottom right-side below
     // the flat table should display one tracked class.
-    await expectLater(
-      find.byType(MemoryBody),
-      matchesGoldenFile('goldens/allocation_one_track_golden.png'),
-    );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
+    await checkGolden('goldens/allocation_one_track_golden.png');
 
     // Exercise search and auto-complete.
     final searchField = find.byKey(memorySearchFieldKey);
@@ -604,68 +619,48 @@ void main() {
 
     // OneClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneClass'));
-    await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the 2nd item highlighted.
-    await expectLater(
-      find.byType(MemoryBody),
-      matchesGoldenFile(
-          'goldens/allocation_dropdown_hilight_line_2_golden.png'),
+    await checkGolden(
+      'goldens/allocation_dropdown_hilight_line_2_golden.png',
+      key: searchAutoCompleteKey,
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // OneMoreClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneMoreClass'));
-    await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the 3rd item highlighted.
-    await expectLater(
-      find.byType(MemoryBody),
-      matchesGoldenFile(
-          'goldens/allocation_dropdown_hilight_line_3_golden.png'),
+    await checkGolden(
+      'goldens/allocation_dropdown_hilight_line_3_golden.png',
+      key: searchAutoCompleteKey,
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // SecondClass hilighted.
     await downArrow(autoCompletes4.indexOf('SecondClass'));
-    await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the 4th item highlighted.
-    await expectLater(
-      find.byType(MemoryBody),
-      matchesGoldenFile(
-          'goldens/allocation_dropdown_hilight_line_4_golden.png'),
+    await checkGolden(
+      'goldens/allocation_dropdown_hilight_line_4_golden.png',
+      key: searchAutoCompleteKey,
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // AnotherClass hilighted.
     await downArrow(autoCompletes4.indexOf('AnotherClass'));
-    await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the last item highlighted.
-    await expectLater(
-      find.byType(MemoryBody),
-      matchesGoldenFile(
-          'goldens/allocation_dropdown_hilight_line_1_golden.png'),
+    await checkGolden(
+      'goldens/allocation_dropdown_hilight_line_1_golden.png',
+      key: searchAutoCompleteKey,
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // OneClass hilighted.
     await downArrow(autoCompletes4.indexOf('OneClass'));
-    await pumpAndSettleOneSecond();
 
     // Show's auto-complete dropdown with the 2nd item highlighted.
-    await expectLater(
-      find.byType(MemoryBody),
-      matchesGoldenFile(
-          'goldens/allocation_dropdown_hilight_line_2_golden.png'),
+    await checkGolden(
+      'goldens/allocation_dropdown_hilight_line_2_golden.png',
+      key: searchAutoCompleteKey,
     );
-    // Await delay for golden comparison.
-    await pumpAndSettleTwoSeconds();
 
     // Select last hilighted entry.
     await simulateKeyDownEvent(LogicalKeyboardKey.enter);

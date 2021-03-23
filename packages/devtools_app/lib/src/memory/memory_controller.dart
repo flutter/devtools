@@ -102,6 +102,15 @@ ChartInterval chartInterval(String displayName) {
   }
 }
 
+class OfflineFileException implements Exception {
+  OfflineFileException(this.message) : super();
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 class AllocationStackTrace {
   AllocationStackTrace(CpuSample sample, {List<ProfileFunction> functions}) {
     computeStacktrace(sample, functions: functions);
@@ -256,10 +265,10 @@ class MemoryController extends DisposableController
   // Default state of advanced settings enabled.
   static const advancedSettingsEnabledDefault = false;
 
-  ValueListenable<bool> get advancedSettingsEnabled =>
-      _advancedSettingsEnabled;
+  ValueListenable<bool> get advancedSettingsEnabled => _advancedSettingsEnabled;
 
-  final _advancedSettingsEnabled = ValueNotifier<bool>(advancedSettingsEnabledDefault);
+  final _advancedSettingsEnabled =
+      ValueNotifier<bool>(advancedSettingsEnabledDefault);
 
   // Memory statistics displayed as raw numbers or units (KB, MB, GB).
   static const unitDisplayedDefault = true;
@@ -504,7 +513,9 @@ class MemoryController extends DisposableController
       displayIntervalToIntervalDurationInMs(displayInterval);
 
   /// MemorySource has changed update the view.
-  void updatedMemorySource() {
+  /// Return value of null implies offline file loaded.
+  /// Return value of String is an error message.
+  Future<void> updatedMemorySource() async {
     if (memorySource == MemoryController.liveFeed) {
       if (offline) {
         // User is switching back to 'Live Feed'.
@@ -516,7 +527,9 @@ class MemoryController extends DisposableController
       }
     } else {
       // Switching to an offline memory log (JSON file in /tmp).
-      memoryLog.loadOffline(memorySource);
+      await memoryLog.loadOffline(memorySource).catchError((e) {
+        throw OfflineFileException(e.toString());
+      });
     }
   }
 
@@ -902,8 +915,9 @@ class MemoryController extends DisposableController
 
   DateTime monitorTimestamp;
 
-  ValueListenable<DateTime> get lastMonitorTimestampNotifier => lastMonitorTimestamp;
-  
+  ValueListenable<DateTime> get lastMonitorTimestampNotifier =>
+      lastMonitorTimestamp;
+
   final lastMonitorTimestamp = ValueNotifier<DateTime>(null);
 
   /// Used for Allocations table search auto-complete.
@@ -1431,7 +1445,7 @@ class MemoryLog {
   MemoryController controller;
 
   /// Persist the the live memory data to a JSON file in the /tmp directory.
-  void exportMemory() async {
+  List<String> exportMemory() {
     MemoryScreen.gaActionForExport();
 
     final liveData = controller.memoryTimeline.liveData;
@@ -1464,32 +1478,41 @@ class MemoryLog {
       assert(memoryJson.data.length == liveData.length);
     }
 
-    _fs.writeStringToFile(_memoryLogFilename, jsonPayload);
-
-    // TODO(terry): Display filename created in a toast.
+    _fs.writeStringToFile(_memoryLogFilename, jsonPayload, isMemory: true);
 
     if (pseudoData) liveData.clear();
+
+    return [_fs.exportDirectoryName(isMemory: true), _memoryLogFilename];
   }
 
   /// Return a list of offline memory logs filenames in the /tmp directory
   /// that are available to open.
   List<String> offlineFiles() {
-    final memoryLogs = _fs.list(prefix: MemoryController.logFilenamePrefix);
+    final memoryLogs = _fs.list(
+      prefix: MemoryController.logFilenamePrefix,
+      isMemory: true,
+    );
 
     // Sort by newest file top-most (DateTime is in the filename).
+
     memoryLogs.sort((a, b) => b.compareTo(a));
 
     return memoryLogs;
   }
 
   /// Load the memory profile data from a saved memory log file.
-  void loadOffline(String filename) async {
-    final jsonPayload = _fs.readStringFromFile(filename);
+  Future<void> loadOffline(String filename) async {
+    final jsonPayload = _fs.readStringFromFile(filename, isMemory: true);
+
     final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
 
-    // TODO(terry): Display notification JSON file isn't version isn't
-    // supported or if the payload isn't an exported memory file.
-    assert(memoryJson.isMatchedVersion);
+    if (!memoryJson.isMatchedVersion) {
+      final e =
+          'Error loading file $filename version ${memoryJson.payloadVersion}';
+      log(e, LogLevel.warning);
+      throw OfflineFileException(e);
+    }
+
     assert(memoryJson.isMemoryPayload);
 
     controller.offline = true;
@@ -1498,5 +1521,6 @@ class MemoryLog {
   }
 
   @visibleForTesting
-  bool removeOfflineFile(String filename) => _fs.deleteFile(filename);
+  bool removeOfflineFile(String filename) =>
+      _fs.deleteFile(filename, isMemory: true);
 }

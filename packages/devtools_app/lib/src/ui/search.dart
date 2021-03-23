@@ -90,6 +90,11 @@ mixin SearchControllerMixin<T> {
   }
 }
 
+const searchAutoCompleteKeyName = 'SearchAutoComplete';
+
+@visibleForTesting
+final searchAutoCompleteKey = GlobalKey(debugLabel: searchAutoCompleteKeyName);
+
 mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   final selectTheSearchNotifier = ValueNotifier<bool>(false);
 
@@ -149,6 +154,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     return OverlayEntry(
       builder: (context) {
         return Positioned(
+          key: searchAutoCompleteKey,
           width: box.size.width,
           child: CompositedTransformFollower(
             link: autoCompleteLayerLink,
@@ -325,11 +331,14 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       onEditingComplete: () {
         searchFieldFocusNode.requestFocus();
       },
+      // Guarantee that the TextField on all platforms renders in the same
+      // color for border, label text, and cursor. Primarly, so golden screen
+      // snapshots will compare with the exact color.
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.all(denseSpacing),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Theme.of(context).focusColor),
-        ),
+        focusedBorder: OutlineInputBorder(borderSide: searchFocusBorderColor),
+        enabledBorder: OutlineInputBorder(borderSide: searchFocusBorderColor),
+        labelStyle: TextStyle(color: searchColor),
         border: const OutlineInputBorder(),
         labelText: 'Search',
         suffix: _buildSearchFieldSuffix(
@@ -337,6 +346,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
           supportsNavigation: supportsNavigation,
         ),
       ),
+      cursorColor: searchColor,
     );
 
     if (shouldRequestFocus) {
