@@ -211,10 +211,13 @@ class EvalOnDartLibrary {
     @required Disposable isAlive,
     Map<String, String> scope,
   }) async {
-    final ref = await safeEval(expression, isAlive: isAlive, scope: scope);
-    if (ref == null) return null;
-
-    return getInstance(ref, isAlive);
+    return getInstance(
+      // This is safe to do because `safeEval` will throw instead of returning `null`
+      // when the request is cancelled, so `getInstance` will not receive `null`
+      // as parameter.
+      safeEval(expression, isAlive: isAlive, scope: scope),
+      isAlive,
+    );
   }
 
   static int _nextAsyncEvalId = 0;
@@ -355,8 +358,6 @@ class EvalOnDartLibrary {
         );
       });
 
-      if (result == null) return null;
-
       if (result is! InstanceRef) {
         if (result is ErrorRef) {
           throw EvalErrorException(
@@ -379,18 +380,17 @@ class EvalOnDartLibrary {
         );
       }
     } catch (err, stack) {
+      /// Throwing when the request is cancelled instead of returning `null`
+      /// allows easily chaining eval calls, without having to check "disposed"
+      /// between each request.
+      /// It also removes the need for using `!` once the devtool is migrated to NNBD
+      if (isAlive.disposed) {
+        // throw before _handleError as we don't want to log cancellations.
+        throw CancelledException('safeEval');
+      }
+
       _handleError(err, stack);
       rethrow;
-    }
-
-    // We throw if the request was canceled instead of returning `null` because
-    // `null` is a valid value for `InstanceRef` (when the evaluation returns `null`).
-    // This could confuse the caller into believing that the evaluation suceeded
-    // and perform extra operations, when in fact the caller should stop all operations.
-    if (isAlive.disposed) {
-      // throw outside of the try/catch to not log this exception, since
-      // "cancelled" is an expected exception.
-      throw CancelledException('safeEval');
     }
 
     return result;
