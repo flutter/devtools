@@ -1,5 +1,5 @@
 ## 2.0.0+2
-* Upgrade dependencies for `shelf`, `shelf_proxy`, `http`, and `dds` [#2818](https://github.com/flutter/devtools/pull/2818)
+* Upgrade DevTools dependencies [#2818](https://github.com/flutter/devtools/pull/2818)
 
 ## 2.0.0+1
 * Upgrade dependencies for `args`, `meta`, `path`, and `pedantic` [#2817](https://github.com/flutter/devtools/pull/2817)
