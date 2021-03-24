@@ -96,7 +96,7 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const usedDisplay = 'Dart/Flutter';
   @visibleForTesting
-  static const externalDisplay = 'Flutter engine/rendering';
+  static const externalDisplay = 'Dart/Flutter Native';
   @visibleForTesting
   static const rssDisplay = 'RSS';
   @visibleForTesting

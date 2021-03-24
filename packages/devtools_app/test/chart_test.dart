@@ -2,6 +2,7 @@ import 'package:devtools_app/src/charts/chart_controller.dart';
 import 'package:devtools_app/src/charts/chart_trace.dart';
 import 'package:devtools_app/src/charts/chart.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -57,7 +58,7 @@ void main() {
             symbol: ChartSymbol.disc,
             diameter: 1.5,
           ),
-          name: 'Flutter engine/rendering',
+          name: MemoryScreen.externalDisplay,
         );
 
         // Used Heap
@@ -68,7 +69,7 @@ void main() {
             symbol: ChartSymbol.disc,
             diameter: 1.5,
           ),
-          name: 'Dart/Flutter',
+          name: MemoryScreen.usedDisplay,
         );
 
         // Heap Capacity
@@ -79,7 +80,7 @@ void main() {
             diameter: 0.0,
             symbol: ChartSymbol.dashedLine,
           ),
-          name: 'Allocated',
+          name: MemoryScreen.allocatedDisplay,
         );
 
         // RSS
@@ -90,7 +91,7 @@ void main() {
             symbol: ChartSymbol.dashedLine,
             strokeWidth: 2,
           ),
-          name: 'RSS',
+          name: MemoryScreen.rssDisplay,
         );
 
         expect(controller.traces.length, equals(4));
@@ -98,19 +99,19 @@ void main() {
           switch (index) {
             case 0:
               expect(externalTraceIndex, equals(0));
-              expect(controller.traces[index].name, 'Flutter engine/rendering');
+              expect(controller.traces[index].name, MemoryScreen.externalDisplay);
               break;
             case 1:
               expect(usedTraceIndex, equals(1));
-              expect(controller.traces[index].name, 'Dart/Flutter');
+              expect(controller.traces[index].name, MemoryScreen.usedDisplay);
               break;
             case 2:
               expect(capacityTraceIndex, equals(2));
-              expect(controller.traces[index].name, 'Allocated');
+              expect(controller.traces[index].name, MemoryScreen.allocatedDisplay);
               break;
             case 3:
               expect(rssTraceIndex, equals(3));
-              expect(controller.traces[index].name, 'RSS');
+              expect(controller.traces[index].name, MemoryScreen.rssDisplay);
               break;
           }
         }
