@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 import 'dart:convert';
 
+import 'package:devtools_app/src/globals.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
 import '../network/network_model.dart';
@@ -12,16 +14,38 @@ import '../trace_event.dart';
 import '../utils.dart';
 import 'http.dart';
 
-/// Used to represent an instant event emitted during an HTTP request.
-class HttpInstantEvent {
-  HttpInstantEvent._(this._event);
+class TimelineHttpInstantEvent extends HttpInstantEvent {
+  TimelineHttpInstantEvent._(this._event);
 
   final TraceEvent _event;
 
+  @override
   String get name => _event.name;
 
   /// The time the instant event was recorded.
+  @override
   int get timestampMicros => _event.timestampMicros;
+}
+
+class DartIOHttpInstantEvent extends HttpInstantEvent {
+  DartIOHttpInstantEvent._(this._event);
+
+  final HttpProfileRequestEvent _event;
+
+  @override
+  String get name => _event.event;
+
+  /// The time the instant event was recorded.
+  @override
+  int get timestampMicros => _event.timestamp;
+}
+
+/// Used to represent an instant event emitted during an HTTP request.
+abstract class HttpInstantEvent {
+  String get name;
+
+  /// The time the instant event was recorded.
+  int get timestampMicros;
 
   /// The amount of time since the last instant event completed.
   TimeRange get timeRange => _timeRange;
@@ -30,9 +54,135 @@ class HttpInstantEvent {
   TimeRange _timeRange;
 }
 
+abstract class HttpRequestData extends NetworkRequest {
+  HttpRequestData(int timelineMicrosBase) : super(timelineMicrosBase);
+
+  static const _connectionInfoKey = 'connectionInfo';
+  static const _contentTypeKey = 'content-type';
+  static const _cookieKey = 'cookie';
+  static const _errorKey = 'error';
+  static const _filterKey = 'filterKey';
+  static const _localPortKey = 'localPort';
+  static const _methodKey = 'method';
+  static const _requestHeadersKey = 'requestHeaders';
+  static const _responseHeadersKey = 'responseHeaders';
+  static const _statusCodeKey = 'statusCode';
+  // TODO(kenz): modify this to `setCookie` once
+  // https://github.com/dart-lang/sdk/issues/42822 is resolved
+  static const _setCookieKey = 'set-cookie';
+  static const _uriKey = 'uri';
+
+  @override
+  String get contentType {
+    if (responseHeaders == null ||
+        responseHeaders[HttpRequestData._contentTypeKey] == null) {
+      return null;
+    }
+    return responseHeaders[HttpRequestData._contentTypeKey].toString();
+  }
+
+  @override
+  String get type {
+    var mime = contentType;
+    if (mime == null) return 'http';
+
+    // Extract the MIME from `contentType`.
+    // Example: "[text/html; charset-UTF-8]" --> "text/html"
+    mime = mime.split(';').first;
+    if (mime.startsWith('[')) {
+      mime = mime.substring(1);
+    }
+    // TODO(kenz): consider special casing some extensions. For example,
+    // "text/html" is the MIME for both .html and .htm, but since .htm comes
+    // first alphabetically, `extensionFromMime` returns "htm". Other cases are
+    // more unintuitive such as "text/plain" returning "conf".
+    return extensionFromMime(mime);
+  }
+
+  /// Whether the request is safe to display in the UI.
+  ///
+  /// It is possible to get invalid events if we receive an endEvent but no
+  /// matching start event due when we started tracking network traffic. These
+  /// invalid requests will never complete so it wouldn't make sense to work
+  /// around the issue by displaying them as "in-progress". It would be
+  /// reasonable to display them as "unknown start time" but that seems like
+  /// more complexity than it is worth.
+  // TODO(kenz): https://github.com/flutter/devtools/issues/2335 - figure out
+  // how to handle HTTP body events in the network profiler. For now, mark them
+  // as invalid.
+  bool get isValid;
+
+  /// True if either the request or response contained cookies.
+  bool get hasCookies =>
+      requestCookies.isNotEmpty || responseCookies.isNotEmpty;
+
+  /// A map of general information associated with an HTTP request.
+  Map<String, dynamic> get general;
+
+  @override
+  int get port {
+    if (general == null) return null;
+    final Map<String, dynamic> connectionInfo =
+        general[HttpRequestData._connectionInfoKey];
+    return connectionInfo != null
+        ? connectionInfo[HttpRequestData._localPortKey]
+        : null;
+  }
+
+  @override
+  bool get didFail {
+    if (status == null) return false;
+    if (status == 'Error') return true;
+
+    try {
+      final code = int.parse(status);
+      // Status codes 400-499 are client errors and 500-599 are server errors.
+      if (code >= 400) {
+        return true;
+      }
+    } on Exception catch (_) {
+      log(
+        'Could not parse HTTP request status: $status',
+        LogLevel.error,
+      );
+      return true;
+    }
+    return false;
+  }
+
+  /// True if the HTTP request hasn't completed yet, determined by the lack of
+  /// an end event.
+  bool get inProgress;
+
+  /// All instant events logged to the timeline for this HTTP request.
+  List<HttpInstantEvent> get instantEvents;
+
+  /// A list of all cookies contained within the request headers.
+  List<Cookie> get requestCookies;
+
+  /// The request headers for the HTTP request.
+  Map<String, dynamic> get requestHeaders;
+
+  /// A list of all cookies contained within the response headers.
+  List<Cookie> get responseCookies;
+
+  /// The response headers for the HTTP request.
+  Map<String, dynamic> get responseHeaders;
+
+  String get responseBody;
+
+  /// Merges the information from another [HttpRequestData] into this instance.
+  void merge(HttpRequestData data);
+
+  static List<Cookie> _parseCookies(List cookies) {
+    if (cookies == null) return [];
+    return cookies.map((cookie) => Cookie.fromSetCookieValue(cookie)).toList();
+  }
+}
+
 /// An abstraction of an HTTP request made through dart:io.
-class HttpRequestData extends NetworkRequest {
-  HttpRequestData._(
+class TimelineHttpRequestData extends HttpRequestData {
+  TimelineHttpRequestData._(
     int timelineMicrosBase,
     this._startEvent,
     this._endEvent,
@@ -44,7 +194,7 @@ class HttpRequestData extends NetworkRequest {
   /// `timelineMicrosBase` is the offset used to determine the wall-time of a
   /// timeline event. `events` is a list of Chrome trace format timeline
   /// events.
-  factory HttpRequestData.fromTimeline({
+  factory TimelineHttpRequestData.fromTimeline({
     @required int timelineMicrosBase,
     @required List<Map<String, dynamic>> requestEvents,
     @required List<Map<String, dynamic>> responseEvents,
@@ -89,35 +239,21 @@ class HttpRequestData extends NetworkRequest {
       // Non-UTF8 response.
     }
 
-    final data = HttpRequestData._(
+    final data = TimelineHttpRequestData._(
       timelineMicrosBase,
       requestStartEvent,
       requestEndEvent,
       responseBody,
     );
     data._addInstantEvents(
-        requestInstantEvents.map((e) => HttpInstantEvent._(e)));
+        requestInstantEvents.map((e) => TimelineHttpInstantEvent._(e)));
 
     return data;
   }
 
-  static const _connectionInfoKey = 'connectionInfo';
-  static const _contentTypeKey = 'content-type';
-  static const _cookieKey = 'cookie';
-  static const _errorKey = 'error';
-  static const _filterKey = 'filterKey';
-  static const _localPortKey = 'localPort';
-  static const _methodKey = 'method';
-  static const _requestHeadersKey = 'requestHeaders';
-  static const _responseHeadersKey = 'responseHeaders';
-  static const _statusCodeKey = 'statusCode';
-  // TODO(kenz): modify this to `setCookie` once
-  // https://github.com/dart-lang/sdk/issues/42822 is resolved
-  static const _setCookieKey = 'set-cookie';
-  static const _uriKey = 'uri';
-
   final TraceEvent _startEvent;
   TraceEvent _endEvent;
+  @override
   final String responseBody;
 
   // Do not add to this list directly! Call `_addInstantEvents` which is
@@ -134,32 +270,6 @@ class HttpRequestData extends NetworkRequest {
     return range.duration;
   }
 
-  @override
-  String get contentType {
-    if (responseHeaders == null || responseHeaders[_contentTypeKey] == null) {
-      return null;
-    }
-    return responseHeaders[_contentTypeKey].toString();
-  }
-
-  @override
-  String get type {
-    var mime = contentType;
-    if (mime == null) return 'http';
-
-    // Extract the MIME from `contentType`.
-    // Example: "[text/html; charset-UTF-8]" --> "text/html"
-    mime = mime.split(';').first;
-    if (mime.startsWith('[')) {
-      mime = mime.substring(1);
-    }
-    // TODO(kenz): consider special casing some extensions. For example,
-    // "text/html" is the MIME for both .html and .htm, but since .htm comes
-    // first alphabetically, `extensionFromMime` returns "htm". Other cases are
-    // more unintuitive such as "text/plain" returning "conf".
-    return extensionFromMime(mime);
-  }
-
   /// Whether the request is safe to display in the UI.
   ///
   /// It is possible to get invalid events if we receive an endEvent but no
@@ -171,14 +281,12 @@ class HttpRequestData extends NetworkRequest {
   // TODO(kenz): https://github.com/flutter/devtools/issues/2335 - figure out
   // how to handle HTTP body events in the network profiler. For now, mark them
   // as invalid.
+  @override
   bool get isValid =>
       _startEvent != null && !_startEvent.name.contains('HTTP CLIENT response');
 
-  /// True if either the request or response contained cookies.
-  bool get hasCookies =>
-      requestCookies.isNotEmpty || responseCookies.isNotEmpty;
-
   /// A map of general information associated with an HTTP request.
+  @override
   Map<String, dynamic> get general {
     if (_general != null) return _general;
     if (!isValid) return null;
@@ -186,57 +294,32 @@ class HttpRequestData extends NetworkRequest {
     if (!inProgress) {
       copy.addAll(_endEvent.args);
     }
-    copy.remove(_requestHeadersKey);
-    copy.remove(_responseHeadersKey);
-    copy.remove(_filterKey);
+    copy.remove(HttpRequestData._requestHeadersKey);
+    copy.remove(HttpRequestData._responseHeadersKey);
+    copy.remove(HttpRequestData._filterKey);
     return _general = copy;
   }
 
   Map<String, dynamic> _general;
 
-  @override
-  int get port {
-    if (general == null) return null;
-    final Map<String, dynamic> connectionInfo = general[_connectionInfoKey];
-    return connectionInfo != null ? connectionInfo[_localPortKey] : null;
-  }
-
-  @override
-  bool get didFail {
-    if (status == null) return false;
-    if (status == 'Error') return true;
-
-    try {
-      final code = int.parse(status);
-      // Status codes 400-499 are client errors and 500-599 are server errors.
-      if (code >= 400) {
-        return true;
-      }
-    } on Exception catch (_) {
-      log(
-        'Could not parse HTTP request status: $status',
-        LogLevel.error,
-      );
-      return true;
-    }
-    return false;
-  }
-
   /// True if the HTTP request hasn't completed yet, determined by the lack of
   /// an end event.
+  @override
   bool get inProgress => _endEvent == null;
 
   /// All instant events logged to the timeline for this HTTP request.
+  @override
   List<HttpInstantEvent> get instantEvents => _instantEvents;
 
   @override
   String get method {
     if (!isValid) return null;
-    assert(_startEvent.args.containsKey(_methodKey));
-    return _startEvent.args[_methodKey];
+    assert(_startEvent.args.containsKey(HttpRequestData._methodKey));
+    return _startEvent.args[HttpRequestData._methodKey];
   }
 
   /// A list of all cookies contained within the request headers.
+  @override
   List<Cookie> get requestCookies {
     // The request may still be in progress, in which case we don't display any
     // cookies.
@@ -244,16 +327,18 @@ class HttpRequestData extends NetworkRequest {
     if (headers == null) {
       return [];
     }
-    return _parseCookies(headers[_cookieKey] ?? []);
+    return HttpRequestData._parseCookies(
+        headers[HttpRequestData._cookieKey] ?? []);
   }
 
   /// The request headers for the HTTP request.
+  @override
   Map<String, dynamic> get requestHeaders {
     // The request may still be in progress, in which case we don't display any
     // headers, or the request may be invalid, in which case we also don't
     // display any headers.
     if (inProgress || !isValid) return null;
-    return _endEvent.args[_requestHeadersKey];
+    return _endEvent.args[HttpRequestData._requestHeadersKey];
   }
 
   /// The time the HTTP request was issued.
@@ -273,6 +358,7 @@ class HttpRequestData extends NetworkRequest {
   }
 
   /// A list of all cookies contained within the response headers.
+  @override
   List<Cookie> get responseCookies {
     // The request may still be in progress, in which case we don't display any
     // cookies.
@@ -280,18 +366,19 @@ class HttpRequestData extends NetworkRequest {
     if (headers == null) {
       return [];
     }
-    return _parseCookies(
-      headers[_setCookieKey] ?? [],
+    return HttpRequestData._parseCookies(
+      headers[HttpRequestData._setCookieKey] ?? [],
     );
   }
 
   /// The response headers for the HTTP request.
+  @override
   Map<String, dynamic> get responseHeaders {
     // The request may still be in progress, in which case we don't display any
     // headers, or the request may be invalid, in which case we also don't
     // display any headers.
     if (inProgress || !isValid) return null;
-    return _endEvent.args[_responseHeadersKey];
+    return _endEvent.args[HttpRequestData._responseHeadersKey];
   }
 
   /// A string representing the status of the request.
@@ -303,12 +390,12 @@ class HttpRequestData extends NetworkRequest {
     if (inProgress || !isValid) return null;
     String statusCode;
     final endArgs = _endEvent.args;
-    if (endArgs.containsKey(_errorKey)) {
+    if (endArgs.containsKey(HttpRequestData._errorKey)) {
       // This case occurs when an exception has been thrown, so there's no
       // status code to associate with the request.
       statusCode = 'Error';
     } else {
-      statusCode = endArgs[_statusCodeKey]?.toString();
+      statusCode = endArgs[HttpRequestData._statusCodeKey]?.toString();
     }
     return statusCode;
   }
@@ -316,22 +403,22 @@ class HttpRequestData extends NetworkRequest {
   @override
   String get uri {
     if (!isValid) return null;
-    assert(_startEvent.args.containsKey(_uriKey));
-    return _startEvent.args[_uriKey];
+    assert(_startEvent.args.containsKey(HttpRequestData._uriKey));
+    return _startEvent.args[HttpRequestData._uriKey];
   }
 
   /// Merges the information from another [HttpRequestData] into this instance.
+  @override
   void merge(HttpRequestData data) {
+    assert(data is TimelineHttpRequestData);
+    final requestData = data as TimelineHttpRequestData;
+
     if (data.instantEvents.isNotEmpty) {
       _addInstantEvents(data.instantEvents);
     }
-    if (data._endEvent != null) {
-      _endEvent = data._endEvent;
+    if (requestData._endEvent != null) {
+      _endEvent = requestData._endEvent;
     }
-  }
-
-  static List<Cookie> _parseCookies(List cookies) {
-    return cookies.map((cookie) => Cookie.fromSetCookieValue(cookie)).toList();
   }
 
   void _addInstantEvents(Iterable<HttpInstantEvent> events) {
@@ -360,4 +447,165 @@ class HttpRequestData extends NetworkRequest {
 
   @override
   String toString() => '$method $uri';
+}
+
+class DartIOHttpRequestData extends HttpRequestData {
+  DartIOHttpRequestData(
+    int timelineMicrosBase,
+    this._request,
+  ) : super(timelineMicrosBase) {
+    if (_request.isResponseComplete) {
+      serviceManager.service
+          .getHttpProfileRequest(
+            _request.isolateId,
+            _request.id,
+          )
+          .then((value) => _request = value);
+    }
+  }
+
+  HttpProfileRequestRef _request;
+
+  Future<void> getFullRequestData() {
+    return serviceManager.service
+        .getHttpProfileRequest(
+          _request.isolateId,
+          _request.id,
+        )
+        .then((updated) => _request = updated);
+  }
+
+  @override
+  Duration get duration {
+    if (inProgress || !isValid) return null;
+    // Timestamps are in microseconds
+    final range = TimeRange()
+      ..start = Duration(microseconds: _request.startTime)
+      ..end = Duration(microseconds: _request.response.endTime);
+    return range.duration;
+  }
+
+  /// Whether the request is safe to display in the UI.
+  ///
+  /// The dart:io HTTP profiling service extensions should never return invalid
+  /// requests.
+  @override
+  bool get isValid => true;
+
+  /// A map of general information associated with an HTTP request.
+  @override
+  Map<String, dynamic> get general {
+    return {
+      'method': _request.method,
+      'uri': _request.uri.toString(),
+      'connectionInfo': _request.request.connectionInfo,
+      'contentLength': _request.request.contentLength,
+      if (_request.response != null) ...{
+        'compressionState': _request.response.compressionState,
+        'isRedirect': _request.response.isRedirect,
+        'persistentConnection': _request.response.persistentConnection,
+        'reasonPhrase': _request.response.reasonPhrase,
+        'redirects': _request.response.redirects,
+        'statusCode': _request.response.statusCode,
+      },
+    };
+  }
+
+  @override
+  String get method => _request.method;
+
+  /// True if the HTTP request hasn't completed yet, determined by the lack of
+  /// an end event.
+  @override
+  bool get inProgress => !_request.isResponseComplete;
+
+  /// All instant events logged to the timeline for this HTTP request.
+  @override
+  List<HttpInstantEvent> get instantEvents {
+    if (_instantEvents == null) {
+      _instantEvents = [
+        for (final event in _request.request?.events ?? [])
+          DartIOHttpInstantEvent._(event)
+      ];
+      _recalculateInstantEventTimes();
+    }
+    return _instantEvents;
+  }
+
+  List<HttpInstantEvent> _instantEvents;
+
+  /// A list of all cookies contained within the request headers.
+  @override
+  List<Cookie> get requestCookies =>
+      HttpRequestData._parseCookies(_request.request?.cookies);
+
+  /// The request headers for the HTTP request.
+  @override
+  Map<String, dynamic> get requestHeaders => _request.request?.headers;
+
+  /// A list of all cookies contained within the response headers.
+  @override
+  List<Cookie> get responseCookies =>
+      HttpRequestData._parseCookies(_request.response?.cookies);
+
+  /// The response headers for the HTTP request.
+  @override
+  Map<String, dynamic> get responseHeaders => _request.response?.headers;
+
+  /// Merges the information from another [HttpRequestData] into this instance.
+  @override
+  void merge(HttpRequestData data) {
+    assert(data is DartIOHttpRequestData);
+    final requestData = data as DartIOHttpRequestData;
+    _request = requestData._request;
+  }
+
+  @override
+  DateTime get endTimestamp => DateTime.fromMicrosecondsSinceEpoch(
+        timelineMicrosecondsSinceEpoch(_request?.response?.endTime),
+      );
+
+  @override
+  DateTime get startTimestamp => DateTime.fromMicrosecondsSinceEpoch(
+        timelineMicrosecondsSinceEpoch(_request.startTime),
+      );
+
+  @override
+  String get status => _request.response?.statusCode?.toString();
+
+  @override
+  String get uri => _request.uri.toString();
+
+  @override
+  String get responseBody {
+    if (_request is! HttpProfileRequest) {
+      return null;
+    }
+    final fullRequest = _request as HttpProfileRequest;
+    try {
+      if (!_request.isResponseComplete) return null;
+      if (_responseBody != null) return _responseBody;
+      _responseBody = utf8.decode(fullRequest.responseBody);
+      if (contentType.contains('json')) {
+        print('formatting json');
+        _responseBody = const JsonEncoder.withIndent('  ').convert(json.decode(_responseBody));
+      }
+      return _responseBody;
+    } on FormatException {
+      return '<binary data>'; //fullRequest.responseBody.toString();
+    }
+  }
+
+  String _responseBody;
+
+  void _recalculateInstantEventTimes() {
+    int lastTime = _request.startTime;
+    for (final instant in instantEvents) {
+      final instantTime = instant.timestampMicros;
+      instant._timeRange = TimeRange()
+        ..start = Duration(microseconds: lastTime)
+        ..end = Duration(microseconds: instantTime);
+      lastTime = instantTime;
+    }
+  }
 }

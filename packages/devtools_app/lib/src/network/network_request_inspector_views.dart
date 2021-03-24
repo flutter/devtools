@@ -420,6 +420,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     final _colors = [
       searchMatchColor,
       mainRasterColor,
+      mainAsyncColor,
     ];
     var _colorIndex = 0;
     Color _nextColor() {
@@ -450,6 +451,25 @@ class NetworkRequestOverviewView extends StatelessWidget {
         ),
       );
     }
+    final duration = Duration(
+      microseconds: data.endTimestamp.microsecondsSinceEpoch -
+          data.instantEvents.last.timestampMicros - data.timelineMicrosecondsSinceEpoch(0),
+    );
+    final flex =
+        (duration.inMicroseconds / data.duration.inMicroseconds * 100).round();
+    timingWidgets.add(
+      Flexible(
+        flex: flex,
+        child: Tooltip(
+          waitDuration: tooltipWait,
+          message: 'Response - ${msText(duration)}',
+          child: Container(
+            height: _timingGraphHeight,
+            color: _nextColor(),
+          ),
+        ),
+      ),
+    );
     return Row(
       key: httpTimingGraphKey,
       children: timingWidgets,

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/version.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
@@ -39,16 +40,41 @@ class NetworkService {
 
     final timestamp = await serviceManager.service.getVMTimelineMicros();
     final sockets = await _refreshSockets();
-    final timeline = await serviceManager.service.getVMTimeline(
-      timeOriginMicros: networkController.lastRefreshMicros,
-      timeExtentMicros:
-          timestamp.timestamp - networkController.lastRefreshMicros,
-    );
+    List<HttpProfileRequest> httpRequests;
+    Timeline timeline;
+    if (await serviceManager.service.isDartIoVersionSupported(
+      supportedVersion: SemanticVersion(major: 1, minor: 3),
+      isolateId: serviceManager.isolateManager.selectedIsolate.id,
+    )) {
+      httpRequests = await _refreshHttpProfile();
+    } else {
+      timeline = await serviceManager.service.getVMTimeline(
+        timeOriginMicros: networkController.lastRefreshMicros,
+        timeExtentMicros:
+            timestamp.timestamp - networkController.lastRefreshMicros,
+      );
+    }
     networkController.lastRefreshMicros = timestamp.timestamp;
     networkController.processNetworkTraffic(
       timeline: timeline,
       sockets: sockets,
+      httpRequests: httpRequests,
     );
+  }
+
+  Future<List<HttpProfileRequest>> _refreshHttpProfile() async {
+    assert(serviceManager.service != null);
+    if (serviceManager.service == null) return [];
+
+    final requests = <HttpProfileRequest>[];
+    await serviceManager.service.forEachIsolate((isolate) async {
+      final request = await serviceManager.service.getHttpProfile(
+        isolate.id,
+        updatedSince: networkController.lastRefreshMicros,
+      );
+      requests.addAll(request.requests);
+    });
+    return requests;
   }
 
   Future<List<SocketStatistic>> _refreshSockets() async {
