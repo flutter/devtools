@@ -514,11 +514,11 @@ class TimelineFlameChartState
         backgroundColor.blue,
         0.85,
       );
-      children.addAll([
-        SizedBox(height: topSpacer),
+      children.add(
         Container(
+          padding: EdgeInsets.only(top: topSpacer, bottom: bottomSpacer),
           alignment: Alignment.topLeft,
-          height: group.displaySizePx,
+          height: group.displaySizePx + topSpacer + bottomSpacer,
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: densePadding,
@@ -531,8 +531,7 @@ class TimelineFlameChartState
             ),
           ),
         ),
-        SizedBox(height: bottomSpacer),
-      ]);
+      );
     }
 
     return Positioned(
