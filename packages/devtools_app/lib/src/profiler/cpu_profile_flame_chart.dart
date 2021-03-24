@@ -83,7 +83,7 @@ class _CpuProfileFlameChartState
   }
 
   @override
-  List<CustomPaint> buildCustomPaints(
+  List<Widget> buildChartOverlays(
     BoxConstraints constraints,
     BuildContext buildContext,
   ) {
@@ -94,8 +94,8 @@ class _CpuProfileFlameChartState
         painter: TimelineGridPainter(
           zoom: zoom,
           constraints: constraints,
-          verticalController: verticalController,
-          horizontalController: horizontalController,
+          verticalController: verticalControllerGroup,
+          horizontalController: horizontalControllerGroup,
           chartStartInset: widget.startInset,
           chartEndInset: widget.endInset,
           flameChartWidth: widthWithZoom,
@@ -108,7 +108,7 @@ class _CpuProfileFlameChartState
 
   @override
   bool isDataVerticallyInView(CpuStackFrame data) {
-    final verticalScrollOffset = verticalController.offset;
+    final verticalScrollOffset = verticalControllerGroup.offset;
     final stackFrameTopY = topYForData(data);
     return stackFrameTopY > verticalScrollOffset &&
         stackFrameTopY + rowHeightWithPadding <
@@ -117,7 +117,7 @@ class _CpuProfileFlameChartState
 
   @override
   bool isDataHorizontallyInView(CpuStackFrame data) {
-    final horizontalScrollOffset = horizontalController.offset;
+    final horizontalScrollOffset = horizontalControllerGroup.offset;
     final startX = startXForData(data);
     return startX >= horizontalScrollOffset &&
         startX <= horizontalScrollOffset + widget.containerWidth;

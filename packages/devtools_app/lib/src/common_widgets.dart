@@ -1097,12 +1097,6 @@ extension ColorExtension on Color {
 }
 
 /// Gets an alternating color to use for indexed UI elements.
-Color alternatingColorForIndexWithContext(int index, BuildContext context) {
-  final theme = Theme.of(context);
-  final color = theme.canvasColor;
-  return _colorForIndex(color, index, theme.colorScheme);
-}
-
 Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
   final color = colorScheme.defaultBackgroundColor;
   return _colorForIndex(color, index, colorScheme);
