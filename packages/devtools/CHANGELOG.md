@@ -1,3 +1,6 @@
+## 2.0.0+4
+* Upgrade DevTools dependencies for http_multi_server [#2838](https://github.com/flutter/devtools/pull/2838)
+
 ## 2.0.0+3
 * Upgrade DevTools dependencies for usage and shelf_static [#2836](https://github.com/flutter/devtools/pull/2836)
 
