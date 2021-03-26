@@ -126,6 +126,8 @@ class _FileImportContainerState extends State<FileImportContainer> {
         ),
         const SizedBox(width: denseSpacing),
         FileImportButton(onPressed: _importFile),
+        const SizedBox(width: denseSpacing),
+        ClearButton(onPressed: _clearFile),
         // Horizontal spacer with flex value of 1.
         const Flexible(
           child: SizedBox(height: rowHeight),
@@ -172,6 +174,14 @@ class _FileImportContainerState extends State<FileImportContainer> {
     final importedFile =
         await importFileFromPicker(acceptedTypes: widget.extensions);
     _handleImportedFile(importedFile);
+  }
+
+  void _clearFile() {
+    if (mounted) {
+      setState(() {
+        importedFile = null;
+      });
+    }
   }
 
   // TODO(kenz): add error handling to ensure we only allow importing supported
