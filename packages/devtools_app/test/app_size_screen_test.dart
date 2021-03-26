@@ -131,7 +131,7 @@ void main() {
       );
 
       expect(find.byKey(AppSizeScreen.dropdownKey), findsNothing);
-      expect(find.byType(ClearButton), findsOneWidget);
+      expect(find.byType(ClearButton), findsNWidgets(2));
 
       expect(find.byType(FileImportContainer), findsOneWidget);
       expect(find.text(AnalysisView.importInstructions), findsOneWidget);
@@ -223,7 +223,7 @@ void main() {
       await loadDiffTabAndSettle(tester);
 
       expect(find.byKey(AppSizeScreen.dropdownKey), findsOneWidget);
-      expect(find.byType(ClearButton), findsOneWidget);
+      expect(find.byType(ClearButton), findsNWidgets(3));
 
       expect(find.byType(DualFileImportContainer), findsOneWidget);
       expect(find.byType(FileImportContainer), findsNWidgets(2));
