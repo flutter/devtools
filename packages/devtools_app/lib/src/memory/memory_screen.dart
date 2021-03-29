@@ -1193,7 +1193,7 @@ class MemoryBodyState extends State<MemoryBody>
             ? legendHeight2Charts
             : legendHeight1Chart,
         child: Container(
-          padding: const EdgeInsets.fromLTRB(0, 5, 0, 8),
+          padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
           decoration: BoxDecoration(
             color: Colors.black,
             border: Border.all(color: Colors.yellow),
