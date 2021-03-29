@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 import 'dart:convert';
 
-import 'package:devtools_app/src/globals.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
+import '../globals.dart';
 import '../network/network_model.dart';
 import '../trace_event.dart';
 import '../utils.dart';
@@ -54,6 +55,7 @@ abstract class HttpInstantEvent {
   TimeRange _timeRange;
 }
 
+/// An abstraction of an HTTP request made through dart:io.
 abstract class HttpRequestData extends NetworkRequest {
   HttpRequestData(int timelineMicrosBase) : super(timelineMicrosBase);
 
@@ -253,6 +255,7 @@ class TimelineHttpRequestData extends HttpRequestData {
 
   final TraceEvent _startEvent;
   TraceEvent _endEvent;
+
   @override
   final String responseBody;
 
@@ -455,12 +458,7 @@ class DartIOHttpRequestData extends HttpRequestData {
     this._request,
   ) : super(timelineMicrosBase) {
     if (_request.isResponseComplete) {
-      serviceManager.service
-          .getHttpProfileRequest(
-            _request.isolateId,
-            _request.id,
-          )
-          .then((value) => _request = value);
+      getFullRequestData();
     }
   }
 
@@ -587,12 +585,13 @@ class DartIOHttpRequestData extends HttpRequestData {
       if (_responseBody != null) return _responseBody;
       _responseBody = utf8.decode(fullRequest.responseBody);
       if (contentType.contains('json')) {
-        print('formatting json');
-        _responseBody = const JsonEncoder.withIndent('  ').convert(json.decode(_responseBody));
+        _responseBody = FormattedJson.encoder.convert(
+          json.decode(_responseBody),
+        );
       }
       return _responseBody;
     } on FormatException {
-      return '<binary data>'; //fullRequest.responseBody.toString();
+      return '<binary data>';
     }
   }
 

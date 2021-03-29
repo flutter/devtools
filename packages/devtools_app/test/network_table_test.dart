@@ -26,6 +26,7 @@ void main() {
       final networkRequests = controller.processNetworkTrafficHelper(
         timeline,
         sockets,
+        [],
         0,
         currentValues: [],
         invalidRequests: [],

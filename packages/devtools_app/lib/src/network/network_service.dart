@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/version.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
 import '../utils.dart';
+import '../version.dart';
 import 'network_controller.dart';
 
 class NetworkService {
