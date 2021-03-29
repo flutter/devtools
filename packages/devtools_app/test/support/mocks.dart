@@ -431,8 +431,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
 
   @override
-  Future<bool> isHttpProfilingAvailable(String isolateId) =>
-      Future.value(true);
+  Future<bool> isHttpProfilingAvailable(String isolateId) => Future.value(true);
 
   @override
   Future<bool> isHttpTimelineLoggingAvailable(String isolateId) =>
