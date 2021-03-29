@@ -117,8 +117,7 @@ void main() {
 
     test('TimestampColumn', () {
       final column = TimestampColumn();
-      final request = requests.first;
-
+      final request = requests.firstWhere((e) => e is! WebSocket);
       // The hours field may be unreliable since it depends on the timezone the
       // test is running in.
       expect(column.getDisplayValue(request), contains(':25:34.126'));

@@ -458,7 +458,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     SemanticVersion supportedVersion,
   }) {
     return Future.value(
-      supportedVersion.isSupported(supportedVersion: dartIoVersion),
+      dartIoVersion.isSupported(supportedVersion: supportedVersion),
     );
   }
 
