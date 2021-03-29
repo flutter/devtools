@@ -9,6 +9,7 @@ import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/network/network_model.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/filter.dart';
+import 'package:devtools_app/src/version.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -32,6 +33,12 @@ void main() {
         ),
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      // Disables getHttpProfile support.
+      (fakeServiceManager.service as FakeVmService).dartIoVersion =
+          SemanticVersion(
+        major: 1,
+        minor: 2,
+      );
       controller = NetworkController();
     });
 

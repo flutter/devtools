@@ -190,6 +190,9 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   /// Specifies the return value of `socketProfilingEnabled`.
   bool socketProfilingEnabledResult = true;
 
+  /// Specifies the dart:io service extension version.
+  SemanticVersion dartIoVersion = SemanticVersion(major: 1, minor: 3);
+
   final VmFlagManager _vmFlagManager;
   final Timeline _timelineData;
   SocketProfile _socketProfile;
@@ -447,6 +450,16 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     }
     return Future.value(
         HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult));
+  }
+
+  @override
+  Future<bool> isDartIoVersionSupported({
+    String isolateId,
+    SemanticVersion supportedVersion,
+  }) {
+    return Future.value(
+      supportedVersion.isSupported(supportedVersion: dartIoVersion),
+    );
   }
 
   @override
