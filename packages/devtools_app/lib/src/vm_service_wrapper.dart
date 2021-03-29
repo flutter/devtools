@@ -516,8 +516,10 @@ class VmServiceWrapper implements VmService {
   /// The returned [HttpProfile] will only include requests issued after
   /// [httpTimelineLogging] has been enabled or after the last
   /// [clearHttpProfile] invocation.
-  Future<HttpProfile> getHttpProfile(String isolateId,
-      {int updatedSince}) async {
+  Future<HttpProfile> getHttpProfile(
+    String isolateId, {
+    int updatedSince,
+  }) async {
     assert(await isHttpProfilingAvailable(isolateId));
     return trackFuture(
       'getHttpProfile',
@@ -529,7 +531,9 @@ class VmServiceWrapper implements VmService {
   }
 
   Future<HttpProfileRequest> getHttpProfileRequest(
-      String isolateId, int id) async {
+    String isolateId,
+    int id,
+  ) async {
     assert(await isHttpProfilingAvailable(isolateId));
     return trackFuture(
       'getHttpProfileRequest',
