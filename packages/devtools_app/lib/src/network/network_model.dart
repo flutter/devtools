@@ -34,6 +34,9 @@ abstract class NetworkRequest {
   int timelineMicrosecondsSinceEpoch(int micros) {
     return _timelineMicrosBase + micros;
   }
+
+  @override
+  String toString() => '$method $uri';
 }
 
 class WebSocket extends NetworkRequest {
