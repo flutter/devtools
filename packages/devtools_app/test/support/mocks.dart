@@ -184,6 +184,9 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
 
+  /// Specifies the return value of isHttpProfilingAvailable.
+  bool isHttpProfilingAvailableResult = false;
+
   /// Specifies the return value of `socketProfilingEnabled`.
   bool socketProfilingEnabledResult = true;
 
@@ -428,8 +431,12 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
 
   @override
-  Future<bool> isHttpTimelineLoggingAvailable(String isolateId) =>
+  Future<bool> isHttpProfilingAvailable(String isolateId) =>
       Future.value(true);
+
+  @override
+  Future<bool> isHttpTimelineLoggingAvailable(String isolateId) =>
+      Future.value(isHttpProfilingAvailableResult);
 
   @override
   Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
