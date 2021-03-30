@@ -141,13 +141,15 @@ class _FileImportContainerState extends State<FileImportContainer> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          importedFile?.path ?? 'No File Selected',
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: Theme.of(context).textTheme.headline1.color,
+        Expanded(
+          child: Text(
+            importedFile?.path ?? 'No File Selected',
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline1.color,
+            ),
+            textAlign: TextAlign.left,
           ),
-          textAlign: TextAlign.left,
         ),
         if (importedFile != null) clearInputButton(_clearFile),
       ],
