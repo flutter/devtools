@@ -1028,6 +1028,36 @@ class MemoryController extends DisposableController
     return serviceManager?.vm?.operatingSystem == 'android';
   }
 
+  /// All library dependencies for the app.
+  List<LibraryRef> get activeLibraries =>
+      serviceManager.isolateManager.selectedIsolateLibraries;
+
+  /// Source file name as returned from allocation's stacktrace.
+  /// Map source URI
+  ///    packages/flutter/src/widgets/image.dart
+  /// would map to
+  ///    package:flutter/lib/src/widgets/image.dart
+  // TODO(terry): Review with Ben pathing doesn't quite work the
+  //              source file has the lib/ maybe a LibraryRef could
+  //              be returned if in a library otherwise file:/// as today?
+  static const packageName = '/packages/';
+  String displayAsPackage(String sourceName) {
+    final packagesIndex = sourceName.indexOf(packageName);
+    final restToMatchStartIndex = packagesIndex + packageName.length;
+    if (packagesIndex >= 0) {
+      final match = activeLibraries.firstWhere(
+        (element) {
+          final toMatch = sourceName.substring(restToMatchStartIndex);
+          return element.uri.endsWith(toMatch);
+        },
+        orElse: () => null,
+      );
+      return match == null ? sourceName : match.name;
+    }
+
+    return sourceName;
+  }
+
   Future<List<InstanceSummary>> getInstances(
     String classRef,
     String className,

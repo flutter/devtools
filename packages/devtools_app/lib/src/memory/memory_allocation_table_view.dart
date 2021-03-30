@@ -114,10 +114,7 @@ class AllocationTableViewState extends State<AllocationTableView>
 
     addAutoDisposeListener(controller.monitorAllocationsNotifier);
 
-    addAutoDisposeListener(trackerData.selectionNotifier, () {
-      final Tracker item = trackerData.selectionNotifier.value.node;
-      if (item is TrackerMore) trackerData.expandCallStack(item);
-    });
+    addAutoDisposeListener(trackerData.selectionNotifier);
 
     addAutoDisposeListener(controller.selectTheSearchNotifier, _handleSearch);
 
@@ -229,13 +226,15 @@ class AllocationTableViewState extends State<AllocationTableView>
           controller.searchMatchMonitorAllocationsNotifier,
     );
 
+    final ScrollController scroller = ScrollController();
+
     return Split(
       initialFractions: const [0.8, 0.2],
       minSizes: const [200, 0],
       axis: Axis.vertical,
       children: [
         controller.allocationsFieldsTable,
-        trackerData.createTrackingTable(context, controller),
+        trackerData.createTrackingTable(context, controller, scroller),
       ],
     );
   }
