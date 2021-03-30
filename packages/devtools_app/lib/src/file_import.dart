@@ -135,13 +135,19 @@ class _FileImportContainerState extends State<FileImportContainer> {
   }
 
   Widget _buildImportedFileDisplay() {
-    return Text(
-      importedFile?.path ?? 'No File Selected',
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        color: Theme.of(context).textTheme.headline1.color,
-      ),
-      textAlign: TextAlign.left,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          importedFile?.path ?? 'No File Selected',
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.headline1.color,
+          ),
+          textAlign: TextAlign.left,
+        ),
+        if (importedFile != null) clearInputButton(_clearFile),
+      ],
     );
   }
 
@@ -172,6 +178,14 @@ class _FileImportContainerState extends State<FileImportContainer> {
     final importedFile =
         await importFileFromPicker(acceptedTypes: widget.extensions);
     _handleImportedFile(importedFile);
+  }
+
+  void _clearFile() {
+    if (mounted) {
+      setState(() {
+        importedFile = null;
+      });
+    }
   }
 
   // TODO(kenz): add error handling to ensure we only allow importing supported
