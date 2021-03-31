@@ -4,7 +4,6 @@
 * Use widgets for flame chart group labels instead of custom painters [#2837](https://github.com/flutter/devtools/pull/#2837)
 * Add EvalOnDartLibrary utilities [#2807](https://github.com/flutter/devtools/pull/#2807)
 * Remove Android Memory CTA if not connected to an Android app[#2799](https://github.com/flutter/devtools/pull/#2799)
-
 * Fixed location of exported memory stat JSON file. [#2795](https://github.com/flutter/devtools/pull/#2795)
 * Increase size of total time column in CPU profiler [#2814](https://github.com/flutter/devtools/pull/#2814)
 * Fix bugs with DevTools title and move title code to separate file [#2809](https://github.com/flutter/devtools/pull/#2809)
