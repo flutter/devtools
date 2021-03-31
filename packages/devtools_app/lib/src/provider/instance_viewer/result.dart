@@ -1,6 +1,6 @@
 // import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../eval_on_dart_library.dart';
+import '../../eval_on_dart_library.dart';
 
 import 'fake_freezed_annotation.dart';
 

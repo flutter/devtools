@@ -12,13 +12,13 @@ import 'package:provider/provider.dart' as provider show Provider;
 import '../banner_messages.dart';
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
-import '../instance_viewer/eval.dart';
-import '../instance_viewer/instance_details.dart';
-import '../instance_viewer/instance_providers.dart';
-import '../instance_viewer/instance_viewer.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
+import './instance_viewer/eval.dart';
+import './instance_viewer/instance_details.dart';
+import './instance_viewer/instance_providers.dart';
+import './instance_viewer/instance_viewer.dart';
 import 'provider_list.dart';
 
 final _selectedProviderEvalProvider =

@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 // import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../eval_on_dart_library.dart';
+import '../../eval_on_dart_library.dart';
 import 'fake_freezed_annotation.dart';
 import 'result.dart';
 

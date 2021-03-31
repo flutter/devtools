@@ -9,8 +9,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
-import '../eval_on_dart_library.dart';
-import '../globals.dart';
+import '../../eval_on_dart_library.dart';
+import '../../globals.dart';
 import 'eval.dart';
 import 'instance_details.dart';
 import 'result.dart';

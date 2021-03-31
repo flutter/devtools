@@ -12,8 +12,8 @@ import 'package:vm_service/vm_service.dart';
 import '../common_widgets.dart';
 import '../globals.dart';
 import '../inspector/inspector_tree.dart';
-import '../instance_viewer/eval.dart';
-import '../instance_viewer/instance_providers.dart';
+import './instance_viewer/eval.dart';
+import './instance_viewer/instance_providers.dart';
 import '../theme.dart';
 
 const _tilePadding = EdgeInsets.only(

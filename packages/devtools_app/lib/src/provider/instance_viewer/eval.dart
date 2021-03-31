@@ -7,8 +7,8 @@ library eval;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../eval_on_dart_library.dart';
-import '../globals.dart';
+import '../../eval_on_dart_library.dart';
+import '../../globals.dart';
 
 /// An [EvalOnDartLibrary] that has access to no specific library in particular
 ///
