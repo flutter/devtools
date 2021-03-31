@@ -17,6 +17,7 @@
 * Clean up - fix overflow error and some text styles [#2782](https://github.com/flutter/devtools/pull/#2782)
 * Add option to load offline file from landing screen [#2762](https://github.com/flutter/devtools/pull/#2762)
 * Evaluation HoverCard [#2746](https://github.com/flutter/devtools/pull/#2746), [#2810](https://github.com/flutter/devtools/pull/#2810), [#2831](https://github.com/flutter/devtools/pull/#2831)
+* Reworked UX for tracking call stack. [#2846](https://github.com/flutter/devtools/pull/#2846)
 
 ## 2.0.0+4
 * Upgrade DevTools dependencies for http_multi_server [#2838](https://github.com/flutter/devtools/pull/2838)
