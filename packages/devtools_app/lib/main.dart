@@ -12,7 +12,7 @@ import 'src/config_specific/framework_initialize/framework_initialize.dart';
 import 'src/config_specific/ide_theme/ide_theme.dart';
 import 'src/debugger/syntax_highlighter.dart';
 import 'src/preferences.dart';
-import 'src/riverpod_error_logger_observer.dart';
+import 'src/provider/riverpod_error_logger_observer.dart';
 
 void main() async {
   final ideTheme = getIdeTheme();

@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/eval_on_dart_library.dart';
+import 'package:devtools_app/src/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/instance_viewer/instance_viewer.dart';
-import 'package:devtools_app/src/result.dart';
+import 'package:devtools_app/src/instance_viewer/result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pedantic/pedantic.dart';
 
 import '../support/utils.dart';
 
@@ -22,7 +22,7 @@ final neverExpandedOverride =
 final emptyObjectInstance = AsyncValue.data(
   InstanceDetails.object(
     const [],
-    hash: '0',
+    hash: 0,
     instanceRefId: 'map0',
     setter: null,
     evalForInstance: FakeEvalOnDartLibrary(),
@@ -52,7 +52,7 @@ final object2Instance = AsyncValue.data(
         isDefinedByDependency: false,
       ),
     ],
-    hash: '0',
+    hash: 0,
     instanceRefId: 'object',
     setter: null,
     evalForInstance: FakeEvalOnDartLibrary(),
@@ -61,20 +61,20 @@ final object2Instance = AsyncValue.data(
 );
 
 final emptyMapInstance = AsyncValue.data(
-  InstanceDetails.map(const [], hash: '0', instanceRefId: 'map0', setter: null),
+  InstanceDetails.map(const [], hash: 0, instanceRefId: 'map0', setter: null),
 );
 
 final map2Instance = AsyncValue.data(
   InstanceDetails.map([
     stringInstance.data.value,
     list2Instance.data.value,
-  ], hash: '0', instanceRefId: '0', setter: null),
+  ], hash: 0, instanceRefId: '0', setter: null),
 );
 
 final emptyListInstance = AsyncValue.data(
   InstanceDetails.list(
     length: 0,
-    hash: '0',
+    hash: 0,
     instanceRefId: 'list0',
     setter: null,
   ),
@@ -83,7 +83,7 @@ final emptyListInstance = AsyncValue.data(
 final list2Instance = AsyncValue.data(
   InstanceDetails.list(
     length: 2,
-    hash: '0',
+    hash: 0,
     instanceRefId: 'list2',
     setter: null,
   ),
@@ -1145,17 +1145,6 @@ void main() {
 
       expect(
         container
-            .read(
-              isExpandedProvider(const InstancePath.fromRiverpodId(
-                ProviderId(containerId: '0', providerId: 'ref/0'),
-              )),
-            )
-            .state,
-        isTrue,
-      );
-
-      expect(
-        container
             .read(isExpandedProvider(const InstancePath.fromInstanceId('0')))
             .state,
         isTrue,
@@ -1174,18 +1163,6 @@ void main() {
                 pathToProperty: [PathToProperty.listIndex(0)],
               ),
             ))
-            .state,
-        isFalse,
-      );
-
-      expect(
-        container
-            .read(
-              isExpandedProvider(const InstancePath.fromRiverpodId(
-                ProviderId(containerId: '0', providerId: 'ref/0'),
-                pathToProperty: [PathToProperty.listIndex(0)],
-              )),
-            )
             .state,
         isFalse,
       );

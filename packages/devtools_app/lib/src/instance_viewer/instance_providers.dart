@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pedantic/pedantic.dart';
@@ -12,199 +11,9 @@ import 'package:vm_service/vm_service.dart' hide SentinelException;
 
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
-import '../result.dart';
 import 'eval.dart';
-
-// run `flutter pub run build_runner build --delete-conflicting-outputs` to re-generate
-part 'instance_providers.freezed.dart';
-
-@freezed
-abstract class ProviderId with _$ProviderId {
-  const factory ProviderId({
-    @required String containerId,
-    @required String providerId,
-  }) = _ProviderId;
-}
-
-// TODO make sure that expansion state is preserved between state update (refs could change, breaking it)
-
-@freezed
-abstract class PathToProperty with _$PathToProperty {
-  const factory PathToProperty.listIndex(int index) = _ListIndexPath;
-
-  // TODO test that mutating a Map does not collapse previously expanded keys
-  const factory PathToProperty.mapKey({
-    @required @nullable String ref,
-  }) = _MapKeyPath;
-
-  /// Must not depend on [InstanceRef] and its ID, as they may change across
-  /// re-evaluations of the object.
-  /// Depending on those would lead to the UI collapsing previously expanded objects
-  /// because the new path to a property would be different.
-  ///
-  /// We can't just rely on the property name either, because in some cases
-  /// an object can have multiple properties with the same name (private properties
-  /// defined in different libraries)
-  const factory PathToProperty.objectProperty({
-    @required String name,
-
-    /// Path to the class/mixin that defined this property
-    @required String ownerUri,
-
-    /// Name of the class/mixin that defined this property
-    @required String ownerName,
-  }) = _PropertyPath;
-
-  factory PathToProperty.fromObjectField(ObjectField field) {
-    return PathToProperty.objectProperty(
-      name: field.name,
-      ownerUri: field.ownerUri,
-      ownerName: field.ownerName,
-    );
-  }
-}
-
-/// The path to visit child elements of an [Instance] or providers from `provider`/`riverpod`.
-@freezed
-abstract class InstancePath with _$InstancePath {
-  const InstancePath._();
-
-  const factory InstancePath.fromInstanceId(
-    @nullable String instanceId, {
-    @Default([]) List<PathToProperty> pathToProperty,
-  }) = _InstancePathFromInstanceId;
-
-  const factory InstancePath.fromProviderId(
-    String providerId, {
-    @Default([]) List<PathToProperty> pathToProperty,
-  }) = _InstancePathFromProviderId;
-
-  const factory InstancePath.fromRiverpodId(
-    ProviderId riverpodId, {
-    @Default([]) List<PathToProperty> pathToProperty,
-  }) = _InstancePathFromRiverpodId;
-
-  InstancePath get root => copyWith(pathToProperty: []);
-
-  InstancePath get parent {
-    if (pathToProperty.isEmpty) return null;
-
-    return copyWith(
-      pathToProperty: [
-        for (var i = 0; i + 1 < pathToProperty.length; i++) pathToProperty[i],
-      ],
-    );
-  }
-
-  InstancePath pathForChild(PathToProperty property) {
-    return copyWith(
-      pathToProperty: [...pathToProperty, property],
-    );
-  }
-}
-
-typedef Setter = Future<void> Function(String);
-
-@freezed
-abstract class ObjectField with _$ObjectField {
-  factory ObjectField({
-    @required String name,
-    @required bool isFinal,
-    @required String ownerName,
-    @required String ownerUri,
-    @required @nullable Result<InstanceRef> ref,
-
-    /// An [EvalOnDartLibrary] that can access this field from the owner object
-    @required EvalOnDartLibrary eval,
-
-    /// Whether this field was defined by the inspected app or by one of its dependencies
-    ///
-    /// This is used by the UI to hide variables that are not useful for the user.
-    @required bool isDefinedByDependency,
-  }) = _ObjectField;
-
-  ObjectField._();
-
-  bool get isPrivate => name.startsWith('_');
-}
-
-@freezed
-abstract class InstanceDetails with _$InstanceDetails {
-  InstanceDetails._();
-
-  @Assert('instanceRefId == null')
-  factory InstanceDetails.nill({
-    String instanceRefId,
-    @required @nullable Setter setter,
-  }) = NullInstance;
-
-  factory InstanceDetails.boolean(
-    String displayString, {
-    @required String instanceRefId,
-    @required @nullable Setter setter,
-  }) = BoolInstance;
-
-  factory InstanceDetails.number(
-    String displayString, {
-    @required String instanceRefId,
-    @required @nullable Setter setter,
-  }) = NumInstance;
-
-  factory InstanceDetails.string(
-    String displayString, {
-    @required String instanceRefId,
-    @required @nullable Setter setter,
-  }) = StringInstance;
-
-  factory InstanceDetails.map(
-    List<InstanceDetails> keys, {
-    @required String hash,
-    @required String instanceRefId,
-    @required @nullable Setter setter,
-  }) = MapInstance;
-
-  factory InstanceDetails.list({
-    @required @nullable int length,
-    @required String hash,
-    @required String instanceRefId,
-    @required @nullable Setter setter,
-  }) = ListInstance;
-
-  factory InstanceDetails.object(
-    List<ObjectField> fields, {
-    @required String type,
-    @required String hash,
-    @required String instanceRefId,
-    @required @nullable Setter setter,
-
-    /// An [EvalOnDartLibrary] associated with the library of this object
-    ///
-    /// This allows to edit private properties.
-    @required EvalOnDartLibrary evalForInstance,
-  }) = ObjectInstance;
-
-  factory InstanceDetails.enumeration({
-    @required String type,
-    @required String value,
-    @required @nullable Setter setter,
-    @required String instanceRefId,
-  }) = EnumInstance;
-
-  bool get isExpandable {
-    bool falsy(Object obj) => false;
-
-    return map(
-      nill: falsy,
-      boolean: falsy,
-      number: falsy,
-      string: falsy,
-      enumeration: falsy,
-      map: (instance) => instance.keys.isNotEmpty,
-      list: (instance) => instance.length > 0,
-      object: (instance) => instance.fields.isNotEmpty,
-    );
-  }
-}
+import 'instance_details.dart';
+import 'result.dart';
 
 Future<InstanceRef> _resolveInstanceRefForPath(
   InstancePath path, {
@@ -216,20 +25,6 @@ Future<InstanceRef> _resolveInstanceRefForPath(
     // root of the provider tree
 
     return path.map(
-      fromRiverpodId: (path) async {
-        // cause the instances to be re-evaluated when the devtool is notified
-        // that a provider changed
-        ref.watch(_riverpodChanged(path.riverpodId));
-
-        final eval = ref.watch(riverpodEvalProvider);
-
-        return eval.safeEval(
-          'RiverpodBinding.debugInstance.containers["${path.riverpodId.containerId}"]'
-          '!.debugProviderElements.firstWhere((p) => p.provider.debugId == "${path.riverpodId.providerId}")'
-          '.getExposedValue()',
-          isAlive: isAlive,
-        );
-      },
       fromProviderId: (path) {
         final eval = ref.watch(providerEvalProvider);
         // cause the instances to be re-evaluated when the devtool is notified
@@ -261,7 +56,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
     // TODO: iterables should use iterators / next() for iterable to navigate, to avoid recomputing the content
 
     map: (parent) {
-      final keyPath = path.pathToProperty.last as _MapKeyPath;
+      final keyPath = path.pathToProperty.last as MapKeyPath;
       final key = keyPath.ref == null ? 'null' : 'key';
 
       return eval.safeEval(
@@ -274,7 +69,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
       );
     },
     list: (parent) {
-      final indexPath = path.pathToProperty.last as _ListIndexPath;
+      final indexPath = path.pathToProperty.last as ListIndexPath;
 
       return eval.safeEval(
         'parent[${indexPath.index}]',
@@ -283,7 +78,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
       );
     },
     object: (parent) async {
-      final propertyPath = path.pathToProperty.last as _PropertyPath;
+      final propertyPath = path.pathToProperty.last as PropertyPath;
 
       // compare by both name and ref ID because an object may have multiple
       // fields with the same name
@@ -319,7 +114,7 @@ Future<void> _mutate(
   await parent.maybeMap(
     list: (parent) {
       final eval = ref.watch(evalProvider);
-      final indexPath = path.pathToProperty.last as _ListIndexPath;
+      final indexPath = path.pathToProperty.last as ListIndexPath;
       return eval.safeEval(
         'parent[${indexPath.index}] = $newValueExpression',
         isAlive: isAlive,
@@ -330,7 +125,7 @@ Future<void> _mutate(
     },
     map: (parent) {
       final eval = ref.watch(evalProvider);
-      final keyPath = path.pathToProperty.last as _MapKeyPath;
+      final keyPath = path.pathToProperty.last as MapKeyPath;
       final keyRefVar = keyPath.ref == null ? 'null' : 'key';
 
       return eval.safeEval(
@@ -344,7 +139,7 @@ Future<void> _mutate(
     },
     // TODO test can mutate properties of a mixin placed in a different library that the class that uses it
     object: (parent) {
-      final propertyPath = path.pathToProperty.last as _PropertyPath;
+      final propertyPath = path.pathToProperty.last as PropertyPath;
 
       final field =
           parent.fields.firstWhere((f) => f.name == propertyPath.name);
@@ -360,19 +155,7 @@ Future<void> _mutate(
     orElse: () => throw StateError('Can only mutate lists/maps/objects'),
   );
 
-  await path.map(
-    fromInstanceId: (_) async {},
-    fromProviderId: (_) async {},
-    fromRiverpodId: (path) async {
-      final eval = ref.watch(riverpodEvalProvider);
-      await eval.safeEval(
-        'RiverpodBinding.debugInstance.containers["${path.riverpodId.containerId}"]'
-        '!.debugProviderElements.firstWhere((p) => p.provider.debugId == "${path.riverpodId.providerId}")'
-        '.markDidChange()',
-        isAlive: isAlive,
-      );
-    },
-  );
+  // TODO(rrousselGit): call notifyListeners/setState/notifyClients based on the modified object
 
   // Since the same object can be used in multiple locations at once, we need
   // to refresh the entire tree instead of just the node that was modified.
@@ -472,7 +255,7 @@ Setter _parseSetter({
     map: (parent) => mutate,
     list: (parent) => mutate,
     object: (parent) {
-      final keyPath = path.pathToProperty.last as _PropertyPath;
+      final keyPath = path.pathToProperty.last as PropertyPath;
 
       // Mutate properties by name as we can't mutate them from a reference.
       // This may edit the wrong property when an object has two properties with
@@ -546,8 +329,6 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
       );
 
     case InstanceKind.kMap:
-      final hashCodeFuture =
-          eval.getInstanceHashCode(instanceRef, isAlive: isAlive);
 
       // voluntarily throw if a key failed to load
       final keysRef = instance.associations.map((e) => e.key as InstanceRef);
@@ -561,7 +342,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
 
       return InstanceDetails.map(
         await keysFuture,
-        hash: await hashCodeFuture,
+        hash: instanceRef.identityHashCode,
         instanceRefId: instanceRef.id,
         setter: setter,
       );
@@ -572,7 +353,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
     case InstanceKind.kList:
       return InstanceDetails.list(
         length: instance.length,
-        hash: await eval.getInstanceHashCode(instanceRef, isAlive: isAlive),
+        hash: instance.identityHashCode,
         instanceRefId: instanceRef.id,
         setter: setter,
       );
@@ -588,9 +369,6 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
       );
 
       if (enumDetails != null) return enumDetails;
-
-      final hashCodeFuture =
-          eval.getInstanceHashCode(instanceRef, isAlive: isAlive);
 
       final classInstance = await eval.getClass(instance.classRef, isAlive);
       final evalForInstance =
@@ -609,7 +387,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
 
       return InstanceDetails.object(
         fields.sorted(_sortFieldsByName),
-        hash: await hashCodeFuture,
+        hash: instanceRef.identityHashCode,
         type: instance.classRef.name,
         instanceRefId: instanceRef.id,
         evalForInstance: evalForInstance,
@@ -705,15 +483,6 @@ final _providerChanged =
   return serviceManager.service.onExtensionEvent.where((event) {
     return event.extensionKind == 'provider:provider_changed' &&
         event.extensionData.data['id'] == id;
-  });
-});
-
-final _riverpodChanged =
-    AutoDisposeStreamProviderFamily<void, ProviderId>((ref, id) {
-  return serviceManager.service.onExtensionEvent.where((event) {
-    return event.extensionKind == 'riverpod:provider_changed' &&
-        event.extensionData.data['provider_id'] == id.providerId &&
-        event.extensionData.data['container_id'] == id.containerId;
   });
 });
 

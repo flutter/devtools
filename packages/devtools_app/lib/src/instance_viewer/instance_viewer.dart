@@ -12,6 +12,7 @@ import '../eval_on_dart_library.dart';
 import '../inspector/inspector_text_styles.dart';
 import '../sliver_iterable_child_delegate.dart';
 import '../theme.dart';
+import 'instance_details.dart';
 import 'instance_providers.dart';
 
 const typeColor = Color.fromARGB(255, 78, 201, 176);
@@ -409,7 +410,7 @@ class _ObjectHeader extends StatelessWidget {
   }) : super(key: key);
 
   final String type;
-  final String hash;
+  final int hash;
   final String meta;
   final String startToken;
   final String endToken;

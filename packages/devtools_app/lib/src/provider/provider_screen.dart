@@ -13,9 +13,9 @@ import '../banner_messages.dart';
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
 import '../instance_viewer/eval.dart';
+import '../instance_viewer/instance_details.dart';
 import '../instance_viewer/instance_providers.dart';
 import '../instance_viewer/instance_viewer.dart';
-import '../riverpod/riverpod_screen.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
@@ -117,16 +117,6 @@ void showProviderErrorBanner(BuildContext context) {
     listen: false,
   ).addMessage(
     const ProviderUnknownErrorBanner(screenId: ProviderScreen.id)
-        .build(context),
-  );
-}
-
-void showRiverpodErrorBanner(BuildContext context) {
-  provider.Provider.of<BannerMessagesController>(
-    context,
-    listen: false,
-  ).addMessage(
-    const RiverpodUnknownErrorBanner(screenId: RiverpodScreen.id)
         .build(context),
   );
 }

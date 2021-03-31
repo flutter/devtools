@@ -1,7 +1,7 @@
-import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import './config_specific/logger/logger.dart';
+import '../config_specific/logger/logger.dart';
+import '../eval_on_dart_library.dart';
 
 class ErrorLoggerObserver extends ProviderObserver {
   const ErrorLoggerObserver();

@@ -276,28 +276,6 @@ This could be caused by an outdated version of package:provider. Make sure that 
   }
 }
 
-class RiverpodUnknownErrorBanner {
-  const RiverpodUnknownErrorBanner({@required this.screenId});
-
-  final String screenId;
-
-  BannerMessage build(BuildContext context) {
-    return _BannerError(
-      key: Key('RiverpodUnknownErrorBanner - $screenId'),
-      screenId: screenId,
-      textSpans: const [
-        TextSpan(
-          text: '''
-The devtool failed to connect with package:riverpod.
-
-This could be caused by an outdated version of package:riverpod. Make sure that you are using a version >=0.13.0.''',
-          style: TextStyle(color: _BannerError.foreground),
-        ),
-      ],
-    );
-  }
-}
-
 class HighProfileGranularityMessage {
   HighProfileGranularityMessage(this.screenId)
       : key = Key('HighProfileGranularityMessage - $screenId');

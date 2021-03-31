@@ -1,4 +1,8 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+// import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../eval_on_dart_library.dart';
+
+import 'fake_freezed_annotation.dart';
 
 // run `flutter pub run build_runner build --delete-conflicting-outputs` to re-generate
 part 'result.freezed.dart';
@@ -47,4 +51,14 @@ abstract class Result<T> with _$Result<T> {
       },
     );
   }
+}
+
+Result<T> parseSentinel<T>(Object value) {
+  // TODO(rrousselGit) remove condition after migrating to NNBD
+  if (value == null) return Result.data(null);
+
+  if (value is T) return Result.data(value);
+  if (value is SentinelException) return Result.error(value);
+
+  return Result.error(StateError('Unknown error'));
 }

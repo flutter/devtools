@@ -38,7 +38,6 @@ import 'performance/performance_screen.dart';
 import 'profiler/profiler_screen.dart';
 import 'profiler/profiler_screen_controller.dart';
 import 'provider/provider_screen.dart';
-import 'riverpod/riverpod_screen.dart';
 import 'routing.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -569,10 +568,6 @@ List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
       ),
       DevToolsScreen<void>(
         const ProviderScreen(),
-        createController: () {},
-      ),
-      DevToolsScreen<void>(
-        const RiverpodScreen(),
         createController: () {},
       ),
 // Uncomment to see a sample implementation of a conditional screen.

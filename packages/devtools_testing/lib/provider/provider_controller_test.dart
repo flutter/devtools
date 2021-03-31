@@ -5,6 +5,7 @@
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, non_constant_identifier_names
 
 import 'package:devtools_app/src/instance_viewer/instance_providers.dart';
+import 'package:devtools_app/src/instance_viewer/instance_details.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/provider/provider_list.dart';
@@ -50,8 +51,8 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         completion(['0']),
       );
 
-      await evalOnDartLibrary.awaitEval(
-        'tester.tap(find.byKey(Key("add"))).then((_) => tester.pump())',
+      await evalOnDartLibrary.asyncEval(
+        'await tester.tap(find.byKey(Key("add"))).then((_) => tester.pump())',
         isAlive: isAlive,
       );
 
@@ -60,8 +61,8 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         completion(['0', '1']),
       );
 
-      await evalOnDartLibrary.awaitEval(
-        'tester.tap(find.byKey(Key("remove"))).then((_) => tester.pump())',
+      await evalOnDartLibrary.asyncEval(
+        'await tester.tap(find.byKey(Key("remove"))).then((_) => tester.pump())',
         isAlive: isAlive,
       );
 
@@ -77,8 +78,8 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
 
       final sub0 = container.listen(providerNodeProvider('0').last);
 
-      await evalOnDartLibrary.awaitEval(
-        'tester.tap(find.byKey(Key("add"))).then((_) => tester.pump())',
+      await evalOnDartLibrary.asyncEval(
+        'await tester.tap(find.byKey(Key("add"))).then((_) => tester.pump())',
         isAlive: isAlive,
       );
 
@@ -594,8 +595,8 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           ),
         );
 
-        await evalOnDartLibrary.awaitEval(
-          'tester.tap(find.byKey(Key("increment"))).then((_) => tester.pump())',
+        await evalOnDartLibrary.asyncEval(
+          'await tester.tap(find.byKey(Key("increment"))).then((_) => tester.pump())',
           isAlive: isAlive,
         );
 

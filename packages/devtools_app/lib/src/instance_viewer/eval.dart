@@ -31,17 +31,6 @@ final providerEvalProvider = Provider<EvalOnDartLibrary>((ref) {
   return eval;
 });
 
-/// An [EvalOnDartLibrary] that has access to `riverpod`
-final riverpodEvalProvider = Provider<EvalOnDartLibrary>((ref) {
-  final eval = EvalOnDartLibrary(
-    ['package:riverpod/src/provider.dart'],
-    serviceManager.service,
-  );
-
-  ref.onDispose(eval.dispose);
-  return eval;
-});
-
 /// An [EvalOnDartLibrary] for custom objects.
 final libraryEvalProvider =
     AutoDisposeProviderFamily<EvalOnDartLibrary, String>((ref, libraryPath) {
