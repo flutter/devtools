@@ -308,6 +308,20 @@ extension DevToolsColorScheme on ColorScheme {
         colors: [expandedTopContentColor, expandedBottomContentColor],
         tileMode: TileMode.repeated,
       );
+
+  /// TextStyle for callstack.
+  TextStyle get stackTraceCall => TextStyle(
+        color: defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: 12.0,
+      );
+
+  /// TextStyle for source file displayed in callstack.
+  TextStyle get stackTraceSource => TextStyle(
+        color: defaultForeground,
+        fontWeight: FontWeight.w100,
+        fontSize: 12,
+      );
 }
 
 /// Utility extension methods to the [ThemeData] class.

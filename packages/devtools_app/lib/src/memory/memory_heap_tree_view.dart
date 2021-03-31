@@ -450,9 +450,7 @@ class HeapTreeViewState extends State<HeapTree>
                   children: [
                     _buildAllocationsControls(),
                     const SizedBox(height: denseRowSpacing),
-                    const Expanded(
-                      child: AllocationTableView(),
-                    ),
+                    const Expanded(child: AllocationTableView()),
                   ],
                 ),
               ],
