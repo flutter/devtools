@@ -139,7 +139,6 @@ class _FileImportContainerState extends State<FileImportContainer> {
 
   Widget _buildImportedFileDisplay() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: Text(
