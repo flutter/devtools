@@ -248,7 +248,7 @@ class TreeTracker {
                 ],
               ),
               separatorBuilder: (context, index) =>
-                  Divider(color: devtoolsGrey[400], height: 8),
+                  Divider(color: devtoolsGrey[400], height: 12),
             ),
           ),
         ),
