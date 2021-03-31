@@ -184,8 +184,14 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
 
+  /// Specifies the return value of isHttpProfilingAvailable.
+  bool isHttpProfilingAvailableResult = false;
+
   /// Specifies the return value of `socketProfilingEnabled`.
   bool socketProfilingEnabledResult = true;
+
+  /// Specifies the dart:io service extension version.
+  SemanticVersion dartIoVersion = SemanticVersion(major: 1, minor: 3);
 
   final VmFlagManager _vmFlagManager;
   final Timeline _timelineData;
@@ -428,8 +434,11 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
 
   @override
+  Future<bool> isHttpProfilingAvailable(String isolateId) => Future.value(true);
+
+  @override
   Future<bool> isHttpTimelineLoggingAvailable(String isolateId) =>
-      Future.value(true);
+      Future.value(isHttpProfilingAvailableResult);
 
   @override
   Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
@@ -441,6 +450,16 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     }
     return Future.value(
         HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult));
+  }
+
+  @override
+  Future<bool> isDartIoVersionSupported({
+    String isolateId,
+    SemanticVersion supportedVersion,
+  }) {
+    return Future.value(
+      dartIoVersion.isSupported(supportedVersion: supportedVersion),
+    );
   }
 
   @override

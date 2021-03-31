@@ -16,6 +16,7 @@ import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../dialogs.dart';
 import '../globals.dart';
+import '../notifications.dart';
 import '../screen.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
@@ -90,6 +91,19 @@ class MemoryScreen extends Screen {
   static const androidChartButtonKey = Key('Android Memory');
 
   static const memorySourceMenuItemPrefix = 'Source: ';
+
+  @visibleForTesting
+  static const allocatedDisplay = 'Allocated';
+  @visibleForTesting
+  static const usedDisplay = 'Dart/Flutter';
+  @visibleForTesting
+  static const externalDisplay = 'Dart/Flutter Native';
+  @visibleForTesting
+  static const rssDisplay = 'RSS';
+  @visibleForTesting
+  static const layerDisplay = 'Raster Layer';
+  @visibleForTesting
+  static const pictureDisplay = 'Raster Picture';
 
   static void gaAction({Key key, String name}) {
     final recordName = key != null ? keyName(key) : name;
@@ -173,10 +187,26 @@ class MemoryBodyState extends State<MemoryBody>
     });
 
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller.memorySourceNotifier, () {
+    addAutoDisposeListener(controller.memorySourceNotifier, () async {
+      String errorMessage;
+      await controller.updatedMemorySource().catchError((e) {
+        errorMessage = '$e';
+        controller.memorySource = MemoryController.liveFeed;
+      });
+
       setState(() {
-        controller.updatedMemorySource();
-        _refreshCharts();
+        if (errorMessage == null) {
+          _refreshCharts();
+        } else {
+          // Display toast, unable to load the saved memory JSON payload.
+          final notificationsState = Notifications.of(context);
+          if (notificationsState != null) {
+            notificationsState.push(errorMessage);
+          } else {
+            // Running in test harness, unexpected error.
+            throw OfflineFileException(errorMessage);
+          }
+        }
       });
     });
 
@@ -547,9 +577,8 @@ class MemoryBodyState extends State<MemoryBody>
       key: MemoryScreen.androidChartButtonKey,
       icon: controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
       label: keyName(MemoryScreen.androidChartButtonKey),
-      onPressed: controller.isConnectedDeviceAndroid && isAndroidCollection
-          ? controller.toggleAndroidChartVisibility
-          : null,
+      onPressed:
+          isAndroidCollection ? controller.toggleAndroidChartVisibility : null,
       includeTextWidth: 900,
     );
   }
@@ -559,7 +588,9 @@ class MemoryBodyState extends State<MemoryBody>
       children: [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
-        createToggleAdbMemoryButton(),
+        controller.isConnectedDeviceAndroid
+            ? createToggleAdbMemoryButton()
+            : const SizedBox(),
         const SizedBox(width: denseSpacing),
         isAdvancedSettingsEnabled
             ? Row(
@@ -577,8 +608,7 @@ class MemoryBodyState extends State<MemoryBody>
             : const SizedBox(),
         IconLabelButton(
           key: MemoryScreen.exportButtonKey,
-          onPressed:
-              controller.offline ? null : controller.memoryLog.exportMemory,
+          onPressed: controller.offline ? null : _exportToFile,
           icon: Icons.file_download,
           label: 'Export',
           includeTextWidth: _primaryControlsMinVerboseWidth,
@@ -600,6 +630,16 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
+  void _exportToFile() {
+    final outputPath = controller.memoryLog.exportMemory();
+    final notificationsState = Notifications.of(context);
+    if (notificationsState != null) {
+      notificationsState.push(
+        'Successfully exported file ${outputPath.last} to ${outputPath.first} directory',
+      );
+    }
+  }
+
   void _openSettingsDialog() {
     showDialog(
       context: context,
@@ -618,7 +658,7 @@ class MemoryBodyState extends State<MemoryBody>
   final hoverKey = GlobalKey(debugLabel: MemoryScreen.hoverKeyName);
   static const hoverXOffset = 10;
   static const hoverYOffset = 0.0;
-  static const hoverWidth = 203.0;
+  static const hoverWidth = 210.0;
   static const hover_card_border_width = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
@@ -654,7 +694,7 @@ class MemoryBodyState extends State<MemoryBody>
   static const eventLegend = '${base}event_glyph.png';
   static const eventsLegend = '${base}events_glyph.png';
 
-  static const capacityLegend = '${base}capacity_glyph.png';
+  static const allocatedLegend = '${base}capacity_glyph.png';
   static const usedLegend = '${base}used_glyph.png';
   static const externalLegend = '${base}external_glyph.png';
   static const rssLegend = '${base}rss_glyph.png';
@@ -680,10 +720,12 @@ class MemoryBodyState extends State<MemoryBody>
       final rightSide = <Widget>[];
       if (name != null && image != null) {
         rightSide.addAll([
-          Container(
-            padding: EdgeInsets.fromLTRB(leftEdge, 0, 0, 2),
-            width: legendTextWidth + leftEdge,
-            child: Text(name, style: legendEntry),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.fromLTRB(leftEdge, 0, 0, 2),
+              width: legendTextWidth + leftEdge,
+              child: Text(name, style: legendEntry),
+            ),
           ),
           const PaddedDivider(
             padding: EdgeInsets.only(left: denseRowSpacing),
@@ -701,11 +743,15 @@ class MemoryBodyState extends State<MemoryBody>
       rowChildren.addAll(legendPart(name2, image2, 20.0));
     }
 
-    return Container(
+    return Expanded(
+      child: Container(
         padding: const EdgeInsets.fromLTRB(10, 0, 0, 2),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: rowChildren,
-        ));
+        ),
+      ),
+    );
   }
 
   Widget hoverRow({
@@ -986,13 +1032,6 @@ class MemoryBodyState extends State<MemoryBody>
       : nf.format(number);
 
   List<Widget> displayVmDataInHover(ChartsValues chartsValues) {
-    const rssDisplay = 'RSS';
-    const capacityDisplay = 'Capacity';
-    const usedDisplay = 'Used';
-    const externalDisplay = 'External';
-    const layerDisplay = 'Raster Layer';
-    const pictureDisplay = 'Raster Picture';
-
     final results = <Widget>[];
 
     final vmDataDisplayed = <String, String>{};
@@ -1000,22 +1039,26 @@ class MemoryBodyState extends State<MemoryBody>
     final data = chartsValues.vmData;
 
     final rssValueDisplay = formatNumeric(data[rssJsonName]);
-    vmDataDisplayed['$rssDisplay $rssValueDisplay'] = rssLegend;
+    vmDataDisplayed['${MemoryScreen.rssDisplay} $rssValueDisplay'] = rssLegend;
 
     final capacityValueDisplay = formatNumeric(data[capacityJsonName]);
-    vmDataDisplayed['$capacityDisplay $capacityValueDisplay'] = capacityLegend;
+    vmDataDisplayed['${MemoryScreen.allocatedDisplay} $capacityValueDisplay'] =
+        allocatedLegend;
 
     final usedValueDisplay = formatNumeric(data[usedJsonName]);
-    vmDataDisplayed['$usedDisplay $usedValueDisplay'] = usedLegend;
+    vmDataDisplayed['${MemoryScreen.usedDisplay} $usedValueDisplay'] =
+        usedLegend;
 
     final externalValueDisplay = formatNumeric(data[externalJsonName]);
-    vmDataDisplayed['$externalDisplay $externalValueDisplay'] = externalLegend;
+    vmDataDisplayed['${MemoryScreen.externalDisplay} $externalValueDisplay'] =
+        externalLegend;
 
     final layerValueDisplay = formatNumeric(data[rasterLayerJsonName]);
-    vmDataDisplayed['$layerDisplay $layerValueDisplay'] = rasterLayerLegend;
+    vmDataDisplayed['${MemoryScreen.layerDisplay} $layerValueDisplay'] =
+        rasterLayerLegend;
 
     final pictureValueDisplay = formatNumeric(data[rasterPictureJsonName]);
-    vmDataDisplayed['$pictureDisplay $pictureValueDisplay'] =
+    vmDataDisplayed['${MemoryScreen.pictureDisplay} $pictureValueDisplay'] =
         rasterPictureLegend;
 
     for (var entry in vmDataDisplayed.entries) {
@@ -1199,7 +1242,7 @@ class MemoryBodyState extends State<MemoryBody>
             ? legendHeight2Charts
             : legendHeight1Chart,
         child: Container(
-          padding: const EdgeInsets.fromLTRB(0, 5, 0, 8),
+          padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
           decoration: BoxDecoration(
             color: Colors.black,
             border: Border.all(color: Colors.yellow),
@@ -1235,10 +1278,13 @@ class MemoryBodyState extends State<MemoryBody>
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
                 child: Text('Memory Legend', style: legendHeading),
               ),
-              legendRow(name1: 'Capacity', image1: capacityLegend),
-              legendRow(name1: 'Used', image1: usedLegend),
-              legendRow(name1: 'External', image1: externalLegend),
-              legendRow(name1: 'RSS', image1: rssLegend),
+              legendRow(
+                  name1: MemoryScreen.allocatedDisplay,
+                  image1: allocatedLegend),
+              legendRow(name1: MemoryScreen.usedDisplay, image1: usedLegend),
+              legendRow(
+                  name1: MemoryScreen.externalDisplay, image1: externalLegend),
+              legendRow(name1: MemoryScreen.rssDisplay, image1: rssLegend),
               if (controller.isAndroidChartVisible)
                 const Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 9)),
               if (controller.isAndroidChartVisible)

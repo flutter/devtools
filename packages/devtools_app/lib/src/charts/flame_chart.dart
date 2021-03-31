@@ -105,14 +105,13 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   double mouseHoverX;
 
-  ScrollController verticalController;
-
   FixedExtentDelegate verticalExtentDelegate;
 
-  LinkedScrollControllerGroup horizontalController;
+  LinkedScrollControllerGroup verticalControllerGroup;
 
-  double get maxScrollOffset =>
-      widget.containerWidth * (zoomController.value - 1);
+  LinkedScrollControllerGroup horizontalControllerGroup;
+
+  ScrollController _flameChartScrollController;
 
   /// Animation controller for animating flame chart zoom changes.
   AnimationController zoomController;
@@ -140,7 +139,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       contentWidthWithZoom + widget.startInset + widget.endInset;
 
   TimeRange get visibleTimeRange {
-    final horizontalScrollOffset = horizontalController.offset;
+    final horizontalScrollOffset = horizontalControllerGroup.offset;
     final startMicros = horizontalScrollOffset < widget.startInset
         ? startTimeOffset
         : startTimeOffset +
@@ -165,11 +164,11 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   int get startTimeOffset => widget.data.time.start.inMicroseconds;
 
-  /// Provides CustomPaint widgets to be painted on top of the flame chart, if
-  /// overridden.
+  /// Provides widgets to be layered on top of the flame chart, if overridden.
   ///
-  /// The painters will be painted in the order that they are returned.
-  List<CustomPaint> buildCustomPaints(
+  /// The widgets will be layered in a [Stack] in the order that they are
+  /// returned.
+  List<Widget> buildChartOverlays(
     BoxConstraints constraints,
     BuildContext buildContext,
   ) {
@@ -181,8 +180,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     super.initState();
     initFlameChartElements();
 
-    horizontalController = LinkedScrollControllerGroup();
-    verticalController = ScrollController();
+    horizontalControllerGroup = LinkedScrollControllerGroup();
+    verticalControllerGroup = LinkedScrollControllerGroup();
+
+    _flameChartScrollController = verticalControllerGroup.addAndGet();
 
     zoomController = AnimationController(
       value: FlameChart.minZoomLevel,
@@ -221,8 +222,8 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   void didUpdateWidget(T oldWidget) {
     if (widget.data != oldWidget.data) {
       initFlameChartElements();
-      horizontalController.resetScroll();
-      verticalController.jumpTo(FlameChart.minScrollOffset);
+      horizontalControllerGroup.resetScroll();
+      verticalControllerGroup.resetScroll();
       previousZoom = FlameChart.minZoomLevel;
       zoomController.reset();
       verticalExtentDelegate.recompute();
@@ -233,7 +234,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   @override
   void dispose() {
-    verticalController.dispose();
     zoomController.dispose();
     super.dispose();
   }
@@ -253,17 +253,17 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
         // Scrollbar needs to wrap [LayoutBuilder] so that the scroll bar is
         // rendered on top of the custom painters defined in [buildCustomPaints]
         child: Scrollbar(
-          controller: verticalController,
+          controller: _flameChartScrollController,
           isAlwaysShown: true,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final customPaints = buildCustomPaints(constraints, context);
+              final chartOverlays = buildChartOverlays(constraints, context);
               final flameChart = _buildFlameChart(constraints);
-              return customPaints.isNotEmpty
+              return chartOverlays.isNotEmpty
                   ? Stack(
                       children: [
                         flameChart,
-                        ...customPaints,
+                        ...chartOverlays,
                       ],
                     )
                   : flameChart;
@@ -277,13 +277,13 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   Widget _buildFlameChart(BoxConstraints constraints) {
     return ExtentDelegateListView(
       physics: const ClampingScrollPhysics(),
-      controller: verticalController,
+      controller: _flameChartScrollController,
       extentDelegate: verticalExtentDelegate,
       customPointerSignalHandler: _handlePointerSignal,
       childrenDelegate: SliverChildBuilderDelegate(
         (context, index) {
           return ScrollingFlameChartRow<V>(
-            linkedScrollControllerGroup: horizontalController,
+            linkedScrollControllerGroup: horizontalControllerGroup,
             nodes: rows[index].nodes,
             width: math.max(constraints.maxWidth, widthWithZoom),
             startInset: widget.startInset,
@@ -349,9 +349,9 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
           zoomController.value - keyboardZoomOutUnit,
         ));
       } else if (keyLabel == 'a') {
-        scrollToX(horizontalController.offset - keyboardScrollUnit);
+        scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
       } else if (keyLabel == 'd') {
-        scrollToX(horizontalController.offset + keyboardScrollUnit);
+        scrollToX(horizontalControllerGroup.offset + keyboardScrollUnit);
       }
     }
   }
@@ -362,10 +362,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       double deltaY = event.scrollDelta.dy;
       if (deltaY.abs() >= deltaX.abs()) {
         if (_altKeyPressed) {
-          verticalController.jumpTo(math.max(
+          verticalControllerGroup.jumpTo(math.max(
             math.min(
-              verticalController.offset + deltaY,
-              verticalController.position.maxScrollExtent,
+              verticalControllerGroup.offset + deltaY,
+              verticalControllerGroup.position.maxScrollExtent,
             ),
             0.0,
           ));
@@ -384,6 +384,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
             FlameChart.maxZoomLevel,
           );
           await zoomTo(newZoomLevel, jump: true);
+          if (newZoomLevel == FlameChart.minZoomLevel &&
+              horizontalControllerGroup.offset != 0.0) {
+            await scrollToX(0.0);
+          }
         }
       }
     }
@@ -395,7 +399,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       if (currentZoom == previousZoom) return;
 
       // Store current scroll values for re-calculating scroll location on zoom.
-      final lastScrollOffset = horizontalController.offset;
+      final lastScrollOffset = horizontalControllerGroup.offset;
 
       final safeMouseHoverX = mouseHoverX ?? widget.containerWidth / 2;
       // Position in the zoomable coordinate space that we want to keep fixed.
@@ -415,8 +419,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       // to call this that guarantees the scroll controller offsets will be
       // updated for the new zoom level and layout size
       // https://github.com/flutter/devtools/issues/2012.
-      horizontalController.jumpTo(
-          newScrollOffset.clamp(FlameChart.minScrollOffset, maxScrollOffset));
+      scrollToX(newScrollOffset, jump: true);
     });
   }
 
@@ -438,11 +441,14 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     double offset, {
     bool jump = false,
   }) async {
-    final target = offset.clamp(FlameChart.minScrollOffset, maxScrollOffset);
+    final target = offset.clamp(
+      FlameChart.minScrollOffset,
+      horizontalControllerGroup.position.maxScrollExtent,
+    );
     if (jump) {
-      horizontalController.jumpTo(target);
+      horizontalControllerGroup.jumpTo(target);
     } else {
-      await horizontalController.animateTo(
+      await horizontalControllerGroup.animateTo(
         target,
         curve: defaultCurve,
         duration: shortDuration,
@@ -451,10 +457,12 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   }
 
   Future<void> scrollVerticallyToData(V data) async {
-    await verticalController.animateTo(
+    await verticalControllerGroup.animateTo(
       // Subtract [2 * rowHeightWithPadding] to give the target scroll event top padding.
-      (topYForData(data) - 2 * rowHeightWithPadding)
-          .clamp(0.0, verticalController.position.maxScrollExtent),
+      (topYForData(data) - 2 * rowHeightWithPadding).clamp(
+        FlameChart.minScrollOffset,
+        verticalControllerGroup.position.maxScrollExtent,
+      ),
       duration: shortDuration,
       curve: defaultCurve,
     );
@@ -635,9 +643,9 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
         child: Container(
           height: rowHeightWithPadding,
           width: widget.width,
-          color: alternatingColorForIndexWithContext(
+          color: alternatingColorForIndex(
             nodes.first.sectionIndex,
-            context,
+            Theme.of(context).colorScheme,
           ),
           // TODO(kenz): investigate if `addAutomaticKeepAlives: false` and
           // `addRepaintBoundaries: false` are needed here for perf improvement.
@@ -1121,7 +1129,7 @@ abstract class FlameChartPainter extends CustomPainter {
   })  : assert(colorScheme != null),
         super(
             repaint: Listenable.merge([
-          verticalController,
+          verticalController.offsetNotifier,
           horizontalController.offsetNotifier,
         ]));
 
@@ -1129,7 +1137,7 @@ abstract class FlameChartPainter extends CustomPainter {
 
   final BoxConstraints constraints;
 
-  final ScrollController verticalController;
+  final LinkedScrollControllerGroup verticalController;
 
   final LinkedScrollControllerGroup horizontalController;
 
@@ -1165,7 +1173,7 @@ class TimelineGridPainter extends FlameChartPainter {
   TimelineGridPainter({
     @required double zoom,
     @required BoxConstraints constraints,
-    @required ScrollController verticalController,
+    @required LinkedScrollControllerGroup verticalController,
     @required LinkedScrollControllerGroup horizontalController,
     @required double chartStartInset,
     @required this.chartEndInset,

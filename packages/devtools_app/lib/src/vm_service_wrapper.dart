@@ -503,6 +503,55 @@ class VmServiceWrapper implements VmService {
     }
   }
 
+  // TODO(bkonyi): move this method to
+  // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
+  Future<bool> isHttpProfilingAvailable(String isolateId) async {
+    final Isolate isolate = await getIsolate(isolateId);
+    return isolate.extensionRPCs.contains('ext.dart.io.getHttpProfile');
+  }
+
+  /// The `getHttpProfile` RPC is used to retrieve HTTP profiling information
+  /// for requests made via `dart:io`'s `HttpClient`.
+  ///
+  /// The returned [HttpProfile] will only include requests issued after
+  /// [httpTimelineLogging] has been enabled or after the last
+  /// [clearHttpProfile] invocation.
+  Future<HttpProfile> getHttpProfile(
+    String isolateId, {
+    int updatedSince,
+  }) async {
+    assert(await isHttpProfilingAvailable(isolateId));
+    return trackFuture(
+      'getHttpProfile',
+      _vmService.getHttpProfile(
+        isolateId,
+        updatedSince: updatedSince,
+      ),
+    );
+  }
+
+  Future<HttpProfileRequest> getHttpProfileRequest(
+    String isolateId,
+    int id,
+  ) async {
+    assert(await isHttpProfilingAvailable(isolateId));
+    return trackFuture(
+      'getHttpProfileRequest',
+      _vmService.getHttpProfileRequest(isolateId, id),
+    );
+  }
+
+  /// The `clearHttpProfile` RPC is used to clear previously recorded HTTP
+  /// requests from the HTTP profiler state. Requests still in-flight after
+  /// clearing the profiler state will be ignored by the profiler.
+  Future<Success> clearHttpProfile(String isolateId) async {
+    assert(await isHttpProfilingAvailable(isolateId));
+    return trackFuture(
+      'clearHttpProfile',
+      _vmService.clearHttpProfile(isolateId),
+    );
+  }
+
   // TODO(kenz): move this method to
   // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
   Future<bool> isSocketProfilingAvailable(String isolateId) async {

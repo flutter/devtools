@@ -457,8 +457,8 @@ class RecordingInfo extends StatelessWidget {
 
 class RecordingStatus extends StatelessWidget {
   const RecordingStatus({
-    Key key, @required
-    this.recordedObject,
+    Key key,
+    @required this.recordedObject,
   }) : super(key: key);
 
   final String recordedObject;
@@ -496,15 +496,15 @@ class RecordingInstructions extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: isPause
           ? const [
-        Text('Click the pause button '),
-        Icon(Icons.pause),
-        Text(' to pause the recording.'),
-      ]
+              Text('Click the pause button '),
+              Icon(Icons.pause),
+              Text(' to pause the recording.'),
+            ]
           : const [
-        Text('Click the stop button '),
-        Icon(Icons.stop),
-        Text(' to end the recording.'),
-      ],
+              Text('Click the stop button '),
+              Icon(Icons.stop),
+              Text(' to end the recording.'),
+            ],
     );
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -522,7 +522,6 @@ class RecordingInstructions extends StatelessWidget {
     );
   }
 }
-
 
 class ProcessingInfo extends StatelessWidget {
   const ProcessingInfo({
@@ -1098,12 +1097,6 @@ extension ColorExtension on Color {
 }
 
 /// Gets an alternating color to use for indexed UI elements.
-Color alternatingColorForIndexWithContext(int index, BuildContext context) {
-  final theme = Theme.of(context);
-  final color = theme.canvasColor;
-  return _colorForIndex(color, index, theme.colorScheme);
-}
-
 Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
   final color = colorScheme.defaultBackgroundColor;
   return _colorForIndex(color, index, colorScheme);

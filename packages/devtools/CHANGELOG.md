@@ -1,3 +1,15 @@
+## 2.0.0+4
+* Upgrade DevTools dependencies for http_multi_server [#2838](https://github.com/flutter/devtools/pull/2838)
+
+## 2.0.0+3
+* Upgrade DevTools dependencies for usage and shelf_static [#2836](https://github.com/flutter/devtools/pull/2836)
+
+## 2.0.0+2
+* Upgrade DevTools dependencies [#2818](https://github.com/flutter/devtools/pull/2818)
+
+## 2.0.0+1
+* Upgrade dependencies for `args`, `meta`, `path`, and `pedantic` [#2817](https://github.com/flutter/devtools/pull/2817)
+
 ## 2.0.0
 * Add support for older VMs, cleanup memory filter dialog and retained size [#2752](https://github.com/flutter/devtools/pull/2752)
 * Add memory allocations tracked indicator and polish event icons for track and reset [#2751](https://github.com/flutter/devtools/pull/2751)
@@ -62,7 +74,7 @@
 * Bundle canvaskit with the release binary so that DevTools can be used without internet [#2634](https://github.com/flutter/devtools/pull/2634)
 * Add support for visualizing fixed layouts in the layout explorer [#2633](https://github.com/flutter/devtools/pull/2633)
 * Listen for logs with event history in logging page and error badge manager [#2629](https://github.com/flutter/devtools/pull/2629)
-* Add app events, extension events, and chart selection hover card to live memory view [#2605](https://github.com/flutter/devtools/pull/2605) 
+* Add app events, extension events, and chart selection hover card to live memory view [#2605](https://github.com/flutter/devtools/pull/2605)
 * Correctly process large HTTP responses in network profiler [#2602](https://github.com/flutter/devtools/pull/2602)
 * Fallback to port 0 if we cannot connect the DevTools server to ports 9100+ [#2600](https://github.com/flutter/devtools/pull/2600)
 * Add tooltips to CPU profiler column titles [#2599](https://github.com/flutter/devtools/pull/2599)
@@ -70,13 +82,13 @@
 * Migrate to new material buttons [#2592](https://github.com/flutter/devtools/pull/2592)
 
 ## 0.9.6+3
-* Support null safe `package:intl` version `>=0.17.x`. 
+* Support null safe `package:intl` version `>=0.17.x`.
 
 ## 0.9.6+2
-* Support null safe `package:vm_service` version `>=6.x.x`. 
+* Support null safe `package:vm_service` version `>=6.x.x`.
 
-## 0.9.6+1  
-* Fallback to port 0 if we cannot connect the DevTools server to ports 9100-9109 #2600 
+## 0.9.6+1
+* Fallback to port 0 if we cannot connect the DevTools server to ports 9100-9109 #2600
 
 ## 0.9.6
 * Remove use of Flutter service worker [#2586](https://github.com/flutter/devtools/pull/2586)
@@ -241,7 +253,7 @@
 * Use registerServiceExtension method instead of eval directly in layout explorer [#1531](https://github.com/flutter/devtools/pull/1531)
 * Factor zoom level into flame chart node selection logic [#1623](https://github.com/flutter/devtools/pull/1623)
 * Update to support devtools_server [#1622](https://github.com/flutter/devtools/pull/1622)
-* Flame chart zoom and navigation with WASD keys [#1611](https://github.com/flutter/devtools/pull/1611) 
+* Flame chart zoom and navigation with WASD keys [#1611](https://github.com/flutter/devtools/pull/1611)
 * Updated to use package:devtools_shared [#1620](https://github.com/flutter/devtools/pull/1620))
 * Initial devtools_shared package [#1619](https://github.com/flutter/devtools/pull/1619)
 * Remove --trace-systrace flag from MacOs and Linux configs [#1614](https://github.com/flutter/devtools/pull/1614)

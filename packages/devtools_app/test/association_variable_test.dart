@@ -58,15 +58,18 @@ void main() {
             id: '4',
             kind: InstanceKind.kString,
             valueAsString: 'Hey',
+            identityHashCode: null,
           ),
           value: InstanceRef(
             classRef: null,
             id: '5',
             kind: InstanceKind.kDouble,
             valueAsString: '12.34',
+            identityHashCode: null,
           ),
         ),
       ],
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',
@@ -103,15 +106,18 @@ void main() {
             id: '4',
             kind: InstanceKind.kInt,
             valueAsString: '1',
+            identityHashCode: null,
           ),
           value: InstanceRef(
             classRef: null,
             id: '5',
             kind: InstanceKind.kDouble,
             valueAsString: '12.34',
+            identityHashCode: null,
           ),
         ),
       ],
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',
@@ -147,15 +153,18 @@ void main() {
             classRef: ClassRef(id: 'a', name: 'Foo'),
             id: '4',
             kind: InstanceKind.kPlainInstance,
+            identityHashCode: null,
           ),
           value: InstanceRef(
             classRef: null,
             id: '5',
             kind: InstanceKind.kDouble,
             valueAsString: '12.34',
+            identityHashCode: null,
           ),
         ),
       ],
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',

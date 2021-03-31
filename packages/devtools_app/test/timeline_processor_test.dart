@@ -74,16 +74,16 @@ void main() {
         ..time = (TimeRange()
           ..start = const Duration(microseconds: 5000)
           ..end = const Duration(microseconds: 6000));
-      final gpuEvent = goldenRasterTimelineEvent.deepCopy()
+      final rasterEvent = goldenRasterTimelineEvent.deepCopy()
         ..time = (TimeRange()
           ..start = const Duration(microseconds: 4000)
           ..end = const Duration(microseconds: 8000));
 
       expect(processor.satisfiesUiRasterOrder(uiEvent, frame), isTrue);
-      expect(processor.satisfiesUiRasterOrder(gpuEvent, frame), isTrue);
+      expect(processor.satisfiesUiRasterOrder(rasterEvent, frame), isTrue);
 
       frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
-      expect(processor.satisfiesUiRasterOrder(gpuEvent, frame), isFalse);
+      expect(processor.satisfiesUiRasterOrder(rasterEvent, frame), isFalse);
 
       frame = FlutterFrame('frameId')
         ..pipelineItemTime.start = const Duration(microseconds: frameStartTime)
@@ -91,8 +91,30 @@ void main() {
 
       frame
         ..setEventFlow(null, type: TimelineEventType.ui)
-        ..setEventFlow(gpuEvent, type: TimelineEventType.raster);
+        ..setEventFlow(rasterEvent, type: TimelineEventType.raster);
       expect(processor.satisfiesUiRasterOrder(uiEvent, frame), isFalse);
+    });
+
+    test(
+        'UI event flow sets end frame time if it completes after raster event flow',
+        () {
+      final uiEvent = goldenUiTimelineEvent.deepCopy()
+        ..time = (TimeRange()
+          ..start = const Duration(microseconds: 5000)
+          ..end = const Duration(microseconds: 8000));
+      final rasterEvent = goldenRasterTimelineEvent.deepCopy()
+        ..time = (TimeRange()
+          ..start = const Duration(microseconds: 6000)
+          ..end = const Duration(microseconds: 7000));
+
+      final frame = FlutterFrame('frameId');
+      frame.setEventFlow(rasterEvent, type: TimelineEventType.raster);
+      expect(frame.time.start, isNull);
+      expect(frame.time.end, isNull);
+
+      frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
+      expect(frame.time.start, equals(const Duration(microseconds: 5000)));
+      expect(frame.time.end, equals(const Duration(microseconds: 8000)));
     });
 
     test('frame completed', () async {

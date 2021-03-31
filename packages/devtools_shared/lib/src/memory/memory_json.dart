@@ -38,10 +38,14 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
     if (payloadVersion != version) {
       // TODO(terry): Convert Payload TBD - only one version today.
       // TODO(terry): Notify user the file is being converted.
+      // TODO(terry): Consider moving config_specific/logger/ into shared to
+      //              use logger instead of print.
+      print('WARNING: Unable to convert JSON memory file payload version=$payloadVersion.');
+      // TODO(terry): After conversion update payloadVersion to version;
     }
 
     _memoryPayload = payloadDevToolsScreen == devToolsScreenValueMemory;
-    _payloadVersion = payloadVersion == version;
+    _payloadVersion = payloadVersion;
 
     // Any problem return (data is empty).
     if (!isMatchedVersion || !isMemoryPayload) return;
@@ -53,10 +57,12 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
     }
   }
 
-  bool _payloadVersion;
+  int _payloadVersion;
+
+  int get payloadVersion => _payloadVersion;
 
   /// Imported JSON data loaded and converted, if necessary, to the latest version.
-  bool get isMatchedVersion => _payloadVersion;
+  bool get isMatchedVersion => _payloadVersion == version;
 
   bool _memoryPayload;
 

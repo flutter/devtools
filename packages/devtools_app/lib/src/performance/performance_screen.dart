@@ -308,27 +308,12 @@ class PerformanceSettingsDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...dialogSubHeader(theme, 'Default Recorded Timeline Streams'),
+            ...dialogSubHeader(theme, 'Recorded Timeline Streams'),
             ..._defaultRecordedStreams(theme),
-            const SizedBox(height: denseSpacing),
-            ...dialogSubHeader(theme, 'Advanced Recorded Timeline Streams'),
             ..._advancedStreams(theme),
             if (serviceManager.connectedApp.isFlutterAppNow) ...[
               const SizedBox(height: denseSpacing),
-              ...dialogSubHeader(theme, 'Additional Settings'),
-              Row(
-                children: [
-                  NotifierCheckbox(notifier: controller.badgeTabForJankyFrames),
-                  RichText(
-                    overflow: TextOverflow.visible,
-                    text: TextSpan(
-                      text:
-                          'Badge Performance tab when Flutter UI jank is detected',
-                      style: theme.regularTextStyle,
-                    ),
-                  ),
-                ],
-              ),
+              ..._additionalFlutterSettings(theme),
             ],
           ],
         ),
@@ -341,6 +326,12 @@ class PerformanceSettingsDialog extends StatelessWidget {
 
   List<Widget> _defaultRecordedStreams(ThemeData theme) {
     return [
+      RichText(
+        text: TextSpan(
+          text: 'Default',
+          style: theme.subtleTextStyle,
+        ),
+      ),
       ..._timelineStreams(theme, advanced: false),
       // Special case "Network Traffic" because it is not implemented as a
       // Timeline recorded stream in the VM. The user does not need to be aware of
@@ -356,7 +347,15 @@ class PerformanceSettingsDialog extends StatelessWidget {
   }
 
   List<Widget> _advancedStreams(ThemeData theme) {
-    return _timelineStreams(theme, advanced: true);
+    return [
+      RichText(
+        text: TextSpan(
+          text: 'Advanced',
+          style: theme.subtleTextStyle,
+        ),
+      ),
+      ..._timelineStreams(theme, advanced: true),
+    ];
   }
 
   List<Widget> _timelineStreams(
@@ -412,6 +411,35 @@ class PerformanceSettingsDialog extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _additionalFlutterSettings(ThemeData theme) {
+    return [
+      ...dialogSubHeader(theme, 'Additional Settings'),
+      _BadgeJankyFramesSetting(controller),
+    ];
+  }
+}
+
+class _BadgeJankyFramesSetting extends StatelessWidget {
+  const _BadgeJankyFramesSetting(this.controller);
+
+  final PerformanceController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        NotifierCheckbox(notifier: controller.badgeTabForJankyFrames),
+        RichText(
+          overflow: TextOverflow.visible,
+          text: TextSpan(
+            text: 'Badge Performance tab when Flutter UI jank is detected',
+            style: Theme.of(context).regularTextStyle,
           ),
         ),
       ],

@@ -123,7 +123,8 @@ String printMB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
 }
 
 String printGB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
-  var output = (bytes / (1024 * 1024.0 * 1024.0)).toStringAsFixed(fractionDigits);
+  var output =
+      (bytes / (1024 * 1024.0 * 1024.0)).toStringAsFixed(fractionDigits);
   if (includeUnit) {
     output += ' GB';
   }

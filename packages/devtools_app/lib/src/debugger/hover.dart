@@ -7,53 +7,66 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import '../ui/utils.dart';
+
+/// Regex for valid Dart identifiers.
+final _identifier = RegExp(r'^[a-zA-Z0-9]|_|\$');
 
 /// Returns the word in the [line] for the provided hover [dx] offset given
 /// the [line]'s [textStyle].
-String wordForHover(double dx, TextSpan line, TextStyle textStyle) {
-  final index = _hoverIndex(dx, line, textStyle);
-  var word = '';
-  if (index == -1) return word;
-  word = line.children[index].toPlainText();
-  word = _mergedLinkedWords(word, index, line);
+String wordForHover(double dx, TextSpan line) {
+  String word = '';
+  final hoverIndex = _hoverIndexFor(dx, line);
+  final lineText = line.toPlainText();
+  if (hoverIndex >= 0 && hoverIndex < lineText.length) {
+    final hoverChar = lineText[hoverIndex];
+    word = '$word$hoverChar';
+    if (_identifier.hasMatch(hoverChar) || hoverChar == '.') {
+      // Merge trailing valid identifiers.
+      int charIndex = hoverIndex + 1;
+      while (charIndex < lineText.length) {
+        final character = lineText[charIndex];
+        if (_identifier.hasMatch(character)) {
+          word = '$word$character';
+        } else {
+          break;
+        }
+        charIndex++;
+      }
+
+      // Merge preceding characters including those linked by a `.`.
+      charIndex = hoverIndex - 1;
+      while (charIndex >= 0) {
+        final character = lineText[charIndex];
+        if (_identifier.hasMatch(character) || character == '.') {
+          word = '$character$word';
+        } else {
+          break;
+        }
+        charIndex--;
+      }
+    }
+  }
+
   return word;
 }
 
-/// Merges words linked by a `.`.
-///
-/// For example, hovering over `bar` in `foo.bar.baz` would return
-/// `foo.bar`.
-String _mergedLinkedWords(String word, int index, TextSpan line) {
-  var left = index - 1;
-  while (left > 1) {
-    final prev = line.children[left].toPlainText();
-    final prevprev = line.children[left - 1].toPlainText();
-    if (prev == '.') {
-      word = '$prevprev$prev$word';
-      left -= 2;
-    } else {
+/// Returns the index in the Textspan's plainText for which the hover offset is
+/// located.
+int _hoverIndexFor(double dx, TextSpan line) {
+  int hoverIndex = -1;
+  final length = line.toPlainText().length;
+  for (var i = 0; i < length; i++) {
+    final painter = TextPainter(
+      text: truncateTextSpan(line, i + 1),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    if (dx <= painter.width) {
+      hoverIndex = i;
       break;
     }
   }
-  return word;
-}
-
-/// Returns the index in the [line]'s children for which the hover offset is
-/// located.
-int _hoverIndex(double dx, TextSpan line, TextStyle textStyle) {
-  int index = 0;
-  var cumulativeWidth = 0.0;
-  while (index < line.children.length) {
-    final span = line.children[index];
-    final painter = TextPainter(
-      text: TextSpan(children: [span], style: textStyle),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    cumulativeWidth += painter.width;
-    if (cumulativeWidth >= dx) return index;
-    index++;
-  }
-  return -1;
+  return hoverIndex;
 }
 
 const _hoverCardBorderWidth = 2.0;
