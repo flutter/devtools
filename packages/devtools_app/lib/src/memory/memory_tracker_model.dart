@@ -189,6 +189,7 @@ class TreeTracker {
         ],
       );
 
+  // TODO(terry): Move to a class derived from widget.
   Widget displaySelectedStackTrace(
     BuildContext context,
     MemoryController controller,
@@ -259,6 +260,7 @@ class TreeTracker {
   static const trackInstancesViewWidth = 200.0;
   static const callstackViewWidth = 280.0;
 
+  // TODO(terry): Move to a class derived from widget.
   Widget createTrackingTable(
     BuildContext context,
     MemoryController controller,
