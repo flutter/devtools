@@ -14,6 +14,9 @@ import '../utils.dart';
 import 'memory_allocation_table_view.dart';
 import 'memory_controller.dart';
 
+/// Space between items in the call stack list.
+const defaultSpacerHeight = 12.0;
+
 class Tracker extends TreeNode<Tracker> {
   factory Tracker({String className}) {
     return Tracker._internal(name: className);
@@ -233,23 +236,19 @@ class TreeTracker {
               controller: scroller,
               itemCount: callstackLength,
               itemBuilder: (context, index) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      '#$index ${stackTrace[index]}',
-                      style: colorScheme.stackTraceCall,
-                    ),
+                  Text(
+                    '#$index ${stackTrace[index]}',
+                    style: colorScheme.stackTraceCall,
                   ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(sources[index],
-                        style: colorScheme.stackTraceSource),
-                  ),
+                  Text(sources[index], style: colorScheme.stackTraceSource),
                 ],
               ),
-              separatorBuilder: (context, index) =>
-                  Divider(color: devtoolsGrey[400], height: 12),
+              separatorBuilder: (context, index) => Divider(
+                color: devtoolsGrey[400],
+                height: defaultSpacerHeight,
+              ),
             ),
           ),
         ),
