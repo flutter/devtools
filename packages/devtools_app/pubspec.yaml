@@ -66,7 +66,7 @@ dev_dependencies:
   # (temporary home for canonical lints)
   simple_lint_rules: ^1.0.0
   test: any # This version is pinned by Flutter so we don't need to set one explicitly.
-  webkit_inspection_protocol: '>=0.5.0 <0.8.0'
+  webkit_inspection_protocol: '>=0.5.0 <2.0.0'
 
 
 flutter:
