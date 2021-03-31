@@ -745,12 +745,12 @@ class MemoryBodyState extends State<MemoryBody>
 
     return Expanded(
       child: Container(
-          padding: const EdgeInsets.fromLTRB(10, 0, 0, 2),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: rowChildren,
-          ),
+        padding: const EdgeInsets.fromLTRB(10, 0, 0, 2),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: rowChildren,
         ),
+      ),
     );
   }
 
@@ -1042,16 +1042,20 @@ class MemoryBodyState extends State<MemoryBody>
     vmDataDisplayed['${MemoryScreen.rssDisplay} $rssValueDisplay'] = rssLegend;
 
     final capacityValueDisplay = formatNumeric(data[capacityJsonName]);
-    vmDataDisplayed['${MemoryScreen.allocatedDisplay} $capacityValueDisplay'] = allocatedLegend;
+    vmDataDisplayed['${MemoryScreen.allocatedDisplay} $capacityValueDisplay'] =
+        allocatedLegend;
 
     final usedValueDisplay = formatNumeric(data[usedJsonName]);
-    vmDataDisplayed['${MemoryScreen.usedDisplay} $usedValueDisplay'] = usedLegend;
+    vmDataDisplayed['${MemoryScreen.usedDisplay} $usedValueDisplay'] =
+        usedLegend;
 
     final externalValueDisplay = formatNumeric(data[externalJsonName]);
-    vmDataDisplayed['${MemoryScreen.externalDisplay} $externalValueDisplay'] = externalLegend;
+    vmDataDisplayed['${MemoryScreen.externalDisplay} $externalValueDisplay'] =
+        externalLegend;
 
     final layerValueDisplay = formatNumeric(data[rasterLayerJsonName]);
-    vmDataDisplayed['${MemoryScreen.layerDisplay} $layerValueDisplay'] = rasterLayerLegend;
+    vmDataDisplayed['${MemoryScreen.layerDisplay} $layerValueDisplay'] =
+        rasterLayerLegend;
 
     final pictureValueDisplay = formatNumeric(data[rasterPictureJsonName]);
     vmDataDisplayed['${MemoryScreen.pictureDisplay} $pictureValueDisplay'] =
@@ -1274,9 +1278,12 @@ class MemoryBodyState extends State<MemoryBody>
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
                 child: Text('Memory Legend', style: legendHeading),
               ),
-              legendRow(name1: MemoryScreen.allocatedDisplay, image1: allocatedLegend),
+              legendRow(
+                  name1: MemoryScreen.allocatedDisplay,
+                  image1: allocatedLegend),
               legendRow(name1: MemoryScreen.usedDisplay, image1: usedLegend),
-              legendRow(name1: MemoryScreen.externalDisplay, image1: externalLegend),
+              legendRow(
+                  name1: MemoryScreen.externalDisplay, image1: externalLegend),
               legendRow(name1: MemoryScreen.rssDisplay, image1: rssLegend),
               if (controller.isAndroidChartVisible)
                 const Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 9)),

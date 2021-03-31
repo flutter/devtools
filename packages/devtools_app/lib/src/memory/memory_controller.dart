@@ -34,8 +34,6 @@ enum ChartType {
   AndroidHeaps,
 }
 
-typedef chartStateListener = void Function();
-
 // TODO(terry): Consider supporting more than one file since app was launched.
 // Memory Log filename.
 final String _memoryLogFilename =
