@@ -226,7 +226,7 @@ class AllocationTableViewState extends State<AllocationTableView>
           controller.searchMatchMonitorAllocationsNotifier,
     );
 
-    final ScrollController scroller = ScrollController();
+    final ScrollController scrollerController = ScrollController();
 
     return Split(
       initialFractions: const [0.8, 0.2],
@@ -234,7 +234,7 @@ class AllocationTableViewState extends State<AllocationTableView>
       axis: Axis.vertical,
       children: [
         controller.allocationsFieldsTable,
-        trackerData.createTrackingTable(context, controller, scroller),
+        trackerData.createTrackingTable(context, controller, scrollerController),
       ],
     );
   }

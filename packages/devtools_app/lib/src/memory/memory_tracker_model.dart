@@ -38,7 +38,7 @@ class TrackerAllocation extends Tracker {
 
   final int timestamp;
 
-  /// Souces and callstack for an instance.
+  /// Sources and callstack for an instance.
   final AllocationStackTrace stacktrace;
 
   @override
@@ -161,7 +161,7 @@ class TreeTracker {
     }
   }
 
-  Widget _helpTrackScreen(BuildContext context) {
+  Widget allocationTrackingInstructions(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -181,11 +181,11 @@ class TreeTracker {
     );
   }
 
-  Widget _helpStacktraceScreen(BuildContext context) => Row(
+  Widget allocationCallStackInstructions(BuildContext context) => Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [
-          Text('Select an instance of a tracked class to'
-              ' view its allocation stack trace.'),
+          Text('Select an instance of a tracked class'),
+          Text('to view its allocation stack trace.'),
         ],
       );
 
@@ -195,6 +195,8 @@ class TreeTracker {
     ScrollController scroller,
     TrackerAllocation tracker,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     final allocationStacktrace = tracker.stacktrace;
 
     final stackTrace = allocationStacktrace.stacktrace;
@@ -224,18 +226,29 @@ class TreeTracker {
           child: Scrollbar(
             isAlwaysShown: true,
             controller: scroller,
-            child: ListView.builder(
+            child: ListView.separated(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
               controller: scroller,
               itemCount: callstackLength,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: Text('#$index ${stackTrace[index]}'),
-                  //subtitle: Text(controller.displayAsPackage(sources[index])),
-                  subtitle: Text(sources[index]),
-                );
-              },
+              itemBuilder: (context, index) => Column(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '#$index ${stackTrace[index]}',
+                      style: colorScheme.stackTraceCall,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(sources[index],
+                        style: colorScheme.stackTraceSource),
+                  ),
+                ],
+              ),
+              separatorBuilder: (context, index) =>
+                  Divider(color: devtoolsGrey[400], height: 8),
             ),
           ),
         ),
@@ -256,9 +269,9 @@ class TreeTracker {
         selection.node is TrackerAllocation ? selection.node : null;
 
     final widget = controller.trackAllocations.isEmpty
-        ? _helpTrackScreen(context)
+        ? allocationTrackingInstructions(context)
         : Split(
-            initialFractions: const [0.32, 0.68],
+            initialFractions: const [0.5, 0.5],
             minSizes: const [trackInstancesViewWidth, callstackViewWidth],
             axis: Axis.horizontal,
             children: [
@@ -277,7 +290,7 @@ class TreeTracker {
                 selectionNotifier: selectionNotifier,
               ),
               trackerAllocation == null
-                  ? _helpStacktraceScreen(context)
+                  ? allocationCallStackInstructions(context)
                   : displaySelectedStackTrace(
                       context,
                       controller,
