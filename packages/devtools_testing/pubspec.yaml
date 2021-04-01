@@ -22,11 +22,6 @@ dependencies:
   test: any # This version is pinned by Flutter so we don't need to set one explicitly.
   vm_service: '>=5.0.0+1 < 7.0.0'
 
-
-dev_dependencies:
-  # (temporary home for canonical lints)
-  simple_lint_rules: ^1.0.0
-
 dependency_overrides:
 # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.
 # All overriden dependencies are published together so there is no harm
