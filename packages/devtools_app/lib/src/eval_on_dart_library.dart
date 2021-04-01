@@ -484,7 +484,7 @@ class EvalOnDartLibrary {
     Disposable isAlive, {
     int offset,
     int count,
-  }) async {
+  }) {
     return addRequest<T>(isAlive, () async {
       final T value = await service.getObject(
         _isolateId,

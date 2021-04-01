@@ -11,11 +11,11 @@ version: 2.0.0+4
 homepage: https://github.com/flutter/devtools
 
 environment:
-  sdk: ">=2.10.0 <3.0.0"
+  sdk: '>=2.10.0 <3.0.0'
   # The flutter desktop support interacts with build scripts on the Flutter
   # side that are not yet stable, so it requires a very recent version of
   # Flutter. This version will increase regularly as the build scripts change.
-  flutter: ">=1.10.0"
+  flutter: '>=1.10.0'
 
 dependencies:
   ansi_up: ^0.0.2
@@ -65,7 +65,7 @@ dev_dependencies:
   # (temporary home for canonical lints)
   simple_lint_rules: ^1.0.0
   test: any # This version is pinned by Flutter so we don't need to set one explicitly.
-  webkit_inspection_protocol: ">=0.5.0 <0.8.0"
+  webkit_inspection_protocol: '>=0.5.0 <0.8.0'
 
 flutter:
   uses-material-design: true
@@ -121,15 +121,12 @@ flutter:
         - asset: packages/codicon/font/codicon.ttf
 
 dependency_overrides:
-  # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.
-  # All overriden dependencies are published together so there is no harm
-  # in treating them like they are part of a mono-repo while developing.
+# The '#OVERRIDE_FOR_DEVELOPMENT' lines are stripped out when we publish.
+# All overriden dependencies are published together so there is no harm
+# in treating them like they are part of a mono-repo while developing.
   devtools_server: #OVERRIDE_FOR_DEVELOPMENT
     path: ../devtools_server #OVERRIDE_FOR_DEVELOPMENT
   devtools_shared: #OVERRIDE_FOR_DEVELOPMENT
     path: ../devtools_shared #OVERRIDE_FOR_DEVELOPMENT
   devtools_testing: #OVERRIDE_FOR_DEVELOPMENT
     path: ../devtools_testing #OVERRIDE_FOR_DEVELOPMENT
-  # build_runner:
-  # freezed: ^0.12.0
-  # freezed_annotation: ^0.12.0

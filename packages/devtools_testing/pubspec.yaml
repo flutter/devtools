@@ -38,4 +38,3 @@ dependency_overrides:
     path: ../devtools_server  #OVERRIDE_FOR_DEVELOPMENT
   devtools_shared:  #OVERRIDE_FOR_DEVELOPMENT
     path: ../devtools_shared  #OVERRIDE_FOR_DEVELOPMENT
-  freezed_annotation: ^0.12.0
