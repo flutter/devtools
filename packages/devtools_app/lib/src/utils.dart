@@ -1069,3 +1069,46 @@ String prettyTimestamp(
   );
   return DateFormat.Hms().format(timestampDT); // HH:mm:ss
 }
+
+/// A [ChangeNotifier] that holds a list of data.
+///
+/// When [value] is replaced with something that is not equal to the old
+/// value as evaluated by the equality operator ==, this class notifies its
+/// listeners.
+///
+/// This class also exposes methods `addAndNotify` and `addAllAndNotify` that
+/// will notify listeners upon the list [value] being modified.
+class ListValueNotifier<T extends List<V>, V> extends ChangeNotifier
+    implements ValueListenable<T> {
+  /// Creates a [ChangeNotifier] that wraps this value.
+  ListValueNotifier(this._value);
+
+  /// The current value stored in this notifier.
+  ///
+  /// When the value is replaced with something that is not equal to the old
+  /// value as evaluated by the equality operator ==, this class notifies its
+  /// listeners.
+  @override
+  T get value => _value;
+  T _value;
+  set value(T newValue) {
+    if (_value == newValue) {
+      return;
+    }
+    _value = newValue;
+    notifyListeners();
+  }
+
+  void addAndNotify(V item) {
+    _value.add(item);
+    notifyListeners();
+  }
+
+  void addAllAndNotify(T itemList) {
+    _value.addAll(itemList);
+    notifyListeners();
+  }
+
+  @override
+  String toString() => '${describeIdentity(this)}($value)';
+}

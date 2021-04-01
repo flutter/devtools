@@ -911,6 +911,44 @@ void main() {
         expect(['a', 'b'].joinWith('z'), equals(['a', 'z', 'b']));
       });
     });
+
+    group('ListValueNotifier', () {
+      ListValueNotifier<List<int>, int> notifier;
+
+      bool didNotify;
+
+      setUp(() {
+        didNotify = false;
+        notifier = ListValueNotifier<List<int>, int>([]);
+        notifier.addListener(() {
+          didNotify = true;
+        });
+      });
+
+      test('notifies on value change', () {
+        expect(didNotify, isFalse);
+        expect(notifier.value, equals([]));
+        notifier.value = [1, 2, 3];
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 2, 3]));
+      });
+
+      test('notifies on addAndNotify', () {
+        expect(didNotify, isFalse);
+        expect(notifier.value, equals([]));
+        notifier.addAndNotify(1);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1]));
+      });
+
+      test('notifies on addAllAndNotify', () {
+        expect(didNotify, isFalse);
+        expect(notifier.value, equals([]));
+        notifier.addAllAndNotify([1, 2]);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 2]));
+      });
+    });
   });
 }
 
