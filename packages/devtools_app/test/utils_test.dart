@@ -936,7 +936,7 @@ void main() {
       test('notifies on addAndNotify', () {
         expect(didNotify, isFalse);
         expect(notifier.value, equals([]));
-        notifier.addAndNotify(1);
+        notifier.add(1);
         expect(didNotify, isTrue);
         expect(notifier.value, equals([1]));
       });
@@ -944,7 +944,7 @@ void main() {
       test('notifies on addAllAndNotify', () {
         expect(didNotify, isFalse);
         expect(notifier.value, equals([]));
-        notifier.addAllAndNotify([1, 2]);
+        notifier.addAll([1, 2]);
         expect(didNotify, isTrue);
         expect(notifier.value, equals([1, 2]));
       });

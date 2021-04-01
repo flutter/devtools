@@ -1082,12 +1082,12 @@ class ListValueNotifier<T> extends ValueNotifier<List<T>> {
   /// Creates a [ListValueNotifier] that wraps this value.
   ListValueNotifier(List<T> value) : super(value);
 
-  void addAndNotify(T item) {
+  void add(T item) {
     value.add(item);
     notifyListeners();
   }
 
-  void addAllAndNotify(List<T> itemList) {
+  void addAll(List<T> itemList) {
     value.addAll(itemList);
     notifyListeners();
   }
@@ -1095,7 +1095,7 @@ class ListValueNotifier<T> extends ValueNotifier<List<T>> {
   /// Forces notifying listeners with the current value.
   ///
   /// This should only be used if the list [value] cannot be modified with
-  /// [addAndNotify] or [addAllAndNotify].
+  /// [add] or [addAll].
   void forceNotify() {
     notifyListeners();
   }
