@@ -948,6 +948,19 @@ void main() {
         expect(didNotify, isTrue);
         expect(notifier.value, equals([1, 2]));
       });
+
+      test('notifies on forceNotify', () {
+        expect(didNotify, isFalse);
+        expect(notifier.value, equals([]));
+        notifier.value = [1, 2];
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 2]));
+
+        didNotify = false;
+        notifier.forceNotify();
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 2]));
+      });
     });
   });
 }

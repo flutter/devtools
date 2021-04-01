@@ -1109,6 +1109,14 @@ class ListValueNotifier<T extends List<V>, V> extends ChangeNotifier
     notifyListeners();
   }
 
+  /// Forces notifying listeners with the current value.
+  ///
+  /// This should only be used if the list [value] cannot be modified with
+  /// [addAndNotify] or [addAllAndNotify].
+  void forceNotify() {
+    notifyListeners();
+  }
+
   @override
   String toString() => '${describeIdentity(this)}($value)';
 }
