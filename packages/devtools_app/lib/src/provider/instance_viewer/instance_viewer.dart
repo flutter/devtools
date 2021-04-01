@@ -7,6 +7,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -428,7 +429,7 @@ class _ObjectHeader extends StatelessWidget {
               style: const TextStyle(color: typeColor),
             ),
           TextSpan(
-            text: '#$hash',
+            text: '#${shortHash(hash)}',
             style: unimportant(colorScheme),
           ),
           TextSpan(text: startToken),
