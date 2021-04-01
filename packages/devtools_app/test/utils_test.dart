@@ -913,13 +913,13 @@ void main() {
     });
 
     group('ListValueNotifier', () {
-      ListValueNotifier<List<int>, int> notifier;
+      ListValueNotifier<int> notifier;
 
       bool didNotify;
 
       setUp(() {
         didNotify = false;
-        notifier = ListValueNotifier<List<int>, int>([]);
+        notifier = ListValueNotifier<int>([]);
         notifier.addListener(() {
           didNotify = true;
         });
