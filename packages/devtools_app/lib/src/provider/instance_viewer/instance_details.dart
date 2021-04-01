@@ -18,8 +18,6 @@ part 'instance_details.freezed.dart';
 
 typedef Setter = Future<void> Function(String newValue);
 
-// TODO make sure that expansion state is preserved between state update (refs could change, breaking it)
-
 @freezed
 abstract class PathToProperty with _$PathToProperty {
   const factory PathToProperty.listIndex(int index) = ListIndexPath;

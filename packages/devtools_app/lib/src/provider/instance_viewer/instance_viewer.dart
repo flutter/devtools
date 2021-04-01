@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(rrousselGit) merge this code with the debugger view
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -25,7 +27,6 @@ const propertyColor = Color.fromARGB(255, 206, 145, 120);
 const double rowHeight = 20.0;
 
 final isExpandedProvider = StateProviderFamily<bool, InstancePath>((ref, path) {
-  // TODO refreshing the provider (after evaluating an expression) should not reset the expansion state
   // expands the root by default, but not children
   return path.pathToProperty.isEmpty;
 });
@@ -129,7 +130,6 @@ class _InstanceViewerState extends State<InstanceViewer> {
     bool disableExpand = false,
   }) {
     return watch(instanceProvider(path)).when(
-      // TODO: during loading, return the previous result to avoid flickers
       loading: () => const [Text('loading...')],
       error: (err, stack) => _buildError(err, stack, path),
       data: (instance) sync* {
