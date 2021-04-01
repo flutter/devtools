@@ -949,6 +949,19 @@ void main() {
         expect(notifier.value, equals([1, 2]));
       });
 
+      test('notifies on clear', () {
+        expect(didNotify, isFalse);
+        expect(notifier.value, equals([]));
+        notifier.value = [1, 2];
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 2]));
+
+        didNotify = false;
+        notifier.clear();
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([]));
+      });
+
       test('notifies on forceNotify', () {
         expect(didNotify, isFalse);
         expect(notifier.value, equals([]));

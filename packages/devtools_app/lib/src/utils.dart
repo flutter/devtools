@@ -1092,6 +1092,11 @@ class ListValueNotifier<T> extends ValueNotifier<List<T>> {
     notifyListeners();
   }
 
+  void clear() {
+    value.clear();
+    notifyListeners();
+  }
+
   /// Forces notifying listeners with the current value.
   ///
   /// This should only be used if the list [value] cannot be modified with
