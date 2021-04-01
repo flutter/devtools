@@ -235,7 +235,10 @@ class AllocationTableViewState extends State<AllocationTableView>
       children: [
         controller.allocationsFieldsTable,
         trackerData.createTrackingTable(
-            context, controller, scrollerController),
+          context,
+          controller,
+          scrollerController,
+        ),
       ],
     );
   }
