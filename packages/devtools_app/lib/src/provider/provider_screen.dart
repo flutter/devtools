@@ -2,38 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart' as provider show Provider;
 
 import '../banner_messages.dart';
-import '../eval_on_dart_library.dart';
-import '../globals.dart';
 import '../screen.dart';
 import '../split.dart';
-import '../theme.dart';
-import './instance_viewer/eval.dart';
 import './instance_viewer/instance_details.dart';
 import './instance_viewer/instance_providers.dart';
 import './instance_viewer/instance_viewer.dart';
 import 'provider_list.dart';
-
-final _selectedProviderEvalProvider =
-    AutoDisposeFutureProvider<EvalOnDartLibrary>((ref) async {
-  final selectedProviderId = ref.watch(selectedProviderIdProvider).state;
-
-  final instanceDetails = await ref.watch(
-    rawInstanceProvider(InstancePath.fromProviderId(selectedProviderId)).future,
-  );
-
-  return instanceDetails.maybeMap(
-    object: (instance) => instance.evalForInstance,
-    orElse: () => ref.watch(evalProvider),
-  );
-});
 
 final _hasErrorProvider = Provider.autoDispose<bool>((ref) {
   if (ref.watch(providerIdsProvider) is AsyncError) return true;
@@ -97,8 +76,6 @@ class ProviderScreenBody extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
-                const _SplitBorder(child: _ProviderEvaluation()),
               ] else
                 const Expanded(
                   child: _SplitBorder(child: SizedBox.expand()),
@@ -119,81 +96,6 @@ void showProviderErrorBanner(BuildContext context) {
     const ProviderUnknownErrorBanner(screenId: ProviderScreen.id)
         .build(context),
   );
-}
-
-class _ProviderEvaluation extends StatefulWidget {
-  const _ProviderEvaluation({Key key}) : super(key: key);
-
-  @override
-  _ProviderEvaluationState createState() => _ProviderEvaluationState();
-}
-
-class _ProviderEvaluationState extends State<_ProviderEvaluation> {
-  final isAlive = IsAlive();
-
-  @override
-  void dispose() {
-    isAlive.dispose();
-    super.dispose();
-  }
-
-  Future<void> _evalExpression(
-    FutureOr<EvalOnDartLibrary> evalFuture,
-    String expression,
-  ) async {
-    try {
-      final eval = await evalFuture;
-
-      final selectedProviderId = context.read(selectedProviderIdProvider).state;
-      final providerInstance = await context.read(
-        rawInstanceProvider(InstancePath.fromProviderId(selectedProviderId))
-            .future,
-      );
-
-      await eval.safeEval(
-        expression,
-        isAlive: isAlive,
-        scope: {
-          r'$value': providerInstance.instanceRefId,
-        },
-      );
-
-      unawaited(
-        context.refresh(
-          rawInstanceProvider(InstancePath.fromProviderId(selectedProviderId)),
-        ),
-      );
-
-      await serviceManager.performHotReload();
-    } catch (err) {
-      showErrorSnackBar(context, err);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(densePadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Execute code against the value exposed by this provider'),
-          Consumer(
-            builder: (context, watch, _) {
-              final eval = watch(_selectedProviderEvalProvider.future);
-
-              return TextField(
-                onSubmitted: (value) => _evalExpression(eval, value),
-                decoration: const InputDecoration(
-                  hintText: r'$value.increment()',
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _SplitBorder extends StatelessWidget {

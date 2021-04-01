@@ -205,6 +205,9 @@ class EvalOnDartLibrary {
     InstanceRef instance, {
     @required Disposable isAlive,
   }) async {
+    // identityHashCode will be -1 if the Flutter SDK is not recent enough
+    if (instance.identityHashCode != -1) return instance.identityHashCode;
+
     final hash = await evalInstance(
       'instance.hashCode',
       isAlive: isAlive,
@@ -300,7 +303,8 @@ class EvalOnDartLibrary {
       '() async {'
       '  final reader = widgetInspectorService.toObject("$readerId", "$readerGroup") as List;'
       '  try {'
-      '    final result = $expression;'
+      // Cast as dynamic so that it is possible to await Future<void>
+      '    dynamic result = ($expression) as dynamic;'
       '    reader.add(result);'
       '  } catch (err, stack) {'
       '    reader.add(err);'

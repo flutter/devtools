@@ -301,13 +301,11 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
     parent: parent,
   );
 
-  if (instanceRef == null) {
-    return InstanceDetails.nill(setter: setter);
-  }
-
   final instance = await eval.getInstance(instanceRef, isAlive);
 
   switch (instance.kind) {
+    case InstanceKind.kNull:
+      return InstanceDetails.nill(setter: setter);
     case InstanceKind.kBool:
       return InstanceDetails.boolean(
         instance.valueAsString,
@@ -342,7 +340,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
 
       return InstanceDetails.map(
         await keysFuture,
-        hash: instanceRef.identityHashCode,
+        hash: await eval.getHashCode(instance, isAlive: isAlive),
         instanceRefId: instanceRef.id,
         setter: setter,
       );
@@ -353,7 +351,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
     case InstanceKind.kList:
       return InstanceDetails.list(
         length: instance.length,
-        hash: instance.identityHashCode,
+        hash: await eval.getHashCode(instance, isAlive: isAlive),
         instanceRefId: instanceRef.id,
         setter: setter,
       );
@@ -387,7 +385,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
 
       return InstanceDetails.object(
         fields.sorted(_sortFieldsByName),
-        hash: instanceRef.identityHashCode,
+        hash: await eval.getHashCode(instance, isAlive: isAlive),
         type: instance.classRef.name,
         instanceRefId: instanceRef.id,
         evalForInstance: evalForInstance,
@@ -456,9 +454,6 @@ Future<List<ObjectField>> _parseFields(
   @required IsAlive isAlive,
   @required String appName,
 }) async {
-  if (instance.fields == null) {
-    print('fields null $instance');
-  }
   final fields = instance.fields.map((field) async {
     final owner = await eval.getClass(field.decl.owner, isAlive);
 

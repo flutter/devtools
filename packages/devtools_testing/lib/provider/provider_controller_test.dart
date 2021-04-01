@@ -242,7 +242,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           completion(
             isA<ObjectInstance>()
                 .having((e) => e.type, 'type', 'Counter')
-                .having((e) => e.hash, 'hash', '0002a')
+                .having((e) => e.hash, 'hash', 42)
                 .having((e) => e.fields, 'fields', [
               isA<ObjectField>()
                   .having((e) => e.name, 'name', 'complex')
@@ -270,7 +270,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           complexFuture,
           isA<ObjectInstance>()
               .having((e) => e.type, 'type', 'ComplexObject')
-              .having((e) => e.hash, 'hash', '00015')
+              .having((e) => e.hash, 'hash', 21)
               .having((e) => e.fields, 'fields', [
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'boolean')
@@ -401,7 +401,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         expect(
           complexProperties['list'],
           isA<ListInstance>()
-              .having((e) => e.hash, 'hash', isNotEmpty)
+              .having((e) => e.hash, 'hash', isA<int>())
               .having((e) => e.length, 'length', 6)
               .having((e) => e.setter, 'setter', isNotNull),
         );
@@ -409,7 +409,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         expect(
           complexProperties['map'],
           isA<MapInstance>()
-              .having((e) => e.hash, 'hash', isNotEmpty)
+              .having((e) => e.hash, 'hash', isA<int>())
               .having((e) => e.keys.length, 'keys.length', 8)
               .having((e) => e.setter, 'setter', isNotNull),
         );

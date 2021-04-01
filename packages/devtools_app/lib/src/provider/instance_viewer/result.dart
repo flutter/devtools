@@ -1,5 +1,7 @@
 // import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'package:vm_service/vm_service.dart' hide SentinelException;
+
 import '../../eval_on_dart_library.dart';
 
 import 'fake_freezed_annotation.dart';
@@ -56,9 +58,14 @@ abstract class Result<T> with _$Result<T> {
 Result<T> parseSentinel<T>(Object value) {
   // TODO(rrousselGit) remove condition after migrating to NNBD
   if (value == null) return Result.data(null);
-
   if (value is T) return Result.data(value);
-  if (value is SentinelException) return Result.error(value);
 
-  return Result.error(StateError('Unknown error'));
+  if (value is Sentinel) {
+    return Result.error(
+      SentinelException(value),
+      StackTrace.current,
+    );
+  }
+
+  return Result.error(value, StackTrace.current);
 }
