@@ -1078,16 +1078,16 @@ String prettyTimestamp(
 ///
 /// This class also exposes methods `addAndNotify` and `addAllAndNotify` that
 /// will notify listeners upon the list [value] being modified.
-class ListValueNotifier<T extends List<V>, V> extends ValueNotifier<T> {
-  /// Creates a [ChangeNotifier] that wraps this value.
-  ListValueNotifier(T value) : super(value);
+class ListValueNotifier<T> extends ValueNotifier<List<T>> {
+  /// Creates a [ListValueNotifier] that wraps this value.
+  ListValueNotifier(List<T> value) : super(value);
 
-  void addAndNotify(V item) {
+  void addAndNotify(T item) {
     value.add(item);
     notifyListeners();
   }
 
-  void addAllAndNotify(T itemList) {
+  void addAllAndNotify(List<T> itemList) {
     value.addAll(itemList);
     notifyListeners();
   }
