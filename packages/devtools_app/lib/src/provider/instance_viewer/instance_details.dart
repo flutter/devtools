@@ -1,11 +1,19 @@
+// Copyright 2021 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
-// import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../eval_on_dart_library.dart';
 import 'fake_freezed_annotation.dart';
 import 'result.dart';
 
+// This part is generated using package:freezed, but without the devtool depending
+// on the package.
+// To update the generated files, temporarily add freezed/freezed_annotation/build_runner
+// as dependencies; replace the `fake_freezed_annotation.dart` import with the
+// real annotation package, then execute `pub run build_runner build`.
 part 'instance_details.freezed.dart';
 
 typedef Setter = Future<void> Function(String newValue);

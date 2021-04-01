@@ -4,7 +4,6 @@ analyzer:
   exclude:
     - lib/generated_plugin_registrant.dart
     - macos/
-    - "**/*.freezed.dart"
 # Enable this option if you need to test whether the inspector_polyfill_script is compatible with
 # versions of flutter that require null safety.
 #  enable-experiment:

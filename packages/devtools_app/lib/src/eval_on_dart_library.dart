@@ -84,7 +84,6 @@ class EvalOnDartLibrary {
 
   Completer<LibraryRef> _libraryRef;
   Future<LibraryRef> get libraryRef => _libraryRef.future;
-  Completer<LibraryRef> get libraryRefCompleter => _libraryRef;
 
   Completer allPendingRequestsDone;
 
@@ -486,11 +485,6 @@ class EvalOnDartLibrary {
     int offset,
     int count,
   }) async {
-    if (instance == null) {
-      // instance can be null when writing `getInstance(eval(...))`
-      throw ArgumentError.notNull('instance');
-    }
-
     return addRequest<T>(isAlive, () async {
       final T value = await service.getObject(
         _isolateId,
