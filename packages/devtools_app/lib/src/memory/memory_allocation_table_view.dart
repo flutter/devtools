@@ -234,7 +234,8 @@ class AllocationTableViewState extends State<AllocationTableView>
       axis: Axis.vertical,
       children: [
         controller.allocationsFieldsTable,
-        trackerData.createTrackingTable(context, controller, scrollerController),
+        trackerData.createTrackingTable(
+            context, controller, scrollerController),
       ],
     );
   }
