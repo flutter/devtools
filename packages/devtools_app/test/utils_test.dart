@@ -931,6 +931,15 @@ void main() {
         setUpWithInitialValue([]);
       });
 
+      test('does not respect changes to the initial list', () {
+        final initialList = [1, 2, 3];
+        setUpWithInitialValue(initialList);
+
+        initialList.add(4);
+        notifier.add(5);
+        expect(notifier.value, equals([1, 2, 3, 5]));
+      });
+
       test('value returns ImmutableList', () {
         expect(notifier.value, isA<ImmutableList>());
       });

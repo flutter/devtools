@@ -1078,7 +1078,7 @@ String prettyTimestamp(
 class ListValueNotifier<T> extends ChangeNotifier
     implements ValueListenable<List<T>> {
   /// Creates a [ListValueNotifier] that wraps this value [_rawList].
-  ListValueNotifier(this._rawList) {
+  ListValueNotifier(List<T> rawList) : _rawList = List<T>.from(rawList) {
     _currentList = ImmutableList(_rawList);
   }
 
