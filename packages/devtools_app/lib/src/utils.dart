@@ -1072,29 +1072,101 @@ String prettyTimestamp(
 
 /// A [ChangeNotifier] that holds a list of data.
 ///
-/// When [value] is replaced with something that is not equal to the old
-/// value as evaluated by the equality operator ==, this class notifies its
-/// listeners.
-///
-/// This class also exposes methods `addAndNotify` and `addAllAndNotify` that
-/// will notify listeners upon the list [value] being modified.
-class ListValueNotifier<T> extends ValueNotifier<List<T>> {
-  /// Creates a [ListValueNotifier] that wraps this value.
-  ListValueNotifier(List<T> value) : super(value);
-
-  void add(T item) {
-    value.add(item);
-    notifyListeners();
+/// This class also exposes methods to interact with the data. By default,
+/// listeners are notified whenever the data is modified, but notifying can be
+/// optionally disabled.
+class ListValueNotifier<T> extends ChangeNotifier
+    implements ValueListenable<List<T>> {
+  /// Creates a [ListValueNotifier] that wraps this value [_rawList].
+  ListValueNotifier(this._rawList) {
+    _currentList = ImmutableList(_rawList);
   }
 
-  void addAll(List<T> itemList) {
-    value.addAll(itemList);
-    notifyListeners();
+  final List<T> _rawList;
+
+  ImmutableList<T> _currentList;
+
+  @override
+  List<T> get value => _currentList;
+  set value(List<T> newValue) {
+    throw Exception(
+      '[value] cannot be set explicitly. Use the methods on ListValueNotifier'
+      ' to interact with [value].',
+    );
   }
 
-  void clear() {
-    value.clear();
-    notifyListeners();
+  void add(T item, {bool notify = true}) {
+    _rawList.add(item);
+    _currentList = ImmutableList(_rawList);
+    if (notify) {
+      notifyListeners();
+    }
+  }
+
+  void addAll(List<T> itemList, {bool notify = true}) {
+    _rawList.addAll(itemList);
+    _currentList = ImmutableList(_rawList);
+    if (notify) {
+      notifyListeners();
+    }
+  }
+
+  bool remove(T element, {bool notify = true}) {
+    final removed = _rawList.remove(element);
+    _currentList = ImmutableList(_rawList);
+    if (removed && notify) {
+      notifyListeners();
+    }
+    return removed;
+  }
+
+  T removeAt(int index, {bool notify = true}) {
+    final element = _rawList.removeAt(index);
+    _currentList = ImmutableList(_rawList);
+    if (notify) {
+      notifyListeners();
+    }
+    return element;
+  }
+
+  void removeWhere(bool test(T element), {bool notify = true}) {
+    _rawList.removeWhere(test);
+    _currentList = ImmutableList(_rawList);
+    if (notify) {
+      notifyListeners();
+    }
+  }
+
+  void insert(int index, T element, {bool notify = true}) {
+    _rawList.insert(index, element);
+    _currentList = ImmutableList(_rawList);
+    if (notify) {
+      notifyListeners();
+    }
+  }
+
+  void insertAll(int index, Iterable<T> iterable, {bool notify = true}) {
+    _rawList.insertAll(index, iterable);
+    _currentList = ImmutableList(_rawList);
+    if (notify) {
+      notifyListeners();
+    }
+  }
+
+  void clear({bool notify = true}) {
+    _rawList.clear();
+    _currentList = ImmutableList(_rawList);
+    if (notify) {
+      notifyListeners();
+    }
+  }
+
+  void sort({int Function(T a, T b) compare, bool notify = true}) {
+    _rawList.sort(compare);
+    _currentList = ImmutableList(_rawList);
+    if (notify) {
+      notifyListeners();
+    }
   }
 
   /// Forces notifying listeners with the current value.
@@ -1103,5 +1175,119 @@ class ListValueNotifier<T> extends ValueNotifier<List<T>> {
   /// [add] or [addAll].
   void forceNotify() {
     notifyListeners();
+  }
+}
+
+/// Wrapper for a list that prevents any modification of the list's content.
+///
+/// This class should only be used as part of [ListValueNotifier].
+@visibleForTesting
+class ImmutableList<T> with ListMixin<T> implements List<T> {
+  ImmutableList(this._rawList) : length = _rawList.length;
+
+  final List<T> _rawList;
+
+  @override
+  int length;
+
+  @override
+  T operator [](int index) {
+    if (_rawList.length != length) {
+      throw Exception('Bad State: the underlying list has been modified');
+    } else if (index >= 0 && index < length) {
+      return _rawList[index];
+    } else {
+      throw Exception('Index out of range [0-${length - 1}]: $index');
+    }
+  }
+
+  @override
+  void operator []=(int index, T value) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void add(T element) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void addAll(Iterable<T> iterable) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  bool remove(Object element) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  T removeAt(int index) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  T removeLast() {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void removeRange(int start, int end) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void removeWhere(bool test(T element)) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void retainWhere(bool test(T element)) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void insert(int index, T element) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void insertAll(int index, Iterable<T> iterable) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void clear() {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void fillRange(int start, int end, [T fill]) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void setRange(int start, int end, Iterable<T> iterable, [int skipCount = 0]) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void replaceRange(int start, int end, Iterable<T> newContents) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void setAll(int index, Iterable<T> iterable) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void sort([int Function(T a, T b) compare]) {
+    throw Exception('Cannot modify the content of _ImmutableList');
+  }
+
+  @override
+  void shuffle([Random random]) {
+    throw Exception('Cannot modify the content of _ImmutableList');
   }
 }
