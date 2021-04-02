@@ -658,15 +658,16 @@ class MemoryBodyState extends State<MemoryBody>
   final hoverKey = GlobalKey(debugLabel: MemoryScreen.hoverKeyName);
   static const hoverXOffset = 10;
   static const hoverYOffset = 0.0;
-  static const hoverWidth = 210.0;
+  static const hoverWidth = 225.0;
   static const hover_card_border_width = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
   static const hoverHeightMinimum = 40.0;
   static const hoverItemHeight = 18.0;
-  static const hoverOneEventsHeight =
-      82.0; // One extension event to display (3 lines).
-  static const hoverEventsHeight = 120.0; // Many extension events to display.
+  // One extension event to display (3 lines).
+  static const hoverOneEventsHeight = 82.0;
+  // Many extension events to display.
+  static const hoverEventsHeight = 120.0;
 
   static double computeHoverHeight(
     int eventsCount,
@@ -774,7 +775,8 @@ class MemoryBodyState extends State<MemoryBody>
       double leftEdge = 5.0,
     ]) {
       String displayName = name;
-      String displayValue = '';
+      // Empty string overflows, default value space.
+      String displayValue = ' ';
       if (hasNumeric) {
         int startOfNumber = name.lastIndexOf(' ');
         if (hasUnit) {
@@ -787,6 +789,7 @@ class MemoryBodyState extends State<MemoryBody>
         displayName = '${name.substring(0, startOfNumber)} ';
         displayValue = name.substring(startOfNumber + 1);
       }
+
       return [
         image == null
             ? const SizedBox()
@@ -797,7 +800,7 @@ class MemoryBodyState extends State<MemoryBody>
           padding: EdgeInsets.only(left: denseRowSpacing),
         ),
         Text(displayName, style: bold ? hoverTitleEntry : hoverSmallEntry),
-        Text(displayValue, style: hoverValueEntry)
+        Text(displayValue, style: hoverValueEntry),
       ];
     }
 
@@ -893,8 +896,8 @@ class MemoryBodyState extends State<MemoryBody>
   //                final displayData = encoder.convert(data);
   String longValueToShort(String longValue) {
     var value = longValue;
-    if (longValue.length > 35) {
-      final firstPart = longValue.substring(0, 10);
+    if (longValue.length > 34) {
+      final firstPart = longValue.substring(0, 9);
       final endPart = longValue.substring(longValue.length - 20);
       value = '$firstPart...$endPart';
     }
@@ -915,9 +918,9 @@ class MemoryBodyState extends State<MemoryBody>
       final outputSizes = '$displaySize/$decodeSize';
       if (outputSizes.length > 10) {
         output.writeln('Display/Decode Size=');
-        output.writeln('    $outputSizes');
+        output.write('    $outputSizes');
       } else {
-        output.writeln('Display/Decode Size=$outputSizes');
+        output.write('Display/Decode Size=$outputSizes');
       }
     } else if (event[eventName] == devToolsEvent &&
         event.containsKey(customEvent)) {
@@ -947,7 +950,7 @@ class MemoryBodyState extends State<MemoryBody>
     }
 
     output.writeln(index == null ? name : '$index. $name');
-    output.writeln(decodeEventValues(event));
+    output.write(decodeEventValues(event));
 
     return output.toString();
   }
