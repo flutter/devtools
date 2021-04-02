@@ -1028,6 +1028,39 @@ class MemoryController extends DisposableController
     return serviceManager?.vm?.operatingSystem == 'android';
   }
 
+  /// Source file name as returned from allocation's stacktrace.
+  /// Map source URI
+  ///    packages/flutter/lib/src/widgets/image.dart
+  /// would map to
+  ///    package:flutter/src/widgets/image.dart
+  // TODO(terry): Review with Ben pathing doesn't quite work the source
+  //              file has the lib/ maybe a LibraryRef could be returned
+  //              if it's a package today all packages are file:///? Also,
+  //              would be nice to have a line # too for the source.
+  //
+  //              When line # and package mapping exist ability to navigate
+  //              to line number of the source file when clicked is needed.
+  static const packageName = '/packages/';
+  String displayAsPackage(String sourceName) {
+    final packagesIndex = sourceName.indexOf(packageName);
+    // See issue https://github.com/dart-lang/sdk/issues/45530
+    final restToMatchStartIndex = packagesIndex + packageName.length;
+    if (packagesIndex >= 0) {
+      final activeLibraries =
+          serviceManager.isolateManager.selectedIsolateLibraries;
+      final match = activeLibraries.firstWhere(
+        (element) {
+          final toMatch = sourceName.substring(restToMatchStartIndex);
+          return element.uri.endsWith(toMatch);
+        },
+        orElse: () => null,
+      );
+      return match == null ? sourceName : match.name;
+    }
+
+    return sourceName;
+  }
+
   Future<List<InstanceSummary>> getInstances(
     String classRef,
     String className,

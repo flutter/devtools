@@ -5,12 +5,17 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
+import '../theme.dart';
 import '../trees.dart';
 import '../utils.dart';
 import 'memory_allocation_table_view.dart';
 import 'memory_controller.dart';
+
+/// Space between items in the call stack list.
+const defaultSpacerHeight = 12.0;
 
 class Tracker extends TreeNode<Tracker> {
   factory Tracker({String className}) {
@@ -31,14 +36,13 @@ class TrackerClass extends Tracker {
 }
 
 class TrackerAllocation extends Tracker {
-  TrackerAllocation(this.timestamp) : super._internal(name: null);
+  TrackerAllocation(this.timestamp, this.stacktrace)
+      : super._internal(name: null);
 
   final int timestamp;
 
-  bool displayAll = false;
-
-  /// If displayAll is false then depth of callstack is:
-  final callDepthDisplay = 4;
+  /// Sources and callstack for an instance.
+  final AllocationStackTrace stacktrace;
 
   @override
   String toString() => '$timestamp';
@@ -51,28 +55,20 @@ class TrackerCall extends Tracker {
   String toString() => name;
 }
 
-class TrackerMore extends Tracker {
-  TrackerMore(this.stacktrace) : super._internal(name: 'More ...');
-
-  final List<String> stacktrace;
-
-  @override
-  String toString() => name;
-}
-
 class _TrackerClassColumn extends TreeColumnData<Tracker> {
   _TrackerClassColumn() : super('Tracking');
 
   @override
   dynamic getValue(Tracker dataObject) {
-    if (dataObject is TrackerClass || dataObject is TrackerMore) {
-      return dataObject.name;
+    if (dataObject is TrackerClass) {
+      final TrackerClass trackerClass = dataObject;
+      return trackerClass.name;
     } else if (dataObject is TrackerCall) {
       final TrackerCall call = dataObject;
       return call.name;
     } else if (dataObject is TrackerAllocation) {
       final TrackerAllocation allocation = dataObject;
-      return '${dataObject.parent.name} @ ${prettyTimestamp(allocation.timestamp)}';
+      return 'Instance ${dataObject.index} @ ${prettyTimestamp(allocation.timestamp)}';
     }
 
     assert(false, 'Unknown dataObject');
@@ -91,7 +87,7 @@ class _TrackerClassColumn extends TreeColumnData<Tracker> {
   }
 
   @override
-  double get fixedWidthPx => 640;
+  double get fixedWidthPx => 300;
 
   @override
   bool get supportsSorting => true;
@@ -111,9 +107,7 @@ class _TrackerCountColumn extends ColumnData<Tracker> {
       return '${dataObject.children.length}';
     }
 
-    assert(dataObject is TrackerAllocation ||
-        dataObject is TrackerCall ||
-        dataObject is TrackerMore);
+    assert(dataObject is TrackerAllocation || dataObject is TrackerCall);
     return '';
   }
 
@@ -160,78 +154,153 @@ class TreeTracker {
 
       if (allocationSample != null) {
         for (var stacktrace in allocationSample.stacktraces) {
-          final allocation = TrackerAllocation(stacktrace.timestamp);
+          final allocation = TrackerAllocation(
+            stacktrace.timestamp,
+            stacktrace,
+          );
           classEntry.addChild(allocation);
-          int displayDepth = 0;
-          for (var callStackEntry in stacktrace.stacktrace) {
-            if (allocation.displayAll ||
-                displayDepth++ < allocation.callDepthDisplay) {
-              allocation.addChild(TrackerCall(callStackEntry));
-            }
-          }
-          if (!allocation.displayAll) {
-            allocation.addChild(TrackerMore(stacktrace.stacktrace));
-          }
         }
       }
     }
   }
 
-  /// Remove the "More ..." and show the entire call stack.
-  void expandCallStack(TrackerMore item) {
-    final TrackerAllocation allocation = item.parent;
-
-    // Show the entire call stack for this instance.
-    allocation.displayAll = true;
-
-    // Re-construct the callstack for this instance.
-    final leafNodesCount = allocation.children.length;
-
-    assert(allocation.children.last is TrackerMore);
-    allocation.removeLastChild(); // Remove "More ..."
-
-    // Add the entire call stack as leaf nodes.
-    final totalCallStack = item.stacktrace.length;
-    for (var index = leafNodesCount - 1; index < totalCallStack; index++) {
-      allocation.addChild(TrackerCall(item.stacktrace[index]));
-    }
-    allocation.expandCascading();
+  Widget allocationTrackingInstructions(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('To track allocations for a class, enable the '
+            'checkbox for that class in the table above.'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('After interacting with your app, come '
+                'back to this tool and click the track button '),
+            trackImage(context),
+          ],
+        ),
+        const Text('to view the collected stack '
+            'traces of constructor calls.'),
+      ],
+    );
   }
 
-  Widget createTrackingTable(
-      BuildContext context, MemoryController controller) {
-    final widget = controller.trackAllocations.isEmpty
-        ? Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('To track allocations for a class, enable the '
-                  'checkbox for that class in the table above.'),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+  Widget allocationCallStackInstructions(BuildContext context) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Text('Select an instance of a tracked class'),
+          Text('to view its allocation stack trace.'),
+        ],
+      );
+
+  // TODO(terry): Move to a class derived from widget.
+  Widget displaySelectedStackTrace(
+    BuildContext context,
+    MemoryController controller,
+    ScrollController scroller,
+    TrackerAllocation tracker,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final allocationStacktrace = tracker.stacktrace;
+
+    final stackTrace = allocationStacktrace.stacktrace;
+    final sources = allocationStacktrace.sources;
+    final callstackLength = stackTrace.length;
+    assert(sources.length == callstackLength);
+
+    final titleBackground = titleSolidBackgroundColor(Theme.of(context));
+
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: defaultRowHeight + 4, // From table.dart
+          child: Container(
+              color: titleBackground,
+              child: Align(
+                child: Text(
+                  '${tracker.parent.name} Call Stack for Instance ${tracker.index} @ '
+                  '${prettyTimestamp(tracker.timestamp)}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(backgroundColor: titleBackground),
+                ),
+              )),
+        ),
+        Expanded(
+          child: Scrollbar(
+            isAlwaysShown: true,
+            controller: scroller,
+            child: ListView.separated(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              controller: scroller,
+              itemCount: callstackLength,
+              itemBuilder: (context, index) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('After interacting with your app, come '
-                      'back to this tool and click the track button '),
-                  trackImage(context),
+                  Text(
+                    '#$index ${stackTrace[index]}',
+                    style: colorScheme.stackTraceCall,
+                  ),
+                  Text(sources[index], style: colorScheme.stackTraceSource),
                 ],
               ),
-              const Text('to view the collected stack '
-                  'traces of constructor calls.'),
+              separatorBuilder: (context, index) => Divider(
+                color: devtoolsGrey[400],
+                height: defaultSpacerHeight,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  static const trackInstancesViewWidth = 200.0;
+  static const callstackViewWidth = 280.0;
+
+  // TODO(terry): Move to a class derived from widget.
+  Widget createTrackingTable(
+    BuildContext context,
+    MemoryController controller,
+    ScrollController scroller,
+  ) {
+    final selection = selectionNotifier.value;
+    final trackerAllocation =
+        selection.node is TrackerAllocation ? selection.node : null;
+
+    final widget = controller.trackAllocations.isEmpty
+        ? allocationTrackingInstructions(context)
+        : Split(
+            initialFractions: const [0.5, 0.5],
+            minSizes: const [trackInstancesViewWidth, callstackViewWidth],
+            axis: Axis.horizontal,
+            children: [
+              TreeTable<Tracker>(
+                columns: [
+                  treeColumn,
+                  _TrackerCountColumn(),
+                ],
+                dataRoots: tree1.children,
+                treeColumn: treeColumn,
+                keyFactory: (d) {
+                  return Key(d.name);
+                },
+                sortColumn: treeColumn,
+                sortDirection: SortDirection.ascending,
+                selectionNotifier: selectionNotifier,
+              ),
+              trackerAllocation == null
+                  ? allocationCallStackInstructions(context)
+                  : displaySelectedStackTrace(
+                      context,
+                      controller,
+                      scroller,
+                      trackerAllocation,
+                    ),
             ],
-          )
-        : TreeTable<Tracker>(
-            columns: [
-              treeColumn,
-              _TrackerCountColumn(),
-            ],
-            dataRoots: tree1.children,
-            treeColumn: treeColumn,
-            keyFactory: (d) {
-              return Key(d.name);
-            },
-            sortColumn: treeColumn,
-            sortDirection: SortDirection.ascending,
-            selectionNotifier: selectionNotifier,
           );
+
     return widget;
   }
 }
