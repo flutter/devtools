@@ -944,10 +944,6 @@ void main() {
         expect(notifier.value, isA<ImmutableList>());
       });
 
-      test('value setter throws', () {
-        expect(() => notifier.value = [4, 5, 6], throwsException);
-      });
-
       test('notifies on add', () {
         notifier.add(1);
         expect(didNotify, isTrue);
@@ -972,83 +968,6 @@ void main() {
         expect(notifier.value, equals([1, 2]));
       });
 
-      test('notifies on remove', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.remove(1);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([2, 3]));
-      });
-
-      test('does not notify on remove when disabled', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.remove(1, notify: false);
-        expect(didNotify, isFalse);
-        expect(notifier.value, equals([2, 3]));
-      });
-
-      test('does not notify on remove no-op', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.remove(4);
-        expect(didNotify, isFalse);
-        expect(notifier.value, equals([1, 2, 3]));
-      });
-
-      test('notifies on removeAt', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.removeAt(1);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([1, 3]));
-      });
-
-      test('does not notify on removeAt when disabled', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.removeAt(1, notify: false);
-        expect(didNotify, isFalse);
-        expect(notifier.value, equals([1, 3]));
-      });
-
-      test('notifies on removeWhere', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.removeWhere((int n) => n == 1);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([2, 3]));
-      });
-
-      test('does not notify on removeWhere when disabled', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.removeWhere((int n) => n == 1, notify: false);
-        expect(didNotify, isFalse);
-        expect(notifier.value, equals([2, 3]));
-      });
-
-      test('notifies on insert', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.insert(1, 4);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([1, 4, 2, 3]));
-      });
-
-      test('does not notify on insert when disabled', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.insert(1, 4, notify: false);
-        expect(didNotify, isFalse);
-        expect(notifier.value, equals([1, 4, 2, 3]));
-      });
-
-      test('notifies on insertAll', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.insertAll(1, [4, 5, 6]);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([1, 4, 5, 6, 2, 3]));
-      });
-
-      test('does not notify on insertAll when disabled', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.insertAll(1, [4, 5, 6], notify: false);
-        expect(didNotify, isFalse);
-        expect(notifier.value, equals([1, 4, 5, 6, 2, 3]));
-      });
-
       test('notifies on clear', () {
         setUpWithInitialValue([1, 2, 3]);
         notifier.clear();
@@ -1060,27 +979,6 @@ void main() {
         setUpWithInitialValue([1, 2, 3]);
         notifier.clear(notify: false);
         expect(didNotify, isFalse);
-        expect(notifier.value, equals([]));
-      });
-
-      test('notifies on sort', () {
-        setUpWithInitialValue([3, 1, 5, 2, 4]);
-        notifier.sort();
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([1, 2, 3, 4, 5]));
-      });
-
-      test('does not notify on sort when disabled', () {
-        setUpWithInitialValue([3, 1, 5, 2, 4]);
-        notifier.sort(notify: false);
-        expect(didNotify, isFalse);
-        expect(notifier.value, equals([1, 2, 3, 4, 5]));
-      });
-
-      test('notifies on forceNotify', () {
-        expect(notifier.value, equals([]));
-        notifier.forceNotify();
-        expect(didNotify, isTrue);
         expect(notifier.value, equals([]));
       });
     });
@@ -1109,20 +1007,14 @@ void main() {
 
         rawList.add(4);
 
-        // Throws because the underlying list has an element added to it.
-        expect(() => immutableList[0], throwsException);
-        expect(rawList[0], equals(1));
+        // Accessing an index < the original length should not throw.
+        expect(immutableList[0], equals(1));
+        expect(immutableList[1], equals(2));
+        expect(immutableList[2], equals(3));
 
         // Throws because the index is out of range of the immutable list.
         expect(() => immutableList[3], throwsException);
         expect(rawList[3], equals(4));
-
-        rawList.removeLast();
-        rawList.removeLast();
-
-        // Throws because the underlying list had an element removed.
-        expect(() => immutableList[0], throwsException);
-        expect(rawList[0], equals(1));
       });
 
       test('throws on []=', () {
