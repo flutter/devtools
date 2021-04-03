@@ -461,6 +461,14 @@ class MemoryController extends DisposableController
 
   String get memorySource => _memorySourceNotifier.value;
 
+  ValueListenable get refreshCharts => _refreshCharts;
+
+  final _refreshCharts = ValueNotifier<int>(0);
+
+  void refreshAllCharts() {
+    _refreshCharts.value++;
+  }
+
   /// Starting chunk for slider based on the intervalDurationInMs.
   double sliderValue = 1.0;
 

@@ -330,6 +330,12 @@ class MemoryBodyState extends State<MemoryBody>
       });
     });
 
+    addAutoDisposeListener(controller.refreshCharts, () {
+      setState(() {
+        _refreshCharts();
+      });
+    });
+
     _updateListeningState();
   }
 
@@ -423,11 +429,6 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget _intervalDropdown(TextTheme textTheme) {
-    final files = controller.memoryLog.offlineFiles();
-
-    // First item is 'Live Feed', then followed by memory log filenames.
-    files.insert(0, MemoryController.liveFeed);
-
     final mediaWidth = MediaQuery.of(context).size.width;
     final isVerboseDropdown = mediaWidth > verboseDropDownMinimumWidth;
 
@@ -891,14 +892,19 @@ class MemoryBodyState extends State<MemoryBody>
     return results;
   }
 
+  /// Long string need to show first part ... last part.
+  static const longStringLength = 34;
+  static const firstCharacters = 9;
+  static const lastCharacters = 20;
+
   // TODO(terry): Data could be long need better mechanism for long data e.g.,:
   //                const encoder = JsonEncoder.withIndent('  ');
   //                final displayData = encoder.convert(data);
   String longValueToShort(String longValue) {
     var value = longValue;
-    if (longValue.length > 34) {
-      final firstPart = longValue.substring(0, 9);
-      final endPart = longValue.substring(longValue.length - 20);
+    if (longValue.length > longStringLength) {
+      final firstPart = longValue.substring(0, firstCharacters);
+      final endPart = longValue.substring(longValue.length - lastCharacters);
       value = '$firstPart...$endPart';
     }
     return value;
