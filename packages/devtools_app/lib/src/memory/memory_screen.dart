@@ -188,26 +188,23 @@ class MemoryBodyState extends State<MemoryBody>
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(controller.memorySourceNotifier, () async {
-      String errorMessage;
-      await controller.updatedMemorySource().catchError((e) {
-        errorMessage = '$e';
+      try {
+        await controller.updatedMemorySource();
+      } catch (e) {
+        final errorMessage = '$e';
         controller.memorySource = MemoryController.liveFeed;
-      });
-
-      setState(() {
-        if (errorMessage == null) {
-          _refreshCharts();
+        // Display toast, unable to load the saved memory JSON payload.
+        final notificationsState = Notifications.of(context);
+        if (notificationsState != null) {
+          notificationsState.push(errorMessage);
         } else {
-          // Display toast, unable to load the saved memory JSON payload.
-          final notificationsState = Notifications.of(context);
-          if (notificationsState != null) {
-            notificationsState.push(errorMessage);
-          } else {
-            // Running in test harness, unexpected error.
-            throw OfflineFileException(errorMessage);
-          }
+          // Running in test harness, unexpected error.
+          throw OfflineFileException(errorMessage);
         }
-      });
+        return;
+      }
+
+      controller.refreshAllCharts();
     });
 
     addAutoDisposeListener(controller.legendVisibleNotifier, () {
