@@ -950,21 +950,9 @@ void main() {
         expect(notifier.value, equals([1]));
       });
 
-      test('does not notify on add when disabled', () {
-        notifier.add(1, notify: false);
-        expect(didNotify, isFalse);
-        expect(notifier.value, equals([1]));
-      });
-
       test('notifies on addAll', () {
         notifier.addAll([1, 2]);
         expect(didNotify, isTrue);
-        expect(notifier.value, equals([1, 2]));
-      });
-
-      test('does not notify on addAll when disabled', () {
-        notifier.addAll([1, 2], notify: false);
-        expect(didNotify, isFalse);
         expect(notifier.value, equals([1, 2]));
       });
 
@@ -972,13 +960,6 @@ void main() {
         setUpWithInitialValue([1, 2, 3]);
         notifier.clear();
         expect(didNotify, isTrue);
-        expect(notifier.value, equals([]));
-      });
-
-      test('does not notify on clear when disabled', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.clear(notify: false);
-        expect(didNotify, isFalse);
         expect(notifier.value, equals([]));
       });
     });

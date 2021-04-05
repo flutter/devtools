@@ -1089,28 +1089,25 @@ class ListValueNotifier<T> extends ChangeNotifier
   @override
   List<T> get value => _currentList;
 
-  void add(T item, {bool notify = true}) {
-    _rawList.add(item);
+  /// Adds an element to the list and notifies listeners.
+  void add(T element) {
+    _rawList.add(element);
     _currentList = ImmutableList(_rawList);
-    if (notify) {
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
-  void addAll(List<T> itemList, {bool notify = true}) {
-    _rawList.addAll(itemList);
+  /// Adds elements to the list and notifies listeners.
+  void addAll(List<T> elements) {
+    _rawList.addAll(elements);
     _currentList = ImmutableList(_rawList);
-    if (notify) {
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
-  void clear({bool notify = true}) {
+  /// Clears the list and notifies listeners.
+  void clear() {
     _rawList = [];
     _currentList = ImmutableList(_rawList);
-    if (notify) {
-      notifyListeners();
-    }
+    notifyListeners();
   }
 }
 
