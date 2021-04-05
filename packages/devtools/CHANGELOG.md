@@ -1,3 +1,24 @@
+## 2.1.0
+* Memory legends cleanup [#2833](https://github.com/flutter/devtools/pull/#2833)
+* Update network profiler to support dart:io HTTP profiling service extensions [#2839](https://github.com/flutter/devtools/pull/#2839)
+* Use widgets for flame chart group labels instead of custom painters [#2837](https://github.com/flutter/devtools/pull/#2837)
+* Add EvalOnDartLibrary utilities [#2807](https://github.com/flutter/devtools/pull/#2807)
+* Remove Android Memory CTA if not connected to an Android app[#2799](https://github.com/flutter/devtools/pull/#2799)
+* Fixed location of exported memory stat JSON file. [#2795](https://github.com/flutter/devtools/pull/#2795)
+* Increase size of total time column in CPU profiler [#2814](https://github.com/flutter/devtools/pull/#2814)
+* Fix bugs with DevTools title and move title code to separate file [#2809](https://github.com/flutter/devtools/pull/#2809)
+* Fix some flame chart scrolling bugs [#2808](https://github.com/flutter/devtools/pull/#2808)
+* Cleanup for performance settings dialog [#2801](https://github.com/flutter/devtools/pull/#2801)
+* Fix frame timing issue in performance page [#2802](https://github.com/flutter/devtools/pull/#2802)
+* Improve file history picker UX [#2785](https://github.com/flutter/devtools/pull/#2785)
+* Improve file picker UX [#2784](https://github.com/flutter/devtools/pull/#2784)
+* Add show/hide gc button in memory screen[#1089](https://github.com/flutter/devtools/pull/#1089) [#2787](https://github.com/flutter/devtools/pull/#2787)
+* Show correct mouse cursor for splitters [#2783](https://github.com/flutter/devtools/pull/#2783)
+* Clean up - fix overflow error and some text styles [#2782](https://github.com/flutter/devtools/pull/#2782)
+* Add option to load offline file from landing screen [#2762](https://github.com/flutter/devtools/pull/#2762)
+* Evaluation HoverCard [#2746](https://github.com/flutter/devtools/pull/#2746), [#2810](https://github.com/flutter/devtools/pull/#2810), [#2831](https://github.com/flutter/devtools/pull/#2831)
+* Reworked UX for tracking call stack. [#2846](https://github.com/flutter/devtools/pull/#2846)
+
 ## 2.0.0+4
 * Upgrade DevTools dependencies for http_multi_server [#2838](https://github.com/flutter/devtools/pull/2838)
 
