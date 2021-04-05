@@ -655,6 +655,8 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
       );
     }
 
+    // TODO: https://github.com/flutter/devtools/issues/2858
+    // ignore: deprecated_member_use
     return _configuration.buildViewportChrome(
         context, result, widget.axisDirection);
   }
