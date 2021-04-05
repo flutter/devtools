@@ -4,6 +4,8 @@
 
 @TestOn('vm')
 
+import 'dart:ui';
+
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_heap_tree_view.dart';
@@ -159,61 +161,64 @@ void main() {
 
     testWidgetsWithWindowSize('Chart Select Hover Test', windowSize,
         (WidgetTester tester) async {
+      const _twoSeconds = Duration(seconds: 2);
+
+      Future<void> pumpAndSettleTwoSeconds() async {
+        await tester.pumpAndSettle(_twoSeconds);
+      }
+
       await pumpMemoryScreen(tester);
 
-      // Should be collecting live feed.
-      expect(controller.offline, isFalse);
+      // Load canned data.
+      _setUpServiceManagerForMemory();
+
+      expect(controller.offline, isTrue);
 
       // Verify default event pane and vm chart exists.
       expect(find.byKey(MemoryScreen.eventChartKey), findsOneWidget);
       expect(find.byKey(MemoryScreen.vmChartKey), findsOneWidget);
 
       expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
-      expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);
+      expect(controller.memoryTimeline.offlineData.isEmpty, isFalse);
 
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      controller.refreshAllCharts();
+      await pumpAndSettleTwoSeconds();
 
-      // Load canned data.
-      _setUpServiceManagerForMemory();
-
-      expect(controller.memoryTimeline.data.isNotEmpty, isTrue);
+      expect(controller.memoryTimeline.data.isEmpty, isFalse);
 
       final data = controller.memoryTimeline.data;
 
       // Total number of collected HeapSamples.
       expect(data.length, 104);
 
-      // TODO(terry): Need to fix Flutter detecting UX overflow of hover.
-      //              Also, the Chart is not resized (visible) in golden.
-/*
+      await pumpAndSettleTwoSeconds();
+
+      // TODO(terry): Need to fix hover not appearing.
+      /*
       final vmChartFinder = find.byKey(MemoryScreen.vmChartKey);
       final vmChart = tester.firstWidget(vmChartFinder) as MemoryVMChart;
+      final rect = tester.getRect(vmChartFinder);
 
-      final globalPosition = tester.getCenter(vmChartFinder);
-      final newOffset = Offset(globalPosition.dx - 100, globalPosition.dy);
+      final globalPosition = Offset(rect.right - 100, rect.top + 10);
 
       vmChart.chartController.tapLocation.value = TapLocation(
         TapDownDetails(
-          globalPosition: newOffset,
+          globalPosition: globalPosition,
           kind: PointerDeviceKind.touch,
         ),
-        controller.memoryTimeline.data[2].timestamp,
-        2,
+        controller.memoryTimeline.data[35].timestamp,
+        35,
       );
-
-      await tester.pump();
-
-      await tester.pump(const Duration(seconds: 2));
-
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await pumpAndSettleTwoSeconds();
+      */
 
       await expectLater(
         find.byKey(MemoryScreen.vmChartKey),
         matchesGoldenFile('goldens/memory_hover_card.png'),
       );
+
       // Await delay for golden comparison.
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-*/
+      await pumpAndSettleTwoSeconds();
     });
 
     testWidgetsWithWindowSize('export current memory profile', windowSize,
@@ -286,6 +291,22 @@ void main() {
     // Load canned data.
     _setUpServiceManagerForMemory();
 
+    expect(controller.offline, isTrue);
+
+    // Verify default event pane and vm chart exists.
+    expect(find.byKey(MemoryScreen.eventChartKey), findsOneWidget);
+    expect(find.byKey(MemoryScreen.vmChartKey), findsOneWidget);
+
+    expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
+    expect(controller.memoryTimeline.offlineData.isEmpty, isFalse);
+
+    controller.refreshAllCharts();
+
+    // Await charts to update.
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    expect(controller.memoryTimeline.data.isEmpty, isFalse);
+
     final data = controller.memoryTimeline.data;
 
     // Total number of collected HeapSamples.
@@ -351,14 +372,19 @@ void main() {
       controller.selectedSnapshotTimestamp.millisecondsSinceEpoch,
       lessThan(DateTime.now().millisecondsSinceEpoch),
     );
+
+    await expectLater(
+      find.byKey(MemoryScreen.vmChartKey),
+      matchesGoldenFile('goldens/memory_heap_tree.png'),
+    );
+
+    // Await delay for golden comparison.
+    await tester.pumpAndSettle(const Duration(seconds: 2));
   });
 
   testWidgetsWithWindowSize(
       'allocation monitor, class tracking and search auto-complete', windowSize,
       (WidgetTester tester) async {
-    // Load canned data.
-    _setUpServiceManagerForMemory();
-
     const _oneSecond = Duration(seconds: 1);
     const _twoSeconds = Duration(seconds: 2);
 
@@ -369,6 +395,16 @@ void main() {
     Future<void> pumpAndSettleTwoSeconds() async {
       await tester.pumpAndSettle(_twoSeconds);
     }
+
+    await pumpMemoryScreen(tester);
+
+    // Load canned data.
+    _setUpServiceManagerForMemory();
+
+    controller.refreshAllCharts();
+    await pumpAndSettleTwoSeconds();
+
+    expect(controller.offline, isTrue);
 
     Future<void> checkGolden(String goldenFilename, {Key key}) async {
       // Await delay for golden comparison.
