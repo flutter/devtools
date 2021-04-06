@@ -409,6 +409,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
       ),
       centerTitle: false,
+      toolbarHeight: kToolbarHeight / 2.0,
       actions: actions,
       flexibleSpace: flexibleSpace,
     );
