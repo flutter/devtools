@@ -16,6 +16,7 @@ import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../dialogs.dart';
 import '../globals.dart';
+import '../notifications.dart';
 import '../screen.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
@@ -90,6 +91,19 @@ class MemoryScreen extends Screen {
   static const androidChartButtonKey = Key('Android Memory');
 
   static const memorySourceMenuItemPrefix = 'Source: ';
+
+  @visibleForTesting
+  static const allocatedDisplay = 'Allocated';
+  @visibleForTesting
+  static const usedDisplay = 'Dart/Flutter';
+  @visibleForTesting
+  static const externalDisplay = 'Dart/Flutter Native';
+  @visibleForTesting
+  static const rssDisplay = 'RSS';
+  @visibleForTesting
+  static const layerDisplay = 'Raster Layer';
+  @visibleForTesting
+  static const pictureDisplay = 'Raster Picture';
 
   static void gaAction({Key key, String name}) {
     final recordName = key != null ? keyName(key) : name;
@@ -173,11 +187,24 @@ class MemoryBodyState extends State<MemoryBody>
     });
 
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller.memorySourceNotifier, () {
-      setState(() {
-        controller.updatedMemorySource();
-        _refreshCharts();
-      });
+    addAutoDisposeListener(controller.memorySourceNotifier, () async {
+      try {
+        await controller.updatedMemorySource();
+      } catch (e) {
+        final errorMessage = '$e';
+        controller.memorySource = MemoryController.liveFeed;
+        // Display toast, unable to load the saved memory JSON payload.
+        final notificationsState = Notifications.of(context);
+        if (notificationsState != null) {
+          notificationsState.push(errorMessage);
+        } else {
+          // Running in test harness, unexpected error.
+          throw OfflineFileException(errorMessage);
+        }
+        return;
+      }
+
+      controller.refreshAllCharts();
     });
 
     addAutoDisposeListener(controller.legendVisibleNotifier, () {
@@ -300,6 +327,12 @@ class MemoryBodyState extends State<MemoryBody>
       });
     });
 
+    addAutoDisposeListener(controller.refreshCharts, () {
+      setState(() {
+        _refreshCharts();
+      });
+    });
+
     _updateListeningState();
   }
 
@@ -393,11 +426,6 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget _intervalDropdown(TextTheme textTheme) {
-    final files = controller.memoryLog.offlineFiles();
-
-    // First item is 'Live Feed', then followed by memory log filenames.
-    files.insert(0, MemoryController.liveFeed);
-
     final mediaWidth = MediaQuery.of(context).size.width;
     final isVerboseDropdown = mediaWidth > verboseDropDownMinimumWidth;
 
@@ -547,9 +575,8 @@ class MemoryBodyState extends State<MemoryBody>
       key: MemoryScreen.androidChartButtonKey,
       icon: controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
       label: keyName(MemoryScreen.androidChartButtonKey),
-      onPressed: controller.isConnectedDeviceAndroid && isAndroidCollection
-          ? controller.toggleAndroidChartVisibility
-          : null,
+      onPressed:
+          isAndroidCollection ? controller.toggleAndroidChartVisibility : null,
       includeTextWidth: 900,
     );
   }
@@ -559,7 +586,9 @@ class MemoryBodyState extends State<MemoryBody>
       children: [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
-        createToggleAdbMemoryButton(),
+        controller.isConnectedDeviceAndroid
+            ? createToggleAdbMemoryButton()
+            : const SizedBox(),
         const SizedBox(width: denseSpacing),
         isAdvancedSettingsEnabled
             ? Row(
@@ -577,8 +606,7 @@ class MemoryBodyState extends State<MemoryBody>
             : const SizedBox(),
         IconLabelButton(
           key: MemoryScreen.exportButtonKey,
-          onPressed:
-              controller.offline ? null : controller.memoryLog.exportMemory,
+          onPressed: controller.offline ? null : _exportToFile,
           icon: Icons.file_download,
           label: 'Export',
           includeTextWidth: _primaryControlsMinVerboseWidth,
@@ -600,6 +628,16 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
+  void _exportToFile() {
+    final outputPath = controller.memoryLog.exportMemory();
+    final notificationsState = Notifications.of(context);
+    if (notificationsState != null) {
+      notificationsState.push(
+        'Successfully exported file ${outputPath.last} to ${outputPath.first} directory',
+      );
+    }
+  }
+
   void _openSettingsDialog() {
     showDialog(
       context: context,
@@ -618,15 +656,16 @@ class MemoryBodyState extends State<MemoryBody>
   final hoverKey = GlobalKey(debugLabel: MemoryScreen.hoverKeyName);
   static const hoverXOffset = 10;
   static const hoverYOffset = 0.0;
-  static const hoverWidth = 203.0;
+  static const hoverWidth = 225.0;
   static const hover_card_border_width = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
   static const hoverHeightMinimum = 40.0;
   static const hoverItemHeight = 18.0;
-  static const hoverOneEventsHeight =
-      82.0; // One extension event to display (3 lines).
-  static const hoverEventsHeight = 120.0; // Many extension events to display.
+  // One extension event to display (3 lines).
+  static const hoverOneEventsHeight = 82.0;
+  // Many extension events to display.
+  static const hoverEventsHeight = 120.0;
 
   static double computeHoverHeight(
     int eventsCount,
@@ -654,7 +693,7 @@ class MemoryBodyState extends State<MemoryBody>
   static const eventLegend = '${base}event_glyph.png';
   static const eventsLegend = '${base}events_glyph.png';
 
-  static const capacityLegend = '${base}capacity_glyph.png';
+  static const allocatedLegend = '${base}capacity_glyph.png';
   static const usedLegend = '${base}used_glyph.png';
   static const externalLegend = '${base}external_glyph.png';
   static const rssLegend = '${base}rss_glyph.png';
@@ -680,10 +719,12 @@ class MemoryBodyState extends State<MemoryBody>
       final rightSide = <Widget>[];
       if (name != null && image != null) {
         rightSide.addAll([
-          Container(
-            padding: EdgeInsets.fromLTRB(leftEdge, 0, 0, 2),
-            width: legendTextWidth + leftEdge,
-            child: Text(name, style: legendEntry),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.fromLTRB(leftEdge, 0, 0, 2),
+              width: legendTextWidth + leftEdge,
+              child: Text(name, style: legendEntry),
+            ),
           ),
           const PaddedDivider(
             padding: EdgeInsets.only(left: denseRowSpacing),
@@ -701,11 +742,15 @@ class MemoryBodyState extends State<MemoryBody>
       rowChildren.addAll(legendPart(name2, image2, 20.0));
     }
 
-    return Container(
+    return Expanded(
+      child: Container(
         padding: const EdgeInsets.fromLTRB(10, 0, 0, 2),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: rowChildren,
-        ));
+        ),
+      ),
+    );
   }
 
   Widget hoverRow({
@@ -728,7 +773,8 @@ class MemoryBodyState extends State<MemoryBody>
       double leftEdge = 5.0,
     ]) {
       String displayName = name;
-      String displayValue = '';
+      // Empty string overflows, default value space.
+      String displayValue = ' ';
       if (hasNumeric) {
         int startOfNumber = name.lastIndexOf(' ');
         if (hasUnit) {
@@ -741,6 +787,7 @@ class MemoryBodyState extends State<MemoryBody>
         displayName = '${name.substring(0, startOfNumber)} ';
         displayValue = name.substring(startOfNumber + 1);
       }
+
       return [
         image == null
             ? const SizedBox()
@@ -751,7 +798,7 @@ class MemoryBodyState extends State<MemoryBody>
           padding: EdgeInsets.only(left: denseRowSpacing),
         ),
         Text(displayName, style: bold ? hoverTitleEntry : hoverSmallEntry),
-        Text(displayValue, style: hoverValueEntry)
+        Text(displayValue, style: hoverValueEntry),
       ];
     }
 
@@ -842,14 +889,19 @@ class MemoryBodyState extends State<MemoryBody>
     return results;
   }
 
+  /// Long string need to show first part ... last part.
+  static const longStringLength = 34;
+  static const firstCharacters = 9;
+  static const lastCharacters = 20;
+
   // TODO(terry): Data could be long need better mechanism for long data e.g.,:
   //                const encoder = JsonEncoder.withIndent('  ');
   //                final displayData = encoder.convert(data);
   String longValueToShort(String longValue) {
     var value = longValue;
-    if (longValue.length > 35) {
-      final firstPart = longValue.substring(0, 10);
-      final endPart = longValue.substring(longValue.length - 20);
+    if (longValue.length > longStringLength) {
+      final firstPart = longValue.substring(0, firstCharacters);
+      final endPart = longValue.substring(longValue.length - lastCharacters);
       value = '$firstPart...$endPart';
     }
     return value;
@@ -869,9 +921,9 @@ class MemoryBodyState extends State<MemoryBody>
       final outputSizes = '$displaySize/$decodeSize';
       if (outputSizes.length > 10) {
         output.writeln('Display/Decode Size=');
-        output.writeln('    $outputSizes');
+        output.write('    $outputSizes');
       } else {
-        output.writeln('Display/Decode Size=$outputSizes');
+        output.write('Display/Decode Size=$outputSizes');
       }
     } else if (event[eventName] == devToolsEvent &&
         event.containsKey(customEvent)) {
@@ -901,7 +953,7 @@ class MemoryBodyState extends State<MemoryBody>
     }
 
     output.writeln(index == null ? name : '$index. $name');
-    output.writeln(decodeEventValues(event));
+    output.write(decodeEventValues(event));
 
     return output.toString();
   }
@@ -986,13 +1038,6 @@ class MemoryBodyState extends State<MemoryBody>
       : nf.format(number);
 
   List<Widget> displayVmDataInHover(ChartsValues chartsValues) {
-    const rssDisplay = 'RSS';
-    const capacityDisplay = 'Capacity';
-    const usedDisplay = 'Used';
-    const externalDisplay = 'External';
-    const layerDisplay = 'Raster Layer';
-    const pictureDisplay = 'Raster Picture';
-
     final results = <Widget>[];
 
     final vmDataDisplayed = <String, String>{};
@@ -1000,22 +1045,26 @@ class MemoryBodyState extends State<MemoryBody>
     final data = chartsValues.vmData;
 
     final rssValueDisplay = formatNumeric(data[rssJsonName]);
-    vmDataDisplayed['$rssDisplay $rssValueDisplay'] = rssLegend;
+    vmDataDisplayed['${MemoryScreen.rssDisplay} $rssValueDisplay'] = rssLegend;
 
     final capacityValueDisplay = formatNumeric(data[capacityJsonName]);
-    vmDataDisplayed['$capacityDisplay $capacityValueDisplay'] = capacityLegend;
+    vmDataDisplayed['${MemoryScreen.allocatedDisplay} $capacityValueDisplay'] =
+        allocatedLegend;
 
     final usedValueDisplay = formatNumeric(data[usedJsonName]);
-    vmDataDisplayed['$usedDisplay $usedValueDisplay'] = usedLegend;
+    vmDataDisplayed['${MemoryScreen.usedDisplay} $usedValueDisplay'] =
+        usedLegend;
 
     final externalValueDisplay = formatNumeric(data[externalJsonName]);
-    vmDataDisplayed['$externalDisplay $externalValueDisplay'] = externalLegend;
+    vmDataDisplayed['${MemoryScreen.externalDisplay} $externalValueDisplay'] =
+        externalLegend;
 
     final layerValueDisplay = formatNumeric(data[rasterLayerJsonName]);
-    vmDataDisplayed['$layerDisplay $layerValueDisplay'] = rasterLayerLegend;
+    vmDataDisplayed['${MemoryScreen.layerDisplay} $layerValueDisplay'] =
+        rasterLayerLegend;
 
     final pictureValueDisplay = formatNumeric(data[rasterPictureJsonName]);
-    vmDataDisplayed['$pictureDisplay $pictureValueDisplay'] =
+    vmDataDisplayed['${MemoryScreen.pictureDisplay} $pictureValueDisplay'] =
         rasterPictureLegend;
 
     for (var entry in vmDataDisplayed.entries) {
@@ -1199,7 +1248,7 @@ class MemoryBodyState extends State<MemoryBody>
             ? legendHeight2Charts
             : legendHeight1Chart,
         child: Container(
-          padding: const EdgeInsets.fromLTRB(0, 5, 0, 8),
+          padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
           decoration: BoxDecoration(
             color: Colors.black,
             border: Border.all(color: Colors.yellow),
@@ -1235,10 +1284,13 @@ class MemoryBodyState extends State<MemoryBody>
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
                 child: Text('Memory Legend', style: legendHeading),
               ),
-              legendRow(name1: 'Capacity', image1: capacityLegend),
-              legendRow(name1: 'Used', image1: usedLegend),
-              legendRow(name1: 'External', image1: externalLegend),
-              legendRow(name1: 'RSS', image1: rssLegend),
+              legendRow(
+                  name1: MemoryScreen.allocatedDisplay,
+                  image1: allocatedLegend),
+              legendRow(name1: MemoryScreen.usedDisplay, image1: usedLegend),
+              legendRow(
+                  name1: MemoryScreen.externalDisplay, image1: externalLegend),
+              legendRow(name1: MemoryScreen.rssDisplay, image1: rssLegend),
               if (controller.isAndroidChartVisible)
                 const Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 9)),
               if (controller.isAndroidChartVisible)

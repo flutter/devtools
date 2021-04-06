@@ -1,7 +1,6 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -217,8 +216,16 @@ class TimelineFlameChartState
 
   FlutterFrame _selectedFrame;
 
+  ScrollController _groupLabelScrollController;
+
   @override
   int get rowOffsetForTopPadding => TimelineFlameChart.rowOffsetForTopPadding;
+
+  @override
+  void initState() {
+    super.initState();
+    _groupLabelScrollController = verticalControllerGroup.addAndGet();
+  }
 
   @override
   void didChangeDependencies() {
@@ -236,7 +243,7 @@ class TimelineFlameChartState
   @override
   bool isDataVerticallyInView(TimelineEvent data) {
     final eventTopY = topYForData(data);
-    final verticalScrollOffset = verticalController.offset;
+    final verticalScrollOffset = verticalControllerGroup.offset;
     return eventTopY > verticalScrollOffset &&
         eventTopY + rowHeightWithPadding <
             verticalScrollOffset + widget.containerHeight;
@@ -421,7 +428,7 @@ class TimelineFlameChartState
   }
 
   @override
-  List<CustomPaint> buildCustomPaints(
+  List<Widget> buildChartOverlays(
     BoxConstraints constraints,
     BuildContext buildContext,
   ) {
@@ -432,8 +439,8 @@ class TimelineFlameChartState
         painter: AsyncGuidelinePainter(
           zoom: zoom,
           constraints: constraints,
-          verticalController: verticalController,
-          horizontalController: horizontalController,
+          verticalController: verticalControllerGroup,
+          horizontalController: horizontalControllerGroup,
           verticalGuidelines: verticalGuidelines,
           horizontalGuidelines: horizontalGuidelines,
           chartStartInset: widget.startInset,
@@ -444,8 +451,8 @@ class TimelineFlameChartState
         painter: TimelineGridPainter(
           zoom: zoom,
           constraints: constraints,
-          verticalController: verticalController,
-          horizontalController: horizontalController,
+          verticalController: verticalControllerGroup,
+          horizontalController: horizontalControllerGroup,
           chartStartInset: widget.startInset,
           chartEndInset: widget.endInset,
           flameChartWidth: widthWithZoom,
@@ -458,8 +465,8 @@ class TimelineFlameChartState
           _selectedFrame,
           zoom: zoom,
           constraints: constraints,
-          verticalController: verticalController,
-          horizontalController: horizontalController,
+          verticalController: verticalControllerGroup,
+          horizontalController: horizontalControllerGroup,
           chartStartInset: widget.startInset,
           startTimeOffsetMicros: startTimeOffset,
           startingPxPerMicro: startingPxPerMicro,
@@ -471,18 +478,74 @@ class TimelineFlameChartState
           colorScheme: colorScheme,
         ),
       ),
-      CustomPaint(
-        painter: SectionLabelPainter(
-          _timelineController.data.eventGroups,
-          zoom: zoom,
-          constraints: constraints,
-          verticalController: verticalController,
-          horizontalController: horizontalController,
-          chartStartInset: widget.startInset,
-          colorScheme: colorScheme,
+      _buildSectionLabels(constraints: constraints),
+    ];
+  }
+
+  Widget _buildSectionLabels({@required BoxConstraints constraints}) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final eventGroups = _timelineController.data.eventGroups;
+
+    final children = <Widget>[];
+    for (int i = 0; i < eventGroups.length; i++) {
+      var topSpacer = 0.0;
+      var bottomSpacer = 0.0;
+      if (i == 0) {
+        // Add spacing to account for timestamps at top of chart.
+        topSpacer +=
+            sectionSpacing * TimelineFlameChart.rowOffsetForTopPadding -
+                rowHeight;
+      }
+      if (i == eventGroups.length - 1) {
+        // Add spacing to account for bottom row of padding.
+        bottomSpacer = rowHeight;
+      }
+
+      final groupName = eventGroups.keys.elementAt(i);
+      final group = eventGroups[groupName];
+      final backgroundColor = alternatingColorForIndex(
+        eventGroups.values.toList().indexOf(group),
+        colorScheme,
+      );
+      final backgroundWithOpacity = Color.fromRGBO(
+        backgroundColor.red,
+        backgroundColor.green,
+        backgroundColor.blue,
+        0.85,
+      );
+      children.add(
+        Container(
+          padding: EdgeInsets.only(top: topSpacer, bottom: bottomSpacer),
+          alignment: Alignment.topLeft,
+          height: group.displaySizePx + topSpacer + bottomSpacer,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: densePadding,
+              vertical: rowPadding,
+            ),
+            color: backgroundWithOpacity,
+            child: Text(
+              groupName,
+              style: TextStyle(color: colorScheme.chartTextColor),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Positioned(
+      top: rowHeight, // Adjust for row of timestamps
+      left: 0.0,
+      height: constraints.maxHeight,
+      width: widget.startInset,
+      child: IgnorePointer(
+        child: ListView(
+          physics: const ClampingScrollPhysics(),
+          controller: _groupLabelScrollController,
+          children: children,
         ),
       ),
-    ];
+    );
   }
 
   void _calculateAsyncGuidelines() {
@@ -638,97 +701,11 @@ class TimelineFlameChartState
   }
 }
 
-class SectionLabelPainter extends FlameChartPainter {
-  SectionLabelPainter(
-    this.eventGroups, {
-    @required double zoom,
-    @required BoxConstraints constraints,
-    @required ScrollController verticalController,
-    @required LinkedScrollControllerGroup horizontalController,
-    @required double chartStartInset,
-    @required ColorScheme colorScheme,
-  }) : super(
-          zoom: zoom,
-          constraints: constraints,
-          verticalController: verticalController,
-          horizontalController: horizontalController,
-          chartStartInset: chartStartInset,
-          colorScheme: colorScheme,
-        );
-
-  final SplayTreeMap<String, TimelineEventGroup> eventGroups;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final verticalScrollOffset = verticalController.offset;
-    canvas.clipRect(Rect.fromLTWH(
-      0.0,
-      rowHeight, // We do not want to paint inside the timestamp section.
-      constraints.maxWidth,
-      constraints.maxHeight - rowHeight,
-    ));
-
-    // Start at row height to account for timestamps at top of chart.
-    var startSectionPx =
-        sectionSpacing * TimelineFlameChart.rowOffsetForTopPadding;
-    for (String groupName in eventGroups.keys) {
-      final group = eventGroups[groupName];
-      final labelTop = startSectionPx - verticalScrollOffset;
-
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: groupName,
-          style: TextStyle(color: colorScheme.chartTextColor),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-
-      final labelWidth = textPainter.width + 2 * densePadding;
-      final backgroundColor = alternatingColorForIndex(
-        eventGroups.values.toList().indexOf(group),
-        colorScheme,
-      );
-      final backgroundWithOpacity = Color.fromRGBO(
-        backgroundColor.red,
-        backgroundColor.green,
-        backgroundColor.blue,
-        0.85,
-      );
-
-      canvas.drawRect(
-        Rect.fromLTWH(
-          0.0,
-          labelTop,
-          labelWidth,
-          rowHeightWithPadding,
-        ),
-        Paint()..color = backgroundWithOpacity,
-      );
-
-      textPainter.paint(
-        canvas,
-        Offset(densePadding, labelTop + rowPadding),
-      );
-
-      startSectionPx += group.displaySizePx;
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    if (oldDelegate is SectionLabelPainter) {
-      return eventGroups != oldDelegate.eventGroups ||
-          super.shouldRepaint(oldDelegate);
-    }
-    return true;
-  }
-}
-
 class AsyncGuidelinePainter extends FlameChartPainter {
   AsyncGuidelinePainter({
     @required double zoom,
     @required BoxConstraints constraints,
-    @required ScrollController verticalController,
+    @required LinkedScrollControllerGroup verticalController,
     @required LinkedScrollControllerGroup horizontalController,
     @required double chartStartInset,
     @required this.verticalGuidelines,
@@ -866,7 +843,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
     this.selectedFrame, {
     @required double zoom,
     @required BoxConstraints constraints,
-    @required ScrollController verticalController,
+    @required LinkedScrollControllerGroup verticalController,
     @required LinkedScrollControllerGroup horizontalController,
     @required double chartStartInset,
     @required this.startTimeOffsetMicros,

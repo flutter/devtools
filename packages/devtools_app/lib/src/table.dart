@@ -238,7 +238,10 @@ class FlatTableState<T> extends State<FlatTable<T>>
       onPressed: widget.onItemSelected,
       columns: widget.columns,
       columnWidths: columnWidths,
-      backgroundColor: alternatingColorForIndexWithContext(index, context),
+      backgroundColor: alternatingColorForIndex(
+        index,
+        Theme.of(context).colorScheme,
+      ),
       isSelected: widget.selectionNotifier != null
           ? node == widget.selectionNotifier.value
           : false,
@@ -546,7 +549,10 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         linkedScrollControllerGroup: linkedScrollControllerGroup,
         node: node,
         onPressed: (item) => _onItemPressed(item, index),
-        backgroundColor: alternatingColorForIndexWithContext(index, context),
+        backgroundColor: alternatingColorForIndex(
+          index,
+          Theme.of(context).colorScheme,
+        ),
         columns: widget.columns,
         columnWidths: columnWidths,
         expandableColumn: widget.treeColumn,

@@ -98,7 +98,7 @@ class VMInfoList extends StatelessWidget {
 
   Widget _buildAlternatingRow(BuildContext context, int index, Widget row) {
     return Container(
-      color: alternatingColorForIndexWithContext(index, context),
+      color: alternatingColorForIndex(index, Theme.of(context).colorScheme),
       height: defaultRowHeight,
       padding: const EdgeInsets.symmetric(
         horizontal: defaultSpacing,

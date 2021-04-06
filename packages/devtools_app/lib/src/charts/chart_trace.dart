@@ -162,7 +162,7 @@ class Trace {
         datum.y <= characteristics.fixedMaxY,
         'y=${datum.y} fixedMaxY=${characteristics.fixedMaxY}',
       );
-    } else if (datum.y > dataYMax) {
+    } else if (dataYMax != null && datum.y > dataYMax) {
       dataYMax = datum.y.toDouble();
       yAxis = AxisScale(0, dataYMax, 30);
     }

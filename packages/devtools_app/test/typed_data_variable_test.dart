@@ -56,6 +56,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',
@@ -85,6 +86,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',
@@ -114,6 +116,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',
@@ -143,6 +146,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',
@@ -172,6 +176,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',
@@ -201,6 +206,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',
@@ -230,6 +236,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',
@@ -259,6 +266,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',
@@ -288,6 +296,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',
@@ -318,6 +327,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
     final variable = Variable.create(BoundVariable(
       name: 'test',
@@ -346,6 +356,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
 
     final variable = Variable.create(BoundVariable(
@@ -376,6 +387,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
 
     final variable = Variable.create(BoundVariable(
@@ -406,6 +418,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
 
     final variable = Variable.create(BoundVariable(
@@ -436,6 +449,7 @@ void main() {
       id: '123',
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
     );
 
     final variable = Variable.create(BoundVariable(

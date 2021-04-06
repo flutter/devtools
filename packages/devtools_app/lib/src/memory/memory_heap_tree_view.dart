@@ -32,6 +32,8 @@ import 'memory_screen.dart';
 import 'memory_snapshot_models.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
+
+@visibleForTesting
 final memorySearchFieldKey = GlobalKey(debugLabel: memorySearchFieldKeyName);
 
 class HeapTree extends StatefulWidget {
@@ -382,6 +384,7 @@ class HeapTreeViewState extends State<HeapTree>
 
     if (_isSnapshotRunning) {
       snapshotDisplay = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 50.0),
           snapshotDisplay = const CircularProgressIndicator(),
@@ -447,9 +450,7 @@ class HeapTreeViewState extends State<HeapTree>
                   children: [
                     _buildAllocationsControls(),
                     const SizedBox(height: denseRowSpacing),
-                    const Expanded(
-                      child: AllocationTableView(),
-                    ),
+                    const Expanded(child: AllocationTableView()),
                   ],
                 ),
               ],

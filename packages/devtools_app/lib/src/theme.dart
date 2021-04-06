@@ -308,6 +308,20 @@ extension DevToolsColorScheme on ColorScheme {
         colors: [expandedTopContentColor, expandedBottomContentColor],
         tileMode: TileMode.repeated,
       );
+
+  /// TextStyle for callstack.
+  TextStyle get stackTraceCall => TextStyle(
+        color: defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: 12.0,
+      );
+
+  /// TextStyle for source file displayed in callstack.
+  TextStyle get stackTraceSource => TextStyle(
+        color: defaultForeground,
+        fontWeight: FontWeight.w100,
+        fontSize: 12,
+      );
 }
 
 /// Utility extension methods to the [ThemeData] class.
@@ -338,6 +352,15 @@ TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
 const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
 const defaultTextFieldHeight = 36.0;
+
+/// Default color of cursor and color used by search's TextField.
+/// Guarantee that the Search TextField on all platforms renders in the same
+/// color for border, label text, and cursor. Primarly, so golden screen
+/// snapshots will compare successfully using the exact color.
+Color searchColor = Colors.blue;
+
+/// Default Border of search's TextField.
+BorderSide searchFocusBorderColor = BorderSide(color: searchColor, width: 2);
 
 /// A short duration to use for animations.
 ///
