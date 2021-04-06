@@ -152,7 +152,7 @@ class _InitializerState extends State<Initializer>
               Text('Disconnected', style: theme.textTheme.headline3),
               const SizedBox(height: defaultSpacing),
               if (widget.allowConnectionScreenOnDisconnect)
-                FixedHeightElevatedButton(
+                ElevatedButton(
                     onPressed: () {
                       hideDisconnectedOverlay();
                       DevToolsRouterDelegate.of(context)
@@ -165,7 +165,7 @@ class _InitializerState extends State<Initializer>
                   style: theme.textTheme.bodyText2,
                 ),
               const Spacer(),
-              FixedHeightElevatedButton(
+              ElevatedButton(
                 onPressed: hideDisconnectedOverlay,
                 child: const Text('Review History'),
               ),

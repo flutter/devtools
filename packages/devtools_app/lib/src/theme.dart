@@ -78,23 +78,24 @@ ThemeData _baseTheme({
     canvasColor: backgroundColor,
     scaffoldBackgroundColor: backgroundColor,
     colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
-    // TODO(kenz): add fixed height to all of these button themes when
-    // https://github.com/flutter/flutter/issues/73741 is fixed.
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         primary: theme.colorScheme.contrastForeground,
         minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: const Size.fromHeight(defaultButtonHeight),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         primary: theme.colorScheme.contrastForeground,
         minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: const Size.fromHeight(defaultButtonHeight),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: const Size.fromHeight(defaultButtonHeight),
       ),
     ),
   );
