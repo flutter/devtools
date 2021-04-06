@@ -254,12 +254,13 @@ void main() {
       // Live feed should be default selected.
       expect(controller.memorySource, MemoryController.liveFeed);
 
-      // Export memory to a memory log file.
+      // Expand the memory sources.
       await tester.tap(find.byKey(MemoryScreen.sourcesDropdownKey));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Last item in dropdown list of memory source should be memory log file.
-      await tester.tap(find.byKey(MemoryScreen.sourcesMenuItemKey).last);
+      await tester
+          .tap(find.byType(typeOf<SourceDropdownMenuItem<String>>()).last);
       await tester.pump();
 
       expect(

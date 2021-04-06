@@ -67,8 +67,6 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const sourcesDropdownKey = Key('Sources Dropdown');
   @visibleForTesting
-  static const sourcesMenuItemKey = Key('Sources Menu Item');
-  @visibleForTesting
   static const sourcesKey = Key('Sources');
   @visibleForTesting
   static const exportButtonKey = Key('Export Button');
@@ -486,8 +484,7 @@ class MemoryBodyState extends State<MemoryBody>
           (!isVerbose && value.startsWith(MemoryController.logFilenamePrefix))
               ? value.substring(MemoryController.logFilenamePrefix.length)
               : value;
-      return DropdownMenuItem<String>(
-        key: MemoryScreen.sourcesMenuItemKey,
+      return SourceDropdownMenuItem<String>(
         value: value,
         child: Text(
           '${controller.memorySourcePrefix}$displayValue',
@@ -1629,4 +1626,9 @@ class MemoryConfigurationsDialog extends StatelessWidget {
       ],
     );
   }
+}
+
+class SourceDropdownMenuItem<T> extends DropdownMenuItem<T> {
+  const SourceDropdownMenuItem({T value, @required Widget child})
+      : super(value: value, child: child);
 }
