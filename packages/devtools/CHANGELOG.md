@@ -1,3 +1,6 @@
+## 2.1.1
+* Set the correct dart:io service extension protocol version for the new HTTP profiler logic [#2867](https://github.com/flutter/devtools/pull/2867)
+
 ## 2.1.0
 * Memory legends cleanup [#2833](https://github.com/flutter/devtools/pull/2833)
 * Update network profiler to support dart:io HTTP profiling service extensions [#2839](https://github.com/flutter/devtools/pull/2839)
