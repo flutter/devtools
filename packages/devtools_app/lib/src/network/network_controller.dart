@@ -79,11 +79,9 @@ class NetworkController
     _selectedRequest.value = selection;
   }
 
-  @visibleForTesting
-  NetworkRequests processNetworkTrafficHelper(
-    Timeline timeline,
-    List<SocketStatistic> sockets,
-    int timelineMicrosOffset, {
+  void _processTimeline({
+    @required Timeline timeline,
+    @required int timelineMicrosOffset,
     @required List<NetworkRequest> currentValues,
     @required List<HttpRequestData> invalidRequests,
     @required Map<String, HttpRequestData> outstandingRequestsMap,
@@ -129,7 +127,7 @@ class NetworkController
         responseEvents.addAll(httpEvents[responseId] ?? []);
       }
 
-      final requestData = HttpRequestData.fromTimeline(
+      final requestData = TimelineHttpRequestData.fromTimeline(
         timelineMicrosBase: timelineMicrosOffset,
         requestEvents: request.value,
         responseEvents: responseEvents,
@@ -154,7 +152,47 @@ class NetworkController
         invalidRequests.add(requestData);
       }
     }
+  }
 
+  void _processHttpProfileRequests({
+    @required List<HttpProfileRequest> httpRequests,
+    @required List<NetworkRequest> currentValues,
+    @required Map<String, HttpRequestData> outstandingRequestsMap,
+  }) {
+    for (final request in httpRequests) {
+      final wrapped = DartIOHttpRequestData(
+        _timelineMicrosOffset,
+        request,
+      );
+      final id = request.id.toString();
+      if (outstandingRequestsMap.containsKey(id)) {
+        outstandingRequestsMap[id].merge(wrapped);
+        if (!outstandingRequestsMap[id].inProgress) {
+          final data =
+              outstandingRequestsMap.remove(id) as DartIOHttpRequestData;
+          data.getFullRequestData().then((value) => _updateData());
+        }
+        continue;
+      } else if (wrapped.inProgress) {
+        outstandingRequestsMap.putIfAbsent(id, () => wrapped);
+      } else {
+        // If the response has completed, send a request for body data.
+        wrapped.getFullRequestData().then((value) => _updateData());
+      }
+      currentValues.add(wrapped);
+    }
+  }
+
+  @visibleForTesting
+  NetworkRequests processNetworkTrafficHelper(
+    Timeline timeline,
+    List<SocketStatistic> sockets,
+    List<HttpProfileRequest> httpRequests,
+    int timelineMicrosOffset, {
+    @required List<NetworkRequest> currentValues,
+    @required List<HttpRequestData> invalidRequests,
+    @required Map<String, HttpRequestData> outstandingRequestsMap,
+  }) {
     // [currentValues] contains all the current requests we have in the
     // profiler, which will contain web socket requests if they exist. The new
     // [sockets] may contain web sockets with the same ids as ones we already
@@ -171,6 +209,22 @@ class NetworkController
       currentValues.add(webSocket);
     }
 
+    if (timeline != null) {
+      _processTimeline(
+        timeline: timeline,
+        timelineMicrosOffset: timelineMicrosOffset,
+        currentValues: currentValues,
+        invalidRequests: invalidRequests,
+        outstandingRequestsMap: outstandingRequestsMap,
+      );
+    } else {
+      _processHttpProfileRequests(
+        httpRequests: httpRequests,
+        currentValues: currentValues,
+        outstandingRequestsMap: outstandingRequestsMap,
+      );
+    }
+
     return NetworkRequests(
       requests: currentValues,
       invalidHttpRequests: invalidRequests,
@@ -181,11 +235,13 @@ class NetworkController
   void processNetworkTraffic({
     @required Timeline timeline,
     @required List<SocketStatistic> sockets,
+    @required List<HttpProfileRequest> httpRequests,
   }) {
     // Trigger refresh.
     _requests.value = processNetworkTrafficHelper(
       timeline,
       sockets,
+      httpRequests,
       _timelineMicrosOffset,
       currentValues: List.from(requests.value.requests),
       invalidRequests: [],

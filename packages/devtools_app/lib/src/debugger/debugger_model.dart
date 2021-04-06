@@ -294,6 +294,13 @@ class FileNode extends TreeNode<FileNode> {
 
   bool get hasScript => scriptRef != null;
 
+  String _fileName = '';
+
+  /// Returns the name of the file.
+  ///
+  /// May be empty.
+  String get fileName => _fileName;
+
   /// Given a flat list of service protocol scripts, return a tree of scripts
   /// representing the best hierarchical grouping.
   static List<FileNode> createRootsFrom(List<ScriptRef> scripts) {
@@ -310,6 +317,7 @@ class FileNode extends TreeNode<FileNode> {
       }
 
       node.scriptRef = script;
+      node._fileName = ScriptRefUtils.fileName(script);
     }
 
     // Clear out the _childrenAsMap map.
@@ -353,6 +361,9 @@ class FileNode extends TreeNode<FileNode> {
 }
 
 class ScriptRefUtils {
+  static String fileName(ScriptRef scriptRef) =>
+      Uri.parse(scriptRef.uri).path.split('/').last;
+
   /// Return the Uri for the given ScriptRef split into path segments.
   ///
   /// This is useful for converting a flat list of scripts into a directory tree

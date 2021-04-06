@@ -6,12 +6,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
 
-import '../common_widgets.dart';
-import '../config_specific/drag_and_drop/drag_and_drop.dart';
-import '../notifications.dart';
-import '../theme.dart';
-import '../ui/label.dart';
-import '../utils.dart';
+import 'common_widgets.dart';
+import 'config_specific/drag_and_drop/drag_and_drop.dart';
+import 'notifications.dart';
+import 'theme.dart';
+import 'ui/label.dart';
+import 'utils.dart';
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
@@ -125,7 +125,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
           ),
         ),
         const SizedBox(width: denseSpacing),
-        _buildImportButton(),
+        FileImportButton(onPressed: _importFile),
         // Horizontal spacer with flex value of 1.
         const Flexible(
           child: SizedBox(height: rowHeight),
@@ -142,14 +142,6 @@ class _FileImportContainerState extends State<FileImportContainer> {
         color: Theme.of(context).textTheme.headline1.color,
       ),
       textAlign: TextAlign.left,
-    );
-  }
-
-  Widget _buildImportButton() {
-    return IconLabelButton(
-      onPressed: _importFile,
-      icon: Icons.file_upload,
-      label: 'Import File',
     );
   }
 
@@ -176,17 +168,10 @@ class _FileImportContainerState extends State<FileImportContainer> {
     );
   }
 
-  void _importFile() async {
-    final acceptedTypeGroups = [XTypeGroup(extensions: widget.extensions)];
-    final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
-    final data = jsonDecode(await file.readAsString());
-    final lastModifiedTime = await file.lastModified();
-    final devToolsJsonFile = DevToolsJsonFile(
-      data: data,
-      name: file.name,
-      lastModifiedTime: lastModifiedTime,
-    );
-    _handleImportedFile(devToolsJsonFile);
+  Future<void> _importFile() async {
+    final importedFile =
+        await importFileFromPicker(acceptedTypes: widget.extensions);
+    _handleImportedFile(importedFile);
   }
 
   // TODO(kenz): add error handling to ensure we only allow importing supported
@@ -201,6 +186,43 @@ class _FileImportContainerState extends State<FileImportContainer> {
     if (widget.onFileSelected != null) {
       widget.onFileSelected(file);
     }
+  }
+}
+
+Future<DevToolsJsonFile> importFileFromPicker({
+  @required List<String> acceptedTypes,
+}) async {
+  final acceptedTypeGroups = [XTypeGroup(extensions: acceptedTypes)];
+  final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
+  final data = jsonDecode(await file.readAsString());
+  final lastModifiedTime = await file.lastModified();
+  // TODO(kenz): this will need to be modified if we need to support other file
+  // extensions than .json. We will need to return a more generic file type.
+  return DevToolsJsonFile(
+    data: data,
+    name: file.name,
+    lastModifiedTime: lastModifiedTime,
+  );
+}
+
+class FileImportButton extends StatelessWidget {
+  const FileImportButton({
+    @required this.onPressed,
+    this.elevatedButton = false,
+  });
+
+  final VoidCallback onPressed;
+
+  final bool elevatedButton;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconLabelButton(
+      onPressed: onPressed,
+      icon: Icons.file_upload,
+      label: 'Import File',
+      elevatedButton: elevatedButton,
+    );
   }
 }
 

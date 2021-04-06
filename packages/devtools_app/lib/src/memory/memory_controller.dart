@@ -34,8 +34,6 @@ enum ChartType {
   AndroidHeaps,
 }
 
-typedef chartStateListener = void Function();
-
 // TODO(terry): Consider supporting more than one file since app was launched.
 // Memory Log filename.
 final String _memoryLogFilename =
@@ -100,6 +98,15 @@ ChartInterval chartInterval(String displayName) {
       assert(false);
       return null;
   }
+}
+
+class OfflineFileException implements Exception {
+  OfflineFileException(this.message) : super();
+
+  final String message;
+
+  @override
+  String toString() => message;
 }
 
 class AllocationStackTrace {
@@ -252,6 +259,14 @@ class MemoryController extends DisposableController
       _androidCollectionEnabled;
 
   final _androidCollectionEnabled = ValueNotifier<bool>(androidADBDefault);
+
+  // Default state of advanced settings enabled.
+  static const advancedSettingsEnabledDefault = false;
+
+  ValueListenable<bool> get advancedSettingsEnabled => _advancedSettingsEnabled;
+
+  final _advancedSettingsEnabled =
+      ValueNotifier<bool>(advancedSettingsEnabledDefault);
 
   // Memory statistics displayed as raw numbers or units (KB, MB, GB).
   static const unitDisplayedDefault = true;
@@ -446,6 +461,14 @@ class MemoryController extends DisposableController
 
   String get memorySource => _memorySourceNotifier.value;
 
+  ValueListenable get refreshCharts => _refreshCharts;
+
+  final _refreshCharts = ValueNotifier<int>(0);
+
+  void refreshAllCharts() {
+    _refreshCharts.value++;
+  }
+
   /// Starting chunk for slider based on the intervalDurationInMs.
   double sliderValue = 1.0;
 
@@ -496,7 +519,9 @@ class MemoryController extends DisposableController
       displayIntervalToIntervalDurationInMs(displayInterval);
 
   /// MemorySource has changed update the view.
-  void updatedMemorySource() {
+  /// Return value of null implies offline file loaded.
+  /// Return value of String is an error message.
+  Future<void> updatedMemorySource() async {
     if (memorySource == MemoryController.liveFeed) {
       if (offline) {
         // User is switching back to 'Live Feed'.
@@ -508,7 +533,9 @@ class MemoryController extends DisposableController
       }
     } else {
       // Switching to an offline memory log (JSON file in /tmp).
-      memoryLog.loadOffline(memorySource);
+      await memoryLog.loadOffline(memorySource).catchError((e) {
+        throw OfflineFileException(e.toString());
+      });
     }
   }
 
@@ -535,6 +562,11 @@ class MemoryController extends DisposableController
 
   bool toggleAndroidChartVisibility() =>
       _androidChartVisibleNotifier.value = !_androidChartVisibleNotifier.value;
+
+  bool get isAdvancedSettingsVisible => _advancedSettingsEnabled.value;
+
+  bool toggleAdvancedSettingsVisibility() =>
+      _advancedSettingsEnabled.value = !_advancedSettingsEnabled.value;
 
   final SettingsModel settings = SettingsModel();
 
@@ -889,8 +921,9 @@ class MemoryController extends DisposableController
 
   DateTime monitorTimestamp;
 
-  ValueListenable<DateTime> get lastMonitorTimestampNotifier => lastMonitorTimestamp;
-  
+  ValueListenable<DateTime> get lastMonitorTimestampNotifier =>
+      lastMonitorTimestamp;
+
   final lastMonitorTimestamp = ValueNotifier<DateTime>(null);
 
   /// Used for Allocations table search auto-complete.
@@ -1001,6 +1034,39 @@ class MemoryController extends DisposableController
 
   bool get isConnectedDeviceAndroid {
     return serviceManager?.vm?.operatingSystem == 'android';
+  }
+
+  /// Source file name as returned from allocation's stacktrace.
+  /// Map source URI
+  ///    packages/flutter/lib/src/widgets/image.dart
+  /// would map to
+  ///    package:flutter/src/widgets/image.dart
+  // TODO(terry): Review with Ben pathing doesn't quite work the source
+  //              file has the lib/ maybe a LibraryRef could be returned
+  //              if it's a package today all packages are file:///? Also,
+  //              would be nice to have a line # too for the source.
+  //
+  //              When line # and package mapping exist ability to navigate
+  //              to line number of the source file when clicked is needed.
+  static const packageName = '/packages/';
+  String displayAsPackage(String sourceName) {
+    final packagesIndex = sourceName.indexOf(packageName);
+    // See issue https://github.com/dart-lang/sdk/issues/45530
+    final restToMatchStartIndex = packagesIndex + packageName.length;
+    if (packagesIndex >= 0) {
+      final activeLibraries =
+          serviceManager.isolateManager.selectedIsolateLibraries;
+      final match = activeLibraries.firstWhere(
+        (element) {
+          final toMatch = sourceName.substring(restToMatchStartIndex);
+          return element.uri.endsWith(toMatch);
+        },
+        orElse: () => null,
+      );
+      return match == null ? sourceName : match.name;
+    }
+
+    return sourceName;
   }
 
   Future<List<InstanceSummary>> getInstances(
@@ -1418,7 +1484,7 @@ class MemoryLog {
   MemoryController controller;
 
   /// Persist the the live memory data to a JSON file in the /tmp directory.
-  void exportMemory() async {
+  List<String> exportMemory() {
     MemoryScreen.gaActionForExport();
 
     final liveData = controller.memoryTimeline.liveData;
@@ -1451,32 +1517,41 @@ class MemoryLog {
       assert(memoryJson.data.length == liveData.length);
     }
 
-    _fs.writeStringToFile(_memoryLogFilename, jsonPayload);
-
-    // TODO(terry): Display filename created in a toast.
+    _fs.writeStringToFile(_memoryLogFilename, jsonPayload, isMemory: true);
 
     if (pseudoData) liveData.clear();
+
+    return [_fs.exportDirectoryName(isMemory: true), _memoryLogFilename];
   }
 
   /// Return a list of offline memory logs filenames in the /tmp directory
   /// that are available to open.
   List<String> offlineFiles() {
-    final memoryLogs = _fs.list(prefix: MemoryController.logFilenamePrefix);
+    final memoryLogs = _fs.list(
+      prefix: MemoryController.logFilenamePrefix,
+      isMemory: true,
+    );
 
     // Sort by newest file top-most (DateTime is in the filename).
+
     memoryLogs.sort((a, b) => b.compareTo(a));
 
     return memoryLogs;
   }
 
   /// Load the memory profile data from a saved memory log file.
-  void loadOffline(String filename) async {
-    final jsonPayload = _fs.readStringFromFile(filename);
+  Future<void> loadOffline(String filename) async {
+    final jsonPayload = _fs.readStringFromFile(filename, isMemory: true);
+
     final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
 
-    // TODO(terry): Display notification JSON file isn't version isn't
-    // supported or if the payload isn't an exported memory file.
-    assert(memoryJson.isMatchedVersion);
+    if (!memoryJson.isMatchedVersion) {
+      final e =
+          'Error loading file $filename version ${memoryJson.payloadVersion}';
+      log(e, LogLevel.warning);
+      throw OfflineFileException(e);
+    }
+
     assert(memoryJson.isMemoryPayload);
 
     controller.offline = true;
@@ -1485,5 +1560,6 @@ class MemoryLog {
   }
 
   @visibleForTesting
-  bool removeOfflineFile(String filename) => _fs.deleteFile(filename);
+  bool removeOfflineFile(String filename) =>
+      _fs.deleteFile(filename, isMemory: true);
 }

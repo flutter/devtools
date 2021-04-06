@@ -383,11 +383,22 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
         .map((scriptRef) {
       return PopupMenuItem(
         value: scriptRef,
-        child: Text(
-          scriptRef.uri,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-          style: const TextStyle(fontSize: 14.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              ScriptRefUtils.fileName(scriptRef),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              scriptRef.uri,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: Theme.of(context).subtleTextStyle,
+            ),
+          ],
         ),
       );
     }).toList();
@@ -591,16 +602,15 @@ class _LineItemState extends State<LineItem> {
     _removeTimer?.cancel();
     if (!_debuggerController.isPaused.value) return;
     _showTimer = Timer(LineItem._hoverDelay, () async {
-      final theme = Theme.of(context);
       _hoverCard?.remove();
       final word = wordForHover(
         event.localPosition.dx,
         widget.lineContents,
-        theme.fixedFontStyle,
       );
       if (word != '') {
         try {
           final response = await _debuggerController.evalAtCurrentFrame(word);
+          if (response is! InstanceRef) return;
           final variable = Variable.fromRef(response);
           await _debuggerController.buildVariablesTree(variable);
           _hoverCard = HoverCard(

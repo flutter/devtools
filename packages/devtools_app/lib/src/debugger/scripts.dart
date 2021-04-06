@@ -16,6 +16,7 @@ import 'debugger_screen.dart';
 
 const containerIcon = Icons.folder;
 const libraryIcon = Icons.insert_chart;
+const listItemHeight = 40.0;
 
 /// Picker that takes a list of scripts and allows filtering and selection of
 /// items.
@@ -113,6 +114,7 @@ class ScriptPickerState extends State<ScriptPicker> {
           if (!_isLoading)
             Expanded(
               child: TreeView<FileNode>(
+                itemExtent: listItemHeight,
                 dataRoots: _rootScriptNodes,
                 dataDisplayProvider: (item, onTap) =>
                     _displayProvider(context, item, onTap),
@@ -148,10 +150,30 @@ class ScriptPickerState extends State<ScriptPicker> {
               ),
               const SizedBox(width: densePadding),
               Expanded(
-                child: Text(
-                  node.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!node.hasScript)
+                      Text(
+                        node.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    else ...[
+                      Text(
+                        node.fileName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        node.scriptRef.uri,
+                        style: Theme.of(context).subtleTextStyle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ]
+                  ],
                 ),
               ),
             ],

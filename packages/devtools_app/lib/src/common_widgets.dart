@@ -90,6 +90,7 @@ class IconLabelButton extends StatelessWidget {
     @required this.label,
     @required this.onPressed,
     this.includeTextWidth,
+    this.elevatedButton = false,
   }) : super(key: key);
 
   final IconData icon;
@@ -100,15 +101,25 @@ class IconLabelButton extends StatelessWidget {
 
   final VoidCallback onPressed;
 
+  /// Whether this icon label button should use an elevated button style.
+  final bool elevatedButton;
+
   @override
   Widget build(BuildContext context) {
+    final iconLabel = MaterialIconLabel(
+      label: label,
+      iconData: icon,
+      includeTextWidth: includeTextWidth,
+    );
+    if (elevatedButton) {
+      return ElevatedButton(
+        onPressed: onPressed,
+        child: iconLabel,
+      );
+    }
     return OutlinedButton(
       onPressed: onPressed,
-      child: MaterialIconLabel(
-        label: label,
-        iconData: icon,
-        includeTextWidth: includeTextWidth,
-      ),
+      child: iconLabel,
     );
   }
 }
@@ -351,12 +362,12 @@ class RecordingInfo extends StatelessWidget {
         processedObject: recordedObject,
       );
     } else if (recording) {
-      child = _recordingStatus(
+      child = RecordingStatus(
         key: recordingStatusKey,
         recordedObject: recordedObject,
       );
     } else {
-      child = _recordingInstructions(
+      child = RecordingInstructions(
         key: instructionsKey,
         recordedObject: recordedObject,
         isPause: isPause,
@@ -366,9 +377,45 @@ class RecordingInfo extends StatelessWidget {
       child: child,
     );
   }
+}
 
-  Widget _recordingInstructions(
-      {Key key, String recordedObject, bool isPause}) {
+class RecordingStatus extends StatelessWidget {
+  const RecordingStatus({
+    Key key,
+    @required this.recordedObject,
+  }) : super(key: key);
+
+  final String recordedObject;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Recording $recordedObject',
+          style: Theme.of(context).subtleTextStyle,
+        ),
+        const SizedBox(height: defaultSpacing),
+        const CircularProgressIndicator(),
+      ],
+    );
+  }
+}
+
+class RecordingInstructions extends StatelessWidget {
+  const RecordingInstructions({
+    Key key,
+    @required this.isPause,
+    @required this.recordedObject,
+  }) : super(key: key);
+
+  final String recordedObject;
+
+  final bool isPause;
+
+  @override
+  Widget build(BuildContext context) {
     final stopOrPauseRow = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: isPause
@@ -384,7 +431,6 @@ class RecordingInfo extends StatelessWidget {
             ],
     );
     return Column(
-      key: key,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Row(
@@ -396,18 +442,6 @@ class RecordingInfo extends StatelessWidget {
           ],
         ),
         stopOrPauseRow,
-      ],
-    );
-  }
-
-  Widget _recordingStatus({Key key, String recordedObject}) {
-    return Column(
-      key: key,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('Recording $recordedObject'),
-        const SizedBox(height: defaultSpacing),
-        const CircularProgressIndicator(),
       ],
     );
   }
@@ -430,7 +464,10 @@ class ProcessingInfo extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Processing $processedObject'),
+          Text(
+            'Processing $processedObject',
+            style: Theme.of(context).subtleTextStyle,
+          ),
           const SizedBox(height: defaultSpacing),
           SizedBox(
             width: 200.0,
@@ -986,12 +1023,6 @@ extension ColorExtension on Color {
 }
 
 /// Gets an alternating color to use for indexed UI elements.
-Color alternatingColorForIndexWithContext(int index, BuildContext context) {
-  final theme = Theme.of(context);
-  final color = theme.canvasColor;
-  return _colorForIndex(color, index, theme.colorScheme);
-}
-
 Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
   final color = colorScheme.defaultBackgroundColor;
   return _colorForIndex(color, index, colorScheme);

@@ -293,14 +293,14 @@ class OfflinePerformanceData extends PerformanceData {
                 .cast<String, dynamic>())
         : null;
 
-    final double displayRefreshRate =
+    final displayRefreshRate =
         json[PerformanceData.displayRefreshRateKey] ?? defaultRefreshRate;
 
     return OfflinePerformanceData._(
       traceEvents: traceEvents,
       selectedFrameId: selectedFrameId,
       selectedEvent: selectedEvent,
-      displayRefreshRate: displayRefreshRate,
+      displayRefreshRate: displayRefreshRate.toDouble(),
       cpuProfileData: cpuProfileData,
     );
   }
@@ -441,9 +441,29 @@ class FlutterFrame {
     type ??= event?.type;
     if (type == TimelineEventType.ui) {
       time.start = event?.time?.start;
+      // If [rasterEventFlow] has already completed, set the end time for this
+      // frame to [event]'s end time.
+      if (rasterEventFlow != null) {
+        time.end = event?.time?.end;
+      }
     }
     if (type == TimelineEventType.raster) {
-      time.end = event?.time?.end;
+      // If [uiEventFlow] is null, that means that this raster event flow
+      // completed before the ui event flow did for this frame. This means one
+      // of two things: 1) there will never be a [uiEventFlow] for this frame
+      // because the UI events are not present in the available timeline
+      // events, or 2) the [uiEventFlow] has started but not completed yet. In
+      // the event that 2) is true, do not set the frame end time here because
+      // the end time for this frame will be set to the the end time for
+      // [uiEventFlow] once it finishes.
+      if (uiEventFlow != null) {
+        time.end = Duration(
+          microseconds: math.max(
+            uiEventFlow.time.end.inMicroseconds,
+            event?.time?.end?.inMicroseconds ?? 0,
+          ),
+        );
+      }
     }
     eventFlows[type.index] = event;
     event?.frameId = id;

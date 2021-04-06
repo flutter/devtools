@@ -7,7 +7,7 @@ import 'package:devtools_app/src/network/network_model.dart';
 import 'package:vm_service/vm_service.dart';
 
 const _getStartTime = 231935000000;
-final httpGetEvent = HttpRequestData.fromTimeline(
+final httpGetEvent = TimelineHttpRequestData.fromTimeline(
   timelineMicrosBase: _getStartTime - 1000000, // - 1000000 is arbitrary.
   requestEvents: httpGetEventTrace,
   responseEvents: httpGetResponseEventTrace,
@@ -216,7 +216,7 @@ final httpGetResponseEventTrace = [
 ];
 
 const _putStartTime = 231936000000;
-final httpPutEvent = HttpRequestData.fromTimeline(
+final httpPutEvent = TimelineHttpRequestData.fromTimeline(
   timelineMicrosBase: _putStartTime - 1000000, // - 1000000 is arbitrary.
   requestEvents: httpPutEventTrace,
   responseEvents: [],
@@ -309,7 +309,7 @@ final httpPutEventTrace = [
 ];
 
 const _getWithErrorStartTime = 231937000000;
-final httpGetEventWithError = HttpRequestData.fromTimeline(
+final httpGetEventWithError = TimelineHttpRequestData.fromTimeline(
   timelineMicrosBase:
       _getWithErrorStartTime - 1000000, // - 1000000 is arbitrary.
   requestEvents: httpGetEventWithErrorTrace,
@@ -353,7 +353,7 @@ final httpGetEventWithErrorTrace = [
 ];
 
 const _invalidStartTime = 231938000000;
-final httpInvalidEvent = HttpRequestData.fromTimeline(
+final httpInvalidEvent = TimelineHttpRequestData.fromTimeline(
   timelineMicrosBase: _invalidStartTime - 1000000, // - 1000000 is arbitrary.
   requestEvents: httpInvalidEventTrace,
   responseEvents: [],
@@ -401,7 +401,7 @@ final httpInvalidEventTrace = [
 ];
 
 const _inProgressStartTime = 231939000000;
-final httpInProgressEvent = HttpRequestData.fromTimeline(
+final httpInProgressEvent = TimelineHttpRequestData.fromTimeline(
   timelineMicrosBase: _inProgressStartTime - 1000000, // - 1000000 is arbitrary.
   requestEvents: httpInProgressEventTrace,
   responseEvents: [],
