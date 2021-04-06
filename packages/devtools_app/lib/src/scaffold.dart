@@ -369,8 +369,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
       );
       preferredSize = isNarrow
-          ? const Size.fromHeight(kToolbarHeight / 2.0 + 40.0)
-          : const Size.fromHeight(kToolbarHeight / 2.0);
+          ? const Size.fromHeight(defaultToolbarHeight + 40.0)
+          : const Size.fromHeight(defaultToolbarHeight);
       final alignment = isNarrow ? Alignment.bottomLeft : Alignment.centerRight;
 
       final rightAdjust = isNarrow ? 0.0 : BulletSpacer.width;
@@ -398,9 +398,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       automaticallyImplyLeading: false,
       title: Text(
         title,
-        style: const TextStyle(
-          fontSize: 14,
-        ),
+        style: Theme.of(context).textTheme.subtitle1,
       ),
       centerTitle: false,
       toolbarHeight: kToolbarHeight / 2.0,
