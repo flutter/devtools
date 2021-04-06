@@ -123,7 +123,9 @@ bool isValidLightColor(Color color) {
   return color.computeLuminance() >= 1 - _lightDarkLuminanceThreshold;
 }
 
-const defaultButtonHeight = 36.0;
+const defaultToolbarHeight = 32.0;
+
+const defaultButtonHeight = 32.0;
 const buttonMinWidth = 36.0;
 
 const defaultIconSize = 16.0;
