@@ -88,7 +88,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
               'At this time, DevTools only supports importing files that were originally'
               ' exported from DevTools.'),
           const SizedBox(height: defaultSpacing),
-          FixedHeightElevatedButton(
+          ElevatedButton(
             onPressed: _importFile,
             child: const MaterialIconLabel(
               label: 'Import File',
