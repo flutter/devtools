@@ -169,24 +169,27 @@ class _AppSizeBodyState extends State<AppSizeBody>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TabBar(
-              labelColor: Theme.of(context).textTheme.bodyText1.color,
-              isScrollable: true,
-              controller: _tabController,
-              tabs: tabs,
-            ),
-            Row(
-              children: [
-                if (currentTab.key == AppSizeScreen.diffTabKey)
-                  _buildDiffTreeTypeDropdown(),
-                const SizedBox(width: defaultSpacing),
-                _buildClearButton(currentTab.key),
-              ],
-            ),
-          ],
+        SizedBox(
+          height: defaultButtonHeight,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TabBar(
+                labelColor: Theme.of(context).textTheme.bodyText1.color,
+                isScrollable: true,
+                controller: _tabController,
+                tabs: tabs,
+              ),
+              Row(
+                children: [
+                  if (currentTab.key == AppSizeScreen.diffTabKey)
+                    _buildDiffTreeTypeDropdown(),
+                  const SizedBox(width: defaultSpacing),
+                  _buildClearButton(currentTab.key),
+                ],
+              ),
+            ],
+          ),
         ),
         Expanded(
           child: TabBarView(

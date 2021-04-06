@@ -99,52 +99,55 @@ class _CpuProfilerState extends State<CpuProfiler>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TabBar(
-              labelColor: textTheme.bodyText1.color,
-              isScrollable: true,
-              controller: _tabController,
-              tabs: CpuProfiler.tabs,
-            ),
-            // TODO(kenz): support search for call tree and bottom up tabs as
-            // well. This will require implementing search for tree tables.
-            if (currentTab.key == CpuProfiler.flameChartTab &&
-                widget.searchFieldKey != null)
-              Row(
-                children: [
-                  _buildSearchField(hasData),
-                  FlameChartHelpButton(),
-                ],
+        SizedBox(
+          height: defaultButtonHeight,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TabBar(
+                labelColor: textTheme.bodyText1.color,
+                isScrollable: true,
+                controller: _tabController,
+                tabs: CpuProfiler.tabs,
               ),
-            if (currentTab.key != CpuProfiler.flameChartTab)
-              Row(children: [
-                ExpandAllButton(
-                  key: CpuProfiler.expandButtonKey,
-                  onPressed: () {
-                    _performOnDataRoots(
-                      (root) => root.expandCascading(),
-                      currentTab,
-                    );
-                  },
+              // TODO(kenz): support search for call tree and bottom up tabs as
+              // well. This will require implementing search for tree tables.
+              if (currentTab.key == CpuProfiler.flameChartTab &&
+                  widget.searchFieldKey != null)
+                Row(
+                  children: [
+                    _buildSearchField(hasData),
+                    FlameChartHelpButton(),
+                  ],
                 ),
-                const SizedBox(width: denseSpacing),
-                CollapseAllButton(
-                  key: CpuProfiler.collapseButtonKey,
-                  onPressed: () {
-                    _performOnDataRoots(
-                      (root) => root.collapseCascading(),
-                      currentTab,
-                    );
-                  },
-                ),
-                // The standaloneProfiler does not need padding because it is
-                // not wrapped in a bordered container.
-                if (!widget.standaloneProfiler)
+              if (currentTab.key != CpuProfiler.flameChartTab)
+                Row(children: [
+                  ExpandAllButton(
+                    key: CpuProfiler.expandButtonKey,
+                    onPressed: () {
+                      _performOnDataRoots(
+                        (root) => root.expandCascading(),
+                        currentTab,
+                      );
+                    },
+                  ),
                   const SizedBox(width: denseSpacing),
-              ]),
-          ],
+                  CollapseAllButton(
+                    key: CpuProfiler.collapseButtonKey,
+                    onPressed: () {
+                      _performOnDataRoots(
+                        (root) => root.collapseCascading(),
+                        currentTab,
+                      );
+                    },
+                  ),
+                  // The standaloneProfiler does not need padding because it is
+                  // not wrapped in a bordered container.
+                  if (!widget.standaloneProfiler)
+                    const SizedBox(width: denseSpacing),
+                ]),
+            ],
+          ),
         ),
         Expanded(
           child: _buildCpuProfileDataView(),

@@ -27,7 +27,7 @@ final hotReload = RegisteredServiceDescription._(
   title: 'Hot Reload',
   icon: createImageIcon(
     'icons/hot-reload-white@2x.png',
-    size: defaultIconThemeSize,
+    size: actionsIconSize,
   ),
 );
 
@@ -37,7 +37,10 @@ final hotReload = RegisteredServiceDescription._(
 const hotRestart = RegisteredServiceDescription._(
   service: 'hotRestart',
   title: 'Hot Restart',
-  icon: Icon(Icons.settings_backup_restore),
+  icon: Icon(
+    Icons.settings_backup_restore,
+    size: actionsIconSize,
+  ),
 );
 
 /// Flutter version service registered by Flutter Tools.

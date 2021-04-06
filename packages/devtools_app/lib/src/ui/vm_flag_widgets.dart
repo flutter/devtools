@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../banner_messages.dart';
+import '../common_widgets.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/profile_granularity.dart';
 
@@ -59,17 +60,17 @@ class ProfileGranularityDropdownState
             widget.screenId,
           );
         }
-        return DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            key: ProfileGranularityDropdown.dropdownKey,
-            value: safeValue,
-            items: [
-              _buildMenuItem(ProfileGranularity.low),
-              _buildMenuItem(ProfileGranularity.medium),
-              _buildMenuItem(ProfileGranularity.high),
-            ],
-            onChanged: (value) => _onProfileGranularityChanged(value, context),
-          ),
+        return RoundedDropDownButton<String>(
+          key: ProfileGranularityDropdown.dropdownKey,
+          isDense: true,
+          style: Theme.of(context).textTheme.bodyText2,
+          value: safeValue,
+          items: [
+            _buildMenuItem(ProfileGranularity.low),
+            _buildMenuItem(ProfileGranularity.medium),
+            _buildMenuItem(ProfileGranularity.high),
+          ],
+          onChanged: (value) => _onProfileGranularityChanged(value, context),
         );
       },
     );

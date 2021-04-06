@@ -366,9 +366,12 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
         onTap: _onClick,
         child: Row(
           children: <Widget>[
-            Switch(
-              value: value,
-              onChanged: _onClick,
+            SizedBox(
+              height: defaultButtonHeight,
+              child: Switch(
+                value: value,
+                onChanged: _onClick,
+              ),
             ),
             Text(widget.service.description),
             // The switch is padded on its sides by 16dp.

@@ -52,6 +52,9 @@ class MemoryScreen extends Screen {
   static const legendKeyName = 'Legend Button';
   static const hoverKeyName = 'Chart Hover';
 
+  // TODO(kenz): clean up these keys. We should remove them if we are only using
+  // for testing and can avoid them.
+
   @visibleForTesting
   static const pauseButtonKey = Key('Pause Button');
   @visibleForTesting
@@ -60,10 +63,6 @@ class MemoryScreen extends Screen {
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
   static const intervalDropdownKey = Key('ChartInterval Dropdown');
-  @visibleForTesting
-  static const intervalMenuItem = Key('ChartInterval Menu Item');
-  @visibleForTesting
-  static const intervalKey = Key('ChartInterval');
 
   @visibleForTesting
   static const sourcesDropdownKey = Key('Sources Dropdown');
@@ -364,7 +363,7 @@ class MemoryBodyState extends State<MemoryBody>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildPrimaryStateControls(textTheme),
-              const Expanded(child: SizedBox(width: denseSpacing)),
+              const Spacer(),
               _buildMemoryControls(textTheme),
             ],
           ),
@@ -441,34 +440,31 @@ class MemoryBodyState extends State<MemoryBody>
             : 'Minute${value == displayOneMinute ? '' : 's'}';
 
         return DropdownMenuItem<String>(
-          key: MemoryScreen.intervalMenuItem,
           value: value,
           child: Text(
             '${isVerboseDropdown ? 'Display' : ''} $value $unit',
-            key: MemoryScreen.intervalKey,
           ),
         );
       },
     ).toList();
 
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        key: MemoryScreen.intervalDropdownKey,
-        style: textTheme.bodyText2,
-        value: displayDuration(controller.displayInterval),
-        onChanged: (String newValue) {
-          setState(() {
-            MemoryScreen.gaAction(key: MemoryScreen.intervalDropdownKey);
-            controller.displayInterval = chartInterval(newValue);
-            final duration = chartDuration(controller.displayInterval);
+    return RoundedDropDownButton<String>(
+      key: MemoryScreen.intervalDropdownKey,
+      isDense: true,
+      style: textTheme.bodyText2,
+      value: displayDuration(controller.displayInterval),
+      onChanged: (String newValue) {
+        setState(() {
+          MemoryScreen.gaAction(key: MemoryScreen.intervalDropdownKey);
+          controller.displayInterval = chartInterval(newValue);
+          final duration = chartDuration(controller.displayInterval);
 
-            eventChartController?.zoomDuration = duration;
-            vmChartController?.zoomDuration = duration;
-            androidChartController?.zoomDuration = duration;
-          });
-        },
-        items: _displayTypes,
-      ),
+          eventChartController?.zoomDuration = duration;
+          vmChartController?.zoomDuration = duration;
+          androidChartController?.zoomDuration = duration;
+        });
+      },
+      items: _displayTypes,
     );
   }
 
@@ -500,19 +496,18 @@ class MemoryBodyState extends State<MemoryBody>
       );
     }).toList();
 
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        key: MemoryScreen.sourcesDropdownKey,
-        style: textTheme.bodyText2,
-        value: controller.memorySource,
-        onChanged: (String newValue) {
-          setState(() {
-            MemoryScreen.gaAction(key: MemoryScreen.sourcesDropdownKey);
-            controller.memorySource = newValue;
-          });
-        },
-        items: allMemorySources,
-      ),
+    return RoundedDropDownButton<String>(
+      key: MemoryScreen.sourcesDropdownKey,
+      isDense: true,
+      style: textTheme.bodyText2,
+      value: controller.memorySource,
+      onChanged: (String newValue) {
+        setState(() {
+          MemoryScreen.gaAction(key: MemoryScreen.sourcesDropdownKey);
+          controller.memorySource = newValue;
+        });
+      },
+      items: allMemorySources,
     );
   }
 
@@ -541,6 +536,7 @@ class MemoryBodyState extends State<MemoryBody>
       valueListenable: controller.paused,
       builder: (context, paused, _) {
         return Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             PauseButton(
               key: MemoryScreen.pauseButtonKey,
@@ -583,6 +579,7 @@ class MemoryBodyState extends State<MemoryBody>
 
   Widget _buildMemoryControls(TextTheme textTheme) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
