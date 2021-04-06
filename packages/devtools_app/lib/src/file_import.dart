@@ -50,7 +50,7 @@ class FileImportContainer extends StatefulWidget {
 
 class _FileImportContainerState extends State<FileImportContainer> {
   DevToolsJsonFile importedFile;
-//Force bots to update
+
   @override
   Widget build(BuildContext context) {
     return Column(
