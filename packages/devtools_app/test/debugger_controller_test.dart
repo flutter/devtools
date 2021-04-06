@@ -3,10 +3,62 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'support/mocks.dart';
+
 void main() {
+  group('stdio', () {
+    DebuggerController debuggerController;
+
+    setUp(() {
+      final service = MockVmService();
+      when(service.onDebugEvent).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      when(service.onVMEvent).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      when(service.onIsolateEvent).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      when(service.onStdoutEvent).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      when(service.onStderrEvent).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      final manager = FakeServiceManager(service: service);
+      setGlobal(ServiceConnectionManager, manager);
+      debuggerController = DebuggerController(initialSwitchToIsolate: false);
+    });
+
+    test('ignores trailing new lines', () {
+      debuggerController.appendStdio('1\n');
+      expect(debuggerController.stdio.value.length, 1);
+    });
+
+    test('has an item for each line', () {
+      debuggerController.appendStdio('1\n');
+      debuggerController.appendStdio('2\n');
+      debuggerController.appendStdio('3\n');
+      debuggerController.appendStdio('4\n');
+      expect(debuggerController.stdio.value.length, 4);
+    });
+
+    test('preserves additional newlines', () {
+      debuggerController.appendStdio('1\n\n');
+      debuggerController.appendStdio('2\n\n');
+      debuggerController.appendStdio('3\n\n');
+      debuggerController.appendStdio('4\n\n');
+      expect(debuggerController.stdio.value.length, 8);
+    });
+  });
+
   group('ScriptsHistory', () {
     ScriptsHistory history;
 
