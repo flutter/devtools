@@ -153,7 +153,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FixedHeightElevatedButton(
+            ElevatedButton(
               onPressed: importedFile != null
                   ? () => widget.onAction(importedFile)
                   : null,
@@ -316,7 +316,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FixedHeightElevatedButton(
+            ElevatedButton(
               onPressed: firstImportedFile != null && secondImportedFile != null
                   ? () => widget.onAction(
                         firstImportedFile,

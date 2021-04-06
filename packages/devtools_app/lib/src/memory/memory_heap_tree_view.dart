@@ -581,13 +581,15 @@ class HeapTreeViewState extends State<HeapTree>
       height: defaultButtonHeight,
       child: Row(
         children: [
-          FixedHeightOutlinedButton(
-            buttonKey: snapshotButtonKey,
+          DevToolsTooltip(
             tooltip: 'Take a memory profile snapshot',
-            onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
-            child: const MaterialIconLabel(
-              label: 'Take Heap Snapshot',
-              iconData: Icons.camera,
+            child: OutlinedButton(
+              key: snapshotButtonKey,
+              onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
+              child: const MaterialIconLabel(
+                label: 'Take Heap Snapshot',
+                iconData: Icons.camera,
+              ),
             ),
           ),
           const SizedBox(width: defaultSpacing),
@@ -722,29 +724,33 @@ class HeapTreeViewState extends State<HeapTree>
 
     return Row(
       children: [
-        FixedHeightOutlinedButton(
-          buttonKey: allocationMonitorKey,
+        DevToolsTooltip(
           tooltip: 'Collect Allocation Statistics',
-          onPressed: () async {
-            MemoryScreen.gaAction(key: allocationMonitorKey);
-            await _allocationStart();
-          },
-          child: MaterialIconLabel(
-            label: 'Track',
-            imageIcon: trackImage(context),
+          child: OutlinedButton(
+            key: allocationMonitorKey,
+            onPressed: () async {
+              MemoryScreen.gaAction(key: allocationMonitorKey);
+              await _allocationStart();
+            },
+            child: MaterialIconLabel(
+              label: 'Track',
+              imageIcon: trackImage(context),
+            ),
           ),
         ),
         const SizedBox(width: denseSpacing),
-        FixedHeightOutlinedButton(
-          buttonKey: allocationMonitorResetKey,
+        DevToolsTooltip(
           tooltip: 'Reset all accumulators',
-          onPressed: () async {
-            MemoryScreen.gaAction(key: allocationMonitorResetKey);
-            await _allocationReset();
-          },
-          child: MaterialIconLabel(
-            label: 'Reset',
-            imageIcon: resetImage(context),
+          child: OutlinedButton(
+            key: allocationMonitorResetKey,
+            onPressed: () async {
+              MemoryScreen.gaAction(key: allocationMonitorResetKey);
+              await _allocationReset();
+            },
+            child: MaterialIconLabel(
+              label: 'Reset',
+              imageIcon: resetImage(context),
+            ),
           ),
         ),
         const Spacer(),
