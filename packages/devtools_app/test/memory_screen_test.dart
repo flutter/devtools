@@ -24,6 +24,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'support/mocks.dart';
+import 'support/utils.dart';
 import 'support/wrappers.dart';
 
 void main() {
