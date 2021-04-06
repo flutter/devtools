@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import 'analytics/prompt.dart';
@@ -162,10 +163,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       _tabController.animateTo(newIndex);
     }
   }
-
-  bool get isNarrow =>
-      MediaQuery.of(context).size.width <=
-      DevToolsScaffold.narrowWidthThreshold;
 
   @override
   void didChangeDependencies() {
@@ -362,6 +359,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     Size preferredSize;
     TabBar tabBar;
 
+    final isNarrow =
+        MediaQuery.of(context).size.width <= _wideWidth(title, widget);
+
     // Add a leading [BulletSpacer] to the actions if the screen is not narrow.
     final actions = List<Widget>.from(widget.actions ?? []);
     if (!isNarrow && actions.isNotEmpty && widget.tabs.length > 1) {
@@ -375,8 +375,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
       );
       preferredSize = isNarrow
-          ? const Size.fromHeight(kToolbarHeight + 40.0)
-          : const Size.fromHeight(kToolbarHeight);
+          ? const Size.fromHeight(kToolbarHeight / 2.0 + 40.0)
+          : const Size.fromHeight(kToolbarHeight / 2.0);
       final alignment = isNarrow ? Alignment.bottomLeft : Alignment.centerRight;
 
       final rightAdjust = isNarrow ? 0.0 : BulletSpacer.width;
@@ -391,7 +391,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         alignment: alignment,
         child: Padding(
           padding: EdgeInsets.only(
-            top: 4.0,
+            top: isNarrow ? 40.0 : 4.0,
             right: rightPadding,
           ),
           child: tabBar,
@@ -402,7 +402,12 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final appBar = AppBar(
       // Turn off the appbar's back button.
       automaticallyImplyLeading: false,
-      title: Text(title),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 14,
+        ),
+      ),
       centerTitle: false,
       actions: actions,
       flexibleSpace: flexibleSpace,
@@ -464,4 +469,20 @@ class SimpleScreen extends Screen {
   Widget build(BuildContext context) {
     return child;
   }
+}
+
+/// Returns the width of the scaffold title, tabs and default icons.
+double _wideWidth(String title, DevToolsScaffold widget) {
+  final painter = TextPainter(
+    text: TextSpan(
+      text: title,
+    ),
+    textDirection: TextDirection.ltr,
+  )..layout();
+  // Approximate size of title and default icons.
+  double wideWidth = painter.width + 300;
+  for (var tab in widget.tabs) {
+    wideWidth += tab.approximateWidth();
+  }
+  return wideWidth;
 }
