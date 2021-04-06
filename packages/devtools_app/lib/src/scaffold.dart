@@ -401,7 +401,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         style: Theme.of(context).textTheme.subtitle1,
       ),
       centerTitle: false,
-      toolbarHeight: kToolbarHeight / 2.0,
+      toolbarHeight: defaultToolbarHeight,
       actions: actions,
       flexibleSpace: flexibleSpace,
     );
