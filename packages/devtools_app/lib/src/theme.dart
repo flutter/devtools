@@ -130,7 +130,6 @@ const buttonMinWidth = 36.0;
 
 const defaultIconSize = 16.0;
 const actionsIconSize = 20.0;
-const defaultIconThemeSize = 24.0;
 
 const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
@@ -354,7 +353,7 @@ TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
 
 const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
-const defaultTextFieldHeight = 36.0;
+const defaultTextFieldHeight = 32.0;
 
 /// Default color of cursor and color used by search's TextField.
 /// Guarantee that the Search TextField on all platforms renders in the same

@@ -117,9 +117,14 @@ class IconLabelButton extends StatelessWidget {
         child: iconLabel,
       );
     }
-    return OutlinedButton(
-      onPressed: onPressed,
-      child: iconLabel,
+    // TODO(kenz): this SizedBox wrapper should be unnecessary once
+    // https://github.com/flutter/flutter/issues/79894 is fixed.
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        child: iconLabel,
+      ),
     );
   }
 }
@@ -259,6 +264,9 @@ class SettingsOutlinedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
+      // TODO(kenz): this height should be unnecessary once
+      // https://github.com/flutter/flutter/issues/79894 is fixed.
+      height: defaultButtonHeight,
       width: defaultButtonHeight, // This will result in a square button.
       child: DevToolsTooltip(
         tooltip: tooltip,
@@ -767,20 +775,74 @@ class FilterButton extends StatelessWidget {
     final theme = Theme.of(context);
     return DevToolsTooltip(
       tooltip: 'Filter',
-      child: OutlinedButton(
-        key: key,
-        onPressed: onPressed,
-        style: TextButton.styleFrom(
-          backgroundColor: isFilterActive
-              ? theme.colorScheme.toggleButtonBackgroundColor
-              : Colors.transparent,
+      // TODO(kenz): this SizedBox wrapper should be unnecessary once
+      // https://github.com/flutter/flutter/issues/79894 is fixed.
+      child: SizedBox(
+        height: defaultButtonHeight,
+        child: OutlinedButton(
+          key: key,
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            backgroundColor: isFilterActive
+                ? theme.colorScheme.toggleButtonBackgroundColor
+                : Colors.transparent,
+          ),
+          child: Icon(
+            Icons.filter_list,
+            size: defaultIconSize,
+            color: isFilterActive
+                ? theme.colorScheme.toggleButtonForegroundColor
+                : theme.colorScheme.contrastForeground,
+          ),
         ),
-        child: Icon(
-          Icons.filter_list,
-          size: defaultIconSize,
-          color: isFilterActive
-              ? theme.colorScheme.toggleButtonForegroundColor
-              : theme.colorScheme.contrastForeground,
+      ),
+    );
+  }
+}
+
+class RoundedDropDownButton<T> extends StatelessWidget {
+  const RoundedDropDownButton({
+    Key key,
+    this.value,
+    this.onChanged,
+    this.isDense = false,
+    this.style,
+    this.selectedItemBuilder,
+    this.items,
+  }) : super(key: key);
+
+  final T value;
+
+  final ValueChanged<T> onChanged;
+
+  final bool isDense;
+
+  final TextStyle style;
+
+  final DropdownButtonBuilder selectedItemBuilder;
+
+  final List<DropdownMenuItem<T>> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoundedOutlinedBorder(
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.only(
+            left: defaultSpacing,
+            right: borderPadding,
+          ),
+          height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<T>(
+              value: value,
+              onChanged: onChanged,
+              isDense: isDense,
+              style: style,
+              selectedItemBuilder: selectedItemBuilder,
+              items: items,
+            ),
+          ),
         ),
       ),
     );

@@ -201,3 +201,8 @@ void _mockFlutterAssets() {
     return Future<ByteData>.value(encoded.buffer.asByteData());
   });
 }
+
+/// Helper method for finding widgets by type when they have a generic type.
+///
+/// E.g. `find.byType(typeOf<MyTypeWithAGeneric<String>>());`
+Type typeOf<T>() => T;
