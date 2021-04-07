@@ -99,6 +99,16 @@ abstract class Screen {
 
   int get badgeCount => 0;
 
+  double approximateWidth() {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: title,
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    return painter.width + defaultIconSize + denseSpacing * 2.0;
+  }
+
   /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main
   /// navbar.
   ///

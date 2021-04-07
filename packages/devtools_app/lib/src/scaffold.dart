@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import 'analytics/prompt.dart';
@@ -65,12 +66,6 @@ class DevToolsScaffold extends StatefulWidget {
 
   /// A [Key] that indicates the scaffold is showing in full-width mode.
   static const Key fullWidthKey = Key('Full-width Scaffold');
-
-  // TODO(jacobr): compute this based on the width of the list of tabs rather
-  // than hardcoding. Computing this width dynamically is even more important
-  // in the presence of conditional screens.
-  /// The width at or below which we treat the scaffold as narrow-width.
-  static const double narrowWidthThreshold = 1350.0;
 
   /// The size that all actions on this widget are expected to have.
   static const double actionWidgetSize = 48.0;
@@ -162,10 +157,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       _tabController.animateTo(newIndex);
     }
   }
-
-  bool get isNarrow =>
-      MediaQuery.of(context).size.width <=
-      DevToolsScaffold.narrowWidthThreshold;
 
   @override
   void didChangeDependencies() {
@@ -362,6 +353,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     Size preferredSize;
     TabBar tabBar;
 
+    final isNarrow =
+        MediaQuery.of(context).size.width <= _wideWidth(title, widget);
+
     // Add a leading [BulletSpacer] to the actions if the screen is not narrow.
     final actions = List<Widget>.from(widget.actions ?? []);
     if (!isNarrow && actions.isNotEmpty && widget.tabs.length > 1) {
@@ -375,8 +369,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
       );
       preferredSize = isNarrow
-          ? const Size.fromHeight(kToolbarHeight + 40.0)
-          : const Size.fromHeight(kToolbarHeight);
+          ? const Size.fromHeight(defaultToolbarHeight + 40.0)
+          : const Size.fromHeight(defaultToolbarHeight);
       final alignment = isNarrow ? Alignment.bottomLeft : Alignment.centerRight;
 
       final rightAdjust = isNarrow ? 0.0 : BulletSpacer.width;
@@ -391,7 +385,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         alignment: alignment,
         child: Padding(
           padding: EdgeInsets.only(
-            top: 4.0,
+            top: isNarrow ? 40.0 : 4.0,
             right: rightPadding,
           ),
           child: tabBar,
@@ -402,8 +396,12 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final appBar = AppBar(
       // Turn off the appbar's back button.
       automaticallyImplyLeading: false,
-      title: Text(title),
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.subtitle1,
+      ),
       centerTitle: false,
+      toolbarHeight: defaultToolbarHeight,
       actions: actions,
       flexibleSpace: flexibleSpace,
     );
@@ -464,4 +462,20 @@ class SimpleScreen extends Screen {
   Widget build(BuildContext context) {
     return child;
   }
+}
+
+/// Returns the width of the scaffold title, tabs and default icons.
+double _wideWidth(String title, DevToolsScaffold widget) {
+  final painter = TextPainter(
+    text: TextSpan(
+      text: title,
+    ),
+    textDirection: TextDirection.ltr,
+  )..layout();
+  // Approximate size of title and default icons.
+  double wideWidth = painter.width + 300;
+  for (var tab in widget.tabs) {
+    wideWidth += tab.approximateWidth();
+  }
+  return wideWidth;
 }

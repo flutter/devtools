@@ -219,7 +219,7 @@ class DebuggerController extends DisposableController
     var lines = _stdio.value.toList();
     final newLines = text.split('\n');
 
-    final last = lines.safeLast;
+    var last = lines.safeLast;
     if (lines.isNotEmpty && !_stdioTrailingNewline && last is TextConsoleLine) {
       lines.last = ConsoleLine.text('${last.text}${newLines.first}');
       if (newLines.length > 1) {
@@ -232,6 +232,7 @@ class DebuggerController extends DisposableController
     _stdioTrailingNewline = text.endsWith('\n');
 
     // Don't report trailing blank lines.
+    last = lines.safeLast;
     if (lines.isNotEmpty && (last is TextConsoleLine && last.text.isEmpty)) {
       lines = lines.sublist(0, lines.length - 1);
     }

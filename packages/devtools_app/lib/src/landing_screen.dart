@@ -88,7 +88,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
               'At this time, DevTools only supports importing files that were originally'
               ' exported from DevTools.'),
           const SizedBox(height: defaultSpacing),
-          FixedHeightElevatedButton(
+          ElevatedButton(
             onPressed: _importFile,
             child: const MaterialIconLabel(
               label: 'Import File',
@@ -119,7 +119,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
           _captionText('Load Dart AOT snapshots or app size analysis files to '
               'track down size issues in your app.'),
           const SizedBox(height: defaultSpacing),
-          FixedHeightElevatedButton(
+          ElevatedButton(
             child: const Text('Open app size tool'),
             onPressed: () =>
                 DevToolsRouterDelegate.of(context).navigate(appSizePageId),
@@ -185,7 +185,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
               ),
             ),
             const SizedBox(width: defaultSpacing),
-            FixedHeightElevatedButton(
+            ElevatedButton(
               child: const Text('Connect'),
               onPressed: connectDebounce.invoke,
             ),

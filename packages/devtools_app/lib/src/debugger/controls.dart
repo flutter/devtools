@@ -48,7 +48,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
           const SizedBox(width: denseSpacing),
           _stepButtons(canStep: canStep),
           const SizedBox(width: denseSpacing),
-          _breakOnExceptionsControl(),
+          BreakOnExceptionsControl(controller: controller),
           const Expanded(child: SizedBox(width: denseSpacing)),
           _librariesButton(),
         ],
@@ -109,20 +109,6 @@ class _DebuggingControlsState extends State<DebuggingControls>
     );
   }
 
-  Widget _breakOnExceptionsControl() {
-    return RoundedOutlinedBorder(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.only(
-            left: defaultSpacing,
-            right: borderPadding,
-          ),
-          child: BreakOnExceptionsControl(controller: controller),
-        ),
-      ),
-    );
-  }
-
   Widget _librariesButton() {
     return ValueListenableBuilder(
       valueListenable: controller.librariesVisible,
@@ -155,30 +141,28 @@ class BreakOnExceptionsControl extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller.exceptionPauseMode,
       builder: (BuildContext context, String modeId, _) {
-        return DropdownButtonHideUnderline(
-          child: DropdownButton<ExceptionMode>(
-            value: ExceptionMode.from(modeId),
-            onChanged: (ExceptionMode mode) {
-              controller.setExceptionPauseMode(mode.id);
-            },
-            isDense: true,
-            items: [
+        return RoundedDropDownButton<ExceptionMode>(
+          value: ExceptionMode.from(modeId),
+          onChanged: (ExceptionMode mode) {
+            controller.setExceptionPauseMode(mode.id);
+          },
+          isDense: true,
+          items: [
+            for (var mode in ExceptionMode.modes)
+              DropdownMenuItem<ExceptionMode>(
+                value: mode,
+                child: Text(mode.description),
+              )
+          ],
+          selectedItemBuilder: (BuildContext context) {
+            return [
               for (var mode in ExceptionMode.modes)
                 DropdownMenuItem<ExceptionMode>(
                   value: mode,
-                  child: Text(mode.description),
+                  child: Text(mode.name),
                 )
-            ],
-            selectedItemBuilder: (BuildContext context) {
-              return [
-                for (var mode in ExceptionMode.modes)
-                  DropdownMenuItem<ExceptionMode>(
-                    value: mode,
-                    child: Text(mode.name),
-                  )
-              ];
-            },
-          ),
+            ];
+          },
         );
       },
     );
@@ -232,18 +216,20 @@ class DebuggerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FixedHeightOutlinedButton(
-      autofocus: autofocus,
+    return DevToolsTooltip(
       tooltip: title,
-      style: OutlinedButton.styleFrom(
-        side: BorderSide.none,
-        shape: const ContinuousRectangleBorder(),
-      ),
-      onPressed: onPressed,
-      child: MaterialIconLabel(
-        label: title,
-        iconData: icon,
-        includeTextWidth: mediumDeviceWidth,
+      child: OutlinedButton(
+        autofocus: autofocus,
+        style: OutlinedButton.styleFrom(
+          side: BorderSide.none,
+          shape: const ContinuousRectangleBorder(),
+        ),
+        onPressed: onPressed,
+        child: MaterialIconLabel(
+          label: title,
+          iconData: icon,
+          includeTextWidth: mediumDeviceWidth,
+        ),
       ),
     );
   }

@@ -112,14 +112,19 @@ class IconLabelButton extends StatelessWidget {
       includeTextWidth: includeTextWidth,
     );
     if (elevatedButton) {
-      return FixedHeightElevatedButton(
+      return ElevatedButton(
         onPressed: onPressed,
         child: iconLabel,
       );
     }
-    return FixedHeightOutlinedButton(
-      onPressed: onPressed,
-      child: iconLabel,
+    // TODO(kenz): this SizedBox wrapper should be unnecessary once
+    // https://github.com/flutter/flutter/issues/79894 is fixed.
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        child: iconLabel,
+      ),
     );
   }
 }
@@ -258,13 +263,20 @@ class SettingsOutlinedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FixedHeightOutlinedButton(
+    return SizedBox(
+      // TODO(kenz): this height should be unnecessary once
+      // https://github.com/flutter/flutter/issues/79894 is fixed.
+      height: defaultButtonHeight,
       width: defaultButtonHeight, // This will result in a square button.
-      onPressed: onPressed,
-      tooltip: tooltip,
-      child: const Icon(
-        Icons.settings,
-        size: defaultIconSize,
+      child: DevToolsTooltip(
+        tooltip: tooltip,
+        child: OutlinedButton(
+          onPressed: onPressed,
+          child: const Icon(
+            Icons.settings,
+            size: defaultIconSize,
+          ),
+        ),
       ),
     );
   }
@@ -298,7 +310,7 @@ class ExpandAllButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FixedHeightOutlinedButton(
+    return OutlinedButton(
       onPressed: onPressed,
       child: const Text('Expand All'),
     );
@@ -313,89 +325,9 @@ class CollapseAllButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FixedHeightOutlinedButton(
+    return OutlinedButton(
       onPressed: onPressed,
       child: const Text('Collapse All'),
-    );
-  }
-}
-
-// TODO(kenz): remove use of this class once we can specify a fixed button
-// height in the theme. See https://github.com/flutter/flutter/issues/73741.
-class FixedHeightOutlinedButton extends StatelessWidget {
-  const FixedHeightOutlinedButton({
-    this.buttonKey,
-    @required this.onPressed,
-    @required this.child,
-    this.autofocus = false,
-    this.style,
-    this.width,
-    this.tooltip,
-  });
-
-  final Key buttonKey;
-
-  final VoidCallback onPressed;
-
-  final Widget child;
-
-  final bool autofocus;
-
-  final ButtonStyle style;
-
-  final double width;
-
-  final String tooltip;
-
-  @override
-  Widget build(BuildContext context) {
-    final button = SizedBox(
-      height: defaultButtonHeight,
-      width: width,
-      child: OutlinedButton(
-        key: buttonKey,
-        style: style,
-        autofocus: autofocus,
-        onPressed: onPressed,
-        child: child,
-      ),
-    );
-    if (tooltip != null) {
-      return Tooltip(
-        message: tooltip,
-        preferBelow: false,
-        waitDuration: tooltipWait,
-        child: button,
-      );
-    }
-    return button;
-  }
-}
-
-// TODO(kenz): remove use of this class once we can specify a fixed button
-// height in the theme. See https://github.com/flutter/flutter/issues/73741.
-class FixedHeightElevatedButton extends StatelessWidget {
-  const FixedHeightElevatedButton({
-    @required this.child,
-    @required this.onPressed,
-    this.style,
-  });
-
-  final Widget child;
-
-  final VoidCallback onPressed;
-
-  final ButtonStyle style;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: defaultButtonHeight,
-      child: ElevatedButton(
-        style: style,
-        onPressed: onPressed,
-        child: child,
-      ),
     );
   }
 }
@@ -573,8 +505,8 @@ class ExitOfflineButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FixedHeightOutlinedButton(
-      buttonKey: const Key('exit offline button'),
+    return OutlinedButton(
+      key: const Key('exit offline button'),
       onPressed: onPressed,
       child: const MaterialIconLabel(
         label: 'Exit offline mode',
@@ -841,21 +773,77 @@ class FilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return FixedHeightOutlinedButton(
-      buttonKey: key,
+    return DevToolsTooltip(
       tooltip: 'Filter',
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        backgroundColor: isFilterActive
-            ? theme.colorScheme.toggleButtonBackgroundColor
-            : Colors.transparent,
+      // TODO(kenz): this SizedBox wrapper should be unnecessary once
+      // https://github.com/flutter/flutter/issues/79894 is fixed.
+      child: SizedBox(
+        height: defaultButtonHeight,
+        child: OutlinedButton(
+          key: key,
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            backgroundColor: isFilterActive
+                ? theme.colorScheme.toggleButtonBackgroundColor
+                : Colors.transparent,
+          ),
+          child: Icon(
+            Icons.filter_list,
+            size: defaultIconSize,
+            color: isFilterActive
+                ? theme.colorScheme.toggleButtonForegroundColor
+                : theme.colorScheme.contrastForeground,
+          ),
+        ),
       ),
-      child: Icon(
-        Icons.filter_list,
-        size: defaultIconSize,
-        color: isFilterActive
-            ? theme.colorScheme.toggleButtonForegroundColor
-            : theme.colorScheme.contrastForeground,
+    );
+  }
+}
+
+class RoundedDropDownButton<T> extends StatelessWidget {
+  const RoundedDropDownButton({
+    Key key,
+    this.value,
+    this.onChanged,
+    this.isDense = false,
+    this.style,
+    this.selectedItemBuilder,
+    this.items,
+  }) : super(key: key);
+
+  final T value;
+
+  final ValueChanged<T> onChanged;
+
+  final bool isDense;
+
+  final TextStyle style;
+
+  final DropdownButtonBuilder selectedItemBuilder;
+
+  final List<DropdownMenuItem<T>> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoundedOutlinedBorder(
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.only(
+            left: defaultSpacing,
+            right: borderPadding,
+          ),
+          height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<T>(
+              value: value,
+              onChanged: onChanged,
+              isDense: isDense,
+              style: style,
+              selectedItemBuilder: selectedItemBuilder,
+              items: items,
+            ),
+          ),
+        ),
       ),
     );
   }

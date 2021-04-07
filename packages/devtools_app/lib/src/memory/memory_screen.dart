@@ -52,6 +52,9 @@ class MemoryScreen extends Screen {
   static const legendKeyName = 'Legend Button';
   static const hoverKeyName = 'Chart Hover';
 
+  // TODO(kenz): clean up these keys. We should remove them if we are only using
+  // for testing and can avoid them.
+
   @visibleForTesting
   static const pauseButtonKey = Key('Pause Button');
   @visibleForTesting
@@ -60,15 +63,9 @@ class MemoryScreen extends Screen {
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
   static const intervalDropdownKey = Key('ChartInterval Dropdown');
-  @visibleForTesting
-  static const intervalMenuItem = Key('ChartInterval Menu Item');
-  @visibleForTesting
-  static const intervalKey = Key('ChartInterval');
 
   @visibleForTesting
   static const sourcesDropdownKey = Key('Sources Dropdown');
-  @visibleForTesting
-  static const sourcesMenuItemKey = Key('Sources Menu Item');
   @visibleForTesting
   static const sourcesKey = Key('Sources');
   @visibleForTesting
@@ -188,26 +185,23 @@ class MemoryBodyState extends State<MemoryBody>
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(controller.memorySourceNotifier, () async {
-      String errorMessage;
-      await controller.updatedMemorySource().catchError((e) {
-        errorMessage = '$e';
+      try {
+        await controller.updatedMemorySource();
+      } catch (e) {
+        final errorMessage = '$e';
         controller.memorySource = MemoryController.liveFeed;
-      });
-
-      setState(() {
-        if (errorMessage == null) {
-          _refreshCharts();
+        // Display toast, unable to load the saved memory JSON payload.
+        final notificationsState = Notifications.of(context);
+        if (notificationsState != null) {
+          notificationsState.push(errorMessage);
         } else {
-          // Display toast, unable to load the saved memory JSON payload.
-          final notificationsState = Notifications.of(context);
-          if (notificationsState != null) {
-            notificationsState.push(errorMessage);
-          } else {
-            // Running in test harness, unexpected error.
-            throw OfflineFileException(errorMessage);
-          }
+          // Running in test harness, unexpected error.
+          throw OfflineFileException(errorMessage);
         }
-      });
+        return;
+      }
+
+      controller.refreshAllCharts();
     });
 
     addAutoDisposeListener(controller.legendVisibleNotifier, () {
@@ -330,6 +324,12 @@ class MemoryBodyState extends State<MemoryBody>
       });
     });
 
+    addAutoDisposeListener(controller.refreshCharts, () {
+      setState(() {
+        _refreshCharts();
+      });
+    });
+
     _updateListeningState();
   }
 
@@ -361,7 +361,7 @@ class MemoryBodyState extends State<MemoryBody>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildPrimaryStateControls(textTheme),
-              const Expanded(child: SizedBox(width: denseSpacing)),
+              const Spacer(),
               _buildMemoryControls(textTheme),
             ],
           ),
@@ -423,11 +423,6 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget _intervalDropdown(TextTheme textTheme) {
-    final files = controller.memoryLog.offlineFiles();
-
-    // First item is 'Live Feed', then followed by memory log filenames.
-    files.insert(0, MemoryController.liveFeed);
-
     final mediaWidth = MediaQuery.of(context).size.width;
     final isVerboseDropdown = mediaWidth > verboseDropDownMinimumWidth;
 
@@ -443,34 +438,31 @@ class MemoryBodyState extends State<MemoryBody>
             : 'Minute${value == displayOneMinute ? '' : 's'}';
 
         return DropdownMenuItem<String>(
-          key: MemoryScreen.intervalMenuItem,
           value: value,
           child: Text(
             '${isVerboseDropdown ? 'Display' : ''} $value $unit',
-            key: MemoryScreen.intervalKey,
           ),
         );
       },
     ).toList();
 
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        key: MemoryScreen.intervalDropdownKey,
-        style: textTheme.bodyText2,
-        value: displayDuration(controller.displayInterval),
-        onChanged: (String newValue) {
-          setState(() {
-            MemoryScreen.gaAction(key: MemoryScreen.intervalDropdownKey);
-            controller.displayInterval = chartInterval(newValue);
-            final duration = chartDuration(controller.displayInterval);
+    return RoundedDropDownButton<String>(
+      key: MemoryScreen.intervalDropdownKey,
+      isDense: true,
+      style: textTheme.bodyText2,
+      value: displayDuration(controller.displayInterval),
+      onChanged: (String newValue) {
+        setState(() {
+          MemoryScreen.gaAction(key: MemoryScreen.intervalDropdownKey);
+          controller.displayInterval = chartInterval(newValue);
+          final duration = chartDuration(controller.displayInterval);
 
-            eventChartController?.zoomDuration = duration;
-            vmChartController?.zoomDuration = duration;
-            androidChartController?.zoomDuration = duration;
-          });
-        },
-        items: _displayTypes,
-      ),
+          eventChartController?.zoomDuration = duration;
+          vmChartController?.zoomDuration = duration;
+          androidChartController?.zoomDuration = duration;
+        });
+      },
+      items: _displayTypes,
     );
   }
 
@@ -492,8 +484,7 @@ class MemoryBodyState extends State<MemoryBody>
           (!isVerbose && value.startsWith(MemoryController.logFilenamePrefix))
               ? value.substring(MemoryController.logFilenamePrefix.length)
               : value;
-      return DropdownMenuItem<String>(
-        key: MemoryScreen.sourcesMenuItemKey,
+      return SourceDropdownMenuItem<String>(
         value: value,
         child: Text(
           '${controller.memorySourcePrefix}$displayValue',
@@ -502,19 +493,18 @@ class MemoryBodyState extends State<MemoryBody>
       );
     }).toList();
 
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        key: MemoryScreen.sourcesDropdownKey,
-        style: textTheme.bodyText2,
-        value: controller.memorySource,
-        onChanged: (String newValue) {
-          setState(() {
-            MemoryScreen.gaAction(key: MemoryScreen.sourcesDropdownKey);
-            controller.memorySource = newValue;
-          });
-        },
-        items: allMemorySources,
-      ),
+    return RoundedDropDownButton<String>(
+      key: MemoryScreen.sourcesDropdownKey,
+      isDense: true,
+      style: textTheme.bodyText2,
+      value: controller.memorySource,
+      onChanged: (String newValue) {
+        setState(() {
+          MemoryScreen.gaAction(key: MemoryScreen.sourcesDropdownKey);
+          controller.memorySource = newValue;
+        });
+      },
+      items: allMemorySources,
     );
   }
 
@@ -543,6 +533,7 @@ class MemoryBodyState extends State<MemoryBody>
       valueListenable: controller.paused,
       builder: (context, paused, _) {
         return Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             PauseButton(
               key: MemoryScreen.pauseButtonKey,
@@ -585,6 +576,7 @@ class MemoryBodyState extends State<MemoryBody>
 
   Widget _buildMemoryControls(TextTheme textTheme) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
@@ -658,15 +650,16 @@ class MemoryBodyState extends State<MemoryBody>
   final hoverKey = GlobalKey(debugLabel: MemoryScreen.hoverKeyName);
   static const hoverXOffset = 10;
   static const hoverYOffset = 0.0;
-  static const hoverWidth = 210.0;
+  static const hoverWidth = 225.0;
   static const hover_card_border_width = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
   static const hoverHeightMinimum = 40.0;
   static const hoverItemHeight = 18.0;
-  static const hoverOneEventsHeight =
-      82.0; // One extension event to display (3 lines).
-  static const hoverEventsHeight = 120.0; // Many extension events to display.
+  // One extension event to display (3 lines).
+  static const hoverOneEventsHeight = 82.0;
+  // Many extension events to display.
+  static const hoverEventsHeight = 120.0;
 
   static double computeHoverHeight(
     int eventsCount,
@@ -774,7 +767,8 @@ class MemoryBodyState extends State<MemoryBody>
       double leftEdge = 5.0,
     ]) {
       String displayName = name;
-      String displayValue = '';
+      // Empty string overflows, default value space.
+      String displayValue = ' ';
       if (hasNumeric) {
         int startOfNumber = name.lastIndexOf(' ');
         if (hasUnit) {
@@ -787,6 +781,7 @@ class MemoryBodyState extends State<MemoryBody>
         displayName = '${name.substring(0, startOfNumber)} ';
         displayValue = name.substring(startOfNumber + 1);
       }
+
       return [
         image == null
             ? const SizedBox()
@@ -797,7 +792,7 @@ class MemoryBodyState extends State<MemoryBody>
           padding: EdgeInsets.only(left: denseRowSpacing),
         ),
         Text(displayName, style: bold ? hoverTitleEntry : hoverSmallEntry),
-        Text(displayValue, style: hoverValueEntry)
+        Text(displayValue, style: hoverValueEntry),
       ];
     }
 
@@ -888,14 +883,19 @@ class MemoryBodyState extends State<MemoryBody>
     return results;
   }
 
+  /// Long string need to show first part ... last part.
+  static const longStringLength = 34;
+  static const firstCharacters = 9;
+  static const lastCharacters = 20;
+
   // TODO(terry): Data could be long need better mechanism for long data e.g.,:
   //                const encoder = JsonEncoder.withIndent('  ');
   //                final displayData = encoder.convert(data);
   String longValueToShort(String longValue) {
     var value = longValue;
-    if (longValue.length > 35) {
-      final firstPart = longValue.substring(0, 10);
-      final endPart = longValue.substring(longValue.length - 20);
+    if (longValue.length > longStringLength) {
+      final firstPart = longValue.substring(0, firstCharacters);
+      final endPart = longValue.substring(longValue.length - lastCharacters);
       value = '$firstPart...$endPart';
     }
     return value;
@@ -915,9 +915,9 @@ class MemoryBodyState extends State<MemoryBody>
       final outputSizes = '$displaySize/$decodeSize';
       if (outputSizes.length > 10) {
         output.writeln('Display/Decode Size=');
-        output.writeln('    $outputSizes');
+        output.write('    $outputSizes');
       } else {
-        output.writeln('Display/Decode Size=$outputSizes');
+        output.write('Display/Decode Size=$outputSizes');
       }
     } else if (event[eventName] == devToolsEvent &&
         event.containsKey(customEvent)) {
@@ -947,7 +947,7 @@ class MemoryBodyState extends State<MemoryBody>
     }
 
     output.writeln(index == null ? name : '$index. $name');
-    output.writeln(decodeEventValues(event));
+    output.write(decodeEventValues(event));
 
     return output.toString();
   }
@@ -1626,4 +1626,9 @@ class MemoryConfigurationsDialog extends StatelessWidget {
       ],
     );
   }
+}
+
+class SourceDropdownMenuItem<T> extends DropdownMenuItem<T> {
+  const SourceDropdownMenuItem({T value, @required Widget child})
+      : super(value: value, child: child);
 }

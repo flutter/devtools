@@ -39,8 +39,8 @@ void main() {
       setGlobal(SurveyService, SurveyService());
     });
 
-    testWidgetsWithWindowSize('displays in narrow mode without error',
-        const Size(DevToolsScaffold.narrowWidthThreshold - 200.0, 1200.0),
+    testWidgetsWithWindowSize(
+        'displays in narrow mode without error', const Size(200.0, 1200.0),
         (WidgetTester tester) async {
       await tester.pumpWidget(wrap(
         DevToolsScaffold(
@@ -54,8 +54,8 @@ void main() {
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
     });
 
-    testWidgetsWithWindowSize('displays in full-width mode without error',
-        const Size(DevToolsScaffold.narrowWidthThreshold + 3.0, 1200.0),
+    testWidgetsWithWindowSize(
+        'displays in full-width mode without error', const Size(1200.0, 1200.0),
         (WidgetTester tester) async {
       await tester.pumpWidget(wrap(
         DevToolsScaffold(

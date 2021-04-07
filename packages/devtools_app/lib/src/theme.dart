@@ -78,23 +78,24 @@ ThemeData _baseTheme({
     canvasColor: backgroundColor,
     scaffoldBackgroundColor: backgroundColor,
     colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
-    // TODO(kenz): add fixed height to all of these button themes when
-    // https://github.com/flutter/flutter/issues/73741 is fixed.
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         primary: theme.colorScheme.contrastForeground,
         minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: const Size.fromHeight(defaultButtonHeight),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         primary: theme.colorScheme.contrastForeground,
         minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: const Size.fromHeight(defaultButtonHeight),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: const Size.fromHeight(defaultButtonHeight),
       ),
     ),
   );
@@ -122,12 +123,13 @@ bool isValidLightColor(Color color) {
   return color.computeLuminance() >= 1 - _lightDarkLuminanceThreshold;
 }
 
-const defaultButtonHeight = 36.0;
+const defaultToolbarHeight = 32.0;
+
+const defaultButtonHeight = 32.0;
 const buttonMinWidth = 36.0;
 
 const defaultIconSize = 16.0;
 const actionsIconSize = 20.0;
-const defaultIconThemeSize = 24.0;
 
 const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
@@ -308,6 +310,20 @@ extension DevToolsColorScheme on ColorScheme {
         colors: [expandedTopContentColor, expandedBottomContentColor],
         tileMode: TileMode.repeated,
       );
+
+  /// TextStyle for callstack.
+  TextStyle get stackTraceCall => TextStyle(
+        color: defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: 12.0,
+      );
+
+  /// TextStyle for source file displayed in callstack.
+  TextStyle get stackTraceSource => TextStyle(
+        color: defaultForeground,
+        fontWeight: FontWeight.w100,
+        fontSize: 12,
+      );
 }
 
 /// Utility extension methods to the [ThemeData] class.
@@ -337,7 +353,7 @@ TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
 
 const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
-const defaultTextFieldHeight = 36.0;
+const defaultTextFieldHeight = 32.0;
 
 /// Default color of cursor and color used by search's TextField.
 /// Guarantee that the Search TextField on all platforms renders in the same

@@ -20,6 +20,7 @@ class FileImportContainer extends StatefulWidget {
     this.actionText,
     this.onAction,
     this.onFileSelected,
+    this.onFileCleared,
     this.onError,
     this.extensions = const ['json'],
     Key key,
@@ -35,6 +36,8 @@ class FileImportContainer extends StatefulWidget {
   final DevToolsJsonFileHandler onAction;
 
   final DevToolsJsonFileHandler onFileSelected;
+
+  final VoidCallback onFileCleared;
 
   final void Function(String error) onError;
 
@@ -135,13 +138,20 @@ class _FileImportContainerState extends State<FileImportContainer> {
   }
 
   Widget _buildImportedFileDisplay() {
-    return Text(
-      importedFile?.path ?? 'No File Selected',
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        color: Theme.of(context).textTheme.headline1.color,
-      ),
-      textAlign: TextAlign.left,
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            importedFile?.path ?? 'No File Selected',
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline1.color,
+            ),
+            textAlign: TextAlign.left,
+          ),
+        ),
+        if (importedFile != null) clearInputButton(_clearFile),
+      ],
     );
   }
 
@@ -153,7 +163,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FixedHeightElevatedButton(
+            ElevatedButton(
               onPressed: importedFile != null
                   ? () => widget.onAction(importedFile)
                   : null,
@@ -172,6 +182,17 @@ class _FileImportContainerState extends State<FileImportContainer> {
     final importedFile =
         await importFileFromPicker(acceptedTypes: widget.extensions);
     _handleImportedFile(importedFile);
+  }
+
+  void _clearFile() {
+    if (mounted) {
+      setState(() {
+        importedFile = null;
+      });
+    }
+    if (widget.onFileCleared != null) {
+      widget.onFileCleared();
+    }
   }
 
   // TODO(kenz): add error handling to ensure we only allow importing supported
@@ -272,6 +293,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
             title: widget.firstFileTitle,
             instructions: widget.firstInstructions,
             onFileSelected: onFirstFileSelected,
+            onFileCleared: onFirstFileCleared,
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -282,6 +304,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
             title: widget.secondFileTitle,
             instructions: widget.secondInstructions,
             onFileSelected: onSecondFileSelected,
+            onFileCleared: onSecondFileCleared,
           ),
         ),
       ],
@@ -306,6 +329,22 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
     }
   }
 
+  void onFirstFileCleared() {
+    if (mounted) {
+      setState(() {
+        firstImportedFile = null;
+      });
+    }
+  }
+
+  void onSecondFileCleared() {
+    if (mounted) {
+      setState(() {
+        secondImportedFile = null;
+      });
+    }
+  }
+
   Widget _buildActionButton() {
     final notifications = Notifications.of(context);
 
@@ -316,7 +355,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FixedHeightElevatedButton(
+            ElevatedButton(
               onPressed: firstImportedFile != null && secondImportedFile != null
                   ? () => widget.onAction(
                         firstImportedFile,

@@ -77,7 +77,9 @@ class _InspectorDetailsTabControllerState
     return Column(
       children: <Widget>[
         SizedBox(
-          height: 50.0,
+          // Add [denseSpacing] to add slight padding around the expand /
+          // collapse buttons.
+          height: defaultButtonHeight + denseSpacing,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
@@ -92,6 +94,7 @@ class _InspectorDetailsTabControllerState
               ),
               Expanded(
                 child: Container(
+                  alignment: Alignment.centerRight,
                   decoration: BoxDecoration(border: Border(bottom: borderSide)),
                   child: hasActionButtons
                       ? widget.actionButtons

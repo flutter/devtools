@@ -2,7 +2,7 @@ name: devtools_testing
 description: Package of shared testing code for Dart DevTools.
 # Note: this version should only be updated by running tools/update_version.sh
 # that updates all versions of packages from packages/devtools.
-version: 2.0.0+4
+version: 2.1.1
 
 homepage: https://github.com/flutter/devtools
 
@@ -10,8 +10,8 @@ environment:
   sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
-  devtools_app: 2.0.0+4
-  devtools_shared: 2.0.0+4
+  devtools_app: 2.1.1
+  devtools_shared: 2.1.1
   flutter:
     sdk: flutter
   flutter_riverpod: ^0.13.1
@@ -22,11 +22,6 @@ dependencies:
   pedantic: ^1.11.0
   test: any # This version is pinned by Flutter so we don't need to set one explicitly.
   vm_service: '>=5.0.0+1 <7.0.0'
-
-
-dev_dependencies:
-  # (temporary home for canonical lints)
-  simple_lint_rules: ^1.0.0
 
 dependency_overrides:
 # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.

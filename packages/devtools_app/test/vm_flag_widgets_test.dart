@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/banner_messages.dart';
+import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
@@ -59,7 +60,7 @@ void main() {
       expect(find.text(ProfileGranularity.low.display), findsOneWidget);
       expect(find.text(ProfileGranularity.medium.display), findsOneWidget);
       expect(find.text(ProfileGranularity.high.display), findsOneWidget);
-      final DropdownButton dropdownButton =
+      final RoundedDropDownButton<String> dropdownButton =
           tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
       expect(dropdownButton.value, equals(ProfileGranularity.medium.value));
     });
@@ -70,7 +71,7 @@ void main() {
       expect(find.text(ProfileGranularity.low.display), findsOneWidget);
       expect(find.text(ProfileGranularity.medium.display), findsOneWidget);
       expect(find.text(ProfileGranularity.high.display), findsOneWidget);
-      DropdownButton dropdownButton =
+      RoundedDropDownButton<String> dropdownButton =
           tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
       expect(dropdownButton.value, equals(ProfileGranularity.medium.value));
 
@@ -138,7 +139,8 @@ void main() {
       expect(find.byWidget(dropdown), findsOneWidget);
       final dropdownButtonFinder =
           find.byKey(ProfileGranularityDropdown.dropdownKey);
-      DropdownButton dropdownButton = tester.widget(dropdownButtonFinder);
+      RoundedDropDownButton<String> dropdownButton =
+          tester.widget(dropdownButtonFinder);
       expect(dropdownButton.value, equals(ProfileGranularity.medium.value));
 
       await serviceManager.service.setFlag(
