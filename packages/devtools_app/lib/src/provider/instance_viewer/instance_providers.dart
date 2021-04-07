@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart' hide SentinelException;
 
 import '../../eval_on_dart_library.dart';
 import '../../globals.dart';
+import '../../utils.dart';
 import 'eval.dart';
 import 'instance_details.dart';
 import 'result.dart';
@@ -172,21 +173,6 @@ Future<InstanceDetails> _resolveParent(
   return path.pathToProperty.isNotEmpty
       ? await ref.watch(rawInstanceProvider(path.parent).future)
       : null;
-}
-
-/// Public properties first, then sort alphabetically
-int _sortFieldsByName(ObjectField a, ObjectField b) {
-  final isAPrivate = a.name.startsWith('_');
-  final isBPrivate = b.name.startsWith('_');
-
-  if (isAPrivate && !isBPrivate) {
-    return 1;
-  }
-  if (!isAPrivate && isBPrivate) {
-    return -1;
-  }
-
-  return a.name.compareTo(b.name);
 }
 
 Future<EnumInstance> _tryParseEnum(
@@ -384,7 +370,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
       );
 
       return InstanceDetails.object(
-        fields.sorted(_sortFieldsByName),
+        fields.sorted((a, b) => sortFieldsByName(a.name, b.name)),
         hash: await eval.getHashCode(instance, isAlive: isAlive),
         type: instance.classRef.name,
         instanceRefId: instanceRef.id,

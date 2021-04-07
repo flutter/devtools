@@ -811,7 +811,9 @@ class DebuggerController extends DisposableController
     }
 
     final variables = frame.vars.map((v) => Variable.create(v)).toList();
-    variables.forEach(buildVariablesTree);
+    variables
+      ..forEach(buildVariablesTree)
+      ..sort((a, b) => sortFieldsByName(a.boundVar.name, b.boundVar.name));
     return variables;
   }
 

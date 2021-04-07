@@ -20,6 +20,21 @@ import 'package:vm_service/vm_service.dart';
 import 'config_specific/logger/logger.dart' as logger;
 import 'notifications.dart';
 
+/// Public properties first, then sort alphabetically
+int sortFieldsByName(String a, String b) {
+  final isAPrivate = a.startsWith('_');
+  final isBPrivate = b.startsWith('_');
+
+  if (isAPrivate && !isBPrivate) {
+    return 1;
+  }
+  if (!isAPrivate && isBPrivate) {
+    return -1;
+  }
+
+  return a.compareTo(b);
+}
+
 bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
 
 const String loremIpsum = '''
