@@ -15,6 +15,7 @@ analyzer:
     missing_return: warning
   exclude:
     - build/**
+    - '*.freezed.dart'
 
 linter:
   rules:
