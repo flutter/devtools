@@ -29,6 +29,8 @@ Future<String> initializePlatform() async {
   // handle in the app. This is a workaround for
   // https://github.com/flutter/flutter/issues/58119.
   window.onKeyDown.listen((event) {
+    _sendKeyPressToParent(event);
+
     // Here, we're just trying to match the '⌘P' keybinding on macos.
     if (!event.metaKey) {
       return;
@@ -43,6 +45,32 @@ Future<String> initializePlatform() async {
   });
 
   return '${window.location}';
+}
+
+void _sendKeyPressToParent(KeyboardEvent event) {
+  // When DevTools is embedded inside IDEs in iframes, it will capture all
+  // keypresses, preventing IDE shortcuts from working. To fix this, keypresses
+  // will need to be posted up to the parent
+  // https://github.com/flutter/devtools/issues/2775
+
+  // Check we have a connection and we appear to be embedded somewhere expected
+  // because we can't use targetOrigin in postMessage as only the scheme is fixed
+  // for VS Code (vscode-webview://[some guid]).
+  if (!serviceManager.hasConnection) return;
+  if (!window.navigator.userAgent.contains('Electron')) return;
+
+  final data = {
+    'altKey': event.altKey,
+    'code': event.code,
+    'ctrlKey': event.ctrlKey,
+    'isComposing': event.isComposing,
+    'key': event.key,
+    'location': event.location,
+    'metaKey': event.metaKey,
+    'repeat': event.repeat,
+    'shiftKey': event.shiftKey
+  };
+  window.parent?.postMessage({'command': 'keydown', 'data': data}, '*');
 }
 
 class ServerConnectionStorage implements Storage {
