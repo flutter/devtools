@@ -349,12 +349,34 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                   style: theme.textTheme.subtitle2,
                 ),
               ),
-              ToolbarAction(
-                icon: Icons.copy,
-                onPressed: () =>
-                    Clipboard.setData(ClipboardData(text: scriptRef?.uri)),
-              ),
               const SizedBox(width: denseSpacing),
+              PopupMenuButton<_ScriptPopupMenuOptions>(
+                onSelected: (item) {
+                  if (item == _ScriptPopupMenuOptions.Copy) {
+                    Clipboard.setData(ClipboardData(text: scriptRef?.uri));
+                  }
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: _ScriptPopupMenuOptions.Copy,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Text('Copy filename',
+                            style: Theme.of(context).regularTextStyle),
+                        const Icon(
+                          Icons.copy,
+                          size: actionsIconSize,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                child: const Icon(
+                  Icons.more_vert,
+                  size: actionsIconSize,
+                ),
+              ),
               PopupMenuButton<ScriptRef>(
                 itemBuilder: _buildScriptMenuFromHistory,
                 enabled: scriptsHistory.hasScripts,
@@ -730,3 +752,5 @@ class _LineItemState extends State<LineItem> {
         ),
       );
 }
+
+enum _ScriptPopupMenuOptions { Copy }
