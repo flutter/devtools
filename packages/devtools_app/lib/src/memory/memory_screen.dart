@@ -786,8 +786,8 @@ class MemoryBodyState extends State<MemoryBody>
         image == null
             ? const SizedBox()
             : scaleImage
-                ? Image(image: AssetImage(image), width: 20, height: 10)
-                : Image(image: AssetImage(image)),
+            ? Image(image: AssetImage(image), width: 20, height: 10)
+            : Image(image: AssetImage(image)),
         const PaddedDivider(
           padding: EdgeInsets.only(left: denseRowSpacing),
         ),
