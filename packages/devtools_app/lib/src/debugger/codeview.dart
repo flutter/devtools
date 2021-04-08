@@ -379,6 +379,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
               ),
               PopupMenuButton<ScriptRef>(
                 itemBuilder: _buildScriptMenuFromHistory,
+                tooltip: 'Select recent script',
                 enabled: scriptsHistory.hasScripts,
                 onSelected: (scriptRef) {
                   widget.controller
@@ -389,7 +390,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                   buttonMinWidth + denseSpacing,
                 ),
                 child: const Icon(
-                  Icons.keyboard_arrow_down,
+                  Icons.history,
                   size: actionsIconSize,
                 ),
               ),
