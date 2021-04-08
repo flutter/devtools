@@ -114,6 +114,13 @@ class ScriptPickerState extends State<ScriptPicker> {
           if (!_isLoading)
             Expanded(
               child: TreeView<FileNode>(
+                onTraverse: (node) {
+                  // Auto expand children when there are minimal search results.
+                  if (_filterController.text.isNotEmpty &&
+                      node.children.length <= 3) {
+                    node.expand();
+                  }
+                },
                 itemExtent: listItemHeight,
                 dataRoots: _rootScriptNodes,
                 dataDisplayProvider: (item, onTap) =>
