@@ -660,10 +660,10 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
   @override
   Widget build(BuildContext context) {
     if (nodes.isEmpty) {
-      return Container(
+      return EmptyFlameChartRow(
         height: sectionSpacing,
         width: widget.width,
-        color: widget.backgroundColor,
+        backgroundColor: widget.backgroundColor,
       );
     }
     // Having each row handle gestures and mouse events instead of each node
@@ -1487,6 +1487,29 @@ class _FlameChartHelpDialog extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class EmptyFlameChartRow extends StatelessWidget {
+  const EmptyFlameChartRow({
+    @required this.height,
+    @required this.width,
+    @required this.backgroundColor,
+  });
+
+  final double height;
+
+  final double width;
+
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      width: width,
+      color: backgroundColor,
     );
   }
 }

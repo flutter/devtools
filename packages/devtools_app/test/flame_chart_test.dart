@@ -236,9 +236,10 @@ void main() {
       expect(find.byWidget(currentRow), findsOneWidget);
       expect(find.byType(MouseRegion), findsNothing);
 
-      final sizedBoxFinder = find.byType(SizedBox);
-      final SizedBox box = tester.widget(sizedBoxFinder);
-      expect(box.height, equals(sectionSpacing));
+      final emptyRowFinder = find.byType(EmptyFlameChartRow);
+      final EmptyFlameChartRow emptyFlameChartRow =
+          tester.widget(emptyRowFinder);
+      expect(emptyFlameChartRow.height, equals(sectionSpacing));
     });
 
     testWidgets('binary search for node returns correct node',
