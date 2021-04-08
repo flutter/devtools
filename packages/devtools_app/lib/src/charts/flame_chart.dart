@@ -159,15 +159,15 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
   double get startingPxPerMicro =>
-      widget.startingContentWidth / widget.data.time.duration.inMicroseconds;
+      widget.startingContentWidth / widget.time.duration.inMicroseconds;
 
-  int get startTimeOffset => widget.data.time.start.inMicroseconds;
+  int get startTimeOffset => widget.time.start.inMicroseconds;
 
   double get maxZoomLevel {
     // The max zoom level is hit when 1 microsecond is the width of each grid
     // interval (this may bottom out at 2 micros per interval due to rounding).
     return TimelineGridPainter.baseGridIntervalPx *
-        widget.data.time.duration.inMicroseconds /
+        widget.time.duration.inMicroseconds /
         widget.startingContentWidth;
   }
 
