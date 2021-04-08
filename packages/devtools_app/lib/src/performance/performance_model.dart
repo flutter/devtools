@@ -172,6 +172,18 @@ class TimelineEventGroup {
 
   final rowIndexForEvent = <TimelineEvent, int>{};
 
+  int earliestTimestampMicros;
+
+  int latestTimestampMicros;
+
+  List<TimelineEvent> get sortedEventRoots =>
+      _sortedEventRoots ??= List<TimelineEvent>.from(rowIndexForEvent.keys)
+          .where((event) => event.isRoot)
+          .toList()
+            ..sort((a, b) => a.time.start.inMicroseconds
+                .compareTo(b.time.start.inMicroseconds));
+  List<TimelineEvent> _sortedEventRoots;
+
   int get displayDepth => rows.length;
 
   // TODO(kenz): prevent guideline "elbows" from overlapping other events.
@@ -229,6 +241,14 @@ class TimelineEventGroup {
     for (int i = 0; i < event.displayDepth; i++) {
       final displayRow = event.displayRows[i];
       for (var e in displayRow) {
+        earliestTimestampMicros = math.min(
+          e.time.start.inMicroseconds,
+          earliestTimestampMicros ?? e.time.start.inMicroseconds,
+        );
+        latestTimestampMicros = math.max(
+          e.time.end.inMicroseconds,
+          latestTimestampMicros ?? e.time.end.inMicroseconds,
+        );
         rows[row + i].events.add(e);
         rowIndexForEvent[e] = row + i;
         if (e.time.end >
