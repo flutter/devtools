@@ -290,7 +290,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       childrenDelegate: SliverChildBuilderDelegate(
         (context, index) {
           final nodes = rows[index].nodes;
-          Color rowBackgroundColor = Colors.transparent;
+          var rowBackgroundColor = Colors.transparent;
           if (index >= rowOffsetForTopPadding && nodes.isEmpty) {
             // If this is a spacer row, we should use the background color of
             // the previous row with nodes.
