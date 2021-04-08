@@ -42,6 +42,8 @@ class ScriptPickerState extends State<ScriptPicker> {
   // TODO(devoncarew): How to retain the filter text state?
   final _filterController = TextEditingController();
 
+  final _maxAutoExpandChildCount = 3;
+
   List<ObjRef> _items = [];
   List<ObjRef> _filteredItems = [];
   List<FileNode> _rootScriptNodes;
@@ -117,7 +119,7 @@ class ScriptPickerState extends State<ScriptPicker> {
                 onTraverse: (node) {
                   // Auto expand children when there are minimal search results.
                   if (_filterController.text.isNotEmpty &&
-                      node.children.length <= 3) {
+                      node.children.length <= _maxAutoExpandChildCount) {
                     node.expand();
                   }
                 },
