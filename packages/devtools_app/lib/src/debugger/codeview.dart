@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
@@ -347,6 +348,11 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                   scriptRef?.uri ?? ' ',
                   style: theme.textTheme.subtitle2,
                 ),
+              ),
+              ToolbarAction(
+                icon: Icons.copy,
+                onPressed: () =>
+                    Clipboard.setData(ClipboardData(text: scriptRef?.uri)),
               ),
               const SizedBox(width: denseSpacing),
               PopupMenuButton<ScriptRef>(
