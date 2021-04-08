@@ -24,7 +24,7 @@ import '../utils.dart';
 const double rowPadding = 2.0;
 const double rowHeight = 25.0;
 const double rowHeightWithPadding = rowHeight + rowPadding;
-const double sectionSpacing = 15.0;
+const double sectionSpacing = 16.0;
 const double sideInset = 70.0;
 const double sideInsetSmall = 60.0;
 
@@ -48,7 +48,6 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   });
 
   static const minZoomLevel = 1.0;
-  static const maxZoomLevel = double.infinity;
   static const zoomMultiplier = 0.01;
   static const minScrollOffset = 0.0;
   static const rowOffsetForBottomPadding = 1;
@@ -160,9 +159,17 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
   double get startingPxPerMicro =>
-      widget.startingContentWidth / widget.data.time.duration.inMicroseconds;
+      widget.startingContentWidth / widget.time.duration.inMicroseconds;
 
-  int get startTimeOffset => widget.data.time.start.inMicroseconds;
+  int get startTimeOffset => widget.time.start.inMicroseconds;
+
+  double get maxZoomLevel {
+    // The max zoom level is hit when 1 microsecond is the width of each grid
+    // interval (this may bottom out at 2 micros per interval due to rounding).
+    return TimelineGridPainter.baseGridIntervalPx *
+        widget.time.duration.inMicroseconds /
+        widget.startingContentWidth;
+  }
 
   /// Provides widgets to be layered on top of the flame chart, if overridden.
   ///
@@ -188,7 +195,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     zoomController = AnimationController(
       value: FlameChart.minZoomLevel,
       lowerBound: FlameChart.minZoomLevel,
-      upperBound: FlameChart.maxZoomLevel,
+      upperBound: maxZoomLevel,
       vsync: this,
     )..addListener(_handleZoomControllerValueUpdate);
 
@@ -282,14 +289,36 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       customPointerSignalHandler: _handlePointerSignal,
       childrenDelegate: SliverChildBuilderDelegate(
         (context, index) {
+          final nodes = rows[index].nodes;
+          var rowBackgroundColor = Colors.transparent;
+          if (index >= rowOffsetForTopPadding && nodes.isEmpty) {
+            // If this is a spacer row, we should use the background color of
+            // the previous row with nodes.
+            for (int i = index; i > rowOffsetForTopPadding; i--) {
+              // Look back until we find the first non-empty row.
+              if (rows[i].nodes.isNotEmpty) {
+                rowBackgroundColor = alternatingColorForIndex(
+                  rows[i].nodes.first.sectionIndex,
+                  Theme.of(context).colorScheme,
+                );
+                break;
+              }
+            }
+          } else if (nodes.isNotEmpty) {
+            rowBackgroundColor = alternatingColorForIndex(
+              nodes.first.sectionIndex,
+              Theme.of(context).colorScheme,
+            );
+          }
           return ScrollingFlameChartRow<V>(
             linkedScrollControllerGroup: horizontalControllerGroup,
-            nodes: rows[index].nodes,
+            nodes: nodes,
             width: math.max(constraints.maxWidth, widthWithZoom),
             startInset: widget.startInset,
             selectionNotifier: widget.selectionNotifier,
             searchMatchesNotifier: widget.searchMatchesNotifier,
             activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+            backgroundColor: rowBackgroundColor,
             zoom: zoomController.value,
           );
         },
@@ -340,7 +369,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       // if the key is held currently.
       if (keyLabel == 'w') {
         zoomTo(math.min(
-          FlameChart.maxZoomLevel,
+          maxZoomLevel,
           zoomController.value + keyboardZoomInUnit,
         ));
       } else if (keyLabel == 's') {
@@ -381,7 +410,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
           final multiplier = FlameChart.zoomMultiplier * currentZoom;
           final newZoomLevel = (currentZoom + deltaY * multiplier).clamp(
             FlameChart.minZoomLevel,
-            FlameChart.maxZoomLevel,
+            maxZoomLevel,
           );
           await zoomTo(newZoomLevel, jump: true);
           if (newZoomLevel == FlameChart.minZoomLevel &&
@@ -432,7 +461,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       mouseHoverX = forceMouseX;
     }
     await zoomController.animateTo(
-      zoom.clamp(FlameChart.minZoomLevel, FlameChart.maxZoomLevel),
+      zoom.clamp(FlameChart.minZoomLevel, maxZoomLevel),
       duration: jump ? Duration.zero : shortDuration,
     );
   }
@@ -492,6 +521,7 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
     @required this.selectionNotifier,
     @required this.searchMatchesNotifier,
     @required this.activeSearchMatchNotifier,
+    @required this.backgroundColor,
     @required this.zoom,
   });
 
@@ -508,6 +538,8 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
   final ValueListenable<List<V>> searchMatchesNotifier;
 
   final ValueListenable<V> activeSearchMatchNotifier;
+
+  final Color backgroundColor;
 
   final double zoom;
 
@@ -628,9 +660,10 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
   @override
   Widget build(BuildContext context) {
     if (nodes.isEmpty) {
-      return SizedBox(
+      return EmptyFlameChartRow(
         height: sectionSpacing,
         width: widget.width,
+        backgroundColor: widget.backgroundColor,
       );
     }
     // Having each row handle gestures and mouse events instead of each node
@@ -643,10 +676,7 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
         child: Container(
           height: rowHeightWithPadding,
           width: widget.width,
-          color: alternatingColorForIndex(
-            nodes.first.sectionIndex,
-            Theme.of(context).colorScheme,
-          ),
+          color: widget.backgroundColor,
           // TODO(kenz): investigate if `addAutomaticKeepAlives: false` and
           // `addRepaintBoundaries: false` are needed here for perf improvement.
           child: ExtentDelegateListView(
@@ -1282,8 +1312,7 @@ class TimelineGridPainter extends FlameChartPainter {
 
   int _microsPerInterval(double intervalWidth) {
     final contentWidth = flameChartWidth - chartStartInset - chartEndInset;
-    final numCompleteIntervals =
-        (flameChartWidth - chartStartInset - chartEndInset) ~/ intervalWidth;
+    final numCompleteIntervals = contentWidth ~/ intervalWidth;
     final remainderContentWidth =
         contentWidth - (numCompleteIntervals * intervalWidth);
     final remainderMicros =
@@ -1458,6 +1487,29 @@ class _FlameChartHelpDialog extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class EmptyFlameChartRow extends StatelessWidget {
+  const EmptyFlameChartRow({
+    @required this.height,
+    @required this.width,
+    @required this.backgroundColor,
+  });
+
+  final double height;
+
+  final double width;
+
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      width: width,
+      color: backgroundColor,
     );
   }
 }
