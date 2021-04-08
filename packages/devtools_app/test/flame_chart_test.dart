@@ -166,6 +166,7 @@ void main() {
       selectionNotifier: ValueNotifier<CpuStackFrame>(null),
       searchMatchesNotifier: null,
       activeSearchMatchNotifier: null,
+      backgroundColor: Colors.transparent,
       zoom: FlameChart.minZoomLevel,
     );
     final zoomedTestRow = ScrollingFlameChartRow(
@@ -177,6 +178,7 @@ void main() {
       selectionNotifier: ValueNotifier<CpuStackFrame>(null),
       searchMatchesNotifier: null,
       activeSearchMatchNotifier: null,
+      backgroundColor: Colors.transparent,
       zoom: 2.0,
     );
 
@@ -226,6 +228,7 @@ void main() {
         selectionNotifier: ValueNotifier<CpuStackFrame>(null),
         searchMatchesNotifier: null,
         activeSearchMatchNotifier: null,
+        backgroundColor: Colors.transparent,
         zoom: FlameChart.minZoomLevel,
       );
 
