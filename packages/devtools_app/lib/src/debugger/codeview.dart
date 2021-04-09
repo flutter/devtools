@@ -15,6 +15,7 @@ import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
+import '../globals.dart';
 import '../theme.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
@@ -720,8 +721,6 @@ class _LineItemState extends State<LineItem> {
       );
 }
 
-enum _ScriptPopupMenuOptions { Copy }
-
 class ScriptPopupMenu extends StatelessWidget {
   const ScriptPopupMenu(this._scriptRef);
 
@@ -729,26 +728,14 @@ class ScriptPopupMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<_ScriptPopupMenuOptions>(
-      onSelected: (item) {
-        if (item == _ScriptPopupMenuOptions.Copy) {
-          Clipboard.setData(ClipboardData(text: _scriptRef?.uri));
-        }
-      },
+    return PopupMenuButton<ScriptPopupMenuOption>(
+      onSelected: (option) => option.onSelected(_scriptRef),
       itemBuilder: (_) => [
-        PopupMenuItem(
-          value: _ScriptPopupMenuOptions.Copy,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Text('Copy filename', style: Theme.of(context).regularTextStyle),
-              const Icon(
-                Icons.content_copy,
-                size: actionsIconSize,
-              ),
-            ],
-          ),
-        ),
+        for (final menuOption in defaultScriptPopupMenuOptions)
+          menuOption.build(context),
+        for (final extensionMenuOption in devToolsExtensionPoints
+            .buildExtraDebuggerScriptPopupMenuOptions())
+          extensionMenuOption.build(context),
       ],
       child: const Icon(
         Icons.more_vert,
@@ -789,3 +776,44 @@ class ScriptHistoryPopupMenu extends StatelessWidget {
     );
   }
 }
+
+class ScriptPopupMenuOption {
+  const ScriptPopupMenuOption({
+    @required this.label,
+    @required this.onSelected,
+    this.icon,
+  });
+
+  final String label;
+
+  final void Function(ScriptRef) onSelected;
+
+  final IconData icon;
+
+  PopupMenuItem<ScriptPopupMenuOption> build(BuildContext context) {
+    return PopupMenuItem<ScriptPopupMenuOption>(
+      value: this,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: Theme.of(context).regularTextStyle),
+          if (icon != null)
+            Icon(
+              icon,
+              size: actionsIconSize,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+final defaultScriptPopupMenuOptions = [copyScriptNameOption];
+
+final copyScriptNameOption = ScriptPopupMenuOption(
+  label: 'Copy filename',
+  icon: Icons.content_copy,
+  onSelected: (scriptRef) => Clipboard.setData(
+    ClipboardData(text: scriptRef?.uri),
+  ),
+);
