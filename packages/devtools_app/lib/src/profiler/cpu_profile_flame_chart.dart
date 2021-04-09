@@ -94,8 +94,8 @@ class _CpuProfileFlameChartState
         painter: TimelineGridPainter(
           zoom: zoom,
           constraints: constraints,
-          verticalController: verticalControllerGroup,
-          horizontalController: horizontalControllerGroup,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
           chartStartInset: widget.startInset,
           chartEndInset: widget.endInset,
           flameChartWidth: widthWithZoom,
