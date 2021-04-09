@@ -284,7 +284,7 @@ class TimelineFlameChartState
     return contentWidthWithZoom * ratio;
   }
 
-  Future<void> _viewPreviousEventInGroup(TimelineEventGroup group) async {
+  int _indexOfFirstEventInView(TimelineEventGroup group) {
     final boundEvent = SyncTimelineEvent(
       TraceEventWrapper(
         TraceEvent({'ts': visibleTimeRange.start.inMicroseconds})
@@ -292,24 +292,29 @@ class TimelineFlameChartState
         0, // This is arbitrary
       ),
     )..time = visibleTimeRange;
-    final firstInViewIndex = lowerBound(
+    return lowerBound(
       group.sortedEventRoots,
       boundEvent,
       compare: (TimelineEvent a, TimelineEvent b) =>
           a.time.start.compareTo(b.time.start),
     );
+
+  Future<void> _viewPreviousEventInGroup(TimelineEventGroup group) async {
+    final firstInViewIndex = _indexOfFirstEventInView(group);
     if (firstInViewIndex > 0) {
       final event = group.sortedEventRoots[firstInViewIndex - 1];
-      await zoomToTimeRange(
+      await zoomAndScrollToData(
         startMicros: event.time.start.inMicroseconds,
         durationMicros: event.time.duration.inMicroseconds,
+        data: event,
+        scrollVertically: false,
+        jumpZoom: true,
       );
-      await scrollHorizontallyToData(event);
       return;
     }
-    // This notification should not be shown if we are correctly disabling the
-    // previous button when there are no more events out of view for the group.
-    // Leave this here as a fallback though, so that we do not give the user a
+    // This notification should not be shown, as we are disabling the previous
+    // button when there are no more events out of view for the group. Leave
+    // this here as a fallback though, so that we do not give the user a
     // completely broken experience if we regress or if there is a race.
     Notifications.of(context).push(
       'There are no events on this thread that occurred before this time range.',
@@ -326,19 +331,38 @@ class TimelineFlameChartState
     )..time = (TimeRange()
       ..start = visibleTimeRange.end
       ..end = visibleTimeRange.end);
-    final firstOutOfView = lowerBound(
+    final firstOutOfViewIndex = lowerBound(
       group.sortedEventRoots,
       boundEvent,
       compare: (TimelineEvent a, TimelineEvent b) =>
           a.time.end.compareTo(b.time.end),
     );
-    if (firstOutOfView < group.sortedEventRoots.length) {
-      final event = group.sortedEventRoots[firstOutOfView];
-      await zoomToTimeRange(
-        startMicros: event.time.start.inMicroseconds,
-        durationMicros: event.time.duration.inMicroseconds,
+
+    TimelineEvent zoomTo;
+    // If there are no events in this group that occur after the visible time
+    // range, and the first event in the visible time range is the first event
+    // in the group, zoom to this event. This covers the case where a user is
+    // viewing a very zoomed out chart and would like to jump to the first in
+    // view. If the first event in the group occurs before the visible time
+    // range, then the user will be able to use the previous button to navigate
+    // to that event.
+    if (firstOutOfViewIndex == group.sortedEventRoots.length) {
+      final firstInViewIndex = _indexOfFirstEventInView(group);
+      if (firstInViewIndex == 0) {
+        zoomTo = group.sortedEventRoots.first;
+      }
+    } else if (firstOutOfViewIndex < group.sortedEventRoots.length) {
+      zoomTo = group.sortedEventRoots[firstOutOfViewIndex];
+    }
+
+    if (zoomTo != null) {
+      await zoomAndScrollToData(
+        startMicros: zoomTo.time.start.inMicroseconds,
+        durationMicros: zoomTo.time.duration.inMicroseconds,
+        data: zoomTo,
+        scrollVertically: false,
+        jumpZoom: true,
       );
-      await scrollHorizontallyToData(event);
       return;
     }
 
@@ -346,9 +370,9 @@ class TimelineFlameChartState
     // a refresh of timeline events here if we know there are more events we
     // have yet to render.
 
-    // This notification should not be shown if we are correctly disabling the
-    // next button when there are no more events out of view for the group.
-    // Leave this here as a fallback though, so that we do not give the user a
+    // This notification should not be shown, as we are disabling the next
+    // button when there are no more events out of view for the group. Leave
+    // this here as a fallback though, so that we do not give the user a
     // completely broken experience if we regress or if there is a race.
     Notifications.of(context).push(
       'There are no events on this thread that occurred after this time range.',
@@ -367,40 +391,13 @@ class TimelineFlameChartState
       // TODO(kenz): consider using jumpTo for some of these animations to
       // improve performance.
 
-      // Vertically scroll to the frame's UI event.
-      await scrollVerticallyToData(selectedFrame.uiEventFlow);
-
-      // Bail early if the selection has changed again while the animation was
-      // in progress.
-      if (selectedFrame != _selectedFrame) return;
-
-      // Zoom the frame into view.
-      await zoomToTimeRange(
+      // Zoom and scroll to the frame's UI event.
+      await zoomAndScrollToData(
         startMicros: selectedFrame.time.start.inMicroseconds,
         durationMicros: selectedFrame.time.duration.inMicroseconds,
+        data: selectedFrame.uiEventFlow,
       );
-
-      // Bail early if the selection has changed again while the animation was
-      // in progress.
-      if (selectedFrame != _selectedFrame) return;
-
-      // Horizontally scroll to the frame.
-      await scrollHorizontallyToData(selectedFrame.uiEventFlow);
     }
-  }
-
-  Future<void> zoomToTimeRange({
-    @required int startMicros,
-    @required int durationMicros,
-    double targetWidth,
-  }) async {
-    targetWidth ??= widget.containerWidth * 0.8;
-    final startingWidth = durationMicros * startingPxPerMicro;
-    final zoom = targetWidth / startingWidth;
-    final mouseXForZoom = (startMicros - startTimeOffset + durationMicros / 2) *
-            startingPxPerMicro +
-        widget.startInset;
-    await zoomTo(zoom, forceMouseX: mouseXForZoom);
   }
 
   @override
@@ -631,24 +628,22 @@ class TimelineFlameChartState
   }) {
     const threadButtonContainerWidth = buttonMinWidth + defaultSpacing;
     final eventGroups = _timelineController.data.eventGroups;
-    final prevInThreadChildren = <Widget>[];
-    final nextInThreadChildren = <Widget>[];
 
-    for (int i = 0; i < eventGroups.length; i++) {
+    Widget buildNavigatorButton(int index, {@required bool isNext}) {
       // Add spacing to account for timestamps at top of chart.
-      final topSpacer = i == 0
+      final topSpacer = index == 0
           ? sectionSpacing * TimelineFlameChart.rowOffsetForTopPadding -
               rowHeight
           : 0.0;
       // Add spacing to account for bottom row of padding.
-      final bottomSpacer = i == eventGroups.length - 1 ? rowHeight : 0.0;
+      final bottomSpacer = index == eventGroups.length - 1 ? rowHeight : 0.0;
 
-      final groupName = eventGroups.keys.elementAt(i);
+      final groupName = eventGroups.keys.elementAt(index);
       final group = eventGroups[groupName];
       final backgroundColor = alternatingColorForIndex(
         // Add 1 so that the color of the button contrasts with the group
         // background color.
-        i + 1,
+        index + 1,
         Theme.of(context).colorScheme,
       );
       final backgroundWithOpacity = Color.fromRGBO(
@@ -657,27 +652,21 @@ class TimelineFlameChartState
         backgroundColor.blue,
         0.85,
       );
-
-      prevInThreadChildren.add(PreviousInThreadButton(
+      return NavigateInThreadInButton(
         group: group,
+        isNext: isNext,
         topSpacer: topSpacer,
         bottomSpacer: bottomSpacer,
         backgroundColor: backgroundWithOpacity,
         threadButtonContainerWidth: threadButtonContainerWidth,
-        onPressed: () => _viewPreviousEventInGroup(group),
-        shouldEnableButton: _shouldEnablePrevInThreadButton,
+        onPressed: () => isNext
+            ? _viewNextEventInGroup(group)
+            : _viewPreviousEventInGroup(group),
+        shouldEnableButton: (g) => isNext
+            ? _shouldEnableNextInThreadButton(g)
+            : _shouldEnablePrevInThreadButton(g),
         horizontalController: horizontalControllerGroup,
-      ));
-      nextInThreadChildren.add(NextInThreadButton(
-        group: group,
-        topSpacer: topSpacer,
-        bottomSpacer: bottomSpacer,
-        backgroundColor: backgroundWithOpacity,
-        threadButtonContainerWidth: threadButtonContainerWidth,
-        onPressed: () => _viewNextEventInGroup(group),
-        shouldEnableButton: _shouldEnableNextInThreadButton,
-        horizontalController: horizontalControllerGroup,
-      ));
+      );
     }
 
     return [
@@ -686,10 +675,11 @@ class TimelineFlameChartState
         left: 0.0,
         height: constraints.maxHeight,
         width: threadButtonContainerWidth,
-        child: ListView(
+        child: ListView.builder(
           physics: const ClampingScrollPhysics(),
           controller: _previousInGroupButtonsScrollController,
-          children: prevInThreadChildren,
+          itemCount: eventGroups.length,
+          itemBuilder: (context, i) => buildNavigatorButton(i, isNext: false),
         ),
       ),
       Positioned(
@@ -697,10 +687,11 @@ class TimelineFlameChartState
         right: 0.0,
         height: constraints.maxHeight,
         width: threadButtonContainerWidth,
-        child: ListView(
+        child: ListView.builder(
           physics: const ClampingScrollPhysics(),
           controller: _nextInGroupButtonsScrollController,
-          children: nextInThreadChildren,
+          itemCount: eventGroups.length,
+          itemBuilder: (context, i) => buildNavigatorButton(i, isNext: true),
         ),
       ),
     ];
@@ -712,15 +703,11 @@ class TimelineFlameChartState
   }
 
   bool _shouldEnableNextInThreadButton(TimelineEventGroup group) {
-    const smallEventSize = 10.0;
-    final firstEventIsSmall =
-        group.sortedEventRoots.first.time.duration.inMicroseconds *
-                startingPxPerMicro *
-                zoomController.value <
-            smallEventSize;
-    final atMinZoomLevel = zoomController.value == FlameChart.minZoomLevel;
-    return firstEventIsSmall ||
-        atMinZoomLevel ||
+    final firstEventInView = _indexOfFirstEventInView(group);
+    final noEventsAfterVisibleTimeRange =
+        horizontalControllerGroup.hasAttachedControllers &&
+            group.latestTimestampMicros <= visibleTimeRange.end.inMicroseconds;
+    return (firstEventInView == 0 && noEventsAfterVisibleTimeRange) ||
         horizontalControllerGroup.hasAttachedControllers &&
             group.latestTimestampMicros > visibleTimeRange.end.inMicroseconds;
   }
@@ -1189,124 +1176,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
       );
 }
 
-class PreviousInThreadButton extends StatefulWidget {
-  const PreviousInThreadButton({
-    @required this.group,
-    @required this.topSpacer,
-    @required this.bottomSpacer,
-    @required this.backgroundColor,
-    @required this.threadButtonContainerWidth,
-    @required this.onPressed,
-    @required this.shouldEnableButton,
-    @required this.horizontalController,
-  });
-
-  final TimelineEventGroup group;
-
-  final double topSpacer;
-
-  final double bottomSpacer;
-
-  final Color backgroundColor;
-
-  final double threadButtonContainerWidth;
-
-  final VoidCallback onPressed;
-
-  final bool Function(TimelineEventGroup) shouldEnableButton;
-
-  final LinkedScrollControllerGroup horizontalController;
-
-  @override
-  _PreviousInThreadButtonState createState() => _PreviousInThreadButtonState();
-}
-
-class _PreviousInThreadButtonState extends State<PreviousInThreadButton>
-    with AutoDisposeMixin {
-  @override
-  void initState() {
-    super.initState();
-    // Call set state each time the horizontal offset is updated. This will
-    // ensure we are properly enabling/disabling the navigator button based on
-    // the visible time range.
-    addAutoDisposeListener(widget.horizontalController.offsetNotifier);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ThreadNavigatorButtonContainer(
-      group: widget.group,
-      isNext: false,
-      topSpacer: widget.topSpacer,
-      bottomSpacer: widget.bottomSpacer,
-      backgroundColor: widget.backgroundColor,
-      threadButtonContainerWidth: widget.threadButtonContainerWidth,
-      onPressed:
-          widget.shouldEnableButton(widget.group) ? widget.onPressed : null,
-    );
-  }
-}
-
-class NextInThreadButton extends StatefulWidget {
-  const NextInThreadButton({
-    @required this.group,
-    @required this.topSpacer,
-    @required this.bottomSpacer,
-    @required this.backgroundColor,
-    @required this.threadButtonContainerWidth,
-    @required this.onPressed,
-    @required this.shouldEnableButton,
-    @required this.horizontalController,
-  });
-
-  final TimelineEventGroup group;
-
-  final double topSpacer;
-
-  final double bottomSpacer;
-
-  final Color backgroundColor;
-
-  final double threadButtonContainerWidth;
-
-  final VoidCallback onPressed;
-
-  final bool Function(TimelineEventGroup) shouldEnableButton;
-
-  final LinkedScrollControllerGroup horizontalController;
-
-  @override
-  _NextInThreadButtonState createState() => _NextInThreadButtonState();
-}
-
-class _NextInThreadButtonState extends State<NextInThreadButton>
-    with AutoDisposeMixin {
-  @override
-  void initState() {
-    super.initState();
-    // Call set state each time the horizontal offset is updated. This will
-    // ensure we are properly enabling/disabling the navigator button based on
-    // the visible time range.
-    addAutoDisposeListener(widget.horizontalController.offsetNotifier);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ThreadNavigatorButtonContainer(
-      group: widget.group,
-      isNext: true,
-      topSpacer: widget.topSpacer,
-      bottomSpacer: widget.bottomSpacer,
-      backgroundColor: widget.backgroundColor,
-      threadButtonContainerWidth: widget.threadButtonContainerWidth,
-      onPressed:
-          widget.shouldEnableButton(widget.group) ? widget.onPressed : null,
-    );
-  }
-}
-
-class ThreadNavigatorButtonContainer extends StatelessWidget {
-  const ThreadNavigatorButtonContainer({
+class NavigateInThreadInButton extends StatefulWidget {
+  const NavigateInThreadInButton({
     @required this.group,
     @required this.isNext,
     @required this.topSpacer,
@@ -1314,6 +1185,8 @@ class ThreadNavigatorButtonContainer extends StatelessWidget {
     @required this.backgroundColor,
     @required this.threadButtonContainerWidth,
     @required this.onPressed,
+    @required this.shouldEnableButton,
+    @required this.horizontalController,
   });
 
   final TimelineEventGroup group;
@@ -1330,33 +1203,56 @@ class ThreadNavigatorButtonContainer extends StatelessWidget {
 
   final VoidCallback onPressed;
 
+  final bool Function(TimelineEventGroup) shouldEnableButton;
+
+  final LinkedScrollControllerGroup horizontalController;
+
   static const topPaddingForMediumGroups = 20.0;
 
   @override
+  _NavigateInThreadInButtonState createState() =>
+      _NavigateInThreadInButtonState();
+}
+
+class _NavigateInThreadInButtonState extends State<NavigateInThreadInButton>
+    with AutoDisposeMixin {
+  @override
+  void initState() {
+    super.initState();
+    // Call set state each time the horizontal offset is updated. This will
+    // ensure we are properly enabling/disabling the navigator button based on
+    // the visible time range.
+    addAutoDisposeListener(widget.horizontalController.offsetNotifier);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final useSmallButton = !isNext && group.displayDepth <= 1;
-    final topPadding =
-        !isNext && group.displayDepth == 2 ? topPaddingForMediumGroups : 0.0;
+    final useSmallButton = !widget.isNext && widget.group.displayDepth <= 1;
+    final topPadding = !widget.isNext && widget.group.displayDepth == 2
+        ? NavigateInThreadInButton.topPaddingForMediumGroups
+        : 0.0;
     return Container(
       margin: EdgeInsets.only(
-        top: topSpacer,
-        bottom: bottomSpacer,
+        top: widget.topSpacer,
+        bottom: widget.bottomSpacer,
       ),
       padding: EdgeInsets.only(
         top: topPadding,
-        bottom: useSmallButton ? 2.0 : 0.0,
-        right: isNext ? defaultSpacing : 0.0,
-        left: isNext ? 0.0 : defaultSpacing,
+        bottom: useSmallButton ? borderPadding : 0.0,
+        right: widget.isNext ? defaultSpacing : 0.0,
+        left: widget.isNext ? 0.0 : defaultSpacing,
       ),
-      height: group.displaySizePx,
-      width: threadButtonContainerWidth,
+      height: widget.group.displaySizePx,
+      width: widget.threadButtonContainerWidth,
       alignment: useSmallButton ? Alignment.bottomCenter : Alignment.center,
       child: ThreadNavigatorButton(
         useSmallButton: useSmallButton,
-        backgroundColor: backgroundColor,
-        tooltip: isNext ? 'Next event in thread' : 'Previous event in thread',
-        icon: isNext ? Icons.chevron_right : Icons.chevron_left,
-        onPressed: onPressed,
+        backgroundColor: widget.backgroundColor,
+        tooltip:
+            widget.isNext ? 'Next event in thread' : 'Previous event in thread',
+        icon: widget.isNext ? Icons.chevron_right : Icons.chevron_left,
+        onPressed:
+            widget.shouldEnableButton(widget.group) ? widget.onPressed : null,
       ),
     );
   }
@@ -1381,14 +1277,13 @@ class ThreadNavigatorButton extends StatelessWidget {
 
   final VoidCallback onPressed;
 
-  static const smallButtonHeight = 20.0;
-
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: roundedBorderDecoration(context).copyWith(
         color: backgroundColor,
       ),
+      // Using [buttonMinWidth] will result in a square button.
       height: useSmallButton ? smallButtonHeight : buttonMinWidth,
       width: buttonMinWidth,
       child: DevToolsTooltip(

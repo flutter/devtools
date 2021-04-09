@@ -126,6 +126,8 @@ bool isValidLightColor(Color color) {
 const defaultToolbarHeight = 32.0;
 
 const defaultButtonHeight = 32.0;
+const smallButtonHeight = 20.0;
+
 const buttonMinWidth = 36.0;
 
 const defaultIconSize = 16.0;
