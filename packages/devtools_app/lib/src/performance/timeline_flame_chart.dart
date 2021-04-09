@@ -1289,7 +1289,6 @@ class ThreadNavigatorButton extends StatelessWidget {
       width: buttonMinWidth,
       child: DevToolsTooltip(
         tooltip: tooltip,
-        preferBelow: false,
         child: IconButton(
           padding: EdgeInsets.zero,
           icon: Icon(

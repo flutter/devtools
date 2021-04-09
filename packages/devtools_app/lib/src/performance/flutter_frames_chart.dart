@@ -286,27 +286,26 @@ class FlutterFramesChartItem extends StatelessWidget {
     );
     return Stack(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: densePadding),
-          color: selected ? colorScheme.selectedFrameBackgroundColor : null,
-          child: Column(
-            children: [
-              // Dummy child so that the InkWell does not take up the entire column.
-              const Expanded(child: SizedBox()),
-              // TODO(kenz): make tooltip to persist if the frame is selected.
-              Tooltip(
-                message: _tooltipText(frame),
-                padding: const EdgeInsets.all(denseSpacing),
-                preferBelow: false,
-                child: Row(
+        // TODO(kenz): make tooltip to persist if the frame is selected.
+        DevToolsTooltip(
+          tooltip: _tooltipText(frame),
+          padding: const EdgeInsets.all(denseSpacing),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: densePadding),
+            color: selected ? colorScheme.selectedFrameBackgroundColor : null,
+            child: Column(
+              children: [
+                // Dummy child so that the InkWell does not take up the entire column.
+                const Expanded(child: SizedBox()),
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     ui,
                     raster,
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         if (selected)
