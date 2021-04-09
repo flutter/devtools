@@ -298,6 +298,7 @@ class TimelineFlameChartState
       compare: (TimelineEvent a, TimelineEvent b) =>
           a.time.start.compareTo(b.time.start),
     );
+  }
 
   Future<void> _viewPreviousEventInGroup(TimelineEventGroup group) async {
     final firstInViewIndex = _indexOfFirstEventInView(group);
