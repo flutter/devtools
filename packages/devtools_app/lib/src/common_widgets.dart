@@ -924,14 +924,16 @@ class RoundedOutlinedBorder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).focusColor),
-        borderRadius: BorderRadius.circular(defaultBorderRadius),
-      ),
+      decoration: roundedBorderDecoration(context),
       child: child,
     );
   }
 }
+
+BoxDecoration roundedBorderDecoration(BuildContext context) => BoxDecoration(
+      border: Border.all(color: Theme.of(context).focusColor),
+      borderRadius: BorderRadius.circular(defaultBorderRadius),
+    );
 
 class LeftBorder extends StatelessWidget {
   const LeftBorder({this.child});

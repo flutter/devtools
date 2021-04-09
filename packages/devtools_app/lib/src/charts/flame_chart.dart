@@ -415,7 +415,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
           await zoomTo(newZoomLevel, jump: true);
           if (newZoomLevel == FlameChart.minZoomLevel &&
               horizontalControllerGroup.offset != 0.0) {
-            await scrollToX(0.0);
+            // We do not need to call this in a post frame callback because
+            // `FlameChart.minScrollOffset` (0.0) is guaranteed to be less than
+            // the scroll controllers max scroll extent.
+            await scrollToX(FlameChart.minScrollOffset);
           }
         }
       }
@@ -466,6 +469,13 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     );
   }
 
+  /// Scroll the flame chart horizontally to [offset] scroll position.
+  ///
+  /// If this is being called immediately after a zoom call, without a chance
+  /// for the UI to build between the zoom call and the call to
+  /// this method, the call to this method should be placed inside of a
+  /// postFrameCallback:
+  /// `WidgetsBinding.instance.addPostFrameCallback((_) { ... });`.
   FutureOr<void> scrollToX(
     double offset, {
     bool jump = false,
@@ -497,10 +507,57 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     );
   }
 
+  /// Scroll the flame chart horizontally to put [data] in view.
+  ///
+  /// If this is being called immediately after a zoom call, the call to
+  /// this method should be placed inside of a postFrameCallback:
+  /// `WidgetsBinding.instance.addPostFrameCallback((_) { ... });`.
   Future<void> scrollHorizontallyToData(V data) async {
     final offset =
         startXForData(data) + widget.startInset - widget.containerWidth * 0.1;
     await scrollToX(offset);
+  }
+
+  Future<void> zoomAndScrollToData({
+    @required int startMicros,
+    @required int durationMicros,
+    @required V data,
+    bool scrollHorizontally = true,
+    bool scrollVertically = true,
+    bool jumpZoom = false,
+  }) async {
+    await Future.wait([
+      zoomToTimeRange(
+        startMicros: startMicros,
+        durationMicros: durationMicros,
+        jump: jumpZoom,
+      ),
+      if (scrollVertically) scrollVerticallyToData(data),
+    ]);
+    // Call this in a post frame callback so that the horizontal scroll
+    // controllers have had time to update their scroll extents. Otherwise, we
+    // can hit a race where are trying to scroll to an offset that is beyond
+    // what the scroll controller thinks its max scroll extent is.
+    if (scrollHorizontally) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await scrollHorizontallyToData(data);
+      });
+    }
+  }
+
+  Future<void> zoomToTimeRange({
+    @required int startMicros,
+    @required int durationMicros,
+    double targetWidth,
+    bool jump = false,
+  }) async {
+    targetWidth ??= widget.containerWidth * 0.8;
+    final startingWidth = durationMicros * startingPxPerMicro;
+    final zoom = targetWidth / startingWidth;
+    final mouseXForZoom = (startMicros - startTimeOffset + durationMicros / 2) *
+            startingPxPerMicro +
+        widget.startInset;
+    await zoomTo(zoom, forceMouseX: mouseXForZoom, jump: jump);
   }
 
   bool isDataVerticallyInView(V data);
