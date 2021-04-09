@@ -130,7 +130,7 @@ class _TimelineFlameChartContainerState
         controller: controller,
         searchFieldKey: timelineSearchFieldKey,
         searchFieldEnabled: searchFieldEnabled,
-        shouldRequestFocus: searchFieldEnabled,
+        shouldRequestFocus: false,
         supportsNavigation: true,
       ),
     );

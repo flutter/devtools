@@ -166,6 +166,7 @@ void main() {
       selectionNotifier: ValueNotifier<CpuStackFrame>(null),
       searchMatchesNotifier: null,
       activeSearchMatchNotifier: null,
+      onTapUp: () {},
       backgroundColor: Colors.transparent,
       zoom: FlameChart.minZoomLevel,
     );
@@ -178,6 +179,7 @@ void main() {
       selectionNotifier: ValueNotifier<CpuStackFrame>(null),
       searchMatchesNotifier: null,
       activeSearchMatchNotifier: null,
+      onTapUp: () {},
       backgroundColor: Colors.transparent,
       zoom: 2.0,
     );
@@ -229,6 +231,7 @@ void main() {
         searchMatchesNotifier: null,
         activeSearchMatchNotifier: null,
         backgroundColor: Colors.transparent,
+        onTapUp: () {},
         zoom: FlameChart.minZoomLevel,
       );
 
