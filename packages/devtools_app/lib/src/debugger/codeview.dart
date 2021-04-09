@@ -350,33 +350,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                 ),
               ),
               const SizedBox(width: denseSpacing),
-              PopupMenuButton<_ScriptPopupMenuOptions>(
-                onSelected: (item) {
-                  if (item == _ScriptPopupMenuOptions.Copy) {
-                    Clipboard.setData(ClipboardData(text: scriptRef?.uri));
-                  }
-                },
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    value: _ScriptPopupMenuOptions.Copy,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Text('Copy filename',
-                            style: Theme.of(context).regularTextStyle),
-                        const Icon(
-                          Icons.copy,
-                          size: actionsIconSize,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                child: const Icon(
-                  Icons.more_vert,
-                  size: actionsIconSize,
-                ),
-              ),
+              ScriptPopupMenu(scriptRef),
               PopupMenuButton<ScriptRef>(
                 itemBuilder: _buildScriptMenuFromHistory,
                 tooltip: 'Select recent script',
@@ -755,3 +729,39 @@ class _LineItemState extends State<LineItem> {
 }
 
 enum _ScriptPopupMenuOptions { Copy }
+
+class ScriptPopupMenu extends StatelessWidget {
+  const ScriptPopupMenu(this._scriptRef);
+
+  final ScriptRef _scriptRef;
+
+  @override
+  Widget build(BuildContext context) =>
+      PopupMenuButton<_ScriptPopupMenuOptions>(
+        onSelected: (item) {
+          if (item == _ScriptPopupMenuOptions.Copy) {
+            Clipboard.setData(ClipboardData(text: _scriptRef?.uri));
+          }
+        },
+        itemBuilder: (_) => [
+          PopupMenuItem(
+            value: _ScriptPopupMenuOptions.Copy,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Text('Copy filename',
+                    style: Theme.of(context).regularTextStyle),
+                const Icon(
+                  Icons.copy,
+                  size: actionsIconSize,
+                ),
+              ],
+            ),
+          ),
+        ],
+        child: const Icon(
+          Icons.more_vert,
+          size: actionsIconSize,
+        ),
+      );
+}
