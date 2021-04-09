@@ -590,12 +590,14 @@ class DevToolsTooltip extends StatelessWidget {
   const DevToolsTooltip({
     @required this.tooltip,
     @required this.child,
-    this.preferBelow = true,
+    this.preferBelow = false,
+    this.padding,
   });
 
   final String tooltip;
   final Widget child;
   final bool preferBelow;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -603,6 +605,7 @@ class DevToolsTooltip extends StatelessWidget {
       message: tooltip,
       waitDuration: tooltipWait,
       preferBelow: preferBelow,
+      padding: padding,
       child: child,
     );
   }
