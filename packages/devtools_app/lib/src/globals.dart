@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'core/message_bus.dart';
+import 'extension_points/extensions_base.dart';
 import 'framework_controller.dart';
 import 'preferences.dart';
 import 'service_manager.dart';
@@ -30,6 +31,9 @@ Storage get storage => globals[Storage];
 SurveyService get surveyService => globals[SurveyService];
 
 PreferencesController get preferences => globals[PreferencesController];
+
+DevToolsExtensionPoints get devToolsExtensionPoints =>
+    globals[DevToolsExtensionPoints];
 
 void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;
