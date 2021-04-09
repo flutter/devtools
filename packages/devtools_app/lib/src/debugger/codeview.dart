@@ -351,22 +351,14 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
               ),
               const SizedBox(width: denseSpacing),
               ScriptPopupMenu(scriptRef),
-              PopupMenuButton<ScriptRef>(
+              const SizedBox(width: denseSpacing),
+              ScriptHistoryPopupMenu(
                 itemBuilder: _buildScriptMenuFromHistory,
-                tooltip: 'Select recent script',
-                enabled: scriptsHistory.hasScripts,
                 onSelected: (scriptRef) {
                   widget.controller
                       .showScriptLocation(ScriptLocation(scriptRef));
                 },
-                offset: const Offset(
-                  actionsIconSize + denseSpacing,
-                  buttonMinWidth + denseSpacing,
-                ),
-                child: const Icon(
-                  Icons.history,
-                  size: actionsIconSize,
-                ),
+                enabled: scriptsHistory.hasScripts,
               ),
               const SizedBox(width: denseSpacing),
             ],
@@ -736,32 +728,64 @@ class ScriptPopupMenu extends StatelessWidget {
   final ScriptRef _scriptRef;
 
   @override
-  Widget build(BuildContext context) =>
-      PopupMenuButton<_ScriptPopupMenuOptions>(
-        onSelected: (item) {
-          if (item == _ScriptPopupMenuOptions.Copy) {
-            Clipboard.setData(ClipboardData(text: _scriptRef?.uri));
-          }
-        },
-        itemBuilder: (_) => [
-          PopupMenuItem(
-            value: _ScriptPopupMenuOptions.Copy,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Text('Copy filename',
-                    style: Theme.of(context).regularTextStyle),
-                const Icon(
-                  Icons.copy,
-                  size: actionsIconSize,
-                ),
-              ],
-            ),
+  Widget build(BuildContext context) {
+    return PopupMenuButton<_ScriptPopupMenuOptions>(
+      onSelected: (item) {
+        if (item == _ScriptPopupMenuOptions.Copy) {
+          Clipboard.setData(ClipboardData(text: _scriptRef?.uri));
+        }
+      },
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: _ScriptPopupMenuOptions.Copy,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text('Copy filename', style: Theme.of(context).regularTextStyle),
+              const Icon(
+                Icons.content_copy,
+                size: actionsIconSize,
+              ),
+            ],
           ),
-        ],
-        child: const Icon(
-          Icons.more_vert,
-          size: actionsIconSize,
         ),
-      );
+      ],
+      child: const Icon(
+        Icons.more_vert,
+        size: actionsIconSize,
+      ),
+    );
+  }
+}
+
+class ScriptHistoryPopupMenu extends StatelessWidget {
+  const ScriptHistoryPopupMenu({
+    @required this.itemBuilder,
+    @required this.onSelected,
+    @required this.enabled,
+  });
+
+  final PopupMenuItemBuilder<ScriptRef> itemBuilder;
+
+  final void Function(ScriptRef) onSelected;
+
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<ScriptRef>(
+      itemBuilder: itemBuilder,
+      tooltip: 'Select recent script',
+      enabled: enabled,
+      onSelected: onSelected,
+      offset: const Offset(
+        actionsIconSize + denseSpacing,
+        buttonMinWidth + denseSpacing,
+      ),
+      child: const Icon(
+        Icons.history,
+        size: actionsIconSize,
+      ),
+    );
+  }
 }
