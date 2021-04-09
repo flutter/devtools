@@ -752,7 +752,7 @@ class ScriptPopupMenu extends StatelessWidget {
                 Text('Copy filename',
                     style: Theme.of(context).regularTextStyle),
                 const Icon(
-                  Icons.copy,
+                  Icons.file_copy,
                   size: actionsIconSize,
                 ),
               ],
