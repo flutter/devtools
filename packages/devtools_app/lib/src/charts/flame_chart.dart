@@ -117,6 +117,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   double previousZoom = FlameChart.minZoomLevel;
 
+  double horizontalScrollOffset = FlameChart.minScrollOffset;
+
+  double verticalScrollOffset = FlameChart.minScrollOffset;
+
   // Scrolling via WASD controls will pan the left/right 25% of the view.
   double get keyboardScrollUnit => widget.containerWidth * 0.25;
 
@@ -189,6 +193,17 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
     horizontalControllerGroup = LinkedScrollControllerGroup();
     verticalControllerGroup = LinkedScrollControllerGroup();
+
+    addAutoDisposeListener(horizontalControllerGroup.offsetNotifier, () {
+      setState(() {
+        horizontalScrollOffset = horizontalControllerGroup.offset;
+      });
+    });
+    addAutoDisposeListener(verticalControllerGroup.offsetNotifier, () {
+      setState(() {
+        verticalScrollOffset = verticalControllerGroup.offset;
+      });
+    });
 
     _flameChartScrollController = verticalControllerGroup.addAndGet();
 
@@ -1204,32 +1219,27 @@ abstract class FlameChartPainter extends CustomPainter {
   FlameChartPainter({
     @required this.zoom,
     @required this.constraints,
-    @required this.verticalController,
-    @required this.horizontalController,
+    @required this.verticalScrollOffset,
+    @required this.horizontalScrollOffset,
     @required this.chartStartInset,
     @required this.colorScheme,
-  })  : assert(colorScheme != null),
-        super(
-            repaint: Listenable.merge([
-          verticalController.offsetNotifier,
-          horizontalController.offsetNotifier,
-        ]));
+  }) : assert(colorScheme != null);
 
   final double zoom;
 
   final BoxConstraints constraints;
 
-  final LinkedScrollControllerGroup verticalController;
+  final double verticalScrollOffset;
 
-  final LinkedScrollControllerGroup horizontalController;
+  final double horizontalScrollOffset;
 
   final double chartStartInset;
 
   /// The absolute coordinates of the flame chart's visible section.
   Rect get visibleRect {
     return Rect.fromLTWH(
-      horizontalController.offset,
-      verticalController.offset,
+      horizontalScrollOffset,
+      verticalScrollOffset,
       constraints.maxWidth,
       constraints.maxHeight,
     );
@@ -1240,8 +1250,8 @@ abstract class FlameChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     if (oldDelegate is FlameChartPainter) {
-      return verticalController != oldDelegate.verticalController ||
-          horizontalController != oldDelegate.horizontalController ||
+      return verticalScrollOffset != oldDelegate.verticalScrollOffset ||
+          horizontalScrollOffset != oldDelegate.horizontalScrollOffset ||
           constraints != oldDelegate.constraints ||
           zoom != oldDelegate.zoom ||
           chartStartInset != oldDelegate.chartStartInset ||
@@ -1255,8 +1265,8 @@ class TimelineGridPainter extends FlameChartPainter {
   TimelineGridPainter({
     @required double zoom,
     @required BoxConstraints constraints,
-    @required LinkedScrollControllerGroup verticalController,
-    @required LinkedScrollControllerGroup horizontalController,
+    @required double verticalScrollOffset,
+    @required double horizontalScrollOffset,
     @required double chartStartInset,
     @required this.chartEndInset,
     @required this.flameChartWidth,
@@ -1265,8 +1275,8 @@ class TimelineGridPainter extends FlameChartPainter {
   }) : super(
           zoom: zoom,
           constraints: constraints,
-          verticalController: verticalController,
-          horizontalController: horizontalController,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
           chartStartInset: chartStartInset,
           colorScheme: colorScheme,
         );
@@ -1374,8 +1384,6 @@ class TimelineGridPainter extends FlameChartPainter {
   }
 
   int _startingTimestamp(double intervalWidth, int microsPerInterval) {
-    final horizontalScrollOffset = horizontalController.offset;
-
     final startingIntervalIndex = horizontalScrollOffset < chartStartInset
         ? 0
         : (horizontalScrollOffset - chartStartInset) ~/ intervalWidth + 1;
@@ -1390,7 +1398,7 @@ class TimelineGridPainter extends FlameChartPainter {
     return zoom == other.zoom &&
         constraints == other.constraints &&
         flameChartWidth == other.flameChartWidth &&
-        horizontalController == other.horizontalController &&
+        horizontalScrollOffset == other.horizontalScrollOffset &&
         duration == other.duration &&
         colorScheme == other.colorScheme;
   }
@@ -1400,7 +1408,7 @@ class TimelineGridPainter extends FlameChartPainter {
         zoom,
         constraints,
         flameChartWidth,
-        horizontalController,
+        horizontalScrollOffset,
         duration,
         colorScheme,
       );

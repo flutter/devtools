@@ -517,8 +517,8 @@ class TimelineFlameChartState
         painter: AsyncGuidelinePainter(
           zoom: zoom,
           constraints: constraints,
-          verticalController: verticalControllerGroup,
-          horizontalController: horizontalControllerGroup,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
           verticalGuidelines: verticalGuidelines,
           horizontalGuidelines: horizontalGuidelines,
           chartStartInset: widget.startInset,
@@ -529,8 +529,8 @@ class TimelineFlameChartState
         painter: TimelineGridPainter(
           zoom: zoom,
           constraints: constraints,
-          verticalController: verticalControllerGroup,
-          horizontalController: horizontalControllerGroup,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
           chartStartInset: widget.startInset,
           chartEndInset: widget.endInset,
           flameChartWidth: widthWithZoom,
@@ -543,8 +543,8 @@ class TimelineFlameChartState
           _selectedFrame,
           zoom: zoom,
           constraints: constraints,
-          verticalController: verticalControllerGroup,
-          horizontalController: horizontalControllerGroup,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
           chartStartInset: widget.startInset,
           startTimeOffsetMicros: startTimeOffset,
           startingPxPerMicro: startingPxPerMicro,
@@ -870,8 +870,8 @@ class AsyncGuidelinePainter extends FlameChartPainter {
   AsyncGuidelinePainter({
     @required double zoom,
     @required BoxConstraints constraints,
-    @required LinkedScrollControllerGroup verticalController,
-    @required LinkedScrollControllerGroup horizontalController,
+    @required double verticalScrollOffset,
+    @required double horizontalScrollOffset,
     @required double chartStartInset,
     @required this.verticalGuidelines,
     @required this.horizontalGuidelines,
@@ -879,8 +879,8 @@ class AsyncGuidelinePainter extends FlameChartPainter {
   }) : super(
           zoom: zoom,
           constraints: constraints,
-          verticalController: verticalController,
-          horizontalController: horizontalController,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
           chartStartInset: chartStartInset,
           colorScheme: colorScheme,
         );
@@ -935,9 +935,6 @@ class AsyncGuidelinePainter extends FlameChartPainter {
     List<LineSegment> guidelines,
     int firstLineIndex,
   ) {
-    final horizontalScrollOffset = horizontalController.offset;
-    final verticalScrollOffset = verticalController.offset;
-
     final paint = Paint()..color = colorScheme.treeGuidelineColor;
     var lastOpacity = 1.0;
     for (int i = firstLineIndex; i < guidelines.length; i++) {
@@ -1008,8 +1005,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
     this.selectedFrame, {
     @required double zoom,
     @required BoxConstraints constraints,
-    @required LinkedScrollControllerGroup verticalController,
-    @required LinkedScrollControllerGroup horizontalController,
+    @required double verticalScrollOffset,
+    @required double horizontalScrollOffset,
     @required double chartStartInset,
     @required this.startTimeOffsetMicros,
     @required this.startingPxPerMicro,
@@ -1018,8 +1015,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
   }) : super(
           zoom: zoom,
           constraints: constraints,
-          verticalController: verticalController,
-          horizontalController: horizontalController,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
           chartStartInset: chartStartInset,
           colorScheme: colorScheme,
         );
@@ -1161,8 +1158,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
         selectedFrame == other.selectedFrame &&
         zoom == other.zoom &&
         constraints == other.constraints &&
-        verticalController == other.verticalController &&
-        horizontalController == other.horizontalController &&
+        verticalScrollOffset == other.verticalScrollOffset &&
+        horizontalScrollOffset == other.horizontalScrollOffset &&
         colorScheme == other.colorScheme;
   }
 
@@ -1171,8 +1168,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
         selectedFrame,
         zoom,
         constraints,
-        verticalController,
-        horizontalController,
+        verticalScrollOffset,
+        horizontalScrollOffset,
         colorScheme,
       );
 }
