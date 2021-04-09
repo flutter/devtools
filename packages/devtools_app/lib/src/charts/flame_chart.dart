@@ -250,8 +250,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     // TODO(kenz): handle tooltips hover here instead of wrapping each row in a
     // MouseRegion widget.
     return MouseRegion(
-      onEnter: _handleMouseEnter,
-      onExit: _handleMouseExit,
       onHover: _handleMouseHover,
       child: RawKeyboardListener(
         autofocus: true,
@@ -318,6 +316,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
             selectionNotifier: widget.selectionNotifier,
             searchMatchesNotifier: widget.searchMatchesNotifier,
             activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+            onTapUp: focusNode.requestFocus,
             backgroundColor: rowBackgroundColor,
             zoom: zoomController.value,
           );
@@ -340,14 +339,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     for (int i = currentLength; i < newRowLength; i++) {
       rows.add(FlameChartRow<V>(i));
     }
-  }
-
-  void _handleMouseEnter(PointerEnterEvent event) {
-    focusNode.requestFocus();
-  }
-
-  void _handleMouseExit(PointerExitEvent event) {
-    focusNode.unfocus();
   }
 
   void _handleMouseHover(PointerHoverEvent event) {
@@ -578,6 +569,7 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
     @required this.selectionNotifier,
     @required this.searchMatchesNotifier,
     @required this.activeSearchMatchNotifier,
+    @required this.onTapUp,
     @required this.backgroundColor,
     @required this.zoom,
   });
@@ -595,6 +587,8 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
   final ValueListenable<List<V>> searchMatchesNotifier;
 
   final ValueListenable<V> activeSearchMatchNotifier;
+
+  final VoidCallback onTapUp;
 
   final Color backgroundColor;
 
@@ -801,6 +795,7 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     if (nodeToSelect != null) {
       nodeToSelect.onSelected(nodeToSelect.data);
     }
+    widget.onTapUp();
   }
 
   @visibleForTesting
