@@ -19,12 +19,14 @@ import 'common_widgets.dart';
 import 'config_specific/drag_and_drop/drag_and_drop.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'config_specific/import_export/import_export.dart';
+import 'debugger/console.dart';
 import 'debugger/debugger_screen.dart';
 import 'framework_controller.dart';
 import 'globals.dart';
 import 'notifications.dart';
 import 'routing.dart';
 import 'screen.dart';
+import 'split.dart';
 import 'status_line.dart';
 import 'theme.dart';
 import 'title.dart';
@@ -74,7 +76,7 @@ class DevToolsScaffold extends StatefulWidget {
   // from flame_chart.dart.
   /// The border around the content in the DevTools UI.
   static const EdgeInsets appPadding =
-      EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
+      EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0);
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
@@ -306,6 +308,22 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
     ];
 
+    final content = Stack(
+      children: [
+        TabBarView(
+          physics: defaultTabBarViewPhysics,
+          controller: _tabController,
+          children: tabBodies,
+        ),
+        if (serviceManager.connectedAppInitialized &&
+            !offlineMode &&
+            _currentScreen.showFloatingDebuggerControls)
+          Container(
+            alignment: Alignment.topCenter,
+            child: FloatingDebuggerControls(),
+          ),
+      ],
+    );
     final theme = Theme.of(context);
     return Provider<BannerMessagesController>(
       create: (_) => BannerMessagesController(),
@@ -323,22 +341,18 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               color: theme.primaryColor,
               child: Scaffold(
                 appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
-                body: Stack(
-                  children: [
-                    TabBarView(
-                      physics: defaultTabBarViewPhysics,
-                      controller: _tabController,
-                      children: tabBodies,
-                    ),
-                    if (serviceManager.connectedAppInitialized &&
+                body: (serviceManager.connectedAppInitialized &&
                         !offlineMode &&
-                        _currentScreen.screenId != DebuggerScreen.id)
-                      Container(
-                        alignment: Alignment.topCenter,
-                        child: FloatingDebuggerControls(),
-                      ),
-                  ],
-                ),
+                        _currentScreen.showConsole(widget.embed))
+                    ? Split(
+                        axis: Axis.vertical,
+                        children: [
+                          content,
+                          const DebuggerConsole(),
+                        ],
+                        initialFractions: const [0.8, 0.2],
+                      )
+                    : content,
                 bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
               ),
             ),
@@ -474,7 +488,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 }
 
 class SimpleScreen extends Screen {
-  const SimpleScreen(this.child) : super(id);
+  const SimpleScreen(this.child)
+      : super(
+          id,
+          showFloatingDebuggerControls: false,
+        );
 
   static const id = 'simple';
 

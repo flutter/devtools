@@ -91,7 +91,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Service used to retrieve more detailed information about the value of
   /// the property and its children and properties.
-  final FutureOr<ObjectGroup> inspectorService;
+  final ObjectGroup inspectorService;
 
   /// JSON describing the diagnostic node.
   final Map<String, Object> json;
@@ -465,7 +465,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       }
       if (isEnumProperty()) {
         // Populate all the enum property values.
-        return (await inspectorService)?.getEnumPropertyValues(valueRef);
+        return inspectorService?.getEnumPropertyValues(valueRef);
       }
 
       List<String> propertyNames;
@@ -482,8 +482,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
           _valueProperties = Future.value();
           return _valueProperties;
       }
-      _valueProperties = (await inspectorService)
-          ?.getDartObjectProperties(valueRef, propertyNames);
+      _valueProperties =
+          inspectorService?.getDartObjectProperties(valueRef, propertyNames);
     }
     return _valueProperties;
   }
@@ -552,7 +552,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() async {
-    return (await inspectorService)?.getChildren(
+    return inspectorService.getChildren(
       dartDiagnosticRef,
       isSummaryTree,
       this,
@@ -672,8 +672,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<void> setSelectionInspector(bool uiAlreadyUpdated) async {
-    await (await inspectorService)
-        ?.setSelectionInspector(valueRef, uiAlreadyUpdated);
+    await inspectorService?.setSelectionInspector(valueRef, uiAlreadyUpdated);
   }
 }
 

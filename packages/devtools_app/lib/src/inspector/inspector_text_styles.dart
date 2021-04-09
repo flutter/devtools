@@ -8,7 +8,7 @@ import '../theme.dart';
 
 TextStyle unimportant(ColorScheme colorScheme) => TextStyle(
     color: colorScheme.isLight ? Colors.grey.shade500 : Colors.grey.shade600);
-const regular = TextStyle();
+const TextStyle regular = TextStyle();
 TextStyle warning(ColorScheme colorScheme) => TextStyle(
     color:
         colorScheme.isLight ? Colors.orange.shade900 : Colors.orange.shade400);
@@ -20,14 +20,8 @@ TextStyle link(ColorScheme colorScheme) => TextStyle(
       decoration: TextDecoration.underline,
     );
 
-TextStyle regularBold(ColorScheme colorScheme) => TextStyle(
-      color: colorScheme.defaultForeground,
-      fontWeight: FontWeight.w700,
-    );
-TextStyle regularItalic(ColorScheme colorScheme) => TextStyle(
-      color: colorScheme.defaultForeground,
-      fontStyle: FontStyle.italic,
-    );
+const TextStyle regularBold = TextStyle(fontWeight: FontWeight.w700);
+const TextStyle regularItalic = TextStyle(fontStyle: FontStyle.italic);
 TextStyle unimportantItalic(ColorScheme colorScheme) =>
     unimportant(colorScheme).merge(const TextStyle(
       fontStyle: FontStyle.italic,
