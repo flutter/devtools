@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
@@ -349,8 +350,10 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                 ),
               ),
               const SizedBox(width: denseSpacing),
+              ScriptPopupMenu(scriptRef),
               PopupMenuButton<ScriptRef>(
                 itemBuilder: _buildScriptMenuFromHistory,
+                tooltip: 'Select recent script',
                 enabled: scriptsHistory.hasScripts,
                 onSelected: (scriptRef) {
                   widget.controller
@@ -361,7 +364,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                   buttonMinWidth + denseSpacing,
                 ),
                 child: const Icon(
-                  Icons.keyboard_arrow_down,
+                  Icons.history,
                   size: actionsIconSize,
                 ),
               ),
@@ -721,6 +724,44 @@ class _LineItemState extends State<LineItem> {
           widget.lineContents,
           scrollPhysics: const NeverScrollableScrollPhysics(),
           maxLines: 1,
+        ),
+      );
+}
+
+enum _ScriptPopupMenuOptions { Copy }
+
+class ScriptPopupMenu extends StatelessWidget {
+  const ScriptPopupMenu(this._scriptRef);
+
+  final ScriptRef _scriptRef;
+
+  @override
+  Widget build(BuildContext context) =>
+      PopupMenuButton<_ScriptPopupMenuOptions>(
+        onSelected: (item) {
+          if (item == _ScriptPopupMenuOptions.Copy) {
+            Clipboard.setData(ClipboardData(text: _scriptRef?.uri));
+          }
+        },
+        itemBuilder: (_) => [
+          PopupMenuItem(
+            value: _ScriptPopupMenuOptions.Copy,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Text('Copy filename',
+                    style: Theme.of(context).regularTextStyle),
+                const Icon(
+                  Icons.copy,
+                  size: actionsIconSize,
+                ),
+              ],
+            ),
+          ),
+        ],
+        child: const Icon(
+          Icons.more_vert,
+          size: actionsIconSize,
         ),
       );
 }
