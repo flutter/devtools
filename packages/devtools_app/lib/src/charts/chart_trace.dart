@@ -106,8 +106,8 @@ class Trace {
 
   /// All traces, stacked == true, are aligned to previous stacked trace.
   /// E.g., Trace 1, 2, and 3 are all stacked,
-  /// 
-  /// |         /'''''''''\      /     <--- Trace 3 
+  ///
+  /// |         /'''''''''\      /     <--- Trace 3
   /// |        /           \    /
   /// |-------/             \  /
   /// | /\      _______      \/
