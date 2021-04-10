@@ -655,7 +655,7 @@ class MemoryBodyState extends State<MemoryBody>
 
   // TODO(terry): Compute below heights dynamically.
   static const hoverHeightMinimum = 40.0;
-  static const hoverItemHeight = 18.0;
+  static const hoverItemHeight = 19.0;
   // One extension event to display (3 lines).
   static const hoverOneEventsHeight = 82.0;
   // Many extension events to display.
@@ -750,6 +750,8 @@ class MemoryBodyState extends State<MemoryBody>
   Widget hoverRow({
     String name,
     String image,
+    Color colorPatch,
+    bool dashed = false,
     bool bold = true,
     bool hasNumeric = false,
     bool hasUnit = false,
@@ -761,11 +763,13 @@ class MemoryBodyState extends State<MemoryBody>
     final hoverSmallEntry =
         Theme.of(context).colorScheme.hoverSmallValueTextStyle;
 
-    List<Widget> hoverPart(
-      String name,
-      String image, [
+    List<Widget> hoverPartImageLine(
+      String name, {
+      String image,
+      Color colorPatch,
+      bool dashed = false,
       double leftEdge = 5.0,
-    ]) {
+    }) {
       String displayName = name;
       // Empty string overflows, default value space.
       String displayValue = ' ';
@@ -782,12 +786,32 @@ class MemoryBodyState extends State<MemoryBody>
         displayValue = name.substring(startOfNumber + 1);
       }
 
-      return [
-        image == null
+      Widget traceColor;
+      if (colorPatch != null) {
+        if (dashed) {
+          traceColor = Padding(
+            child: CustomPaint(
+              painter: DashedLine(15, colorPatch, 2, 4, 3),
+              foregroundPainter: DashedLine(15, colorPatch, 2, 4, 3),
+            ),
+            padding: const EdgeInsets.fromLTRB(2, 5, 20, 1),
+          );
+        } else {
+          traceColor = Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 1.0),
+            child: Container(height: 6, width: 20, color: colorPatch),
+          );
+        }
+      } else {
+        traceColor = image == null
             ? const SizedBox()
             : scaleImage
-            ? Image(image: AssetImage(image), width: 20, height: 10)
-            : Image(image: AssetImage(image)),
+                ? Image(image: AssetImage(image), width: 20, height: 10)
+                : Image(image: AssetImage(image));
+      }
+
+      return [
+        traceColor,
         const PaddedDivider(
           padding: EdgeInsets.only(left: denseRowSpacing),
         ),
@@ -797,7 +821,14 @@ class MemoryBodyState extends State<MemoryBody>
     }
 
     final rowChildren = <Widget>[];
-    rowChildren.addAll(hoverPart(name, image, leftPadding));
+
+    rowChildren.addAll(hoverPartImageLine(
+      name,
+      image: image,
+      colorPatch: colorPatch,
+      dashed: dashed,
+      leftEdge: leftPadding,
+    ));
     return Container(
         padding: const EdgeInsets.fromLTRB(5, 0, 0, 2),
         child: Row(
@@ -826,7 +857,7 @@ class MemoryBodyState extends State<MemoryBody>
     for (var entry in eventsDisplayed.entries) {
       if (entry.key.endsWith(eventsDisplayName)) {
         widgets.add(Container(
-          height: 120,
+          height: hoverEventsHeight,
           child: ListView(
             shrinkWrap: true,
             primary: false,
@@ -843,7 +874,8 @@ class MemoryBodyState extends State<MemoryBody>
         widgets.add(hoverRow(name: entry.key, image: entry.value));
 
         /// Pull out the event name, and custom values.
-        final output = displayEvent(null, chartsValues.extensionEvents.first);
+        final output =
+            displayEvent(null, chartsValues.extensionEvents.first).trim();
         widgets.add(hoverRow(name: output, bold: false, leftPadding: 0.0));
       }
     }
@@ -1034,38 +1066,69 @@ class MemoryBodyState extends State<MemoryBody>
   List<Widget> displayVmDataInHover(ChartsValues chartsValues) {
     final results = <Widget>[];
 
-    final vmDataDisplayed = <String, String>{};
+    final vmDataDisplayed = <String, Map<String, Object>>{};
 
     final data = chartsValues.vmData;
 
+    final traces = vmChartController.traces;
+
     final rssValueDisplay = formatNumeric(data[rssJsonName]);
-    vmDataDisplayed['${MemoryScreen.rssDisplay} $rssValueDisplay'] = rssLegend;
+    vmDataDisplayed['${MemoryScreen.rssDisplay} $rssValueDisplay'] =
+        traceRender(
+      color: traces[vm.TraceName.rSS.index].characteristics.color,
+      dashed: true,
+    );
 
     final capacityValueDisplay = formatNumeric(data[capacityJsonName]);
     vmDataDisplayed['${MemoryScreen.allocatedDisplay} $capacityValueDisplay'] =
-        allocatedLegend;
+        traceRender(
+      color: traces[vm.TraceName.capacity.index].characteristics.color,
+      dashed: true,
+    );
 
     final usedValueDisplay = formatNumeric(data[usedJsonName]);
     vmDataDisplayed['${MemoryScreen.usedDisplay} $usedValueDisplay'] =
-        usedLegend;
+        traceRender(
+      color: traces[vm.TraceName.used.index].characteristics.color,
+    );
 
     final externalValueDisplay = formatNumeric(data[externalJsonName]);
     vmDataDisplayed['${MemoryScreen.externalDisplay} $externalValueDisplay'] =
-        externalLegend;
+        traceRender(
+      color: traces[vm.TraceName.external.index].characteristics.color,
+    );
 
     final layerValueDisplay = formatNumeric(data[rasterLayerJsonName]);
     vmDataDisplayed['${MemoryScreen.layerDisplay} $layerValueDisplay'] =
-        rasterLayerLegend;
+        traceRender(
+      color: traces[vm.TraceName.rasterLayer.index].characteristics.color,
+      dashed: true,
+    );
 
     final pictureValueDisplay = formatNumeric(data[rasterPictureJsonName]);
     vmDataDisplayed['${MemoryScreen.pictureDisplay} $pictureValueDisplay'] =
-        rasterPictureLegend;
+        traceRender(
+      color: traces[vm.TraceName.rasterPicture.index].characteristics.color,
+      dashed: true,
+    );
 
     for (var entry in vmDataDisplayed.entries) {
+      final image = entry.value.keys.contains(renderImage)
+          ? entry.value[renderImage] as String
+          : null;
+      final color = entry.value.keys.contains(renderLine)
+          ? entry.value[renderLine] as Color
+          : null;
+      final dashedLine = entry.value.keys.contains(renderDashed)
+          ? entry.value[renderDashed]
+          : false;
+
       results.add(
         hoverRow(
           name: entry.key,
-          image: entry.value,
+          colorPatch: color,
+          dashed: dashedLine,
+          image: image,
           hasNumeric: true,
           hasUnit: controller.unitDisplayed.value,
           scaleImage: true,
@@ -1074,6 +1137,24 @@ class MemoryBodyState extends State<MemoryBody>
     }
 
     return results;
+  }
+
+  static const renderLine = 'color';
+  static const renderDashed = 'dashed';
+  static const renderImage = 'image';
+
+  Map<String, Object> traceRender(
+      {String image, Color color, bool dashed = false}) {
+    final result = <String, Object>{};
+
+    if (image != null) {
+      result[renderImage] = image;
+    } else {
+      result[renderLine] = color;
+      result[renderDashed] = dashed;
+    }
+
+    return result;
   }
 
   List<Widget> displayAndroidDataInHover(ChartsValues chartsValues) {
@@ -1088,43 +1169,82 @@ class MemoryBodyState extends State<MemoryBody>
     final results = <Widget>[];
 
     if (controller.isAndroidChartVisible) {
-      final androidDataDisplayed = <String, String>{};
+      final androidDataDisplayed = <String, Map<String, Object>>{};
 
       final data = chartsValues.androidData;
 
+      final traces = androidChartController.traces;
+
       final totalValueDisplay = formatNumeric(data[adbTotalJsonName]);
-      androidDataDisplayed['$totalDisplay $totalValueDisplay'] =
-          androidTotalLegend;
+      androidDataDisplayed['$totalDisplay $totalValueDisplay'] = traceRender(
+        color: traces[android.TraceName.total.index].characteristics.color,
+        dashed: true,
+      );
 
+      // Other trace
       final otherValueDisplay = formatNumeric(data[adbOtherJsonName]);
-      androidDataDisplayed['$otherDisplay $otherValueDisplay'] =
-          androidOtherLegend;
+      androidDataDisplayed['$otherDisplay $otherValueDisplay'] = traceRender(
+        color: traces[android.TraceName.other.index].characteristics.color,
+      );
 
-      final codeValueDisplay = formatNumeric(data[adbCodeJsonName]);
-      androidDataDisplayed['$codeDisplay $codeValueDisplay'] =
-          androidCodeLegend;
-
+      // Native heap trace
       final nativeValueDisplay = formatNumeric(data[adbNativeHeapJsonName]);
-      androidDataDisplayed['$nativeDisplay $nativeValueDisplay'] =
-          androidNativeLegend;
+      androidDataDisplayed['$nativeDisplay $nativeValueDisplay'] = traceRender(
+        color: traces[android.TraceName.nativeHeap.index].characteristics.color,
+      );
 
-      final javaValueDisplay = formatNumeric(data[adbJavaHeapJsonName]);
-      androidDataDisplayed['$javaDisplay $javaValueDisplay'] =
-          androidJavaLegend;
-
-      final stackValueDisplay = formatNumeric(data[adbStackJsonName]);
-      androidDataDisplayed['$stackDisplay $stackValueDisplay'] =
-          androidStackLegend;
-
+      // Graphics trace
       final graphicsValueDisplay = formatNumeric(data[adbGraphicsJsonName]);
       androidDataDisplayed['$graphicsDisplay $graphicsValueDisplay'] =
-          androidGraphicsLegend;
+          traceRender(
+        color: traces[android.TraceName.graphics.index].characteristics.color,
+      );
+
+      // Code trace
+      final codeValueDisplay = formatNumeric(data[adbCodeJsonName]);
+      androidDataDisplayed['$codeDisplay $codeValueDisplay'] = traceRender(
+        color: traces[android.TraceName.code.index].characteristics.color,
+      );
+
+      // Java heap trace
+      final javaValueDisplay = formatNumeric(data[adbJavaHeapJsonName]);
+      androidDataDisplayed['$javaDisplay $javaValueDisplay'] = traceRender(
+        color: traces[android.TraceName.javaHeap.index].characteristics.color,
+      );
+
+      // Stack trace
+      final stackValueDisplay = formatNumeric(data[adbStackJsonName]);
+      androidDataDisplayed['$stackDisplay $stackValueDisplay'] = traceRender(
+        color: traces[android.TraceName.stack.index].characteristics.color,
+      );
+
+      const width =
+          MemoryBodyState.hoverWidth - 40 - DashedLine.defaultDashWidth;
+      final dashedColor = Colors.grey.shade600;
+      results.add(
+        Padding(
+          child: CustomPaint(painter: DashedLine(width, dashedColor)),
+          padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
+        ),
+      );
 
       for (var entry in androidDataDisplayed.entries) {
+        final image = entry.value.keys.contains(renderImage)
+            ? entry.value[renderImage] as String
+            : null;
+        final color = entry.value.keys.contains(renderLine)
+            ? entry.value[renderLine] as Color
+            : null;
+        final dashedLine = entry.value.keys.contains(renderDashed)
+            ? entry.value[renderDashed]
+            : false;
+
         results.add(
           hoverRow(
             name: entry.key,
-            image: entry.value,
+            colorPatch: color,
+            dashed: dashedLine,
+            image: image,
             hasNumeric: true,
             hasUnit: controller.unitDisplayed.value,
             scaleImage: true,
@@ -1359,6 +1479,48 @@ class MemoryBodyState extends State<MemoryBody>
       log('Unable to GC ${e.toString()}', LogLevel.error);
     }
   }
+}
+
+/// Draw a dashed line on the canvas.
+class DashedLine extends CustomPainter {
+  DashedLine(
+    this._totalWidth, [
+    Color color,
+    this._dashHeight = defaultDashHeight,
+    this._dashWidth = defaultDashWidth,
+    this._dashSpace = defaultDashSpace,
+  ]) {
+    _color = color == null ? (Colors.grey.shade500) : color;
+  }
+
+  static const defaultDashHeight = 1.0;
+  static const defaultDashWidth = 5.0;
+  static const defaultDashSpace = 5.0;
+
+  final double _dashHeight;
+  final double _dashWidth;
+  final double _dashSpace;
+
+  double _totalWidth;
+  Color _color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    double startX = 0;
+    final paint = Paint()
+      ..color = _color
+      ..strokeWidth = _dashHeight;
+
+    while (_totalWidth >= 0) {
+      canvas.drawLine(Offset(startX, 0), Offset(startX + _dashWidth, 0), paint);
+      final space = _dashSpace + _dashWidth;
+      startX += space;
+      _totalWidth -= space;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 /// Event types handled for hover card.
