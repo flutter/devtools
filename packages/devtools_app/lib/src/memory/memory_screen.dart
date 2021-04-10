@@ -806,8 +806,8 @@ class MemoryBodyState extends State<MemoryBody>
         traceColor = image == null
             ? const SizedBox()
             : scaleImage
-                ? Image(image: AssetImage(image), width: 20, height: 10)
-                : Image(image: AssetImage(image));
+            ? Image(image: AssetImage(image), width: 20, height: 10)
+            : Image(image: AssetImage(image));
       }
 
       return [
