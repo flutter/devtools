@@ -15,15 +15,6 @@ import '../theme.dart';
 import 'memory_controller.dart';
 import 'memory_timeline.dart';
 
-// TODO(terry): Consider custom painter?
-const _base = 'assets/img/legend/';
-const allocatedLegend = '${_base}capacity_glyph.png';
-const usedLegend = '${_base}used_glyph.png';
-const externalLegend = '${_base}external_glyph.png';
-const rssLegend = '${_base}rss_glyph.png';
-const rasterLayerLegend = '${_base}layer_glyph.png';
-const rasterPictureLegend = '${_base}picture_glyph.png';
-
 class VMChartController extends ChartController {
   VMChartController(this._memoryController)
       : super(

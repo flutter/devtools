@@ -631,8 +631,8 @@ class MemoryBodyState extends State<MemoryBody>
   static const legendYOffset = 7.0;
   static const legendWidth = 200.0;
   static const legendTextWidth = 55.0;
-  static const legendHeight1Chart = 185.0;
-  static const legendHeight2Charts = 340.0;
+  static const legendHeight1Chart = 200.0;
+  static const legendHeight2Charts = 323.0;
 
   final hoverKey = GlobalKey(debugLabel: MemoryScreen.hoverKeyName);
   static const hoverXOffset = 10;
@@ -663,16 +663,124 @@ class MemoryBodyState extends State<MemoryBody>
               : hoverEventsHeight)
           : 0);
 
-  Widget legendRow({String name1, String image1, String name2, String image2}) {
-    final legendEntry = Theme.of(context).textTheme.caption;
+  Map<String, Map<String, Object>> eventLegend() {
+    final result = <String, Map<String, Object>>{};
+
+    result[events.manualSnapshotLegendName] = traceRender(
+      image: events.snapshotManualLegend,
+    );
+    result[events.autoSnapshotLegendName] = traceRender(
+      image: events.snapshotAutoLegend,
+    );
+    result[events.monitorLegendName] = traceRender(image: events.monitorLegend);
+    result[events.resetLegendName] = traceRender(image: events.resetLegend);
+    result[events.vmGCLegendName] = traceRender(image: events.gcVMLegend);
+    result[events.manualGCLegendName] = traceRender(
+      image: events.gcManualLegend,
+    );
+    result[events.eventLegendName] = traceRender(image: events.eventLegend);
+    result[events.eventsLegendName] = traceRender(image: events.eventsLegend);
+
+    return result;
+  }
+
+  Map<String, Map<String, Object>> vmLegend() {
+    final result = <String, Map<String, Object>>{};
+
+    final traces = vmChartController.traces;
+    // RSS trace
+    result[rssDisplay] = traceRender(
+      color: traces[vm.TraceName.rSS.index].characteristics.color,
+      dashed: true,
+    );
+
+    // Allocated trace
+    result[allocatedDisplay] = traceRender(
+      color: traces[vm.TraceName.capacity.index].characteristics.color,
+      dashed: true,
+    );
+
+    // Used trace
+    result[usedDisplay] = traceRender(
+      color: traces[vm.TraceName.used.index].characteristics.color,
+    );
+
+    // External trace
+    result[externalDisplay] = traceRender(
+      color: traces[vm.TraceName.external.index].characteristics.color,
+    );
+
+    // Raster layer trace
+    result[layerDisplay] = traceRender(
+      color: traces[vm.TraceName.rasterLayer.index].characteristics.color,
+      dashed: true,
+    );
+
+    // Raster picture trace
+    result[pictureDisplay] = traceRender(
+      color: traces[vm.TraceName.rasterPicture.index].characteristics.color,
+      dashed: true,
+    );
+
+    return result;
+  }
+
+  Map<String, Map<String, Object>> androidLegend() {
+    final result = <String, Map<String, Object>>{};
+
+    final traces = androidChartController.traces;
+    // Total trace
+    result[androidTotalDisplay] = traceRender(
+      color: traces[android.TraceName.total.index].characteristics.color,
+      dashed: true,
+    );
+
+    // Other trace
+    result[androidOtherDisplay] = traceRender(
+      color: traces[android.TraceName.other.index].characteristics.color,
+    );
+
+    // Native heap trace
+    result[androidNativeDisplay] = traceRender(
+      color: traces[android.TraceName.nativeHeap.index].characteristics.color,
+    );
+
+    // Graphics trace
+    result[androidGraphicsDisplay] = traceRender(
+      color: traces[android.TraceName.graphics.index].characteristics.color,
+    );
+
+    // Code trace
+    result[androidCodeDisplay] = traceRender(
+      color: traces[android.TraceName.code.index].characteristics.color,
+    );
+
+    // Java heap trace
+    result[androidJavaDisplay] = traceRender(
+      color: traces[android.TraceName.javaHeap.index].characteristics.color,
+    );
+
+    // Stack trace
+    result[androidStackDisplay] = traceRender(
+      color: traces[android.TraceName.stack.index].characteristics.color,
+    );
+
+    return result;
+  }
+
+  Widget legendRow({
+    MapEntry<String, Map<String, Object>> entry1,
+    MapEntry<String, Map<String, Object>> entry2,
+  }) {
+    final legendEntry = Theme.of(context).colorScheme.legendTextStyle;
 
     List<Widget> legendPart(
       String name,
-      String image, [
+      Widget widget, [
       double leftEdge = 5.0,
     ]) {
       final rightSide = <Widget>[];
-      if (name != null && image != null) {
+      if (name != null && widget != null) {
         rightSide.addAll([
           Expanded(
             child: Container(
@@ -684,17 +792,55 @@ class MemoryBodyState extends State<MemoryBody>
           const PaddedDivider(
             padding: EdgeInsets.only(left: denseRowSpacing),
           ),
-          Image(image: AssetImage(image)),
+          widget,
         ]);
       }
 
       return rightSide;
     }
 
+    Widget legendSymbol(Map<String, Object> dataToDisplay) {
+      final image = dataToDisplay.containsKey(renderImage)
+          ? dataToDisplay[renderImage] as String
+          : null;
+      final color = dataToDisplay.containsKey(renderLine)
+          ? dataToDisplay[renderLine] as Color
+          : null;
+      final dashedLine = dataToDisplay.containsKey(renderDashed)
+          ? dataToDisplay[renderDashed]
+          : false;
+
+      Widget traceColor;
+      if (color != null) {
+        if (dashedLine) {
+          traceColor = Padding(
+            child: CustomPaint(
+              painter: DashedLine(15, color, 2, 4, 3),
+              foregroundPainter: DashedLine(15, color, 2, 4, 3),
+            ),
+            padding: const EdgeInsets.fromLTRB(2, 5, 20, 1),
+          );
+        } else {
+          traceColor = Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 1.0),
+            child: Container(height: 6, width: 20, color: color),
+          );
+        }
+      } else {
+        traceColor =
+            image == null ? const SizedBox() : Image(image: AssetImage(image));
+      }
+
+      return traceColor;
+    }
+
     final rowChildren = <Widget>[];
-    rowChildren.addAll(legendPart(name1, image1));
-    if (name2 != null && image2 != null) {
-      rowChildren.addAll(legendPart(name2, image2, 20.0));
+
+    rowChildren.addAll(legendPart(entry1.key, legendSymbol(entry1.value)));
+    if (entry2 != null) {
+      rowChildren.addAll(
+        legendPart(entry2.key, legendSymbol(entry2.value), 20.0),
+      );
     }
 
     return Expanded(
@@ -992,14 +1138,14 @@ class MemoryBodyState extends State<MemoryBody>
     if (firstWidget != null) results.add(firstWidget);
 
     for (var entry in dataToDisplay.entries) {
-      final image = entry.value.keys.contains(ChartsValues.renderImage)
-          ? entry.value[ChartsValues.renderImage] as String
+      final image = entry.value.keys.contains(renderImage)
+          ? entry.value[renderImage] as String
           : null;
-      final color = entry.value.keys.contains(ChartsValues.renderLine)
-          ? entry.value[ChartsValues.renderLine] as Color
+      final color = entry.value.keys.contains(renderLine)
+          ? entry.value[renderLine] as Color
           : null;
-      final dashedLine = entry.value.keys.contains(ChartsValues.renderDashed)
-          ? entry.value[ChartsValues.renderDashed]
+      final dashedLine = entry.value.keys.contains(renderDashed)
+          ? entry.value[renderDashed]
           : false;
 
       results.add(
@@ -1135,10 +1281,57 @@ class MemoryBodyState extends State<MemoryBody>
   void showLegend(BuildContext context) {
     final RenderBox box = legendKey.currentContext.findRenderObject();
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final legendHeading = colorScheme.hoverTextStyle;
+
     // Global position.
     final position = box.localToGlobal(Offset.zero);
 
-    final legendHeading = Theme.of(context).textTheme.subtitle2;
+    final legendRows = <Widget>[];
+
+    final events = eventLegend();
+    legendRows.add(Container(
+      padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+      child: Text('Events Legend', style: legendHeading),
+    ));
+
+    var iterator = events.entries.iterator;
+    while (iterator.moveNext()) {
+      final leftEntry = iterator.current;
+      final rightEntry = iterator.moveNext() ? iterator.current : null;
+      legendRows.add(legendRow(entry1: leftEntry, entry2: rightEntry));
+    }
+
+    final vms = vmLegend();
+    legendRows.add(
+      Container(
+        padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+        child: Text('Memory Legend', style: legendHeading),
+      ),
+    );
+
+    iterator = vms.entries.iterator;
+    while (iterator.moveNext()) {
+      final legendEntry = iterator.current;
+      legendRows.add(legendRow(entry1: legendEntry));
+    }
+
+    if (controller.isAndroidChartVisible) {
+      final androids = androidLegend();
+      legendRows.add(
+        Container(
+          padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+          child: Text('Android Legend', style: legendHeading),
+        ),
+      );
+
+      iterator = androids.entries.iterator;
+      while (iterator.moveNext()) {
+        final legendEntry = iterator.current;
+        legendRows.add(legendRow(entry1: legendEntry));
+      }
+    }
+
     final OverlayState overlayState = Overlay.of(context);
     legendOverlayEntry ??= OverlayEntry(
       builder: (context) => Positioned(
@@ -1150,87 +1343,14 @@ class MemoryBodyState extends State<MemoryBody>
         child: Container(
           padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
           decoration: BoxDecoration(
-            color: Colors.black,
+            color: colorScheme.defaultBackgroundColor,
             border: Border.all(color: Colors.yellow),
             borderRadius: BorderRadius.circular(10.0),
           ),
           width: legendWidth,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
-                child: Text('Events Legend', style: legendHeading),
-              ),
-              legendRow(
-                name1: 'Snapshot',
-                image1: events.snapshotManualLegend,
-                name2: 'Auto',
-                image2: events.snapshotAutoLegend,
-              ),
-              legendRow(
-                name1: 'Monitor',
-                image1: events.monitorLegend,
-                name2: 'Reset',
-                image2: events.resetLegend,
-              ),
-              legendRow(
-                name1: 'GC VM',
-                image1: events.gcVMLegend,
-                name2: 'Manual',
-                image2: events.gcManualLegend,
-              ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
-                child: Text('Memory Legend', style: legendHeading),
-              ),
-              legendRow(name1: allocatedDisplay, image1: vm.allocatedLegend),
-              legendRow(name1: usedDisplay, image1: vm.usedLegend),
-              legendRow(name1: externalDisplay, image1: vm.externalLegend),
-              legendRow(name1: rssDisplay, image1: vm.rssLegend),
-              if (controller.isAndroidChartVisible)
-                const Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 9)),
-              if (controller.isAndroidChartVisible)
-                Container(
-                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
-                  child: Text('Android Legend', style: legendHeading),
-                ),
-              if (controller.isAndroidChartVisible)
-                legendRow(
-                  name1: androidTotalDisplay,
-                  image1: android.totalLegend,
-                ),
-              if (controller.isAndroidChartVisible)
-                legendRow(
-                  name1: androidOtherDisplay,
-                  image1: android.otherLegend,
-                ),
-              if (controller.isAndroidChartVisible)
-                legendRow(
-                  name1: androidCodeDisplay,
-                  image1: android.codeLegend,
-                ),
-              if (controller.isAndroidChartVisible)
-                legendRow(
-                  name1: androidNativeDisplay,
-                  image1: android.nativeLegend,
-                ),
-              if (controller.isAndroidChartVisible)
-                legendRow(
-                  name1: androidJavaDisplay,
-                  image1: android.javaLegend,
-                ),
-              if (controller.isAndroidChartVisible)
-                legendRow(
-                  name1: androidStackDisplay,
-                  image1: android.stackLegend,
-                ),
-              if (controller.isAndroidChartVisible)
-                legendRow(
-                  name1: androidGraphicsDisplay,
-                  image1: android.graphicsLegend,
-                ),
-            ],
+            children: legendRows,
           ),
         ),
       ),

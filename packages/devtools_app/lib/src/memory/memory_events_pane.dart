@@ -27,6 +27,16 @@ const gcVMLegend = '${_base}gc_vm_glyph.png';
 const eventLegend = '${_base}event_glyph.png';
 const eventsLegend = '${_base}events_glyph.png';
 
+/// Events trace name displayed
+const manualSnapshotLegendName = 'Snapshot';
+const autoSnapshotLegendName = 'Auto';
+const monitorLegendName = 'Monitor';
+const resetLegendName = 'Reset';
+const vmGCLegendName = 'GC VM';
+const manualGCLegendName = 'Manual';
+const eventLegendName = 'Event';
+const eventsLegendName = 'Events';
+
 class EventChartController extends ChartController {
   EventChartController(this._memoryController)
       : super(
