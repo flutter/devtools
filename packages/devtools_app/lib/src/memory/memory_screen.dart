@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +23,7 @@ import '../ui/utils.dart';
 import '../utils.dart';
 
 import 'memory_android_chart.dart' as android;
+import 'memory_charts.dart';
 import 'memory_controller.dart';
 import 'memory_events_pane.dart' as events;
 import 'memory_heap_tree_view.dart';
@@ -88,19 +88,6 @@ class MemoryScreen extends Screen {
   static const androidChartButtonKey = Key('Android Memory');
 
   static const memorySourceMenuItemPrefix = 'Source: ';
-
-  @visibleForTesting
-  static const allocatedDisplay = 'Allocated';
-  @visibleForTesting
-  static const usedDisplay = 'Dart/Flutter';
-  @visibleForTesting
-  static const externalDisplay = 'Dart/Flutter Native';
-  @visibleForTesting
-  static const rssDisplay = 'RSS';
-  @visibleForTesting
-  static const layerDisplay = 'Raster Layer';
-  @visibleForTesting
-  static const pictureDisplay = 'Raster Picture';
 
   static void gaAction({Key key, String name}) {
     final recordName = key != null ? keyName(key) : name;
@@ -676,32 +663,6 @@ class MemoryBodyState extends State<MemoryBody>
               : hoverEventsHeight)
           : 0);
 
-  // TODO(terry): Consider custom painter?
-  static const base = 'assets/img/legend/';
-  static const snapshotManualLegend = '${base}snapshot_manual_glyph.png';
-  static const snapshotAutoLegend = '${base}snapshot_auto_glyph.png';
-  static const monitorLegend = '${base}monitor_glyph.png';
-  static const resetLegend = '${base}reset_glyph.png';
-  static const gcManualLegend = '${base}gc_manual_glyph.png';
-  static const gcVMLegend = '${base}gc_vm_glyph.png';
-  static const eventLegend = '${base}event_glyph.png';
-  static const eventsLegend = '${base}events_glyph.png';
-
-  static const allocatedLegend = '${base}capacity_glyph.png';
-  static const usedLegend = '${base}used_glyph.png';
-  static const externalLegend = '${base}external_glyph.png';
-  static const rssLegend = '${base}rss_glyph.png';
-  static const rasterLayerLegend = '${base}layer_glyph.png';
-  static const rasterPictureLegend = '${base}picture_glyph.png';
-
-  static const androidTotalLegend = '${base}android_total_glyph.png';
-  static const androidOtherLegend = '${base}android_other_glyph.png';
-  static const androidCodeLegend = '${base}android_code_glyph.png';
-  static const androidNativeLegend = '${base}android_native_glyph.png';
-  static const androidJavaLegend = '${base}android_java_glyph.png';
-  static const androidStackLegend = '${base}android_stack_glyph.png';
-  static const androidGraphicsLegend = '${base}android_graphics_glyph.png';
-
   Widget legendRow({String name1, String image1, String name2, String image2}) {
     final legendEntry = Theme.of(context).textTheme.caption;
 
@@ -806,8 +767,8 @@ class MemoryBodyState extends State<MemoryBody>
         traceColor = image == null
             ? const SizedBox()
             : scaleImage
-            ? Image(image: AssetImage(image), width: 20, height: 10)
-            : Image(image: AssetImage(image));
+                ? Image(image: AssetImage(image), width: 20, height: 10)
+                : Image(image: AssetImage(image));
       }
 
       return [
@@ -836,23 +797,10 @@ class MemoryBodyState extends State<MemoryBody>
         ));
   }
 
-  /// Display name is either '1 Event' or 'n Events'
-  static const eventDisplayName = ' Event';
-  static const eventsDisplayName = ' Events';
-
   List<Widget> displayExtensionEventsInHover(ChartsValues chartsValues) {
     final widgets = <Widget>[];
-    final eventsDisplayed = <String, String>{};
 
-    if (chartsValues.hasExtensionEvents) {
-      final eventLength = chartsValues.extensionEventsLength;
-      if (eventLength > 0) {
-        final displayKey = '$eventLength'
-            '${eventLength == 1 ? eventDisplayName : eventsDisplayName}';
-        eventsDisplayed[displayKey] =
-            eventLength == 1 ? eventLegend : eventsLegend;
-      }
-    }
+    final eventsDisplayed = chartsValues.extensionEventsToDisplay;
 
     for (var entry in eventsDisplayed.entries) {
       if (entry.key.endsWith(eventsDisplayName)) {
@@ -863,7 +811,7 @@ class MemoryBodyState extends State<MemoryBody>
             primary: false,
             children: [
               listItem(
-                events: chartsValues.extensionEvents,
+                allEvents: chartsValues.extensionEvents,
                 title: entry.key,
                 icon: Icons.dashboard,
               ),
@@ -885,25 +833,7 @@ class MemoryBodyState extends State<MemoryBody>
   List<Widget> displayEventsInHover(ChartsValues chartsValues) {
     final results = <Widget>[];
 
-    final eventsDisplayed = <String, String>{};
-
-    if (chartsValues.hasSnapshot) {
-      eventsDisplayed['Snapshot'] = snapshotManualLegend;
-    } else if (chartsValues.hasAutoSnapshot) {
-      eventsDisplayed['Auto Snapshot'] = snapshotAutoLegend;
-    } else if (chartsValues.hasMonitorStart) {
-      eventsDisplayed['Monitor Start'] = monitorLegend;
-    } else if (chartsValues.hasMonitorReset) {
-      eventsDisplayed['Monitor Reset'] = resetLegend;
-    }
-
-    if (chartsValues.hasGc) {
-      eventsDisplayed['GC'] = gcVMLegend;
-    }
-
-    if (chartsValues.hasManualGc) {
-      eventsDisplayed['User GC'] = gcManualLegend;
-    }
+    final eventsDisplayed = chartsValues.eventsToDisplay;
 
     for (var entry in eventsDisplayed.entries) {
       Widget widget;
@@ -985,14 +915,14 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget listItem({
-    List<Map<String, Object>> events,
+    List<Map<String, Object>> allEvents,
     int index,
     String title,
     IconData icon,
   }) {
     final widgets = <Widget>[];
     var index = 1;
-    for (var event in events) {
+    for (var event in allEvents) {
       final output = displayEvent(index, event);
       widgets.add(cardWidget(output));
       index++;
@@ -1013,9 +943,9 @@ class MemoryBodyState extends State<MemoryBody>
           leading: Container(
             padding: const EdgeInsets.fromLTRB(5, 4, 0, 0),
             child: Image(
-              image: events.length > 1
-                  ? const AssetImage(eventsLegend)
-                  : const AssetImage(eventLegend),
+              image: allEvents.length > 1
+                  ? const AssetImage(events.eventsLegend)
+                  : const AssetImage(events.eventLegend),
             ),
           ),
           backgroundColor: collapsedColor,
@@ -1053,74 +983,23 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
-  String formatNumeric(num number) => controller.unitDisplayed.value
-      ? prettyPrintBytes(
-          number,
-          kbFractionDigits: 1,
-          mbFractionDigits: 2,
-          includeUnit: true,
-          roundingPoint: 0.7,
-        )
-      : nf.format(number);
-
-  List<Widget> displayVmDataInHover(ChartsValues chartsValues) {
+  List<Widget> _dataToDisplay(
+    Map<String, Map<String, Object>> dataToDisplay, {
+    Widget firstWidget,
+  }) {
     final results = <Widget>[];
 
-    final vmDataDisplayed = <String, Map<String, Object>>{};
+    if (firstWidget != null) results.add(firstWidget);
 
-    final data = chartsValues.vmData;
-
-    final traces = vmChartController.traces;
-
-    final rssValueDisplay = formatNumeric(data[rssJsonName]);
-    vmDataDisplayed['${MemoryScreen.rssDisplay} $rssValueDisplay'] =
-        traceRender(
-      color: traces[vm.TraceName.rSS.index].characteristics.color,
-      dashed: true,
-    );
-
-    final capacityValueDisplay = formatNumeric(data[capacityJsonName]);
-    vmDataDisplayed['${MemoryScreen.allocatedDisplay} $capacityValueDisplay'] =
-        traceRender(
-      color: traces[vm.TraceName.capacity.index].characteristics.color,
-      dashed: true,
-    );
-
-    final usedValueDisplay = formatNumeric(data[usedJsonName]);
-    vmDataDisplayed['${MemoryScreen.usedDisplay} $usedValueDisplay'] =
-        traceRender(
-      color: traces[vm.TraceName.used.index].characteristics.color,
-    );
-
-    final externalValueDisplay = formatNumeric(data[externalJsonName]);
-    vmDataDisplayed['${MemoryScreen.externalDisplay} $externalValueDisplay'] =
-        traceRender(
-      color: traces[vm.TraceName.external.index].characteristics.color,
-    );
-
-    final layerValueDisplay = formatNumeric(data[rasterLayerJsonName]);
-    vmDataDisplayed['${MemoryScreen.layerDisplay} $layerValueDisplay'] =
-        traceRender(
-      color: traces[vm.TraceName.rasterLayer.index].characteristics.color,
-      dashed: true,
-    );
-
-    final pictureValueDisplay = formatNumeric(data[rasterPictureJsonName]);
-    vmDataDisplayed['${MemoryScreen.pictureDisplay} $pictureValueDisplay'] =
-        traceRender(
-      color: traces[vm.TraceName.rasterPicture.index].characteristics.color,
-      dashed: true,
-    );
-
-    for (var entry in vmDataDisplayed.entries) {
-      final image = entry.value.keys.contains(renderImage)
-          ? entry.value[renderImage] as String
+    for (var entry in dataToDisplay.entries) {
+      final image = entry.value.keys.contains(ChartsValues.renderImage)
+          ? entry.value[ChartsValues.renderImage] as String
           : null;
-      final color = entry.value.keys.contains(renderLine)
-          ? entry.value[renderLine] as Color
+      final color = entry.value.keys.contains(ChartsValues.renderLine)
+          ? entry.value[ChartsValues.renderLine] as Color
           : null;
-      final dashedLine = entry.value.keys.contains(renderDashed)
-          ? entry.value[renderDashed]
+      final dashedLine = entry.value.keys.contains(ChartsValues.renderDashed)
+          ? entry.value[ChartsValues.renderDashed]
           : false;
 
       results.add(
@@ -1139,121 +1018,28 @@ class MemoryBodyState extends State<MemoryBody>
     return results;
   }
 
-  static const renderLine = 'color';
-  static const renderDashed = 'dashed';
-  static const renderImage = 'image';
-
-  Map<String, Object> traceRender(
-      {String image, Color color, bool dashed = false}) {
-    final result = <String, Object>{};
-
-    if (image != null) {
-      result[renderImage] = image;
-    } else {
-      result[renderLine] = color;
-      result[renderDashed] = dashed;
-    }
-
-    return result;
-  }
+  List<Widget> displayVmDataInHover(ChartsValues chartsValues) =>
+      _dataToDisplay(
+        chartsValues.displayVmDataToDisplay(vmChartController.traces),
+      );
 
   List<Widget> displayAndroidDataInHover(ChartsValues chartsValues) {
-    const totalDisplay = 'Total';
-    const otherDisplay = 'Other';
-    const codeDisplay = 'Code';
-    const nativeDisplay = 'Native';
-    const javaDisplay = 'Java';
-    const stackDisplay = 'Stack';
-    const graphicsDisplay = 'Graphics';
+    if (!controller.isAndroidChartVisible) return [];
 
-    final results = <Widget>[];
+    final androidDataDisplayed =
+        chartsValues.androidDataToDisplay(androidChartController.traces);
 
-    if (controller.isAndroidChartVisible) {
-      final androidDataDisplayed = <String, Map<String, Object>>{};
+    // Separator between Android data.
+    const width = MemoryBodyState.hoverWidth - 40 - DashedLine.defaultDashWidth;
+    final dashedColor = Colors.grey.shade600;
 
-      final data = chartsValues.androidData;
-
-      final traces = androidChartController.traces;
-
-      final totalValueDisplay = formatNumeric(data[adbTotalJsonName]);
-      androidDataDisplayed['$totalDisplay $totalValueDisplay'] = traceRender(
-        color: traces[android.TraceName.total.index].characteristics.color,
-        dashed: true,
-      );
-
-      // Other trace
-      final otherValueDisplay = formatNumeric(data[adbOtherJsonName]);
-      androidDataDisplayed['$otherDisplay $otherValueDisplay'] = traceRender(
-        color: traces[android.TraceName.other.index].characteristics.color,
-      );
-
-      // Native heap trace
-      final nativeValueDisplay = formatNumeric(data[adbNativeHeapJsonName]);
-      androidDataDisplayed['$nativeDisplay $nativeValueDisplay'] = traceRender(
-        color: traces[android.TraceName.nativeHeap.index].characteristics.color,
-      );
-
-      // Graphics trace
-      final graphicsValueDisplay = formatNumeric(data[adbGraphicsJsonName]);
-      androidDataDisplayed['$graphicsDisplay $graphicsValueDisplay'] =
-          traceRender(
-        color: traces[android.TraceName.graphics.index].characteristics.color,
-      );
-
-      // Code trace
-      final codeValueDisplay = formatNumeric(data[adbCodeJsonName]);
-      androidDataDisplayed['$codeDisplay $codeValueDisplay'] = traceRender(
-        color: traces[android.TraceName.code.index].characteristics.color,
-      );
-
-      // Java heap trace
-      final javaValueDisplay = formatNumeric(data[adbJavaHeapJsonName]);
-      androidDataDisplayed['$javaDisplay $javaValueDisplay'] = traceRender(
-        color: traces[android.TraceName.javaHeap.index].characteristics.color,
-      );
-
-      // Stack trace
-      final stackValueDisplay = formatNumeric(data[adbStackJsonName]);
-      androidDataDisplayed['$stackDisplay $stackValueDisplay'] = traceRender(
-        color: traces[android.TraceName.stack.index].characteristics.color,
-      );
-
-      const width =
-          MemoryBodyState.hoverWidth - 40 - DashedLine.defaultDashWidth;
-      final dashedColor = Colors.grey.shade600;
-      results.add(
-        Padding(
-          child: CustomPaint(painter: DashedLine(width, dashedColor)),
-          padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
-        ),
-      );
-
-      for (var entry in androidDataDisplayed.entries) {
-        final image = entry.value.keys.contains(renderImage)
-            ? entry.value[renderImage] as String
-            : null;
-        final color = entry.value.keys.contains(renderLine)
-            ? entry.value[renderLine] as Color
-            : null;
-        final dashedLine = entry.value.keys.contains(renderDashed)
-            ? entry.value[renderDashed]
-            : false;
-
-        results.add(
-          hoverRow(
-            name: entry.key,
-            colorPatch: color,
-            dashed: dashedLine,
-            image: image,
-            hasNumeric: true,
-            hasUnit: controller.unitDisplayed.value,
-            scaleImage: true,
-          ),
-        );
-      }
-    }
-
-    return results;
+    return _dataToDisplay(
+      androidDataDisplayed,
+      firstWidget: Padding(
+        child: CustomPaint(painter: DashedLine(width, dashedColor)),
+        padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
+      ),
+    );
   }
 
   void showHover(
@@ -1378,33 +1164,30 @@ class MemoryBodyState extends State<MemoryBody>
               ),
               legendRow(
                 name1: 'Snapshot',
-                image1: snapshotManualLegend,
+                image1: events.snapshotManualLegend,
                 name2: 'Auto',
-                image2: snapshotAutoLegend,
+                image2: events.snapshotAutoLegend,
               ),
               legendRow(
                 name1: 'Monitor',
-                image1: monitorLegend,
+                image1: events.monitorLegend,
                 name2: 'Reset',
-                image2: resetLegend,
+                image2: events.resetLegend,
               ),
               legendRow(
                 name1: 'GC VM',
-                image1: gcVMLegend,
+                image1: events.gcVMLegend,
                 name2: 'Manual',
-                image2: gcManualLegend,
+                image2: events.gcManualLegend,
               ),
               Container(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
                 child: Text('Memory Legend', style: legendHeading),
               ),
-              legendRow(
-                  name1: MemoryScreen.allocatedDisplay,
-                  image1: allocatedLegend),
-              legendRow(name1: MemoryScreen.usedDisplay, image1: usedLegend),
-              legendRow(
-                  name1: MemoryScreen.externalDisplay, image1: externalLegend),
-              legendRow(name1: MemoryScreen.rssDisplay, image1: rssLegend),
+              legendRow(name1: allocatedDisplay, image1: vm.allocatedLegend),
+              legendRow(name1: usedDisplay, image1: vm.usedLegend),
+              legendRow(name1: externalDisplay, image1: vm.externalLegend),
+              legendRow(name1: rssDisplay, image1: vm.rssLegend),
               if (controller.isAndroidChartVisible)
                 const Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 9)),
               if (controller.isAndroidChartVisible)
@@ -1413,19 +1196,40 @@ class MemoryBodyState extends State<MemoryBody>
                   child: Text('Android Legend', style: legendHeading),
                 ),
               if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Total', image1: androidTotalLegend),
+                legendRow(
+                  name1: androidTotalDisplay,
+                  image1: android.totalLegend,
+                ),
               if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Other', image1: androidOtherLegend),
+                legendRow(
+                  name1: androidOtherDisplay,
+                  image1: android.otherLegend,
+                ),
               if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Code', image1: androidCodeLegend),
+                legendRow(
+                  name1: androidCodeDisplay,
+                  image1: android.codeLegend,
+                ),
               if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Native', image1: androidNativeLegend),
+                legendRow(
+                  name1: androidNativeDisplay,
+                  image1: android.nativeLegend,
+                ),
               if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Java', image1: androidJavaLegend),
+                legendRow(
+                  name1: androidJavaDisplay,
+                  image1: android.javaLegend,
+                ),
               if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Stack', image1: androidStackLegend),
+                legendRow(
+                  name1: androidStackDisplay,
+                  image1: android.stackLegend,
+                ),
               if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Graphics', image1: androidGraphicsLegend),
+                legendRow(
+                  name1: androidGraphicsDisplay,
+                  image1: android.graphicsLegend,
+                ),
             ],
           ),
         ),
@@ -1521,193 +1325,6 @@ class DashedLine extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-/// Event types handled for hover card.
-const devToolsEvent = 'DevTools.Event';
-const imageSizesForFrameEvent = 'Flutter.ImageSizesForFrame';
-const displaySizeInBytesData = 'displaySizeInBytes';
-const decodedSizeInBytesData = 'decodedSizeInBytes';
-
-const String eventName = 'name';
-const String eventData = 'data';
-const String customEvent = 'custom';
-const String customEventName = 'name';
-const String customEventData = 'data';
-
-const String indexPayloadJson = 'index';
-const String timestampPayloadJson = 'timestamp';
-const String prettyTimestampPayloadJson = 'prettyTimestamp';
-const String eventPayloadJson = 'event';
-const String vmPayloadJson = 'vm';
-const String androidPayloadJson = 'android';
-
-/// VM Data
-const String rssJsonName = 'rss';
-const String capacityJsonName = 'capacity';
-const String usedJsonName = 'used';
-const String externalJsonName = 'external';
-const String rasterPictureJsonName = 'rasterLayer';
-const String rasterLayerJsonName = 'rasterPicture';
-
-/// Android data
-const String adbTotalJsonName = 'total';
-const String adbOtherJsonName = 'other';
-const String adbCodeJsonName = 'code';
-const String adbNativeHeapJsonName = 'nativeHeap';
-const String adbJavaHeapJsonName = 'javaHeap';
-const String adbStackJsonName = 'stack';
-const String adbGraphicsJsonName = 'graphics';
-
-/// Events data
-const String snapshotJsonName = 'snapshot';
-const String autoSnapshotJsonName = 'autoSnapshot';
-const String monitorStartJsonName = 'monitorStart';
-const String monitorResetJsonName = 'monitorReset';
-const String extensionEventsJsonName = 'extensionEvents';
-const String manualGCJsonName = 'manualGC';
-const String gcJsonName = 'gc';
-
-/// Retrieve all data values of a given index (timestamp) of the collected data.
-class ChartsValues {
-  ChartsValues(this.controller, this.index, this.timestamp) {
-    _fetch();
-  }
-
-  final MemoryController controller;
-
-  final int index;
-
-  final int timestamp;
-
-  final _event = <String, Object>{};
-
-  final _extensionEvents = <Map<String, Object>>[];
-
-  Map<String, Object> get vmData => _vm;
-
-  final _vm = <String, Object>{};
-
-  Map<String, Object> get androidData => _android;
-
-  final _android = <String, Object>{};
-
-  Map<String, Object> toJson() {
-    return {
-      indexPayloadJson: index,
-      timestampPayloadJson: timestamp,
-      prettyTimestampPayloadJson: prettyTimestamp(timestamp),
-      eventPayloadJson: _event,
-      vmPayloadJson: _vm,
-      androidPayloadJson: _android,
-    };
-  }
-
-  int get eventCount =>
-      _event.entries.length -
-      (extensionEventsLength > 0 ? 1 : 0) +
-      (hasGc ? 1 : 0);
-
-  bool get hasSnapshot => _event.containsKey(snapshotJsonName);
-
-  bool get hasAutoSnapshot => _event.containsKey(autoSnapshotJsonName);
-
-  bool get hasMonitorStart => _event.containsKey(monitorStartJsonName);
-
-  bool get hasMonitorReset => _event.containsKey(monitorResetJsonName);
-
-  bool get hasExtensionEvents => _event.containsKey(extensionEventsJsonName);
-
-  bool get hasManualGc => _event.containsKey(manualGCJsonName);
-
-  bool get hasGc => _vm[gcJsonName];
-
-  int get extensionEventsLength =>
-      hasExtensionEvents ? extensionEvents.length : 0;
-
-  List<Map<String, Object>> get extensionEvents {
-    if (_extensionEvents.isEmpty) {
-      _extensionEvents.addAll(_event[extensionEventsJsonName]);
-    }
-    return _extensionEvents;
-  }
-
-  void _fetch() {
-    _event.clear();
-    _vm.clear();
-    _android.clear();
-
-    _fetchEventData(_event);
-    _fetchVMData(controller.memoryTimeline.data[index], _vm);
-    _fetchAndroidData(
-      controller.memoryTimeline.data[index].adbMemoryInfo,
-      _android,
-    );
-  }
-
-  void _fetchEventData(Map<String, Object> results) {
-    // Use the detailed extension events data stored in the memoryTimeline.
-    final eventInfo = controller.memoryTimeline.data[index].memoryEventInfo;
-
-    if (eventInfo.isEmpty) return;
-
-    if (eventInfo.isEventGC) results[manualGCJsonName] = true;
-    if (eventInfo.isEventSnapshot) results[snapshotJsonName] = true;
-    if (eventInfo.isEventSnapshotAuto) results[autoSnapshotJsonName] = true;
-    if (eventInfo.isEventAllocationAccumulator) {
-      if (eventInfo.allocationAccumulator.isStart) {
-        results[monitorStartJsonName] = true;
-      }
-      if (eventInfo.allocationAccumulator.isReset) {
-        results[monitorResetJsonName] = true;
-      }
-    }
-
-    if (eventInfo.hasExtensionEvents) {
-      final events = <Map<String, Object>>[];
-      for (ExtensionEvent event in eventInfo.extensionEvents.theEvents) {
-        if (event.customEventName != null) {
-          events.add(
-            {
-              eventName: event.eventKind,
-              customEvent: {
-                customEventName: event.customEventName,
-                customEventData: event.data,
-              },
-            },
-          );
-        } else {
-          events.add({eventName: event.eventKind, eventData: event.data});
-        }
-      }
-      if (events.isNotEmpty) {
-        results[extensionEventsJsonName] = events;
-      }
-    }
-  }
-
-  void _fetchVMData(HeapSample heapSample, Map<String, Object> results) {
-    results[rssJsonName] = heapSample.rss;
-    results[capacityJsonName] = heapSample.capacity;
-    results[usedJsonName] = heapSample.used;
-    results[externalJsonName] = heapSample.external;
-    results[gcJsonName] = heapSample.isGC;
-    results[rasterPictureJsonName] = heapSample.rasterCache.pictureBytes;
-    results[rasterLayerJsonName] = heapSample.rasterCache.layerBytes;
-  }
-
-  void _fetchAndroidData(
-    AdbMemoryInfo androidData,
-    Map<String, Object> results,
-  ) {
-    results[adbTotalJsonName] = androidData.total;
-    results[adbOtherJsonName] = androidData.other;
-    results[adbCodeJsonName] = androidData.code;
-    results[adbNativeHeapJsonName] = androidData.nativeHeap;
-    results[adbJavaHeapJsonName] = androidData.javaHeap;
-    results[adbStackJsonName] = androidData.stack;
-    results[adbGraphicsJsonName] = androidData.graphics;
-  }
 }
 
 class MemoryConfigurationsDialog extends StatelessWidget {

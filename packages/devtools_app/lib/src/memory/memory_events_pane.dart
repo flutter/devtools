@@ -16,6 +16,17 @@ import '../theme.dart';
 import 'memory_controller.dart';
 import 'memory_timeline.dart';
 
+// TODO(terry): Consider custom painter?
+const _base = 'assets/img/legend/';
+const snapshotManualLegend = '${_base}snapshot_manual_glyph.png';
+const snapshotAutoLegend = '${_base}snapshot_auto_glyph.png';
+const monitorLegend = '${_base}monitor_glyph.png';
+const resetLegend = '${_base}reset_glyph.png';
+const gcManualLegend = '${_base}gc_manual_glyph.png';
+const gcVMLegend = '${_base}gc_vm_glyph.png';
+const eventLegend = '${_base}event_glyph.png';
+const eventsLegend = '${_base}events_glyph.png';
+
 class EventChartController extends ChartController {
   EventChartController(this._memoryController)
       : super(

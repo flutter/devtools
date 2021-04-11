@@ -15,6 +15,16 @@ import '../theme.dart';
 import 'memory_controller.dart';
 import 'memory_timeline.dart';
 
+// TODO(terry): Consider custom painter?
+const _base = 'assets/img/legend/';
+const totalLegend = '${_base}android_total_glyph.png';
+const otherLegend = '${_base}android_other_glyph.png';
+const codeLegend = '${_base}android_code_glyph.png';
+const nativeLegend = '${_base}android_native_glyph.png';
+const javaLegend = '${_base}android_java_glyph.png';
+const stackLegend = '${_base}android_stack_glyph.png';
+const graphicsLegend = '${_base}android_graphics_glyph.png';
+
 class AndroidChartController extends ChartController {
   AndroidChartController(this._memoryController, {List<int> sharedLabels})
       : super(
