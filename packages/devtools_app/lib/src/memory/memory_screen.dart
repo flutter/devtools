@@ -663,7 +663,7 @@ class MemoryBodyState extends State<MemoryBody>
               : hoverEventsHeight)
           : 0);
 
-  Map<String, Map<String, Object>> eventLegend() {
+  Map<String, Map<String, Object>> eventLegend(bool isLight) {
     final result = <String, Map<String, Object>>{};
 
     result[events.manualSnapshotLegendName] = traceRender(
@@ -673,7 +673,9 @@ class MemoryBodyState extends State<MemoryBody>
       image: events.snapshotAutoLegend,
     );
     result[events.monitorLegendName] = traceRender(image: events.monitorLegend);
-    result[events.resetLegendName] = traceRender(image: events.resetLegend);
+    result[events.resetLegendName] = traceRender(
+      image: isLight ? events.resetLightLegend : events.resetDarkLegend,
+    );
     result[events.vmGCLegendName] = traceRender(image: events.gcVMLegend);
     result[events.manualGCLegendName] = traceRender(
       image: events.gcManualLegend,
@@ -976,10 +978,12 @@ class MemoryBodyState extends State<MemoryBody>
     return widgets;
   }
 
-  List<Widget> displayEventsInHover(ChartsValues chartsValues) {
+  List<Widget> displayEventsInHover(ChartsValues chartsValues) {   
     final results = <Widget>[];
 
-    final eventsDisplayed = chartsValues.eventsToDisplay;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final eventsDisplayed = chartsValues.eventsToDisplay(colorScheme.isLight);
 
     for (var entry in eventsDisplayed.entries) {
       Widget widget;
@@ -1289,7 +1293,7 @@ class MemoryBodyState extends State<MemoryBody>
 
     final legendRows = <Widget>[];
 
-    final events = eventLegend();
+    final events = eventLegend(colorScheme.isLight);
     legendRows.add(Container(
       padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
       child: Text('Events Legend', style: legendHeading),

@@ -239,7 +239,8 @@ class ChartsValues {
     results[adbGraphicsJsonName] = androidData.graphics;
   }
 
-  Map<String, String> get eventsToDisplay {
+  Map<String, String> eventsToDisplay(bool isLight) {
+    
     final eventsDisplayed = <String, String>{};
 
     if (hasSnapshot) {
@@ -249,9 +250,9 @@ class ChartsValues {
     } else if (hasMonitorStart) {
       eventsDisplayed['Monitor Start'] = events.monitorLegend;
     } else if (hasMonitorReset) {
-      eventsDisplayed['Monitor Reset'] = events.resetLegend;
+      eventsDisplayed['Monitor Reset'] = isLight ? events.resetLightLegend : events.resetDarkLegend;
     }
-
+    
     if (hasGc) {
       eventsDisplayed['GC'] = events.gcVMLegend;
     }
