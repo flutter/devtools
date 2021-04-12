@@ -1032,6 +1032,12 @@ class MemoryController extends DisposableController
     return allocations;
   }
 
+  /// If viewing offline data (Android collected) the connection may not be Android.
+  /// If offline and collected data is Android then we're Android viewing.
+  bool get isOfflineAndAndroidData {
+    return offline && memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
+  }
+
   bool get isConnectedDeviceAndroid {
     return serviceManager?.vm?.operatingSystem == 'android';
   }

@@ -32,6 +32,8 @@ import 'memory_vm_chart.dart' as vm;
 /// Width of application when memory buttons loose their text.
 const _primaryControlsMinVerboseWidth = 1100.0;
 
+final legendKey = GlobalKey(debugLabel: MemoryScreen.legendKeyName);
+
 class MemoryScreen extends Screen {
   const MemoryScreen()
       : super.conditional(
@@ -74,6 +76,7 @@ class MemoryScreen extends Screen {
   static const gcButtonKey = Key('GC Button');
   @visibleForTesting
   static const legendButtonkey = Key(legendKeyName);
+
   @visibleForTesting
   static const settingsButtonKey = Key('Memory Configuration');
 
@@ -562,14 +565,17 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget _buildMemoryControls(TextTheme textTheme) {
+    final androidChartButton = controller.isConnectedDeviceAndroid ||
+            controller.isOfflineAndAndroidData
+        ? createToggleAdbMemoryButton()
+        : const SizedBox();
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
-        controller.isConnectedDeviceAndroid
-            ? createToggleAdbMemoryButton()
-            : const SizedBox(),
+        androidChartButton,
         const SizedBox(width: denseSpacing),
         isAdvancedSettingsEnabled
             ? Row(
@@ -626,7 +632,6 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
-  final legendKey = GlobalKey(debugLabel: MemoryScreen.legendKeyName);
   static const legendXOffset = 20;
   static const legendYOffset = 7.0;
   static const legendWidth = 200.0;
@@ -978,17 +983,14 @@ class MemoryBodyState extends State<MemoryBody>
     return widgets;
   }
 
-  List<Widget> displayEventsInHover(ChartsValues chartsValues) {   
+  List<Widget> displayEventsInHover(ChartsValues chartsValues) {
     final results = <Widget>[];
 
     final colorScheme = Theme.of(context).colorScheme;
-
     final eventsDisplayed = chartsValues.eventsToDisplay(colorScheme.isLight);
 
     for (var entry in eventsDisplayed.entries) {
-      Widget widget;
-
-      widget = hoverRow(name: entry.key, image: entry.value);
+      final widget = hoverRow(name: ' ${entry.key}', image: entry.value);
       results.add(widget);
     }
 
