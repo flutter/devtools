@@ -99,8 +99,7 @@ void main() {
           switch (index) {
             case 0:
               expect(externalTraceIndex, equals(0));
-              expect(
-                  controller.traces[index].name, externalDisplay);
+              expect(controller.traces[index].name, externalDisplay);
               break;
             case 1:
               expect(usedTraceIndex, equals(1));
@@ -108,8 +107,7 @@ void main() {
               break;
             case 2:
               expect(capacityTraceIndex, equals(2));
-              expect(
-                  controller.traces[index].name, allocatedDisplay);
+              expect(controller.traces[index].name, allocatedDisplay);
               break;
             case 3:
               expect(rssTraceIndex, equals(3));
