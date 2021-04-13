@@ -937,14 +937,14 @@ class MemoryBodyState extends State<MemoryBody>
         traceColor = image == null
             ? const SizedBox()
             : scaleImage
-                ? Image(
-                    image: AssetImage(image),
-                    width: 20,
-                    height: 10,
-                  )
-                : Image(
-                    image: AssetImage(image),
-                  );
+            ? Image(
+                image: AssetImage(image),
+                width: 20,
+                height: 10,
+              )
+            : Image(
+                image: AssetImage(image),
+              );
       }
 
       return [
@@ -1199,20 +1199,33 @@ class MemoryBodyState extends State<MemoryBody>
       );
 
   List<Widget> displayAndroidDataInHover(ChartsValues chartsValues) {
+    const dividerLineVerticalSpace = 2.0;
+    const dividerLineHorizontalSpace = 20.0;
+    const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
+
     if (!controller.isAndroidChartVisible) return [];
 
     final androidDataDisplayed =
         chartsValues.androidDataToDisplay(androidChartController.traces);
 
     // Separator between Android data.
-    const width = MemoryBodyState.hoverWidth - 40 - DashedLine.defaultDashWidth;
+    // TODO(terry): Why Center widget doesn't work (parent width is bigger/centered too far right).
+    //              Is it centering on a too wide Overlay?
+    const width = MemoryBodyState.hoverWidth -
+        totalDividerLineHorizontalSpace -
+        DashedLine.defaultDashWidth;
     final dashedColor = Colors.grey.shade600;
 
     return _dataToDisplay(
       androidDataDisplayed,
-      firstWidget: Padding(
-        child: CustomPaint(painter: DashedLine(width, dashedColor)),
-        padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
+      firstWidget: Align(
+        alignment: Alignment.topLeft,
+        child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: dividerLineVerticalSpace,
+              horizontal: dividerLineHorizontalSpace,
+            ),
+            child: CustomPaint(painter: DashedLine(width, dashedColor))),
       ),
     );
   }

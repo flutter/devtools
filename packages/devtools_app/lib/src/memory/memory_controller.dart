@@ -1034,7 +1034,7 @@ class MemoryController extends DisposableController
 
   /// If viewing offline data (Android collected) the connection may not be
   /// Android.
-  /// 
+  ///
   /// If offline and if any Android collected data then we can view the Android
   /// data.
   bool get isOfflineAndAndroidData {
