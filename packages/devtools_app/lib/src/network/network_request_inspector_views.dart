@@ -69,9 +69,9 @@ class HttpRequestHeadersView extends StatelessWidget {
             style: Theme.of(context).textTheme.subtitle2,
           ),
           Expanded(
-            child: Text(
+            child: SelectableText(
               value,
-              overflow: TextOverflow.ellipsis,
+              minLines: 1,
               maxLines: 5,
             ),
           ),
@@ -144,7 +144,7 @@ class HttpResponseView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Text(
+      child: SelectableText(
         data.responseBody,
         style: Theme.of(context).fixedFontStyle,
       ),
@@ -573,9 +573,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
   }
 
   Widget _valueText(String value) {
-    return Text(
+    return SelectableText(
       value,
-      overflow: TextOverflow.ellipsis,
+      minLines: 1,
       maxLines: 5,
     );
   }
