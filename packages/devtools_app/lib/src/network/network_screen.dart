@@ -215,19 +215,23 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
       valueListenable: _networkController.selectedRequest,
       builder: (context, selectedRequest, _) {
         return Expanded(
-          child: Split(
-            initialFractions: const [0.5, 0.5],
-            minSizes: const [200, 200],
-            axis: Axis.horizontal,
-            children: [
-              NetworkRequestsTable(
-                networkController: _networkController,
-                requests: filteredRequests,
-                searchMatchesNotifier: _networkController.searchMatches,
-                activeSearchMatchNotifier: _networkController.activeSearchMatch,
-              ),
-              NetworkRequestInspector(selectedRequest),
-            ],
+          child: GestureDetector(
+            onTap: () => FocusScope.of(context)?.unfocus(),
+            child: Split(
+              initialFractions: const [0.5, 0.5],
+              minSizes: const [200, 200],
+              axis: Axis.horizontal,
+              children: [
+                NetworkRequestsTable(
+                  networkController: _networkController,
+                  requests: filteredRequests,
+                  searchMatchesNotifier: _networkController.searchMatches,
+                  activeSearchMatchNotifier:
+                      _networkController.activeSearchMatch,
+                ),
+                NetworkRequestInspector(selectedRequest),
+              ],
+            ),
           ),
         );
       },
