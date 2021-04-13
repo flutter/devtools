@@ -121,14 +121,19 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
   }
 }
 
-/// Used to track current and previous x,y position and where the bottom
-/// of the Y is located (for non stacked traces yBottom is 0).
-class Point {
-  Point(this.x, this.y, this.yBottom);
+/// Used to track current and previous x,y position. The parameter yBase
+/// is for stacked traces. If the Trace is stacked then yBase is the previous
+/// trace's Y position. If a trace is not stacked then yBase is always 0.
+class PointAndBase {
+  PointAndBase(
+    this.x,
+    this.y, {
+    double yBase,
+  }) : base = yBase;
 
   final double x;
   final double y;
-  final double yBottom;
+  final double base;
 }
 
 class ChartPainter extends CustomPainter {
@@ -186,10 +191,10 @@ class ChartPainter extends CustomPainter {
     );
 
     /// Key is trace index and value is x,y point.
-    final previousTracesData = <int, Point>{};
+    final previousTracesData = <int, PointAndBase>{};
 
     /// Key is trace index and value is x,y point.
-    final currentTracesData = <int, Point>{};
+    final currentTracesData = <int, PointAndBase>{};
 
     // Visible Y max.
     var visibleYMax = 0.0;
@@ -259,10 +264,10 @@ class ChartPainter extends CustomPainter {
                     visibleYMax = yValue;
                   }
 
-                  currentTracesData[index] = Point(
+                  currentTracesData[index] = PointAndBase(
                     xCoord,
                     yCoord,
-                    chartController.yPositonToYCanvasCoord(stackedY),
+                    yBase: chartController.yPositonToYCanvasCoord(stackedY),
                   );
 
                   if (trace.chartType == ChartType.symbol) {
@@ -315,10 +320,10 @@ class ChartPainter extends CustomPainter {
                         trace.characteristics,
                         previousTracesData[index].x,
                         previousTracesData[index].y,
-                        previousTracesData[index].yBottom,
+                        previousTracesData[index].base,
                         currentTracesData[index].x,
                         currentTracesData[index].y,
-                        currentTracesData[index].yBottom,
+                        currentTracesData[index].base,
                       );
                     } else {
                       // Draw point
