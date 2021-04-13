@@ -84,8 +84,11 @@ const renderLine = 'color';
 const renderDashed = 'dashed';
 const renderImage = 'image';
 
-Map<String, Object> traceRender(
-    {String image, Color color, bool dashed = false}) {
+Map<String, Object> traceRender({
+  String image,
+  Color color,
+  bool dashed = false,
+}) {
   final result = <String, Object>{};
 
   if (image != null) {
@@ -101,7 +104,7 @@ Map<String, Object> traceRender(
 /// Retrieve all data values of a given index (timestamp) of the collected data.
 class ChartsValues {
   ChartsValues(this.controller, this.index, this.timestamp) {
-    _fetch();
+    _getDataFromIndex();
   }
 
   final MemoryController controller;
@@ -162,20 +165,17 @@ class ChartsValues {
     return _extensionEvents;
   }
 
-  void _fetch() {
+  void _getDataFromIndex() {
     _event.clear();
     _vm.clear();
     _android.clear();
 
-    _fetchEventData(_event);
-    _fetchVMData(controller.memoryTimeline.data[index], _vm);
-    _fetchAndroidData(
-      controller.memoryTimeline.data[index].adbMemoryInfo,
-      _android,
-    );
+    _getEventData(_event);
+    _getVMData(_vm);
+    _getAndroidData(_android);
   }
 
-  void _fetchEventData(Map<String, Object> results) {
+  void _getEventData(Map<String, Object> results) {
     // Use the detailed extension events data stored in the memoryTimeline.
     final eventInfo = controller.memoryTimeline.data[index].memoryEventInfo;
 
@@ -216,7 +216,9 @@ class ChartsValues {
     }
   }
 
-  void _fetchVMData(HeapSample heapSample, Map<String, Object> results) {
+  void _getVMData(Map<String, Object> results) {
+    final HeapSample heapSample = controller.memoryTimeline.data[index];
+
     results[rssJsonName] = heapSample.rss;
     results[capacityJsonName] = heapSample.capacity;
     results[usedJsonName] = heapSample.used;
@@ -226,10 +228,10 @@ class ChartsValues {
     results[rasterLayerJsonName] = heapSample.rasterCache.layerBytes;
   }
 
-  void _fetchAndroidData(
-    AdbMemoryInfo androidData,
-    Map<String, Object> results,
-  ) {
+  void _getAndroidData(Map<String, Object> results) {
+    final AdbMemoryInfo androidData =
+        controller.memoryTimeline.data[index].adbMemoryInfo;
+
     results[adbTotalJsonName] = androidData.total;
     results[adbOtherJsonName] = androidData.other;
     results[adbCodeJsonName] = androidData.code;

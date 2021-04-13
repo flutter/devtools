@@ -565,17 +565,14 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget _buildMemoryControls(TextTheme textTheme) {
-    final androidChartButton = controller.isConnectedDeviceAndroid ||
-            controller.isOfflineAndAndroidData
-        ? createToggleAdbMemoryButton()
-        : const SizedBox();
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
-        androidChartButton,
+        if (controller.isConnectedDeviceAndroid ||
+            controller.isOfflineAndAndroidData)
+          createToggleAdbMemoryButton(),
         const SizedBox(width: denseSpacing),
         isAdvancedSettingsEnabled
             ? Row(
@@ -820,18 +817,9 @@ class MemoryBodyState extends State<MemoryBody>
       Widget traceColor;
       if (color != null) {
         if (dashedLine) {
-          traceColor = Padding(
-            child: CustomPaint(
-              painter: DashedLine(15, color, 2, 4, 3),
-              foregroundPainter: DashedLine(15, color, 2, 4, 3),
-            ),
-            padding: const EdgeInsets.fromLTRB(2, 5, 20, 1),
-          );
+          traceColor = createDashWidget(color);
         } else {
-          traceColor = Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 1.0),
-            child: Container(height: 6, width: 20, color: color),
-          );
+          traceColor = createSolidLine(color);
         }
       } else {
         traceColor =
@@ -857,6 +845,44 @@ class MemoryBodyState extends State<MemoryBody>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: rowChildren,
         ),
+      ),
+    );
+  }
+
+  static const totalDashWidth = 15.0;
+  static const dashHeight = 2.0;
+  static const dashWidth = 4.0;
+  static const spaceBetwenDash = 3.0;
+
+  Widget createDashWidget(Color color) {
+    return Container(
+      padding: const EdgeInsets.only(right: 20),
+      child: CustomPaint(
+        painter: DashedLine(
+          totalDashWidth,
+          color,
+          dashHeight,
+          dashWidth,
+          spaceBetwenDash,
+        ),
+        foregroundPainter: DashedLine(
+          totalDashWidth,
+          color,
+          dashHeight,
+          dashWidth,
+          spaceBetwenDash,
+        ),
+      ),
+    );
+  }
+
+  Widget createSolidLine(Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 1.0),
+      child: Container(
+        height: 6,
+        width: 20,
+        color: color,
       ),
     );
   }
@@ -903,25 +929,22 @@ class MemoryBodyState extends State<MemoryBody>
       Widget traceColor;
       if (colorPatch != null) {
         if (dashed) {
-          traceColor = Padding(
-            child: CustomPaint(
-              painter: DashedLine(15, colorPatch, 2, 4, 3),
-              foregroundPainter: DashedLine(15, colorPatch, 2, 4, 3),
-            ),
-            padding: const EdgeInsets.fromLTRB(2, 5, 20, 1),
-          );
+          traceColor = createDashWidget(colorPatch);
         } else {
-          traceColor = Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 1.0),
-            child: Container(height: 6, width: 20, color: colorPatch),
-          );
+          traceColor = createSolidLine(colorPatch);
         }
       } else {
         traceColor = image == null
             ? const SizedBox()
             : scaleImage
-            ? Image(image: AssetImage(image), width: 20, height: 10)
-            : Image(image: AssetImage(image));
+                ? Image(
+                    image: AssetImage(image),
+                    width: 20,
+                    height: 10,
+                  )
+                : Image(
+                    image: AssetImage(image),
+                  );
       }
 
       return [
@@ -1284,6 +1307,9 @@ class MemoryBodyState extends State<MemoryBody>
     }
   }
 
+  /// Padding for each title in the legend.
+  static const _legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
+
   void showLegend(BuildContext context) {
     final RenderBox box = legendKey.currentContext.findRenderObject();
 
@@ -1297,7 +1323,7 @@ class MemoryBodyState extends State<MemoryBody>
 
     final events = eventLegend(colorScheme.isLight);
     legendRows.add(Container(
-      padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+      padding: _legendTitlePadding,
       child: Text('Events Legend', style: legendHeading),
     ));
 
@@ -1311,7 +1337,7 @@ class MemoryBodyState extends State<MemoryBody>
     final vms = vmLegend();
     legendRows.add(
       Container(
-        padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+        padding: _legendTitlePadding,
         child: Text('Memory Legend', style: legendHeading),
       ),
     );
@@ -1326,7 +1352,7 @@ class MemoryBodyState extends State<MemoryBody>
       final androids = androidLegend();
       legendRows.add(
         Container(
-          padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
+          padding: _legendTitlePadding,
           child: Text('Android Legend', style: legendHeading),
         ),
       );

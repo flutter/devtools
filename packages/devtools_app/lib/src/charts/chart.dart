@@ -259,8 +259,11 @@ class ChartPainter extends CustomPainter {
                     visibleYMax = yValue;
                   }
 
-                  currentTracesData[index] = Point(xCoord, yCoord,
-                      chartController.yPositonToYCanvasCoord(stackedY));
+                  currentTracesData[index] = Point(
+                    xCoord,
+                    yCoord,
+                    chartController.yPositonToYCanvasCoord(stackedY),
+                  );
 
                   if (trace.chartType == ChartType.symbol) {
                     assert(!trace.stacked);
