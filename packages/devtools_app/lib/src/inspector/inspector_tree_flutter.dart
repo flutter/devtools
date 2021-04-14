@@ -395,24 +395,24 @@ class _InspectorTreeState extends State<InspectorTree>
 
   /// Handle arrow keys for the InspectorTree. Ignore other key events so that
   /// other widgets have a chance to respond to them.
-  bool _handleKeyEvent(FocusNode _, RawKeyEvent event) {
-    if (event is! RawKeyDownEvent) return false;
+  KeyEventResult _handleKeyEvent(FocusNode _, RawKeyEvent event) {
+    if (event is! RawKeyDownEvent) return KeyEventResult.ignored;
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
       controller.navigateDown();
-      return true;
+      return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
       controller.navigateUp();
-      return true;
+      return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
       controller.navigateLeft();
-      return true;
+      return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
       controller.navigateRight();
-      return true;
+      return KeyEventResult.handled;
     }
 
-    return false;
+    return KeyEventResult.ignored;
   }
 
   void _bindToController() {
