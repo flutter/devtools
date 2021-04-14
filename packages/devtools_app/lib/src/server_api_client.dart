@@ -27,11 +27,19 @@ class DevToolsServerConnection {
 
   static Future<DevToolsServerConnection> connect() async {
     final baseUri = Uri.base;
+    // Ensure we don't drop portions of the path at which DevTools is hosted.
+    final baseUriPathSegments = baseUri.pathSegments.where(
+      (e) => e.isNotEmpty,
+    );
     final uri = Uri(
         scheme: baseUri.scheme,
         host: baseUri.host,
         port: baseUri.port,
-        path: '/api/ping');
+        pathSegments: [
+          ...baseUriPathSegments,
+          'api',
+          'ping',
+        ]);
 
     try {
       // ignore: unused_local_variable
@@ -51,7 +59,13 @@ class DevToolsServerConnection {
       return null;
     }
 
-    final client = SseClient('/api/sse');
+    final sseUri = Uri(pathSegments: [
+      '', // Leading '/'
+      ...baseUriPathSegments,
+      'api',
+      'sse'
+    ]);
+    final client = SseClient(sseUri.toString());
     return DevToolsServerConnection._(client);
   }
 
@@ -104,7 +118,12 @@ class DevToolsServerConnection {
 
   Future<T> _callMethod<T>(String method, [Map<String, dynamic> params]) {
     final id = '${_nextRequestId++}';
-    final json = jsonEncode({'id': id, 'method': method, 'params': params});
+    final json = jsonEncode({
+      'jsonrpc': '2.0',
+      'id': id,
+      'method': method,
+      'params': params,
+    });
     final completer = Completer<T>();
     _completers[id] = completer;
     sseClient.sink.add(json);

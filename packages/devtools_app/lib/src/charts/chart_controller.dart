@@ -458,11 +458,16 @@ class ChartController extends DisposableController
     ChartType chartType,
     PaintCharacteristics characteristics, {
     String name,
+    bool stacked = false,
     List<Data> data,
   }) {
     final traceIndex = traces.length;
 
     final trace = Trace(this, chartType, characteristics);
+
+    // Stacked only suppported for line charts.
+    assert((stacked && chartType == ChartType.line) || !stacked);
+    trace.stacked = stacked;
 
     if (name != null) trace.name = name;
     if (data != null) trace.addAllData(data);

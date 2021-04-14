@@ -47,7 +47,6 @@ class VMChartController extends ChartController {
 
     addTimestamp(sample.timestamp);
 
-    // TODO(terry): Trace should compute stacked or not here.
     final timestamp = sample.timestamp;
     final externalValue = sample.external.toDouble();
     addDataToTrace(
@@ -55,8 +54,7 @@ class VMChartController extends ChartController {
       trace.Data(timestamp, externalValue),
     );
 
-    // TODO(terry): Trace should compute stacked or not here.
-    final usedValue = externalValue + sample.used;
+    final usedValue = sample.used.toDouble();
     addDataToTrace(TraceName.used.index, trace.Data(timestamp, usedValue));
 
     final capacityValue = sample.capacity.toDouble();
@@ -163,9 +161,9 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   static const usedColor = Color(0xff33b5e5);
   static const externalColor = Color(0xff4ddeff);
   // TODO(terry): UX review of raster colors see https://github.com/flutter/devtools/issues/2616
-  static const rasterLayerColor = Color(0xff99cc00);
+  final rasterLayerColor = Colors.greenAccent.shade400;
   static const rasterPictureColor = Color(0xffff4444);
-  static const rssColor = Color(0xffff9300);
+  final rssColor = Colors.orange.shade700;
 
   void setupTraces() {
     if (_chartController.traces.isNotEmpty) {
@@ -205,6 +203,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
+      stacked: true,
       name: TraceName.external.toString(),
     );
     assert(externalIndex == TraceName.external.index);
@@ -219,6 +218,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
+      stacked: true,
       name: TraceName.used.toString(),
     );
     assert(usedIndex == TraceName.used.index);

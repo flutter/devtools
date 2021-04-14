@@ -104,6 +104,19 @@ class Trace {
 
   final PaintCharacteristics characteristics;
 
+  /// All traces, stacked == true, are aligned to previous stacked trace.
+  /// E.g., Trace 1, 2, and 3 are all stacked,
+  ///
+  /// |         /'''''''''\      /     <--- Trace 3
+  /// |        /           \    /
+  /// |-------/             \  /
+  /// | /\      _______      \/
+  /// |/  \____/       \
+  /// | ___/'''''''\    \  /''''''     <--- Trace 2 (lowest Y is zero)
+  /// |/            \____\/_____/''    <--- Trace 1
+  /// -------------------------------
+  bool stacked;
+
   String name;
 
   double dataYMax = 0;

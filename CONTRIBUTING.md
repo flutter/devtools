@@ -14,7 +14,7 @@ file.
 
 - `git clone https://github.com/flutter/devtools`
 - `cd devtools/packages/devtools_app`
-- `flutter pub get`
+- `flutter pub upgrade`
 
 From a separate terminal, start running a flutter app to connect to DevTools:
 - `git clone https://github.com/flutter/gallery.git` (this is an existing application with many examples of Flutter widgets)
