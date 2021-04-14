@@ -565,7 +565,7 @@ class LineItem extends StatefulWidget {
   }) : super(key: key);
 
   static const _hoverDelay = Duration(milliseconds: 500);
-  static const _hoverWidth = 250.0;
+  static const _hoverWidth = 400.0;
 
   final TextSpan lineContents;
   final StackFrameAndSourcePosition pausedFrame;
