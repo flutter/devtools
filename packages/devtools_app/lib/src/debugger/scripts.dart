@@ -199,7 +199,7 @@ class ScriptPickerState extends State<ScriptPicker> {
 
     _items = widget.scripts;
     _filteredItems = widget.scripts
-        .where((ref) => ref.uri.toLowerCase().contains(filterText))
+        .where((ref) => ref.uri.caseInsensitiveFuzzyMatch(filterText))
         .toList();
 
     // Remove the cached value here; it'll be re-computed the next time we need

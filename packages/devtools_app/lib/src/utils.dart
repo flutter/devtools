@@ -1020,6 +1020,32 @@ extension StringExtension on String {
         _lowercaseLookup.putIfAbsent(str, () => str.toLowerCase());
     return lowerCase.contains(strLowerCase);
   }
+
+  /// Whether [query] is a case insensitive "fuzzy match" for this String.
+  ///
+  /// For example, the query "hwf" would be a fuzzy match for the String
+  /// "hello_world_file".
+  bool caseInsensitiveFuzzyMatch(String query) {
+    query = query.toLowerCase();
+    final lowercase = toLowerCase();
+    final it = query.characters.iterator;
+    var strIndex = 0;
+    while (it.moveNext()) {
+      final char = it.current;
+      var foundChar = false;
+      for (int i = strIndex; i < lowercase.length; i++) {
+        if (lowercase[i] == char) {
+          strIndex = i + 1;
+          foundChar = true;
+          break;
+        }
+      }
+      if (!foundChar) {
+        return false;
+      }
+    }
+    return true;
+  }
 }
 
 extension ListExtension<T> on List<T> {
