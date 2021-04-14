@@ -215,6 +215,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
       valueListenable: _networkController.selectedRequest,
       builder: (context, selectedRequest, _) {
         return Expanded(
+          // TODO(@lesliearkorful): remove GestureDetector once #80455 is fixed
           child: GestureDetector(
             onTap: () => FocusScope.of(context)?.unfocus(),
             child: Split(
