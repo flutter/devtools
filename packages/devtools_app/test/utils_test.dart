@@ -1082,7 +1082,7 @@ void main() {
         expect(str.caseInsensitiveFuzzyMatch('hwf'), isTrue);
         expect(str.caseInsensitiveFuzzyMatch('_e'), isTrue);
         expect(str.caseInsensitiveFuzzyMatch('HWF'), isTrue);
-        expect(str.caseInsensitiveFuzzyMatch('_EE'), isTrue);
+        expect(str.caseInsensitiveFuzzyMatch('_E'), isTrue);
 
         expect(str.caseInsensitiveFuzzyMatch('hwfh'), isFalse);
         expect(str.caseInsensitiveFuzzyMatch('hfw'), isFalse);
