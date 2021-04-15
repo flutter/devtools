@@ -97,7 +97,7 @@ class _TrackerCountColumn extends ColumnData<Tracker> {
   _TrackerCountColumn()
       : super(
           'Count',
-          alignment: ColumnAlignment.left,
+          alignment: ColumnAlignment.right,
           fixedWidthPx: 100.0,
         );
 
@@ -112,7 +112,7 @@ class _TrackerCountColumn extends ColumnData<Tracker> {
   }
 
   @override
-  double get fixedWidthPx => 300.0;
+  double get fixedWidthPx => 100.0;
 
   @override
   bool get supportsSorting => true;
