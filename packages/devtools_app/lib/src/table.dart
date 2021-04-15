@@ -33,7 +33,7 @@ typedef IndexedScrollableWidgetBuilder = Widget Function(
   List<double> columnWidths,
 );
 
-typedef TableKeyEventHandler = bool Function(RawKeyEvent event,
+typedef TableKeyEventHandler = KeyEventResult Function(RawKeyEvent event,
     ScrollController scrollController, BoxConstraints constraints);
 
 enum ScrollKind { up, down, parent }
@@ -589,12 +589,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       ..forEach(_sort);
   }
 
-  bool _handleKeyEvent(
+  KeyEventResult _handleKeyEvent(
     RawKeyEvent event,
     ScrollController scrollController,
     BoxConstraints constraints,
   ) {
-    if (event is! RawKeyDownEvent) return false;
+    if (event is! RawKeyDownEvent) return KeyEventResult.ignored;
 
     // Exit early if we aren't handling the key
     if (![
@@ -602,7 +602,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       LogicalKeyboardKey.arrowUp,
       LogicalKeyboardKey.arrowLeft,
       LogicalKeyboardKey.arrowRight
-    ].contains(event.logicalKey)) return false;
+    ].contains(event.logicalKey)) return KeyEventResult.ignored;
 
     // If there is no selected node, choose the first one.
     if (selectionNotifier.value.node == null) {
@@ -645,7 +645,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       }
     }
 
-    return true;
+    return KeyEventResult.handled;
   }
 
   void _moveSelection(

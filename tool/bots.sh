@@ -86,10 +86,12 @@ if [ "$BOT" = "main" ]; then
     # Provision our packages.
     flutter pub get
 
-    # Verify that dart format has been run.
-    echo "Checking formatting..."
-    # Here, we use the dart instance from the flutter sdk.
-    $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
+    if [ "$CHANNEL" != "master" ]; then
+        # Verify that dart format has been run.
+        echo "Checking formatting..."
+        # Here, we use the dart instance from the flutter sdk.
+        $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
+    fi
 
     # Make sure the app versions are in sync.
     repo_tool repo-check
