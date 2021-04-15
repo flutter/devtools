@@ -255,7 +255,8 @@ class ChartPainter extends CustomPainter {
                 yTranslation,
                 (canvas) {
                   final xCoord = xCanvasCoord;
-                  final yCoord = chartController.yPositonToYCanvasCoord(yValue);
+                  final yCoord =
+                      chartController.yPositionToYCanvasCoord(yValue);
                   final hasMultipleExtensionEvents =
                       traceData is DataAggregate ? traceData.count > 1 : false;
 
@@ -267,7 +268,7 @@ class ChartPainter extends CustomPainter {
                   currentTracesData[index] = PointAndBase(
                     xCoord,
                     yCoord,
-                    yBase: chartController.yPositonToYCanvasCoord(stackedY),
+                    yBase: chartController.yPositionToYCanvasCoord(stackedY),
                   );
 
                   if (trace.chartType == ChartType.symbol) {
@@ -500,7 +501,7 @@ class ChartPainter extends CustomPainter {
       final unit = pow(10, yScale?.labelUnitExponent).floor();
       final y = labelIndex * unit;
       // Need to be zero based
-      final yCoord = chartController.yPositonToYCanvasCoord(y);
+      final yCoord = chartController.yPositionToYCanvasCoord(y);
 
       final labelName = constructLabel(
         labelIndex.floor(),

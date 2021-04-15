@@ -852,7 +852,7 @@ class MemoryBodyState extends State<MemoryBody>
   static const totalDashWidth = 15.0;
   static const dashHeight = 2.0;
   static const dashWidth = 4.0;
-  static const spaceBetwenDash = 3.0;
+  static const spaceBetweenDash = 3.0;
 
   Widget createDashWidget(Color color) {
     return Container(
@@ -863,14 +863,14 @@ class MemoryBodyState extends State<MemoryBody>
           color,
           dashHeight,
           dashWidth,
-          spaceBetwenDash,
+          spaceBetweenDash,
         ),
         foregroundPainter: DashedLine(
           totalDashWidth,
           color,
           dashHeight,
           dashWidth,
-          spaceBetwenDash,
+          spaceBetweenDash,
         ),
       ),
     );
@@ -937,14 +937,14 @@ class MemoryBodyState extends State<MemoryBody>
         traceColor = image == null
             ? const SizedBox()
             : scaleImage
-            ? Image(
-                image: AssetImage(image),
-                width: 20,
-                height: 10,
-              )
-            : Image(
-                image: AssetImage(image),
-              );
+                ? Image(
+                    image: AssetImage(image),
+                    width: 20,
+                    height: 10,
+                  )
+                : Image(
+                    image: AssetImage(image),
+                  );
       }
 
       return [
