@@ -47,6 +47,9 @@ class StatusLine extends StatelessWidget {
 
     // Optionally display an isolate selector.
     if (currentScreen != null) {
+      // Ensure that the current screen's state is initialized. In particular,
+      // make sure that the screen's controller is available before calling
+      // `currentScreen.showIsolateSelector`.
       children.add(
         ValueListenableBuilder<bool>(
           valueListenable: currentScreen.showIsolateSelector,
