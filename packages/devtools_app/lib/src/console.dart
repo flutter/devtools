@@ -132,6 +132,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput> {
     final theme = Theme.of(context);
 
     return Scrollbar(
+      controller: _scroll,
       child: ListView.builder(
         padding: const EdgeInsets.all(denseSpacing),
         itemCount: widget.lines?.length ?? 0,

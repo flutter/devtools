@@ -112,7 +112,7 @@ class _TrackerCountColumn extends ColumnData<Tracker> {
   }
 
   @override
-  double get fixedWidthPx => 50.0;
+  double get fixedWidthPx => 100.0;
 
   @override
   bool get supportsSorting => true;

@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/devtools.dart' as devtools;
 import 'package:devtools_app/src/app.dart';
+import 'package:devtools_app/src/extension_points/extensions_base.dart';
+import 'package:devtools_app/src/extension_points/extensions_external.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +20,7 @@ void main() {
   group('About Dialog', () {
     setUp(() {
       aboutDialog = DevToolsAboutDialog();
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(ServiceConnectionManager, FakeServiceManager());
     });
 

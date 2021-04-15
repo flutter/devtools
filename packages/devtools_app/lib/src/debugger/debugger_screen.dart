@@ -172,10 +172,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       shortcuts: <LogicalKeySet, Intent>{
         focusLibraryFilterKeySet:
             FocusLibraryFilterIntent(_libraryFilterFocusNode, controller),
+        goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
           FocusLibraryFilterIntent: FocusLibraryFilterAction(),
+          GoToLineNumberIntent: GoToLineNumberAction(),
         },
         child: Split(
           axis: Axis.horizontal,
@@ -264,6 +266,13 @@ final LogicalKeySet focusLibraryFilterKeySet = LogicalKeySet(
   LogicalKeyboardKey.keyP,
 );
 
+final LogicalKeySet goToLineNumberKeySet = LogicalKeySet(
+  HostPlatform.instance.isMacOS
+      ? LogicalKeyboardKey.meta
+      : LogicalKeyboardKey.control,
+  LogicalKeyboardKey.keyG,
+);
+
 class FocusLibraryFilterIntent extends Intent {
   const FocusLibraryFilterIntent(
     this.focusNode,
@@ -273,6 +282,19 @@ class FocusLibraryFilterIntent extends Intent {
 
   final FocusNode focusNode;
   final DebuggerController debuggerController;
+}
+
+class GoToLineNumberIntent extends Intent {
+  const GoToLineNumberIntent(this._context, this._controller);
+  final BuildContext _context;
+  final DebuggerController _controller;
+}
+
+class GoToLineNumberAction extends Action<GoToLineNumberIntent> {
+  @override
+  void invoke(GoToLineNumberIntent intent) {
+    showGoToLineDialog(intent._context, intent._controller);
+  }
 }
 
 class FocusLibraryFilterAction extends Action<FocusLibraryFilterIntent> {

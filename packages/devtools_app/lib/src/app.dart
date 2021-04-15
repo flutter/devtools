@@ -446,16 +446,14 @@ class DevToolsAboutDialog extends StatelessWidget {
   }
 
   Widget _createFeedbackLink(BuildContext context) {
-    const urlPath = 'github.com/flutter/devtools/issues';
+    final reportIssuesLink = devToolsExtensionPoints.issueTrackerLink();
     final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () async {
         ga.select(devToolsMain, feedback);
-
-        const reportIssuesUrl = 'https://$urlPath';
-        await launchUrl(reportIssuesUrl, context);
+        await launchUrl(reportIssuesLink.url, context);
       },
-      child: Text(urlPath, style: linkTextStyle(colorScheme)),
+      child: Text(reportIssuesLink.display, style: linkTextStyle(colorScheme)),
     );
   }
 }
