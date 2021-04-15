@@ -111,10 +111,10 @@ class MemoryAndroidChart extends StatefulWidget {
 /// too (order of trace creation top-down order).
 enum TraceName {
   stack,
-  graphics,
-  nativeHeap,
   javaHeap,
   code,
+  graphics,
+  nativeHeap,
   other,
   system,
   total,
@@ -135,8 +135,6 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   @override
   void initState() {
     super.initState();
-
-    setupTraces();
   }
 
   @override
@@ -172,12 +170,14 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   }
 
   /// TODO(terry): Colors used in charts (move to theme).
-  static const stackColor = Colors.white;
-  static const graphicColor = Color(0xffff8800); // HoloOrangeDark
+  static const otherColor = Color(0xffff8800); // HoloOrangeDark;
   static const nativeHeapColor = Color(0xff33b5e5); // HoloBlueLight
-  static const otherColor = Color(0xffaa66cc); // HoloPurple
+  final graphicColor = Colors.greenAccent.shade400;
+  static const codeColor = Color(0xffaa66cc); // HoloPurple
+  static const javaColor = Colors.yellow;
+  static const stackColor = Colors.tealAccent;
   static const systemColor = Color(0xff669900); // HoloGreenDark
-  static const totalColor = Color(0xFFCCCCCC); // Light Grey
+  final totalColor = Colors.blueGrey.shade100;
 
   void setupTraces() {
     if (_chartController.traces.isNotEmpty) {
@@ -219,6 +219,8 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     }
 
     // Need to create the trace first time.
+
+    // Stack trace
     final stackIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
@@ -226,12 +228,44 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
+      stacked: true,
       name: TraceName.stack.toString(),
     );
     assert(stackIndex == TraceName.stack.index);
     assert(_chartController.trace(stackIndex).name ==
         TraceName.values[stackIndex].toString());
 
+    // Java heap trace.
+    final javaHeapIndex = _chartController.createTrace(
+      trace.ChartType.line,
+      trace.PaintCharacteristics(
+        color: javaColor,
+        symbol: trace.ChartSymbol.disc,
+        diameter: 1.5,
+      ),
+      stacked: true,
+      name: TraceName.javaHeap.toString(),
+    );
+    assert(javaHeapIndex == TraceName.javaHeap.index);
+    assert(_chartController.trace(javaHeapIndex).name ==
+        TraceName.values[javaHeapIndex].toString());
+
+    // Code trace
+    final codeIndex = _chartController.createTrace(
+      trace.ChartType.line,
+      trace.PaintCharacteristics(
+        color: codeColor,
+        symbol: trace.ChartSymbol.disc,
+        diameter: 1.5,
+      ),
+      stacked: true,
+      name: TraceName.code.toString(),
+    );
+    assert(codeIndex == TraceName.code.index);
+    assert(_chartController.trace(codeIndex).name ==
+        TraceName.values[codeIndex].toString());
+
+    // Graphics Trace
     final graphicIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
@@ -239,12 +273,14 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
+      stacked: true,
       name: TraceName.graphics.toString(),
     );
     assert(graphicIndex == TraceName.graphics.index);
     assert(_chartController.trace(graphicIndex).name ==
         TraceName.values[graphicIndex].toString());
 
+    // Native heap trace.
     final nativeHeapIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
@@ -252,38 +288,14 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
+      stacked: true,
       name: TraceName.nativeHeap.toString(),
     );
     assert(nativeHeapIndex == TraceName.nativeHeap.index);
     assert(_chartController.trace(nativeHeapIndex).name ==
         TraceName.values[nativeHeapIndex].toString());
 
-    final javaHeapIndex = _chartController.createTrace(
-      trace.ChartType.line,
-      trace.PaintCharacteristics(
-        color: Colors.yellow,
-        symbol: trace.ChartSymbol.disc,
-        diameter: 1.5,
-      ),
-      name: TraceName.javaHeap.toString(),
-    );
-    assert(javaHeapIndex == TraceName.javaHeap.index);
-    assert(_chartController.trace(javaHeapIndex).name ==
-        TraceName.values[javaHeapIndex].toString());
-
-    final codeIndex = _chartController.createTrace(
-      trace.ChartType.line,
-      trace.PaintCharacteristics(
-        color: Colors.grey,
-        symbol: trace.ChartSymbol.disc,
-        diameter: 1.5,
-      ),
-      name: TraceName.code.toString(),
-    );
-    assert(codeIndex == TraceName.code.index);
-    assert(_chartController.trace(codeIndex).name ==
-        TraceName.values[codeIndex].toString());
-
+    // Other trace
     final otherIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
@@ -291,12 +303,14 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
+      stacked: true,
       name: TraceName.other.toString(),
     );
     assert(otherIndex == TraceName.other.index);
     assert(_chartController.trace(otherIndex).name ==
         TraceName.values[otherIndex].toString());
 
+    // System trace
     final systemIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
@@ -304,12 +318,14 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         symbol: trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
+      stacked: true,
       name: TraceName.system.toString(),
     );
     assert(systemIndex == TraceName.system.index);
     assert(_chartController.trace(systemIndex).name ==
         TraceName.values[systemIndex].toString());
 
+    // Total trace.
     final totalIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(

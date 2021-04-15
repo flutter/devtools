@@ -57,13 +57,13 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField> {
               onKey: (_, RawKeyEvent event) {
                 if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
                   _historyNavUp();
-                  return true;
+                  return KeyEventResult.handled;
                 } else if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
                   _historyNavDown();
-                  return true;
+                  return KeyEventResult.handled;
                 }
 
-                return false;
+                return KeyEventResult.ignored;
               },
               child: TextField(
                 onSubmitted: (value) => _handleExpressionEval(context, value),
