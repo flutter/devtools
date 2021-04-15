@@ -484,6 +484,7 @@ class IsolateManager extends Disposer {
       _isolateCreatedController.add(event.isolate);
       // TODO(jacobr): we assume the first isolate started is the main isolate
       // but that may not always be a safe assumption.
+
       _mainIsolate.value ??= event.isolate;
 
       if (_selectedIsolate == null) {
@@ -650,6 +651,9 @@ class ServiceExtensionManager extends Disposer {
   ConnectedApp _connectedApp;
 
   Future<void> _handleIsolateEvent(Event event) async {
+    if (event.kind == EventKind.kIsolateExit) {
+      _firstFrameReceived = Completer<void>();
+    }
     if (event.kind == EventKind.kServiceExtensionAdded) {
       // On hot restart, service extensions are added from here.
       await _maybeAddServiceExtension(event.extensionRPC);
@@ -809,7 +813,7 @@ class ServiceExtensionManager extends Disposer {
   }
 
   Future<void> _maybeAddServiceExtension(String name) async {
-    if (_firstFrameEventReceived || !isUnsafeBeforeFirstFlutterFrame(name)) {
+    if (_firstFrameEventReceived /*|| !isUnsafeBeforeFirstFlutterFrame(name)*/) {
       await _addServiceExtension(name);
     } else {
       _pendingServiceExtensions.add(name);
