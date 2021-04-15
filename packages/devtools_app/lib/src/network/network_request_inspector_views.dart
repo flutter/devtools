@@ -72,7 +72,6 @@ class HttpRequestHeadersView extends StatelessWidget {
             child: SelectableText(
               value,
               minLines: 1,
-              maxLines: 5,
             ),
           ),
         ],
@@ -576,7 +575,6 @@ class NetworkRequestOverviewView extends StatelessWidget {
     return SelectableText(
       value,
       minLines: 1,
-      maxLines: 5,
     );
   }
 }
