@@ -1255,3 +1255,11 @@ class FormattedJson extends StatelessWidget {
     );
   }
 }
+
+class Link {
+  const Link({this.display, this.url});
+
+  final String display;
+
+  final String url;
+}
